@@ -1,1 +1,2 @@
 stripe
+django-model-utils
