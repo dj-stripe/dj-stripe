@@ -31,6 +31,7 @@ setup(
     package_dir={'djstripe': 'djstripe'},
     include_package_data=True,
     install_requires=[
+    'stripe',
     ],
     license="BSD",
     zip_safe=False,
