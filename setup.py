@@ -5,6 +5,8 @@ import sys
 
 import djstripe
 
+version = djstripe.__version__
+
 try:
     from setuptools import setup
 except ImportError:
@@ -12,6 +14,9 @@ except ImportError:
 
 if sys.argv[-1] == 'publish':
     os.system('python setup.py sdist upload')
+    print("You probably want to also tag the version now:")
+    print("  git tag -a %s -m 'version %s'" % (version, version))
+    print("  git push --tags")
     sys.exit()
 
 readme = open('README.rst').read()
@@ -19,7 +24,7 @@ history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='dj-stripe',
-    version=djstripe.__version__,
+    version=djstripe.version,
     description='A Django app for Stripe',
     long_description=readme + '\n\n' + history,
     author='Daniel Greenfeld',
