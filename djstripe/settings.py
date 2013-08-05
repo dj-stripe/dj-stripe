@@ -2,9 +2,12 @@
 Beging porting from django-stripe-payments
 """
 from __future__ import unicode_literals
+import sys
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import importlib
+
+PY3 = sys.version > "3"
 
 try:
     from django.contrib.auth import get_user_model
@@ -24,7 +27,7 @@ def load_path_attr(path):
     module, attr = path[:i], path[i + 1:]
     try:
         mod = importlib.import_module(module)
-    except ImportError, e:
+    except ImportError as e:
         raise ImproperlyConfigured("Error importing %s: '%s'" % (module, e))
     try:
         attr = getattr(mod, attr)
@@ -56,7 +59,13 @@ TRIAL_PERIOD_FOR_USER_CALLBACK = getattr(
     "PAYMENTS_TRIAL_PERIOD_FOR_USER_CALLBACK",
     None
 )
-if isinstance(TRIAL_PERIOD_FOR_USER_CALLBACK, basestring):
-    TRIAL_PERIOD_FOR_USER_CALLBACK = load_path_attr(
-        TRIAL_PERIOD_FOR_USER_CALLBACK
-    )
+if PY3:
+    if isinstance(TRIAL_PERIOD_FOR_USER_CALLBACK, str):
+        TRIAL_PERIOD_FOR_USER_CALLBACK = load_path_attr(
+            TRIAL_PERIOD_FOR_USER_CALLBACK
+        )
+else:
+    if isinstance(TRIAL_PERIOD_FOR_USER_CALLBACK, basestring):
+        TRIAL_PERIOD_FOR_USER_CALLBACK = load_path_attr(
+            TRIAL_PERIOD_FOR_USER_CALLBACK
+        )

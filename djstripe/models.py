@@ -402,7 +402,7 @@ class Customer(StripeObject):
         for inv in self.invoices.filter(paid=False, closed=False):
             try:
                 inv.retry()  # Always retry unpaid invoices
-            except stripe.InvalidRequestError, error:
+            except stripe.InvalidRequestError as error:
                 if error.message != "Invoice is already paid":
                     raise error
 
