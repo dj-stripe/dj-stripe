@@ -29,7 +29,7 @@ class SubscribeFormView(
         FormView):
 
     form_class = PlanForm
-    template_name = "djstripe/subscribe.html"
+    template_name = "djstripe/subscribe_form.html"
     success_url = reverse_lazy("history")
 
     def get_context_data(self, *args, **kwargs):
