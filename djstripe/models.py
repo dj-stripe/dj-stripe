@@ -15,8 +15,9 @@ from django.template.loader import render_to_string
 
 from django.contrib.sites.models import Site
 
-import stripe
 from jsonfield.fields import JSONField
+from model_utils.models import TimeStampedModel
+import stripe
 
 from .managers import CustomerManager, ChargeManager, TransferManager
 from .settings import PAYMENTS_PLANS, INVOICE_FROM_EMAIL
@@ -50,22 +51,20 @@ def convert_tstamp(response, field_name=None):
     return None
 
 
-class StripeObject(models.Model):
+class StripeObject(TimeStampedModel):
 
     stripe_id = models.CharField(max_length=50, unique=True)
-    created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         abstract = True
 
 
-class EventProcessingException(models.Model):
+class EventProcessingException(TimeStampedModel):
 
     event = models.ForeignKey("Event", null=True)
     data = models.TextField()
     message = models.CharField(max_length=500)
     traceback = models.TextField()
-    created_at = models.DateTimeField(default=timezone.now)
 
     @classmethod
     def log(cls, data, exception, event):
@@ -296,13 +295,12 @@ class Transfer(StripeObject):
             obj.update_status()
 
 
-class TransferChargeFee(models.Model):
+class TransferChargeFee(TimeStampedModel):
     transfer = models.ForeignKey(Transfer, related_name="charge_fee_details")
     amount = models.DecimalField(decimal_places=2, max_digits=7)
     application = models.TextField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     kind = models.CharField(max_length=150)
-    created_at = models.DateTimeField(default=timezone.now)
 
 
 class Customer(StripeObject):
@@ -526,7 +524,7 @@ class Customer(StripeObject):
         return Charge.sync_from_stripe_data(data)
 
 
-class CurrentSubscription(models.Model):
+class CurrentSubscription(TimeStampedModel):
 
     customer = models.OneToOneField(
         Customer,
@@ -546,8 +544,6 @@ class CurrentSubscription(models.Model):
     trial_start = models.DateTimeField(null=True)
     amount = models.DecimalField(decimal_places=2, max_digits=7)
 
-    created_at = models.DateTimeField(default=timezone.now)
-
     def plan_display(self):
         return PAYMENTS_PLANS[self.plan]["name"]
 
@@ -564,7 +560,7 @@ class CurrentSubscription(models.Model):
         return self.is_period_current() and self.is_status_current()
 
 
-class Invoice(models.Model):
+class Invoice(TimeStampedModel):
 
     stripe_id = models.CharField(max_length=50)
     customer = models.ForeignKey(Customer, related_name="invoices")
@@ -578,7 +574,6 @@ class Invoice(models.Model):
     total = models.DecimalField(decimal_places=2, max_digits=7)
     date = models.DateTimeField()
     charge = models.CharField(max_length=50, blank=True)
-    created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         ordering = ["-date"]
