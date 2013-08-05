@@ -13,10 +13,7 @@ env:
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: 
-  - pip install -q Django==$DJANGO --use-mirrors
-  - pip install -q django-jsonfield==0.8.12
-  - pip install -q mock --use-mirrors
-  - pip install -q django-nose --use-mirrors
+  - pip install -r requirements_test.txt
 
 # command to run tests, e.g. python setup.py test
 script: python runtests.py
