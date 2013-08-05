@@ -26,9 +26,24 @@ Install dj-stripe::
 
     pip install dj-stripe
 
-Then use it in a project::
+settings.py::
 
-	TODO - add install instructions
+	# settings.py
+	INSTALLED_APPS +=(
+	    "djstripe",
+	)
+
+urls.py::
+
+	url(r'^stripe/', include('djstripe.urls', namespace="djstripe")),
+	
+Run the commands::
+
+	python manage.py syncdb
+	
+	python manage.py djstripe_init_customers
+	
+	python manage.py djstripe_init_plans
 
 Running Tests
 --------------
