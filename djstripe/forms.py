@@ -1,6 +1,6 @@
 from django import forms
 
-from payments.settings import PLAN_CHOICES
+from .settings import PLAN_CHOICES
 
 
 class PlanForm(forms.Form):

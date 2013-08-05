@@ -19,24 +19,19 @@ Call from url tag::
 from __future__ import unicode_literals
 from django.conf.urls import patterns, url
 
-from djstripe import views
+from . import views
 
 
 urlpatterns = patterns("",
     url(
         r"^subscribe/$",
-        views.SubscribeView.as_view(),
+        views.SubscribeFormView.as_view(),
         name="subscribe"
     ),
     url(
         r"^change/card/$",
         views.ChangeCardView.as_view(),
         name="change_card"
-    ),
-    url(
-        r"^change/plan/$",
-        views.ChangePlanView.as_view(),
-        name="change_plan"
     ),
     url(
         r"^cancel/$",
@@ -47,5 +42,10 @@ urlpatterns = patterns("",
         r"^history/$",
         views.HistoryView.as_view(),
         name="history"
+    ),
+    url(
+        r"^webhook/$",
+        views.WebHook.as_view(),
+        name="webhook"
     ),
 )

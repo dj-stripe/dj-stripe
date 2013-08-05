@@ -5,3 +5,4 @@ nose
 django-nose
 django-jsonfield
 mock
+django-braces

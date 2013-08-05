@@ -1,8 +1,9 @@
+from __future__ import unicode_literals
 from django.contrib import messages
 from django.shortcuts import redirect
 
 from .models import Customer
-import djstripe.settings as app_settings
+from . import settings as app_settings
 
 
 class PaymentRequiredMixin(object):

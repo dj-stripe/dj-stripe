@@ -1,3 +1,4 @@
 django>=1.5
 stripe
 django-model-utils
+django-braces

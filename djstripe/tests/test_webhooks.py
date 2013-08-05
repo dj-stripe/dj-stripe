@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import decimal
 import json
 
@@ -14,7 +15,7 @@ from ..models import Event, Transfer
 class TestWebhook(TestCase):
     
     @patch("stripe.Event.retrieve")
-    def xtest_webhook_with_transfer_event(self, StripeEventMock):
+    def test_webhook_with_transfer_event(self, StripeEventMock):
         data = {
             "created": 1348360173,
             "data": {
@@ -63,7 +64,7 @@ class TestWebhook(TestCase):
         StripeEventMock.return_value.to_dict.return_value = data
         msg = json.dumps(data)
         resp = Client().post(
-            reverse("payments_webhook"),
+            reverse("webhook"),
             msg,
             content_type="application/json"
         )

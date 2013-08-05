@@ -1,14 +1,23 @@
+from __future__ import unicode_literals
+import json
+
 from django.core.urlresolvers import reverse_lazy
 from django.db.models import ObjectDoesNotExist
+from django.http import HttpResponse
 from django.views.generic import FormView
 from django.views.generic import TemplateView
+from django.views.generic import View
 
+from braces.views import CsrfExemptMixin
 from braces.views import LoginRequiredMixin
 import stripe
 
 from .forms import PlanForm
 from .models import Customer
+from .models import Event
+from .models import EventProcessingException
 from .settings import PLAN_CHOICES
+from .settings import PY3
 from .viewmixins import PaymentsContextMixin
 
 
@@ -60,4 +69,32 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, TemplateView):
 
 class CancelView(LoginRequiredMixin, PaymentsContextMixin, TemplateView):
     template_name = "djstripe/cancel.html"
+
+
+class WebHook(CsrfExemptMixin, View):
+
+    def post(self, request, *args, **kwargs):
+        if PY3:
+            # Handles Python 3 conversion of bytes to str
+            body = request.body.decode(encoding="UTF-8")
+        else:
+            # Handles Python 2
+            body = request.body
+        data = json.loads(body)
+        if Event.objects.filter(stripe_id=data["id"]).exists():
+            EventProcessingException.objects.create(
+                data=data,
+                message="Duplicate event record",
+                traceback=""
+            )
+        else:
+            event = Event.objects.create(
+                stripe_id=data["id"],
+                kind=data["type"],
+                livemode=data["livemode"],
+                webhook_message=data
+            )
+            event.validate()
+            event.process()
+        return HttpResponse()
 
