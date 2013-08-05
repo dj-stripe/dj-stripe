@@ -535,12 +535,12 @@ class CurrentSubscription(TimeStampedModel):
     start = models.DateTimeField()
     # trialing, active, past_due, canceled, or unpaid
     status = models.CharField(max_length=25)
-    canceled_at = models.DateTimeField(null=True)
+    canceled_at = models.DateTimeField(null=True, blank=True)
     current_period_end = models.DateTimeField(null=True)
     current_period_start = models.DateTimeField(null=True)
-    ended_at = models.DateTimeField(null=True)
-    trial_end = models.DateTimeField(null=True)
-    trial_start = models.DateTimeField(null=True)
+    ended_at = models.DateTimeField(null=True, blank=True)
+    trial_end = models.DateTimeField(null=True, blank=True)
+    trial_start = models.DateTimeField(null=True, blank=True)
     amount = models.DecimalField(decimal_places=2, max_digits=7)
 
     def plan_display(self):
