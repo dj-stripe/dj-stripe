@@ -6,7 +6,6 @@ python:
   - "3.3"
   - "2.7"
   - "2.6"
-  - "pypy"
 
 env:
   - DJANGO=1.4
@@ -14,7 +13,15 @@ env:
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: 
-    - pip install -r requirements_test.txt
+  - pip install -q Django==$DJANGO --use-mirrors
+  - pip install -q django-jsonfield==0.8.12
+  - pip install -q mock --use-mirrors
+  - pip install -q django-nose --use-mirrors
 
 # command to run tests, e.g. python setup.py test
-script: python runtest
+script: python runtests.py
+
+matrix:
+  exclude:
+    - python: 3.3
+      env: DJANGO=1.4
