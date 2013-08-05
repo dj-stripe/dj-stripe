@@ -199,7 +199,7 @@ class Event(StripeObject):
                 self.send_signal()
                 self.processed = True
                 self.save()
-            except stripe.StripeError, e:
+            except stripe.StripeError as e:
                 EventProcessingException.log(
                     data=e.http_body,
                     exception=e,
