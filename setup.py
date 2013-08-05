@@ -24,7 +24,7 @@ history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='dj-stripe',
-    version=djstripe.version,
+    version=version,
     description='A Django app for Stripe',
     long_description=readme + '\n\n' + history,
     author='Daniel Greenfeld',
