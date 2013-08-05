@@ -14,7 +14,7 @@ from ..models import Event, Transfer
 class TestWebhook(TestCase):
     
     @patch("stripe.Event.retrieve")
-    def test_webhook_with_transfer_event(self, StripeEventMock):
+    def xtest_webhook_with_transfer_event(self, StripeEventMock):
         data = {
             "created": 1348360173,
             "data": {

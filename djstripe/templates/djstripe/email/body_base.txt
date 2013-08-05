@@ -1,0 +1,27 @@
+{% if charge.paid %}Your {{ site.name }} account was successfully charged ${{ charge.amount|floatformat:2 }} to the credit card ending in {{ charge.card_last_4 }}. The invoice below is for your records.
+
+
+========================================================
+INVOICE #{{ charge.pk }}     {{ charge.created_at|date:"F d, Y" }}
+........................................................
+
+
+CUSTOMER: {% block customer_name %}{{ charge.customer.user }}{% endblock %}
+
+
+DETAILS
+-------
+{{ charge.customer.current_subscription.plan_display }} - ${{ charge.amount|floatformat:2 }}
+
+TOTAL: ${{ charge.amount|floatformat:2 }} USD
+PAID BY CREDIT CARD: -${{ charge.amount|floatformat:2 }}
+========================================================
+{% else %}{% if charge.refunded %}Your credit card ending in {{ charge.card_last_4 }} was refunded ${{ charge.amount|floatformat:2 }}.
+{% else %}We are sorry, but we failed to charge your credit card ending in {{ charge.card_last_4 }} for the amount ${{ charge.amount|floatformat:2 }}.
+{% endif %}{% endif %}
+
+Please contact us with any questions regarding this invoice.
+
+---
+Your {{ site.name }} Team
+{{ protocol }}://{{ site.domain }}

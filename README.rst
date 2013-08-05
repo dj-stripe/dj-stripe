@@ -28,7 +28,15 @@ Install dj-stripe::
 
 Then use it in a project::
 
-	import dj-stripe
+	TODO - add install instructions
+
+Running Tests
+--------------
+
+::
+
+    pip install -r requirements_text.txt
+    python runtests.py
 
 Features
 --------

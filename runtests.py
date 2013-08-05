@@ -27,7 +27,7 @@ settings.configure(
 from django_nose import NoseTestSuiteRunner
 
 test_runner = NoseTestSuiteRunner(verbosity=1)
-failures = test_runner.run_tests(["payments"])
+failures = test_runner.run_tests(["djstripe"])
 
 if failures:
     sys.exit(failures)

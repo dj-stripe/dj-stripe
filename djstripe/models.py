@@ -773,9 +773,9 @@ class Charge(StripeObject):
                 "site": site,
                 "protocol": protocol,
             }
-            subject = render_to_string("payments/email/subject.txt", ctx)
+            subject = render_to_string("djstripe/email/subject.txt", ctx)
             subject = subject.strip()
-            message = render_to_string("payments/email/body.txt", ctx)
+            message = render_to_string("djstripe/email/body.txt", ctx)
             num_sent = EmailMessage(
                 subject,
                 message,

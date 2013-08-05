@@ -1,0 +1,7 @@
+django>=1.4
+stripe
+django-model-utils
+nose
+django-nose
+django-jsonfield
+mock

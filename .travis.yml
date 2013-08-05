@@ -8,8 +8,13 @@ python:
   - "2.6"
   - "pypy"
 
+env:
+  - DJANGO=1.4
+  - DJANGO=1.5
+
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
-install: pip install -r requirements.txt
+install: 
+    - pip install -r requirements_test.txt
 
 # command to run tests, e.g. python setup.py test
-script: python setup.py test
+script: python runtest
