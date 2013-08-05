@@ -4,12 +4,14 @@ import json
 from django.core.urlresolvers import reverse_lazy
 from django.db.models import ObjectDoesNotExist
 from django.http import HttpResponse
+from django.views.generic import DetailView
 from django.views.generic import FormView
 from django.views.generic import TemplateView
 from django.views.generic import View
 
 from braces.views import CsrfExemptMixin
 from braces.views import LoginRequiredMixin
+from braces.views import SelectRelatedMixin
 import stripe
 
 from .forms import PlanForm
@@ -59,8 +61,16 @@ class SubscribeFormView(
             return self.form_invalid(form)
 
 
-class HistoryView(LoginRequiredMixin, TemplateView):
+class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
     template_name = "djstripe/history.html"
+    model = Customer
+    select_related = ["invoice"]
+
+    def get_object(self):
+        try:
+            return self.request.user.customer
+        except Customer.DoesNotExist:
+            return Customer.create(self.request.user)
 
 
 class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, TemplateView):
