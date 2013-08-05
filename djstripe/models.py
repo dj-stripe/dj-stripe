@@ -22,7 +22,6 @@ import stripe
 from .managers import CustomerManager, ChargeManager, TransferManager
 from .settings import PAYMENTS_PLANS, INVOICE_FROM_EMAIL
 from .settings import plan_from_stripe_id
-from .settings import User
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
@@ -305,7 +304,7 @@ class TransferChargeFee(TimeStampedModel):
 
 class Customer(StripeObject):
 
-    user = models.OneToOneField(User, null=True)
+    user = models.OneToOneField(getattr(settings, 'AUTH_USER_MODEL', 'auth.User'), null=True)
     card_fingerprint = models.CharField(max_length=200, blank=True)
     card_last_4 = models.CharField(max_length=4, blank=True)
     card_kind = models.CharField(max_length=50, blank=True)
