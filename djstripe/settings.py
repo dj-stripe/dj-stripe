@@ -69,3 +69,9 @@ else:
         TRIAL_PERIOD_FOR_USER_CALLBACK = load_path_attr(
             TRIAL_PERIOD_FOR_USER_CALLBACK
         )
+
+DJSTRIPE_WEBHOOK_URL = getattr(
+    settings,
+    "DJSTRIPE_WEBHOOK_URL",
+    r"^webhook/$"
+)

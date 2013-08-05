@@ -19,6 +19,7 @@ Call from url tag::
 from __future__ import unicode_literals
 from django.conf.urls import patterns, url
 
+from . import settings as app_settings
 from . import views
 
 
@@ -44,7 +45,7 @@ urlpatterns = patterns("",
         name="history"
     ),
     url(
-        r"^webhook/$",
+        app_settings.DJSTRIPE_WEBHOOK_URL,
         views.WebHook.as_view(),
         name="webhook"
     ),
