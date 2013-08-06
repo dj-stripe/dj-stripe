@@ -365,6 +365,13 @@ class Customer(StripeObject):
         cancelled.send(sender=self, stripe_response=sub)
 
     @classmethod
+    def get_or_create(cls, user):
+        try:
+            return Customer.objects.filter(user=user), False
+        except Customer.DoesNotExist:
+            return cls.create(user), True
+
+    @classmethod
     def create(cls, user):
 
         trial_days = None

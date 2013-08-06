@@ -3,6 +3,13 @@
 History
 -------
 
+0.1.3 (2013-08-?)
+++++++++++++++++++
+
+* Added Customer.get_or_create method
+* sync file for all code that keeps things in sync with stripe
+* Added djstripe_sync_customers management command
+
 0.1.2 (2013-08-6)
 ++++++++++++++++++
 

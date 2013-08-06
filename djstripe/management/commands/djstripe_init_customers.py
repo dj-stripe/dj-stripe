@@ -14,5 +14,5 @@ class Command(BaseCommand):
         for user in User.objects.filter(customer__isnull=True):
             # use get_or_create in case of race conditions on large
             #      user bases
-            Customer.create(user=user)
+            Customer.get_or_create(user=user)
             print("Created customer for {0}".format(user.email))

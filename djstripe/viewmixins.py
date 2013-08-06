@@ -9,10 +9,8 @@ from . import settings as app_settings
 class PaymentRequiredMixin(object):
     """ Used to check to see if someone paid """
     def dispatch(self, request, *args, **kwargs):
-        customer, create = Customer.objects.get_or_create(
-            user=request.user
-        )
-        if not customer.has_active_subscription():
+        customer, created = Customer.get_or_create(request.user)
+        if created or not customer.has_active_subscription():
             msg = "Your account is inactive. Please renew your subscription"
             messages.info(request, msg, fail_silently=True)
             return redirect("subscriptions:subscribe")
