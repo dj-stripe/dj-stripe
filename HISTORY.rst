@@ -3,11 +3,12 @@
 History
 -------
 
-0.1.2 (2013-08-?)
+0.1.2 (2013-08-6)
 ++++++++++++++++++
 
 * Admin working
 * Better publish statement
+* Fix dependencies
 
 0.1.1 (2013-08-6)
 ++++++++++++++++++

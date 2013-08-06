@@ -36,7 +36,10 @@ setup(
     package_dir={'djstripe': 'djstripe'},
     include_package_data=True,
     install_requires=[
-    'stripe',
+        'django>=1.4',
+        'stripe>=1.9.2',
+        'django-model-utils>=1.4.0',
+        'django-braces>=1.2.1',
     ],
     license="BSD",
     zip_safe=False,

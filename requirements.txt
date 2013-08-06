@@ -1,4 +1,4 @@
-django>=1.5
-stripe
-django-model-utils
-django-braces
+django>=1.4
+stripe>=1.9.2
+django-model-utils>=1.4.0
+django-braces>=1.2.1
