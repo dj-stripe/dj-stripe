@@ -56,6 +56,7 @@ class SubscribeFormView(
                 # add form error here
                 self.error = e.args[0]
                 return self.form_invalid(form)
+            # redirect to confirmation page
             return self.form_valid(form)
         else:
             return self.form_invalid(form)

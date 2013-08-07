@@ -3,7 +3,7 @@
 History
 -------
 
-0.1.3 (2013-08-?)
+0.1.3 (2013-08-7)
 ++++++++++++++++++
 
 * Added Customer.get_or_create method
