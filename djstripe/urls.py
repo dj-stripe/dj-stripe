@@ -44,8 +44,14 @@ urlpatterns = patterns("",
         name="history"
     ),
     url(
+        r"^a/sync_history/$",
+        views.SyncHistoryView.as_view(),
+        name="sync_history"
+    ),
+    url(
         app_settings.DJSTRIPE_WEBHOOK_URL,
         views.WebHook.as_view(),
         name="webhook"
     ),
+
 )

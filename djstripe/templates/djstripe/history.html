@@ -4,39 +4,18 @@
 
 {% block content %}
     {{ block.super }}
-    <h2>Payment History</h2>
-    <p class="lead">Your transaction history</p>
-    {% if customer.invoices.all %}
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Transaction ID</th>
-                    <th>Date</th>
-                    <th>Amount</th>
-                </tr>
-            </thead>
-            {% for invoice in customer.invoices.all %}
-                <tr>
-                    <td class="fixed">#{{ invoice.id }}</td>
-                    <td>{{ invoice.date|date:"M d" }}</td>
-                    </td>
-                    <td>
-                        {% if invoice.paid and invoice.total > 0 %}
-                            <p>
-                                <span class="label label-success">Paid</span> ${{ invoice.total|floatformat:"2" }}
-                            </p>
-                        {% endif %}
-                        
-                        {% if invoice.paid and invoice.total < 0 %}
-                            <p>
-                                <span class="label label-success">Credit</span> ${{ invoice.total|floatformat:"2" }}
-                            </p>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-        </table>
-    {% else %}
-        <p>You have not made any payments yet.</p>
-    {% endif %}
+    <div id="history-table">
+    {% include "djstripe/includes/_history_table.html" %}
+    </div>
 {% endblock content %}
+
+{% block javascript %}
+{{ block.super }}
+<script>
+    $(function() {
+        $.post("{% url 'djstripe:sync_history' %}", function(data) {
+            $('#history-table').html(data);
+        });
+    });
+</script>
+{% endblock javascript %}

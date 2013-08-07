@@ -4,6 +4,7 @@ import json
 from django.core.urlresolvers import reverse_lazy
 from django.db.models import ObjectDoesNotExist
 from django.http import HttpResponse
+from django.shortcuts import render
 from django.views.generic import DetailView
 from django.views.generic import FormView
 from django.views.generic import TemplateView
@@ -20,6 +21,7 @@ from .models import Event
 from .models import EventProcessingException
 from .settings import PLAN_CHOICES
 from .settings import PY3
+from .sync import sync_customer
 from .viewmixins import PaymentsContextMixin
 
 
@@ -62,18 +64,6 @@ class SubscribeFormView(
             return self.form_invalid(form)
 
 
-class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
-    template_name = "djstripe/history.html"
-    model = Customer
-    select_related = ["invoice"]
-
-    def get_object(self):
-        try:
-            return self.request.user.customer
-        except Customer.DoesNotExist:
-            return Customer.create(self.request.user)
-
-
 class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, TemplateView):
     template_name = "djstripe/change_card.html"
 
@@ -109,3 +99,22 @@ class WebHook(CsrfExemptMixin, View):
             event.process()
         return HttpResponse()
 
+
+class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
+    template_name = "djstripe/history.html"
+    model = Customer
+    select_related = ["invoice"]
+
+    def get_object(self):
+        customer, created = Customer.get_or_create(self.request.user)
+        return customer
+
+
+class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
+
+    def post(self, request, *args, **kwargs):
+        return render(
+            request,
+            "djstripe/includes/_history_table.html",
+            {"customer": sync_customer(request.user)}
+        )
