@@ -5,6 +5,50 @@
 {% block content %}
 <h2>Subscription Form</h2>
 
-{{ form }}
+{% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+{% endif %}
+{% if view.error %}
+    <div class="alert alert-error">{{ view.error }}</div>
+{% endif %}
+
+<form action="{% url 'subscriptions:subscribe' %}" class="payments"  data-stripe-key="{{ STRIPE_PUBLIC_KEY }}" data-replace-closest=".subscribe-form" method="POST">
+    {% csrf_token %}
+    {{ form }}
+    <input name="stripe_token" type="hidden" />
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Subscribe</button>
+    </div>
+</form>
 
 {% endblock content %}
+
+{% block javascript %}
+{{ block.super }}
+<script src="//checkout.stripe.com/v2/checkout.js"></script>
+<script text="text/javascript">
+    $(function() {
+
+        $('body').on("click", '.payments button[type=submit]', function(e) {
+          e.preventDefault();
+          var $form = $("form.payments"),
+              token = function(res) {
+                $form.find("input[name=stripe_token]").val(res.id);
+                $(".main-content").hide();
+                $("div.progress").removeClass("hidden");
+                $('.progress-bar').animate({width:'+=100%'}, 2000);
+                $form.trigger("submit");
+              };
+
+          StripeCheckout.open({
+            key:         $form.data("stripe-key"),
+            name:        'Payment Method',
+            panelLabel:  'Add Payment Method',
+            token:       token
+          });
+
+          return false;
+        });
+    });
+</script>
+{% endblock javascript %}
