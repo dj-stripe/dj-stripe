@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 import json
 
 from django.core.urlresolvers import reverse_lazy
-from django.db.models import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.generic import DetailView

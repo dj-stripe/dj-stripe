@@ -32,6 +32,10 @@ settings.py::
 	INSTALLED_APPS +=(
 	    "djstripe",
 	)
+    TEMPLATE_CONTEXT_PROCESSORS +=(
+        'djstripe.context_processors.payments_settings',
+
+    )
 
 urls.py::
 

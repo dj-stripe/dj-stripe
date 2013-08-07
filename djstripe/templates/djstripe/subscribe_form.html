@@ -1,4 +1,5 @@
 {% extends "djstripe/base.html" %}
+{% load crispy_forms_tags %}
 
 {% block title %}Subscription Form{% endblock title %}
 
@@ -15,7 +16,7 @@
 
 <form action="{% url 'djstripe:subscribe' %}" class="djstripe-payments"  data-stripe-key="{{ STRIPE_PUBLIC_KEY }}"  method="POST">
     {% csrf_token %}
-    {{ form }}
+    {{ form|crispy }}
     <input name="stripe_token" type="hidden" />
     <div class="form-actions">
         <!-- disable this when clicked -->
