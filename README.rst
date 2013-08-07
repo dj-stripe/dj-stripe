@@ -22,24 +22,61 @@ The full documentation is at http://dj-stripe.rtfd.org.
 Quickstart
 ----------
 
-Install dj-stripe::
+Install dj-stripe:
+
+.. code-block:: bash
 
     pip install dj-stripe
 
-settings.py::
+Add ``djstripe`` to your ``INSTALLED_APPS``:
 
-	# settings.py
+.. code-block:: python
+
 	INSTALLED_APPS +=(
 	    "djstripe",
 	)
+
+Add the context processor to your ``TEMPLATE_CONTEXT_PROCESSORS``:
+
+.. code-block:: python
+
     TEMPLATE_CONTEXT_PROCESSORS +=(
         'djstripe.context_processors.payments_settings',
-
     )
 
-urls.py::
+Add your stripe keys:
 
-	url(r'^stripe/', include('djstripe.urls', namespace="djstripe")),
+.. code-block:: python
+
+    STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "<your publishable test key>")
+    STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "<your secret test key>")
+
+Add some payment plans:
+
+.. code-block:: python
+
+    PAYMENTS_PLANS = {
+        "monthly": {
+            "stripe_plan_id": "pro-monthly",
+            "name": "Web App Pro ($25/month)",
+            "description": "The monthly subscription plan to WebApp",
+            "price": 25,
+            "currency": "usd",
+            "interval": "month"
+        },
+        "yearly": {
+            "stripe_plan_id": "pro-yearly",
+            "name": "Web App Pro ($199/year)",
+            "description": "The annual subscription plan to WebApp",
+            "price": 199,
+            "currency": "usd",
+            "interval": "year"
+        }
+    }
+
+Add to the urls.py::
+
+	url(r'^payments/', include('djstripe.urls', namespace="djstripe")),
 	
 Run the commands::
 
@@ -48,6 +85,10 @@ Run the commands::
 	python manage.py djstripe_init_customers
 	
 	python manage.py djstripe_init_plans
+
+Start up the webserver:
+
+    * http://127.0.0.1:8000/payments/
 
 Running Tests
 --------------
