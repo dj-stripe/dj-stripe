@@ -74,7 +74,9 @@ Add some payment plans:
         }
     }
 
-Add to the urls.py::
+Add to the urls.py:
+
+.. code-block:: python
 
 	url(r'^payments/', include('djstripe.urls', namespace="djstripe")),
 	

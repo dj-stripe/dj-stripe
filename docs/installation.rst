@@ -15,9 +15,9 @@ Or, if you have virtualenvwrapper installed::
     $ pip install dj-stripe
 
 
-Or for development::
+Or for development, first fork it and then:
 
-    $ git clone https://github.com/pydanny/dj-stripe/
+    $ git clone https://github.com/<yourname>/dj-stripe/
     $ python setup.py develop
 
 
@@ -86,3 +86,11 @@ Run the commands::
 Start up the webserver:
 
     * http://127.0.0.1:8000/payments/
+
+Running Tests
+--------------
+
+::
+
+    pip install -r requirements_text.txt
+    python runtests.py
