@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 from django.core.management.base import BaseCommand
 
 
-from .settings import User
-from .sync import sync_customer
+from ...settings import User
+from ...sync import sync_customer
 
 
 class Command(BaseCommand):

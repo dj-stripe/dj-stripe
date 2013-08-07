@@ -3,8 +3,7 @@ Wire this into the root URLConf this way::
 
     url(r'^stripe/', include('djstripe.urls', namespace="djstripe")),
     # url can be changed
-    # namespace can be changed
-    # Call to 'djstripe.urls' must stay as is
+    # Call to 'djstripe.urls' and 'namespace' must stay as is
 
 Call it from reverse()::
 

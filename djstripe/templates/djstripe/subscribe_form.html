@@ -12,7 +12,7 @@
     <div class="alert alert-error">{{ view.error }}</div>
 {% endif %}
 
-<form action="{% url 'subscriptions:subscribe' %}" class="payments"  data-stripe-key="{{ STRIPE_PUBLIC_KEY }}" data-replace-closest=".subscribe-form" method="POST">
+<form action="{% url 'djstripe:subscribe' %}" class="djstripe-payments"  data-stripe-key="{{ STRIPE_PUBLIC_KEY }}"  method="POST">
     {% csrf_token %}
     {{ form }}
     <input name="stripe_token" type="hidden" />
@@ -29,14 +29,16 @@
 <script text="text/javascript">
     $(function() {
 
-        $('body').on("click", '.payments button[type=submit]', function(e) {
+        $('body').on("click", '.djstripe-payments button[type=submit]', function(e) {
           e.preventDefault();
-          var $form = $("form.payments"),
+          var $form = $(".djstripe-payments"),
               token = function(res) {
                 $form.find("input[name=stripe_token]").val(res.id);
-                $(".main-content").hide();
-                $("div.progress").removeClass("hidden");
-                $('.progress-bar').animate({width:'+=100%'}, 2000);
+
+                // work on this for pure HTML edition. Or maybe JS edition?
+                //$(".main-content").hide();
+                //$("div.progress").removeClass("hidden");
+                //$('.progress-bar').animate({width:'+=100%'}, 2000);
                 $form.trigger("submit");
               };
 
