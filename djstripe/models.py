@@ -367,7 +367,7 @@ class Customer(StripeObject):
     @classmethod
     def get_or_create(cls, user):
         try:
-            return Customer.objects.filter(user=user), False
+            return Customer.objects.get(user=user), False
         except Customer.DoesNotExist:
             return cls.create(user), True
 

@@ -9,11 +9,17 @@ from django.utils import importlib
 
 PY3 = sys.version > "3"
 
-try:
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-except ImportError:
-    from django.contrib.auth.models import User
+
+def get_user_model():
+    """ Place this in a function to avoid circular imports """
+    try:
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+    except ImportError:
+        from django.contrib.auth.models import User
+    return User
+
+User = get_user_model()
 
 
 def plan_from_stripe_id(stripe_id):

@@ -3,9 +3,10 @@ from __future__ import unicode_literals
 from django.core.management.base import BaseCommand
 
 
-from ...settings import User
+from ...settings import get_user_model
 from ...sync import sync_customer
 
+User = get_user_model()
 
 class Command(BaseCommand):
 
