@@ -56,5 +56,8 @@ Running Tests
 Features
 --------
 
-* TODO
-
+* Subscription management
+* Works with Django 1.5, 1.4
+* Works with Python 3.3, 2.7, 2.6
+* Dead-Easy installation (Done, just needs documentation)
+* Single-unit purchases (forthcoming)
