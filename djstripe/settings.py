@@ -69,6 +69,7 @@ PLAN_LIST = []
 for p in settings.PAYMENTS_PLANS:
     if settings.PAYMENTS_PLANS[p].get("stripe_plan_id"):
         plan = settings.PAYMENTS_PLANS[p]
+        plan['plan'] = p
         PLAN_LIST.append(plan)
 
 if PY3:
