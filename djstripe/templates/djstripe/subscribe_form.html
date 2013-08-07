@@ -1,8 +1,9 @@
-{% extends "payments/base.html" %}
+{% extends "djstripe/base.html" %}
 
 {% block title %}Subscription Form{% endblock title %}
 
 {% block content %}
+{{ block.super }}
 <h2>Subscription Form</h2>
 
 {% if error %}
@@ -22,6 +23,7 @@
     </div>
 </form>
 
+
 {% endblock content %}
 
 {% block javascript %}
@@ -36,10 +38,9 @@
               token = function(res) {
                 $form.find("input[name=stripe_token]").val(res.id);
 
-                // work on this for pure HTML edition. Or maybe JS edition?
-                //$(".main-content").hide();
-                //$("div.progress").removeClass("hidden");
-                //$('.progress-bar').animate({width:'+=100%'}, 2000);
+                $("button[type=submit]").attr("disabled", "true");
+                $('#in-progress').modal({"keyboard": false})
+                $('.progress-bar').animate({width:'+=100%'}, 2000);
                 $form.trigger("submit");
               };
 

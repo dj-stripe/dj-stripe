@@ -1,0 +1,67 @@
+{% extends "payments/base.html" %}
+
+{% block title %}Account{% endblock title %}
+
+{% block content %}
+    {{ block.super }}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h2>Account Information</h2>
+            {% include "djstripe/includes/_subscription_status.html" %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <p>
+                Credit Card on file.
+                <a class="btn btn-info" href="">Show card</a>
+            </p>
+        </div>
+        <div class="col-6">
+            <p class="pull-right">
+                Next billed on {{ subscription.current_period_end }}
+                <a class="btn btn-primary" href="{% url 'djstripe:subscribe' %}">Update credit card</a>
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Plan</th>
+                        <th>Interval</th>
+                        <th>Description</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    {% for plan in plans %}
+                        <tr>
+                            <td>{{ plan.name }}</td>
+                            <td>{{ plan.interval.title }}ly</td>
+                            <td>{{ plan.description }}</td>
+                            <td>Your plan</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+{% endblock content %}
+
+{% block javascript %}
+{{ block.super }}
+<script>
+    $(function() {
+        $.post("{% url 'djstripe:sync_history' %}", function(data) {
+            $('#history-table').html(data);
+        });
+    });
+</script>
+{% endblock javascript %}

@@ -6,9 +6,12 @@ History
 0.1.3 (2013-08-7)
 ++++++++++++++++++
 
+* Added account view
 * Added Customer.get_or_create method
-* sync file for all code that keeps things in sync with stripe
 * Added djstripe_sync_customers management command
+* sync file for all code that keeps things in sync with stripe
+* Use client-side JavaScript to get history data asynchronously
+* More user friendly action views
 
 0.1.2 (2013-08-6)
 ++++++++++++++++++

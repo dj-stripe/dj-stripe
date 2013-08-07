@@ -24,6 +24,11 @@ from . import views
 
 urlpatterns = patterns("",
     url(
+        r"^$",
+        views.AccountView.as_view(),
+        name="account"
+    ),
+    url(
         r"^subscribe/$",
         views.SubscribeFormView.as_view(),
         name="subscribe"

@@ -1,41 +1,21 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
-{% with customer.current_subscription as subscription %}
-    {% if subscription %}
-        {% if subscription.status == "active" %}
-            <div class="alert alert-info">
-                Your subscription will automatically renew in <strong>{{ subscription.current_period_end|timeuntil }}</strong>.
+  <!-- Modal -->
+  <div class="modal fade" id="in-progress">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Server Update In-Progress <img src="{% static 'img/in-progress.gif' %}" /></h4>
+        </div>
+        <div class="modal-body">
+            <div class="progress">
+                <div class="progress-bar" style="width: 0%;"></div>
             </div>
-        {% else %}
-            {% if subscription.status == "trialing" %}
-                {% if request.user.customer.plan and request.user.customer.card_kind %}
-                    <div class="alert alert-info">
-                        Your free trial will end in <strong>{{ subscription.current_period_end|timeuntil }}</strong> after which you commence a <strong>{{ subscription.plan_display }}</strong> plan.
-                    </div>
-                {% else %}
-                    <div class="alert alert-warning lead">
-                        Your free trial will end in <strong>{{ subscription.current_period_end|timeuntil }}</strong> after which you will need to get a subscription to continue using the site.
-                    </div>
-                {% endif %}
-            {% else %}
-                {% if subscription.status == "canceled" %}
-                    {% if subscription.is_period_current %}
-                        <div class="alert alert-warning lead">
-                            Your subscription has been <strong>canceled</strong> but you can continue to use the site for another <strong>{{ subscription.current_period_end|timeuntil }}</strong>.
-                        </div>
-                    {% else %}
-                        <div class="alert alert-danger lead">
-                            Your subscription has been <strong>canceled</strong>.
-                        </div>
-                    {% endif %}
-                {% else %}
-                    <div class="alert alert-danger lead">
-                        Your subscription is <strong>{{ subscription.status }}</strong>.
-                    </div>
-                {% endif %}
-            {% endif %}
-        {% endif %}
-    {% endif %}
-{% endwith %}
+        </div>
+
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
 {% endblock %}

@@ -20,6 +20,7 @@ from .models import Customer
 from .models import Event
 from .models import EventProcessingException
 from .settings import PLAN_CHOICES
+from .settings import PLAN_LIST
 from .settings import PY3
 from .sync import sync_customer
 from .viewmixins import PaymentsContextMixin
@@ -37,6 +38,7 @@ class SubscribeFormView(
     def get_context_data(self, *args, **kwargs):
         context = super(SubscribeFormView, self).get_context_data(**kwargs)
         context['is_plans_plural'] = bool(len(PLAN_CHOICES) > 1)
+        context['customer'], created = Customer.get_or_create(self.request.user)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -48,10 +50,7 @@ class SubscribeFormView(
         form = self.get_form(form_class)
         if form.is_valid():
             try:
-                try:
-                    customer = self.request.user.customer
-                except ObjectDoesNotExist:
-                    customer = Customer.create(self.request.user)
+                customer, created = Customer.get_or_create(self.request.user)
                 customer.update_card(self.request.POST.get("stripe_token"))
                 customer.subscribe(form.cleaned_data["plan"])
             except stripe.StripeError as e:
@@ -118,3 +117,15 @@ class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
             "djstripe/includes/_history_table.html",
             {"customer": sync_customer(request.user)}
         )
+
+
+class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
+    template_name = "djstripe/account.html"
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(AccountView, self).get_context_data(**kwargs)
+        customer, created = Customer.get_or_create(self.request.user)
+        context['customer'] = customer
+        context['subscription'] = customer.current_subscription
+        context['plans'] = PLAN_LIST
+        return context

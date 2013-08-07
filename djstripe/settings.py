@@ -65,6 +65,12 @@ TRIAL_PERIOD_FOR_USER_CALLBACK = getattr(
     "PAYMENTS_TRIAL_PERIOD_FOR_USER_CALLBACK",
     None
 )
+PLAN_LIST = []
+for p in settings.PAYMENTS_PLANS:
+    if settings.PAYMENTS_PLANS[p].get("stripe_plan_id"):
+        plan = settings.PAYMENTS_PLANS[p]
+        PLAN_LIST.append(plan)
+
 if PY3:
     if isinstance(TRIAL_PERIOD_FOR_USER_CALLBACK, str):
         TRIAL_PERIOD_FOR_USER_CALLBACK = load_path_attr(
