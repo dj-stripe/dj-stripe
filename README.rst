@@ -19,6 +19,16 @@ Documentation
 
 The full documentation is at http://dj-stripe.rtfd.org.
 
+Features
+--------
+
+* Subscription management
+* Works with Django 1.5, 1.4
+* Works with Python 3.3, 2.7, 2.6
+* Dead-Easy installation (Done, just needs documentation)
+* Single-unit purchases (forthcoming)
+
+
 Quickstart
 ----------
 
@@ -100,11 +110,3 @@ Running Tests
     pip install -r requirements_text.txt
     python runtests.py
 
-Features
---------
-
-* Subscription management
-* Works with Django 1.5, 1.4
-* Works with Python 3.3, 2.7, 2.6
-* Dead-Easy installation (Done, just needs documentation)
-* Single-unit purchases (forthcoming)
