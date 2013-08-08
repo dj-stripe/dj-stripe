@@ -3,6 +3,11 @@
 History
 -------
 
+0.1.4 (2013-08-08)
++++++++++++++++++++
+
+* Change PaymentRequiredMixin to SubscriptionPaymentRequiredMixin
+
 0.1.3 (2013-08-7)
 ++++++++++++++++++
 
