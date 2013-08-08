@@ -3,4 +3,4 @@ include CONTRIBUTING.rst
 include HISTORY.rst
 include LICENSE
 include README.rst
-recursive-include djstripe *.html *.css *.js *.png *.gif
+recursive-include djstripe *.html *.png *.gif
