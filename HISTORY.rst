@@ -3,6 +3,11 @@
 History
 -------
 
+0.1.5 (2013-08-08)
++++++++++++++++++++
+
+* Fixed the manifest so we include html, css, js, images.
+
 0.1.4 (2013-08-08)
 +++++++++++++++++++
 
