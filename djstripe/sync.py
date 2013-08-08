@@ -2,6 +2,7 @@ from .models import Customer
 
 
 def sync_customer(user):
+    # TODO - needs tests
     customer, created = Customer.get_or_create(user)
     cu = customer.stripe_customer
     customer.sync(cu=cu)

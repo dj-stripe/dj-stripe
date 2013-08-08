@@ -7,6 +7,7 @@ History
 +++++++++++++++++++
 
 * Change PaymentRequiredMixin to SubscriptionPaymentRequiredMixin
+* Add subscription_payment_required function-based view decorator
 
 0.1.3 (2013-08-7)
 ++++++++++++++++++

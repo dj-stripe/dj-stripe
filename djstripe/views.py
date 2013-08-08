@@ -30,6 +30,7 @@ class SubscribeFormView(
         LoginRequiredMixin,
         PaymentsContextMixin,
         FormView):
+    # TODO - needs tests
 
     form_class = PlanForm
     template_name = "djstripe/subscribe_form.html"
@@ -64,10 +65,12 @@ class SubscribeFormView(
 
 
 class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, TemplateView):
+    # TODO - needs tests
     template_name = "djstripe/change_card.html"
 
 
 class CancelView(LoginRequiredMixin, PaymentsContextMixin, TemplateView):
+    # TODO - needs tests
     template_name = "djstripe/cancel.html"
 
 
@@ -100,6 +103,7 @@ class WebHook(CsrfExemptMixin, View):
 
 
 class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
+    # TODO - needs tests
     template_name = "djstripe/history.html"
     model = Customer
     select_related = ["invoice"]
@@ -110,7 +114,7 @@ class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
 
 
 class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
-
+    # TODO - needs tests
     def post(self, request, *args, **kwargs):
         return render(
             request,
@@ -120,6 +124,7 @@ class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
 
 
 class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
+    # TODO - needs tests
     template_name = "djstripe/account.html"
 
     def get_context_data(self, *args, **kwargs):
