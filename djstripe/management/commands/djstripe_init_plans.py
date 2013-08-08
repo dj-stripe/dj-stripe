@@ -11,15 +11,15 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         stripe.api_key = settings.STRIPE_SECRET_KEY
-        for plan in settings.PAYMENTS_PLANS:
-            if settings.PAYMENTS_PLANS[plan].get("stripe_plan_id"):
+        for plan in settings.DJSTRIPE_PLANS:
+            if settings.DJSTRIPE_PLANS[plan].get("stripe_plan_id"):
                 try:
                     stripe.Plan.create(
-                        amount=settings.PAYMENTS_PLANS[plan]["price"],
-                        interval=settings.PAYMENTS_PLANS[plan]["interval"],
-                        name=settings.PAYMENTS_PLANS[plan]["name"],
-                        currency=settings.PAYMENTS_PLANS[plan]["currency"],
-                        id=settings.PAYMENTS_PLANS[plan].get("stripe_plan_id")
+                        amount=settings.DJSTRIPE_PLANS[plan]["price"],
+                        interval=settings.DJSTRIPE_PLANS[plan]["interval"],
+                        name=settings.DJSTRIPE_PLANS[plan]["name"],
+                        currency=settings.DJSTRIPE_PLANS[plan]["currency"],
+                        id=settings.DJSTRIPE_PLANS[plan].get("stripe_plan_id")
                     )
                     print("Plan created for {0}".format(plan))
                 except Exception as e:

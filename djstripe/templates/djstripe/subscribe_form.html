@@ -5,7 +5,6 @@
 
 {% block content %}
 {{ block.super }}
-<div class="container">
 <h2>Choose a Subscription</h2>
 
 {% if error %}
@@ -14,30 +13,34 @@
 {% if view.error %}
     <div class="alert alert-error">{{ view.error }}</div>
 {% endif %}
-
 <div class="row">
     {% for plan in PLAN_LIST %}
-        <div class="col-3">
+        <div class="col-4">
             <form action="{% url 'djstripe:subscribe' %}" class="djstripe-payments"  data-stripe-key="{{ STRIPE_PUBLIC_KEY }}"  method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="plan" value="{{ plan.plan }}" />
                 <input name="stripe_token" type="hidden" /> 
 
                 <!-- disable this when clicked -->
-                <button type="submit" class="btn btn-primary">
+                <button
+                  {% if customer.current_subscription.plan == plan.plan %}
+                    disabled="true"
+                  {% endif %}
+                 type="submit" class="btn btn-primary">
                   {% with image=plan.image|default:"img/default-plan-image.png" %}
                     <img src="{% static image %}" class="img-thumbnail" />
                   {% endwith %}
                   <h3>{{ plan.name }}</h3>
                   <p>{{ plan.description }}</p>
                 </button>
-
+              {% if customer.current_subscription.plan == plan.plan %}
+                <h4>Your Current Plan</h4>
+              {% endif %}
             </form>
         </div>
     {% endfor %}
 </div>
 
-</div>
 {% endblock content %}
 
 {% block javascript %}
