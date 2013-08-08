@@ -14,6 +14,7 @@ Contents:
    installation
    usage
    settings
+   migrating_to_djstripe
    contributing
    authors
    history

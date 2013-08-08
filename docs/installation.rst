@@ -52,12 +52,12 @@ Add some payment plans:
 
 .. code-block:: python
 
-    PAYMENTS_PLANS = {
+    DJSTRIPE_PLANS = {
         "monthly": {
             "stripe_plan_id": "pro-monthly",
             "name": "Web App Pro ($25/month)",
             "description": "The monthly subscription plan to WebApp",
-            "price": 25,
+            "price": 2500,  # $25.00
             "currency": "usd",
             "interval": "month"
         },
@@ -65,7 +65,7 @@ Add some payment plans:
             "stripe_plan_id": "pro-yearly",
             "name": "Web App Pro ($199/year)",
             "description": "The annual subscription plan to WebApp",
-            "price": 199,
+            "price": 19900,  # $19900
             "currency": "usd",
             "interval": "year"
         }

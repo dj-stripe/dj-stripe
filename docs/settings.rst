@@ -22,6 +22,29 @@ Payment plans.
 
 Possibly deprecated in favor of model based plans.
 
+Example:
+
+.. code-block:: 
+
+    DJSTRIPE_PLANS = {
+        "monthly": {
+            "stripe_plan_id": "pro-monthly",
+            "name": "Web App Pro ($25/month)",
+            "description": "The monthly subscription plan to WebApp",
+            "price": 2500,  # $25.00
+            "currency": "usd",
+            "interval": "month"
+        },
+        "yearly": {
+            "stripe_plan_id": "pro-yearly",
+            "name": "Web App Pro ($199/year)",
+            "description": "The annual subscription plan to WebApp",
+            "price": 19900,  # $19900
+            "currency": "usd",
+            "interval": "year"
+        }
+    }
+
 
 DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS (=())
 ---------------------------------------------------
