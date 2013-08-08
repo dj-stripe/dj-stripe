@@ -3,6 +3,26 @@ Settings
 
 Available settings:
 
+DJSTRIPE_DEFAULT_PLAN (=None)
+-----------------------------
+
+Payment plans default. 
+
+Possibly deprecated in favor of model based plans.
+
+DJSTRIPE_INVOICE_FROM_EMAIL (="billing@example.com")
+----------------------------------------------------
+
+Invoice emails come from this address.
+
+DJSTRIPE_PLANS (={})
+--------------------
+
+Payment plans. 
+
+Possibly deprecated in favor of model based plans.
+
+
 DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS (=())
 ---------------------------------------------------
 
@@ -25,6 +45,12 @@ Example:
         "products:detail",  # A ProductDetail view you want shown to non-payers
         "home",  # Site homepage
     )
+
+DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK (=None)
+------------------------------------------------
+
+TODO: Document!
+
 
 DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")
 --------------------------------------

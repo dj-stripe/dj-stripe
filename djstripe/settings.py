@@ -47,28 +47,28 @@ def load_path_attr(path):
 STRIPE_PUBLIC_KEY = settings.STRIPE_PUBLIC_KEY
 INVOICE_FROM_EMAIL = getattr(
     settings,
-    "PAYMENTS_INVOICE_FROM_EMAIL",
+    "DJSTRIPE_INVOICE_FROM_EMAIL",
     "billing@example.com"
 )
-PAYMENTS_PLANS = getattr(settings, "PAYMENTS_PLANS", {})
+PAYMENTS_PLANS = getattr(settings, "DJSTRIPE_PLANS", {})
 PLAN_CHOICES = [
     (plan, PAYMENTS_PLANS[plan].get("name", plan))
     for plan in PAYMENTS_PLANS
 ]
 DEFAULT_PLAN = getattr(
     settings,
-    "PAYMENTS_DEFAULT_PLAN",
+    "DJSTRIPE_DEFAULT_PLAN",
     None
 )
 TRIAL_PERIOD_FOR_USER_CALLBACK = getattr(
     settings,
-    "PAYMENTS_TRIAL_PERIOD_FOR_USER_CALLBACK",
+    "DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK",
     None
 )
 PLAN_LIST = []
-for p in settings.PAYMENTS_PLANS:
-    if settings.PAYMENTS_PLANS[p].get("stripe_plan_id"):
-        plan = settings.PAYMENTS_PLANS[p]
+for p in PAYMENTS_PLANS:
+    if PAYMENTS_PLANS[p].get("stripe_plan_id"):
+        plan = PAYMENTS_PLANS[p]
         plan['plan'] = p
         PLAN_LIST.append(plan)
 
