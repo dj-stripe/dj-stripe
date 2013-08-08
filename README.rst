@@ -70,7 +70,7 @@ Add some payment plans:
             "stripe_plan_id": "pro-monthly",
             "name": "Web App Pro ($24.99/month)",
             "description": "The monthly subscription plan to WebApp",
-            "price": 24.99,  # $24.99
+            "price": 2499,  # $24.99
             "currency": "usd",
             "interval": "month"
         },
