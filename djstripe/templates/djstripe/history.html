@@ -4,9 +4,7 @@
 
 {% block content %}
     {{ block.super }}
-    <div id="history-table">
     {% include "djstripe/includes/_history_table.html" %}
-    </div>
 {% endblock content %}
 
 {% block javascript %}

@@ -29,9 +29,9 @@ Example:
     DJSTRIPE_PLANS = {
         "monthly": {
             "stripe_plan_id": "pro-monthly",
-            "name": "Web App Pro ($25/month)",
+            "name": "Web App Pro ($24.99/month)",
             "description": "The monthly subscription plan to WebApp",
-            "price": 2500,  # $25.00
+            "price": 2499,  # $24.99
             "currency": "usd",
             "interval": "month"
         },

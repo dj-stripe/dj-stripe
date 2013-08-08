@@ -132,5 +132,5 @@ class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
         customer, created = Customer.get_or_create(self.request.user)
         context['customer'] = customer
         context['subscription'] = customer.current_subscription
-        context['plans'] = PLAN_LIST
+        #context['plans'] = PLAN_LIST
         return context

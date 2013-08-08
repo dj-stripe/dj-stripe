@@ -1,5 +1,6 @@
+{% load static %}
+<div id="history-table">
 <h2>Payment History</h2>
-<p class="lead">Your transaction history</p>
 {% if customer.invoices.all %}
     <table class="table table-striped">
         <thead>
@@ -7,6 +8,7 @@
                 <th>Transaction ID</th>
                 <th>Date</th>
                 <th>Amount</th>
+                <th class="pull-right"><img class="in-progress-gif" src="{% static 'img/in-progress.gif' %}" /></th>
             </tr>
         </thead>
         {% for invoice in customer.invoices.all %}
@@ -27,9 +29,11 @@
                         </p>
                     {% endif %}
                 </td>
+                <td></td>
             </tr>
         {% endfor %}
     </table>
 {% else %}
     <p>You have not made any payments yet.</p>
 {% endif %}
+</div>

@@ -1,9 +1,9 @@
 {% extends "payments/base.html" %}
 
-{% block title %}Account{% endblock title %}
+{% block title %}Accounts Dashboard{% endblock title %}
 
 {% block content %}
-    {{ block.super }}
+{{ block.super }}
 <div class="container">
     <div class="row">
         <div class="col-12">
@@ -20,42 +20,51 @@
         </div>
         <div class="col-6">
             <p class="pull-right">
-                Next billed on {{ subscription.current_period_end }}
-                <a class="btn btn-primary" href="{% url 'djstripe:subscribe' %}">Update credit card</a>
+                Next billed on {{ subscription.current_period_end|date }}.
+                <a class="btn btn-primary" href="{% url 'djstripe:subscribe' %}">Update Subscription</a>
             </p>
         </div>
     </div>
-    <div class="row">
-        <div class="col-12">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Plan</th>
-                        <th>Interval</th>
-                        <th>Description</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    
-                    {% for plan in plans %}
+
+
+
+    {% if plans %}
+        {# Show available plans #}
+        <div class="row">
+            <div class="col-12">
+                <table class="table table-hover">
+                    <thead>
                         <tr>
-                            <td>{{ plan.name }}</td>
-                            <td>{{ plan.interval.title }}ly</td>
-                            <td>{{ plan.description }}</td>
-                            <td>
-                                {% if plan.plan == subscription.plan %}
-                                    Your plan
-                                {% else %}
-                                    Not your plan
-                                {% endif %}
-                            </td>
+                            <th>Plan</th>
+                            <th>Interval</th>
+                            <th>Description</th>
+                            <th></th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        
+                        {% for plan in plans %}
+                            <tr>
+                                <td>{{ plan.name }}</td>
+                                <td>{{ plan.interval.title }}ly</td>
+                                <td>{{ plan.description }}</td>
+                                <td>
+                                    {% if plan.plan == subscription.plan %}
+                                        Your plan
+                                    {% else %}
+                                        Not your plan
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
+    {% else %}
+        {# No plans so just show payment history #}
+        {% include "djstripe/includes/_history_table.html" %}
+    {% endif %}
 </div>
 
 {% endblock content %}
@@ -69,4 +78,15 @@
         });
     });
 </script>
+
+{% if not plans %}
+    <script>
+        $(function() {
+            $.post("{% url 'djstripe:sync_history' %}", function(data) {
+                $('#history-table').html(data);
+                $('.in-progress-gif').hide();
+            });
+        });
+    </script>
+{% endif %}
 {% endblock javascript %}
