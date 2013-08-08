@@ -532,6 +532,12 @@ class Customer(StripeObject):
 
 class CurrentSubscription(TimeStampedModel):
 
+    STATUS_TRIALING = "trialing"
+    STATUS_ACTIVE = "active"
+    STATUS_PAST_DUE = "past_due"
+    STATUS_CANCELLED = "canceled"
+    STATUS_UNPAID = "unpaid"
+
     customer = models.OneToOneField(
         Customer,
         related_name="current_subscription",
@@ -541,6 +547,7 @@ class CurrentSubscription(TimeStampedModel):
     quantity = models.IntegerField()
     start = models.DateTimeField()
     # trialing, active, past_due, canceled, or unpaid
+    # In progress of moving it to choices field
     status = models.CharField(max_length=25)
     canceled_at = models.DateTimeField(null=True, blank=True)
     current_period_end = models.DateTimeField(null=True)

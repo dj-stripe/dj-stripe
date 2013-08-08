@@ -1,6 +1,6 @@
 {% if subscription %}
-    {% if subscription.status != "active" %}
-        {% if subscription.status == "trialing" %}
+    {% if subscription.status != subscription.STATUS_ACTIVE %}
+        {% if subscription.status == subscription.STATUS_TRIALING %}
             {% if request.user.customer.plan and request.user.customer.card_kind %}
                 <div class="alert alert-info">
                     Your free trial will end in <strong>{{ subscription.current_period_end|timeuntil }}</strong> after which you commence a <strong>{{ subscription.plan_display }}</strong> plan.
@@ -11,7 +11,7 @@
                 </div>
             {% endif %}
         {% else %}
-            {% if subscription.status == "canceled" %}
+            {% if subscription.status == subscription.STATUS_CANCELLED %}
                 {% if subscription.is_period_current %}
                     <div class="alert alert-warning lead">
                         Your subscription has been <strong>canceled</strong> but you can continue to use the site for another <strong>{{ subscription.current_period_end|timeuntil }}</strong>.
