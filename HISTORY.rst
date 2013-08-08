@@ -8,6 +8,7 @@ History
 
 * Change PaymentRequiredMixin to SubscriptionPaymentRequiredMixin
 * Add subscription_payment_required function-based view decorator
+* Added SubscriptionPaymentRedirectMiddleware
 * Much nicer accounts view display
 * Much improved subscription form display
 * Payment plans can have decimals
