@@ -59,6 +59,7 @@ Rules:
 * "[namespace]" means everything with this name is exempt
 * "namespace:name" means this namespaced URL is exempt
 * "name" means this URL is exempt
+* The entire djtripe namespace is exempt
 
 Example:
 
@@ -66,7 +67,7 @@ Example:
 
     DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = (
         "(allauth)",  # anything in the django-allauth URLConf
-        "[djstripe]",  # Anything in the djstripe app
+        "[blogs]",  # Anything in the blogs namespace
         "products:detail",  # A ProductDetail view you want shown to non-payers
         "home",  # Site homepage
     )

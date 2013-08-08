@@ -10,32 +10,34 @@ DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = getattr(
 
 from .models import Customer
 
+# So we don't have crazy long lines of code
+EXEMPT = list(DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS)
+EXEMPT.append("[djstripe]")
+
 
 class SubscriptionPaymentMiddleware(object):
     """
     Rules:
-        "(app_name)" means everything from this app is exempt
-        "[namespace]" means everything with this name is exempt
-        "namespace:name" means this namespaced URL is exempt
-        "name" means this URL is exempt
+
+        * "(app_name)" means everything from this app is exempt
+        * "[namespace]" means everything with this name is exempt
+        * "namespace:name" means this namespaced URL is exempt
+        * "name" means this URL is exempt
+        * The entire djtripe namespace is exempt
 
     Example::
 
         DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = (
             "(allauth)",  # anything in the django-allauth URLConf
-            "[djstripe]",  # Anything in the djstripe app
+            "[blogs]",  # Anything in the blogs namespace
             "products:detail",  # A ProductDetail view you want shown to non-payers
             "home",  # Site homepage
-
         )
     """
 
     # TODO - needs tests
 
     def process_request(self, request):
-
-        # So we don't have crazy long lines of code
-        EXEMPT = DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS
 
         if request.user.is_authenticated() and not request.user.is_staff:
             match = resolve(request.path)

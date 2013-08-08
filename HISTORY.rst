@@ -3,6 +3,11 @@
 History
 -------
 
+0.1.7 (2013-08-08)
++++++++++++++++++++
+
+* Middleware excepts all of the djstripe namespaced URLs. This way people can pay.
+
 0.1.6 (2013-08-08)
 +++++++++++++++++++
 
