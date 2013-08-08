@@ -15,6 +15,7 @@ from braces.views import SelectRelatedMixin
 import stripe
 
 from .forms import PlanForm
+from .models import CurrentSubscription
 from .models import Customer
 from .models import Event
 from .models import EventProcessingException
@@ -133,6 +134,9 @@ class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
         context = super(AccountView, self).get_context_data(**kwargs)
         customer, created = Customer.get_or_create(self.request.user)
         context['customer'] = customer
-        context['subscription'] = customer.current_subscription
+        try:
+            context['subscription'] = customer.current_subscription
+        except CurrentSubscription.DoesNotExist:
+            context['subscription'] = None
         context['plans'] = PLAN_LIST
         return context
