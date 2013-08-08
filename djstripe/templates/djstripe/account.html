@@ -8,20 +8,14 @@
     <div class="row">
         <div class="col-12">
             <h2>Account Information</h2>
-            {% include "djstripe/includes/_subscription_status.html" %}
         </div>
     </div>
     <div class="row">
-        <div class="col-6">
+        <div class="col-12">
             <p>
                 Credit Card on file.
-                <a class="btn btn-info" href="">Show card</a>
-            </p>
-        </div>
-        <div class="col-6">
-            <p class="pull-right">
-                Next billed on {{ subscription.current_period_end|date }}.
-                <a class="btn btn-primary" href="{% url 'djstripe:subscribe' %}">Update Subscription</a>
+                <a class="btn btn-info" data-toggle="modal" href="#show-card">Show Card</a>
+                <a class="btn btn-primary pull-right" href="">Manage Credit Card</a>
             </p>
         </div>
     </div>
@@ -30,6 +24,25 @@
 
     {% if plans %}
         {# Show available plans #}
+        <div class="row">
+            <div class="col-12">
+                <h2>Subscription</h2>
+                {% include "djstripe/includes/_subscription_status.html" %}
+            </div>  
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <p>Next billed on {{ subscription.current_period_end|date }}.<br/>
+                    <a href="{% url 'djstripe:history' %}">Payment History</a>
+                </p>
+            </div>
+            <div class="col-6">
+                <p class="pull-right">
+                    <a class="btn btn-primary" href="{% url 'djstripe:subscribe' %}">Manage Subscription</a>
+                </p>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-12">
                 <table class="table table-hover">
@@ -66,6 +79,25 @@
         {% include "djstripe/includes/_history_table.html" %}
     {% endif %}
 </div>
+
+  <!-- Modal for showing card -->
+  <div class="modal fade" id="show-card">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Card on File</h4>
+        </div>
+        <div class="modal-body">
+            <p><strong>Type:</strong> {{ customer.card_kind }}</p>
+            <p><strong>Last 4 Digits:</strong> {{ customer.card_last_4 }}</p>
+            <p><small>For security, your card information is stored on <a href="https://stripe.com">stripe.com</a>.</small></p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
 
 {% endblock content %}
 
