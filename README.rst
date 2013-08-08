@@ -19,6 +19,16 @@ Documentation
 
 The full documentation is at http://dj-stripe.rtfd.org.
 
+Features
+--------
+
+* Subscription management
+* Works with Django 1.5, 1.4
+* Works with Python 3.3, 2.7, 2.6
+* Dead-Easy installation (Done, just needs documentation)
+* Single-unit purchases (forthcoming)
+
+
 Quickstart
 ----------
 
@@ -60,7 +70,7 @@ Add some payment plans:
             "stripe_plan_id": "pro-monthly",
             "name": "Web App Pro ($24.99/month)",
             "description": "The monthly subscription plan to WebApp",
-            "price": 24.99,  # $24.99
+            "price": 2499,  # $24.99
             "currency": "usd",
             "interval": "month"
         },
@@ -68,7 +78,7 @@ Add some payment plans:
             "stripe_plan_id": "pro-yearly",
             "name": "Web App Pro ($199/year)",
             "description": "The annual subscription plan to WebApp",
-            "price": 19900,  # $19900
+            "price": 19900,  # $199.00
             "currency": "usd",
             "interval": "year"
         }
@@ -100,11 +110,3 @@ Running Tests
     pip install -r requirements_text.txt
     python runtests.py
 
-Features
---------
-
-* Subscription management
-* Works with Django 1.5, 1.4
-* Works with Python 3.3, 2.7, 2.6
-* Dead-Easy installation (Done, just needs documentation)
-* Single-unit purchases (forthcoming)
