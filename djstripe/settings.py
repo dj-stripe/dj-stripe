@@ -55,6 +55,8 @@ PLAN_CHOICES = [
     (plan, PAYMENTS_PLANS[plan].get("name", plan))
     for plan in PAYMENTS_PLANS
 ]
+
+
 DEFAULT_PLAN = getattr(
     settings,
     "DJSTRIPE_DEFAULT_PLAN",

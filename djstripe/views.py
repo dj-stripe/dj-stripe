@@ -23,6 +23,8 @@ from .settings import PLAN_LIST
 from .settings import PY3
 from .sync import sync_customer
 from .viewmixins import PaymentsContextMixin
+
+# This is here as a utility. Might move it out.
 from .viewmixins import SubscriptionPaymentRequiredMixin
 
 

@@ -33,7 +33,8 @@ Example:
             "description": "The monthly subscription plan to WebApp",
             "price": 2499,  # $24.99
             "currency": "usd",
-            "interval": "month"
+            "interval": "month",
+            "image": "img/pro-monthly.png"
         },
         "yearly": {
             "stripe_plan_id": "pro-yearly",
@@ -41,7 +42,8 @@ Example:
             "description": "The annual subscription plan to WebApp",
             "price": 19900,  # $19900
             "currency": "usd",
-            "interval": "year"
+            "interval": "year",
+            "image": "img/pro-yearly.png"
         }
     }
 

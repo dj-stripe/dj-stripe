@@ -41,7 +41,7 @@ Add the context processor to your ``TEMPLATE_CONTEXT_PROCESSORS``:
 .. code-block:: python
 
     TEMPLATE_CONTEXT_PROCESSORS +=(
-        'djstripe.context_processors.payments_settings',
+        'djstripe.context_processors.djstripe_settings',
     )
 
 Add your stripe keys:

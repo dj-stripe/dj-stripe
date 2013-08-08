@@ -21,7 +21,7 @@ settings.configure(
     SITE_ID=1,
     STRIPE_PUBLIC_KEY="",
     STRIPE_SECRET_KEY="",
-    PAYMENTS_PLANS={}
+    DJSTRIPE_PLANS={}
 )
 
 from django_nose import NoseTestSuiteRunner
