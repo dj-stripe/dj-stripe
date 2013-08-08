@@ -23,7 +23,7 @@ PAYMENT_PLANS vs DJSTRIPE_PLANS
             "stripe_plan_id": "pro-monthly",
             "name": "Web App Pro ($25/month)",
             "description": "The monthly subscription plan to WebApp",
-            "price": 2500,  # $25.00
+            "price": 25,  # $25.00
             "currency": "usd",
             "interval": "month"
         },
