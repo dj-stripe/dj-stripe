@@ -6,7 +6,7 @@ from .models import Customer
 from . import settings as app_settings
 
 
-class PaymentRequiredMixin(object):
+class SubscriptionPaymentRequiredMixin(object):
     """ Used to check to see if someone paid """
     def dispatch(self, request, *args, **kwargs):
         customer, created = Customer.get_or_create(request.user)
@@ -15,7 +15,7 @@ class PaymentRequiredMixin(object):
             messages.info(request, msg, fail_silently=True)
             return redirect("subscriptions:subscribe")
 
-        return super(PaymentRequiredMixin, self).dispatch(
+        return super(SubscriptionPaymentRequiredMixin, self).dispatch(
             request, *args, **kwargs)
 
 

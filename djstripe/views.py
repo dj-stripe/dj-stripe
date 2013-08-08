@@ -23,6 +23,7 @@ from .settings import PLAN_LIST
 from .settings import PY3
 from .sync import sync_customer
 from .viewmixins import PaymentsContextMixin
+from .viewmixins import SubscriptionPaymentRequiredMixin
 
 
 class SubscribeFormView(
