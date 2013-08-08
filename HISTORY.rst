@@ -3,6 +3,12 @@
 History
 -------
 
+0.1.6 (2013-08-08)
++++++++++++++++++++
+
+* Fixed a couple template paths
+* Fixed the manifest so we include html, images.
+
 0.1.5 (2013-08-08)
 +++++++++++++++++++
 
