@@ -63,7 +63,7 @@
                                 <td>{{ plan.description }}</td>
                                 <td>
                                     {% if plan.plan == subscription.plan %}
-                                        Your plan
+                                        <strong>Your plan</strong>
                                     {% else %}
                                         Not your plan
                                     {% endif %}
@@ -103,15 +103,15 @@
 
 {% block javascript %}
 {{ block.super }}
-<script>
-    $(function() {
-        $.post("{% url 'djstripe:sync_history' %}", function(data) {
-            $('#history-table').html(data);
+{% if plans %}
+    <script>
+        $(function() {
+            $.post("{% url 'djstripe:sync_history' %}", function(data) {
+                $('#history-table').html(data);
+            });
         });
-    });
-</script>
-
-{% if not plans %}
+    </script>
+{% else %}
     <script>
         $(function() {
             $.post("{% url 'djstripe:sync_history' %}", function(data) {

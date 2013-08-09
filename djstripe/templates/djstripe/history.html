@@ -3,7 +3,10 @@
 {% block title %}Payment History{% endblock title %}
 
 {% block content %}
-    {{ block.super }}
+    <ul class="breadcrumb">
+      <li><a href="{% url 'djstripe:account' %}">Home</a></li>
+      <li class="active">Payment History</li>
+    </ul>
     {% include "djstripe/includes/_history_table.html" %}
 {% endblock content %}
 

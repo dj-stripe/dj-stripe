@@ -10,6 +10,7 @@ from django.views.generic import TemplateView
 from django.views.generic import View
 
 from braces.views import CsrfExemptMixin
+from braces.views import FormValidMessageMixin
 from braces.views import LoginRequiredMixin
 from braces.views import SelectRelatedMixin
 import stripe
@@ -19,52 +20,13 @@ from .models import CurrentSubscription
 from .models import Customer
 from .models import Event
 from .models import EventProcessingException
-from .settings import PLAN_CHOICES
 from .settings import PLAN_LIST
 from .settings import PY3
 from .sync import sync_customer
-from .viewmixins import PaymentsContextMixin
+from .viewmixins import PaymentsContextMixin, SubscriptionMixin
 
 # This is here as a utility. Might move it out.
 from .viewmixins import SubscriptionPaymentRequiredMixin
-
-
-class SubscribeFormView(
-        LoginRequiredMixin,
-        PaymentsContextMixin,
-        FormView):
-    # TODO - needs tests
-
-    form_class = PlanForm
-    template_name = "djstripe/subscribe_form.html"
-    success_url = reverse_lazy("djstripe:history")
-
-    def get_context_data(self, *args, **kwargs):
-        context = super(SubscribeFormView, self).get_context_data(**kwargs)
-        context['is_plans_plural'] = bool(len(PLAN_CHOICES) > 1)
-        context['customer'], created = Customer.get_or_create(self.request.user)
-        return context
-
-    def post(self, request, *args, **kwargs):
-        """
-        Handles POST requests, instantiating a form instance with the passed
-        POST variables and then checked for validity.
-        """
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        if form.is_valid():
-            try:
-                customer, created = Customer.get_or_create(self.request.user)
-                customer.update_card(self.request.POST.get("stripe_token"))
-                customer.subscribe(form.cleaned_data["plan"])
-            except stripe.StripeError as e:
-                # add form error here
-                self.error = e.args[0]
-                return self.form_invalid(form)
-            # redirect to confirmation page
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
 
 
 class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, TemplateView):
@@ -140,3 +102,64 @@ class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
             context['subscription'] = None
         context['plans'] = PLAN_LIST
         return context
+
+
+################## Subscription views
+
+
+class SubscribeFormView(
+        LoginRequiredMixin,
+        FormValidMessageMixin,
+        SubscriptionMixin,
+        FormView):
+    # TODO - needs tests
+
+    form_class = PlanForm
+    template_name = "djstripe/subscribe_form.html"
+    success_url = reverse_lazy("djstripe:history")
+    form_valid_message = "You are now subscribed!"
+
+    def post(self, request, *args, **kwargs):
+        """
+        Handles POST requests, instantiating a form instance with the passed
+        POST variables and then checked for validity.
+        """
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        if form.is_valid():
+            try:
+                customer, created = Customer.get_or_create(self.request.user)
+                customer.update_card(self.request.POST.get("stripe_token"))
+                customer.subscribe(form.cleaned_data["plan"])
+            except stripe.StripeError as e:
+                # add form error here
+                self.error = e.args[0]
+                return self.form_invalid(form)
+            # redirect to confirmation page
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+
+class ChangePlanView(LoginRequiredMixin,
+                        FormValidMessageMixin,
+                        SubscriptionMixin,
+                        FormView):
+
+    form_class = PlanForm
+    template_name = "djstripe/subscribe_form.html"
+    success_url = reverse_lazy("djstripe:history")
+    form_valid_message = "You've just changed your plan!"
+
+    def post(self, request, *args, **kwargs):
+        form = PlanForm(request.POST)
+        customer = request.user.customer
+        if form.is_valid():
+            try:
+                customer.subscribe(form.cleaned_data["plan"])
+            except stripe.StripeError as e:
+                self.error = e.message
+                return self.form_invalid(form)
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)

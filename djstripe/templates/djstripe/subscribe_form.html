@@ -1,10 +1,14 @@
 {% extends "djstripe/base.html" %}
-{% load crispy_forms_tags static %}
+{% load crispy_forms_tags static djstripe_tags %}
 
 {% block title %}Choose a Subscription{% endblock title %}
 
 {% block content %}
 {{ block.super }}
+<ul class="breadcrumb">
+  <li><a href="{% url 'djstripe:account' %}">Home</a></li>
+  <li class="active">Subscription</li>
+</ul>
 <h2>Choose a Subscription</h2>
 
 {% if error %}
@@ -17,7 +21,14 @@
 <div class="row">
     {% for plan in PLAN_LIST %}
         <div class="col-4">
-            <form action="{% url 'djstripe:subscribe' %}" class="djstripe-payments"  data-stripe-key="{{ STRIPE_PUBLIC_KEY }}"  method="POST">
+            <form
+              {% if not customer.current_subscription %}
+                  action="{% url 'djstripe:subscribe' %}" class="djstripe-subscribe"  
+              {% else %}
+                  action="{% url 'djstripe:change_plan' %}" class="djstripe-change-plan"
+              {% endif %}
+
+              data-stripe-key="{{ STRIPE_PUBLIC_KEY }}"  method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="plan" value="{{ plan.plan }}" />
                 <input name="stripe_token" type="hidden" /> 
@@ -34,8 +45,15 @@
                   <h3>{{ plan.name }}</h3>
                   <p>{{ plan.description }}</p>
                 </button>
-              {% if customer.current_subscription.plan == plan.plan %}
+
+              {% if not customer.current_subscription %}
+                <!-- do nothing -->
+              {% elif customer.current_subscription.plan == plan.plan %}
                 <h4>Your Current Plan</h4>
+              {% elif customer.current_subscription.amount < plan.price|division:100 %}
+                <h4>Upgrade</h4>
+              {% elif customer.current_subscription.amount > plan.price|division:100 %}
+                <h4>Downgrade</h4>
               {% endif %}
             </form>
         </div>
@@ -49,7 +67,7 @@
 <script src="//checkout.stripe.com/v2/checkout.js"></script>
 <script text="text/javascript">
     $(function() {
-        $('body').on("click", '.djstripe-payments button[type=submit]', function(e) {
+        $('body').on("click", '.djstripe-subscribe button[type=submit]', function(e) {
           e.preventDefault();
           var $form = $(".djstripe-payments"),
               token = function(res) {
@@ -70,6 +88,14 @@
 
           return false;
         });
+        $('.djstripe-change-plan').click(function(e){
+            $("button[type=submit]").attr("disabled", "true");
+            $('#in-progress').modal({"keyboard": false})
+            $('.progress-bar').animate({width:'+=100%'}, 2000);
+            var $form = $(".djstripe-change-plan")
+            $form.trigger("submit");
+        });
+
     });
 </script>
 {% endblock javascript %}

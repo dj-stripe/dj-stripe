@@ -3,6 +3,12 @@
 History
 -------
 
+0.1.8 (2013-08-09)
++++++++++++++++++++
+
+* Added breadcrumbs to improve navigation.
+* Improved installation instructions.
+
 0.1.7 (2013-08-08)
 +++++++++++++++++++
 
