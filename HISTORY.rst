@@ -6,6 +6,7 @@ History
 0.1.8 (2013-08-09)
 +++++++++++++++++++
 
+* Upgrades and downgrades of plans now work
 * Added breadcrumbs to improve navigation.
 * Improved installation instructions.
 
