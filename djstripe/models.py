@@ -690,8 +690,9 @@ class Invoice(TimeStampedModel):
             cls.sync_from_stripe_data(stripe_invoice)
 
 
-class InvoiceItem(StripeObject):
+class InvoiceItem(TimeStampedModel):
 
+    stripe_id = models.CharField(max_length=50)
     invoice = models.ForeignKey(Invoice, related_name="items")
     amount = models.DecimalField(decimal_places=2, max_digits=7)
     currency = models.CharField(max_length=10)

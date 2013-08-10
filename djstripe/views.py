@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django.views.generic import DetailView
 from django.views.generic import FormView
 from django.views.generic import TemplateView
+from django.views.generic import UpdateView
 from django.views.generic import View
 
 from braces.views import CsrfExemptMixin
@@ -29,9 +30,42 @@ from .viewmixins import PaymentsContextMixin, SubscriptionMixin
 from .viewmixins import SubscriptionPaymentRequiredMixin
 
 
-class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, TemplateView):
+class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
     # TODO - needs tests
+    # Needs a form
+    # Not done yet
     template_name = "djstripe/change_card.html"
+
+    def get_object(self):
+        if hasattr(self, "customer"):
+            return self.customer
+        self.customer, created = Customer.get_or_create(self.request.user)
+        return self.customer
+
+    def post(self, request, *args, **kwargs):
+        customer = self.get_object()
+        try:
+            send_invoice = customer.card_fingerprint == ""
+            customer.update_card(
+                request.POST.get("stripe_token")
+            )
+            if send_invoice:
+                customer.send_invoice()
+            customer.retry_unpaid_invoices()
+        except stripe.CardError as e:
+            return render(
+                request,
+                self.template_name,
+                {
+                    "customer": self.get_object(),
+                    "stripe_error": e.message
+                }
+            )
+        return render(
+            request,
+            self.template_name,
+            {"customer": self.get_object()}
+        )
 
 
 class CancelView(LoginRequiredMixin, PaymentsContextMixin, TemplateView):

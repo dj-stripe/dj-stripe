@@ -34,12 +34,12 @@ urlpatterns = patterns("",
         name="subscribe"
     ),
     url(
-        r"^change/pan/$",
+        r"^change/plan/$",
         views.ChangePlanView.as_view(),
         name="change_plan"
     ),
     url(
-        r"^change/card/$",
+        r"^change/cards/$",
         views.ChangeCardView.as_view(),
         name="change_card"
     ),

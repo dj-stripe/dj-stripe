@@ -1,3 +1,8 @@
+"""
+Note: Code to make this work with Django 1.5+ customer user models
+        was inspired by work by Andrew Brown (@almostabc).
+"""
+
 from django.contrib import admin
 from django.db.models.fields import FieldDoesNotExist
 
@@ -24,6 +29,7 @@ else:
         "customer__user__username",
         "customer__user__email"
     ]
+
 
 class CustomerHasCardListFilter(admin.SimpleListFilter):
     title = "card presence"
