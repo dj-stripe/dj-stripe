@@ -93,6 +93,8 @@ Add to the urls.py:
 Run the commands::
 
 	python manage.py syncdb
+
+    python manage.py migrate  # if you are using South
 	
 	python manage.py djstripe_init_customers
 	
