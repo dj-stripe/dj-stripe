@@ -691,6 +691,9 @@ class Invoice(TimeStampedModel):
 
 
 class InvoiceItem(TimeStampedModel):
+    """ Not inherited from StripeObject because there can be multiple invoice
+        items for a single stripe_id.
+    """
 
     stripe_id = models.CharField(max_length=50)
     invoice = models.ForeignKey(Invoice, related_name="items")
