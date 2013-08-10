@@ -94,3 +94,4 @@ Running Tests
 
     pip install -r requirements_text.txt
     coverage run --source djstripe runtests.py
+    coverage report -m
