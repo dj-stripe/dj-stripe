@@ -1,8 +1,29 @@
 from django.contrib import admin
+from django.db.models.fields import FieldDoesNotExist
 
 from .models import Event, EventProcessingException, Transfer, Charge
 from .models import Invoice, InvoiceItem, CurrentSubscription, Customer
 
+from .settings import User
+
+if hasattr(User, 'USERNAME_FIELD'):
+    # Using a Django 1.5 User model
+    user_search_fields = [
+        "customer__user__{}".format(User.USERNAME_FIELD)
+    ]
+
+    try:
+        # get_field_by_name throws FieldDoesNotExist if the field is not present on the model
+        User._meta.get_field_by_name('email')
+        user_search_fields + ["customer__user__email"]
+    except FieldDoesNotExist:
+        pass
+else:
+    # Using a pre-Django 1.5 User model
+    user_search_fields = [
+        "customer__user__username",
+        "customer__user__email"
+    ]
 
 class CustomerHasCardListFilter(admin.SimpleListFilter):
     title = "card presence"
@@ -81,7 +102,7 @@ admin.site.register(
         "card_last_4",
         "customer__user__username",
         "invoice__stripe_id"
-    ],
+    ] + user_search_fields,
     list_filter=[
         "paid",
         "disputed",
@@ -132,7 +153,7 @@ admin.site.register(
         "customer__user__username",
         "customer__user__email",
         "validated_message"
-    ],
+    ] + user_search_fields,
 )
 
 
@@ -164,7 +185,7 @@ admin.site.register(
         "stripe_id",
         "user__username",
         "user__email"
-    ],
+    ] + user_search_fields,
     inlines=[CurrentSubscriptionInline]
 )
 
@@ -179,9 +200,18 @@ customer_has_card.short_description = "Customer Has Card"
 
 
 def customer_user(obj):
+    if hasattr(User, 'USERNAME_FIELD'):
+        # Using a Django 1.5 User model
+        username = getattr(obj, obj.USERNAME_FIELD)
+    else:
+        # Using a pre-Django 1.5 User model
+        username = obj.customer.user.username
+    # In Django 1.5+ a User is not guaranteed to have an email field
+    email = getattr(obj, 'email', '')
+
     return "{} <{}>".format(
-        obj.customer.user.username,
-        obj.customer.user.email
+        username,
+        email
     )
 customer_has_card.short_description = "Customer"
 
@@ -205,7 +235,7 @@ admin.site.register(
         "customer__stripe_id",
         "customer__user__username",
         "customer__user__email"
-    ],
+    ] + user_search_fields,
     list_filter=[
         InvoiceCustomerHasCardListFilter,
         "paid",
