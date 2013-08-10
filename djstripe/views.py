@@ -7,7 +7,6 @@ from django.shortcuts import render
 from django.views.generic import DetailView
 from django.views.generic import FormView
 from django.views.generic import TemplateView
-from django.views.generic import UpdateView
 from django.views.generic import View
 
 from braces.views import CsrfExemptMixin
@@ -25,9 +24,6 @@ from .settings import PLAN_LIST
 from .settings import PY3
 from .sync import sync_customer
 from .viewmixins import PaymentsContextMixin, SubscriptionMixin
-
-# This is here as a utility. Might move it out.
-from .viewmixins import SubscriptionPaymentRequiredMixin
 
 
 class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
