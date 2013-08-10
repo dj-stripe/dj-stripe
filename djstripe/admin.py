@@ -14,7 +14,7 @@ from .settings import User
 if hasattr(User, 'USERNAME_FIELD'):
     # Using a Django 1.5 User model
     user_search_fields = [
-        "customer__user__{}".format(User.USERNAME_FIELD)
+        "customer__user__{0}".format(User.USERNAME_FIELD)
     ]
 
     try:
@@ -215,7 +215,7 @@ def customer_user(obj):
     # In Django 1.5+ a User is not guaranteed to have an email field
     email = getattr(obj, 'email', '')
 
-    return "{} <{}>".format(
+    return "{0} <{1}>".format(
         username,
         email
     )

@@ -58,12 +58,18 @@ class MiddlewareTest(TestCase):
         response = self.spm.process_request(request)
         self.assertEqual(response, None)
 
-    def test_appname_exempt(self):
+    def test_appname(self):
         request = Request(self.user, "/admin/")
         response = self.spm.process_request(request)
         self.assertEqual(response, None)
 
-    def test_namespace_exempt(self):
+    def test_namespace(self):
         request = Request(self.user, "/djstripe/")
         response = self.spm.process_request(request)
         self.assertEqual(response, None)
+
+    def test_namespace_and_url(self):
+        pass
+
+    def test_url(self):
+        pass
