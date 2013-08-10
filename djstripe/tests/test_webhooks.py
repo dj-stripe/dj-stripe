@@ -13,7 +13,7 @@ from ..models import Event, Transfer
 
 
 class TestWebhook(TestCase):
-    
+
     @patch("stripe.Event.retrieve")
     def test_webhook_with_transfer_event(self, StripeEventMock):
         data = {
