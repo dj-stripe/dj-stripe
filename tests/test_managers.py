@@ -5,12 +5,12 @@ from django.test import TestCase
 from django.utils import timezone
 
 from . import TRANSFER_CREATED_TEST_DATA, TRANSFER_CREATED_TEST_DATA2
-from ..models import Event, Transfer, Customer, CurrentSubscription
-from ..settings import User
+from djstripe.models import Event, Transfer, Customer, CurrentSubscription
+from djstripe.settings import User
 
 
 class CustomerManagerTest(TestCase):
-    
+
     def setUp(self):
         # create customers and current subscription records
         period_start = datetime.datetime(2013, 4, 1, tzinfo=timezone.utc)

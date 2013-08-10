@@ -9,7 +9,7 @@ from django.test.client import Client
 from mock import patch
 
 from . import TRANSFER_CREATED_TEST_DATA
-from ..models import Event, Transfer
+from djstripe.models import Event, Transfer
 
 
 class TestWebhook(TestCase):

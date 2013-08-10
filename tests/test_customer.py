@@ -4,8 +4,8 @@ from django.test import TestCase
 
 from mock import patch
 
-from ..models import Customer, Charge
-from ..settings import User
+from djstripe.models import Customer, Charge
+from djstripe.settings import User
 
 
 class TestCustomer(TestCase):
@@ -19,7 +19,7 @@ class TestCustomer(TestCase):
             card_last_4="2342",
             card_kind="Visa"
         )
-    
+
     @patch("stripe.Customer.retrieve")
     def test_customer_purge_leaves_customer_record(self, CustomerRetrieveMock):
         self.customer.purge()
@@ -29,7 +29,7 @@ class TestCustomer(TestCase):
         self.assertTrue(customer.card_last_4 == "")
         self.assertTrue(customer.card_kind == "")
         self.assertTrue(User.objects.filter(pk=self.user.pk).exists())
-    
+
     @patch("stripe.Customer.retrieve")
     def test_customer_delete_same_as_purge(self, CustomerRetrieveMock):
         self.customer.delete()
@@ -39,7 +39,7 @@ class TestCustomer(TestCase):
         self.assertTrue(customer.card_last_4 == "")
         self.assertTrue(customer.card_kind == "")
         self.assertTrue(User.objects.filter(pk=self.user.pk).exists())
-    
+
     def test_change_charge(self):
         self.assertTrue(self.customer.can_charge())
     
