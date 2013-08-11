@@ -3,12 +3,17 @@
 History
 -------
 
-0.1.8 (2013-08-09)
+0.1.8 (2013-08-11)
 +++++++++++++++++++
 
-* Upgrades and downgrades of plans now work
+* Upgrades and downgrades of plans now work.
+* Changing of cards now works.
 * Added breadcrumbs to improve navigation.
 * Improved installation instructions.
+* Consolidation of test instructions.
+* Added coverage.py to test process.
+* project metadata moved from __init__ to __about__.
+* Added south migration.
 
 0.1.7 (2013-08-08)
 +++++++++++++++++++
