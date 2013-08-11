@@ -2,3 +2,4 @@
 omit =
     djstripe/migrations/*
     djstripe/management/*
+    djstripe/admin.py
