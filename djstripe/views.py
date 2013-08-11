@@ -1,9 +1,10 @@
 from __future__ import unicode_literals
 import json
 
+from django.contrib import messages
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import DetailView
 from django.views.generic import FormView
 from django.views.generic import TemplateView
@@ -49,6 +50,7 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
                 customer.send_invoice()
             customer.retry_unpaid_invoices()
         except stripe.CardError as e:
+            messages.info(request, "Stripe Error")
             return render(
                 request,
                 self.template_name,
@@ -57,11 +59,8 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
                     "stripe_error": e.message
                 }
             )
-        return render(
-            request,
-            self.template_name,
-            {"customer": self.get_object()}
-        )
+        messages.info(request, "Your card is now updated.")
+        return redirect("djstripe:account")
 
 
 class CancelView(LoginRequiredMixin, PaymentsContextMixin, TemplateView):
