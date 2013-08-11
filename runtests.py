@@ -22,7 +22,11 @@ settings.configure(
     STRIPE_PUBLIC_KEY="",
     STRIPE_SECRET_KEY="",
     DJSTRIPE_PLANS={},
-    DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS=("(admin)", )
+    DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS=(
+        "(admin)",
+        "test_url_name",
+        "testapp_namespaced:test_url_namespaced"
+    )
 )
 
 from django_nose import NoseTestSuiteRunner

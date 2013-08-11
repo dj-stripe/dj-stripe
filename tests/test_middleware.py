@@ -1,11 +1,10 @@
 import datetime
 import decimal
 
-from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
-from django.test.utils import override_settings
 from django.utils import timezone
+
 
 from djstripe.models import Customer, CurrentSubscription
 from djstripe import middleware
@@ -13,13 +12,42 @@ from djstripe.settings import User
 
 
 class Request(object):
+    # TODO - Switch to RequestFactory
 
     def __init__(self, user, path):
         self.user = user
         self.path = path
 
 
-class MiddlewareTest(TestCase):
+class MiddlewareURLTest(TestCase):
+    urls = 'tests.test_urls'
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="pydanny")
+        self.middleware = middleware.SubscriptionPaymentMiddleware()
+
+    def test_appname(self):
+        request = Request(self.user, "/admin/")
+        response = self.middleware.process_request(request)
+        self.assertEqual(response, None)
+
+    def test_namespace(self):
+        request = Request(self.user, "/djstripe/")
+        response = self.middleware.process_request(request)
+        self.assertEqual(response, None)
+
+    def test_namespace_and_url(self):
+        request = Request(self.user, "/testapp_namespaced/")
+        response = self.middleware.process_request(request)
+        self.assertEqual(response, None)
+
+    def test_url(self):
+        request = Request(self.user, "/testapp/")
+        response = self.middleware.process_request(request)
+        self.assertEqual(response, None)
+
+
+class MiddlewareLogicTest(TestCase):
     urls = 'tests.test_urls'
 
     def setUp(self):
@@ -44,32 +72,29 @@ class MiddlewareTest(TestCase):
             start=start,
             quantity=1
         )
-        self.spm = middleware.SubscriptionPaymentMiddleware()
+        self.middleware = middleware.SubscriptionPaymentMiddleware()
 
     def test_anonymous(self):
         request = Request(AnonymousUser(), "clarg")
-        response = self.spm.process_request(request)
+        response = self.middleware.process_request(request)
         self.assertEqual(response, None)
 
     def test_is_staff(self):
         self.user.is_staff = True
         self.user.save()
         request = Request(self.user, "nonsense")
-        response = self.spm.process_request(request)
+        response = self.middleware.process_request(request)
         self.assertEqual(response, None)
 
-    def test_appname(self):
-        request = Request(self.user, "/admin/")
-        response = self.spm.process_request(request)
+    def test_customer_has_inactive_subscription(self):
+        request = Request(self.user, "/testapp_content/")
+        response = self.middleware.process_request(request)
+        self.assertEqual(response.status_code, 302)
+
+    def test_customer_has_active_subscription(self):
+        end_date = datetime.datetime(2100, 4, 30, tzinfo=timezone.utc)
+        self.subscription.current_period_end = end_date
+        self.subscription.save()
+        request = Request(self.user, "/testapp_content/")
+        response = self.middleware.process_request(request)
         self.assertEqual(response, None)
-
-    def test_namespace(self):
-        request = Request(self.user, "/djstripe/")
-        response = self.spm.process_request(request)
-        self.assertEqual(response, None)
-
-    def test_namespace_and_url(self):
-        pass
-
-    def test_url(self):
-        pass
