@@ -1,1 +1,1 @@
-__version__ = '0.1.7'
+from .__about__ import *

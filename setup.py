@@ -3,7 +3,7 @@
 import os
 import sys
 
-import djstripe
+from djstripe import __about__ as djstripe
 
 version = djstripe.__version__
 
@@ -25,11 +25,11 @@ history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 setup(
     name='dj-stripe',
     version=version,
-    description='Django + Stripe for Humans',
+    description=djstripe.__summary__,
     long_description=readme + '\n\n' + history,
-    author='Daniel Greenfeld',
-    author_email='pydanny@gmail.com',
-    url='https://github.com/pydanny/dj-stripe',
+    author=djstripe.__author__,
+    author_email=djstripe.__email__,
+    url=djstripe.__uri__,
     packages=[
         'djstripe',
     ],
@@ -42,7 +42,7 @@ setup(
         'django-braces>=1.2.1',
         'django-jsonfield>=0.9.10'
     ],
-    license="BSD",
+    license=djstripe.__license__,
     zip_safe=False,
     keywords='stripe django',
     classifiers=[
