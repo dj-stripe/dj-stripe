@@ -83,6 +83,16 @@ Run the commands::
     
     python manage.py djstripe_init_plans
 
+If you haven't already, add the Bootstrap 3.0.0 JS and CSS to your base template:
+
+.. code-block:: html
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/css/bootstrap.min.css">
+     
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/js/bootstrap.min.js"></script>
+
 Start up the webserver:
 
     * http://127.0.0.1:8000/payments/
