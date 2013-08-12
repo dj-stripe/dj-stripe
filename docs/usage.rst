@@ -16,7 +16,7 @@ dj-stripe provides three methods to support ongoing subscriptions:
 * Class-Based View mixin to constrain individual views.
 * View decoration to constrain Function-based views.
 
-.. warning:: * **anonymous** users always raise a ``ImproperlyConfigured`` exception.
+.. warning:: **anonymous** users always raise a ``ImproperlyConfigured`` exception.
 
      When **anonymous** users encounter these components they will raise a ``django.core.exceptions.ImproperlyConfigured`` exception. This is done because dj-stripe is not an authentication system, so it does a hard error to make it easier for you to catch where content may not be behind authentication systems.
 
