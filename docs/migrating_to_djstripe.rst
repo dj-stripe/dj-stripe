@@ -13,7 +13,7 @@ PAYMENT_PLANS vs DJSTRIPE_PLANS
 
 **dj-stripe** allows for plans with decimal numbers. So you can have plans that are $9.99 instead of just $10. The price in a specific plan is therefore in cents rather than whole dollars
 
-.. code-block:: pthon
+.. code-block:: python
 
     # settings.py
 

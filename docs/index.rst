@@ -3,10 +3,17 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to dj-stripe's documentation!
-======================================
+Django + Stripe for Humans
+--------------------------------
 
-Contents:
+* Subscription management
+* Works with Django 1.5, 1.4
+* Works with Python 3.3, 2.7, 2.6
+* Dead-Easy installation (Done, just needs documentation)
+* Single-unit purchases (forthcoming)
+
+Contents
+---------
 
 .. toctree::
    :maxdepth: 2
@@ -19,9 +26,4 @@ Contents:
    authors
    history
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+:ref:`search`
