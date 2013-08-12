@@ -41,7 +41,24 @@ PAYMENT_PLANS vs DJSTRIPE_PLANS
         },
     }
 
-Migrating data
+Migrating Data
 ~~~~~~~~~~~~~~~
 
-TODO
+**Issues:**
+
+1. **dj-stripe** includes South migrations and **django-stripe-payments** has no database migrations. 
+2. **dj-stripe** replaces the ``payments.models.StripeObject.created_at`` field with ``django-model-utils`` fields of ``model_utls.models.TimeStampedModel.created`` and ``model_utls.models.TimeStampedModel.modified``.
+
+This will require some sort of one-time migration script. If you create one for your own project, please submit it or link to a paste/gist of the code.
+
+.. seealso::
+
+    * https://github.com/pydanny/dj-stripe/issues/10.
+
+Migrating Templates
+~~~~~~~~~~~~~~~~~~~~
+
+**Issue: django-stripe-payments** uses Bootstrap 2 and django-forms-bootstrap, while **dj-stripe** uses Bootstrap 3 and eschews the use of Django form libraries in favor of hand-crafted forms.
+
+TODO: Write this.
+
