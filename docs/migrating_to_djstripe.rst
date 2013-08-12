@@ -41,6 +41,11 @@ PAYMENT_PLANS vs DJSTRIPE_PLANS
         },
     }
 
+Migrating Settings
+~~~~~~~~~~~~~~~~~~
+
+TODO
+
 Migrating Data
 ~~~~~~~~~~~~~~~
 

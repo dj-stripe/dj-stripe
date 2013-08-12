@@ -1,8 +1,6 @@
 Settings
 =========
 
-Available settings:
-
 DJSTRIPE_DEFAULT_PLAN (=None)
 -----------------------------
 
@@ -11,7 +9,7 @@ Payment plans default.
 Possibly deprecated in favor of model based plans.
 
 DJSTRIPE_INVOICE_FROM_EMAIL (="billing@example.com")
-----------------------------------------------------
+-------------------------------------------------------
 
 Invoice emails come from this address.
 
@@ -24,7 +22,7 @@ Possibly deprecated in favor of model based plans.
 
 Example:
 
-.. code-block:: 
+.. code-block:: python
 
     DJSTRIPE_PLANS = {
         "monthly": {
@@ -49,7 +47,7 @@ Example:
 
 
 DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS (=())
----------------------------------------------------
+-------------------------------------------------------
 
 Used by ``djstripe.middleware.SubscriptionPaymentMiddleware``
 
@@ -73,13 +71,13 @@ Example:
     )
 
 DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK (=None)
-------------------------------------------------
+--------------------------------------------------
 
 TODO: Document!
 
 
 DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")
---------------------------------------
+----------------------------------------
 
 This is where you can set *Stripe.com* to send webhook response. You can set this to what you want to prevent unnecessary hijinks from unfriendly people.
 
