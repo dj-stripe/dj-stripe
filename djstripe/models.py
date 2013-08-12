@@ -574,7 +574,13 @@ class CurrentSubscription(TimeStampedModel):
         return self.status in [self.STATUS_TRIALING, self.STATUS_ACTIVE]
 
     def is_valid(self):
-        return self.is_period_current() and self.is_status_current()
+        if not self.is_status_current():
+            return False
+
+        if self.cancel_at_period_end and not self.is_period_current():
+            return False
+
+        return True
 
 
 class Invoice(TimeStampedModel):

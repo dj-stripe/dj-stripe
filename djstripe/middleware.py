@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import resolve
 from django.shortcuts import redirect
 
@@ -60,3 +61,6 @@ class SubscriptionPaymentMiddleware(object):
             if not customer.has_active_subscription():
                 return redirect("djstripe:subscribe")
 
+        # TODO get this working in tests
+        # if request.user.is_anonymous():
+        #     raise ImproperlyConfigured

@@ -17,6 +17,7 @@ from braces.views import SelectRelatedMixin
 import stripe
 
 from .forms import PlanForm
+from .mixins import PaymentsContextMixin, SubscriptionMixin
 from .models import CurrentSubscription
 from .models import Customer
 from .models import Event
@@ -24,7 +25,6 @@ from .models import EventProcessingException
 from .settings import PLAN_LIST
 from .settings import PY3
 from .sync import sync_customer
-from .viewmixins import PaymentsContextMixin, SubscriptionMixin
 
 
 class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):

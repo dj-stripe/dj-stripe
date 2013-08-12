@@ -3,10 +3,12 @@
 History
 -------
 
-0.2.1 (2013-08-??)
+0.2.1 (2013-08-12)
 +++++++++++++++++++
 
-* Documentation enhancements
+* Fixed a bug on CurrentSubscription tests
+* Improved usage documentation
+* Added to migration from other tools documentation
 
 0.2.0 (2013-08-12)
 +++++++++++++++++++

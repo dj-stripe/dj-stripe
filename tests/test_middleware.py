@@ -70,7 +70,8 @@ class MiddlewareLogicTest(TestCase):
             amount=(500 / decimal.Decimal("100.0")),
             status="active",
             start=start,
-            quantity=1
+            quantity=1,
+            cancel_at_period_end=True
         )
         self.middleware = middleware.SubscriptionPaymentMiddleware()
 
