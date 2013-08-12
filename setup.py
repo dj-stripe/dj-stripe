@@ -3,7 +3,7 @@
 import os
 import sys
 
-from djstripe import __about__ as djstripe
+import djstripe
 
 version = djstripe.__version__
 
