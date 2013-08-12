@@ -3,17 +3,20 @@
 History
 -------
 
-0.1.8 (2013-08-11)
+0.2.0 (2013-08-12)
 +++++++++++++++++++
 
+* Cancellation of plans now works.
 * Upgrades and downgrades of plans now work.
 * Changing of cards now works.
 * Added breadcrumbs to improve navigation.
 * Improved installation instructions.
 * Consolidation of test instructions.
+* Minor improvement to django-stripe-payments documentation
 * Added coverage.py to test process.
-* project metadata moved from __init__ to __about__.
-* Added south migration.
+* Added south migrations.
+* Fixed the subscription_payment_required function-based view decorator.
+* Removed unnecessary django-crispy-forms
 
 0.1.7 (2013-08-08)
 +++++++++++++++++++
