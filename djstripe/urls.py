@@ -23,6 +23,8 @@ from . import views
 
 
 urlpatterns = patterns("",
+
+    # HTML views
     url(
         r"^$",
         views.AccountView.as_view(),
@@ -53,11 +55,21 @@ urlpatterns = patterns("",
         views.HistoryView.as_view(),
         name="history"
     ),
+
+
+    # Web services
     url(
-        r"^a/sync_history/$",
+        r"^a/sync/history/$",
         views.SyncHistoryView.as_view(),
         name="sync_history"
     ),
+    url(
+        r"^a/check/available/(?P<attr_name>(username|email))/$",
+        views.CheckAvailableUserAttributeView.as_view(),
+        name="check_available_user_attr"
+    ),
+
+    # Webhook
     url(
         app_settings.DJSTRIPE_WEBHOOK_URL,
         views.WebHook.as_view(),

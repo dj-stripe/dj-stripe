@@ -24,6 +24,7 @@ from .models import Event
 from .models import EventProcessingException
 from .settings import PLAN_LIST
 from .settings import PY3
+from .settings import User
 from .sync import sync_customer
 
 
@@ -192,3 +193,14 @@ class ChangePlanView(LoginRequiredMixin,
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
+
+
+######### Web services
+class CheckAvailableUserAttributeView(View):
+
+    def get(self, request, *args, **kwargs):
+        attr_name = self.kwargs['attr_name']
+        not_available = User.objects.filter(
+                **{attr_name: request.GET.get("v", "")}
+        ).exists()
+        return HttpResponse(json.dumps(not not_available))

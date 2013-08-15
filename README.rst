@@ -35,6 +35,12 @@ Features
 * Documented (Making good progress)
 * Tested (Making good progress)
 
+Constraints
+------------
+
+1. For stripe.com only
+2. Only use or support well-maintained third-party libraries
+3. For modern Python and Django
 
 
 Quickstart
