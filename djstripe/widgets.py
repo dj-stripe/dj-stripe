@@ -5,5 +5,5 @@ except ImportError:
 
 if floppyforms:
 
-    class StripeWidget(floppyforms.NumberInput):
+    class StripeWidget(floppyforms.TextInput):
         template_name = 'djstripe/stripe_input.html'

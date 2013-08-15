@@ -1,6 +1,6 @@
 from django.conf import settings
 from django import forms
-from django.utils.translation import pgettext as _
+from django.utils.translation import ugettext as _
 
 import stripe
 
@@ -34,6 +34,27 @@ except ImportError:
 if StripeWidget and setup_user_email:
 
     class StripeSubscriptionSignupForm(forms.Form):
+        """
+            Requires the following packages:
+
+                * django-crispy-forms
+                * django-floppyforms
+                * django-allauth
+
+            Necessary settings::
+
+                INSTALLED_APPS += (
+                    "floppyforms",
+                    "allauth",  # registration
+                    "allauth.account",  # registration
+                )
+                ACCOUNT_SIGNUP_FORM_CLASS = "djstripe.StripeSubscriptionSignupForm"
+
+            Necessary URLS::
+
+                (r'^accounts/', include('allauth.urls')),
+
+        """
 
         password1 = SetPasswordField(label=_("Password"))
         password2 = PasswordField(label=_("Password (again)"))
