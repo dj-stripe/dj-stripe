@@ -67,15 +67,19 @@ if StripeWidget and setup_user_email:
 
         # Stripe nameless fields
         number = forms.CharField(max_length=20,
+            required=False,
             widget=StripeWidget(attrs={"data-stripe": "number"})
         )
         cvc = forms.CharField(max_length=4, label=_("CVC"),
+            required=False,
             widget=StripeWidget(attrs={"data-stripe": "cvc"}))
         exp_month = forms.CharField(max_length=2,
+                required=False,
                 widget=StripeWidget(attrs={"data-stripe": "exp-month"})
         )
         exp_year = forms.CharField(max_length=4,
-                widget=StripeWidget(attrs={"data-stripe": "exp-month"})
+                required=False,
+                widget=StripeWidget(attrs={"data-stripe": "exp-year"})
         )
 
         def save(self, request):
