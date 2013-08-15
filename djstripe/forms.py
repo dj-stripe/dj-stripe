@@ -82,20 +82,12 @@ if StripeWidget and setup_user_email:
                 widget=StripeWidget(attrs={"data-stripe": "exp-year"})
         )
 
-        def save(self, request):
-            new_user = self.create_user()
-            super(StripeSubscriptionSignupForm, self).save(new_user)
-            setup_user_email(request, new_user, [])
-            self.after_signup(new_user)
-            return new_user
-
-        def after_signup(self, user, **kwargs):
+        def save(self, user):
             try:
-                customer, created = Customer.get_or_create(self.request.user)
-                customer.update_card(self.cleaned_data("stripe_token"))
+                customer, created = Customer.get_or_create(user)
+                customer.update_card(self.cleaned_data["stripe_token"])
                 customer.subscribe(self.cleaned_data["plan"])
             except stripe.StripeError as e:
                 # handle error here
                 raise e
-
 
