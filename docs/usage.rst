@@ -179,3 +179,46 @@ Described is an anti-pattern. View logic belongs in views.py, not urls.py.
             name="content_detail"
         ),
     )
+
+Subscriptions + Registration
+=============================
+
+This requires the following additional requirements:
+
+* django-allauth (user registration)
+* django-crispy-forms (form rendering)
+* django-floppyforms (widget rendering)
+
+Additional Settings (settings.py):
+
+.. code-block:: python
+
+    # django.contrib.sites is also necessary
+    INSTALLED_APPS += (
+        "floppyforms",
+        "allauth",  # registration
+        "allauth.account",  # registration
+    )
+    TEMPLATE_CONTEXT_PROCESSORS += (
+        "allauth.account.context_processors.account",
+    )
+    AUTHENTICATION_BACKENDS = (
+        "django.contrib.auth.backends.ModelBackend",
+        "allauth.account.auth_backends.AuthenticationBackend",
+    )
+    ACCOUNT_SIGNUP_FORM_CLASS = "djstripe.StripeSubscriptionSignupForm"
+    ACCOUNT_AUTHENTICATION_METHOD = "username"
+    ACCOUNT_EMAIL_REQUIRED = True
+    ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+    ACCOUNT_SIGNUP_FORM_CLASS = "djstripe.forms.StripeSubscriptionSignupForm"
+    SITE_ID = 1
+
+Necessary URLS (root URLConf):
+
+.. code-block:: python
+
+    (r'^accounts/', include('allauth.urls')),
+
+Try it out!:
+
+* http://127.0.0.1:8000/accounts/signup
