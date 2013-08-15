@@ -71,6 +71,6 @@ if StripeWidget and setup_user_email:
                 customer.subscribe(self.cleaned_data["plan"])
             except stripe.StripeError as e:
                 # handle error here
-                pass
+                raise e
 
 
