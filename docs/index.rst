@@ -7,10 +7,16 @@ Django + Stripe for Humans
 --------------------------------
 
 * Subscription management
+* Single-unit purchases (forthcoming)
 * Works with Django 1.5, 1.4
 * Works with Python 3.3, 2.7, 2.6
-* Dead-Easy installation (Done, just needs documentation)
-* Single-unit purchases (forthcoming)
+* Works with Bootstrap 3
+* Built-in South migrations
+* Dead-Easy installation
+* Leverages in the best of the 3rd party Django package ecosystem.
+* `djstripe` namespace so you can have more than one payments related app.
+* Documented (Making good progress)
+* Tested (Making good progress)
 
 Contents
 ---------
