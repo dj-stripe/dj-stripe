@@ -3,10 +3,10 @@
 History
 -------
 
-0.2.3 (2013-08-??)
+0.2.3 (2013-08-16)
 +++++++++++++++++++
 
-* forthcoming
+* Fix packaging so all submodules are loaded
 
 0.2.2 (2013-08-15)
 +++++++++++++++++++

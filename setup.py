@@ -32,6 +32,10 @@ setup(
     url=djstripe.__uri__,
     packages=[
         'djstripe',
+        'djstripe.management.commands',
+        'djstripe.migrations',
+        'djstripe.templatetags',
+
     ],
     package_dir={'djstripe': 'djstripe'},
     include_package_data=True,

@@ -56,9 +56,9 @@ Add ``djstripe`` to your ``INSTALLED_APPS``:
 
 .. code-block:: python
 
-	INSTALLED_APPS +=(
-	    "djstripe",
-	)
+    INSTALLED_APPS +=(
+        "djstripe",
+    )
 
 Add the context processor to your ``TEMPLATE_CONTEXT_PROCESSORS``:
 
@@ -102,17 +102,17 @@ Add to the urls.py:
 
 .. code-block:: python
 
-	url(r'^payments/', include('djstripe.urls', namespace="djstripe")),
-	
+    url(r'^payments/', include('djstripe.urls', namespace="djstripe")),
+    
 Run the commands::
 
-	python manage.py syncdb
+    python manage.py syncdb
 
     python manage.py migrate  # if you are using South
-	
-	python manage.py djstripe_init_customers
-	
-	python manage.py djstripe_init_plans
+    
+    python manage.py djstripe_init_customers
+    
+    python manage.py djstripe_init_plans
 
 If you haven't already, add the Bootstrap 3.0.0 JS and CSS to your base template:
 
