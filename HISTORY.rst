@@ -6,7 +6,8 @@ History
 0.2.5 (2013-08-??)
 +++++++++++++++++++
 
-* Recursive package finding.
+* Fixed bug in initial checkout
+* You can't purchase the same plan that you currently have.
 
 0.2.4 (2013-08-18)
 +++++++++++++++++++
