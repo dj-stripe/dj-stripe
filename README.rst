@@ -12,7 +12,7 @@ dj-stripe
         :target: https://crate.io/packages/dj-stripe?version=latest
 
 
-Django + Stripe for Humans
+Django + Stripe Made Easy
 
 Documentation
 -------------
