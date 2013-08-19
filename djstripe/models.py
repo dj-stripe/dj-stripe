@@ -568,6 +568,8 @@ class CurrentSubscription(TimeStampedModel):
         return self.status.replace("_", " ").title()
 
     def is_period_current(self):
+        if self.current_period_end is None:
+            return False
         return self.current_period_end > timezone.now()
 
     def is_status_current(self):
