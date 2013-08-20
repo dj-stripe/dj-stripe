@@ -3,6 +3,11 @@
 History
 -------
 
+0.2.7 (2013-08-??)
++++++++++++++++++++
+
+* Add handy rest_framework permission class
+
 0.2.6 (2013-08-20)
 +++++++++++++++++++
 
