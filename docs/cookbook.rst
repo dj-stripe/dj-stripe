@@ -17,7 +17,7 @@ It's a common use case that you want to present internally the list of plans ava
     from django.db import models
     from django.utils.translation import ugettext_lazy as _
 
-    from djstripe.settings import PLAN_CHOICES
+    from djstripe.safe_settings import PLAN_CHOICES
 
 
     class User(AbstractUser):
