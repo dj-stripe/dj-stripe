@@ -3,6 +3,12 @@
 History
 -------
 
+0.2.6 (2013-08-20)
++++++++++++++++++++
+
+* Added ``safe_setting.py`` module to handle edge cases when working with custom user models.
+* Added cookbook page in the documentation.
+
 0.2.5 (2013-08-18)
 +++++++++++++++++++
 
