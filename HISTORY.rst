@@ -6,6 +6,7 @@ History
 0.2.6 (2013-08-20)
 +++++++++++++++++++
 
+* Changed name of division tag to djdiv. 
 * Added ``safe_setting.py`` module to handle edge cases when working with custom user models.
 * Added cookbook page in the documentation.
 

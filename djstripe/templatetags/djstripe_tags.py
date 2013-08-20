@@ -7,7 +7,7 @@ register = Library()
 
 
 @register.filter
-def division(value, arg):
+def djdiv(value, arg):
     """
     Divide the value by the arg, using Python 3-style division that returns
     floats. If bad values are passed in, return the empty string.

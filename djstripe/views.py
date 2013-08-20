@@ -190,6 +190,8 @@ class ChangePlanView(LoginRequiredMixin,
             except stripe.StripeError as e:
                 self.error = e.message
                 return self.form_invalid(form)
+            except Exception as e:
+                raise e
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
