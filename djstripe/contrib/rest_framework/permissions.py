@@ -6,6 +6,9 @@ from ..models import Customer
 class DJStripePermission(BasePermission):
 
     def has_permission(self, request, view):
+        if request.user is None:
+            return False
+
         # get the user's customer object
         customer, created = Customer.get_or_create(user=request.user)
         if created:
