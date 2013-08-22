@@ -138,12 +138,6 @@ Start up the webserver:
 Similar Projects
 ----------------
 
+* https://github.com/eldarion/django-stripe-payments - The project that dj-stripe forked. It's an an awesome project and worth checking out.
 * https://github.com/agiliq/merchant - A single charge payment processing system that also includes many other Gateways. Really nice but doesn't out-of-the-box handle the use case of subscription payments. 
-* https://github.com/eldarion/django-stripe-payments - The project that inspired dj-stripe. dj-stripe differs in many ways, including:
-
-  * dj-stripe adds Python 3.3 support (it also does 2.7).
-  * Uses the more specific 'djstripe' namespace instead of 'payments'.
-  * All requires packages are installed when dj-stripe is installed.
-  * Entirely based on Class-Based Views, so you can extend it to suit your particular needs.
- 
 * django-zebra - One of the first stripe payment systems for Django. 
