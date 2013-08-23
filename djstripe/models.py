@@ -613,6 +613,8 @@ class Invoice(TimeStampedModel):
     def status(self):
         if self.paid:
             return "Paid"
+        if self.closed:
+            return "Closed"
         return "Open"
 
     @classmethod
