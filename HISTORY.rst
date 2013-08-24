@@ -3,10 +3,12 @@
 History
 -------
 
-0.2.7 (2013-08-??)
+0.2.7 (2013-08-24)
 +++++++++++++++++++
 
-* Add handy rest_framework permission class
+* Add handy rest_framework permission class.
+* Fixing attribution for django-stripe-payments.
+* Add new status to Invoice model.
 
 0.2.6 (2013-08-20)
 +++++++++++++++++++
