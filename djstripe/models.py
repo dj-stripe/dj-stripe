@@ -36,15 +36,21 @@ stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
 def convert_tstamp(response, field_name=None):
     try:
         if field_name and response[field_name]:
-            return datetime.datetime.fromtimestamp(
-                response[field_name],
-                timezone.utc
-            )
+            if settings.USE_TZ:
+                return datetime.datetime.fromtimestamp(
+                    response[field_name],
+                    timezone.utc
+                )
+            else:
+                return datetime.datetime.fromtimestamp(response[field_name])
         if not field_name:
-            return datetime.datetime.fromtimestamp(
-                response,
-                timezone.utc
-            )
+            if settings.USE_TZ:
+                return datetime.datetime.fromtimestamp(
+                    response,
+                    timezone.utc
+                )
+            else:
+                return datetime.datetime.fromtimestamp(response)
     except KeyError:
         pass
     return None
