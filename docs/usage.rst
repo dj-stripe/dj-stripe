@@ -206,7 +206,6 @@ Additional Settings (settings.py):
         "django.contrib.auth.backends.ModelBackend",
         "allauth.account.auth_backends.AuthenticationBackend",
     )
-    ACCOUNT_SIGNUP_FORM_CLASS = "djstripe.StripeSubscriptionSignupForm"
     ACCOUNT_AUTHENTICATION_METHOD = "username"
     ACCOUNT_EMAIL_REQUIRED = True
     ACCOUNT_EMAIL_VERIFICATION = "mandatory"
