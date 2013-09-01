@@ -138,6 +138,6 @@ Start up the webserver:
 Similar Projects
 ----------------
 
-* https://github.com/eldarion/django-stripe-payments - The project that dj-stripe forked. It's an an awesome project and worth checking out.
+* https://github.com/eldarion/django-stripe-payments - The project that dj-stripe forked. It's an awesome project and worth checking out.
 * https://github.com/agiliq/merchant - A single charge payment processing system that also includes many other Gateways. Really nice but doesn't out-of-the-box handle the use case of subscription payments. 
 * django-zebra - One of the first stripe payment systems for Django. 
