@@ -217,7 +217,13 @@ Necessary URLS (root URLConf):
 .. code-block:: python
 
     (r'^accounts/', include('allauth.urls')),
+    
 
 Try it out!:
 
 * http://127.0.0.1:8000/accounts/signup
+
+**Note:**
+
+If you override allauth's signup template you'll need to make sure it includes
+the critical elements dj-stripe's version found at https://raw.github.com/pydanny/dj-stripe/master/djstripe/templates/account/signup.html
