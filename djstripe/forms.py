@@ -6,7 +6,6 @@ import stripe
 
 from .models import Customer
 from .settings import PLAN_CHOICES
-from .sync import sync_customer
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
@@ -55,7 +54,8 @@ if StripeWidget and setup_user_email:
                 (r'^accounts/', include('allauth.urls')),
 
         """
-
+        username = forms.CharField(max_length=30)
+        email = forms.EmailField(max_length=30)
         password1 = SetPasswordField(label=_("Password"))
         password2 = PasswordField(label=_("Password (again)"))
         confirmation_key = forms.CharField(
