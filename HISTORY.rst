@@ -3,6 +3,14 @@
 History
 -------
 
+0.2.8 (2013-09-02)
++++++++++++++++++++
+
+* Improved usage documentation.
+* Corrected order of fields in StripeSubscriptionSignupForm.
+* Corrected transaction history template layout.
+* Updated models to take into account when settings.USE_TZ is disabled.
+
 0.2.7 (2013-08-24)
 +++++++++++++++++++
 

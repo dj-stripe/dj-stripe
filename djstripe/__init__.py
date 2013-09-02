@@ -4,7 +4,7 @@ __title__ = "dj-stripe"
 __summary__ = "Django + Stripe Made Easy"
 __uri__ = "https://github.com/pydanny/dj-stripe/"
 
-__version__ = "0.2.7"
+__version__ = "0.2.8"
 
 __author__ = "Daniel Greenfeld"
 __email__ = "pydanny@gmail.com"
