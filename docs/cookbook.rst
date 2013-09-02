@@ -3,8 +3,8 @@ Cookbook
 
 This is a list of handy recipes that fall outside the domain of normal usage.
 
-Customer User Model has_active_subscription method
---------------------------------------------------
+Customer User Model has_active_subscription property
+----------------------------------------------------
 
 Very useful for working inside of templates or other places where you need
 to check the subscription status repeatedly. The `cached_property` decorator
@@ -18,8 +18,6 @@ it for reuse.
     from django.contrib.auth.models import AbstractUser 
     from django.db import models
     from django.utils.functional import cached_property
-
-    from djstripe.models import Customer
 
 
     class User(AbstractUser):
@@ -35,15 +33,50 @@ it for reuse.
         @cached_property
         def has_active_subscription(self):
             """
-            Helper method to check if a user has an active subscription.
-            Throws improperlyConfigured if user.is_anonymous == True
+            Helper property to check if a user has an active subscription.
             """
+            # Anonymous users return false
             if self.is_anonymous():
                 return False
+
+            # Import placed here to avoid circular imports
+            from djstripe.models import Customer
+
+            # Get or create the customer object
             customer, created = Customer.get_or_create(self)
+
+            # If new customer, return false
+            # If existing customer but inactive return false
             if created or not customer.has_active_subscription():
                 return False
+
+            # Existing, valid customer so return true
             return True
+
+Usage:
+
+.. code-block:: html+django
+
+    <ul class="actions">
+    <h2>{{ object }}</h2>
+    <!-- first use of request.user.has_active_subscription -->
+    {% if request.user.has_active_subscription %}
+        <p>
+            <small>
+                <a href="{% url 'things:update' %}">edit</a>
+            </small>
+        </p>
+    {% endif %}    
+    <p>{{ object.description }}</p>
+
+    <!-- second use of request.user.has_active_subscription -->
+    {% if request.user.has_active_subscription %}
+        <li>
+            <a href="{% url 'places:create' %}">Add Place</a>
+            <a href="{% url 'places:list' %}">View Places</a>
+        </li>
+    {% endif %}
+    </ul>
 
 
 Adding a custom plan that is outside of stripe
