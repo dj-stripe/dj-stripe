@@ -433,14 +433,14 @@ class Customer(StripeObject):
             self.card_kind = cu.active_card.type
             self.save()
 
-    def sync_invoices(self, cu=None):
+    def sync_invoices(self, cu=None, **kwargs):
         cu = cu or self.stripe_customer
-        for invoice in cu.invoices().data:
+        for invoice in cu.invoices(**kwargs).data:
             Invoice.sync_from_stripe_data(invoice, send_receipt=False)
 
-    def sync_charges(self, cu=None):
+    def sync_charges(self, cu=None, **kwargs):
         cu = cu or self.stripe_customer
-        for charge in cu.charges().data:
+        for charge in cu.charges(**kwargs).data:
             self.record_charge(charge.id)
 
     def sync_current_subscription(self, cu=None):
