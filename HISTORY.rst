@@ -3,6 +3,12 @@
 History
 -------
 
+0.2.9 (2013-09-??)
+++++++++++++++++++
+
+* Cancellation added to views
+* Support for kwargs on charge and invoice fetching
+
 0.2.8 (2013-09-02)
 +++++++++++++++++++
 
