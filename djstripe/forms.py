@@ -16,6 +16,10 @@ class PlanForm(forms.Form):
     plan = forms.ChoiceField(choices=PLAN_CHOICES)
 
 
+class CancelSubscriptionForm(forms.Form):
+    pass
+
+
 ########### Begin SignupForm code
 try:
     from .widgets import StripeWidget

@@ -6,8 +6,9 @@ History
 0.2.9 (2013-09-??)
 ++++++++++++++++++
 
-* Cancellation added to views
-* Support for kwargs on charge and invoice fetching
+* Cancellation added to views.
+* Support for kwargs on charge and invoice fetching.
+* Fixed templates to work with Bootstrap 3.0.0 column design.
 
 0.2.8 (2013-09-02)
 +++++++++++++++++++

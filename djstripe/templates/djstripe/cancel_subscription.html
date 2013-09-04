@@ -28,12 +28,11 @@
         {% endblock cancellation_ramifications %}
 
         <h3>Are you sure you want to cancel?</h3>
-        <form action="{% url 'djstripe:cancel' %}" method="post" id="cancel-form">
+        <form action="{% url 'djstripe:cancel_subscription' %}" method="post" id="cancel-form">
+            {% csrf_token %}
             <a href="{% url 'djstripe:account' %}" class="btn btn-primary">I change my mind!</a>
             <button class="btn btn-danger">Cancel my account!</button>
         </form>
-        
-          
     </div>
 </div>
 {% endblock content %}

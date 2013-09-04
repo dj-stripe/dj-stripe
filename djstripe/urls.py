@@ -46,9 +46,9 @@ urlpatterns = patterns("",
         name="change_card"
     ),
     url(
-        r"^cancel/$",
-        views.CancelView.as_view(),
-        name="cancel"
+        r"^cancel/subscription/$",
+        views.CancelSubscriptionView.as_view(),
+        name="cancel_subscription"
     ),
     url(
         r"^history/$",

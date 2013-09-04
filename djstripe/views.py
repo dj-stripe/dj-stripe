@@ -16,7 +16,7 @@ from braces.views import LoginRequiredMixin
 from braces.views import SelectRelatedMixin
 import stripe
 
-from .forms import PlanForm
+from .forms import PlanForm, CancelSubscriptionForm
 from .mixins import PaymentsContextMixin, SubscriptionMixin
 from .models import CurrentSubscription
 from .models import Customer
@@ -64,14 +64,17 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
         return redirect("djstripe:account")
 
 
-class CancelView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
+class CancelSubscriptionView(LoginRequiredMixin, PaymentsContextMixin, FormView):
     # TODO - needs tests
-    template_name = "djstripe/cancel.html"
-    model = Customer
+    template_name = "djstripe/cancel_subscription.html"
+    form_class = CancelSubscriptionForm
 
-    def get_object(self):
+    def form_valid(self, form):
         customer, created = Customer.get_or_create(self.request.user)
-        return customer
+        # TODO - pass in setting to control at_period_end boolean
+        customer.cancel(at_period_end=False)
+        messages.info(self.request, "Your account has been cancelled")
+        return redirect("djstripe:history")
 
 
 class WebHook(CsrfExemptMixin, View):
