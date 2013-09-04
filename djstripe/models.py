@@ -514,7 +514,7 @@ class Customer(StripeObject):
             self.send_invoice()
         subscription_made.send(sender=self, plan=plan, stripe_response=resp)
 
-    def charge(self, amount, currency="usd", description=None, send_receipt=False):
+    def charge(self, amount, currency="usd", description=None, send_receipt=True):
         """
         This method expects `amount` to be a Decimal type representing a
         dollar amount. It will be converted to cents so any decimals beyond
