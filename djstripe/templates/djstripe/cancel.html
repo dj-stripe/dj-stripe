@@ -1,0 +1,40 @@
+{% extends "djstripe/base.html" %}
+
+{% block title %}Cancel Subscription{% endblock title %}
+
+{% block content %}
+<div class="row">
+    <div class="col-xs-12">
+        <ul class="breadcrumb">
+          <li><a href="{% url 'djstripe:account' %}">Home</a></li>
+          <li class="active">Cancel Subscription</li>
+        </ul>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12">
+        <h2>Cancel Subscription</h2>
+        <p class="lead">
+          Are you sure you want to cancel your subscription?
+        </p>
+
+        {% block cancellation_ramifications %}
+        <h3>What you lose by cancelling your subscription:</h2>
+        <ul>
+          <li>Access to subscription-only content.</li>
+          <li>Ability to use subscription-only features.</li>
+        </ul>
+        {% endblock cancellation_ramifications %}
+
+        <h3>Are you sure you want to cancel?</h3>
+        <form action="{% url 'djstripe:cancel' %}" method="post" id="cancel-form">
+            <a href="{% url 'djstripe:account' %}" class="btn btn-primary">I change my mind!</a>
+            <button class="btn btn-danger">Cancel my account!</button>
+        </form>
+        
+          
+    </div>
+</div>
+{% endblock content %}
+

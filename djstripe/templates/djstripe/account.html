@@ -6,16 +6,25 @@
 {{ block.super }}
 <div class="container">
     <div class="row">
-        <div class="col-12">
+        <div class="col-xs-12">
             <h2>Account Information</h2>
         </div>
     </div>
     <div class="row">
-        <div class="col-12">
+        <div class="col-xs-4">
             <p>
                 Credit Card on file.
                 <a class="btn btn-info" data-toggle="modal" href="#show-card">Show Card</a>
+            </p>
+        </div>
+        <div class="col-xs-4">
+            <p>
                 <a class="btn btn-primary pull-right" href="{% url 'djstripe:change_card' %}">Change Card</a>
+            </p>
+        </div>
+        <div class="col-xs-4">
+            <p>
+                <a class="btn btn-danger pull-right" href="{% url 'djstripe:cancel' %}">Cancel subscription</a>
             </p>
         </div>
     </div>
@@ -25,18 +34,18 @@
     {% if plans %}
         {# Show available plans #}
         <div class="row">
-            <div class="col-12">
+            <div class="col-xs-12">
                 <h2>Subscription</h2>
                 {% include "djstripe/includes/_subscription_status.html" %}
             </div>  
         </div>
         <div class="row">
-            <div class="col-6">
+            <div class="col-xs-6">
                 <p>Next billed on {{ subscription.current_period_end|date }}.<br/>
                     <a href="{% url 'djstripe:history' %}">Payment History</a>
                 </p>
             </div>
-            <div class="col-6">
+            <div class="col-xs-6">
                 <p class="pull-right">
                     <a class="btn btn-primary" href="{% url 'djstripe:subscribe' %}">Manage Subscription</a>
                 </p>
@@ -44,7 +53,7 @@
         </div>
 
         <div class="row">
-            <div class="col-12">
+            <div class="col-xs-12">
                 <table class="table table-hover">
                     <thead>
                         <tr>

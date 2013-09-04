@@ -64,9 +64,14 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
         return redirect("djstripe:account")
 
 
-class CancelView(LoginRequiredMixin, PaymentsContextMixin, TemplateView):
+class CancelView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
     # TODO - needs tests
     template_name = "djstripe/cancel.html"
+    model = Customer
+
+    def get_object(self):
+        customer, created = Customer.get_or_create(self.request.user)
+        return customer
 
 
 class WebHook(CsrfExemptMixin, View):
