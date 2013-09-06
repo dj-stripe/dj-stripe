@@ -7,6 +7,7 @@
 <div class="container">
     <div class="row">
         <div class="col-xs-12">
+            {% include "djstripe/includes/_subscription_status.html" %}
             <h2>Account Information</h2>
         </div>
     </div>
@@ -23,9 +24,11 @@
             </p>
         </div>
         <div class="col-xs-4">
+            {% if subscription.status != subscription.STATUS_CANCELLED %}
             <p>
                 <a class="btn btn-danger pull-right" href="{% url 'djstripe:cancel_subscription' %}">Cancel Subscription</a>
             </p>
+            {% endif %}
         </div>
     </div>
 
@@ -36,7 +39,6 @@
         <div class="row">
             <div class="col-xs-12">
                 <h2>Subscription</h2>
-                {% include "djstripe/includes/_subscription_status.html" %}
             </div>  
         </div>
         <div class="row">

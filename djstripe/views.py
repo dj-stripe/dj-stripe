@@ -72,9 +72,14 @@ class CancelSubscriptionView(LoginRequiredMixin, PaymentsContextMixin, FormView)
     def form_valid(self, form):
         customer, created = Customer.get_or_create(self.request.user)
         # TODO - pass in setting to control at_period_end boolean
-        customer.cancel(at_period_end=False)
-        messages.info(self.request, "Your account has been cancelled")
-        return redirect("djstripe:history")
+        current_subscription = customer.cancel_subscription(at_period_end=True)
+        if current_subscription.status == current_subscription.STATUS_CANCELLED:
+            messages.info(self.request, "Your account is now cancelled.")
+        else:
+            messages.info(self.request, "Your account status is now '{}'".format(
+                current_subscription.status)
+            )
+        return redirect("djstripe:account")
 
 
 class WebHook(CsrfExemptMixin, View):

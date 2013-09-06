@@ -19,6 +19,7 @@ from jsonfield.fields import JSONField
 from model_utils.models import TimeStampedModel
 import stripe
 
+from . import exceptions
 from .managers import CustomerManager, ChargeManager, TransferManager
 from .settings import PAYMENTS_PLANS, INVOICE_FROM_EMAIL
 from .settings import plan_from_stripe_id
@@ -359,17 +360,31 @@ class Customer(StripeObject):
         except CurrentSubscription.DoesNotExist:
             return False
 
-    def cancel(self, at_period_end=True):
+    def cancel_subscription(self, at_period_end=True):
         try:
-            current = self.current_subscription
+            current_subscription = self.current_subscription
         except CurrentSubscription.DoesNotExist:
-            return
-        sub = self.stripe_customer.cancel_subscription(at_period_end=at_period_end)
-        current.status = sub.status
-        current.cancel_at_period_end = sub.cancel_at_period_end
-        current.period_end = convert_tstamp(sub, "current_period_end")
-        current.save()
+            raise exceptions.SubscriptionCancellationFailure(
+                "Customer does not have current subscription"
+            )
+        try:
+            sub = self.stripe_customer.cancel_subscription(at_period_end=at_period_end)
+        except stripe.InvalidRequestError as e:
+            raise exceptions.SubscriptionCancellationFailure(
+                "Customer's information is not current with Stripe.\n{}".format(
+                    e.message
+                )
+            )
+        current_subscription.status = sub.status
+        current_subscription.cancel_at_period_end = sub.cancel_at_period_end
+        current_subscription.period_end = convert_tstamp(sub, "current_period_end")
+        current_subscription.save()
         cancelled.send(sender=self, stripe_response=sub)
+        return current_subscription
+
+    def cancel(self, at_period_end=True):
+        """ Utility method to preserve usage of previous API """
+        return self.cancel_subscription(at_period_end=at_period_end)
 
     @classmethod
     def get_or_create(cls, user):
