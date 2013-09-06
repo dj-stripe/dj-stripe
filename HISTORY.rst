@@ -8,6 +8,7 @@ History
 
 * Cancellation added to views.
 * Support for kwargs on charge and invoice fetching.
+* def charge() now supports send_receipt flag, default to True.
 * Fixed templates to work with Bootstrap 3.0.0 column design.
 
 0.2.8 (2013-09-02)
