@@ -3,7 +3,7 @@ from rest_framework.permissions import BasePermission
 from ...models import Customer
 
 
-class DJStripePermission(BasePermission):
+class DJStripeSubscriptionPermission(BasePermission):
 
     def has_permission(self, request, view):
 
