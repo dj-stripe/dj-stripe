@@ -117,6 +117,9 @@ class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
     select_related = ["invoice"]
 
     def get_object(self):
+        def get_object(self):
+            if hasattr(self, "customer"):
+                return self.customer
         customer, created = Customer.get_or_create(self.request.user)
         return customer
 
