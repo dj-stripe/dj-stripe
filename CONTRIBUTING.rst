@@ -62,19 +62,23 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
 
     $ git clone git@github.com:your_name_here/dj-stripe.git
 
-3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
+3. Assuming the tests are run against PostgreSQL::
+
+  createdb djstripe
+
+4. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
 
     $ mkvirtualenv dj-stripe
     $ cd dj-stripe/
     $ python setup.py develop
 
-4. Create a branch for local development::
+5. Create a branch for local development::
 
     $ git checkout -b name-of-your-bugfix-or-feature
 
 Now you can make your changes locally.
 
-5. When you're done making changes, check that your changes pass flake8 and the
+6. When you're done making changes, check that your changes pass flake8 and the
 tests, including testing other Python versions with tox::
 
     $ pip install -r requirements_test.txt
@@ -84,18 +88,18 @@ tests, including testing other Python versions with tox::
 
 To get flake8 and tox, just pip install them into your virtualenv. 
 
-6. Check the test coverage report. Make sure coverage hasn't dropped::
+7. Check the test coverage report. Make sure coverage hasn't dropped::
 
     $ coverage run --source djstripe runtests.py
     $ coverage report -m
 
-6. Commit your changes and push your branch to GitHub::
+8. Commit your changes and push your branch to GitHub::
 
     $ git add .
     $ git commit -m "Your detailed description of your changes."
     $ git push origin name-of-your-bugfix-or-feature
 
-7. Submit a pull request through the GitHub website.
+9. Submit a pull request through the GitHub website.
 
 Pull Request Guidelines
 -----------------------

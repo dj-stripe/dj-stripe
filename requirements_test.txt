@@ -12,3 +12,6 @@ django-nose>=1.2
 django-floppyforms
 django-crispy-forms
 django-allauth
+
+# Tightly constrained database for more accurate testing
+psycopg2

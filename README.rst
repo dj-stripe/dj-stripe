@@ -137,8 +137,9 @@ Start up the webserver:
 Running the Tests
 ------------------
 
-:: 
+Assuming the tests are run against PostgreSQL::
 
+    createdb djstripe
     pip install -r requirements_text.txt
     coverage run --source djstripe runtests.py
     coverage report -m

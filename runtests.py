@@ -7,8 +7,13 @@ settings.configure(
     USE_TZ=True,
     DATABASES={
         "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-        }
+            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "NAME": "djstripe",
+            "USER": "",
+            "PASSWORD": "",
+            "HOST": "",
+            "PORT": "",
+        },
     },
     ROOT_URLCONF="djstripe.urls",
     INSTALLED_APPS=[
