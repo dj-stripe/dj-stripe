@@ -88,7 +88,7 @@ class EventProcessingException(TimeStampedModel):
 class Event(StripeObject):
 
     kind = models.CharField(max_length=250)
-    livemode = models.BooleanField()
+    livemode = models.BooleanField(default=False)
     customer = models.ForeignKey("Customer", null=True)
     webhook_message = JSONField()
     validated_message = JSONField(null=True)
@@ -574,7 +574,7 @@ class CurrentSubscription(TimeStampedModel):
     # trialing, active, past_due, canceled, or unpaid
     # In progress of moving it to choices field
     status = models.CharField(max_length=25)
-    cancel_at_period_end = models.BooleanField()
+    cancel_at_period_end = models.BooleanField(default=False)
     canceled_at = models.DateTimeField(null=True, blank=True)
     current_period_end = models.DateTimeField(null=True)
     current_period_start = models.DateTimeField(null=True)
@@ -613,8 +613,8 @@ class Invoice(TimeStampedModel):
     customer = models.ForeignKey(Customer, related_name="invoices")
     attempted = models.NullBooleanField()
     attempts = models.PositiveIntegerField(null=True)
-    closed = models.BooleanField()
-    paid = models.BooleanField()
+    closed = models.BooleanField(default=False)
+    paid = models.BooleanField(default=False)
     period_end = models.DateTimeField()
     period_start = models.DateTimeField()
     subtotal = models.DecimalField(decimal_places=2, max_digits=7)
@@ -737,7 +737,7 @@ class InvoiceItem(TimeStampedModel):
     currency = models.CharField(max_length=10)
     period_start = models.DateTimeField()
     period_end = models.DateTimeField()
-    proration = models.BooleanField()
+    proration = models.BooleanField(default=False)
     line_type = models.CharField(max_length=50)
     description = models.CharField(max_length=200, blank=True)
     plan = models.CharField(max_length=100, blank=True)
