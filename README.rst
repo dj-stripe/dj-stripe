@@ -134,6 +134,15 @@ Start up the webserver:
 
     * http://127.0.0.1:8000/payments/
 
+Running the Tests
+------------------
+
+:: 
+
+    pip install -r requirements_text.txt
+    coverage run --source djstripe runtests.py
+    coverage report -m
+
 
 Similar Projects
 ----------------
