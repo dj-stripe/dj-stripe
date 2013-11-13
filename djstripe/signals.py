@@ -1,5 +1,5 @@
 """
-Beging porting from django-stripe-payments
+Being porting from django-stripe-payments
 """
 from django.dispatch import Signal
 
