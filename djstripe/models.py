@@ -378,7 +378,7 @@ class Customer(StripeObject):
         current_subscription.status = sub.status
         current_subscription.cancel_at_period_end = sub.cancel_at_period_end
         current_subscription.period_end = convert_tstamp(sub, "current_period_end")
-		current_subscription.canceled_at = timezone.now()
+        current_subscription.canceled_at = timezone.now()
         current_subscription.save()
         cancelled.send(sender=self, stripe_response=sub)
         return current_subscription
