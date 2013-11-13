@@ -1,18 +1,10 @@
 from __future__ import unicode_literals
 from functools import wraps
 
-from django.contrib import messages
 from django.utils.decorators import available_attrs
-from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import redirect
 
-from .models import Customer
-
-ERROR_MSG = (
-                "The subscription_payment_required decorator requires the user"
-                "be authenticated before use. Please use django.contrib.auth's"
-                "login_required decorator."
-            )
+from .utils import user_has_active_subscription
 
 
 def user_passes_pay_test(test_func, pay_page="djstripe:subscribe"):
@@ -31,19 +23,6 @@ def user_passes_pay_test(test_func, pay_page="djstripe:subscribe"):
             return redirect(pay_page)
         return _wrapped_view
     return decorator
-
-
-def user_has_active_subscription(user):
-    """
-    Helper function to check if a user has an active subscription.
-    Throws improperlyConfigured if user.is_anonymous == True
-    """
-    if user.is_anonymous():
-        raise ImproperlyConfigured
-    customer, created = Customer.get_or_create(user)
-    if created or not customer.has_active_subscription():
-        return False
-    return True
 
 
 def subscription_payment_required(function=None, pay_page="djstripe:subscribe"):

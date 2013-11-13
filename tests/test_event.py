@@ -49,7 +49,7 @@ class TestEventMethods(TestCase):
         )
         event.link_customer()
         self.assertEquals(event.customer, self.customer)
-    
+
     def test_link_customer_customer_updated(self):
         msg = {
             "created": 1346855599,
@@ -104,7 +104,7 @@ class TestEventMethods(TestCase):
         )
         event.link_customer()
         self.assertEquals(event.customer, self.customer)
-    
+
     def test_link_customer_customer_deleted(self):
         msg = {
             "created": 1348286560,

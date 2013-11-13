@@ -89,3 +89,4 @@ class TestSubscriptionPaymentRequired(TestCase):
         request.user = user
         response = a_view(request)
         self.assertEqual(response.status_code, 200)
+

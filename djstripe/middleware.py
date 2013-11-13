@@ -54,6 +54,8 @@ class SubscriptionPaymentMiddleware(object):
             if match.url_name in EXEMPT:
                 return
 
+            # TODO: Consider converting to use
+            #       djstripe.utils.user_has_active_subscription function
             customer, created = Customer.get_or_create(request.user)
             if created:
                 return redirect("djstripe:subscribe")

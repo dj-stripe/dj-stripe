@@ -1,10 +1,10 @@
 from __future__ import unicode_literals
 from django.contrib import messages
-from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import redirect
 
 from .models import Customer, CurrentSubscription
 from . import settings as app_settings
+from .utils import user_has_active_subscription
 
 ERROR_MSG = (
                 "SubscriptionPaymentRequiredMixin requires the user be"
@@ -17,11 +17,7 @@ class SubscriptionPaymentRequiredMixin(object):
     """ Used to check to see if someone paid """
     # TODO - needs tests
     def dispatch(self, request, *args, **kwargs):
-        if request.user.is_anonymous():
-            raise ImproperlyConfigured(ERROR_MSG)
-
-        customer, created = Customer.get_or_create(request.user)
-        if created or not customer.has_active_subscription():
+        if not user_has_active_subscription(request.user):
             msg = "Your account is inactive. Please renew your subscription"
             messages.info(request, msg, fail_silently=True)
             return redirect("djstripe:subscribe")
