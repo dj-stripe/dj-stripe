@@ -3,6 +3,7 @@ import sys
 from django.conf import settings
 
 settings.configure(
+    TIME_ZONE='America/Los_Angeles',
     DEBUG=True,
     USE_TZ=True,
     DATABASES={

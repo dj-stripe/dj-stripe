@@ -15,7 +15,7 @@ class CustomerManagerTest(TestCase):
         # create customers and current subscription records
         period_start = datetime.datetime(2013, 4, 1, tzinfo=timezone.utc)
         period_end = datetime.datetime(2013, 4, 30, tzinfo=timezone.utc)
-        start = datetime.datetime(2013, 1, 1, tzinfo=timezone.utc)
+        start = datetime.datetime(2013, 1, 1, 0, 0, 1)  # more realistic start
         for i in range(10):
             customer = Customer.objects.create(
                 user=User.objects.create_user(username="patrick{0}".format(i)),
