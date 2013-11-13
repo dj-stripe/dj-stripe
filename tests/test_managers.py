@@ -69,58 +69,58 @@ class CustomerManagerTest(TestCase):
             start=start,
             quantity=1
         )
-    
+
     def test_started_during_no_records(self):
         self.assertEquals(
             Customer.objects.started_during(2013, 4).count(),
             0
         )
-    
+
     def test_started_during_has_records(self):
         self.assertEquals(
             Customer.objects.started_during(2013, 1).count(),
             12
         )
-    
+
     def test_canceled_during(self):
         self.assertEquals(
             Customer.objects.canceled_during(2013, 4).count(),
             1
         )
-    
+
     def test_canceled_all(self):
         self.assertEquals(
             Customer.objects.canceled().count(),
             1
         )
-    
+
     def test_active_all(self):
         self.assertEquals(
             Customer.objects.active().count(),
             11
         )
-    
+
     def test_started_plan_summary(self):
         for plan in Customer.objects.started_plan_summary_for(2013, 1):
             if plan["current_subscription__plan"] == "test":
                 self.assertEquals(plan["count"], 11)
             if plan["current_subscription__plan"] == "test-2":
                 self.assertEquals(plan["count"], 1)
-    
+
     def test_active_plan_summary(self):
         for plan in Customer.objects.active_plan_summary():
             if plan["current_subscription__plan"] == "test":
                 self.assertEquals(plan["count"], 10)
             if plan["current_subscription__plan"] == "test-2":
                 self.assertEquals(plan["count"], 1)
-    
+
     def test_canceled_plan_summary(self):
         for plan in Customer.objects.canceled_plan_summary_for(2013, 1):
             if plan["current_subscription__plan"] == "test":
                 self.assertEquals(plan["count"], 1)
             if plan["current_subscription__plan"] == "test-2":
                 self.assertEquals(plan["count"], 0)
-    
+
     def test_churn(self):
         self.assertEquals(
             Customer.objects.churn(),
@@ -129,7 +129,7 @@ class CustomerManagerTest(TestCase):
 
 
 class TransferManagerTest(TestCase):
-    
+
     def test_transfer_summary(self):
         event = Event.objects.create(
             stripe_id=TRANSFER_CREATED_TEST_DATA["id"],
