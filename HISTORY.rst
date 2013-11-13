@@ -3,6 +3,13 @@
 History
 -------
 
+0.3.0 (2013-11-12)
++++++++++++++++++++
+
+* Fully tested against Django 1.6, 1.5, and 1.4
+* Fix boolean default issue in models (from now on they are all default to `False`).
+* Replace duplicated code with `djstripe.utils.user_has_active_subscription`.
+
 0.2.9 (2013-09-06)
 ++++++++++++++++++
 
