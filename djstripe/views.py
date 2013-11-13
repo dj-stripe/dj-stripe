@@ -76,9 +76,10 @@ class CancelSubscriptionView(LoginRequiredMixin, PaymentsContextMixin, FormView)
         if current_subscription.status == current_subscription.STATUS_CANCELLED:
             messages.info(self.request, "Your account is now cancelled.")
         else:
-            messages.info(self.request, "Your account status is now '{}'".format(
-                current_subscription.status)
-            )
+			messages.info(self.request, "Your account status is now '{a}' until '{b}'".format(
+				a=current_subscription.status, b=current_subscription.current_period_end) 
+			)
+
         return redirect("djstripe:account")
 
 
