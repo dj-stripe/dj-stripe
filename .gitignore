@@ -19,7 +19,8 @@ develop-eggs
 lib
 lib64
 
-# Installer logs
+# Logs
+logfile
 pip-log.txt
 
 # Unit test / coverage reports
@@ -34,10 +35,6 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
-
-# Complexity
-output/*.html
-output/*/index.html
 
 # Sphinx
 docs/_build
