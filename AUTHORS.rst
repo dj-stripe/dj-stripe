@@ -13,3 +13,5 @@ Contributors
 
 * Audrey Roy
 * Luis Montiel <luismmontielg@gmail.com>
+* dollydagr
+* Yasmine Charif

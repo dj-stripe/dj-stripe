@@ -15,6 +15,18 @@
 <div class="row">
     <div class="col-xs-12">
         <h2>Cancel Subscription</h2>
+        
+		{% if not customer.current_subscription %}
+			<p>You have no subscription on file.</p>
+			<p>See your <a href="{% url 'djstripe:account' %}">account status</a> or better yet, <a href="{% url 'djstripe:subscribe' %}">subscribe</a>.</p>
+
+		{% elif customer.current_subscription.canceled_at and customer.current_subscription.start < customer.current_subscription.canceled_at %}
+    		<p>Your subscription was already cancelled.</p>
+			<p>See your <a href="{% url 'djstripe:account' %}">account status</a> or better yet, get a <a href="{% url 'djstripe:subscribe' %}">fresh subscription</a>.</p>
+
+    	{% else %}        
+
+        
         <p class="lead">
           Are you sure you want to cancel your subscription?
         </p>
@@ -33,6 +45,8 @@
             <a href="{% url 'djstripe:account' %}" class="btn btn-primary">I change my mind!</a>
             <button class="btn btn-danger">Cancel my subscription!</button>
         </form>
+        
+        {% endif %}
     </div>
 </div>
 {% endblock content %}
