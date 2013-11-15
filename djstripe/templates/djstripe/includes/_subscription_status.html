@@ -1,12 +1,12 @@
 {% if subscription %} 
-    {% if subscription.status == subscription.STATUS_ACTIVE %}
+    {% if subscription.status == subscription.STATUS_ACTIVE and not subscription.current_period_end %}
         <div class="alert alert-success lead">
             Your subscription is <strong>{{ subscription.status }}</strong>.
         </div>
     {% else %}
         {% if subscription.status == subscription.STATUS_TRIALING %}
             {% if customer.plan and customer.card_kind %}
-                <div class="alert alert-info">
+                <div class="alert alert-info lead">
                     Your free trial will end in <strong>{{ subscription.current_period_end|timeuntil }}</strong> after which you commence a <strong>{{ subscription.plan_display }}</strong> plan.
                 </div>
             {% else %}
@@ -18,6 +18,13 @@
             {% if subscription.status == subscription.STATUS_CANCELLED %}
                 <div class="alert alert-danger lead">
                     Your subscription has been <strong>canceled</strong>.
+                    {% if subscription.is_period_current %}
+                        You can continue to use the site for another <strong>{{ subscription.current_period_end|timeuntil }}.</strong>
+                    {% endif %}
+                </div>
+            {% elif subscription.canceled_at and subscription.start < subscription.canceled_at  %}
+            	<div class="alert alert-warning lead">
+                    Your subscription has been <strong>canceled</strong> on {{ subscription.canceled_at }}
                     {% if subscription.is_period_current %}
                         You can continue to use the site for another <strong>{{ subscription.current_period_end|timeuntil }}.</strong>
                     {% endif %}
