@@ -3,6 +3,12 @@
 History
 -------
 
+0.3.1 (2013-11-14)
++++++++++++++++++++
+
+* Cancellation fix (Thanks @dollydagr and Yasmine Charif)
+* Add setup.cfg for wheel generation (Thanks Charlie Denton)
+
 0.3.0 (2013-11-12)
 +++++++++++++++++++
 
