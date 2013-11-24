@@ -89,6 +89,7 @@ class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
 
 admin.site.register(
     Charge,
+    readonly_fields = ('created',),
     list_display=[
         "stripe_id",
         "customer",
@@ -124,6 +125,7 @@ admin.site.register(
 
 admin.site.register(
     EventProcessingException,
+    readonly_fields = ('created',),
     list_display=[
         "message",
         "event",
@@ -139,6 +141,7 @@ admin.site.register(
 admin.site.register(
     Event,
     raw_id_fields=["customer"],
+    readonly_fields = ('created',),
     list_display=[
         "stripe_id",
         "kind",
@@ -175,12 +178,14 @@ subscription_status.short_description = "Subscription Status"
 admin.site.register(
     Customer,
     raw_id_fields=["user"],
+    readonly_fields = ('created',),
     list_display=[
         "stripe_id",
         "user",
         "card_kind",
         "card_last_4",
-        subscription_status
+        subscription_status,
+        "created"
     ],
     list_filter=[
         "card_kind",
@@ -225,6 +230,7 @@ customer_has_card.short_description = "Customer"
 admin.site.register(
     Invoice,
     raw_id_fields=["customer"],
+    readonly_fields = ('created',),
     list_display=[
         "stripe_id",
         "paid",
@@ -234,7 +240,8 @@ admin.site.register(
         "period_start",
         "period_end",
         "subtotal",
-        "total"
+        "total",
+        "created"
     ],
     search_fields=[
         "stripe_id",
@@ -260,12 +267,14 @@ admin.site.register(
 admin.site.register(
     Transfer,
     raw_id_fields=["event"],
+    readonly_fields = ('created',),
     list_display=[
         "stripe_id",
         "amount",
         "status",
         "date",
-        "description"
+        "description",
+        "created"
     ],
     search_fields=[
         "stripe_id",
