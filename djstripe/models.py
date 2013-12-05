@@ -685,6 +685,10 @@ class Invoice(TimeStampedModel):
         for item in stripe_invoice["lines"].get("data", []):
             period_end = convert_tstamp(item["period"], "end")
             period_start = convert_tstamp(item["period"], "start")
+            """
+            Period end of invoice is the period end of the latest invoiceitem.
+            """
+            invoice.period_end = period_end
 
             if item.get("plan"):
                 plan = plan_from_stripe_id(item["plan"]["id"])
@@ -717,6 +721,11 @@ class Invoice(TimeStampedModel):
                 inv_item.quantity = item.get("quantity")
                 inv_item.save()
 
+        """
+        Save invoice period end assignment.
+        """
+        invoice.save()
+        
         if stripe_invoice.get("charge"):
             obj = c.record_charge(stripe_invoice["charge"])
             obj.invoice = invoice
