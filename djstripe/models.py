@@ -514,15 +514,22 @@ class Customer(StripeObject):
     def subscribe(self, plan, quantity=1, trial_days=None,
                   charge_immediately=True):
         cu = self.stripe_customer
+        """
+        The subscription is defined with prorate=False to make the subscription
+        end behavior of Change plan consistent with the one of Cancel subscription (which is
+        defined with at_period_end=True).
+        """
         if trial_days:
             resp = cu.update_subscription(
                 plan=PAYMENTS_PLANS[plan]["stripe_plan_id"],
                 trial_end=timezone.now() + datetime.timedelta(days=trial_days),
+                prorate=False,
                 quantity=quantity
             )
         else:
             resp = cu.update_subscription(
                 plan=PAYMENTS_PLANS[plan]["stripe_plan_id"],
+                prorate=False,
                 quantity=quantity
             )
         self.sync_current_subscription()
