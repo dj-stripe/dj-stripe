@@ -24,9 +24,13 @@
             </p>
         </div>
         <div class="col-xs-4">
-            {% if subscription.status != subscription.STATUS_CANCELLED %}
+            {% if subscription.is_status_current and not subscription.is_status_temporarily_current %}
             <p>
                 <a class="btn btn-danger pull-right" href="{% url 'djstripe:cancel_subscription' %}">Cancel Subscription</a>
+            </p>
+            {% else %}
+            <p>
+            	<a class="btn btn-success" href="{% url 'djstripe:subscribe' %}">Subscribe</a>
             </p>
             {% endif %}
         </div>
@@ -43,9 +47,11 @@
         </div>
         <div class="row">
             <div class="col-xs-6">
-                <p>Next billed on {{ subscription.current_period_end|date }}.<br/>
-                    <a href="{% url 'djstripe:history' %}">Payment History</a>
-                </p>
+            	{# Do not show next billing if subscription has been canceled although is still active #}
+            	{% if subscription.is_status_current and not subscription.is_status_temporarily_current %}
+				<p>Next billed on {{ subscription.current_period_end|date }}.</p>
+				{% endif %}
+    			<p><a href="{% url 'djstripe:history' %}">Payment History</a></p>
             </div>
             <div class="col-xs-6">
                 <p class="pull-right">

@@ -18,9 +18,6 @@
             {% if subscription.status == subscription.STATUS_CANCELLED %}
                 <div class="alert alert-danger lead">
                     Your subscription has been <strong>canceled</strong>.
-                    {% if subscription.is_period_current %}
-                        You can continue to use the site for another <strong>{{ subscription.current_period_end|timeuntil }}.</strong>
-                    {% endif %}
                 </div>
             {% elif subscription.canceled_at and subscription.start < subscription.canceled_at  %}
             	<div class="alert alert-warning lead">

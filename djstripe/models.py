@@ -368,6 +368,12 @@ class Customer(StripeObject):
                 "Customer does not have current subscription"
             )
         try:
+            """ 
+            If plan has trial days and customer cancels before trial period ends, 
+            then end subscription now, i.e. at_period_end=False 
+            """
+            if self.current_subscription.trial_end and self.current_subscription.trial_end > timezone.now():
+                at_period_end = False
             sub = self.stripe_customer.cancel_subscription(at_period_end=at_period_end)
         except stripe.InvalidRequestError as e:
             raise exceptions.SubscriptionCancellationFailure(
@@ -498,8 +504,17 @@ class Customer(StripeObject):
             if sub.trial_start and sub.trial_end:
                 sub_obj.trial_start = convert_tstamp(sub.trial_start)
                 sub_obj.trial_end = convert_tstamp(sub.trial_end)
-                sub_obj.save()
-
+            else:
+                """
+                Avoids keeping old values for trial_start and trial_end
+                for cases where customer had a subscription with trial days
+                then one without that (s)he cancels.
+                """
+                sub_obj.trial_start = None
+                sub_obj.trial_end = None
+            
+            sub_obj.save()
+            
             return sub_obj
 
     def update_plan_quantity(self, quantity, charge_immediately=False):
@@ -514,6 +529,12 @@ class Customer(StripeObject):
     def subscribe(self, plan, quantity=1, trial_days=None,
                   charge_immediately=True):
         cu = self.stripe_customer
+        """
+        Trial_days corresponds to the value specified by the selected plan
+        for the key trial_period_days.
+        """
+        if ("trial_period_days" in PAYMENTS_PLANS[plan]):
+            trial_days=PAYMENTS_PLANS[plan]["trial_period_days"]
         """
         The subscription is defined with prorate=False to make the subscription
         end behavior of Change plan consistent with the one of Cancel subscription (which is
@@ -605,6 +626,13 @@ class CurrentSubscription(TimeStampedModel):
     def is_status_current(self):
         return self.status in [self.STATUS_TRIALING, self.STATUS_ACTIVE]
 
+    """
+    Status when customer canceled their latest subscription, one that does not prorate,
+    and therefore has a temporary active subscription until period end.
+    """
+    def is_status_temporarily_current(self):
+        return self.canceled_at and self.start < self.canceled_at and self.cancel_at_period_end
+        
     def is_valid(self):
         if not self.is_status_current():
             return False
