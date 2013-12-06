@@ -844,7 +844,8 @@ class Charge(StripeObject):
         obj.amount = (data["amount"] / decimal.Decimal("100"))
         obj.paid = data["paid"]
         obj.refunded = data["refunded"]
-        obj.fee = (data["fee"] / decimal.Decimal("100"))
+        if data.get("fee"):
+            obj.fee = (data["fee"] / decimal.Decimal("100"))
         obj.disputed = data["dispute"] is not None
         obj.charge_created = convert_tstamp(data, "created")
         if data.get("description"):
