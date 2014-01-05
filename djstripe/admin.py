@@ -87,6 +87,15 @@ class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
             return queryset.filter(current_subscription__status=self.value())
 
 
+def send_charge_receipt(modeladmin, request, queryset):
+    """
+    Function for sending receipts from the admin if a receipt is not sent for
+    a specific charge.
+    """
+    for charge in queryset:
+        charge.send_receipt()
+
+
 admin.site.register(
     Charge,
     readonly_fields = ('created',),
@@ -121,6 +130,7 @@ admin.site.register(
         "customer",
         "invoice"
     ],
+    actions=(send_charge_receipt,),
 )
 
 admin.site.register(
