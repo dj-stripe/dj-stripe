@@ -5,7 +5,8 @@ from django.utils.translation import ugettext as _
 import stripe
 
 from .models import Customer
-from .settings import PLAN_CHOICES
+from .settings import PLAN_CHOICES, PASSWORD_INPUT_RENDER_VALUE, \
+    PASSWORD_MIN_LENGTH
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
@@ -21,6 +22,27 @@ class CancelSubscriptionForm(forms.Form):
 
 
 ########### Begin SignupForm code
+
+class PasswordField(forms.CharField):
+    def __init__(self, *args, **kwargs):
+        render_value = kwargs.pop('render_value', PASSWORD_INPUT_RENDER_VALUE)
+        kwargs['widget'] = forms.PasswordInput(
+            render_value=render_value,
+            attrs={'placeholder': _('Password')})
+        super(PasswordField, self).__init__(*args, **kwargs)
+
+
+class SetPasswordField(PasswordField):
+    def clean(self, value):
+        value = super(SetPasswordField, self).clean(value)
+        min_length = PASSWORD_MIN_LENGTH
+        if len(value) < min_length:
+            raise forms.ValidationError(
+                _("Password must be a minimum of {0} "
+                  "characters.").format(min_length))
+        return value
+
+
 try:
     from .widgets import StripeWidget
 except ImportError:
@@ -28,10 +50,8 @@ except ImportError:
 
 try:
     from allauth.account.utils import setup_user_email
-    from allauth.account.forms import SetPasswordField
-    from allauth.account.forms import PasswordField
 except ImportError:
-    setup_user_email, SetPasswordField, PasswordField = None, None, None
+    setup_user_email = None
 
 
 if StripeWidget and setup_user_email:
