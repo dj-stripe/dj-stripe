@@ -140,7 +140,7 @@ Running the Tests
 Assuming the tests are run against PostgreSQL::
 
     createdb djstripe
-    pip install -r requirements_text.txt
+    pip install -r requirements_test.txt
     coverage run --source djstripe runtests.py
     coverage report -m
 
