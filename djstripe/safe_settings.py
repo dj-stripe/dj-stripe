@@ -13,3 +13,7 @@ PLAN_CHOICES = [
     (plan, PAYMENTS_PLANS[plan].get("name", plan))
     for plan in PAYMENTS_PLANS
 ]
+PASSWORD_INPUT_RENDER_VALUE = getattr(
+    settings, 'DJSTRIPE_PASSWORD_INPUT_RENDER_VALUE', False)
+PASSWORD_MIN_LENGTH = getattr(
+    settings, 'DJSTRIPE_PASSWORD_MIN_LENGTH', 6)

@@ -32,7 +32,8 @@ settings.configure(
         "(admin)",
         "test_url_name",
         "testapp_namespaced:test_url_namespaced"
-    )
+    ),
+    ACCOUNT_SIGNUP_FORM_CLASS='djstripe.forms.StripeSubscriptionSignupForm'
 )
 
 from django_nose import NoseTestSuiteRunner
