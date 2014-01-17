@@ -3,9 +3,15 @@
 History
 -------
 
-0.3.2 (???)
+0.3.2 (2014-01-16)
 +++++++++++++++++++
 
+* Made Yasmine Charif a core committer
+* Take into account trial days in a subscription plan (Thanks Yasmine Charif)
+* Correct invoice period end value (Thanks Yasmine Charif)
+* Make plan cancellation and plan change consistently not prorating (Thanks Yasmine Charif)
+* Fix circular import when ACCOUNT_SIGNUP_FORM_CLASS is defined (Thanks Dustin Farris)
+* Add send e-mail receipt action in charges admin panel (Thanks Buddy Lindsay)
 * Add `created` field to all ModelAdmins to help with internal auditing (Thanks Kulbir Singh)
 
 0.3.1 (2013-11-14)
