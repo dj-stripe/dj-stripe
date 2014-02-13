@@ -368,9 +368,9 @@ class Customer(StripeObject):
                 "Customer does not have current subscription"
             )
         try:
-            """ 
-            If plan has trial days and customer cancels before trial period ends, 
-            then end subscription now, i.e. at_period_end=False 
+            """
+            If plan has trial days and customer cancels before trial period ends,
+            then end subscription now, i.e. at_period_end=False
             """
             if self.current_subscription.trial_end and self.current_subscription.trial_end > timezone.now():
                 at_period_end = False
@@ -512,9 +512,9 @@ class Customer(StripeObject):
                 """
                 sub_obj.trial_start = None
                 sub_obj.trial_end = None
-            
+
             sub_obj.save()
-            
+
             return sub_obj
 
     def update_plan_quantity(self, quantity, charge_immediately=False):
@@ -534,7 +534,7 @@ class Customer(StripeObject):
         for the key trial_period_days.
         """
         if ("trial_period_days" in PAYMENTS_PLANS[plan]):
-            trial_days=PAYMENTS_PLANS[plan]["trial_period_days"]
+            trial_days = PAYMENTS_PLANS[plan]["trial_period_days"]
         """
         The subscription is defined with prorate=False to make the subscription
         end behavior of Change plan consistent with the one of Cancel subscription (which is
@@ -632,7 +632,7 @@ class CurrentSubscription(TimeStampedModel):
     """
     def is_status_temporarily_current(self):
         return self.canceled_at and self.start < self.canceled_at and self.cancel_at_period_end
-        
+
     def is_valid(self):
         if not self.is_status_current():
             return False
@@ -753,7 +753,7 @@ class Invoice(TimeStampedModel):
         Save invoice period end assignment.
         """
         invoice.save()
-        
+
         if stripe_invoice.get("charge"):
             obj = c.record_charge(stripe_invoice["charge"])
             obj.invoice = invoice
@@ -877,3 +877,93 @@ class Charge(StripeObject):
             ).send()
             self.receipt_sent = num_sent > 0
             self.save()
+
+
+class Plan(StripeObject):
+    """A Stripe Plan."""
+
+    CURRENCIES = (
+        ('usd', 'U.S. Dollars',),
+        ('gbp', 'Pounds (GBP)',),
+        ('eur', 'Euros',))
+
+    INTERVALS = (
+        ('week', 'Week',),
+        ('month', 'Month',),
+        ('year', 'Year',))
+
+    name = models.CharField(max_length=100, null=False)
+    currency = models.CharField(
+        choices=CURRENCIES,
+        max_length=10,
+        null=False)
+    interval = models.CharField(
+        max_length=10,
+        choices=INTERVALS,
+        verbose_name="Interval type",
+        null=False)
+    interval_count = models.IntegerField(
+        verbose_name="Intervals between charges",
+        default=1,
+        null=True)
+    amount = models.DecimalField(decimal_places=2, max_digits=7,
+                                 verbose_name="Amount (per period)",
+                                 null=False)
+    trial_period_days = models.IntegerField(null=True)
+
+    def __unicode__(self):
+        return self.name
+
+    @classmethod
+    def create(cls, metadata={}, **kwargs):
+        """Create and then return a Plan (both in Stripe, and in our db)."""
+
+        stripe.Plan.create(
+            id=kwargs['stripe_id'],
+            amount=int(kwargs['amount'] * 100),
+            currency=kwargs['currency'],
+            interval=kwargs['interval'],
+            interval_count=kwargs.get('interval_count', None),
+            name=kwargs['name'],
+            trial_period_days=kwargs.get('trial_period_days'),
+            metadata=metadata)
+
+        plan = Plan.objects.create(
+            stripe_id=kwargs['stripe_id'],
+            amount=kwargs['amount'],
+            currency=kwargs['currency'],
+            interval=kwargs['interval'],
+            interval_count=kwargs.get('interval_count', None),
+            name=kwargs['name'],
+            trial_period_days=kwargs.get('trial_period_days'),
+        )
+
+        return plan
+
+    @classmethod
+    def get_or_create(cls, **kwargs):
+        try:
+            return Plan.objects.get(stripe_id=kwargs['stripe_id']), False
+        except Plan.DoesNotExist:
+            return cls.create(**kwargs), True
+
+    def update_plan_name(self):
+        """Update the name of the Plan in Stripe and in the db.
+
+        - Assumes the object being passed in has the name attribute already
+          set, but has not been saved.
+        - Stripe does not allow for update of any other Plan attributes besides
+          name.
+
+        """
+
+        p = stripe.Plan.retrieve(self.stripe_id)
+        p.name = self.name
+        p.save()
+
+        self.save()
+
+    @property
+    def stripe_plan(self):
+        """Return the plan data from Stripe."""
+        return stripe.Plan.retrieve(self.stripe_id)

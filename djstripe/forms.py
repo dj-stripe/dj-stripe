@@ -4,7 +4,7 @@ from django.utils.translation import ugettext as _
 
 import stripe
 
-from .models import Customer
+from .models import Customer, Plan
 from .settings import PLAN_CHOICES, PASSWORD_INPUT_RENDER_VALUE, \
     PASSWORD_MIN_LENGTH
 
@@ -114,4 +114,12 @@ if StripeWidget and setup_user_email:
             except stripe.StripeError as e:
                 # handle error here
                 raise e
+
+
+
+
+
+
+
+
 
