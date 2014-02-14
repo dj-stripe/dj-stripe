@@ -300,7 +300,7 @@ class PlanAdmin(admin.ModelAdmin):
         sync with Stripe."""
 
         if change:
-            obj.update_plan_name()
+            obj.update_name()
 
         else:
             Plan.get_or_create(**form.cleaned_data)

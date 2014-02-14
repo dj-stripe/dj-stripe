@@ -879,18 +879,19 @@ class Charge(StripeObject):
             self.save()
 
 
+CURRENCIES = (
+    ('usd', 'U.S. Dollars',),
+    ('gbp', 'Pounds (GBP)',),
+    ('eur', 'Euros',))
+
+INTERVALS = (
+    ('week', 'Week',),
+    ('month', 'Month',),
+    ('year', 'Year',))
+
+
 class Plan(StripeObject):
     """A Stripe Plan."""
-
-    CURRENCIES = (
-        ('usd', 'U.S. Dollars',),
-        ('gbp', 'Pounds (GBP)',),
-        ('eur', 'Euros',))
-
-    INTERVALS = (
-        ('week', 'Week',),
-        ('month', 'Month',),
-        ('year', 'Year',))
 
     name = models.CharField(max_length=100, null=False)
     currency = models.CharField(
@@ -947,11 +948,11 @@ class Plan(StripeObject):
         except Plan.DoesNotExist:
             return cls.create(**kwargs), True
 
-    def update_plan_name(self):
+    def update_name(self):
         """Update the name of the Plan in Stripe and in the db.
 
-        - Assumes the object being passed in has the name attribute already
-          set, but has not been saved.
+        - Assumes the object being called has the name attribute already
+          reset, but has not been saved.
         - Stripe does not allow for update of any other Plan attributes besides
           name.
 
