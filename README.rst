@@ -144,6 +144,18 @@ Assuming the tests are run against PostgreSQL::
     coverage run --source djstripe runtests.py
     coverage report -m
 
+Follows Best Practices
+======================
+
+.. image:: http://twoscoops.smugmug.com/Two-Scoops-Press-Media-Kit/i-C8s5jkn/0/O/favicon-152.png
+   :name: Two Scoops Logo
+   :align: center
+   :alt: Two Scoops of Django
+   :target: http://twoscoopspress.org/products/two-scoops-of-django-1-6
+
+This project follows best practices as espoused in `Two Scoops of Django: Best Practices for Django 1.6`_.
+
+.. _`Two Scoops of Django: Best Practices for Django 1.6`: http://twoscoopspress.org/products/two-scoops-of-django-1-6
 
 Similar Projects
 ----------------
@@ -151,3 +163,4 @@ Similar Projects
 * https://github.com/eldarion/django-stripe-payments - The project that dj-stripe forked. It's an awesome project and worth checking out.
 * https://github.com/agiliq/merchant - A single charge payment processing system that also includes many other Gateways. Really nice but doesn't out-of-the-box handle the use case of subscription payments. 
 * https://github.com/GoodCloud/django-zebra - One of the first stripe payment systems for Django. 
+
