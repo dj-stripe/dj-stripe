@@ -25,7 +25,7 @@ Features
 * Subscription management
 * Subscription during registration
 * Single-unit purchases (forthcoming)
-* Works with Django 1.5, 1.4
+* Works with Django 1.6, 1.5, 1.4
 * Works with Python 3.3, 2.7, 2.6
 * Works with Bootstrap 3
 * Built-in South migrations
