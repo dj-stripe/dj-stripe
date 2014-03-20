@@ -87,3 +87,15 @@ DJSTRIPE_WEBHOOK_URL = getattr(
     "DJSTRIPE_WEBHOOK_URL",
     r"^webhook/$"
 )
+
+ALLOW_MULTIPLE_SUBSCRIPTIONS = getattr(
+    settings,
+    "DJSTRIPE_ALLOW_MULTIPLE_SUBSCRIPTIONS",
+    False
+)
+
+RETAIN_CANCELED_SUBSCRIPTIONS = getattr(
+    settings,
+    "DJSTRIPE_RETAIN_CANCELED_SUBSCRIPTIONS",
+    False
+)

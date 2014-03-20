@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 from django.contrib import messages
 from django.shortcuts import redirect
 
-from .models import Customer, CurrentSubscription
+from .models import Customer, Subscription
 from . import settings as app_settings
 from .utils import user_has_active_subscription
 
@@ -43,5 +43,5 @@ class SubscriptionMixin(PaymentsContextMixin):
         context = super(SubscriptionMixin, self).get_context_data(**kwargs)
         context['is_plans_plural'] = bool(len(app_settings.PLAN_CHOICES) > 1)
         context['customer'], created = Customer.get_or_create(self.request.user)
-        context['CurrentSubscription'] = CurrentSubscription
+        context['Subscription'] = Subscription
         return context

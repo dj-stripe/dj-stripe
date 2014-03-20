@@ -11,47 +11,47 @@ class CustomerManager(models.Manager):
 
     def started_during(self, year, month):
         return self.exclude(
-            current_subscription__status="trialing"
+            subscriptions__status="trialing"
         ).filter(
-            current_subscription__start__year=year,
-            current_subscription__start__month=month
-        )
+            subscriptions__start__year=year,
+            subscriptions__start__month=month
+        ).distinct()
 
     def active(self):
         return self.filter(
-            current_subscription__status="active"
-        )
+            subscriptions__status="active"
+        ).distinct()
 
     def canceled(self):
         return self.filter(
-            current_subscription__status="canceled"
-        )
+            subscriptions__status="canceled"
+        ).distinct()
 
     def canceled_during(self, year, month):
         return self.canceled().filter(
-            current_subscription__canceled_at__year=year,
-            current_subscription__canceled_at__month=month,
-        )
+            subscriptions__canceled_at__year=year,
+            subscriptions__canceled_at__month=month,
+        ).distinct()
 
     def started_plan_summary_for(self, year, month):
         return self.started_during(year, month).values(
-            "current_subscription__plan"
+            "subscriptions__plan"
         ).order_by().annotate(
-            count=models.Count("current_subscription__plan")
+            count=models.Count("subscriptions__plan")
         )
 
     def active_plan_summary(self):
         return self.active().values(
-            "current_subscription__plan"
+            "subscriptions__plan"
         ).order_by().annotate(
-            count=models.Count("current_subscription__plan")
+            count=models.Count("subscriptions__plan")
         )
 
     def canceled_plan_summary_for(self, year, month):
         return self.canceled_during(year, month).values(
-            "current_subscription__plan"
+            "subscriptions__plan"
         ).order_by().annotate(
-            count=models.Count("current_subscription__plan")
+            count=models.Count("subscriptions__plan")
         )
 
     def churn(self):
