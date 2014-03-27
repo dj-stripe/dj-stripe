@@ -64,7 +64,7 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
         return redirect("djstripe:account")
 
 
-class CancelSubscriptionView(LoginRequiredMixin, PaymentsContextMixin, FormView):
+class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
     # TODO - needs tests
     template_name = "djstripe/cancel_subscription.html"
     form_class = CancelSubscriptionForm
