@@ -21,7 +21,7 @@ import stripe
 
 from . import exceptions
 from .managers import CustomerManager, ChargeManager, TransferManager
-from .settings import PAYMENTS_PLANS, INVOICE_FROM_EMAIL
+from .settings import PAYMENTS_PLANS, INVOICE_FROM_EMAIL, SEND_INVOICE_RECEIPT_EMAILS
 from .settings import plan_from_stripe_id
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
@@ -768,7 +768,7 @@ class Invoice(TimeStampedModel):
         if event.kind in valid_events:
             invoice_data = event.message["data"]["object"]
             stripe_invoice = stripe.Invoice.retrieve(invoice_data["id"])
-            cls.sync_from_stripe_data(stripe_invoice)
+            cls.sync_from_stripe_data(stripe_invoice, send_receipt=SEND_INVOICE_RECEIPT_EMAILS)
 
 
 class InvoiceItem(TimeStampedModel):
