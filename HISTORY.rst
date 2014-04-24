@@ -3,6 +3,12 @@
 History
 -------
 
+0.3.3 (2014-04-24)
++++++++++++++++++++
+
+* Increased the extendability of the views by removing as many hard-coded URLs as possible and replacing them with ``success_url`` and other attributes/methods.
+* Added single unit purchasing to the cookbook
+
 0.3.2 (2014-01-16)
 +++++++++++++++++++
 
