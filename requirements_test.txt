@@ -16,3 +16,5 @@ django-allauth
 
 # Tightly constrained database for more accurate testing
 psycopg2
+flake8
+wheel
