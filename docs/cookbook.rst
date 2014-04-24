@@ -122,3 +122,24 @@ Sometimes you want a custom plan for per-customer billing. Or perhaps you are pr
             user.plan = kwargs['plan']
             user.save()
 
+Making individual purchases
+---------------------------
+
+On the user's customer object, use the charge method to generate a Stripe charge. You'll need to have already captured the user's ``stripe_id``.
+
+.. code-block:: python
+
+    from decimal import Decimal
+
+    from django.contrib.auth import get_user_model
+
+    from djstripe.models import Customer
+
+    User = get_user_model()
+
+    customer, created = Customer.get_or_create(user)
+
+    amount = Decimal(10.00)
+    customer.charge(amount)
+
+Source code for the Customer.charge method is at https://github.com/pydanny/dj-stripe/blob/master/djstripe/models.py#L561-L580
