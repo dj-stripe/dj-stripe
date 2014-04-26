@@ -5,11 +5,12 @@ from django.conf import settings
 import stripe
 
 from .models import Customer
-
+from .backends import get_backend
 
 def sync_customer(user):
     # TODO - needs tests
-    customer, created = Customer.get_or_create(user)
+    backend = get_backend()
+    customer, created = backend.create_customer_from_user(user)
     cu = customer.stripe_customer
     customer.sync(cu=cu)
     customer.sync_current_subscription(cu=cu)
