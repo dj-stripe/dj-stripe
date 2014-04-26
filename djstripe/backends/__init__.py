@@ -22,7 +22,7 @@ def get_backend():
     module, attr = DJSTRIPE_BACKEND[:i], DJSTRIPE_BACKEND[i+1:]
     try:
         mod = import_module(module)
-    except ImportError, e:
+    except ImportError as e:
         raise ImproperlyConfigured('Error loading dj-stripe backend %s: "%s"' % (module, e))
     try:
         backend_class = getattr(mod, attr)
