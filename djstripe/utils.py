@@ -1,5 +1,6 @@
 from django.core.exceptions import ImproperlyConfigured
 from .models import Customer
+from .backends import get_backend
 
 ERROR_MSG = (
                 "The subscription_payment_required decorator requires the user"
@@ -17,7 +18,10 @@ def user_has_active_subscription(user):
     """
     if user.is_anonymous():
         raise ImproperlyConfigured(ERROR_MSG)
-    customer, created = Customer.get_or_create(user)
+    
+    backend = get_backend()    
+    customer, created = backend.create_customer_from_user(user)
+        
     if created or not customer.has_active_subscription():
         return False
     return True

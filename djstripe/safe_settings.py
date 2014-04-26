@@ -2,6 +2,9 @@ from __future__ import unicode_literals
 
 from django.conf import settings
 
+
+DJSTRIPE_BACKEND = getattr(settings, "DJSTRIPE_BACKEND", "djstripe.backends.default.DefaultBackend")
+
 STRIPE_PUBLIC_KEY = settings.STRIPE_PUBLIC_KEY
 INVOICE_FROM_EMAIL = getattr(
     settings,
