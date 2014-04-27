@@ -99,14 +99,13 @@ As this is embedded in the URLConf, this must be a resolvable regular expression
 CUSTOMER_RELATED_MODEL (=User)
 ------------------------------
 
-Model that is related to the customer.
+Model for ``Customer.related_model``.
 
 
 DJSTRIPE_BACKEND (="djstripe.backends.default.DefaultBackend")
 --------------------------------------------------------------
 
-You can set a different backend to customize some behavior.
-
+Backend to customize related_model, management and admin.py behavior. See ``djstripe.backends.default.DefaultBackend``. You'll need to write one if you decide to change ``CUSTOMER_RELATED_MODEL``.
 
 
 Safe Settings

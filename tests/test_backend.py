@@ -28,7 +28,8 @@ class BackendRetrievalTests(TestCase):
 
 
 class TestUserBackend(TestCase):
-    
+    #TODO:
+    #Add more tests!
     def setUp(self):
         self.user = User.objects.create_user(username="pydanny")        
         self.customer = Customer.objects.create(
@@ -46,20 +47,6 @@ class TestUserBackend(TestCase):
     def test_get_customer(self):
         customer = self.backend.get_customer(self.request)        
         self.assertTrue(isinstance(customer, Customer))
-    
-    """
-    
-    def test_successful_create_customer_from_user(self):
-        pass
-            
-    def test_successful_create_customer(self):
-        customer, created = self.backend.create_customer(self.request)        
-        self.assertTrue(isinstance(customer, Customer))        
-        self.assertFalse(created)        
-        self.request.user = User.objects.create_user(username="msaizar")
-        customer, created = self.backend.create_customer(self.request)
-        self.assertTrue(isinstance(customer, Customer))
-        self.assertTrue(created)
-    """
+
         
    
