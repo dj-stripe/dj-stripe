@@ -29,7 +29,7 @@ from .signals import webhook_processing_error
 from .settings import TRIAL_PERIOD_FOR_RELATED_MODEL_CALLBACK
 from .settings import DEFAULT_PLAN
 from .settings import DJSTRIPE_CUSTOMER_RELATED_MODEL
-from .backends import get_backend
+from .settings import DJSTRIPE_RELATED_MODEL_BILLING_EMAIL_FIELD
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
@@ -407,9 +407,8 @@ class Customer(StripeObject):
         trial_days = None
         if TRIAL_PERIOD_FOR_RELATED_MODEL_CALLBACK:
             trial_days = TRIAL_PERIOD_FOR_RELATED_MODEL_CALLBACK(related_model)
-        backend = get_backend()
         stripe_customer = stripe.Customer.create(
-            email=backend.get_email_from_related_model(related_model)
+            email=getattr(related_model, DJSTRIPE_RELATED_MODEL_BILLING_EMAIL_FIELD)
         )
         cus = Customer.objects.create(
             related_model=related_model,
@@ -867,15 +866,13 @@ class Charge(StripeObject):
                 "site": site,
                 "protocol": protocol,
             }
-            backend = get_backend()
             subject = render_to_string("djstripe/email/subject.txt", ctx)
             subject = subject.strip()
             message = render_to_string("djstripe/email/body.txt", ctx)
             num_sent = EmailMessage(
                 subject,
-                message,
-                
-                to=[backend.get_email_from_customer(self.customer)],
+                message,                
+                to=[getattr(self.customer.related_model, DJSTRIPE_RELATED_MODEL_BILLING_EMAIL_FIELD)],
                 from_email=INVOICE_FROM_EMAIL
             ).send()
             self.receipt_sent = num_sent > 0

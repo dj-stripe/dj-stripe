@@ -9,12 +9,13 @@ from django.db.models.fields import FieldDoesNotExist
 from .models import Event, EventProcessingException, Transfer, Charge, Plan
 from .models import Invoice, InvoiceItem, CurrentSubscription, Customer
 
-from .backends import get_backend
+from .settings import DJSTRIPE_RELATED_MODEL_BILLING_EMAIL_FIELD
+from .settings import DJSTRIPE_RELATED_MODEL_NAME_FIELD
+from .plugins import get_plugin
 
-backend = get_backend()
-
-related_model_search_fields = backend.get_related_model_search_fields()
-related_model_search_fields_for_customer = backend.get_related_model_search_fields_for_customer()
+plugin = get_plugin()
+related_model_search_fields = plugin.get_related_model_search_fields()
+related_model_search_fields_for_customer = ["related_model__{0}".format(DJSTRIPE_RELATED_MODEL_BILLING_EMAIL_FIELD), "related_model__{0}".format(DJSTRIPE_RELATED_MODEL_NAME_FIELD)]
 
 
 
@@ -213,7 +214,7 @@ admin.site.register(
         "stripe_id",
         "paid",
         "closed",
-        backend.customer_related_model_list_display,
+        plugin.customer_related_model_list_display,
         customer_has_card,
         "period_start",
         "period_end",

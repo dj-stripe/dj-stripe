@@ -1,7 +1,7 @@
 from rest_framework.permissions import BasePermission
 
 from ...models import Customer
-from ...backends import get_backend
+from ...plugins import get_plugin
 
 class DJStripeSubscriptionPermission(BasePermission):
 
@@ -12,8 +12,8 @@ class DJStripeSubscriptionPermission(BasePermission):
             return False
 
         # get the user's customer object
-        backend = get_backend()  
-        customer, created = backend.create_customer(request)
+        plugin = get_plugin()  
+        customer, created = plugin.create_customer(request)
 
         if created:
             # If just created, then they can't possibly have a subscription.

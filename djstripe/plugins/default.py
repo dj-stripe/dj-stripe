@@ -4,7 +4,7 @@ from ..models import Customer
 from ..settings import User
 from ..sync import sync_customer
 
-class DefaultBackend(object):
+class DefaultPlugin(object):
 
 
     ERROR_MSG = (
@@ -34,14 +34,6 @@ class DefaultBackend(object):
             username,
             email
         )
-
-    def get_related_model_search_fields_for_customer(self):
-        """
-        admin.py extra search_field for Customer
-        
-        """
-        
-        return ["related_model__username", "related_model__email"]
 
     def get_related_model_search_fields(self):
         """
@@ -75,30 +67,6 @@ class DefaultBackend(object):
 
         """
         return Customer.get_or_create(related_model=request.user)
-
-    def create_customer_from_related_model(self, related_model):
-        """
-        get_or_create a customer from a related_model.
-
-        """
-        
-        return Customer.get_or_create(related_model=related_model)
-    
-    def get_email_from_related_model(self, related_model):
-        """
-        Given a related_model, returns the email used for Stripe.
-
-        """
-        
-        return related_model.email
-
-    def get_email_from_customer(self, customer):
-        """
-        Given a customer, returns the email used for Stripe.
-
-        """
-        
-        return customer.related_model.email
     
     def get_related_model(self, request):
         return request.user
@@ -106,46 +74,18 @@ class DefaultBackend(object):
     def get_customer(self, request):
         return request.user.customer
 
-    def related_model_has_active_subscription(self, user):
+    def related_model_has_active_subscription(self, related_model):
         """
         utils.py function used by decorators and mixins.
         
         """
         
-        if user.is_anonymous():
+        if related_model.is_anonymous():
             raise ImproperlyConfigured(self.ERROR_MSG)
     
-        customer, created = self.create_customer_from_related_model(user)
+        customer, created = Customer.get_or_create(related_model)
         
         if created or not customer.has_active_subscription():
             return False
         return True
 
-    def init_customers(self, *args, **options):        
-        """        
-        Management function for creating customers for existing related models
-
-        """
-        
-        for user in User.objects.filter(customer__isnull=True):
-            # use get_or_create in case of race conditions on large
-            #      user bases
-            Customer.get_or_create(related_model=user)
-            print("Created customer for {0}".format(user.email))
-        
-    def sync_customers(self, *args, **options):        
-        """        
-        Management function for syncing customers
-
-        """
-        
-        qs = User.objects.exclude(customer__isnull=True)
-        count = 0
-        total = qs.count()
-        for user in qs:
-            count += 1
-            perc = int(round(100 * (float(count) / float(total))))
-            print("[{0}/{1} {2}%] Syncing {3} [{4}]").format(
-                count, total, perc, user.username, user.pk
-            ) 
-            sync_customer(user)
