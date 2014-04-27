@@ -45,7 +45,7 @@ class DefaultBackend(object):
 
     def get_related_model_search_fields(self):
         """
-        admin.py extra search_field for Charge, Event, Customer and Invoice 
+        admin.py extra search_field for Charge, Event and Invoice 
         
         """
         
