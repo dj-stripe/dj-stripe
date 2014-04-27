@@ -20,7 +20,6 @@ def sync_customer(user):
 
 
 def sync_plans():
-
     stripe.api_key = settings.STRIPE_SECRET_KEY
     for plan in settings.DJSTRIPE_PLANS:
         if settings.DJSTRIPE_PLANS[plan].get("stripe_plan_id"):

@@ -9,26 +9,13 @@ from django.db.models.fields import FieldDoesNotExist
 from .models import Event, EventProcessingException, Transfer, Charge, Plan
 from .models import Invoice, InvoiceItem, CurrentSubscription, Customer
 
-from .settings import User
+from .backends import get_backend
 
-if hasattr(User, 'USERNAME_FIELD'):
-    # Using a Django 1.5 User model
-    user_search_fields = [
-        "customer__related_model__{0}".format(User.USERNAME_FIELD)
-    ]
+backend = get_backend()
 
-    try:
-        # get_field_by_name throws FieldDoesNotExist if the field is not present on the model
-        User._meta.get_field_by_name('email')
-        user_search_fields + ["customer__related_model__email"]
-    except FieldDoesNotExist:
-        pass
-else:
-    # Using a pre-Django 1.5 User model
-    user_search_fields = [
-        "customer__related_model__username",
-        "customer__related_model__email"
-    ]
+related_model_search_fields = backend.get_related_model_search_fields()
+related_model_search_fields_for_customer = backend.get_related_model_search_fields_for_customer()
+
 
 
 class CustomerHasCardListFilter(admin.SimpleListFilter):
@@ -114,11 +101,9 @@ admin.site.register(
     search_fields=[
         "stripe_id",
         "customer__stripe_id",
-        "customer__related_model__email",
         "card_last_4",
-        "customer__related_model__username",
         "invoice__stripe_id"
-    ] + user_search_fields,
+    ] + related_model_search_fields,
     list_filter=[
         "paid",
         "disputed",
@@ -169,10 +154,8 @@ admin.site.register(
     search_fields=[
         "stripe_id",
         "customer__stripe_id",
-        "customer__related_model__username",
-        "customer__related_model__email",
         "validated_message"
-    ] + user_search_fields,
+    ] + related_model_search_fields,
 )
 
 
@@ -203,10 +186,9 @@ admin.site.register(
         CustomerSubscriptionStatusListFilter
     ],
     search_fields=[
-        "stripe_id",
-        "related_model__username",
-        "related_model__email"
-    ] + user_search_fields,
+        "stripe_id"
+    ] + related_model_search_fields_for_customer
+    + related_model_search_fields,
     inlines=[CurrentSubscriptionInline]
 )
 
@@ -220,20 +202,7 @@ def customer_has_card(obj):
 customer_has_card.short_description = "Customer Has Card"
 
 
-def customer_user(obj):
-    if hasattr(obj, 'USERNAME_FIELD'):
-        # Using a Django 1.5 User model
-        username = getattr(obj.customer.related_model, User.USERNAME_FIELD)
-    else:
-        # Using a pre-Django 1.5 User model
-        username = obj.customer.related_model.username
-    # In Django 1.5+ a User is not guaranteed to have an email field
-    email = getattr(obj.customer.related_model, 'email', '')
 
-    return "{0} <{1}>".format(
-        username,
-        email
-    )
 customer_has_card.short_description = "Customer"
 
 
@@ -245,7 +214,7 @@ admin.site.register(
         "stripe_id",
         "paid",
         "closed",
-        customer_user,
+        backend.customer_related_model_list_display,
         customer_has_card,
         "period_start",
         "period_end",
@@ -256,9 +225,7 @@ admin.site.register(
     search_fields=[
         "stripe_id",
         "customer__stripe_id",
-        "customer__related_model__username",
-        "customer__related_model__email"
-    ] + user_search_fields,
+    ] + related_model_search_fields,
     list_filter=[
         InvoiceCustomerHasCardListFilter,
         "paid",
