@@ -96,7 +96,7 @@ This is where you can set *Stripe.com* to send webhook response. You can set thi
 As this is embedded in the URLConf, this must be a resolvable regular expression.
 
 
-CUSTOMER_RELATED_MODEL (=User)
+DJSTRIPE_CUSTOMER_RELATED_MODEL (=User)
 ------------------------------
 
 Model for ``Customer.related_model``.
@@ -105,7 +105,7 @@ Model for ``Customer.related_model``.
 DJSTRIPE_BACKEND (="djstripe.backends.default.DefaultBackend")
 --------------------------------------------------------------
 
-Backend to customize related_model, management and admin.py behavior. See ``djstripe.backends.default.DefaultBackend``. You'll need to write one if you decide to change ``CUSTOMER_RELATED_MODEL``.
+Backend to customize related_model, management and admin.py behavior. See ``djstripe.backends.default.DefaultBackend``. You'll need to write one if you decide to change ``DJSTRIPE_CUSTOMER_RELATED_MODEL``.
 
 
 Safe Settings

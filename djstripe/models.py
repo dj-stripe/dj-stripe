@@ -28,7 +28,7 @@ from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
 from .settings import TRIAL_PERIOD_FOR_RELATED_MODEL_CALLBACK
 from .settings import DEFAULT_PLAN
-from .settings import CUSTOMER_RELATED_MODEL
+from .settings import DJSTRIPE_CUSTOMER_RELATED_MODEL
 from .backends import get_backend
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -312,7 +312,7 @@ class TransferChargeFee(TimeStampedModel):
 
 class Customer(StripeObject):
 
-    related_model = models.OneToOneField(getattr(settings, 'CUSTOMER_RELATED_MODEL', 'auth.User'), null=True)
+    related_model = models.OneToOneField(getattr(settings, 'DJSTRIPE_CUSTOMER_RELATED_MODEL', 'auth.User'), null=True)
     card_fingerprint = models.CharField(max_length=200, blank=True)
     card_last_4 = models.CharField(max_length=4, blank=True)
     card_kind = models.CharField(max_length=50, blank=True)
