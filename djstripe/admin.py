@@ -187,8 +187,7 @@ admin.site.register(
     ],
     search_fields=[
         "stripe_id"
-    ] + related_model_search_fields_for_customer
-    + related_model_search_fields,
+    ] + related_model_search_fields_for_customer,
     inlines=[CurrentSubscriptionInline]
 )
 
