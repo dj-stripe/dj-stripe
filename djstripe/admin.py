@@ -114,9 +114,9 @@ admin.site.register(
     search_fields=[
         "stripe_id",
         "customer__stripe_id",
-        "customer__user__email",
+        "customer__related_model__email",
         "card_last_4",
-        "customer__user__username",
+        "customer__related_model__username",
         "invoice__stripe_id"
     ] + user_search_fields,
     list_filter=[
@@ -187,11 +187,11 @@ subscription_status.short_description = "Subscription Status"
 
 admin.site.register(
     Customer,
-    raw_id_fields=["user"],
+    raw_id_fields=["related_model"],
     readonly_fields=('created',),
     list_display=[
         "stripe_id",
-        "user",
+        "related_model",
         "card_kind",
         "card_last_4",
         subscription_status,
