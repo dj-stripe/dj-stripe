@@ -81,10 +81,11 @@ Example:
         "home",  # Site homepage
     )
 
-DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK (=None)
+TRIAL_PERIOD_FOR_RELATED_MODEL_CALLBACK (=None)
 --------------------------------------------------
 
 TODO: Document!
+
 
 
 DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")
@@ -93,6 +94,20 @@ DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")
 This is where you can set *Stripe.com* to send webhook response. You can set this to what you want to prevent unnecessary hijinks from unfriendly people.
 
 As this is embedded in the URLConf, this must be a resolvable regular expression.
+
+
+CUSTOMER_RELATED_MODEL (=User)
+------------------------------
+
+Model that is related to the customer.
+
+
+DJSTRIPE_BACKEND (="djstripe.backends.default.DefaultBackend")
+--------------------------------------------------------------
+
+You can set a different backend to customize some behavior.
+
+
 
 Safe Settings
 -------------------

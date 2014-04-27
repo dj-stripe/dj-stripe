@@ -4,10 +4,10 @@ from functools import wraps
 from django.utils.decorators import available_attrs
 from django.shortcuts import redirect
 
-from .utils import user_has_active_subscription
+from .utils import related_model_has_active_subscription
 
 
-def user_passes_pay_test(test_func, pay_page="djstripe:subscribe"):
+def related_model_passes_pay_test(test_func, pay_page="djstripe:subscribe"):
     """
     Decorator for views that checks that the user passes the given test for a "Paid Feature",
     redirecting to the pay form if necessary. The test should be a callable
@@ -31,8 +31,8 @@ def subscription_payment_required(function=None, pay_page="djstripe:subscribe"):
     subscribe page if necessary.
     """
 
-    actual_decorator = user_passes_pay_test(
-        user_has_active_subscription,
+    actual_decorator = related_model_passes_pay_test(
+        related_model_has_active_subscription,
         pay_page=pay_page
     )
     if function:

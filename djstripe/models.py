@@ -26,9 +26,10 @@ from .settings import plan_from_stripe_id
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
-from .settings import TRIAL_PERIOD_FOR_USER_CALLBACK
+from .settings import TRIAL_PERIOD_FOR_RELATED_MODEL_CALLBACK
 from .settings import DEFAULT_PLAN
-
+from .settings import CUSTOMER_RELATED_MODEL
+from .backends import get_backend
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
@@ -311,7 +312,7 @@ class TransferChargeFee(TimeStampedModel):
 
 class Customer(StripeObject):
 
-    user = models.OneToOneField(getattr(settings, 'AUTH_USER_MODEL', 'auth.User'), null=True)
+    related_model = models.OneToOneField(getattr(settings, 'CUSTOMER_RELATED_MODEL', 'auth.User'), null=True)
     card_fingerprint = models.CharField(max_length=200, blank=True)
     card_last_4 = models.CharField(max_length=4, blank=True)
     card_kind = models.CharField(max_length=50, blank=True)
@@ -320,7 +321,7 @@ class Customer(StripeObject):
     objects = CustomerManager()
 
     def __unicode__(self):
-        return unicode(self.user)
+        return unicode(self.related_model)
 
     @property
     def stripe_customer(self):
@@ -337,7 +338,7 @@ class Customer(StripeObject):
             else:
                 # The exception was raised for another reason, re-raise it
                 raise
-        self.user = None
+        self.related_model = None
         self.card_fingerprint = ""
         self.card_last_4 = ""
         self.card_kind = ""
@@ -394,24 +395,24 @@ class Customer(StripeObject):
         return self.cancel_subscription(at_period_end=at_period_end)
 
     @classmethod
-    def get_or_create(cls, user):
+    def get_or_create(cls, related_model):
         try:
-            return Customer.objects.get(user=user), False
+            return Customer.objects.get(related_model=related_model), False
         except Customer.DoesNotExist:
-            return cls.create(user), True
+            return cls.create(related_model), True
 
     @classmethod
-    def create(cls, user):
+    def create(cls, related_model):
 
         trial_days = None
-        if TRIAL_PERIOD_FOR_USER_CALLBACK:
-            trial_days = TRIAL_PERIOD_FOR_USER_CALLBACK(user)
-
+        if TRIAL_PERIOD_FOR_RELATED_MODEL_CALLBACK:
+            trial_days = TRIAL_PERIOD_FOR_RELATED_MODEL_CALLBACK(related_model)
+        backend = get_backend()
         stripe_customer = stripe.Customer.create(
-            email=user.email
+            email=backend.get_email_from_related_model(related_model)
         )
         cus = Customer.objects.create(
-            user=user,
+            related_model=related_model,
             stripe_id=stripe_customer.id
         )
 
@@ -866,13 +867,15 @@ class Charge(StripeObject):
                 "site": site,
                 "protocol": protocol,
             }
+            backend = get_backend()
             subject = render_to_string("djstripe/email/subject.txt", ctx)
             subject = subject.strip()
             message = render_to_string("djstripe/email/body.txt", ctx)
             num_sent = EmailMessage(
                 subject,
                 message,
-                to=[self.customer.user.email],
+                
+                to=[backend.get_email_from_customer(self.customer)],
                 from_email=INVOICE_FROM_EMAIL
             ).send()
             self.receipt_sent = num_sent > 0

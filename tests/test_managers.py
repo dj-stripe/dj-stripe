@@ -18,7 +18,7 @@ class CustomerManagerTest(TestCase):
         start = datetime.datetime(2013, 1, 1, 0, 0, 1)  # more realistic start
         for i in range(10):
             customer = Customer.objects.create(
-                user=User.objects.create_user(username="patrick{0}".format(i)),
+                related_model=User.objects.create_user(username="patrick{0}".format(i)),
                 stripe_id="cus_xxxxxxxxxxxxxx{0}".format(i),
                 card_fingerprint="YYYYYYYY",
                 card_last_4="2342",
@@ -35,7 +35,7 @@ class CustomerManagerTest(TestCase):
                 quantity=1
             )
         customer = Customer.objects.create(
-            user=User.objects.create_user(username="patrick{0}".format(11)),
+            related_model=User.objects.create_user(username="patrick{0}".format(11)),
             stripe_id="cus_xxxxxxxxxxxxxx{0}".format(11),
             card_fingerprint="YYYYYYYY",
             card_last_4="2342",
@@ -53,7 +53,7 @@ class CustomerManagerTest(TestCase):
             quantity=1
         )
         customer = Customer.objects.create(
-            user=User.objects.create_user(username="patrick{0}".format(12)),
+            related_model=User.objects.create_user(username="patrick{0}".format(12)),
             stripe_id="cus_xxxxxxxxxxxxxx{0}".format(12),
             card_fingerprint="YYYYYYYY",
             card_last_4="2342",
