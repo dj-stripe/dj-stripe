@@ -9,12 +9,12 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         # Rename field 'Customer.user'
-        db.rename_column('djstripe_customer', 'user_id', 'related_model')
+        db.rename_column('djstripe_customer', 'user_id', 'related_model_id')
 
 
     def backwards(self, orm):
         # Rename field 'Customer.user'
-        db.rename_column('djstripe_customer', 'related_model', 'user_id')
+        db.rename_column('djstripe_customer', 'related_model_id', 'user_id')
 
 
 
