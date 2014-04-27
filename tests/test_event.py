@@ -13,7 +13,7 @@ class TestEventMethods(TestCase):
         self.user.save()
         self.customer = Customer.objects.create(
             stripe_id="cus_xxxxxxxxxxxxxxx",
-            user=self.user
+            related_model=self.user
         )
 
     def test_link_customer_customer_created(self):
@@ -174,4 +174,4 @@ class TestEventMethods(TestCase):
         )
         event.process()
         self.assertEquals(event.customer, self.customer)
-        self.assertEquals(event.customer.user, None)
+        self.assertEquals(event.customer.related_model, None)

@@ -1,23 +1,12 @@
-from django.core.exceptions import ImproperlyConfigured
-from .models import Customer
-
-ERROR_MSG = (
-                "The subscription_payment_required decorator requires the user"
-                "be authenticated before use. Please use django.contrib.auth's"
-                "login_required decorator."
-                "Please read the warning at"
-                "http://dj-stripe.readthedocs.org/en/latest/usage.html#ongoing-subscriptions"
-            )
+from .plugins import get_plugin
 
 
-def user_has_active_subscription(user):
+
+def related_model_has_active_subscription(related_model):
     """
-    Helper function to check if a user has an active subscription.
-    Throws improperlyConfigured if user.is_anonymous == True.
+    Helper function to check if a related model has an active subscription.
     """
-    if user.is_anonymous():
-        raise ImproperlyConfigured(ERROR_MSG)
-    customer, created = Customer.get_or_create(user)
-    if created or not customer.has_active_subscription():
-        return False
-    return True
+    
+    plugin = get_plugin()
+    return plugin.related_model_has_active_subscription(related_model)
+

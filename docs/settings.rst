@@ -81,10 +81,11 @@ Example:
         "home",  # Site homepage
     )
 
-DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK (=None)
+TRIAL_PERIOD_FOR_RELATED_MODEL_CALLBACK (=None)
 --------------------------------------------------
 
 TODO: Document!
+
 
 
 DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")
@@ -93,6 +94,32 @@ DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")
 This is where you can set *Stripe.com* to send webhook response. You can set this to what you want to prevent unnecessary hijinks from unfriendly people.
 
 As this is embedded in the URLConf, this must be a resolvable regular expression.
+
+
+
+DJSTRIPE_CUSTOMER_RELATED_MODEL (=User)
+------------------------------
+
+Model for ``Customer.related_model``.
+
+
+DJSTRIPE_CUSTOMER_RELATED_MODEL_PLUGIN (="djstripe.plugins.default.DefaultPlugin")
+--------------------------------------------------------------
+
+Backend to customize related_model and admin.py behavior. See ``djstripe.plugins.default.DefaultPlugin``. You'll need to write one if you decide to change ``DJSTRIPE_CUSTOMER_RELATED_MODEL``.
+
+
+DJSTRIPE_RELATED_MODEL_NAME_FIELD (="username")
+-----------------------------------------------
+
+``DJSTRIPE_CUSTOMER_RELATED_MODEL`` field for name used in Management and ``admin.py``
+
+
+DJSTRIPE_RELATED_MODEL_BILLING_EMAIL_FIELD (="email")
+-----------------------------------------------------
+
+``DJSTRIPE_CUSTOMER_RELATED_MODEL`` field for billing email used in Stripe, receipt emails and ``admin.py``
+
 
 Safe Settings
 -------------------

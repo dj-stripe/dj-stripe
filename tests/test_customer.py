@@ -13,7 +13,7 @@ class TestCustomer(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="patrick")
         self.customer = Customer.objects.create(
-            user=self.user,
+            related_model=self.user,
             stripe_id="cus_xxxxxxxxxxxxxxx",
             card_fingerprint="YYYYYYYY",
             card_last_4="2342",
@@ -24,7 +24,7 @@ class TestCustomer(TestCase):
     def test_customer_purge_leaves_customer_record(self, CustomerRetrieveMock):
         self.customer.purge()
         customer = Customer.objects.get(stripe_id=self.customer.stripe_id)
-        self.assertTrue(customer.user is None)
+        self.assertTrue(customer.related_model is None)
         self.assertTrue(customer.card_fingerprint == "")
         self.assertTrue(customer.card_last_4 == "")
         self.assertTrue(customer.card_kind == "")
@@ -34,7 +34,7 @@ class TestCustomer(TestCase):
     def test_customer_delete_same_as_purge(self, CustomerRetrieveMock):
         self.customer.delete()
         customer = Customer.objects.get(stripe_id=self.customer.stripe_id)
-        self.assertTrue(customer.user is None)
+        self.assertTrue(customer.related_model is None)
         self.assertTrue(customer.card_fingerprint == "")
         self.assertTrue(customer.card_last_4 == "")
         self.assertTrue(customer.card_kind == "")

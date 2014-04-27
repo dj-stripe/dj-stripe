@@ -56,7 +56,7 @@ class MiddlewareLogicTest(TestCase):
         start = datetime.datetime(2013, 1, 1, tzinfo=timezone.utc)
         self.user = User.objects.create_user(username="pydanny")
         self.customer = Customer.objects.create(
-            user=self.user,
+            related_model=self.user,
             stripe_id="cus_xxxxxxxxxxxxxxx",
             card_fingerprint="YYYYYYYY",
             card_last_4="2342",

@@ -4,7 +4,8 @@ from django.shortcuts import redirect
 
 from .models import Customer, CurrentSubscription
 from . import settings as app_settings
-from .utils import user_has_active_subscription
+from .utils import related_model_has_active_subscription
+from .plugins import get_plugin
 
 ERROR_MSG = (
                 "SubscriptionPaymentRequiredMixin requires the user be"
@@ -17,7 +18,7 @@ class SubscriptionPaymentRequiredMixin(object):
     """ Used to check to see if someone paid """
     # TODO - needs tests
     def dispatch(self, request, *args, **kwargs):
-        if not user_has_active_subscription(request.user):
+        if not related_model_has_active_subscription(plugin.get_related_model(request)):
             msg = "Your account is inactive. Please renew your subscription"
             messages.info(request, msg, fail_silently=True)
             return redirect("djstripe:subscribe")
@@ -42,6 +43,7 @@ class SubscriptionMixin(PaymentsContextMixin):
     def get_context_data(self, *args, **kwargs):
         context = super(SubscriptionMixin, self).get_context_data(**kwargs)
         context['is_plans_plural'] = bool(len(app_settings.PLAN_CHOICES) > 1)
-        context['customer'], created = Customer.get_or_create(self.request.user)
+        plugin = get_plugin()      
+        context['customer'], created = plugin.create_customer(self.request)        
         context['CurrentSubscription'] = CurrentSubscription
         return context
