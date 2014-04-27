@@ -41,7 +41,7 @@ class TestSubscriptionPaymentRequired(TestCase):
 
         user = User.objects.create_user(username="pydanny")
         Customer.objects.create(
-            user=user,
+            related_model=user,
             stripe_id="cus_xxxxxxxxxxxxxxx",
             card_fingerprint="YYYYYYYY",
             card_last_4="2342",
@@ -64,7 +64,7 @@ class TestSubscriptionPaymentRequired(TestCase):
         start = datetime.datetime(2013, 1, 1, tzinfo=timezone.utc)
         user = User.objects.create_user(username="pydanny")
         customer = Customer.objects.create(
-            user=user,
+            related_model=user,
             stripe_id="cus_xxxxxxxxxxxxxxx",
             card_fingerprint="YYYYYYYY",
             card_last_4="2342",
