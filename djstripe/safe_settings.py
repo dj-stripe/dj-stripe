@@ -20,8 +20,6 @@ PLAN_CHOICES = [
     (plan, PAYMENTS_PLANS[plan].get("name", plan))
     for plan in PAYMENTS_PLANS
 ]
-#raise Exception(PLAN_CHOICES)
-#PLAN_CHOICES = sorted(PLAN_CHOICES, key=lambda x: x['price'])
 
 PASSWORD_INPUT_RENDER_VALUE = getattr(
     settings, 'DJSTRIPE_PASSWORD_INPUT_RENDER_VALUE', False)
