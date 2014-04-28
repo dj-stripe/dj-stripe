@@ -1,5 +1,11 @@
 from __future__ import unicode_literals
-from collections import OrderedDict
+
+try:
+    # For Python 2.7 and Python 3.x users
+    from collections import OrderedDict
+except ImportError:
+    # For Python 2.6 users
+    from ordereddict import OrderedDict
 
 from django.conf import settings
 
