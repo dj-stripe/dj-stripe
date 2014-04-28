@@ -5,7 +5,6 @@ from django.shortcuts import redirect
 from .models import Customer, CurrentSubscription
 from . import settings as app_settings
 from .utils import user_has_active_subscription
-from .plugins import get_plugin
 
 ERROR_MSG = (
                 "SubscriptionPaymentRequiredMixin requires the user be"
@@ -43,7 +42,6 @@ class SubscriptionMixin(PaymentsContextMixin):
     def get_context_data(self, *args, **kwargs):
         context = super(SubscriptionMixin, self).get_context_data(**kwargs)
         context['is_plans_plural'] = bool(len(app_settings.PLAN_CHOICES) > 1)
-        plugin = get_plugin()      
-        context['customer'], created = Customer.get_or_create(plugin.get_related_model(request.user))      
+        context['customer'], created = Customer.get_or_create(request.user)
         context['CurrentSubscription'] = CurrentSubscription
         return context

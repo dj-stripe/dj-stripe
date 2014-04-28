@@ -10,7 +10,6 @@ DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = getattr(
 )
 
 from .models import Customer
-from .plugins import get_plugin
 
 # So we don't have crazy long lines of code
 EXEMPT = list(DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS)
@@ -57,8 +56,7 @@ class SubscriptionPaymentMiddleware(object):
 
             # TODO: Consider converting to use
             #       djstripe.utils.user_has_active_subscription function
-            plugin = get_plugin()        
-            customer, created = Customer.get_or_create(plugin.get_related_model(request.user))
+            customer, created = Customer.get_or_create(request.user)
             if created:
                 return redirect("djstripe:subscribe")
 

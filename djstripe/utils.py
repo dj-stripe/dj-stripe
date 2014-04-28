@@ -1,6 +1,5 @@
 from django.core.exceptions import ImproperlyConfigured
 from .models import Customer
-from .plugins import get_plugin
 
 ERROR_MSG = (
                 "The subscription_payment_required decorator requires the user"
@@ -19,8 +18,7 @@ def user_has_active_subscription(user):
     if user.is_anonymous():
         raise ImproperlyConfigured(ERROR_MSG)
 
-    plugin = get_plugin()
-    customer, created = Customer.get_or_create(plugin.get_related_model(user)) 
+    customer, created = Customer.get_or_create(user) 
     if created or not customer.has_active_subscription():
         return False
     return True

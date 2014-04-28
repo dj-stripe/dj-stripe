@@ -21,5 +21,5 @@ class Command(BaseCommand):
         for related_model in RELATED_MODEL.objects.filter(customer__isnull=True):
             # use get_or_create in case of race conditions on large
             #      user bases
-            Customer.get_or_create(related_model)
+            Customer.objects.get_or_create(related_model=related_model)
             print("Created customer for {0}".format(getattr(related_model, DJSTRIPE_RELATED_MODEL_BILLING_EMAIL_FIELD, '')))

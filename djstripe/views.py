@@ -25,7 +25,6 @@ from .models import EventProcessingException
 from .settings import PLAN_LIST
 from .settings import PY3
 from .settings import User
-from .plugins import get_plugin
 
 from .sync import sync_customer
 
@@ -39,8 +38,7 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
     def get_object(self):
         if hasattr(self, "customer"):
             return self.customer
-        plugin = get_plugin()    
-        self.customer, created = Customer.get_or_create(plugin.get_related_model(request.user)) 
+        self.customer, created = Customer.get_or_create(request.user) 
         return self.customer
 
     def post(self, request, *args, **kwargs):
@@ -78,8 +76,7 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
     success_url = reverse_lazy("djstripe:account")
 
     def form_valid(self, form):
-        plugin = get_plugin()    
-        customer, created = Customer.get_or_create(plugin.get_related_model(request.user)) 
+        customer, created = Customer.get_or_create(request.user) 
         # TODO - pass in setting to control at_period_end boolean
         current_subscription = customer.cancel_subscription(at_period_end=True)
         if current_subscription.status == current_subscription.STATUS_CANCELLED:
@@ -127,8 +124,7 @@ class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
     select_related = ["invoice"]
 
     def get_object(self):
-        plugin = get_plugin()   
-        customer, created = Customer.get_or_create(plugin.get_related_model(request.user))
+        customer, created = Customer.get_or_create(request.user)
         return customer
 
 
@@ -138,8 +134,7 @@ class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
 
     # TODO - needs tests
     def post(self, request, *args, **kwargs):
-        plugin = get_plugin()     
-        customer = plugin.get_related_model(request.user).customer
+        customer, created = Customer.get_or_create(request.user)
         
         return render(
             request,
@@ -154,8 +149,7 @@ class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super(AccountView, self).get_context_data(**kwargs)
-        plugin = get_plugin()
-        customer, created = Customer.get_or_create(plugin.get_related_model(request.user))        
+        customer, created = Customer.get_or_create(request.user)        
         context['customer'] = customer
         try:
             context['subscription'] = customer.current_subscription
@@ -189,8 +183,7 @@ class SubscribeFormView(
         form = self.get_form(form_class)
         if form.is_valid():
             try:
-                plugin = get_plugin()     
-                customer, created = Customer.get_or_create(plugin.get_related_model(request.user))                  
+                customer, created = Customer.get_or_create(request.user)                  
                 customer.update_card(self.request.POST.get("stripe_token"))
                 customer.subscribe(form.cleaned_data["plan"])
             except stripe.StripeError as e:
@@ -215,8 +208,7 @@ class ChangePlanView(LoginRequiredMixin,
 
     def post(self, request, *args, **kwargs):
         form = PlanForm(request.POST)
-        plugin = get_plugin()
-        customer = plugin.get_related_model(request.user).customer     
+        customer, created = Customer.get_or_create(request.user)        
         if form.is_valid():
             try:
                 customer.subscribe(form.cleaned_data["plan"])
