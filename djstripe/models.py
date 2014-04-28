@@ -28,9 +28,9 @@ from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
 from .settings import TRIAL_PERIOD_FOR_RELATED_MODEL_CALLBACK
 from .settings import DEFAULT_PLAN
-from .settings import DJSTRIPE_CUSTOMER_RELATED_MODEL
 from .settings import DJSTRIPE_RELATED_MODEL_BILLING_EMAIL_FIELD
 
+from .plugins import get_plugin
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
 
@@ -395,7 +395,9 @@ class Customer(StripeObject):
         return self.cancel_subscription(at_period_end=at_period_end)
 
     @classmethod
-    def get_or_create(cls, related_model):
+    def get_or_create(cls, user):
+        plugin = get_plugin()
+        related_model = plugin.get_related_model(user)
         try:
             return Customer.objects.get(related_model=related_model), False
         except Customer.DoesNotExist:

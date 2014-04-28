@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from djstripe.settings import User
 from djstripe.models import convert_tstamp, Customer, CurrentSubscription
-from djstripe.utils import related_model_has_active_subscription
+from djstripe.utils import user_has_active_subscription
 
 
 class TestTimestampConversion(TestCase):
@@ -47,10 +47,10 @@ class TestUserHasActiveSubscription(TestCase):
             card_kind="Visa"
         )
 
-    def test_related_model_has_inactive_subscription(self):
-        self.assertFalse(related_model_has_active_subscription(self.user))
+    def test_user_has_inactive_subscription(self):
+        self.assertFalse(user_has_active_subscription(self.user))
 
-    def test_related_model_has_active_subscription(self):
+    def test_user_has_active_subscription(self):
         # Make the user have an active subscription
         period_start = datetime.datetime(2013, 4, 1, tzinfo=timezone.utc)
         period_end = datetime.datetime(2013, 4, 30, tzinfo=timezone.utc)
@@ -69,7 +69,7 @@ class TestUserHasActiveSubscription(TestCase):
         )
 
         # Assert that the user's subscription is action
-        self.assertTrue(related_model_has_active_subscription(self.user))
+        self.assertTrue(user_has_active_subscription(self.user))
 
     def test_anonymous_user(self):
         """ This needs to throw an ImproperlyConfigured error so the developer
@@ -77,4 +77,4 @@ class TestUserHasActiveSubscription(TestCase):
         """
         anon_user = AnonymousUser()
         with self.assertRaises(ImproperlyConfigured):
-            related_model_has_active_subscription(anon_user)
+            user_has_active_subscription(anon_user)

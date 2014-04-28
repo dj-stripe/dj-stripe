@@ -11,12 +11,41 @@ from .models import Invoice, InvoiceItem, CurrentSubscription, Customer
 
 from .settings import DJSTRIPE_RELATED_MODEL_BILLING_EMAIL_FIELD
 from .settings import DJSTRIPE_RELATED_MODEL_NAME_FIELD
-from .plugins import get_plugin
+from .settings import User
 
-plugin = get_plugin()
-related_model_search_fields = plugin.get_related_model_search_fields()
-related_model_search_fields_for_customer = ["related_model__{0}".format(DJSTRIPE_RELATED_MODEL_BILLING_EMAIL_FIELD), "related_model__{0}".format(DJSTRIPE_RELATED_MODEL_NAME_FIELD)]
 
+if hasattr(User, 'USERNAME_FIELD'):
+    # Using a Django 1.5 User model
+    related_model_search_fields = [
+        "customer__related_model__{0}".format(User.USERNAME_FIELD)
+    ]
+
+    related_model_search_fields_for_customer = [
+        "related_model__{0}".format(User.USERNAME_FIELD)
+    ]
+
+
+    try:
+        # get_field_by_name throws FieldDoesNotExist if the field is not present on the model
+        User._meta.get_field_by_name('email')
+        related_model_search_fields + ["customer__related_model__email"]
+        related_model_search_fields_for_customer + ["related_model__email"]        
+    except FieldDoesNotExist:
+        pass
+else:
+    # Using a pre-Django 1.5 User model or a custom related model
+    related_model_search_fields = [
+        "customer__related_model__{0}".format(DJSTRIPE_RELATED_MODEL_BILLING_EMAIL_FIELD),
+        "customer__related_model__{0}".format(DJSTRIPE_RELATED_MODEL_NAME_FIELD)
+    ]
+    related_model_search_fields_for_customer = [
+        "related_model__{0}".format(DJSTRIPE_RELATED_MODEL_BILLING_EMAIL_FIELD),
+        "related_model__{0}".format(DJSTRIPE_RELATED_MODEL_NAME_FIELD)
+    ]
+
+
+
+    
 
 
 class CustomerHasCardListFilter(admin.SimpleListFilter):
@@ -202,9 +231,24 @@ def customer_has_card(obj):
 customer_has_card.short_description = "Customer Has Card"
 
 
-
 customer_has_card.short_description = "Customer"
 
+
+
+
+def customer_related_model_list_display(self, obj):
+    if hasattr(obj, 'USERNAME_FIELD'):
+        # Using a Django 1.5 User model
+        username = getattr(obj.customer.related_model, User.USERNAME_FIELD)
+    else:
+        # Using a pre-Django 1.5 User model
+        username = getattr(obj.customer.related_model, DJSTRIPE_RELATED_MODEL_NAME_FIELD)
+    # In Django 1.5+ a User is not guaranteed to have an email field
+    email = getattr(obj.customer.related_model, DJSTRIPE_RELATED_MODEL_BILLING_EMAIL_FIELD, '')
+    return "{0} <{1}>".format(
+        username,
+        email
+    )
 
 admin.site.register(
     Invoice,
@@ -214,7 +258,7 @@ admin.site.register(
         "stripe_id",
         "paid",
         "closed",
-        plugin.customer_related_model_list_display,
+        customer_related_model_list_display,
         customer_has_card,
         "period_start",
         "period_end",
