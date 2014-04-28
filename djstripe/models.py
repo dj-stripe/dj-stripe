@@ -10,8 +10,9 @@ import traceback
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.db import models
-from django.utils import timezone
 from django.template.loader import render_to_string
+from django.utils import timezone
+from django.utils.encoding import python_2_unicode_compatible
 
 from django.contrib.sites.models import Site
 
@@ -23,6 +24,7 @@ from . import exceptions
 from .managers import CustomerManager, ChargeManager, TransferManager
 from .settings import PAYMENTS_PLANS, INVOICE_FROM_EMAIL
 from .settings import plan_from_stripe_id
+from .settings import PY3
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
@@ -33,6 +35,9 @@ from .settings import DEFAULT_PLAN
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
 
+
+if PY3:
+    unicode = str
 
 def convert_tstamp(response, field_name=None):
     try:
@@ -65,6 +70,7 @@ class StripeObject(TimeStampedModel):
         abstract = True
 
 
+@python_2_unicode_compatible
 class EventProcessingException(TimeStampedModel):
 
     event = models.ForeignKey("Event", null=True)
@@ -81,10 +87,11 @@ class EventProcessingException(TimeStampedModel):
             traceback=traceback.format_exc()
         )
 
-    def __unicode__(self):
+    def __str__(self):
         return u"<%s, pk=%s, Event=%s>" % (self.message, self.pk, self.event)
 
 
+@python_2_unicode_compatible
 class Event(StripeObject):
 
     kind = models.CharField(max_length=250)
@@ -99,7 +106,7 @@ class Event(StripeObject):
     def message(self):
         return self.validated_message
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s - %s" % (self.kind, self.stripe_id)
 
     def link_customer(self):
@@ -309,6 +316,7 @@ class TransferChargeFee(TimeStampedModel):
     kind = models.CharField(max_length=150)
 
 
+@python_2_unicode_compatible
 class Customer(StripeObject):
 
     user = models.OneToOneField(getattr(settings, 'AUTH_USER_MODEL', 'auth.User'), null=True)
@@ -319,7 +327,7 @@ class Customer(StripeObject):
 
     objects = CustomerManager()
 
-    def __unicode__(self):
+    def __str__(self):
         return unicode(self.user)
 
     @property
@@ -890,6 +898,7 @@ INTERVALS = (
     ('year', 'Year',))
 
 
+@python_2_unicode_compatible
 class Plan(StripeObject):
     """A Stripe Plan."""
 
@@ -912,7 +921,7 @@ class Plan(StripeObject):
                                  null=False)
     trial_period_days = models.IntegerField(null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     @classmethod

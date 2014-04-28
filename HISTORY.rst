@@ -3,8 +3,15 @@
 History
 -------
 
+0.3.4 (2014-04-??)
+++++++++++++++++++++++
+
+* Switch from ``__unicode__`` to ``__str__`` methods on models to better support Python 3.
+* Add ``python_2_unicode_compatible`` decorator to Models.
+* Check for PY3 so the ``unicode(self.user)`` in models.Customer doesn't blow up in Python 3.
+
 0.3.3 (2014-04-24)
-+++++++++++++++++++
+++++++++++++++++++++++
 
 * Increased the extendability of the views by removing as many hard-coded URLs as possible and replacing them with ``success_url`` and other attributes/methods.
 * Added single unit purchasing to the cookbook
