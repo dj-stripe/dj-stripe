@@ -4,3 +4,4 @@ django-model-utils>=1.4.0
 django-braces>=1.2.1
 django-jsonfield>=0.9.10
 pytz>=2013.9
+ordereddict>=1.1
