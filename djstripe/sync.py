@@ -10,7 +10,7 @@ from .plugins import get_plugin
 def sync_customer(user):
     # TODO - needs tests
     plugin = get_plugin()
-    customer, created = plugin.create_customer_from_user(user)
+    customer, created = Customer.get_or_create(plugin.get_related_model(user)) 
     cu = customer.stripe_customer
     customer.sync(cu=cu)
     customer.sync_current_subscription(cu=cu)

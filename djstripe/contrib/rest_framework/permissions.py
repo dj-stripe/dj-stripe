@@ -13,7 +13,7 @@ class DJStripeSubscriptionPermission(BasePermission):
 
         # get the user's customer object
         plugin = get_plugin()  
-        customer, created = plugin.create_customer(request)
+        customer, created = Customer.get_or_create(plugin.get_related_model(request.user))
 
         if created:
             # If just created, then they can't possibly have a subscription.

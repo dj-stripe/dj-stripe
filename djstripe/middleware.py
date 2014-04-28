@@ -58,7 +58,7 @@ class SubscriptionPaymentMiddleware(object):
             # TODO: Consider converting to use
             #       djstripe.utils.user_has_active_subscription function
             plugin = get_plugin()        
-            customer, created = plugin.create_customer(request)
+            customer, created = Customer.get_or_create(plugin.get_related_model(request.user))
             if created:
                 return redirect("djstripe:subscribe")
 
