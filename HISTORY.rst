@@ -6,7 +6,7 @@ History
 0.3.4 (2014-04-??)
 ++++++++++++++++++++++
 
-* Use SortedDict to ensure that plans are listed in order of price.
+* Use collections.OrderedDict to ensure that plans are listed in order of price.
 * Switch from ``__unicode__`` to ``__str__`` methods on models to better support Python 3.
 * Add ``python_2_unicode_compatible`` decorator to Models.
 * Check for PY3 so the ``unicode(self.user)`` in models.Customer doesn't blow up in Python 3.
