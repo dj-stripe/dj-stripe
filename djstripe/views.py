@@ -38,7 +38,7 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
     def get_object(self):
         if hasattr(self, "customer"):
             return self.customer
-        self.customer, created = Customer.get_or_create(request.user) 
+        self.customer, created = Customer.get_or_create(self.request.user) 
         return self.customer
 
     def post(self, request, *args, **kwargs):
@@ -76,7 +76,7 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
     success_url = reverse_lazy("djstripe:account")
 
     def form_valid(self, form):
-        customer, created = Customer.get_or_create(request.user) 
+        customer, created = Customer.get_or_create(self.request.user) 
         # TODO - pass in setting to control at_period_end boolean
         current_subscription = customer.cancel_subscription(at_period_end=True)
         if current_subscription.status == current_subscription.STATUS_CANCELLED:
@@ -124,7 +124,7 @@ class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
     select_related = ["invoice"]
 
     def get_object(self):
-        customer, created = Customer.get_or_create(request.user)
+        customer, created = Customer.get_or_create(self.request.user)
         return customer
 
 
@@ -149,7 +149,7 @@ class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super(AccountView, self).get_context_data(**kwargs)
-        customer, created = Customer.get_or_create(request.user)        
+        customer, created = Customer.get_or_create(self.request.user)        
         context['customer'] = customer
         try:
             context['subscription'] = customer.current_subscription
