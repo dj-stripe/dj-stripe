@@ -139,7 +139,7 @@ class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
         return render(
             request,
             self.template_name,
-            {"customer": sync_customer(customer)}
+            {"customer": sync_customer(customer.related_model)}
         )
 
 
