@@ -6,9 +6,9 @@ import stripe
 
 from .models import Customer
 
-def sync_customer(user):
+def sync_customer(related_model):
     # TODO - needs tests
-    customer, created = Customer.get_or_create(user) 
+    customer, created = Customer.objects.get_or_create(related_model=related_model) 
     cu = customer.stripe_customer
     customer.sync(cu=cu)
     customer.sync_current_subscription(cu=cu)
