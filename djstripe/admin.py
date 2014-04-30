@@ -236,7 +236,7 @@ customer_has_card.short_description = "Customer"
 
 
 
-def customer_related_model_list_display(self, obj):
+def customer_related_model_list_display(obj):
     if hasattr(obj, 'USERNAME_FIELD'):
         # Using a Django 1.5 User model
         username = getattr(obj.customer.related_model, User.USERNAME_FIELD)
