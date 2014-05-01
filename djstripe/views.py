@@ -23,6 +23,7 @@ from .models import Customer
 from .models import Event
 from .models import EventProcessingException
 from .settings import PLAN_LIST
+from .settings import CANCELLATION_AT_PERIOD_END
 from .settings import PY3
 from .settings import User
 from .sync import sync_customer
@@ -76,8 +77,7 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
 
     def form_valid(self, form):
         customer, created = Customer.get_or_create(self.request.user)
-        # TODO - pass in setting to control at_period_end boolean
-        current_subscription = customer.cancel_subscription(at_period_end=True)
+        current_subscription = customer.cancel_subscription(at_period_end=CANCELLATION_AT_PERIOD_END)
         if current_subscription.status == current_subscription.STATUS_CANCELLED:
             messages.info(self.request, "Your account is now cancelled.")
         else:
