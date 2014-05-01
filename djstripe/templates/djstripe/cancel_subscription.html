@@ -20,10 +20,15 @@
 			<p>You have no subscription on file.</p>
 			<p>See your <a href="{% url 'djstripe:account' %}">account status</a> or better yet, <a href="{% url 'djstripe:subscribe' %}">subscribe</a>.</p>
 
-		{% elif customer.current_subscription.canceled_at and customer.current_subscription.start < customer.current_subscription.canceled_at %}
-    		<p>Your subscription was already cancelled.</p>
+		{% elif customer.current_subscription.status == customer.current_subscription.STATUS_CANCELLED %}
+			<p>Your subscription has already been canceled.</p>
 			<p>See your <a href="{% url 'djstripe:account' %}">account status</a> or better yet, get a <a href="{% url 'djstripe:subscribe' %}">fresh subscription</a>.</p>
-
+			
+    	{% elif customer.current_subscription.is_status_temporarily_current %}
+ 
+			<p>Your subscription has already been canceled.</p>		
+			<p>However, you can still use the site for another {{ customer.current_subscription.current_period_end|timeuntil }}.</p>
+			
     	{% else %}        
 
         
