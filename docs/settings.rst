@@ -82,6 +82,13 @@ Example:
         "home",  # Site homepage
     )
 
+.. note:: Adding app_names to applications.
+
+    To make the ``(allauth)`` work, you may need to define an app_name in the ``include()`` function in the URLConf. For example::
+
+        # in urls.py
+        url(r'^accounts/', include('allauth.urls',  app_name="allauth")),
+
 DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK (=None)
 --------------------------------------------------
 
