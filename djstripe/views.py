@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import json
 
 from django.contrib import messages
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.generic import DetailView
@@ -61,13 +61,18 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
                 }
             )
         messages.info(request, "Your card is now updated.")
-        return redirect("djstripe:account")
+        return redirect(self.get_post_success_url())
+
+    def get_post_success_url(self):
+        """ Makes it easier to do custom dj-stripe integrations. """
+        return reverse("djstripe:account")
 
 
-class CancelSubscriptionView(LoginRequiredMixin, PaymentsContextMixin, FormView):
+class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
     # TODO - needs tests
     template_name = "djstripe/cancel_subscription.html"
     form_class = CancelSubscriptionForm
+    success_url = reverse_lazy("djstripe:account")
 
     def form_valid(self, form):
         customer, created = Customer.get_or_create(self.request.user)
@@ -80,7 +85,7 @@ class CancelSubscriptionView(LoginRequiredMixin, PaymentsContextMixin, FormView)
                     a=current_subscription.status, b=current_subscription.current_period_end)
             )
 
-        return redirect("djstripe:account")
+        return super(CancelSubscriptionView, self).form_valid(form)
 
 
 class WebHook(CsrfExemptMixin, View):
@@ -123,11 +128,14 @@ class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
 
 
 class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
+
+    template_name = "djstripe/includes/_history_table.html"
+
     # TODO - needs tests
     def post(self, request, *args, **kwargs):
         return render(
             request,
-            "djstripe/includes/_history_table.html",
+            self.template_name,
             {"customer": sync_customer(request.user)}
         )
 

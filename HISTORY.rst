@@ -3,9 +3,30 @@
 History
 -------
 
-0.3.2 (???)
+0.3.4 (2014-04-??)
+++++++++++++++++++++++
+
+* Use collections.OrderedDict to ensure that plans are listed in order of price.
+* Added ``ordereddict`` library to support Python 2.6 users. 
+* Switch from ``__unicode__`` to ``__str__`` methods on models to better support Python 3.
+* Add ``python_2_unicode_compatible`` decorator to Models.
+* Check for PY3 so the ``unicode(self.user)`` in models.Customer doesn't blow up in Python 3.
+
+0.3.3 (2014-04-24)
+++++++++++++++++++++++
+
+* Increased the extendability of the views by removing as many hard-coded URLs as possible and replacing them with ``success_url`` and other attributes/methods.
+* Added single unit purchasing to the cookbook
+
+0.3.2 (2014-01-16)
 +++++++++++++++++++
 
+* Made Yasmine Charif a core committer
+* Take into account trial days in a subscription plan (Thanks Yasmine Charif)
+* Correct invoice period end value (Thanks Yasmine Charif)
+* Make plan cancellation and plan change consistently not prorating (Thanks Yasmine Charif)
+* Fix circular import when ACCOUNT_SIGNUP_FORM_CLASS is defined (Thanks Dustin Farris)
+* Add send e-mail receipt action in charges admin panel (Thanks Buddy Lindsay)
 * Add `created` field to all ModelAdmins to help with internal auditing (Thanks Kulbir Singh)
 
 0.3.1 (2013-11-14)

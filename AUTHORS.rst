@@ -15,3 +15,6 @@ Contributors
 * Audrey Roy
 * Luis Montiel <luismmontielg@gmail.com>
 * Kulbir Singh (@kulbir)
+* Dustin Farris (@dustinfarris)
+* Liwen S (@sunliwen)
+* centrove
