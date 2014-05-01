@@ -3,9 +3,10 @@
 History
 -------
 
-0.3.4 (2014-04-??)
+0.3.4 (2014-05-??)
 ++++++++++++++++++++++
 
+* If settings.DEBUG is True, then django-debug-toolbar is exempt from redirect to subscription form.
 * Use collections.OrderedDict to ensure that plans are listed in order of price.
 * Added ``ordereddict`` library to support Python 2.6 users. 
 * Switch from ``__unicode__`` to ``__str__`` methods on models to better support Python 3.
