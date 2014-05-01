@@ -9,6 +9,12 @@ DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = getattr(
     ()
 )
 
+DJSTRIPE_SUBSCRIPTION_REDIRECT = getattr(
+    settings,
+    "DJSTRIPE_SUBSCRIPTION_REDIRECT",
+    "djstripe:subscribe"
+)
+
 from .models import Customer
 
 # So we don't have crazy long lines of code
@@ -25,6 +31,7 @@ class SubscriptionPaymentMiddleware(object):
         * "namespace:name" means this namespaced URL is exempt
         * "name" means this URL is exempt
         * The entire djtripe namespace is exempt
+        * If settings.DEBUG is True, then django-debug-toolbar is exempt
 
     Example::
 
@@ -41,6 +48,12 @@ class SubscriptionPaymentMiddleware(object):
     def process_request(self, request):
 
         if request.user.is_authenticated() and not request.user.is_staff:
+            # First, if in DEBUG mode and with django-debug-toolbar, we skip
+            #   this entire process.
+            if settings.DEBUG and request.path.startswith("/__debug__"):
+                return
+
+            # Second we check against matches
             match = resolve(request.path)
             if "({0})".format(match.app_name) in EXEMPT:
                 return
@@ -58,10 +71,10 @@ class SubscriptionPaymentMiddleware(object):
             #       djstripe.utils.user_has_active_subscription function
             customer, created = Customer.get_or_create(request.user)
             if created:
-                return redirect("djstripe:subscribe")
+                return redirect(DJSTRIPE_SUBSCRIPTION_REDIRECT)
 
             if not customer.has_active_subscription():
-                return redirect("djstripe:subscribe")
+                return redirect(DJSTRIPE_SUBSCRIPTION_REDIRECT)
 
         # TODO get this working in tests
         # if request.user.is_anonymous():

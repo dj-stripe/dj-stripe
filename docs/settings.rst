@@ -68,7 +68,8 @@ Rules:
 * "[namespace]" means everything with this name is exempt
 * "namespace:name" means this namespaced URL is exempt
 * "name" means this URL is exempt
-* The entire djtripe namespace is exempt
+* The entire djstripe namespace is exempt
+* If settings.DEBUG is True, then django-debug-toolbar is exempt
 
 Example:
 
