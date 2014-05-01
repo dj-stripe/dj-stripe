@@ -23,6 +23,7 @@ import stripe
 from . import exceptions
 from .managers import CustomerManager, ChargeManager, TransferManager
 from .settings import PAYMENTS_PLANS, INVOICE_FROM_EMAIL
+from .settings import PRORATION_POLICY, CANCELLATION_AT_PERIOD_END
 from .settings import plan_from_stripe_id
 from .settings import PY3
 from .signals import WEBHOOK_SIGNALS
@@ -488,7 +489,7 @@ class Customer(StripeObject):
                 )
                 sub_obj.amount = (sub.plan.amount / decimal.Decimal("100"))
                 sub_obj.status = sub.status
-                sub_obj.cancel_at_period_end = sub.cancel_at_period_end
+                sub_obj.cancel_at_period_end = CANCELLATION_AT_PERIOD_END
                 sub_obj.start = convert_tstamp(sub.start)
                 sub_obj.quantity = sub.quantity
                 sub_obj.save()
@@ -504,7 +505,7 @@ class Customer(StripeObject):
                     ),
                     amount=(sub.plan.amount / decimal.Decimal("100")),
                     status=sub.status,
-                    cancel_at_period_end=sub.cancel_at_period_end,
+                    cancel_at_period_end=CANCELLATION_AT_PERIOD_END,
                     start=convert_tstamp(sub.start),
                     quantity=sub.quantity
                 )
@@ -543,22 +544,18 @@ class Customer(StripeObject):
         """
         if ("trial_period_days" in PAYMENTS_PLANS[plan]):
             trial_days = PAYMENTS_PLANS[plan]["trial_period_days"]
-        """
-        The subscription is defined with prorate=False to make the subscription
-        end behavior of Change plan consistent with the one of Cancel subscription (which is
-        defined with at_period_end=True).
-        """
+        
         if trial_days:
             resp = cu.update_subscription(
                 plan=PAYMENTS_PLANS[plan]["stripe_plan_id"],
                 trial_end=timezone.now() + datetime.timedelta(days=trial_days),
-                prorate=False,
+                prorate=PRORATION_POLICY,
                 quantity=quantity
             )
         else:
             resp = cu.update_subscription(
                 plan=PAYMENTS_PLANS[plan]["stripe_plan_id"],
-                prorate=False,
+                prorate=PRORATION_POLICY,
                 quantity=quantity
             )
         self.sync_current_subscription()

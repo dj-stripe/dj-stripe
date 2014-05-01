@@ -78,7 +78,8 @@
         
         $('body').on("click", '.djstripe-subscribe button[type=submit]', function(e) {
           e.preventDefault();
-          var $form = $(".djstripe-subscribe"),
+          // retrieve current $(".djstripe-subscribe")
+          var $form = $(e.target).parents('form'),
               token = function(res) {
                 $form.find("input[name=stripe_token]").val(res.id);
                 $("button[type=submit]").attr("disabled", "true");

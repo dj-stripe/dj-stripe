@@ -30,3 +30,10 @@ PASSWORD_INPUT_RENDER_VALUE = getattr(
     settings, 'DJSTRIPE_PASSWORD_INPUT_RENDER_VALUE', False)
 PASSWORD_MIN_LENGTH = getattr(
     settings, 'DJSTRIPE_PASSWORD_MIN_LENGTH', 6)
+
+PRORATION_POLICY = getattr(
+    settings, 'DJSTRIPE_PRORATION_POLICY', False)
+
+# TODO - need to find a better way to do this
+CANCELLATION_AT_PERIOD_END = not PRORATION_POLICY
+
