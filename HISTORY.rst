@@ -6,16 +6,17 @@ History
 0.3.6 (2014-05-??)
 ----------------------
 
-* Enable proration when customer upgrades plan, and pass proration policy for upgrades in settings.
+* Enable proration when customer upgrades plan, and pass proration policy for upgrades in settings. (Thanks Yasmine Charif)
+* Pass proration policy and cancellation at period end in settings. (Thanks Yasmine Charif)
+* Fix correct plan selection on subscription in subscribe_form template. (Thanks Yasmine Charif)
+* Fix subscription status in account, _subscription_status, and cancel_subscription templates. (Thanks Yasmine Charif)
+* Update remaining DOM Ids for Bootstrap 3. (Thanks Yasmine Charif)
 
 
 0.3.5 (2014-05-01)
 ----------------------
 
 * Fixed ``djstripe_init_customers`` management command so it works with custom user models.
-* Pass proration policy and cancellation at period end in settings.
-* Fix correct plan selection on subscription in subscribe_form template.
-* Fix subscription status in account, _subscription_status, and cancel_subscription templates.
 
 0.3.4 (2014-05-01)
 ----------------------
