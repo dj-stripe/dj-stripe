@@ -64,6 +64,13 @@ Step 2: Specify exempt URLS:
 
 Using this example any request on this site that isn't on the homepage, about, accounts, or djstripe pages is redirected to ``djstripe.views.SubscribeFormView``/
 
+.. warning:: Adding app_names to applications.
+
+    To make the ``(allauth)`` work, you may need to define an app_name in the ``include()`` function in the URLConf. For example::
+
+        # in urls.py
+        url(r'^accounts/', include('allauth.urls',  app_name="allauth")),
+
 .. seealso::
 
     * :doc:`settings`
