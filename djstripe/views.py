@@ -24,6 +24,7 @@ from .models import Event
 from .models import EventProcessingException
 from .settings import PLAN_LIST
 from .settings import CANCELLATION_AT_PERIOD_END
+from .settings import PRORATION_POLICY_FOR_UPGRADES
 from .settings import PY3
 from .settings import User
 from .sync import sync_customer
@@ -208,7 +209,25 @@ class ChangePlanView(LoginRequiredMixin,
         customer = request.user.customer
         if form.is_valid():
             try:
-                customer.subscribe(form.cleaned_data["plan"])
+                """ 
+                When a customer upgrades their plan, and PRORATION_POLICY_FOR_UPGRADES is set to True,
+                then we force the proration of his current plan and use it towards the upgraded plan,
+                no matter what PRORATION_POLICY is set to.
+                """
+                if PRORATION_POLICY_FOR_UPGRADES:
+                    current_subscription_amount = customer.current_subscription.amount
+                    selected_plan_name = form.cleaned_data["plan"]
+                    selected_plan = (plan for plan in PLAN_LIST if plan["plan"] == selected_plan_name).next()
+                    selected_plan_price = selected_plan["price"]
+                    if not isinstance(selected_plan["price"], decimal.Decimal):
+                        selected_plan_price = selected_plan["price"] / decimal.Decimal("100")
+                    """ Is it an upgrade """
+                    if selected_plan_price > current_subscription_amount:
+                        customer.subscribe(selected_plan_name, prorate=True)
+                    else:
+                        customer.subscribe(selected_plan_name)
+                else:
+                    customer.subscribe(form.cleaned_data["plan"])
             except stripe.StripeError as e:
                 self.error = e.message
                 return self.form_invalid(form)

@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="row">
-    <div class="span12">
+    <div class="col-xs-12">
         <ul class="breadcrumb">
           <li><a href="{% url 'djstripe:account' %}">Home</a></li>
           <li class="active">Change Card</li>
@@ -13,7 +13,7 @@
 </div>
 
 <div class="row">
-    <div class="span12">
+    <div class="col-xs-12">
         <h2>Current Card</h2>
         <p class="lead">
             {% if request.user.customer.card_kind and request.user.customer.card_last_4 %}

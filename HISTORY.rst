@@ -7,13 +7,15 @@ History
 ++++++++++++++++++++++
 
 * Use collections.OrderedDict to ensure that plans are listed in order of price.
-* Added ``ordereddict`` library to support Python 2.6 users. 
+* Add ``ordereddict`` library to support Python 2.6 users. 
 * Switch from ``__unicode__`` to ``__str__`` methods on models to better support Python 3.
 * Add ``python_2_unicode_compatible`` decorator to Models.
 * Check for PY3 so the ``unicode(self.user)`` in models.Customer doesn't blow up in Python 3.
-* Proration policy and cancellation at period end passed in settings.
+* Pass proration policy and cancellation at period end in settings.
+* Enable proration when customer upgrades plan, and pass proration policy for upgrades in settings.
 * Fix correct plan selection on subscription in subscribe_form template.
 * Fix subscription status in account, _subscription_status, and cancel_subscription templates.
+
 
 0.3.3 (2014-04-24)
 ++++++++++++++++++++++
