@@ -190,6 +190,19 @@ Described is an anti-pattern. View logic belongs in views.py, not urls.py.
 Subscriptions + Registration
 =============================
 
+.. warning:: Deprecation Warning!
+
+    Because this combines identity and financial submissions in one form, it's
+    arguably a security risk. Instead, we recommend using the standard two-stage
+    registration process, where personal info is gathered on one page, and CC 
+    information on the next.
+
+    Therefore, using this technique will trigger a deprecation warning while in 
+    DEBUG mode.
+
+    Discussion: https://github.com/pydanny/dj-stripe/issues/86
+
+
 This requires the following additional requirements:
 
 * django-allauth (user registration)

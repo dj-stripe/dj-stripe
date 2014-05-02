@@ -1,3 +1,5 @@
+import warnings
+
 from django.conf import settings
 from django import forms
 from django.utils.translation import ugettext as _
@@ -111,3 +113,9 @@ if StripeWidget and setup_user_email:
             except stripe.StripeError as e:
                 # handle error here
                 raise e
+
+        def __init__(self, *args, **kwargs):
+            if settings.DEBUG:
+                msg = "djstripe.forms.StripeSubscriptionSignupForm is now deprecated. djstripe recommends the standard two-stage account creation processes."
+                warnings.warn(msg, DeprecationWarning, stacklevel=2)
+            super(StripeSubscriptionSignupForm, self).__init__(*args, **kwargs)
