@@ -68,7 +68,8 @@ Rules:
 * "[namespace]" means everything with this name is exempt
 * "namespace:name" means this namespaced URL is exempt
 * "name" means this URL is exempt
-* The entire djtripe namespace is exempt
+* The entire djstripe namespace is exempt
+* If settings.DEBUG is True, then django-debug-toolbar is exempt
 
 Example:
 
@@ -80,6 +81,13 @@ Example:
         "products:detail",  # A ProductDetail view you want shown to non-payers
         "home",  # Site homepage
     )
+
+.. note:: Adding app_names to applications.
+
+    To make the ``(allauth)`` work, you may need to define an app_name in the ``include()`` function in the URLConf. For example::
+
+        # in urls.py
+        url(r'^accounts/', include('allauth.urls',  app_name="allauth")),
 
 DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK (=None)
 --------------------------------------------------

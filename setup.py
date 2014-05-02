@@ -23,7 +23,7 @@ if sys.argv[-1] == 'publish':
 readme = open('README.rst').read()
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
-INSTALL_REQUIRES =[
+INSTALL_REQUIRES = [
     'django>=1.4',
     'stripe>=1.9.2',
     'django-model-utils>=1.4.0',
