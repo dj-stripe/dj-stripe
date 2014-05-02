@@ -84,7 +84,8 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
             messages.info(self.request, "Your account is now cancelled.")
         else:
             messages.info(self.request, "Your account status is now '{a}' until '{b}'".format(
-                    a=current_subscription.status, b=current_subscription.current_period_end)
+                    a=current_subscription.status, b=current_subscription.current_period_end
+                )
             )
 
         return super(CancelSubscriptionView, self).form_valid(form)

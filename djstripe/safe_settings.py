@@ -36,7 +36,6 @@ PRORATION_POLICY = getattr(
 
 PRORATION_POLICY_FOR_UPGRADES = getattr(
     settings, 'DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES', True)
-    
+
 # TODO - need to find a better way to do this
 CANCELLATION_AT_PERIOD_END = not PRORATION_POLICY
-
