@@ -9,7 +9,7 @@ dj-stripe
         :target: https://travis-ci.org/pydanny/dj-stripe
 
 .. image:: https://pypip.in/d/dj-stripe/badge.png
-        :target: https://crate.io/packages/dj-stripe?version=latest
+        :target: https://pypi.python.org/pypi/dj-stripe/
 
 
 Django + Stripe Made Easy
