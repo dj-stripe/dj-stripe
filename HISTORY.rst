@@ -3,6 +3,11 @@
 History
 =======
 
+0.3.5 (2014-05-01)
+----------------------
+
+* Fixed ``djstripe_init_customers`` management command so it works with custom user models.
+
 0.3.4 (2014-05-01)
 ----------------------
 
