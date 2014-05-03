@@ -200,7 +200,10 @@ Subscriptions + Registration
     Therefore, using this technique will trigger a deprecation warning while in 
     DEBUG mode.
 
-    Discussion: https://github.com/pydanny/dj-stripe/issues/86
+    Discussion: 
+
+        * https://github.com/pydanny/dj-stripe/issues/86
+        * https://github.com/pydanny/dj-stripe/issues/92
 
 
 This requires the following additional requirements:
