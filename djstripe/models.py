@@ -38,6 +38,7 @@ stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
 if PY3:
     unicode = str
 
+
 def convert_tstamp(response, field_name=None):
     try:
         if field_name and response[field_name]:
@@ -383,9 +384,13 @@ class Customer(StripeObject):
                 at_period_end = False
             sub = self.stripe_customer.cancel_subscription(at_period_end=at_period_end)
         except stripe.InvalidRequestError as e:
+            if PY3:
+                err_msg = str(e)
+            else:
+                err_msg = e.message
             raise exceptions.SubscriptionCancellationFailure(
                 "Customer's information is not current with Stripe.\n{}".format(
-                    e.message
+                    err_msg
                 )
             )
         current_subscription.status = sub.status

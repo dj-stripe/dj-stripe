@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import decimal
 import json
 
+from django.contrib.auth import logout
 from django.contrib import messages
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponse
@@ -82,9 +83,14 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
         customer, created = Customer.get_or_create(self.request.user)
         current_subscription = customer.cancel_subscription(at_period_end=CANCELLATION_AT_PERIOD_END)
         if current_subscription.status == current_subscription.STATUS_CANCELLED:
-            messages.info(self.request, "Your account is now cancelled.")
+            # If no pro-rate, they get kicked right out.
+            messages.info(self.request, "Your subscription is now cancelled.")
+            # logout the user
+            logout(self.request)
+            return redirect("home")
         else:
-            messages.info(self.request, "Your account status is now '{a}' until '{b}'".format(
+            # If pro-rate, they get some time to stay.
+            messages.info(self.request, "Your subscription status is now '{a}' until '{b}'".format(
                     a=current_subscription.status, b=current_subscription.current_period_end
                 )
             )

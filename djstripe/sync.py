@@ -6,16 +6,23 @@ from django.conf import settings
 import stripe
 
 from .models import Customer
+from .settings import PY3
 
 
 def sync_customer(user):
     # TODO - needs tests
     customer, created = Customer.get_or_create(user)
-    cu = customer.stripe_customer
-    customer.sync(cu=cu)
-    customer.sync_current_subscription(cu=cu)
-    customer.sync_invoices(cu=cu)
-    customer.sync_charges(cu=cu)
+    try:
+        cu = customer.stripe_customer
+        customer.sync(cu=cu)
+        customer.sync_current_subscription(cu=cu)
+        customer.sync_invoices(cu=cu)
+        customer.sync_charges(cu=cu)
+    except stripe.error.InvalidRequestError as e:
+        if PY3:
+            print("ERROR: " + str(e))
+        else:
+            print("ERROR: " + e.message)
     return customer
 
 
@@ -34,4 +41,7 @@ def sync_plans():
                 )
                 print("Plan created for {0}".format(plan))
             except Exception as e:
-                print(e.message)
+                if PY3:
+                    print(str(e))
+                else:
+                    print(e.message)
