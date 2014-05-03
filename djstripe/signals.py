@@ -1,6 +1,4 @@
-"""
-Being porting from django-stripe-payments
-"""
+# -*- coding: utf-8 -*-
 from django.dispatch import Signal
 
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Wire this into the root URLConf this way::
 

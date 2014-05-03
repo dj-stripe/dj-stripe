@@ -10,4 +10,4 @@ __author__ = "Daniel Greenfeld"
 __email__ = "pydanny@gmail.com"
 
 __license__ = "BSD"
-__copyright__ = "Copyright 2013 Daniel Greenfeld"
+__copyright__ = "Copyright 2014 Daniel Greenfeld"

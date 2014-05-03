@@ -1,6 +1,6 @@
-"""
-Beging porting from django-stripe-payments
-"""
+# -*- coding: utf-8 -*-
+
+
 from __future__ import unicode_literals
 import decimal
 

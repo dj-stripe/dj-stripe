@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Note: Code to make this work with Django 1.5+ customer user models
         was inspired by work by Andrew Brown (@almostabc).

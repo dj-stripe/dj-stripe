@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Beging porting from django-stripe-payments
 """
