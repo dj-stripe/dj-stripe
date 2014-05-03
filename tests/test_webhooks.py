@@ -64,7 +64,7 @@ class TestWebhook(TestCase):
         StripeEventMock.return_value.to_dict.return_value = data
         msg = json.dumps(data)
         resp = Client().post(
-            reverse("webhook"),
+            reverse("djstripe:webhook"),
             msg,
             content_type="application/json"
         )
@@ -73,7 +73,7 @@ class TestWebhook(TestCase):
 
 
 class TestTransferWebhooks(TestCase):
-    
+
     def test_transfer_created(self):
         event = Event.objects.create(
             stripe_id=TRANSFER_CREATED_TEST_DATA["id"],

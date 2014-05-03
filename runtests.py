@@ -1,4 +1,7 @@
+import os
 import sys
+
+TESTS_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 from django.conf import settings
 
@@ -16,24 +19,29 @@ settings.configure(
             "PORT": "",
         },
     },
-    ROOT_URLCONF="djstripe.urls",
+    ROOT_URLCONF="tests.test_urls",
     INSTALLED_APPS=[
+        "django.contrib.admin",
         "django.contrib.auth",
         "django.contrib.contenttypes",
+        "django.contrib.sessions",
         "django.contrib.sites",
         "jsonfield",
         "djstripe",
     ],
     SITE_ID=1,
-    STRIPE_PUBLIC_KEY="",
-    STRIPE_SECRET_KEY="",
+    STRIPE_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", ""),
+    STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", ""),
     DJSTRIPE_PLANS={},
     DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS=(
         "(admin)",
         "test_url_name",
         "testapp_namespaced:test_url_namespaced"
     ),
-    ACCOUNT_SIGNUP_FORM_CLASS='djstripe.forms.StripeSubscriptionSignupForm'
+    ACCOUNT_SIGNUP_FORM_CLASS='djstripe.forms.StripeSubscriptionSignupForm',
+    TEMPLATE_DIRS = [
+        os.path.join(TESTS_ROOT, "tests/templates"),
+    ]
 )
 
 from django_nose import NoseTestSuiteRunner
