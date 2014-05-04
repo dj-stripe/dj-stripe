@@ -67,6 +67,12 @@ DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES (=True)
 
 TODO
 
+DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS (=True)
+=============================================
+
+By default dj-stripe sends emails for each receipt. You can turn this off by
+setting this value to ``False``.
+
 
 DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS (=())
 ======================================================

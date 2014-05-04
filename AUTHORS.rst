@@ -18,3 +18,4 @@ Contributors
 * Dustin Farris (@dustinfarris)
 * Liwen S (@sunliwen)
 * centrove
+* Chris Halpert (@cphalpert)

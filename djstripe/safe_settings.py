@@ -32,6 +32,7 @@ PASSWORD_INPUT_RENDER_VALUE = getattr(
 PASSWORD_MIN_LENGTH = getattr(
     settings, 'DJSTRIPE_PASSWORD_MIN_LENGTH', 6)
 
+
 PRORATION_POLICY = getattr(
     settings, 'DJSTRIPE_PRORATION_POLICY', False)
 
@@ -40,3 +41,7 @@ PRORATION_POLICY_FOR_UPGRADES = getattr(
 
 # TODO - need to find a better way to do this
 CANCELLATION_AT_PERIOD_END = not PRORATION_POLICY
+
+# Manages sending of receipt emails
+SEND_INVOICE_RECEIPT_EMAILS = getattr(settings, "DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS", True)
+
