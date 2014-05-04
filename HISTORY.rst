@@ -6,6 +6,7 @@ History
 0.3.6 (2014-05-??)
 ----------------------
 
+* Added setting to disable Invoice receipt emails (Thanks Chris Halpert)
 * Check for ``PY3`` when handling some of the error methods
 * Placed `StripeSubscriptionSignupForm` into deprecation mode. It will probably be removed  in the 0.4 release.
 * Enable proration when customer upgrades plan, and pass proration policy for upgrades in settings. (Thanks Yasmine Charif)
