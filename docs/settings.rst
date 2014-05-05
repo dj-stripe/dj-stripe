@@ -60,12 +60,20 @@ Example:
 DJSTRIPE_PRORATION_POLICY (=False)
 ====================================
 
-TODO
+By default, plans are not prorated in dj-stripe. Concretely, this is how this translates: 
 
-DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES (=True)
+1) If a customer cancels their plan during a trial, the cancellation is effective right away.
+2) If a customer cancels their plan outside of a trial, their subscription remains active until the subscription's period end, and they do not receive a refund.
+3) If a customer switches from one plan to another, the new plan becomes effective right away, and the customer is billed for the new plan's amount.
+
+Assigning ``True`` to ``DJSTRIPE_PRORATION_POLICY`` reverses the functioning of item 2 (plan cancellation) by making a cancellation effective right away and refunding the unused balance to the customer, and affects the functioning of item 3 (plan change) by prorating the previous customer's plan towards their new plan's amount.
+
+DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES (=False)
 ======================================================
 
-TODO
+By default, the plan change policy described in item 3 above holds also for plan upgrades.
+
+Assigning ``True`` to ``DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES`` allows dj-stripe to prorate plans in the specific case of an upgrade. Therefore, if a customer upgrades their plan, their new plan is effective right away, and they get billed for the new plan's amount minus the unused balance from their previous plan.
 
 DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS (=True)
 =============================================
