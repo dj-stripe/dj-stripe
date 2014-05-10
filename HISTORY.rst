@@ -6,6 +6,7 @@ History
 0.3.6 (2014-05-??)
 ----------------------
 
+* Deprecated the ``djstripe.forms.StripeSubscriptionSignupForm``. Making this form work easily with both `dj-stripe` and `django-allauth` required too much abstraction. We'll include this code as a cookbook recipe, but it won't be in dj-stripe itself.
 * Added setting to disable Invoice receipt emails (Thanks Chris Halpert)
 * Check for ``PY3`` when handling some of the error methods
 * Placed `StripeSubscriptionSignupForm` into deprecation mode. It will probably be removed  in the 0.4 release.
