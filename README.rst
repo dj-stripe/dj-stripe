@@ -129,6 +129,12 @@ If you haven't already, add JQuery and the Bootstrap 3.0.0 JS and CSS to your ba
 
     <!-- Latest compiled and minified JavaScript -->
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    
+Also, if you don't have it already, add a javascript block to your base.html file:
+
+.. code-block:: html
+
+    {% block javascript %}{% endblock %} 
 
 Start up the webserver:
 
