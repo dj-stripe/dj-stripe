@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.core.management.base import BaseCommand
+from django.conf import settings
 
 from djstripe.models import Customer
 
@@ -9,7 +10,7 @@ from djstripe.models import Customer
 #   seems to blow up in management commands.
 from djstripe.settings import get_user_model
 
-User = get_user_model()
+User = settings.AUTH_USER_MODEL
 
 
 class Command(BaseCommand):
