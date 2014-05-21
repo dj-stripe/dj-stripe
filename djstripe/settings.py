@@ -13,7 +13,7 @@ PY3 = sys.version > "3"
 def get_user_model():
     """ Place this in a function to avoid circular imports """
     try:
-        settings.AUTH_USER_MODEL
+        User = settings.AUTH_USER_MODEL
     except ImportError:
         from django.contrib.auth.models import User
     return User
