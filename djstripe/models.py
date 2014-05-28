@@ -493,7 +493,7 @@ class Customer(StripeObject):
                 )
                 sub_obj.amount = (sub.plan.amount / decimal.Decimal("100"))
                 sub_obj.status = sub.status
-                sub_obj.cancel_at_period_end = CANCELLATION_AT_PERIOD_END
+                sub_obj.cancel_at_period_end = sub.cancel_at_period_end
                 sub_obj.start = convert_tstamp(sub.start)
                 sub_obj.quantity = sub.quantity
                 sub_obj.save()
@@ -509,7 +509,7 @@ class Customer(StripeObject):
                     ),
                     amount=(sub.plan.amount / decimal.Decimal("100")),
                     status=sub.status,
-                    cancel_at_period_end=CANCELLATION_AT_PERIOD_END,
+                    cancel_at_period_end=sub.cancel_at_period_end,
                     start=convert_tstamp(sub.start),
                     quantity=sub.quantity
                 )
