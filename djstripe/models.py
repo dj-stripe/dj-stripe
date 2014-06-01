@@ -396,8 +396,8 @@ class Customer(StripeObject):
             )
         current_subscription.status = sub.status
         current_subscription.cancel_at_period_end = sub.cancel_at_period_end
-        current_subscription.period_end = convert_tstamp(sub, "current_period_end")
-        current_subscription.canceled_at = timezone.now()
+        current_subscription.current_period_end = convert_tstamp(sub, "current_period_end")
+        current_subscription.canceled_at = convert_tstamp(sub, "canceled_at") or timezone.now()
         current_subscription.save()
         cancelled.send(sender=self, stripe_response=sub)
         return current_subscription
@@ -493,7 +493,8 @@ class Customer(StripeObject):
                 )
                 sub_obj.amount = (sub.plan.amount / decimal.Decimal("100"))
                 sub_obj.status = sub.status
-                sub_obj.cancel_at_period_end = CANCELLATION_AT_PERIOD_END
+                sub_obj.cancel_at_period_end = sub.cancel_at_period_end
+                sub_obj.canceled_at = convert_tstamp(sub, "canceled_at")
                 sub_obj.start = convert_tstamp(sub.start)
                 sub_obj.quantity = sub.quantity
                 sub_obj.save()
@@ -509,7 +510,8 @@ class Customer(StripeObject):
                     ),
                     amount=(sub.plan.amount / decimal.Decimal("100")),
                     status=sub.status,
-                    cancel_at_period_end=CANCELLATION_AT_PERIOD_END,
+                    cancel_at_period_end=sub.cancel_at_period_end,
+                    canceled_at=convert_tstamp(sub, "canceled_at"),
                     start=convert_tstamp(sub.start),
                     quantity=sub.quantity
                 )
