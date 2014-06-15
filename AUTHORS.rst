@@ -19,3 +19,4 @@ Contributors
 * Liwen S (@sunliwen)
 * centrove
 * Chris Halpert (@cphalpert)
+* Thomas Parslow (@almost)
