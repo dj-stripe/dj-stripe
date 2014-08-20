@@ -20,3 +20,4 @@ Contributors
 * centrove
 * Chris Halpert (@cphalpert)
 * Thomas Parslow (@almost)
+* Leonid Shvechikov (@shvechikov)
