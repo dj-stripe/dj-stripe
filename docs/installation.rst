@@ -65,7 +65,7 @@ Add some payment plans:
             "stripe_plan_id": "pro-yearly",
             "name": "Web App Pro ($199/year)",
             "description": "The annual subscription plan to WebApp",
-            "price": 19900,  # $19900
+            "price": 19900,  # $199.00
             "currency": "usd",
             "interval": "year"
         }
