@@ -4,6 +4,7 @@ import sys
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import importlib
+from django.utils.functional import SimpleLazyObject
 
 from . import safe_settings
 
@@ -19,7 +20,7 @@ def get_user_model():
         from django.contrib.auth.models import User
     return User
 
-User = get_user_model()
+User = SimpleLazyObject(get_user_model)
 
 
 def plan_from_stripe_id(stripe_id):
