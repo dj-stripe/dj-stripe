@@ -74,13 +74,13 @@ Add some payment plans:
 Add to the urls.py::
 
     url(r'^payments/', include('djstripe.urls', namespace="djstripe")),
-    
+
 Run the commands::
 
     python manage.py syncdb
-    
+
     python manage.py djstripe_init_customers
-    
+
     python manage.py djstripe_init_plans
 
 If you haven't already, add JQuery and the Bootstrap 3.0.0 JS and CSS to your base template:
@@ -88,16 +88,16 @@ If you haven't already, add JQuery and the Bootstrap 3.0.0 JS and CSS to your ba
 .. code-block:: html
 
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
 
     <!-- Optional theme -->
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
-    
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+
     <!-- Latest JQuery -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 
     <!-- Latest compiled and minified JavaScript -->
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
 
 Start up the webserver:
 
