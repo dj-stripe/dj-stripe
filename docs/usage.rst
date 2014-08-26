@@ -20,7 +20,7 @@ dj-stripe provides three methods to support ongoing subscriptions:
 
      When **anonymous** users encounter these components they will raise a ``django.core.exceptions.ImproperlyConfigured`` exception. This is done because dj-stripe is not an authentication system, so it does a hard error to make it easier for you to catch where content may not be behind authentication systems.
 
-Any project can use one or more of these methods to control access. 
+Any project can use one or more of these methods to control access.
 
 
 Constraining Entire Sites
@@ -33,7 +33,7 @@ If you want to quickly constrain an entire site, the ``djstripe.middleware.Subsc
     * ... have a valid subscription --or--
     * ... are not ``user.is_staff==True``.
 
-* **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system. 
+* **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system.
 
 ----
 
@@ -78,14 +78,14 @@ Using this example any request on this site that isn't on the homepage, about, a
 Constraining Class-Based Views
 ------------------------------
 
-If you want to quickly constrain a single Class-Based View, the ``djstripe.mixins.SubscriptionPaymentRequiredMixin`` mixin does the following to user requests:
+If you want to quickly constrain a single Class-Based View, the ``djstripe.decorators.subscription_payment_required`` decorator does the following to user requests:
 
 * **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they...:
 
     * ... have a valid subscription --or--
     * ... are not ``user.is_staff==True``.
 
-* **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system. 
+* **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system.
 
 ----
 
@@ -94,23 +94,30 @@ If you want to quickly constrain a single Class-Based View, the ``djstripe.mixin
 .. code-block:: python
 
     # import necessary Django stuff
-    from django.views.generic import View
     from django.http import HttpResponse
+    from django.views.generic import View
+    from django.contrib.auth.decorators import login_required
 
-    # dependency of dj-stripe so it's garanteed to be there.
-    from braces.views import LoginRequiredMixin  
+    # import the wonderful decorator
+    from djstripe.decorators import subscription_payment_required
 
-    # import the incredible, edible mixin!
-    from djstripe.mixins import SubscriptionPaymentRequiredMixin
+    # import method_decorator which allows us to use function
+    # decorators on Class-Based View dispatch function.
+    from django.utils.decorators import method_decorator
 
-    class MyConstrainedView(
-            LoginRequiredMixin,  # Checks authentication
-            SubscriptionPaymentRequiredMixin,  # Checks for valid subscription
-            View
-        ):
+
+    class MyConstrainedView(View):
 
         def get(self, request, *args, **kwargs):
             return HttpReponse("I like cheese")
+
+        @method_decorator(login_required)
+        @method_decorator(subscription_payment_required)
+        def dispatch(self, *args, **kwargs):
+            return super(MyConstrainedView, self).dispatch(*args, **kwargs)
+
+
+If you are unfamiliar with this technique please read the following documentation `here <https://docs.djangoproject.com/en/1.5/topics/class-based-views/intro/#decorating-the-class>`_.
 
 
 Constraining Function-Based Views
@@ -123,7 +130,7 @@ If you want to quickly constrain a single Function-Based View, the ``djstripe.de
     * ... have a valid subscription --or--
     * ... are not ``user.is_staff==True``.
 
-* **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system. 
+* **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system.
 
 ----
 
@@ -194,13 +201,13 @@ Subscriptions + Registration
 
     Because this combines identity and financial submissions in one form, it's
     arguably a security risk. Instead, we recommend using the standard two-stage
-    registration process, where personal info is gathered on one page, and CC 
+    registration process, where personal info is gathered on one page, and CC
     information on the next.
 
-    Therefore, using this technique will trigger a deprecation warning while in 
+    Therefore, using this technique will trigger a deprecation warning while in
     DEBUG mode.
 
-    Discussion: 
+    Discussion:
 
         * https://github.com/pydanny/dj-stripe/issues/86
         * https://github.com/pydanny/dj-stripe/issues/92
@@ -240,7 +247,7 @@ Necessary URLS (root URLConf):
 .. code-block:: python
 
     (r'^accounts/', include('allauth.urls')),
-    
+
 
 Try it out!:
 
