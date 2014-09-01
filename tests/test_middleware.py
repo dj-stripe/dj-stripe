@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 
-from djstripe.models import Customer, CurrentSubscription
+from djstripe.models import Customer, Subscription
 from djstripe import middleware
 from djstripe.settings import User
 
@@ -62,7 +62,8 @@ class MiddlewareLogicTest(TestCase):
             card_last_4="2342",
             card_kind="Visa"
         )
-        self.subscription = CurrentSubscription.objects.create(
+        self.subscription = Subscription.objects.create(
+            stripe_id="sub_xxxxxxxxxxxxxxx",
             customer=self.customer,
             plan="test",
             current_period_start=period_start,

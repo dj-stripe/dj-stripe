@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 from django.conf import settings
@@ -6,23 +5,16 @@ from django.conf import settings
 import stripe
 
 from .models import Customer
-from .settings import PY3
 
 
 def sync_customer(user):
     # TODO - needs tests
     customer, created = Customer.get_or_create(user)
-    try:
-        cu = customer.stripe_customer
-        customer.sync(cu=cu)
-        customer.sync_current_subscription(cu=cu)
-        customer.sync_invoices(cu=cu)
-        customer.sync_charges(cu=cu)
-    except stripe.error.InvalidRequestError as e:
-        if PY3:
-            print("ERROR: " + str(e))
-        else:
-            print("ERROR: " + e.message)
+    cu = customer.stripe_customer
+    customer.sync(cu=cu)
+    customer.sync_subscriptions(cu=cu)
+    customer.sync_invoices(cu=cu)
+    customer.sync_charges(cu=cu)
     return customer
 
 
@@ -41,7 +33,4 @@ def sync_plans():
                 )
                 print("Plan created for {0}".format(plan))
             except Exception as e:
-                if PY3:
-                    print(str(e))
-                else:
-                    print(e.message)
+                print(e.message)
