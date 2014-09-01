@@ -21,7 +21,7 @@ import stripe
 
 from .forms import PlanForm, CancelSubscriptionForm
 from .mixins import PaymentsContextMixin, SubscriptionMixin
-from .models import CurrentSubscription
+from .models import Subscription
 from .models import Customer
 from .models import Event
 from .models import EventProcessingException
@@ -160,7 +160,7 @@ class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
         context['customer'] = customer
         try:
             context['subscription'] = customer.current_subscription
-        except CurrentSubscription.DoesNotExist:
+        except Subscription.DoesNotExist:
             context['subscription'] = None
         context['plans'] = PLAN_LIST
         return context
