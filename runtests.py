@@ -3,6 +3,7 @@ import sys
 
 TESTS_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
+import django
 from django.conf import settings
 
 settings.configure(
@@ -43,6 +44,12 @@ settings.configure(
         os.path.join(TESTS_ROOT, "tests/templates"),
     ]
 )
+
+# Avoid AppRegistryNotReady exception
+# http://stackoverflow.com/questions/24793351/django-appregistrynotready
+if hasattr(django, "setup"):
+    django.setup()
+
 
 from django_nose import NoseTestSuiteRunner
 
