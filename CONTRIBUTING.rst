@@ -64,7 +64,7 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
 
 3. Assuming the tests are run against PostgreSQL::
 
-  createdb djstripe
+    $ createdb djstripe
 
 4. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
 
@@ -83,7 +83,7 @@ tests, including testing other Python versions with tox::
 
     $ pip install -r requirements_test.txt
     $ flake8 dj-stripe tests
-  	$ python runtests.py
+    $ python runtests.py
     $ tox
 
 To get flake8 and tox, just pip install them into your virtualenv. 
