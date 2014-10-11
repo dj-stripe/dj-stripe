@@ -22,7 +22,7 @@ class Command(BaseCommand):
             perc = int(round(100 * (float(count) / float(total))))
             print(
                 "[{0}/{1} {2}%] Syncing {3} [{4}]".format(
-                   count, total, perc, user.username, user.pk
+                   count, total, perc, user.get_username(), user.pk
                 )
             )
             sync_customer(user)
