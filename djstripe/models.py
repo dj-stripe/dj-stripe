@@ -153,7 +153,7 @@ class Event(StripeObject):
             "charge.refunded",
             "charge.dispute.created",
             "charge.dispute.updated",
-            "chagne.dispute.closed",
+            "charge.dispute.closed",
             "customer.created",
             "customer.updated",
             "customer.deleted",
