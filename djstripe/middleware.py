@@ -59,9 +59,6 @@ class SubscriptionPaymentMiddleware(object):
             if "({0})".format(match.app_name) in EXEMPT:
                 return
 
-            if "account" in request.path:
-                raise Exception(match)
-
             if "[{0}]".format(match.namespace) in EXEMPT:
                 return
 
