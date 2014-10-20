@@ -3,9 +3,10 @@
 History
 =======
 
-0.3.6 (2014-05-??)
+0.3.6 (2014-10-??)
 ----------------------
 
+* Remove "account" bug in Middleware (Thanks @sromero84)
 * Deprecated the ``djstripe.forms.StripeSubscriptionSignupForm``. Making this form work easily with both `dj-stripe` and `django-allauth` required too much abstraction. We'll include this code as a cookbook recipe, but it won't be in dj-stripe itself.
 * Added setting to disable Invoice receipt emails (Thanks Chris Halpert)
 * Check for ``PY3`` when handling some of the error methods
