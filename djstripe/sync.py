@@ -59,4 +59,7 @@ def sync_plans():
                 stripe.Plan.create(**kwargs)
                 print("Plan created for {0}".format(plan))
             except Exception as e:
-                print(e.message)
+                if PY3:
+                   print(str(e))
+                else:
+                   print(e.message)
