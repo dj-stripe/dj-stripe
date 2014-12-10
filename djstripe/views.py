@@ -181,26 +181,18 @@ class SubscribeFormView(
     success_url = reverse_lazy("djstripe:history")
     form_valid_message = "You are now subscribed!"
 
-    def post(self, request, *args, **kwargs):
-        """
-        Handles POST requests, instantiating a form instance with the passed
-        POST variables and then checked for validity.
-        """
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        if form.is_valid():
-            try:
-                customer, created = Customer.get_or_create(self.request.user)
+    def form_valid(self, form):
+        try:
+            customer, created = Customer.get_or_create(self.request.user)
+            if self.request.POST.get("stripe_token"):
                 customer.update_card(self.request.POST.get("stripe_token"))
-                customer.subscribe(form.cleaned_data["plan"])
-            except stripe.StripeError as e:
-                # add form error here
-                self.error = e.args[0]
-                return self.form_invalid(form)
-            # redirect to confirmation page
-            return self.form_valid(form)
-        else:
+            customer.subscribe(form.cleaned_data["plan"])
+        except stripe.StripeError as e:
+            # add form error here
+            self.error = e.args[0]
             return self.form_invalid(form)
+
+        return super(SubscribeFormView, self).form_valid(form)
 
 
 class ChangePlanView(LoginRequiredMixin,
