@@ -16,7 +16,7 @@ settings.configure(
             "NAME": "djstripe",
             "USER": "",
             "PASSWORD": "",
-            "HOST": "",
+            "HOST": "localhost",
             "PORT": "",
         },
     },
