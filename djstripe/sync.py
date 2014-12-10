@@ -29,19 +29,34 @@ def sync_customer(user):
 def sync_plans():
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
+
+    allowed_values = (
+        'id',
+        'amount',
+        'currency',
+        'interval',
+        'interval_count',
+        'name',
+        'trial_period_days',
+        'metadata',
+        'statement_description'
+    )
+    conversion = {
+        'stripe_plan_id': 'id',
+        'price': 'amount'
+    }
+
     for plan in settings.DJSTRIPE_PLANS:
-        if settings.DJSTRIPE_PLANS[plan].get("stripe_plan_id"):
+        stripe_plan = settings.DJSTRIPE_PLANS[plan]
+        if stripe_plan.get("stripe_plan_id"):
+            kwargs = {}
+            for key in stripe_plan:
+                kw_key = conversion.get(key, key)
+                if kw_key not in allowed_values:
+                    continue
+                kwargs[kw_key] = stripe_plan[key]
             try:
-                stripe.Plan.create(
-                    amount=settings.DJSTRIPE_PLANS[plan]["price"],
-                    interval=settings.DJSTRIPE_PLANS[plan]["interval"],
-                    name=settings.DJSTRIPE_PLANS[plan]["name"],
-                    currency=settings.DJSTRIPE_PLANS[plan]["currency"],
-                    id=settings.DJSTRIPE_PLANS[plan].get("stripe_plan_id")
-                )
+                stripe.Plan.create(**kwargs)
                 print("Plan created for {0}".format(plan))
             except Exception as e:
-                if PY3:
-                    print(str(e))
-                else:
-                    print(e.message)
+                print(e.message)
