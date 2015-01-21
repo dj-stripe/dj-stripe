@@ -3,7 +3,6 @@ from django.test import TestCase
 from django.test.client import RequestFactory
 
 from djstripe.models import DJStripeCustomer
-from djstripe.contrib.rest_framework.permissions import DJStripeSubscriptionPermission
 
 try:
     import rest_framework
@@ -11,6 +10,8 @@ except ImportError:
     rest_framework = None
 
 if rest_framework:
+    from djstripe.contrib.rest_framework.permissions import DJStripeSubscriptionPermission
+
     class TestUserHasActiveSubscription(TestCase):
 
         def setUp(self):
