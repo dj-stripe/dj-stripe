@@ -1,7 +1,6 @@
 from copy import deepcopy
 
 from django.test import TestCase
-from django.test.utils import override_settings
 
 from djstripe.models import EventProcessingException, Event
 
@@ -88,4 +87,3 @@ class TestEventProcessingException(TestCase):
         event_copy.validated_message = self.invalid_customer_msg
         event_copy.save()
         self.assertEqual(None, event_copy.link_customer())
-

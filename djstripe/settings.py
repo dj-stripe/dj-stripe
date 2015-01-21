@@ -32,7 +32,6 @@ def get_customer_model():
     # Check if a customer model is specified. If not, fall back and exit.
     if not CUSTOMER_MODEL:
         from django.contrib.auth import get_user_model
-        CUSTOMER_REQUEST_CALLBACK = (lambda request: request.user)
         return get_user_model()
 
     customer_model = None
