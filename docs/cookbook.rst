@@ -141,4 +141,4 @@ On the customers's djstripecustomer object, use the charge method to generate a 
     amount = Decimal(10.00)
     djstripecustomer.charge(amount)
 
-Source code for the DJStripeCustomer.charge method is at https://github.com/pydanny/dj-stripe/blob/master/djstripe/models.py#L572-L595
+Source code for the DJStripeCustomer.charge method is at https://github.com/pydanny/dj-stripe/blob/master/djstripe/models.py#L573-L596
