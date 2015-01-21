@@ -148,6 +148,7 @@ It must be a callable that takes a request object and returns an instance of DJS
 Examples:
 
 `middleware.py`
+
 .. code-block:: python
 
     class DynamicOrganizationIDMiddleware(object):
@@ -166,13 +167,17 @@ Examples:
             request.organization_id = organization_id
 
 `settings.py`
+
 .. code-block:: python
 
     def organization_request_callback(request):
         """ Gets an organization instance from the id passed through ``request``"""
         return Organization.objects.get(id=request.organization_id)
 
-.. note:: This callback only becomes active when ``DJSTRIPE_CUSTOMER_MODEL`` is set.
+
+.. note:: Note
+
+    This callback only becomes active when ``DJSTRIPE_CUSTOMER_MODEL`` is set.
 
 DJSTRIPE_TRIAL_PERIOD_FOR_CUSTOMER_MODEL_CALLBACK (=None)
 ======================================================
@@ -201,7 +206,9 @@ Examples:
         else:
             return 7
 
-.. note:: This setting was named ``DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK`` prior to version 0.4
+.. note:: Note
+
+    This setting was named ``DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK`` prior to version 0.4
 
 
 DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")
