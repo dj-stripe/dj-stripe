@@ -175,9 +175,7 @@ Examples:
         return Organization.objects.get(id=request.organization_id)
 
 
-.. note:: Note
-
-    This callback only becomes active when ``DJSTRIPE_CUSTOMER_MODEL`` is set.
+.. note:: This callback only becomes active when ``DJSTRIPE_CUSTOMER_MODEL`` is set.
 
 DJSTRIPE_TRIAL_PERIOD_FOR_CUSTOMER_MODEL_CALLBACK (=None)
 ======================================================
@@ -206,9 +204,7 @@ Examples:
         else:
             return 7
 
-.. note:: Note
-
-    This setting was named ``DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK`` prior to version 0.4
+.. note:: This setting was named ``DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK`` prior to version 0.4
 
 
 DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")
