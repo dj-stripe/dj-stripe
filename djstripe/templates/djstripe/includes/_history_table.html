@@ -10,7 +10,7 @@
             
         </tr>
     </thead>
-    {% for invoice in customer.invoices.all %}
+    {% for invoice in djstripecustomer.invoices.all %}
         <tr>
             <td class="fixed">#{{ invoice.id }}</td>
             <td>{{ invoice.date|date:"M d" }}</td>

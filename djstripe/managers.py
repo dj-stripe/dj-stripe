@@ -7,7 +7,7 @@ import decimal
 from django.db import models
 
 
-class CustomerManager(models.Manager):
+class DJStripeCustomerManager(models.Manager):
 
     def started_during(self, year, month):
         return self.exclude(

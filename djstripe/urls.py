@@ -64,11 +64,6 @@ urlpatterns = patterns("",
         views.SyncHistoryView.as_view(),
         name="sync_history"
     ),
-    url(
-        r"^a/check/available/(?P<attr_name>(username|email))/$",
-        views.CheckAvailableUserAttributeView.as_view(),
-        name="check_available_user_attr"
-    ),
 
     # Webhook
     url(
@@ -76,5 +71,4 @@ urlpatterns = patterns("",
         views.WebHook.as_view(),
         name="webhook"
     ),
-
 )

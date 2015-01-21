@@ -1,35 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Note: Code to make this work with Django 1.5+ customer user models
-        was inspired by work by Andrew Brown (@almostabc).
+Note: Django 1.4 support was dropped in #107
+        https://github.com/pydanny/dj-stripe/pull/107
 """
 
 from django.contrib import admin
-from django.db.models.fields import FieldDoesNotExist
 
 from .models import Event, EventProcessingException, Transfer, Charge, Plan
-from .models import Invoice, InvoiceItem, CurrentSubscription, Customer
-
-from .settings import User
-
-if hasattr(User, 'USERNAME_FIELD'):
-    # Using a Django 1.5 User model
-    user_search_fields = [
-        "customer__user__{0}".format(User.USERNAME_FIELD)
-    ]
-
-    try:
-        # get_field_by_name throws FieldDoesNotExist if the field is not present on the model
-        User._meta.get_field_by_name('email')
-        user_search_fields + ["customer__user__email"]
-    except FieldDoesNotExist:
-        pass
-else:
-    # Using a pre-Django 1.5 User model
-    user_search_fields = [
-        "customer__user__username",
-        "customer__user__email"
-    ]
+from .models import Invoice, InvoiceItem, CurrentSubscription, DJStripeCustomer
 
 
 class CustomerHasCardListFilter(admin.SimpleListFilter):
@@ -61,9 +39,9 @@ class InvoiceCustomerHasCardListFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == "yes":
-            return queryset.exclude(customer__card_fingerprint="")
+            return queryset.exclude(djstripecustomer__card_fingerprint="")
         if self.value() == "no":
-            return queryset.filter(customer__card_fingerprint="")
+            return queryset.filter(djstripecustomer__card_fingerprint="")
 
 
 class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
@@ -102,7 +80,7 @@ admin.site.register(
     readonly_fields=('created',),
     list_display=[
         "stripe_id",
-        "customer",
+        "djstripecustomer",
         "amount",
         "description",
         "paid",
@@ -114,12 +92,11 @@ admin.site.register(
     ],
     search_fields=[
         "stripe_id",
-        "customer__stripe_id",
-        "customer__user__email",
+        "djstripecustomer__stripe_id",
+        "djstripecustomer__customer__email",
         "card_last_4",
-        "customer__user__username",
         "invoice__stripe_id"
-    ] + user_search_fields,
+    ],
     list_filter=[
         "paid",
         "disputed",
@@ -128,7 +105,7 @@ admin.site.register(
         "created"
     ],
     raw_id_fields=[
-        "customer",
+        "djstripecustomer",
         "invoice"
     ],
     actions=(send_charge_receipt,),
@@ -151,7 +128,7 @@ admin.site.register(
 
 admin.site.register(
     Event,
-    raw_id_fields=["customer"],
+    raw_id_fields=["djstripecustomer"],
     readonly_fields=('created',),
     list_display=[
         "stripe_id",
@@ -169,11 +146,10 @@ admin.site.register(
     ],
     search_fields=[
         "stripe_id",
-        "customer__stripe_id",
-        "customer__user__username",
-        "customer__user__email",
+        "djstripecustomer__stripe_id",
+        "djstripecustomer__customer__email",
         "validated_message"
-    ] + user_search_fields,
+    ],
 )
 
 
@@ -187,12 +163,12 @@ subscription_status.short_description = "Subscription Status"
 
 
 admin.site.register(
-    Customer,
-    raw_id_fields=["user"],
+    DJStripeCustomer,
+    raw_id_fields=["customer"],
     readonly_fields=('created',),
     list_display=[
         "stripe_id",
-        "user",
+        "customer",
         "card_kind",
         "card_last_4",
         subscription_status,
@@ -205,9 +181,8 @@ admin.site.register(
     ],
     search_fields=[
         "stripe_id",
-        "user__username",
-        "user__email"
-    ] + user_search_fields,
+        "customer__email"
+    ],
     inlines=[CurrentSubscriptionInline]
 )
 
@@ -216,38 +191,28 @@ class InvoiceItemInline(admin.TabularInline):
     model = InvoiceItem
 
 
-def customer_has_card(obj):
-    return obj.customer.card_fingerprint != ""
-customer_has_card.short_description = "Customer Has Card"
+def djstripecustomer_has_card(obj):
+    """ Returns True if the customer has a card attached to its account."""
+    return obj.djstripecustomer.card_fingerprint != ""
+djstripecustomer_has_card.short_description = "DJStripeCustomer Has Card"
 
 
-def customer_user(obj):
-    if hasattr(obj.customer.user, 'USERNAME_FIELD'):
-        # Using a Django 1.5 User model
-        username = getattr(obj.customer.user, User.USERNAME_FIELD)
-    else:
-        # Using a pre-Django 1.5 User model
-        username = obj.customer.user.username
-    # In Django 1.5+ a User is not guaranteed to have an email field
-    email = getattr(obj.customer.user, 'email', '')
-
-    return "{0} <{1}>".format(
-        username,
-        email
-    )
-customer_has_card.short_description = "Customer"
+def djstripecustomer_email(obj):
+    """ Returns a string representation of the djstripe customer's email."""
+    return str(obj.djstripecustomer.customer.email)
+djstripecustomer_email.short_description = "DJStripeCustomer"
 
 
 admin.site.register(
     Invoice,
-    raw_id_fields=["customer"],
+    raw_id_fields=["djstripecustomer"],
     readonly_fields=('created',),
     list_display=[
         "stripe_id",
         "paid",
         "closed",
-        customer_user,
-        customer_has_card,
+        djstripecustomer_email,
+        djstripecustomer_has_card,
         "period_start",
         "period_end",
         "subtotal",
@@ -256,10 +221,9 @@ admin.site.register(
     ],
     search_fields=[
         "stripe_id",
-        "customer__stripe_id",
-        "customer__user__username",
-        "customer__user__email"
-    ] + user_search_fields,
+        "djstripecustomer__stripe_id",
+        "djstripecustomer__customer__email"
+    ],
     list_filter=[
         InvoiceCustomerHasCardListFilter,
         "paid",

@@ -9,27 +9,24 @@ if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
     import stripe
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
-    from djstripe.models import Customer
-
-    User = get_user_model()
+    from djstripe.models import DJStripeCustomer
 
     class AccountEmailViewTests(TestCase):
 
         def setUp(self):
             self.url = reverse("djstripe:account")
-            self.user = User.objects.create_user(
-                username="testuser",
-                email="test@example.com",
-                password="123")
+            self.user = get_user_model().objects.create_user(username="testuser",
+                                                             email="test@example.com",
+                                                             password="123")
 
         def test_autocreate_customer(self):
             # raise Exception(settings.TEMPLATE_DIRS)
 
-            self.assertEqual(Customer.objects.count(), 0)
+            self.assertEqual(DJStripeCustomer.objects.count(), 0)
 
             # simply visiting the page should generate a new customer record.
-            self.assertTrue(self.client.login(username=self.user.username, password="123"))
+            self.assertTrue(self.client.login(username=self.user.email,
+                                              password=self.user.password))
             r = self.client.get(self.url)
             print(r.content)
-            self.assertEqual(Customer.objects.count(), 1)
-
+            self.assertEqual(DJStripeCustomer.objects.count(), 1)

@@ -31,7 +31,8 @@ If you want to quickly constrain an entire site, the ``djstripe.middleware.Subsc
 * **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they...:
 
     * ... have a valid subscription --or--
-    * ... are not ``user.is_staff==True``.
+    * ... are superusers (user.is_superuser==True).
+    * ... are staff members (user.is_staff==True) --or--
 
 * **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system.
 
@@ -83,7 +84,8 @@ If you want to quickly constrain a single Class-Based View, the ``djstripe.decor
 * **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they...:
 
     * ... have a valid subscription --or--
-    * ... are not ``user.is_staff==True``.
+    * ... are superusers (user.is_superuser==True).
+    * ... are staff members (user.is_staff==True) --or--
 
 * **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system.
 
@@ -128,7 +130,8 @@ If you want to quickly constrain a single Function-Based View, the ``djstripe.de
 * **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they...:
 
     * ... have a valid subscription --or--
-    * ... are not ``user.is_staff==True``.
+    * ... are superusers (user.is_superuser==True).
+    * ... are staff members (user.is_staff==True) --or--
 
 * **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system.
 

@@ -4,23 +4,74 @@ import sys
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import importlib
-from django.utils.functional import SimpleLazyObject
 
 from . import safe_settings
 
 PY3 = sys.version > "3"
 
 
-def get_user_model():
-    """ Place this in a function to avoid circular imports """
-    try:
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-    except ImportError:
-        from django.contrib.auth.models import User
-    return User
+CUSTOMER_REQUEST_CALLBACK = getattr(settings, "DJSTRIPE_CUSTOMER_MODEL_REQUEST_CALLBACK", (lambda request: request.user))
 
-User = SimpleLazyObject(get_user_model)
+
+def get_customer_model():
+    """
+    Users have the option of specifying a custom customer model via the
+    DJSTRIPE_CUSTOMER_MODEL setting.
+
+    This method attempts to pull that model from settings, and falls back to
+    AUTH_USER_MODEL if DJSTRIPE_CUSTOMER_MODEL is not set.
+
+    Note: Django 1.4 support was dropped in #107
+          https://github.com/pydanny/dj-stripe/pull/107
+
+    Returns the Customer model that is active in this project.
+    """
+
+    CUSTOMER_MODEL = getattr(settings, "DJSTRIPE_CUSTOMER_MODEL", None)
+
+    # Check if a customer model is specified. If not, fall back and exit.
+    if not CUSTOMER_MODEL:
+        from django.contrib.auth import get_user_model
+        CUSTOMER_REQUEST_CALLBACK = (lambda request: request.user)
+        return get_user_model()
+
+    customer_model = None
+
+    # Attempt a Django 1.7 app lookup first
+    try:
+        from django.apps import apps as django_apps
+    except ImportError:
+        # Attempt to pull the model Django 1.5/1.6 style
+        try:
+            app_label, model_name = CUSTOMER_MODEL.split('.')
+        except ValueError:
+            raise ImproperlyConfigured("DJSTRIPE_CUSTOMER_MODEL must be of the form 'app_label.model_name'.")
+
+        from django.db.models import get_model
+        customer_model = get_model(app_label, model_name)
+        if customer_model is None:
+            raise ImproperlyConfigured("DJSTRIPE_CUSTOMER_MODEL refers to model '{model}' that has not been installed.".format(model=CUSTOMER_MODEL))
+    else:
+        # Continue attempting to pull the model Django 1.7 style
+        try:
+            customer_model = django_apps.get_model(CUSTOMER_MODEL)
+        except ValueError:
+            raise ImproperlyConfigured("DJSTRIPE_CUSTOMER_MODEL must be of the form 'app_label.model_name'.")
+        except LookupError:
+            raise ImproperlyConfigured("DJSTRIPE_CUSTOMER_MODEL refers to model '{model}' that has not been installed.".format(model=CUSTOMER_MODEL))
+
+    # Ensure the custom model has an ``email`` field or property.
+    if ("email" not in customer_model._meta.get_all_field_names()) and not hasattr(customer_model, 'email'):
+        raise ImproperlyConfigured("DJSTRIPE_CUSTOMER_MODEL must have an email attribute.")
+
+    # Custom user model detected. Make sure the callback is configured.
+    if hasattr(settings, "DJSTRIPE_CUSTOMER_MODEL_REQUEST_CALLBACK"):
+        if not callable(getattr(settings, "DJSTRIPE_CUSTOMER_MODEL_REQUEST_CALLBACK")):
+            raise ImproperlyConfigured("DJSTRIPE_CUSTOMER_MODEL_REQUEST_CALLBACK must be callable.")
+    else:
+        raise ImproperlyConfigured("DJSTRIPE_CUSTOMER_MODEL_REQUEST_CALLBACK must be implemented if a DJSTRIPE_CUSTOMER_MODEL is defined.")
+
+    return customer_model
 
 
 def plan_from_stripe_id(stripe_id):
@@ -64,11 +115,7 @@ DEFAULT_PLAN = getattr(
     "DJSTRIPE_DEFAULT_PLAN",
     None
 )
-TRIAL_PERIOD_FOR_USER_CALLBACK = getattr(
-    settings,
-    "DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK",
-    None
-)
+
 PLAN_LIST = []
 for p in PAYMENTS_PLANS:
     if PAYMENTS_PLANS[p].get("stripe_plan_id"):
@@ -76,15 +123,22 @@ for p in PAYMENTS_PLANS:
         plan['plan'] = p
         PLAN_LIST.append(plan)
 
+# Try to find the new settings variable first. If that fails, revert to the
+# old variable.
+TRIAL_PERIOD_FOR_CUSTOMER_MODEL_CALLBACK = getattr(settings,
+    "DJSTRIPE_TRIAL_PERIOD_FOR_CUSTOMER_MODEL_CALLBACK",
+    getattr(settings, "DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK", None)
+)
+
 if PY3:
-    if isinstance(TRIAL_PERIOD_FOR_USER_CALLBACK, str):
-        TRIAL_PERIOD_FOR_USER_CALLBACK = load_path_attr(
-            TRIAL_PERIOD_FOR_USER_CALLBACK
+    if isinstance(TRIAL_PERIOD_FOR_CUSTOMER_MODEL_CALLBACK, str):
+        TRIAL_PERIOD_FOR_CUSTOMER_MODEL_CALLBACK = load_path_attr(
+            TRIAL_PERIOD_FOR_CUSTOMER_MODEL_CALLBACK
         )
 else:
-    if isinstance(TRIAL_PERIOD_FOR_USER_CALLBACK, basestring):
-        TRIAL_PERIOD_FOR_USER_CALLBACK = load_path_attr(
-            TRIAL_PERIOD_FOR_USER_CALLBACK
+    if isinstance(TRIAL_PERIOD_FOR_CUSTOMER_MODEL_CALLBACK, basestring):
+        TRIAL_PERIOD_FOR_CUSTOMER_MODEL_CALLBACK = load_path_attr(
+            TRIAL_PERIOD_FOR_CUSTOMER_MODEL_CALLBACK
         )
 
 DJSTRIPE_WEBHOOK_URL = getattr(

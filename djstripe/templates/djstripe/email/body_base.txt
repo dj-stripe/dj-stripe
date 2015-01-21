@@ -6,12 +6,12 @@ INVOICE #{{ charge.pk }}     {{ charge.created_at|date:"F d, Y" }}
 ........................................................
 
 
-CUSTOMER: {% block customer_name %}{{ charge.customer.user }}{% endblock %}
+CUSTOMER: {% block djstripecustomer_name %}{{ charge.djstripecustomer.customer }}{% endblock %}
 
 
 DETAILS
 -------
-{{ charge.customer.current_subscription.plan_display }} - ${{ charge.amount|floatformat:2 }}
+{{ charge.djstripecustomer.current_subscription.plan_display }} - ${{ charge.amount|floatformat:2 }}
 
 TOTAL: ${{ charge.amount|floatformat:2 }} USD
 PAID BY CREDIT CARD: -${{ charge.amount|floatformat:2 }}

@@ -1,25 +1,24 @@
 # -*- coding: utf-8 -*-
 from rest_framework.permissions import BasePermission
 
-from ...models import Customer
+from ...utils import customer_has_active_subscription
+from ...settings import CUSTOMER_REQUEST_CALLBACK
 
 
 class DJStripeSubscriptionPermission(BasePermission):
 
     def has_permission(self, request, view):
+        """
+        Check if the customer has an active subscription.
 
-        if request.user is None:
-            # No user? Then they don't have permission!
+        Returns false if:
+            * a customer isn't passed through the request
+
+        See ``utils.customer_has_active_subscription`` for more rules.
+
+        """
+
+        try:
+            customer_has_active_subscription(CUSTOMER_REQUEST_CALLBACK(request))
+        except AttributeError:
             return False
-
-        # get the user's customer object
-        customer, created = Customer.get_or_create(user=request.user)
-
-        if created:
-            # If just created, then they can't possibly have a subscription.
-            # Since customer.has_active_subscription() does at least one query,
-            #   we send them on their way without permission.
-            return False
-
-        # Do formal check to see if user with permission has an active subscription.
-        return customer.has_active_subscription()

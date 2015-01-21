@@ -40,17 +40,17 @@ it for reuse.
                 return False
 
             # Import placed here to avoid circular imports
-            from djstripe.models import Customer
+            from djstripe.models import DJStripeCustomer
 
-            # Get or create the customer object
-            customer, created = Customer.get_or_create(self)
+            # Get or create the djstripecustomer object
+            djstripecustomer, created = DJStripeCustomer.get_or_create(self)
 
-            # If new customer, return false
-            # If existing customer but inactive return false
-            if created or not customer.has_active_subscription():
+            # If new djstripecustomer, return false
+            # If existing djstripecustomer but inactive return false
+            if created or not djstripecustomer.has_active_subscription():
                 return False
 
-            # Existing, valid customer so return true
+            # Existing, valid djstripecustomer so return true
             return True
 
 Usage:
@@ -113,9 +113,7 @@ Sometimes you want a custom plan for per-customer billing. Or perhaps you are pr
     @receiver(subscription_made)
     def my_callback(sender, **kwargs):
         # Updates the User record any time the subscription is changed.
-        user = User.objects.get(
-                    customer__stripe_id=kwargs['stripe_response'].customer
-        )
+        user = User.objects.get(djstripecustomer__stripe_id=kwargs['stripe_response'].customer)
 
         # Only update users with non-custom choices
         if user.plan in [x[0] for x in PLAN_CHOICES]:
@@ -125,7 +123,7 @@ Sometimes you want a custom plan for per-customer billing. Or perhaps you are pr
 Making individual purchases
 ---------------------------
 
-On the user's customer object, use the charge method to generate a Stripe charge. You'll need to have already captured the user's ``stripe_id``.
+On the customers's djstripecustomer object, use the charge method to generate a Stripe charge. You'll need to have already captured the customer instance. In this example, we're using the user with ID=1 as the customer.
 
 .. code-block:: python
 
@@ -133,13 +131,14 @@ On the user's customer object, use the charge method to generate a Stripe charge
 
     from django.contrib.auth import get_user_model
 
-    from djstripe.models import Customer
+    from djstripe.models import DJStripeCustomer
 
-    User = get_user_model()
 
-    customer, created = Customer.get_or_create(user)
+    user = get_user_model().objects.get(id=1) 
+
+    djstripecustomer, created = DJStripeCustomer.get_or_create(customer=user)
 
     amount = Decimal(10.00)
-    customer.charge(amount)
+    djstripecustomer.charge(amount)
 
-Source code for the Customer.charge method is at https://github.com/pydanny/dj-stripe/blob/master/djstripe/models.py#L561-L580
+Source code for the DJStripeCustomer.charge method is at https://github.com/pydanny/dj-stripe/blob/master/djstripe/models.py#L572-L595

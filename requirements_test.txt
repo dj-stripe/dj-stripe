@@ -1,4 +1,5 @@
-django>=1.4
+django>=1.5
+south>=1.0
 stripe>=1.9.2
 django-model-utils>=1.4.0
 django-braces>=1.2.1

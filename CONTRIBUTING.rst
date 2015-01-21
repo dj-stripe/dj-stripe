@@ -86,6 +86,11 @@ tests, including testing other Python versions with tox::
     $ python runtests.py
     $ tox
 
+.. note:: Most pep8 errors in this package either of type E501 or E128.
+
+    Run flake8 with the ignore flag to hide those errors
+    $ flake8 dj-stripe tests --ignore=E501,E128
+
 To get flake8 and tox, just pip install them into your virtualenv. 
 
 7. Check the test coverage report. Make sure coverage hasn't dropped::

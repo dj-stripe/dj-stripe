@@ -1,56 +1,59 @@
 import decimal
 
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from mock import patch
 
-from djstripe.models import Customer, Charge
-from djstripe.settings import User
+from djstripe.models import DJStripeCustomer, Charge
 
 
 class TestCustomer(TestCase):
 
     def setUp(self):
-        self.user = User.objects.create_user(username="patrick")
-        self.customer = Customer.objects.create(
-            user=self.user,
+        self.user = get_user_model().objects.create_user(username="patrick", email="patrick@gmail.com")
+        self.djstripecustomer = DJStripeCustomer.objects.create(
+            customer=self.user,
             stripe_id="cus_xxxxxxxxxxxxxxx",
             card_fingerprint="YYYYYYYY",
             card_last_4="2342",
             card_kind="Visa"
         )
 
+    def test_tostring(self):
+        self.assertEquals("patrick", str(self.djstripecustomer))
+
     @patch("stripe.Customer.retrieve")
     def test_customer_purge_leaves_customer_record(self, CustomerRetrieveMock):
-        self.customer.purge()
-        customer = Customer.objects.get(stripe_id=self.customer.stripe_id)
-        self.assertTrue(customer.user is None)
-        self.assertTrue(customer.card_fingerprint == "")
-        self.assertTrue(customer.card_last_4 == "")
-        self.assertTrue(customer.card_kind == "")
-        self.assertTrue(User.objects.filter(pk=self.user.pk).exists())
+        self.djstripecustomer.purge()
+        djstripecustomer = DJStripeCustomer.objects.get(stripe_id=self.djstripecustomer.stripe_id)
+        self.assertTrue(djstripecustomer.customer is None)
+        self.assertTrue(djstripecustomer.card_fingerprint == "")
+        self.assertTrue(djstripecustomer.card_last_4 == "")
+        self.assertTrue(djstripecustomer.card_kind == "")
+        self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
 
     @patch("stripe.Customer.retrieve")
     def test_customer_delete_same_as_purge(self, CustomerRetrieveMock):
-        self.customer.delete()
-        customer = Customer.objects.get(stripe_id=self.customer.stripe_id)
-        self.assertTrue(customer.user is None)
-        self.assertTrue(customer.card_fingerprint == "")
-        self.assertTrue(customer.card_last_4 == "")
-        self.assertTrue(customer.card_kind == "")
-        self.assertTrue(User.objects.filter(pk=self.user.pk).exists())
+        self.djstripecustomer.delete()
+        djstripecustomer = DJStripeCustomer.objects.get(stripe_id=self.djstripecustomer.stripe_id)
+        self.assertTrue(djstripecustomer.customer is None)
+        self.assertTrue(djstripecustomer.card_fingerprint == "")
+        self.assertTrue(djstripecustomer.card_last_4 == "")
+        self.assertTrue(djstripecustomer.card_kind == "")
+        self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
 
     def test_change_charge(self):
-        self.assertTrue(self.customer.can_charge())
+        self.assertTrue(self.djstripecustomer.can_charge())
 
     @patch("stripe.Customer.retrieve")
     def test_cannot_charge(self, CustomerRetrieveMock):
-        self.customer.delete()
-        self.assertFalse(self.customer.can_charge())
+        self.djstripecustomer.delete()
+        self.assertFalse(self.djstripecustomer.can_charge())
 
     def test_charge_accepts_only_decimals(self):
         with self.assertRaises(ValueError):
-            self.customer.charge(10)
+            self.djstripecustomer.charge(10)
 
     @patch("stripe.Charge.retrieve")
     def test_record_charge(self, RetrieveMock):
@@ -68,7 +71,7 @@ class TestCustomer(TestCase):
             "created": 1363911708,
             "customer": "cus_xxxxxxxxxxxxxxx"
         }
-        obj = self.customer.record_charge("ch_XXXXXX")
+        obj = self.djstripecustomer.record_charge("ch_XXXXXX")
         self.assertEquals(Charge.objects.get(stripe_id="ch_XXXXXX").pk, obj.pk)
         self.assertEquals(obj.paid, True)
         self.assertEquals(obj.disputed, False)
@@ -79,7 +82,7 @@ class TestCustomer(TestCase):
     def test_refund_charge(self, RetrieveMock):
         charge = Charge.objects.create(
             stripe_id="ch_XXXXXX",
-            customer=self.customer,
+            djstripecustomer=self.djstripecustomer,
             card_last_4="4323",
             card_kind="Visa",
             amount=decimal.Decimal("10.00"),
@@ -111,7 +114,7 @@ class TestCustomer(TestCase):
     def test_calculate_refund_amount_full_refund(self):
         charge = Charge(
             stripe_id="ch_111111",
-            customer=self.customer,
+            djstripecustomer=self.djstripecustomer,
             amount=decimal.Decimal("500.00")
         )
         self.assertEquals(
@@ -122,7 +125,7 @@ class TestCustomer(TestCase):
     def test_calculate_refund_amount_partial_refund(self):
         charge = Charge(
             stripe_id="ch_111111",
-            customer=self.customer,
+            djstripecustomer=self.djstripecustomer,
             amount=decimal.Decimal("500.00")
         )
         self.assertEquals(
@@ -133,7 +136,7 @@ class TestCustomer(TestCase):
     def test_calculate_refund_above_max_refund(self):
         charge = Charge(
             stripe_id="ch_111111",
-            customer=self.customer,
+            djstripecustomer=self.djstripecustomer,
             amount=decimal.Decimal("500.00")
         )
         self.assertEquals(
@@ -159,7 +162,7 @@ class TestCustomer(TestCase):
             "created": 1363911708,
             "customer": "cus_xxxxxxxxxxxxxxx"
         }
-        self.customer.charge(
+        self.djstripecustomer.charge(
             amount=decimal.Decimal("10.00")
         )
         _, kwargs = ChargeMock.call_args

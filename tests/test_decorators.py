@@ -2,7 +2,8 @@ import datetime
 import decimal
 import sys
 
-from django.contrib.auth.models import User, AnonymousUser
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponse
 from django.test import TestCase
@@ -10,13 +11,23 @@ from django.test.client import RequestFactory
 from django.utils import timezone
 
 from djstripe.decorators import subscription_payment_required
-from djstripe.models import Customer, CurrentSubscription
+from djstripe.models import DJStripeCustomer, CurrentSubscription
 
 PY3 = sys.version > '3'
-if PY3:
-    from unittest.mock import Mock
-else:
-    from mock import Mock
+
+
+class TestDeprecationWarning(TestCase):
+    """
+    Tests the deprecation warning set in the decorators file.
+    See https://docs.python.org/3.4/library/warnings.html#testing-warnings
+    """
+
+    def test_deprecation(self):
+        with self.assertWarns(DeprecationWarning):
+            from djstripe.decorators import user_passes_pay_test
+
+            test_func = (lambda customer: True)
+            user_passes_pay_test(test_func=test_func)
 
 
 class TestSubscriptionPaymentRequired(TestCase):
@@ -24,6 +35,9 @@ class TestSubscriptionPaymentRequired(TestCase):
 
     def setUp(self):
         self.factory = RequestFactory()
+
+    def test_direct(self):
+        subscription_payment_required(function=None)
 
     def test_anonymous(self):
 
@@ -36,12 +50,11 @@ class TestSubscriptionPaymentRequired(TestCase):
         self.assertRaises(ImproperlyConfigured, a_view, request)
 
     def test_user_unpaid(self):
-
         # create customer object with no subscription
-
-        user = User.objects.create_user(username="pydanny")
-        Customer.objects.create(
-            user=user,
+        user = get_user_model().objects.create_user(username="pydanny",
+                                                    email="pydanny@gmail.com")
+        DJStripeCustomer.objects.create(
+            customer=user,
             stripe_id="cus_xxxxxxxxxxxxxxx",
             card_fingerprint="YYYYYYYY",
             card_last_4="2342",
@@ -62,16 +75,18 @@ class TestSubscriptionPaymentRequired(TestCase):
         period_start = datetime.datetime(2013, 4, 1, tzinfo=timezone.utc)
         period_end = datetime.datetime(2030, 4, 30, tzinfo=timezone.utc)
         start = datetime.datetime(2013, 1, 1, tzinfo=timezone.utc)
-        user = User.objects.create_user(username="pydanny")
-        customer = Customer.objects.create(
-            user=user,
+        user = get_user_model().objects.create_user(username="pydanny",
+                                                    email="pydanny@gmail.com")
+
+        djstripecustomer = DJStripeCustomer.objects.create(
+            customer=user,
             stripe_id="cus_xxxxxxxxxxxxxxx",
             card_fingerprint="YYYYYYYY",
             card_last_4="2342",
             card_kind="Visa"
         )
         CurrentSubscription.objects.create(
-            customer=customer,
+            djstripecustomer=djstripecustomer,
             plan="test",
             current_period_start=period_start,
             current_period_end=period_end,
@@ -89,4 +104,3 @@ class TestSubscriptionPaymentRequired(TestCase):
         request.user = user
         response = a_view(request)
         self.assertEqual(response.status_code, 200)
-
