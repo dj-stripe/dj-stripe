@@ -13,10 +13,10 @@ from django.utils import timezone
 from djstripe.decorators import subscription_payment_required
 from djstripe.models import DJStripeCustomer, CurrentSubscription
 
-PY3 = sys.version > '3'
+from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
 
-class TestDeprecationWarning(TestCase):
+class TestDeprecationWarning(AssertWarnsEnabledTestCase):
     """
     Tests the deprecation warning set in the decorators file.
     See https://docs.python.org/3.4/library/warnings.html#testing-warnings

@@ -11,8 +11,10 @@ from django.utils import timezone
 from djstripe.models import convert_tstamp, DJStripeCustomer, CurrentSubscription
 from djstripe.utils import customer_has_active_subscription
 
+from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
-class TestDeprecationWarning(TestCase):
+
+class TestDeprecationWarning(AssertWarnsEnabledTestCase):
     """
     Tests the deprecation warning set in the decorators file.
     See https://docs.python.org/3.4/library/warnings.html#testing-warnings
