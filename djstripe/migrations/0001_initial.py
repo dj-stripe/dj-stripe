@@ -2,10 +2,10 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-import django.utils.timezone
 import jsonfield.fields
-import model_utils.fields
+import django.utils.timezone
 from django.conf import settings
+import model_utils.fields
 
 
 class Migration(migrations.Migration):
@@ -18,19 +18,19 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Charge',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
-                ('stripe_id', models.CharField(max_length=50, unique=True)),
+                ('stripe_id', models.CharField(unique=True, max_length=50)),
                 ('card_last_4', models.CharField(max_length=4, blank=True)),
                 ('card_kind', models.CharField(max_length=50, blank=True)),
-                ('amount', models.DecimalField(max_digits=7, null=True, decimal_places=2)),
-                ('amount_refunded', models.DecimalField(max_digits=7, null=True, decimal_places=2)),
+                ('amount', models.DecimalField(null=True, max_digits=7, decimal_places=2)),
+                ('amount_refunded', models.DecimalField(null=True, max_digits=7, decimal_places=2)),
                 ('description', models.TextField(blank=True)),
                 ('paid', models.NullBooleanField()),
                 ('disputed', models.NullBooleanField()),
                 ('refunded', models.NullBooleanField()),
-                ('fee', models.DecimalField(max_digits=7, null=True, decimal_places=2)),
+                ('fee', models.DecimalField(null=True, max_digits=7, decimal_places=2)),
                 ('receipt_sent', models.BooleanField(default=False)),
                 ('charge_created', models.DateTimeField(null=True, blank=True)),
             ],
@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='CurrentSubscription',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
                 ('plan', models.CharField(max_length=100)),
@@ -64,17 +64,17 @@ class Migration(migrations.Migration):
             bases=(models.Model,),
         ),
         migrations.CreateModel(
-            name='DJStripeCustomer',
+            name='Customer',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
-                ('stripe_id', models.CharField(max_length=50, unique=True)),
+                ('stripe_id', models.CharField(unique=True, max_length=50)),
                 ('card_fingerprint', models.CharField(max_length=200, blank=True)),
                 ('card_last_4', models.CharField(max_length=4, blank=True)),
                 ('card_kind', models.CharField(max_length=50, blank=True)),
                 ('date_purged', models.DateTimeField(null=True, editable=False)),
-                ('customer', models.OneToOneField(to=settings.AUTH_USER_MODEL, null=True)),
+                ('user', models.OneToOneField(null=True, to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'abstract': False,
@@ -84,17 +84,17 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Event',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
-                ('stripe_id', models.CharField(max_length=50, unique=True)),
+                ('stripe_id', models.CharField(unique=True, max_length=50)),
                 ('kind', models.CharField(max_length=250)),
                 ('livemode', models.BooleanField(default=False)),
                 ('webhook_message', jsonfield.fields.JSONField(default=dict)),
                 ('validated_message', jsonfield.fields.JSONField(null=True)),
                 ('valid', models.NullBooleanField()),
                 ('processed', models.BooleanField(default=False)),
-                ('djstripecustomer', models.ForeignKey(to='djstripe.DJStripeCustomer', null=True)),
+                ('customer', models.ForeignKey(to='djstripe.Customer', null=True)),
             ],
             options={
                 'abstract': False,
@@ -104,7 +104,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='EventProcessingException',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
                 ('data', models.TextField()),
@@ -120,7 +120,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Invoice',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
                 ('stripe_id', models.CharField(max_length=50)),
@@ -134,7 +134,7 @@ class Migration(migrations.Migration):
                 ('total', models.DecimalField(max_digits=7, decimal_places=2)),
                 ('date', models.DateTimeField()),
                 ('charge', models.CharField(max_length=50, blank=True)),
-                ('djstripecustomer', models.ForeignKey(related_name='invoices', to='djstripe.DJStripeCustomer')),
+                ('customer', models.ForeignKey(related_name='invoices', to='djstripe.Customer')),
             ],
             options={
                 'ordering': ['-date'],
@@ -144,7 +144,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='InvoiceItem',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
                 ('stripe_id', models.CharField(max_length=50)),
@@ -167,15 +167,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Plan',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
-                ('stripe_id', models.CharField(max_length=50, unique=True)),
+                ('stripe_id', models.CharField(unique=True, max_length=50)),
                 ('name', models.CharField(max_length=100)),
                 ('currency', models.CharField(max_length=10, choices=[('usd', 'U.S. Dollars'), ('gbp', 'Pounds (GBP)'), ('eur', 'Euros')])),
                 ('interval', models.CharField(max_length=10, verbose_name='Interval type', choices=[('week', 'Week'), ('month', 'Month'), ('year', 'Year')])),
-                ('interval_count', models.IntegerField(default=1, verbose_name='Intervals between charges', null=True)),
-                ('amount', models.DecimalField(max_digits=7, verbose_name='Amount (per period)', decimal_places=2)),
+                ('interval_count', models.IntegerField(default=1, null=True, verbose_name='Intervals between charges')),
+                ('amount', models.DecimalField(verbose_name='Amount (per period)', max_digits=7, decimal_places=2)),
                 ('trial_period_days', models.IntegerField(null=True)),
             ],
             options={
@@ -186,10 +186,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Transfer',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
-                ('stripe_id', models.CharField(max_length=50, unique=True)),
+                ('stripe_id', models.CharField(unique=True, max_length=50)),
                 ('amount', models.DecimalField(max_digits=7, decimal_places=2)),
                 ('status', models.CharField(max_length=25)),
                 ('date', models.DateTimeField()),
@@ -218,7 +218,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TransferChargeFee',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
                 ('amount', models.DecimalField(max_digits=7, decimal_places=2)),
@@ -234,14 +234,14 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='currentsubscription',
-            name='djstripecustomer',
-            field=models.OneToOneField(related_name='current_subscription', to='djstripe.DJStripeCustomer', null=True),
+            name='customer',
+            field=models.OneToOneField(related_name='current_subscription', null=True, to='djstripe.Customer'),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='charge',
-            name='djstripecustomer',
-            field=models.ForeignKey(related_name='charges', to='djstripe.DJStripeCustomer'),
+            name='customer',
+            field=models.ForeignKey(related_name='charges', to='djstripe.Customer'),
             preserve_default=True,
         ),
         migrations.AddField(
