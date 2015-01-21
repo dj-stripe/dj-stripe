@@ -63,7 +63,7 @@ class TestTimestampConversion(TestCase):
         stamp = convert_tstamp(1365567407)
         self.assertEquals(
             stamp,
-            datetime.datetime(2013, 4, 9, 21, 16, 47)
+            datetime.datetime(2013, 4, 10, 4, 16, 47)
         )
 
     @override_settings(USE_TZ=False)
@@ -71,7 +71,7 @@ class TestTimestampConversion(TestCase):
         stamp = convert_tstamp({"my_date": 1365567407}, "my_date")
         self.assertEquals(
             stamp,
-            datetime.datetime(2013, 4, 9, 21, 16, 47)
+            datetime.datetime(2013, 4, 10, 4, 16, 47)
         )
 
     @override_settings(USE_TZ=False)
