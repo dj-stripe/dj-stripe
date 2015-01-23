@@ -3,8 +3,8 @@ from django.conf import settings
 from django.core.urlresolvers import resolve
 from django.shortcuts import redirect
 
-from .utils import customer_has_active_subscription
-from .settings import CUSTOMER_REQUEST_CALLBACK
+from .utils import subscriber_has_active_subscription
+from .settings import subscriber_request_callback
 
 
 DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = getattr(
@@ -69,8 +69,8 @@ class SubscriptionPaymentMiddleware(object):
         if match.url_name in EXEMPT:
             return
 
-        # Finally, we check the customer's subscription status
-        customer = CUSTOMER_REQUEST_CALLBACK(request)
+        # Finally, we check the subscriber's subscription status
+        subscriber = subscriber_request_callback(request)
 
-        if not customer_has_active_subscription(customer):
+        if not subscriber_has_active_subscription(subscriber):
             return redirect(DJSTRIPE_SUBSCRIPTION_REDIRECT)

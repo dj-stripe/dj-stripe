@@ -22,15 +22,15 @@ import stripe
 from .forms import PlanForm, CancelSubscriptionForm
 from .mixins import PaymentsContextMixin, SubscriptionMixin
 from .models import CurrentSubscription
-from .models import DJStripeCustomer
+from .models import Customer
 from .models import Event
 from .models import EventProcessingException
 from .settings import PLAN_LIST
 from .settings import CANCELLATION_AT_PERIOD_END
-from .settings import CUSTOMER_REQUEST_CALLBACK
+from .settings import subscriber_request_callback
 from .settings import PRORATION_POLICY_FOR_UPGRADES
 from .settings import PY3
-from .sync import sync_customer
+from .sync import sync_subscriber
 
 
 # ============================================================================ #
@@ -44,11 +44,11 @@ class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super(AccountView, self).get_context_data(**kwargs)
-        djstripecustomer, created = DJStripeCustomer.get_or_create(
-            customer=CUSTOMER_REQUEST_CALLBACK(self.request))
-        context['djstripecustomer'] = djstripecustomer
+        customer, created = Customer.get_or_create(
+            subscriber=subscriber_request_callback(self.request))
+        context['customer'] = customer
         try:
-            context['subscription'] = djstripecustomer.current_subscription
+            context['subscription'] = customer.current_subscription
         except CurrentSubscription.DoesNotExist:
             context['subscription'] = None
         context['plans'] = PLAN_LIST
@@ -62,29 +62,29 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
     template_name = "djstripe/change_card.html"
 
     def get_object(self):
-        if hasattr(self, "djstripecustomer"):
-            return self.djstripecustomer
-        self.djstripecustomer, created = DJStripeCustomer.get_or_create(
-            customer=CUSTOMER_REQUEST_CALLBACK(self.request))
-        return self.djstripecustomer
+        if hasattr(self, "customer"):
+            return self.customer
+        self.customer, created = Customer.get_or_create(
+            subscriber=subscriber_request_callback(self.request))
+        return self.customer
 
     def post(self, request, *args, **kwargs):
-        djstripecustomer = self.get_object()
+        customer = self.get_object()
         try:
-            send_invoice = djstripecustomer.card_fingerprint == ""
-            djstripecustomer.update_card(
+            send_invoice = customer.card_fingerprint == ""
+            customer.update_card(
                 request.POST.get("stripe_token")
             )
             if send_invoice:
-                djstripecustomer.send_invoice()
-            djstripecustomer.retry_unpaid_invoices()
+                customer.send_invoice()
+            customer.retry_unpaid_invoices()
         except stripe.CardError as e:
             messages.info(request, "Stripe Error")
             return render(
                 request,
                 self.template_name,
                 {
-                    "djstripecustomer": self.get_object(),
+                    "customer": self.get_object(),
                     "stripe_error": e.message
                 }
             )
@@ -99,13 +99,13 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
 class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
     # TODO - needs tests
     template_name = "djstripe/history.html"
-    model = DJStripeCustomer
+    model = Customer
     select_related = ["invoice"]
 
     def get_object(self):
-        djstripecustomer, created = DJStripeCustomer.get_or_create(
-            customer=CUSTOMER_REQUEST_CALLBACK(self.request))
-        return djstripecustomer
+        customer, created = Customer.get_or_create(
+            subscriber=subscriber_request_callback(self.request))
+        return customer
 
 
 class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
@@ -117,7 +117,7 @@ class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
         return render(
             request,
             self.template_name,
-            {"djstripecustomer": sync_customer(CUSTOMER_REQUEST_CALLBACK(request))}
+            {"customer": sync_subscriber(subscriber_request_callback(request))}
         )
 
 
@@ -143,10 +143,10 @@ class SubscribeFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionM
         form = self.get_form(form_class)
         if form.is_valid():
             try:
-                djstripecustomer, created = DJStripeCustomer.get_or_create(
-                    customer=CUSTOMER_REQUEST_CALLBACK(self.request))
-                djstripecustomer.update_card(self.request.POST.get("stripe_token"))
-                djstripecustomer.subscribe(form.cleaned_data["plan"])
+                customer, created = Customer.get_or_create(
+                    subscriber=subscriber_request_callback(self.request))
+                customer.update_card(self.request.POST.get("stripe_token"))
+                customer.subscribe(form.cleaned_data["plan"])
             except stripe.StripeError as e:
                 # add form error here
                 self.error = e.args[0]
@@ -167,14 +167,14 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
 
     def post(self, request, *args, **kwargs):
         form = PlanForm(request.POST)
-        djstripecustomer = CUSTOMER_REQUEST_CALLBACK(request).djstripecustomer
+        customer = subscriber_request_callback(request).customer
         if form.is_valid():
             try:
                 # When a customer upgrades their plan, and PRORATION_POLICY_FOR_UPGRADES is set to True,
                 # then we force the proration of his current plan and use it towards the upgraded plan,
                 # no matter what PRORATION_POLICY is set to.
                 if PRORATION_POLICY_FOR_UPGRADES:
-                    current_subscription_amount = djstripecustomer.current_subscription.amount
+                    current_subscription_amount = customer.current_subscription.amount
                     selected_plan_name = form.cleaned_data["plan"]
                     selected_plan = next(
                         (plan for plan in PLAN_LIST if plan["plan"] == selected_plan_name)
@@ -186,11 +186,11 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
 
                     # Is it an upgrade?
                     if selected_plan_price > current_subscription_amount:
-                        djstripecustomer.subscribe(selected_plan_name, prorate=True)
+                        customer.subscribe(selected_plan_name, prorate=True)
                     else:
-                        djstripecustomer.subscribe(selected_plan_name)
+                        customer.subscribe(selected_plan_name)
                 else:
-                    djstripecustomer.subscribe(form.cleaned_data["plan"])
+                    customer.subscribe(form.cleaned_data["plan"])
             except stripe.StripeError as e:
                 self.error = e.message
                 return self.form_invalid(form)
@@ -208,9 +208,9 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
     success_url = reverse_lazy("djstripe:account")
 
     def form_valid(self, form):
-        djstripecustomer, created = DJStripeCustomer.get_or_create(
-            customer=CUSTOMER_REQUEST_CALLBACK(self.request))
-        current_subscription = djstripecustomer.cancel_subscription(
+        customer, created = Customer.get_or_create(
+            subscriber=subscriber_request_callback(self.request))
+        current_subscription = customer.cancel_subscription(
             at_period_end=CANCELLATION_AT_PERIOD_END)
 
         if current_subscription.status == current_subscription.STATUS_CANCELLED:

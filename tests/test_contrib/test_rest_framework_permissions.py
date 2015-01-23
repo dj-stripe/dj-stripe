@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.test.client import RequestFactory
 
-from djstripe.models import DJStripeCustomer
+from djstripe.models import Customer
 
 try:
     import rest_framework
@@ -17,8 +17,8 @@ if rest_framework:
         def setUp(self):
             self.user = get_user_model().objects.create_user(username="pydanny",
                                                              email="pydanny@gmail.com")
-            self.djstripecustomer = DJStripeCustomer.objects.create(
-                customer=self.user,
+            self.customer = Customer.objects.create(
+                subscriber=self.user,
                 stripe_id="cus_xxxxxxxxxxxxxxx",
                 card_fingerprint="YYYYYYYY",
                 card_last_4="2342",

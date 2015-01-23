@@ -8,8 +8,8 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import timezone
 
-from djstripe.models import convert_tstamp, DJStripeCustomer, CurrentSubscription
-from djstripe.utils import customer_has_active_subscription
+from djstripe.models import convert_tstamp, Customer, CurrentSubscription
+from djstripe.utils import subscriber_has_active_subscription
 
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
@@ -23,8 +23,8 @@ class TestDeprecationWarning(AssertWarnsEnabledTestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="pydanny",
                                                          email="pydanny@gmail.com")
-        self.djstripecustomer = DJStripeCustomer.objects.create(
-            customer=self.user,
+        self.customer = Customer.objects.create(
+            subscriber=self.user,
             stripe_id="cus_xxxxxxxxxxxxxxx",
             card_fingerprint="YYYYYYYY",
             card_last_4="2342",
@@ -90,8 +90,8 @@ class TestUserHasActiveSubscription(TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="pydanny",
                                                          email="pydanny@gmail.com")
-        self.djstripecustomer = DJStripeCustomer.objects.create(
-            customer=self.user,
+        self.customer = Customer.objects.create(
+            subscriber=self.user,
             stripe_id="cus_xxxxxxxxxxxxxxx",
             card_fingerprint="YYYYYYYY",
             card_last_4="2342",
@@ -99,7 +99,7 @@ class TestUserHasActiveSubscription(TestCase):
         )
 
     def test_user_has_inactive_subscription(self):
-        self.assertFalse(customer_has_active_subscription(self.user))
+        self.assertFalse(subscriber_has_active_subscription(self.user))
 
     def test_user_has_active_subscription(self):
         # Make the customer have an active subscription
@@ -109,7 +109,7 @@ class TestUserHasActiveSubscription(TestCase):
         # Start 'em off'
         start = datetime.datetime(2013, 1, 1, 0, 0, 1)  # more realistic start
         CurrentSubscription.objects.create(
-            djstripecustomer=self.djstripecustomer,
+            customer=self.customer,
             plan="test",
             current_period_start=period_start,
             current_period_end=period_end,
@@ -120,7 +120,7 @@ class TestUserHasActiveSubscription(TestCase):
         )
 
         # Assert that the customer's subscription is action
-        self.assertTrue(customer_has_active_subscription(self.user))
+        self.assertTrue(subscriber_has_active_subscription(self.user))
 
     def test_anonymous_user(self):
         """
@@ -129,16 +129,16 @@ class TestUserHasActiveSubscription(TestCase):
         """
         anon_user = AnonymousUser()
         with self.assertRaises(ImproperlyConfigured):
-            customer_has_active_subscription(anon_user)
+            subscriber_has_active_subscription(anon_user)
 
     def test_staff_user(self):
         self.user.is_staff = True
         self.user.save()
 
-        self.assertTrue(customer_has_active_subscription(self.user))
+        self.assertTrue(subscriber_has_active_subscription(self.user))
 
     def test_superuser(self):
         self.user.is_superuser = True
         self.user.save()
 
-        self.assertTrue(customer_has_active_subscription(self.user))
+        self.assertTrue(subscriber_has_active_subscription(self.user))

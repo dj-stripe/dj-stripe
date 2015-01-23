@@ -6,7 +6,7 @@ from django.test import TestCase
 
 from mock import patch
 
-from djstripe.models import DJStripeCustomer
+from djstripe.models import Customer
 
 
 class EmailReceiptTest(TestCase):
@@ -14,8 +14,8 @@ class EmailReceiptTest(TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="patrick",
                                                          email="patrick@gmail.com")
-        self.djstripecustomer = DJStripeCustomer.objects.create(
-            customer=self.user,
+        self.customer = Customer.objects.create(
+            subscriber=self.user,
             stripe_id="cus_xxxxxxxxxxxxxxx",
             card_fingerprint="YYYYYYYY",
             card_last_4="2342",
@@ -40,7 +40,7 @@ class EmailReceiptTest(TestCase):
             "created": 1363911708,
             "customer": "cus_xxxxxxxxxxxxxxx"
         }
-        self.djstripecustomer.charge(
+        self.customer.charge(
             amount=decimal.Decimal("400.00")
         )
         self.assertTrue("$400.00" in mail.outbox[0].body)

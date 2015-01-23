@@ -2,7 +2,6 @@
 import datetime
 from south.db import db
 from south.v2 import SchemaMigration
-from django.db import models
 
 try:
     from django.contrib.auth import get_user_model
@@ -179,7 +178,6 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'djstripe', ['Charge'])
 
-
     def backwards(self, orm):
         # Deleting model 'EventProcessingException'
         db.delete_table(u'djstripe_eventprocessingexception')
@@ -207,7 +205,6 @@ class Migration(SchemaMigration):
 
         # Deleting model 'Charge'
         db.delete_table(u'djstripe_charge')
-
 
     models = {
         u'auth.group': {

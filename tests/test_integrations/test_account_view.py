@@ -9,7 +9,7 @@ if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
     import stripe
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
-    from djstripe.models import DJStripeCustomer
+    from djstripe.models import Customer
 
     class AccountEmailViewTests(TestCase):
 
@@ -22,11 +22,11 @@ if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
         def test_autocreate_customer(self):
             # raise Exception(settings.TEMPLATE_DIRS)
 
-            self.assertEqual(DJStripeCustomer.objects.count(), 0)
+            self.assertEqual(Customer.objects.count(), 0)
 
             # simply visiting the page should generate a new customer record.
             self.assertTrue(self.client.login(username=self.user.email,
                                               password=self.user.password))
             r = self.client.get(self.url)
             print(r.content)
-            self.assertEqual(DJStripeCustomer.objects.count(), 1)
+            self.assertEqual(Customer.objects.count(), 1)

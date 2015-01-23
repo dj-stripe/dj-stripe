@@ -24,7 +24,7 @@
         <div class="col-xs-{{ 12|djdiv:plan_count|floatformat }}">
       {% endwith %}
             <form
-              {% if not djstripecustomer.current_subscription or djstripecustomer.current_subscription.status == CurrentSubscription.STATUS_CANCELLED %}
+              {% if not customer.current_subscription or customer.current_subscription.status == CurrentSubscription.STATUS_CANCELLED %}
                   action="{% url 'djstripe:subscribe' %}" class="djstripe-subscribe"  
                   data-key="{{ STRIPE_PUBLIC_KEY }}"
                   data-amount="{{ plan.price }}"
@@ -43,7 +43,7 @@
 
                 <!-- disable this when clicked -->
                 <button
-                  {% if djstripecustomer.current_subscription.plan == plan.plan and djstripecustomer.current_subscription.status != CurrentSubscription.STATUS_CANCELLED %}
+                  {% if customer.current_subscription.plan == plan.plan and customer.current_subscription.status != CurrentSubscription.STATUS_CANCELLED %}
                     disabled="true"
                   {% endif %}
                  type="submit" class="btn btn-primary">
@@ -54,13 +54,13 @@
                   <p>{{ plan.description }}</p>
                 </button>
 
-              {% if not djstripecustomer.current_subscription or djstripecustomer.current_subscription.status == CurrentSubscription.STATUS_CANCELLED %}
+              {% if not customer.current_subscription or customer.current_subscription.status == CurrentSubscription.STATUS_CANCELLED %}
                 <!-- do nothing -->
-              {% elif djstripecustomer.current_subscription.plan == plan.plan %}
+              {% elif customer.current_subscription.plan == plan.plan %}
                 <h4>Your Current Plan</h4>
-              {% elif djstripecustomer.current_subscription.amount < plan.price|djdiv:100 %}
+              {% elif customer.current_subscription.amount < plan.price|djdiv:100 %}
                 <h4>Upgrade</h4>
-              {% elif djstripecustomer.current_subscription.amount > plan.price|djdiv:100 %}
+              {% elif customer.current_subscription.amount > plan.price|djdiv:100 %}
                 <h4>Downgrade</h4>
               {% endif %}
             </form>

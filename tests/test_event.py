@@ -4,7 +4,7 @@ from mock import patch
 
 from django.contrib.auth import get_user_model
 
-from djstripe.models import DJStripeCustomer, Event
+from djstripe.models import Customer, Event
 
 
 class TestEventMethods(TestCase):
@@ -12,12 +12,12 @@ class TestEventMethods(TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="testuser",
                                                          email="testuser@gmail.com")
-        self.djstripecustomer = DJStripeCustomer.objects.create(
+        self.customer = Customer.objects.create(
             stripe_id="cus_xxxxxxxxxxxxxxx",
-            customer=self.user
+            subscriber=self.user
         )
 
-    def test_link_customer_djstripecustomer_created(self):
+    def test_link_customer_customer_created(self):
         msg = {
             "created": 1363911708,
             "data": {
@@ -49,9 +49,9 @@ class TestEventMethods(TestCase):
             validated_message=msg
         )
         event.link_customer()
-        self.assertEquals(event.djstripecustomer, self.djstripecustomer)
+        self.assertEquals(event.customer, self.customer)
 
-    def test_link_customer_djstripecustomer_updated(self):
+    def test_link_customer_customer_updated(self):
         msg = {
             "created": 1346855599,
             "data": {
@@ -104,9 +104,9 @@ class TestEventMethods(TestCase):
             validated_message=msg
         )
         event.link_customer()
-        self.assertEquals(event.djstripecustomer, self.djstripecustomer)
+        self.assertEquals(event.customer, self.customer)
 
-    def test_link_customer_djstripecustomer_deleted(self):
+    def test_link_customer_customer_deleted(self):
         msg = {
             "created": 1348286560,
             "data": {
@@ -138,10 +138,10 @@ class TestEventMethods(TestCase):
             validated_message=msg
         )
         event.link_customer()
-        self.assertEquals(event.djstripecustomer, self.djstripecustomer)
+        self.assertEquals(event.customer, self.customer)
 
     @patch("stripe.Customer.retrieve")
-    def test_process_djstripecustomer_deleted(self, CustomerMock):
+    def test_process_customer_deleted(self, CustomerMock):
         msg = {
             "created": 1348286560,
             "data": {
@@ -174,5 +174,5 @@ class TestEventMethods(TestCase):
             valid=True
         )
         event.process()
-        self.assertEquals(event.djstripecustomer, self.djstripecustomer)
-        self.assertEquals(event.djstripecustomer.customer, None)
+        self.assertEquals(event.customer, self.customer)
+        self.assertEquals(event.customer.subscriber, None)

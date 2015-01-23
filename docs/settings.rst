@@ -115,15 +115,15 @@ Example:
         url(r'^accounts/', include('allauth.urls',  app_name="allauth")),
 
 
-DJSTRIPE_CUSTOMER_MODEL (=settings.AUTH_USER_MODEL)
+DJSTRIPE_SUBSCRIBER_MODEL (=settings.AUTH_USER_MODEL)
 ======================================================
 
-If the AUTH_USER_MODEL doesn't represent the object your application's subscription holder, you may define a customer model to use here.
+If the AUTH_USER_MODEL doesn't represent the object your application's subscription holder, you may define a subscriber model to use here.
 
 Rules:
 
-* DJSTRIPE_CUSTOMER_MODEL must have an ``email`` field. If your existing model has no email field, add an email property that defines an email address to use.
-* You must also implement ``DJSTRIPE_CUSTOMER_MODEL_REQUEST_CALLBACK``.
+* DJSTRIPE_SUBSCRIBER_MODEL must have an ``email`` field. If your existing model has no email field, add an email property that defines an email address to use.
+* You must also implement ``DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK``.
 
 Example Model:
 
@@ -139,11 +139,11 @@ Example Model:
             return self.owner.email
 
 
-DJSTRIPE_CUSTOMER_MODEL_REQUEST_CALLBACK (=None)
+DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK (=None)
 ======================================================
 
-If you choose to use a custom customer model, you'll need a way to pull it from ``request``. That's where this callback comes in.
-It must be a callable that takes a request object and returns an instance of DJSTRIPE_CUSTOMER_MODEL
+If you choose to use a custom subscriber model, you'll need a way to pull it from ``request``. That's where this callback comes in.
+It must be a callable that takes a request object and returns an instance of DJSTRIPE_SUBSCRIBER_MODEL
 
 Examples:
 
@@ -175,31 +175,31 @@ Examples:
         return Organization.objects.get(id=request.organization_id)
 
 
-.. note:: This callback only becomes active when ``DJSTRIPE_CUSTOMER_MODEL`` is set.
+.. note:: This callback only becomes active when ``DJSTRIPE_SUBSCRIBER_MODEL`` is set.
 
-DJSTRIPE_TRIAL_PERIOD_FOR_CUSTOMER_MODEL_CALLBACK (=None)
+DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK (=None)
 ======================================================
 
-Used by ``djstripe.models.StripeCustomer`` only when creating stripe customers.
+Used by ``djstripe.models.Customer`` only when creating stripe customers.
 
-This is called to dynamically add a trial period to a customer's plan. It must be a callable that takes a customer object and returns the number of days the trial period should last.
+This is called to dynamically add a trial period to a subscriber's plan. It must be a callable that takes a subscriber object and returns the number of days the trial period should last.
 
 Examples:
 
 .. code-block:: python
 
-    def static_trial_period(customer):
-        """ Adds a static trial period of 7 days to each customer's account."""
+    def static_trial_period(subscriber):
+        """ Adds a static trial period of 7 days to each subscriber's account."""
         return 7
 
 
-    def dynamic_trial_period(customer):
+    def dynamic_trial_period(subscriber):
         """
-        Adds a static trial period of 7 days to each customer's plan,
+        Adds a static trial period of 7 days to each subscriber's plan,
         unless they've accepted our month-long promotion.
         """
         
-        if customer.coupons.get(slug="monthlongtrial"):
+        if subscriber.coupons.get(slug="monthlongtrial"):
             return 30
         else:
             return 7

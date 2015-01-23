@@ -7,7 +7,7 @@ from django.utils.translation import ugettext as _
 
 import stripe
 
-from .models import DJStripeCustomer
+from .models import Customer
 from .settings import PLAN_CHOICES, PASSWORD_INPUT_RENDER_VALUE, PASSWORD_MIN_LENGTH
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -112,11 +112,11 @@ if StripeWidget and setup_user_email:
                                    required=False,
                                    widget=StripeWidget(attrs={"data-stripe": "exp-year"}))
 
-        def save(self, customer):
+        def save(self, subscriber):
             try:
-                djstripecustomer, created = DJStripeCustomer.get_or_create(customer=customer)
-                djstripecustomer.update_card(self.cleaned_data["stripe_token"])
-                djstripecustomer.subscribe(self.cleaned_data["plan"])
+                customer, created = Customer.get_or_create(subscriber=subscriber)
+                customer.update_card(self.cleaned_data["stripe_token"])
+                customer.subscribe(self.cleaned_data["plan"])
             except stripe.StripeError as e:
                 # handle error here
                 raise e

@@ -5,26 +5,26 @@ from django.conf import settings
 
 import stripe
 
-from .models import DJStripeCustomer
+from .models import Customer
 from .settings import PY3
 
 
-def sync_customer(customer_model):
+def sync_subscriber(subscriber_model):
     # TODO - needs tests
 
-    djstripecustomer, created = DJStripeCustomer.get_or_create(customer=customer_model)
+    customer, created = Customer.get_or_create(subscriber=subscriber_model)
     try:
-        cu = djstripecustomer.stripe_customer
-        djstripecustomer.sync(cu=cu)
-        djstripecustomer.sync_current_subscription(cu=cu)
-        djstripecustomer.sync_invoices(cu=cu)
-        djstripecustomer.sync_charges(cu=cu)
+        cu = customer.stripe_customer
+        customer.sync(cu=cu)
+        customer.sync_current_subscription(cu=cu)
+        customer.sync_invoices(cu=cu)
+        customer.sync_charges(cu=cu)
     except stripe.error.InvalidRequestError as e:
         if PY3:
             print("ERROR: " + str(e))
         else:
             print("ERROR: " + e.message)
-    return djstripecustomer
+    return customer
 
 
 def sync_plans():

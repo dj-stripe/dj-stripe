@@ -7,7 +7,7 @@ Note: Django 1.4 support was dropped in #107
 from django.contrib import admin
 
 from .models import Event, EventProcessingException, Transfer, Charge, Plan
-from .models import Invoice, InvoiceItem, CurrentSubscription, DJStripeCustomer
+from .models import Invoice, InvoiceItem, CurrentSubscription, Customer
 
 
 class CustomerHasCardListFilter(admin.SimpleListFilter):
@@ -39,9 +39,9 @@ class InvoiceCustomerHasCardListFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == "yes":
-            return queryset.exclude(djstripecustomer__card_fingerprint="")
+            return queryset.exclude(customer__card_fingerprint="")
         if self.value() == "no":
-            return queryset.filter(djstripecustomer__card_fingerprint="")
+            return queryset.filter(customer__card_fingerprint="")
 
 
 class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
@@ -80,7 +80,7 @@ admin.site.register(
     readonly_fields=('created',),
     list_display=[
         "stripe_id",
-        "djstripecustomer",
+        "customer",
         "amount",
         "description",
         "paid",
@@ -92,8 +92,8 @@ admin.site.register(
     ],
     search_fields=[
         "stripe_id",
-        "djstripecustomer__stripe_id",
-        "djstripecustomer__customer__email",
+        "customer__stripe_id",
+        "customer__subscriber__email",
         "card_last_4",
         "invoice__stripe_id"
     ],
@@ -105,7 +105,7 @@ admin.site.register(
         "created"
     ],
     raw_id_fields=[
-        "djstripecustomer",
+        "customer",
         "invoice"
     ],
     actions=(send_charge_receipt,),
@@ -128,7 +128,7 @@ admin.site.register(
 
 admin.site.register(
     Event,
-    raw_id_fields=["djstripecustomer"],
+    raw_id_fields=["customer"],
     readonly_fields=('created',),
     list_display=[
         "stripe_id",
@@ -146,8 +146,8 @@ admin.site.register(
     ],
     search_fields=[
         "stripe_id",
-        "djstripecustomer__stripe_id",
-        "djstripecustomer__customer__email",
+        "customer__stripe_id",
+        "customer__subscriber__email",
         "validated_message"
     ],
 )
@@ -163,12 +163,12 @@ subscription_status.short_description = "Subscription Status"
 
 
 admin.site.register(
-    DJStripeCustomer,
-    raw_id_fields=["customer"],
+    Customer,
+    raw_id_fields=["subscriber"],
     readonly_fields=('created',),
     list_display=[
         "stripe_id",
-        "customer",
+        "subscriber",
         "card_kind",
         "card_last_4",
         subscription_status,
@@ -181,7 +181,7 @@ admin.site.register(
     ],
     search_fields=[
         "stripe_id",
-        "customer__email"
+        "subscriber__email"
     ],
     inlines=[CurrentSubscriptionInline]
 )
@@ -191,28 +191,28 @@ class InvoiceItemInline(admin.TabularInline):
     model = InvoiceItem
 
 
-def djstripecustomer_has_card(obj):
+def customer_has_card(obj):
     """ Returns True if the customer has a card attached to its account."""
-    return obj.djstripecustomer.card_fingerprint != ""
-djstripecustomer_has_card.short_description = "DJStripeCustomer Has Card"
+    return obj.customer.card_fingerprint != ""
+customer_has_card.short_description = "Customer Has Card"
 
 
-def djstripecustomer_email(obj):
-    """ Returns a string representation of the djstripe customer's email."""
-    return str(obj.djstripecustomer.customer.email)
-djstripecustomer_email.short_description = "DJStripeCustomer"
+def customer_email(obj):
+    """ Returns a string representation of the customer's email."""
+    return str(obj.customer.subscriber.email)
+customer_email.short_description = "Customer"
 
 
 admin.site.register(
     Invoice,
-    raw_id_fields=["djstripecustomer"],
+    raw_id_fields=["customer"],
     readonly_fields=('created',),
     list_display=[
         "stripe_id",
         "paid",
         "closed",
-        djstripecustomer_email,
-        djstripecustomer_has_card,
+        customer_email,
+        customer_has_card,
         "period_start",
         "period_end",
         "subtotal",
@@ -221,8 +221,8 @@ admin.site.register(
     ],
     search_fields=[
         "stripe_id",
-        "djstripecustomer__stripe_id",
-        "djstripecustomer__customer__email"
+        "customer__stripe_id",
+        "customer__subscriber__email"
     ],
     list_filter=[
         InvoiceCustomerHasCardListFilter,

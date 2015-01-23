@@ -1,6 +1,5 @@
 import datetime
 import decimal
-import sys
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
@@ -11,7 +10,7 @@ from django.test.client import RequestFactory
 from django.utils import timezone
 
 from djstripe.decorators import subscription_payment_required
-from djstripe.models import DJStripeCustomer, CurrentSubscription
+from djstripe.models import Customer, CurrentSubscription
 
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
@@ -26,7 +25,7 @@ class TestDeprecationWarning(AssertWarnsEnabledTestCase):
         with self.assertWarns(DeprecationWarning):
             from djstripe.decorators import user_passes_pay_test
 
-            test_func = (lambda customer: True)
+            test_func = (lambda subscriber: True)
             user_passes_pay_test(test_func=test_func)
 
 
@@ -53,8 +52,8 @@ class TestSubscriptionPaymentRequired(TestCase):
         # create customer object with no subscription
         user = get_user_model().objects.create_user(username="pydanny",
                                                     email="pydanny@gmail.com")
-        DJStripeCustomer.objects.create(
-            customer=user,
+        Customer.objects.create(
+            subscriber=user,
             stripe_id="cus_xxxxxxxxxxxxxxx",
             card_fingerprint="YYYYYYYY",
             card_last_4="2342",
@@ -78,15 +77,15 @@ class TestSubscriptionPaymentRequired(TestCase):
         user = get_user_model().objects.create_user(username="pydanny",
                                                     email="pydanny@gmail.com")
 
-        djstripecustomer = DJStripeCustomer.objects.create(
-            customer=user,
+        customer = Customer.objects.create(
+            subscriber=user,
             stripe_id="cus_xxxxxxxxxxxxxxx",
             card_fingerprint="YYYYYYYY",
             card_last_4="2342",
             card_kind="Visa"
         )
         CurrentSubscription.objects.create(
-            djstripecustomer=djstripecustomer,
+            customer=customer,
             plan="test",
             current_period_start=period_start,
             current_period_end=period_end,
