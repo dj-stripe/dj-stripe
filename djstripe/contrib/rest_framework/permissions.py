@@ -2,7 +2,7 @@
 from rest_framework.permissions import BasePermission
 
 from ...utils import subscriber_has_active_subscription
-from ...settings import SUBSCRIBER_REQUEST_CALLBACK
+from ...settings import subscriber_request_callback
 
 
 class DJStripeSubscriptionPermission(BasePermission):
@@ -19,6 +19,6 @@ class DJStripeSubscriptionPermission(BasePermission):
         """
 
         try:
-            subscriber_has_active_subscription(SUBSCRIBER_REQUEST_CALLBACK(request))
+            subscriber_has_active_subscription(subscriber_request_callback(request))
         except AttributeError:
             return False
