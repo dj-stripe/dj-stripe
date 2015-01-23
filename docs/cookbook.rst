@@ -123,7 +123,7 @@ Sometimes you want a custom plan for per-customer billing. Or perhaps you are pr
 Making individual purchases
 ---------------------------
 
-On the subscriber's customer object, use the charge method to generate a Stripe charge. You'll need to have already captured the customer instance. In this example, we're using the user with ID=1 as the customer.
+On the subscriber's customer object, use the charge method to generate a Stripe charge. In this example, we're using the user with ID=1 as the subscriber.
 
 .. code-block:: python
 
