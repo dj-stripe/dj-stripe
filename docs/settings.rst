@@ -118,12 +118,13 @@ Example:
 DJSTRIPE_SUBSCRIBER_MODEL (=settings.AUTH_USER_MODEL)
 ======================================================
 
-If the AUTH_USER_MODEL doesn't represent the object your application's subscription holder, you may define a subscriber model to use here.
+If the AUTH_USER_MODEL doesn't represent the object your application's subscription holder, you may define a subscriber model to use here. It should be a string in the form of 'app.model'.
 
 Rules:
 
 * DJSTRIPE_SUBSCRIBER_MODEL must have an ``email`` field. If your existing model has no email field, add an email property that defines an email address to use.
 * You must also implement ``DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK``.
+* The app that contains the referenced model must be higher up on your installed_apps list than djstripe.
 
 Example Model:
 
