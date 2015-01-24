@@ -18,6 +18,8 @@ it for reuse.
     from django.contrib.auth.models import AbstractUser 
     from django.db import models
     from django.utils.functional import cached_property
+    
+    from djstripe.utils import subscriber_has_active_subscription
 
 
     class User(AbstractUser):
@@ -32,26 +34,8 @@ it for reuse.
 
         @cached_property
         def has_active_subscription(self):
-            """
-            Helper property to check if a user has an active subscription.
-            """
-            # Anonymous users return false
-            if self.is_anonymous():
-                return False
-
-            # Import placed here to avoid circular imports
-            from djstripe.models import Customer
-
-            # Get or create the customer object
-            customer, created = Customer.get_or_create(self)
-
-            # If new customer, return false
-            # If existing customer but inactive return false
-            if created or not customer.has_active_subscription():
-                return False
-
-            # Existing, valid customer so return true
-            return True
+            """Checks if a user has an active subscription."""
+            return subscriber_has_active_subscription(self)
 
 Usage:
 
