@@ -124,7 +124,6 @@ Rules:
 
 * DJSTRIPE_SUBSCRIBER_MODEL must have an ``email`` field. If your existing model has no email field, add an email property that defines an email address to use.
 * You must also implement ``DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK``.
-* The app that contains the referenced model must be higher up on your installed_apps list than djstripe.
 
 Example Model:
 
