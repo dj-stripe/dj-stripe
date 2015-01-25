@@ -43,11 +43,6 @@
         // Disable the submit button to prevent repeated clicks
         $form.find('button').prop('disabled', true);
 
-        // TODO: Implement!
-        var username_url = "{% url 'djstripe:check_available_user_attr' 'username' %}?v="+ $('#id_username').val();
-        var email_url = "{% url 'djstripe:check_available_user_attr' 'email' %}?v="+ $('#id_email').val();
-
-
         Stripe.createToken($form, stripeResponseHandler);
 
         // Prevent the form from submitting with the default action

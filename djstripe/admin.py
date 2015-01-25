@@ -1,35 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Note: Code to make this work with Django 1.5+ customer user models
-        was inspired by work by Andrew Brown (@almostabc).
+Note: Django 1.4 support was dropped in #107
+        https://github.com/pydanny/dj-stripe/pull/107
 """
 
 from django.contrib import admin
-from django.db.models.fields import FieldDoesNotExist
 
 from .models import Event, EventProcessingException, Transfer, Charge, Plan
 from .models import Invoice, InvoiceItem, CurrentSubscription, Customer
-
-from .settings import User
-
-if hasattr(User, 'USERNAME_FIELD'):
-    # Using a Django 1.5 User model
-    user_search_fields = [
-        "customer__user__{0}".format(User.USERNAME_FIELD)
-    ]
-
-    try:
-        # get_field_by_name throws FieldDoesNotExist if the field is not present on the model
-        User._meta.get_field_by_name('email')
-        user_search_fields + ["customer__user__email"]
-    except FieldDoesNotExist:
-        pass
-else:
-    # Using a pre-Django 1.5 User model
-    user_search_fields = [
-        "customer__user__username",
-        "customer__user__email"
-    ]
 
 
 class CustomerHasCardListFilter(admin.SimpleListFilter):
@@ -115,11 +93,10 @@ admin.site.register(
     search_fields=[
         "stripe_id",
         "customer__stripe_id",
-        "customer__user__email",
+        "customer__subscriber__email",
         "card_last_4",
-        "customer__user__username",
         "invoice__stripe_id"
-    ] + user_search_fields,
+    ],
     list_filter=[
         "paid",
         "disputed",
@@ -170,10 +147,9 @@ admin.site.register(
     search_fields=[
         "stripe_id",
         "customer__stripe_id",
-        "customer__user__username",
-        "customer__user__email",
+        "customer__subscriber__email",
         "validated_message"
-    ] + user_search_fields,
+    ],
 )
 
 
@@ -188,11 +164,11 @@ subscription_status.short_description = "Subscription Status"
 
 admin.site.register(
     Customer,
-    raw_id_fields=["user"],
+    raw_id_fields=["subscriber"],
     readonly_fields=('created',),
     list_display=[
         "stripe_id",
-        "user",
+        "subscriber",
         "card_kind",
         "card_last_4",
         subscription_status,
@@ -205,9 +181,8 @@ admin.site.register(
     ],
     search_fields=[
         "stripe_id",
-        "user__username",
-        "user__email"
-    ] + user_search_fields,
+        "subscriber__email"
+    ],
     inlines=[CurrentSubscriptionInline]
 )
 
@@ -217,25 +192,15 @@ class InvoiceItemInline(admin.TabularInline):
 
 
 def customer_has_card(obj):
+    """ Returns True if the customer has a card attached to its account."""
     return obj.customer.card_fingerprint != ""
 customer_has_card.short_description = "Customer Has Card"
 
 
-def customer_user(obj):
-    if hasattr(obj.customer.user, 'USERNAME_FIELD'):
-        # Using a Django 1.5 User model
-        username = getattr(obj.customer.user, User.USERNAME_FIELD)
-    else:
-        # Using a pre-Django 1.5 User model
-        username = obj.customer.user.username
-    # In Django 1.5+ a User is not guaranteed to have an email field
-    email = getattr(obj.customer.user, 'email', '')
-
-    return "{0} <{1}>".format(
-        username,
-        email
-    )
-customer_has_card.short_description = "Customer"
+def customer_email(obj):
+    """ Returns a string representation of the customer's email."""
+    return str(obj.customer.subscriber.email)
+customer_email.short_description = "Customer"
 
 
 admin.site.register(
@@ -246,7 +211,7 @@ admin.site.register(
         "stripe_id",
         "paid",
         "closed",
-        customer_user,
+        customer_email,
         customer_has_card,
         "period_start",
         "period_end",
@@ -257,9 +222,8 @@ admin.site.register(
     search_fields=[
         "stripe_id",
         "customer__stripe_id",
-        "customer__user__username",
-        "customer__user__email"
-    ] + user_search_fields,
+        "customer__subscriber__email"
+    ],
     list_filter=[
         InvoiceCustomerHasCardListFilter,
         "paid",

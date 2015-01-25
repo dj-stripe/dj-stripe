@@ -23,3 +23,4 @@ Contributors
 * Thomas Parslow (@almost)
 * Leonid Shvechikov (@shvechikov)
 * sromero84
+* Alexander Kavanaugh <kavanaugh.development@outlook.com>
