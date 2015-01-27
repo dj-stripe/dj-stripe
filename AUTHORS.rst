@@ -23,3 +23,6 @@ Contributors
 * Thomas Parslow (@almost)
 * Leonid Shvechikov (@shvechikov)
 * sromero84
+* Mahdi Yusuf (@myusuf3)
+* Peter Baumgartner (@ipmb)
+

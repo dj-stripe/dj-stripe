@@ -3,8 +3,9 @@
 History
 =======
 
-0.3.6 (2014-10-??)
-----------------------
+
+0.4.0 (2015-01-??)
+==================
 
 * Remove "account" bug in Middleware (Thanks @sromero84)
 * Deprecated the ``djstripe.forms.StripeSubscriptionSignupForm``. Making this form work easily with both `dj-stripe` and `django-allauth` required too much abstraction. We'll include this code as a cookbook recipe, but it won't be in dj-stripe itself.
@@ -16,6 +17,14 @@ History
 * Fix correct plan selection on subscription in subscribe_form template. (Thanks Yasmine Charif)
 * Fix subscription status in account, _subscription_status, and cancel_subscription templates. (Thanks Yasmine Charif)
 * Update remaining DOM Ids for Bootstrap 3. (Thanks Yasmine Charif)
+* Fix ``charge.dispute.closed`` typo. (Thanks @ipmb)
+* Update publish command in setup.py. (Thanks @pydanny)
+* Fix contributing docs formatting. (Thanks @audreyr)
+* Explicitly specify tox's virtual environment names. (Thanks @audreyr)
+* Manually call django.setup() to populate apps registry. (Thanks @audreyr)
+* Remove Python 2.6 from Travis CI build. (Thanks @audreyr)
+* Drop Django 1.4 support. (Thanks @audreyr)
+* Use ``user.get_username()`` instead of ``user.username``, to support custom User models. (Thanks @shvechikov)
 
 
 0.3.5 (2014-05-01)
