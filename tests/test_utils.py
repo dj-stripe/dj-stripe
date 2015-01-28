@@ -60,6 +60,9 @@ class TestTimestampConversion(TestCase):
             None
         )
 
+    # NOTE: These next two tests will fail if your system clock is not in UTC
+    # Travis CI is, and coverage is good, so...
+
     @override_settings(USE_TZ=False)
     def test_conversion_without_field_name_no_tz(self):
         stamp = convert_tstamp(1365567407)
