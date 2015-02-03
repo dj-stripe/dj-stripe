@@ -83,7 +83,7 @@ If you want to quickly constrain a single Class-Based View, the ``djstripe.decor
 * **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they...:
 
     * ... have a valid subscription --or--
-    * ... are not ``user.is_staff==True``.
+    * ... are ``user.is_staff==True``.
 
 * **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system.
 
