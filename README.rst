@@ -11,6 +11,9 @@ Personally, as I work on several critical, high profile projects for the Python 
 
 If you wish to change the status of this project, please feel free to contact me at pydanny@gmail.com. Please not that since one of my agreements getting hired by my employer is that I end my consulting work, I am only interested in sponsorship of the project, not formal consulting work.
 
+.. _Cookiecutter: https://github.com/audreyr/cookiecutter
+.. _`Django Packages`: https://github.com/pydanny/djangopackages
+
 
 Badges
 ------
