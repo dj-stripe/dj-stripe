@@ -2,9 +2,22 @@
 dj-stripe
 =============================
 
+This Project is Unmaintained
+----------------------------
+
+Since anything involving payments requires a careful eye for detail, rather than spend 5-10 minutes a week glancing at pull requests and issues, until further notice this project is unmaintained. Use it at your own risk.
+
+Personally, as I work on several critical, high profile projects for the Python and Django communities (including Cookiecutter_ and `Django Packages`_), all my open source time goes to those efforts.
+
+If you wish to change the status of this project, please feel free to contact me at pydanny@gmail.com. Please not that since one of my agreements with my employer is that I ended my consulting work, I am only interested in sponsorship of the project, not formal consulting work.
+
+
+Badges
+------
+
 .. image:: https://badge.fury.io/py/dj-stripe.png
     :target: http://badge.fury.io/py/dj-stripe
-    
+
 .. image:: https://travis-ci.org/pydanny/dj-stripe.png?branch=master
         :target: https://travis-ci.org/pydanny/dj-stripe
 
