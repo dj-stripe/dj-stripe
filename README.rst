@@ -7,9 +7,9 @@ This Project is Unmaintained
 
 Since anything involving payments requires a careful eye for detail, rather than spend 5-10 minutes a week glancing at pull requests and issues, until further notice this project is unmaintained. Use it at your own risk.
 
-Personally, as I work on several critical, high profile projects for the Python and Django communities (including Cookiecutter_ and `Django Packages`_), all my admittedly limited open source time goes to those efforts.
+As I work on several critical, high profile projects for the Python and Django communities (including Cookiecutter_ and `Django Packages`_), all my admittedly limited open source time goes to those efforts.
 
-If you wish to change the status of this project, please feel free to contact me at pydanny@gmail.com. Please not that since one of my agreements getting hired by my employer is that I end my consulting work, I am only interested in sponsorship of the project, not formal consulting work.
+If you wish to change the status of this project, please feel free to contact me at pydanny@gmail.com. Please not that since one of my agreements getting hired by my employer is that I end my consulting work, I am only interested in **sponsorship** of the project, not formal consulting work.
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`Django Packages`: https://github.com/pydanny/djangopackages
