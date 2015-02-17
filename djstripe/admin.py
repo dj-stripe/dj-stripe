@@ -207,7 +207,7 @@ admin.site.register(
         "stripe_id",
         "user__username",
         "user__email"
-    ] + user_search_fields,
+    ],
     inlines=[CurrentSubscriptionInline]
 )
 
