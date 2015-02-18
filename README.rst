@@ -9,7 +9,7 @@ Since anything involving payments requires a careful eye for detail, rather than
 
 As I work on several critical, high profile projects for the Python and Django communities (including Cookiecutter_ and `Django Packages`_), all my admittedly limited open source time goes to those efforts.
 
-If you wish to change the status of this project, please feel free to contact me at pydanny@gmail.com. Please note that since one of my agreements getting hired by my employer is that I end my consulting work, I am only interested in **sponsorship** of the project, not formal consulting work.
+If you wish to change the status of this project by sponsoring it, please feel free to contact me at pydanny@gmail.com. Please note that since one of my agreements getting hired by my employer is that I end my consulting work, I am only interested in **sponsorship** of the project, not formal consulting work.
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`Django Packages`: https://github.com/pydanny/djangopackages
