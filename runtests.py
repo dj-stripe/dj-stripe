@@ -30,6 +30,10 @@ settings.configure(
         "jsonfield",
         "djstripe",
     ],
+    MIDDLEWARE_CLASSES = (
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+    ),
     SITE_ID=1,
     STRIPE_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", ""),
     STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", ""),
