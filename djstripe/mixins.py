@@ -33,8 +33,6 @@ class PaymentsContextMixin(object):
         context = super(PaymentsContextMixin, self).get_context_data(**kwargs)
         context.update({
             "STRIPE_PUBLIC_KEY": app_settings.STRIPE_PUBLIC_KEY,
-            "PLAN_CHOICES": app_settings.PLAN_CHOICES,
-            "PAYMENT_PLANS": app_settings.PAYMENTS_PLANS
         })
         return context
 
