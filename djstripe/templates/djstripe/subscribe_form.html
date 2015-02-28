@@ -29,7 +29,6 @@
                   data-key="{{ STRIPE_PUBLIC_KEY }}"
                   data-amount="{{ plan.amount }}"
                   data-name="{{ plan.name }}"
-                  data-description="{{ plan.description }}"
               {% else %}
                   data-stripe-key="{{ STRIPE_PUBLIC_KEY }}" 
                   action="{% url 'djstripe:change_plan' %}" class="djstripe-change-plan"
@@ -48,7 +47,6 @@
                     <img src="{% static image %}" class="img-thumbnail" />
                   {% endwith %}
                   <h3>{{ plan.name }}</h3>
-                  <p>{{ plan.description }}</p>
                 </button>
 
               {% if not customer.current_subscription or customer.current_subscription.status == CurrentSubscription.STATUS_CANCELLED %}
@@ -94,7 +92,7 @@
 
           return false;
         });
-        {% if PLAN_LIST|length > 1 %}
+        {% if plans|length > 1 %}
           $('.djstripe-change-plan').click(function(e){
               $("button[type=submit]").attr("disabled", "true");
               $('#in-progress').modal({"keyboard": false})
