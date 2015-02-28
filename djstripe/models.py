@@ -21,7 +21,7 @@ import stripe
 from . import exceptions
 from .managers import CustomerManager, ChargeManager, TransferManager
 
-from .settings import INVOICE_FROM_EMAIL, SEND_INVOICE_RECEIPT_EMAILS
+from .settings import PAYMENTS_PLANS, INVOICE_FROM_EMAIL, SEND_INVOICE_RECEIPT_EMAILS
 from .settings import PRORATION_POLICY, CANCELLATION_AT_PERIOD_END
 from .settings import PY3
 from .signals import WEBHOOK_SIGNALS
@@ -39,7 +39,7 @@ if PY3:
     unicode = str
 
 
-def get_interval_by_stripe_id(stripe_id):
+def plan_from_stripe_id(stripe_id):
     plan = Plan.objects.get(stripe_id=stripe_id)
 
     return plan.interval
@@ -489,7 +489,7 @@ class Customer(StripeObject):
         if sub:
             try:
                 sub_obj = self.current_subscription
-                sub_obj.plan = get_interval_by_stripe_id(sub.plan.id)
+                sub_obj.plan = plan_from_stripe_id(sub.plan.id)
                 sub_obj.current_period_start = convert_tstamp(
                     sub.current_period_start
                 )
@@ -506,7 +506,7 @@ class Customer(StripeObject):
             except CurrentSubscription.DoesNotExist:
                 sub_obj = CurrentSubscription.objects.create(
                     customer=self,
-                    plan=get_interval_by_stripe_id(sub.plan.id),
+                    plan=plan_from_stripe_id(sub.plan.id),
                     current_period_start=convert_tstamp(
                         sub.current_period_start
                     ),
@@ -539,7 +539,7 @@ class Customer(StripeObject):
 
     def update_plan_quantity(self, quantity, charge_immediately=False):
         self.subscribe(
-            plan=get_interval_by_stripe_id(
+            plan=plan_from_stripe_id(
                 self.stripe_customer.subscription.plan.id
             ),
             quantity=quantity,
@@ -632,7 +632,13 @@ class CurrentSubscription(TimeStampedModel):
     amount = models.DecimalField(decimal_places=2, max_digits=7)
 
     def plan_display(self):
-        plan_object = Plan.objects.get(stripe_id=self.plan)
+        """
+        Returns current subscription plan name
+        """
+        plan_object = Plan.objects.get(
+            interval=self.plan,
+            amount=self.amount
+        )
         return plan_object.name
 
     def status_display(self):
@@ -739,7 +745,7 @@ class Invoice(TimeStampedModel):
             invoice.period_end = period_end
 
             if item.get("plan"):
-                plan = get_interval_by_stripe_id(item["plan"]["id"])
+                plan = plan_from_stripe_id(item["plan"]["id"])
             else:
                 plan = ""
 
@@ -809,7 +815,13 @@ class InvoiceItem(TimeStampedModel):
     quantity = models.IntegerField(null=True)
 
     def plan_display(self):
-        plan_object = Plan.objects.get(stripe_id=self.plan)
+        """
+        Returns current subscription plan name
+        """
+        plan_object = Plan.objects.get(
+            interval=self.plan,
+            amount=self.amount
+        )
         return plan_object.name
 
 
