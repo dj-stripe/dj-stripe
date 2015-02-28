@@ -26,7 +26,6 @@ from .models import Customer
 from .models import Event
 from .models import Plan
 from .models import EventProcessingException
-from .settings import PLAN_LIST
 from .settings import CANCELLATION_AT_PERIOD_END
 from .settings import PRORATION_POLICY_FOR_UPGRADES
 from .settings import PY3
@@ -163,7 +162,7 @@ class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
             context['subscription'] = customer.current_subscription
         except CurrentSubscription.DoesNotExist:
             context['subscription'] = None
-        context['plans'] = PLAN_LIST
+        context['plans'] = Plan.objects.all()
         return context
 
 

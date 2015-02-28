@@ -72,7 +72,7 @@
                     <tbody>
                         
                         {% for plan in plans %}
-                            <tr {% if plan.interval == subscription.plan %} 
+                            <tr {% if plan.interval == subscription.plan and customer.current_subscription.amount == plan.amount %} 
         						{% if subscription.is_status_current and not subscription.is_status_temporarily_current and subscription.status != subscription.STATUS_TRIALING %} 
         							class="success" 
         						{% elif subscription.is_status_temporarily_current or subscription.status == subscription.STATUS_TRIALING %} 
@@ -83,7 +83,7 @@
                                 <td>{{ plan.name }}</td>
                                 <td>{{ plan.interval.title }}ly</td>
                                 <td>
-                                	{% if plan.interval == subscription.plan and subscription.status != subscription.STATUS_CANCELLED %}
+                                	{% if plan.interval == subscription.plan and subscription.status != subscription.STATUS_CANCELLED and customer.current_subscription.amount == plan.amount %}
                                         <strong>Your plan</strong>
                                     {% else %}
                                         Not your plan

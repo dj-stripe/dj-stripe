@@ -27,17 +27,14 @@
               {% if not customer.current_subscription or customer.current_subscription.status == CurrentSubscription.STATUS_CANCELLED %}
                   action="{% url 'djstripe:subscribe' %}" class="djstripe-subscribe"  
                   data-key="{{ STRIPE_PUBLIC_KEY }}"
-                  data-amount="{{ plan.price }}"
+                  data-amount="{{ plan.amount }}"
                   data-name="{{ plan.name }}"
                   data-description="{{ plan.description }}"
               {% else %}
                   data-stripe-key="{{ STRIPE_PUBLIC_KEY }}" 
                   action="{% url 'djstripe:change_plan' %}" class="djstripe-change-plan"
               {% endif %}
-            method="POST">
-
-               
-                {% csrf_token %}
+            method="POST">{% csrf_token %}
                 <input type="hidden" name="plan" value="{{ plan.stripe_id }}" />
                 <input name="stripe_token" type="hidden" /> 
 
@@ -55,8 +52,9 @@
                 </button>
 
               {% if not customer.current_subscription or customer.current_subscription.status == CurrentSubscription.STATUS_CANCELLED %}
-                <!-- do nothing -->
-              {% elif customer.current_subscription.plan == plan.stripe_id %}
+              {# do nothing #}
+              {% elif customer.current_subscription.plan == plan.interval and customer.current_subscription.amount == plan.amount %}
+              {# check if user plan owner #}
                 <h4>Your Current Plan</h4>
               {% elif customer.current_subscription.amount < plan.amount|djdiv:100 %}
                 <h4>Upgrade</h4>

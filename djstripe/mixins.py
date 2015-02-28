@@ -40,7 +40,8 @@ class PaymentsContextMixin(object):
 class SubscriptionMixin(PaymentsContextMixin):
     def get_context_data(self, *args, **kwargs):
         context = super(SubscriptionMixin, self).get_context_data(**kwargs)
-        context['is_plans_plural'] = bool(len(app_settings.PLAN_CHOICES) > 1)
+        # TODO: Needs to refactor
+        # context['is_plans_plural'] = bool(len(app_settings.PLAN_CHOICES) > 1)
         context['customer'], created = Customer.get_or_create(self.request.user)
         context['CurrentSubscription'] = CurrentSubscription
         return context
