@@ -222,7 +222,6 @@ class ChangePlanView(LoginRequiredMixin,
     def post(self, request, *args, **kwargs):
         form = PlanForm(request.POST)
         customer = request.user.customer
-        import ipdb; ipdb.set_trace()
         if form.is_valid():
             try:
                 """
