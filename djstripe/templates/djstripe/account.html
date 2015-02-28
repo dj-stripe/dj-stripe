@@ -27,15 +27,6 @@
 
 
 
-{% if subscription.is_status_current and not subscription.is_status_temporarily_current %}<p>Next billed on {{ subscription.current_period_end|date }}.</p>
-			<p>You can <a href="{% url 'djstripe:subscribe' %}">change</a> your plan
-				or <a href="{% url 'djstripe:cancel_subscription' %}">cancel</a> your subscription.
-    		</p>
-			{% else %}
-			<p>You can <a href="{% url 'djstripe:subscribe' %}">subscribe</a>.</p>
-    		{% endif %}
-    		<p>Or consult your <a href="{% url 'djstripe:history' %}">payment history</a>.</p>
-
 
     {% if plans %}
         {# Show available plans #}
@@ -49,7 +40,7 @@
             	{# Do not show next billing if subscription has been canceled although is still active #}
             	{% if subscription.is_status_current and not subscription.is_status_temporarily_current %}
             	<p>Next billed on {{ subscription.current_period_end|date }}.</p>
-            	<p>You can <a href="{% url 'djstripe:change_plan' %}">change</a> your plan
+            	<p>You can <a href="{% url 'djstripe:subscribe' %}">change</a> your plan
 					or <a href="{% url 'djstripe:cancel_subscription' %}">cancel</a> your subscription.
     			</p>
 				{% else %}
