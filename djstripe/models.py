@@ -21,7 +21,7 @@ import stripe
 from . import exceptions
 from .managers import CustomerManager, ChargeManager, TransferManager
 
-from .settings import PAYMENTS_PLANS, INVOICE_FROM_EMAIL, SEND_INVOICE_RECEIPT_EMAILS
+from .settings import INVOICE_FROM_EMAIL, SEND_INVOICE_RECEIPT_EMAILS
 from .settings import PRORATION_POLICY, CANCELLATION_AT_PERIOD_END
 from .settings import PY3
 from .signals import WEBHOOK_SIGNALS
