@@ -229,6 +229,7 @@ class ChangePlanView(LoginRequiredMixin,
                 no matter what PRORATION_POLICY is set to.
                 """
                 if PRORATION_POLICY_FOR_UPGRADES:
+                    # TODO: Needs refactor
                     current_subscription_amount = customer.current_subscription.amount
                     selected_plan_name = form.cleaned_data["plan"]
                     selected_plan = next(
@@ -243,7 +244,7 @@ class ChangePlanView(LoginRequiredMixin,
                     else:
                         customer.subscribe(selected_plan_name)
                 else:
-                    customer.subscribe(form.cleaned_data["plan"])
+                    customer.subscribe(form.cleaned_data.get("plan"))
             except stripe.StripeError as e:
                 self.error = e.message
                 return self.form_invalid(form)

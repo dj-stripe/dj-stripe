@@ -22,7 +22,7 @@ from . import exceptions
 from .managers import CustomerManager, ChargeManager, TransferManager
 
 from .settings import INVOICE_FROM_EMAIL, SEND_INVOICE_RECEIPT_EMAILS
-from .settings import PRORATION_POLICY, CANCELLATION_AT_PERIOD_END
+from .settings import PRORATION_POLICY
 from .settings import PY3
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
@@ -546,7 +546,7 @@ class Customer(StripeObject):
             charge_immediately=charge_immediately
         )
 
-    def subscribe(self, plan, quantity=1, trial_days=None,
+    def subscribe(self, stripe_plan_id, quantity=1, trial_days=None,
                   charge_immediately=True, prorate=PRORATION_POLICY):
         cu = self.stripe_customer
         """
@@ -554,7 +554,7 @@ class Customer(StripeObject):
         for the key trial_period_days.
         """
 
-        plan_object = Plan.objects.get(stripe_id=plan)
+        plan_object = Plan.objects.get(stripe_id=stripe_plan_id)
 
         if plan_object.trial_period_days:
             trial_days = plan_object.trial_period_days
@@ -575,7 +575,11 @@ class Customer(StripeObject):
         self.sync_current_subscription()
         if charge_immediately:
             self.send_invoice()
-        subscription_made.send(sender=self, plan=plan, stripe_response=resp)
+        subscription_made.send(
+            sender=self,
+            plan=stripe_plan_id,
+            stripe_response=resp
+        )
 
     def charge(self, amount, currency="usd", description=None, send_receipt=True):
         """
