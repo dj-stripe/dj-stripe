@@ -23,7 +23,6 @@ from .managers import CustomerManager, ChargeManager, TransferManager
 
 from .settings import PAYMENTS_PLANS, INVOICE_FROM_EMAIL, SEND_INVOICE_RECEIPT_EMAILS
 from .settings import PRORATION_POLICY, CANCELLATION_AT_PERIOD_END
-from .settings import plan_from_stripe_id
 from .settings import PY3
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
@@ -38,6 +37,12 @@ stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
 
 if PY3:
     unicode = str
+
+
+def plan_from_stripe_id(stripe_id):
+    plan = Plan.objects.get(stripe_id=stripe_id)
+
+    return plan.interval
 
 
 def convert_tstamp(response, field_name=None):
@@ -548,19 +553,22 @@ class Customer(StripeObject):
         Trial_days corresponds to the value specified by the selected plan
         for the key trial_period_days.
         """
-        if ("trial_period_days" in PAYMENTS_PLANS[plan]):
-            trial_days = PAYMENTS_PLANS[plan]["trial_period_days"]
-        
+
+        plan_object = Plan.objects.get(stripe_id=plan)
+
+        if plan_object.trial_period_days:
+            trial_days = plan_object.trial_period_days
+
         if trial_days:
             resp = cu.update_subscription(
-                plan=PAYMENTS_PLANS[plan]["stripe_plan_id"],
+                plan=plan_object.stripe_id,
                 trial_end=timezone.now() + datetime.timedelta(days=trial_days),
                 prorate=prorate,
                 quantity=quantity
             )
         else:
             resp = cu.update_subscription(
-                plan=PAYMENTS_PLANS[plan]["stripe_plan_id"],
+                plan=plan_object.stripe_id,
                 prorate=prorate,
                 quantity=quantity
             )
@@ -624,7 +632,8 @@ class CurrentSubscription(TimeStampedModel):
     amount = models.DecimalField(decimal_places=2, max_digits=7)
 
     def plan_display(self):
-        return PAYMENTS_PLANS[self.plan]["name"]
+        plan_object = Plan.objects.get(stripe_id=self.plan)
+        return plan_object.name
 
     def status_display(self):
         return self.status.replace("_", " ").title()
@@ -800,7 +809,8 @@ class InvoiceItem(TimeStampedModel):
     quantity = models.IntegerField(null=True)
 
     def plan_display(self):
-        return PAYMENTS_PLANS[self.plan]["name"]
+        plan_object = Plan.objects.get(stripe_id=self.plan)
+        return plan_object.name
 
 
 class Charge(StripeObject):

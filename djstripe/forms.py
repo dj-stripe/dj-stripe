@@ -14,10 +14,12 @@ from .settings import PLAN_CHOICES, PASSWORD_INPUT_RENDER_VALUE, \
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
 
+from .models import Plan
 
 class PlanForm(forms.Form):
-
-    plan = forms.ChoiceField(choices=PLAN_CHOICES)
+    plan = forms.ChoiceField(
+        choices=[(plan.stripe_id, plan.name) for plan in Plan.objects.all()]
+    )
 
 
 class CancelSubscriptionForm(forms.Form):

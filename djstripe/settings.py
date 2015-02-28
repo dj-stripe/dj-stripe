@@ -23,12 +23,6 @@ def get_user_model():
 User = SimpleLazyObject(get_user_model)
 
 
-def plan_from_stripe_id(stripe_id):
-    for key in PAYMENTS_PLANS.keys():
-        if PAYMENTS_PLANS[key].get("stripe_plan_id") == stripe_id:
-            return key
-
-
 def load_path_attr(path):
     i = path.rfind(".")
     module, attr = path[:i], path[i + 1:]

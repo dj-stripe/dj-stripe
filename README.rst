@@ -82,6 +82,7 @@ Add the context processor to your ``TEMPLATE_CONTEXT_PROCESSORS``:
 
     TEMPLATE_CONTEXT_PROCESSORS +=(
         'djstripe.context_processors.djstripe_settings',
+        'django.core.context_processors.request',
     )
 
 Add your stripe keys:

@@ -24,6 +24,7 @@ from .mixins import PaymentsContextMixin, SubscriptionMixin
 from .models import CurrentSubscription
 from .models import Customer
 from .models import Event
+from .models import Plan
 from .models import EventProcessingException
 from .settings import PLAN_LIST
 from .settings import CANCELLATION_AT_PERIOD_END
@@ -181,6 +182,11 @@ class SubscribeFormView(
     success_url = reverse_lazy("djstripe:history")
     form_valid_message = "You are now subscribed!"
 
+    def get_context_data(self, **kwargs):
+        context = super(SubscribeFormView, self).get_context_data(**kwargs)
+        context['plans'] = Plan.objects.all()
+        return context
+
     def post(self, request, *args, **kwargs):
         """
         Handles POST requests, instantiating a form instance with the passed
@@ -216,6 +222,7 @@ class ChangePlanView(LoginRequiredMixin,
     def post(self, request, *args, **kwargs):
         form = PlanForm(request.POST)
         customer = request.user.customer
+        import ipdb; ipdb.set_trace()
         if form.is_valid():
             try:
                 """

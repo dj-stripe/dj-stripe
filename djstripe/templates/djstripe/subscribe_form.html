@@ -19,8 +19,8 @@
 {% endif %}
 
 <div class="row">
-    {% for plan in PLAN_LIST %}
-      {% with plan_count=PLAN_LIST|length %}
+    {% for plan in plans %}
+      {% with plan_count=plans|length %}
         <div class="col-xs-{{ 12|djdiv:plan_count|floatformat }}">
       {% endwith %}
             <form
@@ -38,12 +38,12 @@
 
                
                 {% csrf_token %}
-                <input type="hidden" name="plan" value="{{ plan.plan }}" />
+                <input type="hidden" name="plan" value="{{ plan.stripe_id }}" />
                 <input name="stripe_token" type="hidden" /> 
 
                 <!-- disable this when clicked -->
                 <button
-                  {% if customer.current_subscription.plan == plan.plan and customer.current_subscription.status != CurrentSubscription.STATUS_CANCELLED %}
+                  {% if customer.current_subscription.plan == plan.stripe_id and customer.current_subscription.status != CurrentSubscription.STATUS_CANCELLED %}
                     disabled="true"
                   {% endif %}
                  type="submit" class="btn btn-primary">
@@ -56,11 +56,11 @@
 
               {% if not customer.current_subscription or customer.current_subscription.status == CurrentSubscription.STATUS_CANCELLED %}
                 <!-- do nothing -->
-              {% elif customer.current_subscription.plan == plan.plan %}
+              {% elif customer.current_subscription.plan == plan.stripe_id %}
                 <h4>Your Current Plan</h4>
-              {% elif customer.current_subscription.amount < plan.price|djdiv:100 %}
+              {% elif customer.current_subscription.amount < plan.amount|djdiv:100 %}
                 <h4>Upgrade</h4>
-              {% elif customer.current_subscription.amount > plan.price|djdiv:100 %}
+              {% elif customer.current_subscription.amount > plan.amount|djdiv:100 %}
                 <h4>Downgrade</h4>
               {% endif %}
             </form>
