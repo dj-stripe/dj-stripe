@@ -28,7 +28,7 @@ INSTALL_REQUIRES = [
     'stripe>=1.9.2',
     'django-model-utils>=1.4.0',
     'django-braces>=1.2.1',
-    'django-jsonfield>=0.9.10'
+    'jsonfield>=1.0.3'
 ]
 
 # Add ordereddict to users of Python 2.6.
