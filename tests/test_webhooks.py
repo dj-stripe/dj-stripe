@@ -87,7 +87,7 @@ class TestTransferWebhooks(TestCase):
         transfer = Transfer.objects.get(stripe_id="tr_XXXXXXXXXXXX")
         self.assertEquals(transfer.amount, decimal.Decimal("4.55"))
         self.assertEquals(transfer.status, "paid")
-    
+
     def test_transfer_paid_updates_existing_record(self):
         event = Event.objects.create(
             stripe_id=TRANSFER_CREATED_TEST_DATA["id"],

@@ -28,10 +28,11 @@ Constraining Entire Sites
 
 If you want to quickly constrain an entire site, the ``djstripe.middleware.SubscriptionPaymentMiddleware`` middleware does the following to user requests:
 
-* **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they...:
+* **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they:
 
-    * ... have a valid subscription --or--
-    * ... are not ``user.is_staff==True``.
+    * have a valid subscription --or--
+    * are superusers (user.is_superuser==True) --or--
+    * are staff members (user.is_staff==True).
 
 * **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system.
 
@@ -80,10 +81,11 @@ Constraining Class-Based Views
 
 If you want to quickly constrain a single Class-Based View, the ``djstripe.decorators.subscription_payment_required`` decorator does the following to user requests:
 
-* **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they...:
+* **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they:
 
-    * ... have a valid subscription --or--
-    * ... are not ``user.is_staff==True``.
+    * have a valid subscription --or--
+    * are superusers (user.is_superuser==True) --or--
+    * are staff members (user.is_staff==True).
 
 * **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system.
 
@@ -125,10 +127,11 @@ Constraining Function-Based Views
 
 If you want to quickly constrain a single Function-Based View, the ``djstripe.decorators.subscription_payment_required`` decorator does the following to user requests:
 
-* **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they...:
+* **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they:
 
-    * ... have a valid subscription --or--
-    * ... are not ``user.is_staff==True``.
+    * have a valid subscription --or--
+    * are superusers (user.is_superuser==True) --or--
+    * are staff members (user.is_staff==True).
 
 * **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system.
 

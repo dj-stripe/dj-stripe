@@ -2,18 +2,19 @@ from django.test import TestCase
 
 from mock import patch
 
+from django.contrib.auth import get_user_model
+
 from djstripe.models import Customer, Event
-from djstripe.settings import User
 
 
 class TestEventMethods(TestCase):
 
     def setUp(self):
-        self.user = User.objects.create_user(username="testuser")
-        self.user.save()
+        self.user = get_user_model().objects.create_user(username="testuser",
+                                                         email="testuser@gmail.com")
         self.customer = Customer.objects.create(
             stripe_id="cus_xxxxxxxxxxxxxxx",
-            user=self.user
+            subscriber=self.user
         )
 
     def test_link_customer_customer_created(self):
@@ -174,4 +175,4 @@ class TestEventMethods(TestCase):
         )
         event.process()
         self.assertEquals(event.customer, self.customer)
-        self.assertEquals(event.customer.user, None)
+        self.assertEquals(event.customer.subscriber, None)

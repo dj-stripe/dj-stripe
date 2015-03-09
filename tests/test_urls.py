@@ -14,6 +14,7 @@ urlpatterns = patterns('',
     url(r'^djstripe/', include('djstripe.urls',
             namespace="djstripe", app_name="djstripe")),
     url(r'^testapp/', include('tests.apps.testapp.urls')),
+    url(r'^__debug__/', include('tests.apps.testapp.urls')),
     url(
         r'^testapp_namespaced/',
         include('tests.apps.testapp_namespaced.urls',
@@ -23,4 +24,3 @@ urlpatterns = patterns('',
     # Represents protected content
     url(r'^testapp_content/', include('tests.apps.testapp_content.urls')),
 )
-

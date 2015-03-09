@@ -36,6 +36,10 @@ nosetests.xml
 .project
 .pydevproject
 
+# Eclipse Project Files
+.settings/
+.prefs
+
 # Sphinx
 docs/_build
 htmlcov
