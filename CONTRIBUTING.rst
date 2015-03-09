@@ -82,9 +82,15 @@ Now you can make your changes locally.
 tests, including testing other Python versions with tox::
 
     $ pip install -r requirements_test.txt
-    $ flake8 dj-stripe tests
+    $ flake8 djstripe tests
     $ python runtests.py
     $ tox
+  
+.. note:: Most pep8 errors in this package either of type E501 or E128.
+
+    Run flake8 with the ignore flag to hide those errors:
+
+        $ flake8 djstripe tests --ignore=E501,E128
 
 To get flake8 and tox, just pip install them into your virtualenv. 
 

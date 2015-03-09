@@ -1,12 +1,12 @@
 import datetime
 import decimal
 
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 
 from . import TRANSFER_CREATED_TEST_DATA, TRANSFER_CREATED_TEST_DATA2
 from djstripe.models import Event, Transfer, Customer, CurrentSubscription
-from djstripe.settings import User
 
 
 class CustomerManagerTest(TestCase):
@@ -18,7 +18,8 @@ class CustomerManagerTest(TestCase):
         start = datetime.datetime(2013, 1, 1, 0, 0, 1)  # more realistic start
         for i in range(10):
             customer = Customer.objects.create(
-                user=User.objects.create_user(username="patrick{0}".format(i)),
+                subscriber=get_user_model().objects.create_user(username="patrick{0}".format(i),
+                                                              email="patrick{0}@gmail.com".format(i)),
                 stripe_id="cus_xxxxxxxxxxxxxx{0}".format(i),
                 card_fingerprint="YYYYYYYY",
                 card_last_4="2342",
@@ -35,7 +36,8 @@ class CustomerManagerTest(TestCase):
                 quantity=1
             )
         customer = Customer.objects.create(
-            user=User.objects.create_user(username="patrick{0}".format(11)),
+            subscriber=get_user_model().objects.create_user(username="patrick{0}".format(11),
+                                                          email="patrick{0}@gmail.com".format(11)),
             stripe_id="cus_xxxxxxxxxxxxxx{0}".format(11),
             card_fingerprint="YYYYYYYY",
             card_last_4="2342",
@@ -53,7 +55,8 @@ class CustomerManagerTest(TestCase):
             quantity=1
         )
         customer = Customer.objects.create(
-            user=User.objects.create_user(username="patrick{0}".format(12)),
+            subscriber=get_user_model().objects.create_user(username="patrick{0}".format(12),
+                                                          email="patrick{0}@gmail.com".format(12)),
             stripe_id="cus_xxxxxxxxxxxxxx{0}".format(12),
             card_fingerprint="YYYYYYYY",
             card_last_4="2342",

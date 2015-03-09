@@ -4,23 +4,75 @@ import sys
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import importlib
-from django.utils.functional import SimpleLazyObject
 
 from . import safe_settings
 
 PY3 = sys.version > "3"
 
+if PY3:
+    basestring = str
 
-def get_user_model():
-    """ Place this in a function to avoid circular imports """
-    try:
+subscriber_request_callback = getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK", (lambda request: request.user))
+
+
+def get_subscriber_model():
+    """
+    Users have the option of specifying a custom subscriber model via the
+    DJSTRIPE_SUBSCRIBER_MODEL setting.
+
+    This method attempts to pull that model from settings, and falls back to
+    AUTH_USER_MODEL if DJSTRIPE_SUBSCRIBER_MODEL is not set.
+
+    Note: Django 1.4 support was dropped in #107
+          https://github.com/pydanny/dj-stripe/pull/107
+
+    Returns the subscriber model that is active in this project.
+    """
+
+    SUBSCRIBER_MODEL = getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", None)
+
+    # Check if a subscriber model is specified. If not, fall back and exit.
+    if not SUBSCRIBER_MODEL:
         from django.contrib.auth import get_user_model
-        User = get_user_model()
-    except ImportError:
-        from django.contrib.auth.models import User
-    return User
+        return get_user_model()
 
-User = SimpleLazyObject(get_user_model)
+    subscriber_model = None
+
+    # Attempt a Django 1.7 app lookup first
+    try:
+        from django.apps import apps as django_apps
+    except ImportError:
+        # Attempt to pull the model Django 1.5/1.6 style
+        try:
+            app_label, model_name = SUBSCRIBER_MODEL.split('.')
+        except ValueError:
+            raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL must be of the form 'app_label.model_name'.")
+
+        from django.db.models import get_model
+        subscriber_model = get_model(app_label, model_name)
+        if subscriber_model is None:
+            raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL refers to model '{model}' that has not been installed.".format(model=SUBSCRIBER_MODEL))
+    else:
+        # Continue attempting to pull the model Django 1.7 style
+        try:
+            subscriber_model = django_apps.get_model(SUBSCRIBER_MODEL)
+        except ValueError:
+            raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL must be of the form 'app_label.model_name'.")
+        except LookupError:
+            raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL refers to model '{model}' that has not been installed.".format(model=SUBSCRIBER_MODEL))
+
+    # Ensure the custom model has an ``email`` field or property.
+    if ("email" not in subscriber_model._meta.get_all_field_names()) and not hasattr(subscriber_model, 'email'):
+        raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL must have an email attribute.")
+
+    # Custom user model detected. Make sure the callback is configured.
+    if hasattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK"):
+        if not callable(getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK")):
+            raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be callable.")
+    else:
+        raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be implemented if a DJSTRIPE_SUBSCRIBER_MODEL is defined.")
+
+    return subscriber_model
 
 
 def plan_from_stripe_id(stripe_id):
@@ -64,11 +116,7 @@ DEFAULT_PLAN = getattr(
     "DJSTRIPE_DEFAULT_PLAN",
     None
 )
-TRIAL_PERIOD_FOR_USER_CALLBACK = getattr(
-    settings,
-    "DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK",
-    None
-)
+
 PLAN_LIST = []
 for p in PAYMENTS_PLANS:
     if PAYMENTS_PLANS[p].get("stripe_plan_id"):
@@ -76,16 +124,17 @@ for p in PAYMENTS_PLANS:
         plan['plan'] = p
         PLAN_LIST.append(plan)
 
-if PY3:
-    if isinstance(TRIAL_PERIOD_FOR_USER_CALLBACK, str):
-        TRIAL_PERIOD_FOR_USER_CALLBACK = load_path_attr(
-            TRIAL_PERIOD_FOR_USER_CALLBACK
-        )
-else:
-    if isinstance(TRIAL_PERIOD_FOR_USER_CALLBACK, basestring):
-        TRIAL_PERIOD_FOR_USER_CALLBACK = load_path_attr(
-            TRIAL_PERIOD_FOR_USER_CALLBACK
-        )
+# Try to find the new settings variable first. If that fails, revert to the
+# old variable.
+trial_period_for_subscriber_callback = getattr(settings,
+    "DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK",
+    getattr(settings, "DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK", None)
+)
+
+if isinstance(trial_period_for_subscriber_callback, basestring):
+    trial_period_for_subscriber_callback = load_path_attr(
+        trial_period_for_subscriber_callback
+    )
 
 DJSTRIPE_WEBHOOK_URL = getattr(
     settings,
