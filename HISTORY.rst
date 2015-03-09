@@ -7,6 +7,8 @@ History
 0.4.0 (2015-01-??)
 ----------------------
 
+* Formal Python 3.3+/Django 1.7 Support
+* Ability to add custom customer model (Thanks @kavdev)
 * Remove "account" bug in Middleware (Thanks @sromero84)
 * Deprecated the ``djstripe.forms.StripeSubscriptionSignupForm``. Making this form work easily with both `dj-stripe` and `django-allauth` required too much abstraction. We'll include this code as a cookbook recipe, but it won't be in dj-stripe itself.
 * Added setting to disable Invoice receipt emails (Thanks Chris Halpert)
