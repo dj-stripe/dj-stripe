@@ -10,6 +10,7 @@ Development Lead
 * Yasmine Charif (@dollydagr)
 * Audrey Roy
 * Mahdi Yusuf (@myusuf3)
+* Alexander Kavanaugh (@kavdev)
 
 Contributors
 ------------
