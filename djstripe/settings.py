@@ -15,6 +15,13 @@ if PY3:
 subscriber_request_callback = getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK", (lambda request: request.user))
 
 
+def _check_subscriber_for_email_address(subscriber_model, message):
+    """Ensure the custom model has an ``email`` field or property."""
+
+    if ("email" not in subscriber_model._meta.get_all_field_names()) and not hasattr(subscriber_model, 'email'):
+        raise ImproperlyConfigured(message)
+
+
 def get_subscriber_model():
     """
     Users have the option of specifying a custom subscriber model via the
@@ -34,7 +41,10 @@ def get_subscriber_model():
     # Check if a subscriber model is specified. If not, fall back and exit.
     if not SUBSCRIBER_MODEL:
         from django.contrib.auth import get_user_model
-        return get_user_model()
+        subscriber_model = get_user_model()
+        _check_subscriber_for_email_address(subscriber_model, "The customer user model must have an email attribute.")
+
+        return subscriber_model
 
     subscriber_model = None
 
@@ -61,9 +71,7 @@ def get_subscriber_model():
         except LookupError:
             raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL refers to model '{model}' that has not been installed.".format(model=SUBSCRIBER_MODEL))
 
-    # Ensure the custom model has an ``email`` field or property.
-    if ("email" not in subscriber_model._meta.get_all_field_names()) and not hasattr(subscriber_model, 'email'):
-        raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL must have an email attribute.")
+    _check_subscriber_for_email_address(subscriber_model, "DJSTRIPE_SUBSCRIBER_MODEL must have an email attribute.")
 
     # Custom user model detected. Make sure the callback is configured.
     if hasattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK"):
