@@ -158,6 +158,7 @@ class Event(StripeObject):
             "customer.created",
             "customer.updated",
             "customer.deleted",
+            "customer.source.created",
             "customer.subscription.created",
             "customer.subscription.updated",
             "customer.subscription.deleted",
