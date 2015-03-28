@@ -27,3 +27,4 @@ Contributors
 * Mahdi Yusuf (@myusuf3)
 * Peter Baumgartner (@ipmb)
 * Vikas (@vikasgulati)
+* Colton Allen (@cmanallen)
