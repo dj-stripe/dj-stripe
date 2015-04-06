@@ -3,12 +3,18 @@
 History
 =======
 
+0.5.0 (2015-04-??)
+---------------------
+
+* Removed the StripeSubscriptionSignupForm
+
 0.4.0 (2015-04-05)
 ----------------------
+
 * Formal Python 3.3+/Django 1.7 Support (including migrations)
 * Removed Python 2.6 from Travis CI build. (Thanks @audreyr)
 * Dropped Django 1.4 support. (Thanks @audreyr)
-* Deprecated the ``djstripe.forms.StripeSubscriptionSignupForm``. Making this form work easily with both `dj-stripe` and `django-allauth` required too much abstraction. It will be removed in the 0.5 release.
+* Deprecated the ``djstripe.forms.StripeSubscriptionSignupForm``. Making this form work easily with both `dj-stripe` and `django-allauth` required too much abstraction. It will be removed in the 0.5.0 release.
 * Add the ability to add invoice items for a customer (Thanks @kavdev)
 * Add the ability to use a custom customer model (Thanks @kavdev)
 * Added setting to disable Invoice receipt emails (Thanks Chris Halpert)

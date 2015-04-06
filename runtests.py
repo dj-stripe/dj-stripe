@@ -44,7 +44,6 @@ settings.configure(
         "test_url_name",
         "testapp_namespaced:test_url_namespaced"
     ),
-    ACCOUNT_SIGNUP_FORM_CLASS='djstripe.forms.StripeSubscriptionSignupForm',
     TEMPLATE_DIRS = [
         os.path.join(TESTS_ROOT, "tests/templates"),
     ]

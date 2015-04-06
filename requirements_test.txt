@@ -14,11 +14,6 @@ ordereddict>=1.1
 djangorestframework==3.0.3
 unittest2==0.8.0
 
-# registration + subscription requirements
-django-floppyforms
-django-crispy-forms
-django-allauth
-
 # Tightly constrained database for more accurate testing
 psycopg2
 flake8

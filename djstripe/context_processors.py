@@ -3,7 +3,8 @@
 .. module:: djstripe.context_processors
    :synopsis: dj-stripe Context Processors .
 
-.. moduleauthor:: Alex Kavanaugh <kavanaugh.development@outlook.com>
+.. moduleauthor:: Daniel Greenfeld (@pydanny)
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
 
 """
 
