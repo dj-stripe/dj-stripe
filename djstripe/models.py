@@ -158,6 +158,7 @@ class Event(StripeObject):
             "customer.created",
             "customer.updated",
             "customer.deleted",
+            "customer.source.created",
             "customer.subscription.created",
             "customer.subscription.updated",
             "customer.subscription.deleted",
@@ -590,6 +591,40 @@ class Customer(StripeObject):
             obj.send_receipt()
         return obj
 
+    def add_invoice_item(self, amount, currency="usd", invoice_id=None, description=None):
+        """
+        Adds an arbitrary charge or credit to the customer's upcoming invoice.
+        Different than creating a charge. Charges are separate bills that get
+        processed immediately. Invoice items are appended to the customer's next
+        invoice. This is extremely useful when adding surcharges to subscriptions.
+
+        This method expects `amount` to be a Decimal type representing a
+        dollar amount. It will be converted to cents so any decimals beyond
+        two will be ignored.
+
+        Note: Since invoice items are appended to invoices, a record will be stored
+        in dj-stripe when invoices are pulled.
+
+        :param invoice:
+            The ID of an existing invoice to add this invoice item to.
+            When left blank, the invoice item will be added to the next upcoming
+            scheduled invoice. Use this when adding invoice items in response
+            to an invoice.created webhook. You cannot add an invoice item to
+            an invoice that has already been paid, attempted or closed.
+        """
+
+        if not isinstance(amount, decimal.Decimal):
+            raise ValueError(
+                "You must supply a decimal value representing dollars."
+            )
+        stripe.InvoiceItem.create(
+            amount=int(amount * 100),  # Convert dollars into cents
+            currency=currency,
+            customer=self.stripe_id,
+            description=description,
+            invoice=invoice_id,
+        )
+
     def record_charge(self, charge_id):
         data = stripe.Charge.retrieve(charge_id)
         return Charge.sync_from_stripe_data(data)
@@ -656,10 +691,9 @@ class CurrentSubscription(TimeStampedModel):
         return True
 
 
-class Invoice(TimeStampedModel):
+class Invoice(StripeObject):
     # TODO - needs tests
 
-    stripe_id = models.CharField(max_length=50)
     customer = models.ForeignKey(Customer, related_name="invoices")
     attempted = models.NullBooleanField()
     attempts = models.PositiveIntegerField(null=True)
