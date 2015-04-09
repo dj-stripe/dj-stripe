@@ -214,6 +214,12 @@ This is where you can set *Stripe.com* to send webhook response. You can set thi
 
 As this is embedded in the URLConf, this must be a resolvable regular expression.
 
+DJSTRIPE_CURRENCIES (=(('usd', 'U.S. Dollars',), ('gbp', 'Pounds (GBP)',), ('eur', 'Euros',)))
+==============================================================================================
+
+A Field.choices list of allowed currencies for Plan models.
+
+
 Safe Settings
 ==================
 
