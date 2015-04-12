@@ -28,10 +28,10 @@ Features
 * Subscription management
 * Designed for easy implementation of post-registration subscription forms
 * Single-unit purchases (forthcoming)
-* Works with Django 1.6, 1.5, 1.4
-* Works with Python 3.3, 2.7, 2.6
+* Works with Django 1.7, 1.6, 1.5
+* Works with Python 3.4, 3.3, 2.7
 * Works with Bootstrap 3
-* Built-in South migrations
+* Built-in migrations
 * Dead-Easy installation
 * Leverages in the best of the 3rd party Django package ecosystem
 * `djstripe` namespace so you can have more than one payments related app
@@ -61,14 +61,6 @@ Add ``djstripe`` to your ``INSTALLED_APPS``:
 
     INSTALLED_APPS +=(
         "djstripe",
-    )
-
-Add the context processor to your ``TEMPLATE_CONTEXT_PROCESSORS``:
-
-.. code-block:: python
-
-    TEMPLATE_CONTEXT_PROCESSORS +=(
-        'djstripe.context_processors.djstripe_settings',
     )
 
 Add your stripe keys:
@@ -109,9 +101,7 @@ Add to the urls.py:
     
 Run the commands::
 
-    python manage.py syncdb
-
-    python manage.py migrate  # if you are using South
+    python manage.py migrate  # or syncdb, then migrate with South
     
     python manage.py djstripe_init_customers
     
