@@ -23,6 +23,7 @@ History
 * Fixed create a token call in change_card.html (Thanks @dollydagr)
 * Fix ``charge.dispute.closed`` typo. (Thanks @ipmb)
 * Fix contributing docs formatting. (Thanks @audreyr)
+* Fix subscription cancelled_at_period_end field sync on plan upgrade (Thanks @nigma)
 * Remove "account" bug in Middleware (Thanks @sromero84)
 * Fix correct plan selection on subscription in subscribe_form template. (Thanks Yasmine Charif)
 * Fix subscription status in account, _subscription_status, and cancel_subscription templates. (Thanks Yasmine Charif)
