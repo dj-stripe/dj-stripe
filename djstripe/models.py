@@ -207,7 +207,10 @@ class Event(StripeObject):
                     if not self.customer:
                         self.link_customer()
                     if self.customer:
-                        self.customer.sync_current_subscription()
+                        if self.kind == "customer.subscription.deleted":
+                            self.customer.current_subscription.delete()
+                        else:
+                            self.customer.sync_current_subscription()
                 elif self.kind == "customer.deleted":
                     if not self.customer:
                         self.link_customer()
