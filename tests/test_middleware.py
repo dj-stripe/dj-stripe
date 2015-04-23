@@ -90,7 +90,7 @@ class MiddlewareLogicTest(TestCase):
         self.middleware = SubscriptionPaymentMiddleware()
 
     def test_anonymous(self):
-        request = self.factory.get("djstripe/")
+        request = self.factory.get("/djstripe/")
         request.user = AnonymousUser()
 
         response = self.middleware.process_request(request)
@@ -100,7 +100,7 @@ class MiddlewareLogicTest(TestCase):
         self.user.is_staff = True
         self.user.save()
 
-        request = self.factory.get("djstripe/")
+        request = self.factory.get("/djstripe/")
         request.user = self.user
 
         response = self.middleware.process_request(request)
@@ -110,7 +110,7 @@ class MiddlewareLogicTest(TestCase):
         self.user.is_superuser = True
         self.user.save()
 
-        request = self.factory.get("djstripe/")
+        request = self.factory.get("/djstripe/")
         request.user = self.user
 
         response = self.middleware.process_request(request)
