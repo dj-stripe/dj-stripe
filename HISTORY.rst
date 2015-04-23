@@ -7,6 +7,7 @@ History
 ---------------------
 
 * Removed the StripeSubscriptionSignupForm
+* Moved available currencies to the DJSTRIPE_CURRENCIES setting (Thanks @martinhill)
 
 0.4.0 (2015-04-05)
 ----------------------
