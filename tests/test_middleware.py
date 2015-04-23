@@ -13,9 +13,9 @@ from djstripe.middleware import SubscriptionPaymentMiddleware
 
 
 class MiddlewareURLTest(TestCase):
-    urls = 'tests.test_urls'
 
     def setUp(self):
+        self.settings(ROOT_URLCONF='tests.test_urls')
         self.factory = RequestFactory()
         self.user = get_user_model().objects.create_user(username="pydanny",
                                                          email="pydanny@gmail.com")
