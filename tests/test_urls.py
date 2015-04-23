@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 
 
 from django.contrib import admin
 admin.autodiscover()
 
 
-urlpatterns = patterns('',
-
+urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^djstripe/', include('djstripe.urls',
             namespace="djstripe", app_name="djstripe")),
@@ -23,4 +22,4 @@ urlpatterns = patterns('',
 
     # Represents protected content
     url(r'^testapp_content/', include('tests.apps.testapp_content.urls')),
-)
+]
