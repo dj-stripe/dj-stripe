@@ -3,6 +3,7 @@
 language: python
 
 python:
+  - 3.4
   - 3.3
   - 2.7
 
@@ -10,6 +11,7 @@ env:
   - DJANGO=1.5
   - DJANGO=1.6
   - DJANGO=1.7
+  - DJANGO=1.8
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: 
@@ -21,7 +23,7 @@ before_script:
 # command to run tests, e.g. python setup.py test
 script: python runtests.py
 
-matrix:
-  exclude:
-    - python: 3.3
-      env: DJANGO=1.4
+# matrix:
+#   exclude:
+#     - python: 3.3
+#       env: DJANGO=1.4

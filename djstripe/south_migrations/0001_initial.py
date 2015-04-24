@@ -2,22 +2,209 @@
 import datetime
 from south.db import db
 from south.v2 import SchemaMigration
-from django.db import models
+
+try:
+    from django.contrib.auth import get_user_model
+except ImportError:  # django < 1.5
+    from django.contrib.auth.models import User
+else:
+    User = get_user_model()
 
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding field 'CurrentSubscription.cancel_at_period_end'
-        db.add_column(u'djstripe_currentsubscription', 'cancel_at_period_end',
-                      self.gf('django.db.models.fields.BooleanField')(default=False),
-                      keep_default=False)
+        # Adding model 'EventProcessingException'
+        db.create_table(u'djstripe_eventprocessingexception', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
+            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
+            ('event', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['djstripe.Event'], null=True)),
+            ('data', self.gf('django.db.models.fields.TextField')()),
+            ('message', self.gf('django.db.models.fields.CharField')(max_length=500)),
+            ('traceback', self.gf('django.db.models.fields.TextField')()),
+        ))
+        db.send_create_signal(u'djstripe', ['EventProcessingException'])
 
+        # Adding model 'Event'
+        db.create_table(u'djstripe_event', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
+            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
+            ('stripe_id', self.gf('django.db.models.fields.CharField')(unique=True, max_length=50)),
+            ('kind', self.gf('django.db.models.fields.CharField')(max_length=250)),
+            ('livemode', self.gf('django.db.models.fields.BooleanField')()),
+            ('customer', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['djstripe.Customer'], null=True)),
+            ('webhook_message', self.gf('jsonfield.fields.JSONField')(default={})),
+            ('validated_message', self.gf('jsonfield.fields.JSONField')(null=True)),
+            ('valid', self.gf('django.db.models.fields.NullBooleanField')(null=True, blank=True)),
+            ('processed', self.gf('django.db.models.fields.BooleanField')(default=False)),
+        ))
+        db.send_create_signal(u'djstripe', ['Event'])
+
+        # Adding model 'Transfer'
+        db.create_table(u'djstripe_transfer', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
+            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
+            ('stripe_id', self.gf('django.db.models.fields.CharField')(unique=True, max_length=50)),
+            ('event', self.gf('django.db.models.fields.related.ForeignKey')(related_name=u'transfers', to=orm['djstripe.Event'])),
+            ('amount', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2)),
+            ('status', self.gf('django.db.models.fields.CharField')(max_length=25)),
+            ('date', self.gf('django.db.models.fields.DateTimeField')()),
+            ('description', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('adjustment_count', self.gf('django.db.models.fields.IntegerField')()),
+            ('adjustment_fees', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2)),
+            ('adjustment_gross', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2)),
+            ('charge_count', self.gf('django.db.models.fields.IntegerField')()),
+            ('charge_fees', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2)),
+            ('charge_gross', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2)),
+            ('collected_fee_count', self.gf('django.db.models.fields.IntegerField')()),
+            ('collected_fee_gross', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2)),
+            ('net', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2)),
+            ('refund_count', self.gf('django.db.models.fields.IntegerField')()),
+            ('refund_fees', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2)),
+            ('refund_gross', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2)),
+            ('validation_count', self.gf('django.db.models.fields.IntegerField')()),
+            ('validation_fees', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2)),
+        ))
+        db.send_create_signal(u'djstripe', ['Transfer'])
+
+        # Adding model 'TransferChargeFee'
+        db.create_table(u'djstripe_transferchargefee', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
+            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
+            ('transfer', self.gf('django.db.models.fields.related.ForeignKey')(related_name=u'charge_fee_details', to=orm['djstripe.Transfer'])),
+            ('amount', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2)),
+            ('application', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('description', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('kind', self.gf('django.db.models.fields.CharField')(max_length=150)),
+        ))
+        db.send_create_signal(u'djstripe', ['TransferChargeFee'])
+
+        # Adding model 'Customer'
+        db.create_table(u'djstripe_customer', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
+            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
+            ('stripe_id', self.gf('django.db.models.fields.CharField')(unique=True, max_length=50)),
+            ('user', self.gf('django.db.models.fields.related.OneToOneField')(to=User, unique=True, null=True)),
+            ('card_fingerprint', self.gf('django.db.models.fields.CharField')(max_length=200, blank=True)),
+            ('card_last_4', self.gf('django.db.models.fields.CharField')(max_length=4, blank=True)),
+            ('card_kind', self.gf('django.db.models.fields.CharField')(max_length=50, blank=True)),
+            ('date_purged', self.gf('django.db.models.fields.DateTimeField')(null=True)),
+        ))
+        db.send_create_signal(u'djstripe', ['Customer'])
+
+        # Adding model 'CurrentSubscription'
+        db.create_table(u'djstripe_currentsubscription', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
+            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
+            ('customer', self.gf('django.db.models.fields.related.OneToOneField')(related_name=u'current_subscription', unique=True, null=True, to=orm['djstripe.Customer'])),
+            ('plan', self.gf('django.db.models.fields.CharField')(max_length=100)),
+            ('quantity', self.gf('django.db.models.fields.IntegerField')()),
+            ('start', self.gf('django.db.models.fields.DateTimeField')()),
+            ('status', self.gf('django.db.models.fields.CharField')(max_length=25)),
+            ('canceled_at', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+            ('current_period_end', self.gf('django.db.models.fields.DateTimeField')(null=True)),
+            ('current_period_start', self.gf('django.db.models.fields.DateTimeField')(null=True)),
+            ('ended_at', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+            ('trial_end', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+            ('trial_start', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+            ('amount', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2)),
+        ))
+        db.send_create_signal(u'djstripe', ['CurrentSubscription'])
+
+        # Adding model 'Invoice'
+        db.create_table(u'djstripe_invoice', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
+            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
+            ('stripe_id', self.gf('django.db.models.fields.CharField')(max_length=50)),
+            ('customer', self.gf('django.db.models.fields.related.ForeignKey')(related_name=u'invoices', to=orm['djstripe.Customer'])),
+            ('attempted', self.gf('django.db.models.fields.NullBooleanField')(null=True, blank=True)),
+            ('attempts', self.gf('django.db.models.fields.PositiveIntegerField')(null=True)),
+            ('closed', self.gf('django.db.models.fields.BooleanField')()),
+            ('paid', self.gf('django.db.models.fields.BooleanField')()),
+            ('period_end', self.gf('django.db.models.fields.DateTimeField')()),
+            ('period_start', self.gf('django.db.models.fields.DateTimeField')()),
+            ('subtotal', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2)),
+            ('total', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2)),
+            ('date', self.gf('django.db.models.fields.DateTimeField')()),
+            ('charge', self.gf('django.db.models.fields.CharField')(max_length=50, blank=True)),
+        ))
+        db.send_create_signal(u'djstripe', ['Invoice'])
+
+        # Adding model 'InvoiceItem'
+        db.create_table(u'djstripe_invoiceitem', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
+            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
+            ('stripe_id', self.gf('django.db.models.fields.CharField')(max_length=50)),
+            ('invoice', self.gf('django.db.models.fields.related.ForeignKey')(related_name=u'items', to=orm['djstripe.Invoice'])),
+            ('amount', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2)),
+            ('currency', self.gf('django.db.models.fields.CharField')(max_length=10)),
+            ('period_start', self.gf('django.db.models.fields.DateTimeField')()),
+            ('period_end', self.gf('django.db.models.fields.DateTimeField')()),
+            ('proration', self.gf('django.db.models.fields.BooleanField')()),
+            ('line_type', self.gf('django.db.models.fields.CharField')(max_length=50)),
+            ('description', self.gf('django.db.models.fields.CharField')(max_length=200, blank=True)),
+            ('plan', self.gf('django.db.models.fields.CharField')(max_length=100, blank=True)),
+            ('quantity', self.gf('django.db.models.fields.IntegerField')(null=True)),
+        ))
+        db.send_create_signal(u'djstripe', ['InvoiceItem'])
+
+        # Adding model 'Charge'
+        db.create_table(u'djstripe_charge', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
+            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
+            ('stripe_id', self.gf('django.db.models.fields.CharField')(unique=True, max_length=50)),
+            ('customer', self.gf('django.db.models.fields.related.ForeignKey')(related_name=u'charges', to=orm['djstripe.Customer'])),
+            ('invoice', self.gf('django.db.models.fields.related.ForeignKey')(related_name=u'charges', null=True, to=orm['djstripe.Invoice'])),
+            ('card_last_4', self.gf('django.db.models.fields.CharField')(max_length=4, blank=True)),
+            ('card_kind', self.gf('django.db.models.fields.CharField')(max_length=50, blank=True)),
+            ('amount', self.gf('django.db.models.fields.DecimalField')(null=True, max_digits=7, decimal_places=2)),
+            ('amount_refunded', self.gf('django.db.models.fields.DecimalField')(null=True, max_digits=7, decimal_places=2)),
+            ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
+            ('paid', self.gf('django.db.models.fields.NullBooleanField')(null=True, blank=True)),
+            ('disputed', self.gf('django.db.models.fields.NullBooleanField')(null=True, blank=True)),
+            ('refunded', self.gf('django.db.models.fields.NullBooleanField')(null=True, blank=True)),
+            ('fee', self.gf('django.db.models.fields.DecimalField')(null=True, max_digits=7, decimal_places=2)),
+            ('receipt_sent', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('charge_created', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+        ))
+        db.send_create_signal(u'djstripe', ['Charge'])
 
     def backwards(self, orm):
-        # Deleting field 'CurrentSubscription.cancel_at_period_end'
-        db.delete_column(u'djstripe_currentsubscription', 'cancel_at_period_end')
+        # Deleting model 'EventProcessingException'
+        db.delete_table(u'djstripe_eventprocessingexception')
 
+        # Deleting model 'Event'
+        db.delete_table(u'djstripe_event')
+
+        # Deleting model 'Transfer'
+        db.delete_table(u'djstripe_transfer')
+
+        # Deleting model 'TransferChargeFee'
+        db.delete_table(u'djstripe_transferchargefee')
+
+        # Deleting model 'Customer'
+        db.delete_table(u'djstripe_customer')
+
+        # Deleting model 'CurrentSubscription'
+        db.delete_table(u'djstripe_currentsubscription')
+
+        # Deleting model 'Invoice'
+        db.delete_table(u'djstripe_invoice')
+
+        # Deleting model 'InvoiceItem'
+        db.delete_table(u'djstripe_invoiceitem')
+
+        # Deleting model 'Charge'
+        db.delete_table(u'djstripe_charge')
 
     models = {
         u'auth.group': {
@@ -63,7 +250,6 @@ class Migration(SchemaMigration):
         u'djstripe.currentsubscription': {
             'Meta': {'object_name': 'CurrentSubscription'},
             'amount': ('django.db.models.fields.DecimalField', [], {'max_digits': '7', 'decimal_places': '2'}),
-            'cancel_at_period_end': ('django.db.models.fields.BooleanField', [], {}),
             'canceled_at': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'created': ('model_utils.fields.AutoCreatedField', [], {'default': 'datetime.datetime.now'}),
             'current_period_end': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),

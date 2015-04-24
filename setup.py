@@ -15,6 +15,8 @@ except ImportError:
 if sys.argv[-1] == 'publish':
     os.system('python setup.py sdist upload')
     os.system('python setup.py bdist_wheel upload')
+
+if sys.argv[-1] == 'tag':
     print("Tagging the version on github:")
     os.system("git tag -a %s -m 'version %s'" % (version, version))
     os.system("git push --tags")
@@ -28,7 +30,7 @@ INSTALL_REQUIRES = [
     'stripe>=1.9.2',
     'django-model-utils>=1.4.0',
     'django-braces>=1.2.1',
-    'django-jsonfield>=0.9.10'
+    'jsonfield>=1.0.3'
 ]
 
 # Add ordereddict to users of Python 2.6.

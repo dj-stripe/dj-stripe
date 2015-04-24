@@ -33,14 +33,6 @@ Add ``djstripe`` to your ``INSTALLED_APPS``:
         "djstripe",
     )
 
-Add the context processor to your ``TEMPLATE_CONTEXT_PROCESSORS``:
-
-.. code-block:: python
-
-    TEMPLATE_CONTEXT_PROCESSORS +=(
-        'djstripe.context_processors.djstripe_settings',
-    )
-
 Add your stripe keys:
 
 .. code-block:: python
