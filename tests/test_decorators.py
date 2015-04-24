@@ -30,9 +30,9 @@ class TestDeprecationWarning(AssertWarnsEnabledTestCase):
 
 
 class TestSubscriptionPaymentRequired(TestCase):
-    urls = 'tests.test_urls'
 
     def setUp(self):
+        self.settings(ROOT_URLCONF='tests.test_urls')
         self.factory = RequestFactory()
 
     def test_direct(self):

@@ -28,7 +28,7 @@ Features
 * Subscription management
 * Designed for easy implementation of post-registration subscription forms
 * Single-unit purchases (forthcoming)
-* Works with Django 1.7, 1.6, 1.5
+* Works with Django 1.8, 1.7, 1.6, 1.5
 * Works with Python 3.4, 3.3, 2.7
 * Works with Bootstrap 3
 * Built-in migrations

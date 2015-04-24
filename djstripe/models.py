@@ -30,6 +30,7 @@ from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
 from .settings import trial_period_for_subscriber_callback
 from .settings import DEFAULT_PLAN
+from .settings import CURRENCIES
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -926,11 +927,6 @@ class Charge(StripeObject):
             self.receipt_sent = num_sent > 0
             self.save()
 
-
-CURRENCIES = (
-    ('usd', 'U.S. Dollars',),
-    ('gbp', 'Pounds (GBP)',),
-    ('eur', 'Euros',))
 
 INTERVALS = (
     ('week', 'Week',),
