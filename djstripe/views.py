@@ -138,8 +138,9 @@ class SubscribeFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionM
         try:
             customer, created = Customer.get_or_create(
                 subscriber=subscriber_request_callback(self.request))
-            if self.request.POST.get("stripe_token"):
-                customer.update_card(self.request.POST.get("stripe_token"))
+            stripe_token = self.request.POST.get("stripe_token")
+            if stripe_token:
+                customer.update_card(stripe_token)
             customer.subscribe(form.cleaned_data["plan"])
         except stripe.StripeError as e:
             # add form error here
