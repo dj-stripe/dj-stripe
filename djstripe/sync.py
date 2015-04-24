@@ -41,7 +41,7 @@ def sync_plans():
         'name',
         'trial_period_days',
         'metadata',
-        'statement_description'
+        'statement_descriptor'
     )
     conversion = {
         'stripe_plan_id': 'id',
