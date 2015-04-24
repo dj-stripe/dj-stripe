@@ -9,9 +9,10 @@ from .models import Customer
 from .settings import PY3
 
 
-def sync_customer(user):
+def sync_subscriber(subscriber_model):
     # TODO - needs tests
-    customer, created = Customer.get_or_create(user)
+
+    customer, created = Customer.get_or_create(subscriber=subscriber_model)
     try:
         cu = customer.stripe_customer
         customer.sync(cu=cu)
@@ -27,6 +28,7 @@ def sync_customer(user):
 
 
 def sync_plans():
+    # TODO - needs tests
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
 

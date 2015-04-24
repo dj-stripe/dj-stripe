@@ -114,10 +114,97 @@ Example:
         # in urls.py
         url(r'^accounts/', include('allauth.urls',  app_name="allauth")),
 
-DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK (=None)
+
+DJSTRIPE_SUBSCRIBER_MODEL (=settings.AUTH_USER_MODEL)
 ======================================================
 
-TODO: Document!
+If the AUTH_USER_MODEL doesn't represent the object your application's subscription holder, you may define a subscriber model to use here. It should be a string in the form of 'app.model'.
+
+Rules:
+
+* DJSTRIPE_SUBSCRIBER_MODEL must have an ``email`` field. If your existing model has no email field, add an email property that defines an email address to use.
+* You must also implement ``DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK``.
+
+Example Model:
+
+.. code-block:: python
+
+    class Organization(models.Model):
+        name = CharField(max_length=200, unique=True)
+        subdomain = CharField(max_length=63, unique=True, verbose_name="Organization Subdomain")
+        owner = ForeignKey(settings.AUTH_USER_MODEL, related_name="organization_owner", verbose_name="Organization Owner")
+        
+        @property
+        def email(self):
+            return self.owner.email
+
+
+DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK (=None)
+======================================================
+
+If you choose to use a custom subscriber model, you'll need a way to pull it from ``request``. That's where this callback comes in.
+It must be a callable that takes a request object and returns an instance of DJSTRIPE_SUBSCRIBER_MODEL
+
+Examples:
+
+`middleware.py`
+
+.. code-block:: python
+
+    class DynamicOrganizationIDMiddleware(object):
+        """ Adds the current organization's ID based on the subdomain."""
+    
+        def process_request(self, request):
+            subdomain = parse_subdomain(request.get_host())
+
+            try:
+                organization = Organization.objects.get(subdomain=subdomain)
+            except Organization.DoesNotExist:
+                return TemplateResponse(request=request, template='404.html', status=404)
+            else:
+                organization_id = organization.id
+    
+            request.organization_id = organization_id
+
+`settings.py`
+
+.. code-block:: python
+
+    def organization_request_callback(request):
+        """ Gets an organization instance from the id passed through ``request``"""
+        return Organization.objects.get(id=request.organization_id)
+
+
+.. note:: This callback only becomes active when ``DJSTRIPE_SUBSCRIBER_MODEL`` is set.
+
+DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK (=None)
+======================================================
+
+Used by ``djstripe.models.Customer`` only when creating stripe customers.
+
+This is called to dynamically add a trial period to a subscriber's plan. It must be a callable that takes a subscriber object and returns the number of days the trial period should last.
+
+Examples:
+
+.. code-block:: python
+
+    def static_trial_period(subscriber):
+        """ Adds a static trial period of 7 days to each subscriber's account."""
+        return 7
+
+
+    def dynamic_trial_period(subscriber):
+        """
+        Adds a static trial period of 7 days to each subscriber's plan,
+        unless they've accepted our month-long promotion.
+        """
+        
+        if subscriber.coupons.get(slug="monthlongtrial"):
+            return 30
+        else:
+            return 7
+
+.. note:: This setting was named ``DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK`` prior to version 0.4
 
 
 DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")
@@ -126,6 +213,12 @@ DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")
 This is where you can set *Stripe.com* to send webhook response. You can set this to what you want to prevent unnecessary hijinks from unfriendly people.
 
 As this is embedded in the URLConf, this must be a resolvable regular expression.
+
+DJSTRIPE_CURRENCIES (=(('usd', 'U.S. Dollars',), ('gbp', 'Pounds (GBP)',), ('eur', 'Euros',)))
+==============================================================================================
+
+A Field.choices list of allowed currencies for Plan models.
+
 
 Safe Settings
 ==================

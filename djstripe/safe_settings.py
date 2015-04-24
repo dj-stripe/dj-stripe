@@ -45,3 +45,8 @@ CANCELLATION_AT_PERIOD_END = not PRORATION_POLICY
 # Manages sending of receipt emails
 SEND_INVOICE_RECEIPT_EMAILS = getattr(settings, "DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS", True)
 
+CURRENCIES = getattr(
+    settings, "DJSTRIPE_CURRENCIES", (
+        ('usd', 'U.S. Dollars',),
+        ('gbp', 'Pounds (GBP)',),
+        ('eur', 'Euros',)))
