@@ -209,10 +209,9 @@ class SubscribeFormView(
 
 
 class ChangePlanView(LoginRequiredMixin,
-                        FormValidMessageMixin,
-                        SubscriptionMixin,
-                        FormView):
-
+                     FormValidMessageMixin,
+                     SubscriptionMixin,
+                     FormView):
     form_class = PlanForm
     template_name = "djstripe/subscribe_form.html"
     success_url = reverse_lazy("djstripe:history")
@@ -221,6 +220,7 @@ class ChangePlanView(LoginRequiredMixin,
     def post(self, request, *args, **kwargs):
         form = PlanForm(request.POST)
         customer = request.user.customer
+        plans = Plan.objects.all()
         if form.is_valid():
             try:
                 """
@@ -233,7 +233,7 @@ class ChangePlanView(LoginRequiredMixin,
                     current_subscription_amount = customer.current_subscription.amount
                     selected_plan_name = form.cleaned_data["plan"]
                     selected_plan = next(
-                        (plan for plan in PLAN_LIST if plan["plan"] == selected_plan_name)
+                        (plan for plan in plans if plan.stripe_id == selected_plan_name)
                     )
                     selected_plan_price = selected_plan["price"]
                     if not isinstance(selected_plan["price"], decimal.Decimal):
