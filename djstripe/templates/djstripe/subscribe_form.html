@@ -81,18 +81,24 @@
           // retrieve current $(".djstripe-subscribe")
           var $form = $(e.target).parents('form'),
               token = function(res) {
-                $form.find("input[name=stripe_token]").val(res.id);
+                if(res)
+                  $form.find("input[name=stripe_token]").val(res.id);
                 $("button[type=submit]").attr("disabled", "true");
                 $('#in-progress').modal({"keyboard": false})
                 $('.progress-bar').animate({width:'+=100%'}, 2000);
                 $form.trigger("submit");
               };
-          StripeCheckout.open({
-            key:         "{{ STRIPE_PUBLIC_KEY }}",
-            name:        'Payment Method',
-            panelLabel:  'Add Payment Method',
-            token:       token
-          });
+
+          if($form.attr('data-amount') === '0') {
+            token();
+          }else{
+            StripeCheckout.open({
+              key:         "{{ STRIPE_PUBLIC_KEY }}",
+              name:        'Payment Method',
+              panelLabel:  'Add Payment Method',
+              token:       token
+          	});
+	  	  }
 
           return false;
         });
