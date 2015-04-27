@@ -28,3 +28,4 @@ Contributors
 * Peter Baumgartner (@ipmb)
 * Vikas (@vikasgulati)
 * Colton Allen (@cmanallen)
+* Michael Thornhill <michael.thornhill@gmail.com>
