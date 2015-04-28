@@ -26,9 +26,6 @@ class Migration(SchemaMigration):
         # Deleting model 'Plan'
         db.delete_table(u'djstripe_plan')
 
-        # Changing field 'Customer.user'
-        db.alter_column(u'djstripe_customer', 'user_id', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['users.User'], unique=True, null=True))
-
     models = {
         u'accounts.siuser': {
             'Meta': {'object_name': 'SIUser'},

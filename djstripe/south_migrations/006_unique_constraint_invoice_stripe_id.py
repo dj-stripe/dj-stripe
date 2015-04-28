@@ -8,13 +8,13 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Rename 'user' field to 'subscriber'
-        db.rename_column('djstripe_customer', 'user_id', 'subscriber_id')
+        # Adding unique constraint on 'Invoice', fields ['stripe_id']
+        db.create_unique(u'djstripe_invoice', ['stripe_id'])
 
 
     def backwards(self, orm):
-        # Rename 'subscriber' field to 'user'
-        db.rename_column('djstripe_customer', 'subscriber_id', 'user_id')
+        # Removing unique constraint on 'Invoice', fields ['stripe_id']
+        db.delete_unique(u'djstripe_invoice', ['stripe_id'])
 
 
     models = {
