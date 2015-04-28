@@ -28,4 +28,7 @@ Contributors
 * Peter Baumgartner (@ipmb)
 * Vikas (@vikasgulati)
 * Colton Allen (@cmanallen)
+* Filip Wasilewski (@nigma)
+* Martin Hill (@martinhill)
 * Michael Thornhill <michael.thornhill@gmail.com>
+* Tobias Lorenz (@Tyrdall)
