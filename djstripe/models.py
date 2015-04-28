@@ -878,7 +878,7 @@ class Charge(StripeObject):
         ).refund(
             amount=self.calculate_refund_amount(amount=amount)
         )
-        Charge.sync_from_stripe_data(charge_obj)
+        return Charge.sync_from_stripe_data(charge_obj)
 
     @classmethod
     def sync_from_stripe_data(cls, data):
