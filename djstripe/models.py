@@ -346,7 +346,7 @@ class Customer(StripeObject):
         try:
             self.stripe_customer.delete()
         except stripe.InvalidRequestError as e:
-            if e.message.startswith("No such customer:"):
+            if str(e).startswith("No such customer:"):
                 # The exception was thrown because the stripe customer was already
                 # deleted on the stripe side, ignore the exception
                 pass
@@ -849,11 +849,7 @@ class Charge(StripeObject):
     card_last_4 = models.CharField(max_length=4, blank=True)
     card_kind = models.CharField(max_length=50, blank=True)
     amount = models.DecimalField(decimal_places=2, max_digits=7, null=True)
-    amount_refunded = models.DecimalField(
-        decimal_places=2,
-        max_digits=7,
-        null=True
-    )
+    amount_refunded = models.DecimalField(decimal_places=2, max_digits=7, null=True)
     description = models.TextField(blank=True)
     paid = models.NullBooleanField(null=True)
     disputed = models.NullBooleanField(null=True)
