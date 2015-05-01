@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
+# from collections import OrderedDict
 import sys
+
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import importlib
-
-from . import safe_settings
 
 PY3 = sys.version > "3"
 
@@ -83,12 +84,6 @@ def get_subscriber_model():
     return subscriber_model
 
 
-def plan_from_stripe_id(stripe_id):
-    for key in PAYMENTS_PLANS.keys():
-        if PAYMENTS_PLANS[key].get("stripe_plan_id") == stripe_id:
-            return key
-
-
 def load_path_attr(path):
     i = path.rfind(".")
     module, attr = path[:i], path[i + 1:]
@@ -105,25 +100,37 @@ def load_path_attr(path):
     return attr
 
 
-STRIPE_PUBLIC_KEY = safe_settings.STRIPE_PUBLIC_KEY
-INVOICE_FROM_EMAIL = safe_settings.INVOICE_FROM_EMAIL
-PAYMENTS_PLANS = safe_settings.PAYMENTS_PLANS
-PLAN_CHOICES = safe_settings.PLAN_CHOICES
-PASSWORD_INPUT_RENDER_VALUE = safe_settings.PASSWORD_INPUT_RENDER_VALUE
-PASSWORD_MIN_LENGTH = safe_settings.PASSWORD_MIN_LENGTH
+STRIPE_PUBLIC_KEY = settings.STRIPE_PUBLIC_KEY
+INVOICE_FROM_EMAIL = getattr(settings, "DJSTRIPE_INVOICE_FROM_EMAIL", "billing@example.com")
+PAYMENTS_PLANS = getattr(settings, "DJSTRIPE_PLANS", {})
 
-PRORATION_POLICY = safe_settings.PRORATION_POLICY
-PRORATION_POLICY_FOR_UPGRADES = safe_settings.PRORATION_POLICY_FOR_UPGRADES
-CANCELLATION_AT_PERIOD_END = safe_settings.CANCELLATION_AT_PERIOD_END
+# Sort the PAYMENT_PLANS dictionary ascending by price.
+# PAYMENT_PLANS = OrderedDict(sorted(PAYMENTS_PLANS.items(), key=lambda t: t[1]['price']))
+PLAN_CHOICES = [(plan, PAYMENTS_PLANS[plan].get("name", plan)) for plan in PAYMENTS_PLANS]
 
-SEND_INVOICE_RECEIPT_EMAILS = safe_settings.SEND_INVOICE_RECEIPT_EMAILS
-CURRENCIES = safe_settings.CURRENCIES
 
-DEFAULT_PLAN = getattr(
-    settings,
-    "DJSTRIPE_DEFAULT_PLAN",
-    None
+def plan_from_stripe_id(stripe_id):
+    for key in PAYMENTS_PLANS.keys():
+        if PAYMENTS_PLANS[key].get("stripe_plan_id") == stripe_id:
+            return key
+
+
+PASSWORD_INPUT_RENDER_VALUE = getattr(settings, 'DJSTRIPE_PASSWORD_INPUT_RENDER_VALUE', False)
+PASSWORD_MIN_LENGTH = getattr(settings, 'DJSTRIPE_PASSWORD_MIN_LENGTH', 6)
+
+PRORATION_POLICY = getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False)
+PRORATION_POLICY_FOR_UPGRADES = getattr(settings, 'DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES', False)
+# TODO - need to find a better way to do this
+CANCELLATION_AT_PERIOD_END = not PRORATION_POLICY
+
+SEND_INVOICE_RECEIPT_EMAILS = getattr(settings, "DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS", True)
+CURRENCIES = getattr(settings, "DJSTRIPE_CURRENCIES", (
+    ('usd', 'U.S. Dollars',),
+    ('gbp', 'Pounds (GBP)',),
+    ('eur', 'Euros',))
 )
+
+DEFAULT_PLAN = getattr(settings, "DJSTRIPE_DEFAULT_PLAN", None)
 
 PLAN_LIST = []
 for p in PAYMENTS_PLANS:
@@ -144,8 +151,4 @@ if isinstance(trial_period_for_subscriber_callback, basestring):
         trial_period_for_subscriber_callback
     )
 
-DJSTRIPE_WEBHOOK_URL = getattr(
-    settings,
-    "DJSTRIPE_WEBHOOK_URL",
-    r"^webhook/$"
-)
+DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")

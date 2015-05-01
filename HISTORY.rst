@@ -7,6 +7,7 @@ History
 ---------------------
 
 * Removed the StripeSubscriptionSignupForm
+* Removed ``djstripe.safe_settings``. Settings are now all located in ``djstripe.settings``
 * The sync_subscriber argument has been renamed from subscriber_model to subscriber
 * Moved available currencies to the DJSTRIPE_CURRENCIES setting (Thanks @martinhill)
 * Allow passing of extra parameters to stripe Charge API (Thanks @mthornhill)
