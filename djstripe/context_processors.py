@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 .. module:: djstripe.context_processors
-   :synopsis: dj-stripe Context Processors .
+   :synopsis: dj-stripe Context Processors.
 
 .. moduleauthor:: Daniel Greenfeld (@pydanny)
 .. moduleauthor:: Alex Kavanaugh (@kavdev)
