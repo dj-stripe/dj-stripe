@@ -220,7 +220,6 @@ class ChangePlanView(LoginRequiredMixin,
     def post(self, request, *args, **kwargs):
         form = PlanForm(request.POST)
         customer = request.user.customer
-        plans = Plan.objects.all()
         if form.is_valid():
             try:
                 """
@@ -231,18 +230,16 @@ class ChangePlanView(LoginRequiredMixin,
                 if PRORATION_POLICY_FOR_UPGRADES:
                     # TODO: Needs refactor
                     current_subscription_amount = customer.current_subscription.amount
-                    selected_plan_name = form.cleaned_data["plan"]
-                    selected_plan = next(
-                        (plan for plan in plans if plan.stripe_id == selected_plan_name)
-                    )
-                    selected_plan_price = selected_plan["price"]
-                    if not isinstance(selected_plan["price"], decimal.Decimal):
-                        selected_plan_price = selected_plan["price"] / decimal.Decimal("100")
+                    selected_plan_id = form.cleaned_data["plan"]
+                    selected_plan = Plan.objects.get(stripe_id=selected_plan_id)
+                    selected_plan_price = selected_plan.amount
+                    if not isinstance(selected_plan_price, decimal.Decimal):
+                        selected_plan_price = selected_plan_price / decimal.Decimal("100")
                     """ Is it an upgrade """
                     if selected_plan_price > current_subscription_amount:
-                        customer.subscribe(selected_plan_name, prorate=True)
+                        customer.subscribe(selected_plan_id, prorate=True)
                     else:
-                        customer.subscribe(selected_plan_name)
+                        customer.subscribe(selected_plan_id)
                 else:
                     customer.subscribe(form.cleaned_data.get("plan"))
             except stripe.StripeError as e:

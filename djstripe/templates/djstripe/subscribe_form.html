@@ -54,9 +54,9 @@
               {% elif customer.current_subscription.plan == plan.interval and customer.current_subscription.amount == plan.amount %}
               {# check if user plan owner #}
                 <h4>Your Current Plan</h4>
-              {% elif customer.current_subscription.amount < plan.amount|djdiv:100 %}
+              {% elif customer.current_subscription.amount < plan.amount %}
                 <h4>Upgrade</h4>
-              {% elif customer.current_subscription.amount > plan.amount|djdiv:100 %}
+              {% elif customer.current_subscription.amount > plan.amount %}
                 <h4>Downgrade</h4>
               {% endif %}
             </form>
