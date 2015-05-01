@@ -1,7 +1,6 @@
 import datetime
 import decimal
 
-from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured
@@ -10,11 +9,11 @@ from django.test.utils import override_settings
 from django.utils import timezone
 
 from djstripe.models import convert_tstamp, Customer, CurrentSubscription
-from djstripe.utils import subscriber_has_active_subscription, get_supported_currency_choices
+from djstripe.utils import subscriber_has_active_subscription
 
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
-from tests.apps.testapp.models import Organization, StaticEmailOrganization
+from tests.apps.testapp.models import Organization
 
 
 class TestDeprecationWarning(AssertWarnsEnabledTestCase):
@@ -157,17 +156,3 @@ class TestUserHasActiveSubscription(TestCase):
         self.user.save()
 
         self.assertTrue(subscriber_has_active_subscription(self.user))
-
-
-class TestGetSupportedCurrencyChoices(TestCase):
-
-    def test_get_choices(self):
-        """
-        Simple test to test sure that at least one currency choice tuple is returned.
-        USD should always be an option.
-        """
-
-        currency_choices = get_supported_currency_choices(settings.STRIPE_SECRET_KEY)
-        self.assertGreaterEqual(len(currency_choices), 1, "Currency choices pull returned an empty list.")
-        self.assertEqual(tuple, type(currency_choices[0]), "Currency choices are not tuples.")
-        self.assertIn(("usd", "USD"), currency_choices, "USD not in currency choices.")
