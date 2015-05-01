@@ -7,6 +7,7 @@ History
 ---------------------
 
 * Removed the StripeSubscriptionSignupForm
+* The sync_subscriber argument has been renamed from subscriber_model to subscriber
 * Moved available currencies to the DJSTRIPE_CURRENCIES setting (Thanks @martinhill)
 * Allow passing of extra parameters to stripe Charge API (Thanks @mthornhill)
 * South migrations are now up to date (Thanks @Tyrdall)
