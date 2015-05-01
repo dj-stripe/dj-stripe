@@ -1,21 +1,23 @@
 # -*- coding: utf-8 -*-
-from south.utils import datetime_utils as datetime
+from django.conf import settings
 from south.db import db
 from south.v2 import SchemaMigration
-from django.db import models
+
+
+# Can't use the callable because the app registry is not ready yet.
+# Really trusting users here... bad idea? probably.
+DJSTRIPE_UNSAFE_SUBSCRIBER_MODEL = getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", settings.AUTH_USER_MODEL)
 
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding unique constraint on 'Invoice', fields ['stripe_id']
-        db.create_unique(u'djstripe_invoice', ['stripe_id'])
-
+        # Changing field 'Customer.subscriber'
+        db.alter_column(u'djstripe_customer', 'subscriber_id', self.gf('django.db.models.fields.related.OneToOneField')(to=orm[DJSTRIPE_UNSAFE_SUBSCRIBER_MODEL], null=True))
 
     def backwards(self, orm):
-        # Removing unique constraint on 'Invoice', fields ['stripe_id']
-        db.delete_unique(u'djstripe_invoice', ['stripe_id'])
-
+        # Changing field 'Customer.subscriber'
+        db.alter_column(u'djstripe_customer', 'subscriber_id', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['users.User'], unique=True, null=True))
 
     models = {
         u'auth.group': {

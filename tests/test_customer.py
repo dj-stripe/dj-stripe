@@ -168,7 +168,6 @@ class TestCustomer(TestCase):
         _, kwargs = ChargeMock.call_args
         self.assertEquals(kwargs["amount"], 1000)
 
-
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")
     def test_charge_passes_extra_arguments(self, ChargeMock, RetrieveMock):

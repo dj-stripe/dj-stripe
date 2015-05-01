@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import SchemaMigration
-from django.db import models
 
 
 class Migration(SchemaMigration):
@@ -11,11 +9,9 @@ class Migration(SchemaMigration):
         # Rename 'user' field to 'subscriber'
         db.rename_column('djstripe_customer', 'user_id', 'subscriber_id')
 
-
     def backwards(self, orm):
         # Rename 'subscriber' field to 'user'
         db.rename_column('djstripe_customer', 'subscriber_id', 'user_id')
-
 
     models = {
         u'auth.group': {
