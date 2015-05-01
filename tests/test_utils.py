@@ -1,6 +1,7 @@
 import datetime
 import decimal
 
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured
@@ -9,9 +10,11 @@ from django.test.utils import override_settings
 from django.utils import timezone
 
 from djstripe.models import convert_tstamp, Customer, CurrentSubscription
-from djstripe.utils import subscriber_has_active_subscription
+from djstripe.utils import subscriber_has_active_subscription, get_supported_currency_choices
 
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
+
+from tests.apps.testapp.models import Organization, StaticEmailOrganization
 
 
 class TestDeprecationWarning(AssertWarnsEnabledTestCase):
@@ -125,6 +128,15 @@ class TestUserHasActiveSubscription(TestCase):
         # Assert that the customer's subscription is action
         self.assertTrue(subscriber_has_active_subscription(self.user))
 
+    def test_custom_subscriber(self):
+        """
+        ``subscriber_has_active_subscription`` attempts to create a customer object
+        for the current user. This causes a ValueError in this test because the
+        database has already been established with auth.User.
+        """
+        subscriber = Organization.objects.create(email="email@test.com")
+        self.assertRaises(ValueError, subscriber_has_active_subscription, subscriber)
+
     def test_anonymous_user(self):
         """
         This needs to throw an ImproperlyConfigured error so the developer
@@ -145,3 +157,17 @@ class TestUserHasActiveSubscription(TestCase):
         self.user.save()
 
         self.assertTrue(subscriber_has_active_subscription(self.user))
+
+
+class TestGetSupportedCurrencyChoices(TestCase):
+
+    def test_get_choices(self):
+        """
+        Simple test to test sure that at least one currency choice tuple is returned.
+        USD should always be an option.
+        """
+
+        currency_choices = get_supported_currency_choices(settings.STRIPE_SECRET_KEY)
+        self.assertGreaterEqual(len(currency_choices), 1, "Currency choices pull returned an empty list.")
+        self.assertEqual(tuple, type(currency_choices[0]), "Currency choices are not tuples.")
+        self.assertIn(("usd", "USD"), currency_choices, "USD not in currency choices.")
