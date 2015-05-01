@@ -79,7 +79,8 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
 Now you can make your changes locally.
 
 6. When you're done making changes, check that your changes pass flake8 and the
-tests, including testing other Python versions with tox::
+tests, including testing other Python versions with tox. If your changes cause code
+coverage to drop, the tests will fail.::
 
     $ pip install -r requirements_test.txt
     $ flake8 djstripe tests
@@ -94,12 +95,7 @@ tests, including testing other Python versions with tox::
 
 To get flake8 and tox, just pip install them into your virtualenv. 
 
-7. Check the test coverage report. Make sure coverage hasn't dropped::
-
-    $ coverage run --source djstripe runtests.py
-    $ coverage report -m
-
-8. Commit your changes and push your branch to GitHub::
+7. Commit your changes and push your branch to GitHub::
 
     $ git add .
     $ git commit -m "Your detailed description of your changes."

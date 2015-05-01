@@ -36,8 +36,8 @@ settings.configure(
         "django.contrib.auth.middleware.AuthenticationMiddleware",
     ),
     SITE_ID=1,
-    STRIPE_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", ""),
-    STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", ""),
+    STRIPE_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_lOasUMgiIA701U9wZnL6Zo6a"),
+    STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", "sk_test_nZBY1yjOJ75iFKGjorN29GiA"),
     DJSTRIPE_PLANS={},
     DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS=(
         "(admin)",
@@ -46,7 +46,12 @@ settings.configure(
     ),
     TEMPLATE_DIRS = [
         os.path.join(TESTS_ROOT, "tests/templates"),
-    ]
+    ],
+    NOSE_ARGS = ['--with-coverage',
+                 '--cover-branches',
+                 '--cover-html',
+                 '--cover-package=djstripe',
+                 '--cover-min-percentage=64']
 )
 
 # Avoid AppRegistryNotReady exception
