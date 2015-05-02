@@ -1,3 +1,8 @@
+from coverage import coverage
+cov = coverage(config_file=True)
+cov.erase()
+cov.start()
+
 import os
 import sys
 
@@ -38,7 +43,39 @@ settings.configure(
     SITE_ID=1,
     STRIPE_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_lOasUMgiIA701U9wZnL6Zo6a"),
     STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", "sk_test_nZBY1yjOJ75iFKGjorN29GiA"),
-    DJSTRIPE_PLANS={},
+    DJSTRIPE_PLANS={
+        "test0": {
+            "stripe_plan_id": "test_id_0",
+            "name": "Test Plan 0",
+            "description": "A test plan",
+            "price": 1000,  # $10.00
+            "currency": "usd",
+            "interval": "month"
+        },
+        "test": {
+            "stripe_plan_id": "test_id",
+            "name": "Test Plan 1",
+            "description": "Another test plan",
+            "price": 2500,  # $25.00
+            "currency": "usd",
+            "interval": "month"
+        },
+        "test2": {
+            "stripe_plan_id": "test_id_2",
+            "name": "Test Plan 2",
+            "description": "Yet Another test plan",
+            "price": 5000,  # $50.00
+            "currency": "usd",
+            "interval": "month"
+        },
+        "unidentified_test_plan": {
+            "name": "Unidentified Test Plan",
+            "description": "A test plan with no ID.",
+            "price": 2500,  # $25.00
+            "currency": "usd",
+            "interval": "month"
+        }
+    },
     DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS=(
         "(admin)",
         "test_url_name",
@@ -47,11 +84,6 @@ settings.configure(
     TEMPLATE_DIRS = [
         os.path.join(TESTS_ROOT, "tests/templates"),
     ],
-    NOSE_ARGS = ['--with-coverage',
-                 '--cover-branches',
-                 '--cover-html',
-                 '--cover-package=djstripe',
-                 '--cover-min-percentage=64']
 )
 
 # Avoid AppRegistryNotReady exception
@@ -67,3 +99,11 @@ failures = test_runner.run_tests(["."])
 
 if failures:
     sys.exit(failures)
+
+cov.stop()
+percentage = cov.report(show_missing=True)
+cov.html_report(directory='cover')
+cov.save()
+
+if percentage < 71.0:
+    sys.exit("WARNING: YOUR CHANGES HAVE CAUSED TEST COVERAGE TO DROP.")

@@ -1,6 +1,7 @@
 [run]
-source = djstripe
 branch = True
+source = djstripe
+
 omit =
     djstripe/migrations/*
     djstripe/south_migrations/*
@@ -9,4 +10,4 @@ omit =
     djstripe/*__init__.py
 
 [html]
-directory = "htmlcoverage"
+directory = cover

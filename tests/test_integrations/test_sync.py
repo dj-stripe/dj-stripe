@@ -87,8 +87,15 @@ if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
     class TestSyncPlans(TestCase):
 
         def test_simple_sync(self):
+            import stripe
+            stripe.api_key = settings.STRIPE_SECRET_KEY
+
+            # Delete all plans
+            for plan in stripe.Plan.all()["data"]:
+                plan.delete()
+
             sync_plans()
+            self.assertTrue("Plan created for test", sys.stdout.getvalue().strip())
 
-            message = sys.stdout.getvalue().strip()
-
-            self.assertTrue("ERROR: Plan already exists." == message or "Plan created for test" == message)
+            sync_plans()
+            self.assertTrue("ERROR: Plan already exists.", sys.stdout.getvalue().strip())

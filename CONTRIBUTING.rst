@@ -79,8 +79,9 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
 Now you can make your changes locally.
 
 6. When you're done making changes, check that your changes pass flake8 and the
-tests, including testing other Python versions with tox. If your changes cause code
-coverage to drop, the tests will fail.::
+tests, including testing other Python versions with tox. runtests will output both
+command line and html coverage statistics and will warn you if your changes caused code
+coverage to drop.::
 
     $ pip install -r requirements_test.txt
     $ flake8 djstripe tests

@@ -207,9 +207,3 @@ DJSTRIPE_CURRENCIES (=(('usd', 'U.S. Dollars',), ('gbp', 'Pounds (GBP)',), ('eur
 ==============================================================================================
 
 A Field.choices list of allowed currencies for Plan models.
-
-
-PLAN_CHOICES
-------------------------------------
-
-Creates a models/forms choices formatted tuple of tuples.

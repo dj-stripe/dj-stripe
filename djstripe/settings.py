@@ -1,19 +1,36 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-# from collections import OrderedDict
+from collections import OrderedDict
 import sys
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.utils import importlib
 
 PY3 = sys.version > "3"
 
-if PY3:
-    basestring = str
+USE_TZ = settings.USE_TZ
 
 subscriber_request_callback = getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK", (lambda request: request.user))
+
+INVOICE_FROM_EMAIL = getattr(settings, "DJSTRIPE_INVOICE_FROM_EMAIL", "billing@example.com")
+PAYMENTS_PLANS = getattr(settings, "DJSTRIPE_PLANS", {})
+
+
+# Sort the PAYMENT_PLANS dictionary ascending by price.
+PAYMENT_PLANS = OrderedDict(sorted(PAYMENTS_PLANS.items(), key=lambda t: t[1]['price']))
+PLAN_CHOICES = [(plan, PAYMENTS_PLANS[plan].get("name", plan)) for plan in PAYMENTS_PLANS]
+
+
+def plan_from_stripe_id(stripe_id):
+    payment_plans = getattr(settings, "DJSTRIPE_PLANS", {})
+    plan_id = None
+
+    for key in payment_plans.keys():
+        if payment_plans[key].get("stripe_plan_id") == stripe_id:
+            plan_id = key
+
+    return plan_id
 
 
 def _check_subscriber_for_email_address(subscriber_model, message):
@@ -84,35 +101,8 @@ def get_subscriber_model():
     return subscriber_model
 
 
-def load_path_attr(path):
-    i = path.rfind(".")
-    module, attr = path[:i], path[i + 1:]
-    try:
-        mod = importlib.import_module(module)
-    except ImportError as e:
-        raise ImproperlyConfigured("Error importing %s: '%s'" % (module, e))
-    try:
-        attr = getattr(mod, attr)
-    except AttributeError:
-        raise ImproperlyConfigured("Module '%s' does not define a '%s'" % (
-            module, attr)
-        )
-    return attr
 
 
-STRIPE_PUBLIC_KEY = settings.STRIPE_PUBLIC_KEY
-INVOICE_FROM_EMAIL = getattr(settings, "DJSTRIPE_INVOICE_FROM_EMAIL", "billing@example.com")
-PAYMENTS_PLANS = getattr(settings, "DJSTRIPE_PLANS", {})
-
-# Sort the PAYMENT_PLANS dictionary ascending by price.
-# PAYMENT_PLANS = OrderedDict(sorted(PAYMENTS_PLANS.items(), key=lambda t: t[1]['price']))
-PLAN_CHOICES = [(plan, PAYMENTS_PLANS[plan].get("name", plan)) for plan in PAYMENTS_PLANS]
-
-
-def plan_from_stripe_id(stripe_id):
-    for key in PAYMENTS_PLANS.keys():
-        if PAYMENTS_PLANS[key].get("stripe_plan_id") == stripe_id:
-            return key
 
 
 PASSWORD_INPUT_RENDER_VALUE = getattr(settings, 'DJSTRIPE_PASSWORD_INPUT_RENDER_VALUE', False)
@@ -145,10 +135,5 @@ trial_period_for_subscriber_callback = getattr(settings,
     "DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK",
     getattr(settings, "DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK", None)
 )
-
-if isinstance(trial_period_for_subscriber_callback, basestring):
-    trial_period_for_subscriber_callback = load_path_attr(
-        trial_period_for_subscriber_callback
-    )
 
 DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
