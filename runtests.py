@@ -105,5 +105,5 @@ percentage = cov.report(show_missing=True)
 cov.html_report(directory='cover')
 cov.save()
 
-if percentage < 71.0:
+if percentage < 73.0:
     sys.exit("WARNING: YOUR CHANGES HAVE CAUSED TEST COVERAGE TO DROP.")
