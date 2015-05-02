@@ -111,8 +111,9 @@ Before you submit a pull request, check that it meets these guidelines:
 
 1. The pull request should include tests.
 2. If the pull request adds functionality, the docs should be updated. Put
-   your new functionality into a function with a docstring, and add the
-   feature to the list in README.rst.
-3. The pull request should work for Python 2.6, 2.7, and 3.3, and for PyPy. Check 
+   your new functionality into a function with a docstring.
+3. If the pull request makes changes to a model, include both South migrations (Django <= 1.6)
+   and Django migrations (Django 1.7+).
+4. The pull request should work for Python 2.7, 3.3, and 3.4. Check 
    https://travis-ci.org/pydanny/dj-stripe/pull_requests
    and make sure that the tests pass for all supported Python versions.
