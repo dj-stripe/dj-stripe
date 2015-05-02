@@ -10,6 +10,7 @@ Development Lead
 * Yasmine Charif (@dollydagr)
 * Audrey Roy
 * Mahdi Yusuf (@myusuf3)
+* Alexander Kavanaugh (@kavdev)
 
 Contributors
 ------------
@@ -25,4 +26,10 @@ Contributors
 * sromero84
 * Mahdi Yusuf (@myusuf3)
 * Peter Baumgartner (@ipmb)
-
+* Vikas (@vikasgulati)
+* Colton Allen (@cmanallen)
+* Filip Wasilewski (@nigma)
+* Martin Hill (@martinhill)
+* Michael Thornhill <michael.thornhill@gmail.com>
+* Tobias Lorenz (@Tyrdall)
+* nanvel

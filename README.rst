@@ -2,19 +2,6 @@
 dj-stripe
 =============================
 
-This Project is Unmaintained
-----------------------------
-
-Since anything involving payments requires a careful eye for detail, rather than spend 5-10 minutes a week glancing at pull requests and issues, until further notice this project is unmaintained. Use it at your own risk.
-
-As I work on several critical, high profile projects for the Python and Django communities (including Cookiecutter_ and `Django Packages`_), all my admittedly limited open source time goes to those efforts.
-
-If you wish to change the status of this project by sponsoring it, please feel free to contact me at pydanny@gmail.com. Please note that since one of my agreements getting hired by my employer is that I end my consulting work, I am only interested in **sponsorship** of the project, not formal consulting work.
-
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`Django Packages`: https://github.com/pydanny/djangopackages
-
-
 Badges
 ------
 
@@ -41,10 +28,10 @@ Features
 * Subscription management
 * Designed for easy implementation of post-registration subscription forms
 * Single-unit purchases (forthcoming)
-* Works with Django 1.6, 1.5, 1.4
-* Works with Python 3.3, 2.7, 2.6
+* Works with Django 1.8, 1.7, 1.6, 1.5
+* Works with Python 3.4, 3.3, 2.7
 * Works with Bootstrap 3
-* Built-in South migrations
+* Built-in migrations
 * Dead-Easy installation
 * Leverages in the best of the 3rd party Django package ecosystem
 * `djstripe` namespace so you can have more than one payments related app
@@ -76,15 +63,6 @@ Add ``djstripe`` to your ``INSTALLED_APPS``:
         "djstripe",
     )
 
-Add the context processor to your ``TEMPLATE_CONTEXT_PROCESSORS``:
-
-.. code-block:: python
-
-    TEMPLATE_CONTEXT_PROCESSORS +=(
-        'djstripe.context_processors.djstripe_settings',
-        'django.core.context_processors.request',
-    )
-
 Add your stripe keys:
 
 .. code-block:: python
@@ -100,9 +78,7 @@ Add to the urls.py:
     
 Run the commands::
 
-    python manage.py syncdb
-
-    python manage.py migrate  # if you are using South
+    python manage.py migrate  # or syncdb, then migrate with South
     
     python manage.py djstripe_init_customers
 

@@ -28,10 +28,11 @@ Constraining Entire Sites
 
 If you want to quickly constrain an entire site, the ``djstripe.middleware.SubscriptionPaymentMiddleware`` middleware does the following to user requests:
 
-* **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they...:
+* **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they:
 
-    * ... have a valid subscription --or--
-    * ... are not ``user.is_staff==True``.
+    * have a valid subscription --or--
+    * are superusers (user.is_superuser==True) --or--
+    * are staff members (user.is_staff==True).
 
 * **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system.
 
@@ -80,10 +81,11 @@ Constraining Class-Based Views
 
 If you want to quickly constrain a single Class-Based View, the ``djstripe.decorators.subscription_payment_required`` decorator does the following to user requests:
 
-* **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they...:
+* **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they:
 
-    * ... have a valid subscription --or--
-    * ... are not ``user.is_staff==True``.
+    * have a valid subscription --or--
+    * are superusers (user.is_superuser==True) --or--
+    * are staff members (user.is_staff==True).
 
 * **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system.
 
@@ -125,10 +127,11 @@ Constraining Function-Based Views
 
 If you want to quickly constrain a single Function-Based View, the ``djstripe.decorators.subscription_payment_required`` decorator does the following to user requests:
 
-* **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they...:
+* **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they:
 
-    * ... have a valid subscription --or--
-    * ... are not ``user.is_staff==True``.
+    * have a valid subscription --or--
+    * are superusers (user.is_superuser==True) --or--
+    * are staff members (user.is_staff==True).
 
 * **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system.
 
@@ -193,67 +196,3 @@ Described is an anti-pattern. View logic belongs in views.py, not urls.py.
             name="content_detail"
         ),
     )
-
-Subscriptions + Registration
-=============================
-
-.. warning:: Deprecation Warning!
-
-    Because this combines identity and financial submissions in one form, it's
-    arguably a security risk. Instead, we recommend using the standard two-stage
-    registration process, where personal info is gathered on one page, and CC
-    information on the next.
-
-    Therefore, using this technique will trigger a deprecation warning while in
-    DEBUG mode.
-
-    Discussion:
-
-        * https://github.com/pydanny/dj-stripe/issues/86
-        * https://github.com/pydanny/dj-stripe/issues/92
-
-
-This requires the following additional requirements:
-
-* django-allauth (user registration)
-* django-crispy-forms (form rendering)
-* django-floppyforms (widget rendering)
-
-Additional Settings (settings.py):
-
-.. code-block:: python
-
-    # django.contrib.sites is also necessary
-    INSTALLED_APPS += (
-        "floppyforms",
-        "allauth",  # registration
-        "allauth.account",  # registration
-    )
-    TEMPLATE_CONTEXT_PROCESSORS += (
-        "allauth.account.context_processors.account",
-    )
-    AUTHENTICATION_BACKENDS = (
-        "django.contrib.auth.backends.ModelBackend",
-        "allauth.account.auth_backends.AuthenticationBackend",
-    )
-    ACCOUNT_AUTHENTICATION_METHOD = "username"
-    ACCOUNT_EMAIL_REQUIRED = True
-    ACCOUNT_EMAIL_VERIFICATION = "mandatory"
-    ACCOUNT_SIGNUP_FORM_CLASS = "djstripe.forms.StripeSubscriptionSignupForm"
-    SITE_ID = 1
-
-Necessary URLS (root URLConf):
-
-.. code-block:: python
-
-    (r'^accounts/', include('allauth.urls')),
-
-
-Try it out!:
-
-* http://127.0.0.1:8000/accounts/signup
-
-**Note:**
-
-If you override allauth's signup template you'll need to make sure it includes
-the critical elements dj-stripe's version found at https://raw.github.com/pydanny/dj-stripe/master/djstripe/templates/account/signup.html

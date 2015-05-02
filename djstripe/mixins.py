@@ -5,20 +5,14 @@ from django.shortcuts import redirect
 
 from .models import Customer, CurrentSubscription, Plan
 from . import settings as app_settings
-from .utils import user_has_active_subscription
-
-ERROR_MSG = (
-                "SubscriptionPaymentRequiredMixin requires the user be"
-                "authenticated before use. Please use django-braces'"
-                "LoginRequiredMixin."
-            )
+from .utils import subscriber_has_active_subscription
 
 
 class SubscriptionPaymentRequiredMixin(object):
     """ Used to check to see if someone paid """
     # TODO - needs tests
     def dispatch(self, request, *args, **kwargs):
-        if not user_has_active_subscription(request.user):
+        if not subscriber_has_active_subscription(app_settings.subscriber_request_callback(request)):
             msg = "Your account is inactive. Please renew your subscription"
             messages.info(request, msg, fail_silently=True)
             return redirect("djstripe:subscribe")
@@ -29,6 +23,7 @@ class SubscriptionPaymentRequiredMixin(object):
 
 class PaymentsContextMixin(object):
     """ Used to check to see if someone paid """
+    # TODO - needs tests
     def get_context_data(self, **kwargs):
         context = super(PaymentsContextMixin, self).get_context_data(**kwargs)
         context.update({
@@ -38,6 +33,7 @@ class PaymentsContextMixin(object):
 
 
 class SubscriptionMixin(PaymentsContextMixin):
+    # TODO - needs tests
     def get_context_data(self, *args, **kwargs):
         context = super(SubscriptionMixin, self).get_context_data(**kwargs)
         context['is_plans_plural'] = bool(Plan.objects.all().count() > 1)

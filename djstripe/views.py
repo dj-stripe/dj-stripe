@@ -27,10 +27,32 @@ from .models import Event
 from .models import Plan
 from .models import EventProcessingException
 from .settings import CANCELLATION_AT_PERIOD_END
+from .settings import subscriber_request_callback
 from .settings import PRORATION_POLICY_FOR_UPGRADES
 from .settings import PY3
-from .settings import User
-from .sync import sync_customer
+from .sync import sync_subscriber
+
+
+# ============================================================================ #
+#                                 Account Views                                #
+# ============================================================================ #
+
+
+class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
+    # TODO - needs tests
+    template_name = "djstripe/account.html"
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(AccountView, self).get_context_data(**kwargs)
+        customer, created = Customer.get_or_create(
+            subscriber=subscriber_request_callback(self.request))
+        context['customer'] = customer
+        try:
+            context['subscription'] = customer.current_subscription
+        except CurrentSubscription.DoesNotExist:
+            context['subscription'] = None
+        context['plans'] = Plan.objects.all()
+        return context
 
 
 class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
@@ -42,7 +64,8 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
     def get_object(self):
         if hasattr(self, "customer"):
             return self.customer
-        self.customer, created = Customer.get_or_create(self.request.user)
+        self.customer, created = Customer.get_or_create(
+            subscriber=subscriber_request_callback(self.request))
         return self.customer
 
     def post(self, request, *args, **kwargs):
@@ -73,59 +96,6 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
         return reverse("djstripe:account")
 
 
-class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
-    # TODO - needs tests
-    template_name = "djstripe/cancel_subscription.html"
-    form_class = CancelSubscriptionForm
-    success_url = reverse_lazy("djstripe:account")
-
-    def form_valid(self, form):
-        customer, created = Customer.get_or_create(self.request.user)
-        current_subscription = customer.cancel_subscription(at_period_end=CANCELLATION_AT_PERIOD_END)
-        if current_subscription.status == current_subscription.STATUS_CANCELLED:
-            # If no pro-rate, they get kicked right out.
-            messages.info(self.request, "Your subscription is now cancelled.")
-            # logout the user
-            logout(self.request)
-            return redirect("home")
-        else:
-            # If pro-rate, they get some time to stay.
-            messages.info(self.request, "Your subscription status is now '{a}' until '{b}'".format(
-                    a=current_subscription.status, b=current_subscription.current_period_end
-                )
-            )
-
-        return super(CancelSubscriptionView, self).form_valid(form)
-
-
-class WebHook(CsrfExemptMixin, View):
-
-    def post(self, request, *args, **kwargs):
-        if PY3:
-            # Handles Python 3 conversion of bytes to str
-            body = request.body.decode(encoding="UTF-8")
-        else:
-            # Handles Python 2
-            body = request.body
-        data = json.loads(body)
-        if Event.objects.filter(stripe_id=data["id"]).exists():
-            EventProcessingException.objects.create(
-                data=data,
-                message="Duplicate event record",
-                traceback=""
-            )
-        else:
-            event = Event.objects.create(
-                stripe_id=data["id"],
-                kind=data["type"],
-                livemode=data["livemode"],
-                webhook_message=data
-            )
-            event.validate()
-            event.process()
-        return HttpResponse()
-
-
 class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
     # TODO - needs tests
     template_name = "djstripe/history.html"
@@ -133,7 +103,8 @@ class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
     select_related = ["invoice"]
 
     def get_object(self):
-        customer, created = Customer.get_or_create(self.request.user)
+        customer, created = Customer.get_or_create(
+            subscriber=subscriber_request_callback(self.request))
         return customer
 
 
@@ -146,34 +117,16 @@ class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
         return render(
             request,
             self.template_name,
-            {"customer": sync_customer(request.user)}
+            {"customer": sync_subscriber(subscriber_request_callback(request))}
         )
 
 
-class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
-    # TODO - needs tests
-    template_name = "djstripe/account.html"
-
-    def get_context_data(self, *args, **kwargs):
-        context = super(AccountView, self).get_context_data(**kwargs)
-        customer, created = Customer.get_or_create(self.request.user)
-        context['customer'] = customer
-        try:
-            context['subscription'] = customer.current_subscription
-        except CurrentSubscription.DoesNotExist:
-            context['subscription'] = None
-        context['plans'] = Plan.objects.all()
-        return context
+# ============================================================================ #
+#                              Subscription Views                              #
+# ============================================================================ #
 
 
-################## Subscription views
-
-
-class SubscribeFormView(
-        LoginRequiredMixin,
-        FormValidMessageMixin,
-        SubscriptionMixin,
-        FormView):
+class SubscribeFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
     # TODO - needs tests
 
     form_class = PlanForm
@@ -195,7 +148,8 @@ class SubscribeFormView(
         form = self.get_form(form_class)
         if form.is_valid():
             try:
-                customer, created = Customer.get_or_create(self.request.user)
+                customer, created = Customer.get_or_create(
+                    subscriber=subscriber_request_callback(self.request))
                 customer.update_card(self.request.POST.get("stripe_token"))
                 customer.subscribe(form.cleaned_data["plan"])
             except stripe.StripeError as e:
@@ -219,14 +173,12 @@ class ChangePlanView(LoginRequiredMixin,
 
     def post(self, request, *args, **kwargs):
         form = PlanForm(request.POST)
-        customer = request.user.customer
+        customer = subscriber_request_callback(request).customer
         if form.is_valid():
             try:
-                """
-                When a customer upgrades their plan, and PRORATION_POLICY_FOR_UPGRADES is set to True,
-                then we force the proration of his current plan and use it towards the upgraded plan,
-                no matter what PRORATION_POLICY is set to.
-                """
+                # When a customer upgrades their plan, and PRORATION_POLICY_FOR_UPGRADES is set to True,
+                # then we force the proration of his current plan and use it towards the upgraded plan,
+                # no matter what PRORATION_POLICY is set to.
                 if PRORATION_POLICY_FOR_UPGRADES:
                     # TODO: Needs refactor
                     current_subscription_amount = customer.current_subscription.amount
@@ -252,12 +204,62 @@ class ChangePlanView(LoginRequiredMixin,
             return self.form_invalid(form)
 
 
-######### Web services
-class CheckAvailableUserAttributeView(View):
+class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
+    # TODO - needs tests
+    template_name = "djstripe/cancel_subscription.html"
+    form_class = CancelSubscriptionForm
+    success_url = reverse_lazy("djstripe:account")
 
-    def get(self, request, *args, **kwargs):
-        attr_name = self.kwargs['attr_name']
-        not_available = User.objects.filter(
-                **{attr_name: request.GET.get("v", "")}
-        ).exists()
-        return HttpResponse(json.dumps(not not_available))
+    def form_valid(self, form):
+        customer, created = Customer.get_or_create(
+            subscriber=subscriber_request_callback(self.request))
+        current_subscription = customer.cancel_subscription(
+            at_period_end=CANCELLATION_AT_PERIOD_END)
+
+        if current_subscription.status == current_subscription.STATUS_CANCELLED:
+            # If no pro-rate, they get kicked right out.
+            messages.info(self.request, "Your subscription is now cancelled.")
+            # logout the user
+            logout(self.request)
+            return redirect("home")
+        else:
+            # If pro-rate, they get some time to stay.
+            messages.info(self.request, "Your subscription status is now '{status}' until '{period_end}'".format(
+                status=current_subscription.status, period_end=current_subscription.current_period_end)
+            )
+
+        return super(CancelSubscriptionView, self).form_valid(form)
+
+
+# ============================================================================ #
+#                                 Web Services                                 #
+# ============================================================================ #
+
+
+class WebHook(CsrfExemptMixin, View):
+    # TODO - needs tests
+
+    def post(self, request, *args, **kwargs):
+        if PY3:
+            # Handles Python 3 conversion of bytes to str
+            body = request.body.decode(encoding="UTF-8")
+        else:
+            # Handles Python 2
+            body = request.body
+        data = json.loads(body)
+        if Event.objects.filter(stripe_id=data["id"]).exists():
+            EventProcessingException.objects.create(
+                data=data,
+                message="Duplicate event record",
+                traceback=""
+            )
+        else:
+            event = Event.objects.create(
+                stripe_id=data["id"],
+                kind=data["type"],
+                livemode=data["livemode"],
+                webhook_message=data
+            )
+            event.validate()
+            event.process()
+        return HttpResponse()

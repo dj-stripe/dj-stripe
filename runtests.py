@@ -29,7 +29,12 @@ settings.configure(
         "django.contrib.sites",
         "jsonfield",
         "djstripe",
+        "tests.apps.testapp"
     ],
+    MIDDLEWARE_CLASSES=(
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+    ),
     SITE_ID=1,
     STRIPE_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", ""),
     STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", ""),
@@ -39,7 +44,6 @@ settings.configure(
         "test_url_name",
         "testapp_namespaced:test_url_namespaced"
     ),
-    ACCOUNT_SIGNUP_FORM_CLASS='djstripe.forms.StripeSubscriptionSignupForm',
     TEMPLATE_DIRS = [
         os.path.join(TESTS_ROOT, "tests/templates"),
     ]
