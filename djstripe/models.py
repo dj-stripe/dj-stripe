@@ -881,6 +881,12 @@ class Charge(StripeObject):
         )
         return Charge.sync_from_stripe_data(charge_obj)
 
+    def capture(self):
+        charge_obj = stripe.Charge.retrieve(
+            self.stripe_id
+        ).capture()
+        return Charge.sync_from_stripe_data(charge_obj)
+
     @classmethod
     def sync_from_stripe_data(cls, data):
         customer = Customer.objects.get(stripe_id=data["customer"])
