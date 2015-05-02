@@ -882,6 +882,11 @@ class Charge(StripeObject):
         return Charge.sync_from_stripe_data(charge_obj)
 
     def capture(self):
+        """
+        Capture the payment of an existing, uncaptured, charge. This is the second half of the two-step payment flow,
+        where first you created a charge with the capture option set to false.
+        See https://stripe.com/docs/api#capture_charge
+        """
         charge_obj = stripe.Charge.retrieve(
             self.stripe_id
         ).capture()
