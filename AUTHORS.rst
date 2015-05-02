@@ -24,7 +24,6 @@ Contributors
 * Thomas Parslow (@almost)
 * Leonid Shvechikov (@shvechikov)
 * sromero84
-* Mahdi Yusuf (@myusuf3)
 * Peter Baumgartner (@ipmb)
 * Vikas (@vikasgulati)
 * Colton Allen (@cmanallen)
@@ -32,4 +31,5 @@ Contributors
 * Martin Hill (@martinhill)
 * Michael Thornhill <michael.thornhill@gmail.com>
 * Tobias Lorenz (@Tyrdall)
+* Ben Whalley
 * nanvel

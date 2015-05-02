@@ -1,66 +1,48 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
 import datetime
 import decimal
 import json
 import traceback as exception_traceback
 
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 
-from django.contrib.sites.models import Site
-
 from jsonfield.fields import JSONField
 from model_utils.models import TimeStampedModel
 import stripe
 
-from . import exceptions
+from . import settings as djstripe_settings
+from .exceptions import SubscriptionCancellationFailure
 from .managers import CustomerManager, ChargeManager, TransferManager
-
-from .settings import INVOICE_FROM_EMAIL, SEND_INVOICE_RECEIPT_EMAILS
-from .settings import PRORATION_POLICY
-from .settings import PY3
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
-from .settings import trial_period_for_subscriber_callback
-from .settings import DEFAULT_PLAN
-from .settings import CURRENCIES
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
 
 
-if PY3:
+if djstripe_settings.PY3:
     unicode = str
 
 
 def convert_tstamp(response, field_name=None):
-    try:
-        if field_name and response[field_name]:
-            if settings.USE_TZ:
-                return datetime.datetime.fromtimestamp(
-                    response[field_name],
-                    timezone.utc
-                )
-            else:
-                return datetime.datetime.fromtimestamp(response[field_name])
-        if not field_name:
-            if settings.USE_TZ:
-                return datetime.datetime.fromtimestamp(
-                    response,
-                    timezone.utc
-                )
-            else:
-                return datetime.datetime.fromtimestamp(response)
-    except KeyError:
-        pass
-    return None
+    # Overrides the set timezone to UTC - I think...
+    tz = timezone.utc if settings.USE_TZ else None
+
+    if not field_name:
+        return datetime.datetime.fromtimestamp(response, tz)
+    else:
+        if field_name in response and response[field_name]:
+            return datetime.datetime.fromtimestamp(response[field_name], tz)
 
 
 class StripeObject(TimeStampedModel):
@@ -124,7 +106,9 @@ class Event(StripeObject):
 
         if stripe_customer_id is not None:
             try:
-                self.customer = Customer.objects.get(stripe_id=stripe_customer_id)
+                self.customer = Customer.objects.get(
+                    stripe_id=stripe_customer_id
+                )
                 self.save()
             except Customer.DoesNotExist:
                 pass
@@ -345,7 +329,7 @@ class Customer(StripeObject):
         try:
             self.stripe_customer.delete()
         except stripe.InvalidRequestError as e:
-            if e.message.startswith("No such customer:"):
+            if str(e).startswith("No such customer:"):
                 # The exception was thrown because the stripe customer was already
                 # deleted on the stripe side, ignore the exception
                 pass
@@ -379,9 +363,8 @@ class Customer(StripeObject):
         try:
             current_subscription = self.current_subscription
         except CurrentSubscription.DoesNotExist:
-            raise exceptions.SubscriptionCancellationFailure(
-                "Customer does not have current subscription"
-            )
+            raise SubscriptionCancellationFailure("Customer does not have current subscription")
+
         try:
             """
             If plan has trial days and customer cancels before trial period ends,
@@ -390,16 +373,9 @@ class Customer(StripeObject):
             if self.current_subscription.trial_end and self.current_subscription.trial_end > timezone.now():
                 at_period_end = False
             sub = self.stripe_customer.cancel_subscription(at_period_end=at_period_end)
-        except stripe.InvalidRequestError as e:
-            if PY3:
-                err_msg = str(e)
-            else:
-                err_msg = e.message
-            raise exceptions.SubscriptionCancellationFailure(
-                "Customer's information is not current with Stripe.\n{}".format(
-                    err_msg
-                )
-            )
+        except stripe.InvalidRequestError as exc:
+            raise SubscriptionCancellationFailure("Customer's information is not current with Stripe.\n{}".format(str(exc)))
+
         current_subscription.status = sub.status
         current_subscription.cancel_at_period_end = sub.cancel_at_period_end
         current_subscription.current_period_end = convert_tstamp(sub, "current_period_end")
@@ -423,14 +399,14 @@ class Customer(StripeObject):
     @classmethod
     def create(cls, subscriber):
         trial_days = None
-        if trial_period_for_subscriber_callback:
-            trial_days = trial_period_for_subscriber_callback(subscriber)
+        if djstripe_settings.trial_period_for_subscriber_callback:
+            trial_days = djstripe_settings.trial_period_for_subscriber_callback(subscriber)
 
         stripe_customer = stripe.Customer.create(email=subscriber.email)
         cus = Customer.objects.create(subscriber=subscriber, stripe_id=stripe_customer.id)
 
-        if DEFAULT_PLAN and trial_days:
-            cus.subscribe(plan=DEFAULT_PLAN, trial_days=trial_days)
+        if djstripe_settings.DEFAULT_PLAN and trial_days:
+            cus.subscribe(plan=djstripe_settings.DEFAULT_PLAN, trial_days=trial_days)
 
         return cus
 
@@ -541,7 +517,7 @@ class Customer(StripeObject):
         )
 
     def subscribe(self, stripe_plan_id, quantity=1, trial_days=None,
-                  charge_immediately=True, prorate=PRORATION_POLICY):
+                  charge_immediately=True, prorate=djstripe_settings.PRORATION_POLICY):
         cu = self.stripe_customer
         """
         Trial_days corresponds to the value specified by the selected plan
@@ -828,7 +804,7 @@ class Invoice(StripeObject):
         if event.kind in valid_events:
             invoice_data = event.message["data"]["object"]
             stripe_invoice = stripe.Invoice.retrieve(invoice_data["id"])
-            cls.sync_from_stripe_data(stripe_invoice, send_receipt=SEND_INVOICE_RECEIPT_EMAILS)
+            cls.sync_from_stripe_data(stripe_invoice, send_receipt=djstripe_settings.SEND_INVOICE_RECEIPT_EMAILS)
 
 
 class InvoiceItem(TimeStampedModel):
@@ -866,15 +842,12 @@ class Charge(StripeObject):
     card_last_4 = models.CharField(max_length=4, blank=True)
     card_kind = models.CharField(max_length=50, blank=True)
     amount = models.DecimalField(decimal_places=2, max_digits=7, null=True)
-    amount_refunded = models.DecimalField(
-        decimal_places=2,
-        max_digits=7,
-        null=True
-    )
+    amount_refunded = models.DecimalField(decimal_places=2, max_digits=7, null=True)
     description = models.TextField(blank=True)
     paid = models.NullBooleanField(null=True)
     disputed = models.NullBooleanField(null=True)
     refunded = models.NullBooleanField(null=True)
+    captured = models.NullBooleanField(null=True)
     fee = models.DecimalField(decimal_places=2, max_digits=7, null=True)
     receipt_sent = models.BooleanField(default=False)
     charge_created = models.DateTimeField(null=True, blank=True)
@@ -890,11 +863,18 @@ class Charge(StripeObject):
         return int(amount_to_refund * 100)
 
     def refund(self, amount=None):
-        charge_obj = stripe.Charge.retrieve(
-            self.stripe_id
-        ).refund(
+        charge_obj = stripe.Charge.retrieve(self.stripe_id).refund(
             amount=self.calculate_refund_amount(amount=amount)
         )
+        return Charge.sync_from_stripe_data(charge_obj)
+
+    def capture(self):
+        """
+        Capture the payment of an existing, uncaptured, charge. This is the second half of the two-step payment flow,
+        where first you created a charge with the capture option set to false.
+        See https://stripe.com/docs/api#capture_charge
+        """
+        charge_obj = stripe.Charge.retrieve(self.stripe_id).capture()
         return Charge.sync_from_stripe_data(charge_obj)
 
     @classmethod
@@ -910,6 +890,7 @@ class Charge(StripeObject):
         obj.amount = (data["amount"] / decimal.Decimal("100"))
         obj.paid = data["paid"]
         obj.refunded = data["refunded"]
+        obj.captured = data["captured"]
         obj.fee = (data["fee"] / decimal.Decimal("100"))
         obj.disputed = data["dispute"] is not None
         obj.charge_created = convert_tstamp(data, "created")
@@ -939,7 +920,7 @@ class Charge(StripeObject):
                 subject,
                 message,
                 to=[self.customer.subscriber.email],
-                from_email=INVOICE_FROM_EMAIL
+                from_email=djstripe_settings.INVOICE_FROM_EMAIL
             ).send()
             self.receipt_sent = num_sent > 0
             self.save()
@@ -957,7 +938,7 @@ class Plan(StripeObject):
 
     name = models.CharField(max_length=100, null=False)
     currency = models.CharField(
-        choices=CURRENCIES,
+        choices=djstripe_settings.CURRENCIES,
         max_length=10,
         null=False)
     interval = models.CharField(

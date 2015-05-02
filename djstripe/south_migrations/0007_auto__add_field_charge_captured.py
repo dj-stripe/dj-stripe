@@ -1,17 +1,23 @@
 # -*- coding: utf-8 -*-
+from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import SchemaMigration
+from django.db import models
 
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Rename 'user' field to 'subscriber'
-        db.rename_column('djstripe_customer', 'user_id', 'subscriber_id')
+        # Adding field 'Charge.captured'
+        db.add_column(u'djstripe_charge', 'captured',
+                      self.gf('django.db.models.fields.NullBooleanField')(null=True, blank=True),
+                      keep_default=False)
+
 
     def backwards(self, orm):
-        # Rename 'subscriber' field to 'user'
-        db.rename_column('djstripe_customer', 'subscriber_id', 'user_id')
+        # Deleting field 'Charge.captured'
+        db.delete_column(u'djstripe_charge', 'captured')
+
 
     models = {
         u'auth.group': {
@@ -54,6 +60,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Charge'},
             'amount': ('django.db.models.fields.DecimalField', [], {'null': 'True', 'max_digits': '7', 'decimal_places': '2'}),
             'amount_refunded': ('django.db.models.fields.DecimalField', [], {'null': 'True', 'max_digits': '7', 'decimal_places': '2'}),
+            'captured': ('django.db.models.fields.NullBooleanField', [], {'null': 'True', 'blank': 'True'}),
             'card_kind': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'}),
             'card_last_4': ('django.db.models.fields.CharField', [], {'max_length': '4', 'blank': 'True'}),
             'charge_created': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),

@@ -49,3 +49,19 @@ def subscriber_has_active_subscription(subscriber):
     if created or not customer.has_active_subscription():
         return False
     return True
+
+
+def get_supported_currency_choices(api_key):
+    """
+    Pulls a stripe account's supported currencies and returns a choices tuple of
+    those supported currencies.
+
+    :param api_key: The api key associated with the account from which to pull data.
+    :type api_key: str
+    """
+
+    import stripe
+    stripe.api_key = api_key
+
+    account = stripe.Account.retrieve()
+    return [(currency, currency.upper()) for currency in account["currencies_supported"]]

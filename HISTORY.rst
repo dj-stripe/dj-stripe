@@ -7,6 +7,9 @@ History
 ---------------------
 
 * Removed the StripeSubscriptionSignupForm
+* Removed ``djstripe.safe_settings``. Settings are now all located in ``djstripe.settings``
+* ``DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK`` can no longer be a module string
+* The sync_subscriber argument has been renamed from subscriber_model to subscriber
 * Moved available currencies to the DJSTRIPE_CURRENCIES setting (Thanks @martinhill)
 * Allow passing of extra parameters to stripe Charge API (Thanks @mthornhill)
 * charge.refund() now returns the refunded charge object (Thanks @mthornhill)

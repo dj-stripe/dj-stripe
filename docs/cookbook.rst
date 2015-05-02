@@ -66,7 +66,7 @@ Usage:
 Adding a custom plan that is outside of stripe
 -----------------------------------------------
  
-Sometimes you want a custom plan for per-customer billing. Or perhaps you are providing a special free-for-open-source plan. In which case, `djstripe.safe_settings.PLAN_CHOICES` is your friend:
+Sometimes you want a custom plan for per-customer billing. Or perhaps you are providing a special free-for-open-source plan. In which case, `djstripe.settings.PLAN_CHOICES` is your friend:
 
 .. code-block:: python
 
@@ -77,7 +77,7 @@ Sometimes you want a custom plan for per-customer billing. Or perhaps you are pr
     from django.db import models
     from django.utils.translation import ugettext_lazy as _
 
-    from djstripe.safe_settings import PLAN_CHOICES
+    from djstripe.settings import PLAN_CHOICES
     from djstripe.signals import subscription_made
 
     CUSTOM_CHOICES = (
