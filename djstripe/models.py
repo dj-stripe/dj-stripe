@@ -858,6 +858,7 @@ class Charge(StripeObject):
     paid = models.NullBooleanField(null=True)
     disputed = models.NullBooleanField(null=True)
     refunded = models.NullBooleanField(null=True)
+    captured = models.NullBooleanField(null=True)
     fee = models.DecimalField(decimal_places=2, max_digits=7, null=True)
     receipt_sent = models.BooleanField(default=False)
     charge_created = models.DateTimeField(null=True, blank=True)
@@ -893,6 +894,7 @@ class Charge(StripeObject):
         obj.amount = (data["amount"] / decimal.Decimal("100"))
         obj.paid = data["paid"]
         obj.refunded = data["refunded"]
+        obj.captured = data["captured"]
         obj.fee = (data["fee"] / decimal.Decimal("100"))
         obj.disputed = data["dispute"] is not None
         obj.charge_created = convert_tstamp(data, "created")
