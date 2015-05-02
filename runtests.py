@@ -6,6 +6,7 @@ cov.start()
 import os
 import sys
 
+TESTS_THRESHOLD = 72.66
 TESTS_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 import django
@@ -101,9 +102,10 @@ if failures:
     sys.exit(failures)
 
 cov.stop()
-percentage = cov.report(show_missing=True)
+percentage = round(cov.report(show_missing=True), 2)
 cov.html_report(directory='cover')
 cov.save()
 
-if percentage < 73.0:
-    sys.exit("WARNING: YOUR CHANGES HAVE CAUSED TEST COVERAGE TO DROP.")
+if percentage < TESTS_THRESHOLD:
+    sys.exit("WARNING: YOUR CHANGES HAVE CAUSED TEST COVERAGE TO DROP. " +
+             "WAS {old}%, IS NOW {new}%.".format(old=TESTS_THRESHOLD, new=percentage))
