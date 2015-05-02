@@ -35,6 +35,7 @@ class EmailReceiptTest(TestCase):
             "amount": 40000,
             "paid": True,
             "refunded": False,
+            "captured": True,
             "fee": 499,
             "dispute": None,
             "created": 1363911708,

@@ -858,6 +858,7 @@ class Charge(StripeObject):
     paid = models.NullBooleanField(null=True)
     disputed = models.NullBooleanField(null=True)
     refunded = models.NullBooleanField(null=True)
+    captured = models.NullBooleanField(null=True)
     fee = models.DecimalField(decimal_places=2, max_digits=7, null=True)
     receipt_sent = models.BooleanField(default=False)
     charge_created = models.DateTimeField(null=True, blank=True)
@@ -880,6 +881,17 @@ class Charge(StripeObject):
         )
         return Charge.sync_from_stripe_data(charge_obj)
 
+    def capture(self):
+        """
+        Capture the payment of an existing, uncaptured, charge. This is the second half of the two-step payment flow,
+        where first you created a charge with the capture option set to false.
+        See https://stripe.com/docs/api#capture_charge
+        """
+        charge_obj = stripe.Charge.retrieve(
+            self.stripe_id
+        ).capture()
+        return Charge.sync_from_stripe_data(charge_obj)
+
     @classmethod
     def sync_from_stripe_data(cls, data):
         customer = Customer.objects.get(stripe_id=data["customer"])
@@ -893,6 +905,7 @@ class Charge(StripeObject):
         obj.amount = (data["amount"] / decimal.Decimal("100"))
         obj.paid = data["paid"]
         obj.refunded = data["refunded"]
+        obj.captured = data["captured"]
         obj.fee = (data["fee"] / decimal.Decimal("100"))
         obj.disputed = data["dispute"] is not None
         obj.charge_created = convert_tstamp(data, "created")
