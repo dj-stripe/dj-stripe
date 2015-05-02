@@ -6,7 +6,7 @@ cov.start()
 import os
 import sys
 
-TESTS_THRESHOLD = 72.00
+TESTS_THRESHOLD = 72.40
 TESTS_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 import django

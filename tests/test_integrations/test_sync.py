@@ -12,6 +12,8 @@ from django.conf import settings
 from django.test.testcases import TestCase
 from django.contrib.auth import get_user_model
 
+from stripe.error import InvalidRequestError
+
 from djstripe.models import Charge
 from djstripe.sync import sync_subscriber, sync_plans
 
@@ -92,7 +94,10 @@ if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
 
             # Delete all plans
             for plan in stripe.Plan.all()["data"]:
-                plan.delete()
+                try:
+                    plan.delete()
+                except InvalidRequestError:
+                    continue
 
             sync_plans()
             self.assertTrue("Plan created for test", sys.stdout.getvalue().strip())
