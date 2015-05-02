@@ -843,9 +843,7 @@ class Charge(StripeObject):
         return int(amount_to_refund * 100)
 
     def refund(self, amount=None):
-        charge_obj = stripe.Charge.retrieve(
-            self.stripe_id
-        ).refund(
+        charge_obj = stripe.Charge.retrieve(self.stripe_id).refund(
             amount=self.calculate_refund_amount(amount=amount)
         )
         return Charge.sync_from_stripe_data(charge_obj)
@@ -856,9 +854,7 @@ class Charge(StripeObject):
         where first you created a charge with the capture option set to false.
         See https://stripe.com/docs/api#capture_charge
         """
-        charge_obj = stripe.Charge.retrieve(
-            self.stripe_id
-        ).capture()
+        charge_obj = stripe.Charge.retrieve(self.stripe_id).capture()
         return Charge.sync_from_stripe_data(charge_obj)
 
     @classmethod
