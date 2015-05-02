@@ -3,13 +3,14 @@
 History
 =======
 
-0.5.0 (2015-04-??)
+0.5.0 (2015-05-??)
 ---------------------
 
 * Removed the StripeSubscriptionSignupForm
 * Moved available currencies to the DJSTRIPE_CURRENCIES setting (Thanks @martinhill)
 * Allow passing of extra parameters to stripe Charge API (Thanks @mthornhill)
 * charge.refund() now returns the refunded charge object (Thanks @mthornhill)
+* Charge model now has captured field and a capture method (Thanks @mthornhill)
 * South migrations are now up to date (Thanks @Tyrdall)
 
 0.4.0 (2015-04-05)
