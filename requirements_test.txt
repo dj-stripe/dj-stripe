@@ -2,7 +2,7 @@ django>=1.5
 stripe>=1.22.2
 django-model-utils>=1.4.0
 django-braces>=1.8.0
-# jsonfield>=1.0.3
+jsonfield>=1.0.3
 pytz>=2015.2
 
 south>=1.0.2
