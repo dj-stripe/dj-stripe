@@ -7,15 +7,13 @@
 
 """
 
-from .models import Plan
 from django import forms
 
-
-PLAN_CHOICES = [(plan.stripe_id, plan.name) for plan in Plan.objects.all()]
+from . import settings as djstripe_settings
 
 
 class PlanForm(forms.Form):
-    plan = forms.ChoiceField(choices=PLAN_CHOICES)
+    plan = forms.ChoiceField(choices=djstripe_settings.get_plan_choices())
 
 
 class CancelSubscriptionForm(forms.Form):

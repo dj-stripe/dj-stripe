@@ -30,6 +30,7 @@ from .settings import CANCELLATION_AT_PERIOD_END
 from .settings import subscriber_request_callback
 from .settings import PRORATION_POLICY_FOR_UPGRADES
 from .settings import PY3
+from .settings import get_plan_list
 from .sync import sync_subscriber
 
 
@@ -51,7 +52,7 @@ class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
             context['subscription'] = customer.current_subscription
         except CurrentSubscription.DoesNotExist:
             context['subscription'] = None
-        context['plans'] = Plan.objects.all()
+        context['plans'] = get_plan_list()
         return context
 
 
@@ -133,11 +134,6 @@ class SubscribeFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionM
     template_name = "djstripe/subscribe_form.html"
     success_url = reverse_lazy("djstripe:history")
     form_valid_message = "You are now subscribed!"
-
-    def get_context_data(self, **kwargs):
-        context = super(SubscribeFormView, self).get_context_data(**kwargs)
-        context['plans'] = Plan.objects.all()
-        return context
 
     def post(self, request, *args, **kwargs):
         """

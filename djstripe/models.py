@@ -819,10 +819,7 @@ class InvoiceItem(TimeStampedModel):
         """
         Returns current subscription plan name
         """
-        plan_object = Plan.objects.get(
-            interval=self.plan,
-            amount=self.amount
-        )
+        plan_object = Plan.objects.get(interval=self.plan, amount=self.amount)
         return plan_object.name
 
 

@@ -108,3 +108,15 @@ trial_period_for_subscriber_callback = getattr(settings,
 )
 
 DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
+
+
+def get_plan_list():
+    from .models import Plan
+
+    return Plan.objects.all()
+
+
+def get_plan_choices():
+    from .models import Plan
+    PLAN_CHOICES = [(plan.stripe_id, plan.name) for plan in Plan.objects.all()]
+    return PLAN_CHOICES

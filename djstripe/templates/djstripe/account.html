@@ -74,7 +74,7 @@
                                 <td>{{ plan.name }}</td>
                                 <td>{{ plan.interval.title }}ly</td>
                                 <td>
-                                	{% if plan.interval == subscription.plan and subscription.status != subscription.STATUS_CANCELLED and customer.current_subscription.amount == plan.amount %}
+                                	{% if plan.stripe_id == subscription.plan and subscription.status != subscription.STATUS_CANCELLED and customer.current_subscription.amount == plan.amount %}
                                         <strong>Your plan</strong>
                                     {% else %}
                                         Not your plan
