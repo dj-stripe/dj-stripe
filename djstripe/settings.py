@@ -102,8 +102,7 @@ DEFAULT_PLAN = getattr(settings, "DJSTRIPE_DEFAULT_PLAN", None)
 
 # Try to find the new settings variable first. If that fails, revert to the
 # old variable.
-trial_period_for_subscriber_callback = getattr(
-    settings,
+trial_period_for_subscriber_callback = getattr(settings,
     "DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK",
     getattr(settings, "DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK", None)
 )

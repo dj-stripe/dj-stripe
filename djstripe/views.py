@@ -162,10 +162,7 @@ class SubscribeFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionM
             return self.form_invalid(form)
 
 
-class ChangePlanView(LoginRequiredMixin,
-                     FormValidMessageMixin,
-                     SubscriptionMixin,
-                     FormView):
+class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
     form_class = PlanForm
     template_name = "djstripe/subscribe_form.html"
     success_url = reverse_lazy("djstripe:history")

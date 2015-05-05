@@ -106,9 +106,7 @@ class Event(StripeObject):
 
         if stripe_customer_id is not None:
             try:
-                self.customer = Customer.objects.get(
-                    stripe_id=stripe_customer_id
-                )
+                self.customer = Customer.objects.get(stripe_id=stripe_customer_id)
                 self.save()
             except Customer.DoesNotExist:
                 pass
@@ -545,11 +543,7 @@ class Customer(StripeObject):
         self.sync_current_subscription()
         if charge_immediately:
             self.send_invoice()
-        subscription_made.send(
-            sender=self,
-            plan=stripe_plan_id,
-            stripe_response=resp
-        )
+        subscription_made.send(sender=self, plan=stripe_plan_id, stripe_response=resp)
 
     def charge(self, amount, currency="usd", description=None, send_receipt=True, **kwargs):
         """
@@ -645,10 +639,7 @@ class CurrentSubscription(TimeStampedModel):
         """
         Returns current subscription plan name
         """
-        plan_object = Plan.objects.get(
-            interval=self.plan,
-            amount=self.amount
-        )
+        plan_object = Plan.objects.get(interval=self.plan, amount=self.amount)
         return plan_object.name
 
     def status_display(self):

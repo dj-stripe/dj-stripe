@@ -51,9 +51,7 @@ class SubscriptionMixin(PaymentsContextMixin):
         context = super(SubscriptionMixin, self).get_context_data(**kwargs)
         context['is_plans_plural'] = bool(Plan.objects.all().count() > 1)
         context['customer'], created = Customer.get_or_create(
-            subscriber=djstripe_settings.subscriber_request_callback(
-                self.request
-            )
+            subscriber=djstripe_settings.subscriber_request_callback(self.request)
         )
         context['CurrentSubscription'] = CurrentSubscription
         return context
