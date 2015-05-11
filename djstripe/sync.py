@@ -28,40 +28,26 @@ def sync_subscriber(subscriber_model):
 
 
 def sync_plans():
-    # TODO - needs tests
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
-
-    allowed_values = (
-        'id',
-        'amount',
-        'currency',
-        'interval',
-        'interval_count',
-        'name',
-        'trial_period_days',
-        'metadata',
-        'statement_descriptor'
-    )
-    conversion = {
-        'stripe_plan_id': 'id',
-        'price': 'amount'
-    }
-
     for plan in settings.DJSTRIPE_PLANS:
-        stripe_plan = settings.DJSTRIPE_PLANS[plan]
-        if stripe_plan.get("stripe_plan_id"):
-            kwargs = {}
-            for key in stripe_plan:
-                kw_key = conversion.get(key, key)
-                if kw_key not in allowed_values:
-                    continue
-                kwargs[kw_key] = stripe_plan[key]
+        if settings.DJSTRIPE_PLANS[plan].get("stripe_plan_id"):
             try:
-                stripe.Plan.create(**kwargs)
+                pln = settings.DJSTRIPE_PLANS[plan]
+                stripe.Plan.create(
+                    amount=pln["price"],
+                    interval=pln["interval"],
+                    name=pln["name"],
+                    currency=pln["currency"],
+                    id=pln["stripe_plan_id"],
+                    interval_count=pln.get("interval_count"),
+                    trial_period_days=pln.get("trial_period_days"),
+                    statement_descriptor=pln.get("statement_descriptor"),
+                    metadata=pln.get("metadata")
+                )
                 print("Plan created for {0}".format(plan))
             except Exception as e:
                 if PY3:
-                   print(str(e))
+                    print(str(e))
                 else:
-                   print(e.message)
+                    print(e.message)
