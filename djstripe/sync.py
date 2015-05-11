@@ -24,19 +24,19 @@ def sync_subscriber(subscriber):
 def sync_plans():
     stripe.api_key = settings.STRIPE_SECRET_KEY
     for plan in settings.DJSTRIPE_PLANS:
-        if settings.DJSTRIPE_PLANS[plan].get("stripe_plan_id"):
+        stripe_plan = settings.DJSTRIPE_PLANS[plan]
+        if stripe_plan.get("stripe_plan_id"):
             try:
-                pln = settings.DJSTRIPE_PLANS[plan]
                 stripe.Plan.create(
-                    amount=pln["price"],
-                    interval=pln["interval"],
-                    name=pln["name"],
-                    currency=pln["currency"],
-                    id=pln["stripe_plan_id"],
-                    interval_count=pln.get("interval_count"),
-                    trial_period_days=pln.get("trial_period_days"),
-                    statement_descriptor=pln.get("statement_descriptor"),
-                    metadata=pln.get("metadata")
+                    amount=stripe_plan["price"],
+                    interval=stripe_plan["interval"],
+                    name=stripe_plan["name"],
+                    currency=stripe_plan["currency"],
+                    id=stripe_plan["stripe_plan_id"],
+                    interval_count=stripe_plan.get("interval_count"),
+                    trial_period_days=stripe_plan.get("trial_period_days"),
+                    statement_descriptor=stripe_plan.get("statement_descriptor"),
+                    metadata=stripe_plan.get("metadata")
                 )
                 print("Plan created for {0}".format(plan))
             except Exception as e:
