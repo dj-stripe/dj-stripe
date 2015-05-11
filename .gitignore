@@ -24,6 +24,7 @@ logfile
 pip-log.txt
 
 # Unit test / coverage reports
+cover/*
 .coverage
 .tox
 nosetests.xml

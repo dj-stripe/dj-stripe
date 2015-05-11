@@ -66,6 +66,7 @@ class TestCustomer(TestCase):
             "amount": 1000,
             "paid": True,
             "refunded": False,
+            "captured": True,
             "fee": 499,
             "dispute": None,
             "created": 1363911708,
@@ -100,6 +101,7 @@ class TestCustomer(TestCase):
             "amount": 1000,
             "paid": True,
             "refunded": True,
+            "captured": True,
             "amount_refunded": 1000,
             "fee": 499,
             "dispute": None,
@@ -108,6 +110,72 @@ class TestCustomer(TestCase):
         }
         charge.refund()
         charge2 = Charge.objects.get(stripe_id="ch_XXXXXX")
+        self.assertEquals(charge2.refunded, True)
+        self.assertEquals(charge2.amount_refunded, decimal.Decimal("10.00"))
+
+    @patch("stripe.Charge.retrieve")
+    def test_capture_charge(self, RetrieveMock):
+        charge = Charge.objects.create(
+            stripe_id="ch_XXXXXX",
+            customer=self.customer,
+            card_last_4="4323",
+            card_kind="Visa",
+            amount=decimal.Decimal("10.00"),
+            paid=True,
+            refunded=False,
+            captured=False,
+            fee=decimal.Decimal("4.99"),
+            disputed=False
+        )
+        RetrieveMock.return_value.capture.return_value = {
+            "id": "ch_XXXXXX",
+            "card": {
+                "last4": "4323",
+                "type": "Visa"
+            },
+            "amount": 1000,
+            "paid": True,
+            "refunded": True,
+            "captured": True,
+            "amount_refunded": 1000,
+            "fee": 499,
+            "dispute": None,
+            "created": 1363911708,
+            "customer": "cus_xxxxxxxxxxxxxxx"
+        }
+        charge2 = charge.capture()
+        self.assertEquals(charge2.captured, True)
+
+    @patch("stripe.Charge.retrieve")
+    def test_refund_charge_object_returned(self, RetrieveMock):
+        charge = Charge.objects.create(
+            stripe_id="ch_XXXXXX",
+            customer=self.customer,
+            card_last_4="4323",
+            card_kind="Visa",
+            amount=decimal.Decimal("10.00"),
+            paid=True,
+            refunded=False,
+            fee=decimal.Decimal("4.99"),
+            disputed=False
+        )
+        RetrieveMock.return_value.refund.return_value = {
+            "id": "ch_XXXXXX",
+            "card": {
+                "last4": "4323",
+                "type": "Visa"
+            },
+            "amount": 1000,
+            "paid": True,
+            "refunded": True,
+            "captured": True,
+            "amount_refunded": 1000,
+            "fee": 499,
+            "dispute": None,
+            "created": 1363911708,
+            "customer": "cus_xxxxxxxxxxxxxxx"
+        }
+        charge2 = charge.refund()
         self.assertEquals(charge2.refunded, True)
         self.assertEquals(charge2.amount_refunded, decimal.Decimal("10.00"))
 
@@ -157,6 +225,7 @@ class TestCustomer(TestCase):
             "amount": 1000,
             "paid": True,
             "refunded": False,
+            "captured": True,
             "fee": 499,
             "dispute": None,
             "created": 1363911708,
@@ -167,3 +236,31 @@ class TestCustomer(TestCase):
         )
         _, kwargs = ChargeMock.call_args
         self.assertEquals(kwargs["amount"], 1000)
+
+    @patch("stripe.Charge.retrieve")
+    @patch("stripe.Charge.create")
+    def test_charge_passes_extra_arguments(self, ChargeMock, RetrieveMock):
+        ChargeMock.return_value.id = "ch_XXXXX"
+        RetrieveMock.return_value = {
+            "id": "ch_XXXXXX",
+            "card": {
+                "last4": "4323",
+                "type": "Visa"
+            },
+            "amount": 1000,
+            "paid": True,
+            "refunded": False,
+            "captured": True,
+            "fee": 499,
+            "dispute": None,
+            "created": 1363911708,
+            "customer": "cus_xxxxxxxxxxxxxxx"
+        }
+        self.customer.charge(
+            amount=decimal.Decimal("10.00"),
+            capture=True,
+            destination='a_stripe_client_id'
+        )
+        _, kwargs = ChargeMock.call_args
+        self.assertEquals(kwargs["capture"], True)
+        self.assertEquals(kwargs["destination"], 'a_stripe_client_id')
