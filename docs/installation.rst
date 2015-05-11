@@ -63,6 +63,17 @@ Add some payment plans:
         }
     }
 
+.. note:: Stripe Plan creation
+
+    Not all properties listed in the plans above are used by Stripe - i.e 'description', which
+    is used to display the plans description within specific templates.
+
+    Although any arbitrary property you require can be added to each plan listed in DJ_STRIPE_PLANS,
+    only specific properties are used by Stripe. The full list of required and optional arguments
+    can be found here_.
+
+.. _here: https://stripe.com/docs/api/python#create_plan
+
 Add to the urls.py::
 
     url(r'^payments/', include('djstripe.urls', namespace="djstripe")),
