@@ -13,6 +13,8 @@ from djstripe.utils import subscriber_has_active_subscription
 
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
+from tests.apps.testapp.models import Organization
+
 
 class TestDeprecationWarning(AssertWarnsEnabledTestCase):
     """
@@ -124,6 +126,15 @@ class TestUserHasActiveSubscription(TestCase):
 
         # Assert that the customer's subscription is action
         self.assertTrue(subscriber_has_active_subscription(self.user))
+
+    def test_custom_subscriber(self):
+        """
+        ``subscriber_has_active_subscription`` attempts to create a customer object
+        for the current user. This causes a ValueError in this test because the
+        database has already been established with auth.User.
+        """
+        subscriber = Organization.objects.create(email="email@test.com")
+        self.assertRaises(ValueError, subscriber_has_active_subscription, subscriber)
 
     def test_anonymous_user(self):
         """
