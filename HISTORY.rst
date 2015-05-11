@@ -12,6 +12,7 @@ History
 * The sync_subscriber argument has been renamed from subscriber_model to subscriber
 * Moved available currencies to the DJSTRIPE_CURRENCIES setting (Thanks @martinhill)
 * Allow passing of extra parameters to stripe Charge API (Thanks @mthornhill)
+* Support for all available arguments when syncing plans (Thanks @jamesbrobb)
 * charge.refund() now returns the refunded charge object (Thanks @mthornhill)
 * Charge model now has captured field and a capture method (Thanks @mthornhill)
 * South migrations are now up to date (Thanks @Tyrdall)
