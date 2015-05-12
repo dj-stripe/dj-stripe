@@ -24,7 +24,6 @@ from . import views
 
 
 urlpatterns = [
-
     # HTML views
     url(
         r"^$",
