@@ -639,7 +639,7 @@ class CurrentSubscription(TimeStampedModel):
         """
         Returns current subscription plan name
         """
-        plan_object = Plan.objects.get(interval=self.plan, amount=self.amount)
+        plan_object = Plan.objects.get(stripe_id=self.plan, amount=self.amount)
         return plan_object.name
 
     def status_display(self):
@@ -819,7 +819,7 @@ class InvoiceItem(TimeStampedModel):
         """
         Returns current subscription plan name
         """
-        plan_object = Plan.objects.get(interval=self.plan, amount=self.amount)
+        plan_object = Plan.objects.get(stripe_id=self.plan, amount=self.amount)
         return plan_object.name
 
 
