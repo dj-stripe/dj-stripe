@@ -189,7 +189,12 @@ class Event(StripeObject):
                     if not self.customer:
                         self.link_customer()
                     if self.customer:
-                        self.customer.sync_current_subscription()
+                        if self.kind == "customer.subscription.deleted":
+                            self.customer.current_subscription.status = CurrentSubscription.STATUS_CANCELLED
+                            self.customer.current_subscription.canceled_at = timezone.now()
+                            self.customer.current_subscription.save()
+                        else:
+                            self.customer.sync_current_subscription()
                 elif self.kind == "customer.deleted":
                     if not self.customer:
                         self.link_customer()
