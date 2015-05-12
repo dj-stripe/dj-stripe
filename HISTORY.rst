@@ -15,6 +15,7 @@ History
 * Support for all available arguments when syncing plans (Thanks @jamesbrobb)
 * charge.refund() now returns the refunded charge object (Thanks @mthornhill)
 * Charge model now has captured field and a capture method (Thanks @mthornhill)
+* Subscription deleted webhook bugfix
 * South migrations are now up to date (Thanks @Tyrdall)
 
 0.4.0 (2015-04-05)
