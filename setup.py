@@ -15,6 +15,7 @@ except ImportError:
 if sys.argv[-1] == 'publish':
     os.system('python setup.py sdist upload')
     os.system('python setup.py bdist_wheel upload')
+    sys.exit()
 
 if sys.argv[-1] == 'tag':
     print("Tagging the version on github:")
@@ -65,6 +66,7 @@ setup(
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3'
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4'
     ],
 )
