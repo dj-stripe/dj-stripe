@@ -10,4 +10,5 @@ __author__ = "Daniel Greenfeld"
 __email__ = "pydanny@gmail.com"
 
 __license__ = "BSD"
+__license__ = "License :: OSI Approved :: BSD License"
 __copyright__ = "Copyright 2015 Daniel Greenfeld"
