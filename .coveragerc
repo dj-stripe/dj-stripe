@@ -1,5 +1,13 @@
 [run]
+branch = True
+source = djstripe
+
 omit =
     djstripe/migrations/*
+    djstripe/south_migrations/*
     djstripe/management/*
     djstripe/admin.py
+    djstripe/*__init__.py
+
+[html]
+directory = cover

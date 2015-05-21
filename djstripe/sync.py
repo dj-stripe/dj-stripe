@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
 from django.conf import settings
@@ -7,30 +8,36 @@ import stripe
 from .models import Customer
 
 
-def sync_customer(user):
-    # TODO - needs tests
-    customer, created = Customer.get_or_create(user)
-    cu = customer.stripe_customer
-    customer.sync(cu=cu)
-    customer.sync_subscriptions(cu=cu)
-    customer.sync_invoices(cu=cu)
-    customer.sync_charges(cu=cu)
+def sync_subscriber(subscriber):
+    customer, created = Customer.get_or_create(subscriber=subscriber)
+    try:
+        cu = customer.stripe_customer
+        customer.sync(cu=cu)
+        customer.sync_subscriptions(cu=cu)
+        customer.sync_invoices(cu=cu)
+        customer.sync_charges(cu=cu)
+    except stripe.error.InvalidRequestError as e:
+        print("ERROR: " + str(e))
     return customer
 
 
 def sync_plans():
-
     stripe.api_key = settings.STRIPE_SECRET_KEY
     for plan in settings.DJSTRIPE_PLANS:
-        if settings.DJSTRIPE_PLANS[plan].get("stripe_plan_id"):
+        stripe_plan = settings.DJSTRIPE_PLANS[plan]
+        if stripe_plan.get("stripe_plan_id"):
             try:
                 stripe.Plan.create(
-                    amount=settings.DJSTRIPE_PLANS[plan]["price"],
-                    interval=settings.DJSTRIPE_PLANS[plan]["interval"],
-                    name=settings.DJSTRIPE_PLANS[plan]["name"],
-                    currency=settings.DJSTRIPE_PLANS[plan]["currency"],
-                    id=settings.DJSTRIPE_PLANS[plan].get("stripe_plan_id")
+                    amount=stripe_plan["price"],
+                    interval=stripe_plan["interval"],
+                    name=stripe_plan["name"],
+                    currency=stripe_plan["currency"],
+                    id=stripe_plan["stripe_plan_id"],
+                    interval_count=stripe_plan.get("interval_count"),
+                    trial_period_days=stripe_plan.get("trial_period_days"),
+                    statement_descriptor=stripe_plan.get("statement_descriptor"),
+                    metadata=stripe_plan.get("metadata")
                 )
                 print("Plan created for {0}".format(plan))
             except Exception as e:
-                print(e.message)
+                print("ERROR: " + str(e))

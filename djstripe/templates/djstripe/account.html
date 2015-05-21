@@ -23,19 +23,18 @@
                 <a class="btn btn-primary pull-right" href="{% url 'djstripe:change_card' %}">Change Card</a>
             </p>
         </div>
-        <div class="col-xs-4">
-            {% if subscription.is_status_current and not subscription.is_status_temporarily_current %}
-            <p>
-                <a class="btn btn-danger pull-right" href="{% url 'djstripe:cancel_subscription' %}">Cancel Subscription</a>
-            </p>
-            {% else %}
-            <p>
-            	<a class="btn btn-success" href="{% url 'djstripe:subscribe' %}">Subscribe</a>
-            </p>
-            {% endif %}
-        </div>
     </div>
 
+
+
+{% if subscription.is_status_current and not subscription.is_status_temporarily_current %}<p>Next billed on {{ subscription.current_period_end|date }}.</p>
+			<p>You can <a href="{% url 'djstripe:subscribe' %}">change</a> your plan
+				or <a href="{% url 'djstripe:cancel_subscription' %}">cancel</a> your subscription.
+    		</p>
+			{% else %}
+			<p>You can <a href="{% url 'djstripe:subscribe' %}">subscribe</a>.</p>
+    		{% endif %}
+    		<p>Or consult your <a href="{% url 'djstripe:history' %}">payment history</a>.</p>
 
 
     {% if plans %}
@@ -49,14 +48,14 @@
             <div class="col-xs-6">
             	{# Do not show next billing if subscription has been canceled although is still active #}
             	{% if subscription.is_status_current and not subscription.is_status_temporarily_current %}
-				<p>Next billed on {{ subscription.current_period_end|date }}.</p>
-				{% endif %}
-    			<p><a href="{% url 'djstripe:history' %}">Payment History</a></p>
-            </div>
-            <div class="col-xs-6">
-                <p class="pull-right">
-                    <a class="btn btn-primary" href="{% url 'djstripe:subscribe' %}">Manage Subscription</a>
-                </p>
+            	<p>Next billed on {{ subscription.current_period_end|date }}.</p>
+            	<p>You can <a href="{% url 'djstripe:change_plan' %}">change</a> your plan
+					or <a href="{% url 'djstripe:cancel_subscription' %}">cancel</a> your subscription.
+    			</p>
+				{% else %}
+				<p>You can <a href="{% url 'djstripe:subscribe' %}">subscribe</a>.</p>
+    			{% endif %}
+    			<p>Or consult here your <a href="{% url 'djstripe:history' %}">payment history</a>.</p>
             </div>
         </div>
 
@@ -74,12 +73,19 @@
                     <tbody>
                         
                         {% for plan in plans %}
-                            <tr>
+                            <tr {% if plan.plan == subscription.plan %} 
+        						{% if subscription.is_status_current and not subscription.is_status_temporarily_current and subscription.status != subscription.STATUS_TRIALING %} 
+        							class="success" 
+        						{% elif subscription.is_status_temporarily_current or subscription.status == subscription.STATUS_TRIALING %} 
+        							class="warning" 
+        						{% endif %}
+        					{% endif %}>
+                            
                                 <td>{{ plan.name }}</td>
                                 <td>{{ plan.interval.title }}ly</td>
                                 <td>{{ plan.description }}</td>
                                 <td>
-                                    {% if plan.plan == subscription.plan %}
+                                	{% if plan.plan == subscription.plan and subscription.status != subscription.STATUS_CANCELLED %}
                                         <strong>Your plan</strong>
                                     {% else %}
                                         Not your plan

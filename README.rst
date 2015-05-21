@@ -2,14 +2,17 @@
 dj-stripe
 =============================
 
+Badges
+------
+
 .. image:: https://badge.fury.io/py/dj-stripe.png
     :target: http://badge.fury.io/py/dj-stripe
-    
+
 .. image:: https://travis-ci.org/pydanny/dj-stripe.png?branch=master
         :target: https://travis-ci.org/pydanny/dj-stripe
 
 .. image:: https://pypip.in/d/dj-stripe/badge.png
-        :target: https://crate.io/packages/dj-stripe?version=latest
+        :target: https://pypi.python.org/pypi/dj-stripe/
 
 
 Django + Stripe Made Easy
@@ -23,12 +26,12 @@ Features
 --------
 
 * Subscription management
-* Subscription during registration
+* Designed for easy implementation of post-registration subscription forms
 * Single-unit purchases (forthcoming)
-* Works with Django 1.6, 1.5, 1.4
-* Works with Python 3.3, 2.7, 2.6
+* Works with Django 1.8, 1.7, 1.6, 1.5
+* Works with Python 3.4, 3.3, 2.7
 * Works with Bootstrap 3
-* Built-in South migrations
+* Built-in migrations
 * Dead-Easy installation
 * Leverages in the best of the 3rd party Django package ecosystem
 * `djstripe` namespace so you can have more than one payments related app
@@ -58,14 +61,6 @@ Add ``djstripe`` to your ``INSTALLED_APPS``:
 
     INSTALLED_APPS +=(
         "djstripe",
-    )
-
-Add the context processor to your ``TEMPLATE_CONTEXT_PROCESSORS``:
-
-.. code-block:: python
-
-    TEMPLATE_CONTEXT_PROCESSORS +=(
-        'djstripe.context_processors.djstripe_settings',
     )
 
 Add your stripe keys:
@@ -106,9 +101,7 @@ Add to the urls.py:
     
 Run the commands::
 
-    python manage.py syncdb
-
-    python manage.py migrate  # if you are using South
+    python manage.py migrate  # or syncdb, then migrate with South
     
     python manage.py djstripe_init_customers
     
@@ -129,6 +122,12 @@ If you haven't already, add JQuery and the Bootstrap 3.0.0 JS and CSS to your ba
 
     <!-- Latest compiled and minified JavaScript -->
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    
+Also, if you don't have it already, add a javascript block to your base.html file:
+
+.. code-block:: html
+
+    {% block javascript %}{% endblock %} 
 
 Start up the webserver:
 
@@ -141,8 +140,7 @@ Assuming the tests are run against PostgreSQL::
 
     createdb djstripe
     pip install -r requirements_test.txt
-    coverage run --source djstripe runtests.py
-    coverage report -m
+    python runtests.py
 
 Follows Best Practices
 ======================

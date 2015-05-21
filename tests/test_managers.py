@@ -1,12 +1,12 @@
 import datetime
 import decimal
 
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 
 from . import TRANSFER_CREATED_TEST_DATA, TRANSFER_CREATED_TEST_DATA2
-from djstripe.models import Event, Transfer, Customer, Subscription
-from djstripe.settings import User
+from djstripe.models import Event, Transfer, Customer, Subscription, Charge
 
 
 class CustomerManagerTest(TestCase):
@@ -18,7 +18,8 @@ class CustomerManagerTest(TestCase):
         start = datetime.datetime(2013, 1, 1, 0, 0, 1)  # more realistic start
         for i in range(10):
             customer = Customer.objects.create(
-                user=User.objects.create_user(username="patrick{0}".format(i)),
+                subscriber=get_user_model().objects.create_user(username="patrick{0}".format(i),
+                                                              email="patrick{0}@gmail.com".format(i)),
                 stripe_id="cus_xxxxxxxxxxxxxx{0}".format(i),
                 card_fingerprint="YYYYYYYY",
                 card_last_4="2342",
@@ -36,7 +37,8 @@ class CustomerManagerTest(TestCase):
                 quantity=1
             )
         customer = Customer.objects.create(
-            user=User.objects.create_user(username="patrick{0}".format(11)),
+            subscriber=get_user_model().objects.create_user(username="patrick{0}".format(11),
+                                                          email="patrick{0}@gmail.com".format(11)),
             stripe_id="cus_xxxxxxxxxxxxxx{0}".format(11),
             card_fingerprint="YYYYYYYY",
             card_last_4="2342",
@@ -55,7 +57,8 @@ class CustomerManagerTest(TestCase):
             quantity=1
         )
         customer = Customer.objects.create(
-            user=User.objects.create_user(username="patrick{0}".format(12)),
+            subscriber=get_user_model().objects.create_user(username="patrick{0}".format(12),
+                                                          email="patrick{0}@gmail.com".format(12)),
             stripe_id="cus_xxxxxxxxxxxxxx{0}".format(12),
             card_fingerprint="YYYYYYYY",
             card_last_4="2342",
@@ -172,3 +175,88 @@ class TransferManagerTest(TestCase):
         self.assertEquals(
             totals["total_validation_fees"], decimal.Decimal("0")
         )
+
+
+class ChargeManagerTest(TestCase):
+
+    def setUp(self):
+        customer = Customer.objects.create(stripe_id="cus_XXXXXXX")
+
+        self.march_charge = Charge.objects.create(
+            stripe_id="ch_XXXXMAR1",
+            customer=customer,
+            charge_created=datetime.datetime(2015, 3, 31)
+        )
+
+        self.april_charge_1 = Charge.objects.create(
+            stripe_id="ch_XXXXAPR1",
+            customer=customer,
+            paid=True,
+            amount=decimal.Decimal("20.15"),
+            fee=decimal.Decimal("4.90"),
+            charge_created=datetime.datetime(2015, 4, 1)
+        )
+
+        self.april_charge_2 = Charge.objects.create(
+            stripe_id="ch_XXXXAPR2",
+            customer=customer,
+            paid=True,
+            amount=decimal.Decimal("10.35"),
+            amount_refunded=decimal.Decimal("5.35"),
+            charge_created=datetime.datetime(2015, 4, 18)
+        )
+
+        self.april_charge_3 = Charge.objects.create(
+            stripe_id="ch_XXXXAPR3",
+            customer=customer,
+            paid=False,
+            amount=decimal.Decimal("100.00"),
+            amount_refunded=decimal.Decimal("80.00"),
+            fee=decimal.Decimal("5.00"),
+            charge_created=datetime.datetime(2015, 4, 30)
+        )
+
+        self.may_charge = Charge.objects.create(
+            stripe_id="ch_XXXXMAY1",
+            customer=customer,
+            charge_created=datetime.datetime(2015, 5, 1)
+        )
+
+        self.november_charge = Charge.objects.create(
+            stripe_id="ch_XXXXNOV1",
+            customer=customer,
+            charge_created=datetime.datetime(2015, 11, 16)
+        )
+
+        self.charge_2014 = Charge.objects.create(
+            stripe_id="ch_XXXX20141",
+            customer=customer,
+            charge_created=datetime.datetime(2014, 12, 31)
+        )
+
+        self.charge_2016 = Charge.objects.create(
+            stripe_id="ch_XXXX20161",
+            customer=customer,
+            charge_created=datetime.datetime(2016, 1, 1)
+        )
+
+    def test_is_during_april_2015(self):
+        raw_charges = Charge.objects.during(year=2015, month=4)
+        charges = [charge.stripe_id for charge in raw_charges]
+
+        self.assertIn(self.april_charge_1.stripe_id, charges, "April charge 1 not in charges.")
+        self.assertIn(self.april_charge_2.stripe_id, charges, "April charge 2 not in charges.")
+        self.assertIn(self.april_charge_3.stripe_id, charges, "April charge 3 not in charges.")
+
+        self.assertNotIn(self.march_charge.stripe_id, charges, "March charge unexpectedly in charges.")
+        self.assertNotIn(self.may_charge.stripe_id, charges, "May charge unexpectedly in charges.")
+        self.assertNotIn(self.november_charge.stripe_id, charges, "November charge unexpectedly in charges.")
+        self.assertNotIn(self.charge_2014.stripe_id, charges, "2014 charge unexpectedly in charges.")
+        self.assertNotIn(self.charge_2016.stripe_id, charges, "2016 charge unexpectedly in charges.")
+
+    def test_get_paid_totals_for_april_2015(self):
+        paid_totals = Charge.objects.paid_totals_for(year=2015, month=4)
+
+        self.assertEqual(decimal.Decimal("30.50"), paid_totals["total_amount"], "Total amount is not correct.")
+        self.assertEqual(decimal.Decimal("4.90"), paid_totals["total_fee"], "Total fees is not correct.")
+        self.assertEqual(decimal.Decimal("5.35"), paid_totals["total_refunded"], "Total amount refunded is not correct.")

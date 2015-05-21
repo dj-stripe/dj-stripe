@@ -1,39 +1,17 @@
 # -*- coding: utf-8 -*-
-from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import SchemaMigration
-from django.db import models
 
 
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Deleting model 'CurrentSubscription'
-        db.delete_table(u'djstripe_currentsubscription')
-
+        # Rename 'user' field to 'subscriber'
+        db.rename_column('djstripe_customer', 'user_id', 'subscriber_id')
 
     def backwards(self, orm):
-        # Adding model 'CurrentSubscription'
-        db.create_table(u'djstripe_currentsubscription', (
-            ('customer', self.gf('django.db.models.fields.related.OneToOneField')(related_name=u'current_subscription', unique=True, null=True, to=orm['djstripe.Customer'])),
-            ('status', self.gf('django.db.models.fields.CharField')(max_length=25)),
-            ('trial_start', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-            ('cancel_at_period_end', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('created', self.gf('model_utils.fields.AutoCreatedField')(default=datetime.datetime.now)),
-            ('canceled_at', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-            ('current_period_end', self.gf('django.db.models.fields.DateTimeField')(null=True)),
-            ('start', self.gf('django.db.models.fields.DateTimeField')()),
-            ('modified', self.gf('model_utils.fields.AutoLastModifiedField')(default=datetime.datetime.now)),
-            ('current_period_start', self.gf('django.db.models.fields.DateTimeField')(null=True)),
-            ('amount', self.gf('django.db.models.fields.DecimalField')(max_digits=7, decimal_places=2)),
-            ('plan', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('ended_at', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-            ('trial_end', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('quantity', self.gf('django.db.models.fields.IntegerField')()),
-        ))
-        db.send_create_signal(u'djstripe', ['CurrentSubscription'])
-
+        # Rename 'subscriber' field to 'user'
+        db.rename_column('djstripe_customer', 'subscriber_id', 'user_id')
 
     models = {
         u'auth.group': {
@@ -92,6 +70,25 @@ class Migration(SchemaMigration):
             'refunded': ('django.db.models.fields.NullBooleanField', [], {'null': 'True', 'blank': 'True'}),
             'stripe_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50'})
         },
+        u'djstripe.currentsubscription': {
+            'Meta': {'object_name': 'CurrentSubscription'},
+            'amount': ('django.db.models.fields.DecimalField', [], {'max_digits': '7', 'decimal_places': '2'}),
+            'cancel_at_period_end': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'canceled_at': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
+            'created': ('model_utils.fields.AutoCreatedField', [], {'default': 'datetime.datetime.now'}),
+            'current_period_end': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
+            'current_period_start': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
+            'customer': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "u'current_subscription'", 'unique': 'True', 'null': 'True', 'to': u"orm['djstripe.Customer']"}),
+            'ended_at': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'}),
+            'plan': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
+            'quantity': ('django.db.models.fields.IntegerField', [], {}),
+            'start': ('django.db.models.fields.DateTimeField', [], {}),
+            'status': ('django.db.models.fields.CharField', [], {'max_length': '25'}),
+            'trial_end': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
+            'trial_start': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'})
+        },
         u'djstripe.customer': {
             'Meta': {'object_name': 'Customer'},
             'card_fingerprint': ('django.db.models.fields.CharField', [], {'max_length': '200', 'blank': 'True'}),
@@ -102,7 +99,7 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'}),
             'stripe_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50'}),
-            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['auth.User']", 'unique': 'True', 'null': 'True'})
+            'subscriber': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['auth.User']", 'unique': 'True', 'null': 'True'})
         },
         u'djstripe.event': {
             'Meta': {'object_name': 'Event'},
@@ -116,7 +113,7 @@ class Migration(SchemaMigration):
             'stripe_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50'}),
             'valid': ('django.db.models.fields.NullBooleanField', [], {'null': 'True', 'blank': 'True'}),
             'validated_message': ('jsonfield.fields.JSONField', [], {'null': 'True'}),
-            'webhook_message': ('jsonfield.fields.JSONField', [], {'default': '{}'})
+            'webhook_message': ('jsonfield.fields.JSONField', [], {})
         },
         u'djstripe.eventprocessingexception': {
             'Meta': {'object_name': 'EventProcessingException'},
@@ -142,7 +139,7 @@ class Migration(SchemaMigration):
             'paid': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'period_end': ('django.db.models.fields.DateTimeField', [], {}),
             'period_start': ('django.db.models.fields.DateTimeField', [], {}),
-            'stripe_id': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
+            'stripe_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50'}),
             'subtotal': ('django.db.models.fields.DecimalField', [], {'max_digits': '7', 'decimal_places': '2'}),
             'total': ('django.db.models.fields.DecimalField', [], {'max_digits': '7', 'decimal_places': '2'})
         },
@@ -175,26 +172,6 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'stripe_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50'}),
             'trial_period_days': ('django.db.models.fields.IntegerField', [], {'null': 'True'})
-        },
-        u'djstripe.subscription': {
-            'Meta': {'object_name': 'Subscription'},
-            'amount': ('django.db.models.fields.DecimalField', [], {'max_digits': '7', 'decimal_places': '2'}),
-            'cancel_at_period_end': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'canceled_at': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'created': ('model_utils.fields.AutoCreatedField', [], {'default': 'datetime.datetime.now'}),
-            'current_period_end': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
-            'current_period_start': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
-            'customer': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'subscriptions'", 'null': 'True', 'to': u"orm['djstripe.Customer']"}),
-            'ended_at': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'}),
-            'plan': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'quantity': ('django.db.models.fields.IntegerField', [], {}),
-            'start': ('django.db.models.fields.DateTimeField', [], {}),
-            'status': ('django.db.models.fields.CharField', [], {'max_length': '25'}),
-            'stripe_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50'}),
-            'trial_end': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'trial_start': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'})
         },
         u'djstripe.transfer': {
             'Meta': {'object_name': 'Transfer'},

@@ -20,7 +20,7 @@ dj-stripe provides three methods to support ongoing subscriptions:
 
      When **anonymous** users encounter these components they will raise a ``django.core.exceptions.ImproperlyConfigured`` exception. This is done because dj-stripe is not an authentication system, so it does a hard error to make it easier for you to catch where content may not be behind authentication systems.
 
-Any project can use one or more of these methods to control access. 
+Any project can use one or more of these methods to control access.
 
 
 Constraining Entire Sites
@@ -28,12 +28,13 @@ Constraining Entire Sites
 
 If you want to quickly constrain an entire site, the ``djstripe.middleware.SubscriptionPaymentMiddleware`` middleware does the following to user requests:
 
-* **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they...:
+* **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they:
 
-    * ... have a valid subscription --or--
-    * ... are not ``user.is_staff==True``.
+    * have a valid subscription --or--
+    * are superusers (user.is_superuser==True) --or--
+    * are staff members (user.is_staff==True).
 
-* **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system. 
+* **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system.
 
 ----
 
@@ -64,6 +65,13 @@ Step 2: Specify exempt URLS:
 
 Using this example any request on this site that isn't on the homepage, about, accounts, or djstripe pages is redirected to ``djstripe.views.SubscribeFormView``/
 
+.. warning:: Adding app_names to applications.
+
+    To make the ``(allauth)`` work, you may need to define an app_name in the ``include()`` function in the URLConf. For example::
+
+        # in urls.py
+        url(r'^accounts/', include('allauth.urls',  app_name="allauth")),
+
 .. seealso::
 
     * :doc:`settings`
@@ -71,14 +79,15 @@ Using this example any request on this site that isn't on the homepage, about, a
 Constraining Class-Based Views
 ------------------------------
 
-If you want to quickly constrain a single Class-Based View, the ``djstripe.mixins.SubscriptionPaymentRequiredMixin`` mixin does the following to user requests:
+If you want to quickly constrain a single Class-Based View, the ``djstripe.decorators.subscription_payment_required`` decorator does the following to user requests:
 
-* **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they...:
+* **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they:
 
-    * ... have a valid subscription --or--
-    * ... are not ``user.is_staff==True``.
+    * have a valid subscription --or--
+    * are superusers (user.is_superuser==True) --or--
+    * are staff members (user.is_staff==True).
 
-* **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system. 
+* **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system.
 
 ----
 
@@ -87,23 +96,30 @@ If you want to quickly constrain a single Class-Based View, the ``djstripe.mixin
 .. code-block:: python
 
     # import necessary Django stuff
-    from django.views.generic import View
     from django.http import HttpResponse
+    from django.views.generic import View
+    from django.contrib.auth.decorators import login_required
 
-    # dependency of dj-stripe so it's garanteed to be there.
-    from braces.views import LoginRequiredMixin  
+    # import the wonderful decorator
+    from djstripe.decorators import subscription_payment_required
 
-    # import the incredible, edible mixin!
-    from djstripe.mixins import SubscriptionPaymentRequiredMixin
+    # import method_decorator which allows us to use function
+    # decorators on Class-Based View dispatch function.
+    from django.utils.decorators import method_decorator
 
-    class MyConstrainedView(
-            LoginRequiredMixin,  # Checks authentication
-            SubscriptionPaymentRequiredMixin,  # Checks for valid subscription
-            View
-        ):
+
+    class MyConstrainedView(View):
 
         def get(self, request, *args, **kwargs):
             return HttpReponse("I like cheese")
+
+        @method_decorator(login_required)
+        @method_decorator(subscription_payment_required)
+        def dispatch(self, *args, **kwargs):
+            return super(MyConstrainedView, self).dispatch(*args, **kwargs)
+
+
+If you are unfamiliar with this technique please read the following documentation `here <https://docs.djangoproject.com/en/1.5/topics/class-based-views/intro/#decorating-the-class>`_.
 
 
 Constraining Function-Based Views
@@ -111,12 +127,13 @@ Constraining Function-Based Views
 
 If you want to quickly constrain a single Function-Based View, the ``djstripe.decorators.subscription_payment_required`` decorator does the following to user requests:
 
-* **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they...:
+* **authenticated** users are redirected to ``djstripe.views.SubscribeFormView`` unless they:
 
-    * ... have a valid subscription --or--
-    * ... are not ``user.is_staff==True``.
+    * have a valid subscription --or--
+    * are superusers (user.is_superuser==True) --or--
+    * are staff members (user.is_staff==True).
 
-* **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system. 
+* **anonymous** users always raise a ``django.core.exceptions.ImproperlyConfigured`` exception when they encounter these systems. This is done because dj-stripe is not an authentication system.
 
 ----
 
@@ -179,51 +196,3 @@ Described is an anti-pattern. View logic belongs in views.py, not urls.py.
             name="content_detail"
         ),
     )
-
-Subscriptions + Registration
-=============================
-
-This requires the following additional requirements:
-
-* django-allauth (user registration)
-* django-crispy-forms (form rendering)
-* django-floppyforms (widget rendering)
-
-Additional Settings (settings.py):
-
-.. code-block:: python
-
-    # django.contrib.sites is also necessary
-    INSTALLED_APPS += (
-        "floppyforms",
-        "allauth",  # registration
-        "allauth.account",  # registration
-    )
-    TEMPLATE_CONTEXT_PROCESSORS += (
-        "allauth.account.context_processors.account",
-    )
-    AUTHENTICATION_BACKENDS = (
-        "django.contrib.auth.backends.ModelBackend",
-        "allauth.account.auth_backends.AuthenticationBackend",
-    )
-    ACCOUNT_AUTHENTICATION_METHOD = "username"
-    ACCOUNT_EMAIL_REQUIRED = True
-    ACCOUNT_EMAIL_VERIFICATION = "mandatory"
-    ACCOUNT_SIGNUP_FORM_CLASS = "djstripe.forms.StripeSubscriptionSignupForm"
-    SITE_ID = 1
-
-Necessary URLS (root URLConf):
-
-.. code-block:: python
-
-    (r'^accounts/', include('allauth.urls')),
-    
-
-Try it out!:
-
-* http://127.0.0.1:8000/accounts/signup
-
-**Note:**
-
-If you override allauth's signup template you'll need to make sure it includes
-the critical elements dj-stripe's version found at https://raw.github.com/pydanny/dj-stripe/master/djstripe/templates/account/signup.html

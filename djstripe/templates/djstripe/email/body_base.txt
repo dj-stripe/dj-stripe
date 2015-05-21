@@ -6,7 +6,7 @@ INVOICE #{{ charge.pk }}     {{ charge.created_at|date:"F d, Y" }}
 ........................................................
 
 
-CUSTOMER: {% block customer_name %}{{ charge.customer.user }}{% endblock %}
+CUSTOMER: {% block customer_name %}{{ charge.customer.subscriber }}{% endblock %}
 
 
 DETAILS

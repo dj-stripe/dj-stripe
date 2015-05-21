@@ -15,13 +15,27 @@ except ImportError:
 if sys.argv[-1] == 'publish':
     os.system('python setup.py sdist upload')
     os.system('python setup.py bdist_wheel upload')
-    print("You probably want to also tag the version now:")
-    print("  git tag -a %s -m 'version %s'" % (version, version))
-    print("  git push --tags")
+
+if sys.argv[-1] == 'tag':
+    print("Tagging the version on github:")
+    os.system("git tag -a %s -m 'version %s'" % (version, version))
+    os.system("git push --tags")
     sys.exit()
 
 readme = open('README.rst').read()
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
+
+INSTALL_REQUIRES = [
+    'django>=1.4',
+    'stripe>=1.9.2',
+    'django-model-utils>=1.4.0',
+    'django-braces>=1.2.1',
+    'jsonfield>=1.0.3'
+]
+
+# Add ordereddict to users of Python 2.6.
+if sys.version > "2.6" and sys.version < "2.7":
+    INSTALL_REQUIRES += ["ordereddict>=1.1"]
 
 setup(
     name='dj-stripe',
@@ -36,13 +50,7 @@ setup(
     ],
     package_dir={'djstripe': 'djstripe'},
     include_package_data=True,
-    install_requires=[
-        'django>=1.4',
-        'stripe>=1.9.2',
-        'django-model-utils>=1.4.0',
-        'django-braces>=1.2.1',
-        'django-jsonfield>=0.9.10'
-    ],
+    install_requires=INSTALL_REQUIRES,
     license=djstripe.__license__,
     zip_safe=False,
     keywords='stripe django',

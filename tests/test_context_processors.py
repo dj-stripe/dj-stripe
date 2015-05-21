@@ -1,14 +1,23 @@
-from django.test import TestCase
+"""
+.. module:: dj-stripe.tests.test_context_processors
+   :synopsis: dj-stripe Context Processor Tests.
 
-from djstripe.context_processors import djstripe_settings
-from djstripe import settings
+   NOTE: This file will be removed along with the deprecated context_processor.
+
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
+
+"""
+
+from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
 
-class TestContextProcessor(TestCase):
+class TestDeprecationWarning(AssertWarnsEnabledTestCase):
+    """
+    Tests the deprecation warning set in the context_processors file.
+    See https://docs.python.org/3.4/library/warnings.html#testing-warnings
+    """
 
-    def test_results(self):
-        ctx = djstripe_settings(None)
-        self.assertEquals(ctx["STRIPE_PUBLIC_KEY"], settings.STRIPE_PUBLIC_KEY)
-        self.assertEquals(ctx["PLAN_CHOICES"], settings.PLAN_CHOICES)
-        self.assertEquals(ctx["PLAN_LIST"], settings.PLAN_LIST)
-        self.assertEquals(ctx["PAYMENT_PLANS"], settings.PAYMENTS_PLANS)
+    def test_deprecation(self):
+        with self.assertWarns(DeprecationWarning):
+            from djstripe.context_processors import djstripe_settings
+            djstripe_settings(None)

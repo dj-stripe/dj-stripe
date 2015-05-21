@@ -1,73 +1,23 @@
 # -*- coding: utf-8 -*-
-from south.utils import datetime_utils as datetime
+from django.conf import settings
 from south.db import db
-from south.v2 import DataMigration
-from django.db import models
+from south.v2 import SchemaMigration
 
-class Migration(DataMigration):
+
+# Can't use the callable because the app registry is not ready yet.
+# Really trusting users here... bad idea? probably.
+DJSTRIPE_UNSAFE_SUBSCRIBER_MODEL = getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", settings.AUTH_USER_MODEL)
+
+
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        "Write your forwards methods here."
-        # Note: Don't use "from appname.models import ModelName". 
-        # Use orm.ModelName to refer to models in this application,
-        # and orm['appname.ModelName'] for models in other applications.
-        from django.conf import settings
-        import stripe
-        stripe.api_key = settings.STRIPE_SECRET_KEY
-        # Must have a sufficiently old API version to access "subscription", as against "subscriptions".
-        stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
-        
-        num_skipped_ids = 0
-        for csub in orm.CurrentSubscription.objects.all():
-            try:
-                stripe_id = stripe.Customer.retrieve(csub.customer.stripe_id).subscription.id
-            except:
-                num_skipped_ids += 1
-                stripe_id = "can_{:014d}".format(num_skipped_ids)
-                
-            sub = orm.Subscription(created=csub.created,
-                                   modified=csub.modified,      # will get set to now() upon saving
-                                   stripe_id=stripe_id,
-                                   customer=csub.customer,
-                                   plan=csub.plan,
-                                   quantity=csub.quantity,
-                                   start=csub.start,
-                                   status=csub.status,
-                                   cancel_at_period_end=csub.cancel_at_period_end,
-                                   canceled_at=csub.canceled_at,
-                                   current_period_end=csub.current_period_end,
-                                   current_period_start=csub.current_period_start,
-                                   ended_at=csub.ended_at,
-                                   trial_end=csub.trial_end,
-                                   trial_start=csub.trial_start,
-                                   amount=csub.amount)
-            sub.save()
-        if num_skipped_ids > 0:
-            print("Warning: unable to retrieve all {} subscription IDs, will be set to dummy values.".format(num_skipped_ids))
+        # Changing field 'Customer.subscriber'
+        db.alter_column(u'djstripe_customer', 'subscriber_id', self.gf('django.db.models.fields.related.OneToOneField')(to=orm[DJSTRIPE_UNSAFE_SUBSCRIBER_MODEL], null=True))
 
     def backwards(self, orm):
-        "Write your backwards methods here."
-        for sub in orm.Subscription.objects.all():
-            try:
-                csub = orm.CurrentSubscription(created=sub.created,
-                                               modified=sub.modified,      # will get set to now() upon saving
-                                               customer=sub.customer,
-                                               plan=sub.plan,
-                                               quantity=sub.quantity,
-                                               start=sub.start,
-                                               status=sub.status,
-                                               cancel_at_period_end=sub.cancel_at_period_end,
-                                               canceled_at=sub.canceled_at,
-                                               current_period_end=sub.current_period_end,
-                                               current_period_start=sub.current_period_start,
-                                               ended_at=sub.ended_at,
-                                               trial_end=sub.trial_end,
-                                               trial_start=sub.trial_start,
-                                               amount=sub.amount)
-                csub.save()
-            except:
-                # May throw if multiple subscriptions for a customer.
-                pass
+        # Changing field 'Customer.subscriber'
+        db.alter_column(u'djstripe_customer', 'subscriber_id', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['users.User'], unique=True, null=True))
 
     models = {
         u'auth.group': {
@@ -155,7 +105,7 @@ class Migration(DataMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'}),
             'stripe_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50'}),
-            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['auth.User']", 'unique': 'True', 'null': 'True'})
+            'subscriber': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['auth.User']", 'unique': 'True', 'null': 'True'})
         },
         u'djstripe.event': {
             'Meta': {'object_name': 'Event'},
@@ -169,7 +119,7 @@ class Migration(DataMigration):
             'stripe_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50'}),
             'valid': ('django.db.models.fields.NullBooleanField', [], {'null': 'True', 'blank': 'True'}),
             'validated_message': ('jsonfield.fields.JSONField', [], {'null': 'True'}),
-            'webhook_message': ('jsonfield.fields.JSONField', [], {'default': '{}'})
+            'webhook_message': ('jsonfield.fields.JSONField', [], {})
         },
         u'djstripe.eventprocessingexception': {
             'Meta': {'object_name': 'EventProcessingException'},
@@ -195,7 +145,7 @@ class Migration(DataMigration):
             'paid': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'period_end': ('django.db.models.fields.DateTimeField', [], {}),
             'period_start': ('django.db.models.fields.DateTimeField', [], {}),
-            'stripe_id': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
+            'stripe_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50'}),
             'subtotal': ('django.db.models.fields.DecimalField', [], {'max_digits': '7', 'decimal_places': '2'}),
             'total': ('django.db.models.fields.DecimalField', [], {'max_digits': '7', 'decimal_places': '2'})
         },
@@ -228,26 +178,6 @@ class Migration(DataMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'stripe_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50'}),
             'trial_period_days': ('django.db.models.fields.IntegerField', [], {'null': 'True'})
-        },
-        u'djstripe.subscription': {
-            'Meta': {'object_name': 'Subscription'},
-            'amount': ('django.db.models.fields.DecimalField', [], {'max_digits': '7', 'decimal_places': '2'}),
-            'cancel_at_period_end': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'canceled_at': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'created': ('model_utils.fields.AutoCreatedField', [], {'default': 'datetime.datetime.now'}),
-            'current_period_end': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
-            'current_period_start': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
-            'customer': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'subscriptions'", 'null': 'True', 'to': u"orm['djstripe.Customer']"}),
-            'ended_at': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'modified': ('model_utils.fields.AutoLastModifiedField', [], {'default': 'datetime.datetime.now'}),
-            'plan': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'quantity': ('django.db.models.fields.IntegerField', [], {}),
-            'start': ('django.db.models.fields.DateTimeField', [], {}),
-            'status': ('django.db.models.fields.CharField', [], {'max_length': '25'}),
-            'stripe_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50'}),
-            'trial_end': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'trial_start': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'})
         },
         u'djstripe.transfer': {
             'Meta': {'object_name': 'Transfer'},
@@ -289,4 +219,3 @@ class Migration(DataMigration):
     }
 
     complete_apps = ['djstripe']
-    symmetrical = True

@@ -1,14 +1,16 @@
+# -*- coding: utf-8 -*-
 """
-Beging porting from django-stripe-payments
+.. module:: djstripe.context_processors
+   :synopsis: dj-stripe Context Processors.
+
+.. moduleauthor:: Daniel Greenfeld (@pydanny)
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
+
 """
-from . import settings
+
+import warnings
 
 
 def djstripe_settings(request):
-    # TODO - needs tests
-    return {
-        "STRIPE_PUBLIC_KEY": settings.STRIPE_PUBLIC_KEY,
-        "PLAN_CHOICES": settings.PLAN_CHOICES,
-        "PLAN_LIST": settings.PLAN_LIST,
-        "PAYMENT_PLANS": settings.PAYMENTS_PLANS  # possibly nuke
-    }
+    warnings.warn("This context processor is deprecated. It will be removed in dj-stripe 1.0.", DeprecationWarning)
+    return None

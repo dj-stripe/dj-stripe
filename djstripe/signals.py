@@ -1,6 +1,4 @@
-"""
-Being porting from django-stripe-payments
-"""
+# -*- coding: utf-8 -*-
 from django.dispatch import Signal
 
 
@@ -23,6 +21,7 @@ WEBHOOK_SIGNALS = dict([
         "customer.created",
         "customer.updated",
         "customer.deleted",
+        "customer.source.created",
         "customer.subscription.created",
         "customer.subscription.updated",
         "customer.subscription.deleted",

@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns, url, include
 
 from django.http import HttpResponse
 
@@ -13,4 +13,5 @@ urlpatterns = patterns("",
         testview,
         name="test_url_name"
     ),
+    url(r"^djstripe/", include('djstripe.urls', namespace="djstripe")),
 )

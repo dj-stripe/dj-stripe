@@ -33,14 +33,6 @@ Add ``djstripe`` to your ``INSTALLED_APPS``:
         "djstripe",
     )
 
-Add the context processor to your ``TEMPLATE_CONTEXT_PROCESSORS``:
-
-.. code-block:: python
-
-    TEMPLATE_CONTEXT_PROCESSORS +=(
-        'djstripe.context_processors.djstripe_settings',
-    )
-
 Add your stripe keys:
 
 .. code-block:: python
@@ -65,22 +57,33 @@ Add some payment plans:
             "stripe_plan_id": "pro-yearly",
             "name": "Web App Pro ($199/year)",
             "description": "The annual subscription plan to WebApp",
-            "price": 19900,  # $19900
+            "price": 19900,  # $199.00
             "currency": "usd",
             "interval": "year"
         }
     }
 
+.. note:: Stripe Plan creation
+
+    Not all properties listed in the plans above are used by Stripe - i.e 'description', which
+    is used to display the plans description within specific templates.
+
+    Although any arbitrary property you require can be added to each plan listed in DJ_STRIPE_PLANS,
+    only specific properties are used by Stripe. The full list of required and optional arguments
+    can be found here_.
+
+.. _here: https://stripe.com/docs/api/python#create_plan
+
 Add to the urls.py::
 
     url(r'^payments/', include('djstripe.urls', namespace="djstripe")),
-    
+
 Run the commands::
 
     python manage.py syncdb
-    
+
     python manage.py djstripe_init_customers
-    
+
     python manage.py djstripe_init_plans
 
 If you haven't already, add JQuery and the Bootstrap 3.0.0 JS and CSS to your base template:
@@ -88,16 +91,16 @@ If you haven't already, add JQuery and the Bootstrap 3.0.0 JS and CSS to your ba
 .. code-block:: html
 
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
 
     <!-- Optional theme -->
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
-    
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+
     <!-- Latest JQuery -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 
     <!-- Latest compiled and minified JavaScript -->
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
 
 Start up the webserver:
 
