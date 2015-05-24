@@ -30,7 +30,6 @@ from .settings import CANCELLATION_AT_PERIOD_END
 from .settings import subscriber_request_callback
 from .settings import PRORATION_POLICY_FOR_UPGRADES
 from .settings import PY3
-from .settings import get_plan_list
 from .sync import sync_subscriber
 
 
@@ -52,7 +51,7 @@ class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
             context['subscription'] = customer.current_subscription
         except CurrentSubscription.DoesNotExist:
             context['subscription'] = None
-        context['plans'] = get_plan_list()
+        context['plans'] = Plan.objects.all()
         return context
 
 

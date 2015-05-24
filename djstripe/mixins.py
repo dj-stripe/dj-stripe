@@ -14,7 +14,7 @@ from django.contrib import messages
 from django.shortcuts import redirect
 
 from . import settings as djstripe_settings
-from .models import Customer, CurrentSubscription
+from .models import Customer, CurrentSubscription, Plan
 from .utils import subscriber_has_active_subscription
 
 
@@ -41,7 +41,7 @@ class PaymentsContextMixin(object):
         context.update({
             "STRIPE_PUBLIC_KEY": settings.STRIPE_PUBLIC_KEY,
             "PLAN_CHOICES": djstripe_settings.get_plan_choices(),
-            "PLAN_LIST": djstripe_settings.get_plan_list()
+            "PLAN_LIST": Plan.objects.all()
         })
         return context
 
@@ -52,7 +52,7 @@ class SubscriptionMixin(PaymentsContextMixin):
     def get_context_data(self, *args, **kwargs):
         context = super(SubscriptionMixin, self).get_context_data(**kwargs)
         context['is_plans_plural'] = bool(len(djstripe_settings.get_plan_choices()) > 1)
-        context['plans'] = djstripe_settings.get_plan_list()
+        context['plans'] = Plan.objects.all()
         context['customer'], created = Customer.get_or_create(
             subscriber=djstripe_settings.subscriber_request_callback(self.request)
         )
