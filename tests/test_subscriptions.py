@@ -149,7 +149,7 @@ def version_tuple(v):
     
     
 def safe_convert_to_stripe_object(resp, api_key):
-    if version_tuple(STRIPE_VERSION) > "1.20.2":
+    if version_tuple(STRIPE_VERSION) > version_tuple("1.20.2"):
         return convert_to_stripe_object(resp, api_key, account="acct_test")
     else:
         return convert_to_stripe_object(resp, api_key)
