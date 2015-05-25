@@ -7,6 +7,7 @@ History
 ---------------------
 
 * Began deprecation of support for Django 1.6 and lower.
+* Added formal support for Django 1.8.
 * Removed the StripeSubscriptionSignupForm
 * Removed ``djstripe.safe_settings``. Settings are now all located in ``djstripe.settings``
 * ``DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK`` can no longer be a module string
