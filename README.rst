@@ -151,11 +151,11 @@ Follows Best Practices
    :name: Two Scoops Logo
    :align: center
    :alt: Two Scoops of Django
-   :target: http://twoscoopspress.org/products/two-scoops-of-django-1-6
+   :target: http://twoscoopspress.org/products/two-scoops-of-django-1-8
 
-This project follows best practices as espoused in `Two Scoops of Django: Best Practices for Django 1.6`_.
+This project follows best practices as espoused in `Two Scoops of Django: Best Practices for Django 1.8`_.
 
-.. _`Two Scoops of Django: Best Practices for Django 1.6`: http://twoscoopspress.org/products/two-scoops-of-django-1-6
+.. _`Two Scoops of Django: Best Practices for Django 1.8`: http://twoscoopspress.org/products/two-scoops-of-django-1-8
 
 Similar Projects
 ----------------
