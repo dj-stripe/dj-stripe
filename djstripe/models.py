@@ -24,7 +24,7 @@ from .managers import CustomerManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
-from .settings import ALLOW_MULTIPLE_SUBSCRIPTIONS, RETAIN_CANCELED_SUBSCRIPTIONS
+from requests import structures
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -329,8 +329,8 @@ class Customer(StripeObject):
 
     objects = CustomerManager()
     
-    allow_multiple_subscriptions = ALLOW_MULTIPLE_SUBSCRIPTIONS
-    retain_canceled_subscriptions = RETAIN_CANCELED_SUBSCRIPTIONS
+    allow_multiple_subscriptions = djstripe_settings.ALLOW_MULTIPLE_SUBSCRIPTIONS
+    retain_canceled_subscriptions = djstripe_settings.RETAIN_CANCELED_SUBSCRIPTIONS
 
     def __str__(self):
         return unicode(self.subscriber)
@@ -368,8 +368,8 @@ class Customer(StripeObject):
             self.date_purged is None
 
     def has_active_subscription(self):
-        for sub in self.subscriptions.all():
-            if sub.is_valid():
+        for subscription in self.subscriptions.all():
+            if subscription.is_valid():
                 return True
         return False
     
@@ -392,16 +392,16 @@ class Customer(StripeObject):
         Stripe subscription.
         """
         cu = cu or self.stripe_customer
-        sub = None
+        stripe_subscription = None
         if cu.subscriptions.count > 0:
             if not Customer.allow_multiple_subscriptions:
-                sub = cu.subscriptions.data[0]
+                stripe_subscription = cu.subscriptions.data[0]
             else:
                 if subscription:
-                    matching = [s for s in cu.subscriptions.data if s.id == subscription.stripe_id]
+                    matching = [sub for sub in cu.subscriptions.data if sub.id == subscription.stripe_id]
                     if matching:
-                        sub = matching[0]
-        return sub
+                        stripe_subscription = matching[0]
+        return stripe_subscription
 
     def cancel_subscription(self, at_period_end=True, subscription=None):
         if Customer.allow_multiple_subscriptions and not subscription:
@@ -423,30 +423,30 @@ class Customer(StripeObject):
             if subscription.trial_end and subscription.trial_end > timezone.now():
                 at_period_end = False
             cu = self.stripe_customer
-            sub = None
+            stripe_subscription = None
             if cu.subscriptions.count > 0:
                 if Customer.allow_multiple_subscriptions:
                     matching = [sub for sub in cu.subscriptions.data if sub.id == subscription.stripe_id]
                     if matching:
-                        sub = matching[0]
+                        stripe_subscription = matching[0]
                 else:
-                    sub = cu.subscriptions.data[0]
-            if sub:
-                sub = sub.delete(at_period_end=at_period_end)
-                subscription.status = sub.status
-                subscription.cancel_at_period_end = sub.cancel_at_period_end
-                subscription.current_period_end = convert_tstamp(sub, "current_period_end")
-                subscription.canceled_at = convert_tstamp(sub, "canceled_at") or timezone.now()
+                    stripe_subscription = cu.subscriptions.data[0]
+            if stripe_subscription:
+                stripe_subscription = stripe_subscription.delete(at_period_end=at_period_end)
+                subscription.status = stripe_subscription.status
+                subscription.cancel_at_period_end = stripe_subscription.cancel_at_period_end
+                subscription.current_period_end = convert_tstamp(stripe_subscription, "current_period_end")
+                subscription.canceled_at = convert_tstamp(stripe_subscription, "canceled_at") or timezone.now()
                 if not at_period_end:
                     subscription.ended_at = subscription.canceled_at
                 subscription.save()
-                cancelled.send(sender=self, stripe_response=sub)
+                cancelled.send(sender=self, stripe_response=stripe_subscription)
             else:
                 """
                 No Stripe subscription exists, perhaps because it was independently cancelled at Stripe.
                 Synthesise the cancellation state using the current time.
                 """
-                subscription.status = "canceled"
+                subscription.status = Subscription.STATUS_CANCELLED
                 subscription.canceled_at = timezone.now()
                 if not at_period_end:
                     subscription.ended_at = subscription.canceled_at
@@ -532,69 +532,69 @@ class Customer(StripeObject):
         subscriptions.
         """
         cu = cu or self.stripe_customer
-        subs = cu.subscriptions
+        stripe_subscriptions = cu.subscriptions
         if Customer.allow_multiple_subscriptions and not Customer.retain_canceled_subscriptions:
             self.subscriptions.all().delete()
-        if subs.count > 0:
-            for sub in subs.data:
+        if stripe_subscriptions.count > 0:
+            for stripe_subscription in stripe_subscriptions.data:
                 try:
                     if Customer.allow_multiple_subscriptions:
-                        sub_obj = self.subscriptions.get(stripe_id=sub.id)
+                        subscription = self.subscriptions.get(stripe_id=stripe_subscription.id)
                     else:
                         if self.subscriptions.count() == 0:
                             raise Subscription.DoesNotExist
-                        sub_obj = self.subscriptions.all()[0]
-                    sub_obj.plan = djstripe_settings.plan_from_stripe_id(sub.plan.id)
-                    sub_obj.current_period_start = convert_tstamp(
-                        sub.current_period_start
+                        subscription = self.subscriptions.all()[0]
+                    subscription.plan = djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id)
+                    subscription.current_period_start = convert_tstamp(
+                        stripe_subscription.current_period_start
                     )
-                    sub_obj.current_period_end = convert_tstamp(
-                        sub.current_period_end
+                    subscription.current_period_end = convert_tstamp(
+                        stripe_subscription.current_period_end
                     )
-                    sub_obj.amount = (sub.plan.amount / decimal.Decimal("100"))
-                    sub_obj.status = sub.status
-                    sub_obj.cancel_at_period_end = sub.cancel_at_period_end
-                    sub_obj.canceled_at = convert_tstamp(sub, "canceled_at")
-                    sub_obj.quantity = sub.quantity
-                    sub_obj.start = convert_tstamp(sub.start)
+                    subscription.amount = (stripe_subscription.plan.amount / decimal.Decimal("100"))
+                    subscription.status = stripe_subscription.status
+                    subscription.cancel_at_period_end = stripe_subscription.cancel_at_period_end
+                    subscription.canceled_at = convert_tstamp(stripe_subscription, "canceled_at")
+                    subscription.quantity = stripe_subscription.quantity
+                    subscription.start = convert_tstamp(stripe_subscription.start)
                     # ended_at will generally be null, since Stripe does not retain ended subscriptions.
-                    sub_obj.ended_at = convert_tstamp(sub, "ended_at")
+                    subscription.ended_at = convert_tstamp(stripe_subscription, "ended_at")
                     
-                    if sub.trial_start and sub.trial_end:
-                        sub_obj.trial_start = convert_tstamp(sub.trial_start)
-                        sub_obj.trial_end = convert_tstamp(sub.trial_end)
+                    if stripe_subscription.trial_start and stripe_subscription.trial_end:
+                        subscription.trial_start = convert_tstamp(stripe_subscription.trial_start)
+                        subscription.trial_end = convert_tstamp(stripe_subscription.trial_end)
                     else:
                         """
                         Avoids keeping old values for trial_start and trial_end
                         for cases where customer had a subscription with trial days
                         then one without that (s)he cancels.
                         """
-                        sub_obj.trial_start = None
-                        sub_obj.trial_end = None
+                        subscription.trial_start = None
+                        subscription.trial_end = None
                         
                 except Subscription.DoesNotExist:
-                    sub_obj = Subscription(
-                        stripe_id=sub.id,
+                    subscription = Subscription(
+                        stripe_id=stripe_subscription.id,
                         customer=self,
-                        plan=djstripe_settings.plan_from_stripe_id(sub.plan.id),
+                        plan=djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id),
                         current_period_start=convert_tstamp(
-                            sub.current_period_start
+                            stripe_subscription.current_period_start
                         ),
                         current_period_end=convert_tstamp(
-                            sub.current_period_end
+                            stripe_subscription.current_period_end
                         ),
-                        amount=(sub.plan.amount / decimal.Decimal("100")),
-                        status=sub.status,
-                        cancel_at_period_end=sub.cancel_at_period_end,
-                        canceled_at=convert_tstamp(sub, "canceled_at"),
-                        start=convert_tstamp(sub.start),
-                        quantity=sub.quantity,
-                        ended_at=convert_tstamp(sub, "ended_at"),
-                        trial_end=convert_tstamp(sub, "trial_end"),
-                        trial_start=convert_tstamp(sub, "trial_start"),
+                        amount=(stripe_subscription.plan.amount / decimal.Decimal("100")),
+                        status=stripe_subscription.status,
+                        cancel_at_period_end=stripe_subscription.cancel_at_period_end,
+                        canceled_at=convert_tstamp(stripe_subscription, "canceled_at"),
+                        start=convert_tstamp(stripe_subscription.start),
+                        quantity=stripe_subscription.quantity,
+                        ended_at=convert_tstamp(stripe_subscription, "ended_at"),
+                        trial_end=convert_tstamp(stripe_subscription, "trial_end"),
+                        trial_start=convert_tstamp(stripe_subscription, "trial_start"),
                     )
                     
-                sub_obj.save()
+                subscription.save()
                 
                 if not Customer.allow_multiple_subscriptions:
                     break
@@ -602,10 +602,10 @@ class Customer(StripeObject):
     def update_plan_quantity(self, quantity, charge_immediately=False, subscription=None):
         if Customer.allow_multiple_subscriptions and not subscription:
             raise SubscriptionApiError("Must specify a subscription to update")
-        sub = self.matching_stripe_subscription(subscription)
-        if sub:
+        stripe_subscription = self.matching_stripe_subscription(subscription)
+        if stripe_subscription:
             self.subscribe(
-                plan=djstripe_settings.plan_from_stripe_id(sub.plan.id),
+                plan=djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id),
                 quantity=quantity,
                 charge_immediately=charge_immediately,
                 subscription=subscription
@@ -621,22 +621,22 @@ class Customer(StripeObject):
         subscription will be modified (upgraded).
         """
         cu = self.stripe_customer
-        sub = self.matching_stripe_subscription(subscription, cu)
+        stripe_subscription = self.matching_stripe_subscription(subscription, cu)
         """
         Trial_days corresponds to the value specified by the selected plan
         for the key trial_period_days.
         """
         if ("trial_period_days" in djstripe_settings.PAYMENTS_PLANS[plan]):
             trial_days = djstripe_settings.PAYMENTS_PLANS[plan]["trial_period_days"]
-        if sub:
-            sub.plan = djstripe_settings.PAYMENTS_PLANS[plan]["stripe_plan_id"]
-            sub.prorate = prorate
-            sub.quantity = quantity
+        if stripe_subscription:
+            stripe_subscription.plan = djstripe_settings.PAYMENTS_PLANS[plan]["stripe_plan_id"]
+            stripe_subscription.prorate = prorate
+            stripe_subscription.quantity = quantity
             if trial_days:
-                sub.trial_end = timezone.now() + datetime.timedelta(days=trial_days)
-            resp = sub.save()
+                stripe_subscription.trial_end = timezone.now() + datetime.timedelta(days=trial_days)
+            response = stripe_subscription.save()
         else:
-            resp = cu.subscriptions.create(
+            response = cu.subscriptions.create(
                 plan=djstripe_settings.PAYMENTS_PLANS[plan]["stripe_plan_id"],
                 trial_end=timezone.now() + datetime.timedelta(days=trial_days) if trial_days else None,
                 prorate=prorate,
@@ -645,7 +645,7 @@ class Customer(StripeObject):
         self.sync_subscriptions()
         if charge_immediately:
             self.send_invoice()
-        subscription_made.send(sender=self, plan=plan, stripe_response=resp)
+        subscription_made.send(sender=self, plan=plan, stripe_response=response)
 
     def charge(self, amount, currency="usd", description=None, send_receipt=True, **kwargs):
         """
