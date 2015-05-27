@@ -26,7 +26,7 @@ from .serializers import (
 
 class SubscriptionRestView(APIView):
     """
-    A REST API for Stripe implementation in the backend
+    A REST API for Stripes implementation in the backend
     """
 
     permission_classes = (IsAuthenticated,)
@@ -58,8 +58,11 @@ class SubscriptionRestView(APIView):
                     serializer.data,
                     status=status.HTTP_201_CREATED
                 )
-            except:
-                pass
+            except InvalidRequestError:
+                return Response(
+                    "Something went wrong processing the payment.",
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         return Response(
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
@@ -80,4 +83,7 @@ class SubscriptionRestView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         except:
-            return None
+            return Response(
+                "Something went wrong cancelling the subscription.",
+                status=status.HTTP_400_BAD_REQUEST
+            )
