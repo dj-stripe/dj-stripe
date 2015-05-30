@@ -18,6 +18,6 @@ __copyright__ = "Copyright 2015 Daniel Greenfeld"
 
 if get_django_version() <= '1.6.x':
     msg = "dj-stripe deprecation notice: Django 1.6 and lower are deprecated\n" \
-            "and will be removed in dj-stripe 0.6.0.\n" \
-            "Reference: https://github.com/pydanny/dj-stripe/issues/173"
+        "and will be removed in dj-stripe 0.6.0.\n" \
+        "Reference: https://github.com/pydanny/dj-stripe/issues/173"
     warnings.warn(msg)
