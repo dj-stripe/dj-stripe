@@ -56,6 +56,8 @@ setup(
         'Development Status :: 3 - Alpha',
         'Environment :: Web Environment',
         'Framework :: Django',
+        'Framework :: Django :: 1.7',
+        'Framework :: Django :: 1.8',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
