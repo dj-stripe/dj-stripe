@@ -29,7 +29,7 @@ from .models import EventProcessingException
 from .settings import PLAN_LIST
 from .settings import CANCELLATION_AT_PERIOD_END
 from .settings import subscriber_request_callback
-from .settings import PRORATION_POLICY_FOR_UPGRADES
+from .settings import get_proration_policy_for_upgrades
 from .sync import sync_subscriber
 
 
@@ -163,7 +163,11 @@ class SubscribeFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionM
 
 
 class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
-    # TODO - needs tests
+    """
+    TODO: This logic should be in form_valid() instead of post().
+
+    Also, this should be combined with SubscribeFormView.
+    """
 
     form_class = PlanForm
     template_name = "djstripe/subscribe_form.html"
@@ -172,22 +176,24 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
 
     def post(self, request, *args, **kwargs):
         form = PlanForm(request.POST)
-        customer = subscriber_request_callback(request).customer
+        try:
+            customer = subscriber_request_callback(request).customer
+        except Customer.DoesNotExist as exc:
+            form.add_error(None, "You must already be subscribed to a plan before you can change it.")
+            return self.form_invalid(form)
+
         if form.is_valid():
             try:
-                # When a customer upgrades their plan, and PRORATION_POLICY_FOR_UPGRADES is set to True,
-                # then we force the proration of his current plan and use it towards the upgraded plan,
-                # no matter what PRORATION_POLICY is set to.
-                if PRORATION_POLICY_FOR_UPGRADES:
+                # When a customer upgrades their plan, and DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES is set to True,
+                # we force the proration of the current plan and use it towards the upgraded plan,
+                # no matter what DJSTRIPE_PRORATION_POLICY is set to.
+                if get_proration_policy_for_upgrades():
                     current_subscription_amount = customer.current_subscription.amount
                     selected_plan_name = form.cleaned_data["plan"]
                     selected_plan = next(
                         (plan for plan in PLAN_LIST if plan["plan"] == selected_plan_name)
                     )
-                    selected_plan_price = selected_plan["price"]
-
-                    if not isinstance(selected_plan["price"], decimal.Decimal):
-                        selected_plan_price = selected_plan["price"] / decimal.Decimal("100")
+                    selected_plan_price = selected_plan["price"] / decimal.Decimal("100")
 
                     # Is it an upgrade?
                     if selected_plan_price > current_subscription_amount:
@@ -196,11 +202,9 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                         customer.subscribe(selected_plan_name)
                 else:
                     customer.subscribe(form.cleaned_data["plan"])
-            except stripe.StripeError as e:
-                self.error = e.message
+            except stripe.StripeError as exc:
+                form.add_error(None, str(exc))
                 return self.form_invalid(form)
-            except Exception as e:
-                raise e
             return self.form_valid(form)
         else:
             return self.form_invalid(form)

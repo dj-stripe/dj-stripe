@@ -73,6 +73,14 @@ settings.configure(
             "currency": "usd",
             "interval": "month"
         },
+        "test3": {
+            "stripe_plan_id": "test_id_3",
+            "name": "Test Plan 3",
+            "description": "Test plan for deletion. You'll have to sync plans manually in your test to ensure this plan exists.",
+            "price": 5000,  # $50.00
+            "currency": "usd",
+            "interval": "month"
+        },
         "unidentified_test_plan": {
             "name": "Unidentified Test Plan",
             "description": "A test plan with no ID.",

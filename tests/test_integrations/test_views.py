@@ -12,10 +12,12 @@ from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
 from django.test.testcases import TestCase
+from django.test.utils import override_settings
 
 from djstripe import settings as djstripe_settings
 from djstripe.models import Customer
 from djstripe.views import ChangeCardView, HistoryView
+from djstripe.sync import sync_plans
 
 
 if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
@@ -219,3 +221,99 @@ if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
             self.assertEqual(200, response.status_code)
             self.assertIn("plan", response.context["form"].errors)
             self.assertIn("This field is required.", response.context["form"].errors["plan"])
+
+    class ChangePlanViewTest(TestCase):
+
+        def setUp(self):
+            self.url = reverse("djstripe:change_plan")
+            self.user1 = get_user_model().objects.create_user(username="testuser1",
+                                                             email="test@example.com",
+                                                             password="123")
+            self.user2 = get_user_model().objects.create_user(username="testuser2",
+                                                             email="test@example.com",
+                                                             password="123")
+
+            token = stripe.Token.create(
+                card={
+                    "number": '4242424242424242',
+                    "exp_month": 12,
+                    "exp_year": 2016,
+                    "cvc": '123'
+                },
+            )
+
+            customer, created = Customer.get_or_create(subscriber=self.user1)
+            customer.update_card(token.id)
+            customer.subscribe("test")
+
+        def test_post_new_sub_no_proration(self):
+            self.assertTrue(self.client.login(username="testuser2", password="123"))
+            response = self.client.post(self.url, {"plan": "test0"})
+            self.assertEqual(200, response.status_code)
+            self.assertIn("form", response.context)
+            self.assertIn("You must already be subscribed to a plan before you can change it.", response.context["form"].errors["__all__"])
+
+        def test_change_sub_no_proration(self):
+            self.assertTrue(self.client.login(username="testuser1", password="123"))
+            response = self.client.post(self.url, {"plan": "test0"})
+            self.assertRedirects(response, reverse("djstripe:history"))
+
+            customer = Customer.objects.get(subscriber=self.user1)
+            self.assertEqual("test0", customer.current_subscription.plan)
+            customer.subscribe("test")  # revert
+
+        def test_post_form_invalid(self):
+            self.assertTrue(self.client.login(username="testuser1", password="123"))
+            response = self.client.post(self.url)
+            self.assertEqual(200, response.status_code)
+            self.assertIn("plan", response.context["form"].errors)
+            self.assertIn("This field is required.", response.context["form"].errors["plan"])
+
+        @override_settings(DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES=True)
+        def test_change_sub_with_proration_downgrade(self):
+            self.assertTrue(self.client.login(username="testuser1", password="123"))
+            response = self.client.post(self.url, {"plan": "test0"})
+            self.assertRedirects(response, reverse("djstripe:history"))
+
+            customer = Customer.objects.get(subscriber=self.user1)
+            self.assertEqual("test0", customer.current_subscription.plan)
+            customer.subscribe("test")  # revert
+
+        @override_settings(DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES=True)
+        def test_change_sub_with_proration_upgrade(self):
+            self.assertTrue(self.client.login(username="testuser1", password="123"))
+            response = self.client.post(self.url, {"plan": "test2"})
+            self.assertRedirects(response, reverse("djstripe:history"))
+
+            customer = Customer.objects.get(subscriber=self.user1)
+            self.assertEqual("test2", customer.current_subscription.plan)
+            customer.subscribe("test")  # revert
+
+        def test_change_sub_same_plan(self):
+            self.assertTrue(self.client.login(username="testuser1", password="123"))
+            response = self.client.post(self.url, {"plan": "test"})
+            self.assertRedirects(response, reverse("djstripe:history"))
+
+            customer = Customer.objects.get(subscriber=self.user1)
+            self.assertEqual("test", customer.current_subscription.plan)
+
+        @override_settings(DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES=True)
+        def test_change_sub_with_proration_same_plan(self):
+            self.assertTrue(self.client.login(username="testuser1", password="123"))
+            response = self.client.post(self.url, {"plan": "test"})
+            self.assertRedirects(response, reverse("djstripe:history"))
+
+            customer = Customer.objects.get(subscriber=self.user1)
+            self.assertEqual("test", customer.current_subscription.plan)
+
+        def test_change_sub_stripe_error(self):
+            self.assertTrue(self.client.login(username="testuser1", password="123"))
+
+            sync_plans()
+            plan = stripe.Plan.retrieve("test_id_3")
+            plan.delete()
+
+            response = self.client.post(self.url, {"plan": "test3"})
+            self.assertEqual(200, response.status_code)
+            self.assertIn("form", response.context)
+            self.assertIn("No such plan: test_id_3", response.context["form"].errors["__all__"])
