@@ -11,7 +11,7 @@ cov = coverage(config_file=True)
 cov.erase()
 cov.start()
 
-TESTS_THRESHOLD = 75.00
+TESTS_THRESHOLD = 77.00
 TESTS_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 settings.configure(
@@ -43,6 +43,7 @@ settings.configure(
     MIDDLEWARE_CLASSES=(
         "django.contrib.sessions.middleware.SessionMiddleware",
         "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware"
     ),
     SITE_ID=1,
     STRIPE_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_lOasUMgiIA701U9wZnL6Zo6a"),

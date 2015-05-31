@@ -39,6 +39,7 @@ from .sync import sync_subscriber
 
 
 class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
+    """Shows account details including customer and subscription details."""
     template_name = "djstripe/account.html"
 
     def get_context_data(self, *args, **kwargs):
@@ -55,9 +56,6 @@ class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
 
 
 class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
-    # TODO - needs tests
-    # Needs a form
-    # Not done yet
     template_name = "djstripe/change_card.html"
 
     def get_object(self):
@@ -68,6 +66,7 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
         return self.customer
 
     def post(self, request, *args, **kwargs):
+        """Needs to be refactored to leverage forms."""
         customer = self.get_object()
         try:
             send_invoice = customer.card_fingerprint == ""
@@ -77,14 +76,14 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
             if send_invoice:
                 customer.send_invoice()
             customer.retry_unpaid_invoices()
-        except stripe.CardError as e:
+        except stripe.CardError as exc:
             messages.info(request, "Stripe Error")
             return render(
                 request,
                 self.template_name,
                 {
                     "customer": self.get_object(),
-                    "stripe_error": e.message
+                    "stripe_error": str(exc)
                 }
             )
         messages.info(request, "Your card is now updated.")
@@ -96,7 +95,6 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
 
 
 class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
-    # TODO - needs tests
     template_name = "djstripe/history.html"
     model = Customer
     select_related = ["invoice"]
