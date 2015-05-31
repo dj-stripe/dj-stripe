@@ -85,7 +85,7 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
             if send_invoice:
                 customer.send_invoice()
             customer.retry_unpaid_invoices()
-        except (stripe.CardError, stripe.InvalidRequestError) as exc:
+        except stripe.StripeError as exc:
             messages.info(request, "Stripe Error")
             return render(
                 request,
@@ -133,7 +133,7 @@ class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
 
 
 class SubscribeFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
-    # TODO - needs tests
+    """TODO: Add stripe_token to the form and use form_valid() instead of post()."""
 
     form_class = PlanForm
     template_name = "djstripe/subscribe_form.html"
@@ -153,9 +153,8 @@ class SubscribeFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionM
                     subscriber=subscriber_request_callback(self.request))
                 customer.update_card(self.request.POST.get("stripe_token"))
                 customer.subscribe(form.cleaned_data["plan"])
-            except stripe.StripeError as e:
-                # add form error here
-                self.error = e.args[0]
+            except stripe.StripeError as exc:
+                form.add_error(None, str(exc))
                 return self.form_invalid(form)
             # redirect to confirmation page
             return self.form_valid(form)

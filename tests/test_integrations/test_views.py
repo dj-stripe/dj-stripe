@@ -183,3 +183,39 @@ if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
         def test_post(self):
             response = self.client.post(self.url)
             self.assertEqual(self.user, response.context["customer"].subscriber)
+
+    class SubscribeFormViewTest(TestCase):
+
+        def setUp(self):
+            self.url = reverse("djstripe:subscribe")
+            self.user = get_user_model().objects.create_user(username="testuser",
+                                                             email="test@example.com",
+                                                             password="123")
+            self.assertTrue(self.client.login(username="testuser", password="123"))
+
+        def test_post_valid(self):
+            token = stripe.Token.create(
+                card={
+                    "number": '4242424242424242',
+                    "exp_month": 12,
+                    "exp_year": 2016,
+                    "cvc": '123'
+                },
+            )
+
+            self.assertEqual(0, Customer.objects.count())
+            response = self.client.post(self.url, {"plan": "test0", "stripe_token": token.id})
+            self.assertRedirects(response, reverse("djstripe:history"))
+            self.assertEqual("test0", Customer.objects.get(subscriber=self.user).current_subscription.plan)
+
+        def test_post_no_card(self):
+            response = self.client.post(self.url, {"plan": "test0"})
+            self.assertEqual(200, response.status_code)
+            self.assertIn("form", response.context)
+            self.assertIn("Invalid source object: must be a dictionary or a non-empty string. See API docs at https://stripe.com/docs'", response.context["form"].errors["__all__"])
+
+        def test_post_form_invalid(self):
+            response = self.client.post(self.url)
+            self.assertEqual(200, response.status_code)
+            self.assertIn("plan", response.context["form"].errors)
+            self.assertIn("This field is required.", response.context["form"].errors["plan"])
