@@ -196,17 +196,6 @@ class TestSingleSubscription(TestCase):
         with self.assertRaises(SubscriptionCancellationFailure):
             self.customer.cancel_subscription()
 
-    @patch("djstripe.models.Customer.cancel_subscription", new_callable=PropertyMock)
-    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
-    def test_cancel_without_stripe_sub(self, StripeCustomerMock, CancelSubscriptionMock):
-        StripeCustomerMock.return_value = safe_convert_to_stripe_object(DUMMY_CUSTOMER_WITHOUT_SUB, api_key)
-        CancelSubscriptionMock.side_effect = InvalidRequestError("No active subscriptions for customer: cus_xxxxxxxxxxxxxx", None)
-        create_subscription(self.customer)
-        self.assertEqual(self.customer.has_active_subscription(), True)
-        self.assertEqual(self.customer.current_subscription.status, "trialing")
-        with self.assertRaises(SubscriptionCancellationFailure):
-            self.customer.cancel_subscription()
-        
     @patch("stripe.resource.Customer.cancel_subscription")
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
     def test_cancel_with_stripe_sub(self, StripeCustomerMock, CancelSubscriptionMock):
