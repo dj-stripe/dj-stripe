@@ -12,6 +12,7 @@ from django.views.generic import DetailView
 from django.views.generic import FormView
 from django.views.generic import TemplateView
 from django.views.generic import View
+from django.utils.encoding import smart_str
 
 from braces.views import CsrfExemptMixin
 from braces.views import FormValidMessageMixin
@@ -29,7 +30,6 @@ from .settings import PLAN_LIST
 from .settings import CANCELLATION_AT_PERIOD_END
 from .settings import subscriber_request_callback
 from .settings import PRORATION_POLICY_FOR_UPGRADES
-from .settings import PY3
 from .sync import sync_subscriber
 
 
@@ -55,7 +55,12 @@ class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
         return context
 
 
+# ============================================================================ #
+#                                 Billing Views                                #
+# ============================================================================ #
+
 class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
+    """TODO: Needs to be refactored to leverage forms and context data."""
     template_name = "djstripe/change_card.html"
 
     def get_object(self):
@@ -66,7 +71,11 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
         return self.customer
 
     def post(self, request, *args, **kwargs):
-        """Needs to be refactored to leverage forms."""
+        """
+        TODO: Raise a validation error when a stripe token isn't passed.
+            Should be resolved when a form is used.
+        """
+
         customer = self.get_object()
         try:
             send_invoice = customer.card_fingerprint == ""
@@ -76,7 +85,7 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
             if send_invoice:
                 customer.send_invoice()
             customer.retry_unpaid_invoices()
-        except stripe.CardError as exc:
+        except (stripe.CardError, stripe.InvalidRequestError) as exc:
             messages.info(request, "Stripe Error")
             return render(
                 request,
@@ -106,10 +115,10 @@ class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
 
 
 class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
+    """TODO: Needs to be refactored to leverage context data."""
 
     template_name = "djstripe/includes/_history_table.html"
 
-    # TODO - needs tests
     def post(self, request, *args, **kwargs):
         return render(
             request,
@@ -234,12 +243,7 @@ class WebHook(CsrfExemptMixin, View):
     # TODO - needs tests
 
     def post(self, request, *args, **kwargs):
-        if PY3:
-            # Handles Python 3 conversion of bytes to str
-            body = request.body.decode(encoding="UTF-8")
-        else:
-            # Handles Python 2
-            body = request.body
+        body = smart_str(request.body)
         data = json.loads(body)
         if Event.objects.filter(stripe_id=data["id"]).exists():
             EventProcessingException.objects.create(

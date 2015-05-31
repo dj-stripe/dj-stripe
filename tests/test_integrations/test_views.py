@@ -13,11 +13,9 @@ from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
 from django.test.testcases import TestCase
 
-from stripe.error import CardError
-
 from djstripe import settings as djstripe_settings
 from djstripe.models import Customer
-from djstripe.views import ChangeCardView
+from djstripe.views import ChangeCardView, HistoryView
 
 
 if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
@@ -25,6 +23,7 @@ if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
     class AccountViewTest(TestCase):
+
         def setUp(self):
             self.url = reverse("djstripe:account")
             self.user = get_user_model().objects.create_user(username="testuser",
@@ -66,6 +65,7 @@ if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
             self.assertEqual("test0", response.context["subscription"].plan)
 
     class ChangeCardViewTest(TestCase):
+
         def setUp(self):
             self.url = reverse("djstripe:change_card")
             self.user = get_user_model().objects.create_user(username="testuser",
@@ -87,7 +87,7 @@ if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
                 },
             )
 
-            response = self.client.post(self.url, {"stripe_token": token.id})
+            self.client.post(self.url, {"stripe_token": token.id})
             customer_instance = Customer.objects.get(subscriber=self.user)
             self.assertEqual(token.card.fingerprint, customer_instance.card_fingerprint)
 
@@ -115,7 +115,7 @@ if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
             customer_instance = Customer.objects.get(subscriber=self.user)
             self.assertEqual(token_b.card.fingerprint, customer_instance.card_fingerprint)
 
-        def test_post_exception(self):
+        def test_post_card_error(self):
             token = stripe.Token.create(
                 card={
                     "number": '4000000000000119',
@@ -128,6 +128,11 @@ if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
             response = self.client.post(self.url, {"stripe_token": token.id})
             self.assertIn("stripe_error", response.context)
             self.assertIn("An error occurred while processing your card.", response.context["stripe_error"])
+
+        def test_post_no_card(self):
+            response = self.client.post(self.url)
+            self.assertIn("stripe_error", response.context)
+            self.assertIn("Invalid source object:", response.context["stripe_error"])
 
         def test_get_object(self):
             view_instance = ChangeCardView()
@@ -145,3 +150,36 @@ if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
         def test_get_success_url(self):
             view_instance = ChangeCardView()
             view_instance.get_post_success_url()
+
+    class HistoryViewTest(TestCase):
+
+        def setUp(self):
+            self.url = reverse("djstripe:history")
+            self.user = get_user_model().objects.create_user(username="testuser",
+                                                             email="test@example.com",
+                                                             password="123")
+            self.assertTrue(self.client.login(username="testuser", password="123"))
+
+        def test_get_object(self):
+            view_instance = HistoryView()
+            request = RequestFactory()
+            request.user = self.user
+
+            view_instance.request = request
+            object_a = view_instance.get_object()
+
+            customer_instance = Customer.objects.get(subscriber=self.user)
+            self.assertEqual(customer_instance, object_a)
+
+    class SyncHistoryViewTest(TestCase):
+
+        def setUp(self):
+            self.url = reverse("djstripe:sync_history")
+            self.user = get_user_model().objects.create_user(username="testuser",
+                                                             email="test@example.com",
+                                                             password="123")
+            self.assertTrue(self.client.login(username="testuser", password="123"))
+
+        def test_post(self):
+            response = self.client.post(self.url)
+            self.assertEqual(self.user, response.context["customer"].subscriber)
