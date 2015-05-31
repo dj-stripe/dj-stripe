@@ -12,6 +12,7 @@ from django.views.generic import DetailView
 from django.views.generic import FormView
 from django.views.generic import TemplateView
 from django.views.generic import View
+from django.utils.encoding import smart_str
 
 from braces.views import CsrfExemptMixin
 from braces.views import FormValidMessageMixin
@@ -28,8 +29,7 @@ from .models import EventProcessingException
 from .settings import PLAN_LIST
 from .settings import CANCELLATION_AT_PERIOD_END
 from .settings import subscriber_request_callback
-from .settings import PRORATION_POLICY_FOR_UPGRADES
-from .settings import PY3
+from .settings import get_proration_policy_for_upgrades
 from .sync import sync_subscriber
 
 
@@ -39,7 +39,7 @@ from .sync import sync_subscriber
 
 
 class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
-    # TODO - needs tests
+    """Shows account details including customer and subscription details."""
     template_name = "djstripe/account.html"
 
     def get_context_data(self, *args, **kwargs):
@@ -55,10 +55,12 @@ class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
         return context
 
 
+# ============================================================================ #
+#                                 Billing Views                                #
+# ============================================================================ #
+
 class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
-    # TODO - needs tests
-    # Needs a form
-    # Not done yet
+    """TODO: Needs to be refactored to leverage forms and context data."""
     template_name = "djstripe/change_card.html"
 
     def get_object(self):
@@ -69,6 +71,11 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
         return self.customer
 
     def post(self, request, *args, **kwargs):
+        """
+        TODO: Raise a validation error when a stripe token isn't passed.
+            Should be resolved when a form is used.
+        """
+
         customer = self.get_object()
         try:
             send_invoice = customer.card_fingerprint == ""
@@ -78,14 +85,14 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
             if send_invoice:
                 customer.send_invoice()
             customer.retry_unpaid_invoices()
-        except stripe.CardError as e:
+        except stripe.StripeError as exc:
             messages.info(request, "Stripe Error")
             return render(
                 request,
                 self.template_name,
                 {
                     "customer": self.get_object(),
-                    "stripe_error": e.message
+                    "stripe_error": str(exc)
                 }
             )
         messages.info(request, "Your card is now updated.")
@@ -97,7 +104,6 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
 
 
 class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
-    # TODO - needs tests
     template_name = "djstripe/history.html"
     model = Customer
     select_related = ["invoice"]
@@ -109,10 +115,10 @@ class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
 
 
 class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
+    """TODO: Needs to be refactored to leverage context data."""
 
     template_name = "djstripe/includes/_history_table.html"
 
-    # TODO - needs tests
     def post(self, request, *args, **kwargs):
         return render(
             request,
@@ -127,7 +133,7 @@ class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
 
 
 class SubscribeFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
-    # TODO - needs tests
+    """TODO: Add stripe_token to the form and use form_valid() instead of post()."""
 
     form_class = PlanForm
     template_name = "djstripe/subscribe_form.html"
@@ -147,9 +153,8 @@ class SubscribeFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionM
                     subscriber=subscriber_request_callback(self.request))
                 customer.update_card(self.request.POST.get("stripe_token"))
                 customer.subscribe(form.cleaned_data["plan"])
-            except stripe.StripeError as e:
-                # add form error here
-                self.error = e.args[0]
+            except stripe.StripeError as exc:
+                form.add_error(None, str(exc))
                 return self.form_invalid(form)
             # redirect to confirmation page
             return self.form_valid(form)
@@ -158,7 +163,11 @@ class SubscribeFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionM
 
 
 class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
-    # TODO - needs tests
+    """
+    TODO: This logic should be in form_valid() instead of post().
+
+    Also, this should be combined with SubscribeFormView.
+    """
 
     form_class = PlanForm
     template_name = "djstripe/subscribe_form.html"
@@ -167,22 +176,24 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
 
     def post(self, request, *args, **kwargs):
         form = PlanForm(request.POST)
-        customer = subscriber_request_callback(request).customer
+        try:
+            customer = subscriber_request_callback(request).customer
+        except Customer.DoesNotExist as exc:
+            form.add_error(None, "You must already be subscribed to a plan before you can change it.")
+            return self.form_invalid(form)
+
         if form.is_valid():
             try:
-                # When a customer upgrades their plan, and PRORATION_POLICY_FOR_UPGRADES is set to True,
-                # then we force the proration of his current plan and use it towards the upgraded plan,
-                # no matter what PRORATION_POLICY is set to.
-                if PRORATION_POLICY_FOR_UPGRADES:
+                # When a customer upgrades their plan, and DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES is set to True,
+                # we force the proration of the current plan and use it towards the upgraded plan,
+                # no matter what DJSTRIPE_PRORATION_POLICY is set to.
+                if get_proration_policy_for_upgrades():
                     current_subscription_amount = customer.current_subscription.amount
                     selected_plan_name = form.cleaned_data["plan"]
                     selected_plan = next(
                         (plan for plan in PLAN_LIST if plan["plan"] == selected_plan_name)
                     )
-                    selected_plan_price = selected_plan["price"]
-
-                    if not isinstance(selected_plan["price"], decimal.Decimal):
-                        selected_plan_price = selected_plan["price"] / decimal.Decimal("100")
+                    selected_plan_price = selected_plan["price"] / decimal.Decimal("100")
 
                     # Is it an upgrade?
                     if selected_plan_price > current_subscription_amount:
@@ -191,11 +202,9 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                         customer.subscribe(selected_plan_name)
                 else:
                     customer.subscribe(form.cleaned_data["plan"])
-            except stripe.StripeError as e:
-                self.error = e.message
+            except stripe.StripeError as exc:
+                form.add_error(None, str(exc))
                 return self.form_invalid(form)
-            except Exception as e:
-                raise e
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
@@ -237,12 +246,7 @@ class WebHook(CsrfExemptMixin, View):
     # TODO - needs tests
 
     def post(self, request, *args, **kwargs):
-        if PY3:
-            # Handles Python 3 conversion of bytes to str
-            body = request.body.decode(encoding="UTF-8")
-        else:
-            # Handles Python 2
-            body = request.body
+        body = smart_str(request.body)
         data = json.loads(body)
         if Event.objects.filter(stripe_id=data["id"]).exists():
             EventProcessingException.objects.create(

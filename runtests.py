@@ -11,7 +11,7 @@ cov = coverage(config_file=True)
 cov.erase()
 cov.start()
 
-TESTS_THRESHOLD = 72.00
+TESTS_THRESHOLD = 77.00
 TESTS_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 settings.configure(
@@ -37,11 +37,13 @@ settings.configure(
         "django.contrib.sites",
         "jsonfield",
         "djstripe",
+        "tests",
         "tests.apps.testapp"
     ],
     MIDDLEWARE_CLASSES=(
         "django.contrib.sessions.middleware.SessionMiddleware",
         "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware"
     ),
     SITE_ID=1,
     STRIPE_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_lOasUMgiIA701U9wZnL6Zo6a"),
@@ -71,6 +73,14 @@ settings.configure(
             "currency": "usd",
             "interval": "month"
         },
+        "test3": {
+            "stripe_plan_id": "test_id_3",
+            "name": "Test Plan 3",
+            "description": "Test plan for deletion. You'll have to sync plans manually in your test to ensure this plan exists.",
+            "price": 5000,  # $50.00
+            "currency": "usd",
+            "interval": "month"
+        },
         "unidentified_test_plan": {
             "name": "Unidentified Test Plan",
             "description": "A test plan with no ID.",
@@ -84,9 +94,6 @@ settings.configure(
         "test_url_name",
         "testapp_namespaced:test_url_namespaced"
     ),
-    TEMPLATE_DIRS = [
-        os.path.join(TESTS_ROOT, "tests/templates"),
-    ],
 )
 
 # Avoid AppRegistryNotReady exception
