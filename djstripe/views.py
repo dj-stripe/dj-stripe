@@ -39,7 +39,6 @@ from .sync import sync_subscriber
 
 
 class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
-    # TODO - needs tests
     template_name = "djstripe/account.html"
 
     def get_context_data(self, *args, **kwargs):

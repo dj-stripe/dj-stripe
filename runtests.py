@@ -11,7 +11,7 @@ cov = coverage(config_file=True)
 cov.erase()
 cov.start()
 
-TESTS_THRESHOLD = 72.00
+TESTS_THRESHOLD = 75.00
 TESTS_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 settings.configure(
@@ -37,6 +37,7 @@ settings.configure(
         "django.contrib.sites",
         "jsonfield",
         "djstripe",
+        "tests",
         "tests.apps.testapp"
     ],
     MIDDLEWARE_CLASSES=(
@@ -84,9 +85,6 @@ settings.configure(
         "test_url_name",
         "testapp_namespaced:test_url_namespaced"
     ),
-    TEMPLATE_DIRS = [
-        os.path.join(TESTS_ROOT, "tests/templates"),
-    ],
 )
 
 # Avoid AppRegistryNotReady exception
