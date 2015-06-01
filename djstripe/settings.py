@@ -10,8 +10,6 @@ from django.core.exceptions import ImproperlyConfigured
 
 PY3 = sys.version > "3"
 
-USE_TZ = settings.USE_TZ
-
 subscriber_request_callback = getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK", (lambda request: request.user))
 
 INVOICE_FROM_EMAIL = getattr(settings, "DJSTRIPE_INVOICE_FROM_EMAIL", "billing@example.com")
@@ -24,9 +22,9 @@ PLAN_CHOICES = [(plan, PAYMENTS_PLANS[plan].get("name", plan)) for plan in PAYME
 PASSWORD_INPUT_RENDER_VALUE = getattr(settings, 'DJSTRIPE_PASSWORD_INPUT_RENDER_VALUE', False)
 PASSWORD_MIN_LENGTH = getattr(settings, 'DJSTRIPE_PASSWORD_MIN_LENGTH', 6)
 
-PRORATION_POLICY = getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False)
+get_proration_policy = (lambda: getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False))
 get_proration_policy_for_upgrades = (lambda: getattr(settings, 'DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES', False))
-CANCELLATION_AT_PERIOD_END = not PRORATION_POLICY  # TODO - need to find a better way to do this
+get_cancellation_at_period_end = (lambda: not getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False))  # TODO - need to find a better way to do this
 
 SEND_INVOICE_RECEIPT_EMAILS = getattr(settings, "DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS", True)
 CURRENCIES = getattr(settings, "DJSTRIPE_CURRENCIES", (

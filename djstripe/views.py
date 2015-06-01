@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import decimal
 import json
 
-from django.contrib.auth import logout
+from django.contrib.auth import logout as auth_logout
 from django.contrib import messages
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponse
@@ -27,9 +27,9 @@ from .models import Customer
 from .models import Event
 from .models import EventProcessingException
 from .settings import PLAN_LIST
-from .settings import CANCELLATION_AT_PERIOD_END
 from .settings import subscriber_request_callback
 from .settings import get_proration_policy_for_upgrades
+from .settings import get_cancellation_at_period_end
 from .sync import sync_subscriber
 
 
@@ -211,7 +211,6 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
 
 
 class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
-    # TODO - needs tests
     template_name = "djstripe/cancel_subscription.html"
     form_class = CancelSubscriptionForm
     success_url = reverse_lazy("djstripe:account")
@@ -220,13 +219,13 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
         customer, created = Customer.get_or_create(
             subscriber=subscriber_request_callback(self.request))
         current_subscription = customer.cancel_subscription(
-            at_period_end=CANCELLATION_AT_PERIOD_END)
+            at_period_end=get_cancellation_at_period_end())
 
         if current_subscription.status == current_subscription.STATUS_CANCELLED:
             # If no pro-rate, they get kicked right out.
             messages.info(self.request, "Your subscription is now cancelled.")
             # logout the user
-            logout(self.request)
+            auth_logout(self.request)
             return redirect("home")
         else:
             # If pro-rate, they get some time to stay.

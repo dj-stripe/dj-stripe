@@ -317,3 +317,35 @@ if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
             self.assertEqual(200, response.status_code)
             self.assertIn("form", response.context)
             self.assertIn("No such plan: test_id_3", response.context["form"].errors["__all__"])
+
+    class CancelSubscriptionViewTest(TestCase):
+        def setUp(self):
+            self.url = reverse("djstripe:cancel_subscription")
+            self.user = get_user_model().objects.create_user(username="testuser",
+                                                             email="test@example.com",
+                                                             password="123")
+            self.assertTrue(self.client.login(username="testuser", password="123"))
+
+            token = stripe.Token.create(
+                card={
+                    "number": '4242424242424242',
+                    "exp_month": 12,
+                    "exp_year": 2016,
+                    "cvc": '123'
+                },
+            )
+
+            customer, created = Customer.get_or_create(subscriber=self.user)
+            customer.update_card(token.id)
+            customer.subscribe("test")
+
+        def test_cancel_no_proration(self):
+            response = self.client.post(self.url)
+            self.assertRedirects(response, reverse("djstripe:account"))
+            self.assertTrue(self.user.is_authenticated())
+
+#         @override_settings(DJSTRIPE_PRORATION_POLICY=True)
+#         def test_cancel_proration(self):
+#             response = self.client.post(self.url)
+#             self.assertRedirects(response, reverse("home"))
+#             self.assertFalse(self.user.is_authenticated())
