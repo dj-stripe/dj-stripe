@@ -127,18 +127,18 @@ def create_subscription(customer, plan="basic"):
         amount=decimal.Decimal("100.00" if plan == "basic" else "1000.00"),
         status="trialing"
     )
-    
-    
+
+
 def version_tuple(v):
     return tuple(map(int, (v.split("."))))
-    
-    
+
+
 def safe_convert_to_stripe_object(resp, api_key):
     if version_tuple(STRIPE_VERSION) > version_tuple("1.20.2"):
         return convert_to_stripe_object(resp, api_key, account="acct_test")
     else:
         return convert_to_stripe_object(resp, api_key)
-    
+
 
 class TestSingleSubscription(TestCase):
 
@@ -151,7 +151,7 @@ class TestSingleSubscription(TestCase):
     def tearDownClass(cls):
         del PAYMENTS_PLANS["basic"]
         del PAYMENTS_PLANS["gold"]
-        
+
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="chris")
         self.customer = Customer.objects.create(
@@ -206,7 +206,7 @@ class TestSingleSubscription(TestCase):
         self.assertEqual(self.customer.current_subscription.status, "trialing")
         with self.assertRaises(SubscriptionCancellationFailure):
             self.customer.cancel_subscription()
-        
+
     @patch("stripe.resource.Customer.cancel_subscription")
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
     def test_cancel_with_stripe_sub(self, StripeCustomerMock, CancelSubscriptionMock):

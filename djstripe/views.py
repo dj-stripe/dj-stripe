@@ -242,7 +242,6 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
 
 
 class WebHook(CsrfExemptMixin, View):
-    # TODO - needs tests
 
     def post(self, request, *args, **kwargs):
         body = smart_str(request.body)
