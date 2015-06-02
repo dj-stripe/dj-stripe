@@ -9,6 +9,7 @@ History
 * Support for Django 1.6 and lower is now deprecated.
 * Improved test harness now tests coverage and pep8
 * SubscribeFormView and ChangePlanView no longer populate self.error with form errors
+* Email templates are now packaged during distribution.
 
 0.5.0 (2015-05-25)
 ---------------------
