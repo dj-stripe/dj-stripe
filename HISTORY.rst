@@ -9,6 +9,7 @@ History
 * Support for Django 1.6 and lower is now deprecated.
 * Improved test harness now tests coverage and pep8
 * SubscribeFormView and ChangePlanView no longer populate self.error with form errors
+* InvoiceItems.plan can now be null (as it is with individual charges), resolving #140 (Thanks @awechsler and @MichelleGlauser for help troubleshooting)
 
 0.5.0 (2015-05-25)
 ---------------------
