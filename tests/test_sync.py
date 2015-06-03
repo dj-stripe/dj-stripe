@@ -31,7 +31,7 @@ class TestSyncSubscriber(TestCase):
     @patch("djstripe.models.Customer.sync_current_subscription")
     @patch("djstripe.models.Customer.sync")
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock, return_value=fake_stripe_customer)
-    @patch("stripe.Customer.create", autospec=True, return_value=PropertyMock(id="cus_xxx1234567890"))
+    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
     def test_sync_success(self, stripe_customer_create_mock, stripe_customer_mock,
                           sync_mock, sync_current_subscription_mock, sync_invoices_mock,
                           sync_charges_mock):
@@ -45,7 +45,7 @@ class TestSyncSubscriber(TestCase):
 
     @patch("djstripe.models.Customer.sync")
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock, return_value="test_stripe_customer")
-    @patch("stripe.Customer.create", autospec=True, return_value=PropertyMock(id="cus_xxx1234567890"))
+    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
     def test_sync_fail(self, stripe_customer_create_mock, stripe_customer_mock, sync_mock):
         sync_mock.side_effect = stripe.InvalidRequestError("No such customer:", "blah")
 
@@ -56,7 +56,7 @@ class TestSyncSubscriber(TestCase):
 
 class TestSyncPlans(TestCase):
 
-    @patch("stripe.Plan.create", autospec=True)
+    @patch("stripe.Plan.create")
     def test_plan_created(self, plan_create_mock):
         sync_plans(api_key)
         self.assertTrue("Plan created for test", sys.stdout.getvalue().strip())
@@ -103,7 +103,7 @@ class TestSyncPlans(TestCase):
 
         self.assertEqual(4, plan_create_mock.call_count)
 
-    @patch("stripe.Plan.create", autospec=True)
+    @patch("stripe.Plan.create")
     def test_plan_exists(self, plan_create_mock):
         plan_create_mock.side_effect = stripe.StripeError("Plan already exists.")
 
