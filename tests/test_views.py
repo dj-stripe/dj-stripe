@@ -322,20 +322,21 @@ class CancelSubscriptionViewTest(TestCase):
         self.assertTrue(self.client.login(username="testuser", password="123"))
 
     @patch.object(stripe.Customer, 'create', autospec=True, return_value=PropertyMock(id="cus_xxx1234567890"))
-    @patch("djstripe.models.Customer.cancel_subscription", return_value=PropertyMock(status=CurrentSubscription.STATUS_CANCELLED))
-    def test_cancel_no_proration(self, cancel_subscription_mock, stripe_create_customer_mock):
+    @patch("djstripe.models.Customer.cancel_subscription", return_value=CurrentSubscription(status=CurrentSubscription.STATUS_ACTIVE))
+    def test_cancel_proration(self, cancel_subscription_mock, stripe_create_customer_mock):
         response = self.client.post(self.url)
 
         cancel_subscription_mock.assert_called_once_with(at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END)
         self.assertRedirects(response, reverse("djstripe:account"))
         self.assertTrue(self.user.is_authenticated())
 
+    @patch("djstripe.views.auth_logout", autospec=True)
     @patch.object(stripe.Customer, 'create', autospec=True, return_value=PropertyMock(id="cus_xxx1234567890"))
-    @patch("djstripe.models.Customer.cancel_subscription", return_value=PropertyMock(status=CurrentSubscription.STATUS_ACTIVE))
-    def test_cancel_proration(self, cancel_subscription_mock, stripe_create_customer_mock):
+    @patch("djstripe.models.Customer.cancel_subscription", return_value=CurrentSubscription(status=CurrentSubscription.STATUS_CANCELLED))
+    def test_cancel_no_proration(self, cancel_subscription_mock, stripe_create_customer_mock, logout_mock):
         response = self.client.post(self.url)
 
         cancel_subscription_mock.assert_called_once_with(at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END)
         self.assertEqual(response.status_code, 302)
-        # Testing redirect failed with delete_cookie
-        # Testing logout doesn't seem to work - is_authenticated returns True...
+
+        self.assertTrue(logout_mock.called)
