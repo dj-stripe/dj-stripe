@@ -9,10 +9,13 @@
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.http.request import HttpRequest
+from django.test.client import RequestFactory
 from django.test.testcases import TestCase
 
+import stripe
+from mock import patch, PropertyMock
+
 from djstripe.mixins import SubscriptionPaymentRequiredMixin, PaymentsContextMixin, SubscriptionMixin
-from django.test.client import RequestFactory
 
 
 class TestSubscriptionPaymentRequiredMixin(TestCase):
@@ -22,15 +25,19 @@ class TestSubscriptionPaymentRequiredMixin(TestCase):
         self.user = get_user_model().objects.create(username="x", email="user@test.com")
         self.superuser = get_user_model().objects.create(username="y", email="superuser@test.com", is_superuser=True)
 
-    def test_dispatch_inactive_subscription(self):
+    @patch("djstripe.mixins.subscriber_has_active_subscription", return_value=False)
+    def test_dispatch_inactive_subscription(self, subscriber_has_active_subscription_mock):
         self.request.user = self.user
 
         mixin = SubscriptionPaymentRequiredMixin()
-        response = mixin.dispatch(self.request)
 
+        response = mixin.dispatch(self.request)
         self.assertEqual(response.url, reverse("djstripe:subscribe"))
 
-    def test_dispatch_active_subscription(self):
+        subscriber_has_active_subscription_mock.assert_called_once_with(self.user)
+
+    @patch("djstripe.mixins.subscriber_has_active_subscription", return_value=True)
+    def test_dispatch_active_subscription(self, subscriber_has_active_subscription_mock):
         self.request.user = self.superuser
 
         mixin = SubscriptionPaymentRequiredMixin()
@@ -66,7 +73,8 @@ class TestPaymentsContextMixin(TestCase):
 
 class TestSubscriptionMixin(TestCase):
 
-    def test_get_context_data(self):
+    @patch.object(stripe.Customer, 'create', autospec=True, return_value=PropertyMock(id="cus_xxx1234567890"))
+    def test_get_context_data(self, stripe_create_customer_mock):
 
         class TestSuperView(object):
             def get_context_data(self):
