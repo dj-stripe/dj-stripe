@@ -522,7 +522,7 @@ class Customer(StripeObject):
         )
 
     def subscribe(self, plan, quantity=1, trial_days=None,
-                  charge_immediately=True, prorate=djstripe_settings.get_proration_policy()):
+                  charge_immediately=True, prorate=djstripe_settings.PRORATION_POLICY):
         cu = self.stripe_customer
         """
         Trial_days corresponds to the value specified by the selected plan

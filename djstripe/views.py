@@ -28,8 +28,8 @@ from .models import Event
 from .models import EventProcessingException
 from .settings import PLAN_LIST
 from .settings import subscriber_request_callback
-from .settings import get_proration_policy_for_upgrades
-from .settings import get_cancellation_at_period_end
+from .settings import PRORATION_POLICY_FOR_UPGRADES
+from .settings import CANCELLATION_AT_PERIOD_END
 from .sync import sync_subscriber
 
 
@@ -187,7 +187,7 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                 # When a customer upgrades their plan, and DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES is set to True,
                 # we force the proration of the current plan and use it towards the upgraded plan,
                 # no matter what DJSTRIPE_PRORATION_POLICY is set to.
-                if get_proration_policy_for_upgrades():
+                if PRORATION_POLICY_FOR_UPGRADES:
                     current_subscription_amount = customer.current_subscription.amount
                     selected_plan_name = form.cleaned_data["plan"]
                     selected_plan = next(
@@ -219,7 +219,7 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
         customer, created = Customer.get_or_create(
             subscriber=subscriber_request_callback(self.request))
         current_subscription = customer.cancel_subscription(
-            at_period_end=get_cancellation_at_period_end())
+            at_period_end=CANCELLATION_AT_PERIOD_END)
 
         if current_subscription.status == current_subscription.STATUS_CANCELLED:
             # If no pro-rate, they get kicked right out.
