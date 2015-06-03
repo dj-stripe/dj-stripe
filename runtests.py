@@ -11,7 +11,7 @@ cov = coverage(config_file=True)
 cov.erase()
 cov.start()
 
-TESTS_THRESHOLD = 86.00
+TESTS_THRESHOLD = 82.00
 TESTS_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 settings.configure(
@@ -76,7 +76,7 @@ settings.configure(
         "test3": {
             "stripe_plan_id": "test_id_3",
             "name": "Test Plan 3",
-            "description": "Test plan for deletion. You'll have to sync plans manually in your test to ensure this plan exists.",
+            "description": "Test plan for deletion.",
             "price": 5000,  # $50.00
             "currency": "usd",
             "interval": "month"

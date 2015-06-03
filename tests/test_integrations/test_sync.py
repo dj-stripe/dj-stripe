@@ -12,12 +12,14 @@ from django.conf import settings
 from django.test.testcases import TestCase
 from django.contrib.auth import get_user_model
 
-from stripe.error import InvalidRequestError
-
 from djstripe.models import Charge
-from djstripe.sync import sync_subscriber, sync_plans
+from djstripe.sync import sync_subscriber
+from unittest.case import skip
 
-if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY and False:
+# These tests will be converted to sync tests on the customer model
+
+if False:
+    @skip
     class TestSyncSubscriber(TestCase):
 
         def setUp(self):
@@ -29,16 +31,12 @@ if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY and False:
 
             # There shouldn't be any items attached to the customer
             self.assertEqual(0, len(charges), "Charges are unexpectedly associated with a new customer object.")
-            customer.purge()
 
         def test_existing_customer(self):
             customerA = sync_subscriber(self.user)
             customerB = sync_subscriber(self.user)
 
             self.assertEqual(customerA, customerB, "Customers returned are not equal.")
-
-            customerA.purge()
-            customerB.purge()
 
         def test_bad_sync(self):
             customer = sync_subscriber(self.user)
@@ -48,8 +46,6 @@ if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY and False:
             sync_subscriber(self.user)
 
             self.assertEqual("ERROR: No such customer: fake_customer_id", sys.stdout.getvalue().strip())
-
-            customer.purge()
 
         def test_charge_sync(self):
             # Initialize stripe
@@ -83,24 +79,3 @@ if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY and False:
             customer = sync_subscriber(self.user)
             charges = Charge.objects.filter(customer=customer)
             self.assertEqual(1, len(charges), "Unexpected number of charges associated with a new customer object.")
-
-            customer.purge()
-
-    class TestSyncPlans(TestCase):
-
-        def test_simple_sync(self):
-            import stripe
-            stripe.api_key = settings.STRIPE_SECRET_KEY
-
-            # Delete all plans
-            for plan in stripe.Plan.all()["data"]:
-                try:
-                    plan.delete()
-                except InvalidRequestError:
-                    continue
-
-            sync_plans()
-            self.assertTrue("Plan created for test", sys.stdout.getvalue().strip())
-
-            sync_plans()
-            self.assertTrue("ERROR: Plan already exists.", sys.stdout.getvalue().strip())
