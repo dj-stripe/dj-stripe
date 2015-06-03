@@ -46,8 +46,8 @@ settings.configure(
         "django.contrib.messages.middleware.MessageMiddleware"
     ),
     SITE_ID=1,
-    STRIPE_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_lOasUMgiIA701U9wZnL6Zo6a"),
-    STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", "sk_test_nZBY1yjOJ75iFKGjorN29GiA"),
+    STRIPE_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", ""),
+    STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", ""),
     DJSTRIPE_PLANS={
         "test0": {
             "stripe_plan_id": "test_id_0",
