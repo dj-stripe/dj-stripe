@@ -73,7 +73,7 @@ class TestPaymentsContextMixin(TestCase):
 
 class TestSubscriptionMixin(TestCase):
 
-    @patch.object(stripe.Customer, 'create', autospec=True, return_value=PropertyMock(id="cus_xxx1234567890"))
+    @patch("stripe.Customer.create", autospec=True, return_value=PropertyMock(id="cus_xxx1234567890"))
     def test_get_context_data(self, stripe_create_customer_mock):
 
         class TestSuperView(object):
