@@ -12,7 +12,7 @@ from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
 from django.utils import timezone
-from django.utils.encoding import python_2_unicode_compatible
+from django.utils.encoding import python_2_unicode_compatible, smart_text
 
 from jsonfield.fields import JSONField
 from model_utils.models import TimeStampedModel
@@ -28,10 +28,6 @@ from .signals import webhook_processing_error
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
-
-
-if djstripe_settings.PY3:
-    unicode = str
 
 
 def convert_tstamp(response, field_name=None):
@@ -120,11 +116,7 @@ class Event(StripeObject):
                 cls=stripe.StripeObjectEncoder
             )
         )
-        if self.webhook_message["data"] == self.validated_message["data"]:
-            self.valid = True
-        else:
-            # TODO - needs test
-            self.valid = False
+        self.valid = self.webhook_message["data"] == self.validated_message["data"]
         self.save()
 
     def process(self):
@@ -167,27 +159,19 @@ class Event(StripeObject):
             "ping"
         """
         if self.valid and not self.processed:
-            # TODO - needs tests
             try:
-                if not self.kind.startswith("plan.") and \
-                        not self.kind.startswith("transfer."):
+                # Link the customer
+                if not self.kind.startswith("plan.") and not self.kind.startswith("transfer."):
                     self.link_customer()
+
+                # Handle events
                 if self.kind.startswith("invoice."):
                     Invoice.handle_event(self)
                 elif self.kind.startswith("charge."):
-                    if not self.customer:
-                        self.link_customer()
-                    self.customer.record_charge(
-                        self.message["data"]["object"]["id"]
-                    )
+                    self.customer.record_charge(self.message["data"]["object"]["id"])
                 elif self.kind.startswith("transfer."):
-                    Transfer.process_transfer(
-                        self,
-                        self.message["data"]["object"]
-                    )
+                    Transfer.process_transfer(self, self.message["data"]["object"])
                 elif self.kind.startswith("customer.subscription."):
-                    if not self.customer:
-                        self.link_customer()
                     if self.customer:
                         if self.kind == "customer.subscription.deleted":
                             self.customer.current_subscription.status = CurrentSubscription.STATUS_CANCELLED
@@ -196,22 +180,20 @@ class Event(StripeObject):
                         else:
                             self.customer.sync_current_subscription()
                 elif self.kind == "customer.deleted":
-                    if not self.customer:
-                        self.link_customer()
                     self.customer.purge()
                 self.send_signal()
                 self.processed = True
                 self.save()
-            except stripe.StripeError as e:
+            except stripe.StripeError as exc:
                 EventProcessingException.log(
-                    data=e.http_body,
-                    exception=e,
+                    data=exc.http_body,
+                    exception=exc,
                     event=self
                 )
                 webhook_processing_error.send(
                     sender=Event,
-                    data=e.http_body,
-                    exception=e
+                    data=exc.http_body,
+                    exception=exc
                 )
 
     def send_signal(self):
@@ -322,7 +304,7 @@ class Customer(StripeObject):
     objects = CustomerManager()
 
     def __str__(self):
-        return unicode(self.subscriber)
+        return smart_text(self.subscriber)
 
     @property
     def stripe_customer(self):

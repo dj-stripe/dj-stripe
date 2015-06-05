@@ -1,3 +1,6 @@
+from stripe import api_key
+from stripe.resource import convert_to_stripe_object
+
 TRANSFER_CREATED_TEST_DATA = {
     "created": 1348360173,
     "data": {
@@ -89,3 +92,7 @@ TRANSFER_CREATED_TEST_DATA2 = {
     "pending_webhooks": 1,
     "type": "transfer.created"
 }
+
+
+def convert_to_fake_stripe_object(response):
+    return convert_to_stripe_object(resp=response, api_key=api_key, account="test_account")
