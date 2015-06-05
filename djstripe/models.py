@@ -226,7 +226,6 @@ class Transfer(StripeObject):
     objects = TransferManager()
 
     def update_status(self):
-        # TODO - needs test
         self.status = stripe.Transfer.retrieve(self.stripe_id).status
         self.save()
 
@@ -255,6 +254,7 @@ class Transfer(StripeObject):
         for field in defaults:
             if field.endswith("fees") or field.endswith("gross"):
                 defaults[field] = defaults[field] / decimal.Decimal("100")
+
         if event.kind == "transfer.paid":
             defaults.update({"event": event})
             obj, created = Transfer.objects.get_or_create(
@@ -267,6 +267,7 @@ class Transfer(StripeObject):
                 event=event,
                 defaults=defaults
             )
+
         if created:
             for fee in transfer["summary"]["charge_fee_details"]:
                 obj.charge_fee_details.create(
@@ -278,8 +279,8 @@ class Transfer(StripeObject):
         else:
             obj.status = transfer["status"]
             obj.save()
+
         if event.kind == "transfer.updated":
-            # TODO - needs test
             obj.update_status()
 
 
