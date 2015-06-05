@@ -3,9 +3,21 @@
 History
 =======
 
-0.5.0 (2015-05-??)
+0.6.0 (2015-06-??)
 ---------------------
 
+* Support for Django 1.6 and lower is now deprecated.
+* Improved test harness now tests coverage and pep8
+* SubscribeFormView and ChangePlanView no longer populate self.error with form errors
+* InvoiceItems.plan can now be null (as it is with individual charges), resolving #140 (Thanks @awechsler and @MichelleGlauser for help troubleshooting)
+* Email templates are now packaged during distribution.
+* sync_plans now takes an optional api_key
+
+0.5.0 (2015-05-25)
+---------------------
+
+* Began deprecation of support for Django 1.6 and lower.
+* Added formal support for Django 1.8.
 * Removed the StripeSubscriptionSignupForm
 * Removed ``djstripe.safe_settings``. Settings are now all located in ``djstripe.settings``
 * ``DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK`` can no longer be a module string

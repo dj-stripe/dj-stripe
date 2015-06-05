@@ -143,12 +143,13 @@ def create_subscription(customer, plan="basic"):
         status="trialing"
     )
     
-    
+
 def version_tuple(v):
     return tuple(map(int, (v.split("."))))
     
     
 def safe_convert_to_stripe_object(resp, api_key):
+    """Minimum required version is now more than this, so at some stage could simplify this."""
     if version_tuple(STRIPE_VERSION) > version_tuple("1.20.2"):
         return convert_to_stripe_object(resp, api_key, account="acct_test")
     else:
@@ -295,8 +296,10 @@ class TestSingleSubscription(TestCase):
         StripeCustomerMock.side_effect = [safe_convert_to_stripe_object(DUMMY_CUSTOMER_WITHOUT_SUB, api_key),
                                           safe_convert_to_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC, api_key)]
         self.assertEqual(self.customer.subscriptions.count(), 0)
+        self.assertEqual(self.customer.has_active_subscription(), False)
         self.customer.subscribe("basic", charge_immediately=False)
         self.assertEqual(self.customer.subscriptions.count(), 1)
+        self.assertEqual(self.customer.has_active_subscription(), True)
         sub = self.customer.current_subscription
         self.assertEqual(sub.quantity, 1)
         self.assertEqual(sub.amount, decimal.Decimal("100.00"))
@@ -307,9 +310,11 @@ class TestSingleSubscription(TestCase):
         StripeCustomerMock.side_effect = [safe_convert_to_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC, api_key),
                                           safe_convert_to_stripe_object(DUMMY_CUSTOMER_WITH_SUB_GOLD, api_key)]
         create_subscription(self.customer)
+        self.assertEqual(self.customer.has_active_subscription(), True)
         self.assertEqual(self.customer.subscriptions.count(), 1)
         self.assertEqual(self.customer.current_subscription.plan, "basic")
         self.customer.subscribe("gold", charge_immediately=False)
+        self.assertEqual(self.customer.has_active_subscription(), True)
         self.assertEqual(self.customer.subscriptions.count(), 1)
         sub = self.customer.current_subscription
         self.assertEqual(sub.amount, decimal.Decimal("1000.00"))

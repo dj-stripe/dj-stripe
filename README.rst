@@ -30,8 +30,8 @@ Features
 * Subscription management
 * Designed for easy implementation of post-registration subscription forms
 * Single-unit purchases (forthcoming)
-* Works with Django 1.8, 1.7, 1.6, 1.5
-* Works with Python 3.4, 3.3, 2.7
+* Works with Django 1.8, 1.7
+* Works with Python 3.4, 2.7
 * Works with Bootstrap 3
 * Built-in migrations
 * Dead-Easy installation
@@ -151,11 +151,11 @@ Follows Best Practices
    :name: Two Scoops Logo
    :align: center
    :alt: Two Scoops of Django
-   :target: http://twoscoopspress.org/products/two-scoops-of-django-1-6
+   :target: http://twoscoopspress.org/products/two-scoops-of-django-1-8
 
-This project follows best practices as espoused in `Two Scoops of Django: Best Practices for Django 1.6`_.
+This project follows best practices as espoused in `Two Scoops of Django: Best Practices for Django 1.8`_.
 
-.. _`Two Scoops of Django: Best Practices for Django 1.6`: http://twoscoopspress.org/products/two-scoops-of-django-1-6
+.. _`Two Scoops of Django: Best Practices for Django 1.8`: http://twoscoopspress.org/products/two-scoops-of-django-1-8
 
 Similar Projects
 ----------------

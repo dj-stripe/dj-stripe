@@ -21,8 +21,8 @@ def sync_subscriber(subscriber):
     return customer
 
 
-def sync_plans():
-    stripe.api_key = settings.STRIPE_SECRET_KEY
+def sync_plans(api_key=settings.STRIPE_SECRET_KEY):
+    stripe.api_key = api_key
     for plan in settings.DJSTRIPE_PLANS:
         stripe_plan = settings.DJSTRIPE_PLANS[plan]
         if stripe_plan.get("stripe_plan_id"):

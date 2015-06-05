@@ -4,22 +4,58 @@ from __future__ import unicode_literals
 from collections import OrderedDict
 import sys
 
+from django.apps import apps as django_apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 PY3 = sys.version > "3"
-
-USE_TZ = settings.USE_TZ
 
 subscriber_request_callback = getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK", (lambda request: request.user))
 
 INVOICE_FROM_EMAIL = getattr(settings, "DJSTRIPE_INVOICE_FROM_EMAIL", "billing@example.com")
 PAYMENTS_PLANS = getattr(settings, "DJSTRIPE_PLANS", {})
 
-
 # Sort the PAYMENT_PLANS dictionary ascending by price.
 PAYMENT_PLANS = OrderedDict(sorted(PAYMENTS_PLANS.items(), key=lambda t: t[1]['price']))
 PLAN_CHOICES = [(plan, PAYMENTS_PLANS[plan].get("name", plan)) for plan in PAYMENTS_PLANS]
+
+PASSWORD_INPUT_RENDER_VALUE = getattr(settings, 'DJSTRIPE_PASSWORD_INPUT_RENDER_VALUE', False)
+PASSWORD_MIN_LENGTH = getattr(settings, 'DJSTRIPE_PASSWORD_MIN_LENGTH', 6)
+
+PRORATION_POLICY = getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False)
+PRORATION_POLICY_FOR_UPGRADES = getattr(settings, 'DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES', False)
+CANCELLATION_AT_PERIOD_END = not getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False)  # TODO - need to find a better way to do this
+
+SEND_INVOICE_RECEIPT_EMAILS = getattr(settings, "DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS", True)
+CURRENCIES = getattr(settings, "DJSTRIPE_CURRENCIES", (
+    ('usd', 'U.S. Dollars',),
+    ('gbp', 'Pounds (GBP)',),
+    ('eur', 'Euros',))
+)
+
+DEFAULT_PLAN = getattr(settings, "DJSTRIPE_DEFAULT_PLAN", None)
+
+PLAN_LIST = []
+for p in PAYMENTS_PLANS:
+    if PAYMENTS_PLANS[p].get("stripe_plan_id"):
+        plan = PAYMENTS_PLANS[p]
+        plan['plan'] = p
+        PLAN_LIST.append(plan)
+
+# Try to find the new settings variable first. If that fails, revert to the
+# old variable.
+trial_period_for_subscriber_callback = getattr(settings,
+    "DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK",
+    getattr(settings, "DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK", None)
+)
+
+DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
+
+# The default is not to allow multiple subscriptions for a single customer.
+ALLOW_MULTIPLE_SUBSCRIPTIONS = getattr(settings, "DJSTRIPE_ALLOW_MULTIPLE_SUBSCRIPTIONS", False)
+
+# Should cancelled subscriptions be retained in the database?
+RETAIN_CANCELED_SUBSCRIPTIONS = getattr(settings, "DJSTRIPE_RETAIN_CANCELED_SUBSCRIPTIONS", False)
 
 
 def plan_from_stripe_id(stripe_id):
@@ -66,28 +102,13 @@ def get_subscriber_model():
 
     subscriber_model = None
 
-    # Attempt a Django 1.7 app lookup first
+    # Attempt a Django 1.7 app lookup
     try:
-        from django.apps import apps as django_apps
-    except ImportError:
-        # Attempt to pull the model Django 1.5/1.6 style
-        try:
-            app_label, model_name = SUBSCRIBER_MODEL.split('.')
-        except ValueError:
-            raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL must be of the form 'app_label.model_name'.")
-
-        from django.db.models import get_model
-        subscriber_model = get_model(app_label, model_name)
-        if subscriber_model is None:
-            raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL refers to model '{model}' that has not been installed.".format(model=SUBSCRIBER_MODEL))
-    else:
-        # Continue attempting to pull the model Django 1.7 style
-        try:
-            subscriber_model = django_apps.get_model(SUBSCRIBER_MODEL)
-        except ValueError:
-            raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL must be of the form 'app_label.model_name'.")
-        except LookupError:
-            raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL refers to model '{model}' that has not been installed.".format(model=SUBSCRIBER_MODEL))
+        subscriber_model = django_apps.get_model(SUBSCRIBER_MODEL)
+    except ValueError:
+        raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL must be of the form 'app_label.model_name'.")
+    except LookupError:
+        raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL refers to model '{model}' that has not been installed.".format(model=SUBSCRIBER_MODEL))
 
     _check_subscriber_for_email_address(subscriber_model, "DJSTRIPE_SUBSCRIBER_MODEL must have an email attribute.")
 
@@ -99,55 +120,3 @@ def get_subscriber_model():
         raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be implemented if a DJSTRIPE_SUBSCRIBER_MODEL is defined.")
 
     return subscriber_model
-
-
-
-
-
-
-PASSWORD_INPUT_RENDER_VALUE = getattr(settings, 'DJSTRIPE_PASSWORD_INPUT_RENDER_VALUE', False)
-PASSWORD_MIN_LENGTH = getattr(settings, 'DJSTRIPE_PASSWORD_MIN_LENGTH', 6)
-
-PRORATION_POLICY = getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False)
-PRORATION_POLICY_FOR_UPGRADES = getattr(settings, 'DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES', False)
-# TODO - need to find a better way to do this
-CANCELLATION_AT_PERIOD_END = not PRORATION_POLICY
-
-SEND_INVOICE_RECEIPT_EMAILS = getattr(settings, "DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS", True)
-CURRENCIES = getattr(settings, "DJSTRIPE_CURRENCIES", (
-    ('usd', 'U.S. Dollars',),
-    ('gbp', 'Pounds (GBP)',),
-    ('eur', 'Euros',))
-)
-
-DEFAULT_PLAN = getattr(settings, "DJSTRIPE_DEFAULT_PLAN", None)
-
-PLAN_LIST = []
-for p in PAYMENTS_PLANS:
-    if PAYMENTS_PLANS[p].get("stripe_plan_id"):
-        plan = PAYMENTS_PLANS[p]
-        plan['plan'] = p
-        PLAN_LIST.append(plan)
-
-# Try to find the new settings variable first. If that fails, revert to the
-# old variable.
-trial_period_for_subscriber_callback = getattr(settings,
-    "DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK",
-    getattr(settings, "DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK", None)
-)
-
-DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
-
-# The default is not to allow multiple subscriptions for a single customer.
-ALLOW_MULTIPLE_SUBSCRIPTIONS = getattr(
-    settings,
-    "DJSTRIPE_ALLOW_MULTIPLE_SUBSCRIPTIONS",
-    False
-)
-
-# Should canceled subscriptions be retained in the database?
-RETAIN_CANCELED_SUBSCRIPTIONS = getattr(
-    settings,
-    "DJSTRIPE_RETAIN_CANCELED_SUBSCRIPTIONS",
-    False
-)

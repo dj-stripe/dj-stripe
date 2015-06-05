@@ -27,16 +27,13 @@ readme = open('README.rst').read()
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 INSTALL_REQUIRES = [
-    'django>=1.4',
-    'stripe>=1.9.2',
-    'django-model-utils>=1.4.0',
-    'django-braces>=1.2.1',
-    'jsonfield>=1.0.3'
+    'django>=1.7',
+    'stripe>=1.22.2',
+    'django-model-utils>=2.2',
+    'django-braces>=1.8.0',
+    'jsonfield>=1.0.3',
+    'pytz>=2015.4'
 ]
-
-# Add ordereddict to users of Python 2.6.
-if sys.version > "2.6" and sys.version < "2.7":
-    INSTALL_REQUIRES += ["ordereddict>=1.1"]
 
 setup(
     name='dj-stripe',
@@ -59,11 +56,12 @@ setup(
         'Development Status :: 3 - Alpha',
         'Environment :: Web Environment',
         'Framework :: Django',
+        'Framework :: Django :: 1.7',
+        'Framework :: Django :: 1.8',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
         "Programming Language :: Python :: 2",
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',

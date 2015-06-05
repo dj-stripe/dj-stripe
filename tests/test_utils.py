@@ -1,3 +1,12 @@
+"""
+.. module:: dj-stripe.tests.test_utils
+   :synopsis: dj-stripe Utilities Tests.
+
+.. moduleauthor:: Daniel Greenfeld (@pydanny)
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
+
+"""
+
 import datetime
 import decimal
 
@@ -9,9 +18,11 @@ from django.test.utils import override_settings
 from django.utils import timezone
 
 from djstripe.models import convert_tstamp, Customer, Subscription
-from djstripe.utils import subscriber_has_active_subscription
+from djstripe.utils import subscriber_has_active_subscription, get_supported_currency_choices
 
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
+from mock import patch
+from stripe import api_key
 
 from tests.apps.testapp.models import Organization
 
@@ -157,3 +168,19 @@ class TestUserHasActiveSubscription(TestCase):
         self.user.save()
 
         self.assertTrue(subscriber_has_active_subscription(self.user))
+
+
+class TestGetSupportedCurrencyChoices(TestCase):
+
+    @patch("stripe.Account.retrieve", return_value={"currencies_supported": ["usd", "cad", "eur"]})
+    def test_get_choices(self, stripe_account_retrieve_mock):
+        """
+        Simple test to test sure that at least one currency choice tuple is returned.
+        USD should always be an option.
+        """
+
+        currency_choices = get_supported_currency_choices(api_key)
+        stripe_account_retrieve_mock.assert_called_once_with()
+        self.assertGreaterEqual(len(currency_choices), 1, "Currency choices pull returned an empty list.")
+        self.assertEqual(tuple, type(currency_choices[0]), "Currency choices are not tuples.")
+        self.assertIn(("usd", "USD"), currency_choices, "USD not in currency choices.")

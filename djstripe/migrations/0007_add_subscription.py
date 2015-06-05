@@ -9,7 +9,7 @@ import model_utils.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('djstripe', '0005_charge_captured'),
+        ('djstripe', '0006_auto_20150602_1934'),
     ]
 
     operations = [

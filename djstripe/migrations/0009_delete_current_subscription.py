@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('djstripe', '0007_copy_subscriptions'),
+        ('djstripe', '0008_copy_subscriptions'),
     ]
 
     operations = [
