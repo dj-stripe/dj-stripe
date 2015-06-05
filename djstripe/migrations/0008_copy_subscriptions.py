@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import migrations
 
 
 def copy_subscriptions_forwards(apps, schema_editor):
@@ -10,7 +10,7 @@ def copy_subscriptions_forwards(apps, schema_editor):
     stripe.api_key = settings.STRIPE_SECRET_KEY
     # Must have a sufficiently old API version to access "subscription", as against "subscriptions".
     stripe.api_version = "2012-11-07"
-    
+
     CurrentSubscription = apps.get_model("djstripe", "CurrentSubscription")
     Subscription = apps.get_model("djstripe", "Subscription")
     num_skipped_ids = 0
@@ -20,7 +20,7 @@ def copy_subscriptions_forwards(apps, schema_editor):
         except:
             num_skipped_ids += 1
             stripe_id = "can_{:014d}".format(num_skipped_ids)
-            
+
         sub = Subscription(created=csub.created,
                            modified=csub.modified,      # will get set to now() upon saving
                            stripe_id=stripe_id,

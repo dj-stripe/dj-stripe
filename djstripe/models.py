@@ -24,7 +24,6 @@ from .managers import CustomerManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
-from requests import structures
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -194,7 +193,7 @@ class Event(StripeObject):
                         """
                         Previously, the code tested for "customer.subscription.deleted" and in
                         this case would cancel the current_subscription, rather than syncing.
-                        
+
                         if self.kind == "customer.subscription.deleted":
                             self.customer.current_subscription.status = CurrentSubscription.STATUS_CANCELLED
                             self.customer.current_subscription.canceled_at = timezone.now()
@@ -328,7 +327,7 @@ class Customer(StripeObject):
     date_purged = models.DateTimeField(null=True, editable=False)
 
     objects = CustomerManager()
-    
+
     allow_multiple_subscriptions = djstripe_settings.ALLOW_MULTIPLE_SUBSCRIPTIONS
     retain_canceled_subscriptions = djstripe_settings.RETAIN_CANCELED_SUBSCRIPTIONS
 
@@ -372,7 +371,7 @@ class Customer(StripeObject):
             if subscription.is_valid():
                 return True
         return False
-    
+
     @property
     def current_subscription(self):
         if Customer.allow_multiple_subscriptions:
@@ -383,7 +382,7 @@ class Customer(StripeObject):
             return self.subscriptions.all()[0]
         else:
             raise Subscription.DoesNotExist
-        
+
     def matching_stripe_subscription(self, subscription, cu=None):
         """
         Look up the Stripe subscription matching this subscription, using the
@@ -525,7 +524,7 @@ class Customer(StripeObject):
         cu = cu or self.stripe_customer
         for charge in cu.charges(**kwargs).data:
             self.record_charge(charge.id)
-            
+
     def sync_subscriptions(self, cu=None):
         """
         Remove all existing Subscription records and regenerate from the Stripe
@@ -559,7 +558,7 @@ class Customer(StripeObject):
                     subscription.start = convert_tstamp(stripe_subscription.start)
                     # ended_at will generally be null, since Stripe does not retain ended subscriptions.
                     subscription.ended_at = convert_tstamp(stripe_subscription, "ended_at")
-                    
+
                     if stripe_subscription.trial_start and stripe_subscription.trial_end:
                         subscription.trial_start = convert_tstamp(stripe_subscription.trial_start)
                         subscription.trial_end = convert_tstamp(stripe_subscription.trial_end)
@@ -571,7 +570,7 @@ class Customer(StripeObject):
                         """
                         subscription.trial_start = None
                         subscription.trial_end = None
-                        
+
                 except Subscription.DoesNotExist:
                     subscription = Subscription(
                         stripe_id=stripe_subscription.id,
@@ -593,9 +592,9 @@ class Customer(StripeObject):
                         trial_end=convert_tstamp(stripe_subscription, "trial_end"),
                         trial_start=convert_tstamp(stripe_subscription, "trial_start"),
                     )
-                    
+
                 subscription.save()
-                
+
                 if not Customer.allow_multiple_subscriptions:
                     break
 
