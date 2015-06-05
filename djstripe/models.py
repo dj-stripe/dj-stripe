@@ -5,6 +5,7 @@ import datetime
 import decimal
 import json
 import traceback as exception_traceback
+import warnings
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -294,8 +295,6 @@ class TransferChargeFee(TimeStampedModel):
 
 @python_2_unicode_compatible
 class Customer(StripeObject):
-    # TODO - needs tests
-
     subscriber = models.OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
     card_fingerprint = models.CharField(max_length=200, blank=True)
     card_last_4 = models.CharField(max_length=4, blank=True)
@@ -314,8 +313,8 @@ class Customer(StripeObject):
     def purge(self):
         try:
             self.stripe_customer.delete()
-        except stripe.InvalidRequestError as e:
-            if str(e).startswith("No such customer:"):
+        except stripe.InvalidRequestError as exc:
+            if str(exc).startswith("No such customer:"):
                 # The exception was thrown because the stripe customer was already
                 # deleted on the stripe side, ignore the exception
                 pass
@@ -371,8 +370,7 @@ class Customer(StripeObject):
         return current_subscription
 
     def cancel(self, at_period_end=True):
-        # TODO - add deprecation warning and test
-        """ Adapter method to preserve usage of previous API """
+        warnings.warn("Deprecated - Use ``cancel_subscription`` instead. This method will be removed in dj-stripe 1.0.", DeprecationWarning)
         return self.cancel_subscription(at_period_end=at_period_end)
 
     @classmethod
