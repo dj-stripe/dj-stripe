@@ -9,6 +9,7 @@ from django.utils import timezone
 
 from mock import patch, PropertyMock
 from stripe import InvalidRequestError
+from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
 from djstripe.exceptions import SubscriptionCancellationFailure
 from djstripe.models import convert_tstamp, Customer, CurrentSubscription
@@ -236,10 +237,14 @@ class TestSingleSubscription(TestCase):
         self.customer.update_plan_quantity(2, charge_immediately=False)
         self.assertEqual(self.customer.current_subscription.quantity, 2)
 
+
+class DeprecationTests(AssertWarnsEnabledTestCase):
+
     @patch("djstripe.models.Customer.cancel_subscription")
     def test_cancel_deprecation(self, cancel_subscription_mock):
+        customer = Customer.objects.create()
 
         with self.assertWarns(DeprecationWarning):
-            self.customer.cancel(at_period_end="cake")
+            customer.cancel(at_period_end="cake")
 
         cancel_subscription_mock.assert_called_once_with(at_period_end="cake")
