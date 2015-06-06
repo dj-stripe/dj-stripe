@@ -425,7 +425,10 @@ class Customer(StripeObject):
 
     def sync(self, cu=None):
         cu = cu or self.stripe_customer
-        if cu.active_card:
+        if getattr(cu, 'deleted', False)==True:
+            # Customer was deleted from stripe - what should we do?
+            pass
+        elif getattr(cu, 'active_card', None):
             self.card_fingerprint = cu.active_card.fingerprint
             self.card_last_4 = cu.active_card.last4
             self.card_kind = cu.active_card.type
