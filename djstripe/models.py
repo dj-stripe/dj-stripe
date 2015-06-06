@@ -425,7 +425,7 @@ class Customer(StripeObject):
 
     def sync(self, cu=None):
         cu = cu or self.stripe_customer
-        if getattr(cu, 'deleted', False)==True:
+        if getattr(cu, 'deleted', False):
             # Customer was deleted from stripe - what should we do?
             pass
         elif getattr(cu, 'active_card', None):
@@ -447,7 +447,7 @@ class Customer(StripeObject):
     def sync_current_subscription(self, cu=None):
         cu = cu or self.stripe_customer
         sub = getattr(cu, 'subscription', None)
-        cur_sub = getattr(self,'current_subscription',None)
+        cur_sub = getattr(self, 'current_subscription', None)
         if sub:
             if cur_sub:
                 _log.debug('Updating subscription')
@@ -506,7 +506,6 @@ class Customer(StripeObject):
             cur_sub.status = CurrentSubscription.STATUS_CANCELLED
             cur_sub.save()
             return cur_sub
-            
 
     def update_plan_quantity(self, quantity, charge_immediately=False):
         self.subscribe(
