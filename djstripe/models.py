@@ -6,6 +6,7 @@ import decimal
 import json
 import traceback as exception_traceback
 import warnings
+import logging
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -26,6 +27,7 @@ from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
 
+_log = logging.getLogger(__name__)
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
@@ -441,26 +443,28 @@ class Customer(StripeObject):
 
     def sync_current_subscription(self, cu=None):
         cu = cu or self.stripe_customer
-        sub = cu.subscription
+        sub = getattr(cu, 'subscription', None)
+        cur_sub = getattr(self,'current_subscription',None)
         if sub:
-            try:
-                sub_obj = self.current_subscription
-                sub_obj.plan = djstripe_settings.plan_from_stripe_id(sub.plan.id)
-                sub_obj.current_period_start = convert_tstamp(
+            if cur_sub:
+                _log.debug('Updating subscription')
+                cur_sub.plan = djstripe_settings.plan_from_stripe_id(sub.plan.id)
+                cur_sub.current_period_start = convert_tstamp(
                     sub.current_period_start
                 )
-                sub_obj.current_period_end = convert_tstamp(
+                cur_sub.current_period_end = convert_tstamp(
                     sub.current_period_end
                 )
-                sub_obj.amount = (sub.plan.amount / decimal.Decimal("100"))
-                sub_obj.status = sub.status
-                sub_obj.cancel_at_period_end = sub.cancel_at_period_end
-                sub_obj.canceled_at = convert_tstamp(sub, "canceled_at")
-                sub_obj.start = convert_tstamp(sub.start)
-                sub_obj.quantity = sub.quantity
-                sub_obj.save()
-            except CurrentSubscription.DoesNotExist:
-                sub_obj = CurrentSubscription.objects.create(
+                cur_sub.amount = (sub.plan.amount / decimal.Decimal("100"))
+                cur_sub.status = sub.status
+                cur_sub.cancel_at_period_end = sub.cancel_at_period_end
+                cur_sub.canceled_at = convert_tstamp(sub, "canceled_at")
+                cur_sub.start = convert_tstamp(sub.start)
+                cur_sub.quantity = sub.quantity
+                cur_sub.save()
+            else:
+                _log.debug('Creating subscription')
+                cur_sub = CurrentSubscription.objects.create(
                     customer=self,
                     plan=djstripe_settings.plan_from_stripe_id(sub.plan.id),
                     current_period_start=convert_tstamp(
@@ -478,20 +482,28 @@ class Customer(StripeObject):
                 )
 
             if sub.trial_start and sub.trial_end:
-                sub_obj.trial_start = convert_tstamp(sub.trial_start)
-                sub_obj.trial_end = convert_tstamp(sub.trial_end)
+                cur_sub.trial_start = convert_tstamp(sub.trial_start)
+                cur_sub.trial_end = convert_tstamp(sub.trial_end)
             else:
                 """
                 Avoids keeping old values for trial_start and trial_end
                 for cases where customer had a subscription with trial days
                 then one without that (s)he cancels.
                 """
-                sub_obj.trial_start = None
-                sub_obj.trial_end = None
+                cur_sub.trial_start = None
+                cur_sub.trial_end = None
 
-            sub_obj.save()
+            cur_sub.save()
 
-            return sub_obj
+            return cur_sub
+        elif cur_sub and cur_sub.status != CurrentSubscription.STATUS_CANCELLED:
+            # Stripe says customer has no subscription but we think they have one.
+            # This could happen if subscription is cancelled from Stripe Dashboard and webhook fails
+            _log.debug('Cancelling subscription for %s' % self)
+            cur_sub.status = CurrentSubscription.STATUS_CANCELLED
+            cur_sub.save()
+            return cur_sub
+            
 
     def update_plan_quantity(self, quantity, charge_immediately=False):
         self.subscribe(
