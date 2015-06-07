@@ -39,13 +39,13 @@ Features
 
 * Subscription management
 * Designed for easy implementation of post-registration subscription forms
-* Single-unit purchases (forthcoming)
+* Single-unit purchases
 * Works with Django 1.8, 1.7
 * Works with Python 3.4, 2.7
 * Works with Bootstrap 3
 * Built-in migrations
 * Dead-Easy installation
-* Leverages in the best of the 3rd party Django package ecosystem
+* Leverages the best of the 3rd party Django package ecosystem
 * `djstripe` namespace so you can have more than one payments related app
 * Documented (Making good progress)
 * Tested (Making good progress)
@@ -79,8 +79,8 @@ Add your stripe keys:
 
 .. code-block:: python
 
-    STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "<your publishable test key>")
-    STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "<your secret test key>")
+    STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "<your publishable key>")
+    STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "<your secret key>")
 
 Add some payment plans:
 
@@ -113,27 +113,27 @@ Add to the urls.py:
     
 Run the commands::
 
-    python manage.py migrate  # or syncdb, then migrate with South
+    python manage.py migrate
     
     python manage.py djstripe_init_customers
     
     python manage.py djstripe_init_plans
 
-If you haven't already, add JQuery and the Bootstrap 3.0.0 JS and CSS to your base template:
+If you haven't already, add JQuery and the Bootstrap 3.0.0+ JS and CSS to your base template:
 
 .. code-block:: html
 
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 
     <!-- Optional theme -->
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
     
-    <!-- Latest JQuery -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+    <!-- Latest JQuery (IE9+) -->
+    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
 
     <!-- Latest compiled and minified JavaScript -->
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     
 Also, if you don't have it already, add a javascript block to your base.html file:
 
@@ -141,9 +141,6 @@ Also, if you don't have it already, add a javascript block to your base.html fil
 
     {% block javascript %}{% endblock %} 
 
-Start up the webserver:
-
-    * http://127.0.0.1:8000/payments/
 
 Running the Tests
 ------------------
