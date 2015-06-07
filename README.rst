@@ -9,8 +9,8 @@ Badges
         :target: https://travis-ci.org/pydanny/dj-stripe
 .. image:: https://img.shields.io/codecov/c/github/pydanny/dj-stripe/coverage.svg?style=flat-square
         :target: http://codecov.io/github/pydanny/dj-stripe?branch=master
-.. image:: https://img.shields.io/versioneye/d/python/dj-stripe.svg?style=flat-square
-        :target: https://www.versioneye.com/user/projects/5574920b3363340023000090#tab-dependencies
+.. image:: https://img.shields.io/requires/github/pydanny/dj-stripe.svg?style=flat-square
+        :target: https://requires.io/github/pydanny/dj-stripe/requirements/?branch=master
 .. image:: https://img.shields.io/codacy/3c99e13eda1c4dea9f993b362e4ea816.svg?style=flat-square
         :target: https://www.codacy.com/app/kavanaugh-development/dj-stripe/dashboard
 
