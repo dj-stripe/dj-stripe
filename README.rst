@@ -14,17 +14,16 @@ Badges
 .. image:: https://img.shields.io/codacy/3c99e13eda1c4dea9f993b362e4ea816.svg?style=flat-square
         :target: https://www.codacy.com/app/kavanaugh-development/dj-stripe/dashboard
 
-|
 .. image:: https://img.shields.io/pypi/v/dj-stripe.svg?style=flat-square
         :target: https://pypi.python.org/pypi/dj-stripe
 .. image:: https://img.shields.io/pypi/dw/dj-stripe.svg?style=flat-square
         :target: https://pypi.python.org/pypi/dj-stripe
-|
+
 .. image:: https://img.shields.io/github/issues/pydanny/dj-stripe.svg?style=flat-square
         :target: https://github.com/pydanny/dj-stripe/issues
 .. image:: https://img.shields.io/github/license/pydanny/dj-stripe.svg?style=flat-square
         :target: https://github.com/pydanny/dj-stripe/blob/master/LICENSE
-|
+
 .. image:: https://badges.gitter.im/Join Chat.svg
         :target: https://gitter.im/pydanny/dj-stripe?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
