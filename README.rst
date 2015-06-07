@@ -5,17 +5,29 @@ dj-stripe
 Badges
 ------
 
-.. image:: https://badge.fury.io/py/dj-stripe.png
-    :target: http://badge.fury.io/py/dj-stripe
-
-.. image:: https://travis-ci.org/pydanny/dj-stripe.png?branch=master
+.. image:: https://img.shields.io/travis/pydanny/dj-stripe.svg?style=flat-square
         :target: https://travis-ci.org/pydanny/dj-stripe
+.. image:: https://img.shields.io/codecov/c/github/pydanny/dj-stripe/coverage.svg?style=flat-square
+        :target: http://codecov.io/github/pydanny/dj-stripe?branch=master
+.. image:: https://img.shields.io/versioneye/d/python/dj-stripe.svg?style=flat-square
+        :target: https://www.versioneye.com/user/projects/5574920b3363340023000090#tab-dependencies
+.. image:: https://img.shields.io/codacy/3c99e13eda1c4dea9f993b362e4ea816.svg?style=flat-square
+        :target: https://www.codacy.com/app/kavanaugh-development/dj-stripe/dashboard
 
-.. image:: https://pypip.in/d/dj-stripe/badge.png
-        :target: https://pypi.python.org/pypi/dj-stripe/
-        
+|
+.. image:: https://img.shields.io/pypi/v/dj-stripe.svg?style=flat-square
+        :target: https://pypi.python.org/pypi/dj-stripe
+.. image:: https://img.shields.io/pypi/dw/dj-stripe.svg?style=flat-square
+        :target: https://pypi.python.org/pypi/dj-stripe
+|
+.. image:: https://img.shields.io/github/issues/pydanny/dj-stripe.svg?style=flat-square
+        :target: https://github.com/pydanny/dj-stripe/issues
+.. image:: https://img.shields.io/github/license/pydanny/dj-stripe.svg?style=flat-square
+        :target: https://github.com/pydanny/dj-stripe/blob/master/LICENSE
+|
 .. image:: https://badges.gitter.im/Join Chat.svg
         :target: https://gitter.im/pydanny/dj-stripe?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
 
 Django + Stripe Made Easy
 
