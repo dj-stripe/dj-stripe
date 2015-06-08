@@ -19,3 +19,9 @@ before_script:
 
 # command to run tests, e.g. python setup.py test
 script: python runtests.py
+
+# Running codecov
+before_install:
+  pip install codecov
+after_success:
+  codecov

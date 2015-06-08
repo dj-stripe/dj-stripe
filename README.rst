@@ -8,10 +8,8 @@ Badges
 
 .. image:: https://img.shields.io/travis/pydanny/dj-stripe.svg?style=flat-square
         :target: https://travis-ci.org/pydanny/dj-stripe
-.. will be switched once codecov is set up # .. image:: https://img.shields.io/codecov/c/github/pydanny/dj-stripe/coverage.svg?style=flat-square
-.. image:: https://img.shields.io/badge/coverage-87%25-green.svg?style=flat-square
+.. image:: https://img.shields.io/codecov/c/github/pydanny/dj-stripe/master.svg?style=flat-square
         :target: http://codecov.io/github/pydanny/dj-stripe?branch=master
-
 .. image:: https://img.shields.io/requires/github/pydanny/dj-stripe.svg?style=flat-square
         :target: https://requires.io/github/pydanny/dj-stripe/requirements/?branch=master
 .. image:: https://img.shields.io/codacy/3c99e13eda1c4dea9f993b362e4ea816.svg?style=flat-square
