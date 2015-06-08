@@ -3,7 +3,7 @@ import decimal
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from mock import patch, PropertyMock
+from mock import patch, PropertyMock, MagicMock
 import stripe
 
 from djstripe.models import Customer, Charge
@@ -309,3 +309,91 @@ class TestCustomer(TestCase):
         customer_create_mock.assert_called_once_with(email=user.email)
         callback_mock.assert_called_once_with(user)
         subscribe_mock.assert_called_once_with(plan=default_plan_fake, trial_days="donkey")
+
+    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
+    def test_update_card(self, customer_stripe_customer_mock):
+        customer_stripe_customer_mock.return_value = PropertyMock(active_card=PropertyMock(fingerprint="test_fingerprint",
+                                                                                           last4="1234", type="test_type"))
+
+        self.customer.update_card("test")
+
+        self.assertEqual("test_fingerprint", self.customer.card_fingerprint)
+        self.assertEqual("1234", self.customer.card_last_4)
+        self.assertEqual("test_type", self.customer.card_kind)
+
+    @patch("stripe.Invoice.create")
+    def test_send_invoice_success(self, invoice_create_mock):
+        return_status = self.customer.send_invoice()
+        self.assertTrue(return_status)
+
+        invoice_create_mock.assert_called_once_with(customer=self.customer.stripe_id)
+
+    @patch("stripe.Invoice.create")
+    def test_send_invoice_failure(self, invoice_create_mock):
+        invoice_create_mock.side_effect = stripe.InvalidRequestError("Invoice creation failed.", "blah")
+
+        return_status = self.customer.send_invoice()
+        self.assertFalse(return_status)
+
+        invoice_create_mock.assert_called_once_with(customer=self.customer.stripe_id)
+
+    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
+    def test_sync_active_card(self, stripe_customer_mock):
+        stripe_customer_mock.return_value = PropertyMock(active_card=PropertyMock(fingerprint="cherry",
+                                                                                  last4="4429", type="apple"))
+        self.customer.sync()
+        self.assertEqual("cherry", self.customer.card_fingerprint)
+        self.assertEqual("4429", self.customer.card_last_4)
+        self.assertEqual("apple", self.customer.card_kind)
+
+    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock,
+           return_value=PropertyMock(active_card=None))
+    def test_sync_no_card(self, stripe_customer_mock):
+        self.customer.sync()
+        self.assertEqual("YYYYYYYY", self.customer.card_fingerprint)
+        self.assertEqual("2342", self.customer.card_last_4)
+        self.assertEqual("Visa", self.customer.card_kind)
+
+    @patch("djstripe.models.Invoice.sync_from_stripe_data")
+    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock,
+           return_value=PropertyMock(invoices=MagicMock(return_value=PropertyMock(data=["apple", "orange", "pear"]))))
+    def test_sync_invoices(self, stripe_customer_mock, sync_from_stripe_data_mock):
+        self.customer.sync_invoices()
+
+        sync_from_stripe_data_mock.assert_any_call("apple", send_receipt=False)
+        sync_from_stripe_data_mock.assert_any_call("orange", send_receipt=False)
+        sync_from_stripe_data_mock.assert_any_call("pear", send_receipt=False)
+
+        self.assertEqual(3, sync_from_stripe_data_mock.call_count)
+
+    @patch("djstripe.models.Invoice.sync_from_stripe_data")
+    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock,
+       return_value=PropertyMock(invoices=MagicMock(return_value=PropertyMock(data=[]))))
+    def test_sync_invoices_none(self, stripe_customer_mock, sync_from_stripe_data_mock):
+        self.customer.sync_invoices()
+
+        self.assertFalse(sync_from_stripe_data_mock.called)
+
+    @patch("djstripe.models.Customer.record_charge")
+    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock,
+           return_value=PropertyMock(charges=MagicMock(return_value=PropertyMock(data=[PropertyMock(id="herbst"), 
+                                                                                       PropertyMock(id="winter"), 
+                                                                                       PropertyMock(id="fruehling"), 
+                                                                                       PropertyMock(id="sommer")]))))
+    def test_sync_charges(self, stripe_customer_mock, record_charge_mock):
+        self.customer.sync_charges()
+
+        record_charge_mock.assert_any_call("herbst")
+        record_charge_mock.assert_any_call("winter")
+        record_charge_mock.assert_any_call("fruehling")
+        record_charge_mock.assert_any_call("sommer")
+
+        self.assertEqual(4, record_charge_mock.call_count)
+
+    @patch("djstripe.models.Customer.record_charge")
+    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock,
+           return_value=PropertyMock(charges=MagicMock(return_value=PropertyMock(data=[]))))
+    def test_sync_charges_none(self, stripe_customer_mock, record_charge_mock):
+        self.customer.sync_charges()
+
+        self.assertFalse(record_charge_mock.called)
