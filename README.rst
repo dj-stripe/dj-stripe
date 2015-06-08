@@ -8,7 +8,7 @@ Badges
 
 .. image:: https://img.shields.io/travis/pydanny/dj-stripe.svg?style=flat-square
         :target: https://travis-ci.org/pydanny/dj-stripe
-.. image:: http://codecov.io/github/pydanny/dj-stripe/coverage.svg?branch=master
+.. image:: https://img.shields.io/codecov/c/github/pydanny/dj-stripe/master.svg?style=flat-square
         :target: http://codecov.io/github/pydanny/dj-stripe?branch=master
 .. image:: https://img.shields.io/requires/github/pydanny/dj-stripe.svg?style=flat-square
         :target: https://requires.io/github/pydanny/dj-stripe/requirements/?branch=master
