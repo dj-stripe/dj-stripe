@@ -17,6 +17,7 @@ from django.utils import timezone
 
 from mock import patch, PropertyMock, MagicMock
 import stripe
+from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
 from djstripe.models import Customer, Charge, CurrentSubscription
 
@@ -535,3 +536,15 @@ class TestCustomer(TestCase):
     def test_add_invoice_item_bad_decimal(self):
         with self.assertRaisesMessage(ValueError, "You must supply a decimal value representing dollars."):
             self.customer.add_invoice_item(amount=5000)
+
+
+class DeprecationTests(AssertWarnsEnabledTestCase):
+
+    @patch("djstripe.models.Customer.cancel_subscription")
+    def test_cancel_deprecation(self, cancel_subscription_mock):
+        customer = Customer.objects.create()
+
+        with self.assertWarns(DeprecationWarning):
+            customer.cancel(at_period_end="cake")
+
+        cancel_subscription_mock.assert_called_once_with(at_period_end="cake")
