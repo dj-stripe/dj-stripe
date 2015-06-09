@@ -73,13 +73,22 @@ settings.configure(
             "currency": "usd",
             "interval": "month"
         },
-        "test3": {
+        "test_deletion": {
             "stripe_plan_id": "test_id_3",
             "name": "Test Plan 3",
             "description": "Test plan for deletion.",
             "price": 5000,  # $50.00
             "currency": "usd",
             "interval": "month"
+        },
+        "test_trial": {
+            "stripe_plan_id": "test_id_4",
+            "name": "Test Plan 4",
+            "description": "Test plan for trails.",
+            "price": 7000,  # $70.00
+            "currency": "usd",
+            "interval": "month",
+            "trial_period_days": 7
         },
         "unidentified_test_plan": {
             "name": "Unidentified Test Plan",

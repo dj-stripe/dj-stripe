@@ -409,9 +409,9 @@ class Customer(StripeObject):
         for inv in self.invoices.filter(paid=False, closed=False):
             try:
                 inv.retry()  # Always retry unpaid invoices
-            except stripe.InvalidRequestError as error:
-                if error.message != "Invoice is already paid":
-                    raise error
+            except stripe.InvalidRequestError as exc:
+                if str(exc) != "Invoice is already paid":
+                    raise exc
 
     def send_invoice(self):
         try:
@@ -446,12 +446,8 @@ class Customer(StripeObject):
             try:
                 sub_obj = self.current_subscription
                 sub_obj.plan = djstripe_settings.plan_from_stripe_id(sub.plan.id)
-                sub_obj.current_period_start = convert_tstamp(
-                    sub.current_period_start
-                )
-                sub_obj.current_period_end = convert_tstamp(
-                    sub.current_period_end
-                )
+                sub_obj.current_period_start = convert_tstamp(sub.current_period_start)
+                sub_obj.current_period_end = convert_tstamp(sub.current_period_end)
                 sub_obj.amount = (sub.plan.amount / decimal.Decimal("100"))
                 sub_obj.status = sub.status
                 sub_obj.cancel_at_period_end = sub.cancel_at_period_end
@@ -463,12 +459,8 @@ class Customer(StripeObject):
                 sub_obj = CurrentSubscription.objects.create(
                     customer=self,
                     plan=djstripe_settings.plan_from_stripe_id(sub.plan.id),
-                    current_period_start=convert_tstamp(
-                        sub.current_period_start
-                    ),
-                    current_period_end=convert_tstamp(
-                        sub.current_period_end
-                    ),
+                    current_period_start=convert_tstamp(sub.current_period_start),
+                    current_period_end=convert_tstamp(sub.current_period_end),
                     amount=(sub.plan.amount / decimal.Decimal("100")),
                     status=sub.status,
                     cancel_at_period_end=sub.cancel_at_period_end,
