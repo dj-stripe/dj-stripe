@@ -515,3 +515,23 @@ class TestCustomer(TestCase):
         self.customer.subscribe(plan="test", charge_immediately=False)
         sync_subscription_mock.assert_called_once_with()
         self.assertFalse(send_invoice_mock.called)
+
+    @patch("djstripe.models.Charge.send_receipt")
+    @patch("djstripe.models.Customer.record_charge", return_value=Charge())
+    @patch("stripe.Charge.create", return_value={"id": "test_charge_id"})
+    def test_charge_not_send_receipt(self, charge_create_mock, record_charge_mock, send_receipt_mock):
+
+        self.customer.charge(amount=decimal.Decimal("50.00"), send_receipt=False)
+        self.assertTrue(charge_create_mock.called)
+        record_charge_mock.assert_called_once_with("test_charge_id")
+        self.assertFalse(send_receipt_mock.called)
+
+    @patch("stripe.InvoiceItem.create")
+    def test_add_invoice_item(self, invoice_item_create_mock):
+        self.customer.add_invoice_item(amount=decimal.Decimal("50.00"), currency="eur", invoice_id=77, description="test")
+
+        invoice_item_create_mock.assert_called_once_with(amount=5000, currency="eur", invoice=77, description="test", customer=self.customer.stripe_id)
+
+    def test_add_invoice_item_bad_decimal(self):
+        with self.assertRaisesMessage(ValueError, "You must supply a decimal value representing dollars."):
+            self.customer.add_invoice_item(amount=5000)

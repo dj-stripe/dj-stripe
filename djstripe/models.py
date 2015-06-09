@@ -584,8 +584,6 @@ class Customer(StripeObject):
 
 
 class CurrentSubscription(TimeStampedModel):
-    # TODO - needs tests
-
     STATUS_TRIALING = "trialing"
     STATUS_ACTIVE = "active"
     STATUS_PAST_DUE = "past_due"
