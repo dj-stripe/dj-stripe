@@ -11,7 +11,7 @@ cov = coverage(config_file=True)
 cov.erase()
 cov.start()
 
-TESTS_THRESHOLD = 99.15
+TESTS_THRESHOLD = 99.5
 TESTS_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 settings.configure(
