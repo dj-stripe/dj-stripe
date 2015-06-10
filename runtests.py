@@ -92,7 +92,7 @@ settings.configure(
     DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS=(
         "(admin)",
         "test_url_name",
-        "testapp_namespaced:test_url_namespaced"
+        "testapp_namespaced:test_url_namespaced",
     ),
 )
 
