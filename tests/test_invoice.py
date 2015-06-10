@@ -218,3 +218,33 @@ class InvoiceTest(TestCase):
         Invoice.sync_from_stripe_data(FAKE_INVOICE_WITH_CHARGE, send_receipt=False)
         record_charge_mock.assert_called_once_with("taco1")
         self.assertFalse(send_receipt_mock.called)
+
+    @patch("djstripe.models.Invoice.sync_from_stripe_data")
+    @patch("stripe.Invoice.retrieve", return_value="key")
+    def test_handle_event_fake(self, invoice_retrieve_mock, sync_invoice_mock):
+        fake_event = Event(kind="fake", message={"data": {"object": {"id": "door"}}})
+
+        Invoice.handle_event(fake_event)
+
+        self.assertFalse(invoice_retrieve_mock.called)
+        self.assertFalse(sync_invoice_mock.called)
+
+    @patch("djstripe.models.Invoice.sync_from_stripe_data")
+    @patch("stripe.Invoice.retrieve", return_value="lock")
+    def test_handle_event_payment_failed(self, invoice_retrieve_mock, sync_invoice_mock):
+        fake_event = Event(kind="invoice.payment_failed", validated_message={"data": {"object": {"id": "door"}}})
+
+        Invoice.handle_event(fake_event)
+
+        invoice_retrieve_mock.assert_called_once_with("door")
+        sync_invoice_mock.assert_called_once_with("lock", send_receipt=True)
+
+    @patch("djstripe.models.Invoice.sync_from_stripe_data")
+    @patch("stripe.Invoice.retrieve", return_value="key")
+    def test_handle_event_payment_succeeded(self, invoice_retrieve_mock, sync_invoice_mock):
+        fake_event = Event(kind="invoice.payment_failed", validated_message={"data": {"object": {"id": "lock"}}})
+
+        Invoice.handle_event(fake_event)
+
+        invoice_retrieve_mock.assert_called_once_with("lock")
+        sync_invoice_mock.assert_called_once_with("key", send_receipt=True)
