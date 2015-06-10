@@ -14,7 +14,7 @@ class MockForm(object):
     cleaned_data = {}
 
 
-class TestPlan(TestCase):
+class TestPlanAdmin(TestCase):
 
     def setUp(self):
         self.plan = Plan.objects.create(
@@ -68,3 +68,20 @@ class TestPlan(TestCase):
                                    form=MockForm(), change=True)
 
         Plan.objects.get(name=self.plan.name)
+
+
+class PlanTest(TestCase):
+
+    def setUp(self):
+        self.test_name = "test_name"
+        self.test_stripe_id = "plan_xxxxxxxxxxxx"
+
+        self.plan = Plan(name=self.test_name, stripe_id=self.test_stripe_id)
+
+    def test_str(self):
+        self.assertEqual(self.test_name, str(self.plan))
+
+    @patch("stripe.Plan.retrieve", return_value="soup")
+    def test_stripe_plan(self, plan_retrieve_mock):
+        self.assertEqual("soup", self.plan.stripe_plan)
+        plan_retrieve_mock.assert_called_once_with(self.test_stripe_id)

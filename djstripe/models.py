@@ -964,5 +964,4 @@ class Plan(StripeObject):
     @property
     def stripe_plan(self):
         """Return the plan data from Stripe."""
-        # TODO - needs test
         return stripe.Plan.retrieve(self.stripe_id)
