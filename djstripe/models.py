@@ -643,8 +643,6 @@ class CurrentSubscription(TimeStampedModel):
 
 
 class Invoice(StripeObject):
-    # TODO - needs tests
-
     customer = models.ForeignKey(Customer, related_name="invoices")
     attempted = models.NullBooleanField()
     attempts = models.PositiveIntegerField(null=True)
