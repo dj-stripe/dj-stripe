@@ -768,8 +768,9 @@ class Invoice(StripeObject):
 
 
 class InvoiceItem(TimeStampedModel):
-    """ Not inherited from StripeObject because there can be multiple invoice
-        items for a single stripe_id.
+    """
+    Not inherited from StripeObject because there can be multiple invoice
+    items for a single stripe_id.
     """
 
     stripe_id = models.CharField(max_length=50)
@@ -785,7 +786,6 @@ class InvoiceItem(TimeStampedModel):
     quantity = models.IntegerField(null=True)
 
     def plan_display(self):
-        # TODO - needs test
         return djstripe_settings.PAYMENTS_PLANS[self.plan]["name"]
 
 
