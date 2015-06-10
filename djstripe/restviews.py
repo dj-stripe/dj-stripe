@@ -11,13 +11,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from djstripe.settings import (
+
+# Project import
+from .settings import (
     subscriber_request_callback,
     CANCELLATION_AT_PERIOD_END,
 )
-from djstripe.models import Customer
-
-# Project import
+from .models import Customer
 from .serializers import (
     SubscriptionSerializer,
     CreateSubscriptionSerializer,
@@ -58,7 +58,9 @@ class SubscriptionRestView(APIView):
                     serializer.data,
                     status=status.HTTP_201_CREATED
                 )
-            except InvalidRequestError:
+            except:
+                # TODO
+                # Better error messages
                 return Response(
                     "Something went wrong processing the payment.",
                     status=status.HTTP_400_BAD_REQUEST
