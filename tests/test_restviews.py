@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 from decimal import Decimal
 
-from django.test import TestCase
 from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -11,10 +10,7 @@ from django.core.urlresolvers import reverse
 from mock import patch, PropertyMock
 from rest_framework import status
 from rest_framework.test import APITestCase
-from djstripe.serializers import (
-    SubscriptionSerializer,
-    CreateSubscriptionSerializer,
-)
+
 from djstripe.models import (
     CurrentSubscription,
     Customer,
@@ -37,8 +33,6 @@ class RestSubscriptionTest(APITestCase):
         )
 
         self.assertTrue(self.client.login(username="testuser", password="123"))
-
-
 
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     @patch("djstripe.models.Customer.update_card", autospec=True)
@@ -79,7 +73,6 @@ class RestSubscriptionTest(APITestCase):
         self.assertEqual(response.data["plan"], "test")
         self.assertEqual(response.data['status'], 'active')
         self.assertEqual(response.data['cancel_at_period_end'], False)
-
 
     @patch("djstripe.models.Customer.cancel_subscription", return_value=CurrentSubscription(status=CurrentSubscription.STATUS_ACTIVE))
     @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", amount=Decimal(25.00), status="active"))
