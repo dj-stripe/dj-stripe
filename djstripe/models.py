@@ -790,7 +790,6 @@ class InvoiceItem(TimeStampedModel):
 
 
 class Charge(StripeObject):
-
     customer = models.ForeignKey(Customer, related_name="charges")
     invoice = models.ForeignKey(Invoice, null=True, related_name="charges")
     card_last_4 = models.CharField(max_length=4, blank=True)
@@ -837,7 +836,6 @@ class Charge(StripeObject):
         obj, _ = customer.charges.get_or_create(stripe_id=data["id"])
         invoice_id = data.get("invoice", None)
         if obj.customer.invoices.filter(stripe_id=invoice_id).exists():
-            # TODO - needs test
             obj.invoice = obj.customer.invoices.get(stripe_id=invoice_id)
         obj.card_last_4 = data["card"]["last4"]
         obj.card_kind = data["card"]["type"]
@@ -849,7 +847,6 @@ class Charge(StripeObject):
         obj.disputed = data["dispute"] is not None
         obj.charge_created = convert_tstamp(data, "created")
         if data.get("description"):
-            # TODO - needs test
             obj.description = data["description"]
         if data.get("amount_refunded"):
             obj.amount_refunded = (data["amount_refunded"] / decimal.Decimal("100"))
