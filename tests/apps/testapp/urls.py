@@ -16,6 +16,6 @@ urlpatterns = [
     url(r"^djstripe/", include('djstripe.urls', namespace="djstripe")),
     url(
         r"^rest_djstripe/",
-        include('djstripe.rest_urls', namespace="rest_djstripe")
+        include('djstripe.contrib.rest_framework.urls', namespace="rest_djstripe")
     ),
 ]

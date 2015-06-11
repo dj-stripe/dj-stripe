@@ -11,10 +11,7 @@ from mock import patch, PropertyMock
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from djstripe.models import (
-    CurrentSubscription,
-    Customer,
-)
+from djstripe.models import CurrentSubscription, Customer
 from djstripe import settings as djstripe_settings
 
 if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:

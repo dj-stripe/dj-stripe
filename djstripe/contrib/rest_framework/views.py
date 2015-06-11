@@ -13,15 +13,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 # Project import
-from .settings import (
-    subscriber_request_callback,
-    CANCELLATION_AT_PERIOD_END,
-)
-from .models import Customer
-from .serializers import (
-    SubscriptionSerializer,
-    CreateSubscriptionSerializer,
-)
+from ...settings import subscriber_request_callback, CANCELLATION_AT_PERIOD_END
+from ...models import Customer
+from .serializers import SubscriptionSerializer, CreateSubscriptionSerializer
 
 
 class SubscriptionRestView(APIView):

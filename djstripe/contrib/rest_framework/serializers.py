@@ -8,9 +8,7 @@ from __future__ import unicode_literals
 # from django.utils.translation import ugettext_lazy as _
 
 # Contrib import
-from rest_framework.serializers import (
-    ModelSerializer,
-)
+from rest_framework.serializers import ModelSerializer
 from djstripe.models import CurrentSubscription
 from rest_framework import serializers
 
