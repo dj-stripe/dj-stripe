@@ -20,7 +20,9 @@ if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
 
 
 class RestSubscriptionTest(APITestCase):
-
+    """
+    Test the REST api for subscriptions.
+    """
     def setUp(self):
         self.url = reverse("rest_djstripe:subscription")
         self.user = get_user_model().objects.create_user(
@@ -46,6 +48,19 @@ class RestSubscriptionTest(APITestCase):
         subscribe_mock.assert_called_once_with(self.user.customer, "test0")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data, data)
+
+    @patch("djstripe.models.Customer.subscribe", autospec=True)
+    @patch("djstripe.models.Customer.update_card", autospec=True)
+    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
+    def test_create_subscription_exception(self, stripe_customer_mock, update_card_mock, subscribe_mock):
+        e = Exception
+        subscribe_mock.side_effect = e
+        data = {
+            "plan": "test0",
+            "stripe_token": "cake",
+        }
+        response = self.client.post(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get_no_content_for_subscription(self):
         response = self.client.get(self.url)
@@ -98,3 +113,34 @@ class RestSubscriptionTest(APITestCase):
             at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END
         )
         self.assertTrue(self.user.is_authenticated())
+
+    def test_cancel_subscription_exception(self):
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_subscription_incorrect_data(self):
+        self.assertEqual(0, Customer.objects.count())
+        data = {
+            "foo": "bar",
+        }
+        response = self.client.post(self.url, data)
+        self.assertEqual(0, Customer.objects.count())
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class RestSubscriptionNotLoggedInTest(APITestCase):
+    """
+    Test the exceptions thrown by the subscription rest views.
+    """
+    def setUp(self):
+        self.url = reverse("rest_djstripe:subscription")
+
+    def test_create_subscription_not_logged_in(self):
+        self.assertEqual(0, Customer.objects.count())
+        data = {
+            "plan": "test0",
+            "stripe_token": "cake",
+        }
+        response = self.client.post(self.url, data)
+        self.assertEqual(0, Customer.objects.count())
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
