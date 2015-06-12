@@ -1,18 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-
-# Python import
-
-# Django import
-# from django.utils.translation import ugettext_lazy as _
-
-# Contrib import
 from rest_framework.serializers import ModelSerializer
 from djstripe.models import CurrentSubscription
 from rest_framework import serializers
-
-# Project import
 
 
 class SubscriptionSerializer(ModelSerializer):

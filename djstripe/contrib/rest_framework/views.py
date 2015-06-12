@@ -1,18 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-
-# Python import
-
-# Django import
-
-# Contrib import
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
-# Project import
 from ...settings import subscriber_request_callback, CANCELLATION_AT_PERIOD_END
 from ...models import Customer
 from .serializers import SubscriptionSerializer, CreateSubscriptionSerializer
@@ -29,8 +22,11 @@ class SubscriptionRestView(APIView):
         """
         Return the users current subscription
         """
+
         try:
-            customer = self.request.user.customer
+            customer = Customer.get_or_create(
+                subscriber=subscriber_request_callback(self.request)
+            )
             subscription = customer.current_subscription
 
             serializer = SubscriptionSerializer(subscription)
@@ -40,7 +36,12 @@ class SubscriptionRestView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     def post(self, request, format=None):
+        """
+        Create a new current subscription for the user.
+        """
+
         serializer = CreateSubscriptionSerializer(data=request.data)
+
         if serializer.is_valid():
             try:
                 customer, created = Customer.get_or_create(
@@ -52,6 +53,7 @@ class SubscriptionRestView(APIView):
                     serializer.data,
                     status=status.HTTP_201_CREATED
                 )
+
             except:
                 # TODO
                 # Better error messages
@@ -59,15 +61,14 @@ class SubscriptionRestView(APIView):
                     "Something went wrong processing the payment.",
                     status=status.HTTP_400_BAD_REQUEST
                 )
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, format=None):
         """
         Return the users current subscription
         """
+
         try:
             customer, created = Customer.get_or_create(
                 subscriber=subscriber_request_callback(self.request)
