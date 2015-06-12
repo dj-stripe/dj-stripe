@@ -127,14 +127,14 @@ On the subscriber's customer object, use the charge method to generate a Stripe 
 
 Source code for the Customer.charge method is at https://github.com/pydanny/dj-stripe/blob/master/djstripe/models.py#L573-L596
 
-REST api
+REST API
 --------
 
-The subscriptions can be accessed through a REST api. Make sure you have
+The subscriptions can be accessed through a REST API. Make sure you have
 Django Rest Framework installed
 (https://github.com/tomchristie/django-rest-framework).
 
-The REST api endpoints require an authenticated user. GET will provide the
+The REST API endpoints require an authenticated user. GET will provide the
 current subscription of the user. POST will create a new current subscription.
 DELETE will cancel the current subscription, based on the settings.
 
