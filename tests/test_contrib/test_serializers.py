@@ -1,3 +1,11 @@
+"""
+.. module:: dj-stripe.tests.test_contrib.test_serializers
+    :synopsis: dj-stripe Serializer Tests.
+
+.. moduleauthor:: Philippe Luickx (@philippeluickx)
+
+"""
+
 from __future__ import unicode_literals
 
 from decimal import Decimal

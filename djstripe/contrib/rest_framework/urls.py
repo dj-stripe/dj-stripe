@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 """
+.. module:: dj-stripe.contrib.rest_framework.urls
+    :synopsis: dj-stripe url REST routing for Subscription.
+
+.. moduleauthor:: Philippe Luickx (@philippeluickx)
+
 Wire this into the root URLConf this way::
 
     url(

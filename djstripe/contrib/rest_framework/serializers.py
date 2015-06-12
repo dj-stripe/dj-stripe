@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+"""
+.. module:: dj-stripe.contrib.rest_framework.serializers
+    :synopsis: dj-stripe Serializer for Subscription.
+
+.. moduleauthor:: Philippe Luickx (@philippeluickx)
+
+"""
+
 from __future__ import unicode_literals
 
 from rest_framework.serializers import ModelSerializer
