@@ -522,21 +522,21 @@ class Customer(StripeObject):
         for the key trial_period_days.
         """
 
-        plan_object = Plan.objects.get(stripe_id=stripe_plan_id)
+        plan_instance = Plan.objects.get(stripe_id=stripe_plan_id)
 
-        if plan_object.trial_period_days:
-            trial_days = plan_object.trial_period_days
+        if plan_instance.trial_period_days:
+            trial_days = plan_instance.trial_period_days
 
         if trial_days:
             resp = cu.update_subscription(
-                plan=plan_object.stripe_id,
+                plan=plan_instance.stripe_id,
                 trial_end=timezone.now() + datetime.timedelta(days=trial_days),
                 prorate=prorate,
                 quantity=quantity
             )
         else:
             resp = cu.update_subscription(
-                plan=plan_object.stripe_id,
+                plan=plan_instance.stripe_id,
                 prorate=prorate,
                 quantity=quantity
             )
@@ -621,7 +621,7 @@ class CurrentSubscription(TimeStampedModel):
         null=True
     )
     plan = models.ForeignKey(
-        'CurrentSubscription',
+        'Plan',
         related_name='current_subscription'
     )
     quantity = models.IntegerField()
@@ -642,8 +642,7 @@ class CurrentSubscription(TimeStampedModel):
         """
         Returns current subscription plan name
         """
-        plan_object = Plan.objects.get(stripe_id=self.plan, amount=self.amount)
-        return plan_object.name
+        return self.plan.name
 
     def status_display(self):
         return self.status.replace("_", " ").title()
@@ -822,8 +821,8 @@ class InvoiceItem(TimeStampedModel):
         """
         Returns current subscription plan name
         """
-        plan_object = Plan.objects.get(stripe_id=self.plan, amount=self.amount)
-        return plan_object.name
+        plan_instance = Plan.objects.get(stripe_id=self.plan, amount=self.amount)
+        return plan_instance.name
 
 
 class Charge(StripeObject):
