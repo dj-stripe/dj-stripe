@@ -445,7 +445,7 @@ class Customer(StripeObject):
         if sub:
             try:
                 sub_obj = self.current_subscription
-                sub_obj.plan = djstripe_settings.sub.plan.id
+                sub_obj.plan = sub.plan
                 sub_obj.current_period_start = convert_tstamp(sub.current_period_start)
                 sub_obj.current_period_end = convert_tstamp(sub.current_period_end)
                 sub_obj.amount = (sub.plan.amount / decimal.Decimal("100"))
@@ -458,7 +458,7 @@ class Customer(StripeObject):
             except CurrentSubscription.DoesNotExist:
                 sub_obj = CurrentSubscription.objects.create(
                     customer=self,
-                    plan=sub.plan.id,
+                    plan=sub.plan,
                     current_period_start=convert_tstamp(sub.current_period_start),
                     current_period_end=convert_tstamp(sub.current_period_end),
                     amount=(sub.plan.amount / decimal.Decimal("100")),
@@ -500,28 +500,28 @@ class Customer(StripeObject):
         for the key trial_period_days.
         """
 
-        plan_instance = Plan.objects.get(stripe_id=stripe_plan_id)
+        sub = cu.subscription
 
-        if plan_instance.trial_period_days:
-            trial_days = plan_instance.trial_period_days
+        if sub.plan.trial_period_days:
+            trial_days = sub.plan.trial_period_days
 
         if trial_days:
             resp = cu.update_subscription(
-                plan=plan_instance.stripe_id,
+                plan=sub.plan,
                 trial_end=timezone.now() + datetime.timedelta(days=trial_days),
                 prorate=prorate,
                 quantity=quantity
             )
         else:
             resp = cu.update_subscription(
-                plan=plan_instance.stripe_id,
+                plan=sub.plan,
                 prorate=prorate,
                 quantity=quantity
             )
         self.sync_current_subscription()
         if charge_immediately:
             self.send_invoice()
-        subscription_made.send(sender=self, plan=stripe_plan_id, stripe_response=resp)
+        subscription_made.send(sender=self, plan=sub.plan, stripe_response=resp)
 
     def charge(self, amount, currency="usd", description=None, send_receipt=True, **kwargs):
         """
@@ -598,7 +598,9 @@ class CurrentSubscription(TimeStampedModel):
     )
     plan = models.ForeignKey(
         'Plan',
-        related_name='current_subscription'
+        related_name='current_subscription',
+        blank=True,
+        null=True
     )
     quantity = models.IntegerField()
     start = models.DateTimeField()
