@@ -814,15 +814,19 @@ class InvoiceItem(TimeStampedModel):
     proration = models.BooleanField(default=False)
     line_type = models.CharField(max_length=50)
     description = models.CharField(max_length=200, blank=True)
-    plan = models.CharField(max_length=100, blank=True)
+    plan = models.ForeignKey(
+        'Plan',
+        related_name='invoice_item',
+        blank=True,
+        null=True
+    )
     quantity = models.IntegerField(null=True)
 
     def plan_display(self):
         """
         Returns current subscription plan name
         """
-        plan_instance = Plan.objects.get(stripe_id=self.plan, amount=self.amount)
-        return plan_instance.name
+        return self.plan.name
 
 
 class Charge(StripeObject):
