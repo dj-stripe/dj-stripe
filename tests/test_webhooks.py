@@ -8,8 +8,8 @@ from django.test.client import Client
 
 from mock import patch
 
-from . import TRANSFER_CREATED_TEST_DATA
-from djstripe.models import Event, Transfer
+from djstripe.models import Event, EventProcessingException, Transfer
+from tests.test_transfer import TRANSFER_CREATED_TEST_DATA
 
 
 class TestWebhook(TestCase):
@@ -70,6 +70,74 @@ class TestWebhook(TestCase):
         )
         self.assertEquals(resp.status_code, 200)
         self.assertTrue(Event.objects.filter(kind="transfer.created").exists())
+
+    @patch("stripe.Event.retrieve")
+    def test_webhook_with_transfer_event_duplicate(self, StripeEventMock):
+        data = {
+            "created": 1348360173,
+            "data": {
+                "object": {
+                    "amount": 455,
+                    "currency": "usd",
+                    "date": 1348876800,
+                    "description": None,
+                    "id": "ach_XXXXXXXXXXXX",
+                    "object": "transfer",
+                    "other_transfers": [],
+                    "status": "pending",
+                    "summary": {
+                        "adjustment_count": 0,
+                        "adjustment_fee_details": [],
+                        "adjustment_fees": 0,
+                        "adjustment_gross": 0,
+                        "charge_count": 1,
+                        "charge_fee_details": [{
+                            "amount": 45,
+                            "application": None,
+                            "currency": "usd",
+                            "description": None,
+                            "type": "stripe_fee"
+                        }],
+                        "charge_fees": 45,
+                        "charge_gross": 500,
+                        "collected_fee_count": 0,
+                        "collected_fee_gross": 0,
+                        "currency": "usd",
+                        "net": 455,
+                        "refund_count": 0,
+                        "refund_fees": 0,
+                        "refund_gross": 0,
+                        "validation_count": 0,
+                        "validation_fees": 0
+                    }
+                }
+            },
+            "id": "evt_XXXXXXXXXXXXx",
+            "livemode": True,
+            "object": "event",
+            "pending_webhooks": 1,
+            "type": "transfer.created"
+        }
+        StripeEventMock.return_value.to_dict.return_value = data
+        msg = json.dumps(data)
+        resp = Client().post(
+            reverse("djstripe:webhook"),
+            msg,
+            content_type="application/json"
+        )
+        self.assertEquals(resp.status_code, 200)
+        self.assertTrue(Event.objects.filter(kind="transfer.created").exists())
+        self.assertEqual(1, Event.objects.filter(kind="transfer.created").count())
+
+        # Duplication
+        resp = Client().post(
+            reverse("djstripe:webhook"),
+            msg,
+            content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(1, Event.objects.filter(kind="transfer.created").count())
+        self.assertEqual(1, EventProcessingException.objects.count())
 
 
 class TestTransferWebhooks(TestCase):

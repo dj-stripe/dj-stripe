@@ -46,6 +46,17 @@ Example:
         }
     }
 
+.. note:: Stripe Plan creation
+
+    Not all properties listed in the plans above are used by Stripe - i.e 'description' and 'image',
+    which are used to display the plans description and related image within specific templates.
+
+    Although any arbitrary property you require can be added to each plan listed in DJ_STRIPE_PLANS,
+    only specific properties are used by Stripe. The full list of required and optional arguments can
+    be found here_.
+
+.. _here: https://stripe.com/docs/api/python#create_plan
+
 DJSTRIPE_PRORATION_POLICY (=False)
 ====================================
 

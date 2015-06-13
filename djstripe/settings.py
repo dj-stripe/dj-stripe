@@ -3,12 +3,11 @@ from __future__ import unicode_literals
 
 import sys
 
+from django.apps import apps as django_apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 PY3 = sys.version > "3"
-
-USE_TZ = settings.USE_TZ
 
 subscriber_request_callback = getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK", (lambda request: request.user))
 
@@ -48,28 +47,13 @@ def get_subscriber_model():
 
     subscriber_model = None
 
-    # Attempt a Django 1.7 app lookup first
+    # Attempt a Django 1.7 app lookup
     try:
-        from django.apps import apps as django_apps
-    except ImportError:
-        # Attempt to pull the model Django 1.5/1.6 style
-        try:
-            app_label, model_name = SUBSCRIBER_MODEL.split('.')
-        except ValueError:
-            raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL must be of the form 'app_label.model_name'.")
-
-        from django.db.models import get_model
-        subscriber_model = get_model(app_label, model_name)
-        if subscriber_model is None:
-            raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL refers to model '{model}' that has not been installed.".format(model=SUBSCRIBER_MODEL))
-    else:
-        # Continue attempting to pull the model Django 1.7 style
-        try:
-            subscriber_model = django_apps.get_model(SUBSCRIBER_MODEL)
-        except ValueError:
-            raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL must be of the form 'app_label.model_name'.")
-        except LookupError:
-            raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL refers to model '{model}' that has not been installed.".format(model=SUBSCRIBER_MODEL))
+        subscriber_model = django_apps.get_model(SUBSCRIBER_MODEL)
+    except ValueError:
+        raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL must be of the form 'app_label.model_name'.")
+    except LookupError:
+        raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL refers to model '{model}' that has not been installed.".format(model=SUBSCRIBER_MODEL))
 
     _check_subscriber_for_email_address(subscriber_model, "DJSTRIPE_SUBSCRIBER_MODEL must have an email attribute.")
 
@@ -81,33 +65,6 @@ def get_subscriber_model():
         raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be implemented if a DJSTRIPE_SUBSCRIBER_MODEL is defined.")
 
     return subscriber_model
-
-
-PASSWORD_INPUT_RENDER_VALUE = getattr(settings, 'DJSTRIPE_PASSWORD_INPUT_RENDER_VALUE', False)
-PASSWORD_MIN_LENGTH = getattr(settings, 'DJSTRIPE_PASSWORD_MIN_LENGTH', 6)
-
-PRORATION_POLICY = getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False)
-PRORATION_POLICY_FOR_UPGRADES = getattr(settings, 'DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES', False)
-# TODO - need to find a better way to do this
-CANCELLATION_AT_PERIOD_END = not PRORATION_POLICY
-
-SEND_INVOICE_RECEIPT_EMAILS = getattr(settings, "DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS", True)
-CURRENCIES = getattr(settings, "DJSTRIPE_CURRENCIES", (
-    ('usd', 'U.S. Dollars',),
-    ('gbp', 'Pounds (GBP)',),
-    ('eur', 'Euros',))
-)
-
-DEFAULT_PLAN = getattr(settings, "DJSTRIPE_DEFAULT_PLAN", None)
-
-# Try to find the new settings variable first. If that fails, revert to the
-# old variable.
-trial_period_for_subscriber_callback = getattr(settings,
-    "DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK",
-    getattr(settings, "DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK", None)
-)
-
-DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
 
 
 def get_plan_choices():
