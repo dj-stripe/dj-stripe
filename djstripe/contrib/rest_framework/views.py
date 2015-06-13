@@ -32,7 +32,7 @@ class SubscriptionRestView(APIView):
         """
 
         try:
-            customer = Customer.get_or_create(
+            customer, created = Customer.get_or_create(
                 subscriber=subscriber_request_callback(self.request)
             )
             subscription = customer.current_subscription
