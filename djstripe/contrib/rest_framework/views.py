@@ -28,7 +28,8 @@ class SubscriptionRestView(APIView):
 
     def get(self, request, format=None):
         """
-        Return the users current subscription
+        Return the users current subscription.
+        Returns with status code 200.
         """
 
         try:
@@ -46,6 +47,7 @@ class SubscriptionRestView(APIView):
     def post(self, request, format=None):
         """
         Create a new current subscription for the user.
+        Returns with status code 201.
         """
 
         serializer = CreateSubscriptionSerializer(data=request.data)
@@ -74,7 +76,8 @@ class SubscriptionRestView(APIView):
 
     def delete(self, request, format=None):
         """
-        Return the users current subscription
+        Marks the users current subscription as cancelled.
+        Returns with status code 204.
         """
 
         try:
