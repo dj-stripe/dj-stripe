@@ -39,7 +39,7 @@ class TestCustomer(TestCase):
         )
 
     def test_tostring(self):
-        self.assertEquals("patrick", str(self.customer))
+        self.assertEquals("<patrick, stripe_id=cus_xxxxxxxxxxxxxxx>", str(self.customer))
 
     @patch("stripe.Customer.retrieve")
     def test_customer_purge_leaves_customer_record(self, customer_retrieve_fake):
