@@ -141,3 +141,6 @@ class TransferTest(TestCase):
         transfer_instance = Transfer.objects.get(stripe_id="salmon")
         transfer_receive_mock.assert_called_once_with(transfer_instance.stripe_id)
         self.assertEqual(transfer_instance.status, "fish")
+
+        # Test to string
+        self.assertEquals("<amount=4.55, status=fish, stripe_id=salmon>", str(transfer_instance))

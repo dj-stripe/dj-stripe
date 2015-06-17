@@ -116,6 +116,10 @@ class ChargeTest(TestCase):
                                               date=timezone.now(),
                                               charge="ch_xxxxxxxxxxxxxxx")
 
+    def test_str(self):
+        charge = Charge(amount=50, paid=True, stripe_id='charge_xxxxxxxxxxxxxx')
+        self.assertEqual("<amount=50, paid=True, stripe_id=charge_xxxxxxxxxxxxxx>", str(charge))
+
     def test_sync_from_stripe_data(self):
         charge = Charge.sync_from_stripe_data(FAKE_CHARGE)
 

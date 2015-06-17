@@ -68,7 +68,7 @@ class EventProcessingException(TimeStampedModel):
         )
 
     def __str__(self):
-        return "<%s, pk=%s, Event=%s>" % (self.message, self.pk, self.event)
+        return "<{message}, pk={pk}, Event={event}>".format(message=self.message, pk=self.pk, event=self.event)
 
 
 @python_2_unicode_compatible
@@ -87,7 +87,7 @@ class Event(StripeObject):
         return self.validated_message
 
     def __str__(self):
-        return "%s - %s" % (self.kind, self.stripe_id)
+        return "<{kind}, stripe_id={stripe_id}>".format(kind=self.kind, stripe_id=self.stripe_id)
 
     def link_customer(self):
         stripe_customer_id = None
@@ -226,6 +226,9 @@ class Transfer(StripeObject):
 
     objects = TransferManager()
 
+    def __str__(self):
+        return "<amount={amount}, status={status}, stripe_id={stripe_id}>".format(amount=self.amount, status=self.status, stripe_id=self.stripe_id)
+
     def update_status(self):
         self.status = stripe.Transfer.retrieve(self.stripe_id).status
         self.save()
@@ -304,7 +307,7 @@ class Customer(StripeObject):
     objects = CustomerManager()
 
     def __str__(self):
-        return smart_text(self.subscriber)
+        return "<{subscriber}, stripe_id={stripe_id}>".format(subscriber=smart_text(self.subscriber), stripe_id=self.stripe_id)
 
     @property
     def stripe_customer(self):
@@ -658,6 +661,9 @@ class Invoice(StripeObject):
     class Meta:
         ordering = ["-date"]
 
+    def __str__(self):
+        return "<total={total}, paid={paid}, stripe_id={stripe_id}>".format(total=self.total, paid=smart_text(self.paid), stripe_id=self.stripe_id)
+
     def retry(self):
         if not self.paid and not self.closed:
             inv = stripe.Invoice.retrieve(self.stripe_id)
@@ -785,6 +791,9 @@ class InvoiceItem(TimeStampedModel):
     plan = models.CharField(max_length=100, null=True, blank=True)
     quantity = models.IntegerField(null=True)
 
+    def __str__(self):
+        return "<amount={amount}, plan={plan}, stripe_id={stripe_id}>".format(amount=self.amount, plan=smart_text(self.plan), stripe_id=self.stripe_id)
+
     def plan_display(self):
         return djstripe_settings.PAYMENTS_PLANS[self.plan]["name"]
 
@@ -806,6 +815,9 @@ class Charge(StripeObject):
     charge_created = models.DateTimeField(null=True, blank=True)
 
     objects = ChargeManager()
+
+    def __str__(self):
+        return "<amount={amount}, paid={paid}, stripe_id={stripe_id}>".format(amount=self.amount, paid=smart_text(self.paid), stripe_id=self.stripe_id)
 
     def calculate_refund_amount(self, amount=None):
         eligible_to_refund = self.amount - (self.amount_refunded or 0)
@@ -907,7 +919,7 @@ class Plan(StripeObject):
     trial_period_days = models.IntegerField(null=True)
 
     def __str__(self):
-        return self.name
+        return "<{name}, stripe_id={stripe_id}>".format(name=smart_text(self.name), stripe_id=self.stripe_id)
 
     @classmethod
     def create(cls, metadata={}, **kwargs):
