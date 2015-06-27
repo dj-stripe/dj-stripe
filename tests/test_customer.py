@@ -329,14 +329,23 @@ class TestCustomer(TestCase):
 
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
     def test_update_card(self, customer_stripe_customer_mock):
-        customer_stripe_customer_mock.return_value = PropertyMock(active_card=PropertyMock(fingerprint="test_fingerprint",
-                                                                                           last4="1234", type="test_type"))
+        customer_stripe_customer_mock.return_value = PropertyMock(
+            active_card=PropertyMock(
+                fingerprint="test_fingerprint",
+                last4="1234",
+                type="test_type",
+                exp_month=12,
+                exp_year=2020
+            )
+        )
 
         self.customer.update_card("test")
 
         self.assertEqual("test_fingerprint", self.customer.card_fingerprint)
         self.assertEqual("1234", self.customer.card_last_4)
         self.assertEqual("test_type", self.customer.card_kind)
+        self.assertEqual(12, self.customer.card_exp_month)
+        self.assertEqual(2020, self.customer.card_exp_year)
 
     @patch("djstripe.models.Customer.invoices", new_callable=PropertyMock,
            return_value=PropertyMock(name="filter", filter=MagicMock(return_value=[MagicMock(name="inv", retry=MagicMock(name="retry", return_value="test"))])))
@@ -385,12 +394,22 @@ class TestCustomer(TestCase):
 
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
     def test_sync_active_card(self, stripe_customer_mock):
-        stripe_customer_mock.return_value = PropertyMock(active_card=PropertyMock(fingerprint="cherry",
-                                                                                  last4="4429", type="apple"))
+        stripe_customer_mock.return_value = PropertyMock(
+            active_card=PropertyMock(
+                fingerprint="cherry",
+                last4="4429",
+                type="apple",
+                exp_month=12,
+                exp_year=2020,
+            )
+        )
+
         self.customer.sync()
         self.assertEqual("cherry", self.customer.card_fingerprint)
         self.assertEqual("4429", self.customer.card_last_4)
         self.assertEqual("apple", self.customer.card_kind)
+        self.assertEqual(12, self.customer.card_exp_month)
+        self.assertEqual(2020, self.customer.card_exp_year)
 
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock,
            return_value=PropertyMock(active_card=None))

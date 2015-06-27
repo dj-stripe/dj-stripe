@@ -302,6 +302,8 @@ class Customer(StripeObject):
     card_fingerprint = models.CharField(max_length=200, blank=True)
     card_last_4 = models.CharField(max_length=4, blank=True)
     card_kind = models.CharField(max_length=50, blank=True)
+    card_exp_month = models.PositiveIntegerField(blank=True, null=True)
+    card_exp_year = models.PositiveIntegerField(blank=True, null=True)
     date_purged = models.DateTimeField(null=True, editable=False)
 
     objects = CustomerManager()
@@ -328,6 +330,8 @@ class Customer(StripeObject):
         self.card_fingerprint = ""
         self.card_last_4 = ""
         self.card_kind = ""
+        self.card_exp_month = None
+        self.card_exp_year = None
         self.date_purged = timezone.now()
         self.save()
 
@@ -404,6 +408,8 @@ class Customer(StripeObject):
         self.card_fingerprint = cu.active_card.fingerprint
         self.card_last_4 = cu.active_card.last4
         self.card_kind = cu.active_card.type
+        self.card_exp_month = cu.active_card.exp_month
+        self.card_exp_year = cu.active_card.exp_year
         self.save()
         card_changed.send(sender=self, stripe_response=cu)
 
@@ -430,6 +436,8 @@ class Customer(StripeObject):
             self.card_fingerprint = cu.active_card.fingerprint
             self.card_last_4 = cu.active_card.last4
             self.card_kind = cu.active_card.type
+            self.card_exp_month = cu.active_card.exp_month
+            self.card_exp_year = cu.active_card.exp_year
             self.save()
 
     def sync_invoices(self, cu=None, **kwargs):
