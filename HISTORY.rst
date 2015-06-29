@@ -14,6 +14,7 @@ History
 * sync_plans now takes an optional api_key
 * 100% test coverage
 * Stripe ID is now returned as part of each model's str method
+* Customer model now stores card expiration month and year (Thanks @jpadilla)
 
 0.5.0 (2015-05-25)
 ---------------------
