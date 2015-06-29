@@ -653,10 +653,7 @@ class CurrentSubscription(TimeStampedModel):
         else:
             period_end = self.current_period_end
 
-        if period_end:
-            period_end += delta
-        else:
-            period_end = timezone.now() + delta
+        period_end += delta
 
         self.customer.stripe_customer.update_subscription(
             prorate=False,
