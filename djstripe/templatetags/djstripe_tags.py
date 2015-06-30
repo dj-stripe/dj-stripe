@@ -28,7 +28,7 @@ division.is_safe = False
 def djstripe_plan_level(name):
     """
     Add support to levels over plans, then you can have different kind of plans with the level same access.
-    
+
     Use: {{ <plan_name>|djstripe_plan_level }}
 
     Custom settings setup need it, please see the documentation for details.
