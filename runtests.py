@@ -98,6 +98,29 @@ settings.configure(
             "interval": "month"
         }
     },
+    DJSTRIPE_HIERARCHY_PLANS = {
+        "bronze": {
+            "level": 1,
+            "plans": [
+                "test0",
+                "test",
+            ]
+        },
+        "silver": {
+            "level": 2,
+            "plans": [
+                "test2",
+                "test_deletion",
+            ]
+        },
+        "gold": {
+            "level": 3,
+            "plans": [
+                "test_trial",
+                "unidentified_test_plan",
+            ]
+        },
+    },
     DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS=(
         "(admin)",
         "test_url_name",
