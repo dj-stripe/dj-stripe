@@ -2,7 +2,7 @@
 from __future__ import division
 
 from django.template import Library
-from django.conf import settings
+from ..settings import HIERARCHY_PLANS
 
 register = Library()
 
@@ -29,14 +29,12 @@ def djstripe_plan_level(name):
     """
     Add support to levels over plans, then you can have different kind of plans with the level same access.
     
-    Use: {% <plan_name>|djstripe_plan_level %}
+    Use: {{ <plan_name>|djstripe_plan_level }}
 
     Custom settings setup need it, please see the documentation for details.
     """
     level = -1
-    hierarchy_plans = settings.DJSTRIPE_HIERARCHY_PLANS
-
-    for config_level in hierarchy_plans.values():
+    for config_level in HIERARCHY_PLANS.values():
         if name in config_level["plans"]:
             level = config_level["level"]
 
