@@ -62,7 +62,7 @@ DJSTRIPE_HIERARCHY_PLANS (={})
 
 Payment plans levels. 
 
-Allow the user to set levels of access to the plans.
+Allows you to set levels of access to the plans.
 
 Example:
 
