@@ -37,3 +37,4 @@ Contributors
 * Areski Belaid (@areski)
 * José Padilla (@jpadilla)
 * Ben Murden (@TigerDX)
+* Philippe Luickx (@philippeluickx)
