@@ -183,6 +183,7 @@ class SyncHistoryViewTest(TestCase):
 
 
 class ConfirmFormViewTest(TestCase):
+    fake_stripe_customer_id = "cus_xxx1234567890"
 
     def setUp(self):
         self.plan = "test0"
@@ -191,6 +192,24 @@ class ConfirmFormViewTest(TestCase):
                                                          email="test@example.com",
                                                          password="123")
         self.assertTrue(self.client.login(username="testuser", password="123"))       
+
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="something-else"))
+    @patch("stripe.Customer.create", return_value=PropertyMock(id=fake_stripe_customer_id))
+    def test_get_form_valid(self, djstripe_customer_customer_subscription_mock, stripe_create_customer_mock):
+        response = self.client.get(self.url)
+        self.assertEqual(200, response.status_code)
+
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test0"))
+    @patch("stripe.Customer.create", return_value=PropertyMock(id=fake_stripe_customer_id))
+    def test_get_form_unknown(self, djstripe_customer_customer_subscription_mock, stripe_create_customer_mock):
+        response = self.client.get(reverse("djstripe:confirm", kwargs={'plan': 'does-not-exist'}))
+        self.assertRedirects(response, reverse("djstripe:subscribe"))
+
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test0"))
+    @patch("stripe.Customer.create", return_value=PropertyMock(id=fake_stripe_customer_id))
+    def test_get_form_invalid(self, djstripe_customer_customer_subscription_mock, stripe_create_customer_mock):
+        response = self.client.get(self.url)
+        self.assertRedirects(response, reverse("djstripe:subscribe"))
 
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     @patch("djstripe.models.Customer.update_card", autospec=True)
