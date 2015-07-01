@@ -34,7 +34,7 @@ def djstripe_plan_level(name):
     Note: Custom settings setup is needed, please see the documentation for details.
     """
     level = -1
-    for config_level in HIERARCHY_PLANS.values():
+    for config_level in DJSTRIPE_PLAN_HIERARCHY.values():
         if name in config_level["plans"]:
             level = config_level["level"]
 
