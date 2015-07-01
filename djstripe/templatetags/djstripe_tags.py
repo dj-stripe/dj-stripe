@@ -2,7 +2,7 @@
 from __future__ import division
 
 from django.template import Library
-from ..settings import HIERARCHY_PLANS
+from ..settings import DJSTRIPE_PLAN_HIERARCHY
 
 register = Library()
 
@@ -31,7 +31,7 @@ def djstripe_plan_level(name):
 
     Use: {{ <plan_name>|djstripe_plan_level }}
 
-    Custom settings setup need it, please see the documentation for details.
+    Note: Custom settings setup is needed, please see the documentation for details.
     """
     level = -1
     for config_level in HIERARCHY_PLANS.values():
