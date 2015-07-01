@@ -652,6 +652,27 @@ class CurrentSubscription(TimeStampedModel):
 
         return True
 
+    def extend(self, delta):
+        if delta.total_seconds() < 0:
+            raise ValueError("delta should be a positive timedelta.")
+
+        period_end = None
+
+        if self.trial_end is not None and \
+           self.trial_end > timezone.now():
+            period_end = self.trial_end
+        else:
+            period_end = self.current_period_end
+
+        period_end += delta
+
+        self.customer.stripe_customer.update_subscription(
+            prorate=False,
+            trial_end=period_end,
+        )
+
+        self.customer.sync_current_subscription()
+
 
 class Invoice(StripeObject):
     customer = models.ForeignKey(Customer, related_name="invoices")
