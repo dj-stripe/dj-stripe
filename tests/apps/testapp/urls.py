@@ -14,4 +14,8 @@ urlpatterns = [
         name="test_url_name"
     ),
     url(r"^djstripe/", include('djstripe.urls', namespace="djstripe")),
+    url(
+        r"^rest_djstripe/",
+        include('djstripe.contrib.rest_framework.urls', namespace="rest_djstripe")
+    ),
 ]
