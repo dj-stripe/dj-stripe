@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import decimal
-import json, sys
+import json
 
 from django.contrib.auth import logout as auth_logout
 from django.contrib import messages
@@ -142,7 +142,7 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
 
     def get(self, request, *args, **kwargs):
         plan_slug = self.kwargs['plan']
-        if not plan_slug in PAYMENT_PLANS:
+        if plan_slug not in PAYMENT_PLANS:
             return redirect("djstripe:subscribe")
 
         plan = PAYMENT_PLANS[plan_slug]
