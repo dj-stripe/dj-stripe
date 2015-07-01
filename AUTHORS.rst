@@ -35,3 +35,5 @@ Contributors
 * nanvel
 * jRobb (@jamesbrobb)
 * Areski Belaid (@areski)
+* José Padilla (@jpadilla)
+* Ben Murden (@TigerDX)
