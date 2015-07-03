@@ -14,7 +14,7 @@ subscriber_request_callback = getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL_REQUE
 
 INVOICE_FROM_EMAIL = getattr(settings, "DJSTRIPE_INVOICE_FROM_EMAIL", "billing@example.com")
 PAYMENTS_PLANS = getattr(settings, "DJSTRIPE_PLANS", {})
-DJSTRIPE_PLAN_HIERARCHY = getattr(settings, "DJSTRIPE_HIERARCHY_PLANS", {})
+PLAN_HIERARCHY = getattr(settings, "DJSTRIPE_PLAN_HIERARCHY", {})
 
 # Sort the PAYMENT_PLANS dictionary ascending by price.
 PAYMENT_PLANS = OrderedDict(sorted(PAYMENTS_PLANS.items(), key=lambda t: t[1]['price']))

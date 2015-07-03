@@ -57,7 +57,7 @@ Example:
 
 .. _here: https://stripe.com/docs/api/python#create_plan
 
-DJSTRIPE_HIERARCHY_PLANS (={})
+DJSTRIPE_PLAN_HIERARCHY (={})
 ===========================
 
 Payment plans levels. 

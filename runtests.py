@@ -98,7 +98,7 @@ settings.configure(
             "interval": "month"
         }
     },
-    DJSTRIPE_HIERARCHY_PLANS = {
+    DJSTRIPE_PLAN_HIERARCHY = {
         "bronze": {
             "level": 1,
             "plans": [

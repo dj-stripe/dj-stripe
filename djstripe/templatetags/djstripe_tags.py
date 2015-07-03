@@ -2,7 +2,7 @@
 from __future__ import division
 
 from django.template import Library
-from ..settings import DJSTRIPE_PLAN_HIERARCHY
+from .. import settings as djstripe_settings
 
 register = Library()
 
@@ -34,7 +34,7 @@ def djstripe_plan_level(name):
     Note: Custom settings setup is needed, please see the documentation for details.
     """
     level = -1
-    for config_level in DJSTRIPE_PLAN_HIERARCHY.values():
+    for config_level in djstripe_settings.PLAN_HIERARCHY.values():
         if name in config_level["plans"]:
             level = config_level["level"]
 
