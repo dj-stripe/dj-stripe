@@ -539,8 +539,9 @@ class TestCustomer(TestCase):
     @patch("djstripe.models.Customer.send_invoice")
     @patch("djstripe.models.Customer.sync_current_subscription")
     @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=fake_current_subscription)
+    @patch("djstripe.models.Customer.matching_stripe_subscription", return_value=None)
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock, return_value=PropertyMock())
-    def test_subscribe_not_charge_immediately(self, stripe_customer_mock, customer_subscription_mock, sync_subscription_mock, send_invoice_mock):
+    def test_subscribe_not_charge_immediately(self, stripe_customer_mock, matching_subscription_mock, customer_subscription_mock, sync_subscription_mock, send_invoice_mock):
         self.customer.subscribe(plan="test", charge_immediately=False)
         sync_subscription_mock.assert_called_once_with()
         self.assertFalse(send_invoice_mock.called)
