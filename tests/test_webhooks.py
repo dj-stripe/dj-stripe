@@ -8,8 +8,8 @@ from django.test.client import Client
 
 from mock import patch
 
-from . import TRANSFER_CREATED_TEST_DATA
 from djstripe.models import Event, EventProcessingException, Transfer
+from tests.test_transfer import TRANSFER_CREATED_TEST_DATA
 
 
 class TestWebhook(TestCase):

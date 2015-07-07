@@ -101,7 +101,17 @@ class TestSyncPlans(TestCase):
                                         statement_descriptor=None,
                                         metadata=None)
 
-        self.assertEqual(4, plan_create_mock.call_count)
+        plan_create_mock.assert_any_call(amount=7000,
+                                        interval="month",
+                                        name="Test Plan 4",
+                                        currency="usd",
+                                        id="test_id_4",
+                                        interval_count=None,
+                                        trial_period_days=7,
+                                        statement_descriptor=None,
+                                        metadata=None)
+
+        self.assertEqual(5, plan_create_mock.call_count)
 
     @patch("stripe.Plan.create")
     def test_plan_exists(self, plan_create_mock):

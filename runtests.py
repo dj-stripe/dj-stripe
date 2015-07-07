@@ -11,7 +11,7 @@ cov = coverage(config_file=True)
 cov.erase()
 cov.start()
 
-TESTS_THRESHOLD = 82.00
+TESTS_THRESHOLD = 100
 TESTS_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 settings.configure(
@@ -73,13 +73,22 @@ settings.configure(
             "currency": "usd",
             "interval": "month"
         },
-        "test3": {
+        "test_deletion": {
             "stripe_plan_id": "test_id_3",
             "name": "Test Plan 3",
             "description": "Test plan for deletion.",
             "price": 5000,  # $50.00
             "currency": "usd",
             "interval": "month"
+        },
+        "test_trial": {
+            "stripe_plan_id": "test_id_4",
+            "name": "Test Plan 4",
+            "description": "Test plan for trails.",
+            "price": 7000,  # $70.00
+            "currency": "usd",
+            "interval": "month",
+            "trial_period_days": 7
         },
         "unidentified_test_plan": {
             "name": "Unidentified Test Plan",
@@ -92,7 +101,7 @@ settings.configure(
     DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS=(
         "(admin)",
         "test_url_name",
-        "testapp_namespaced:test_url_namespaced"
+        "testapp_namespaced:test_url_namespaced",
     ),
 )
 

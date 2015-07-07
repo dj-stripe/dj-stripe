@@ -307,7 +307,7 @@ class ChangePlanViewTest(TestCase):
 
         self.assertTrue(self.client.login(username="testuser1", password="123"))
 
-        response = self.client.post(self.url, {"plan": "test3"})
+        response = self.client.post(self.url, {"plan": "test_deletion"})
         self.assertEqual(200, response.status_code)
         self.assertIn("form", response.context)
         self.assertIn("No such plan: test_id_3", response.context["form"].errors["__all__"])

@@ -12,6 +12,11 @@ History
 * InvoiceItems.plan can now be null (as it is with individual charges), resolving #140 (Thanks @awechsler and @MichelleGlauser for help troubleshooting)
 * Email templates are now packaged during distribution.
 * sync_plans now takes an optional api_key
+* 100% test coverage
+* Stripe ID is now returned as part of each model's str method
+* Customer model now stores card expiration month and year (Thanks @jpadilla)
+* Ability to extend subscriptions (Thanks @TigerDX)
+* Rest API endpoints for Subscriptions [contrib] (Thanks @philippeluickx)
 
 0.5.0 (2015-05-25)
 ---------------------

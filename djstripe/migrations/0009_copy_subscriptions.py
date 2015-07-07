@@ -71,7 +71,7 @@ def copy_subscriptions_backwards(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('djstripe', '0007_add_subscription'),
+        ('djstripe', '0008_add_subscription'),
     ]
 
     operations = [

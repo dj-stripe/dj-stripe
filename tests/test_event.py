@@ -1,21 +1,76 @@
-from django.test import TestCase
+"""
+.. module:: dj-stripe.tests.test_event
+   :synopsis: dj-stripe Event Model Tests.
 
-from mock import patch
+.. moduleauthor:: Daniel Greenfeld (@pydanny)
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
+
+"""
+
+from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.test import TestCase
+from django.utils import timezone
 
-from djstripe.models import Customer, Event
+from mock import patch, PropertyMock
+import stripe
+
+from djstripe.models import Customer, Event, Subscription
+from tests import convert_to_fake_stripe_object
 
 
-class TestEventMethods(TestCase):
+class EventTest(TestCase):
+    message = {
+        "created": 1363911708,
+        "data": {
+            "object": {
+                "account_balance": 0,
+                "active_card": None,
+                "created": 1363911708,
+                "delinquent": False,
+                "description": None,
+                "discount": None,
+                "email": "xxxxxxxxxx@yahoo.com",
+                "id": "cus_yyyyyyyyyyyyyyyyyyyy",
+                "customer": "cus_xxxxxxxxxxxxxxx",
+                "livemode": True,
+                "object": "customer",
+                "subscription": None
+            }
+        },
+        "id": "evt_xxxxxxxxxxxxx",
+        "livemode": True,
+        "object": "event",
+        "pending_webhooks": 1,
+        "type": "ping"
+    }
+
+    fake_current_subscription = Subscription(stripe_id="sub_yyyyyyyyyyyyyy",
+                                             plan="test",
+                                             quantity=1,
+                                             start=timezone.now(),
+                                             amount=Decimal(25.00))
 
     def setUp(self):
+        self.message["data"]["object"]["customer"] = "cus_xxxxxxxxxxxxxxx"  # Yes, this is intentional.
+
         self.user = get_user_model().objects.create_user(username="testuser",
                                                          email="testuser@gmail.com")
         self.customer = Customer.objects.create(
-            stripe_id="cus_xxxxxxxxxxxxxxx",
+            stripe_id=self.message["data"]["object"]["customer"],
             subscriber=self.user
         )
+
+    def test_tostring(self):
+        event = Event.objects.create(
+            stripe_id=self.message["id"],
+            kind="eventkind",
+            webhook_message=self.message,
+            validated_message=self.message,
+            valid=True
+        )
+        self.assertEquals("<eventkind, stripe_id=evt_xxxxxxxxxxxxx>", str(event))
 
     def test_link_customer_customer_created(self):
         msg = {
@@ -140,8 +195,122 @@ class TestEventMethods(TestCase):
         event.link_customer()
         self.assertEquals(event.customer, self.customer)
 
+    @patch('stripe.Event.retrieve', return_value=convert_to_fake_stripe_object({"data": message["data"], "zebra": True, "alpha": False}))
+    def test_validate_true(self, event_retrieve_mock):
+        event = Event.objects.create(
+            stripe_id=self.message["id"],
+            kind="ping",
+            webhook_message=self.message,
+            validated_message=self.message
+        )
+
+        self.assertEqual(None, event.valid)
+        event.validate()
+        event_retrieve_mock.assert_called_once_with(self.message["id"])
+        self.assertEqual(True, event.valid)
+
+    @patch('stripe.Event.retrieve', return_value=convert_to_fake_stripe_object({"data": {"object": {"flavor": "chocolate"}}, "zebra": True, "alpha": False}))
+    def test_validate_false(self, event_retrieve_mock):
+        event = Event.objects.create(
+            stripe_id=self.message["id"],
+            kind="ping",
+            webhook_message=self.message,
+            validated_message=self.message
+        )
+
+        self.assertEqual(None, event.valid)
+        event.validate()
+        event_retrieve_mock.assert_called_once_with(self.message["id"])
+        self.assertEqual(False, event.valid)
+
+    def test_process_exit_immediately(self):
+        event = Event.objects.create(
+            stripe_id=self.message["id"],
+            kind="ping",
+            webhook_message=self.message,
+            validated_message=self.message,
+            valid=False
+        )
+
+        event.process()
+        self.assertFalse(event.processed)
+
+    @patch('djstripe.models.Event.link_customer')
+    @patch('djstripe.models.Invoice.handle_event')
+    def test_process_invoice_event(self, handle_event_mock, link_customer_mock):
+        event = Event.objects.create(
+            stripe_id=self.message["id"],
+            kind="invoice.created",
+            webhook_message=self.message,
+            validated_message=self.message,
+            valid=True
+        )
+
+        event.process()
+        link_customer_mock.assert_called_once_with()
+        handle_event_mock.assert_called_once_with(event)
+        self.assertTrue(event.processed)
+
+    @patch('djstripe.models.Customer.record_charge')
+    def test_process_charge_event(self, record_charge_mock):
+        event = Event.objects.create(
+            stripe_id=self.message["id"],
+            kind="charge.created",
+            webhook_message=self.message,
+            validated_message=self.message,
+            valid=True
+        )
+
+        event.process()
+        self.assertEqual(event.customer, self.customer)
+        record_charge_mock.assert_called_once_with(self.message["data"]["object"]["id"])
+        self.assertTrue(event.processed)
+
+    @patch('djstripe.models.Customer.sync_current_subscription')
+    def test_customer_subscription_event(self, sync_current_subscription_mock):
+        event = Event.objects.create(
+            stripe_id=self.message["id"],
+            kind="customer.subscription.created",
+            webhook_message=self.message,
+            validated_message=self.message,
+            valid=True
+        )
+
+        event.process()
+        sync_current_subscription_mock.assert_called_once_with()
+        self.assertTrue(event.processed)
+
+    @patch('djstripe.models.Customer.sync_current_subscription')
+    def test_customer_subscription_event_no_customer(self, sync_current_subscription_mock):
+        self.message["data"]["object"]["customer"] = None
+        event = Event.objects.create(
+            stripe_id=self.message["id"],
+            kind="customer.subscription.created",
+            webhook_message=self.message,
+            validated_message=self.message,
+            valid=True
+        )
+
+        event.process()
+        self.assertFalse(sync_current_subscription_mock.called)
+        self.assertTrue(event.processed)
+
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=fake_current_subscription)
+    def test_customer_subscription_deleted_event(self, current_subscription_mock):
+        event = Event.objects.create(
+            stripe_id=self.message["id"],
+            kind="customer.subscription.deleted",
+            webhook_message=self.message,
+            validated_message=self.message,
+            valid=True
+        )
+
+        event.process()
+        self.assertTrue(current_subscription_mock.status, Subscription.STATUS_CANCELLED)
+        self.assertTrue(event.processed)
+
     @patch("stripe.Customer.retrieve")
-    def test_process_customer_deleted(self, CustomerMock):
+    def test_process_customer_deleted(self, customer_retrieve_mock):
         msg = {
             "created": 1348286560,
             "data": {
@@ -176,3 +345,32 @@ class TestEventMethods(TestCase):
         event.process()
         self.assertEquals(event.customer, self.customer)
         self.assertEquals(event.customer.subscriber, None)
+        self.assertTrue(event.processed)
+
+    def test_invalid_event_kind(self):
+        """Should just fail silently and not do anything."""
+        event = Event.objects.create(
+            stripe_id=self.message["id"],
+            kind="fake.event.kind",
+            webhook_message=self.message,
+            validated_message=self.message,
+            valid=True
+        )
+
+        event.process()
+        self.assertTrue(event.processed)
+
+    @patch('djstripe.models.EventProcessingException.log')
+    @patch('djstripe.models.Event.send_signal', side_effect=stripe.StripeError())
+    def test_stripe_error(self, send_signal_mock, event_exception_log):
+        event = Event.objects.create(
+            stripe_id=self.message["id"],
+            kind="fake.event.kind",
+            webhook_message=self.message,
+            validated_message=self.message,
+            valid=True
+        )
+
+        event.process()
+        self.assertTrue(event_exception_log.called)
+        self.assertFalse(event.processed)

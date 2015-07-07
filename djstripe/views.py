@@ -165,6 +165,7 @@ class SubscribeFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionM
 class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
     """
     TODO: This logic should be in form_valid() instead of post().
+    TODO: Work in a trial_days kwarg
 
     Also, this should be combined with SubscribeFormView.
     """
