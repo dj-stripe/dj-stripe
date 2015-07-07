@@ -9,8 +9,6 @@ from django.utils import timezone
 
 from mock import patch, PropertyMock
 
-from stripe import InvalidRequestError
-
 from djstripe.exceptions import SubscriptionApiError, SubscriptionCancellationFailure
 from djstripe.models import convert_tstamp, Customer, Subscription
 from djstripe.settings import PAYMENTS_PLANS
@@ -198,6 +196,22 @@ class TestMultipleSubscriptions(TestCase):
         self.assertNotEqual(sub_basic.stripe_id, sub_gold.stripe_id)
         
     @patch("stripe.resource.Subscription.save")
+    @patch("stripe.resource.ListObject.create")
+    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
+    def test_subscribe_with_sub(self, StripeCustomerMock, ListObjectCreateMock, SubscriptionSaveMock):
+        StripeCustomerMock.side_effect = [convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITHOUT_SUB),
+                                          convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC),
+                                          convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC),
+                                          convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC)]
+        self.customer.subscribe("basic", charge_immediately=False, trial_days=10)
+        self.assertEqual(self.customer.subscriptions.count(), 1)
+        sub_basic = self.customer.subscriptions.all()[0]
+        self.assertEqual(sub_basic.quantity, 1)
+        self.customer.subscribe("basic", quantity=2, charge_immediately=False, subscription=sub_basic)
+        self.assertEqual(self.customer.subscriptions.count(), 1)
+        self.assertEqual(sub_basic.quantity, 2)
+        
+    @patch("stripe.resource.Subscription.save")
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
     def test_upgrade(self, StripeCustomerMock, SubscriptionSaveMock):
         StripeCustomerMock.side_effect = [convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC),
@@ -310,7 +324,7 @@ class TestSingleSubscription(TestCase):
         sub = self.customer.current_subscription
         self.assertEqual(sub.amount, decimal.Decimal("1000.00"))
         self.assertEqual(sub.plan, "gold")
-
+        
     def test_cancel_without_sub(self):
         with self.assertRaises(SubscriptionCancellationFailure):
             self.customer.cancel_subscription()
