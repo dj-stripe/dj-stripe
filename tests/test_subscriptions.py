@@ -203,10 +203,10 @@ class TestMultipleSubscriptions(TestCase):
                                           convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC),
                                           convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC),
                                           convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC)]
-        self.customer.subscribe("basic", charge_immediately=False, trial_days=10)
+        self.customer.subscribe("basic", charge_immediately=False)
         self.assertEqual(self.customer.subscriptions.count(), 1)
         sub_basic = self.customer.subscriptions.all()[0]
-        self.customer.subscribe("basic", quantity=2, charge_immediately=False, subscription=sub_basic)
+        self.customer.subscribe("basic", trial_days=10, charge_immediately=False, subscription=sub_basic)
         self.assertEqual(self.customer.subscriptions.count(), 1)
         SubscriptionSaveMock.assert_called_once_with()
         
@@ -266,6 +266,16 @@ class TestMultipleSubscriptions(TestCase):
         self.customer.update_plan_quantity(2, charge_immediately=False,
                                            subscription=self.customer.subscriptions.get(plan="basic"))
         self.assertEqual(self.customer.subscriptions.get(plan="basic").quantity, 2)
+        
+    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
+    def test_sync_with_retain_canceled(self, StripeCustomerMock):
+        StripeCustomerMock.side_effect = [convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_BOTH_SUBS)]
+        Customer.retain_canceled_subscriptions = True
+        create_subscription(self.customer)
+        self.assertEqual(self.customer.subscriptions.count(), 1)
+        self.customer.sync_subscriptions()
+        Customer.retain_canceled_subscriptions = False
+        self.assertEqual(self.customer.subscriptions.count(), 2)
 
 
 class TestSingleSubscription(TestCase):
