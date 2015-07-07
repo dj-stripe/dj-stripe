@@ -185,6 +185,10 @@ class TestMultipleSubscriptions(TestCase):
     def test_current_subscription_not_allowed(self):
         with self.assertRaises(SubscriptionApiError):
             self.customer.current_subscription
+            
+    def test_sync_current_subscription_not_allowed(self):
+        with self.assertRaises(SubscriptionApiError):
+            self.customer.sync_current_subscription()
 
     @patch("stripe.resource.ListObject.create")
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
