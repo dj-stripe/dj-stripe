@@ -206,10 +206,9 @@ class TestMultipleSubscriptions(TestCase):
         self.customer.subscribe("basic", charge_immediately=False, trial_days=10)
         self.assertEqual(self.customer.subscriptions.count(), 1)
         sub_basic = self.customer.subscriptions.all()[0]
-        self.assertEqual(sub_basic.quantity, 1)
         self.customer.subscribe("basic", quantity=2, charge_immediately=False, subscription=sub_basic)
         self.assertEqual(self.customer.subscriptions.count(), 1)
-        self.assertEqual(sub_basic.quantity, 2)
+        SubscriptionSaveMock.assert_called_once_with()
         
     @patch("stripe.resource.Subscription.save")
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
