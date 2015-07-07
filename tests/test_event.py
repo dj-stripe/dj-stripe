@@ -280,6 +280,22 @@ class EventTest(TestCase):
         sync_current_subscription_mock.assert_called_once_with()
         self.assertTrue(event.processed)
 
+    @patch('djstripe.models.Customer.sync_subscriptions')
+    def test_customer_multiple_subscription_event(self, sync_subscriptions_mock):
+        event = Event.objects.create(
+            stripe_id=self.message["id"],
+            kind="customer.subscription.created",
+            webhook_message=self.message,
+            validated_message=self.message,
+            valid=True
+        )
+        
+        Customer.allow_multiple_subscriptions = True
+        event.process()
+        Customer.allow_multiple_subscriptions = False
+        sync_subscriptions_mock.assert_called_once_with()
+        self.assertTrue(event.processed)
+        
     @patch('djstripe.models.Customer.sync_current_subscription')
     def test_customer_subscription_event_no_customer(self, sync_current_subscription_mock):
         self.message["data"]["object"]["customer"] = None

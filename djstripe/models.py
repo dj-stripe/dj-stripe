@@ -399,44 +399,42 @@ class Customer(StripeObject):
                 )
             subscription = self.subscriptions.all()[0]
 
-        try:
-            """
-            If plan has trial days and customer cancels before trial period ends,
-            then end subscription now, i.e. at_period_end=False
-            """
-            if subscription.trial_end and subscription.trial_end > timezone.now():
-                at_period_end = False
-            cu = self.stripe_customer
-            stripe_subscription = None
-            if cu.subscriptions.count > 0:
-                if Customer.allow_multiple_subscriptions:
-                    matching = [sub for sub in cu.subscriptions.data if sub.id == subscription.stripe_id]
-                    if matching:
-                        stripe_subscription = matching[0]
-                else:
-                    stripe_subscription = cu.subscriptions.data[0]
-            if stripe_subscription:
-                stripe_subscription = stripe_subscription.delete(at_period_end=at_period_end)
-                subscription.status = stripe_subscription.status
-                subscription.cancel_at_period_end = stripe_subscription.cancel_at_period_end
-                subscription.current_period_end = convert_tstamp(stripe_subscription, "current_period_end")
-                subscription.canceled_at = convert_tstamp(stripe_subscription, "canceled_at") or timezone.now()
-                if not at_period_end:
-                    subscription.ended_at = subscription.canceled_at
-                subscription.save()
-                cancelled.send(sender=self, stripe_response=stripe_subscription)
+        """
+        If plan has trial days and customer cancels before trial period ends,
+        then end subscription now, i.e. at_period_end=False
+        """
+        if subscription.trial_end and subscription.trial_end > timezone.now():
+            at_period_end = False
+        cu = self.stripe_customer
+        stripe_subscription = None
+        if cu.subscriptions.count > 0:
+            if Customer.allow_multiple_subscriptions:
+                matching = [sub for sub in cu.subscriptions.data if sub.id == subscription.stripe_id]
+                if matching:
+                    stripe_subscription = matching[0]
             else:
-                """
-                No Stripe subscription exists, perhaps because it was independently cancelled at Stripe.
-                Synthesise the cancellation state using the current time.
-                """
-                subscription.status = Subscription.STATUS_CANCELLED
-                subscription.canceled_at = timezone.now()
-                if not at_period_end:
-                    subscription.ended_at = subscription.canceled_at
-                subscription.save()
-        except stripe.InvalidRequestError as exc:
-            raise SubscriptionCancellationFailure("Customer's information is not current with Stripe.\n{}".format(str(exc)))
+                stripe_subscription = cu.subscriptions.data[0]
+        if stripe_subscription:
+            stripe_subscription = stripe_subscription.delete(at_period_end=at_period_end)
+            subscription.status = stripe_subscription.status
+            subscription.cancel_at_period_end = stripe_subscription.cancel_at_period_end
+            subscription.current_period_end = convert_tstamp(stripe_subscription, "current_period_end")
+            subscription.canceled_at = convert_tstamp(stripe_subscription, "canceled_at") or timezone.now()
+            if not at_period_end:
+                subscription.ended_at = subscription.canceled_at
+            subscription.save()
+            cancelled.send(sender=self, stripe_response=stripe_subscription)
+        else:
+            """
+            No Stripe subscription exists, perhaps because it was independently cancelled at Stripe.
+            Synthesise the cancellation state using the current time.
+            """
+            subscription.status = Subscription.STATUS_CANCELLED
+            subscription.canceled_at = timezone.now()
+            if not at_period_end:
+                subscription.ended_at = subscription.canceled_at
+            subscription.save()
+            
         return subscription
 
     def cancel(self, at_period_end=True):
