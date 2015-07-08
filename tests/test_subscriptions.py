@@ -308,6 +308,7 @@ class TestSingleSubscription(TestCase):
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
     def test_subscribe(self, StripeCustomerMock, ListObjectCreateMock):
         StripeCustomerMock.side_effect = [convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITHOUT_SUB),
+                                          convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC),
                                           convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC)]
         self.assertEqual(self.customer.subscriptions.count(), 0)
         self.assertEqual(self.customer.has_active_subscription(), False)
@@ -322,6 +323,7 @@ class TestSingleSubscription(TestCase):
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
     def test_upgrade(self, StripeCustomerMock, SubscriptionSaveMock):
         StripeCustomerMock.side_effect = [convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC),
+                                          convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_GOLD),
                                           convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_GOLD)]
         create_subscription(self.customer)
         self.assertEqual(self.customer.has_active_subscription(), True)
@@ -392,6 +394,7 @@ class TestSingleSubscription(TestCase):
         dummy_customer["subscriptions"]["data"][0]["quantity"] = 2
         StripeCustomerMock.side_effect = [convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC),
                                           convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC),
+                                          convert_to_fake_stripe_object(dummy_customer),
                                           convert_to_fake_stripe_object(dummy_customer)]
         create_subscription(self.customer)
         self.customer.update_plan_quantity(2, charge_immediately=False)
