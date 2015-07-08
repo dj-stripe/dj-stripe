@@ -93,7 +93,6 @@ admin.site.register(
     search_fields=[
         "stripe_id",
         "customer__stripe_id",
-        "customer__subscriber__email",
         "card_last_4",
         "invoice__stripe_id"
     ],
@@ -147,7 +146,6 @@ admin.site.register(
     search_fields=[
         "stripe_id",
         "customer__stripe_id",
-        "customer__subscriber__email",
         "validated_message"
     ],
 )
@@ -180,8 +178,7 @@ admin.site.register(
         CustomerSubscriptionStatusListFilter
     ],
     search_fields=[
-        "stripe_id",
-        "subscriber__email"
+        "stripe_id"
     ],
     inlines=[CurrentSubscriptionInline]
 )
@@ -221,8 +218,7 @@ admin.site.register(
     ],
     search_fields=[
         "stripe_id",
-        "customer__stripe_id",
-        "customer__subscriber__email"
+        "customer__stripe_id"
     ],
     list_filter=[
         InvoiceCustomerHasCardListFilter,
