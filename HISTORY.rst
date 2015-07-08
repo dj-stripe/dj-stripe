@@ -3,7 +3,7 @@
 History
 =======
 
-0.6.0 (2015-06-??)
+0.6.0 (2015-07-??)
 ---------------------
 
 * Support for Django 1.6 and lower is now deprecated.
@@ -17,6 +17,7 @@ History
 * Customer model now stores card expiration month and year (Thanks @jpadilla)
 * Ability to extend subscriptions (Thanks @TigerDX)
 * Rest API endpoints for Subscriptions [contrib] (Thanks @philippeluickx)
+* Admin interface search by email funtionality is removed (#221) (Thanks @jpadilla)
 
 0.5.0 (2015-05-25)
 ---------------------
