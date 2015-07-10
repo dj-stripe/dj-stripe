@@ -10,7 +10,7 @@ from django.utils import timezone
 from mock import patch, PropertyMock
 from stripe import InvalidRequestError
 
-from djstripe.exceptions import SubscriptionCancellationFailure
+from djstripe.exceptions import SubscriptionCancellationFailure, SubscriptionUpdateFailure
 from djstripe.models import convert_tstamp, Customer, CurrentSubscription
 from djstripe.settings import PAYMENTS_PLANS
 from tests import convert_to_fake_stripe_object
@@ -235,6 +235,13 @@ class TestSingleSubscription(TestCase):
         create_subscription(self.customer)
         self.customer.update_plan_quantity(2, charge_immediately=False)
         self.assertEqual(self.customer.current_subscription.quantity, 2)
+
+    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
+    def test_update_no_stripe_sub(self, StripeCustomerMock):
+        StripeCustomerMock.return_value = convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITHOUT_SUB)
+        create_subscription(self.customer)
+        with self.assertRaises(SubscriptionUpdateFailure):
+            self.customer.update_plan_quantity(2)
 
     @patch("stripe.resource.Customer.update_subscription")
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
