@@ -497,11 +497,11 @@ class Customer(StripeObject):
             return sub_obj
 
     def update_plan_quantity(self, quantity, charge_immediately=False):
-        sub = self.stripe_customer.subscription
-        if not sub:
+        stripe_subscription = self.stripe_customer.subscription
+        if not stripe_subscription:
             raise SubscriptionUpdateFailure("Customer does not have a subscription with Stripe")
         self.subscribe(
-            plan=djstripe_settings.plan_from_stripe_id(sub.plan.id),
+            plan=djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id),
             quantity=quantity,
             charge_immediately=charge_immediately
         )
