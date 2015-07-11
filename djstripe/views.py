@@ -30,7 +30,6 @@ from .models import EventProcessingException
 from .settings import CANCELLATION_AT_PERIOD_END
 from .settings import subscriber_request_callback
 from .settings import PRORATION_POLICY_FOR_UPGRADES
-from .settings import CANCELLATION_AT_PERIOD_END
 from .sync import sync_subscriber
 
 
