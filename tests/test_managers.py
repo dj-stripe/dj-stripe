@@ -7,6 +7,8 @@ from django.utils import timezone
 
 from djstripe.models import Event, Transfer, Customer, CurrentSubscription, Charge
 from tests.test_transfer import TRANSFER_CREATED_TEST_DATA, TRANSFER_CREATED_TEST_DATA2
+from .plan_instances import basic_plan
+from .plan_instances import gold_plan
 
 
 class CustomerManagerTest(TestCase):
@@ -27,7 +29,7 @@ class CustomerManagerTest(TestCase):
             )
             CurrentSubscription.objects.create(
                 customer=customer,
-                plan="test",
+                plan=basic_plan,
                 current_period_start=period_start,
                 current_period_end=period_end,
                 amount=(500 / decimal.Decimal("100.0")),
@@ -45,7 +47,7 @@ class CustomerManagerTest(TestCase):
         )
         CurrentSubscription.objects.create(
             customer=customer,
-            plan="test",
+            plan=basic_plan,
             current_period_start=period_start,
             current_period_end=period_end,
             amount=(500 / decimal.Decimal("100.0")),
@@ -64,7 +66,7 @@ class CustomerManagerTest(TestCase):
         )
         CurrentSubscription.objects.create(
             customer=customer,
-            plan="test-2",
+            plan=gold_plan,
             current_period_start=period_start,
             current_period_end=period_end,
             amount=(500 / decimal.Decimal("100.0")),

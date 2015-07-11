@@ -164,7 +164,7 @@ class InvoiceTest(TestCase):
         self.assertEqual(False, invoice_item.proration)
         self.assertEqual("", invoice_item.description)
         self.assertEqual("subscription", invoice_item.line_type)
-        self.assertEqual("test", invoice_item.plan)
+        self.assertEqual("test", invoice_item.plan.name)
         self.assertEqual(1, invoice_item.quantity)
 
         # period_end is determined by latest invoice_item

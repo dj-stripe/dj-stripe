@@ -26,6 +26,8 @@ from stripe import api_key
 
 from tests.apps.testapp.models import Organization
 
+from .plan_instances import basic_plan
+
 
 class TestDeprecationWarning(AssertWarnsEnabledTestCase):
     """
@@ -126,7 +128,7 @@ class TestUserHasActiveSubscription(TestCase):
         start = datetime.datetime(2013, 1, 1, 0, 0, 1)  # more realistic start
         CurrentSubscription.objects.create(
             customer=self.customer,
-            plan="test",
+            plan=basic_plan,
             current_period_start=period_start,
             current_period_end=period_end,
             amount=(500 / decimal.Decimal("100.0")),

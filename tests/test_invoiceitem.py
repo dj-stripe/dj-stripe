@@ -10,9 +10,11 @@ from django.test.testcases import TestCase
 
 from djstripe.models import InvoiceItem
 
+from .plan_instances import basic_plan
+
 
 class InvoiceItemTest(TestCase):
 
     def test_plan_display(self):
-        invoiceitem = InvoiceItem(plan="test")
+        invoiceitem = InvoiceItem(plan=basic_plan)
         self.assertEqual("Test Plan 1", invoiceitem.plan_display())
