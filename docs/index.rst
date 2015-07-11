@@ -8,11 +8,11 @@ Django + Stripe Made Easy
 
 * Subscription management
 * Subscription during registration
-* Single-unit purchases (forthcoming)
-* Works with Django 1.8, 1.7, 1.6, 1.5
-* Works with Python 3.4, 3.3, 2.7
+* Single-unit purchases
+* Works with Django 1.8, 1.7
+* Works with Python 3.4, 2.7
 * Works with Bootstrap 3
-* Built-in South migrations
+* Built-in migrations
 * Dead-Easy installation
 * Leverages in the best of the 3rd party Django package ecosystem.
 * `djstripe` namespace so you can have more than one payments related app.

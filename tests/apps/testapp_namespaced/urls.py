@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 
 from django.http import HttpResponse
 
@@ -7,10 +7,10 @@ from django.http import HttpResponse
 def testview(request):
     return HttpResponse()
 
-urlpatterns = patterns("",
+urlpatterns = [
     url(
         r"^$",
         testview,
         name="test_url_namespaced",
     ),
-)
+]

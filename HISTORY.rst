@@ -3,17 +3,37 @@
 History
 =======
 
-0.5.0 (2015-05-??)
+0.6.0 (2015-07-??)
 ---------------------
 
+* Support for Django 1.6 and lower is now deprecated.
+* Improved test harness now tests coverage and pep8
+* SubscribeFormView and ChangePlanView no longer populate self.error with form errors
+* InvoiceItems.plan can now be null (as it is with individual charges), resolving #140 (Thanks @awechsler and @MichelleGlauser for help troubleshooting)
+* Email templates are now packaged during distribution.
+* sync_plans now takes an optional api_key
+* 100% test coverage
+* Stripe ID is now returned as part of each model's str method
+* Customer model now stores card expiration month and year (Thanks @jpadilla)
+* Ability to extend subscriptions (Thanks @TigerDX)
+* Rest API endpoints for Subscriptions [contrib] (Thanks @philippeluickx)
+* Admin interface search by email funtionality is removed (#221) (Thanks @jpadilla)
+
+0.5.0 (2015-05-25)
+---------------------
+
+* Began deprecation of support for Django 1.6 and lower.
+* Added formal support for Django 1.8.
 * Removed the StripeSubscriptionSignupForm
 * Removed ``djstripe.safe_settings``. Settings are now all located in ``djstripe.settings``
 * ``DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK`` can no longer be a module string
 * The sync_subscriber argument has been renamed from subscriber_model to subscriber
 * Moved available currencies to the DJSTRIPE_CURRENCIES setting (Thanks @martinhill)
 * Allow passing of extra parameters to stripe Charge API (Thanks @mthornhill)
+* Support for all available arguments when syncing plans (Thanks @jamesbrobb)
 * charge.refund() now returns the refunded charge object (Thanks @mthornhill)
 * Charge model now has captured field and a capture method (Thanks @mthornhill)
+* Subscription deleted webhook bugfix
 * South migrations are now up to date (Thanks @Tyrdall)
 
 0.4.0 (2015-04-05)

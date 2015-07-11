@@ -1,16 +1,18 @@
+import os
+import sys
+
+import django
+from django.conf import settings
+
 from coverage import coverage
+from termcolor import colored
+
 cov = coverage(config_file=True)
 cov.erase()
 cov.start()
 
-import os
-import sys
-
-TESTS_THRESHOLD = 72.00
+TESTS_THRESHOLD = 100
 TESTS_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-
-import django
-from django.conf import settings
 
 settings.configure(
     TIME_ZONE='America/Los_Angeles',
@@ -35,15 +37,17 @@ settings.configure(
         "django.contrib.sites",
         "jsonfield",
         "djstripe",
+        "tests",
         "tests.apps.testapp"
     ],
     MIDDLEWARE_CLASSES=(
         "django.contrib.sessions.middleware.SessionMiddleware",
         "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware"
     ),
     SITE_ID=1,
-    STRIPE_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_lOasUMgiIA701U9wZnL6Zo6a"),
-    STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", "sk_test_nZBY1yjOJ75iFKGjorN29GiA"),
+    STRIPE_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", ""),
+    STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", ""),
     DJSTRIPE_PLANS={
         "test0": {
             "stripe_plan_id": "test_id_0",
@@ -69,6 +73,23 @@ settings.configure(
             "currency": "usd",
             "interval": "month"
         },
+        "test_deletion": {
+            "stripe_plan_id": "test_id_3",
+            "name": "Test Plan 3",
+            "description": "Test plan for deletion.",
+            "price": 5000,  # $50.00
+            "currency": "usd",
+            "interval": "month"
+        },
+        "test_trial": {
+            "stripe_plan_id": "test_id_4",
+            "name": "Test Plan 4",
+            "description": "Test plan for trails.",
+            "price": 7000,  # $70.00
+            "currency": "usd",
+            "interval": "month",
+            "trial_period_days": 7
+        },
         "unidentified_test_plan": {
             "name": "Unidentified Test Plan",
             "description": "A test plan with no ID.",
@@ -80,11 +101,8 @@ settings.configure(
     DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS=(
         "(admin)",
         "test_url_name",
-        "testapp_namespaced:test_url_namespaced"
+        "testapp_namespaced:test_url_namespaced",
     ),
-    TEMPLATE_DIRS = [
-        os.path.join(TESTS_ROOT, "tests/templates"),
-    ],
 )
 
 # Avoid AppRegistryNotReady exception
@@ -92,6 +110,13 @@ settings.configure(
 if hasattr(django, "setup"):
     django.setup()
 
+# Announce the test suite
+sys.stdout.write(colored(text="\nWelcome to the ", color="magenta", attrs=["bold"]))
+sys.stdout.write(colored(text="dj-stripe", color="green", attrs=["bold"]))
+sys.stdout.write(colored(text=" test suite.\n\n", color="magenta", attrs=["bold"]))
+
+# Announce test run
+sys.stdout.write(colored(text="Step 1: Running unit tests.\n\n", color="yellow", attrs=["bold"]))
 
 from django_nose import NoseTestSuiteRunner
 
@@ -101,11 +126,34 @@ failures = test_runner.run_tests(["."])
 if failures:
     sys.exit(failures)
 
+# Announce coverage run
+sys.stdout.write(colored(text="\nStep 2: Generating coverage results.\n\n", color="yellow", attrs=["bold"]))
+
 cov.stop()
 percentage = round(cov.report(show_missing=True), 2)
 cov.html_report(directory='cover')
 cov.save()
 
 if percentage < TESTS_THRESHOLD:
-    sys.exit("WARNING: YOUR CHANGES HAVE CAUSED TEST COVERAGE TO DROP. " +
-             "WAS {old}%, IS NOW {new}%.".format(old=TESTS_THRESHOLD, new=percentage))
+            sys.stderr.write(colored(text="YOUR CHANGES HAVE CAUSED TEST COVERAGE TO DROP. " +
+                                     "WAS {old}%, IS NOW {new}%.\n\n".format(old=TESTS_THRESHOLD, new=percentage),
+                                     color="red", attrs=["bold"]))
+            sys.exit(1)
+
+# Announce flake8 run
+sys.stdout.write(colored(text="\nStep 3: Checking for pep8 errors.\n\n", color="yellow", attrs=["bold"]))
+
+print("pep8 errors:")
+print("----------------------------------------------------------------------")
+
+from subprocess import call
+flake_result = call(["flake8", ".", "--count"])
+if flake_result != 0:
+    sys.stderr.write("pep8 errors detected.\n")
+    sys.stderr.write(colored(text="\nYOUR CHANGES HAVE INTRODUCED PEP8 ERRORS!\n\n", color="red", attrs=["bold"]))
+    sys.exit(flake_result)
+else:
+    print("None")
+
+# Announce success
+sys.stdout.write(colored(text="\nTests completed successfully with no errors. Congrats!\n", color="green", attrs=["bold"]))

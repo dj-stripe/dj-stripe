@@ -1,21 +1,33 @@
 =============================
 dj-stripe
 =============================
+Django + Stripe Made Easy
 
 Badges
 ------
 
-.. image:: https://badge.fury.io/py/dj-stripe.png
-    :target: http://badge.fury.io/py/dj-stripe
-
-.. image:: https://travis-ci.org/pydanny/dj-stripe.png?branch=master
+.. image:: https://img.shields.io/travis/pydanny/dj-stripe.svg?style=flat-square
         :target: https://travis-ci.org/pydanny/dj-stripe
+.. image:: https://img.shields.io/codecov/c/github/pydanny/dj-stripe/master.svg?style=flat-square
+        :target: http://codecov.io/github/pydanny/dj-stripe?branch=master
+.. image:: https://img.shields.io/requires/github/pydanny/dj-stripe.svg?style=flat-square
+        :target: https://requires.io/github/pydanny/dj-stripe/requirements/?branch=master
+.. image:: https://img.shields.io/codacy/3c99e13eda1c4dea9f993b362e4ea816.svg?style=flat-square
+        :target: https://www.codacy.com/app/kavanaugh-development/dj-stripe/dashboard
 
-.. image:: https://pypip.in/d/dj-stripe/badge.png
-        :target: https://pypi.python.org/pypi/dj-stripe/
+.. image:: https://img.shields.io/pypi/v/dj-stripe.svg?style=flat-square
+        :target: https://pypi.python.org/pypi/dj-stripe
+.. image:: https://img.shields.io/pypi/dw/dj-stripe.svg?style=flat-square
+        :target: https://pypi.python.org/pypi/dj-stripe
 
+.. image:: https://img.shields.io/github/issues/pydanny/dj-stripe.svg?style=flat-square
+        :target: https://github.com/pydanny/dj-stripe/issues
+.. image:: https://img.shields.io/github/license/pydanny/dj-stripe.svg?style=flat-square
+        :target: https://github.com/pydanny/dj-stripe/blob/master/LICENSE
 
-Django + Stripe Made Easy
+.. image:: https://badges.gitter.im/Join Chat.svg
+        :target: https://gitter.im/pydanny/dj-stripe?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
 
 Documentation
 -------------
@@ -27,13 +39,13 @@ Features
 
 * Subscription management
 * Designed for easy implementation of post-registration subscription forms
-* Single-unit purchases (forthcoming)
-* Works with Django 1.8, 1.7, 1.6, 1.5
-* Works with Python 3.4, 3.3, 2.7
+* Single-unit purchases
+* Works with Django 1.8, 1.7
+* Works with Python 3.4, 2.7
 * Works with Bootstrap 3
 * Built-in migrations
 * Dead-Easy installation
-* Leverages in the best of the 3rd party Django package ecosystem
+* Leverages the best of the 3rd party Django package ecosystem
 * `djstripe` namespace so you can have more than one payments related app
 * Documented (Making good progress)
 * Tested (Making good progress)
@@ -67,8 +79,8 @@ Add your stripe keys:
 
 .. code-block:: python
 
-    STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "<your publishable test key>")
-    STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "<your secret test key>")
+    STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "<your publishable key>")
+    STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "<your secret key>")
 
 Add some payment plans:
 
@@ -101,27 +113,27 @@ Add to the urls.py:
     
 Run the commands::
 
-    python manage.py migrate  # or syncdb, then migrate with South
+    python manage.py migrate
     
     python manage.py djstripe_init_customers
     
     python manage.py djstripe_init_plans
 
-If you haven't already, add JQuery and the Bootstrap 3.0.0 JS and CSS to your base template:
+If you haven't already, add JQuery and the Bootstrap 3.0.0+ JS and CSS to your base template:
 
 .. code-block:: html
 
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 
     <!-- Optional theme -->
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
     
-    <!-- Latest JQuery -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+    <!-- Latest JQuery (IE9+) -->
+    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
 
     <!-- Latest compiled and minified JavaScript -->
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     
 Also, if you don't have it already, add a javascript block to your base.html file:
 
@@ -129,9 +141,6 @@ Also, if you don't have it already, add a javascript block to your base.html fil
 
     {% block javascript %}{% endblock %} 
 
-Start up the webserver:
-
-    * http://127.0.0.1:8000/payments/
 
 Running the Tests
 ------------------
@@ -140,8 +149,7 @@ Assuming the tests are run against PostgreSQL::
 
     createdb djstripe
     pip install -r requirements_test.txt
-    coverage run --source djstripe runtests.py
-    coverage report -m
+    python runtests.py
 
 Follows Best Practices
 ======================
@@ -150,11 +158,11 @@ Follows Best Practices
    :name: Two Scoops Logo
    :align: center
    :alt: Two Scoops of Django
-   :target: http://twoscoopspress.org/products/two-scoops-of-django-1-6
+   :target: http://twoscoopspress.org/products/two-scoops-of-django-1-8
 
-This project follows best practices as espoused in `Two Scoops of Django: Best Practices for Django 1.6`_.
+This project follows best practices as espoused in `Two Scoops of Django: Best Practices for Django 1.8`_.
 
-.. _`Two Scoops of Django: Best Practices for Django 1.6`: http://twoscoopspress.org/products/two-scoops-of-django-1-6
+.. _`Two Scoops of Django: Best Practices for Django 1.8`: http://twoscoopspress.org/products/two-scoops-of-django-1-8
 
 Similar Projects
 ----------------

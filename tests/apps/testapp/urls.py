@@ -1,17 +1,21 @@
 from __future__ import unicode_literals
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 
 from django.http import HttpResponse
 
 
-def testview(request):
+def empty_view(request):
     return HttpResponse()
 
-urlpatterns = patterns("",
+urlpatterns = [
     url(
         r"^$",
-        testview,
+        empty_view,
         name="test_url_name"
     ),
     url(r"^djstripe/", include('djstripe.urls', namespace="djstripe")),
-)
+    url(
+        r"^rest_djstripe/",
+        include('djstripe.contrib.rest_framework.urls', namespace="rest_djstripe")
+    ),
+]

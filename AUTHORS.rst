@@ -33,3 +33,8 @@ Contributors
 * Tobias Lorenz (@Tyrdall)
 * Ben Whalley
 * nanvel
+* jRobb (@jamesbrobb)
+* Areski Belaid (@areski)
+* José Padilla (@jpadilla)
+* Ben Murden (@benmurden)
+* Philippe Luickx (@philippeluickx)
