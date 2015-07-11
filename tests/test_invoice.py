@@ -16,6 +16,7 @@ from django.utils import timezone
 from mock import patch
 
 from djstripe.models import Customer, Invoice, Charge, Event
+from .plan_instances import basic_plan
 
 
 FAKE_INVOICE = {
@@ -45,7 +46,7 @@ FAKE_INVOICE = {
                 "created": 1429616163,
                 "amount": 995,
                 "currency": "usd",
-                "id": "test_id",
+                "id": basic_plan,
                 "object": "plan",
                 "livemode": True,
                 "interval_count": 1,
