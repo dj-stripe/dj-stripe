@@ -604,17 +604,8 @@ class CurrentSubscription(TimeStampedModel):
     STATUS_CANCELLED = "canceled"
     STATUS_UNPAID = "unpaid"
 
-    customer = models.OneToOneField(
-        Customer,
-        related_name="current_subscription",
-        null=True
-    )
-    plan = models.ForeignKey(
-        'Plan',
-        related_name='current_subscription',
-        blank=True,
-        null=True
-    )
+    customer = models.OneToOneField(Customer, related_name="current_subscription", null=True)
+    plan = models.ForeignKey('Plan', related_name='current_subscription', blank=True, null=True)
     quantity = models.IntegerField()
     start = models.DateTimeField()
     # trialing, active, past_due, canceled, or unpaid
