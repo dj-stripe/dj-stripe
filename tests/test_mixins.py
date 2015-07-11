@@ -79,8 +79,8 @@ class TestSubscriptionMixin(TestCase):
         test_view.request.user = get_user_model().objects.create(username="x", email="user@test.com")
 
         context = test_view.get_context_data()
-        #self.assertIn("is_plans_plural", context, "is_plans_plural missing from context.")
-        #self.assertTrue(context["is_plans_plural"], "Incorrect is_plans_plural.")
+        self.assertIn("is_plans_plural", context, "is_plans_plural missing from context.")
+        self.assertTrue(context["is_plans_plural"], "Incorrect is_plans_plural.")
 
         self.assertIn("customer", context, "customer missing from context.")
 
