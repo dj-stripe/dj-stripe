@@ -17,4 +17,4 @@ class InvoiceItemTest(TestCase):
 
     def test_plan_display(self):
         invoiceitem = InvoiceItem(plan=basic_plan)
-        self.assertEqual("Test Plan 1", invoiceitem.plan_display())
+        self.assertEqual("Basic Plan", invoiceitem.plan_display())
