@@ -48,3 +48,28 @@ test_deletion, test_deletion_created = Plan.objects.get_or_create(
     interval_count=1,
     amount=100
 )
+
+Plan.objects.get_or_create(
+    stripe_id="test0",
+    name="test0",
+    currency='USD',
+    interval=1,
+    interval_count=1,
+    amount=100
+)
+Plan.objects.get_or_create(
+    stripe_id="test",
+    name="test",
+    currency='USD',
+    interval=1,
+    interval_count=1,
+    amount=100
+)
+Plan.objects.get_or_create(
+    stripe_id="test2",
+    name="test2",
+    currency='USD',
+    interval=1,
+    interval_count=1,
+    amount=100
+)

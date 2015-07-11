@@ -193,7 +193,7 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                     current_subscription_amount = customer.current_subscription.amount
                     selected_plan_id = form.cleaned_data["plan"]
                     selected_plan = Plan.objects.get(stripe_id=selected_plan_id)
-                    selected_plan_price = selected_plan["price"] / decimal.Decimal("100")
+                    selected_plan_price = selected_plan.amount / decimal.Decimal("100")
 
                     # Is it an upgrade?
                     if selected_plan_price > current_subscription_amount:
