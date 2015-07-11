@@ -83,3 +83,12 @@ Plan.objects.get_or_create(
     interval_count=1,
     amount=100
 )
+
+fish_plan, fish_plan_created = Plan.objects.get_or_create(
+    stripe_id="fish",
+    name="fish",
+    currency='USD',
+    interval=1,
+    interval_count=1,
+    amount=100
+)

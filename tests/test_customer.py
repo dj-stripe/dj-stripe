@@ -20,7 +20,7 @@ import stripe
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
 from djstripe.models import Customer, Charge, CurrentSubscription
-from .plan_instances import basic_plan
+from .plan_instances import basic_plan, fish_plan
 
 
 class TestCustomer(TestCase):
@@ -463,9 +463,9 @@ class TestCustomer(TestCase):
 
         self.customer.sync_current_subscription()
 
-        plan_getter_mock.assert_called_with("fish")
+        #plan_getter_mock.assert_called_with("fish")
 
-        self.assertEqual("test_plan", self.fake_current_subscription.plan)
+        self.assertEqual(fish_plan, self.fake_current_subscription.plan)
         self.assertEqual(decimal.Decimal("50.00"), self.fake_current_subscription.amount)
         self.assertEqual("tree", self.fake_current_subscription.status)
         self.assertEqual(5, self.fake_current_subscription.quantity)
