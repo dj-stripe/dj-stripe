@@ -46,7 +46,7 @@ FAKE_INVOICE = {
                 "created": 1429616163,
                 "amount": 995,
                 "currency": "usd",
-                "id": basic_plan,
+                "id": "basic_id",
                 "object": "plan",
                 "livemode": True,
                 "interval_count": 1,
@@ -186,7 +186,7 @@ class InvoiceTest(TestCase):
         self.assertEqual(1, invoice.items.count())
         invoice_item = invoice.items.all()[0]
 
-        self.assertEqual("", invoice_item.plan)
+        self.assertEqual(None, invoice_item.plan)
 
     @patch("djstripe.models.Charge.send_receipt")
     @patch("djstripe.models.Customer.record_charge")

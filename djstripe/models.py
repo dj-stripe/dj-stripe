@@ -442,8 +442,9 @@ class Customer(StripeObject):
     def sync_current_subscription(self, cu=None):
         cu = cu or self.stripe_customer
         sub = cu.subscription
-        plan_instance = Plan.objects.get(stripe_id=sub.plan.id)
         if sub:
+            plan_instance = Plan.objects.get(stripe_id=sub.plan.id)
+
             try:
                 sub_obj = self.current_subscription
                 sub_obj.plan = plan_instance
@@ -725,9 +726,9 @@ class Invoice(StripeObject):
             invoice.period_end = period_end
 
             if item.get("plan"):
-                plan = item["plan"]["id"]
+                plan = Plan.objects.get(stripe_id=item["plan"]["id"])
             else:
-                plan = ""
+                plan = None
 
             inv_item, inv_item_created = invoice.items.get_or_create(
                 stripe_id=item["id"],
