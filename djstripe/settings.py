@@ -96,3 +96,7 @@ def get_plan_choices():
     from .models import Plan
     PLAN_CHOICES = [(plan.stripe_id, plan.name) for plan in Plan.objects.all()]
     return PLAN_CHOICES
+
+
+def plan_from_stripe_id(stripe_id):
+    return stripe_id
