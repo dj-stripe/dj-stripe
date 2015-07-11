@@ -63,6 +63,16 @@ class EventTest(TestCase):
             subscriber=self.user
         )
 
+    def test_tostring(self):
+        event = Event.objects.create(
+            stripe_id=self.message["id"],
+            kind="eventkind",
+            webhook_message=self.message,
+            validated_message=self.message,
+            valid=True
+        )
+        self.assertEquals("<eventkind, stripe_id=evt_xxxxxxxxxxxxx>", str(event))
+
     def test_link_customer_customer_created(self):
         msg = {
             "created": 1363911708,

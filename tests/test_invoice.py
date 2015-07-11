@@ -101,6 +101,9 @@ class InvoiceTest(TestCase):
                                               date=timezone.now(),
                                               charge="crg_xxxxxxxxx12345")
 
+    def test_tostring(self):
+        self.assertEquals("<total=50.00, paid=False, stripe_id=inv_xxxxxxxx123456>", str(self.invoice))
+
     @patch("stripe.Invoice.retrieve")
     def test_retry_true(self, invoice_retrieve_mock):
         return_value = self.invoice.retry()

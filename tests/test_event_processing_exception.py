@@ -73,19 +73,19 @@ class TestEventProcessingException(TestCase):
 
     def test_tostring(self):
         # Not sure if this is normal, but self.exception returns:
-        # AssertionError: '<IOError, pk=1, Event=ping - evt_xxxxxxxxxxxxx>' != '<Error in transmisssion., pk=1, Event=ping - evt_xxxxxxxxxxxxx>'
+        # AssertionError: '<IOError, pk=1, Event=ping - evt_xxxxxxxxxxxxx>' != '<Error in transmission., pk=1, Event=ping - evt_xxxxxxxxxxxxx>'
         # - <IOError, pk=1, Event=ping - evt_xxxxxxxxxxxxx>
         # ?  --
-        # + <Error in transmisssion., pk=1, Event=ping - evt_xxxxxxxxxxxxx>
+        # + <Error in transmission., pk=1, Event=<ping, stripe_id=evt_xxxxxxxxxxxxx>>
         # ?       ++++++++++++++++++
 
         try:
-            raise IOError("Error in transmisssion.")
+            raise IOError("Error in transmission.")
         except IOError as error:
             EventProcessingException.log(data=self.msg["data"], exception=error, event=self.event)
             exception = EventProcessingException.objects.get(event=self.event)
 
-        self.assertIn('<Error in transmisssion., pk=1, Event=ping - evt_xxxxxxxxxxxxx>', str(exception))
+        self.assertIn('<Error in transmission., pk=1, Event=<ping, stripe_id=evt_xxxxxxxxxxxxx>>', str(exception))
 
     def test_non_crud_link_customer_on_non_customer(self):
         self.assertEqual(None, self.event.link_customer())
@@ -95,4 +95,3 @@ class TestEventProcessingException(TestCase):
         event_copy.validated_message = self.invalid_customer_msg
         event_copy.save()
         self.assertEqual(None, event_copy.link_customer())
-

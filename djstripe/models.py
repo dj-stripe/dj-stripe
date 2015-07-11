@@ -68,7 +68,7 @@ class EventProcessingException(TimeStampedModel):
         )
 
     def __str__(self):
-        return "<%s, pk=%s, Event=%s>" % (self.message, self.pk, self.event)
+        return "<{message}, pk={pk}, Event={event}>".format(message=self.message, pk=self.pk, event=self.event)
 
 
 @python_2_unicode_compatible
@@ -87,7 +87,7 @@ class Event(StripeObject):
         return self.validated_message
 
     def __str__(self):
-        return "%s - %s" % (self.kind, self.stripe_id)
+        return "<{kind}, stripe_id={stripe_id}>".format(kind=self.kind, stripe_id=self.stripe_id)
 
     def link_customer(self):
         stripe_customer_id = None
@@ -226,6 +226,9 @@ class Transfer(StripeObject):
 
     objects = TransferManager()
 
+    def __str__(self):
+        return "<amount={amount}, status={status}, stripe_id={stripe_id}>".format(amount=self.amount, status=self.status, stripe_id=self.stripe_id)
+
     def update_status(self):
         self.status = stripe.Transfer.retrieve(self.stripe_id).status
         self.save()
@@ -299,12 +302,14 @@ class Customer(StripeObject):
     card_fingerprint = models.CharField(max_length=200, blank=True)
     card_last_4 = models.CharField(max_length=4, blank=True)
     card_kind = models.CharField(max_length=50, blank=True)
+    card_exp_month = models.PositiveIntegerField(blank=True, null=True)
+    card_exp_year = models.PositiveIntegerField(blank=True, null=True)
     date_purged = models.DateTimeField(null=True, editable=False)
 
     objects = CustomerManager()
 
     def __str__(self):
-        return smart_text(self.subscriber)
+        return "<{subscriber}, stripe_id={stripe_id}>".format(subscriber=smart_text(self.subscriber), stripe_id=self.stripe_id)
 
     @property
     def stripe_customer(self):
@@ -325,6 +330,8 @@ class Customer(StripeObject):
         self.card_fingerprint = ""
         self.card_last_4 = ""
         self.card_kind = ""
+        self.card_exp_month = None
+        self.card_exp_year = None
         self.date_purged = timezone.now()
         self.save()
 
@@ -401,6 +408,8 @@ class Customer(StripeObject):
         self.card_fingerprint = cu.active_card.fingerprint
         self.card_last_4 = cu.active_card.last4
         self.card_kind = cu.active_card.type
+        self.card_exp_month = cu.active_card.exp_month
+        self.card_exp_year = cu.active_card.exp_year
         self.save()
         card_changed.send(sender=self, stripe_response=cu)
 
@@ -427,6 +436,8 @@ class Customer(StripeObject):
             self.card_fingerprint = cu.active_card.fingerprint
             self.card_last_4 = cu.active_card.last4
             self.card_kind = cu.active_card.type
+            self.card_exp_month = cu.active_card.exp_month
+            self.card_exp_year = cu.active_card.exp_year
             self.save()
 
     def sync_invoices(self, cu=None, **kwargs):
@@ -652,6 +663,27 @@ class CurrentSubscription(TimeStampedModel):
 
         return True
 
+    def extend(self, delta):
+        if delta.total_seconds() < 0:
+            raise ValueError("delta should be a positive timedelta.")
+
+        period_end = None
+
+        if self.trial_end is not None and \
+           self.trial_end > timezone.now():
+            period_end = self.trial_end
+        else:
+            period_end = self.current_period_end
+
+        period_end += delta
+
+        self.customer.stripe_customer.update_subscription(
+            prorate=False,
+            trial_end=period_end,
+        )
+
+        self.customer.sync_current_subscription()
+
 
 class Invoice(StripeObject):
     customer = models.ForeignKey(Customer, related_name="invoices")
@@ -668,6 +700,9 @@ class Invoice(StripeObject):
 
     class Meta:
         ordering = ["-date"]
+
+    def __str__(self):
+        return "<total={total}, paid={paid}, stripe_id={stripe_id}>".format(total=self.total, paid=smart_text(self.paid), stripe_id=self.stripe_id)
 
     def retry(self):
         if not self.paid and not self.closed:
@@ -796,6 +831,9 @@ class InvoiceItem(TimeStampedModel):
     plan = models.ForeignKey('Plan', related_name='invoice_item', null=True, blank=True)
     quantity = models.IntegerField(null=True)
 
+    def __str__(self):
+        return "<amount={amount}, plan={plan}, stripe_id={stripe_id}>".format(amount=self.amount, plan=smart_text(self.plan), stripe_id=self.stripe_id)
+
     def plan_display(self):
         return self.plan.name
 
@@ -817,6 +855,9 @@ class Charge(StripeObject):
     charge_created = models.DateTimeField(null=True, blank=True)
 
     objects = ChargeManager()
+
+    def __str__(self):
+        return "<amount={amount}, paid={paid}, stripe_id={stripe_id}>".format(amount=self.amount, paid=smart_text(self.paid), stripe_id=self.stripe_id)
 
     def calculate_refund_amount(self, amount=None):
         eligible_to_refund = self.amount - (self.amount_refunded or 0)
@@ -918,7 +959,7 @@ class Plan(StripeObject):
     trial_period_days = models.IntegerField(null=True)
 
     def __str__(self):
-        return self.name
+        return "<{name}, stripe_id={stripe_id}>".format(name=smart_text(self.name), stripe_id=self.stripe_id)
 
     @classmethod
     def create(cls, metadata={}, **kwargs):
