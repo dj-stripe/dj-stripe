@@ -13,9 +13,10 @@ History
 * Email templates are now packaged during distribution.
 * sync_plans now takes an optional api_key
 * 100% test coverage
-* Stripe ID is now returned as part of each model's str method
+* Stripe ID is now returned as part of each model's str method (Thanks @areski)
 * Customer model now stores card expiration month and year (Thanks @jpadilla)
 * Ability to extend subscriptions (Thanks @TigerDX)
+* Support for plan heirarchies (Thanks @chrissmejia)
 * Rest API endpoints for Subscriptions [contrib] (Thanks @philippeluickx)
 * Admin interface search by email funtionality is removed (#221) (Thanks @jpadilla)
 

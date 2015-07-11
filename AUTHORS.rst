@@ -38,3 +38,4 @@ Contributors
 * José Padilla (@jpadilla)
 * Ben Murden (@benmurden)
 * Philippe Luickx (@philippeluickx)
+* Chriss Mejía (@chrissmejia)
