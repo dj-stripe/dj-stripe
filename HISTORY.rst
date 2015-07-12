@@ -3,7 +3,7 @@
 History
 =======
 
-0.6.0 (2015-07-??)
+0.6.0 (2015-07-12)
 ---------------------
 
 * Support for Django 1.6 and lower is now deprecated.
@@ -18,7 +18,7 @@ History
 * Ability to extend subscriptions (Thanks @TigerDX)
 * Support for plan heirarchies (Thanks @chrissmejia)
 * Rest API endpoints for Subscriptions [contrib] (Thanks @philippeluickx)
-* Admin interface search by email funtionality is removed (#221) (Thanks @jpadilla)
+* Admin interface search by email functionality is removed (#221) (Thanks @jpadilla)
 
 0.5.0 (2015-05-25)
 ---------------------
