@@ -7,7 +7,9 @@ sudo: false
 language: python
 
 # Leverage the pip cache
-cache: pip
+cache:
+  directories:
+    - $HOME/.cache/pip
 
 python:
   - 3.4
