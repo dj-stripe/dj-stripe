@@ -27,15 +27,6 @@
 
 
 
-{% if subscription.is_status_current and not subscription.is_status_temporarily_current %}<p>Next billed on {{ subscription.current_period_end|date }}.</p>
-			<p>You can <a href="{% url 'djstripe:subscribe' %}">change</a> your plan
-				or <a href="{% url 'djstripe:cancel_subscription' %}">cancel</a> your subscription.
-    		</p>
-			{% else %}
-			<p>You can <a href="{% url 'djstripe:subscribe' %}">subscribe</a>.</p>
-    		{% endif %}
-    		<p>Or consult your <a href="{% url 'djstripe:history' %}">payment history</a>.</p>
-
 
     {% if plans %}
         {# Show available plans #}
@@ -66,14 +57,13 @@
                         <tr>
                             <th>Plan</th>
                             <th>Interval</th>
-                            <th>Description</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         
                         {% for plan in plans %}
-                            <tr {% if plan.plan == subscription.plan %} 
+                            <tr {% if plan.interval == subscription.plan and customer.current_subscription.amount == plan.amount %} 
         						{% if subscription.is_status_current and not subscription.is_status_temporarily_current and subscription.status != subscription.STATUS_TRIALING %} 
         							class="success" 
         						{% elif subscription.is_status_temporarily_current or subscription.status == subscription.STATUS_TRIALING %} 
@@ -83,9 +73,8 @@
                             
                                 <td>{{ plan.name }}</td>
                                 <td>{{ plan.interval.title }}ly</td>
-                                <td>{{ plan.description }}</td>
                                 <td>
-                                	{% if plan.plan == subscription.plan and subscription.status != subscription.STATUS_CANCELLED %}
+                                	{% if plan.stripe_id == subscription.plan and subscription.status != subscription.STATUS_CANCELLED and customer.current_subscription.amount == plan.amount %}
                                         <strong>Your plan</strong>
                                     {% else %}
                                         Not your plan

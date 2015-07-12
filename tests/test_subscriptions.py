@@ -12,8 +12,8 @@ from stripe import InvalidRequestError
 
 from djstripe.exceptions import SubscriptionCancellationFailure
 from djstripe.models import convert_tstamp, Customer, CurrentSubscription
-from djstripe.settings import PAYMENTS_PLANS
 from tests import convert_to_fake_stripe_object
+from .plan_instances import basic_plan as plan
 
 
 def timestamp(year, month, day, hour, minute=0, second=0):
@@ -25,24 +25,6 @@ CREATE_TIME = timestamp(2014, 4, 1, 11)
 START_TIME = timestamp(2014, 4, 1, 12)
 END_TIME = timestamp(2014, 4, 11, 12)
 CANCELED_TIME = timestamp(2014, 4, 6, 12)
-
-BASIC_PLAN = {
-    "stripe_plan_id": "basic_id",
-    "name": "Basic Plan",
-    "description": "Basic Plan (monthly)",
-    "price": 10000,
-    "currency": "usd",
-    "interval": "month"
-}
-
-GOLD_PLAN = {
-    "stripe_plan_id": "gold_id",
-    "name": "Gold Plan",
-    "description": "Gold Plan (annual)",
-    "price": 100000,
-    "currency": "usd",
-    "interval": "year"
-}
 
 DUMMY_CUSTOMER_WITHOUT_SUB = {
     "object": "customer",
@@ -116,7 +98,7 @@ DUMMY_CUSTOMER_WITH_SUB_GOLD = copy.deepcopy(DUMMY_CUSTOMER_WITHOUT_SUB)
 DUMMY_CUSTOMER_WITH_SUB_GOLD["subscription"] = DUMMY_SUB_GOLD_WITH_PLAN
 
 
-def create_subscription(customer, plan="basic"):
+def create_subscription(customer, plan=plan):
     return CurrentSubscription.objects.create(
         customer=customer,
         plan=plan,
@@ -132,16 +114,6 @@ def version_tuple(v):
 
 
 class TestSingleSubscription(TestCase):
-
-    @classmethod
-    def setupClass(cls):
-        PAYMENTS_PLANS["basic"] = BASIC_PLAN
-        PAYMENTS_PLANS["gold"] = GOLD_PLAN
-
-    @classmethod
-    def tearDownClass(cls):
-        del PAYMENTS_PLANS["basic"]
-        del PAYMENTS_PLANS["gold"]
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="chris")
@@ -163,7 +135,7 @@ class TestSingleSubscription(TestCase):
         StripeCustomerMock.side_effect = [convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITHOUT_SUB),
                                           convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC)]
         self.assertEqual(self.customer.has_active_subscription(), False)
-        self.customer.subscribe("basic", charge_immediately=False)
+        self.customer.subscribe("basic_id", charge_immediately=False)
         self.assertEqual(self.customer.has_active_subscription(), True)
         sub = self.customer.current_subscription
         self.assertEqual(sub.quantity, 1)
@@ -176,12 +148,12 @@ class TestSingleSubscription(TestCase):
                                           convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_GOLD)]
         create_subscription(self.customer)
         self.assertEqual(self.customer.has_active_subscription(), True)
-        self.assertEqual(self.customer.current_subscription.plan, "basic")
-        self.customer.subscribe("gold", charge_immediately=False)
+        self.assertEqual(self.customer.current_subscription.plan.name, "Basic Plan")
+        self.customer.subscribe("gold_id", charge_immediately=False)
         self.assertEqual(self.customer.has_active_subscription(), True)
         sub = self.customer.current_subscription
         self.assertEqual(sub.amount, decimal.Decimal("1000.00"))
-        self.assertEqual(sub.plan, "gold")
+        self.assertEqual(sub.plan.name, "Gold Plan")
 
     def test_cancel_without_sub(self):
         with self.assertRaises(SubscriptionCancellationFailure):
@@ -268,15 +240,14 @@ class TestSingleSubscription(TestCase):
 class CurrentSubscriptionTest(TestCase):
 
     def setUp(self):
-        self.plan_id = "test"
-        self.current_subscription = CurrentSubscription.objects.create(plan=self.plan_id,
+        self.current_subscription = CurrentSubscription.objects.create(plan=plan,
                                                                        quantity=1,
                                                                        start=timezone.now(),
                                                                        amount=decimal.Decimal(25.00),
                                                                        status=CurrentSubscription.STATUS_PAST_DUE)
 
     def test_plan_display(self):
-        self.assertEquals(PAYMENTS_PLANS[self.plan_id]["name"], self.current_subscription.plan_display())
+        self.assertEquals(plan.name, self.current_subscription.plan_display())
 
     def test_status_display(self):
         self.assertEqual("Past Due", self.current_subscription.status_display())
@@ -285,7 +256,7 @@ class CurrentSubscriptionTest(TestCase):
         self.assertFalse(self.current_subscription.is_period_current())
 
     def test_is_status_temporarily_current_true(self):
-        current_subscription = CurrentSubscription.objects.create(plan=self.plan_id,
+        current_subscription = CurrentSubscription.objects.create(plan=plan,
                                                                   quantity=1,
                                                                   start=timezone.now(),
                                                                   amount=decimal.Decimal(25.00),

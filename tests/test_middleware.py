@@ -11,6 +11,8 @@ from django.utils import timezone
 from djstripe.models import Customer, CurrentSubscription
 from djstripe.middleware import SubscriptionPaymentMiddleware
 
+from .plan_instances import basic_plan as plan
+
 
 class MiddlewareURLTest(TestCase):
 
@@ -78,7 +80,7 @@ class MiddlewareLogicTest(TestCase):
         )
         self.subscription = CurrentSubscription.objects.create(
             customer=self.customer,
-            plan="test",
+            plan=plan,
             current_period_start=period_start,
             current_period_end=period_end,
             amount=(500 / decimal.Decimal("100.0")),

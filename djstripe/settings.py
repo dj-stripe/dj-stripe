@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from collections import OrderedDict
 import sys
 
 from django.apps import apps as django_apps
@@ -12,13 +11,9 @@ PY3 = sys.version > "3"
 
 subscriber_request_callback = getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK", (lambda request: request.user))
 
-INVOICE_FROM_EMAIL = getattr(settings, "DJSTRIPE_INVOICE_FROM_EMAIL", "billing@example.com")
-PAYMENTS_PLANS = getattr(settings, "DJSTRIPE_PLANS", {})
 PLAN_HIERARCHY = getattr(settings, "DJSTRIPE_PLAN_HIERARCHY", {})
 
-# Sort the PAYMENT_PLANS dictionary ascending by price.
-PAYMENT_PLANS = OrderedDict(sorted(PAYMENTS_PLANS.items(), key=lambda t: t[1]['price']))
-PLAN_CHOICES = [(plan, PAYMENTS_PLANS[plan].get("name", plan)) for plan in PAYMENTS_PLANS]
+INVOICE_FROM_EMAIL = getattr(settings, "DJSTRIPE_INVOICE_FROM_EMAIL", "billing@example.com")
 
 PASSWORD_INPUT_RENDER_VALUE = getattr(settings, 'DJSTRIPE_PASSWORD_INPUT_RENDER_VALUE', False)
 PASSWORD_MIN_LENGTH = getattr(settings, 'DJSTRIPE_PASSWORD_MIN_LENGTH', 6)
@@ -36,13 +31,6 @@ CURRENCIES = getattr(settings, "DJSTRIPE_CURRENCIES", (
 
 DEFAULT_PLAN = getattr(settings, "DJSTRIPE_DEFAULT_PLAN", None)
 
-PLAN_LIST = []
-for p in PAYMENTS_PLANS:
-    if PAYMENTS_PLANS[p].get("stripe_plan_id"):
-        plan = PAYMENTS_PLANS[p]
-        plan['plan'] = p
-        PLAN_LIST.append(plan)
-
 # Try to find the new settings variable first. If that fails, revert to the
 # old variable.
 trial_period_for_subscriber_callback = getattr(settings,
@@ -51,17 +39,6 @@ trial_period_for_subscriber_callback = getattr(settings,
 )
 
 DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
-
-
-def plan_from_stripe_id(stripe_id):
-    payment_plans = getattr(settings, "DJSTRIPE_PLANS", {})
-    plan_id = None
-
-    for key in payment_plans.keys():
-        if payment_plans[key].get("stripe_plan_id") == stripe_id:
-            plan_id = key
-
-    return plan_id
 
 
 def _check_subscriber_for_email_address(subscriber_model, message):
@@ -115,3 +92,13 @@ def get_subscriber_model():
         raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be implemented if a DJSTRIPE_SUBSCRIBER_MODEL is defined.")
 
     return subscriber_model
+
+
+def get_plan_choices():
+    from .models import Plan
+    PLAN_CHOICES = [(plan.stripe_id, plan.name) for plan in Plan.objects.all()]
+    return PLAN_CHOICES
+
+
+def plan_from_stripe_id(stripe_id):
+    return stripe_id

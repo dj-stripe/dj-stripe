@@ -16,6 +16,7 @@ from django.utils import timezone
 from mock import patch
 
 from djstripe.models import Customer, Invoice, Charge, Event
+from .plan_instances import basic_plan
 
 
 FAKE_INVOICE = {
@@ -45,7 +46,7 @@ FAKE_INVOICE = {
                 "created": 1429616163,
                 "amount": 995,
                 "currency": "usd",
-                "id": "test_id",
+                "id": "basic_id",
                 "object": "plan",
                 "livemode": True,
                 "interval_count": 1,
@@ -167,7 +168,7 @@ class InvoiceTest(TestCase):
         self.assertEqual(False, invoice_item.proration)
         self.assertEqual("", invoice_item.description)
         self.assertEqual("subscription", invoice_item.line_type)
-        self.assertEqual("test", invoice_item.plan)
+        self.assertEqual("Basic Plan", invoice_item.plan.name)
         self.assertEqual(1, invoice_item.quantity)
 
         # period_end is determined by latest invoice_item
@@ -188,7 +189,7 @@ class InvoiceTest(TestCase):
         self.assertEqual(1, invoice.items.count())
         invoice_item = invoice.items.all()[0]
 
-        self.assertEqual("", invoice_item.plan)
+        self.assertEqual(None, invoice_item.plan)
 
     @patch("djstripe.models.Charge.send_receipt")
     @patch("djstripe.models.Customer.record_charge")

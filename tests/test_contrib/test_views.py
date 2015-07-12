@@ -22,6 +22,8 @@ from rest_framework.test import APITestCase
 from djstripe.models import CurrentSubscription, Customer
 from djstripe import settings as djstripe_settings
 
+from ..plan_instances import test as test_plan
+
 if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
     import stripe
     stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -81,7 +83,7 @@ class RestSubscriptionTest(APITestCase):
         )
         CurrentSubscription.objects.create(
             customer=fake_customer,
-            plan="test",
+            plan=test_plan,
             quantity=1,
             start=timezone.now(),
             amount=Decimal(25.00),
@@ -90,12 +92,12 @@ class RestSubscriptionTest(APITestCase):
 
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["plan"], "test")
+        self.assertEqual(response.data["plan"], test_plan.id)
         self.assertEqual(response.data['status'], 'active')
         self.assertEqual(response.data['cancel_at_period_end'], False)
 
     @patch("djstripe.models.Customer.cancel_subscription", return_value=CurrentSubscription(status=CurrentSubscription.STATUS_ACTIVE))
-    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", amount=Decimal(25.00), status="active"))
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan=test_plan, amount=Decimal(25.00), status="active"))
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     def test_cancel_subscription(self, subscribe_mock, stripe_create_customer_mock, cancel_subscription_mock):
         fake_customer = Customer.objects.create(
@@ -104,7 +106,7 @@ class RestSubscriptionTest(APITestCase):
         )
         CurrentSubscription.objects.create(
             customer=fake_customer,
-            plan="test",
+            plan=test_plan,
             quantity=1,
             start=timezone.now(),
             amount=Decimal(25.00),

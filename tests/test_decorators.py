@@ -12,6 +12,8 @@ from django.utils import timezone
 from djstripe.decorators import subscription_payment_required
 from djstripe.models import Customer, CurrentSubscription
 
+from .plan_instances import basic_plan as plan
+
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
 
@@ -86,7 +88,7 @@ class TestSubscriptionPaymentRequired(TestCase):
         )
         CurrentSubscription.objects.create(
             customer=customer,
-            plan="test",
+            plan=plan,
             current_period_start=period_start,
             current_period_end=period_end,
             amount=(500 / decimal.Decimal("100.0")),

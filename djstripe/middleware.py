@@ -19,7 +19,6 @@ DJSTRIPE_SUBSCRIPTION_REDIRECT = getattr(
     "djstripe:subscribe"
 )
 
-
 # So we don't have crazy long lines of code
 EXEMPT = list(DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS)
 EXEMPT.append("[djstripe]")

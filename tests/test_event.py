@@ -19,6 +19,8 @@ import stripe
 from djstripe.models import Customer, Event, CurrentSubscription
 from tests import convert_to_fake_stripe_object
 
+from .plan_instances import basic_plan as plan
+
 
 class EventTest(TestCase):
     message = {
@@ -46,7 +48,7 @@ class EventTest(TestCase):
         "type": "ping"
     }
 
-    fake_current_subscription = CurrentSubscription(plan="test",
+    fake_current_subscription = CurrentSubscription(plan=plan,
                                                     quantity=1,
                                                     start=timezone.now(),
                                                     amount=Decimal(25.00))

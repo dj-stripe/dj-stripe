@@ -18,8 +18,11 @@ import stripe
 from mock import patch, PropertyMock
 
 from djstripe import settings as djstripe_settings
-from djstripe.models import Customer, CurrentSubscription
+from djstripe.models import Customer, CurrentSubscription, Plan
 from djstripe.views import ChangeCardView, HistoryView
+
+from .plan_instances import basic_plan as test_plan_07
+from .plan_instances import gold_plan as test_plan
 
 
 class AccountViewTest(TestCase):
@@ -48,18 +51,18 @@ class AccountViewTest(TestCase):
     @patch("stripe.Customer.create", return_value=PropertyMock(id=fake_stripe_customer_id))
     def test_plan_list_context(self, stripe_create_customer_mock):
         response = self.client.get(self.url)
-        self.assertEqual(djstripe_settings.PLAN_LIST, response.context["plans"])
+        self.assertEqual([x for x in Plan.objects.all()], [x for x in response.context["plans"]])
 
     @patch("stripe.Customer.create", return_value=PropertyMock(id=fake_stripe_customer_id))
     def test_subscription_context(self, stripe_create_customer_mock):
         response = self.client.get(self.url)
         self.assertEqual(None, response.context["subscription"])
 
-    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test_plan_07"))
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan=test_plan_07))
     @patch("stripe.Customer.create", return_value=PropertyMock(id=fake_stripe_customer_id))
     def test_subscription_context_with_plan(self, djstripe_customer_customer_subscription_mock, stripe_create_customer_mock):
         response = self.client.get(self.url)
-        self.assertEqual("test_plan_07", response.context["subscription"].plan)
+        self.assertEqual("Basic Plan", response.context["subscription"].plan.name)
 
 
 class ChangeCardViewTest(TestCase):
@@ -252,7 +255,7 @@ class ChangePlanViewTest(TestCase):
         self.assertIn("form", response.context)
         self.assertIn("You must already be subscribed to a plan before you can change it.", response.context["form"].errors["__all__"])
 
-    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", amount=Decimal(25.00)))
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan=test_plan, amount=Decimal(25.00)))
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     def test_change_sub_no_proration(self, subscribe_mock, current_subscription_mock):
         self.assertTrue(self.client.login(username="testuser1", password="123"))
@@ -262,17 +265,17 @@ class ChangePlanViewTest(TestCase):
         subscribe_mock.assert_called_once_with(self.user1.customer, "test0")
 
     @patch("djstripe.views.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
-    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", amount=Decimal(25.00)))
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan=test_plan, amount=Decimal(25.00)))
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     def test_change_sub_with_proration_downgrade(self, subscribe_mock, current_subscription_mock, proration_policy_mock):
         self.assertTrue(self.client.login(username="testuser1", password="123"))
         response = self.client.post(self.url, {"plan": "test0"})
         self.assertRedirects(response, reverse("djstripe:history"))
 
-        subscribe_mock.assert_called_once_with(self.user1.customer, "test0")
+        subscribe_mock.assert_called_once_with(self.user1.customer, "test0", prorate=True)
 
     @patch("djstripe.views.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
-    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", amount=Decimal(25.00)))
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan=test_plan, amount=Decimal(25.00)))
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     def test_change_sub_with_proration_upgrade(self, subscribe_mock, current_subscription_mock, proration_policy_mock):
         self.assertTrue(self.client.login(username="testuser1", password="123"))
@@ -283,16 +286,16 @@ class ChangePlanViewTest(TestCase):
         subscribe_mock.assert_called_once_with(self.user1.customer, "test2", prorate=True)
 
     @patch("djstripe.views.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
-    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", amount=Decimal(25.00)))
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan=test_plan, amount=Decimal(25.00)))
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     def test_change_sub_with_proration_same_plan(self, subscribe_mock, current_subscription_mock, proration_policy_mock):
         self.assertTrue(self.client.login(username="testuser1", password="123"))
         response = self.client.post(self.url, {"plan": "test"})
         self.assertRedirects(response, reverse("djstripe:history"))
 
-        subscribe_mock.assert_called_once_with(self.user1.customer, "test")
+        subscribe_mock.assert_called_once_with(self.user1.customer, "test", prorate=True)
 
-    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", amount=Decimal(25.00)))
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan=test_plan, amount=Decimal(25.00)))
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     def test_change_sub_same_plan(self, subscribe_mock, current_subscription_mock):
         self.assertTrue(self.client.login(username="testuser1", password="123"))

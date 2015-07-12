@@ -9,11 +9,11 @@
 
 from django import forms
 
-from .settings import PLAN_CHOICES
+from . import settings as djstripe_settings
 
 
 class PlanForm(forms.Form):
-    plan = forms.ChoiceField(choices=PLAN_CHOICES)
+    plan = forms.ChoiceField(choices=djstripe_settings.get_plan_choices())
 
 
 class CancelSubscriptionForm(forms.Form):

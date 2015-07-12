@@ -20,10 +20,11 @@ import stripe
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
 from djstripe.models import Customer, Charge, CurrentSubscription
+from .plan_instances import basic_plan, fish_plan
 
 
 class TestCustomer(TestCase):
-    fake_current_subscription = CurrentSubscription(plan="test_plan",
+    fake_current_subscription = CurrentSubscription(plan=basic_plan,
                                                     quantity=1,
                                                     start=timezone.now(),
                                                     amount=decimal.Decimal(25.00))
@@ -481,9 +482,9 @@ class TestCustomer(TestCase):
 
         self.customer.sync_current_subscription()
 
-        plan_getter_mock.assert_called_with("fish")
+        #plan_getter_mock.assert_called_with("fish")
 
-        self.assertEqual("test_plan", self.fake_current_subscription.plan)
+        self.assertEqual(fish_plan, self.fake_current_subscription.plan)
         self.assertEqual(decimal.Decimal("50.00"), self.fake_current_subscription.amount)
         self.assertEqual("tree", self.fake_current_subscription.status)
         self.assertEqual(5, self.fake_current_subscription.quantity)
@@ -518,7 +519,7 @@ class TestCustomer(TestCase):
     def test_subscribe_trial_days_kwarg(self, stripe_customer_mock, update_subscription_mock, sync_subscription_mock, send_invoice_mock):
         trial_days = 9
 
-        self.customer.subscribe(plan="test", trial_days=trial_days)
+        self.customer.subscribe(plan="test_trial_9", trial_days=trial_days)
         sync_subscription_mock.assert_called_once_with()
         send_invoice_mock.assert_called_once_with()
 
@@ -532,7 +533,7 @@ class TestCustomer(TestCase):
     @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=fake_current_subscription)
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock, return_value=PropertyMock())
     def test_subscribe_not_charge_immediately(self, stripe_customer_mock, customer_subscription_mock, sync_subscription_mock, send_invoice_mock):
-        self.customer.subscribe(plan="test", charge_immediately=False)
+        self.customer.subscribe(plan="basic_id", charge_immediately=False)
         sync_subscription_mock.assert_called_once_with()
         self.assertFalse(send_invoice_mock.called)
 
