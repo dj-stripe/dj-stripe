@@ -1,6 +1,15 @@
 # Config file for automatic testing at travis-ci.org
 
+# Trying out new travis containers
+# http://docs.travis-ci.com/user/migrating-from-legacy/?utm_source=legacy-notice&utm_medium=banner&utm_campaign=legacy-upgrade
+sudo: false
+
 language: python
+
+# Leverage the pip cache
+cache:
+  directories:
+    - $HOME/.cache/pip
 
 python:
   - 3.4
