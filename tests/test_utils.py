@@ -23,8 +23,14 @@ from djstripe.utils import subscriber_has_active_subscription, get_supported_cur
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
 from mock import patch
 from stripe import api_key
+from nose.plugins.skip import SkipTest
 
 from tests.apps.testapp.models import Organization
+from django.utils.timezone import get_current_timezone, utc
+
+# Some tests will always fail if test is run on a computer whose clock is not in UTC. Skip those tests
+# rather than failing, so that coverage and other data can still be collated in runtests.py
+system_clock_is_utc = get_current_timezone() == utc
 
 
 class TestDeprecationWarning(AssertWarnsEnabledTestCase):
@@ -78,6 +84,8 @@ class TestTimestampConversion(TestCase):
 
     @override_settings(USE_TZ=False)
     def test_conversion_without_field_name_no_tz(self):
+        if not system_clock_is_utc:
+            raise SkipTest()
         stamp = convert_tstamp(1365567407)
         self.assertEquals(
             stamp,
@@ -86,6 +94,8 @@ class TestTimestampConversion(TestCase):
 
     @override_settings(USE_TZ=False)
     def test_conversion_with_field_name_no_tz(self):
+        if not system_clock_is_utc:
+            raise SkipTest()
         stamp = convert_tstamp({"my_date": 1365567407}, "my_date")
         self.assertEquals(
             stamp,
