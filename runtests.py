@@ -45,6 +45,7 @@ settings.configure(
         "django.contrib.auth.middleware.AuthenticationMiddleware",
         "django.contrib.messages.middleware.MessageMiddleware"
     ),
+    NOSE_PLUGINS = ['nose.plugins.skip.Skip', ],
     SITE_ID=1,
     STRIPE_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", ""),
     STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", ""),
