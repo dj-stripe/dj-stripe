@@ -799,7 +799,7 @@ class Invoice(StripeObject):
     @staticmethod
     @webhook.handler(['invoice', ])
     def webhook_handler(event, data, cat, sub_cat):
-        if sub_cat in ["payment_failed", "payment_succeeded", ]:
+        if sub_cat in ["payment_failed", "payment_succeeded", "created", ]:
             invoice_data = data["object"]
             stripe_invoice = stripe.Invoice.retrieve(invoice_data["id"])
             Invoice.sync_from_stripe_data(stripe_invoice, send_receipt=djstripe_settings.SEND_INVOICE_RECEIPT_EMAILS)

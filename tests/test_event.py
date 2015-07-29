@@ -249,9 +249,10 @@ class EventTest(TestCase):
             valid=True
         )
         customer_get.return_value = self.customer
+        retrieve_mock.return_value = self.message['object']
         event.process()
         customer_get.assert_called_once_with(stripe_id=self.customer.stripe_id)
-        stripe_sync_mock.assert_called_once_with(event.webhook_message['object'])
+        stripe_sync_mock.assert_called_once_with(self.message['object'], send_receipt=True)
         self.assertTrue(event.processed)
 
     @patch('stripe.Charge.retrieve', return_value='hello')
