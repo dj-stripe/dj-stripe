@@ -1,3 +1,19 @@
+"""
+If having trouble due to system clock not being UTC, set this env before running runtests:
+       DJS_SKIP_UTC_TESTS="True"
+
+If you need to skip the coverage test (e.g. it apparently interferes with the debugger in PyCharm):
+       DJS_SKIP_COVERAGE="True"
+
+
+Rather than making these options permanent in your environment, it is recommended you run like this (which sets env
+for just one command):
+
+   DJS_SKIP_COVERAGE=True python runtests.py
+"""
+
+from distutils.util import strtobool
+
 import os
 import sys
 
@@ -7,9 +23,12 @@ from django.conf import settings
 from coverage import coverage
 from termcolor import colored
 
-cov = coverage(config_file=True)
-cov.erase()
-cov.start()
+disable_coverage = strtobool(os.environ.get('DJS_SKIP_COVERAGE', "False"))
+
+if not disable_coverage:
+    cov = coverage(config_file=True)
+    cov.erase()
+    cov.start()
 
 TESTS_THRESHOLD = 100
 TESTS_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
@@ -150,19 +169,24 @@ failures = test_runner.run_tests(["."])
 if failures:
     sys.exit(failures)
 
-# Announce coverage run
-sys.stdout.write(colored(text="\nStep 2: Generating coverage results.\n\n", color="yellow", attrs=["bold"]))
+if not disable_coverage:
+    # Announce coverage run
+    sys.stdout.write(colored(text="\nStep 2: Generating coverage results.\n\n", color="yellow", attrs=["bold"]))
 
-cov.stop()
-percentage = round(cov.report(show_missing=True), 2)
-cov.html_report(directory='cover')
-cov.save()
+    cov.stop()
+    percentage = round(cov.report(show_missing=True), 2)
+    cov.html_report(directory='cover')
+    cov.save()
 
-if percentage < TESTS_THRESHOLD:
-            sys.stderr.write(colored(text="YOUR CHANGES HAVE CAUSED TEST COVERAGE TO DROP. " +
-                                     "WAS {old}%, IS NOW {new}%.\n\n".format(old=TESTS_THRESHOLD, new=percentage),
-                                     color="red", attrs=["bold"]))
-            sys.exit(1)
+    if percentage < TESTS_THRESHOLD:
+                sys.stderr.write(colored(text="YOUR CHANGES HAVE CAUSED TEST COVERAGE TO DROP. " +
+                                         "WAS {old}%, IS NOW {new}%.\n\n".format(old=TESTS_THRESHOLD, new=percentage),
+                                         color="red", attrs=["bold"]))
+                sys.exit(1)
+else:
+    sys.stdout.write(colored(text="\nStep 2: Generating coverage results: SKIPPED due to environment variable setting! "
+                                  "[Do not submit code without running coverage].\n\n",
+                             color="yellow", attrs=["bold"]))
 
 # Announce flake8 run
 sys.stdout.write(colored(text="\nStep 3: Checking for pep8 errors.\n\n", color="yellow", attrs=["bold"]))
