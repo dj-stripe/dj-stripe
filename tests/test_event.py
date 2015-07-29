@@ -100,9 +100,10 @@ class EventTest(TestCase):
             kind="customer.created",
             livemode=True,
             webhook_message=msg,
-            validated_message=msg
+            validated_message=msg,
+            valid=True,
         )
-        event.link_customer()
+        event.process()
         self.assertEquals(event.customer, self.customer)
 
     def test_link_customer_customer_updated(self):
@@ -155,9 +156,10 @@ class EventTest(TestCase):
             kind="customer.updated",
             livemode=True,
             webhook_message=msg,
-            validated_message=msg
+            validated_message=msg,
+            valid=True,
         )
-        event.link_customer()
+        event.process()
         self.assertEquals(event.customer, self.customer)
 
     def test_link_customer_customer_deleted(self):
@@ -189,9 +191,10 @@ class EventTest(TestCase):
             kind="customer.deleted",
             livemode=True,
             webhook_message=msg,
-            validated_message=msg
+            validated_message=msg,
+            valid=True,
         )
-        event.link_customer()
+        event.process()
         self.assertEquals(event.customer, self.customer)
 
     @patch('stripe.Event.retrieve', return_value=convert_to_fake_stripe_object({"data": message["data"], "zebra": True, "alpha": False}))
@@ -234,9 +237,9 @@ class EventTest(TestCase):
         event.process()
         self.assertFalse(event.processed)
 
-    @patch('djstripe.models.Event.link_customer')
+    @patch('djstripe.models.Customer.objects.get')
     @patch('djstripe.models.Invoice.handle_event')
-    def test_process_invoice_event(self, handle_event_mock, link_customer_mock):
+    def test_process_invoice_event(self, handle_event_mock, customer_get):
         event = Event.objects.create(
             stripe_id=self.message["id"],
             kind="invoice.created",
@@ -244,9 +247,9 @@ class EventTest(TestCase):
             validated_message=self.message,
             valid=True
         )
-
+        customer_get.return_value = self.customer
         event.process()
-        link_customer_mock.assert_called_once_with()
+        customer_get.assert_called_once_with(stripe_id=self.customer.stripe_id)
         handle_event_mock.assert_called_once_with(event)
         self.assertTrue(event.processed)
 

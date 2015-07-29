@@ -25,7 +25,7 @@ from .managers import CustomerManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
-
+import webhook
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
@@ -89,25 +89,6 @@ class Event(StripeObject):
     def __str__(self):
         return "<{kind}, stripe_id={stripe_id}>".format(kind=self.kind, stripe_id=self.stripe_id)
 
-    def link_customer(self):
-        stripe_customer_id = None
-        stripe_customer_crud_events = [
-            "customer.created",
-            "customer.updated",
-            "customer.deleted"
-        ]
-        if self.kind in stripe_customer_crud_events:
-            stripe_customer_id = self.message["data"]["object"]["id"]
-        else:
-            stripe_customer_id = self.message["data"]["object"].get("customer", None)
-
-        if stripe_customer_id is not None:
-            try:
-                self.customer = Customer.objects.get(stripe_id=stripe_customer_id)
-                self.save()
-            except Customer.DoesNotExist:
-                pass
-
     def validate(self):
         evt = stripe.Event.retrieve(self.stripe_id)
         self.validated_message = json.loads(
@@ -160,10 +141,12 @@ class Event(StripeObject):
             "ping"
         """
         if self.valid and not self.processed:
+            kind_parts = self.kind.split(".")
+            type, sub_type = kind_parts[0], ".".join(kind_parts[1:])
+
             try:
-                # Link the customer
-                if not self.kind.startswith("plan.") and not self.kind.startswith("transfer."):
-                    self.link_customer()
+                webhook.call_handlers(self, self.message["data"], type, sub_type)
+                self.save()
 
                 # Handle events
                 if self.kind.startswith("invoice."):
@@ -592,6 +575,25 @@ class Customer(StripeObject):
     def record_charge(self, charge_id):
         data = stripe.Charge.retrieve(charge_id)
         return Charge.sync_from_stripe_data(data)
+
+    @staticmethod
+    @webhook.handler_all
+    def event_attach_customer(event, data, type, sub_type):
+        stripe_customer_crud_events = ["created", "updated", "deleted", ]
+        skip_events = ["plan", "transfer", ]
+
+        if type in skip_events:
+            return
+        elif type == "customer" and sub_type in stripe_customer_crud_events:
+            stripe_customer_id = data["object"]["id"]
+        else:
+            stripe_customer_id = data["object"].get("customer", None)
+
+        if stripe_customer_id:
+            try:
+                event.customer = Customer.objects.get(stripe_id=stripe_customer_id)
+            except Customer.DoesNotExist:
+                pass
 
 
 class CurrentSubscription(TimeStampedModel):
