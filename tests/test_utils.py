@@ -23,8 +23,18 @@ from djstripe.utils import subscriber_has_active_subscription, get_supported_cur
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
 from mock import patch
 from stripe import api_key
+from nose.plugins.skip import SkipTest
 
 from tests.apps.testapp.models import Organization
+import os
+from distutils.util import strtobool
+
+# Some tests will always fail if test is run on a computer whose clock is not in UTC. Skip those tests
+# rather than failing, so that coverage and other data can still be collated in runtests.py
+#
+# Not sure how to automatically detect UTC reliably (across Windows and Unix). So, you'll just
+# have to set a special ENV if you want to skip utc tests
+skip_utc_tests = strtobool(os.environ.get('DJS_SKIP_UTC_TESTS', "False"))
 
 
 class TestDeprecationWarning(AssertWarnsEnabledTestCase):
@@ -78,6 +88,8 @@ class TestTimestampConversion(TestCase):
 
     @override_settings(USE_TZ=False)
     def test_conversion_without_field_name_no_tz(self):
+        if skip_utc_tests:
+            raise SkipTest()
         stamp = convert_tstamp(1365567407)
         self.assertEquals(
             stamp,
@@ -86,6 +98,8 @@ class TestTimestampConversion(TestCase):
 
     @override_settings(USE_TZ=False)
     def test_conversion_with_field_name_no_tz(self):
+        if skip_utc_tests:
+            raise SkipTest()
         stamp = convert_tstamp({"my_date": 1365567407}, "my_date")
         self.assertEquals(
             stamp,
