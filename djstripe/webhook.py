@@ -22,14 +22,17 @@ registrations = defaultdict(list)
 registrations_global = list()
 
 
-def handler(f, events):
+def handler(events):
     """
     Decorator which registers a function as a webhook handler for the given
     types of webhook events
     """
-    for event in events:
-        registrations[event].append(f)
-    return f
+    def decorator(f):
+        for event in events:
+            registrations[event].append(f)
+        return f
+
+    return decorator
 
 
 def handler_all(f):

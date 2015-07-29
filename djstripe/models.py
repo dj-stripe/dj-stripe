@@ -146,25 +146,6 @@ class Event(StripeObject):
 
             try:
                 webhook.call_handlers(self, self.message["data"], type, sub_type)
-                self.save()
-
-                # Handle events
-                if self.kind.startswith("invoice."):
-                    Invoice.handle_event(self)
-                elif self.kind.startswith("charge."):
-                    self.customer.record_charge(self.message["data"]["object"]["id"])
-                elif self.kind.startswith("transfer."):
-                    Transfer.process_transfer(self, self.message["data"]["object"])
-                elif self.kind.startswith("customer.subscription."):
-                    if self.customer:
-                        if self.kind == "customer.subscription.deleted":
-                            self.customer.current_subscription.status = CurrentSubscription.STATUS_CANCELLED
-                            self.customer.current_subscription.canceled_at = timezone.now()
-                            self.customer.current_subscription.save()
-                        else:
-                            self.customer.sync_current_subscription()
-                elif self.kind == "customer.deleted":
-                    self.customer.purge()
                 self.send_signal()
                 self.processed = True
                 self.save()
@@ -269,6 +250,12 @@ class Transfer(StripeObject):
 
         if event.kind == "transfer.updated":
             obj.update_status()
+
+    @staticmethod
+    @webhook.handler(["transfer", ])
+    def webhook_handler(event, data, cat, sub_cat):
+        # TODO: re-retrieve this transfer object so we have it in proper API version
+        Transfer.process_transfer(event, data["object"])
 
 
 class TransferChargeFee(TimeStampedModel):
@@ -578,13 +565,13 @@ class Customer(StripeObject):
 
     @staticmethod
     @webhook.handler_all
-    def event_attach_customer(event, data, type, sub_type):
+    def event_attach_customer(event, data, cat, sub_cat):
         stripe_customer_crud_events = ["created", "updated", "deleted", ]
         skip_events = ["plan", "transfer", ]
 
-        if type in skip_events:
+        if cat in skip_events:
             return
-        elif type == "customer" and sub_type in stripe_customer_crud_events:
+        elif cat == "customer" and sub_cat in stripe_customer_crud_events:
             stripe_customer_id = data["object"]["id"]
         else:
             stripe_customer_id = data["object"].get("customer", None)
@@ -594,6 +581,20 @@ class Customer(StripeObject):
                 event.customer = Customer.objects.get(stripe_id=stripe_customer_id)
             except Customer.DoesNotExist:
                 pass
+
+    @staticmethod
+    @webhook.handler(['customer', ])
+    def webhook_handler(event, data, cat, sub_cat):
+        customer = event.customer
+        if customer:
+            if sub_cat == "subscription.deleted":
+                customer.current_subscription.status = CurrentSubscription.STATUS_CANCELLED
+                customer.current_subscription.canceled_at = timezone.now()
+                customer.current_subscription.save()
+            elif sub_cat.startswith("subscription."):
+                customer.sync_current_subscription()
+            elif sub_cat == "deleted":
+                customer.purge()
 
 
 class CurrentSubscription(TimeStampedModel):
@@ -795,13 +796,13 @@ class Invoice(StripeObject):
                 obj.send_receipt()
         return invoice
 
-    @classmethod
-    def handle_event(cls, event):
-        valid_events = ["invoice.payment_failed", "invoice.payment_succeeded"]
-        if event.kind in valid_events:
-            invoice_data = event.message["data"]["object"]
+    @staticmethod
+    @webhook.handler(['invoice', ])
+    def webhook_handler(event, data, cat, sub_cat):
+        if sub_cat in ["payment_failed", "payment_succeeded", ]:
+            invoice_data = data["object"]
             stripe_invoice = stripe.Invoice.retrieve(invoice_data["id"])
-            cls.sync_from_stripe_data(stripe_invoice, send_receipt=djstripe_settings.SEND_INVOICE_RECEIPT_EMAILS)
+            Invoice.sync_from_stripe_data(stripe_invoice, send_receipt=djstripe_settings.SEND_INVOICE_RECEIPT_EMAILS)
 
 
 class InvoiceItem(TimeStampedModel):
@@ -918,6 +919,12 @@ class Charge(StripeObject):
             ).send()
             self.receipt_sent = num_sent > 0
             self.save()
+
+    @staticmethod
+    @webhook.handler(['charge', ])
+    def webhook_handler(event, data, cat, sub_cat):
+        data = stripe.Charge.retrieve(data["object"]["id"])
+        return Charge.sync_from_stripe_data(data)
 
 
 INTERVALS = (
