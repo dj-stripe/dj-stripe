@@ -34,7 +34,7 @@ from distutils.util import strtobool
 #
 # Not sure how to automatically detect UTC reliably (across Windows and Unix). So, you'll just
 # have to set a special ENV if you want to skip utc tests
-skip_utc_tests = strtobool(os.environ.get('DJS_SKIP_UTC_TESTS', "False"))
+skip_utc_tests = strtobool(os.environ.get('DJSTRIPE_TESTS_SKIP_UTC_TESTS', "False"))
 
 
 class TestDeprecationWarning(AssertWarnsEnabledTestCase):
