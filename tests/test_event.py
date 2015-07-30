@@ -255,6 +255,41 @@ class EventTest(TestCase):
         stripe_sync_mock.assert_called_once_with(self.message['object'], send_receipt=True)
         self.assertTrue(event.processed)
 
+    @patch('djstripe.models.Customer.objects.get')
+    @patch('stripe.Invoice.retrieve')
+    @patch('djstripe.models.Invoice.sync_from_stripe_data')
+    def test_process_invoice_event_ignored(self, stripe_sync_mock, retrieve_mock, customer_get):
+        event = Event.objects.create(
+            stripe_id=self.message["id"],
+            kind="invoice.notanevent",
+            webhook_message=self.message,
+            validated_message=self.message,
+            valid=True
+        )
+        customer_get.return_value = self.customer
+        retrieve_mock.return_value = self.message['object']
+        event.process()
+        self.assertFalse(stripe_sync_mock.called)
+        self.assertTrue(event.processed)
+
+    @patch('djstripe.models.Customer.objects.get')
+    @patch('stripe.Invoice.retrieve')
+    @patch('djstripe.models.Invoice.sync_from_stripe_data')
+    def test_process_invoice_event_badcustomer(self, stripe_sync_mock, retrieve_mock, customer_get):
+        event = Event.objects.create(
+            stripe_id=self.message["id"],
+            kind="invoice.created",
+            webhook_message=self.message,
+            validated_message=self.message,
+            valid=True
+        )
+        customer_get.side_effect = Customer.DoesNotExist()
+        retrieve_mock.return_value = self.message['object']
+        event.process()
+        customer_get.assert_called_once_with(stripe_id=self.customer.stripe_id)
+        stripe_sync_mock.assert_called_once_with(self.message['object'], send_receipt=True)
+        self.assertTrue(event.processed)
+
     @patch('stripe.Charge.retrieve', return_value='hello')
     @patch('djstripe.models.Charge.sync_from_stripe_data')
     def test_process_charge_event(self, record_charge_mock, retrieve_mock):

@@ -4,7 +4,7 @@ Utils related to processing or registering for webhooks
 """
 from collections import defaultdict
 
-__all__ = ['handler', 'handler_all', 'call_handlers', 'mock_replacement', ]
+__all__ = ['handler', 'handler_all', 'call_handlers', ]
 
 
 # A model registers itself here if it wants to be in the list of processing
@@ -47,15 +47,3 @@ def handler_all(f):
 def call_handlers(event, data, type, sub_type):
     for handler in registrations_global + registrations[type]:
         handler(event, data, type, sub_type)
-
-
-def mock_replacement(old_func, new_func):
-    """
-    Search for all handlers that used the old function and replace with call
-    to the new function
-    """
-    lists = [registrations_global, ] + registrations.values()
-    for l in lists:
-        for i, f in enumerate(l):
-            if f == old_func:
-                l[i] = new_func
