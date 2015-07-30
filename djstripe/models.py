@@ -434,7 +434,7 @@ class Customer(StripeObject):
             if not at_period_end:
                 subscription.ended_at = subscription.canceled_at
             subscription.save()
-            
+
         return subscription
 
     def cancel(self, at_period_end=True):
@@ -586,9 +586,9 @@ class Customer(StripeObject):
 
                 if not Customer.allow_multiple_subscriptions:
                     break
-                
+
         return first_sub
-                
+
     def sync_current_subscription(self, cu=None):
         """
         Synchronise with Stripe when only using a single subscription.
