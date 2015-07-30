@@ -261,6 +261,8 @@ class TestMultipleSubscriptions(TestCase):
         stripe_subscription = MagicMock()
         p = PropertyMock(return_value="not_sub_id")
         type(stripe_subscription).stripe_id = p
+        p = PropertyMock(return_value=timezone.now() - datetime.timedelta(days=1))
+        type(stripe_subscription).trial_end = p
     
         self.customer.cancel_subscription(subscription=stripe_subscription)
     
@@ -429,6 +431,8 @@ class TestSingleSubscription(TestCase):
         stripe_subscription = MagicMock()
         p = PropertyMock(return_value="not_sub_id")
         type(stripe_subscription).stripe_id = p
+        p = PropertyMock(return_value=timezone.now() - datetime.timedelta(days=1))
+        type(stripe_subscription).trial_end = p
 
         self.customer.cancel_subscription(subscription=stripe_subscription)
 
