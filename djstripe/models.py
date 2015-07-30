@@ -916,7 +916,7 @@ class Invoice(StripeObject):
 
     @classmethod
     def handle_event(cls, event):
-        valid_events = ["invoice.payment_failed", "invoice.payment_succeeded"]
+        valid_events = ["invoice.payment_failed", "invoice.payment_succeeded", "invoice.created", ]
         if event.kind in valid_events:
             invoice_data = event.message["data"]["object"]
             stripe_invoice = stripe.Invoice.retrieve(invoice_data["id"])
