@@ -61,6 +61,16 @@ class EventTest(TestCase):
             subscriber=self.user
         )
 
+    def test_tostring(self):
+        event = Event.objects.create(
+            stripe_id=self.message["id"],
+            kind="eventkind",
+            webhook_message=self.message,
+            validated_message=self.message,
+            valid=True
+        )
+        self.assertEquals("<eventkind, stripe_id=evt_xxxxxxxxxxxxx>", str(event))
+
     def test_link_customer_customer_created(self):
         msg = {
             "created": 1363911708,
@@ -224,9 +234,9 @@ class EventTest(TestCase):
         event.process()
         self.assertFalse(event.processed)
 
-    @patch('djstripe.models.Event.link_customer')
-    @patch('djstripe.models.Invoice.handle_event')
-    def test_process_invoice_event(self, handle_event_mock, link_customer_mock):
+    @patch('stripe.Invoice.retrieve')
+    @patch('djstripe.models.Invoice.sync_from_stripe_data')
+    def test_process_invoice_event(self, stripe_sync_mock, retrieve_mock):
         event = Event.objects.create(
             stripe_id=self.message["id"],
             kind="invoice.created",
@@ -234,10 +244,8 @@ class EventTest(TestCase):
             validated_message=self.message,
             valid=True
         )
-
         event.process()
-        link_customer_mock.assert_called_once_with()
-        handle_event_mock.assert_called_once_with(event)
+        retrieve_mock.assert_called_once_with(self.message['data']['object']['id'])
         self.assertTrue(event.processed)
 
     @patch('djstripe.models.Customer.record_charge')

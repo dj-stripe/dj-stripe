@@ -3,7 +3,11 @@
 History
 =======
 
-0.6.0 (2015-06-??)
+0.7.0 (2015-08-??)
+---------------------
+* djstripe now responds to the invoice.created event (Thanks @wahuneke)
+
+0.6.0 (2015-07-12)
 ---------------------
 
 * Support for Django 1.6 and lower is now deprecated.
@@ -12,6 +16,13 @@ History
 * InvoiceItems.plan can now be null (as it is with individual charges), resolving #140 (Thanks @awechsler and @MichelleGlauser for help troubleshooting)
 * Email templates are now packaged during distribution.
 * sync_plans now takes an optional api_key
+* 100% test coverage
+* Stripe ID is now returned as part of each model's str method (Thanks @areski)
+* Customer model now stores card expiration month and year (Thanks @jpadilla)
+* Ability to extend subscriptions (Thanks @TigerDX)
+* Support for plan heirarchies (Thanks @chrissmejia)
+* Rest API endpoints for Subscriptions [contrib] (Thanks @philippeluickx)
+* Admin interface search by email funtionality is removed (#221) (Thanks @jpadilla)
 
 0.5.0 (2015-05-25)
 ---------------------

@@ -57,6 +57,80 @@ Example:
 
 .. _here: https://stripe.com/docs/api/python#create_plan
 
+DJSTRIPE_PLAN_HIERARCHY (={})
+===========================
+
+Payment plans levels. 
+
+Allows you to set levels of access to the plans.
+
+Example:
+
+.. code-block:: python
+
+    DJSTRIPE_PLANS = {
+        "bronze-monthly": {
+            ...
+        },
+        "bronze-yearly": {
+            ...
+        },
+        "silver-monthly": {
+            ...
+        },
+        "silver-yearly": {
+            ...
+        },
+        "gold-monthly": {
+            ...
+        },
+        "gold-yearly": {
+            ...
+        }
+    }
+
+    DJSTRIPE_PLAN_HIERARCHY = {
+        "bronze": {
+            "level": 1,
+            "plans": [
+                "bronze-monthly",
+                "bronze-yearly",
+            ]
+        },
+        "silver": {
+            "level": 2,
+            "plans": [
+                "silver-monthly",
+                "silver-yearly",
+            ]
+        },
+        "gold": {
+            "level": 3,
+            "plans": [
+                "gold-monthly",
+                "gold-yearly",
+            ]
+        },
+    }
+
+Use:
+
+.. code-block:: python
+
+    {% <plan_name>|djstripe_plan_level %}
+
+Example:
+
+.. code-block:: python
+
+    {% elif customer.current_subscription.plan == plan.plan %}
+        <h4>Your Current Plan</h4>
+    {% elif customer.current_subscription|djstripe_plan_level < plan.plan|djstripe_plan_level %}
+        <h4>Upgrade</h4>
+    {% elif customer.current_subscription|djstripe_plan_level > plan.plan|djstripe_plan_level %}
+        <h4>Downgrade</h4>
+    {% endif %}
+    
 DJSTRIPE_PRORATION_POLICY (=False)
 ====================================
 

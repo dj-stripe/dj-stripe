@@ -78,7 +78,9 @@ Now you can make your changes locally.
 
 6. When you're done making changes, check that your changes pass the tests, including
 testing other Python versions with tox. runtests will output both command line and 
-html coverage statistics and will warn you if your changes caused code coverage to drop.::
+html coverage statistics and will warn you if your changes caused code coverage to drop.
+Note that if your system time is not in UTC, some tests will fail. If you want to ignore
+those tests, the --skip-utc command line option is available on runtests.py.::
 
     $ pip install -r requirements_test.txt
     $ python runtests.py

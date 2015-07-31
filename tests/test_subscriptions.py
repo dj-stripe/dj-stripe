@@ -9,7 +9,6 @@ from django.utils import timezone
 
 from mock import patch, PropertyMock
 from stripe import InvalidRequestError
-from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
 from djstripe.exceptions import SubscriptionCancellationFailure
 from djstripe.models import convert_tstamp, Customer, CurrentSubscription
@@ -237,14 +236,64 @@ class TestSingleSubscription(TestCase):
         self.customer.update_plan_quantity(2, charge_immediately=False)
         self.assertEqual(self.customer.current_subscription.quantity, 2)
 
+    @patch("stripe.resource.Customer.update_subscription")
+    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
+    def test_extend(self, StripeCustomerMock, UpdateSubscriptionMock):
+        StripeCustomerMock.return_value = convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC)
+        subscription_instance = create_subscription(self.customer)
+        subscription_instance.current_period_end = timezone.datetime.fromtimestamp(END_TIME, tz=timezone.utc)
+        delta = timezone.timedelta(days=30)
+        self.customer.current_subscription.extend(delta)
+        UpdateSubscriptionMock.assert_called_once_with(prorate=False, trial_end=subscription_instance.current_period_end + delta)
 
-class DeprecationTests(AssertWarnsEnabledTestCase):
+    def test_extend_negative_delta(self):
+        delta = timezone.timedelta(days=-30)
+        create_subscription(self.customer)
+        with self.assertRaises(ValueError):
+            self.customer.current_subscription.extend(delta)
 
-    @patch("djstripe.models.Customer.cancel_subscription")
-    def test_cancel_deprecation(self, cancel_subscription_mock):
-        customer = Customer.objects.create()
+    @patch("stripe.resource.Customer.update_subscription")
+    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
+    def test_extend_with_trial(self, StripeCustomerMock, UpdateSubscriptionMock):
+        StripeCustomerMock.return_value = convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC)
+        subscription_instance = create_subscription(self.customer)
+        subscription_instance.trial_end = timezone.now() + timezone.timedelta(days=5)
 
-        with self.assertWarns(DeprecationWarning):
-            customer.cancel(at_period_end="cake")
+        delta = timezone.timedelta(days=30)
+        new_trial_end = subscription_instance.trial_end + delta
+        self.customer.current_subscription.extend(delta)
+        UpdateSubscriptionMock.assert_called_once_with(prorate=False, trial_end=new_trial_end)
 
-        cancel_subscription_mock.assert_called_once_with(at_period_end="cake")
+
+class CurrentSubscriptionTest(TestCase):
+
+    def setUp(self):
+        self.plan_id = "test"
+        self.current_subscription = CurrentSubscription.objects.create(plan=self.plan_id,
+                                                                       quantity=1,
+                                                                       start=timezone.now(),
+                                                                       amount=decimal.Decimal(25.00),
+                                                                       status=CurrentSubscription.STATUS_PAST_DUE)
+
+    def test_plan_display(self):
+        self.assertEquals(PAYMENTS_PLANS[self.plan_id]["name"], self.current_subscription.plan_display())
+
+    def test_status_display(self):
+        self.assertEqual("Past Due", self.current_subscription.status_display())
+
+    def test_is_period_current_no_current_period_end(self):
+        self.assertFalse(self.current_subscription.is_period_current())
+
+    def test_is_status_temporarily_current_true(self):
+        current_subscription = CurrentSubscription.objects.create(plan=self.plan_id,
+                                                                  quantity=1,
+                                                                  start=timezone.now(),
+                                                                  amount=decimal.Decimal(25.00),
+                                                                  status=CurrentSubscription.STATUS_PAST_DUE,
+                                                                  canceled_at=timezone.now() + datetime.timedelta(days=5),
+                                                                  cancel_at_period_end=True)
+
+        self.assertTrue(current_subscription.is_status_temporarily_current())
+
+    def test_is_status_temporarily_current_false(self):
+        self.assertFalse(self.current_subscription.is_status_temporarily_current())
