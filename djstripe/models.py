@@ -25,7 +25,7 @@ from .managers import CustomerManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
-from . import webhook
+from . import webhooks
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
@@ -141,11 +141,10 @@ class Event(StripeObject):
             "ping"
         """
         if self.valid and not self.processed:
-            kind_parts = self.kind.split(".")
-            type, sub_type = kind_parts[0], ".".join(kind_parts[1:])
+            event_type, event_subtype = self.kind.split(".", 1)
 
             try:
-                webhook.call_handlers(self, self.message["data"], type, sub_type)
+                webhooks.call_handlers(self, self.message["data"], event_type, event_subtype)
                 self.send_signal()
                 self.processed = True
                 self.save()
@@ -252,10 +251,10 @@ class Transfer(StripeObject):
             obj.update_status()
 
     @staticmethod
-    @webhook.handler(["transfer", ])
-    def webhook_handler(event, data, cat, sub_cat):
+    @webhooks.handler(["transfer"])
+    def webhook_handler(event, event_data, event_type, event_subtype):
         # TODO: re-retrieve this transfer object so we have it in proper API version
-        Transfer.process_transfer(event, data["object"])
+        Transfer.process_transfer(event, event_data["object"])
 
 
 class TransferChargeFee(TimeStampedModel):
@@ -564,17 +563,17 @@ class Customer(StripeObject):
         return Charge.sync_from_stripe_data(data)
 
     @staticmethod
-    @webhook.handler_all
-    def event_attach_customer(event, data, cat, sub_cat):
-        stripe_customer_crud_events = ["created", "updated", "deleted", ]
-        skip_events = ["plan", "transfer", ]
+    @webhooks.handler_all
+    def event_attach_customer(event, event_data, event_type, event_subtype):
+        stripe_customer_crud_events = ["created", "updated", "deleted"]
+        skip_events = ["plan", "transfer"]
 
-        if cat in skip_events:
+        if event_type in skip_events:
             return
-        elif cat == "customer" and sub_cat in stripe_customer_crud_events:
-            stripe_customer_id = data["object"]["id"]
+        elif event_type == "customer" and event_subtype in stripe_customer_crud_events:
+            stripe_customer_id = event_data["object"]["id"]
         else:
-            stripe_customer_id = data["object"].get("customer", None)
+            stripe_customer_id = event_data["object"].get("customer", None)
 
         if stripe_customer_id:
             try:
@@ -583,17 +582,17 @@ class Customer(StripeObject):
                 pass
 
     @staticmethod
-    @webhook.handler(['customer', ])
-    def webhook_handler(event, data, cat, sub_cat):
+    @webhooks.handler(['customer'])
+    def webhook_handler(event, event_data, event_type, event_subtype):
         customer = event.customer
         if customer:
-            if sub_cat == "subscription.deleted":
+            if event_subtype == "subscription.deleted":
                 customer.current_subscription.status = CurrentSubscription.STATUS_CANCELLED
                 customer.current_subscription.canceled_at = timezone.now()
                 customer.current_subscription.save()
-            elif sub_cat.startswith("subscription."):
+            elif event_subtype.startswith("subscription."):
                 customer.sync_current_subscription()
-            elif sub_cat == "deleted":
+            elif event_subtype == "deleted":
                 customer.purge()
 
 
@@ -797,10 +796,10 @@ class Invoice(StripeObject):
         return invoice
 
     @staticmethod
-    @webhook.handler(['invoice', ])
-    def webhook_handler(event, data, cat, sub_cat):
-        if sub_cat in ["payment_failed", "payment_succeeded", "created", ]:
-            invoice_data = data["object"]
+    @webhooks.handler(['invoice'])
+    def webhook_handler(event, event_data, event_type, event_subtype):
+        if event_subtype in ["payment_failed", "payment_succeeded", "created"]:
+            invoice_data = event_data["object"]
             stripe_invoice = stripe.Invoice.retrieve(invoice_data["id"])
             Invoice.sync_from_stripe_data(stripe_invoice, send_receipt=djstripe_settings.SEND_INVOICE_RECEIPT_EMAILS)
 
@@ -921,10 +920,10 @@ class Charge(StripeObject):
             self.save()
 
     @staticmethod
-    @webhook.handler(['charge', ])
-    def webhook_handler(event, data, cat, sub_cat):
-        data = stripe.Charge.retrieve(data["object"]["id"])
-        return Charge.sync_from_stripe_data(data)
+    @webhooks.handler(['charge'])
+    def webhook_handler(event, event_data, event_type, event_subtype):
+        event_data = stripe.Charge.retrieve(event_data["object"]["id"])
+        return Charge.sync_from_stripe_data(event_data)
 
 
 INTERVALS = (
