@@ -28,6 +28,12 @@ class TestCustomer(TestCase):
                                                     start=timezone.now(),
                                                     amount=decimal.Decimal(25.00))
 
+    fake_current_subscription_cancelled_in_stripe = CurrentSubscription(plan="test_plan",
+                                                                        quantity=1,
+                                                                        start=timezone.now(),
+                                                                        amount=decimal.Decimal(25.00),
+                                                                        status=CurrentSubscription.STATUS_ACTIVE)
+
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="patrick", email="patrick@gmail.com")
         self.customer = Customer.objects.create(
@@ -401,7 +407,8 @@ class TestCustomer(TestCase):
                 type="apple",
                 exp_month=12,
                 exp_year=2020,
-            )
+            ),
+            deleted=False
         )
 
         self.customer.sync()
@@ -412,12 +419,23 @@ class TestCustomer(TestCase):
         self.assertEqual(2020, self.customer.card_exp_year)
 
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock,
-           return_value=PropertyMock(active_card=None))
+           return_value=PropertyMock(active_card=None, deleted=False))
     def test_sync_no_card(self, stripe_customer_mock):
         self.customer.sync()
         self.assertEqual("YYYYYYYY", self.customer.card_fingerprint)
         self.assertEqual("2342", self.customer.card_last_4)
         self.assertEqual("Visa", self.customer.card_kind)
+
+    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock,
+           return_value=PropertyMock(deleted=True))
+    def test_sync_deleted_in_stripe(self, stripe_customer_mock):
+        self.customer.sync()
+        customer = Customer.objects.get(stripe_id=self.customer.stripe_id)
+        self.assertTrue(customer.subscriber is None)
+        self.assertTrue(customer.card_fingerprint == "")
+        self.assertTrue(customer.card_last_4 == "")
+        self.assertTrue(customer.card_kind == "")
+        self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
 
     @patch("djstripe.models.Invoice.sync_from_stripe_data")
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock,
@@ -494,6 +512,12 @@ class TestCustomer(TestCase):
         self.assertEqual(tz_test_time, self.fake_current_subscription.current_period_end)
         self.assertEqual(None, self.fake_current_subscription.trial_start)
         self.assertEqual(None, self.fake_current_subscription.trial_end)
+
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=fake_current_subscription_cancelled_in_stripe)
+    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock, return_value=PropertyMock(subscription=None))
+    def test_sync_current_subscription_subscription_cancelled_from_Stripe(self, stripe_customer_mock, customer_subscription_mock):
+        self.assertEqual(CurrentSubscription.STATUS_CANCELLED, self.customer.sync_current_subscription().status)
+
 
     @patch("djstripe.models.Customer.send_invoice")
     @patch("djstripe.models.Customer.sync_current_subscription")
