@@ -14,6 +14,7 @@ from django.test.testcases import TestCase
 from django.utils import timezone
 
 from mock import patch
+from djstripe.event_handlers import invoice_webhook_handler
 
 from djstripe.models import Customer, Invoice, Charge, Event
 
@@ -227,7 +228,7 @@ class InvoiceTest(TestCase):
     def test_handle_event_payment_failed(self, invoice_retrieve_mock, sync_invoice_mock):
         fake_event = Event(kind="invoice.payment_failed", validated_message={"data": {"object": {"id": "door"}}})
 
-        Invoice.webhook_handler(fake_event, fake_event.message["data"], "invoice", "payment_failed")
+        invoice_webhook_handler(fake_event, fake_event.message["data"], "invoice", "payment_failed")
 
         invoice_retrieve_mock.assert_called_once_with("door")
         sync_invoice_mock.assert_called_once_with("lock", send_receipt=True)
@@ -237,7 +238,7 @@ class InvoiceTest(TestCase):
     def test_handle_event_payment_succeeded(self, invoice_retrieve_mock, sync_invoice_mock):
         fake_event = Event(kind="invoice.payment_succeeded", validated_message={"data": {"object": {"id": "lock"}}})
 
-        Invoice.webhook_handler(fake_event, fake_event.message["data"], "invoice", "payment_failed")
+        invoice_webhook_handler(fake_event, fake_event.message["data"], "invoice", "payment_failed")
 
         invoice_retrieve_mock.assert_called_once_with("lock")
         sync_invoice_mock.assert_called_once_with("key", send_receipt=True)

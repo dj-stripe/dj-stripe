@@ -250,12 +250,6 @@ class Transfer(StripeObject):
         if event.kind == "transfer.updated":
             obj.update_status()
 
-    @staticmethod
-    @webhooks.handler(["transfer"])
-    def webhook_handler(event, event_data, event_type, event_subtype):
-        # TODO: re-retrieve this transfer object so we have it in proper API version
-        Transfer.process_transfer(event, event_data["object"])
-
 
 class TransferChargeFee(TimeStampedModel):
     transfer = models.ForeignKey(Transfer, related_name="charge_fee_details")
@@ -562,39 +556,6 @@ class Customer(StripeObject):
         data = stripe.Charge.retrieve(charge_id)
         return Charge.sync_from_stripe_data(data)
 
-    @staticmethod
-    @webhooks.handler_all
-    def event_attach_customer(event, event_data, event_type, event_subtype):
-        stripe_customer_crud_events = ["created", "updated", "deleted"]
-        skip_events = ["plan", "transfer"]
-
-        if event_type in skip_events:
-            return
-        elif event_type == "customer" and event_subtype in stripe_customer_crud_events:
-            stripe_customer_id = event_data["object"]["id"]
-        else:
-            stripe_customer_id = event_data["object"].get("customer", None)
-
-        if stripe_customer_id:
-            try:
-                event.customer = Customer.objects.get(stripe_id=stripe_customer_id)
-            except Customer.DoesNotExist:
-                pass
-
-    @staticmethod
-    @webhooks.handler(['customer'])
-    def webhook_handler(event, event_data, event_type, event_subtype):
-        customer = event.customer
-        if customer:
-            if event_subtype == "subscription.deleted":
-                customer.current_subscription.status = CurrentSubscription.STATUS_CANCELLED
-                customer.current_subscription.canceled_at = timezone.now()
-                customer.current_subscription.save()
-            elif event_subtype.startswith("subscription."):
-                customer.sync_current_subscription()
-            elif event_subtype == "deleted":
-                customer.purge()
-
 
 class CurrentSubscription(TimeStampedModel):
     STATUS_TRIALING = "trialing"
@@ -795,14 +756,6 @@ class Invoice(StripeObject):
                 obj.send_receipt()
         return invoice
 
-    @staticmethod
-    @webhooks.handler(['invoice'])
-    def webhook_handler(event, event_data, event_type, event_subtype):
-        if event_subtype in ["payment_failed", "payment_succeeded", "created"]:
-            invoice_data = event_data["object"]
-            stripe_invoice = stripe.Invoice.retrieve(invoice_data["id"])
-            Invoice.sync_from_stripe_data(stripe_invoice, send_receipt=djstripe_settings.SEND_INVOICE_RECEIPT_EMAILS)
-
 
 class InvoiceItem(TimeStampedModel):
     """
@@ -919,12 +872,6 @@ class Charge(StripeObject):
             self.receipt_sent = num_sent > 0
             self.save()
 
-    @staticmethod
-    @webhooks.handler(['charge'])
-    def webhook_handler(event, event_data, event_type, event_subtype):
-        event_data = stripe.Charge.retrieve(event_data["object"]["id"])
-        return Charge.sync_from_stripe_data(event_data)
-
 
 INTERVALS = (
     ('week', 'Week',),
@@ -1011,3 +958,8 @@ class Plan(StripeObject):
     def stripe_plan(self):
         """Return the plan data from Stripe."""
         return stripe.Plan.retrieve(self.stripe_id)
+
+
+# Much like registering signal handlers. We import this module so that its registrations get picked up
+# the NO QA directive tells flake8 to not complain about the unused import
+import event_handlers  # NOQA
