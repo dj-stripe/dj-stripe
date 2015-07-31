@@ -497,6 +497,7 @@ class Customer(StripeObject):
                     canceled_at=convert_tstamp(stripe_subscription, "canceled_at"),
                     start=convert_tstamp(stripe_subscription.start),
                     quantity=stripe_subscription.quantity
+                )
 
             if stripe_subscription.trial_start and stripe_subscription.trial_end:
                 current_subscription.trial_start = convert_tstamp(stripe_subscription.trial_start)
