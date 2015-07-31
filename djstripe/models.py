@@ -27,7 +27,7 @@ from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
 
-_log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
@@ -359,16 +359,16 @@ class Customer(StripeObject):
             """
             if self.current_subscription.trial_end and self.current_subscription.trial_end > timezone.now():
                 at_period_end = False
-            sub = self.stripe_customer.cancel_subscription(at_period_end=at_period_end)
+            stripe_subscription = self.stripe_customer.cancel_subscription(at_period_end=at_period_end)
         except stripe.InvalidRequestError as exc:
             raise SubscriptionCancellationFailure("Customer's information is not current with Stripe.\n{}".format(str(exc)))
 
-        current_subscription.status = sub.status
-        current_subscription.cancel_at_period_end = sub.cancel_at_period_end
-        current_subscription.current_period_end = convert_tstamp(sub, "current_period_end")
-        current_subscription.canceled_at = convert_tstamp(sub, "canceled_at") or timezone.now()
+        current_subscription.status = stripe_subscription.status
+        current_subscription.cancel_at_period_end = stripe_subscription.cancel_at_period_end
+        current_subscription.current_period_end = convert_tstamp(stripe_subscription, "current_period_end")
+        current_subscription.canceled_at = convert_tstamp(stripe_subscription, "canceled_at") or timezone.now()
         current_subscription.save()
-        cancelled.send(sender=self, stripe_response=sub)
+        cancelled.send(sender=self, stripe_response=stripe_subscription)
         return current_subscription
 
     def cancel(self, at_period_end=True):
@@ -389,22 +389,22 @@ class Customer(StripeObject):
             trial_days = djstripe_settings.trial_period_for_subscriber_callback(subscriber)
 
         stripe_customer = stripe.Customer.create(email=subscriber.email)
-        cus = Customer.objects.create(subscriber=subscriber, stripe_id=stripe_customer.id)
+        customer = Customer.objects.create(subscriber=subscriber, stripe_id=stripe_customer.id)
 
         if djstripe_settings.DEFAULT_PLAN and trial_days:
-            cus.subscribe(plan=djstripe_settings.DEFAULT_PLAN, trial_days=trial_days)
+            customer.subscribe(plan=djstripe_settings.DEFAULT_PLAN, trial_days=trial_days)
 
-        return cus
+        return customer
 
     def update_card(self, token):
-        cu = self.stripe_customer
-        cu.card = token
-        cu.save()
-        self.card_fingerprint = cu.active_card.fingerprint
-        self.card_last_4 = cu.active_card.last4
-        self.card_kind = cu.active_card.type
+        stripe_customer = self.stripe_customer
+        stripe_customer.card = token
+        stripe_customer.save()
+        self.card_fingerprint = stripe_customer.active_card.fingerprint
+        self.card_last_4 = stripe_customer.active_card.last4
+        self.card_kind = stripe_customer.active_card.type
         self.save()
-        card_changed.send(sender=self, stripe_response=cu)
+        card_changed.send(sender=self, stripe_response=stripe_customer)
 
     def retry_unpaid_invoices(self):
         self.sync_invoices()
@@ -423,89 +423,93 @@ class Customer(StripeObject):
         except stripe.InvalidRequestError:
             return False  # There was nothing to invoice
 
+    # TODO refactor, deprecation on cu parameter -> stripe_customer
     def sync(self, cu=None):
-        cu = cu or self.stripe_customer
+        stripe_customer = cu or self.stripe_customer
         if getattr(cu, 'deleted', False):
-            # Customer was deleted from stripe - what should we do?
-            pass
+            # Customer was deleted from stripe
+            self.purge()
         elif getattr(cu, 'active_card', None):
-            self.card_fingerprint = cu.active_card.fingerprint
-            self.card_last_4 = cu.active_card.last4
-            self.card_kind = cu.active_card.type
+            self.card_fingerprint = stripe_customer.active_card.fingerprint
+            self.card_last_4 = stripe_customer.active_card.last4
+            self.card_kind = stripe_customer.active_card.type
             self.save()
 
+    # TODO refactor, deprecation on cu parameter -> stripe_customer
     def sync_invoices(self, cu=None, **kwargs):
-        cu = cu or self.stripe_customer
-        for invoice in cu.invoices(**kwargs).data:
+        stripe_customer = cu or self.stripe_customer
+        for invoice in stripe_customer.invoices(**kwargs).data:
             Invoice.sync_from_stripe_data(invoice, send_receipt=False)
 
+    # TODO refactor, deprecation on cu parameter -> stripe_customer
     def sync_charges(self, cu=None, **kwargs):
-        cu = cu or self.stripe_customer
-        for charge in cu.charges(**kwargs).data:
+        stripe_customer = cu or self.stripe_customer
+        for charge in stripe_customer.charges(**kwargs).data:
             self.record_charge(charge.id)
 
+    # TODO refactor, deprecation on cu parameter -> stripe_customer
     def sync_current_subscription(self, cu=None):
-        cu = cu or self.stripe_customer
-        sub = getattr(cu, 'subscription', None)
-        cur_sub = getattr(self, 'current_subscription', None)
-        if sub:
-            if cur_sub:
-                _log.debug('Updating subscription')
-                cur_sub.plan = djstripe_settings.plan_from_stripe_id(sub.plan.id)
-                cur_sub.current_period_start = convert_tstamp(
-                    sub.current_period_start
+        stripe_subscription = getattr(cu, 'subscription', None)
+        current_subscription = getattr(self, 'current_subscription', None)
+
+        if stripe_subscription:
+            if current_subscription:
+                logger.debug('Updating subscription')
+                current_subscription.plan = djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id)
+                current_subscription.current_period_start = convert_tstamp(
+                    stripe_subscription.current_period_start
                 )
-                cur_sub.current_period_end = convert_tstamp(
-                    sub.current_period_end
+                current_subscription.current_period_end = convert_tstamp(
+                    stripe_subscription.current_period_end
                 )
-                cur_sub.amount = (sub.plan.amount / decimal.Decimal("100"))
-                cur_sub.status = sub.status
-                cur_sub.cancel_at_period_end = sub.cancel_at_period_end
-                cur_sub.canceled_at = convert_tstamp(sub, "canceled_at")
-                cur_sub.start = convert_tstamp(sub.start)
-                cur_sub.quantity = sub.quantity
-                cur_sub.save()
+                current_subscription.amount = (stripe_subscription.plan.amount / decimal.Decimal("100"))
+                current_subscription.status = stripe_subscription.status
+                current_subscription.cancel_at_period_end = stripe_subscription.cancel_at_period_end
+                current_subscription.canceled_at = convert_tstamp(stripe_subscription, "canceled_at")
+                current_subscription.start = convert_tstamp(stripe_subscription.start)
+                current_subscription.quantity = stripe_subscription.quantity
+                current_subscription.save()
             else:
-                _log.debug('Creating subscription')
-                cur_sub = CurrentSubscription.objects.create(
+                logger.debug('Creating subscription')
+                current_subscription = CurrentSubscription.objects.create(
                     customer=self,
-                    plan=djstripe_settings.plan_from_stripe_id(sub.plan.id),
+                    plan=djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id),
                     current_period_start=convert_tstamp(
-                        sub.current_period_start
+                        stripe_subscription.current_period_start
                     ),
                     current_period_end=convert_tstamp(
-                        sub.current_period_end
+                        stripe_subscription.current_period_end
                     ),
-                    amount=(sub.plan.amount / decimal.Decimal("100")),
-                    status=sub.status,
-                    cancel_at_period_end=sub.cancel_at_period_end,
-                    canceled_at=convert_tstamp(sub, "canceled_at"),
-                    start=convert_tstamp(sub.start),
-                    quantity=sub.quantity
+                    amount=(stripe_subscription.plan.amount / decimal.Decimal("100")),
+                    status=stripe_subscription.status,
+                    cancel_at_period_end=stripe_subscription.cancel_at_period_end,
+                    canceled_at=convert_tstamp(stripe_subscription, "canceled_at"),
+                    start=convert_tstamp(stripe_subscription.start),
+                    quantity=stripe_subscription.quantity
                 )
 
-            if sub.trial_start and sub.trial_end:
-                cur_sub.trial_start = convert_tstamp(sub.trial_start)
-                cur_sub.trial_end = convert_tstamp(sub.trial_end)
+            if stripe_subscription.trial_start and stripe_subscription.trial_end:
+                current_subscription.trial_start = convert_tstamp(stripe_subscription.trial_start)
+                current_subscription.trial_end = convert_tstamp(stripe_subscription.trial_end)
             else:
                 """
                 Avoids keeping old values for trial_start and trial_end
                 for cases where customer had a subscription with trial days
                 then one without that (s)he cancels.
                 """
-                cur_sub.trial_start = None
-                cur_sub.trial_end = None
+                current_subscription.trial_start = None
+                current_subscription.trial_end = None
 
-            cur_sub.save()
+            current_subscription.save()
 
-            return cur_sub
-        elif cur_sub and cur_sub.status != CurrentSubscription.STATUS_CANCELLED:
+            return current_subscription
+        elif current_subscription and current_subscription.status != CurrentSubscription.STATUS_CANCELLED:
             # Stripe says customer has no subscription but we think they have one.
             # This could happen if subscription is cancelled from Stripe Dashboard and webhook fails
-            _log.debug('Cancelling subscription for %s' % self)
-            cur_sub.status = CurrentSubscription.STATUS_CANCELLED
-            cur_sub.save()
-            return cur_sub
+            logger.debug('Cancelling subscription for %s' % self)
+            current_subscription.status = CurrentSubscription.STATUS_CANCELLED
+            current_subscription.save()
+            return current_subscription
 
     def update_plan_quantity(self, quantity, charge_immediately=False):
         self.subscribe(
@@ -518,7 +522,7 @@ class Customer(StripeObject):
 
     def subscribe(self, plan, quantity=1, trial_days=None,
                   charge_immediately=True, prorate=djstripe_settings.PRORATION_POLICY):
-        cu = self.stripe_customer
+        stripe_customer = self.stripe_customer
         """
         Trial_days corresponds to the value specified by the selected plan
         for the key trial_period_days.
@@ -527,14 +531,14 @@ class Customer(StripeObject):
             trial_days = djstripe_settings.PAYMENTS_PLANS[plan]["trial_period_days"]
 
         if trial_days:
-            resp = cu.update_subscription(
+            resp = stripe_customer.update_subscription(
                 plan=djstripe_settings.PAYMENTS_PLANS[plan]["stripe_plan_id"],
                 trial_end=timezone.now() + datetime.timedelta(days=trial_days),
                 prorate=prorate,
                 quantity=quantity
             )
         else:
-            resp = cu.update_subscription(
+            resp = stripe_customer.update_subscription(
                 plan=djstripe_settings.PAYMENTS_PLANS[plan]["stripe_plan_id"],
                 prorate=prorate,
                 quantity=quantity
