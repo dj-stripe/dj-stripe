@@ -624,7 +624,7 @@ class Customer(StripeObject):
         )
 
     def record_charge(self, charge_id):
-        data = stripe.Charge.retrieve(charge_id)
+        data = Charge.api().retrieve(charge_id)
         return Charge.sync_from_stripe_data(data)
 
 
@@ -996,7 +996,8 @@ class Plan(StripeObject):
             metadata = {}
 
         # For some reason, we double check for interval_count and make sure it's there... legacy behavior
-        if 'interval_count' not in kwargs: kwargs['interval_count'] = None
+        if 'interval_count' not in kwargs:
+            kwargs['interval_count'] = None
 
         # A few minor things are changed in the api-version of the create call
         api_kwargs = dict(kwargs)
