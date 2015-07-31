@@ -435,15 +435,15 @@ class Customer(StripeObject):
     # TODO refactor, deprecation on cu parameter -> stripe_customer
     def sync(self, cu=None):
         stripe_customer = cu or self.stripe_customer
-        if getattr(cu, 'deleted', False):
+        if getattr(stripe_customer, 'deleted', False):
             # Customer was deleted from stripe
             self.purge()
-        elif getattr(cu, 'active_card', None):
+        elif getattr(stripe_customer, 'active_card', None):
             self.card_fingerprint = stripe_customer.active_card.fingerprint
             self.card_last_4 = stripe_customer.active_card.last4
             self.card_kind = stripe_customer.active_card.type
-            self.card_exp_month = cu.active_card.exp_month
-            self.card_exp_year = cu.active_card.exp_year
+            self.card_exp_month = stripe_customer.active_card.exp_month
+            self.card_exp_year = stripe_customer.active_card.exp_year
             self.save()
 
     # TODO refactor, deprecation on cu parameter -> stripe_customer
@@ -460,7 +460,8 @@ class Customer(StripeObject):
 
     # TODO refactor, deprecation on cu parameter -> stripe_customer
     def sync_current_subscription(self, cu=None):
-        stripe_subscription = getattr(cu, 'subscription', None)
+        stripe_customer = cu or self.stripe_customer
+        stripe_subscription = getattr(stripe_customer, 'subscription', None)
         current_subscription = getattr(self, 'current_subscription', None)
 
         if stripe_subscription:
