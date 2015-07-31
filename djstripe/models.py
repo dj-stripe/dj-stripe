@@ -73,18 +73,64 @@ class EventProcessingException(TimeStampedModel):
 
 @python_2_unicode_compatible
 class Event(StripeObject):
+    """
+    Events are POSTed to our webhook url. They provide information about a Stripe event that just happened. Events
+    are processed in detail by their respective models (charge events by the Charge model, etc).
 
-    kind = models.CharField(max_length=250)
+    Events are initially _UNTRUSTED_, as it is possible for any web entity to post any data to our webhook url. Data
+    posted may be valid Stripe information, garbage, or even malicious. The 'valid' flag in this model monitors this.
+
+    API VERSIONING
+    ====
+    This is a tricky matter when it comes to webhooks. See the discussion here:
+        https://groups.google.com/a/lists.stripe.com/forum/#!topic/api-discuss/h5Y6gzNBZp8
+
+    In this discussion, it is noted that Webhooks are produced in one API version, which will usually be
+    different from the version supported by Stripe plugins (such as djstripe). The solution, described there,
+    is that the receipt of a webhook event should be 1st) validated by doing an event get using the API version
+    of the received hook event. Followed by 2nd) retrieve the referenced object (e.g. the Charge, the Customer, etc)
+    using the plugin's supported API version. Then 3rd) process that event using the retrieved object which will, only
+    now be in a format that you are certain to understand
+    """
+
+    # Stripe API_VERSION: model fields and methods audited to 2015-07-28 - @wahuneke
+    kind = models.CharField(max_length=250, help_text="Stripe's event description code (called 'type' in their API)")
     livemode = models.BooleanField(default=False)
-    customer = models.ForeignKey("Customer", null=True)
-    webhook_message = JSONField()
-    validated_message = JSONField(null=True)
-    valid = models.NullBooleanField(null=True)
-    processed = models.BooleanField(default=False)
+    request_id = models.CharField(max_length=50, null=True, blank=True,
+                                  help_text="Information about the request that triggered this event, for traceability "
+                                            "purposes. If empty string then this is an old entry without that data. If "
+                                            "Null then this is not an old entry, but a Stripe 'automated' event with "
+                                            "no associated request.")
+    event_timestamp = models.DateTimeField(null=True,
+                                           help_text="Empty for old entries. For all others, this entry field gives "
+                                                     "the timestamp of the time when the event occured from Stripe's "
+                                                     "perspective. This is as opposed to the time when we received "
+                                                     "notice of the event, which is not guaranteed to be the same time"
+                                                     "and which is recorded in a different field.")
+    received_api_version = models.CharField(max_length=15, blank=True,
+                                            help_text="the API version at which the event data was rendered. Blank for "
+                                                      "old entries only, all new entries will have this value")
+    webhook_message = JSONField(help_text="data received at webhook. data should be considered to be garbage "
+                                          "until valididty check is run and valid flag is set")
+
+    customer = models.ForeignKey("Customer", null=True,
+                                 help_text="In the event that there is a related customer, this will point to that "
+                                           "Customer record")
+
+    valid = models.NullBooleanField(null=True,
+                                    help_text="Tri-state bool. Null == validity not yet confirmed. Otherwise, this "
+                                              "field indicates that this event was checked via stripe api and found "
+                                              "to be either authentic (valid=True) or in-authentic (possibly "
+                                              "malicious)")
+
+    processed = models.BooleanField(default=False, help_text="If validity is performed, webhook event processor(s) "
+                                                             "may run to take further action on the event. Once these "
+                                                             "have run, this is set to True.")
 
     @property
     def message(self):
-        return self.validated_message
+        if self.valid:
+            return self.webhook_message
 
     def __str__(self):
         return "<{kind}, stripe_id={stripe_id}>".format(kind=self.kind, stripe_id=self.stripe_id)
@@ -109,15 +155,21 @@ class Event(StripeObject):
                 pass
 
     def validate(self):
+        # temporarily switch stripe API version to retrieve event in the exact format it was sent in
+        # (so we can see whether it matches)
+        version_bkp = stripe.api_version
+        stripe.api_version = self.received_api_version
         evt = stripe.Event.retrieve(self.stripe_id)
-        self.validated_message = json.loads(
+        stripe.api_version = version_bkp
+
+        validated_message = json.loads(
             json.dumps(
                 evt.to_dict(),
                 sort_keys=True,
                 cls=stripe.StripeObjectEncoder
             )
         )
-        self.valid = self.webhook_message["data"] == self.validated_message["data"]
+        self.valid = self.webhook_message["data"] == validated_message
         self.save()
 
     def process(self):
