@@ -10,6 +10,7 @@
 import datetime
 import decimal
 
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured
@@ -20,21 +21,12 @@ from django.utils import timezone
 from djstripe.models import convert_tstamp, Customer, CurrentSubscription
 from djstripe.utils import subscriber_has_active_subscription, get_supported_currency_choices
 
+from unittest.case import SkipTest
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
 from mock import patch
 from stripe import api_key
-from nose.plugins.skip import SkipTest
 
 from tests.apps.testapp.models import Organization
-import os
-from distutils.util import strtobool
-
-# Some tests will always fail if test is run on a computer whose clock is not in UTC. Skip those tests
-# rather than failing, so that coverage and other data can still be collated in runtests.py
-#
-# Not sure how to automatically detect UTC reliably (across Windows and Unix). So, you'll just
-# have to set a special ENV if you want to skip utc tests
-skip_utc_tests = strtobool(os.environ.get('DJSTRIPE_TESTS_SKIP_UTC_TESTS', "False"))
 
 
 class TestDeprecationWarning(AssertWarnsEnabledTestCase):
@@ -88,22 +80,26 @@ class TestTimestampConversion(TestCase):
 
     @override_settings(USE_TZ=False)
     def test_conversion_without_field_name_no_tz(self):
-        if skip_utc_tests:
-            raise SkipTest()
+        if settings.DJSTRIPE_TESTS_SKIP_UTC:
+            raise SkipTest("UTC test skipped via command-line arg.")
+
         stamp = convert_tstamp(1365567407)
         self.assertEquals(
             stamp,
-            datetime.datetime(2013, 4, 10, 4, 16, 47)
+            datetime.datetime(2013, 4, 10, 4, 16, 47),
+            "Is your system clock timezone in UTC? Change it, or run tests with '--skip-utc'."
         )
 
     @override_settings(USE_TZ=False)
     def test_conversion_with_field_name_no_tz(self):
-        if skip_utc_tests:
-            raise SkipTest()
+        if settings.DJSTRIPE_TESTS_SKIP_UTC:
+            raise SkipTest("UTC test skipped via command-line arg.")
+
         stamp = convert_tstamp({"my_date": 1365567407}, "my_date")
         self.assertEquals(
             stamp,
-            datetime.datetime(2013, 4, 10, 4, 16, 47)
+            datetime.datetime(2013, 4, 10, 4, 16, 47),
+            "Is your system clock timezone in UTC? Change it, or run tests with '--skip-utc'."
         )
 
     @override_settings(USE_TZ=False)
@@ -111,7 +107,7 @@ class TestTimestampConversion(TestCase):
         stamp = convert_tstamp({"my_date": 1365567407}, "foo")
         self.assertEquals(
             stamp,
-            None
+            None,
         )
 
 
