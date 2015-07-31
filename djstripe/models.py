@@ -410,8 +410,8 @@ class Customer(StripeObject):
         self.card_fingerprint = stripe_customer.active_card.fingerprint
         self.card_last_4 = stripe_customer.active_card.last4
         self.card_kind = stripe_customer.active_card.type
-        self.card_exp_month = cu.active_card.exp_month
-        self.card_exp_year = cu.active_card.exp_year
+        self.card_exp_month = stripe_customer.active_card.exp_month
+        self.card_exp_year = stripe_customer.active_card.exp_year
         self.save()
         card_changed.send(sender=self, stripe_response=stripe_customer)
 
