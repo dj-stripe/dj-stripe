@@ -7,6 +7,7 @@ History
 ---------------------
 * dj-stripe now responds to the invoice.created event (Thanks @wahuneke)
 * dj-stripe now cancels subscriptions and purges customers during sync if they were deleted from the stripe dashboard (Thanks @unformatt)
+* dj-stripe now checks for an active stripe subscription in the ``update_plan_quantity`` call (Thanks @ctrengove)
 
 0.6.0 (2015-07-12)
 ---------------------
