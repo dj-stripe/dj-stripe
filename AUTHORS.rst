@@ -41,3 +41,4 @@ Contributors
 * Chriss Mejía (@chrissmejia)
 * Bill Huneke (@wahuneke)
 * Matt Shaw (@unformatt)
+* Chris Trengove (@ctrengove)
