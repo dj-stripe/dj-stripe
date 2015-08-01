@@ -106,52 +106,27 @@ class Event(StripeObject):
 
     def process(self):
         """
-            "account.updated",
-            "account.application.deauthorized",
-            "charge.succeeded",
-            "charge.failed",
-            "charge.refunded",
-            "charge.dispute.created",
-            "charge.dispute.updated",
-            "charge.dispute.closed",
-            "customer.created",
-            "customer.updated",
-            "customer.deleted",
-            "customer.source.created",
-            "customer.subscription.created",
-            "customer.subscription.updated",
-            "customer.subscription.deleted",
-            "customer.subscription.trial_will_end",
-            "customer.discount.created",
-            "customer.discount.updated",
-            "customer.discount.deleted",
-            "invoice.created",
-            "invoice.updated",
-            "invoice.payment_succeeded",
-            "invoice.payment_failed",
-            "invoiceitem.created",
-            "invoiceitem.updated",
-            "invoiceitem.deleted",
-            "plan.created",
-            "plan.updated",
-            "plan.deleted",
-            "coupon.created",
-            "coupon.updated",
-            "coupon.deleted",
-            "transfer.created",
-            "transfer.updated",
-            "transfer.failed",
-            "ping"
+        Call whatever webhook event handlers have registered for this event, based on event "type" and
+        event "sub type"
+
+        See event handlers registered in djstripe.event_handlers module (or handlers registered in djstripe plugins or
+        contrib packages)
         """
         if self.valid and not self.processed:
             event_type, event_subtype = self.kind.split(".", 1)
 
             try:
+                # TODO: would it make sense to wrap the next 4 lines in a transaction.atomic context? Yes it would,
+                # except that some webhook handlers can have side effects outside of our local database, meaning that
+                # even if we rollback on our database, some updates may have been sent to Stripe, etc in resposne to
+                # webhooks...
                 webhooks.call_handlers(self, self.message["data"], event_type, event_subtype)
                 self.send_signal()
                 self.processed = True
                 self.save()
             except stripe.StripeError as exc:
+                # TODO: What if we caught all exceptions or a broader range of exceptions here? How about DoesNotExist
+                # exceptions, for instance? or how about TypeErrors, KeyErrors, ValueErrors, etc?
                 EventProcessingException.log(
                     data=exc.http_body,
                     exception=exc,
