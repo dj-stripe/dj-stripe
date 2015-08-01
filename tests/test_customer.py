@@ -533,7 +533,7 @@ class TestCustomer(TestCase):
         _, call_kwargs = update_subscription_mock.call_args
 
         self.assertIn("trial_end", call_kwargs)
-        self.assertLess(call_kwargs["trial_end"], timezone.now() + datetime.timedelta(days=trial_days))
+        self.assertLessEqual(call_kwargs["trial_end"], timezone.now() + datetime.timedelta(days=trial_days))
 
     @patch("djstripe.models.Customer.send_invoice")
     @patch("djstripe.models.Customer.sync_current_subscription")
@@ -549,7 +549,7 @@ class TestCustomer(TestCase):
         _, call_kwargs = update_subscription_mock.call_args
 
         self.assertIn("trial_end", call_kwargs)
-        self.assertLess(call_kwargs["trial_end"], timezone.now() + datetime.timedelta(days=trial_days))
+        self.assertLessEqual(call_kwargs["trial_end"], timezone.now() + datetime.timedelta(days=trial_days))
 
     @patch("djstripe.models.Customer.send_invoice")
     @patch("djstripe.models.Customer.sync_current_subscription")
