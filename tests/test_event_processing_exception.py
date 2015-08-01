@@ -85,13 +85,18 @@ class TestEventProcessingException(TestCase):
             EventProcessingException.log(data=self.msg["data"], exception=error, event=self.event)
             exception = EventProcessingException.objects.get(event=self.event)
 
-        self.assertIn('<Error in transmission., pk=1, Event=<ping, stripe_id=evt_xxxxxxxxxxxxx>>', str(exception))
+        # It may be too strict to assert the pk? Maybe incr field not reset in some psql implementations?
+        # self.assertIn('<Error in transmission., pk=1, Event=<ping, stripe_id=evt_xxxxxxxxxxxxx>>', str(exception))
+        self.assertIn('<Error in transmission., pk=', str(exception))
+        self.assertIn(', Event=<ping, stripe_id=evt_xxxxxxxxxxxxx>>', str(exception))
 
     def test_non_crud_link_customer_on_non_customer(self):
-        self.assertEqual(None, self.event.link_customer())
+        self.event.process()
+        self.assertEqual(None, self.event.customer)
 
     def test_non_crud_link_customer_on_invalid_customer(self):
         event_copy = deepcopy(self.event)
         event_copy.validated_message = self.invalid_customer_msg
         event_copy.save()
-        self.assertEqual(None, event_copy.link_customer())
+        event_copy.process()
+        self.assertEqual(None, event_copy.customer)

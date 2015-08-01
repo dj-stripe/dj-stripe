@@ -5,7 +5,8 @@ History
 
 0.7.0 (2015-08-??)
 ---------------------
-* djstripe now responds to the invoice.created event (Thanks @wahuneke)
+* dj-stripe now responds to the invoice.created event (Thanks @wahuneke)
+* dj-stripe now cancels subscriptions and purges customers during sync if they were deleted from the stripe dashboard (Thanks @unformatt)
 
 0.6.0 (2015-07-12)
 ---------------------
