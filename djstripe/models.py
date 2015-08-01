@@ -46,11 +46,40 @@ def convert_tstamp(response, field_name=None):
 
 
 class StripeObject(TimeStampedModel):
+    # This must be defined in descendants of this model/mixin
+    # e.g. "Event", "Charge", "Customer", etc.
+    stripe_api_name = None
 
     stripe_id = models.CharField(max_length=50, unique=True)
 
-    class Meta:
+    class Meta(object):
         abstract = True
+
+    @classmethod
+    def api(cls):
+        """
+        Get the api object for this type of stripe object (requires
+        stripe_api_name attribute to be set on model).
+        """
+        if cls.stripe_api_name is None:
+            raise NotImplementedError("StripeObject descendants are required to define "
+                                      "the stripe_api_name attribute")
+        # e.g. stripe.Event, stripe.Charge, etc
+        return getattr(stripe, cls.stripe_api_name)
+
+    def api_retrieve(self):
+        """
+        Implement very commonly used API function 'retrieve'
+        """
+        # Run stripe.X.retreive(id)
+        return type(self).api().retrieve(self.stripe_id)
+
+    @classmethod
+    def api_create(cls, **kwargs):
+        """
+        Call the stripe API's create operation for this model
+        """
+        return cls.api().create(**kwargs)
 
 
 @python_2_unicode_compatible
@@ -96,7 +125,11 @@ class Event(StripeObject):
     now be in a format that you are certain to understand
     """
 
+    #
     # Stripe API_VERSION: model fields and methods audited to 2015-07-28 - @wahuneke
+    #
+
+    stripe_api_name = "Event"
     kind = models.CharField(max_length=250, help_text="Stripe's event description code (called 'type' in their API)")
     livemode = models.BooleanField(default=False)
     request_id = models.CharField(max_length=50, null=True, blank=True,
@@ -138,14 +171,18 @@ class Event(StripeObject):
     def __str__(self):
         return "<{kind}, stripe_id={stripe_id}>".format(kind=self.kind, stripe_id=self.stripe_id)
 
-    def validate(self):
-        # temporarily switch stripe API version to retrieve event in the exact format it was sent in
-        # (so we can see whether it matches)
+    def api_retrieve(self):
+        # Event retrieve is special. For Event we don't retrieve using djstripe's API version. We always retrieve
+        # using the API version that was used to send the Event (which depends on the Stripe account holders settings
         version_bkp = stripe.api_version
         stripe.api_version = self.received_api_version
-        evt = stripe.Event.retrieve(self.stripe_id)
+        evt = super(Event, self).api_retrieve()
         stripe.api_version = version_bkp
 
+        return evt
+
+    def validate(self):
+        evt = self.api_retrieve()
         validated_message = json.loads(
             json.dumps(
                 evt.to_dict(),
@@ -197,6 +234,8 @@ class Event(StripeObject):
 
 
 class Transfer(StripeObject):
+    stripe_api_name = "Transfer"
+
     event = models.ForeignKey(Event, related_name="transfers")
     amount = models.DecimalField(decimal_places=2, max_digits=7)
     status = models.CharField(max_length=25)
@@ -223,7 +262,7 @@ class Transfer(StripeObject):
         return "<amount={amount}, status={status}, stripe_id={stripe_id}>".format(amount=self.amount, status=self.status, stripe_id=self.stripe_id)
 
     def update_status(self):
-        self.status = stripe.Transfer.retrieve(self.stripe_id).status
+        self.status = self.api_retrieve().status
         self.save()
 
     @classmethod
@@ -291,6 +330,8 @@ class TransferChargeFee(TimeStampedModel):
 
 @python_2_unicode_compatible
 class Customer(StripeObject):
+    stripe_api_name = "Customer"
+
     subscriber = models.OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
     card_fingerprint = models.CharField(max_length=200, blank=True)
     card_last_4 = models.CharField(max_length=4, blank=True)
@@ -306,7 +347,7 @@ class Customer(StripeObject):
 
     @property
     def stripe_customer(self):
-        return stripe.Customer.retrieve(self.stripe_id)
+        return self.api_retrieve()
 
     def purge(self):
         try:
@@ -386,7 +427,7 @@ class Customer(StripeObject):
         if djstripe_settings.trial_period_for_subscriber_callback:
             trial_days = djstripe_settings.trial_period_for_subscriber_callback(subscriber)
 
-        stripe_customer = stripe.Customer.create(email=subscriber.email)
+        stripe_customer = cls.api_create(email=subscriber.email)
         customer = Customer.objects.create(subscriber=subscriber, stripe_id=stripe_customer.id)
 
         if djstripe_settings.DEFAULT_PLAN and trial_days:
@@ -417,7 +458,7 @@ class Customer(StripeObject):
 
     def send_invoice(self):
         try:
-            invoice = stripe.Invoice.create(customer=self.stripe_id)
+            invoice = Invoice.api_create(customer=self.stripe_id)
             invoice.pay()
             return True
         except stripe.InvalidRequestError:
@@ -561,7 +602,7 @@ class Customer(StripeObject):
             raise ValueError(
                 "You must supply a decimal value representing dollars."
             )
-        resp = stripe.Charge.create(
+        resp = Charge.api_create(
             amount=int(amount * 100),  # Convert dollars into cents
             currency=currency,
             customer=self.stripe_id,
@@ -608,7 +649,7 @@ class Customer(StripeObject):
         )
 
     def record_charge(self, charge_id):
-        data = stripe.Charge.retrieve(charge_id)
+        data = Charge.api().retrieve(charge_id)
         return Charge.sync_from_stripe_data(data)
 
 
@@ -693,6 +734,8 @@ class CurrentSubscription(TimeStampedModel):
 
 
 class Invoice(StripeObject):
+    stripe_api_name = "Invoice"
+
     customer = models.ForeignKey(Customer, related_name="invoices")
     attempted = models.NullBooleanField()
     attempts = models.PositiveIntegerField(null=True)
@@ -713,7 +756,7 @@ class Invoice(StripeObject):
 
     def retry(self):
         if not self.paid and not self.closed:
-            inv = stripe.Invoice.retrieve(self.stripe_id)
+            inv = self.api_retrieve()
             inv.pay()
             return True
         return False
@@ -838,6 +881,8 @@ class InvoiceItem(TimeStampedModel):
 
 
 class Charge(StripeObject):
+    stripe_api_name = "Charge"
+
     customer = models.ForeignKey(Customer, related_name="charges")
     invoice = models.ForeignKey(Invoice, null=True, related_name="charges")
     card_last_4 = models.CharField(max_length=4, blank=True)
@@ -867,7 +912,7 @@ class Charge(StripeObject):
         return int(amount_to_refund * 100)
 
     def refund(self, amount=None):
-        charge_obj = stripe.Charge.retrieve(self.stripe_id).refund(
+        charge_obj = self.api_retrieve().refund(
             amount=self.calculate_refund_amount(amount=amount)
         )
         return Charge.sync_from_stripe_data(charge_obj)
@@ -878,7 +923,7 @@ class Charge(StripeObject):
         where first you created a charge with the capture option set to false.
         See https://stripe.com/docs/api#capture_charge
         """
-        charge_obj = stripe.Charge.retrieve(self.stripe_id).capture()
+        charge_obj = self.api_retrieve().capture()
         return Charge.sync_from_stripe_data(charge_obj)
 
     @classmethod
@@ -937,6 +982,7 @@ INTERVALS = (
 @python_2_unicode_compatible
 class Plan(StripeObject):
     """A Stripe Plan."""
+    stripe_api_name = "Plan"
 
     name = models.CharField(max_length=100, null=False)
     currency = models.CharField(
@@ -961,28 +1007,24 @@ class Plan(StripeObject):
         return "<{name}, stripe_id={stripe_id}>".format(name=smart_text(self.name), stripe_id=self.stripe_id)
 
     @classmethod
-    def create(cls, metadata={}, **kwargs):
+    def create(cls, metadata=None, **kwargs):
         """Create and then return a Plan (both in Stripe, and in our db)."""
+        if metadata is None:
+            metadata = {}
 
-        stripe.Plan.create(
-            id=kwargs['stripe_id'],
-            amount=int(kwargs['amount'] * 100),
-            currency=kwargs['currency'],
-            interval=kwargs['interval'],
-            interval_count=kwargs.get('interval_count', None),
-            name=kwargs['name'],
-            trial_period_days=kwargs.get('trial_period_days'),
-            metadata=metadata)
+        # For some reason, we double check for interval_count and make sure it's there... legacy behavior
+        if 'interval_count' not in kwargs:
+            kwargs['interval_count'] = None
 
-        plan = Plan.objects.create(
-            stripe_id=kwargs['stripe_id'],
-            amount=kwargs['amount'],
-            currency=kwargs['currency'],
-            interval=kwargs['interval'],
-            interval_count=kwargs.get('interval_count', None),
-            name=kwargs['name'],
-            trial_period_days=kwargs.get('trial_period_days'),
-        )
+        # A few minor things are changed in the api-version of the create call
+        api_kwargs = dict(kwargs)
+        api_kwargs['id'] = api_kwargs['stripe_id']
+        del(api_kwargs['stripe_id'])
+        api_kwargs['amount'] = int(api_kwargs['amount'] * 100)
+
+        cls.api_create(metadata=metadata, **api_kwargs)
+
+        plan = Plan.objects.create(**kwargs)
 
         return plan
 
@@ -1003,7 +1045,7 @@ class Plan(StripeObject):
 
         """
 
-        p = stripe.Plan.retrieve(self.stripe_id)
+        p = self.api_retrieve()
         p.name = self.name
         p.save()
 
@@ -1012,7 +1054,7 @@ class Plan(StripeObject):
     @property
     def stripe_plan(self):
         """Return the plan data from Stripe."""
-        return stripe.Plan.retrieve(self.stripe_id)
+        return self.api_retrieve()
 
 
 # Much like registering signal handlers. We import this module so that its registrations get picked up
