@@ -21,7 +21,7 @@ from model_utils.models import TimeStampedModel
 import stripe
 
 from . import settings as djstripe_settings
-from .exceptions import SubscriptionCancellationFailure
+from .exceptions import SubscriptionCancellationFailure, SubscriptionUpdateFailure
 from .managers import CustomerManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
@@ -524,10 +524,12 @@ class Customer(StripeObject):
             return current_subscription
 
     def update_plan_quantity(self, quantity, charge_immediately=False):
+        stripe_subscription = self.stripe_customer.subscription
+        if not stripe_subscription:
+            self.sync_current_subscription()
+            raise SubscriptionUpdateFailure("Customer does not have a subscription with Stripe")
         self.subscribe(
-            plan=djstripe_settings.plan_from_stripe_id(
-                self.stripe_customer.subscription.plan.id
-            ),
+            plan=djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id),
             quantity=quantity,
             charge_immediately=charge_immediately
         )
