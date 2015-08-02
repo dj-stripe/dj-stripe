@@ -493,7 +493,7 @@ class TestCustomer(TestCase):
         self.assertFalse(record_charge_mock.called)
 
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock,
-           return_value=PropertyMock(subscriptions=PropertyMock(data=[])))
+           return_value=PropertyMock(subscriptions=PropertyMock(data=[], count=0)))
     def test_sync_current_subscription_no_stripe_subscription(self, stripe_customer_mock):
         self.assertEqual(None, self.customer.sync_current_subscription())
 
