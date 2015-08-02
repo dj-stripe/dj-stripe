@@ -51,6 +51,9 @@ class StripeObject(TimeStampedModel):
     stripe_api_name = None
 
     stripe_id = models.CharField(max_length=50, unique=True)
+    livemode = models.NullBooleanField(help_text="Null here indicates that data was unavailable. Otherwise, this field "
+                                                 "indicates whether this record comes from Stripe test mode or live "
+                                                 "mode operation.")
 
     class Meta(object):
         abstract = True
@@ -131,7 +134,6 @@ class Event(StripeObject):
 
     stripe_api_name = "Event"
     kind = models.CharField(max_length=250, help_text="Stripe's event description code (called 'type' in their API)")
-    livemode = models.BooleanField(default=False)
     request_id = models.CharField(max_length=50, null=True, blank=True,
                                   help_text="Information about the request that triggered this event, for traceability "
                                             "purposes. If empty string then this is an old entry without that data. If "
