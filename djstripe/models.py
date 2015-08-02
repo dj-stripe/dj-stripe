@@ -21,11 +21,12 @@ from model_utils.models import TimeStampedModel
 import stripe
 
 from . import settings as djstripe_settings
-from .exceptions import SubscriptionCancellationFailure
+from .exceptions import SubscriptionCancellationFailure, SubscriptionUpdateFailure
 from .managers import CustomerManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
+from . import webhooks
 
 logger = logging.getLogger(__name__)
 
@@ -121,25 +122,6 @@ class Event(StripeObject):
     def __str__(self):
         return "<{kind}, stripe_id={stripe_id}>".format(kind=self.kind, stripe_id=self.stripe_id)
 
-    def link_customer(self):
-        stripe_customer_id = None
-        stripe_customer_crud_events = [
-            "customer.created",
-            "customer.updated",
-            "customer.deleted"
-        ]
-        if self.kind in stripe_customer_crud_events:
-            stripe_customer_id = self.message["data"]["object"]["id"]
-        else:
-            stripe_customer_id = self.message["data"]["object"].get("customer", None)
-
-        if stripe_customer_id is not None:
-            try:
-                self.customer = Customer.objects.get(stripe_id=stripe_customer_id)
-                self.save()
-            except Customer.DoesNotExist:
-                pass
-
     def validate(self):
         evt = self.api_retrieve()
         self.validated_message = json.loads(
@@ -154,70 +136,27 @@ class Event(StripeObject):
 
     def process(self):
         """
-            "account.updated",
-            "account.application.deauthorized",
-            "charge.succeeded",
-            "charge.failed",
-            "charge.refunded",
-            "charge.dispute.created",
-            "charge.dispute.updated",
-            "charge.dispute.closed",
-            "customer.created",
-            "customer.updated",
-            "customer.deleted",
-            "customer.source.created",
-            "customer.subscription.created",
-            "customer.subscription.updated",
-            "customer.subscription.deleted",
-            "customer.subscription.trial_will_end",
-            "customer.discount.created",
-            "customer.discount.updated",
-            "customer.discount.deleted",
-            "invoice.created",
-            "invoice.updated",
-            "invoice.payment_succeeded",
-            "invoice.payment_failed",
-            "invoiceitem.created",
-            "invoiceitem.updated",
-            "invoiceitem.deleted",
-            "plan.created",
-            "plan.updated",
-            "plan.deleted",
-            "coupon.created",
-            "coupon.updated",
-            "coupon.deleted",
-            "transfer.created",
-            "transfer.updated",
-            "transfer.failed",
-            "ping"
+        Call whatever webhook event handlers have registered for this event, based on event "type" and
+        event "sub type"
+
+        See event handlers registered in djstripe.event_handlers module (or handlers registered in djstripe plugins or
+        contrib packages)
         """
         if self.valid and not self.processed:
-            try:
-                # Link the customer
-                if not self.kind.startswith("plan.") and not self.kind.startswith("transfer."):
-                    self.link_customer()
+            event_type, event_subtype = self.kind.split(".", 1)
 
-                # Handle events
-                if self.kind.startswith("invoice."):
-                    Invoice.handle_event(self)
-                elif self.kind.startswith("charge."):
-                    self.customer.record_charge(self.message["data"]["object"]["id"])
-                elif self.kind.startswith("transfer."):
-                    Transfer.process_transfer(self, self.message["data"]["object"])
-                elif self.kind.startswith("customer.subscription."):
-                    if self.customer:
-                        if self.kind == "customer.subscription.deleted":
-                            self.customer.current_subscription.status = CurrentSubscription.STATUS_CANCELLED
-                            self.customer.current_subscription.canceled_at = timezone.now()
-                            self.customer.current_subscription.save()
-                        else:
-                            self.customer.sync_current_subscription()
-                elif self.kind == "customer.deleted":
-                    self.customer.purge()
+            try:
+                # TODO: would it make sense to wrap the next 4 lines in a transaction.atomic context? Yes it would,
+                # except that some webhook handlers can have side effects outside of our local database, meaning that
+                # even if we rollback on our database, some updates may have been sent to Stripe, etc in resposne to
+                # webhooks...
+                webhooks.call_handlers(self, self.message["data"], event_type, event_subtype)
                 self.send_signal()
                 self.processed = True
                 self.save()
             except stripe.StripeError as exc:
+                # TODO: What if we caught all exceptions or a broader range of exceptions here? How about DoesNotExist
+                # exceptions, for instance? or how about TypeErrors, KeyErrors, ValueErrors, etc?
                 EventProcessingException.log(
                     data=exc.http_body,
                     exception=exc,
@@ -558,10 +497,12 @@ class Customer(StripeObject):
             return current_subscription
 
     def update_plan_quantity(self, quantity, charge_immediately=False):
+        stripe_subscription = self.stripe_customer.subscription
+        if not stripe_subscription:
+            self.sync_current_subscription()
+            raise SubscriptionUpdateFailure("Customer does not have a subscription with Stripe")
         self.subscribe(
-            plan=djstripe_settings.plan_from_stripe_id(
-                self.stripe_customer.subscription.plan.id
-            ),
+            plan=djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id),
             quantity=quantity,
             charge_immediately=charge_immediately
         )
@@ -856,14 +797,6 @@ class Invoice(StripeObject):
                 obj.send_receipt()
         return invoice
 
-    @classmethod
-    def handle_event(cls, event):
-        valid_events = ["invoice.payment_failed", "invoice.payment_succeeded", "invoice.created", ]
-        if event.kind in valid_events:
-            invoice_data = event.message["data"]["object"]
-            stripe_invoice = stripe.Invoice.retrieve(invoice_data["id"])
-            cls.sync_from_stripe_data(stripe_invoice, send_receipt=djstripe_settings.SEND_INVOICE_RECEIPT_EMAILS)
-
 
 class InvoiceItem(TimeStampedModel):
     """
@@ -1060,3 +993,8 @@ class Plan(StripeObject):
     def stripe_plan(self):
         """Return the plan data from Stripe."""
         return self.api_retrieve()
+
+
+# Much like registering signal handlers. We import this module so that its registrations get picked up
+# the NO QA directive tells flake8 to not complain about the unused import
+from . import event_handlers  # NOQA
