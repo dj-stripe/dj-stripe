@@ -51,7 +51,7 @@ class StripeObject(TimeStampedModel):
 
     stripe_id = models.CharField(max_length=50, unique=True)
 
-    class Meta(object):
+    class Meta:
         abstract = True
 
     @classmethod
@@ -1017,23 +1017,18 @@ class Plan(StripeObject):
         return "<{name}, stripe_id={stripe_id}>".format(name=smart_text(self.name), stripe_id=self.stripe_id)
 
     @classmethod
-    def create(cls, metadata=None, **kwargs):
-        """Create and then return a Plan (both in Stripe, and in our db)."""
-        if metadata is None:
-            metadata = {}
-
-        # For some reason, we double check for interval_count and make sure it's there... legacy behavior
-        if 'interval_count' not in kwargs:
-            kwargs['interval_count'] = None
+    def create(cls, **kwargs):
 
         # A few minor things are changed in the api-version of the create call
         api_kwargs = dict(kwargs)
         api_kwargs['id'] = api_kwargs['stripe_id']
         del(api_kwargs['stripe_id'])
         api_kwargs['amount'] = int(api_kwargs['amount'] * 100)
+        cls.api_create(**api_kwargs)
 
-        cls.api_create(metadata=metadata, **api_kwargs)
-
+        # If they passed in a 'metadata' arg, drop that here as it is only for api consumption
+        if 'metadata' in kwargs:
+            del(kwargs['metadata'])
         plan = Plan.objects.create(**kwargs)
 
         return plan

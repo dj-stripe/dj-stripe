@@ -83,8 +83,8 @@ class PlanTest(TestCase):
     def test_create_with_metadata(self, ApiCreateMock, ObjectsCreateMock):
         metadata = {'other_data': 'more_data'}
         Plan.create(metadata=metadata, arg1=1, arg2=2, amount=1, stripe_id=1)
-        ApiCreateMock.assert_called_once_with(metadata=metadata, id=1, arg1=1, arg2=2, amount=100, interval_count=None)
-        ObjectsCreateMock.assert_called_once_with(stripe_id=1, arg1=1, arg2=2, amount=1, interval_count=None)
+        ApiCreateMock.assert_called_once_with(metadata=metadata, id=1, arg1=1, arg2=2, amount=100)
+        ObjectsCreateMock.assert_called_once_with(stripe_id=1, arg1=1, arg2=2, amount=1)
 
     def test_str(self):
         self.assertEqual("<test_name, stripe_id=plan_xxxxxxxxxxxx>", str(self.plan))
