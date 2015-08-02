@@ -6,5 +6,9 @@ class SubscriptionCancellationFailure(Exception):
     pass
 
 
+class SubscriptionUpdateFailure(Exception):
+    pass
+
+
 class SubscriptionApiError(Exception):
     pass
