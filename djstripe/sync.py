@@ -11,11 +11,11 @@ from .models import Customer
 def sync_subscriber(subscriber):
     customer, created = Customer.get_or_create(subscriber=subscriber)
     try:
-        cu = customer.stripe_customer
-        customer.sync(cu=cu)
-        customer.sync_subscriptions(cu=cu)
-        customer.sync_invoices(cu=cu)
-        customer.sync_charges(cu=cu)
+        stripe_customer = customer.stripe_customer
+        customer.sync(cu=stripe_customer)
+        customer.sync_subscriptions(cu=stripe_customer)
+        customer.sync_invoices(cu=stripe_customer)
+        customer.sync_charges(cu=stripe_customer)
     except stripe.error.InvalidRequestError as e:
         print("ERROR: " + str(e))
     return customer

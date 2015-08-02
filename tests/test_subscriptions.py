@@ -321,6 +321,23 @@ class TestMultipleSubscriptions(TestCase):
         Customer.retain_canceled_subscriptions = False
         self.customer.sync_subscriptions()
         self.assertEqual(self.customer.subscriptions.count(), 0)
+        
+    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
+    def test_sync_with_no_subscriptions_multiple(self, StripeCustomerMock):
+        StripeCustomerMock.side_effect = [convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITHOUT_SUB)]
+        sub_basic = create_subscription(self.customer)
+        create_subscription(self.customer, "gold")
+        self.assertEqual(self.customer.subscriptions.count(), 2)
+        sub_basic.status = Subscription.STATUS_CANCELLED
+        sub_basic.save()
+        Customer.retain_canceled_subscriptions = True
+        self.customer.sync_subscriptions()
+        Customer.retain_canceled_subscriptions = False
+        self.assertEqual(self.customer.subscriptions.count(), 2)
+        sub_basic = self.customer.subscriptions.get(plan="basic")
+        self.assertEqual(sub_basic.status, Subscription.STATUS_CANCELLED)
+        sub_gold = self.customer.subscriptions.get(plan="gold")
+        self.assertEqual(sub_gold.status, Subscription.STATUS_CANCELLED)
 
 
 class TestSingleSubscription(TestCase):

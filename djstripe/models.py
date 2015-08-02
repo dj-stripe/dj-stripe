@@ -6,6 +6,7 @@ import decimal
 import json
 import traceback as exception_traceback
 import warnings
+import logging
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -26,6 +27,7 @@ from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
 
+logger = logging.getLogger(__name__)
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2014-01-31")
@@ -455,24 +457,24 @@ class Customer(StripeObject):
             trial_days = djstripe_settings.trial_period_for_subscriber_callback(subscriber)
 
         stripe_customer = stripe.Customer.create(email=subscriber.email)
-        cus = Customer.objects.create(subscriber=subscriber, stripe_id=stripe_customer.id)
+        customer = Customer.objects.create(subscriber=subscriber, stripe_id=stripe_customer.id)
 
         if djstripe_settings.DEFAULT_PLAN and trial_days:
-            cus.subscribe(plan=djstripe_settings.DEFAULT_PLAN, trial_days=trial_days)
+            customer.subscribe(plan=djstripe_settings.DEFAULT_PLAN, trial_days=trial_days)
 
-        return cus
+        return customer
 
     def update_card(self, token):
-        cu = self.stripe_customer
-        cu.card = token
-        cu.save()
-        self.card_fingerprint = cu.active_card.fingerprint
-        self.card_last_4 = cu.active_card.last4
-        self.card_kind = cu.active_card.type
-        self.card_exp_month = cu.active_card.exp_month
-        self.card_exp_year = cu.active_card.exp_year
+        stripe_customer = self.stripe_customer
+        stripe_customer.card = token
+        stripe_customer.save()
+        self.card_fingerprint = stripe_customer.active_card.fingerprint
+        self.card_last_4 = stripe_customer.active_card.last4
+        self.card_kind = stripe_customer.active_card.type
+        self.card_exp_month = stripe_customer.active_card.exp_month
+        self.card_exp_year = stripe_customer.active_card.exp_year
         self.save()
-        card_changed.send(sender=self, stripe_response=cu)
+        card_changed.send(sender=self, stripe_response=stripe_customer)
 
     def retry_unpaid_invoices(self):
         self.sync_invoices()
@@ -491,26 +493,33 @@ class Customer(StripeObject):
         except stripe.InvalidRequestError:
             return False  # There was nothing to invoice
 
+    # TODO refactor, deprecation on cu parameter -> stripe_customer
     def sync(self, cu=None):
-        cu = cu or self.stripe_customer
-        if cu.active_card:
-            self.card_fingerprint = cu.active_card.fingerprint
-            self.card_last_4 = cu.active_card.last4
-            self.card_kind = cu.active_card.type
-            self.card_exp_month = cu.active_card.exp_month
-            self.card_exp_year = cu.active_card.exp_year
+        stripe_customer = cu or self.stripe_customer
+        if getattr(stripe_customer, 'deleted', False):
+            # Customer was deleted from stripe
+            self.purge()
+        elif getattr(stripe_customer, 'active_card', None):
+            self.card_fingerprint = stripe_customer.active_card.fingerprint
+            self.card_last_4 = stripe_customer.active_card.last4
+            self.card_kind = stripe_customer.active_card.type
+            self.card_exp_month = stripe_customer.active_card.exp_month
+            self.card_exp_year = stripe_customer.active_card.exp_year
             self.save()
 
+    # TODO refactor, deprecation on cu parameter -> stripe_customer
     def sync_invoices(self, cu=None, **kwargs):
-        cu = cu or self.stripe_customer
-        for invoice in cu.invoices(**kwargs).data:
+        stripe_customer = cu or self.stripe_customer
+        for invoice in stripe_customer.invoices(**kwargs).data:
             Invoice.sync_from_stripe_data(invoice, send_receipt=False)
 
+    # TODO refactor, deprecation on cu parameter -> stripe_customer
     def sync_charges(self, cu=None, **kwargs):
-        cu = cu or self.stripe_customer
-        for charge in cu.charges(**kwargs).data:
+        stripe_customer = cu or self.stripe_customer
+        for charge in stripe_customer.charges(**kwargs).data:
             self.record_charge(charge.id)
 
+    # TODO refactor, deprecation on cu parameter -> stripe_customer
     def sync_subscriptions(self, cu=None):
         """
         Remove all existing Subscription records and regenerate from the Stripe
@@ -530,6 +539,7 @@ class Customer(StripeObject):
                         if self.subscriptions.count() == 0:
                             raise Subscription.DoesNotExist
                         subscription = self.subscriptions.all()[0]
+                    logger.debug('Updating subscription')
                     subscription.plan = djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id)
                     subscription.current_period_start = convert_tstamp(
                         stripe_subscription.current_period_start
@@ -546,19 +556,8 @@ class Customer(StripeObject):
                     # ended_at will generally be null, since Stripe does not retain ended subscriptions.
                     subscription.ended_at = convert_tstamp(stripe_subscription, "ended_at")
 
-                    if stripe_subscription.trial_start and stripe_subscription.trial_end:
-                        subscription.trial_start = convert_tstamp(stripe_subscription.trial_start)
-                        subscription.trial_end = convert_tstamp(stripe_subscription.trial_end)
-                    else:
-                        """
-                        Avoids keeping old values for trial_start and trial_end
-                        for cases where customer had a subscription with trial days
-                        then one without that (s)he cancels.
-                        """
-                        subscription.trial_start = None
-                        subscription.trial_end = None
-
                 except Subscription.DoesNotExist:
+                    logger.debug('Creating subscription')
                     subscription = Subscription(
                         stripe_id=stripe_subscription.id,
                         customer=self,
@@ -576,9 +575,19 @@ class Customer(StripeObject):
                         start=convert_tstamp(stripe_subscription.start),
                         quantity=stripe_subscription.quantity,
                         ended_at=convert_tstamp(stripe_subscription, "ended_at"),
-                        trial_end=convert_tstamp(stripe_subscription, "trial_end"),
-                        trial_start=convert_tstamp(stripe_subscription, "trial_start"),
                     )
+
+                if stripe_subscription.trial_start and stripe_subscription.trial_end:
+                    subscription.trial_start = convert_tstamp(stripe_subscription.trial_start)
+                    subscription.trial_end = convert_tstamp(stripe_subscription.trial_end)
+                else:
+                    """
+                    Avoids keeping old values for trial_start and trial_end
+                    for cases where customer had a subscription with trial days
+                    then one without that (s)he cancels.
+                    """
+                    subscription.trial_start = None
+                    subscription.trial_end = None
 
                 subscription.save()
                 if not first_sub:
@@ -586,6 +595,17 @@ class Customer(StripeObject):
 
                 if not Customer.allow_multiple_subscriptions:
                     break
+
+        elif self.subscriptions.count() > 0:
+            for subscription in self.subscriptions.all():
+                if subscription.status != Subscription.STATUS_CANCELLED:
+                    # Stripe says customer has no subscription but we think they have one.
+                    # This could happen if subscription is cancelled from Stripe Dashboard and webhook fails
+                    logger.debug('Cancelling subscription for %s' % self)
+                    subscription.status = Subscription.STATUS_CANCELLED
+                    subscription.save()
+                if not first_sub:
+                    first_sub = subscription
 
         return first_sub
 
@@ -598,10 +618,7 @@ class Customer(StripeObject):
                 "sync_current_subscription not available with multiple subscriptions"
             )
         cu = cu or self.stripe_customer
-        data = cu.subscriptions.data
-        sub = data[0] if data else None
-        if sub:
-            return self.sync_subscriptions()
+        return self.sync_subscriptions(cu)
 
     def update_plan_quantity(self, quantity, charge_immediately=False, subscription=None):
         if Customer.allow_multiple_subscriptions and not subscription:
@@ -624,8 +641,8 @@ class Customer(StripeObject):
         subscription, unless the subscription parameter is provided, in which that
         subscription will be modified (upgraded).
         """
-        cu = self.stripe_customer
-        stripe_subscription = self.matching_stripe_subscription(subscription, cu)
+        stripe_customer = self.stripe_customer
+        stripe_subscription = self.matching_stripe_subscription(subscription, stripe_customer)
         """
         Trial_days corresponds to the value specified by the selected plan
         for the key trial_period_days.
@@ -640,7 +657,7 @@ class Customer(StripeObject):
                 stripe_subscription.trial_end = timezone.now() + datetime.timedelta(days=trial_days)
             response = stripe_subscription.save()
         else:
-            response = cu.subscriptions.create(
+            response = stripe_customer.subscriptions.create(
                 plan=djstripe_settings.PAYMENTS_PLANS[plan]["stripe_plan_id"],
                 trial_end=timezone.now() + datetime.timedelta(days=trial_days) if trial_days else None,
                 prorate=prorate,
