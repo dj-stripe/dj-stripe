@@ -31,7 +31,7 @@ from . import webhooks
 logger = logging.getLogger(__name__)
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
-stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
+stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2013-02-11")
 
 
 def convert_tstamp(response, field_name=None):
@@ -701,7 +701,7 @@ class Invoice(StripeObject):
                 subtotal=stripe_invoice["subtotal"] / decimal.Decimal("100"),
                 total=stripe_invoice["total"] / decimal.Decimal("100"),
                 date=date,
-                charge=stripe_invoice.get("charge", ""),
+                charge=stripe_invoice.get("charge") or ""
             )
         )
         if not created:
@@ -713,7 +713,7 @@ class Invoice(StripeObject):
             invoice.subtotal = stripe_invoice["subtotal"] / decimal.Decimal("100")
             invoice.total = stripe_invoice["total"] / decimal.Decimal("100")
             invoice.date = date
-            invoice.charge = stripe_invoice.get("charge", "")
+            invoice.charge = stripe_invoice.get("charge") or ""
             invoice.save()
 
         for item in stripe_invoice["lines"].get("data", []):
