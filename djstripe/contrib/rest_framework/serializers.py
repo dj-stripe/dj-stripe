@@ -16,7 +16,7 @@ from rest_framework import serializers
 
 class SubscriptionSerializer(ModelSerializer):
 
-    class Meta:
+    class Meta(object):
         model = CurrentSubscription
 
 

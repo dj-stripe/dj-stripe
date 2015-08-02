@@ -49,7 +49,7 @@ class StripeObject(TimeStampedModel):
 
     stripe_id = models.CharField(max_length=50, unique=True)
 
-    class Meta:
+    class Meta(object):
         abstract = True
 
 
@@ -655,7 +655,7 @@ class Invoice(StripeObject):
     date = models.DateTimeField()
     charge = models.CharField(max_length=50, blank=True)
 
-    class Meta:
+    class Meta(object):
         ordering = ["-date"]
 
     def __str__(self):
