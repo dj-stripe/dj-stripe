@@ -239,7 +239,7 @@ class Transfer(StripeObject):
     event = models.ForeignKey(Event, related_name="transfers")
     amount = models.DecimalField(decimal_places=2, max_digits=7)
     status = models.CharField(max_length=25)
-    date = models.DateTimeField()
+    date = models.DateTimeField(help_text="Date the transfer is scheduled to arrive at destination")
     description = models.TextField(null=True, blank=True)
     adjustment_count = models.IntegerField()
     adjustment_fees = models.DecimalField(decimal_places=2, max_digits=7)
@@ -734,6 +734,10 @@ class CurrentSubscription(TimeStampedModel):
 
 
 class Invoice(StripeObject):
+    #
+    # Stripe API_VERSION: model fields and methods audited to 2015-07-28 - @wahuneke
+    #
+
     stripe_api_name = "Invoice"
 
     customer = models.ForeignKey(Customer, related_name="invoices")
