@@ -14,12 +14,17 @@ from django.test.testcases import TestCase
 from django.utils import timezone
 
 from mock import patch
-from djstripe.event_handlers import invoice_webhook_handler
 
+from djstripe.event_handlers import invoice_webhook_handler
 from djstripe.models import Customer, Invoice, Charge, Event
 
 
-FAKE_INVOICE = {
+class InvoiceDict(dict):
+    def pay(self):
+        return "fish"
+
+
+FAKE_INVOICE = InvoiceDict({
     "date": 1432327437,
     "id": "in_xxxxxxxxxxxxxxx",
     "period_start": 1429735292,
@@ -85,7 +90,7 @@ FAKE_INVOICE = {
     "statement_descriptor": None,
     "description": None,
     "receipt_number": None,
-}
+})
 
 
 class InvoiceTest(TestCase):
@@ -104,15 +109,18 @@ class InvoiceTest(TestCase):
     def test_tostring(self):
         self.assertEquals("<total=50.00, paid=False, stripe_id=inv_xxxxxxxx123456>", str(self.invoice))
 
-    @patch("stripe.Invoice.retrieve")
-    def test_retry_true(self, invoice_retrieve_mock):
+    @patch("djstripe.models.Invoice.sync_from_stripe_data")
+    @patch("stripe.Invoice.retrieve", return_value=FAKE_INVOICE)
+    def test_retry_true(self, invoice_retrieve_mock, invoice_sync_mock):
         return_value = self.invoice.retry()
 
         invoice_retrieve_mock.assert_called_once_with(self.invoice.stripe_id)
+        invoice_sync_mock.assert_called_once_with("fish")
         self.assertTrue(return_value)
 
+    @patch("djstripe.models.Invoice.sync_from_stripe_data")
     @patch("stripe.Invoice.retrieve")
-    def test_retry_false(self, invoice_retrieve_mock):
+    def test_retry_false(self, invoice_retrieve_mock, invoice_sync_mock):
         invoice = self.invoice
         invoice.pk = None
         invoice.stripe_id = "inv_xxxxxxxx1234567"
@@ -122,6 +130,7 @@ class InvoiceTest(TestCase):
         return_value = invoice.retry()
 
         self.assertFalse(invoice_retrieve_mock.called)
+        self.assertFalse(invoice_sync_mock.called)
         self.assertFalse(return_value)
 
     def test_status_open(self):

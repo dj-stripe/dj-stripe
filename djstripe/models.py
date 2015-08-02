@@ -21,7 +21,7 @@ from model_utils.models import TimeStampedModel
 import stripe
 
 from . import settings as djstripe_settings
-from .exceptions import SubscriptionCancellationFailure
+from .exceptions import SubscriptionCancellationFailure, SubscriptionUpdateFailure
 from .managers import CustomerManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
@@ -31,7 +31,7 @@ from . import webhooks
 logger = logging.getLogger(__name__)
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
-stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
+stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2013-02-11")
 
 
 def convert_tstamp(response, field_name=None):
@@ -556,10 +556,12 @@ class Customer(StripeObject):
             return current_subscription
 
     def update_plan_quantity(self, quantity, charge_immediately=False):
+        stripe_subscription = self.stripe_customer.subscription
+        if not stripe_subscription:
+            self.sync_current_subscription()
+            raise SubscriptionUpdateFailure("Customer does not have a subscription with Stripe")
         self.subscribe(
-            plan=djstripe_settings.plan_from_stripe_id(
-                self.stripe_customer.subscription.plan.id
-            ),
+            plan=djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id),
             quantity=quantity,
             charge_immediately=charge_immediately
         )
@@ -759,9 +761,16 @@ class Invoice(StripeObject):
         return "<total={total}, paid={paid}, stripe_id={stripe_id}>".format(total=self.total, paid=smart_text(self.paid), stripe_id=self.stripe_id)
 
     def retry(self):
+        """ Attempt to collect payment on this invoice.
+
+            :returns: True if the attempt was made, False if it wasn't.
+            :raises: stripe.CardError if payment collection was unsuccessful.
+        """
+
         if not self.paid and not self.closed:
-            inv = self.api_retrieve()
-            inv.pay()
+            stripe_invoice = self.api_retrieve()
+            updated_stripe_invoice = stripe_invoice.pay()  # pay() throws an exception if the charge is not successful.
+            self.sync_from_stripe_data(updated_stripe_invoice)
             return True
         return False
 
@@ -774,7 +783,7 @@ class Invoice(StripeObject):
 
     @classmethod
     def sync_from_stripe_data(cls, stripe_invoice, send_receipt=True):
-        c = Customer.objects.get(stripe_id=stripe_invoice["customer"])
+        customer = Customer.objects.get(stripe_id=stripe_invoice["customer"])
         period_end = convert_tstamp(stripe_invoice, "period_end")
         period_start = convert_tstamp(stripe_invoice, "period_start")
         date = convert_tstamp(stripe_invoice, "date")
@@ -782,7 +791,7 @@ class Invoice(StripeObject):
         invoice, created = cls.objects.get_or_create(
             stripe_id=stripe_invoice["id"],
             defaults=dict(
-                customer=c,
+                customer=customer,
                 attempted=stripe_invoice["attempted"],
                 closed=stripe_invoice["closed"],
                 paid=stripe_invoice["paid"],
@@ -830,7 +839,7 @@ class Invoice(StripeObject):
                     plan=plan,
                     period_start=period_start,
                     period_end=period_end,
-                    quantity=item.get("quantity")
+                    quantity=item.get("quantity"),
                 )
             )
             if not inv_item_created:
@@ -845,13 +854,11 @@ class Invoice(StripeObject):
                 inv_item.quantity = item.get("quantity")
                 inv_item.save()
 
-        """
-        Save invoice period end assignment.
-        """
+        # Save invoice period end assignment.
         invoice.save()
 
         if stripe_invoice.get("charge"):
-            obj = c.record_charge(stripe_invoice["charge"])
+            obj = customer.record_charge(stripe_invoice["charge"])
             obj.invoice = invoice
             obj.save()
             if send_receipt:
