@@ -8,7 +8,7 @@ from django.test.client import RequestFactory
 from django.test.utils import override_settings
 from django.utils import timezone
 
-from djstripe.models import Customer, CurrentSubscription
+from djstripe.models import Customer, Subscription
 from djstripe.middleware import SubscriptionPaymentMiddleware
 
 
@@ -76,7 +76,8 @@ class MiddlewareLogicTest(TestCase):
             card_last_4="2342",
             card_kind="Visa"
         )
-        self.subscription = CurrentSubscription.objects.create(
+        self.subscription = Subscription.objects.create(
+            stripe_id="sub_xxxxxxxxxxxxxxx",
             customer=self.customer,
             plan="test",
             current_period_start=period_start,

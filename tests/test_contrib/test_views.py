@@ -19,7 +19,7 @@ from mock import patch, PropertyMock
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from djstripe.models import CurrentSubscription, Customer
+from djstripe.models import Subscription, Customer
 from djstripe import settings as djstripe_settings
 
 if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
@@ -79,7 +79,8 @@ class RestSubscriptionTest(APITestCase):
             stripe_id="cus_xxx1234567890",
             subscriber=self.user
         )
-        CurrentSubscription.objects.create(
+        Subscription.objects.create(
+            stripe_id="sub_yyyyyyyyyyyyyy",
             customer=fake_customer,
             plan="test",
             quantity=1,
@@ -94,15 +95,16 @@ class RestSubscriptionTest(APITestCase):
         self.assertEqual(response.data['status'], 'active')
         self.assertEqual(response.data['cancel_at_period_end'], False)
 
-    @patch("djstripe.models.Customer.cancel_subscription", return_value=CurrentSubscription(status=CurrentSubscription.STATUS_ACTIVE))
-    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", amount=Decimal(25.00), status="active"))
+    @patch("djstripe.models.Customer.cancel_subscription", return_value=Subscription(status=Subscription.STATUS_ACTIVE))
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=Subscription(plan="test", amount=Decimal(25.00), status="active"))
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     def test_cancel_subscription(self, subscribe_mock, stripe_create_customer_mock, cancel_subscription_mock):
         fake_customer = Customer.objects.create(
             stripe_id="cus_xxx1234567890",
             subscriber=self.user
         )
-        CurrentSubscription.objects.create(
+        Subscription.objects.create(
+            stripe_id="sub_yyyyyyyyyyyyyy",
             customer=fake_customer,
             plan="test",
             quantity=1,
@@ -110,12 +112,12 @@ class RestSubscriptionTest(APITestCase):
             amount=Decimal(25.00),
             status="active",
         )
-        self.assertEqual(1, CurrentSubscription.objects.count())
+        self.assertEqual(1, Subscription.objects.count())
 
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         # Cancelled means flagged as cancelled, so it should still be there
-        self.assertEqual(1, CurrentSubscription.objects.count())
+        self.assertEqual(1, Subscription.objects.count())
 
         cancel_subscription_mock.assert_called_once_with(
             at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END

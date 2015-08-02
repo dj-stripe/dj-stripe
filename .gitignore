@@ -36,6 +36,7 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+.settings
 
 # Eclipse Project Files
 .settings/

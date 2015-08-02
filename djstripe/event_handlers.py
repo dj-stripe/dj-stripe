@@ -13,7 +13,7 @@ from django.utils import timezone
 from . import webhooks
 from . import settings as djstripe_settings
 import stripe
-from .models import Customer, CurrentSubscription, Charge, Transfer, Invoice
+from .models import Customer, Subscription, Charge, Transfer, Invoice
 
 
 # ---------------------------
@@ -42,12 +42,15 @@ def customer_event_attach(event, event_data, event_type, event_subtype):
 def customer_webhook_handler(event, event_data, event_type, event_subtype):
     customer = event.customer
     if customer:
-        if event_subtype == "subscription.deleted":
-            customer.current_subscription.status = CurrentSubscription.STATUS_CANCELLED
+        if event_subtype == "subscription.deleted" and not Customer.allow_multiple_subscriptions:
+            customer.current_subscription.status = Subscription.STATUS_CANCELLED
             customer.current_subscription.canceled_at = timezone.now()
             customer.current_subscription.save()
         elif event_subtype.startswith("subscription."):
-            customer.sync_current_subscription()
+            if Customer.allow_multiple_subscriptions:
+                customer.sync_subscriptions()
+            else:
+                customer.sync_current_subscription()
         elif event_subtype == "deleted":
             customer.purge()
 

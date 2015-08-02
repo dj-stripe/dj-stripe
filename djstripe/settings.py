@@ -52,6 +52,12 @@ trial_period_for_subscriber_callback = getattr(settings,
 
 DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
 
+# The default is not to allow multiple subscriptions for a single customer.
+ALLOW_MULTIPLE_SUBSCRIPTIONS = getattr(settings, "DJSTRIPE_ALLOW_MULTIPLE_SUBSCRIPTIONS", False)
+
+# Should cancelled subscriptions be retained in the database?
+RETAIN_CANCELED_SUBSCRIPTIONS = getattr(settings, "DJSTRIPE_RETAIN_CANCELED_SUBSCRIPTIONS", False)
+
 
 def plan_from_stripe_id(stripe_id):
     payment_plans = getattr(settings, "DJSTRIPE_PLANS", {})

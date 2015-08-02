@@ -8,3 +8,7 @@ class SubscriptionCancellationFailure(Exception):
 
 class SubscriptionUpdateFailure(Exception):
     pass
+
+
+class SubscriptionApiError(Exception):
+    pass

@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 
-from djstripe.models import Event, Transfer, Customer, CurrentSubscription, Charge
+from djstripe.models import Event, Transfer, Customer, Subscription, Charge
 from tests.test_transfer import TRANSFER_CREATED_TEST_DATA, TRANSFER_CREATED_TEST_DATA2
 
 
@@ -25,7 +25,8 @@ class CustomerManagerTest(TestCase):
                 card_last_4="2342",
                 card_kind="Visa"
             )
-            CurrentSubscription.objects.create(
+            Subscription.objects.create(
+                stripe_id="sub_xxxxxxxxxxxxxx{0}".format(i),
                 customer=customer,
                 plan="test",
                 current_period_start=period_start,
@@ -43,7 +44,8 @@ class CustomerManagerTest(TestCase):
             card_last_4="2342",
             card_kind="Visa"
         )
-        CurrentSubscription.objects.create(
+        Subscription.objects.create(
+            stripe_id="sub_xxxxxxxxxxxxxx{0}".format(11),
             customer=customer,
             plan="test",
             current_period_start=period_start,
@@ -62,7 +64,8 @@ class CustomerManagerTest(TestCase):
             card_last_4="2342",
             card_kind="Visa"
         )
-        CurrentSubscription.objects.create(
+        Subscription.objects.create(
+            stripe_id="sub_xxxxxxxxxxxxxx{0}".format(12),
             customer=customer,
             plan="test-2",
             current_period_start=period_start,
@@ -105,23 +108,23 @@ class CustomerManagerTest(TestCase):
 
     def test_started_plan_summary(self):
         for plan in Customer.objects.started_plan_summary_for(2013, 1):
-            if plan["current_subscription__plan"] == "test":
+            if plan["subscriptions__plan"] == "test":
                 self.assertEquals(plan["count"], 11)
-            if plan["current_subscription__plan"] == "test-2":
+            if plan["subscriptions__plan"] == "test-2":
                 self.assertEquals(plan["count"], 1)
 
     def test_active_plan_summary(self):
         for plan in Customer.objects.active_plan_summary():
-            if plan["current_subscription__plan"] == "test":
+            if plan["subscriptions__plan"] == "test":
                 self.assertEquals(plan["count"], 10)
-            if plan["current_subscription__plan"] == "test-2":
+            if plan["subscriptions__plan"] == "test-2":
                 self.assertEquals(plan["count"], 1)
 
     def test_canceled_plan_summary(self):
         for plan in Customer.objects.canceled_plan_summary_for(2013, 1):
-            if plan["current_subscription__plan"] == "test":
+            if plan["subscriptions__plan"] == "test":
                 self.assertEquals(plan["count"], 1)
-            if plan["current_subscription__plan"] == "test-2":
+            if plan["subscriptions__plan"] == "test-2":
                 self.assertEquals(plan["count"], 0)
 
     def test_churn(self):

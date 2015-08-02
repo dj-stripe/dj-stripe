@@ -95,3 +95,4 @@ class TestSubscriptionMixin(TestCase):
         self.assertIn("customer", context, "customer missing from context.")
 
         self.assertIn("CurrentSubscription", context, "CurrentSubscription missing from context.")
+        self.assertIn("Subscription", context, "Subscription missing from context.")

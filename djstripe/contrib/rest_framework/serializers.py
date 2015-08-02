@@ -10,14 +10,14 @@
 from __future__ import unicode_literals
 
 from rest_framework.serializers import ModelSerializer
-from djstripe.models import CurrentSubscription
+from djstripe.models import Subscription
 from rest_framework import serializers
 
 
 class SubscriptionSerializer(ModelSerializer):
 
     class Meta:
-        model = CurrentSubscription
+        model = Subscription
 
 
 class CreateSubscriptionSerializer(serializers.Serializer):

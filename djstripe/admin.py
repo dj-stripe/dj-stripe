@@ -7,7 +7,7 @@ Note: Django 1.4 support was dropped in #107
 from django.contrib import admin
 
 from .models import Event, EventProcessingException, Transfer, Charge, Plan
-from .models import Invoice, InvoiceItem, CurrentSubscription, Customer
+from .models import Invoice, InvoiceItem, Subscription, Customer
 
 
 class CustomerHasCardListFilter(admin.SimpleListFilter):
@@ -51,7 +51,7 @@ class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
     def lookups(self, request, model_admin):
         statuses = [
             [x, x.replace("_", " ").title()]
-            for x in CurrentSubscription.objects.all().values_list(
+            for x in Subscription.objects.all().values_list(
                 "status",
                 flat=True
             ).distinct()
@@ -63,7 +63,7 @@ class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
         if self.value() is None:
             return queryset.all()
         else:
-            return queryset.filter(current_subscription__status=self.value())
+            return queryset.filter(subscriptions__status=self.value()).distinct()
 
 
 def send_charge_receipt(modeladmin, request, queryset):
@@ -151,12 +151,13 @@ admin.site.register(
 )
 
 
-class CurrentSubscriptionInline(admin.TabularInline):
-    model = CurrentSubscription
+class SubscriptionInline(admin.TabularInline):
+    model = Subscription
+    extra = 0
 
 
 def subscription_status(obj):
-    return obj.current_subscription.status
+    return ", ".join([sub.plan + ": " + sub.status for sub in obj.subscriptions.all()])
 subscription_status.short_description = "Subscription Status"
 
 
@@ -180,7 +181,7 @@ admin.site.register(
     search_fields=[
         "stripe_id"
     ],
-    inlines=[CurrentSubscriptionInline]
+    inlines=[SubscriptionInline]
 )
 
 

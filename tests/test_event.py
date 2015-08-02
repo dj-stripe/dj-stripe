@@ -16,7 +16,7 @@ from django.utils import timezone
 from mock import patch, PropertyMock
 import stripe
 
-from djstripe.models import Customer, Event, CurrentSubscription
+from djstripe.models import Customer, Event, Subscription
 from tests import convert_to_fake_stripe_object
 
 
@@ -46,10 +46,11 @@ class EventTest(TestCase):
         "type": "ping"
     }
 
-    fake_current_subscription = CurrentSubscription(plan="test",
-                                                    quantity=1,
-                                                    start=timezone.now(),
-                                                    amount=Decimal(25.00))
+    fake_current_subscription = Subscription(stripe_id="sub_yyyyyyyyyyyyyy",
+                                             plan="test",
+                                             quantity=1,
+                                             start=timezone.now(),
+                                             amount=Decimal(25.00))
 
     def setUp(self):
         self.message["data"]["object"]["customer"] = "cus_xxxxxxxxxxxxxxx"  # Yes, this is intentional.
@@ -321,6 +322,22 @@ class EventTest(TestCase):
         sync_current_subscription_mock.assert_called_once_with()
         self.assertTrue(event.processed)
 
+    @patch('djstripe.models.Customer.sync_subscriptions')
+    def test_customer_multiple_subscription_event(self, sync_subscriptions_mock):
+        event = Event.objects.create(
+            stripe_id=self.message["id"],
+            kind="customer.subscription.created",
+            webhook_message=self.message,
+            validated_message=self.message,
+            valid=True
+        )
+        
+        Customer.allow_multiple_subscriptions = True
+        event.process()
+        Customer.allow_multiple_subscriptions = False
+        sync_subscriptions_mock.assert_called_once_with()
+        self.assertTrue(event.processed)
+        
     @patch('djstripe.models.Customer.sync_current_subscription')
     def test_customer_subscription_event_no_customer(self, sync_current_subscription_mock):
         self.message["data"]["object"]["customer"] = None
@@ -347,7 +364,7 @@ class EventTest(TestCase):
         )
 
         event.process()
-        self.assertTrue(current_subscription_mock.status, CurrentSubscription.STATUS_CANCELLED)
+        self.assertTrue(current_subscription_mock.status, Subscription.STATUS_CANCELLED)
         self.assertTrue(event.processed)
 
     @patch("stripe.Customer.retrieve")

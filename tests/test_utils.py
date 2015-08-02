@@ -18,7 +18,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import timezone
 
-from djstripe.models import convert_tstamp, Customer, CurrentSubscription
+from djstripe.models import convert_tstamp, Customer, Subscription
 from djstripe.utils import subscriber_has_active_subscription, get_supported_currency_choices
 
 from unittest.case import SkipTest
@@ -134,7 +134,8 @@ class TestUserHasActiveSubscription(TestCase):
 
         # Start 'em off'
         start = datetime.datetime(2013, 1, 1, 0, 0, 1)  # more realistic start
-        CurrentSubscription.objects.create(
+        Subscription.objects.create(
+            stripe_id="sub_xxxxxxxxxxxxxxx",
             customer=self.customer,
             plan="test",
             current_period_start=period_start,

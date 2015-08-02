@@ -28,18 +28,18 @@ class TestSyncSubscriber(TestCase):
 
     @patch("djstripe.models.Customer.sync_charges")
     @patch("djstripe.models.Customer.sync_invoices")
-    @patch("djstripe.models.Customer.sync_current_subscription")
+    @patch("djstripe.models.Customer.sync_subscriptions")
     @patch("djstripe.models.Customer.sync")
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock, return_value=fake_stripe_customer)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
     def test_sync_success(self, stripe_customer_create_mock, stripe_customer_mock,
-                          sync_mock, sync_current_subscription_mock, sync_invoices_mock,
+                          sync_mock, sync_subscriptions_mock, sync_invoices_mock,
                           sync_charges_mock):
 
         sync_subscriber(self.user)
 
         sync_mock.assert_called_once_with(cu=self.fake_stripe_customer)
-        sync_current_subscription_mock.assert_called_once_with(cu=self.fake_stripe_customer)
+        sync_subscriptions_mock.assert_called_once_with(cu=self.fake_stripe_customer)
         sync_invoices_mock.assert_called_once_with(cu=self.fake_stripe_customer)
         sync_charges_mock.assert_called_once_with(cu=self.fake_stripe_customer)
 
