@@ -662,9 +662,16 @@ class Invoice(StripeObject):
         return "<total={total}, paid={paid}, stripe_id={stripe_id}>".format(total=self.total, paid=smart_text(self.paid), stripe_id=self.stripe_id)
 
     def retry(self):
+        """ Attempt to collect payment on this invoice.
+
+            :returns: True if the attempt was made, False if it wasn't.
+            :raises: stripe.CardError if payment collection was unsuccessful.
+        """
+
         if not self.paid and not self.closed:
-            inv = stripe.Invoice.retrieve(self.stripe_id)
-            inv.pay()
+            stripe_invoice = stripe.Invoice.retrieve(self.stripe_id)
+            updated_stripe_invoice = stripe_invoice.pay()  # pay() throws an exception if the charge is not successful.
+            self.sync_from_stripe_data(updated_stripe_invoice)
             return True
         return False
 
@@ -677,7 +684,7 @@ class Invoice(StripeObject):
 
     @classmethod
     def sync_from_stripe_data(cls, stripe_invoice, send_receipt=True):
-        c = Customer.objects.get(stripe_id=stripe_invoice["customer"])
+        customer = Customer.objects.get(stripe_id=stripe_invoice["customer"])
         period_end = convert_tstamp(stripe_invoice, "period_end")
         period_start = convert_tstamp(stripe_invoice, "period_start")
         date = convert_tstamp(stripe_invoice, "date")
@@ -685,7 +692,7 @@ class Invoice(StripeObject):
         invoice, created = cls.objects.get_or_create(
             stripe_id=stripe_invoice["id"],
             defaults=dict(
-                customer=c,
+                customer=customer,
                 attempted=stripe_invoice["attempted"],
                 closed=stripe_invoice["closed"],
                 paid=stripe_invoice["paid"],
@@ -694,7 +701,7 @@ class Invoice(StripeObject):
                 subtotal=stripe_invoice["subtotal"] / decimal.Decimal("100"),
                 total=stripe_invoice["total"] / decimal.Decimal("100"),
                 date=date,
-                charge=stripe_invoice.get("charge") or ""
+                charge=stripe_invoice.get("charge", ""),
             )
         )
         if not created:
@@ -706,7 +713,7 @@ class Invoice(StripeObject):
             invoice.subtotal = stripe_invoice["subtotal"] / decimal.Decimal("100")
             invoice.total = stripe_invoice["total"] / decimal.Decimal("100")
             invoice.date = date
-            invoice.charge = stripe_invoice.get("charge") or ""
+            invoice.charge = stripe_invoice.get("charge", "")
             invoice.save()
 
         for item in stripe_invoice["lines"].get("data", []):
@@ -733,7 +740,7 @@ class Invoice(StripeObject):
                     plan=plan,
                     period_start=period_start,
                     period_end=period_end,
-                    quantity=item.get("quantity")
+                    quantity=item.get("quantity"),
                 )
             )
             if not inv_item_created:
@@ -748,13 +755,11 @@ class Invoice(StripeObject):
                 inv_item.quantity = item.get("quantity")
                 inv_item.save()
 
-        """
-        Save invoice period end assignment.
-        """
+        # Save invoice period end assignment.
         invoice.save()
 
         if stripe_invoice.get("charge"):
-            obj = c.record_charge(stripe_invoice["charge"])
+            obj = customer.record_charge(stripe_invoice["charge"])
             obj.invoice = invoice
             obj.save()
             if send_receipt:
