@@ -108,7 +108,7 @@ class StripeObject(TimeStampedModel):
 
     @classmethod
     def stripe_obj_to_record(cls, data):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @classmethod
     def create_from_stripe_object(cls, data):
@@ -378,8 +378,6 @@ class StripeInvoice(StripeObject):
         }
 
     def sync(self, data=None):
-        if data is None:
-            data = self.stripe_obj_to_record(self.api_retrieve())
         for attr, value in data.items():
             setattr(self, attr, value)
 
@@ -486,8 +484,6 @@ class StripeCharge(StripeObject):
         return result
 
     def sync(self, data=None):
-        if data is None:
-            data = self.stripe_obj_to_record(self.api_retrieve())
         for attr, value in data.items():
             setattr(self, attr, value)
 

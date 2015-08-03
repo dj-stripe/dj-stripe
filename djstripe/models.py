@@ -134,8 +134,7 @@ class Transfer(StripeTransfer):
             transfer = cls.create_from_stripe_object(stripe_object)
             created = True
 
-        if event:
-            transfer.event = event
+        transfer.event = event
 
         if created:
             transfer.save()
@@ -506,16 +505,6 @@ class Invoice(StripeInvoice):
     class Meta:
         ordering = ["-date"]
 
-    def __str__(self):
-        return "<total={total}, paid={paid}, stripe_id={stripe_id}>".format(total=self.total, paid=smart_text(self.paid), stripe_id=self.stripe_id)
-
-    def status(self):
-        if self.paid:
-            return "Paid"
-        if self.closed:
-            return "Closed"
-        return "Open"
-
     @classmethod
     def sync_from_stripe_data(cls, stripe_invoice, send_receipt=True):
         c = Customer.objects.get(stripe_id=stripe_invoice["customer"])
@@ -620,17 +609,6 @@ class Charge(StripeCharge):
 
     objects = ChargeManager()
 
-    def __str__(self):
-        return "<amount={amount}, paid={paid}, stripe_id={stripe_id}>".format(amount=self.amount, paid=smart_text(self.paid), stripe_id=self.stripe_id)
-
-    def calculate_refund_amount(self, amount=None):
-        eligible_to_refund = self.amount - (self.amount_refunded or 0)
-        if amount:
-            amount_to_refund = min(eligible_to_refund, amount)
-        else:
-            amount_to_refund = eligible_to_refund
-        return int(amount_to_refund * 100)
-
     def refund(self, amount=None):
         charge_obj = super(Charge, self).refund(amount)
         return Charge.sync_from_stripe_data(charge_obj)
@@ -654,13 +632,9 @@ class Charge(StripeCharge):
             charge = cls.create_from_stripe_object(data)
 
         customer = cls.obj_to_customer(Customer.stripe_objects, data)
-        if customer:
-            charge.customer = customer
+        charge.customer = customer
 
-        try:
-            invoice = cls.obj_to_invoice(Invoice.stripe_objects, data)
-        except Invoice.DoesNotExist:
-            invoice = None
+        invoice = cls.obj_to_invoice(Invoice.stripe_objects, data)
         if invoice:
             charge.invoice = invoice
 
@@ -760,11 +734,6 @@ class Plan(StripePlan):
         p.save()
 
         self.save()
-
-    @property
-    def stripe_plan(self):
-        """Return the plan data from Stripe."""
-        return self.api_retrieve()
 
 
 class Account(StripeAccount):
