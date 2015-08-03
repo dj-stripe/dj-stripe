@@ -34,10 +34,6 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
 
 
-__all__ = ['StripeEvent', 'StripeTransfer', 'StripeCustomer', 'StripeInvoice', 'StripeCharge', 'StripePlan',
-           'StripeAccount', ]
-
-
 @contextmanager
 def stripe_temporary_api_key(temp_key):
     """
@@ -70,17 +66,6 @@ class StripeObject(TimeStampedModel):
     # e.g. "Event", "Charge", "Customer", etc.
     stripe_api_name = None
     stripe_objects = StripeObjectManager()
-    #
-    # Field names in the lists below are 'database field' names, not necessarily stripe object field names
-    #
-    # List field names here to take advantage of automatic multiply/divide by 100
-    # (ie, fields named here are stored locally in dollars and cents, but the Stripe json object is cents)
-    currency_fields = []
-    # List field names here to take advantage of automatic timestamp conversion
-    timestamp_fields = []
-    # Map fields here from their local name (db field name), the key to their stripe name, the value.
-    # This is only necessary if names are different
-    field_name_map = {}
 
     stripe_id = models.CharField(max_length=50, unique=True)
     # livemode = models.BooleanField(default=False)
@@ -119,7 +104,7 @@ class StripeObject(TimeStampedModel):
         extend this to add information to the string representation of the object
         :rtype: list of str
         """
-        return ["id={id}".format(id=self.stripe_id)]
+        return ["stripe_id={id}".format(id=self.stripe_id)]
 
     @classmethod
     def stripe_obj_to_record(cls, data):
@@ -135,7 +120,6 @@ class StripeObject(TimeStampedModel):
 
     def __str__(self):
         return "<{list}>".format(list=", ".join(self.str_parts()))
-
 
 
 class StripeEvent(StripeObject):
@@ -157,7 +141,7 @@ class StripeEvent(StripeObject):
             'kind': data["type"],
             'livemode': data["livemode"],
             'webhook_message': data,
-            }
+        }
 
     def str_parts(self):
         return [self.kind] + super(StripeEvent, self).str_parts()
@@ -168,7 +152,6 @@ class StripeTransfer(StripeObject):
         abstract = True
 
     stripe_api_name = "Transfer"
-    currency_fields = ['amount', '']
 
     amount = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
     status = models.CharField(max_length=25)
@@ -195,8 +178,8 @@ class StripeTransfer(StripeObject):
 
     def str_parts(self):
         return [
-            "amount={amount}".format(self.amount),
-            "status={status}".format(self.status),
+            "amount={amount}".format(amount=self.amount),
+            "status={status}".format(status=self.status),
         ] + super(StripeTransfer, self).str_parts()
 
     def update_status(self):
@@ -206,6 +189,7 @@ class StripeTransfer(StripeObject):
     @classmethod
     def stripe_obj_to_record(cls, data):
         result = {
+            'stripe_id': data["id"],
             "amount": data["amount"] / decimal.Decimal("100"),
             "status": data["status"],
             "date": convert_tstamp(data, "date"),
@@ -283,6 +267,25 @@ class StripeCustomer(StripeObject):
             self.card_exp_month = stripe_customer.active_card.exp_month
             self.card_exp_year = stripe_customer.active_card.exp_year
 
+    def charge(self, amount, currency="usd", description=None, send_receipt=True, **kwargs):
+        """
+        This method expects `amount` to be a Decimal type representing a
+        dollar amount. It will be converted to cents so any decimals beyond
+        two will be ignored.
+        """
+        if not isinstance(amount, decimal.Decimal):
+            raise ValueError(
+                "You must supply a decimal value representing dollars."
+            )
+        resp = StripeCharge.api_create(
+            amount=int(amount * 100),  # Convert dollars into cents
+            currency=currency,
+            customer=self.stripe_id,
+            description=description,
+            **kwargs
+        )
+        return resp["id"]
+
     def add_invoice_item(self, amount, currency="usd", invoice_id=None, description=None):
         """
         Adds an arbitrary charge or credit to the customer's upcoming invoice.
@@ -336,8 +339,10 @@ class StripeInvoice(StripeObject):
     charge = models.CharField(max_length=50, blank=True)
 
     def str_parts(self):
-        return ["total={total}".format(total=self.total), "paid={paid}".format(paid=smart_text(self.paid))] + \
-               super(StripeInvoice, self).str_parts()
+        return [
+            "total={total}".format(total=self.total),
+            "paid={paid}".format(paid=smart_text(self.paid)),
+        ] + super(StripeInvoice, self).str_parts()
 
     def retry(self):
         if not self.paid and not self.closed:
@@ -360,6 +365,7 @@ class StripeInvoice(StripeObject):
         date = convert_tstamp(data, "date")
 
         return {
+            "stripe_id": data["id"],
             "attempted": data["attempted"],
             "closed": data["closed"],
             "paid": data["paid"],
@@ -443,10 +449,7 @@ class StripeCharge(StripeObject):
         :param data: stripe object
         :type data: dict
         """
-        try:
-            return manager.get_by_json(data, "customer")
-        except models.Model.DoesNotExist:
-            pass
+        return manager.get_by_json(data, "customer") if "customer" in data else None
 
     @classmethod
     def obj_to_invoice(cls, manager, data):
@@ -457,14 +460,12 @@ class StripeCharge(StripeObject):
         :param data: stripe object
         :type data: dict
         """
-        try:
-            return manager.get_by_json(data, "invoice")
-        except models.Model.DoesNotExist:
-            pass
+        return manager.get_by_json(data, "invoice") if "invoice" in data else None
 
     @classmethod
     def stripe_obj_to_record(cls, data):
         result = {
+            "stripe_id": data["id"],
             "card_last_4": data["card"]["last4"],
             "card_kind": data["card"]["type"],
             "amount": (data["amount"] / decimal.Decimal("100")),

@@ -28,8 +28,7 @@ from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
 from . import webhooks
-from .stripe_objects import *
-
+from .stripe_objects import StripeEvent, StripeTransfer, StripeCustomer, StripeInvoice, StripeCharge, StripePlan, StripeAccount
 
 logger = logging.getLogger(__name__)
 
@@ -141,14 +140,14 @@ class Transfer(StripeTransfer):
         if created:
             transfer.save()
             for fee in stripe_object["summary"]["charge_fee_details"]:
-                event.charge_fee_details.create(
+                transfer.charge_fee_details.create(
                     amount=fee["amount"] / decimal.Decimal("100"),
                     application=fee.get("application", ""),
                     description=fee.get("description", ""),
                     kind=fee["type"]
                 )
         else:
-            transfer.status = transfer["status"]
+            transfer.status = stripe_object["status"]
             transfer.save()
 
         if event and event.kind == "transfer.updated":
@@ -285,25 +284,6 @@ class Customer(StripeCustomer):
     def sync(self, cu=None):
         super(Customer, self).sync(cu)
         self.save()
-
-    def charge(self, amount, currency="usd", description=None, send_receipt=True, **kwargs):
-        """
-        This method expects `amount` to be a Decimal type representing a
-        dollar amount. It will be converted to cents so any decimals beyond
-        two will be ignored.
-        """
-        if not isinstance(amount, decimal.Decimal):
-            raise ValueError(
-                "You must supply a decimal value representing dollars."
-            )
-        resp = Charge.api_create(
-            amount=int(amount * 100),  # Convert dollars into cents
-            currency=currency,
-            customer=self.stripe_id,
-            description=description,
-            **kwargs
-        )
-        return resp["id"]
 
     # TODO refactor, deprecation on cu parameter -> stripe_customer
     def sync_invoices(self, cu=None, **kwargs):
@@ -541,17 +521,18 @@ class Invoice(StripeInvoice):
         c = Customer.objects.get(stripe_id=stripe_invoice["customer"])
 
         try:
-            invoice = Invoice.stripe_objects.get_by_json(stripe_invoice)
+            invoice = cls.stripe_objects.get_by_json(stripe_invoice)
             created = False
-        except Invoice.DoesNotExist:
-            invoice = Invoice.create_from_stripe_object(stripe_invoice)
+        except cls.DoesNotExist:
+            invoice = cls.create_from_stripe_object(stripe_invoice)
             invoice.customer = c
             created = True
 
         if not created:
             # update all fields using the stripe data
-            invoice.sync(stripe_invoice)
-            invoice.save()
+            invoice.sync(cls.stripe_obj_to_record(stripe_invoice))
+
+        invoice.save()
 
         for item in stripe_invoice["lines"].get("data", []):
             period_end = convert_tstamp(item["period"], "end")
@@ -665,21 +646,24 @@ class Charge(StripeCharge):
 
     @classmethod
     def sync_from_stripe_data(cls, data):
-        customer = cls.obj_to_customer(Customer.stripe_objects, data)
-        invoice = cls.obj_to_invoice(Invoice.stripe_objects, data)
 
         try:
             charge = cls.stripe_objects.get_by_json(data)
-            charge.sync(data)
-            created = False
+            charge.sync(cls.stripe_obj_to_record(data))
         except cls.DoesNotExist:
             charge = cls.create_from_stripe_object(data)
-            created = True
 
-        if invoice:
-            charge.invoice = invoice
+        customer = cls.obj_to_customer(Customer.stripe_objects, data)
         if customer:
             charge.customer = customer
+
+        try:
+            invoice = cls.obj_to_invoice(Invoice.stripe_objects, data)
+        except Invoice.DoesNotExist:
+            invoice = None
+        if invoice:
+            charge.invoice = invoice
+
         charge.save()
         return charge
 

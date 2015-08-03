@@ -10,7 +10,7 @@ from django.test import TestCase
 
 from mock import patch, PropertyMock
 
-from djstripe.models import StripeObject
+from djstripe.stripe_objects import StripeObject
 
 
 class StripeObjectTest(TestCase):
