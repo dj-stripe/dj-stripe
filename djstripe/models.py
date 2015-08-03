@@ -58,7 +58,6 @@ class EventProcessingException(TimeStampedModel):
         return "<{message}, pk={pk}, Event={event}>".format(message=self.message, pk=self.pk, event=self.event)
 
 
-@python_2_unicode_compatible
 class Event(StripeEvent):
     objects = models.Manager()
     customer = models.ForeignKey("Customer", null=True)
@@ -165,7 +164,6 @@ class TransferChargeFee(TimeStampedModel):
     kind = models.CharField(max_length=150)
 
 
-@python_2_unicode_compatible
 class Customer(StripeCustomer):
     subscriber = models.OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
     date_purged = models.DateTimeField(null=True, editable=False)
@@ -638,18 +636,6 @@ class Charge(StripeCharge):
 
     customer = models.ForeignKey(Customer, related_name="charges")
     invoice = models.ForeignKey(Invoice, null=True, related_name="charges")
-    card_last_4 = models.CharField(max_length=4, blank=True)
-    card_kind = models.CharField(max_length=50, blank=True)
-    amount = models.DecimalField(decimal_places=2, max_digits=7, null=True)
-    amount_refunded = models.DecimalField(decimal_places=2, max_digits=7, null=True)
-    description = models.TextField(blank=True)
-    paid = models.NullBooleanField(null=True)
-    disputed = models.NullBooleanField(null=True)
-    refunded = models.NullBooleanField(null=True)
-    captured = models.NullBooleanField(null=True)
-    fee = models.DecimalField(decimal_places=2, max_digits=7, null=True)
-    receipt_sent = models.BooleanField(default=False)
-    charge_created = models.DateTimeField(null=True, blank=True)
 
     objects = ChargeManager()
 
@@ -725,7 +711,6 @@ INTERVALS = (
     ('year', 'Year',))
 
 
-@python_2_unicode_compatible
 class Plan(StripePlan):
     """A Stripe Plan."""
     objects = models.Manager()

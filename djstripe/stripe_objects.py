@@ -64,6 +64,7 @@ def convert_tstamp(response, field_name=None):
             return datetime.datetime.fromtimestamp(response[field_name], tz)
 
 
+@python_2_unicode_compatible
 class StripeObject(TimeStampedModel):
     # This must be defined in descendants of this model/mixin
     # e.g. "Event", "Charge", "Customer", etc.
@@ -82,7 +83,7 @@ class StripeObject(TimeStampedModel):
     field_name_map = {}
 
     stripe_id = models.CharField(max_length=50, unique=True)
-    livemode = models.BooleanField(default=False)
+    # livemode = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -137,9 +138,12 @@ class StripeObject(TimeStampedModel):
 
 
 
-@python_2_unicode_compatible
 class StripeEvent(StripeObject):
     stripe_api_name = "Event"
+
+    class Meta:
+        abstract = True
+    livemode = models.BooleanField(default=False)
 
     # This is "type" in Stripe
     kind = models.CharField(max_length=250)
@@ -160,6 +164,9 @@ class StripeEvent(StripeObject):
 
 
 class StripeTransfer(StripeObject):
+    class Meta:
+        abstract = True
+
     stripe_api_name = "Transfer"
     currency_fields = ['amount', '']
 
@@ -225,8 +232,10 @@ class StripeTransfer(StripeObject):
         return result
 
 
-@python_2_unicode_compatible
 class StripeCustomer(StripeObject):
+    class Meta:
+        abstract = True
+
     stripe_api_name = "Customer"
 
     card_fingerprint = models.CharField(max_length=200, blank=True)
@@ -310,6 +319,9 @@ class StripeCustomer(StripeObject):
 
 
 class StripeInvoice(StripeObject):
+    class Meta:
+        abstract = True
+
     stripe_api_name = "Invoice"
 
     attempted = models.NullBooleanField()
@@ -367,6 +379,9 @@ class StripeInvoice(StripeObject):
 
 
 class StripeCharge(StripeObject):
+    class Meta:
+        abstract = True
+
     stripe_api_name = "Charge"
 
     card_last_4 = models.CharField(max_length=4, blank=True)
@@ -482,8 +497,10 @@ INTERVALS = (
     ('year', 'Year',))
 
 
-@python_2_unicode_compatible
 class StripePlan(StripeObject):
+    class Meta:
+        abstract = True
+
     """A Stripe Plan."""
     stripe_api_name = "Plan"
 
@@ -513,7 +530,3 @@ class StripeAccount(StripeObject):
         # record for "our account"
         with stripe_temporary_api_key(api_key):
             return stripe.Account.retrieve()["currencies_supported"]
-
-# Much like registering signal handlers. We import this module so that its registrations get picked up
-# the NO QA directive tells flake8 to not complain about the unused import
-from . import event_handlers  # NOQA
