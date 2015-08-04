@@ -12,9 +12,11 @@ class StripeObjectManager(models.Manager):
         """
         Search for a matching stripe object based on a Stripe object
         received from Stripe in JSON format
+
         :param data: Stripe event object parsed from a JSON string into an object
         :type data: dict
         :rtype: bool
+        :returns: True if the requested object exists, False otherwise
         """
         return self.filter(stripe_id=data["id"]).exists()
 

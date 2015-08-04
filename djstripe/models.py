@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from contextlib import contextmanager
 
+from contextlib import contextmanager
 import datetime
 import decimal
 import json
@@ -22,9 +22,8 @@ from model_utils.models import TimeStampedModel
 import stripe
 
 from . import settings as djstripe_settings
-from djstripe.managers import StripeObjectManager
 from .exceptions import SubscriptionCancellationFailure, SubscriptionUpdateFailure
-from .managers import CustomerManager, ChargeManager, TransferManager
+from .managers import CustomerManager, ChargeManager, TransferManager, StripeObjectManager
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
@@ -45,10 +44,10 @@ def stripe_temporary_api_key(temp_key):
     the original value is restored as soon as context exits
     """
     import stripe
-    bkp_key = stripe.api_key
+    backup_key = stripe.api_key
     stripe.api_key = temp_key
     yield
-    stripe.api_key = bkp_key
+    stripe.api_key = backup_key
 
 
 def convert_tstamp(response, field_name=None):
@@ -144,8 +143,10 @@ class Event(StripeObject):
     def create_from_stripe_object(cls, data):
         """
         Create an Event object with the provided decoded JSON object received from Stripe
+
         :type data: dict
         :rtype: Event
+        :returns: a new Event object, already saved in the database, matching the provided data from Stripe
         """
         return Event.objects.create(
             stripe_id=data["id"],
