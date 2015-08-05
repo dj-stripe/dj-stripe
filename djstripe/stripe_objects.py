@@ -155,7 +155,7 @@ class StripeEvent(StripeObject):
         abstract = True
 
     # This is "type" in Stripe
-    kind = models.CharField(max_length=250,help_text="Stripe's event description code (called 'type' in their API)" )
+    kind = models.CharField(max_length=250, help_text="Stripe's event description code (called 'type' in their API)")
     request_id = models.CharField(max_length=50, null=True, blank=True,
                                   help_text="Information about the request that triggered this event, for traceability "
                                             "purposes. If empty string then this is an old entry without that data. If "
@@ -181,7 +181,6 @@ class StripeEvent(StripeObject):
             evt = super(StripeEvent, self).api_retrieve()
 
         return evt
-
 
     @classmethod
     def stripe_obj_to_record(cls, data):

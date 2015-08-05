@@ -235,7 +235,7 @@ class InvoiceTest(TestCase):
     @patch("djstripe.models.Invoice.sync_from_stripe_data")
     @patch("stripe.Invoice.retrieve", return_value="lock")
     def test_handle_event_payment_failed(self, invoice_retrieve_mock, sync_invoice_mock):
-        fake_event = Event(kind="invoice.payment_failed", validated_message={"data": {"object": {"id": "door"}}})
+        fake_event = Event(kind="invoice.payment_failed", valid=True, webhook_message={"data": {"object": {"id": "door"}}})
 
         invoice_webhook_handler(fake_event, fake_event.message["data"], "invoice", "payment_failed")
 
@@ -245,7 +245,7 @@ class InvoiceTest(TestCase):
     @patch("djstripe.models.Invoice.sync_from_stripe_data")
     @patch("stripe.Invoice.retrieve", return_value="key")
     def test_handle_event_payment_succeeded(self, invoice_retrieve_mock, sync_invoice_mock):
-        fake_event = Event(kind="invoice.payment_succeeded", validated_message={"data": {"object": {"id": "lock"}}})
+        fake_event = Event(kind="invoice.payment_succeeded", valid=True, webhook_message={"data": {"object": {"id": "lock"}}})
 
         invoice_webhook_handler(fake_event, fake_event.message["data"], "invoice", "payment_failed")
 

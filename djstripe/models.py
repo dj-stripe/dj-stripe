@@ -16,7 +16,6 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 
-from jsonfield.fields import JSONField
 from model_utils.models import TimeStampedModel
 import stripe
 
