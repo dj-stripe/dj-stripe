@@ -122,7 +122,6 @@ class TransferTest(TestCase):
             kind="transfer.created",
             livemode=True,
             webhook_message=TRANSFER_CREATED_TEST_DATA,
-            validated_message=TRANSFER_CREATED_TEST_DATA,
             valid=True
         )
         created_event.process()
@@ -133,7 +132,6 @@ class TransferTest(TestCase):
             kind="transfer.updated",
             livemode=True,
             webhook_message=TRANSFER_UPDATED_TEST_DATA,
-            validated_message=TRANSFER_UPDATED_TEST_DATA,
             valid=True
         )
         updated_event.process()

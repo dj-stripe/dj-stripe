@@ -100,7 +100,6 @@ class EventTest(TestCase):
             kind="customer.created",
             livemode=True,
             webhook_message=msg,
-            validated_message=msg,
             valid=True,
         )
         event.process()
@@ -156,7 +155,6 @@ class EventTest(TestCase):
             kind="customer.updated",
             livemode=True,
             webhook_message=msg,
-            validated_message=msg,
             valid=True,
         )
         event.process()
@@ -191,7 +189,6 @@ class EventTest(TestCase):
             kind="customer.deleted",
             livemode=True,
             webhook_message=msg,
-            validated_message=msg,
             valid=True,
         )
         event.process()
@@ -380,7 +377,6 @@ class EventTest(TestCase):
             kind="customer.deleted",
             livemode=True,
             webhook_message=msg,
-            validated_message=msg,
             valid=True
         )
         event.process()

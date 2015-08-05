@@ -62,7 +62,6 @@ class Event(StripeEvent):
     customer = models.ForeignKey("Customer", null=True,
                                  help_text="In the event that there is a related customer, this will point to that "
                                            "Customer record")
-    validated_message = JSONField(null=True)
     valid = models.NullBooleanField(null=True,
                                     help_text="Tri-state bool. Null == validity not yet confirmed. Otherwise, this "
                                               "field indicates that this event was checked via stripe api and found "
@@ -79,6 +78,14 @@ class Event(StripeEvent):
             return self.webhook_message
 
     def validate(self):
+        """
+        The original contents of the Event message comes from a POST to the webhook endpoint. This data
+        must be confirmed by re-fetching it and comparing the fetched data with the original data. That's what
+        this function does.
+
+        This function makes an API call to Stripe to re-download the Event data. It then
+        marks this record's valid flag to True or False.
+        """
         evt = self.api_retrieve()
         validated_message = json.loads(
             json.dumps(

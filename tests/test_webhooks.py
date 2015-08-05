@@ -148,7 +148,6 @@ class TestTransferWebhooks(TestCase):
             kind="transfer.created",
             livemode=True,
             webhook_message=TRANSFER_CREATED_TEST_DATA,
-            validated_message=TRANSFER_CREATED_TEST_DATA,
             valid=True
         )
         event.process()
@@ -162,7 +161,6 @@ class TestTransferWebhooks(TestCase):
             kind="transfer.created",
             livemode=True,
             webhook_message=TRANSFER_CREATED_TEST_DATA,
-            validated_message=TRANSFER_CREATED_TEST_DATA,
             valid=True
         )
         event.process()
@@ -249,7 +247,6 @@ class TestTransferWebhooks(TestCase):
             kind="transfer.paid",
             livemode=True,
             webhook_message=data,
-            validated_message=data,
             valid=True
         )
         paid_event.process()
