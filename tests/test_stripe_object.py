@@ -10,15 +10,23 @@ from django.test import TestCase
 
 from mock import patch, PropertyMock
 
-from djstripe.models import StripeObject
+from djstripe.stripe_objects import StripeObject
 
 
-class StripeObjectTest(TestCase):
-    def test_bad_impl(self):
+class StripeObjectExceptionsTest(TestCase):
+    def test_missing_apiname(self):
         # This class fails to provide a stripe_api_name attribute
-        class BadBad(StripeObject):
+        class MissingApiName(StripeObject):
             pass
 
         with self.assertRaises(NotImplementedError):
-            BadBad.api()
+            MissingApiName.api()
+
+    def test_missing_obj_to_record(self):
+        # This class fails to provide a stripe_api_name attribute
+        class MissingObjToRecord(StripeObject):
+            stripe_api_name = "hello"
+
+        with self.assertRaises(NotImplementedError):
+            MissingObjToRecord.create_from_stripe_object({})
 

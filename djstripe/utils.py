@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-
 import warnings
 
 from django.core.exceptions import ImproperlyConfigured
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 
-from .models import Customer
+from .models import Customer, Account
 
 
 ANONYMOUS_USER_ERROR_MSG = (
@@ -59,9 +58,4 @@ def get_supported_currency_choices(api_key):
     :param api_key: The api key associated with the account from which to pull data.
     :type api_key: str
     """
-
-    import stripe
-    stripe.api_key = api_key
-
-    account = stripe.Account.retrieve()
-    return [(currency, currency.upper()) for currency in account["currencies_supported"]]
+    return [(currency, currency.upper()) for currency in Account.get_supported_currencies(api_key)]
