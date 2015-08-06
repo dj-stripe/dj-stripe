@@ -5,7 +5,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 
-from .models import Customer, Account
+from .models import Customer
 
 
 ANONYMOUS_USER_ERROR_MSG = (
