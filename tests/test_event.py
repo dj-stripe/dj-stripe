@@ -43,7 +43,9 @@ class EventTest(TestCase):
         "livemode": True,
         "object": "event",
         "pending_webhooks": 1,
-        "type": "ping"
+        "type": "ping",
+        "request": "bla",
+        "api_version": "2015-07-28",
     }
 
     fake_current_subscription = CurrentSubscription(plan="test",
@@ -92,6 +94,8 @@ class EventTest(TestCase):
             "livemode": True,
             "object": "event",
             "pending_webhooks": 1,
+            "request": "bla",
+            "api_version": "2015-07-28",
             "type": "customer.created"
         }
         event = Event.objects.create(
@@ -147,6 +151,8 @@ class EventTest(TestCase):
             "livemode": True,
             "object": "event",
             "pending_webhooks": 1,
+            "request": "bla",
+            "api_version": "2015-07-28",
             "type": "customer.updated"
         }
         event = Event.objects.create(
@@ -181,6 +187,8 @@ class EventTest(TestCase):
             "livemode": True,
             "object": "event",
             "pending_webhooks": 1,
+            "request": "bla",
+            "api_version": "2015-07-28",
             "type": "customer.deleted"
         }
         event = Event.objects.create(
@@ -201,7 +209,7 @@ class EventTest(TestCase):
             webhook_message=self.message,
         )
 
-        event_retrieve_mock.return_value = convert_to_fake_stripe_object(self.message["data"])
+        event_retrieve_mock.return_value = convert_to_fake_stripe_object(self.message)
         self.assertEqual(None, event.valid)
         event.validate()
         event_retrieve_mock.assert_called_once_with(self.message["id"])
@@ -361,6 +369,8 @@ class EventTest(TestCase):
             "livemode": True,
             "object": "event",
             "pending_webhooks": 1,
+            "request": "bla",
+            "api_version": "2015-07-28",
             "type": "customer.deleted"
         }
         event = Event.objects.create(

@@ -37,6 +37,8 @@ class TestEventProcessingException(TestCase):
             "livemode": True,
             "object": "event",
             "pending_webhooks": 1,
+            "request": "bla",
+            "api_version": "2015-07-28",
             "type": "ping"
         }
 
@@ -60,6 +62,8 @@ class TestEventProcessingException(TestCase):
             "id": "evt_xxxxxxxxxxxxx",
             "livemode": True,
             "object": "event",
+            "request": "bla",
+            "api_version": "2015-07-28",
             "pending_webhooks": 1,
             "type": "ping"
         }

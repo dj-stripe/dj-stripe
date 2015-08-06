@@ -59,7 +59,9 @@ class TestWebhook(TestCase):
             "livemode": True,
             "object": "event",
             "pending_webhooks": 1,
-            "type": "transfer.created"
+            "type": "transfer.created",
+            "request": "bla",
+            "api_version": "2015-07-28",
         }
         StripeEventMock.return_value.to_dict.return_value = data
         msg = json.dumps(data)
@@ -116,7 +118,9 @@ class TestWebhook(TestCase):
             "livemode": True,
             "object": "event",
             "pending_webhooks": 1,
-            "type": "transfer.created"
+            "type": "transfer.created",
+            "api_version": "2015-07-28",
+            "request": "blabla",
         }
         StripeEventMock.return_value.to_dict.return_value = data
         msg = json.dumps(data)
@@ -240,7 +244,8 @@ class TestTransferWebhooks(TestCase):
             "livemode": True,
             "object": "event",
             "pending_webhooks": 1,
-            "type": "transfer.paid"
+            "type": "transfer.paid",
+            "request": None,
         }
         paid_event = Event.objects.create(
             stripe_id=data["id"],

@@ -22,11 +22,12 @@ class StripeObjectExceptionsTest(TestCase):
         with self.assertRaises(NotImplementedError):
             MissingApiName.api()
 
-    def test_missing_obj_to_record(self):
-        # This class fails to provide a stripe_api_name attribute
-        class MissingObjToRecord(StripeObject):
+
+class StripeObjectBasicTest(TestCase):
+    def test_basic_val_to_db(self):
+        # Instantiate a stripeobject model class
+        class BasicModel(StripeObject):
             stripe_api_name = "hello"
 
-        with self.assertRaises(NotImplementedError):
-            MissingObjToRecord.create_from_stripe_object({})
-
+        result = BasicModel.stripe_obj_to_record({'id': 1, 'livemode': False})
+        self.assertEqual(result, {'stripe_id': 1, 'livemode': False})

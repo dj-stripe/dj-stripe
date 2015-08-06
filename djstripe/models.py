@@ -93,7 +93,7 @@ class Event(StripeEvent):
                 cls=stripe.StripeObjectEncoder
             )
         )
-        self.valid = self.webhook_message["data"] == validated_message
+        self.valid = self.webhook_message == validated_message
         self.save()
 
     def process(self):
