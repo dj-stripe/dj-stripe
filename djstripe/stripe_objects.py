@@ -9,7 +9,7 @@ This module is an effort to isolate (as much as possible) the API dependent code
 place. Primarily this is:
 
 1) create models containing the fields that we care about, mapping to Stripe's fields
-2) create routines for consistently syncing our database with Stripe's version of the objects
+2) create methods for consistently syncing our database with Stripe's version of the objects
 3) centralized routines for creating new database records to match incoming Stripe objects
 
 This module defines abstract models which are then extended in models.py to provide the remaining
@@ -67,11 +67,11 @@ class StripeObject(TimeStampedModel):
     stripe_api_name = None
     stripe_objects = StripeObjectManager()
 
-    stripe_id = models.CharField(max_length=50, unique=True)
-    # livemode = models.BooleanField(default=False)
-
     class Meta:
         abstract = True
+
+    stripe_id = models.CharField(max_length=50, unique=True)
+    # livemode = models.BooleanField(default=False)
 
     @classmethod
     def api(cls):
@@ -101,13 +101,28 @@ class StripeObject(TimeStampedModel):
 
     def str_parts(self):
         """
-        extend this to add information to the string representation of the object
+        Extend this to add information to the string representation of the object
+
         :rtype: list of str
         """
         return ["stripe_id={id}".format(id=self.stripe_id)]
 
     @classmethod
     def stripe_obj_to_record(cls, data):
+        """
+        This takes an object, as it is formatted in Stripe's current API for our object
+        type. In return, it provides a dict. The dict can be used to create a record or
+        to update a record
+
+        This function takes care of mapping from one field name to another, converting
+        from cents to dollars, converting timestamps, and eliminating unused fields
+        (so that an objects.create() call would not fail).
+
+        :param data: the object, as sent by Stripe. Parsed from JSON, into a dict
+        :type data: dict
+        :return: All the members from the input, translated, mutated, etc
+        :rtype: dict
+        """
         raise NotImplementedError()
 
     @classmethod
@@ -123,10 +138,11 @@ class StripeObject(TimeStampedModel):
 
 
 class StripeEvent(StripeObject):
-    stripe_api_name = "Event"
-
     class Meta:
         abstract = True
+
+    stripe_api_name = "Event"
+
     livemode = models.BooleanField(default=False)
 
     # This is "type" in Stripe
@@ -439,9 +455,10 @@ class StripeCharge(StripeObject):
         return self.api_retrieve().capture()
 
     @classmethod
-    def obj_to_customer(cls, manager, data):
+    def object_to_customer(cls, manager, data):
         """
         Search the given manager for the customer matching this StripeCharge object
+
         :param manager: stripe_objects manager for a table of StripeCustomers
         :type manager: StripeObjectManager
         :param data: stripe object
@@ -450,7 +467,7 @@ class StripeCharge(StripeObject):
         return manager.get_by_json(data, "customer") if "customer" in data else None
 
     @classmethod
-    def obj_to_invoice(cls, manager, data):
+    def object_to_invoice(cls, manager, data):
         """
         Search the given manager for the invoice matching this StripeCharge object
         :param manager: stripe_objects manager for a table of StripeInvoice

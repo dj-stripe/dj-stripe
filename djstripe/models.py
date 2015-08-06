@@ -69,10 +69,10 @@ class Event(StripeEvent):
         return self.validated_message
 
     def validate(self):
-        evt = self.api_retrieve()
+        event = self.api_retrieve()
         self.validated_message = json.loads(
             json.dumps(
-                evt.to_dict(),
+                event.to_dict(),
                 sort_keys=True,
                 cls=stripe.StripeObjectEncoder
             )
@@ -137,7 +137,6 @@ class Transfer(StripeTransfer):
         transfer.event = event
 
         if created:
-            transfer.save()
             for fee in stripe_object["summary"]["charge_fee_details"]:
                 transfer.charge_fee_details.create(
                     amount=fee["amount"] / decimal.Decimal("100"),
@@ -147,11 +146,11 @@ class Transfer(StripeTransfer):
                 )
         else:
             transfer.status = stripe_object["status"]
-            transfer.save()
 
         if event and event.kind == "transfer.updated":
             transfer.update_status()
-            transfer.save()
+
+        transfer.save()
 
 
 class TransferChargeFee(TimeStampedModel):
@@ -407,10 +406,10 @@ class Customer(StripeCustomer):
         two will be ignored.
         """
         charge_id = super(Customer, self).charge(amount, currency, description, send_receipt, **kwargs)
-        obj = self.record_charge(charge_id)
+        recorded_charge = self.record_charge(charge_id)
         if send_receipt:
-            obj.send_receipt()
-        return obj
+            recorded_charge.send_receipt()
+        return recorded_charge
 
     def record_charge(self, charge_id):
         data = Charge.api().retrieve(charge_id)
@@ -507,14 +506,14 @@ class Invoice(StripeInvoice):
 
     @classmethod
     def sync_from_stripe_data(cls, stripe_invoice, send_receipt=True):
-        c = Customer.objects.get(stripe_id=stripe_invoice["customer"])
+        customer = Customer.objects.get(stripe_id=stripe_invoice["customer"])
 
         try:
             invoice = cls.stripe_objects.get_by_json(stripe_invoice)
             created = False
         except cls.DoesNotExist:
             invoice = cls.create_from_stripe_object(stripe_invoice)
-            invoice.customer = c
+            invoice.customer = customer
             created = True
 
         if not created:
@@ -568,7 +567,7 @@ class Invoice(StripeInvoice):
         invoice.save()
 
         if stripe_invoice.get("charge"):
-            obj = c.record_charge(stripe_invoice["charge"])
+            obj = customer.record_charge(stripe_invoice["charge"])
             obj.invoice = invoice
             obj.save()
             if send_receipt:
@@ -610,8 +609,8 @@ class Charge(StripeCharge):
     objects = ChargeManager()
 
     def refund(self, amount=None):
-        charge_obj = super(Charge, self).refund(amount)
-        return Charge.sync_from_stripe_data(charge_obj)
+        refunded_charge = super(Charge, self).refund(amount)
+        return Charge.sync_from_stripe_data(refunded_charge)
 
     def capture(self):
         """
@@ -619,8 +618,8 @@ class Charge(StripeCharge):
         where first you created a charge with the capture option set to false.
         See https://stripe.com/docs/api#capture_charge
         """
-        charge_obj = super(Charge, self).capture()
-        return Charge.sync_from_stripe_data(charge_obj)
+        captured_charge = super(Charge, self).capture()
+        return Charge.sync_from_stripe_data(captured_charge)
 
     @classmethod
     def sync_from_stripe_data(cls, data):
@@ -631,10 +630,10 @@ class Charge(StripeCharge):
         except cls.DoesNotExist:
             charge = cls.create_from_stripe_object(data)
 
-        customer = cls.obj_to_customer(Customer.stripe_objects, data)
+        customer = cls.object_to_customer(Customer.stripe_objects, data)
         charge.customer = customer
 
-        invoice = cls.obj_to_invoice(Invoice.stripe_objects, data)
+        invoice = cls.object_to_invoice(Invoice.stripe_objects, data)
         if invoice:
             charge.invoice = invoice
 
