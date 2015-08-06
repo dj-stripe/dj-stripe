@@ -137,6 +137,7 @@ class Transfer(StripeTransfer):
         transfer.event = event
 
         if created:
+            transfer.save()
             for fee in stripe_object["summary"]["charge_fee_details"]:
                 transfer.charge_fee_details.create(
                     amount=fee["amount"] / decimal.Decimal("100"),
@@ -146,11 +147,11 @@ class Transfer(StripeTransfer):
                 )
         else:
             transfer.status = stripe_object["status"]
+            transfer.save()
 
         if event and event.kind == "transfer.updated":
             transfer.update_status()
-
-        transfer.save()
+            transfer.save()
 
 
 class TransferChargeFee(TimeStampedModel):
