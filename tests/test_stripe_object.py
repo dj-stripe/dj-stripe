@@ -5,13 +5,16 @@
 .. moduleauthor:: Bill Huneke (@wahuneke)
 
 """
+from django.core.exceptions import ImproperlyConfigured
 
 from django.test import TestCase
 
 from mock import patch, PropertyMock
 
-from djstripe.stripe_objects import StripeObject
+from djstripe.stripe_objects import StripeObject, StripeCharField, StripeJSONField, StripeBooleanField
 
+SIMPLE_OBJ = {'id': 'yo', 'livemode': True}
+SIMPLE_OBJ_RESULT = {'stripe_id': 'yo', 'livemode': True}
 
 class StripeObjectExceptionsTest(TestCase):
     def test_missing_apiname(self):
@@ -22,6 +25,26 @@ class StripeObjectExceptionsTest(TestCase):
         with self.assertRaises(NotImplementedError):
             MissingApiName.api()
 
+    def test_deprecated_boolean(self):
+        with self.assertRaises(ImproperlyConfigured):
+            class DeprecatedBool(StripeObject):
+                bad = StripeBooleanField(deprecated=True)
+
+    def test_missing_required_field(self):
+        class HasRequiredField(StripeObject):
+            im_not_optional = StripeCharField()
+
+        with self.assertRaises(KeyError):
+            HasRequiredField.stripe_obj_to_record(SIMPLE_OBJ)
+
+    def test_missing_nonrequired_field(self):
+        class HasRequiredField(StripeObject):
+            im_not_optional = StripeCharField(stripe_required=False)
+
+        # Should be no exception here
+        obj = HasRequiredField.stripe_obj_to_record(SIMPLE_OBJ)
+        self.assertEqual(obj['im_not_optional'], None)
+
 
 class StripeObjectBasicTest(TestCase):
     def test_basic_val_to_db(self):
@@ -29,5 +52,13 @@ class StripeObjectBasicTest(TestCase):
         class BasicModel(StripeObject):
             stripe_api_name = "hello"
 
-        result = BasicModel.stripe_obj_to_record({'id': 1, 'livemode': False})
-        self.assertEqual(result, {'stripe_id': 1, 'livemode': False})
+        result = BasicModel.stripe_obj_to_record(SIMPLE_OBJ)
+        self.assertEqual(result, SIMPLE_OBJ_RESULT)
+
+    def test_basic_jsonfield(self):
+        class HasJsonField(StripeObject):
+            # By default, this just captures the whole message, not any particular member
+            js = StripeJSONField()
+
+        result = HasJsonField.stripe_obj_to_record(SIMPLE_OBJ)
+        self.assertEqual(result['js'], SIMPLE_OBJ)
