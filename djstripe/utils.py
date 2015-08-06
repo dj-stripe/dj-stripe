@@ -58,4 +58,9 @@ def get_supported_currency_choices(api_key):
     :param api_key: The api key associated with the account from which to pull data.
     :type api_key: str
     """
-    return [(currency, currency.upper()) for currency in Account.get_supported_currencies(api_key)]
+
+    import stripe
+    stripe.api_key = api_key
+
+    account = stripe.Account.retrieve()
+    return [(currency, currency.upper()) for currency in account["currencies_supported"]]

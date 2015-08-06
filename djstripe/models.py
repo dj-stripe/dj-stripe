@@ -1030,27 +1030,6 @@ class Plan(StripeObject):
         return self.api_retrieve()
 
 
-class Account(StripeObject):
-    """
-    For now, this is an abstract class, it is here just to provide an interface to the stripe API
-    for a few stripe.Account operations we need
-    """
-    class Meta:
-        abstract = True
-
-    @staticmethod
-    def get_supported_currencies(api_key):
-        """
-        Stripe accounts have a list of currencies they support. Get that list for the Stripe account
-        corresponding to the api key provided
-        :return: list of currency codes
-        :rtype: list of str
-        """
-        # TODO: someday, this will prob be an instance method and we will just have an Account
-        # record for "our account"
-        with stripe_temporary_api_key(api_key):
-            return stripe.Account.retrieve()["currencies_supported"]
-
 # Much like registering signal handlers. We import this module so that its registrations get picked up
 # the NO QA directive tells flake8 to not complain about the unused import
 from . import event_handlers  # NOQA
