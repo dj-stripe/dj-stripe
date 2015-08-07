@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from contextlib import contextmanager
 import datetime
 import decimal
 import json
@@ -21,9 +20,8 @@ from model_utils.models import TimeStampedModel
 import stripe
 
 from . import settings as djstripe_settings
-from djstripe.stripe_objects import convert_tstamp
 from .exceptions import SubscriptionCancellationFailure, SubscriptionUpdateFailure
-from .managers import CustomerManager, ChargeManager, TransferManager, StripeObjectManager
+from .managers import CustomerManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
@@ -744,7 +742,6 @@ class Plan(StripePlan):
         p.save()
 
         self.save()
-
 
 
 # Much like registering signal handlers. We import this module so that its registrations get picked up

@@ -322,7 +322,7 @@ class StripeEvent(StripeObject):
     #
     class Meta:
         abstract = True
-    
+
     stripe_api_name = "Event"
 
     kind = StripeCharField(stripe_name="type", max_length=250, help_text="Stripe's event description code")
