@@ -519,7 +519,7 @@ class Invoice(StripeInvoice):
 
         if not created:
             # update all fields using the stripe data
-            invoice.sync(cls.stripe_obj_to_record(stripe_invoice))
+            invoice.sync(cls.stripe_object_to_record(stripe_invoice))
 
         invoice.save()
 
@@ -568,11 +568,11 @@ class Invoice(StripeInvoice):
         invoice.save()
 
         if stripe_invoice.get("charge"):
-            obj = customer.record_charge(stripe_invoice["charge"])
-            obj.invoice = invoice
-            obj.save()
+            recorded_charge = customer.record_charge(stripe_invoice["charge"])
+            recorded_charge.invoice = invoice
+            recorded_charge.save()
             if send_receipt:
-                obj.send_receipt()
+                recorded_charge.send_receipt()
         return invoice
 
 
@@ -627,7 +627,7 @@ class Charge(StripeCharge):
 
         try:
             charge = cls.stripe_objects.get_by_json(data)
-            charge.sync(cls.stripe_obj_to_record(data))
+            charge.sync(cls.stripe_object_to_record(data))
         except cls.DoesNotExist:
             charge = cls.create_from_stripe_object(data)
 

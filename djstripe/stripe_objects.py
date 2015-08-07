@@ -108,7 +108,7 @@ class StripeObject(TimeStampedModel):
         return ["stripe_id={id}".format(id=self.stripe_id)]
 
     @classmethod
-    def stripe_obj_to_record(cls, data):
+    def stripe_object_to_record(cls, data):
         """
         This takes an object, as it is formatted in Stripe's current API for our object
         type. In return, it provides a dict. The dict can be used to create a record or
@@ -131,7 +131,7 @@ class StripeObject(TimeStampedModel):
         Create a model instance (not saved to db), using the given data object from Stripe
         :type data: dict
         """
-        return cls(**cls.stripe_obj_to_record(data))
+        return cls(**cls.stripe_object_to_record(data))
 
     def __str__(self):
         return "<{list}>".format(list=", ".join(self.str_parts()))
@@ -151,7 +151,7 @@ class StripeEvent(StripeObject):
     webhook_message = JSONField()
 
     @classmethod
-    def stripe_obj_to_record(cls, data):
+    def stripe_object_to_record(cls, data):
         return {
             'stripe_id': data["id"],
             'kind': data["type"],
@@ -203,7 +203,7 @@ class StripeTransfer(StripeObject):
         self.save()
 
     @classmethod
-    def stripe_obj_to_record(cls, data):
+    def stripe_object_to_record(cls, data):
         result = {
             'stripe_id': data["id"],
             "amount": data["amount"] / decimal.Decimal("100"),
@@ -375,7 +375,7 @@ class StripeInvoice(StripeObject):
         return "Open"
 
     @classmethod
-    def stripe_obj_to_record(cls, data):
+    def stripe_object_to_record(cls, data):
         period_end = convert_tstamp(data, "period_end")
         period_start = convert_tstamp(data, "period_start")
         date = convert_tstamp(data, "date")
@@ -478,7 +478,7 @@ class StripeCharge(StripeObject):
         return manager.get_by_json(data, "invoice") if "invoice" in data else None
 
     @classmethod
-    def stripe_obj_to_record(cls, data):
+    def stripe_object_to_record(cls, data):
         result = {
             "stripe_id": data["id"],
             "card_last_4": data["card"]["last4"],
