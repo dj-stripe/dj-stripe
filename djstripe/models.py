@@ -28,7 +28,7 @@ from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
 from . import webhooks
-from .stripe_objects import StripeEvent, StripeTransfer, StripeCustomer, StripeInvoice, StripeCharge, StripePlan, StripeAccount
+from .stripe_objects import StripeEvent, StripeTransfer, StripeCustomer, StripeInvoice, StripeCharge, StripePlan
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +58,6 @@ class EventProcessingException(TimeStampedModel):
 
 
 class Event(StripeEvent):
-    objects = models.Manager()
     customer = models.ForeignKey("Customer", null=True)
     validated_message = JSONField(null=True)
     valid = models.NullBooleanField(null=True)
@@ -498,7 +497,6 @@ class CurrentSubscription(TimeStampedModel):
 
 
 class Invoice(StripeInvoice):
-    objects = models.Manager()
 
     customer = models.ForeignKey(Customer, related_name="invoices")
 
@@ -671,7 +669,6 @@ INTERVALS = (
 
 class Plan(StripePlan):
     """A Stripe Plan."""
-    objects = models.Manager()
 
     name = models.CharField(max_length=100, null=False)
     currency = models.CharField(
@@ -734,16 +731,6 @@ class Plan(StripePlan):
         p.save()
 
         self.save()
-
-
-class Account(StripeAccount):
-    """
-    For now, this is an abstract class, it is here just to provide an interface to the stripe API
-    for a few stripe.Account operations we need
-    """
-    class Meta:
-        abstract = True
-
 
 # Much like registering signal handlers. We import this module so that its registrations get picked up
 # the NO QA directive tells flake8 to not complain about the unused import

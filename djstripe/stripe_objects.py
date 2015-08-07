@@ -43,10 +43,10 @@ def stripe_temporary_api_key(temp_key):
     the original value is restored as soon as context exits
     """
     import stripe
-    bkp_key = stripe.api_key
+    backup_key = stripe.api_key
     stripe.api_key = temp_key
     yield
-    stripe.api_key = bkp_key
+    stripe.api_key = backup_key
 
 
 def convert_tstamp(response, field_name=None):
@@ -65,6 +65,7 @@ class StripeObject(TimeStampedModel):
     # This must be defined in descendants of this model/mixin
     # e.g. "Event", "Charge", "Customer", etc.
     stripe_api_name = None
+    objects = models.Manager()
     stripe_objects = StripeObjectManager()
 
     class Meta:
@@ -522,25 +523,3 @@ class StripePlan(StripeObject):
     def stripe_plan(self):
         """Return the plan data from Stripe."""
         return self.api_retrieve()
-
-
-class StripeAccount(StripeObject):
-    """
-    For now, this is an abstract class, it is here just to provide an interface to the stripe API
-    for a few stripe.Account operations we need
-    """
-    class Meta:
-        abstract = True
-
-    @staticmethod
-    def get_supported_currencies(api_key):
-        """
-        Stripe accounts have a list of currencies they support. Get that list for the Stripe account
-        corresponding to the api key provided
-        :return: list of currency codes
-        :rtype: list of str
-        """
-        # TODO: someday, this will prob be an instance method and we will just have an Account
-        # record for "our account"
-        with stripe_temporary_api_key(api_key):
-            return stripe.Account.retrieve()["currencies_supported"]
