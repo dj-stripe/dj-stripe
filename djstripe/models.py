@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from contextlib import contextmanager
 import datetime
 import decimal
 import json
@@ -22,7 +23,7 @@ import stripe
 from . import settings as djstripe_settings
 from djstripe.stripe_objects import convert_tstamp
 from .exceptions import SubscriptionCancellationFailure, SubscriptionUpdateFailure
-from .managers import CustomerManager, ChargeManager, TransferManager
+from .managers import CustomerManager, ChargeManager, TransferManager, StripeObjectManager
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
@@ -57,7 +58,6 @@ class EventProcessingException(TimeStampedModel):
 
 
 class Event(StripeEvent):
-    objects = models.Manager()
     customer = models.ForeignKey("Customer", null=True,
                                  help_text="In the event that there is a related customer, this will point to that "
                                            "Customer record")
@@ -514,8 +514,6 @@ class CurrentSubscription(TimeStampedModel):
 
 
 class Invoice(StripeInvoice):
-    objects = models.Manager()
-
     customer = models.ForeignKey(Customer, related_name="invoices")
 
     class Meta:
@@ -685,7 +683,6 @@ INTERVALS = (
 
 class Plan(StripePlan):
     """A Stripe Plan."""
-    objects = models.Manager()
 
     name = models.CharField(max_length=100, null=False)
     currency = models.CharField(
@@ -749,14 +746,6 @@ class Plan(StripePlan):
 
         self.save()
 
-
-class Account(StripeAccount):
-    """
-    For now, this is an abstract class, it is here just to provide an interface to the stripe API
-    for a few stripe.Account operations we need
-    """
-    class Meta:
-        abstract = True
 
 
 # Much like registering signal handlers. We import this module so that its registrations get picked up

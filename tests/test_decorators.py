@@ -13,6 +13,7 @@ from djstripe.decorators import subscription_payment_required
 from djstripe.models import Customer, CurrentSubscription
 
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
+from djstripe.stripe_objects import stripe_temporary_api_key
 
 
 class TestDeprecationWarning(AssertWarnsEnabledTestCase):
@@ -27,6 +28,17 @@ class TestDeprecationWarning(AssertWarnsEnabledTestCase):
 
             test_func = (lambda subscriber: True)
             user_passes_pay_test(test_func=test_func)
+
+
+class TestTemporaryKey(TestCase):
+    def test_basic(self):
+        import stripe
+        key = stripe.api_key
+
+        with stripe_temporary_api_key("newkey"):
+            self.assertEqual(stripe.api_key, "newkey")
+
+        self.assertEqual(stripe.api_key, key)
 
 
 class TestSubscriptionPaymentRequired(TestCase):

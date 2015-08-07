@@ -215,6 +215,7 @@ class StripeObject(TimeStampedModel):
     # This must be defined in descendants of this model/mixin
     # e.g. "Event", "Charge", "Customer", etc.
     stripe_api_name = None
+    objects = models.Manager()
     stripe_objects = StripeObjectManager()
 
     stripe_id = StripeIdField(unique=True, stripe_name='id')
