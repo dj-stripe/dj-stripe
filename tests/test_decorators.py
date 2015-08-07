@@ -9,10 +9,11 @@ from django.test import TestCase
 from django.test.client import RequestFactory
 from django.utils import timezone
 
-from djstripe.decorators import subscription_payment_required
-from djstripe.models import Customer, CurrentSubscription, stripe_temporary_api_key
-
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
+
+from djstripe.decorators import subscription_payment_required
+from djstripe.models import Customer, CurrentSubscription
+from djstripe.stripe_objects import stripe_temporary_api_key
 
 
 class TestDeprecationWarning(AssertWarnsEnabledTestCase):
