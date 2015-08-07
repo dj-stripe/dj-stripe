@@ -35,14 +35,14 @@ class StripeObjectExceptionsTest(TestCase):
             im_not_optional = StripeCharField()
 
         with self.assertRaises(KeyError):
-            HasRequiredField.stripe_obj_to_record(SIMPLE_OBJ)
+            HasRequiredField.stripe_object_to_record(SIMPLE_OBJ)
 
     def test_missing_nonrequired_field(self):
         class HasRequiredField(StripeObject):
             im_not_optional = StripeCharField(stripe_required=False)
 
         # Should be no exception here
-        obj = HasRequiredField.stripe_obj_to_record(SIMPLE_OBJ)
+        obj = HasRequiredField.stripe_object_to_record(SIMPLE_OBJ)
         self.assertEqual(obj['im_not_optional'], None)
 
 
@@ -52,7 +52,7 @@ class StripeObjectBasicTest(TestCase):
         class BasicModel(StripeObject):
             stripe_api_name = "hello"
 
-        result = BasicModel.stripe_obj_to_record(SIMPLE_OBJ)
+        result = BasicModel.stripe_object_to_record(SIMPLE_OBJ)
         self.assertEqual(result, SIMPLE_OBJ_RESULT)
 
     def test_basic_jsonfield(self):
@@ -60,5 +60,5 @@ class StripeObjectBasicTest(TestCase):
             # By default, this just captures the whole message, not any particular member
             js = StripeJSONField()
 
-        result = HasJsonField.stripe_obj_to_record(SIMPLE_OBJ)
+        result = HasJsonField.stripe_object_to_record(SIMPLE_OBJ)
         self.assertEqual(result['js'], SIMPLE_OBJ)
