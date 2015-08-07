@@ -7,6 +7,20 @@ import decimal
 from django.db import models
 
 
+class StripeObjectManager(models.Manager):
+    def exists_by_json(self, data):
+        """
+        Search for a matching stripe object based on a Stripe object
+        received from Stripe in JSON format
+
+        :param data: Stripe event object parsed from a JSON string into an object
+        :type data: dict
+        :rtype: bool
+        :returns: True if the requested object exists, False otherwise
+        """
+        return self.filter(stripe_id=data["id"]).exists()
+
+
 class CustomerManager(models.Manager):
 
     def started_during(self, year, month):

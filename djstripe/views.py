@@ -247,19 +247,14 @@ class WebHook(CsrfExemptMixin, View):
     def post(self, request, *args, **kwargs):
         body = smart_str(request.body)
         data = json.loads(body)
-        if Event.objects.filter(stripe_id=data["id"]).exists():
+        if Event.stripe_objects.exists_by_json(data):
             EventProcessingException.objects.create(
                 data=data,
                 message="Duplicate event record",
                 traceback=""
             )
         else:
-            event = Event.objects.create(
-                stripe_id=data["id"],
-                kind=data["type"],
-                livemode=data["livemode"],
-                webhook_message=data
-            )
+            event = Event.create_from_stripe_object(data)
             event.validate()
             event.process()
         return HttpResponse()

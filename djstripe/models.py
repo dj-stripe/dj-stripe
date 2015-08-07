@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from contextlib import contextmanager
 import datetime
 import decimal
 import json
@@ -22,7 +23,7 @@ import stripe
 
 from . import settings as djstripe_settings
 from .exceptions import SubscriptionCancellationFailure, SubscriptionUpdateFailure
-from .managers import CustomerManager, ChargeManager, TransferManager
+from .managers import CustomerManager, ChargeManager, TransferManager, StripeObjectManager
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
@@ -32,6 +33,21 @@ logger = logging.getLogger(__name__)
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
+
+
+@contextmanager
+def stripe_temporary_api_key(temp_key):
+    """
+    A contextmanager
+
+    Temporarily replace the global api_key used in stripe API calls with the given value
+    the original value is restored as soon as context exits
+    """
+    import stripe
+    backup_key = stripe.api_key
+    stripe.api_key = temp_key
+    yield
+    stripe.api_key = backup_key
 
 
 def convert_tstamp(response, field_name=None):
@@ -49,6 +65,8 @@ class StripeObject(TimeStampedModel):
     # This must be defined in descendants of this model/mixin
     # e.g. "Event", "Charge", "Customer", etc.
     stripe_api_name = None
+    objects = models.Manager()
+    stripe_objects = StripeObjectManager()
 
     stripe_id = models.CharField(max_length=50, unique=True)
 
@@ -106,7 +124,6 @@ class EventProcessingException(TimeStampedModel):
 @python_2_unicode_compatible
 class Event(StripeObject):
     stripe_api_name = "Event"
-
     kind = models.CharField(max_length=250)
     livemode = models.BooleanField(default=False)
     customer = models.ForeignKey("Customer", null=True)
@@ -121,6 +138,22 @@ class Event(StripeObject):
 
     def __str__(self):
         return "<{kind}, stripe_id={stripe_id}>".format(kind=self.kind, stripe_id=self.stripe_id)
+
+    @classmethod
+    def create_from_stripe_object(cls, data):
+        """
+        Create an Event object with the provided decoded JSON object received from Stripe
+
+        :type data: dict
+        :rtype: Event
+        :returns: a new Event object, already saved in the database, matching the provided data from Stripe
+        """
+        return Event.objects.create(
+            stripe_id=data["id"],
+            kind=data["type"],
+            livemode=data["livemode"],
+            webhook_message=data
+        )
 
     def validate(self):
         evt = self.api_retrieve()
