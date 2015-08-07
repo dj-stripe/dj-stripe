@@ -65,6 +65,7 @@ class StripeObject(TimeStampedModel):
     # This must be defined in descendants of this model/mixin
     # e.g. "Event", "Charge", "Customer", etc.
     stripe_api_name = None
+    objects = models.Manager()
     stripe_objects = StripeObjectManager()
 
     stripe_id = models.CharField(max_length=50, unique=True)
@@ -123,7 +124,6 @@ class EventProcessingException(TimeStampedModel):
 @python_2_unicode_compatible
 class Event(StripeObject):
     stripe_api_name = "Event"
-    objects = models.Manager()
     kind = models.CharField(max_length=250)
     livemode = models.BooleanField(default=False)
     customer = models.ForeignKey("Customer", null=True)
@@ -711,7 +711,6 @@ class CurrentSubscription(TimeStampedModel):
 
 class Invoice(StripeObject):
     stripe_api_name = "Invoice"
-    objects = models.Manager()
 
     customer = models.ForeignKey(Customer, related_name="invoices")
     attempted = models.NullBooleanField()
@@ -960,7 +959,6 @@ INTERVALS = (
 class Plan(StripeObject):
     """A Stripe Plan."""
     stripe_api_name = "Plan"
-    objects = models.Manager()
 
     name = models.CharField(max_length=100, null=False)
     currency = models.CharField(
