@@ -193,10 +193,10 @@ def stripe_temporary_api_key(temp_key):
     the original value is restored as soon as context exits
     """
     import stripe
-    bkp_key = stripe.api_key
+    backup_key = stripe.api_key
     stripe.api_key = temp_key
     yield
-    stripe.api_key = bkp_key
+    stripe.api_key = backup_key
 
 
 def convert_tstamp(response, field_name=None):
