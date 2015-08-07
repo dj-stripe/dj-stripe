@@ -8,8 +8,6 @@
 
 from django.test import TestCase
 
-from mock import patch, PropertyMock
-
 from djstripe.stripe_objects import StripeObject
 
 

@@ -21,14 +21,13 @@ from model_utils.models import TimeStampedModel
 import stripe
 
 from . import settings as djstripe_settings
-from djstripe.stripe_objects import convert_tstamp
+from . import webhooks
 from .exceptions import SubscriptionCancellationFailure, SubscriptionUpdateFailure
 from .managers import CustomerManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
-from . import webhooks
-from .stripe_objects import StripeEvent, StripeTransfer, StripeCustomer, StripeInvoice, StripeCharge, StripePlan
+from .stripe_objects import StripeEvent, StripeTransfer, StripeCustomer, StripeInvoice, StripeCharge, StripePlan, convert_tstamp
 
 logger = logging.getLogger(__name__)
 

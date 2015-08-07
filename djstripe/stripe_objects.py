@@ -15,6 +15,7 @@ place. Primarily this is:
 This module defines abstract models which are then extended in models.py to provide the remaining
 dj-stripe functionality.
 """
+
 from contextlib import contextmanager
 import datetime
 import decimal
@@ -27,7 +28,8 @@ from jsonfield import JSONField
 
 from model_utils.models import TimeStampedModel
 import stripe
-from djstripe.managers import TransferManager, StripeObjectManager
+
+from .managers import TransferManager, StripeObjectManager
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
