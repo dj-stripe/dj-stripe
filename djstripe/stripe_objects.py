@@ -10,7 +10,7 @@ place. Primarily this is:
 
 1) create models containing the fields that we care about, mapping to Stripe's fields
 2) create methods for consistently syncing our database with Stripe's version of the objects
-3) centralized routines for creating new database records to match incoming Stripe objects
+3) centralized methods for creating new database records to match incoming Stripe objects
 
 This module defines abstract models which are then extended in models.py to provide the remaining
 dj-stripe functionality.
@@ -72,7 +72,7 @@ class StripeFieldMixin(object):
     stripe_required = True
 
     # If a field was populated in previous API versions but we don't want to drop the old
-    # data for some reason, mark it as depricated. This will make sure we never try to send
+    # data for some reason, mark it as deprecated. This will make sure we never try to send
     # it to Stripe or expect in Stripe data received
     # This setting automatically implies Null=True
     deprecated = False
@@ -661,25 +661,3 @@ class StripePlan(StripeObject):
     def stripe_plan(self):
         """Return the plan data from Stripe."""
         return self.api_retrieve()
-
-
-class StripeAccount(StripeObject):
-    """
-    For now, this is an abstract class, it is here just to provide an interface to the stripe API
-    for a few stripe.Account operations we need
-    """
-    class Meta:
-        abstract = True
-
-    @staticmethod
-    def get_supported_currencies(api_key):
-        """
-        Stripe accounts have a list of currencies they support. Get that list for the Stripe account
-        corresponding to the api key provided
-        :return: list of currency codes
-        :rtype: list of str
-        """
-        # TODO: someday, this will prob be an instance method and we will just have an Account
-        # record for "our account"
-        with stripe_temporary_api_key(api_key):
-            return stripe.Account.retrieve()["currencies_supported"]

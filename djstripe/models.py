@@ -28,7 +28,8 @@ from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
 from . import webhooks
-from .stripe_objects import StripeEvent, StripeTransfer, StripeCustomer, StripeInvoice, StripeCharge, StripePlan, StripeAccount
+from .stripe_objects import StripeEvent, StripeTransfer, StripeCustomer, StripeInvoice, StripeCharge, StripePlan, \
+    convert_tstamp
 
 logger = logging.getLogger(__name__)
 
@@ -73,8 +74,7 @@ class Event(StripeEvent):
 
     @property
     def message(self):
-        if self.valid:
-            return self.webhook_message
+        return self.webhook_message if self.valid else None
 
     def validate(self):
         """
