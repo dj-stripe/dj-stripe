@@ -16,6 +16,7 @@ class TestDivisionTag(TestCase):
         rendered = template.render(context)
         self.assertEqual(rendered, "")
 
+
 class TestHierarchy(TestCase):
 
     def test_unknow_hierarchy(self):
