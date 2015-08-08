@@ -36,6 +36,11 @@ import stripe
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2013-02-11")
 
 
+# ============================================================================ #
+#                           Stripe Object Base                                 #
+# ============================================================================ #
+
+
 @python_2_unicode_compatible
 class StripeObject(TimeStampedModel):
     # This must be defined in descendants of this model/mixin
@@ -123,106 +128,107 @@ class StripeObject(TimeStampedModel):
         return "<{list}>".format(list=", ".join(self.str_parts()))
 
 
-class StripeEvent(StripeObject):
-    """
-    Events are POSTed to our webhook url. They provide information about a Stripe event that just happened. Events
-    are processed in detail by their respective models (charge events by the Charge model, etc).
+# ============================================================================ #
+#                               Stripe Objects                                 #
+# ============================================================================ #
 
-    Events are initially _UNTRUSTED_, as it is possible for any web entity to post any data to our webhook url. Data
-    posted may be valid Stripe information, garbage, or even malicious. The 'valid' flag in this model monitors this.
+class StripeCharge(StripeObject):
 
-    API VERSIONING
-    ====
-    This is a tricky matter when it comes to webhooks. See the discussion here:
-        https://groups.google.com/a/lists.stripe.com/forum/#!topic/api-discuss/h5Y6gzNBZp8
-
-    In this discussion, it is noted that Webhooks are produced in one API version, which will usually be
-    different from the version supported by Stripe plugins (such as djstripe). The solution, described there,
-    is:
-
-        1) validate the receipt of a webhook event by doing an event get using the API version of the received hook event.
-        2) retrieve the referenced object (e.g. the Charge, the Customer, etc) using the plugin's supported API version.
-        3) process that event using the retrieved object which will, only now, be in a format that you are certain to understand
-    """
-
-    #
-    # Stripe API_VERSION: model fields and methods audited to 2015-07-28 - @wahuneke
-    #
     class Meta:
         abstract = True
 
-    stripe_api_name = "Event"
+    stripe_api_name = "Charge"
 
-    kind = StripeCharField(stripe_name="type", max_length=250, help_text="Stripe's event description code")
-    request_id = StripeCharField(max_length=50, null=True, blank=True, stripe_name="request",
-                                 help_text="Information about the request that triggered this event, for traceability "
-                                           "purposes. If empty string then this is an old entry without that data. If "
-                                           "Null then this is not an old entry, but a Stripe 'automated' event with "
-                                           "no associated request.")
-    event_timestamp = StripeDateTimeField(null=True, stripe_name="created",
-                                          help_text="Empty for old entries. For all others, this entry field gives "
-                                                    "the timestamp of the time when the event occured from Stripe's "
-                                                    "perspective. This is as opposed to the time when we received "
-                                                    "notice of the event, which is not guaranteed to be the same time"
-                                                    "and which is recorded in a different field.")
-    received_api_version = StripeCharField(max_length=15, blank=True, stripe_name="api_version",
-                                           help_text="the API version at which the event data was rendered. Blank for "
-                                                     "old entries only, all new entries will have this value")
-    webhook_message = StripeJSONField(help_text="data received at webhook. data should be considered to be garbage "
-                                                "until validity check is run and valid flag is set", stripe_name="data")
+    card_last_4 = StripeCharField(max_length=4, blank=True, stripe_name="card.last4")
+    card_kind = StripeCharField(max_length=50, blank=True, stripe_name="card.type")
+    amount = StripeCurrencyField(null=True)
+    amount_refunded = StripeCurrencyField(null=True, stripe_required=False)
+    description = StripeTextField(blank=True, stripe_required=False)
+    paid = StripeNullBooleanField(null=True)
+    disputed = StripeNullBooleanField(null=True)
+    refunded = StripeNullBooleanField(null=True)
+    captured = StripeNullBooleanField(null=True)
+    fee = StripeCurrencyField(null=True)
 
-    def api_retrieve(self):
-        # OVERRIDING the parent version of this function
-        # Event retrieve is special. For Event we don't retrieve using djstripe's API version. We always retrieve
-        # using the API version that was used to send the Event (which depends on the Stripe account holders settings
-        with stripe_temporary_api_version(self.received_api_version):
-            stripe_event = super(StripeEvent, self).api_retrieve()
-
-        return stripe_event
-
-    def str_parts(self):
-        return [self.kind] + super(StripeEvent, self).str_parts()
-
-
-class StripeTransfer(StripeObject):
-    class Meta:
-        abstract = True
-
-    stripe_api_name = "Transfer"
-
-    amount = StripeCurrencyField()
-    status = StripeCharField(max_length=25)
-    date = StripeDateTimeField(help_text="Date the transfer is scheduled to arrive at destination")
-    description = StripeTextField(null=True, blank=True, stripe_required=False)
-
-    # The following fields are nested in the "summary" object
-    adjustment_count = StripeIntegerField(nested_name="summary")
-    adjustment_fees = StripeCurrencyField(nested_name="summary")
-    adjustment_gross = StripeCurrencyField(nested_name="summary")
-    charge_count = StripeIntegerField(nested_name="summary")
-    charge_fees = StripeCurrencyField(nested_name="summary")
-    charge_gross = StripeCurrencyField(nested_name="summary")
-    collected_fee_count = StripeIntegerField(nested_name="summary")
-    collected_fee_gross = StripeCurrencyField(nested_name="summary")
-    net = StripeCurrencyField(nested_name="summary")
-    refund_count = StripeIntegerField(nested_name="summary")
-    refund_fees = StripeCurrencyField(nested_name="summary")
-    refund_gross = StripeCurrencyField(nested_name="summary")
-    validation_count = StripeIntegerField(nested_name="summary")
-    validation_fees = StripeCurrencyField(nested_name="summary")
+    # DEPRECATED fields
+    receipt_sent = StripeNullBooleanField(deprecated=True)
+    charge_created = StripeDateTimeField(deprecated=True, stripe_name="created")
 
     def str_parts(self):
         return [
             "amount={amount}".format(amount=self.amount),
-            "status={status}".format(status=self.status),
-        ] + super(StripeTransfer, self).str_parts()
+            "paid={paid}".format(paid=smart_text(self.paid)),
+        ] + super(StripeCharge, self).str_parts()
 
-    def update_status(self):
-        self.status = self.api_retrieve().status
-        self.save()
+    def calculate_refund_amount(self, amount=None):
+        """
+        :rtype: int
+        :return: amount that can be refunded, in CENTS
+        """
+        eligible_to_refund = self.amount - (self.amount_refunded or 0)
+        if amount:
+            amount_to_refund = min(eligible_to_refund, amount)
+        else:
+            amount_to_refund = eligible_to_refund
+        return int(amount_to_refund * 100)
+
+    def refund(self, amount=None):
+        """
+        Initiate a refund. If amount is not provided, then this will be a full refund
+        :return: Stripe charge object
+        :rtype: dict
+        """
+        charge_obj = self.api_retrieve().refund(
+            amount=self.calculate_refund_amount(amount=amount)
+        )
+        return charge_obj
+
+    def capture(self):
+        """
+        Capture the payment of an existing, uncaptured, charge. This is the second half of the two-step payment flow,
+        where first you created a charge with the capture option set to false.
+        See https://stripe.com/docs/api#capture_charge
+        """
+        return self.api_retrieve().capture()
+
+    @classmethod
+    def object_to_customer(cls, manager, data):
+        """
+        Search the given manager for the customer matching this StripeCharge object
+
+        :param manager: stripe_objects manager for a table of StripeCustomers
+        :type manager: StripeObjectManager
+        :param data: stripe object
+        :type data: dict
+        """
+        return manager.get_by_json(data, "customer") if "customer" in data else None
+
+    @classmethod
+    def object_to_invoice(cls, manager, data):
+        """
+        Search the given manager for the invoice matching this StripeCharge object
+        :param manager: stripe_objects manager for a table of StripeInvoice
+        :type manager: StripeObjectManager
+        :param data: stripe object
+        :type data: dict
+        """
+        return manager.get_by_json(data, "invoice") if "invoice" in data else None
+
+    @classmethod
+    def stripe_object_to_record(cls, data):
+        data["disputed"] = data["dispute"] is not None
+        if data["refunded"]:
+            data["amount_refunded"] = data["amount"]
+
+        return super(StripeCharge, cls).stripe_object_to_record(data)
+
+    def sync(self, data=None):
+        for attr, value in data.items():
+            setattr(self, attr, value)
 
 
 class StripeCustomer(StripeObject):
+
     class Meta:
         abstract = True
 
@@ -318,6 +324,8 @@ class StripeCustomer(StripeObject):
             raise ValueError(
                 "You must supply a decimal value representing dollars."
             )
+
+        # TODO: Refactor when InvoiceItem becomes a StripeObject
         stripe.InvoiceItem.create(api_key=settings.STRIPE_SECRET_KEY,
             amount=int(amount * 100),  # Convert dollars into cents
             currency=currency,
@@ -327,7 +335,37 @@ class StripeCustomer(StripeObject):
         )
 
 
+class StripeCard(StripeObject):
+
+    class Meta:
+        abstract = True
+
+    stripe_api_name = "Card"
+
+
+class StripeSubscription(StripeObject):
+
+    class Meta:
+        abstract = True
+
+    stripe_api_name = "Subscription"
+
+
+class StripePlan(StripeObject):
+
+    class Meta:
+        abstract = True
+
+    stripe_api_name = "Plan"
+
+    @property
+    def stripe_plan(self):
+        """Return the plan data from Stripe."""
+        return self.api_retrieve()
+
+
 class StripeInvoice(StripeObject):
+
     class Meta:
         abstract = True
 
@@ -378,114 +416,117 @@ class StripeInvoice(StripeObject):
         return super(StripeInvoice, cls).stripe_object_to_record(data)
 
 
-class StripeCharge(StripeObject):
+class StripeInvoiceItem(StripeObject):
+
     class Meta:
         abstract = True
 
-    stripe_api_name = "Charge"
+    stripe_api_name = "InvoiceItem"
 
-    card_last_4 = StripeCharField(max_length=4, blank=True, stripe_name="card.last4")
-    card_kind = StripeCharField(max_length=50, blank=True, stripe_name="card.type")
-    amount = StripeCurrencyField(null=True)
-    amount_refunded = StripeCurrencyField(null=True, stripe_required=False)
-    description = StripeTextField(blank=True, stripe_required=False)
-    paid = StripeNullBooleanField(null=True)
-    disputed = StripeNullBooleanField(null=True)
-    refunded = StripeNullBooleanField(null=True)
-    captured = StripeNullBooleanField(null=True)
-    fee = StripeCurrencyField(null=True)
 
-    # DEPRECATED fields
-    receipt_sent = StripeNullBooleanField(deprecated=True)
-    charge_created = StripeDateTimeField(deprecated=True, stripe_name="created")
+class StripeTransfer(StripeObject):
+
+    class Meta:
+        abstract = True
+
+    stripe_api_name = "Transfer"
+
+    amount = StripeCurrencyField()
+    status = StripeCharField(max_length=25)
+    date = StripeDateTimeField(help_text="Date the transfer is scheduled to arrive at destination")
+    description = StripeTextField(null=True, blank=True, stripe_required=False)
+
+    # The following fields are nested in the "summary" object
+    adjustment_count = StripeIntegerField(nested_name="summary")
+    adjustment_fees = StripeCurrencyField(nested_name="summary")
+    adjustment_gross = StripeCurrencyField(nested_name="summary")
+    charge_count = StripeIntegerField(nested_name="summary")
+    charge_fees = StripeCurrencyField(nested_name="summary")
+    charge_gross = StripeCurrencyField(nested_name="summary")
+    collected_fee_count = StripeIntegerField(nested_name="summary")
+    collected_fee_gross = StripeCurrencyField(nested_name="summary")
+    net = StripeCurrencyField(nested_name="summary")
+    refund_count = StripeIntegerField(nested_name="summary")
+    refund_fees = StripeCurrencyField(nested_name="summary")
+    refund_gross = StripeCurrencyField(nested_name="summary")
+    validation_count = StripeIntegerField(nested_name="summary")
+    validation_fees = StripeCurrencyField(nested_name="summary")
 
     def str_parts(self):
         return [
             "amount={amount}".format(amount=self.amount),
-            "paid={paid}".format(paid=smart_text(self.paid)),
-        ] + super(StripeCharge, self).str_parts()
+            "status={status}".format(status=self.status),
+        ] + super(StripeTransfer, self).str_parts()
 
-    def calculate_refund_amount(self, amount=None):
-        """
-        :rtype: int
-        :return: amount that can be refunded, in CENTS
-        """
-        eligible_to_refund = self.amount - (self.amount_refunded or 0)
-        if amount:
-            amount_to_refund = min(eligible_to_refund, amount)
-        else:
-            amount_to_refund = eligible_to_refund
-        return int(amount_to_refund * 100)
-
-    def refund(self, amount=None):
-        """
-        Initiate a refund. If amount is not provided, then this will be a full refund
-        :return: Stripe charge object
-        :rtype: dict
-        """
-        charge_obj = self.api_retrieve().refund(
-            amount=self.calculate_refund_amount(amount=amount)
-        )
-        return charge_obj
-
-    def capture(self):
-        """
-        Capture the payment of an existing, uncaptured, charge. This is the second half of the two-step payment flow,
-        where first you created a charge with the capture option set to false.
-        See https://stripe.com/docs/api#capture_charge
-        """
-        return self.api_retrieve().capture()
-
-    @classmethod
-    def object_to_customer(cls, manager, data):
-        """
-        Search the given manager for the customer matching this StripeCharge object
-
-        :param manager: stripe_objects manager for a table of StripeCustomers
-        :type manager: StripeObjectManager
-        :param data: stripe object
-        :type data: dict
-        """
-        return manager.get_by_json(data, "customer") if "customer" in data else None
-
-    @classmethod
-    def object_to_invoice(cls, manager, data):
-        """
-        Search the given manager for the invoice matching this StripeCharge object
-        :param manager: stripe_objects manager for a table of StripeInvoice
-        :type manager: StripeObjectManager
-        :param data: stripe object
-        :type data: dict
-        """
-        return manager.get_by_json(data, "invoice") if "invoice" in data else None
-
-    @classmethod
-    def stripe_object_to_record(cls, data):
-        data["disputed"] = data["dispute"] is not None
-        if data["refunded"]:
-            data["amount_refunded"] = data["amount"]
-
-        return super(StripeCharge, cls).stripe_object_to_record(data)
-
-    def sync(self, data=None):
-        for attr, value in data.items():
-            setattr(self, attr, value)
+    def update_status(self):
+        self.status = self.api_retrieve().status
+        self.save()
 
 
-INTERVALS = (
-    ('week', 'Week',),
-    ('month', 'Month',),
-    ('year', 'Year',))
+class StripeAccount(StripeObject):
 
-
-class StripePlan(StripeObject):
     class Meta:
         abstract = True
 
-    """A Stripe Plan."""
-    stripe_api_name = "Plan"
+    stripe_api_name = "Account"
 
-    @property
-    def stripe_plan(self):
-        """Return the plan data from Stripe."""
-        return self.api_retrieve()
+
+class StripeEvent(StripeObject):
+    """
+    Events are POSTed to our webhook url. They provide information about a Stripe event that just happened. Events
+    are processed in detail by their respective models (charge events by the Charge model, etc).
+
+    Events are initially _UNTRUSTED_, as it is possible for any web entity to post any data to our webhook url. Data
+    posted may be valid Stripe information, garbage, or even malicious. The 'valid' flag in this model monitors this.
+
+    API VERSIONING
+    ====
+    This is a tricky matter when it comes to webhooks. See the discussion here:
+        https://groups.google.com/a/lists.stripe.com/forum/#!topic/api-discuss/h5Y6gzNBZp8
+
+    In this discussion, it is noted that Webhooks are produced in one API version, which will usually be
+    different from the version supported by Stripe plugins (such as djstripe). The solution, described there,
+    is:
+
+        1) validate the receipt of a webhook event by doing an event get using the API version of the received hook event.
+        2) retrieve the referenced object (e.g. the Charge, the Customer, etc) using the plugin's supported API version.
+        3) process that event using the retrieved object which will, only now, be in a format that you are certain to understand
+    """
+
+    #
+    # Stripe API_VERSION: model fields and methods audited to 2015-07-28 - @wahuneke
+    #
+    class Meta:
+        abstract = True
+
+    stripe_api_name = "Event"
+
+    kind = StripeCharField(stripe_name="type", max_length=250, help_text="Stripe's event description code")
+    request_id = StripeCharField(max_length=50, null=True, blank=True, stripe_name="request",
+                                 help_text="Information about the request that triggered this event, for traceability "
+                                           "purposes. If empty string then this is an old entry without that data. If "
+                                           "Null then this is not an old entry, but a Stripe 'automated' event with "
+                                           "no associated request.")
+    event_timestamp = StripeDateTimeField(null=True, stripe_name="created",
+                                          help_text="Empty for old entries. For all others, this entry field gives "
+                                                    "the timestamp of the time when the event occured from Stripe's "
+                                                    "perspective. This is as opposed to the time when we received "
+                                                    "notice of the event, which is not guaranteed to be the same time"
+                                                    "and which is recorded in a different field.")
+    received_api_version = StripeCharField(max_length=15, blank=True, stripe_name="api_version",
+                                           help_text="the API version at which the event data was rendered. Blank for "
+                                                     "old entries only, all new entries will have this value")
+    webhook_message = StripeJSONField(help_text="data received at webhook. data should be considered to be garbage "
+                                                "until validity check is run and valid flag is set", stripe_name="data")
+
+    def api_retrieve(self):
+        # OVERRIDING the parent version of this function
+        # Event retrieve is special. For Event we don't retrieve using djstripe's API version. We always retrieve
+        # using the API version that was used to send the Event (which depends on the Stripe account holders settings
+        with stripe_temporary_api_version(self.received_api_version):
+            stripe_event = super(StripeEvent, self).api_retrieve()
+
+        return stripe_event
+
+    def str_parts(self):
+        return [self.kind] + super(StripeEvent, self).str_parts()
