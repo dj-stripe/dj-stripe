@@ -18,7 +18,7 @@ from braces.views import CsrfExemptMixin
 from braces.views import FormValidMessageMixin
 from braces.views import LoginRequiredMixin
 from braces.views import SelectRelatedMixin
-import stripe
+from stripe.error import StripeError
 
 from .forms import PlanForm, CancelSubscriptionForm
 from .mixins import PaymentsContextMixin, SubscriptionMixin
@@ -85,7 +85,7 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
             if send_invoice:
                 customer.send_invoice()
             customer.retry_unpaid_invoices()
-        except stripe.StripeError as exc:
+        except StripeError as exc:
             messages.info(request, "Stripe Error")
             return render(
                 request,
@@ -153,7 +153,7 @@ class SubscribeFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionM
                     subscriber=subscriber_request_callback(self.request))
                 customer.update_card(self.request.POST.get("stripe_token"))
                 customer.subscribe(form.cleaned_data["plan"])
-            except stripe.StripeError as exc:
+            except StripeError as exc:
                 form.add_error(None, str(exc))
                 return self.form_invalid(form)
             # redirect to confirmation page
@@ -203,7 +203,7 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                         customer.subscribe(selected_plan_name)
                 else:
                     customer.subscribe(form.cleaned_data["plan"])
-            except stripe.StripeError as exc:
+            except StripeError as exc:
                 form.add_error(None, str(exc))
                 return self.form_invalid(form)
             return self.form_valid(form)
