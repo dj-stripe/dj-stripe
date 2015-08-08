@@ -8,6 +8,7 @@
 
 from copy import deepcopy
 
+from django.conf import settings
 from django.test.testcases import TestCase
 
 from mock import patch, PropertyMock
@@ -117,7 +118,7 @@ TRANSFER_CREATED_TEST_DATA2 = {
 class TransferTest(TestCase):
 
     @patch('stripe.Transfer.retrieve', return_value=PropertyMock(status="fish"))
-    def test_update_transfer(self, transfer_receive_mock):
+    def test_update_transfer(self, transfer_retrieve_mock):
         TRANSFER_UPDATED_TEST_DATA = deepcopy(TRANSFER_CREATED_TEST_DATA)
         TRANSFER_UPDATED_TEST_DATA["type"] = "transfer.updated"
         TRANSFER_UPDATED_TEST_DATA["data"]["object"]["id"] = "salmon"
@@ -143,7 +144,7 @@ class TransferTest(TestCase):
         updated_event.process()
 
         transfer_instance = Transfer.objects.get(stripe_id="salmon")
-        transfer_receive_mock.assert_called_once_with(transfer_instance.stripe_id)
+        transfer_retrieve_mock.assert_called_once_with(id=transfer_instance.stripe_id, api_key=settings.STRIPE_SECRET_KEY)
         self.assertEqual(transfer_instance.status, "fish")
 
         # Test to string

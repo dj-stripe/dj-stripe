@@ -24,7 +24,6 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 
 from model_utils.models import TimeStampedModel
-import stripe
 
 from .context_managers import stripe_temporary_api_version
 from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, StripeCurrencyField,
@@ -33,7 +32,7 @@ from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, Str
 from .managers import StripeObjectManager
 
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
+import stripe
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2013-02-11")
 
 
@@ -72,14 +71,14 @@ class StripeObject(TimeStampedModel):
         Implement very commonly used API function 'retrieve'
         """
         # Run stripe.X.retreive(id)
-        return type(self).api().retrieve(self.stripe_id)
+        return type(self).api().retrieve(id=self.stripe_id, api_key=settings.STRIPE_SECRET_KEY)
 
     @classmethod
     def api_create(cls, **kwargs):
         """
         Call the stripe API's create operation for this model
         """
-        return cls.api().create(**kwargs)
+        return cls.api().create(api_key=settings.STRIPE_SECRET_KEY, **kwargs)
 
     def str_parts(self):
         """
@@ -319,7 +318,7 @@ class StripeCustomer(StripeObject):
             raise ValueError(
                 "You must supply a decimal value representing dollars."
             )
-        stripe.InvoiceItem.create(
+        stripe.InvoiceItem.create(api_key=settings.STRIPE_SECRET_KEY,
             amount=int(amount * 100),  # Convert dollars into cents
             currency=currency,
             customer=self.stripe_id,

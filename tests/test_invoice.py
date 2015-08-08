@@ -10,6 +10,7 @@ from copy import deepcopy
 from datetime import timedelta
 from decimal import Decimal
 
+from django.conf import settings
 from django.test.testcases import TestCase
 from django.utils import timezone
 
@@ -114,7 +115,7 @@ class InvoiceTest(TestCase):
     def test_retry_true(self, invoice_retrieve_mock, invoice_sync_mock):
         return_value = self.invoice.retry()
 
-        invoice_retrieve_mock.assert_called_once_with(self.invoice.stripe_id)
+        invoice_retrieve_mock.assert_called_once_with(id=self.invoice.stripe_id, api_key=settings.STRIPE_SECRET_KEY)
         invoice_sync_mock.assert_called_once_with("fish")
         self.assertTrue(return_value)
 

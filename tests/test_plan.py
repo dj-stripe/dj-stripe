@@ -1,9 +1,11 @@
-from django.test import TestCase
-from djstripe.models import Plan
-from djstripe.admin import PlanAdmin
+from django.conf import settings
 from django.contrib.admin.sites import AdminSite
+from django.test import TestCase
 
 from mock import patch
+
+from djstripe.models import Plan
+from djstripe.admin import PlanAdmin
 
 
 class MockRequest(object):
@@ -92,4 +94,4 @@ class PlanTest(TestCase):
     @patch("stripe.Plan.retrieve", return_value="soup")
     def test_stripe_plan(self, plan_retrieve_mock):
         self.assertEqual("soup", self.plan.stripe_plan)
-        plan_retrieve_mock.assert_called_once_with(self.test_stripe_id)
+        plan_retrieve_mock.assert_called_once_with(id=self.test_stripe_id, api_key=settings.STRIPE_SECRET_KEY)

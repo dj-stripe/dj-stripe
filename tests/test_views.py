@@ -9,6 +9,7 @@
 
 from decimal import Decimal
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
@@ -39,7 +40,7 @@ class AccountViewTest(TestCase):
         response = self.client.get(self.url)
 
         # simply visiting the page should generate a new customer record.
-        stripe_create_customer_mock.assert_called_once_with(email=self.user.email)
+        stripe_create_customer_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, email=self.user.email)
 
         self.assertEqual(self.fake_stripe_customer_id, response.context["customer"].stripe_id)
         self.assertEqual(self.user, response.context["customer"].subscriber)
@@ -158,7 +159,7 @@ class HistoryViewTest(TestCase):
         view_instance.request = request
         object_a = view_instance.get_object()
 
-        stripe_create_customer_mock.assert_called_once_with(email=self.user.email)
+        stripe_create_customer_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, email=self.user.email)
 
         customer_instance = Customer.objects.get(subscriber=self.user)
         self.assertEqual(customer_instance, object_a)

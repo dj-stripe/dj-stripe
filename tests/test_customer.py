@@ -11,6 +11,7 @@
 import datetime
 import decimal
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
@@ -79,7 +80,7 @@ class TestCustomer(TestCase):
         self.assertTrue(customer.card_kind == "")
         self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
 
-        customer_retrieve_mock.assert_called_once_with(self.customer.stripe_id)
+        customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY)
 
     @patch("stripe.Customer.retrieve")
     def test_customer_delete_raises_unexpected_exception(self, customer_retrieve_mock):
@@ -88,7 +89,7 @@ class TestCustomer(TestCase):
         with self.assertRaisesMessage(stripe.InvalidRequestError, "Unexpected Exception"):
             self.customer.purge()
 
-        customer_retrieve_mock.assert_called_once_with(self.customer.stripe_id)
+        customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY)
 
     def test_change_charge(self):
         self.assertTrue(self.customer.can_charge())
@@ -324,7 +325,7 @@ class TestCustomer(TestCase):
         user = get_user_model().objects.create_user(username="test", email="test@gmail.com")
         Customer.create(user)
 
-        customer_create_mock.assert_called_once_with(email=user.email)
+        customer_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, email=user.email)
         callback_mock.assert_called_once_with(user)
 
     @patch("djstripe.models.Customer.subscribe")
@@ -335,7 +336,7 @@ class TestCustomer(TestCase):
         user = get_user_model().objects.create_user(username="test", email="test@gmail.com")
         Customer.create(user)
 
-        customer_create_mock.assert_called_once_with(email=user.email)
+        customer_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, email=user.email)
         callback_mock.assert_called_once_with(user)
         subscribe_mock.assert_called_once_with(plan=default_plan_fake, trial_days="donkey")
 
@@ -393,7 +394,7 @@ class TestCustomer(TestCase):
         return_status = self.customer.send_invoice()
         self.assertTrue(return_status)
 
-        invoice_create_mock.assert_called_once_with(customer=self.customer.stripe_id)
+        invoice_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, customer=self.customer.stripe_id)
 
     @patch("stripe.Invoice.create")
     def test_send_invoice_failure(self, invoice_create_mock):
@@ -402,7 +403,7 @@ class TestCustomer(TestCase):
         return_status = self.customer.send_invoice()
         self.assertFalse(return_status)
 
-        invoice_create_mock.assert_called_once_with(customer=self.customer.stripe_id)
+        invoice_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, customer=self.customer.stripe_id)
 
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
     def test_sync_active_card(self, stripe_customer_mock):
@@ -580,7 +581,7 @@ class TestCustomer(TestCase):
     def test_add_invoice_item(self, invoice_item_create_mock):
         self.customer.add_invoice_item(amount=decimal.Decimal("50.00"), currency="eur", invoice_id=77, description="test")
 
-        invoice_item_create_mock.assert_called_once_with(amount=5000, currency="eur", invoice=77, description="test", customer=self.customer.stripe_id)
+        invoice_item_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, amount=5000, currency="eur", invoice=77, description="test", customer=self.customer.stripe_id)
 
     def test_add_invoice_item_bad_decimal(self):
         with self.assertRaisesMessage(ValueError, "You must supply a decimal value representing dollars."):
