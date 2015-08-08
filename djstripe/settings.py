@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from collections import OrderedDict
+from copy import deepcopy
 import sys
 
 from django.apps import apps as django_apps
@@ -39,7 +40,7 @@ DEFAULT_PLAN = getattr(settings, "DJSTRIPE_DEFAULT_PLAN", None)
 PLAN_LIST = []
 for p in PAYMENTS_PLANS:
     if PAYMENTS_PLANS[p].get("stripe_plan_id"):
-        plan = PAYMENTS_PLANS[p]
+        plan = deepcopy(PAYMENTS_PLANS[p])
         plan['plan'] = p
         PLAN_LIST.append(plan)
 

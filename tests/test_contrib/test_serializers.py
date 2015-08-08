@@ -25,7 +25,7 @@ class SubscriptionSerializerTest(TestCase):
         now = timezone.now()
         serializer = SubscriptionSerializer(
             data={
-                'plan': settings.DJSTRIPE_PLANS['test0']['plan'],
+                'plan': 'test0',
                 'quantity': 2,
                 'start': now,
                 'status': CurrentSubscription.STATUS_ACTIVE,
@@ -46,7 +46,7 @@ class SubscriptionSerializerTest(TestCase):
         now = timezone.now()
         serializer = SubscriptionSerializer(
             data={
-                'plan': settings.DJSTRIPE_PLANS['test0']['plan'],
+                'plan': 'test0',
                 'start': now,
                 'status': CurrentSubscription.STATUS_ACTIVE,
                 'amount': settings.DJSTRIPE_PLANS['test0']['price'],
@@ -64,7 +64,7 @@ class CreateSubscriptionSerializerTest(TestCase):
         token = stripe_token_mock(card={})
         serializer = CreateSubscriptionSerializer(
             data={
-                'plan': settings.DJSTRIPE_PLANS['test0']['plan'],
+                'plan': 'test0',
                 'stripe_token': token.id,
             }
         )
@@ -76,7 +76,7 @@ class CreateSubscriptionSerializerTest(TestCase):
     def test_invalid_serializer(self):
         serializer = CreateSubscriptionSerializer(
             data={
-                'plan': settings.DJSTRIPE_PLANS['test0']['plan'],
+                'plan': 'test0',
             }
         )
         self.assertFalse(serializer.is_valid())
