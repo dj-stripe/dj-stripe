@@ -71,12 +71,12 @@ class StripeObject(TimeStampedModel):
         # e.g. stripe.Event, stripe.Charge, etc
         return getattr(stripe, cls.stripe_api_name)
 
-    def api_retrieve(self):
+    def api_retrieve(self, expand=None):
         """
         Implement very commonly used API function 'retrieve'
         """
         # Run stripe.X.retreive(id)
-        return type(self).api().retrieve(id=self.stripe_id, api_key=settings.STRIPE_SECRET_KEY)
+        return type(self).api().retrieve(id=self.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=expand)
 
     @classmethod
     def api_create(cls, **kwargs):
