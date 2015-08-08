@@ -78,6 +78,14 @@ class PlanTest(TestCase):
 
         self.plan = Plan(name=self.test_name, stripe_id=self.test_stripe_id)
 
+    @patch("djstripe.models.Plan.objects.create")
+    @patch("djstripe.models.Plan.api_create")
+    def test_create_with_metadata(self, ApiCreateMock, ObjectsCreateMock):
+        metadata = {'other_data': 'more_data'}
+        Plan.create(metadata=metadata, arg1=1, arg2=2, amount=1, stripe_id=1)
+        ApiCreateMock.assert_called_once_with(metadata=metadata, id=1, arg1=1, arg2=2, amount=100)
+        ObjectsCreateMock.assert_called_once_with(stripe_id=1, arg1=1, arg2=2, amount=1)
+
     def test_str(self):
         self.assertEqual("<test_name, stripe_id=plan_xxxxxxxxxxxx>", str(self.plan))
 
