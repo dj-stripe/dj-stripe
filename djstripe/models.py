@@ -32,144 +32,64 @@ from .utils import convert_tstamp
 logger = logging.getLogger(__name__)
 
 
-@python_2_unicode_compatible
-class EventProcessingException(TimeStampedModel):
+class Charge(StripeCharge):
+    customer = models.ForeignKey("Customer", related_name="charges")
+    invoice = models.ForeignKey("Invoice", null=True, related_name="charges")
 
-    event = models.ForeignKey("Event", null=True)
-    data = models.TextField()
-    message = models.CharField(max_length=500)
-    traceback = models.TextField()
+    objects = ChargeManager()
+
+    def refund(self, amount=None):
+        refunded_charge = super(Charge, self).refund(amount)
+        return Charge.sync_from_stripe_data(refunded_charge)
+
+    def capture(self):
+        """
+        Capture the payment of an existing, uncaptured, charge. This is the second half of the two-step payment flow,
+        where first you created a charge with the capture option set to false.
+        See https://stripe.com/docs/api#capture_charge
+        """
+        captured_charge = super(Charge, self).capture()
+        return Charge.sync_from_stripe_data(captured_charge)
 
     @classmethod
-    def log(cls, data, exception, event):
-        cls.objects.create(
-            event=event,
-            data=data or "",
-            message=str(exception),
-            traceback=exception_traceback.format_exc()
-        )
+    def sync_from_stripe_data(cls, data):
 
-    def __str__(self):
-        return "<{message}, pk={pk}, Event={event}>".format(message=self.message, pk=self.pk, event=self.event)
-
-
-class Event(StripeEvent):
-    customer = models.ForeignKey("Customer", null=True,
-                                 help_text="In the event that there is a related customer, this will point to that "
-                                           "Customer record")
-    valid = models.NullBooleanField(null=True,
-                                    help_text="Tri-state bool. Null == validity not yet confirmed. Otherwise, this "
-                                              "field indicates that this event was checked via stripe api and found "
-                                              "to be either authentic (valid=True) or in-authentic (possibly "
-                                              "malicious)")
-
-    processed = models.BooleanField(default=False, help_text="If validity is performed, webhook event processor(s) "
-                                                             "may run to take further action on the event. Once these "
-                                                             "have run, this is set to True.")
-
-    @property
-    def message(self):
-        return self.webhook_message if self.valid else None
-
-    def validate(self):
-        """
-        The original contents of the Event message comes from a POST to the webhook endpoint. This data
-        must be confirmed by re-fetching it and comparing the fetched data with the original data. That's what
-        this function does.
-
-        This function makes an API call to Stripe to re-download the Event data. It then
-        marks this record's valid flag to True or False.
-        """
-        event = self.api_retrieve()
-        validated_message = json.loads(
-            json.dumps(
-                event.to_dict(),
-                sort_keys=True,
-            )
-        )
-        self.valid = self.webhook_message == validated_message
-        self.save()
-
-    def process(self):
-        """
-        Call whatever webhook event handlers have registered for this event, based on event "type" and
-        event "sub type"
-
-        See event handlers registered in djstripe.event_handlers module (or handlers registered in djstripe plugins or
-        contrib packages)
-        """
-        if self.valid and not self.processed:
-            event_type, event_subtype = self.kind.split(".", 1)
-
-            try:
-                # TODO: would it make sense to wrap the next 4 lines in a transaction.atomic context? Yes it would,
-                # except that some webhook handlers can have side effects outside of our local database, meaning that
-                # even if we rollback on our database, some updates may have been sent to Stripe, etc in resposne to
-                # webhooks...
-                webhooks.call_handlers(self, self.message["data"], event_type, event_subtype)
-                self.send_signal()
-                self.processed = True
-                self.save()
-            except StripeError as exc:
-                # TODO: What if we caught all exceptions or a broader range of exceptions here? How about DoesNotExist
-                # exceptions, for instance? or how about TypeErrors, KeyErrors, ValueErrors, etc?
-                EventProcessingException.log(
-                    data=exc.http_body,
-                    exception=exc,
-                    event=self
-                )
-                webhook_processing_error.send(
-                    sender=Event,
-                    data=exc.http_body,
-                    exception=exc
-                )
-
-    def send_signal(self):
-        signal = WEBHOOK_SIGNALS.get(self.kind)
-        if signal:
-            return signal.send(sender=Event, event=self)
-
-
-class Transfer(StripeTransfer):
-    event = models.ForeignKey(Event, related_name="transfers")
-
-    objects = TransferManager()
-
-    @classmethod
-    def process_transfer(cls, event, stripe_object):
         try:
-            transfer = cls.stripe_objects.get_by_json(stripe_object)
-            created = False
+            charge = cls.stripe_objects.get_by_json(data)
+            charge.sync(cls.stripe_object_to_record(data))
         except cls.DoesNotExist:
-            transfer = cls.create_from_stripe_object(stripe_object)
-            created = True
+            charge = cls.create_from_stripe_object(data)
 
-        transfer.event = event
+        customer = cls.object_to_customer(Customer.stripe_objects, data)
+        charge.customer = customer
 
-        if created:
-            transfer.save()
-            for fee in stripe_object["summary"]["charge_fee_details"]:
-                transfer.charge_fee_details.create(
-                    amount=fee["amount"] / decimal.Decimal("100"),
-                    application=fee.get("application", ""),
-                    description=fee.get("description", ""),
-                    kind=fee["type"]
-                )
-        else:
-            transfer.status = stripe_object["status"]
-            transfer.save()
+        invoice = cls.object_to_invoice(Invoice.stripe_objects, data)
+        if invoice:
+            charge.invoice = invoice
 
-        if event and event.kind == "transfer.updated":
-            transfer.update_status()
-            transfer.save()
+        charge.save()
+        return charge
 
-
-class TransferChargeFee(TimeStampedModel):
-    transfer = models.ForeignKey(Transfer, related_name="charge_fee_details")
-    amount = models.DecimalField(decimal_places=2, max_digits=7)
-    application = models.TextField(null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
-    kind = models.CharField(max_length=150)
+    def send_receipt(self):
+        if not self.receipt_sent:
+            site = Site.objects.get_current()
+            protocol = getattr(settings, "DEFAULT_HTTP_PROTOCOL", "http")
+            ctx = {
+                "charge": self,
+                "site": site,
+                "protocol": protocol,
+            }
+            subject = render_to_string("djstripe/email/subject.txt", ctx)
+            subject = subject.strip()
+            message = render_to_string("djstripe/email/body.txt", ctx)
+            num_sent = EmailMessage(
+                subject,
+                message,
+                to=[self.customer.subscriber.email],
+                from_email=djstripe_settings.INVOICE_FROM_EMAIL
+            ).send()
+            self.receipt_sent = num_sent > 0
+            self.save()
 
 
 class Customer(StripeCustomer):
@@ -434,11 +354,7 @@ class CurrentSubscription(TimeStampedModel):
     STATUS_CANCELLED = "canceled"
     STATUS_UNPAID = "unpaid"
 
-    customer = models.OneToOneField(
-        Customer,
-        related_name="current_subscription",
-        null=True
-    )
+    customer = models.OneToOneField(Customer, related_name="current_subscription", null=True)
     plan = models.CharField(max_length=100)
     quantity = models.IntegerField()
     start = models.DateTimeField()
@@ -505,6 +421,64 @@ class CurrentSubscription(TimeStampedModel):
         )
 
         self.customer.sync_current_subscription()
+
+
+INTERVALS = (
+    ('week', 'Week',),
+    ('month', 'Month',),
+    ('year', 'Year',))
+
+
+class Plan(StripePlan):
+    name = models.CharField(max_length=100, null=False)
+    currency = models.CharField(choices=djstripe_settings.CURRENCIES, max_length=10, null=False)
+    interval = models.CharField(max_length=10, choices=INTERVALS, verbose_name="Interval type", null=False)
+    interval_count = models.IntegerField(verbose_name="Intervals between charges", default=1, null=True)
+    amount = models.DecimalField(decimal_places=2, max_digits=7, verbose_name="Amount (per period)", null=False)
+    trial_period_days = models.IntegerField(null=True)
+
+    def str_parts(self):
+        return [smart_text(self.name)] + super(Plan, self).str_parts()
+
+    @classmethod
+    def create(cls, **kwargs):
+
+        # A few minor things are changed in the api-version of the create call
+        api_kwargs = dict(kwargs)
+        api_kwargs['id'] = api_kwargs['stripe_id']
+        del(api_kwargs['stripe_id'])
+        api_kwargs['amount'] = int(api_kwargs['amount'] * 100)
+        cls.api_create(**api_kwargs)
+
+        # If they passed in a 'metadata' arg, drop that here as it is only for api consumption
+        if 'metadata' in kwargs:
+            del(kwargs['metadata'])
+        plan = Plan.objects.create(**kwargs)
+
+        return plan
+
+    @classmethod
+    def get_or_create(cls, **kwargs):
+        try:
+            return Plan.objects.get(stripe_id=kwargs['stripe_id']), False
+        except Plan.DoesNotExist:
+            return cls.create(**kwargs), True
+
+    def update_name(self):
+        """Update the name of the Plan in Stripe and in the db.
+
+        - Assumes the object being called has the name attribute already
+          reset, but has not been saved.
+        - Stripe does not allow for update of any other Plan attributes besides
+          name.
+
+        """
+
+        p = self.api_retrieve()
+        p.name = self.name
+        p.save()
+
+        self.save()
 
 
 class Invoice(StripeInvoice):
@@ -608,138 +582,144 @@ class InvoiceItem(TimeStampedModel):
         return djstripe_settings.PAYMENTS_PLANS[self.plan]["name"]
 
 
-class Charge(StripeCharge):
-    stripe_api_name = "Charge"
+class Transfer(StripeTransfer):
+    event = models.ForeignKey("Event", related_name="transfers")
 
-    customer = models.ForeignKey(Customer, related_name="charges")
-    invoice = models.ForeignKey(Invoice, null=True, related_name="charges")
-
-    objects = ChargeManager()
-
-    def refund(self, amount=None):
-        refunded_charge = super(Charge, self).refund(amount)
-        return Charge.sync_from_stripe_data(refunded_charge)
-
-    def capture(self):
-        """
-        Capture the payment of an existing, uncaptured, charge. This is the second half of the two-step payment flow,
-        where first you created a charge with the capture option set to false.
-        See https://stripe.com/docs/api#capture_charge
-        """
-        captured_charge = super(Charge, self).capture()
-        return Charge.sync_from_stripe_data(captured_charge)
+    objects = TransferManager()
 
     @classmethod
-    def sync_from_stripe_data(cls, data):
-
+    def process_transfer(cls, event, stripe_object):
         try:
-            charge = cls.stripe_objects.get_by_json(data)
-            charge.sync(cls.stripe_object_to_record(data))
+            transfer = cls.stripe_objects.get_by_json(stripe_object)
+            created = False
         except cls.DoesNotExist:
-            charge = cls.create_from_stripe_object(data)
+            transfer = cls.create_from_stripe_object(stripe_object)
+            created = True
 
-        customer = cls.object_to_customer(Customer.stripe_objects, data)
-        charge.customer = customer
+        transfer.event = event
 
-        invoice = cls.object_to_invoice(Invoice.stripe_objects, data)
-        if invoice:
-            charge.invoice = invoice
+        if created:
+            transfer.save()
+            for fee in stripe_object["summary"]["charge_fee_details"]:
+                transfer.charge_fee_details.create(
+                    amount=fee["amount"] / decimal.Decimal("100"),
+                    application=fee.get("application", ""),
+                    description=fee.get("description", ""),
+                    kind=fee["type"]
+                )
+        else:
+            transfer.status = stripe_object["status"]
+            transfer.save()
 
-        charge.save()
-        return charge
-
-    def send_receipt(self):
-        if not self.receipt_sent:
-            site = Site.objects.get_current()
-            protocol = getattr(settings, "DEFAULT_HTTP_PROTOCOL", "http")
-            ctx = {
-                "charge": self,
-                "site": site,
-                "protocol": protocol,
-            }
-            subject = render_to_string("djstripe/email/subject.txt", ctx)
-            subject = subject.strip()
-            message = render_to_string("djstripe/email/body.txt", ctx)
-            num_sent = EmailMessage(
-                subject,
-                message,
-                to=[self.customer.subscriber.email],
-                from_email=djstripe_settings.INVOICE_FROM_EMAIL
-            ).send()
-            self.receipt_sent = num_sent > 0
-            self.save()
+        if event and event.kind == "transfer.updated":
+            transfer.update_status()
+            transfer.save()
 
 
-INTERVALS = (
-    ('week', 'Week',),
-    ('month', 'Month',),
-    ('year', 'Year',))
+class TransferChargeFee(TimeStampedModel):
+    transfer = models.ForeignKey(Transfer, related_name="charge_fee_details")
+    amount = models.DecimalField(decimal_places=2, max_digits=7)
+    application = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    kind = models.CharField(max_length=150)
 
 
-class Plan(StripePlan):
-    """A Stripe Plan."""
+@python_2_unicode_compatible
+class EventProcessingException(TimeStampedModel):
 
-    name = models.CharField(max_length=100, null=False)
-    currency = models.CharField(
-        choices=djstripe_settings.CURRENCIES,
-        max_length=10,
-        null=False)
-    interval = models.CharField(
-        max_length=10,
-        choices=INTERVALS,
-        verbose_name="Interval type",
-        null=False)
-    interval_count = models.IntegerField(
-        verbose_name="Intervals between charges",
-        default=1,
-        null=True)
-    amount = models.DecimalField(decimal_places=2, max_digits=7,
-                                 verbose_name="Amount (per period)",
-                                 null=False)
-    trial_period_days = models.IntegerField(null=True)
-
-    def str_parts(self):
-        return [smart_text(self.name)] + super(Plan, self).str_parts()
+    event = models.ForeignKey("Event", null=True)
+    data = models.TextField()
+    message = models.CharField(max_length=500)
+    traceback = models.TextField()
 
     @classmethod
-    def create(cls, **kwargs):
+    def log(cls, data, exception, event):
+        cls.objects.create(
+            event=event,
+            data=data or "",
+            message=str(exception),
+            traceback=exception_traceback.format_exc()
+        )
 
-        # A few minor things are changed in the api-version of the create call
-        api_kwargs = dict(kwargs)
-        api_kwargs['id'] = api_kwargs['stripe_id']
-        del(api_kwargs['stripe_id'])
-        api_kwargs['amount'] = int(api_kwargs['amount'] * 100)
-        cls.api_create(**api_kwargs)
+    def __str__(self):
+        return "<{message}, pk={pk}, Event={event}>".format(message=self.message, pk=self.pk, event=self.event)
 
-        # If they passed in a 'metadata' arg, drop that here as it is only for api consumption
-        if 'metadata' in kwargs:
-            del(kwargs['metadata'])
-        plan = Plan.objects.create(**kwargs)
 
-        return plan
+class Event(StripeEvent):
+    customer = models.ForeignKey("Customer", null=True,
+                                 help_text="In the event that there is a related customer, this will point to that "
+                                           "Customer record")
+    valid = models.NullBooleanField(null=True,
+                                    help_text="Tri-state bool. Null == validity not yet confirmed. Otherwise, this "
+                                              "field indicates that this event was checked via stripe api and found "
+                                              "to be either authentic (valid=True) or in-authentic (possibly "
+                                              "malicious)")
 
-    @classmethod
-    def get_or_create(cls, **kwargs):
-        try:
-            return Plan.objects.get(stripe_id=kwargs['stripe_id']), False
-        except Plan.DoesNotExist:
-            return cls.create(**kwargs), True
+    processed = models.BooleanField(default=False, help_text="If validity is performed, webhook event processor(s) "
+                                                             "may run to take further action on the event. Once these "
+                                                             "have run, this is set to True.")
 
-    def update_name(self):
-        """Update the name of the Plan in Stripe and in the db.
+    @property
+    def message(self):
+        return self.webhook_message if self.valid else None
 
-        - Assumes the object being called has the name attribute already
-          reset, but has not been saved.
-        - Stripe does not allow for update of any other Plan attributes besides
-          name.
-
+    def validate(self):
         """
+        The original contents of the Event message comes from a POST to the webhook endpoint. This data
+        must be confirmed by re-fetching it and comparing the fetched data with the original data. That's what
+        this function does.
 
-        p = self.api_retrieve()
-        p.name = self.name
-        p.save()
-
+        This function makes an API call to Stripe to re-download the Event data. It then
+        marks this record's valid flag to True or False.
+        """
+        event = self.api_retrieve()
+        validated_message = json.loads(
+            json.dumps(
+                event.to_dict(),
+                sort_keys=True,
+            )
+        )
+        self.valid = self.webhook_message == validated_message
         self.save()
+
+    def process(self):
+        """
+        Call whatever webhook event handlers have registered for this event, based on event "type" and
+        event "sub type"
+
+        See event handlers registered in djstripe.event_handlers module (or handlers registered in djstripe plugins or
+        contrib packages)
+        """
+        if self.valid and not self.processed:
+            event_type, event_subtype = self.kind.split(".", 1)
+
+            try:
+                # TODO: would it make sense to wrap the next 4 lines in a transaction.atomic context? Yes it would,
+                # except that some webhook handlers can have side effects outside of our local database, meaning that
+                # even if we rollback on our database, some updates may have been sent to Stripe, etc in resposne to
+                # webhooks...
+                webhooks.call_handlers(self, self.message["data"], event_type, event_subtype)
+                self.send_signal()
+                self.processed = True
+                self.save()
+            except StripeError as exc:
+                # TODO: What if we caught all exceptions or a broader range of exceptions here? How about DoesNotExist
+                # exceptions, for instance? or how about TypeErrors, KeyErrors, ValueErrors, etc?
+                EventProcessingException.log(
+                    data=exc.http_body,
+                    exception=exc,
+                    event=self
+                )
+                webhook_processing_error.send(
+                    sender=Event,
+                    data=exc.http_body,
+                    exception=exc
+                )
+
+    def send_signal(self):
+        signal = WEBHOOK_SIGNALS.get(self.kind)
+        if signal:
+            return signal.send(sender=Event, event=self)
 
 
 # Much like registering signal handlers. We import this module so that its registrations get picked up
