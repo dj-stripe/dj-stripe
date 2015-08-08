@@ -24,7 +24,6 @@ from djstripe.utils import subscriber_has_active_subscription, get_supported_cur
 from unittest.case import SkipTest
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
 from mock import patch
-from stripe import api_key
 
 from tests.apps.testapp.models import Organization
 
@@ -188,7 +187,7 @@ class TestGetSupportedCurrencyChoices(TestCase):
         USD should always be an option.
         """
 
-        currency_choices = get_supported_currency_choices(api_key)
+        currency_choices = get_supported_currency_choices(None)
         stripe_account_retrieve_mock.assert_called_once_with()
         self.assertGreaterEqual(len(currency_choices), 1, "Currency choices pull returned an empty list.")
         self.assertEqual(tuple, type(currency_choices[0]), "Currency choices are not tuples.")
