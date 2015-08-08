@@ -12,8 +12,16 @@ from django.utils import timezone
 
 from . import webhooks
 from . import settings as djstripe_settings
-import stripe
 from .models import Customer, CurrentSubscription, Charge, Transfer, Invoice
+
+
+# ---------------------------
+# Charge model events
+# ---------------------------
+@webhooks.handler(['charge'])
+def charge_webhook_handler(event, event_data, event_type, event_subtype):
+    event_data = Charge(stripe_id=event_data["object"]["id"]).api_retrieve()
+    return Charge.sync_from_stripe_data(event_data)
 
 
 # ---------------------------
@@ -53,29 +61,19 @@ def customer_webhook_handler(event, event_data, event_type, event_subtype):
 
 
 # ---------------------------
+# Invoice model events
+# ---------------------------
+@webhooks.handler(['invoice'])
+def invoice_webhook_handler(event, event_data, event_type, event_subtype):
+    if event_subtype in ["payment_failed", "payment_succeeded", "created"]:
+        stripe_invoice = Invoice(stripe_id=event_data["object"]["id"]).api_retrieve()
+        Invoice.sync_from_stripe_data(stripe_invoice, send_receipt=djstripe_settings.SEND_INVOICE_RECEIPT_EMAILS)
+
+
+# ---------------------------
 # Transfer model events
 # ---------------------------
 @webhooks.handler(["transfer"])
 def transfer_webhook_handler(event, event_data, event_type, event_subtype):
     # TODO: re-retrieve this transfer object so we have it in proper API version
     Transfer.process_transfer(event, event_data["object"])
-
-
-# ---------------------------
-# Invoice model events
-# ---------------------------
-@webhooks.handler(['invoice'])
-def invoice_webhook_handler(event, event_data, event_type, event_subtype):
-    if event_subtype in ["payment_failed", "payment_succeeded", "created"]:
-        invoice_data = event_data["object"]
-        stripe_invoice = stripe.Invoice.retrieve(invoice_data["id"])
-        Invoice.sync_from_stripe_data(stripe_invoice, send_receipt=djstripe_settings.SEND_INVOICE_RECEIPT_EMAILS)
-
-
-# ---------------------------
-# Charge model events
-# ---------------------------
-@webhooks.handler(['charge'])
-def charge_webhook_handler(event, event_data, event_type, event_subtype):
-    event_data = stripe.Charge.retrieve(event_data["object"]["id"])
-    return Charge.sync_from_stripe_data(event_data)
