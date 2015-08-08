@@ -11,7 +11,6 @@ from __future__ import unicode_literals
 from decimal import Decimal
 
 from django.utils import timezone
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 
@@ -21,10 +20,6 @@ from rest_framework.test import APITestCase
 
 from djstripe.models import CurrentSubscription, Customer
 from djstripe import settings as djstripe_settings
-
-if settings.STRIPE_PUBLIC_KEY and settings.STRIPE_SECRET_KEY:
-    import stripe
-    stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 class RestSubscriptionTest(APITestCase):
