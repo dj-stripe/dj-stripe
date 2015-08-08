@@ -12,21 +12,6 @@ from contextlib import contextmanager
 
 
 @contextmanager
-def stripe_temporary_api_key(temp_key):
-    """
-    A contextmanager
-
-    Temporarily replace the global api_key used in stripe API calls with the given value.
-    The original value is restored as soon as context exits.
-    """
-    import stripe
-    backup_key = stripe.api_key
-    stripe.api_key = temp_key
-    yield
-    stripe.api_key = backup_key
-
-
-@contextmanager
 def stripe_temporary_api_version(temp_version):
     """
     A contextmanager

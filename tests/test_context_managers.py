@@ -9,19 +9,7 @@
 
 from django.test import TestCase
 
-from djstripe.context_managers import stripe_temporary_api_key, stripe_temporary_api_version
-
-
-class TestTemporaryKey(TestCase):
-
-    def test_basic(self):
-        import stripe
-        key = stripe.api_key
-
-        with stripe_temporary_api_key("newkey"):
-            self.assertEqual(stripe.api_key, "newkey")
-
-        self.assertEqual(stripe.api_key, key)
+from djstripe.context_managers import stripe_temporary_api_version
 
 
 class TestTemporaryVersion(TestCase):
