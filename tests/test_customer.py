@@ -80,7 +80,7 @@ class TestCustomer(TestCase):
         self.assertTrue(customer.card_kind == "")
         self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
 
-        customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY)
+        customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=None)
 
     @patch("stripe.Customer.retrieve")
     def test_customer_delete_raises_unexpected_exception(self, customer_retrieve_mock):
@@ -89,7 +89,7 @@ class TestCustomer(TestCase):
         with self.assertRaisesMessage(stripe.InvalidRequestError, "Unexpected Exception"):
             self.customer.purge()
 
-        customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY)
+        customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=None)
 
     def test_change_charge(self):
         self.assertTrue(self.customer.can_charge())

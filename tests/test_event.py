@@ -213,7 +213,7 @@ class EventTest(TestCase):
         event_retrieve_mock.return_value = convert_to_fake_stripe_object(self.message)
         self.assertEqual(None, event.valid)
         event.validate()
-        event_retrieve_mock.assert_called_once_with(id=self.message["id"], api_key=settings.STRIPE_SECRET_KEY)
+        event_retrieve_mock.assert_called_once_with(id=self.message["id"], api_key=settings.STRIPE_SECRET_KEY, expand=None)
         self.assertEqual(True, event.valid)
 
     @patch('stripe.Event.retrieve', return_value=convert_to_fake_stripe_object({"data": {"object": {"flavor": "chocolate"}}, "zebra": True, "alpha": False}))
@@ -226,7 +226,7 @@ class EventTest(TestCase):
 
         self.assertEqual(None, event.valid)
         event.validate()
-        event_retrieve_mock.assert_called_once_with(id=self.message["id"], api_key=settings.STRIPE_SECRET_KEY)
+        event_retrieve_mock.assert_called_once_with(id=self.message["id"], api_key=settings.STRIPE_SECRET_KEY, expand=None)
         self.assertEqual(False, event.valid)
         self.assertEqual(None, event.message)
 
@@ -303,7 +303,7 @@ class EventTest(TestCase):
 
         event.process()
         self.assertEqual(event.customer, self.customer)
-        retrieve_mock.assert_called_once_with(self.message["data"]["object"]["id"])
+        retrieve_mock.assert_called_once_with(id=self.message["data"]["object"]["id"], api_key=settings.STRIPE_SECRET_KEY, expand=None)
         record_charge_mock.assert_called_once_with("hello")
         self.assertTrue(event.processed)
 

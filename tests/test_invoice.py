@@ -115,7 +115,7 @@ class InvoiceTest(TestCase):
     def test_retry_true(self, invoice_retrieve_mock, invoice_sync_mock):
         return_value = self.invoice.retry()
 
-        invoice_retrieve_mock.assert_called_once_with(id=self.invoice.stripe_id, api_key=settings.STRIPE_SECRET_KEY)
+        invoice_retrieve_mock.assert_called_once_with(id=self.invoice.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=None)
         invoice_sync_mock.assert_called_once_with("fish")
         self.assertTrue(return_value)
 
@@ -240,7 +240,7 @@ class InvoiceTest(TestCase):
 
         invoice_webhook_handler(fake_event, fake_event.message["data"], "invoice", "payment_failed")
 
-        invoice_retrieve_mock.assert_called_once_with("door")
+        invoice_retrieve_mock.assert_called_once_with(id="door", api_key=settings.STRIPE_SECRET_KEY, expand=None)
         sync_invoice_mock.assert_called_once_with("lock", send_receipt=True)
 
     @patch("djstripe.models.Invoice.sync_from_stripe_data")
@@ -250,5 +250,5 @@ class InvoiceTest(TestCase):
 
         invoice_webhook_handler(fake_event, fake_event.message["data"], "invoice", "payment_failed")
 
-        invoice_retrieve_mock.assert_called_once_with("lock")
+        invoice_retrieve_mock.assert_called_once_with(id="lock", api_key=settings.STRIPE_SECRET_KEY, expand=None)
         sync_invoice_mock.assert_called_once_with("key", send_receipt=True)
