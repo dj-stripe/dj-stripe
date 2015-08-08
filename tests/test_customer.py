@@ -117,7 +117,8 @@ class TestCustomer(TestCase):
             "fee": 499,
             "dispute": None,
             "created": 1363911708,
-            "customer": "cus_xxxxxxxxxxxxxxx"
+            "customer": "cus_xxxxxxxxxxxxxxx",
+            "livemode": True,
         }
         obj = self.customer.record_charge("ch_XXXXXX")
         self.assertEquals(Charge.objects.get(stripe_id="ch_XXXXXX").pk, obj.pk)
@@ -153,7 +154,8 @@ class TestCustomer(TestCase):
             "fee": 499,
             "dispute": None,
             "created": 1363911708,
-            "customer": "cus_xxxxxxxxxxxxxxx"
+            "customer": "cus_xxxxxxxxxxxxxxx",
+            "livemode": True,
         }
         charge.refund()
         charge2 = Charge.objects.get(stripe_id="ch_XXXXXX")
@@ -188,7 +190,8 @@ class TestCustomer(TestCase):
             "fee": 499,
             "dispute": None,
             "created": 1363911708,
-            "customer": "cus_xxxxxxxxxxxxxxx"
+            "customer": "cus_xxxxxxxxxxxxxxx",
+            "livemode": True,
         }
         charge2 = charge.capture()
         self.assertEquals(charge2.captured, True)
@@ -220,7 +223,8 @@ class TestCustomer(TestCase):
             "fee": 499,
             "dispute": None,
             "created": 1363911708,
-            "customer": "cus_xxxxxxxxxxxxxxx"
+            "customer": "cus_xxxxxxxxxxxxxxx",
+            "livemode": True,
         }
         charge2 = charge.refund()
         self.assertEquals(charge2.refunded, True)
@@ -276,7 +280,8 @@ class TestCustomer(TestCase):
             "fee": 499,
             "dispute": None,
             "created": 1363911708,
-            "customer": "cus_xxxxxxxxxxxxxxx"
+            "customer": "cus_xxxxxxxxxxxxxxx",
+            "livemode": True,
         }
         self.customer.charge(
             amount=decimal.Decimal("10.00")
@@ -301,7 +306,8 @@ class TestCustomer(TestCase):
             "fee": 499,
             "dispute": None,
             "created": 1363911708,
-            "customer": "cus_xxxxxxxxxxxxxxx"
+            "customer": "cus_xxxxxxxxxxxxxxx",
+            "livemode": True,
         }
         self.customer.charge(
             amount=decimal.Decimal("10.00"),

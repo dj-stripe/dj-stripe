@@ -24,6 +24,7 @@ TRANSFER_CREATED_TEST_DATA = {
             "date": 1348876800,
             "description": None,
             "id": "tr_XXXXXXXXXXXX",
+            "livemode": True,
             "object": "transfer",
             "other_transfers": [],
             "status": "paid",
@@ -58,6 +59,8 @@ TRANSFER_CREATED_TEST_DATA = {
     "livemode": True,
     "object": "event",
     "pending_webhooks": 1,
+    "request": "bla",
+    "api_version": "2015-07-28",
     "type": "transfer.created"
 }
 
@@ -70,6 +73,7 @@ TRANSFER_CREATED_TEST_DATA2 = {
             "date": 1348876800,
             "description": None,
             "id": "tr_XXXXXXXXXXX2",
+            "livemode": True,
             "object": "transfer",
             "other_transfers": [],
             "status": "paid",
@@ -104,6 +108,8 @@ TRANSFER_CREATED_TEST_DATA2 = {
     "livemode": True,
     "object": "event",
     "pending_webhooks": 1,
+    "request": "bla",
+    "api_version": "2015-07-28",
     "type": "transfer.created"
 }
 
@@ -122,7 +128,6 @@ class TransferTest(TestCase):
             kind="transfer.created",
             livemode=True,
             webhook_message=TRANSFER_CREATED_TEST_DATA,
-            validated_message=TRANSFER_CREATED_TEST_DATA,
             valid=True
         )
         created_event.process()
@@ -133,7 +138,6 @@ class TransferTest(TestCase):
             kind="transfer.updated",
             livemode=True,
             webhook_message=TRANSFER_UPDATED_TEST_DATA,
-            validated_message=TRANSFER_UPDATED_TEST_DATA,
             valid=True
         )
         updated_event.process()

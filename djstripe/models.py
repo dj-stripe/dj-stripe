@@ -16,7 +16,6 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 
-from jsonfield.fields import JSONField
 from model_utils.models import TimeStampedModel
 import stripe
 
@@ -57,25 +56,40 @@ class EventProcessingException(TimeStampedModel):
 
 
 class Event(StripeEvent):
-    customer = models.ForeignKey("Customer", null=True)
-    validated_message = JSONField(null=True)
-    valid = models.NullBooleanField(null=True)
-    processed = models.BooleanField(default=False)
+    customer = models.ForeignKey("Customer", null=True,
+                                 help_text="In the event that there is a related customer, this will point to that "
+                                           "Customer record")
+    valid = models.NullBooleanField(null=True,
+                                    help_text="Tri-state bool. Null == validity not yet confirmed. Otherwise, this "
+                                              "field indicates that this event was checked via stripe api and found "
+                                              "to be either authentic (valid=True) or in-authentic (possibly "
+                                              "malicious)")
+
+    processed = models.BooleanField(default=False, help_text="If validity is performed, webhook event processor(s) "
+                                                             "may run to take further action on the event. Once these "
+                                                             "have run, this is set to True.")
 
     @property
     def message(self):
-        return self.validated_message
+        return self.webhook_message if self.valid else None
 
     def validate(self):
+        """
+        The original contents of the Event message comes from a POST to the webhook endpoint. This data
+        must be confirmed by re-fetching it and comparing the fetched data with the original data. That's what
+        this function does.
+
+        This function makes an API call to Stripe to re-download the Event data. It then
+        marks this record's valid flag to True or False.
+        """
         event = self.api_retrieve()
-        self.validated_message = json.loads(
+        validated_message = json.loads(
             json.dumps(
                 event.to_dict(),
                 sort_keys=True,
-                cls=stripe.StripeObjectEncoder
             )
         )
-        self.valid = self.webhook_message["data"] == self.validated_message["data"]
+        self.valid = self.webhook_message == validated_message
         self.save()
 
     def process(self):
@@ -496,7 +510,6 @@ class CurrentSubscription(TimeStampedModel):
 
 
 class Invoice(StripeInvoice):
-
     customer = models.ForeignKey(Customer, related_name="invoices")
 
     class Meta(object):
@@ -729,6 +742,7 @@ class Plan(StripePlan):
         p.save()
 
         self.save()
+
 
 # Much like registering signal handlers. We import this module so that its registrations get picked up
 # the NO QA directive tells flake8 to not complain about the unused import
