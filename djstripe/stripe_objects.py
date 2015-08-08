@@ -258,26 +258,22 @@ class StripeCustomer(StripeObject):
         return all([self.card_fingerprint, self.card_last_4, self.card_kind])
 
     def sync_card(self):
-        stripe_customer = self.stripe_customer
+        self.card_fingerprint = self.stripe_customer.active_card.fingerprint
+        self.card_last_4 = self.stripe_customer.active_card.last4
+        self.card_kind = self.stripe_customer.active_card.type
+        self.card_exp_month = self.stripe_customer.active_card.exp_month
+        self.card_exp_year = self.stripe_customer.active_card.exp_year
 
-        self.card_fingerprint = stripe_customer.active_card.fingerprint
-        self.card_last_4 = stripe_customer.active_card.last4
-        self.card_kind = stripe_customer.active_card.type
-        self.card_exp_month = stripe_customer.active_card.exp_month
-        self.card_exp_year = stripe_customer.active_card.exp_year
-
-    # TODO refactor, deprecation on cu parameter -> stripe_customer
-    def sync(self, cu=None):
-        stripe_customer = cu or self.stripe_customer
-        if getattr(stripe_customer, 'deleted', False):
+    def sync(self):
+        if getattr(self.stripe_customer, 'deleted', False):
             # Customer was deleted from stripe
             self.purge()
-        elif getattr(stripe_customer, 'active_card', None):
-            self.card_fingerprint = stripe_customer.active_card.fingerprint
-            self.card_last_4 = stripe_customer.active_card.last4
-            self.card_kind = stripe_customer.active_card.type
-            self.card_exp_month = stripe_customer.active_card.exp_month
-            self.card_exp_year = stripe_customer.active_card.exp_year
+        elif getattr(self.stripe_customer, 'active_card', None):
+            self.card_fingerprint = self.stripe_customer.active_card.fingerprint
+            self.card_last_4 = self.stripe_customer.active_card.last4
+            self.card_kind = self.stripe_customer.active_card.type
+            self.card_exp_month = self.stripe_customer.active_card.exp_month
+            self.card_exp_year = self.stripe_customer.active_card.exp_year
 
     def charge(self, amount, currency="usd", description=None, send_receipt=True, **kwargs):
         """
