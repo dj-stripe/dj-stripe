@@ -12,7 +12,6 @@ from django.http.request import HttpRequest
 from django.test.client import RequestFactory
 from django.test.testcases import TestCase
 
-import stripe
 from mock import patch, PropertyMock
 
 from djstripe.mixins import SubscriptionPaymentRequiredMixin, PaymentsContextMixin, SubscriptionMixin

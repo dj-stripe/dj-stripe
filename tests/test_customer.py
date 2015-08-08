@@ -17,7 +17,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from mock import patch, PropertyMock, MagicMock
-import stripe
+from stripe.error import InvalidRequestError
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
 from djstripe.models import Customer, Charge, CurrentSubscription
@@ -70,7 +70,7 @@ class TestCustomer(TestCase):
 
     @patch("stripe.Customer.retrieve")
     def test_customer_purge_raises_customer_exception(self, customer_retrieve_mock):
-        customer_retrieve_mock.side_effect = stripe.InvalidRequestError("No such customer:", "blah")
+        customer_retrieve_mock.side_effect = InvalidRequestError("No such customer:", "blah")
 
         self.customer.purge()
         customer = Customer.objects.get(stripe_id=self.customer.stripe_id)
@@ -84,9 +84,9 @@ class TestCustomer(TestCase):
 
     @patch("stripe.Customer.retrieve")
     def test_customer_delete_raises_unexpected_exception(self, customer_retrieve_mock):
-        customer_retrieve_mock.side_effect = stripe.InvalidRequestError("Unexpected Exception", "blah")
+        customer_retrieve_mock.side_effect = InvalidRequestError("Unexpected Exception", "blah")
 
-        with self.assertRaisesMessage(stripe.InvalidRequestError, "Unexpected Exception"):
+        with self.assertRaisesMessage(InvalidRequestError, "Unexpected Exception"):
             self.customer.purge()
 
         customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=None)
@@ -372,7 +372,7 @@ class TestCustomer(TestCase):
     @patch("djstripe.models.Customer.invoices", new_callable=PropertyMock,
        return_value=PropertyMock(name="filter", filter=MagicMock(return_value=[MagicMock(name="inv", retry=MagicMock(name="retry",
                                                                                                                      return_value="test",
-                                                                                                                     side_effect=stripe.InvalidRequestError("Invoice is already paid", "blah")))])))
+                                                                                                                     side_effect=InvalidRequestError("Invoice is already paid", "blah")))])))
     @patch("djstripe.models.Customer.sync_invoices")
     def test_retry_unpaid_invoices_expected_exception(self, sync_invoices_mock, invoices_mock):
         try:
@@ -383,10 +383,10 @@ class TestCustomer(TestCase):
     @patch("djstripe.models.Customer.invoices", new_callable=PropertyMock,
        return_value=PropertyMock(name="filter", filter=MagicMock(return_value=[MagicMock(name="inv", retry=MagicMock(name="retry",
                                                                                                                      return_value="test",
-                                                                                                                     side_effect=stripe.InvalidRequestError("This should fail!", "blah")))])))
+                                                                                                                     side_effect=InvalidRequestError("This should fail!", "blah")))])))
     @patch("djstripe.models.Customer.sync_invoices")
     def test_retry_unpaid_invoices_unexpected_exception(self, sync_invoices_mock, invoices_mock):
-        with self.assertRaisesMessage(stripe.InvalidRequestError, "This should fail!"):
+        with self.assertRaisesMessage(InvalidRequestError, "This should fail!"):
             self.customer.retry_unpaid_invoices()
 
     @patch("stripe.Invoice.create")
@@ -398,7 +398,7 @@ class TestCustomer(TestCase):
 
     @patch("stripe.Invoice.create")
     def test_send_invoice_failure(self, invoice_create_mock):
-        invoice_create_mock.side_effect = stripe.InvalidRequestError("Invoice creation failed.", "blah")
+        invoice_create_mock.side_effect = InvalidRequestError("Invoice creation failed.", "blah")
 
         return_status = self.customer.send_invoice()
         self.assertFalse(return_status)
@@ -524,7 +524,6 @@ class TestCustomer(TestCase):
     @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock, return_value=PropertyMock(subscription=None))
     def test_sync_current_subscription_subscription_cancelled_from_Stripe(self, stripe_customer_mock, customer_subscription_mock):
         self.assertEqual(CurrentSubscription.STATUS_CANCELLED, self.customer.sync_current_subscription().status)
-
 
     @patch("djstripe.models.Customer.send_invoice")
     @patch("djstripe.models.Customer.sync_current_subscription")

@@ -15,7 +15,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from mock import patch, PropertyMock
-import stripe
+from stripe import StripeError
 
 from djstripe.models import Customer, Event, CurrentSubscription
 from tests import convert_to_fake_stripe_object
@@ -399,7 +399,7 @@ class EventTest(TestCase):
         self.assertTrue(event.processed)
 
     @patch('djstripe.models.EventProcessingException.log')
-    @patch('djstripe.models.Event.send_signal', side_effect=stripe.StripeError())
+    @patch('djstripe.models.Event.send_signal', side_effect=StripeError())
     def test_stripe_error(self, send_signal_mock, event_exception_log):
         event = Event.objects.create(
             stripe_id=self.message["id"],
