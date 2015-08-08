@@ -15,8 +15,8 @@ from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
 from django.test.testcases import TestCase
 
-import stripe
 from mock import patch, PropertyMock
+from stripe.error import StripeError
 
 from djstripe import settings as djstripe_settings
 from djstripe.models import Customer, CurrentSubscription
@@ -104,7 +104,7 @@ class ChangeCardViewTest(TestCase):
     @patch("djstripe.models.Customer.update_card", autospec=True)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
     def test_post_card_error(self, stripe_create_customer_mock, update_card_mock):
-        update_card_mock.side_effect = stripe.StripeError("An error occurred while processing your card.")
+        update_card_mock.side_effect = StripeError("An error occurred while processing your card.")
 
         response = self.client.post(self.url, {"stripe_token": "pie"})
         update_card_mock.assert_called_once_with(self.user.customer, "pie")
@@ -114,7 +114,7 @@ class ChangeCardViewTest(TestCase):
     @patch("djstripe.models.Customer.update_card", autospec=True)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
     def test_post_no_card(self, stripe_create_customer_mock, update_card_mock):
-        update_card_mock.side_effect = stripe.StripeError("Invalid source object:")
+        update_card_mock.side_effect = StripeError("Invalid source object:")
 
         response = self.client.post(self.url)
         update_card_mock.assert_called_once_with(self.user.customer, None)
@@ -208,7 +208,7 @@ class SubscribeFormViewTest(TestCase):
     @patch("djstripe.models.Customer.update_card", autospec=True)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
     def test_post_no_card(self, stripe_customer_mock, update_card_mock, subscribe_mock):
-        update_card_mock.side_effect = stripe.StripeError("Invalid source object:")
+        update_card_mock.side_effect = StripeError("Invalid source object:")
 
         response = self.client.post(self.url, {"plan": "test0"})
         self.assertEqual(200, response.status_code)
@@ -304,7 +304,7 @@ class ChangePlanViewTest(TestCase):
 
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     def test_change_sub_stripe_error(self, subscribe_mock):
-        subscribe_mock.side_effect = stripe.StripeError("No such plan: test_id_3")
+        subscribe_mock.side_effect = StripeError("No such plan: test_id_3")
 
         self.assertTrue(self.client.login(username="testuser1", password="123"))
 
