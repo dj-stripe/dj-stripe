@@ -209,27 +209,20 @@ class Customer(StripeCustomer):
         except InvalidRequestError:
             return False  # There was nothing to invoice
 
-    # TODO refactor, deprecation on cu parameter -> stripe_customer
-    def sync(self, cu=None):
-        super(Customer, self).sync(cu)
+    def sync(self):
+        super(Customer, self).sync()
         self.save()
 
-    # TODO refactor, deprecation on cu parameter -> stripe_customer
-    def sync_invoices(self, cu=None, **kwargs):
-        stripe_customer = cu or self.stripe_customer
-        for invoice in stripe_customer.invoices(**kwargs).data:
+    def sync_invoices(self, **kwargs):
+        for invoice in self.stripe_customer.invoices(**kwargs).data:
             Invoice.sync_from_stripe_data(invoice, send_receipt=False)
 
-    # TODO refactor, deprecation on cu parameter -> stripe_customer
-    def sync_charges(self, cu=None, **kwargs):
-        stripe_customer = cu or self.stripe_customer
-        for charge in stripe_customer.charges(**kwargs).data:
+    def sync_charges(self, **kwargs):
+        for charge in self.stripe_customer.charges(**kwargs).data:
             self.record_charge(charge.id)
 
-    # TODO refactor, deprecation on cu parameter -> stripe_customer
-    def sync_current_subscription(self, cu=None):
-        stripe_customer = cu or self.stripe_customer
-        stripe_subscription = getattr(stripe_customer, 'subscription', None)
+    def sync_current_subscription(self):
+        stripe_subscription = getattr(self.stripe_customer, 'subscription', None)
         current_subscription = getattr(self, 'current_subscription', None)
 
         if stripe_subscription:
