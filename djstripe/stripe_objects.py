@@ -29,7 +29,7 @@ import stripe
 from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, StripeCurrencyField,
                      StripeIntegerField, StripeTextField, StripePositiveIntegerField, StripeIdField,
                      StripeBooleanField, StripeNullBooleanField, StripeJSONField)
-from .managers import TransferManager, StripeObjectManager
+from .managers import StripeObjectManager
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -61,8 +61,9 @@ class StripeObject(TimeStampedModel):
 
     stripe_id = StripeIdField(unique=True, stripe_name='id')
     livemode = StripeNullBooleanField(default=False, null=True,
-                                      help_text="Null here indicates that data was unavailable. Otherwise, this field "
-                                                "indicates whether this record comes from Stripe test mode or live "
+                                      help_text="Null here indicates that the livemode status is unknown "
+                                                "or was previously unrecorded. Otherwise, this field indicates "
+                                                "whether this record comes from Stripe test mode or live "
                                                 "mode operation.")
 
     class Meta:
@@ -152,10 +153,11 @@ class StripeEvent(StripeObject):
 
     In this discussion, it is noted that Webhooks are produced in one API version, which will usually be
     different from the version supported by Stripe plugins (such as djstripe). The solution, described there,
-    is that the receipt of a webhook event should be 1st) validated by doing an event get using the API version
-    of the received hook event. Followed by 2nd) retrieve the referenced object (e.g. the Charge, the Customer, etc)
-    using the plugin's supported API version. Then 3rd) process that event using the retrieved object which will, only
-    now be in a format that you are certain to understand
+    is:
+
+        1) validate the receipt of a webhook event by doing an event get using the API version of the received hook event.
+        2) retrieve the referenced object (e.g. the Charge, the Customer, etc) using the plugin's supported API version.
+        3) process that event using the retrieved object which will, only now, be in a format that you are certain to understand
     """
 
     #
@@ -189,9 +191,9 @@ class StripeEvent(StripeObject):
         # Event retrieve is special. For Event we don't retrieve using djstripe's API version. We always retrieve
         # using the API version that was used to send the Event (which depends on the Stripe account holders settings
         with stripe_temporary_api_key(self.received_api_version):
-            evt = super(StripeEvent, self).api_retrieve()
+            stripe_event = super(StripeEvent, self).api_retrieve()
 
-        return evt
+        return stripe_event
 
     def str_parts(self):
         return [self.kind] + super(StripeEvent, self).str_parts()

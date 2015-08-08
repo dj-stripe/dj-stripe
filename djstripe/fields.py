@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 .. module:: djstripe.fields
-   :synopsis: dj-stripe - Define some custom fields
+   :synopsis: dj-stripe Custom Field Definitions
 
 .. moduleauthor:: Bill Huneke (@wahuneke)
 """
@@ -75,9 +75,8 @@ class StripeFieldMixin(object):
 
 
 class StripeCurrencyField(StripeFieldMixin, models.DecimalField):
-    """
-    Stripe is always in cents. djstripe stores everything in dollars.
-    """
+    """Stripe is always in cents. djstripe stores everything in dollars."""
+
     def __init__(self, *args, **kwargs):
         defaults = {
             'decimal_places': 2,
@@ -93,10 +92,10 @@ class StripeCurrencyField(StripeFieldMixin, models.DecimalField):
 
 
 class StripeBooleanField(StripeFieldMixin, models.BooleanField):
+
     def __init__(self, *args, **kwargs):
         if kwargs.get("deprecated", False):
-            raise ImproperlyConfigured("Boolean field cannot be deprecated. Change field type "
-                                       "StripeNullBooleanField")
+            raise ImproperlyConfigured("Boolean field cannot be deprecated. Change field type to StripeNullBooleanField")
         super(StripeBooleanField, self).__init__(*args, **kwargs)
 
 
@@ -109,9 +108,8 @@ class StripeCharField(StripeFieldMixin, models.CharField):
 
 
 class StripeIdField(StripeCharField):
-    """
-    A field with enough space to hold any stripe ID
-    """
+    """A field with enough space to hold any stripe ID."""
+
     def __init__(self, *args, **kwargs):
         defaults = {
             'max_length': 50,
@@ -127,6 +125,7 @@ class StripeTextField(StripeFieldMixin, models.TextField):
 
 
 class StripeDateTimeField(StripeFieldMixin, models.DateTimeField):
+
     def stripe_to_db(self, data):
         if not self.deprecated:
             return convert_tstamp(super(StripeDateTimeField, self).stripe_to_db(data))
@@ -141,6 +140,7 @@ class StripePositiveIntegerField(StripeFieldMixin, models.PositiveIntegerField):
 
 
 class StripeJSONField(StripeFieldMixin, JSONField):
+
     def stripe_to_db(self, data):
         if self.stripe_name:
             # If this is defined, then we grab the value at that location
