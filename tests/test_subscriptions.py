@@ -48,6 +48,7 @@ DUMMY_CUSTOMER_WITHOUT_SUB = {
     "object": "customer",
     "created": CREATE_TIME,
     "id": "cus_xxxxxxxxxxxxxx",
+    "livemode": True,
     "subscription": None,
     "cards": {
         "object": "list",

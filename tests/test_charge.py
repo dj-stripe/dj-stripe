@@ -133,7 +133,7 @@ class ChargeTest(TestCase):
         self.assertEqual(Decimal("0"), charge.fee)
         self.assertEqual(False, charge.disputed)
         self.assertEqual("test_description", charge.description)
-        self.assertEqual(None, charge.amount_refunded)
+        self.assertEqual(0, charge.amount_refunded)
 
     @patch("djstripe.models.Site.objects.get_current")
     def test_send_receipt_not_sent(self, get_current_mock):

@@ -10,26 +10,26 @@ place. Primarily this is:
 
 1) create models containing the fields that we care about, mapping to Stripe's fields
 2) create methods for consistently syncing our database with Stripe's version of the objects
-3) centralized routines for creating new database records to match incoming Stripe objects
+3) centralized methods for creating new database records to match incoming Stripe objects
 
 This module defines abstract models which are then extended in models.py to provide the remaining
 dj-stripe functionality.
 """
 
 from contextlib import contextmanager
-import datetime
 import decimal
 
 from django.conf import settings
 from django.db import models
-from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
-from jsonfield import JSONField
 
 from model_utils.models import TimeStampedModel
 import stripe
 
-from .managers import TransferManager, StripeObjectManager
+from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, StripeCurrencyField,
+                     StripeIntegerField, StripeTextField, StripePositiveIntegerField, StripeIdField,
+                     StripeBooleanField, StripeNullBooleanField, StripeJSONField)
+from .managers import StripeObjectManager
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -51,17 +51,6 @@ def stripe_temporary_api_key(temp_key):
     stripe.api_key = backup_key
 
 
-def convert_tstamp(response, field_name=None):
-    # Overrides the set timezone to UTC - I think...
-    tz = timezone.utc if settings.USE_TZ else None
-
-    if not field_name:
-        return datetime.datetime.fromtimestamp(response, tz)
-    else:
-        if field_name in response and response[field_name]:
-            return datetime.datetime.fromtimestamp(response[field_name], tz)
-
-
 @python_2_unicode_compatible
 class StripeObject(TimeStampedModel):
     # This must be defined in descendants of this model/mixin
@@ -70,11 +59,15 @@ class StripeObject(TimeStampedModel):
     objects = models.Manager()
     stripe_objects = StripeObjectManager()
 
+    stripe_id = StripeIdField(unique=True, stripe_name='id')
+    livemode = StripeNullBooleanField(default=False, null=True,
+                                      help_text="Null here indicates that the livemode status is unknown "
+                                                "or was previously unrecorded. Otherwise, this field indicates "
+                                                "whether this record comes from Stripe test mode or live "
+                                                "mode operation.")
+
     class Meta:
         abstract = True
-
-    stripe_id = models.CharField(max_length=50, unique=True)
-    # livemode = models.BooleanField(default=False)
 
     @classmethod
     def api(cls):
@@ -126,7 +119,12 @@ class StripeObject(TimeStampedModel):
         :return: All the members from the input, translated, mutated, etc
         :rtype: dict
         """
-        raise NotImplementedError()
+        result = dict()
+        # Iterate over all the fields that we know are related to Stripe, let each field work its own magic
+        for field in filter(lambda x: isinstance(x, StripeFieldMixin), cls._meta.fields):
+            result[field.name] = field.stripe_to_db(data)
+
+        return result
 
     @classmethod
     def create_from_stripe_object(cls, data):
@@ -141,26 +139,61 @@ class StripeObject(TimeStampedModel):
 
 
 class StripeEvent(StripeObject):
+    """
+    Events are POSTed to our webhook url. They provide information about a Stripe event that just happened. Events
+    are processed in detail by their respective models (charge events by the Charge model, etc).
+
+    Events are initially _UNTRUSTED_, as it is possible for any web entity to post any data to our webhook url. Data
+    posted may be valid Stripe information, garbage, or even malicious. The 'valid' flag in this model monitors this.
+
+    API VERSIONING
+    ====
+    This is a tricky matter when it comes to webhooks. See the discussion here:
+        https://groups.google.com/a/lists.stripe.com/forum/#!topic/api-discuss/h5Y6gzNBZp8
+
+    In this discussion, it is noted that Webhooks are produced in one API version, which will usually be
+    different from the version supported by Stripe plugins (such as djstripe). The solution, described there,
+    is:
+
+        1) validate the receipt of a webhook event by doing an event get using the API version of the received hook event.
+        2) retrieve the referenced object (e.g. the Charge, the Customer, etc) using the plugin's supported API version.
+        3) process that event using the retrieved object which will, only now, be in a format that you are certain to understand
+    """
+
+    #
+    # Stripe API_VERSION: model fields and methods audited to 2015-07-28 - @wahuneke
+    #
     class Meta:
         abstract = True
 
     stripe_api_name = "Event"
 
-    livemode = models.BooleanField(default=False)
+    kind = StripeCharField(stripe_name="type", max_length=250, help_text="Stripe's event description code")
+    request_id = StripeCharField(max_length=50, null=True, blank=True, stripe_name="request",
+                                 help_text="Information about the request that triggered this event, for traceability "
+                                           "purposes. If empty string then this is an old entry without that data. If "
+                                           "Null then this is not an old entry, but a Stripe 'automated' event with "
+                                           "no associated request.")
+    event_timestamp = StripeDateTimeField(null=True, stripe_name="created",
+                                          help_text="Empty for old entries. For all others, this entry field gives "
+                                                    "the timestamp of the time when the event occured from Stripe's "
+                                                    "perspective. This is as opposed to the time when we received "
+                                                    "notice of the event, which is not guaranteed to be the same time"
+                                                    "and which is recorded in a different field.")
+    received_api_version = StripeCharField(max_length=15, blank=True, stripe_name="api_version",
+                                           help_text="the API version at which the event data was rendered. Blank for "
+                                                     "old entries only, all new entries will have this value")
+    webhook_message = StripeJSONField(help_text="data received at webhook. data should be considered to be garbage "
+                                                "until validity check is run and valid flag is set", stripe_name="data")
 
-    # This is "type" in Stripe
-    kind = models.CharField(max_length=250)
-    # This is "data" in Stripe
-    webhook_message = JSONField()
+    def api_retrieve(self):
+        # OVERRIDING the parent version of this function
+        # Event retrieve is special. For Event we don't retrieve using djstripe's API version. We always retrieve
+        # using the API version that was used to send the Event (which depends on the Stripe account holders settings
+        with stripe_temporary_api_key(self.received_api_version):
+            stripe_event = super(StripeEvent, self).api_retrieve()
 
-    @classmethod
-    def stripe_object_to_record(cls, data):
-        return {
-            'stripe_id': data["id"],
-            'kind': data["type"],
-            'livemode': data["livemode"],
-            'webhook_message': data,
-        }
+        return stripe_event
 
     def str_parts(self):
         return [self.kind] + super(StripeEvent, self).str_parts()
@@ -172,28 +205,26 @@ class StripeTransfer(StripeObject):
 
     stripe_api_name = "Transfer"
 
-    amount = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
-    status = models.CharField(max_length=25)
-    date = models.DateTimeField()
-    description = models.TextField(null=True, blank=True)
+    amount = StripeCurrencyField()
+    status = StripeCharField(max_length=25)
+    date = StripeDateTimeField(help_text="Date the transfer is scheduled to arrive at destination")
+    description = StripeTextField(null=True, blank=True, stripe_required=False)
 
     # The following fields are nested in the "summary" object
-    adjustment_count = models.IntegerField()
-    adjustment_fees = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
-    adjustment_gross = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
-    charge_count = models.IntegerField()
-    charge_fees = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
-    charge_gross = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
-    collected_fee_count = models.IntegerField()
-    collected_fee_gross = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
-    net = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
-    refund_count = models.IntegerField()
-    refund_fees = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
-    refund_gross = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
-    validation_count = models.IntegerField()
-    validation_fees = models.DecimalField(decimal_places=2, max_digits=7)  # Stripe = cents, djstripe = dollars
-
-    objects = TransferManager()
+    adjustment_count = StripeIntegerField(nested_name="summary")
+    adjustment_fees = StripeCurrencyField(nested_name="summary")
+    adjustment_gross = StripeCurrencyField(nested_name="summary")
+    charge_count = StripeIntegerField(nested_name="summary")
+    charge_fees = StripeCurrencyField(nested_name="summary")
+    charge_gross = StripeCurrencyField(nested_name="summary")
+    collected_fee_count = StripeIntegerField(nested_name="summary")
+    collected_fee_gross = StripeCurrencyField(nested_name="summary")
+    net = StripeCurrencyField(nested_name="summary")
+    refund_count = StripeIntegerField(nested_name="summary")
+    refund_fees = StripeCurrencyField(nested_name="summary")
+    refund_gross = StripeCurrencyField(nested_name="summary")
+    validation_count = StripeIntegerField(nested_name="summary")
+    validation_fees = StripeCurrencyField(nested_name="summary")
 
     def str_parts(self):
         return [
@@ -205,35 +236,6 @@ class StripeTransfer(StripeObject):
         self.status = self.api_retrieve().status
         self.save()
 
-    @classmethod
-    def stripe_object_to_record(cls, data):
-        result = {
-            'stripe_id': data["id"],
-            "amount": data["amount"] / decimal.Decimal("100"),
-            "status": data["status"],
-            "date": convert_tstamp(data, "date"),
-            "description": data.get("description", ""),
-            "adjustment_count": data["summary"]["adjustment_count"],
-            "adjustment_fees": data["summary"]["adjustment_fees"],
-            "adjustment_gross": data["summary"]["adjustment_gross"],
-            "charge_count": data["summary"]["charge_count"],
-            "charge_fees": data["summary"]["charge_fees"],
-            "charge_gross": data["summary"]["charge_gross"],
-            "collected_fee_count": data["summary"]["collected_fee_count"],
-            "collected_fee_gross": data["summary"]["collected_fee_gross"],
-            "net": data["summary"]["net"] / decimal.Decimal("100"),
-            "refund_count": data["summary"]["refund_count"],
-            "refund_fees": data["summary"]["refund_fees"],
-            "refund_gross": data["summary"]["refund_gross"],
-            "validation_count": data["summary"]["validation_count"],
-            "validation_fees": data["summary"]["validation_fees"],
-        }
-        for field in result:
-            if field.endswith("fees") or field.endswith("gross"):
-                result[field] = result[field] / decimal.Decimal("100")
-
-        return result
-
 
 class StripeCustomer(StripeObject):
     class Meta:
@@ -241,11 +243,11 @@ class StripeCustomer(StripeObject):
 
     stripe_api_name = "Customer"
 
-    card_fingerprint = models.CharField(max_length=200, blank=True)
-    card_last_4 = models.CharField(max_length=4, blank=True)
-    card_kind = models.CharField(max_length=50, blank=True)
-    card_exp_month = models.PositiveIntegerField(blank=True, null=True)
-    card_exp_year = models.PositiveIntegerField(blank=True, null=True)
+    card_fingerprint = StripeCharField(max_length=200, blank=True)
+    card_last_4 = StripeCharField(max_length=4, blank=True)
+    card_kind = StripeCharField(max_length=50, blank=True)
+    card_exp_month = StripePositiveIntegerField(blank=True, null=True)
+    card_exp_year = StripePositiveIntegerField(blank=True, null=True)
 
     @property
     def stripe_customer(self):
@@ -346,16 +348,16 @@ class StripeInvoice(StripeObject):
 
     stripe_api_name = "Invoice"
 
-    attempted = models.NullBooleanField()
-    attempts = models.PositiveIntegerField(null=True)
-    closed = models.BooleanField(default=False)
-    paid = models.BooleanField(default=False)
-    period_end = models.DateTimeField()
-    period_start = models.DateTimeField()
-    subtotal = models.DecimalField(decimal_places=2, max_digits=7)
-    total = models.DecimalField(decimal_places=2, max_digits=7)
-    date = models.DateTimeField()
-    charge = models.CharField(max_length=50, blank=True)
+    attempted = StripeNullBooleanField()
+    attempts = StripePositiveIntegerField(null=True, stripe_name="attempt_count")
+    closed = StripeBooleanField(default=False)
+    paid = StripeBooleanField(default=False)
+    period_end = StripeDateTimeField()
+    period_start = StripeDateTimeField()
+    subtotal = StripeCurrencyField()
+    total = StripeCurrencyField()
+    date = StripeDateTimeField()
+    charge = StripeIdField(max_length=50, blank=True, stripe_required=False, default="")
 
     def str_parts(self):
         return [
@@ -365,8 +367,9 @@ class StripeInvoice(StripeObject):
 
     def retry(self):
         if not self.paid and not self.closed:
-            inv = self.api_retrieve()
-            inv.pay()
+            stripe_invoice = self.api_retrieve()
+            updated_stripe_invoice = stripe_invoice.pay()  # pay() throws an exception if the charge is not successful.
+            self.sync_from_stripe_data(updated_stripe_invoice)
             return True
         return False
 
@@ -377,28 +380,17 @@ class StripeInvoice(StripeObject):
             return "Closed"
         return "Open"
 
-    @classmethod
-    def stripe_object_to_record(cls, data):
-        period_end = convert_tstamp(data, "period_end")
-        period_start = convert_tstamp(data, "period_start")
-        date = convert_tstamp(data, "date")
-
-        return {
-            "stripe_id": data["id"],
-            "attempted": data["attempted"],
-            "closed": data["closed"],
-            "paid": data["paid"],
-            "period_end": period_end,
-            "period_start": period_start,
-            "subtotal": data["subtotal"] / decimal.Decimal("100"),
-            "total": data["total"] / decimal.Decimal("100"),
-            "date": date,
-            "charge": data.get("charge") or "",
-        }
-
     def sync(self, data=None):
         for attr, value in data.items():
             setattr(self, attr, value)
+
+    @classmethod
+    def stripe_object_to_record(cls, data):
+        # Perhaps meaningless legacy code. Nonetheless, preserve it. If charge is null
+        # then convert it to ""
+        if 'charge' in data and data['charge'] is None:
+            data['charge'] = ""
+        return super(StripeInvoice, cls).stripe_object_to_record(data)
 
 
 class StripeCharge(StripeObject):
@@ -407,18 +399,20 @@ class StripeCharge(StripeObject):
 
     stripe_api_name = "Charge"
 
-    card_last_4 = models.CharField(max_length=4, blank=True)
-    card_kind = models.CharField(max_length=50, blank=True)
-    amount = models.DecimalField(decimal_places=2, max_digits=7, null=True)
-    amount_refunded = models.DecimalField(decimal_places=2, max_digits=7, null=True)
-    description = models.TextField(blank=True)
-    paid = models.NullBooleanField(null=True)
-    disputed = models.NullBooleanField(null=True)
-    refunded = models.NullBooleanField(null=True)
-    captured = models.NullBooleanField(null=True)
-    fee = models.DecimalField(decimal_places=2, max_digits=7, null=True)
-    receipt_sent = models.BooleanField(default=False)
-    charge_created = models.DateTimeField(null=True, blank=True)
+    card_last_4 = StripeCharField(max_length=4, blank=True, stripe_name="card.last4")
+    card_kind = StripeCharField(max_length=50, blank=True, stripe_name="card.type")
+    amount = StripeCurrencyField(null=True)
+    amount_refunded = StripeCurrencyField(null=True, stripe_required=False)
+    description = StripeTextField(blank=True, stripe_required=False)
+    paid = StripeNullBooleanField(null=True)
+    disputed = StripeNullBooleanField(null=True)
+    refunded = StripeNullBooleanField(null=True)
+    captured = StripeNullBooleanField(null=True)
+    fee = StripeCurrencyField(null=True)
+
+    # DEPRECATED fields
+    receipt_sent = StripeNullBooleanField(deprecated=True)
+    charge_created = StripeDateTimeField(deprecated=True, stripe_name="created")
 
     def str_parts(self):
         return [
@@ -482,26 +476,11 @@ class StripeCharge(StripeObject):
 
     @classmethod
     def stripe_object_to_record(cls, data):
-        result = {
-            "stripe_id": data["id"],
-            "card_last_4": data["card"]["last4"],
-            "card_kind": data["card"]["type"],
-            "amount": (data["amount"] / decimal.Decimal("100")),
-            "paid": data["paid"],
-            "refunded": data["refunded"],
-            "captured": data["captured"],
-            "fee": (data["fee"] / decimal.Decimal("100")),
-            "disputed": data["dispute"] is not None,
-            "charge_created": convert_tstamp(data, "created"),
-        }
-        if data.get("description"):
-            result["description"] = data["description"]
-        if data.get("amount_refunded"):
-            result["amount_refunded"] = (data["amount_refunded"] / decimal.Decimal("100"))
+        data["disputed"] = data["dispute"] is not None
         if data["refunded"]:
-            result["amount_refunded"] = (data["amount"] / decimal.Decimal("100"))
+            data["amount_refunded"] = data["amount"]
 
-        return result
+        return super(StripeCharge, cls).stripe_object_to_record(data)
 
     def sync(self, data=None):
         for attr, value in data.items():

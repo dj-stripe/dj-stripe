@@ -43,7 +43,9 @@ class EventTest(TestCase):
         "livemode": True,
         "object": "event",
         "pending_webhooks": 1,
-        "type": "ping"
+        "type": "ping",
+        "request": "bla",
+        "api_version": "2015-07-28",
     }
 
     fake_current_subscription = CurrentSubscription(plan="test",
@@ -66,7 +68,6 @@ class EventTest(TestCase):
             stripe_id=self.message["id"],
             kind="eventkind",
             webhook_message=self.message,
-            validated_message=self.message,
             valid=True
         )
         self.assertEquals("<eventkind, stripe_id=evt_xxxxxxxxxxxxx>", str(event))
@@ -93,6 +94,8 @@ class EventTest(TestCase):
             "livemode": True,
             "object": "event",
             "pending_webhooks": 1,
+            "request": "bla",
+            "api_version": "2015-07-28",
             "type": "customer.created"
         }
         event = Event.objects.create(
@@ -100,7 +103,6 @@ class EventTest(TestCase):
             kind="customer.created",
             livemode=True,
             webhook_message=msg,
-            validated_message=msg,
             valid=True,
         )
         event.process()
@@ -149,6 +151,8 @@ class EventTest(TestCase):
             "livemode": True,
             "object": "event",
             "pending_webhooks": 1,
+            "request": "bla",
+            "api_version": "2015-07-28",
             "type": "customer.updated"
         }
         event = Event.objects.create(
@@ -156,7 +160,6 @@ class EventTest(TestCase):
             kind="customer.updated",
             livemode=True,
             webhook_message=msg,
-            validated_message=msg,
             valid=True,
         )
         event.process()
@@ -184,6 +187,8 @@ class EventTest(TestCase):
             "livemode": True,
             "object": "event",
             "pending_webhooks": 1,
+            "request": "bla",
+            "api_version": "2015-07-28",
             "type": "customer.deleted"
         }
         event = Event.objects.create(
@@ -191,21 +196,20 @@ class EventTest(TestCase):
             kind="customer.deleted",
             livemode=True,
             webhook_message=msg,
-            validated_message=msg,
             valid=True,
         )
         event.process()
         self.assertEquals(event.customer, self.customer)
 
-    @patch('stripe.Event.retrieve', return_value=convert_to_fake_stripe_object({"data": message["data"], "zebra": True, "alpha": False}))
+    @patch('stripe.Event.retrieve')
     def test_validate_true(self, event_retrieve_mock):
         event = Event.objects.create(
             stripe_id=self.message["id"],
             kind="ping",
             webhook_message=self.message,
-            validated_message=self.message
         )
 
+        event_retrieve_mock.return_value = convert_to_fake_stripe_object(self.message)
         self.assertEqual(None, event.valid)
         event.validate()
         event_retrieve_mock.assert_called_once_with(self.message["id"])
@@ -217,20 +221,19 @@ class EventTest(TestCase):
             stripe_id=self.message["id"],
             kind="ping",
             webhook_message=self.message,
-            validated_message=self.message
         )
 
         self.assertEqual(None, event.valid)
         event.validate()
         event_retrieve_mock.assert_called_once_with(self.message["id"])
         self.assertEqual(False, event.valid)
+        self.assertEqual(None, event.message)
 
     def test_process_exit_immediately(self):
         event = Event.objects.create(
             stripe_id=self.message["id"],
             kind="ping",
             webhook_message=self.message,
-            validated_message=self.message,
             valid=False
         )
 
@@ -245,7 +248,6 @@ class EventTest(TestCase):
             stripe_id=self.message["id"],
             kind="invoice.created",
             webhook_message=self.message,
-            validated_message=self.message,
             valid=True
         )
         customer_get.return_value = self.customer
@@ -263,7 +265,6 @@ class EventTest(TestCase):
             stripe_id=self.message["id"],
             kind="invoice.notanevent",
             webhook_message=self.message,
-            validated_message=self.message,
             valid=True
         )
         customer_get.return_value = self.customer
@@ -280,7 +281,6 @@ class EventTest(TestCase):
             stripe_id=self.message["id"],
             kind="invoice.created",
             webhook_message=self.message,
-            validated_message=self.message,
             valid=True
         )
         customer_get.side_effect = Customer.DoesNotExist()
@@ -297,7 +297,6 @@ class EventTest(TestCase):
             stripe_id=self.message["id"],
             kind="charge.created",
             webhook_message=self.message,
-            validated_message=self.message,
             valid=True
         )
 
@@ -313,7 +312,6 @@ class EventTest(TestCase):
             stripe_id=self.message["id"],
             kind="customer.subscription.created",
             webhook_message=self.message,
-            validated_message=self.message,
             valid=True
         )
 
@@ -328,7 +326,6 @@ class EventTest(TestCase):
             stripe_id=self.message["id"],
             kind="customer.subscription.created",
             webhook_message=self.message,
-            validated_message=self.message,
             valid=True
         )
 
@@ -342,7 +339,6 @@ class EventTest(TestCase):
             stripe_id=self.message["id"],
             kind="customer.subscription.deleted",
             webhook_message=self.message,
-            validated_message=self.message,
             valid=True
         )
 
@@ -373,6 +369,8 @@ class EventTest(TestCase):
             "livemode": True,
             "object": "event",
             "pending_webhooks": 1,
+            "request": "bla",
+            "api_version": "2015-07-28",
             "type": "customer.deleted"
         }
         event = Event.objects.create(
@@ -380,7 +378,6 @@ class EventTest(TestCase):
             kind="customer.deleted",
             livemode=True,
             webhook_message=msg,
-            validated_message=msg,
             valid=True
         )
         event.process()
@@ -394,7 +391,6 @@ class EventTest(TestCase):
             stripe_id=self.message["id"],
             kind="fake.event.kind",
             webhook_message=self.message,
-            validated_message=self.message,
             valid=True
         )
 
@@ -408,7 +404,6 @@ class EventTest(TestCase):
             stripe_id=self.message["id"],
             kind="fake.event.kind",
             webhook_message=self.message,
-            validated_message=self.message,
             valid=True
         )
 

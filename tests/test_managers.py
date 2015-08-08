@@ -139,7 +139,6 @@ class TransferManagerTest(TestCase):
             kind="transfer.created",
             livemode=True,
             webhook_message=TRANSFER_CREATED_TEST_DATA,
-            validated_message=TRANSFER_CREATED_TEST_DATA,
             valid=True
         )
         event.process()
@@ -148,7 +147,6 @@ class TransferManagerTest(TestCase):
             kind="transfer.created",
             livemode=True,
             webhook_message=TRANSFER_CREATED_TEST_DATA2,
-            validated_message=TRANSFER_CREATED_TEST_DATA2,
             valid=True
         )
         event.process()
