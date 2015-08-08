@@ -16,7 +16,7 @@ This module defines abstract models which are then extended in models.py to prov
 dj-stripe functionality.
 """
 
-from contextlib import contextmanager
+
 import decimal
 
 from django.conf import settings
@@ -26,6 +26,7 @@ from django.utils.encoding import python_2_unicode_compatible, smart_text
 from model_utils.models import TimeStampedModel
 import stripe
 
+from .context_managers import stripe_temporary_api_version
 from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, StripeCurrencyField,
                      StripeIntegerField, StripeTextField, StripePositiveIntegerField, StripeIdField,
                      StripeBooleanField, StripeNullBooleanField, StripeJSONField)
@@ -33,22 +34,7 @@ from .managers import StripeObjectManager
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
-stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
-
-
-@contextmanager
-def stripe_temporary_api_key(temp_key):
-    """
-    A contextmanager
-
-    Temporarily replace the global api_key used in stripe API calls with the given value
-    the original value is restored as soon as context exits
-    """
-    import stripe
-    backup_key = stripe.api_key
-    stripe.api_key = temp_key
-    yield
-    stripe.api_key = backup_key
+stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2013-02-11")
 
 
 @python_2_unicode_compatible
@@ -190,7 +176,7 @@ class StripeEvent(StripeObject):
         # OVERRIDING the parent version of this function
         # Event retrieve is special. For Event we don't retrieve using djstripe's API version. We always retrieve
         # using the API version that was used to send the Event (which depends on the Stripe account holders settings
-        with stripe_temporary_api_key(self.received_api_version):
+        with stripe_temporary_api_version(self.received_api_version):
             stripe_event = super(StripeEvent, self).api_retrieve()
 
         return stripe_event

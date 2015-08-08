@@ -17,7 +17,7 @@ from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 
 from model_utils.models import TimeStampedModel
-import stripe
+from stripe.error import StripeError, InvalidRequestError
 
 from . import settings as djstripe_settings
 from . import webhooks
@@ -30,9 +30,6 @@ from .stripe_objects import StripeEvent, StripeTransfer, StripeCustomer, StripeI
 from .utils import convert_tstamp
 
 logger = logging.getLogger(__name__)
-
-stripe.api_key = settings.STRIPE_SECRET_KEY
-stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2013-02-11")
 
 
 @python_2_unicode_compatible
@@ -113,7 +110,7 @@ class Event(StripeEvent):
                 self.send_signal()
                 self.processed = True
                 self.save()
-            except stripe.StripeError as exc:
+            except StripeError as exc:
                 # TODO: What if we caught all exceptions or a broader range of exceptions here? How about DoesNotExist
                 # exceptions, for instance? or how about TypeErrors, KeyErrors, ValueErrors, etc?
                 EventProcessingException.log(
@@ -184,7 +181,7 @@ class Customer(StripeCustomer):
     def purge(self):
         try:
             self.stripe_customer.delete()
-        except stripe.InvalidRequestError as exc:
+        except InvalidRequestError as exc:
             if str(exc).startswith("No such customer:"):
                 # The exception was thrown because the stripe customer was already
                 # deleted on the stripe side, ignore the exception
@@ -227,7 +224,7 @@ class Customer(StripeCustomer):
             if self.current_subscription.trial_end and self.current_subscription.trial_end > timezone.now():
                 at_period_end = False
             stripe_subscription = self.stripe_customer.cancel_subscription(at_period_end=at_period_end)
-        except stripe.InvalidRequestError as exc:
+        except InvalidRequestError as exc:
             raise SubscriptionCancellationFailure("Customer's information is not current with Stripe.\n{}".format(str(exc)))
 
         current_subscription.status = stripe_subscription.status
@@ -280,7 +277,7 @@ class Customer(StripeCustomer):
         for inv in self.invoices.filter(paid=False, closed=False):
             try:
                 inv.retry()  # Always retry unpaid invoices
-            except stripe.InvalidRequestError as exc:
+            except InvalidRequestError as exc:
                 if str(exc) != "Invoice is already paid":
                     raise exc
 
@@ -289,7 +286,7 @@ class Customer(StripeCustomer):
             invoice = Invoice.api_create(customer=self.stripe_id)
             invoice.pay()
             return True
-        except stripe.InvalidRequestError:
+        except InvalidRequestError:
             return False  # There was nothing to invoice
 
     # TODO refactor, deprecation on cu parameter -> stripe_customer
