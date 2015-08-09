@@ -257,24 +257,6 @@ class StripeCustomer(StripeObject):
     def has_valid_card(self):
         return all([self.card_fingerprint, self.card_last_4, self.card_kind])
 
-    def sync_card(self):
-        self.card_fingerprint = self.stripe_customer.active_card.fingerprint
-        self.card_last_4 = self.stripe_customer.active_card.last4
-        self.card_kind = self.stripe_customer.active_card.type
-        self.card_exp_month = self.stripe_customer.active_card.exp_month
-        self.card_exp_year = self.stripe_customer.active_card.exp_year
-
-    def sync(self):
-        if getattr(self.stripe_customer, 'deleted', False):
-            # Customer was deleted from stripe
-            self.purge()
-        elif getattr(self.stripe_customer, 'active_card', None):
-            self.card_fingerprint = self.stripe_customer.active_card.fingerprint
-            self.card_last_4 = self.stripe_customer.active_card.last4
-            self.card_kind = self.stripe_customer.active_card.type
-            self.card_exp_month = self.stripe_customer.active_card.exp_month
-            self.card_exp_year = self.stripe_customer.active_card.exp_year
-
     def charge(self, amount, currency="usd", description=None, send_receipt=True, **kwargs):
         """
         This method expects `amount` to be a Decimal type representing a
@@ -329,6 +311,24 @@ class StripeCustomer(StripeObject):
             description=description,
             invoice=invoice_id,
         )
+
+    def sync_card(self):
+        self.card_fingerprint = self.stripe_customer.active_card.fingerprint
+        self.card_last_4 = self.stripe_customer.active_card.last4
+        self.card_kind = self.stripe_customer.active_card.type
+        self.card_exp_month = self.stripe_customer.active_card.exp_month
+        self.card_exp_year = self.stripe_customer.active_card.exp_year
+
+    def sync(self):
+        if getattr(self.stripe_customer, 'deleted', False):
+            # Customer was deleted from stripe
+            self.purge()
+        elif getattr(self.stripe_customer, 'active_card', None):
+            self.card_fingerprint = self.stripe_customer.active_card.fingerprint
+            self.card_last_4 = self.stripe_customer.active_card.last4
+            self.card_kind = self.stripe_customer.active_card.type
+            self.card_exp_month = self.stripe_customer.active_card.exp_month
+            self.card_exp_year = self.stripe_customer.active_card.exp_year
 
 
 class StripeCard(StripeObject):
@@ -399,10 +399,6 @@ class StripeInvoice(StripeObject):
             return "Closed"
         return "Open"
 
-    def sync(self, data=None):
-        for attr, value in data.items():
-            setattr(self, attr, value)
-
     @classmethod
     def stripe_object_to_record(cls, data):
         # Perhaps meaningless legacy code. Nonetheless, preserve it. If charge is null
@@ -410,6 +406,10 @@ class StripeInvoice(StripeObject):
         if 'charge' in data and data['charge'] is None:
             data['charge'] = ""
         return super(StripeInvoice, cls).stripe_object_to_record(data)
+
+    def sync(self, data=None):
+        for attr, value in data.items():
+            setattr(self, attr, value)
 
 
 class StripeInvoiceItem(StripeObject):
@@ -515,6 +515,9 @@ class StripeEvent(StripeObject):
     webhook_message = StripeJSONField(help_text="data received at webhook. data should be considered to be garbage "
                                                 "until validity check is run and valid flag is set", stripe_name="data")
 
+    def str_parts(self):
+        return [self.kind] + super(StripeEvent, self).str_parts()
+
     def api_retrieve(self):
         # OVERRIDING the parent version of this function
         # Event retrieve is special. For Event we don't retrieve using djstripe's API version. We always retrieve
@@ -523,6 +526,3 @@ class StripeEvent(StripeObject):
             stripe_event = super(StripeEvent, self).api_retrieve()
 
         return stripe_event
-
-    def str_parts(self):
-        return [self.kind] + super(StripeEvent, self).str_parts()
