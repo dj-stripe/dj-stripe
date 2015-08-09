@@ -151,26 +151,61 @@ class StripeSource(StripeObject):
 # ============================================================================ #
 
 class StripeCharge(StripeObject):
+    """
+    To charge a credit or a debit card, you create a charge object. You can
+    retrieve and refund individual charges as well as list all charges. Charges
+    are identified by a unique random ID. (Source: https://stripe.com/docs/api/python#charges)
+
+    # = Mapping the values of this field isn't currently on our roadmap.
+        Please use the stripe dashboard to check the value of this field instead.
+
+    Fields not implemented:
+    * object: Unnecessary. Just check the model name.
+    * refunds: #
+    * application_fee: #
+    * balance_transaction: #
+    * dispute: #; Mapped to a ``disputed`` boolean.
+    * fraud_details: Mapped to a ``fraudulent`` boolean.
+    * receipt_email: Unnecessary.
+    * receipt_number: Unnecessary.
+    """
+
+    STATUS_CHOICES = [(status, status.title()) for status in ["succeeded", "failed"]]
+    CARD_ERROR_CODES = ["invalid_number", "invalid_expiry_month", "invalid_expiry_year",
+                        "invalid_cvc", "incorrect_number", "expired_card",
+                        "incorrect_cvc", "incorrect_zip", "card_declined",
+                        "missing", "processing_error", "rate_limit"]
+    CARD_ERROR_CODE_CHOICES = [(error_code, error_code.replace("_", " ").title()) for error_code in CARD_ERROR_CODES]
 
     class Meta:
         abstract = True
 
     stripe_api_name = "Charge"
+    expand_fields = ["application_fee"]
 
-    card_last_4 = StripeCharField(max_length=4, blank=True, stripe_name="card.last4")
-    card_kind = StripeCharField(max_length=50, blank=True, stripe_name="card.type")
-    amount = StripeCurrencyField(null=True)
-    amount_refunded = StripeCurrencyField(null=True, stripe_required=False)
-    description = StripeTextField(blank=True, stripe_required=False)
-    paid = StripeNullBooleanField(null=True)
-    disputed = StripeNullBooleanField(null=True)
-    refunded = StripeNullBooleanField(null=True)
-    captured = StripeNullBooleanField(null=True)
-    fee = StripeCurrencyField(null=True)
+    amount = StripeCurrencyField(null=True, help_text="Amount charged.")
+    amount_refunded = StripeCurrencyField(null=True, help_text="Amount refunded (can be less than the amount attribute on the charge if a partial refund was issued).")
+    captured = StripeNullBooleanField(null=True, help_text="If the charge was created without capturing, this boolean represents whether or not it is still uncaptured or has since been captured.")
+    # TODO: Rename to "created_stripe"
+    charge_created = StripeDateTimeField(null=True, help_text="The datetime this object was created.", stripe_name="created")
+    currency = StripeCharField(max_length=3, blank=True, help_text="Three-letter ISO currency code representing the currency in which the charge was made.")
+    paid = StripeNullBooleanField(null=True, help_text="``true`` if the charge succeeded, or was successfully authorized for later capture, ``false`` otherwise.")
+    refunded = StripeNullBooleanField(null=True, help_text="Whether or not the charge has been fully refunded. If the charge is only partially refunded, this attribute will still be false.")
+    status = StripeCharField(max_length=10, blank=True, choices=STATUS_CHOICES, help_text="The status of the payment is either ``succeeded`` or ``failed``.")
+    failure_code = StripeCharField(max_length=30, blank=True, choices=CARD_ERROR_CODE_CHOICES, help_text="Error code explaining reason for charge failure if available.")
+    failure_message = StripeTextField(blank=True, help_text="Message to user further explaining reason for charge failure if available.")
+    shipping = StripeJSONField(blank=True, help_text="Shipping information for the charge")
 
-    # DEPRECATED fields
-    receipt_sent = StripeNullBooleanField(deprecated=True)
-    charge_created = StripeDateTimeField(deprecated=True, stripe_name="created")
+    # dj-stripe custom stripe fields. Don't try to send these.
+    source_type = StripeCharField(max_length=20, blank=True, stripe_name="source.object", help_text="The payment source type. If the payment source is supported by dj-stripe, a corresponding model is attached to this Charge via a foreign key matching this field.")
+    source_stripe_id = StripeIdField(blank=True, stripe_name="source.id", help_text="The payment source id.")
+    disputed = StripeBooleanField(default=False, null=True, stripe_required=False, help_text="Whether or not this charge is disputed.")
+    fraudulent = StripeBooleanField(default=False, null=True, stripe_required=False, help_text="Whether or not this charge was marked as fraudulent.")
+
+    # DEPRECATED fields. Will be removed in dj-stripe 1.0
+    card_last_4 = StripeCharField(max_length=4, blank=True, stripe_required=False, stripe_name="source.last4")
+    card_kind = StripeCharField(max_length=50, blank=True, stripe_required=False, stripe_name="source.brand")
+    fee = StripeCurrencyField(null=True, stripe_required=False, stripe_name="application_fee.amount")
 
     def str_parts(self):
         return [
