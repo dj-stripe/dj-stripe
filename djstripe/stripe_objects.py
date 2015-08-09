@@ -270,6 +270,11 @@ class StripeCharge(StripeObject):
     def stripe_object_to_record(cls, data):
         data["disputed"] = data["dispute"] is not None
 
+        # Assessments reported by you have the key user_report and, if set,
+        # possible values of safe and fraudulent. Assessments from Stripe have
+        # the key stripe_report and, if set, the value fraudulent.
+        data["fraudulent"] = data["fraud_details"] and list(data["fraud_details"].values())[0] == "fraudulent"
+
         return super(StripeCharge, cls).stripe_object_to_record(data)
 
     def sync(self, data=None):
