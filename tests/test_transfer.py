@@ -144,7 +144,7 @@ class TransferTest(TestCase):
         updated_event.process()
 
         transfer_instance = Transfer.objects.get(stripe_id="salmon")
-        transfer_retrieve_mock.assert_called_once_with(id=transfer_instance.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=None)
+        transfer_retrieve_mock.assert_called_once_with(id=transfer_instance.stripe_id, api_key=settings.STRIPE_SECRET_KEY)
         self.assertEqual(transfer_instance.status, "fish")
 
         # Test to string
