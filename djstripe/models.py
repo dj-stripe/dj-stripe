@@ -13,8 +13,6 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
 from django.db import models
-from django.db.models.fields import BooleanField
-from django.db.models.fields.related import ForeignKey
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
