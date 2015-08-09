@@ -46,6 +46,8 @@ class StripeObject(TimeStampedModel):
     # This must be defined in descendants of this model/mixin
     # e.g. "Event", "Charge", "Customer", etc.
     stripe_api_name = None
+    expand_fields = None
+
     objects = models.Manager()
     stripe_objects = StripeObjectManager()
 
@@ -73,12 +75,13 @@ class StripeObject(TimeStampedModel):
         # e.g. stripe.Event, stripe.Charge, etc
         return getattr(stripe, cls.stripe_api_name)
 
-    def api_retrieve(self, expand=None):
+    def api_retrieve(self):
         """
-        Implement very commonly used API function 'retrieve'
+        Implement very commonly used API function 'retrieve'.
         """
+
         # Run stripe.X.retreive(id)
-        return type(self).api().retrieve(id=self.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=expand)
+        return type(self).api().retrieve(id=self.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=self.expand_fields)
 
     @classmethod
     def api_create(cls, **kwargs):
