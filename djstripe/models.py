@@ -51,25 +51,6 @@ class Charge(StripeCharge):
         captured_charge = super(Charge, self).capture()
         return Charge.sync_from_stripe_data(captured_charge)
 
-    @classmethod
-    def sync_from_stripe_data(cls, data):
-
-        try:
-            charge = cls.stripe_objects.get_by_json(data)
-            charge.sync(cls.stripe_object_to_record(data))
-        except cls.DoesNotExist:
-            charge = cls.create_from_stripe_object(data)
-
-        customer = cls.object_to_customer(Customer.stripe_objects, data)
-        charge.customer = customer
-
-        invoice = cls.object_to_invoice(Invoice.stripe_objects, data)
-        if invoice:
-            charge.invoice = invoice
-
-        charge.save()
-        return charge
-
     def send_receipt(self):
         if not self.receipt_sent:
             site = Site.objects.get_current()
@@ -91,12 +72,55 @@ class Charge(StripeCharge):
             self.receipt_sent = num_sent > 0
             self.save()
 
+    @classmethod
+    def sync_from_stripe_data(cls, data):
+
+        try:
+            charge = cls.stripe_objects.get_by_json(data)
+            charge.sync(cls.stripe_object_to_record(data))
+        except cls.DoesNotExist:
+            charge = cls.create_from_stripe_object(data)
+
+        customer = cls.object_to_customer(Customer.stripe_objects, data)
+        charge.customer = customer
+
+        invoice = cls.object_to_invoice(Invoice.stripe_objects, data)
+        if invoice:
+            charge.invoice = invoice
+
+        charge.save()
+        return charge
+
 
 class Customer(StripeCustomer):
     subscriber = models.OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
     date_purged = models.DateTimeField(null=True, editable=False)
 
     objects = CustomerManager()
+
+    def str_parts(self):
+        return [smart_text(self.subscriber)] + super(Customer, self).str_parts()
+
+    @classmethod
+    def get_or_create(cls, subscriber):
+        try:
+            return Customer.objects.get(subscriber=subscriber), False
+        except Customer.DoesNotExist:
+            return cls.create(subscriber), True
+
+    @classmethod
+    def create(cls, subscriber):
+        trial_days = None
+        if djstripe_settings.trial_period_for_subscriber_callback:
+            trial_days = djstripe_settings.trial_period_for_subscriber_callback(subscriber)
+
+        stripe_customer = cls.api_create(email=subscriber.email)
+        customer = Customer.objects.create(subscriber=subscriber, stripe_id=stripe_customer.id)
+
+        if djstripe_settings.DEFAULT_PLAN and trial_days:
+            customer.subscribe(plan=djstripe_settings.DEFAULT_PLAN, trial_days=trial_days)
+
+        return customer
 
     def purge(self):
         try:
@@ -113,9 +137,6 @@ class Customer(StripeCustomer):
         super(Customer, self).purge()
         self.date_purged = timezone.now()
         self.save()
-
-    def str_parts(self):
-        return [smart_text(self.subscriber)] + super(Customer, self).str_parts()
 
     def delete(self, using=None):
         # Only way to delete a customer is to use SQL
@@ -159,26 +180,66 @@ class Customer(StripeCustomer):
         warnings.warn("Deprecated - Use ``cancel_subscription`` instead. This method will be removed in dj-stripe 1.0.", DeprecationWarning)
         return self.cancel_subscription(at_period_end=at_period_end)
 
-    @classmethod
-    def get_or_create(cls, subscriber):
+    def subscribe(self, plan, quantity=1, trial_days=None,
+                  charge_immediately=True, prorate=djstripe_settings.PRORATION_POLICY):
+        stripe_customer = self.stripe_customer
+        """
+        Trial_days corresponds to the value specified by the selected plan
+        for the key trial_period_days.
+        """
+        if ("trial_period_days" in djstripe_settings.PAYMENTS_PLANS[plan]):
+            trial_days = djstripe_settings.PAYMENTS_PLANS[plan]["trial_period_days"]
+
+        if trial_days:
+            resp = stripe_customer.update_subscription(
+                plan=djstripe_settings.PAYMENTS_PLANS[plan]["stripe_plan_id"],
+                trial_end=timezone.now() + datetime.timedelta(days=trial_days),
+                prorate=prorate,
+                quantity=quantity
+            )
+        else:
+            resp = stripe_customer.update_subscription(
+                plan=djstripe_settings.PAYMENTS_PLANS[plan]["stripe_plan_id"],
+                prorate=prorate,
+                quantity=quantity
+            )
+        self.sync_current_subscription()
+        if charge_immediately:
+            self.send_invoice()
+        subscription_made.send(sender=self, plan=plan, stripe_response=resp)
+
+    def charge(self, amount, currency="usd", description=None, send_receipt=True, **kwargs):
+        """
+        This method expects `amount` to be a Decimal type representing a
+        dollar amount. It will be converted to cents so any decimals beyond
+        two will be ignored.
+        """
+        charge_id = super(Customer, self).charge(amount, currency, description, send_receipt, **kwargs)
+        recorded_charge = self.record_charge(charge_id)
+        if send_receipt:
+            recorded_charge.send_receipt()
+        return recorded_charge
+
+    def record_charge(self, charge_id):
+        data = Charge.api().retrieve(charge_id)
+        return Charge.sync_from_stripe_data(data)
+
+    def send_invoice(self):
         try:
-            return Customer.objects.get(subscriber=subscriber), False
-        except Customer.DoesNotExist:
-            return cls.create(subscriber), True
+            invoice = Invoice.api_create(customer=self.stripe_id)
+            invoice.pay()
+            return True
+        except InvalidRequestError:
+            return False  # There was nothing to invoice
 
-    @classmethod
-    def create(cls, subscriber):
-        trial_days = None
-        if djstripe_settings.trial_period_for_subscriber_callback:
-            trial_days = djstripe_settings.trial_period_for_subscriber_callback(subscriber)
-
-        stripe_customer = cls.api_create(email=subscriber.email)
-        customer = Customer.objects.create(subscriber=subscriber, stripe_id=stripe_customer.id)
-
-        if djstripe_settings.DEFAULT_PLAN and trial_days:
-            customer.subscribe(plan=djstripe_settings.DEFAULT_PLAN, trial_days=trial_days)
-
-        return customer
+    def retry_unpaid_invoices(self):
+        self.sync_invoices()
+        for invoice in self.invoices.filter(paid=False, closed=False):
+            try:
+                invoice.retry()  # Always retry unpaid invoices
+            except InvalidRequestError as exc:
+                if str(exc) != "Invoice is already paid":
+                    raise exc
 
     def update_card(self, token):
         # send new token to Stripe
@@ -192,22 +253,16 @@ class Customer(StripeCustomer):
         self.save()
         card_changed.send(sender=self, stripe_response=stripe_customer)
 
-    def retry_unpaid_invoices(self):
-        self.sync_invoices()
-        for inv in self.invoices.filter(paid=False, closed=False):
-            try:
-                inv.retry()  # Always retry unpaid invoices
-            except InvalidRequestError as exc:
-                if str(exc) != "Invoice is already paid":
-                    raise exc
-
-    def send_invoice(self):
-        try:
-            invoice = Invoice.api_create(customer=self.stripe_id)
-            invoice.pay()
-            return True
-        except InvalidRequestError:
-            return False  # There was nothing to invoice
+    def update_plan_quantity(self, quantity, charge_immediately=False):
+        stripe_subscription = self.stripe_customer.subscription
+        if not stripe_subscription:
+            self.sync_current_subscription()
+            raise SubscriptionUpdateFailure("Customer does not have a subscription with Stripe")
+        self.subscribe(
+            plan=djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id),
+            quantity=quantity,
+            charge_immediately=charge_immediately
+        )
 
     def sync(self):
         super(Customer, self).sync()
@@ -283,61 +338,6 @@ class Customer(StripeCustomer):
             current_subscription.status = CurrentSubscription.STATUS_CANCELLED
             current_subscription.save()
             return current_subscription
-
-    def update_plan_quantity(self, quantity, charge_immediately=False):
-        stripe_subscription = self.stripe_customer.subscription
-        if not stripe_subscription:
-            self.sync_current_subscription()
-            raise SubscriptionUpdateFailure("Customer does not have a subscription with Stripe")
-        self.subscribe(
-            plan=djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id),
-            quantity=quantity,
-            charge_immediately=charge_immediately
-        )
-
-    def subscribe(self, plan, quantity=1, trial_days=None,
-                  charge_immediately=True, prorate=djstripe_settings.PRORATION_POLICY):
-        stripe_customer = self.stripe_customer
-        """
-        Trial_days corresponds to the value specified by the selected plan
-        for the key trial_period_days.
-        """
-        if ("trial_period_days" in djstripe_settings.PAYMENTS_PLANS[plan]):
-            trial_days = djstripe_settings.PAYMENTS_PLANS[plan]["trial_period_days"]
-
-        if trial_days:
-            resp = stripe_customer.update_subscription(
-                plan=djstripe_settings.PAYMENTS_PLANS[plan]["stripe_plan_id"],
-                trial_end=timezone.now() + datetime.timedelta(days=trial_days),
-                prorate=prorate,
-                quantity=quantity
-            )
-        else:
-            resp = stripe_customer.update_subscription(
-                plan=djstripe_settings.PAYMENTS_PLANS[plan]["stripe_plan_id"],
-                prorate=prorate,
-                quantity=quantity
-            )
-        self.sync_current_subscription()
-        if charge_immediately:
-            self.send_invoice()
-        subscription_made.send(sender=self, plan=plan, stripe_response=resp)
-
-    def charge(self, amount, currency="usd", description=None, send_receipt=True, **kwargs):
-        """
-        This method expects `amount` to be a Decimal type representing a
-        dollar amount. It will be converted to cents so any decimals beyond
-        two will be ignored.
-        """
-        charge_id = super(Customer, self).charge(amount, currency, description, send_receipt, **kwargs)
-        recorded_charge = self.record_charge(charge_id)
-        if send_receipt:
-            recorded_charge.send_receipt()
-        return recorded_charge
-
-    def record_charge(self, charge_id):
-        data = Charge.api().retrieve(charge_id)
-        return Charge.sync_from_stripe_data(data)
 
 
 class CurrentSubscription(TimeStampedModel):
@@ -434,6 +434,13 @@ class Plan(StripePlan):
         return [smart_text(self.name)] + super(Plan, self).str_parts()
 
     @classmethod
+    def get_or_create(cls, **kwargs):
+        try:
+            return Plan.objects.get(stripe_id=kwargs['stripe_id']), False
+        except Plan.DoesNotExist:
+            return cls.create(**kwargs), True
+
+    @classmethod
     def create(cls, **kwargs):
 
         # A few minor things are changed in the api-version of the create call
@@ -449,13 +456,6 @@ class Plan(StripePlan):
         plan = Plan.objects.create(**kwargs)
 
         return plan
-
-    @classmethod
-    def get_or_create(cls, **kwargs):
-        try:
-            return Plan.objects.get(stripe_id=kwargs['stripe_id']), False
-        except Plan.DoesNotExist:
-            return cls.create(**kwargs), True
 
     def update_name(self):
         """Update the name of the Plan in Stripe and in the db.
