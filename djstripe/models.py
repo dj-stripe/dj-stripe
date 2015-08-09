@@ -356,6 +356,10 @@ class Customer(StripeCustomer):
             return current_subscription
 
 
+class Card(StripeCard):
+    pass
+
+
 class CurrentSubscription(TimeStampedModel):
     STATUS_TRIALING = "trialing"
     STATUS_ACTIVE = "active"
@@ -632,6 +636,10 @@ class TransferChargeFee(TimeStampedModel):
     application = models.TextField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     kind = models.CharField(max_length=150)
+
+
+class Account(StripeAccount):
+    pass
 
 
 @python_2_unicode_compatible
