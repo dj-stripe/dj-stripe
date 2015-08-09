@@ -92,9 +92,13 @@ class Charge(StripeCharge):
         if invoice:
             charge.invoice = invoice
 
-        destination = cls.object_destination_to_account(target_cls=Account, data=data)
-        if destination:
-            charge.destination = destination
+        account = cls.object_destination_to_account(target_cls=Account, data=data)
+        if account:
+            charge.destination = account
+
+        transfer = cls.object_to_transfer(target_cls=Transfer, data=data)
+        if transfer:
+            charge.transfer = transfer
 
         # TODO: other sources
         if charge.source_type == "card":
