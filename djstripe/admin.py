@@ -131,14 +131,14 @@ admin.site.register(
     readonly_fields=('created',),
     list_display=[
         "stripe_id",
-        "kind",
+        "type",
         "livemode",
         "valid",
         "processed",
         "created"
     ],
     list_filter=[
-        "kind",
+        "type",
         "created",
         "valid",
         "processed"

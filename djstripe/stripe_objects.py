@@ -178,6 +178,8 @@ class StripeCharge(StripeObject):
     * fraud_details: Mapped to a ``fraudulent`` boolean.
     * receipt_email: Unnecessary.
     * receipt_number: Unnecessary.
+
+    Stripe API_VERSION: model fields and methods audited to 2015-07-28 - @kavdev
     """
 
     STATUS_CHOICES = [(status, status.title()) for status in ["succeeded", "failed"]]
@@ -196,8 +198,7 @@ class StripeCharge(StripeObject):
     amount = StripeCurrencyField(null=True, help_text="Amount charged.")
     amount_refunded = StripeCurrencyField(null=True, help_text="Amount refunded (can be less than the amount attribute on the charge if a partial refund was issued).")
     captured = StripeNullBooleanField(null=True, help_text="If the charge was created without capturing, this boolean represents whether or not it is still uncaptured or has since been captured.")
-    # TODO: Rename to "created_stripe"
-    charge_created = StripeDateTimeField(null=True, help_text="The datetime this object was created.", stripe_name="created")
+    created_stripe = StripeDateTimeField(null=True, help_text="The datetime this object was created.", stripe_name="created")
     currency = StripeCharField(max_length=3, blank=True, help_text="Three-letter ISO currency code representing the currency in which the charge was made.")
     paid = StripeNullBooleanField(null=True, help_text="``true`` if the charge succeeded, or was successfully authorized for later capture, ``false`` otherwise.")
     refunded = StripeNullBooleanField(null=True, help_text="Whether or not the charge has been fully refunded. If the charge is only partially refunded, this attribute will still be false.")
@@ -209,8 +210,8 @@ class StripeCharge(StripeObject):
     # dj-stripe custom stripe fields. Don't try to send these.
     source_type = StripeCharField(max_length=20, blank=True, stripe_name="source.object", help_text="The payment source type. If the payment source is supported by dj-stripe, a corresponding model is attached to this Charge via a foreign key matching this field.")
     source_stripe_id = StripeIdField(blank=True, stripe_name="source.id", help_text="The payment source id.")
-    disputed = StripeBooleanField(default=False, null=True, stripe_required=False, help_text="Whether or not this charge is disputed.")
-    fraudulent = StripeBooleanField(default=False, null=True, stripe_required=False, help_text="Whether or not this charge was marked as fraudulent.")
+    disputed = StripeNullBooleanField(null=True, stripe_required=False, help_text="Whether or not this charge is disputed.")
+    fraudulent = StripeNullBooleanField(null=True, stripe_required=False, help_text="Whether or not this charge was marked as fraudulent.")
 
     # DEPRECATED fields. Will be removed in dj-stripe 1.0
     card_last_4 = StripeCharField(max_length=4, blank=True, stripe_required=False, stripe_name="source.last4")
@@ -544,7 +545,6 @@ class StripeTransfer(StripeObject):
     amount = StripeCurrencyField()
     status = StripeCharField(max_length=25)
     date = StripeDateTimeField(help_text="Date the transfer is scheduled to arrive at destination")
-    description = StripeTextField(null=True, blank=True, stripe_required=False)
 
     # The following fields are nested in the "summary" object
     adjustment_count = StripeIntegerField(nested_name="summary")
@@ -613,17 +613,16 @@ class StripeEvent(StripeObject):
         1) validate the receipt of a webhook event by doing an event get using the API version of the received hook event.
         2) retrieve the referenced object (e.g. the Charge, the Customer, etc) using the plugin's supported API version.
         3) process that event using the retrieved object which will, only now, be in a format that you are certain to understand
+
+    Stripe API_VERSION: model fields and methods audited to 2015-07-28 - @wahuneke
     """
 
-    #
-    # Stripe API_VERSION: model fields and methods audited to 2015-07-28 - @wahuneke
-    #
     class Meta:
         abstract = True
 
     stripe_api_name = "Event"
 
-    kind = StripeCharField(stripe_name="type", max_length=250, help_text="Stripe's event description code")
+    type = StripeCharField(max_length=250, help_text="Stripe's event description code")
     request_id = StripeCharField(max_length=50, null=True, blank=True, stripe_name="request",
                                  help_text="Information about the request that triggered this event, for traceability "
                                            "purposes. If empty string then this is an old entry without that data. If "
