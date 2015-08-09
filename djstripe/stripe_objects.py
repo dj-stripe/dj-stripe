@@ -580,6 +580,18 @@ class StripeAccount(StripeObject):
 
     stripe_api_name = "Account"
 
+    @classmethod
+    def get_connected_account_from_token(cls, access_token):
+        account_data = cls.api_retrieve(api_key=access_token)
+
+        return cls.get_or_create_from_stripe_object(account_data)[0]
+
+    @classmethod
+    def get_default_account(cls):
+        account_data = cls.api_retrieve()
+
+        return cls.get_or_create_from_stripe_object(account_data)[0]
+
 
 class StripeEvent(StripeObject):
     """
