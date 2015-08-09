@@ -34,11 +34,10 @@ logger = logging.getLogger(__name__)
 
 
 class Charge(StripeCharge):
-    # account = models.ForeignKey("Account", related_name="charges_outgoing")
+    account = models.ForeignKey("Account", related_name="charges", help_text="The account (if any) the charge was made on behalf of.")
 
     customer = models.ForeignKey("Customer", related_name="charges", help_text="The customer associated with this charge.")
     invoice = models.ForeignKey("Invoice", null=True, related_name="charges", help_text="The invoice associated with this charge, if it exists.")
-    destination = models.ForeignKey("Account", null=True, related_name="charges_incoming", help_text="The account (if any) the charge was made on behalf of.")
     transfer = models.ForeignKey("Transfer", null=True, help_text="The transfer to the destination account (only applicable if the charge was created using the destination parameter).")
 
     card = models.ForeignKey("Card", null=True, related_name="charges")
@@ -101,13 +100,16 @@ class Charge(StripeCharge):
         if invoice:
             charge.invoice = invoice
 
-        account = cls.object_destination_to_account(target_cls=Account, data=data)
-        if account:
-            charge.destination = account
-
         transfer = cls.object_to_transfer(target_cls=Transfer, data=data)
         if transfer:
             charge.transfer = transfer
+
+        # Set the account on this object.
+        destination_account = cls.object_destination_to_account(target_cls=Account, data=data)
+        if destination_account:
+            charge.account = destination_account
+        else:
+            charge.account = Account.get_default_account()
 
         # TODO: other sources
         if charge.source_type == "card":
