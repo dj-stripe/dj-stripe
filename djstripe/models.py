@@ -357,10 +357,13 @@ class Customer(StripeCustomer):
 
 
 class Card(StripeCard):
+    # account = models.ForeignKey("Account", related_name="cards")
     pass
 
 
 class CurrentSubscription(TimeStampedModel):
+    # account = models.ForeignKey("Account", related_name="subscriptions")
+
     STATUS_TRIALING = "trialing"
     STATUS_ACTIVE = "active"
     STATUS_PAST_DUE = "past_due"
