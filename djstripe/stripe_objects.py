@@ -128,6 +128,12 @@ class StripeObject(TimeStampedModel):
         return "<{list}>".format(list=", ".join(self.str_parts()))
 
 
+class StripeSource(StripeObject):
+
+    class Meta:
+        abstract = True
+
+
 # ============================================================================ #
 #                               Stripe Objects                                 #
 # ============================================================================ #
@@ -329,7 +335,7 @@ class StripeCustomer(StripeObject):
             self.card_exp_year = self.stripe_customer.active_card.exp_year
 
 
-class StripeCard(StripeObject):
+class StripeCard(StripeSource):
 
     class Meta:
         abstract = True
