@@ -56,6 +56,7 @@ class StripeObject(TimeStampedModel):
                                                 "whether this record comes from Stripe test mode or live "
                                                 "mode operation.")
     metadata = StripeJSONField(blank=True, stripe_required=False, help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.")
+    description = StripeTextField(blank=True, stripe_required=False, help_text="A description of this object.")
 
     class Meta:
         abstract = True
