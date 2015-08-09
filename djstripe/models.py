@@ -33,8 +33,12 @@ from .utils import convert_tstamp
 logger = logging.getLogger(__name__)
 
 
+def _lazy_get_account_default():
+    return Account.get_default_account()
+
+
 class Charge(StripeCharge):
-    account = models.ForeignKey("Account", related_name="charges", help_text="The account (if any) the charge was made on behalf of.")
+    account = models.ForeignKey("Account", default=_lazy_get_account_default, related_name="charges", help_text="The account (if any) the charge was made on behalf of.")
 
     customer = models.ForeignKey("Customer", related_name="charges", help_text="The customer associated with this charge.")
     invoice = models.ForeignKey("Invoice", null=True, related_name="charges", help_text="The invoice associated with this charge, if it exists.")
@@ -113,7 +117,7 @@ class Charge(StripeCharge):
 
         # TODO: other sources
         if charge.source_type == "card":
-            card = cls.object_to_source(target_cls=Card, data)
+            card = cls.object_to_source(target_cls=Card, data=data)
             if card:
                 charge.card = card
 
