@@ -131,10 +131,13 @@ class StripeObject(TimeStampedModel):
     @classmethod
     def create_from_stripe_object(cls, data):
         """
-        Create a model instance (not saved to db), using the given data object from Stripe
+        Create a model instance using the given data object from Stripe
         :type data: dict
         """
-        return cls(**cls.stripe_object_to_record(data))
+        instance = cls(**cls.stripe_object_to_record(data))
+        instance.save()
+
+        return instance
 
     @classmethod
     def get_or_create_from_stripe_object(cls, data, field_name="id"):
