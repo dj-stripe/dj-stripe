@@ -124,6 +124,13 @@ class StripeObject(TimeStampedModel):
         """
         return cls(**cls.stripe_object_to_record(data))
 
+    @classmethod
+    def get_or_create_from_stripe_object(cls, data, field_name="id"):
+        try:
+            return cls.stripe_objects.get_by_json(data, field_name), False
+        except cls.DoesNotExist:
+            return cls.create_from_stripe_object(data), True
+
     def __str__(self):
         return "<{list}>".format(list=", ".join(self.str_parts()))
 
