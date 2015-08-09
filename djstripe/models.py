@@ -525,6 +525,7 @@ class Invoice(StripeInvoice):
     def sync_from_stripe_data(cls, stripe_invoice, send_receipt=True):
         customer = Customer.objects.get(stripe_id=stripe_invoice["customer"])
 
+        # TODO: Convert to get_or_create
         try:
             invoice = cls.stripe_objects.get_by_json(stripe_invoice)
             created = False
@@ -621,6 +622,7 @@ class Transfer(StripeTransfer):
 
     @classmethod
     def process_transfer(cls, event, stripe_object):
+        # TODO: Convert to get_or_create
         try:
             transfer = cls.stripe_objects.get_by_json(stripe_object)
             created = False
