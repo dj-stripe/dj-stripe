@@ -50,7 +50,7 @@ class StripeObject(TimeStampedModel):
     stripe_objects = StripeObjectManager()
 
     stripe_id = StripeIdField(unique=True, stripe_name='id')
-    livemode = StripeNullBooleanField(default=False, null=True,
+    livemode = StripeNullBooleanField(default=False, null=True, stripe_required=False,
                                       help_text="Null here indicates that the livemode status is unknown "
                                                 "or was previously unrecorded. Otherwise, this field indicates "
                                                 "whether this record comes from Stripe test mode or live "
