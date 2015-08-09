@@ -34,8 +34,19 @@ logger = logging.getLogger(__name__)
 
 
 class Charge(StripeCharge):
-    customer = models.ForeignKey("Customer", related_name="charges")
-    invoice = models.ForeignKey("Invoice", null=True, related_name="charges")
+    # account = models.ForeignKey("Account", related_name="charges_outgoing")
+
+    customer = models.ForeignKey("Customer", related_name="charges", help_text="The customer associated with this charge.")
+    invoice = models.ForeignKey("Invoice", null=True, related_name="charges", help_text="The invoice associated with this charge, if it exists.")
+    destination = models.ForeignKey("Account", null=True, related_name="charges_incoming", help_text="The account (if any) the charge was made on behalf of.")
+    transfer = models.ForeignKey("Transfer", null=True, help_text="The transfer to the destination account (only applicable if the charge was created using the destination parameter).")
+
+    card = models.ForeignKey("Card", null=True, related_name="charges")
+    # TODO: other sources
+    # bank_account = ForeignKey("BankAccount", null=True, related_name="charges")
+    # bitcoin_receiver = ForeignKey("BitcoinReceiver", null=True, related_name="charges")
+
+    receipt_sent = models.BooleanField(default=False)
 
     objects = ChargeManager()
 
