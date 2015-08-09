@@ -302,6 +302,20 @@ class StripeCharge(StripeObject):
             return target_cls.get_or_create_from_stripe_object(data, "destination")[0]
 
     @classmethod
+    def object_to_transfer(cls, target_cls, data):
+        """
+        Search the given manager for the Transfer matching this StripeCharge object's ``transfer`` field.
+
+        :param target_cls: The target class
+        :type target_cls: StripeTransfer
+        :param data: stripe object
+        :type data: dict
+        """
+
+        if "transfer" in data and data["transfer"]:
+            return target_cls.get_or_create_from_stripe_object(data, "transfer")[0]
+
+    @classmethod
     def stripe_object_to_record(cls, data):
         data["disputed"] = data["dispute"] is not None
 
