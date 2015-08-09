@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 import djstripe.fields
-import djstripe.models
 import django.utils.timezone
 import model_utils.fields
 
@@ -50,7 +49,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='charge',
             name='account',
-            field=models.ForeignKey(default=djstripe.models._lazy_get_account_default, related_name='charges', to='djstripe.Account', help_text='The account (if any) the charge was made on behalf of.'),
+            field=models.ForeignKey(to='djstripe.Account', null=True, related_name='charges', help_text='The account the charge was made on behalf of. Null here indicates that this value was never set.'),
             preserve_default=True,
         ),
         migrations.AddField(
