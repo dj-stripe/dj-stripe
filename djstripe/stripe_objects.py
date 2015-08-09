@@ -217,8 +217,6 @@ class StripeCharge(StripeObject):
     @classmethod
     def stripe_object_to_record(cls, data):
         data["disputed"] = data["dispute"] is not None
-        if data["refunded"]:
-            data["amount_refunded"] = data["amount"]
 
         return super(StripeCharge, cls).stripe_object_to_record(data)
 
