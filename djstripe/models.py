@@ -107,6 +107,8 @@ class Charge(StripeCharge):
 
 
 class Customer(StripeCustomer):
+    # account = models.ForeignKey(Account, related_name="customers")
+
     subscriber = models.OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
     date_purged = models.DateTimeField(null=True, editable=False)
 
@@ -437,6 +439,8 @@ INTERVALS = (
 
 
 class Plan(StripePlan):
+    # account = models.ForeignKey("Account", related_name="plans")
+
     name = models.CharField(max_length=100, null=False)
     currency = models.CharField(choices=djstripe_settings.CURRENCIES, max_length=10, null=False)
     interval = models.CharField(max_length=10, choices=INTERVALS, verbose_name="Interval type", null=False)
@@ -489,6 +493,7 @@ class Plan(StripePlan):
 
 
 class Invoice(StripeInvoice):
+    # account = models.ForeignKey("Account", related_name="invoices")
     customer = models.ForeignKey(Customer, related_name="invoices")
 
     class Meta(object):
@@ -565,10 +570,7 @@ class Invoice(StripeInvoice):
 
 
 class InvoiceItem(TimeStampedModel):
-    """
-    Not inherited from StripeObject because there can be multiple invoice
-    items for a single stripe_id.
-    """
+    # account = models.ForeignKey(Account, related_name="invoiceitems")
 
     stripe_id = models.CharField(max_length=50)
     invoice = models.ForeignKey(Invoice, related_name="items")
@@ -590,6 +592,7 @@ class InvoiceItem(TimeStampedModel):
 
 
 class Transfer(StripeTransfer):
+    # account = models.ForeignKey("Account", related_name="transfers")
     event = models.ForeignKey("Event", related_name="transfers")
 
     objects = TransferManager()
@@ -653,6 +656,8 @@ class EventProcessingException(TimeStampedModel):
 
 
 class Event(StripeEvent):
+    # account = models.ForeignKey(Account, related_name="events")
+
     customer = models.ForeignKey("Customer", null=True,
                                  help_text="In the event that there is a related customer, this will point to that "
                                            "Customer record")
