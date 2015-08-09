@@ -75,20 +75,27 @@ class StripeObject(TimeStampedModel):
         # e.g. stripe.Event, stripe.Charge, etc
         return getattr(stripe, cls.stripe_api_name)
 
-    def api_retrieve(self):
+    def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
         """
         Implement very commonly used API function 'retrieve'.
+
+        :param api_key: The api key to use for this request. Defualts to settings.STRIPE_SECRET_KEY.
+        :type api_key: string
         """
 
         # Run stripe.X.retreive(id)
-        return type(self).api().retrieve(id=self.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=self.expand_fields)
+        return type(self).api().retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
 
     @classmethod
-    def api_create(cls, **kwargs):
+    def api_create(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
         """
         Call the stripe API's create operation for this model
+
+        :param api_key: The api key to use for this request. Defualts to settings.STRIPE_SECRET_KEY.
+        :type api_key: string
         """
-        return cls.api().create(api_key=settings.STRIPE_SECRET_KEY, **kwargs)
+
+        return cls.api().create(api_key=api_key, **kwargs)
 
     def str_parts(self):
         """
