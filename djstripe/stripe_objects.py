@@ -205,27 +205,61 @@ class StripeCharge(StripeObject):
         return self.api_retrieve().capture()
 
     @classmethod
-    def object_to_customer(cls, manager, data):
+    def object_to_customer(cls, target_cls, data):
         """
-        Search the given manager for the customer matching this StripeCharge object
+        Search the given manager for the Customer matching this StripeCharge object's ``customer`` field.
 
-        :param manager: stripe_objects manager for a table of StripeCustomers
-        :type manager: StripeObjectManager
+        :param target_cls: The target class
+        :type target_cls: StripeCustomer
         :param data: stripe object
         :type data: dict
         """
-        return manager.get_by_json(data, "customer") if "customer" in data else None
+
+        if "customer" in data and data["customer"]:
+            return target_cls.get_or_create_from_stripe_object(data, "customer")[0]
 
     @classmethod
-    def object_to_invoice(cls, manager, data):
+    def object_to_invoice(cls, target_cls, data):
         """
-        Search the given manager for the invoice matching this StripeCharge object
-        :param manager: stripe_objects manager for a table of StripeInvoice
-        :type manager: StripeObjectManager
+        Search the given manager for the Invoice matching this StripeCharge object's ``invoice`` field.
+
+        :param target_cls: The target class
+        :type target_cls: StripeInvoice
         :param data: stripe object
         :type data: dict
         """
-        return manager.get_by_json(data, "invoice") if "invoice" in data else None
+
+        if "invoice" in data and data["invoice"]:
+            return target_cls.get_or_create_from_stripe_object(data, "invoice")[0]
+
+    @classmethod
+    def object_to_source(cls, target_cls, data):
+        """
+        Search the given manager for the source matching this StripeCharge object's ``source`` field.
+        Note that the source field is already expanded in each request.
+
+        :param target_cls: The target class
+        :type target_cls: StripeSource
+        :param data: stripe object
+        :type data: dict
+        """
+
+        if "source" in data and data["source"]:
+            return target_cls.get_or_create_from_stripe_object(data["source"])[0]
+
+    @classmethod
+    def object_destination_to_account(cls, target_cls, data):
+        """
+        Search the given manager for the Account matching this StripeCharge object's ``destination`` field.
+
+        :param target_cls: The target class
+        :type target_cls: StripeAccount
+        :param data: stripe object
+        :type data: dict
+        """
+
+        if "destination" in data and data["destination"]:
+            return target_cls.get_or_create_from_stripe_object(data, "destination")[0]
 
     @classmethod
     def stripe_object_to_record(cls, data):
