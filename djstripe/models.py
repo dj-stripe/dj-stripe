@@ -77,19 +77,30 @@ class Charge(StripeCharge):
 
     @classmethod
     def sync_from_stripe_data(cls, data):
+        charge, created = cls.get_or_create_from_stripe_object(data)
 
-        try:
-            charge = cls.stripe_objects.get_by_json(data)
+        if not created:
             charge.sync(cls.stripe_object_to_record(data))
-        except cls.DoesNotExist:
-            charge = cls.create_from_stripe_object(data)
 
-        customer = cls.object_to_customer(Customer.stripe_objects, data)
-        charge.customer = customer
+        customer = cls.object_to_customer(target_cls=Customer, data=data)
+        if customer:
+            charge.customer = customer
+        else:
+            raise ValidationError("A customer was not attached to this charge.")
 
-        invoice = cls.object_to_invoice(Invoice.stripe_objects, data)
+        invoice = cls.object_to_invoice(target_cls=Invoice, data=data)
         if invoice:
             charge.invoice = invoice
+
+        destination = cls.object_destination_to_account(target_cls=Account, data=data)
+        if destination:
+            charge.destination = destination
+
+        # TODO: other sources
+        if charge.source_type == "card":
+            card = cls.object_to_source(target_cls=Card, data)
+            if card:
+                charge.card = card
 
         charge.save()
         return charge
