@@ -233,18 +233,18 @@ class StripeCharge(StripeObject):
     amount = StripeCurrencyField(null=True, help_text="Amount charged.")
     amount_refunded = StripeCurrencyField(null=True, help_text="Amount refunded (can be less than the amount attribute on the charge if a partial refund was issued).")
     captured = StripeNullBooleanField(null=True, help_text="If the charge was created without capturing, this boolean represents whether or not it is still uncaptured or has since been captured.")
-    created_stripe = StripeDateTimeField(null=True, help_text="The datetime this object was created.", stripe_name="created")
-    currency = StripeCharField(max_length=3, blank=True, help_text="Three-letter ISO currency code representing the currency in which the charge was made.")
+    created_stripe = StripeDateTimeField(null=True, stripe_name="created", help_text="The datetime this object was created.")
+    currency = StripeCharField(max_length=3, null=True, help_text="Three-letter ISO currency code representing the currency in which the charge was made.")
     paid = StripeNullBooleanField(null=True, help_text="``true`` if the charge succeeded, or was successfully authorized for later capture, ``false`` otherwise.")
     refunded = StripeNullBooleanField(null=True, help_text="Whether or not the charge has been fully refunded. If the charge is only partially refunded, this attribute will still be false.")
-    status = StripeCharField(max_length=10, blank=True, choices=STATUS_CHOICES, help_text="The status of the payment is either ``succeeded`` or ``failed``.")
-    failure_code = StripeCharField(max_length=30, blank=True, choices=CARD_ERROR_CODE_CHOICES, help_text="Error code explaining reason for charge failure if available.")
-    failure_message = StripeTextField(blank=True, help_text="Message to user further explaining reason for charge failure if available.")
+    status = StripeCharField(max_length=10, null=True, choices=STATUS_CHOICES, help_text="The status of the payment is either ``succeeded`` or ``failed``.")
+    failure_code = StripeCharField(max_length=30, null=True, choices=CARD_ERROR_CODE_CHOICES, help_text="Error code explaining reason for charge failure if available.")
+    failure_message = StripeTextField(null=True, help_text="Message to user further explaining reason for charge failure if available.")
     shipping = StripeJSONField(blank=True, help_text="Shipping information for the charge")
 
     # dj-stripe custom stripe fields. Don't try to send these.
-    source_type = StripeCharField(max_length=20, blank=True, stripe_name="source.object", help_text="The payment source type. If the payment source is supported by dj-stripe, a corresponding model is attached to this Charge via a foreign key matching this field.")
-    source_stripe_id = StripeIdField(blank=True, stripe_name="source.id", help_text="The payment source id.")
+    source_type = StripeCharField(max_length=20, null=True, stripe_name="source.object", help_text="The payment source type. If the payment source is supported by dj-stripe, a corresponding model is attached to this Charge via a foreign key matching this field.")
+    source_stripe_id = StripeIdField(null=True, stripe_name="source.id", help_text="The payment source id.")
     disputed = StripeNullBooleanField(null=True, stripe_required=False, help_text="Whether or not this charge is disputed.")
     fraudulent = StripeNullBooleanField(null=True, stripe_required=False, help_text="Whether or not this charge was marked as fraudulent.")
 
@@ -654,7 +654,7 @@ class StripeEvent(StripeObject):
                                                 "until validity check is run and valid flag is set", stripe_name="data")
 
     def str_parts(self):
-        return [self.kind] + super(StripeEvent, self).str_parts()
+        return [self.type] + super(StripeEvent, self).str_parts()
 
     def api_retrieve(self):
         # OVERRIDING the parent version of this function

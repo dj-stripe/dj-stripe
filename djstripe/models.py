@@ -600,7 +600,9 @@ class InvoiceItem(TimeStampedModel):
 
 class Transfer(StripeTransfer):
     # account = models.ForeignKey("Account", related_name="transfers")
-    event = models.ForeignKey("Event", related_name="transfers")
+
+    # DEPRECATED. Why do we need this?
+    event = models.ForeignKey("Event", null=True, related_name="transfers")
 
     objects = TransferManager()
 
@@ -629,7 +631,7 @@ class Transfer(StripeTransfer):
             transfer.status = stripe_object["status"]
             transfer.save()
 
-        if event and event.kind == "transfer.updated":
+        if event and event.type == "transfer.updated":
             transfer.update_status()
             transfer.save()
 
@@ -715,7 +717,7 @@ class Event(StripeEvent):
         contrib packages)
         """
         if self.valid and not self.processed:
-            event_type, event_subtype = self.kind.split(".", 1)
+            event_type, event_subtype = self.type.split(".", 1)
 
             try:
                 # TODO: would it make sense to wrap the next 4 lines in a transaction.atomic context? Yes it would,
@@ -741,7 +743,7 @@ class Event(StripeEvent):
                 )
 
     def send_signal(self):
-        signal = WEBHOOK_SIGNALS.get(self.kind)
+        signal = WEBHOOK_SIGNALS.get(self.type)
         if signal:
             return signal.send(sender=Event, event=self)
 
