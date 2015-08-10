@@ -8,7 +8,7 @@
 
 import decimal
 
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, FieldError
 from django.db import models
 
 from jsonfield import JSONField
@@ -65,9 +65,10 @@ class StripeFieldMixin(object):
                     result = dict_nested_accessor(data, self.nested_name + "." + self.name)
                 else:
                     result = data[self.name]
-            except KeyError:
+            except (KeyError, TypeError):
                 if self.stripe_required:
-                    raise
+                    raise FieldError("Required stripe field '{field_name}' was not"
+                                     " provided in stripe object.".format(field_name=self.name))
                 else:
                     result = None
 
