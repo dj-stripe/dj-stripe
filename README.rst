@@ -6,7 +6,7 @@ Django + Stripe Made Easy
 Badges
 ------
 
-.. image:: https://img.shields.io/travis/pydanny/dj-stripe.svg?style=flat-square
+.. image:: https://img.shields.io/travis/pydanny/dj-stripe/master.svg?style=flat-square
         :target: https://travis-ci.org/pydanny/dj-stripe
 .. image:: https://img.shields.io/codecov/c/github/pydanny/dj-stripe/master.svg?style=flat-square
         :target: http://codecov.io/github/pydanny/dj-stripe?branch=master
