@@ -1,0 +1,23 @@
+FAKE_ACCOUNT = {
+    "id": "acct_1032D82eZvKYlo2C",
+    "email": "site@stripe.com",
+    "statement_descriptor": None,
+    "display_name": "Stripe.com",
+    "timezone": "US/Pacific",
+    "details_submitted": False,
+    "charges_enabled": False,
+    "transfers_enabled": False,
+    "currencies_supported": [
+      "usd",
+      "aed",
+      "afn",
+    ],
+    "default_currency": "usd",
+    "country": "US",
+    "object": "account",
+    "business_name": "Stripe.com",
+    "business_url": None,
+    "support_phone": None,
+    "business_logo": None,
+    "managed": False,
+}

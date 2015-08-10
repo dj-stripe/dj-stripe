@@ -1,3 +1,4 @@
+from copy import deepcopy
 import decimal
 
 from django.contrib.auth import get_user_model
@@ -8,6 +9,8 @@ from mock import patch
 
 from djstripe.models import Customer, Account
 
+from .test_charge import FAKE_CHARGE
+
 
 class EmailReceiptTest(TestCase):
 
@@ -16,9 +19,9 @@ class EmailReceiptTest(TestCase):
                                                          email="patrick@gmail.com")
         self.customer = Customer.objects.create(
             subscriber=self.user,
-            stripe_id="cus_xxxxxxxxxxxxxxx",
-            card_fingerprint="YYYYYYYY",
-            card_last_4="2342",
+            stripe_id="cus_6lsBvm5rJ0zyHc",
+            card_fingerprint="dgs89-3jjf039jejda-0j2d",
+            card_last_4="4242",
             card_kind="Visa"
         )
         self.account = Account.objects.create()
@@ -26,35 +29,14 @@ class EmailReceiptTest(TestCase):
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")
-    def test_email_reciept_renders_amount_properly(self, ChargeMock, RetrieveMock, default_account_mock):
+    def test_email_reciept_renders_amount_properly(self, charge_create_mock, charge_retrieve_mock, default_account_mock):
         default_account_mock.return_value = self.account
 
-        ChargeMock.return_value.id = "ch_XXXXX"
-        RetrieveMock.return_value = {
-            "id": "ch_XXXXXX",
-            "card": {
-                "last4": "4323",
-                "type": "Visa"
-            },
-            "amount": 40000,
-            "amount_refunded": 0,
-            "paid": True,
-            "refunded": False,
-            "captured": True,
-            "livemode": True,
-            "fee": 499,
-            "dispute": None,
-            "created": 1363911708,
-            "customer": "cus_xxxxxxxxxxxxxxx",
-            "currency": "usd",
-            "status": None,
-            "failure_code": None,
-            "failure_message": None,
-            "fraud_details": {},
-            "source": {"id": "asdf", "object": "test"},
-            "shipping": None,
-        }
-        self.customer.charge(
-            amount=decimal.Decimal("400.00")
-        )
-        self.assertTrue("$400.00" in mail.outbox[0].body)
+        fake_charge_copy = deepcopy(FAKE_CHARGE)
+        fake_charge_copy.update({"invoice": None})
+
+        charge_create_mock.return_value = fake_charge_copy
+        charge_retrieve_mock.return_value = fake_charge_copy
+
+        self.customer.charge(amount=decimal.Decimal("22.00"))
+        self.assertTrue("$22.00" in mail.outbox[0].body)
