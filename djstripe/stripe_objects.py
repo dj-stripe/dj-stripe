@@ -240,7 +240,7 @@ class StripeCharge(StripeObject):
     status = StripeCharField(max_length=10, null=True, choices=STATUS_CHOICES, help_text="The status of the payment is either ``succeeded`` or ``failed``.")
     failure_code = StripeCharField(max_length=30, null=True, choices=CARD_ERROR_CODE_CHOICES, help_text="Error code explaining reason for charge failure if available.")
     failure_message = StripeTextField(null=True, help_text="Message to user further explaining reason for charge failure if available.")
-    shipping = StripeJSONField(blank=True, help_text="Shipping information for the charge")
+    shipping = StripeJSONField(null=True, help_text="Shipping information for the charge")
 
     # dj-stripe custom stripe fields. Don't try to send these.
     source_type = StripeCharField(max_length=20, null=True, stripe_name="source.object", help_text="The payment source type. If the payment source is supported by dj-stripe, a corresponding model is attached to this Charge via a foreign key matching this field.")
@@ -650,8 +650,8 @@ class StripeEvent(StripeObject):
     received_api_version = StripeCharField(max_length=15, blank=True, stripe_name="api_version",
                                            help_text="the API version at which the event data was rendered. Blank for "
                                                      "old entries only, all new entries will have this value")
-    webhook_message = StripeJSONField(help_text="data received at webhook. data should be considered to be garbage "
-                                                "until validity check is run and valid flag is set", stripe_name="data")
+    webhook_message = StripeJSONField(stripe_name="data", help_text="data received at webhook. data should be considered to be garbage "
+                                                                    "until validity check is run and valid flag is set")
 
     def str_parts(self):
         return [self.type] + super(StripeEvent, self).str_parts()
