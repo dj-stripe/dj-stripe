@@ -107,9 +107,7 @@ class Charge(StripeCharge):
 
         # TODO: other sources
         if self.source_type == "card":
-            card = cls.object_to_source(target_cls=Card, data=data)
-            if card:
-                self.card = card
+            self.card = cls.object_to_source(target_cls=Card, data=data)
 
 
 class Customer(StripeCustomer):

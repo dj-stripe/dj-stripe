@@ -308,7 +308,7 @@ class StripeCharge(StripeObject):
     def object_to_source(cls, target_cls, data):
         """
         Search the given manager for the source matching this StripeCharge object's ``source`` field.
-        Note that the source field is already expanded in each request.
+        Note that the source field is already expanded in each request, and that it is required.
 
         :param target_cls: The target class
         :type target_cls: StripeSource
@@ -316,8 +316,7 @@ class StripeCharge(StripeObject):
         :type data: dict
         """
 
-        if "source" in data and data["source"]:
-            return target_cls.get_or_create_from_stripe_object(data["source"])[0]
+        return target_cls.get_or_create_from_stripe_object(data["source"])[0]
 
     @classmethod
     def object_destination_to_account(cls, target_cls, data):
