@@ -6,7 +6,7 @@
 
 """
 
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, FieldError
 
 from django.test import TestCase
 
@@ -14,7 +14,7 @@ from djstripe.stripe_objects import StripeObject, StripeCharField, StripeJSONFie
 
 
 SIMPLE_OBJ = {'id': 'yo', 'livemode': True}
-SIMPLE_OBJ_RESULT = {'stripe_id': 'yo', 'livemode': True}
+SIMPLE_OBJ_RESULT = {'stripe_id': 'yo', 'description': None, 'livemode': True}
 
 
 class StripeObjectExceptionsTest(TestCase):
@@ -35,7 +35,7 @@ class StripeObjectExceptionsTest(TestCase):
         class HasRequiredField(StripeObject):
             im_not_optional = StripeCharField()
 
-        with self.assertRaises(KeyError):
+        with self.assertRaises(FieldError):
             HasRequiredField.stripe_object_to_record(SIMPLE_OBJ)
 
     def test_missing_nonrequired_field(self):

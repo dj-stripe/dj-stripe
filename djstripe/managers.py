@@ -110,7 +110,7 @@ class TransferManager(models.Manager):
 class ChargeManager(models.Manager):
 
     def during(self, year, month):
-        return self.filter(charge_created__year=year, charge_created__month=month)
+        return self.filter(created_stripe__year=year, created_stripe__month=month)
 
     def paid_totals_for(self, year, month):
         return self.during(year, month).filter(paid=True).aggregate(

@@ -70,7 +70,7 @@ class TestEventProcessingException(TestCase):
 
         self.event = Event.objects.create(
             stripe_id=self.msg["id"],
-            kind="ping",
+            type="ping",
             webhook_message=self.msg,
             message=self.msg
         )

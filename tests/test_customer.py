@@ -20,7 +20,7 @@ from mock import patch, PropertyMock, MagicMock
 from stripe.error import InvalidRequestError
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
-from djstripe.models import Customer, Charge, CurrentSubscription
+from djstripe.models import Account, Customer, Charge, CurrentSubscription
 
 
 class TestCustomer(TestCase):
@@ -44,6 +44,8 @@ class TestCustomer(TestCase):
             card_last_4="2342",
             card_kind="Visa"
         )
+
+        self.account = Account.objects.create()
 
     def test_tostring(self):
         self.assertEquals("<patrick, stripe_id=cus_xxxxxxxxxxxxxxx>", str(self.customer))
@@ -80,7 +82,7 @@ class TestCustomer(TestCase):
         self.assertTrue(customer.card_kind == "")
         self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
 
-        customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY)
+        customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=None)
 
     @patch("stripe.Customer.retrieve")
     def test_customer_delete_raises_unexpected_exception(self, customer_retrieve_mock):
@@ -89,7 +91,7 @@ class TestCustomer(TestCase):
         with self.assertRaisesMessage(InvalidRequestError, "Unexpected Exception"):
             self.customer.purge()
 
-        customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY)
+        customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=None)
 
     def test_change_charge(self):
         self.assertTrue(self.customer.can_charge())
@@ -103,8 +105,11 @@ class TestCustomer(TestCase):
         with self.assertRaises(ValueError):
             self.customer.charge(10)
 
+    @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
-    def test_record_charge(self, charge_retrieve_mock):
+    def test_record_charge(self, charge_retrieve_mock, default_account_mock):
+        default_account_mock.return_value = self.account
+
         charge_retrieve_mock.return_value = {
             "id": "ch_XXXXXX",
             "card": {
@@ -112,24 +117,34 @@ class TestCustomer(TestCase):
                 "type": "Visa"
             },
             "amount": 1000,
+            "amount_refunded": 0,
             "paid": True,
             "refunded": False,
             "captured": True,
-            "fee": 499,
+            "application_fee": {"amount": 499},
             "dispute": None,
             "created": 1363911708,
             "customer": "cus_xxxxxxxxxxxxxxx",
             "livemode": True,
+            "currency": "usd",
+            "status": None,
+            "failure_code": None,
+            "failure_message": None,
+            "fraud_details": {},
+            "source": {"id": "asdf", "object": "test"},
         }
         obj = self.customer.record_charge("ch_XXXXXX")
         self.assertEquals(Charge.objects.get(stripe_id="ch_XXXXXX").pk, obj.pk)
         self.assertEquals(obj.paid, True)
         self.assertEquals(obj.disputed, False)
         self.assertEquals(obj.refunded, False)
-        self.assertEquals(obj.amount_refunded, None)
+        self.assertEquals(obj.amount_refunded, 0)
 
+    @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
-    def test_refund_charge(self, charge_retrieve_mock):
+    def test_refund_charge(self, charge_retrieve_mock, default_account_mock):
+        default_account_mock.return_value = self.account
+
         charge = Charge.objects.create(
             stripe_id="ch_XXXXXX",
             customer=self.customer,
@@ -148,23 +163,33 @@ class TestCustomer(TestCase):
                 "type": "Visa"
             },
             "amount": 1000,
+            "amount_refunded": 0,
             "paid": True,
             "refunded": True,
             "captured": True,
             "amount_refunded": 1000,
-            "fee": 499,
+            "application_fee": {"amount": 499},
             "dispute": None,
             "created": 1363911708,
             "customer": "cus_xxxxxxxxxxxxxxx",
             "livemode": True,
+            "currency": "usd",
+            "status": None,
+            "failure_code": None,
+            "failure_message": None,
+            "fraud_details": {},
+            "source": {"id": "asdf", "object": "test"},
         }
         charge.refund()
         charge2 = Charge.objects.get(stripe_id="ch_XXXXXX")
         self.assertEquals(charge2.refunded, True)
         self.assertEquals(charge2.amount_refunded, decimal.Decimal("10.00"))
 
+    @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
-    def test_capture_charge(self, charge_retrieve_mock):
+    def test_capture_charge(self, charge_retrieve_mock, default_account_mock):
+        default_account_mock.return_value = self.account
+
         charge = Charge.objects.create(
             stripe_id="ch_XXXXXX",
             customer=self.customer,
@@ -184,21 +209,31 @@ class TestCustomer(TestCase):
                 "type": "Visa"
             },
             "amount": 1000,
+            "amount_refunded": 0,
             "paid": True,
             "refunded": True,
             "captured": True,
             "amount_refunded": 1000,
-            "fee": 499,
+            "application_fee": {"amount": 499},
             "dispute": None,
             "created": 1363911708,
             "customer": "cus_xxxxxxxxxxxxxxx",
             "livemode": True,
+            "currency": "usd",
+            "status": None,
+            "failure_code": None,
+            "failure_message": None,
+            "fraud_details": {},
+            "source": {"id": "asdf", "object": "test"},
         }
         charge2 = charge.capture()
         self.assertEquals(charge2.captured, True)
 
+    @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
-    def test_refund_charge_object_returned(self, charge_retrieve_mock):
+    def test_refund_charge_object_returned(self, charge_retrieve_mock, default_account_mock):
+        default_account_mock.return_value = self.account
+
         charge = Charge.objects.create(
             stripe_id="ch_XXXXXX",
             customer=self.customer,
@@ -217,15 +252,22 @@ class TestCustomer(TestCase):
                 "type": "Visa"
             },
             "amount": 1000,
+            "amount_refunded": 0,
             "paid": True,
             "refunded": True,
             "captured": True,
             "amount_refunded": 1000,
-            "fee": 499,
+            "application_fee": {"amount": 499},
             "dispute": None,
             "created": 1363911708,
             "customer": "cus_xxxxxxxxxxxxxxx",
             "livemode": True,
+            "currency": "usd",
+            "status": None,
+            "failure_code": None,
+            "failure_message": None,
+            "fraud_details": {},
+            "source": {"id": "asdf", "object": "test"},
         }
         charge2 = charge.refund()
         self.assertEquals(charge2.refunded, True)
@@ -264,9 +306,12 @@ class TestCustomer(TestCase):
             50000
         )
 
+    @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")
-    def test_charge_converts_dollars_into_cents(self, charge_create_mock, charge_retrieve_mock):
+    def test_charge_converts_dollars_into_cents(self, charge_create_mock, charge_retrieve_mock, default_account_mock):
+        default_account_mock.return_value = self.account
+
         charge_create_mock.return_value.id = "ch_XXXXX"
         charge_retrieve_mock.return_value = {
             "id": "ch_XXXXXX",
@@ -275,6 +320,7 @@ class TestCustomer(TestCase):
                 "type": "Visa"
             },
             "amount": 1000,
+            "amount_refunded": 0,
             "paid": True,
             "refunded": False,
             "captured": True,
@@ -283,6 +329,12 @@ class TestCustomer(TestCase):
             "created": 1363911708,
             "customer": "cus_xxxxxxxxxxxxxxx",
             "livemode": True,
+            "currency": "usd",
+            "status": None,
+            "failure_code": None,
+            "failure_message": None,
+            "fraud_details": {},
+            "source": {"id": "asdf", "object": "test"},
         }
         self.customer.charge(
             amount=decimal.Decimal("10.00")
@@ -290,9 +342,12 @@ class TestCustomer(TestCase):
         _, kwargs = charge_create_mock.call_args
         self.assertEquals(kwargs["amount"], 1000)
 
+    @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")
-    def test_charge_passes_extra_arguments(self, charge_create_mock, charge_retrieve_mock):
+    def test_charge_passes_extra_arguments(self, charge_create_mock, charge_retrieve_mock, default_account_mock):
+        default_account_mock.return_value = self.account
+
         charge_create_mock.return_value.id = "ch_XXXXX"
         charge_retrieve_mock.return_value = {
             "id": "ch_XXXXXX",
@@ -301,6 +356,7 @@ class TestCustomer(TestCase):
                 "type": "Visa"
             },
             "amount": 1000,
+            "amount_refunded": 0,
             "paid": True,
             "refunded": False,
             "captured": True,
@@ -309,6 +365,12 @@ class TestCustomer(TestCase):
             "created": 1363911708,
             "customer": "cus_xxxxxxxxxxxxxxx",
             "livemode": True,
+            "currency": "usd",
+            "status": None,
+            "failure_code": None,
+            "failure_message": None,
+            "fraud_details": {},
+            "source": {"id": "asdf", "object": "test"},
         }
         self.customer.charge(
             amount=decimal.Decimal("10.00"),

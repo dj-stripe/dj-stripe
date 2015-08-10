@@ -136,7 +136,7 @@ class TransferManagerTest(TestCase):
     def test_transfer_summary(self):
         event = Event.objects.create(
             stripe_id=TRANSFER_CREATED_TEST_DATA["id"],
-            kind="transfer.created",
+            type="transfer.created",
             livemode=True,
             webhook_message=TRANSFER_CREATED_TEST_DATA,
             valid=True
@@ -144,7 +144,7 @@ class TransferManagerTest(TestCase):
         event.process()
         event = Event.objects.create(
             stripe_id=TRANSFER_CREATED_TEST_DATA2["id"],
-            kind="transfer.created",
+            type="transfer.created",
             livemode=True,
             webhook_message=TRANSFER_CREATED_TEST_DATA2,
             valid=True
@@ -180,7 +180,7 @@ class ChargeManagerTest(TestCase):
         self.march_charge = Charge.objects.create(
             stripe_id="ch_XXXXMAR1",
             customer=customer,
-            charge_created=datetime.datetime(2015, 3, 31)
+            created_stripe=datetime.datetime(2015, 3, 31)
         )
 
         self.april_charge_1 = Charge.objects.create(
@@ -189,7 +189,7 @@ class ChargeManagerTest(TestCase):
             paid=True,
             amount=decimal.Decimal("20.15"),
             fee=decimal.Decimal("4.90"),
-            charge_created=datetime.datetime(2015, 4, 1)
+            created_stripe=datetime.datetime(2015, 4, 1)
         )
 
         self.april_charge_2 = Charge.objects.create(
@@ -198,7 +198,7 @@ class ChargeManagerTest(TestCase):
             paid=True,
             amount=decimal.Decimal("10.35"),
             amount_refunded=decimal.Decimal("5.35"),
-            charge_created=datetime.datetime(2015, 4, 18)
+            created_stripe=datetime.datetime(2015, 4, 18)
         )
 
         self.april_charge_3 = Charge.objects.create(
@@ -208,31 +208,31 @@ class ChargeManagerTest(TestCase):
             amount=decimal.Decimal("100.00"),
             amount_refunded=decimal.Decimal("80.00"),
             fee=decimal.Decimal("5.00"),
-            charge_created=datetime.datetime(2015, 4, 30)
+            created_stripe=datetime.datetime(2015, 4, 30)
         )
 
         self.may_charge = Charge.objects.create(
             stripe_id="ch_XXXXMAY1",
             customer=customer,
-            charge_created=datetime.datetime(2015, 5, 1)
+            created_stripe=datetime.datetime(2015, 5, 1)
         )
 
         self.november_charge = Charge.objects.create(
             stripe_id="ch_XXXXNOV1",
             customer=customer,
-            charge_created=datetime.datetime(2015, 11, 16)
+            created_stripe=datetime.datetime(2015, 11, 16)
         )
 
         self.charge_2014 = Charge.objects.create(
             stripe_id="ch_XXXX20141",
             customer=customer,
-            charge_created=datetime.datetime(2014, 12, 31)
+            created_stripe=datetime.datetime(2014, 12, 31)
         )
 
         self.charge_2016 = Charge.objects.create(
             stripe_id="ch_XXXX20161",
             customer=customer,
-            charge_created=datetime.datetime(2016, 1, 1)
+            created_stripe=datetime.datetime(2016, 1, 1)
         )
 
     def test_is_during_april_2015(self):

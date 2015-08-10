@@ -126,7 +126,7 @@ class TransferTest(TestCase):
         # Create transfer
         created_event = Event.objects.create(
             stripe_id=TRANSFER_CREATED_TEST_DATA["id"],
-            kind="transfer.created",
+            type="transfer.created",
             livemode=True,
             webhook_message=TRANSFER_CREATED_TEST_DATA,
             valid=True
@@ -136,7 +136,7 @@ class TransferTest(TestCase):
         # Signal a transfer update
         updated_event = Event.objects.create(
             stripe_id="evt_test_update",
-            kind="transfer.updated",
+            type="transfer.updated",
             livemode=True,
             webhook_message=TRANSFER_UPDATED_TEST_DATA,
             valid=True
@@ -144,7 +144,7 @@ class TransferTest(TestCase):
         updated_event.process()
 
         transfer_instance = Transfer.objects.get(stripe_id="salmon")
-        transfer_retrieve_mock.assert_called_once_with(id=transfer_instance.stripe_id, api_key=settings.STRIPE_SECRET_KEY)
+        transfer_retrieve_mock.assert_called_once_with(id=transfer_instance.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=None)
         self.assertEqual(transfer_instance.status, "fish")
 
         # Test to string

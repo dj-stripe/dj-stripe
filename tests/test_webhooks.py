@@ -71,7 +71,7 @@ class TestWebhook(TestCase):
             content_type="application/json"
         )
         self.assertEquals(resp.status_code, 200)
-        self.assertTrue(Event.objects.filter(kind="transfer.created").exists())
+        self.assertTrue(Event.objects.filter(type="transfer.created").exists())
 
     @patch("stripe.Event.retrieve")
     def test_webhook_with_transfer_event_duplicate(self, StripeEventMock):
@@ -130,8 +130,8 @@ class TestWebhook(TestCase):
             content_type="application/json"
         )
         self.assertEquals(resp.status_code, 200)
-        self.assertTrue(Event.objects.filter(kind="transfer.created").exists())
-        self.assertEqual(1, Event.objects.filter(kind="transfer.created").count())
+        self.assertTrue(Event.objects.filter(type="transfer.created").exists())
+        self.assertEqual(1, Event.objects.filter(type="transfer.created").count())
 
         # Duplication
         resp = Client().post(
@@ -140,7 +140,7 @@ class TestWebhook(TestCase):
             content_type="application/json"
         )
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(1, Event.objects.filter(kind="transfer.created").count())
+        self.assertEqual(1, Event.objects.filter(type="transfer.created").count())
         self.assertEqual(1, EventProcessingException.objects.count())
 
 
@@ -149,7 +149,7 @@ class TestTransferWebhooks(TestCase):
     def test_transfer_created(self):
         event = Event.objects.create(
             stripe_id=TRANSFER_CREATED_TEST_DATA["id"],
-            kind="transfer.created",
+            type="transfer.created",
             livemode=True,
             webhook_message=TRANSFER_CREATED_TEST_DATA,
             valid=True
@@ -162,7 +162,7 @@ class TestTransferWebhooks(TestCase):
     def test_transfer_paid_updates_existing_record(self):
         event = Event.objects.create(
             stripe_id=TRANSFER_CREATED_TEST_DATA["id"],
-            kind="transfer.created",
+            type="transfer.created",
             livemode=True,
             webhook_message=TRANSFER_CREATED_TEST_DATA,
             valid=True
@@ -249,7 +249,7 @@ class TestTransferWebhooks(TestCase):
         }
         paid_event = Event.objects.create(
             stripe_id=data["id"],
-            kind="transfer.paid",
+            type="transfer.paid",
             livemode=True,
             webhook_message=data,
             valid=True

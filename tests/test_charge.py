@@ -14,9 +14,9 @@ from django.utils import timezone
 
 from mock import patch
 
-from djstripe.models import Charge, Customer, Invoice
+from djstripe.models import Charge, Customer, Invoice, Account
 
-
+# TODO: Update this to the current API
 FAKE_CHARGE = {
     "id": "ch_xxxxxxxxxxxx",
     "object": "charge",
@@ -31,7 +31,7 @@ FAKE_CHARGE = {
         "id": "card_xxxxxxxxxxxxxxx",
         "object": "card",
         "last4": "9999",
-        "type": "Visa",  # type vs brand?
+        "brand": "Visa",
         "funding": "debit",
         "exp_month": 1,
         "exp_year": 2020,
@@ -52,30 +52,6 @@ FAKE_CHARGE = {
         "customer": "cus_xxxxxxxxxxxxxxx"
     },
     "captured": True,
-    "card": {
-        "id": "card_xxxxxxxxxxxxxxx",
-        "object": "card",
-        "last4": "9999",
-        "type": "Visa",  # type vs brand?
-        "funding": "debit",
-        "exp_month": 1,
-        "exp_year": 2020,
-        "fingerprint": "test_fingerprint",
-        "country": "US",
-        "name": "test_name",
-        "address_line1": None,
-        "address_line2": None,
-        "address_city": None,
-        "address_state": None,
-        "address_zip": "12345",
-        "address_country": None,
-        "cvc_check": None,
-        "address_line1_check": None,
-        "address_zip_check": "pass",
-        "dynamic_last4": None,
-        "metadata": {},
-        "customer": "cus_xxxxxxxxxxxxxxx"
-    },
     "balance_transaction": "txn_xxxxxxxxxxxxxxx",
     "failure_message": None,
     "failure_code": None,
@@ -91,8 +67,7 @@ FAKE_CHARGE = {
     "receipt_number": "0000-0000",
     "shipping": None,
     "destination": None,
-    "application_fee": None,
-    "fee": 0,  # Added this in... I think it moved to transaction with the new api
+    "application_fee": {"amount": 0},
     "refunds": {
         "object": "list",
         "total_count": 0,
@@ -115,12 +90,16 @@ class ChargeTest(TestCase):
                                               total=Decimal("50.00"),
                                               date=timezone.now(),
                                               charge="ch_xxxxxxxxxxxxxxx")
+        self.account = Account.objects.create()
 
     def test_str(self):
         charge = Charge(amount=50, paid=True, stripe_id='charge_xxxxxxxxxxxxxx')
         self.assertEqual("<amount=50, paid=True, stripe_id=charge_xxxxxxxxxxxxxx>", str(charge))
 
-    def test_sync_from_stripe_data(self):
+    @patch("djstripe.models.Account.get_default_account")
+    def test_sync_from_stripe_data(self, default_account_mock):
+        default_account_mock.return_value = self.account
+
         charge = Charge.sync_from_stripe_data(FAKE_CHARGE)
 
         self.assertEqual(self.invoice, charge.invoice)
