@@ -512,26 +512,18 @@ class Invoice(StripeInvoice):
     class Meta(object):
         ordering = ["-date"]
 
+    def attach_objects_hook(self, cls, data):
+        customer = cls.object_to_customer(target_cls=Customer, data=data)
+        if customer:
+            self.customer = customer
+        else:
+            raise ValidationError("A customer was not attached to this charge.")
+
     @classmethod
-    def sync_from_stripe_data(cls, stripe_invoice, send_receipt=True):
-        customer = Customer.objects.get(stripe_id=stripe_invoice["customer"])
+    def sync_from_stripe_data(cls, data, send_receipt=True):
+        invoice = super(Invoice, cls).sync_from_stripe_data(data)
 
-        # TODO: Convert to get_or_create
-        try:
-            invoice = cls.stripe_objects.get_by_json(stripe_invoice)
-            created = False
-        except cls.DoesNotExist:
-            invoice = cls.create_from_stripe_object(stripe_invoice)
-            invoice.customer = customer
-            created = True
-
-        if not created:
-            # update all fields using the stripe data
-            invoice.sync(cls.stripe_object_to_record(stripe_invoice))
-
-        invoice.save()
-
-        for item in stripe_invoice["lines"].get("data", []):
+        for item in data["lines"].get("data", []):
             period_end = convert_tstamp(item["period"], "end")
             period_start = convert_tstamp(item["period"], "start")
             """
@@ -573,10 +565,11 @@ class Invoice(StripeInvoice):
         # Save invoice period end assignment.
         invoice.save()
 
-        if stripe_invoice.get("charge"):
-            recorded_charge = customer.record_charge(stripe_invoice["charge"])
-            recorded_charge.invoice = invoice
-            recorded_charge.save()
+        if data.get("charge"):
+            recorded_charge = invoice.customer.record_charge(data["charge"])
+            # record_charge calls sync_from_stripe_data() on the charge, which will attach the invoice
+            # recorded_charge.invoice = invoice
+            # recorded_charge.save()
 
             if send_receipt:
                 recorded_charge.send_receipt()
