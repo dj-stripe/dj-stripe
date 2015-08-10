@@ -68,7 +68,8 @@ class StripeFieldMixin(object):
             except (KeyError, TypeError):
                 if self.stripe_required:
                     raise FieldError("Required stripe field '{field_name}' was not"
-                                     " provided in stripe object.".format(field_name=self.name))
+                                     " provided in {model_name} data object.".format(field_name=self.name,
+                                                                                     model_name=self.model._meta.object_name))
                 else:
                     result = None
 
