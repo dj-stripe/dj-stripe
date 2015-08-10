@@ -141,11 +141,4 @@ class StripePositiveIntegerField(StripeFieldMixin, models.PositiveIntegerField):
 
 
 class StripeJSONField(StripeFieldMixin, JSONField):
-
-    def stripe_to_db(self, data):
-        if self.stripe_name:
-            # If this is defined, then we grab the value at that location
-            return super(StripeJSONField, self).stripe_to_db(data)
-        else:
-            # Otherwise, we use the whole data block
-            return data
+    pass
