@@ -150,6 +150,13 @@ class StripeObject(TimeStampedModel):
         try:
             return cls.stripe_objects.get_by_json(data, field_name), False
         except cls.DoesNotExist:
+            # Grab the stripe data for a nested object
+            if field_name != "id":
+                cls_instance = cls(stripe_id=data["id"])
+                cls_instance.expand_fields = [field_name]
+                data = cls_instance.api_retrieve()[field_name]
+                print(data)
+
             return cls.create_from_stripe_object(data), True
 
     @classmethod
