@@ -132,6 +132,7 @@ class TestCustomer(TestCase):
             "failure_message": None,
             "fraud_details": {},
             "source": {"id": "asdf", "object": "test"},
+            "shipping": None,
         }
         obj = self.customer.record_charge("ch_XXXXXX")
         self.assertEquals(Charge.objects.get(stripe_id="ch_XXXXXX").pk, obj.pk)
@@ -179,6 +180,7 @@ class TestCustomer(TestCase):
             "failure_message": None,
             "fraud_details": {},
             "source": {"id": "asdf", "object": "test"},
+            "shipping": None,
         }
         charge.refund()
         charge2 = Charge.objects.get(stripe_id="ch_XXXXXX")
@@ -225,6 +227,7 @@ class TestCustomer(TestCase):
             "failure_message": None,
             "fraud_details": {},
             "source": {"id": "asdf", "object": "test"},
+            "shipping": None,
         }
         charge2 = charge.capture()
         self.assertEquals(charge2.captured, True)
@@ -268,6 +271,7 @@ class TestCustomer(TestCase):
             "failure_message": None,
             "fraud_details": {},
             "source": {"id": "asdf", "object": "test"},
+            "shipping": None,
         }
         charge2 = charge.refund()
         self.assertEquals(charge2.refunded, True)
@@ -335,6 +339,7 @@ class TestCustomer(TestCase):
             "failure_message": None,
             "fraud_details": {},
             "source": {"id": "asdf", "object": "test"},
+            "shipping": None,
         }
         self.customer.charge(
             amount=decimal.Decimal("10.00")
@@ -371,6 +376,7 @@ class TestCustomer(TestCase):
             "failure_message": None,
             "fraud_details": {},
             "source": {"id": "asdf", "object": "test"},
+            "shipping": None,
         }
         self.customer.charge(
             amount=decimal.Decimal("10.00"),

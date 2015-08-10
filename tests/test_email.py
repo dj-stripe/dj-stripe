@@ -52,6 +52,7 @@ class EmailReceiptTest(TestCase):
             "failure_message": None,
             "fraud_details": {},
             "source": {"id": "asdf", "object": "test"},
+            "shipping": None,
         }
         self.customer.charge(
             amount=decimal.Decimal("400.00")

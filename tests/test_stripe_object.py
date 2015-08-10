@@ -10,11 +10,11 @@ from django.core.exceptions import ImproperlyConfigured, FieldError
 
 from django.test import TestCase
 
-from djstripe.stripe_objects import StripeObject, StripeCharField, StripeJSONField, StripeBooleanField
+from djstripe.stripe_objects import StripeObject, StripeCharField, StripeBooleanField
 
 
 SIMPLE_OBJ = {'id': 'yo', 'livemode': True}
-SIMPLE_OBJ_RESULT = {'stripe_id': 'yo', 'description': None, 'livemode': True}
+SIMPLE_OBJ_RESULT = {'stripe_id': 'yo', 'description': None, 'livemode': True, 'metadata': None}
 
 
 class StripeObjectExceptionsTest(TestCase):
