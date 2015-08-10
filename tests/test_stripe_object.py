@@ -55,11 +55,3 @@ class StripeObjectBasicTest(TestCase):
 
         result = BasicModel.stripe_object_to_record(SIMPLE_OBJ)
         self.assertEqual(result, SIMPLE_OBJ_RESULT)
-
-    def test_basic_jsonfield(self):
-        class HasJsonField(StripeObject):
-            # By default, this just captures the whole message, not any particular member
-            js = StripeJSONField()
-
-        result = HasJsonField.stripe_object_to_record(SIMPLE_OBJ)
-        self.assertEqual(result['js'], SIMPLE_OBJ)
