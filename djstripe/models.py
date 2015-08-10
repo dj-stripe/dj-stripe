@@ -83,42 +83,33 @@ class Charge(StripeCharge):
             self.receipt_sent = num_sent > 0
             self.save()
 
-    @classmethod
-    def sync_from_stripe_data(cls, data):
-        charge, created = cls.get_or_create_from_stripe_object(data)
-
-        if not created:
-            charge.sync(cls.stripe_object_to_record(data))
-
+    def attach_objects_hook(self, cls, data):
         customer = cls.object_to_customer(target_cls=Customer, data=data)
         if customer:
-            charge.customer = customer
+            self.customer = customer
         else:
             raise ValidationError("A customer was not attached to this charge.")
 
         invoice = cls.object_to_invoice(target_cls=Invoice, data=data)
         if invoice:
-            charge.invoice = invoice
+            self.invoice = invoice
 
         transfer = cls.object_to_transfer(target_cls=Transfer, data=data)
         if transfer:
-            charge.transfer = transfer
+            self.transfer = transfer
 
         # Set the account on this object.
         destination_account = cls.object_destination_to_account(target_cls=Account, data=data)
         if destination_account:
-            charge.account = destination_account
+            self.account = destination_account
         else:
-            charge.account = Account.get_default_account()
+            self.account = Account.get_default_account()
 
         # TODO: other sources
-        if charge.source_type == "card":
+        if self.source_type == "card":
             card = cls.object_to_source(target_cls=Card, data=data)
             if card:
-                charge.card = card
-
-        charge.save()
-        return charge
+                self.card = card
 
 
 class Customer(StripeCustomer):

@@ -128,6 +128,11 @@ class StripeObject(TimeStampedModel):
 
         return result
 
+    def attach_objects_hook(self, cls, data):
+        """Gets called by this object's create and sync methods just before save."""
+
+        pass
+
     @classmethod
     def create_from_stripe_object(cls, data):
         """
@@ -135,6 +140,7 @@ class StripeObject(TimeStampedModel):
         :type data: dict
         """
         instance = cls(**cls.stripe_object_to_record(data))
+        instance.attach_objects_hook(cls, data)
         instance.save()
 
         return instance
@@ -145,6 +151,35 @@ class StripeObject(TimeStampedModel):
             return cls.stripe_objects.get_by_json(data, field_name), False
         except cls.DoesNotExist:
             return cls.create_from_stripe_object(data), True
+
+    @classmethod
+    def object_to_customer(cls, target_cls, data):
+        """
+        Search the given manager for the Customer matching this StripeCharge object's ``customer`` field.
+
+        :param target_cls: The target class
+        :type target_cls: StripeCustomer
+        :param data: stripe object
+        :type data: dict
+        """
+
+        if "customer" in data and data["customer"]:
+            return target_cls.get_or_create_from_stripe_object(data, "customer")[0]
+
+    def _sync(self, data):
+        for attr, value in data.items():
+            setattr(self, attr, value)
+
+    @classmethod
+    def sync_from_stripe_data(cls, data):
+        instance, created = cls.get_or_create_from_stripe_object(data)
+
+        if not created:
+            instance._sync(cls.stripe_object_to_record(data))
+            instance.attach_objects_hook(cls, data)
+            instance.save()
+
+        return instance
 
     def __str__(self):
         return "<{list}>".format(list=", ".join(self.str_parts()))
@@ -256,20 +291,6 @@ class StripeCharge(StripeObject):
         return self.api_retrieve().capture()
 
     @classmethod
-    def object_to_customer(cls, target_cls, data):
-        """
-        Search the given manager for the Customer matching this StripeCharge object's ``customer`` field.
-
-        :param target_cls: The target class
-        :type target_cls: StripeCustomer
-        :param data: stripe object
-        :type data: dict
-        """
-
-        if "customer" in data and data["customer"]:
-            return target_cls.get_or_create_from_stripe_object(data, "customer")[0]
-
-    @classmethod
     def object_to_invoice(cls, target_cls, data):
         """
         Search the given manager for the Invoice matching this StripeCharge object's ``invoice`` field.
@@ -336,10 +357,6 @@ class StripeCharge(StripeObject):
         data["fraudulent"] = data["fraud_details"] and list(data["fraud_details"].values())[0] == "fraudulent"
 
         return super(StripeCharge, cls).stripe_object_to_record(data)
-
-    def sync(self, data=None):
-        for attr, value in data.items():
-            setattr(self, attr, value)
 
 
 class StripeCustomer(StripeObject):
@@ -521,10 +538,6 @@ class StripeInvoice(StripeObject):
         if 'charge' in data and data['charge'] is None:
             data['charge'] = ""
         return super(StripeInvoice, cls).stripe_object_to_record(data)
-
-    def sync(self, data=None):
-        for attr, value in data.items():
-            setattr(self, attr, value)
 
 
 class StripeInvoiceItem(StripeObject):
