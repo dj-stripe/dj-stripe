@@ -8,6 +8,7 @@
 
 """
 
+from copy import deepcopy
 import datetime
 import decimal
 
@@ -22,8 +23,7 @@ from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
 from djstripe.models import Account, Customer, Charge, CurrentSubscription
 
-from .test_charge import FAKE_CHARGE
-from copy import deepcopy
+from . import FAKE_CHARGE
 
 
 class TestCustomer(TestCase):
@@ -96,7 +96,7 @@ class TestCustomer(TestCase):
 
         customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=None)
 
-    def test_change_charge(self):
+    def test_can_charge(self):
         self.assertTrue(self.customer.can_charge())
 
     @patch("stripe.Customer.retrieve")
@@ -118,8 +118,8 @@ class TestCustomer(TestCase):
 
         charge_retrieve_mock.return_value = fake_charge_copy
 
-        recorded_charge = self.customer.record_charge("ch_16YKQi2eZvKYlo2CrCuzbJQx")
-        self.assertEquals(Charge.objects.get(stripe_id="ch_16YKQi2eZvKYlo2CrCuzbJQx"), recorded_charge)
+        recorded_charge = self.customer.record_charge(fake_charge_copy["id"])
+        self.assertEquals(Charge.objects.get(stripe_id=fake_charge_copy["id"]), recorded_charge)
         self.assertEquals(recorded_charge.paid, True)
         self.assertEquals(recorded_charge.disputed, False)
         self.assertEquals(recorded_charge.refunded, False)

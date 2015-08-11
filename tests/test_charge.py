@@ -9,7 +9,6 @@
 from copy import deepcopy
 from datetime import timedelta
 from decimal import Decimal
-from unittest.case import skip
 
 from django.core.exceptions import ValidationError
 from django.test.testcases import TestCase
@@ -19,66 +18,7 @@ from mock import patch
 
 from djstripe.models import Charge, Customer, Invoice, Account
 
-FAKE_CHARGE = {
-    "id": "ch_16YKQi2eZvKYlo2CrCuzbJQx",
-    "object": "charge",
-    "created": 1439229084,
-    "livemode": False,
-    "paid": True,
-    "status": "succeeded",
-    "amount": 2200,
-    "currency": "usd",
-    "refunded": False,
-    "source": {
-        "id": "card_16YKQh2eZvKYlo2Cblc5Feoo",
-        "object": "card",
-        "last4": "4242",
-        "brand": "Visa",
-        "fingerprint": "dgs89-3jjf039jejda-0j2d",
-        "funding": "credit",
-        "exp_month": 2,
-        "exp_year": 2016,
-        "country": "US",
-        "name": None,
-        "address_line1": None,
-        "address_line2": None,
-        "address_city": None,
-        "address_state": None,
-        "address_zip": None,
-        "address_country": None,
-        "cvc_check": "pass",
-        "address_line1_check": None,
-        "address_zip_check": None,
-        "tokenization_method": None,
-        "dynamic_last4": None,
-        "metadata": {},
-        "customer": "cus_6lsBvm5rJ0zyHc"
-    },
-    "captured": True,
-    "balance_transaction": "txn_16Vswu2eZvKYlo2C9DlWEgM1",
-    "failure_message": None,
-    "failure_code": None,
-    "amount_refunded": 0,
-    "customer": "cus_6lsBvm5rJ0zyHc",
-    "invoice": "in_7udnik28sj829dj",
-    "description": "VideoDoc consultation for ivanp0001 berkp0001",
-    "dispute": None,
-    "metadata": {},
-    "statement_descriptor": None,
-    "fraud_details": {},
-    "receipt_email": None,
-    "receipt_number": None,
-    "shipping": None,
-    "destination": None,
-    "application_fee": None,
-    "refunds": {
-        "object": "list",
-        "total_count": 0,
-        "has_more": False,
-        "url": "/v1/charges/ch_16YKQi2eZvKYlo2CrCuzbJQx/refunds",
-        "data": []
-    }
-}
+from . import FAKE_CHARGE, FAKE_ACCOUNT
 
 
 class ChargeTest(TestCase):
@@ -142,73 +82,79 @@ class ChargeTest(TestCase):
         fake_charge_copy = deepcopy(FAKE_CHARGE)
         fake_charge_copy.pop("customer", None)
 
-        with self.assertRaises(ValidationError):
+        with self.assertRaisesMessage(ValidationError, "A customer was not attached to this charge."):
             Charge.sync_from_stripe_data(fake_charge_copy)
 
-    @skip
+    @patch("stripe.Charge.retrieve")
+    @patch("stripe.Transfer.retrieve")
     @patch("djstripe.models.Account.get_default_account")
-    def test_sync_from_stripe_data_with_transfer(self, default_account_mock):
+    def test_sync_from_stripe_data_with_transfer(self, default_account_mock, transfer_retrieve_mock, charge_retrieve_mock):
         default_account_mock.return_value = self.account
 
-        fake_charge_copy = deepcopy(FAKE_CHARGE)
-        fake_charge_copy.update({
-            "transfer": {
-                "amount": 455,
-                "currency": "usd",
-                "date": 1348876800,
-                "description": None,
-                "id": "tr_XXXXXXXXXXXX",
-                "livemode": True,
-                "object": "transfer",
-                "other_transfers": [],
-                "status": "paid",
-                "summary": {
-                    "adjustment_count": 0,
-                    "adjustment_fee_details": [],
-                    "adjustment_fees": 0,
-                    "adjustment_gross": 0,
-                    "charge_count": 1,
-                    "charge_fee_details": [{
-                        "amount": 45,
-                        "application": None,
-                        "currency": "usd",
-                        "description": None,
-                        "type": "stripe_fee"
-                    }],
-                    "charge_fees": 45,
-                    "charge_gross": 500,
-                    "collected_fee_count": 0,
-                    "collected_fee_gross": 0,
+        fake_transfer = {
+            "amount": 455,
+            "currency": "usd",
+            "date": 1348876800,
+            "description": None,
+            "id": "tr_XXXXXXXXXXXX",
+            "livemode": True,
+            "object": "transfer",
+            "other_transfers": [],
+            "status": "paid",
+            "summary": {
+                "adjustment_count": 0,
+                "adjustment_fee_details": [],
+                "adjustment_fees": 0,
+                "adjustment_gross": 0,
+                "charge_count": 1,
+                "charge_fee_details": [{
+                    "amount": 45,
+                    "application": None,
                     "currency": "usd",
-                    "net": 455,
-                    "refund_count": 0,
-                    "refund_fees": 0,
-                    "refund_gross": 0,
-                    "validation_count": 0,
-                    "validation_fees": 0
-                }
+                    "description": None,
+                    "type": "stripe_fee"
+                }],
+                "charge_fees": 45,
+                "charge_gross": 500,
+                "collected_fee_count": 0,
+                "collected_fee_gross": 0,
+                "currency": "usd",
+                "net": 455,
+                "refund_count": 0,
+                "refund_fees": 0,
+                "refund_gross": 0,
+                "validation_count": 0,
+                "validation_fees": 0
             }
-        })
+        }
 
-        print(fake_charge_copy)
+        fake_charge_copy = deepcopy(FAKE_CHARGE)
+        fake_charge_copy.update({"transfer": fake_transfer})
 
-        charge = Charge.sync_from_stripe_data(fake_charge_copy)
+        transfer_retrieve_mock.return_value = fake_transfer
+        charge_retrieve_mock.return_value = fake_charge_copy
+
+        charge, created = Charge.get_or_create_from_stripe_object(fake_charge_copy)
+        self.assertTrue(created)
 
         self.assertNotEqual(None, charge.transfer)
-        self.assertEqual("tr_XXXXXXXXXXXX", charge.transfer.id)
+        self.assertEqual("tr_XXXXXXXXXXXX", charge.transfer.stripe_id)
 
-    @skip
-    def test_sync_from_stripe_data_with_destination(self):
-        account_stripe_id = "acct_xxxxxxxxxxxxxxx"
+    @patch("stripe.Charge.retrieve")
+    @patch("stripe.Account.retrieve")
+    def test_sync_from_stripe_data_with_destination(self, account_retrieve_mock, charge_retrieve_mock):
+        account_retrieve_mock.return_value = FAKE_ACCOUNT
 
         fake_charge_copy = deepcopy(FAKE_CHARGE)
-        fake_charge_copy.update({"destination": account_stripe_id})
+        fake_charge_copy.update({"destination": FAKE_ACCOUNT["id"]})
 
-        charge = Charge.sync_from_stripe_data(fake_charge_copy)
+        charge_retrieve_mock.return_value = fake_charge_copy
+
+        charge, created = Charge.get_or_create_from_stripe_object(fake_charge_copy)
+        self.assertTrue(created)
 
         self.assertEqual(2, Account.objects.count())
-        print(Account.objects.all())
-        account = Account.objects.get(stripe_id=account_stripe_id)
+        account = Account.objects.get(stripe_id=FAKE_ACCOUNT["id"])
 
         self.assertEqual(account, charge.account)
 

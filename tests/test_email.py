@@ -9,7 +9,7 @@ from mock import patch
 
 from djstripe.models import Customer, Account
 
-from .test_charge import FAKE_CHARGE
+from . import FAKE_CHARGE
 
 
 class EmailReceiptTest(TestCase):
