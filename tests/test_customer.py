@@ -169,7 +169,7 @@ class TestCustomer(TestCase):
             customer=self.customer,
             amount=decimal.Decimal("500.00")
         )
-        self.assertEquals(charge.calculate_refund_amount(), 50000)
+        self.assertEquals(charge._calculate_refund_amount(), 50000)
 
     def test_calculate_refund_amount_partial_refund(self):
         charge = Charge(
@@ -178,7 +178,7 @@ class TestCustomer(TestCase):
             amount=decimal.Decimal("500.00")
         )
         self.assertEquals(
-            charge.calculate_refund_amount(amount=decimal.Decimal("300.00")),
+            charge._calculate_refund_amount(amount=decimal.Decimal("300.00")),
             30000
         )
 
@@ -189,7 +189,7 @@ class TestCustomer(TestCase):
             amount=decimal.Decimal("500.00")
         )
         self.assertEquals(
-            charge.calculate_refund_amount(amount=decimal.Decimal("600.00")),
+            charge._calculate_refund_amount(amount=decimal.Decimal("600.00")),
             50000
         )
 

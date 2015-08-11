@@ -264,7 +264,7 @@ class StripeCharge(StripeObject):
             "paid={paid}".format(paid=smart_text(self.paid)),
         ] + super(StripeCharge, self).str_parts()
 
-    def calculate_refund_amount(self, amount=None):
+    def _calculate_refund_amount(self, amount=None):
         """
         :rtype: int
         :return: amount that can be refunded, in CENTS
@@ -283,7 +283,7 @@ class StripeCharge(StripeObject):
         :rtype: dict
         """
         charge_obj = self.api_retrieve().refund(
-            amount=self.calculate_refund_amount(amount=amount)
+            amount=self._calculate_refund_amount(amount=amount)
         )
         return charge_obj
 
