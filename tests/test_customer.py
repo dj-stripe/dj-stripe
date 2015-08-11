@@ -195,22 +195,6 @@ class TestCustomer(TestCase):
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
-    def test_capture_charge(self, charge_retrieve_mock, default_account_mock):
-        default_account_mock.return_value = self.account
-
-        fake_charge_no_invoice = deepcopy(FAKE_CHARGE)
-        fake_charge_no_invoice.update({"invoice": None})
-
-        charge_retrieve_mock.return_value = fake_charge_no_invoice
-
-        charge, created = Charge.get_or_create_from_stripe_object(fake_charge_no_invoice)
-        self.assertTrue(created)
-
-        captured_charge = charge.capture()
-        self.assertEquals(captured_charge.captured, True)
-
-    @patch("djstripe.models.Account.get_default_account")
-    @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")
     def test_charge_converts_dollars_into_cents(self, charge_create_mock, charge_retrieve_mock, default_account_mock):
         default_account_mock.return_value = self.account

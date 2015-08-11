@@ -40,6 +40,22 @@ class ChargeTest(TestCase):
         self.assertEqual("<amount=50, paid=True, stripe_id=charge_xxxxxxxxxxxxxx>", str(charge))
 
     @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Charge.retrieve")
+    def test_capture_charge(self, charge_retrieve_mock, default_account_mock):
+        default_account_mock.return_value = self.account
+
+        fake_charge_no_invoice = deepcopy(FAKE_CHARGE)
+        fake_charge_no_invoice.update({"invoice": None})
+
+        charge_retrieve_mock.return_value = fake_charge_no_invoice
+
+        charge, created = Charge.get_or_create_from_stripe_object(fake_charge_no_invoice)
+        self.assertTrue(created)
+
+        captured_charge = charge.capture()
+        self.assertTrue(captured_charge.captured)
+
+    @patch("djstripe.models.Account.get_default_account")
     def test_sync_from_stripe_data(self, default_account_mock):
         default_account_mock.return_value = self.account
 
