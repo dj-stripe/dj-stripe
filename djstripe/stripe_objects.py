@@ -158,7 +158,7 @@ class StripeObject(TimeStampedModel):
             return cls.create_from_stripe_object(data), True
 
     @classmethod
-    def object_to_customer(cls, target_cls, data):
+    def stripe_object_to_customer(cls, target_cls, data):
         """
         Search the given manager for the Customer matching this StripeCharge object's ``customer`` field.
 
@@ -296,7 +296,7 @@ class StripeCharge(StripeObject):
         return self.api_retrieve().capture()
 
     @classmethod
-    def object_to_invoice(cls, target_cls, data):
+    def stripe_object_to_invoice(cls, target_cls, data):
         """
         Search the given manager for the Invoice matching this StripeCharge object's ``invoice`` field.
 
@@ -310,7 +310,7 @@ class StripeCharge(StripeObject):
             return target_cls.get_or_create_from_stripe_object(data, "invoice")[0]
 
     @classmethod
-    def object_to_source(cls, target_cls, data):
+    def stripe_object_to_source(cls, target_cls, data):
         """
         Search the given manager for the source matching this StripeCharge object's ``source`` field.
         Note that the source field is already expanded in each request, and that it is required.
@@ -324,7 +324,7 @@ class StripeCharge(StripeObject):
         return target_cls.get_or_create_from_stripe_object(data["source"])[0]
 
     @classmethod
-    def object_destination_to_account(cls, target_cls, data):
+    def stripe_object_destination_to_account(cls, target_cls, data):
         """
         Search the given manager for the Account matching this StripeCharge object's ``destination`` field.
 
@@ -338,7 +338,7 @@ class StripeCharge(StripeObject):
             return target_cls.get_or_create_from_stripe_object(data, "destination")[0]
 
     @classmethod
-    def object_to_transfer(cls, target_cls, data):
+    def stripe_object_to_transfer(cls, target_cls, data):
         """
         Search the given manager for the Transfer matching this StripeCharge object's ``transfer`` field.
 

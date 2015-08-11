@@ -79,22 +79,22 @@ class Charge(StripeCharge):
             self.save()
 
     def attach_objects_hook(self, cls, data):
-        customer = cls.object_to_customer(target_cls=Customer, data=data)
+        customer = cls.stripe_object_to_customer(target_cls=Customer, data=data)
         if customer:
             self.customer = customer
         else:
             raise ValidationError("A customer was not attached to this charge.")
 
-        invoice = cls.object_to_invoice(target_cls=Invoice, data=data)
+        invoice = cls.stripe_object_to_invoice(target_cls=Invoice, data=data)
         if invoice:
             self.invoice = invoice
 
-        transfer = cls.object_to_transfer(target_cls=Transfer, data=data)
+        transfer = cls.stripe_object_to_transfer(target_cls=Transfer, data=data)
         if transfer:
             self.transfer = transfer
 
         # Set the account on this object.
-        destination_account = cls.object_destination_to_account(target_cls=Account, data=data)
+        destination_account = cls.stripe_object_destination_to_account(target_cls=Account, data=data)
         if destination_account:
             self.account = destination_account
         else:
@@ -102,7 +102,7 @@ class Charge(StripeCharge):
 
         # TODO: other sources
         if self.source_type == "card":
-            self.card = cls.object_to_source(target_cls=Card, data=data)
+            self.card = cls.stripe_object_to_source(target_cls=Card, data=data)
 
 
 class Customer(StripeCustomer):
@@ -506,7 +506,7 @@ class Invoice(StripeInvoice):
         ordering = ["-date"]
 
     def attach_objects_hook(self, cls, data):
-        customer = cls.object_to_customer(target_cls=Customer, data=data)
+        customer = cls.stripe_object_to_customer(target_cls=Customer, data=data)
         if customer:
             self.customer = customer
         else:
