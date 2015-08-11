@@ -535,14 +535,6 @@ class StripeInvoice(StripeObject):
             return "Closed"
         return "Open"
 
-    @classmethod
-    def stripe_object_to_record(cls, data):
-        # Perhaps meaningless legacy code. Nonetheless, preserve it. If charge is null
-        # then convert it to ""
-        if 'charge' in data and data['charge'] is None:
-            data['charge'] = ""
-        return super(StripeInvoice, cls).stripe_object_to_record(data)
-
 
 class StripeInvoiceItem(StripeObject):
 
@@ -605,7 +597,7 @@ class StripeAccount(StripeObject):
 
     @classmethod
     def get_default_account(cls):
-        account_data = cls.api().retrieve()
+        account_data = cls.api().retrieve(api_key=settings.STRIPE_SECRET_KEY)
 
         return cls.get_or_create_from_stripe_object(account_data)[0]
 

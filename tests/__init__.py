@@ -7,7 +7,19 @@ def convert_to_fake_stripe_object(response):
 
 # Connected Stripe Object fakes.
 
-FAKE_CHARGE = {
+
+class ChargeDict(dict):
+
+    def refund(self, amount=None):
+        self.update({"refunded": True, "amount_refunded": amount})
+        return self
+
+    def capture(self):
+        self.update({"captured": True})
+        return self
+
+
+FAKE_CHARGE = ChargeDict({
     "id": "ch_16YKQi2eZvKYlo2CrCuzbJQx",
     "object": "charge",
     "created": 1439229084,
@@ -66,7 +78,7 @@ FAKE_CHARGE = {
         "url": "/v1/charges/ch_16YKQi2eZvKYlo2CrCuzbJQx/refunds",
         "data": []
     }
-}
+})
 
 
 FAKE_REFUND = {

@@ -126,45 +126,37 @@ class TestCustomer(TestCase):
         self.assertEquals(recorded_charge.amount_refunded, 0)
 
     @patch("djstripe.models.Account.get_default_account")
-    @patch("djstripe.stripe_objects.StripeCharge.refund")
     @patch("stripe.Charge.retrieve")
-    def test_refund_charge(self, charge_retrieve_mock, charge_refund_mock, default_account_mock):
+    def test_refund_charge(self, charge_retrieve_mock, default_account_mock):
         default_account_mock.return_value = self.account
 
-        fake_charge_copy = deepcopy(FAKE_CHARGE)
-        fake_charge_copy.update({"invoice": None})
-        fake_refunded_charge = deepcopy(fake_charge_copy)
-        fake_refunded_charge.update({"refunded": True, "amount_refunded": 2200})
+        fake_charge_no_invoice = deepcopy(FAKE_CHARGE)
+        fake_charge_no_invoice.update({"invoice": None})
 
-        charge_retrieve_mock.return_value = fake_charge_copy
-        charge_refund_mock.return_value = fake_refunded_charge
+        charge_retrieve_mock.return_value = fake_charge_no_invoice
 
-        charge, created = Charge.get_or_create_from_stripe_object(fake_charge_copy)
+        charge, created = Charge.get_or_create_from_stripe_object(fake_charge_no_invoice)
         self.assertTrue(created)
 
         charge.refund()
 
-        refunded_charge, created2 = Charge.get_or_create_from_stripe_object(fake_charge_copy)
+        refunded_charge, created2 = Charge.get_or_create_from_stripe_object(fake_charge_no_invoice)
         self.assertFalse(created2)
 
         self.assertEquals(refunded_charge.refunded, True)
         self.assertEquals(refunded_charge.amount_refunded, decimal.Decimal("22.00"))
 
     @patch("djstripe.models.Account.get_default_account")
-    @patch("djstripe.stripe_objects.StripeCharge.refund")
     @patch("stripe.Charge.retrieve")
-    def test_refund_charge_object_returned(self, charge_retrieve_mock, charge_refund_mock, default_account_mock):
+    def test_refund_charge_object_returned(self, charge_retrieve_mock, default_account_mock):
         default_account_mock.return_value = self.account
 
-        fake_charge_copy = deepcopy(FAKE_CHARGE)
-        fake_charge_copy.update({"invoice": None})
-        fake_refunded_charge = deepcopy(fake_charge_copy)
-        fake_refunded_charge.update({"refunded": True, "amount_refunded": 2200})
+        fake_charge_no_invoice = deepcopy(FAKE_CHARGE)
+        fake_charge_no_invoice.update({"invoice": None})
 
-        charge_retrieve_mock.return_value = fake_charge_copy
-        charge_refund_mock.return_value = fake_refunded_charge
+        charge_retrieve_mock.return_value = fake_charge_no_invoice
 
-        charge, created = Charge.get_or_create_from_stripe_object(fake_charge_copy)
+        charge, created = Charge.get_or_create_from_stripe_object(fake_charge_no_invoice)
         self.assertTrue(created)
 
         refunded_charge = charge.refund()
@@ -202,20 +194,16 @@ class TestCustomer(TestCase):
         )
 
     @patch("djstripe.models.Account.get_default_account")
-    @patch("djstripe.stripe_objects.StripeCharge.capture")
     @patch("stripe.Charge.retrieve")
-    def test_capture_charge(self, charge_retrieve_mock, charge_capture_mock, default_account_mock):
+    def test_capture_charge(self, charge_retrieve_mock, default_account_mock):
         default_account_mock.return_value = self.account
 
-        fake_charge_copy = deepcopy(FAKE_CHARGE)
-        fake_charge_copy.update({"invoice": None})
-        fake_captured_charge = deepcopy(fake_charge_copy)
-        fake_captured_charge.update({"captured": True})
+        fake_charge_no_invoice = deepcopy(FAKE_CHARGE)
+        fake_charge_no_invoice.update({"invoice": None})
 
-        charge_retrieve_mock.return_value = fake_charge_copy
-        charge_capture_mock.return_value = fake_captured_charge
+        charge_retrieve_mock.return_value = fake_charge_no_invoice
 
-        charge, created = Charge.get_or_create_from_stripe_object(fake_charge_copy)
+        charge, created = Charge.get_or_create_from_stripe_object(fake_charge_no_invoice)
         self.assertTrue(created)
 
         captured_charge = charge.capture()
