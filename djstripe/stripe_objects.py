@@ -140,7 +140,10 @@ class StripeObject(TimeStampedModel):
         return result
 
     def attach_objects_hook(self, cls, data):
-        """Gets called by this object's create and sync methods just before save."""
+        """
+        Gets called by this object's create and sync methods just before save.
+        Use this to populate fields before the model is saved.
+        """
 
         pass
 
