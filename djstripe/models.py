@@ -607,7 +607,7 @@ class Transfer(StripeTransfer):
             transfer = cls.stripe_objects.get_by_json(stripe_object)
             created = False
         except cls.DoesNotExist:
-            transfer = cls.create_from_stripe_object(stripe_object)
+            transfer = cls._create_from_stripe_object(stripe_object)
             created = True
 
         transfer.event = event

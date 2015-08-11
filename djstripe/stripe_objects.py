@@ -134,7 +134,7 @@ class StripeObject(TimeStampedModel):
         pass
 
     @classmethod
-    def create_from_stripe_object(cls, data):
+    def _create_from_stripe_object(cls, data):
         """
         Create a model instance using the given data object from Stripe
         :type data: dict
@@ -155,7 +155,7 @@ class StripeObject(TimeStampedModel):
                 cls_instance = cls(stripe_id=data[field_name])
                 data = cls_instance.api_retrieve()
 
-            return cls.create_from_stripe_object(data), True
+            return cls._create_from_stripe_object(data), True
 
     @classmethod
     def stripe_object_to_customer(cls, target_cls, data):
