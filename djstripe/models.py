@@ -134,7 +134,7 @@ class Customer(StripeCustomer):
         if djstripe_settings.trial_period_for_subscriber_callback:
             trial_days = djstripe_settings.trial_period_for_subscriber_callback(subscriber)
 
-        stripe_customer = cls.api_create(email=subscriber.email)
+        stripe_customer = cls._api_create(email=subscriber.email)
         customer = Customer.objects.create(subscriber=subscriber, stripe_id=stripe_customer.id)
 
         if djstripe_settings.DEFAULT_PLAN and trial_days:
@@ -246,7 +246,7 @@ class Customer(StripeCustomer):
 
     def send_invoice(self):
         try:
-            invoice = Invoice.api_create(customer=self.stripe_id)
+            invoice = Invoice._api_create(customer=self.stripe_id)
             invoice.pay()
             return True
         except InvalidRequestError:
@@ -477,7 +477,7 @@ class Plan(StripePlan):
         api_kwargs['id'] = api_kwargs['stripe_id']
         del(api_kwargs['stripe_id'])
         api_kwargs['amount'] = int(api_kwargs['amount'] * 100)
-        cls.api_create(**api_kwargs)
+        cls._api_create(**api_kwargs)
 
         # If they passed in a 'metadata' arg, drop that here as it is only for api consumption
         if 'metadata' in kwargs:

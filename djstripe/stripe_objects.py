@@ -87,7 +87,7 @@ class StripeObject(TimeStampedModel):
         return type(self)._api().retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
 
     @classmethod
-    def api_create(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
         """
         Call the stripe API's create operation for this model
 
@@ -403,7 +403,7 @@ class StripeCustomer(StripeObject):
             raise ValueError(
                 "You must supply a decimal value representing dollars."
             )
-        resp = StripeCharge.api_create(
+        resp = StripeCharge._api_create(
             amount=int(amount * 100),  # Convert dollars into cents
             currency=currency,
             customer=self.stripe_id,

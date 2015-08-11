@@ -33,7 +33,7 @@ def sync_plans():
                 del(api_kwargs['price'])
                 del(api_kwargs['description'])
 
-                Plan.api_create(**api_kwargs)
+                Plan._api_create(**api_kwargs)
                 print("Plan created for {0}".format(plan))
             except Exception as e:
                 print("ERROR: " + str(e))
