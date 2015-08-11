@@ -55,7 +55,7 @@ def customer_webhook_handler(event, event_data, event_type, event_subtype):
             customer.current_subscription.canceled_at = timezone.now()
             customer.current_subscription.save()
         elif event_subtype.startswith("subscription."):
-            customer.sync_current_subscription()
+            customer._sync_current_subscription()
         elif event_subtype == "deleted":
             customer.purge()
 

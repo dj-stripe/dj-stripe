@@ -448,23 +448,23 @@ class StripeCustomer(StripeObject):
             invoice=invoice_id,
         )
 
-    def sync_card(self):
-        self.card_fingerprint = self.stripe_customer.active_card.fingerprint
-        self.card_last_4 = self.stripe_customer.active_card.last4
-        self.card_kind = self.stripe_customer.active_card.type
-        self.card_exp_month = self.stripe_customer.active_card.exp_month
-        self.card_exp_year = self.stripe_customer.active_card.exp_year
+    def _sync_card(self):
+        stripe_customer = self.stripe_customer
 
-    def sync(self):
-        if getattr(self.stripe_customer, 'deleted', False):
+        self.card_fingerprint = stripe_customer.active_card.fingerprint
+        self.card_last_4 = stripe_customer.active_card.last4
+        self.card_kind = stripe_customer.active_card.type
+        self.card_exp_month = stripe_customer.active_card.exp_month
+        self.card_exp_year = stripe_customer.active_card.exp_year
+
+    def _sync(self):
+        stripe_customer = self.stripe_customer
+
+        if getattr(stripe_customer, 'deleted', False):
             # Customer was deleted from stripe
             self.purge()
-        elif getattr(self.stripe_customer, 'active_card', None):
-            self.card_fingerprint = self.stripe_customer.active_card.fingerprint
-            self.card_last_4 = self.stripe_customer.active_card.last4
-            self.card_kind = self.stripe_customer.active_card.type
-            self.card_exp_month = self.stripe_customer.active_card.exp_month
-            self.card_exp_year = self.stripe_customer.active_card.exp_year
+        elif getattr(stripe_customer, 'active_card', None):
+            self._sync_card()
 
 
 class StripeCard(StripeSource):

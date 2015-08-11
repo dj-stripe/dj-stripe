@@ -223,7 +223,7 @@ class Customer(StripeCustomer):
                 prorate=prorate,
                 quantity=quantity
             )
-        self.sync_current_subscription()
+        self._sync_current_subscription()
         if charge_immediately:
             self.send_invoice()
         subscription_made.send(sender=self, plan=plan, stripe_response=resp)
@@ -253,7 +253,7 @@ class Customer(StripeCustomer):
             return False  # There was nothing to invoice
 
     def retry_unpaid_invoices(self):
-        self.sync_invoices()
+        self._sync_invoices()
         for invoice in self.invoices.filter(paid=False, closed=False):
             try:
                 invoice.retry()  # Always retry unpaid invoices
@@ -268,7 +268,7 @@ class Customer(StripeCustomer):
         stripe_customer.save()
 
         # Download new card details from Stripe
-        self.sync_card()
+        self._sync_card()
 
         self.save()
         card_changed.send(sender=self, stripe_response=stripe_customer)
@@ -276,7 +276,7 @@ class Customer(StripeCustomer):
     def update_plan_quantity(self, quantity, charge_immediately=False):
         stripe_subscription = self.stripe_customer.subscription
         if not stripe_subscription:
-            self.sync_current_subscription()
+            self._sync_current_subscription()
             raise SubscriptionUpdateFailure("Customer does not have a subscription with Stripe")
         self.subscribe(
             plan=djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id),
@@ -284,19 +284,19 @@ class Customer(StripeCustomer):
             charge_immediately=charge_immediately
         )
 
-    def sync(self):
-        super(Customer, self).sync()
+    def _sync(self):
+        super(Customer, self)._sync()
         self.save()
 
-    def sync_invoices(self, **kwargs):
+    def _sync_invoices(self, **kwargs):
         for invoice in self.stripe_customer.invoices(**kwargs).data:
             Invoice.sync_from_stripe_data(invoice, send_receipt=False)
 
-    def sync_charges(self, **kwargs):
+    def _sync_charges(self, **kwargs):
         for charge in self.stripe_customer.charges(**kwargs).data:
             self.record_charge(charge.id)
 
-    def sync_current_subscription(self):
+    def _sync_current_subscription(self):
         stripe_subscription = getattr(self.stripe_customer, 'subscription', None)
         current_subscription = getattr(self, 'current_subscription', None)
 
@@ -440,7 +440,7 @@ class CurrentSubscription(TimeStampedModel):
             trial_end=period_end,
         )
 
-        self.customer.sync_current_subscription()
+        self.customer._sync_current_subscription()
 
 
 INTERVALS = (

@@ -307,8 +307,8 @@ class EventTest(TestCase):
         record_charge_mock.assert_called_once_with("hello")
         self.assertTrue(event.processed)
 
-    @patch('djstripe.models.Customer.sync_current_subscription')
-    def test_customer_subscription_event(self, sync_current_subscription_mock):
+    @patch('djstripe.models.Customer._sync_current_subscription')
+    def test_customer_subscription_event(self, _sync_current_subscription_mock):
         event = Event.objects.create(
             stripe_id=self.message["id"],
             type="customer.subscription.created",
@@ -317,11 +317,11 @@ class EventTest(TestCase):
         )
 
         event.process()
-        sync_current_subscription_mock.assert_called_once_with()
+        _sync_current_subscription_mock.assert_called_once_with()
         self.assertTrue(event.processed)
 
-    @patch('djstripe.models.Customer.sync_current_subscription')
-    def test_customer_subscription_event_no_customer(self, sync_current_subscription_mock):
+    @patch('djstripe.models.Customer._sync_current_subscription')
+    def test_customer_subscription_event_no_customer(self, _sync_current_subscription_mock):
         self.message["data"]["object"]["customer"] = None
         event = Event.objects.create(
             stripe_id=self.message["id"],
@@ -331,7 +331,7 @@ class EventTest(TestCase):
         )
 
         event.process()
-        self.assertFalse(sync_current_subscription_mock.called)
+        self.assertFalse(_sync_current_subscription_mock.called)
         self.assertTrue(event.processed)
 
     @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=fake_current_subscription)
