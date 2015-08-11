@@ -81,7 +81,7 @@ class PlanTest(TestCase):
         self.plan = Plan(name=self.test_name, stripe_id=self.test_stripe_id)
 
     @patch("djstripe.models.Plan.objects.create")
-    @patch("djstripe.models.Plan.api_create")
+    @patch("djstripe.models.Plan._api_create")
     def test_create_with_metadata(self, ApiCreateMock, ObjectsCreateMock):
         metadata = {'other_data': 'more_data'}
         Plan.create(metadata=metadata, arg1=1, arg2=2, amount=1, stripe_id=1)
