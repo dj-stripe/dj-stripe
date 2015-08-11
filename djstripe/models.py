@@ -241,7 +241,7 @@ class Customer(StripeCustomer):
         return recorded_charge
 
     def record_charge(self, charge_id):
-        data = Charge.api().retrieve(charge_id)
+        data = Charge(stripe_id=charge_id).api_retrieve(charge_id)
         return Charge.sync_from_stripe_data(data)
 
     def send_invoice(self):

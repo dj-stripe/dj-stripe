@@ -64,7 +64,7 @@ class StripeObject(TimeStampedModel):
         abstract = True
 
     @classmethod
-    def api(cls):
+    def _api(cls):
         """
         Get the api object for this type of stripe object (requires
         stripe_api_name attribute to be set on model).
@@ -84,7 +84,7 @@ class StripeObject(TimeStampedModel):
         """
 
         # Run stripe.X.retreive(id)
-        return type(self).api().retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
+        return type(self)._api().retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
 
     @classmethod
     def api_create(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
@@ -95,7 +95,7 @@ class StripeObject(TimeStampedModel):
         :type api_key: string
         """
 
-        return cls.api().create(api_key=api_key, **kwargs)
+        return cls._api().create(api_key=api_key, **kwargs)
 
     def str_parts(self):
         """
@@ -591,13 +591,13 @@ class StripeAccount(StripeObject):
 
     @classmethod
     def get_connected_account_from_token(cls, access_token):
-        account_data = cls.api().retrieve(api_key=access_token)
+        account_data = cls._api().retrieve(api_key=access_token)
 
         return cls.get_or_create_from_stripe_object(account_data)[0]
 
     @classmethod
     def get_default_account(cls):
-        account_data = cls.api().retrieve(api_key=settings.STRIPE_SECRET_KEY)
+        account_data = cls._api().retrieve(api_key=settings.STRIPE_SECRET_KEY)
 
         return cls.get_or_create_from_stripe_object(account_data)[0]
 

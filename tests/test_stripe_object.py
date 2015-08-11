@@ -24,7 +24,7 @@ class StripeObjectExceptionsTest(TestCase):
             pass
 
         with self.assertRaises(NotImplementedError):
-            MissingApiName.api()
+            MissingApiName._api()
 
     def test_deprecated_boolean(self):
         with self.assertRaises(ImproperlyConfigured):
