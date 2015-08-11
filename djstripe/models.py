@@ -574,6 +574,7 @@ class Invoice(StripeInvoice):
         return invoice
 
 
+@python_2_unicode_compatible
 class InvoiceItem(TimeStampedModel):
     # account = models.ForeignKey(Account, related_name="invoiceitems")
 
@@ -590,7 +591,7 @@ class InvoiceItem(TimeStampedModel):
     quantity = models.IntegerField(null=True)
 
     def __str__(self):
-        return "<amount={amount}, plan={plan}, stripe_id={stripe_id}>".format(amount=self.amount, plan=smart_text(self.plan), stripe_id=self.stripe_id)
+        return smart_text("<amount={amount}, plan={plan}, stripe_id={stripe_id}>".format(amount=self.amount, plan=smart_text(self.plan), stripe_id=self.stripe_id))
 
     def plan_display(self):
         return djstripe_settings.PAYMENTS_PLANS[self.plan]["name"]
@@ -664,7 +665,7 @@ class EventProcessingException(TimeStampedModel):
         )
 
     def __str__(self):
-        return "<{message}, pk={pk}, Event={event}>".format(message=self.message, pk=self.pk, event=self.event)
+        return smart_text("<{message}, pk={pk}, Event={event}>".format(message=self.message, pk=self.pk, event=self.event))
 
 
 class Event(StripeEvent):

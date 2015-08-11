@@ -187,7 +187,7 @@ class StripeObject(TimeStampedModel):
         return instance
 
     def __str__(self):
-        return "<{list}>".format(list=", ".join(self.str_parts()))
+        return smart_text("<{list}>".format(list=", ".join(self.str_parts())))
 
 
 class StripeSource(StripeObject):
