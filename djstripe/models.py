@@ -54,11 +54,6 @@ class Charge(StripeCharge):
         return Charge.sync_from_stripe_data(refunded_charge)
 
     def capture(self):
-        """
-        Capture the payment of an existing, uncaptured, charge. This is the second half of the two-step payment flow,
-        where first you created a charge with the capture option set to false.
-        See https://stripe.com/docs/api#capture_charge
-        """
         captured_charge = super(Charge, self).capture()
         return Charge.sync_from_stripe_data(captured_charge)
 
