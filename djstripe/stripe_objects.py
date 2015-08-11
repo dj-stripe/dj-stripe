@@ -106,7 +106,15 @@ class StripeObject(TimeStampedModel):
         return ["stripe_id={id}".format(id=self.stripe_id)]
 
     @classmethod
-    def stripe_object_to_record(cls, data):
+    def manipulate_stripe_object_hook(cls, data):
+        """
+        Gets called by this object's stripe object conversion method just before conversion.
+        Use this to populate custom fields in a StripeObject from stripe data.
+        """
+        return data
+
+    @classmethod
+    def _stripe_object_to_record(cls, data):
         """
         This takes an object, as it is formatted in Stripe's current API for our object
         type. In return, it provides a dict. The dict can be used to create a record or
@@ -121,10 +129,13 @@ class StripeObject(TimeStampedModel):
         :return: All the members from the input, translated, mutated, etc
         :rtype: dict
         """
+
+        manipulated_data = cls.manipulate_stripe_object_hook(data)
+
         result = dict()
         # Iterate over all the fields that we know are related to Stripe, let each field work its own magic
         for field in filter(lambda x: isinstance(x, StripeFieldMixin), cls._meta.fields):
-            result[field.name] = field.stripe_to_db(data)
+            result[field.name] = field.stripe_to_db(manipulated_data)
 
         return result
 
@@ -139,7 +150,7 @@ class StripeObject(TimeStampedModel):
         Create a model instance using the given data object from Stripe
         :type data: dict
         """
-        instance = cls(**cls.stripe_object_to_record(data))
+        instance = cls(**cls._stripe_object_to_record(data))
         instance.attach_objects_hook(cls, data)
         instance.save()
 
@@ -180,7 +191,7 @@ class StripeObject(TimeStampedModel):
         instance, created = cls.get_or_create_from_stripe_object(data)
 
         if not created:
-            instance._sync(cls.stripe_object_to_record(data))
+            instance._sync(cls._stripe_object_to_record(data))
             instance.attach_objects_hook(cls, data)
             instance.save()
 
@@ -352,7 +363,7 @@ class StripeCharge(StripeObject):
             return target_cls.get_or_create_from_stripe_object(data, "transfer")[0]
 
     @classmethod
-    def stripe_object_to_record(cls, data):
+    def manipulate_stripe_object_hook(cls, data):
         data["disputed"] = data["dispute"] is not None
 
         # Assessments reported by you have the key user_report and, if set,
@@ -360,7 +371,7 @@ class StripeCharge(StripeObject):
         # the key stripe_report and, if set, the value fraudulent.
         data["fraudulent"] = data["fraud_details"] and list(data["fraud_details"].values())[0] == "fraudulent"
 
-        return super(StripeCharge, cls).stripe_object_to_record(data)
+        return data
 
 
 class StripeCustomer(StripeObject):
