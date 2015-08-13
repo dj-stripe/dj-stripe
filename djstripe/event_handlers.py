@@ -30,7 +30,7 @@ def charge_webhook_handler(event, event_data, event_type, event_subtype):
 @webhooks.handler_all
 def customer_event_attach(event, event_data, event_type, event_subtype):
     stripe_customer_crud_events = ["created", "updated", "deleted"]
-    skip_events = ["plan", "transfer"]
+    skip_events = ["plan", "transfer"]  # TODO: Convert this to "accept_events"
 
     if event_type in skip_events:
         return
