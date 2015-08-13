@@ -10,6 +10,8 @@ from .models import Event, EventProcessingException, Transfer, Charge, Plan
 from .models import Invoice, InvoiceItem, CurrentSubscription, Customer
 
 
+# TODO: Convert all to use sources instead of cards
+
 class CustomerHasCardListFilter(admin.SimpleListFilter):
     title = "card presence"
     parameter_name = "has_card"
@@ -77,7 +79,7 @@ def send_charge_receipt(modeladmin, request, queryset):
 
 admin.site.register(
     Charge,
-    readonly_fields=('created',),
+    readonly_fields=('stripe_timestamp',),
     list_display=[
         "stripe_id",
         "customer",
@@ -88,7 +90,7 @@ admin.site.register(
         "refunded",
         "fee",
         "receipt_sent",
-        "created"
+        "stripe_timestamp"
     ],
     search_fields=[
         "stripe_id",
@@ -101,7 +103,7 @@ admin.site.register(
         "disputed",
         "refunded",
         "card_kind",
-        "created"
+        "stripe_timestamp"
     ],
     raw_id_fields=[
         "customer",
@@ -112,11 +114,11 @@ admin.site.register(
 
 admin.site.register(
     EventProcessingException,
-    readonly_fields=('created',),
+    readonly_fields=('stripe_timestamp',),
     list_display=[
         "message",
         "event",
-        "created"
+        "stripe_timestamp"
     ],
     search_fields=[
         "message",
@@ -128,14 +130,14 @@ admin.site.register(
 admin.site.register(
     Event,
     raw_id_fields=["customer"],
-    readonly_fields=('created',),
+    readonly_fields=('stripe_timestamp',),
     list_display=[
         "stripe_id",
         "type",
         "livemode",
         "valid",
         "processed",
-        "created"
+        "stripe_timestamp"
     ],
     list_filter=[
         "type",
@@ -163,14 +165,14 @@ subscription_status.short_description = "Subscription Status"
 admin.site.register(
     Customer,
     raw_id_fields=["subscriber"],
-    readonly_fields=('created',),
+    readonly_fields=('stripe_timestamp',),
     list_display=[
         "stripe_id",
         "subscriber",
         "card_kind",
         "card_last_4",
         subscription_status,
-        "created"
+        "stripe_timestamp"
     ],
     list_filter=[
         "card_kind",
@@ -203,7 +205,7 @@ customer_email.short_description = "Customer"
 admin.site.register(
     Invoice,
     raw_id_fields=["customer"],
-    readonly_fields=('created',),
+    readonly_fields=('stripe_timestamp',),
     list_display=[
         "stripe_id",
         "paid",
@@ -214,7 +216,7 @@ admin.site.register(
         "period_end",
         "subtotal",
         "total",
-        "created"
+        "stripe_timestamp"
     ],
     search_fields=[
         "stripe_id",
@@ -226,7 +228,7 @@ admin.site.register(
         "closed",
         "attempted",
         "attempts",
-        "created",
+        "stripe_timestamp",
         "date",
         "period_end",
         "total"
@@ -238,14 +240,14 @@ admin.site.register(
 admin.site.register(
     Transfer,
     raw_id_fields=["event"],
-    readonly_fields=('created',),
+    readonly_fields=('stripe_timestamp',),
     list_display=[
         "stripe_id",
         "amount",
         "status",
         "date",
         "description",
-        "created"
+        "stripe_timestamp"
     ],
     search_fields=[
         "stripe_id",
