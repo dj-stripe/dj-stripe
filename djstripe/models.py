@@ -49,8 +49,8 @@ class Charge(StripeCharge):
 
     objects = ChargeManager()
 
-    def refund(self, amount=None):
-        refunded_charge = super(Charge, self).refund(amount)
+    def refund(self, amount=None, reason=None):
+        refunded_charge = super(Charge, self).refund(amount, reason)
         return Charge.sync_from_stripe_data(refunded_charge)
 
     def capture(self):

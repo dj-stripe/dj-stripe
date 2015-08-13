@@ -10,7 +10,7 @@ def convert_to_fake_stripe_object(response):
 
 class ChargeDict(dict):
 
-    def refund(self, amount=None):
+    def refund(self, amount=None, reason=None):
         self.update({"refunded": True, "amount_refunded": amount})
         return self
 

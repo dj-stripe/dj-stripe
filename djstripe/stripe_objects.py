@@ -290,14 +290,24 @@ class StripeCharge(StripeObject):
             amount_to_refund = eligible_to_refund
         return int(amount_to_refund * 100)
 
-    def refund(self, amount=None):
+    def refund(self, amount=None, reason=None):
         """
-        Initiate a refund. If amount is not provided, then this will be a full refund
+        Initiate a refund. If amount is not provided, then this will be a full refund.
+
+        :param amount: A positive decimal amount representing how much of this charge
+            to refund. Can only refund up to the unrefunded amount remaining of the charge.
+        :trye amount: Decimal
+        :param reason: String indicating the reason for the refund. If set, possible values
+            are ``duplicate``, ``fraudulent``, and ``requested_by_customer``. Specifying
+            ``fraudulent`` as the reason when you believe the charge to be fraudulent will
+            help Stripe improve their fraud detection algorithms.
+
         :return: Stripe charge object
         :rtype: dict
         """
         charge_obj = self.api_retrieve().refund(
-            amount=self._calculate_refund_amount(amount=amount)
+            amount=self._calculate_refund_amount(amount=amount),
+            reason=reason
         )
         return charge_obj
 
@@ -307,6 +317,7 @@ class StripeCharge(StripeObject):
         where first you created a charge with the capture option set to false.
         See https://stripe.com/docs/api#capture_charge
         """
+
         return self.api_retrieve().capture()
 
     @classmethod
