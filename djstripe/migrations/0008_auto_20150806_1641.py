@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.RenameField(
             model_name='charge',
             old_name='charge_created',
-            new_name='created_stripe',
+            new_name='stripe_timestamp',
         ),
         migrations.RenameField(
             model_name='event',
