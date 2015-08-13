@@ -114,11 +114,11 @@ admin.site.register(
 
 admin.site.register(
     EventProcessingException,
-    readonly_fields=('stripe_timestamp',),
+    readonly_fields=('created',),
     list_display=[
         "message",
         "event",
-        "stripe_timestamp"
+        "created"
     ],
     search_fields=[
         "message",
