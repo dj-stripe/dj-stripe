@@ -57,6 +57,7 @@ class StripeObject(TimeStampedModel):
                                                 "or was previously unrecorded. Otherwise, this field indicates "
                                                 "whether this record comes from Stripe test mode or live "
                                                 "mode operation.")
+    stripe_timestamp = StripeDateTimeField(null=True, stripe_required=False, stripe_name="created", help_text="The datetime this object was created in stripe.")
     metadata = StripeJSONField(blank=True, stripe_required=False, help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.")
     description = StripeTextField(blank=True, stripe_required=False, help_text="A description of this object.")
 
@@ -662,12 +663,6 @@ class StripeEvent(StripeObject):
                                            "purposes. If empty string then this is an old entry without that data. If "
                                            "Null then this is not an old entry, but a Stripe 'automated' event with "
                                            "no associated request.")
-    event_timestamp = StripeDateTimeField(null=True, stripe_name="created",
-                                          help_text="Empty for old entries. For all others, this entry field gives "
-                                                    "the timestamp of the time when the event occured from Stripe's "
-                                                    "perspective. This is as opposed to the time when we received "
-                                                    "notice of the event, which is not guaranteed to be the same time"
-                                                    "and which is recorded in a different field.")
     received_api_version = StripeCharField(max_length=15, blank=True, stripe_name="api_version",
                                            help_text="the API version at which the event data was rendered. Blank for "
                                                      "old entries only, all new entries will have this value")
