@@ -303,7 +303,7 @@ class EventTest(TestCase):
 
         event.process()
         self.assertEqual(event.customer, self.customer)
-        retrieve_mock.assert_called_once_with(id=self.message["data"]["object"]["id"], api_key=settings.STRIPE_SECRET_KEY, expand=["application_fee"])
+        retrieve_mock.assert_called_once_with(id=self.message["data"]["object"]["id"], api_key=settings.STRIPE_SECRET_KEY, expand=["balance_transaction"])
         record_charge_mock.assert_called_once_with("hello")
         self.assertTrue(event.processed)
 
