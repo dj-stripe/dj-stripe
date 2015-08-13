@@ -1,0 +1,24 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+from django.db import migrations
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ('djstripe', '0007_auto_20150625_1243'),
+    ]
+
+    operations = [
+        migrations.RenameField(
+            model_name='charge',
+            old_name='charge_created',
+            new_name='created_stripe',
+        ),
+        migrations.RenameField(
+            model_name='event',
+            old_name='kind',
+            new_name='type',
+        ),
+    ]
