@@ -1,4 +1,7 @@
+from copy import deepcopy
+
 from django.conf import settings
+
 from stripe.resource import convert_to_stripe_object
 
 
@@ -6,6 +9,76 @@ def convert_to_fake_stripe_object(response):
     return convert_to_stripe_object(resp=response, api_key=settings.STRIPE_SECRET_KEY, account="test_account")
 
 # Connected Stripe Object fakes.
+
+
+class DataList(object):
+    """http://stackoverflow.com/a/2535952/1834570"""
+
+    __allowed = ("total_count", "has_more", "url", "data")
+
+    object = "list"
+
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            if key in self.__allowed:
+                setattr(self, key, value)
+
+
+FAKE_BALANCE_TRANSACTION = {
+    "id": "txn_16YKQi2eZvKYlo2CNx26h2Wz",
+    "object": "balance_transaction",
+    "amount": 3340,
+    "currency": "usd",
+    "net": 3213,
+    "type": "charge",
+    "created": 1439229084,
+    "available_on": 1439769600,
+    "status": "pending",
+    "fee": 127,
+    "fee_details": [
+        {
+            "amount": 127,
+            "currency": "usd",
+            "type": "stripe_fee",
+            "description": "Stripe processing fees",
+            "application": None
+        }
+    ],
+    "source": "ch_16YKQi2eZvKYlo2CrCuzbJQx",
+    "description": "Charge for RelyMD consultation for Rakesh Mohan",
+    "sourced_transfers": {
+        "object": "list",
+        "total_count": 0,
+        "has_more": False,
+        "url": "/v1/transfers?source_transaction=ch_16YKQi2eZvKYlo2CrCuzbJQx",
+        "data": []
+    }
+}
+
+FAKE_CARD = {
+    "id": "card_16YKQh2eZvKYlo2Cblc5Feoo",
+    "object": "card",
+    "last4": "4242",
+    "brand": "Visa",
+    "funding": "credit",
+    "exp_month": 12,
+    "exp_year": 2016,
+    "country": "US",
+    "name": "alex-nesnes@hotmail.fr",
+    "address_line1": None,
+    "address_line2": None,
+    "address_city": None,
+    "address_state": None,
+    "address_zip": None,
+    "address_country": None,
+    "cvc_check": "pass",
+    "address_line1_check": None,
+    "address_zip_check": None,
+    "tokenization_method": None,
+    "dynamic_last4": None,
+    "metadata": {},
+    "customer": "cus_6lsBvm5rJ0zyHc"
+}
 
 
 class ChargeDict(dict):
@@ -29,33 +102,9 @@ FAKE_CHARGE = ChargeDict({
     "amount": 2200,
     "currency": "usd",
     "refunded": False,
-    "source": {
-        "id": "card_16YKQh2eZvKYlo2Cblc5Feoo",
-        "object": "card",
-        "last4": "4242",
-        "brand": "Visa",
-        "fingerprint": "dgs89-3jjf039jejda-0j2d",
-        "funding": "credit",
-        "exp_month": 2,
-        "exp_year": 2016,
-        "country": "US",
-        "name": None,
-        "address_line1": None,
-        "address_line2": None,
-        "address_city": None,
-        "address_state": None,
-        "address_zip": None,
-        "address_country": None,
-        "cvc_check": "pass",
-        "address_line1_check": None,
-        "address_zip_check": None,
-        "tokenization_method": None,
-        "dynamic_last4": None,
-        "metadata": {},
-        "customer": "cus_6lsBvm5rJ0zyHc"
-    },
+    "source": deepcopy(FAKE_CARD),
     "captured": True,
-    "balance_transaction": "txn_16Vswu2eZvKYlo2C9DlWEgM1",
+    "balance_transaction": deepcopy(FAKE_BALANCE_TRANSACTION),
     "failure_message": None,
     "failure_code": None,
     "amount_refunded": 0,
@@ -94,102 +143,40 @@ FAKE_REFUND = {
     "reason": None
 }
 
-FAKE_CUSTOMER = {
-    "object": "customer",
-    "created": 1439229084,
-    "id": "cus_6lsBvm5rJ0zyHc",
-    "livemode": False,
-    "description": None,
-    "email": "virtumedix+ivanp0001@gmail.com",
-    "delinquent": False,
-    "metadata": {},
-    "subscriptions": {
-        "object": "list",
-        "total_count": 0,
-        "has_more": False,
-        "url": "/v1/customers/cus_6lsBvm5rJ0zyHc/subscriptions",
-        "data": []
-    },
-    "discount": None,
-    "account_balance": 0,
+FAKE_PLAN = {
+    "interval": "month",
+    "name": "New plan name",
+    "created": 1386247539,
+    "amount": 2000,
     "currency": "usd",
-    "sources": {
-        "object": "list",
-        "total_count": 1,
-        "has_more": False,
-        "url": "/v1/customers/cus_6lsBvm5rJ0zyHc/sources",
-        "data": [
-            {
-                "id": "card_16YKQh2eZvKYlo2Cblc5Feoo",
-                "object": "card",
-                "last4": "4242",
-                "brand": "Visa",
-                "funding": "credit",
-                "exp_month": 2,
-                "exp_year": 2016,
-                "country": "US",
-                "name": None,
-                "address_line1": None,
-                "address_line2": None,
-                "address_city": None,
-                "address_state": None,
-                "address_zip": None,
-                "address_country": None,
-                "cvc_check": "pass",
-                "address_line1_check": None,
-                "address_zip_check": None,
-                "tokenization_method": None,
-                "dynamic_last4": None,
-                "metadata": {
-                },
-                "customer": "cus_6lsBvm5rJ0zyHc"
-            }
-        ]
-    },
-    "default_source": "card_16YKQh2eZvKYlo2Cblc5Feoo"
+    "id": "gold21323",
+    "object": "plan",
+    "livemode": False,
+    "interval_count": 1,
+    "trial_period_days": None,
+    "metadata": {},
+    "statement_descriptor": None
 }
 
-FAKE_CARD = {
-    "id": "card_16YKQs2eZvKYlo2C9sTYWuJj",
-    "object": "card",
-    "last4": "4242",
-    "brand": "Visa",
-    "funding": "credit",
-    "exp_month": 12,
-    "exp_year": 2015,
-    "country": "US",
-    "name": "alex-nesnes@hotmail.fr",
-    "address_line1": None,
-    "address_line2": None,
-    "address_city": None,
-    "address_state": None,
-    "address_zip": None,
-    "address_country": None,
-    "cvc_check": "pass",
-    "address_line1_check": None,
-    "address_zip_check": None,
-    "tokenization_method": None,
-    "dynamic_last4": None,
+FAKE_PLAN_II = {
+    "interval": "month",
+    "name": "New plan name",
+    "created": 1386247539,
+    "amount": 2000,
+    "currency": "usd",
+    "id": "gold21323",
+    "object": "plan",
+    "livemode": False,
+    "interval_count": 1,
+    "trial_period_days": None,
     "metadata": {},
-    "customer": None
+    "statement_descriptor": None
 }
+
 
 FAKE_SUBSCRIPTION = {
     "id": "sub_6lsC8pt7IcFpjA",
-    "plan": {
-        "interval": "month",
-        "name": "New plan name",
-        "created": 1386247539,
-        "amount": 2000,
-        "currency": "usd",
-        "id": "gold21323",
-        "object": "plan",
-        "livemode": False,
-        "interval_count": 1,
-        "trial_period_days": None,
-        "metadata": {},
-        "statement_descriptor": None
-    },
+    "plan": deepcopy(FAKE_PLAN),
     "object": "subscription",
     "start": 1439229181,
     "status": "active",
@@ -208,20 +195,67 @@ FAKE_SUBSCRIPTION = {
     "metadata": {}
 }
 
-FAKE_PLAN = {
-    "interval": "month",
-    "name": "New plan name",
-    "created": 1386247539,
-    "amount": 2000,
-    "currency": "usd",
-    "id": "gold21323",
-    "object": "plan",
-    "livemode": False,
-    "interval_count": 1,
-    "trial_period_days": None,
-    "metadata": {},
-    "statement_descriptor": None
+FAKE_SUBSCRIPTION_II = {
+    "id": "6mkwMbhaZF9jih",
+    "plan": deepcopy(FAKE_PLAN_II),
+    "object": "subscription",
+    "start": 1386247539,
+    "status": "active",
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "cancel_at_period_end": False,
+    "current_period_start": 1439432828,
+    "current_period_end": 1442111228,
+    "ended_at": None,
+    "trial_start": None,
+    "trial_end": None,
+    "canceled_at": None,
+    "quantity": 1,
+    "application_fee_percent": None,
+    "discount": None,
+    "tax_percent": None,
+    "metadata": {}
 }
+
+
+class CustomerDict(dict):
+
+    def invoices(self, **kwargs):
+        return DataList(url="/v1/invoices",
+                        has_more=False,
+                        data=[deepcopy(FAKE_INVOICE), deepcopy(FAKE_INVOICE_II), deepcopy(FAKE_INVOICE_III)])
+
+    def update_subscription(self, **kwargs):
+        self.update(kwargs)
+        return self
+
+FAKE_CUSTOMER = CustomerDict({
+    "object": "customer",
+    "created": 1439229084,
+    "id": "cus_6lsBvm5rJ0zyHc",
+    "livemode": False,
+    "description": None,
+    "email": "virtumedix+ivanp0001@gmail.com",
+    "delinquent": False,
+    "metadata": {},
+    "subscriptions": {
+        "object": "list",
+        "total_count": 2,
+        "has_more": False,
+        "url": "/v1/customers/cus_6lsBvm5rJ0zyHc/subscriptions",
+        "data": [deepcopy(FAKE_SUBSCRIPTION), deepcopy(FAKE_SUBSCRIPTION_II)]
+    },
+    "discount": None,
+    "account_balance": 0,
+    "currency": "usd",
+    "sources": {
+        "object": "list",
+        "total_count": 1,
+        "has_more": False,
+        "url": "/v1/customers/cus_6lsBvm5rJ0zyHc/sources",
+        "data": [deepcopy(FAKE_CARD)]
+    },
+    "default_source": "card_16YKQh2eZvKYlo2Cblc5Feoo"
+})
 
 FAKE_COUPON = {
     "id": "grandfathered",
@@ -291,20 +325,7 @@ FAKE_INVOICE = InvoiceDict({
                 },
                 "subscription": None,
                 "quantity": 1,
-                "plan": {
-                    "interval": "month",
-                    "name": "New plan name",
-                    "created": 1386247539,
-                    "amount": 2000,
-                    "currency": "usd",
-                    "id": "gold21323",
-                    "object": "plan",
-                    "livemode": False,
-                    "interval_count": 1,
-                    "trial_period_days": None,
-                    "metadata": {},
-                    "statement_descriptor": None
-                },
+                "plan": deepcopy(FAKE_PLAN),
                 "description": None,
                 "discountable": True,
                 "metadata": {
@@ -341,6 +362,124 @@ FAKE_INVOICE = InvoiceDict({
     "statement_descriptor": None,
     "description": None,
     "receipt_number": None,
+})
+
+FAKE_INVOICE_II = InvoiceDict({
+    "date": 1439308578,
+    "id": "in_16Yf6s2eZvKYlo2CG7FhvCos",
+    "period_start": 1436629839,
+    "period_end": 1439308239,
+    "lines": {
+        "data": [
+            {
+                "id": "sub_6mFNgWRONpWxQU",
+                "object": "line_item",
+                "type": "subscription",
+                "livemode": True,
+                "amount": 2000,
+                "currency": "usd",
+                "proration": False,
+                "period": {
+                    "start": 1441993761,
+                    "end": 1444585761
+                },
+                "subscription": None,
+                "quantity": 1,
+                "plan": deepcopy(FAKE_PLAN),
+                "description": None,
+                "discountable": True,
+                "metadata": {}
+            }
+        ],
+        "total_count": 1,
+        "object": "list",
+        "url": "/v1/invoices/in_16Yf6s2eZvKYlo2CG7FhvCos/lines"
+    },
+    "subtotal": 39859,
+    "total": 39859,
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "object": "invoice",
+    "attempted": True,
+    "closed": True,
+    "forgiven": False,
+    "paid": True,
+    "livemode": False,
+    "attempt_count": 1,
+    "amount_due": 39859,
+    "currency": "usd",
+    "starting_balance": 0,
+    "ending_balance": 0,
+    "next_payment_attempt": None,
+    "webhooks_delivered_at": 1439308586,
+    "charge": "ch_16Yg4x2eZvKYlo2C344tXVAo",
+    "discount": None,
+    "application_fee": None,
+    "subscription": "sub_5qtuFBcWG0JerR",
+    "tax_percent": None,
+    "tax": None,
+    "metadata": {},
+    "statement_descriptor": None,
+    "description": None,
+    "receipt_number": None
+})
+
+FAKE_INVOICE_III = InvoiceDict({
+    "date": 1439425915,
+    "id": "in_16Z9dP2eZvKYlo2CgFHgFx2Z",
+    "period_start": 1436746171,
+    "period_end": 1439424571,
+    "lines": {
+        "data": [
+            {
+                "id": "sub_6mkwMbhaZF9jih",
+                "object": "line_item",
+                "type": "subscription",
+                "livemode": True,
+                "amount": 2000,
+                "currency": "usd",
+                "proration": False,
+                "period": {
+                    "start": 1442111228,
+                    "end": 1444703228
+                },
+                "subscription": None,
+                "quantity": 1,
+                "plan": deepcopy(FAKE_PLAN),
+                "description": None,
+                "discountable": True,
+                "metadata": {}
+            }
+        ],
+        "total_count": 1,
+        "object": "list",
+        "url": "/v1/invoices/in_16Z9dP2eZvKYlo2CgFHgFx2Z/lines"
+    },
+    "subtotal": 20,
+    "total": 20,
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "object": "invoice",
+    "attempted": True,
+    "closed": True,
+    "forgiven": False,
+    "paid": True,
+    "livemode": False,
+    "attempt_count": 0,
+    "amount_due": 0,
+    "currency": "usd",
+    "starting_balance": 0,
+    "ending_balance": 20,
+    "next_payment_attempt": None,
+    "webhooks_delivered_at": 1439426955,
+    "charge": None,
+    "discount": None,
+    "application_fee": None,
+    "subscription": "sub_6EFxeHf3aEjcOl",
+    "tax_percent": None,
+    "tax": None,
+    "metadata": {},
+    "statement_descriptor": None,
+    "description": None,
+    "receipt_number": None
 })
 
 FAKE_INVOICEITEM = {
@@ -679,37 +818,6 @@ FAKE_BALANCE = {
     ],
     "livemode": False,
     "object": "balance"
-}
-
-FAKE_BALANCE_TRANSACTION = {
-    "id": "txn_16Vswu2eZvKYlo2C9DlWEgM1",
-    "object": "balance_transaction",
-    "amount": 4995,
-    "currency": "usd",
-    "net": 4820,
-    "type": "charge",
-    "created": 1438646792,
-    "available_on": 1439251200,
-    "status": "pending",
-    "fee": 175,
-    "fee_details": [
-        {
-            "amount": 175,
-            "currency": "usd",
-            "type": "stripe_fee",
-            "description": "Stripe processing fees",
-            "application": None
-        }
-    ],
-    "source": "ch_16Vswu2eZvKYlo2CnrIx0i3L",
-    "description": "Charge for RelyMD consultation for Rakesh Mohan",
-    "sourced_transfers": {
-        "object": "list",
-        "total_count": 0,
-        "has_more": False,
-        "url": "/v1/transfers?source_transaction=ch_16Vswu2eZvKYlo2CnrIx0i3L",
-        "data": []
-    }
 }
 
 FAKE_EVENT_CHARGE_SUCCEEDED = {
