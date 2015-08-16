@@ -253,9 +253,9 @@ class TestCustomer(TestCase):
         callback_mock.assert_called_once_with(user)
         subscribe_mock.assert_called_once_with(plan=default_plan_fake, trial_days="donkey")
 
-    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
-    def test_update_card(self, customer_stripe_customer_mock):
-        customer_stripe_customer_mock.return_value = PropertyMock(
+    @patch("djstripe.models.Customer.api_retrieve")
+    def test_update_card(self, api_retrieve_mock):
+        api_retrieve_mock.return_value = PropertyMock(
             active_card=PropertyMock(
                 fingerprint="test_fingerprint",
                 last4="1234",

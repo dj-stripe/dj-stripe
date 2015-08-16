@@ -195,7 +195,7 @@ class SubscribeFormViewTest(TestCase):
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     @patch("djstripe.models.Customer.update_card", autospec=True)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_post_valid(self, stripe_customer_mock, update_card_mock, subscribe_mock):
+    def test_post_valid(self, stripe_customer_create_mock, update_card_mock, subscribe_mock):
         self.assertEqual(0, Customer.objects.count())
         response = self.client.post(self.url, {"plan": "test0", "stripe_token": "cake"})
         self.assertEqual(1, Customer.objects.count())
@@ -207,7 +207,7 @@ class SubscribeFormViewTest(TestCase):
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     @patch("djstripe.models.Customer.update_card", autospec=True)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_post_no_card(self, stripe_customer_mock, update_card_mock, subscribe_mock):
+    def test_post_no_card(self, stripe_customer_create_mock, update_card_mock, subscribe_mock):
         update_card_mock.side_effect = StripeError("Invalid source object:")
 
         response = self.client.post(self.url, {"plan": "test0"})
@@ -216,7 +216,7 @@ class SubscribeFormViewTest(TestCase):
         self.assertIn("Invalid source object:", response.context["form"].errors["__all__"])
 
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_post_form_invalid(self, stripe_customer_mock):
+    def test_post_form_invalid(self, stripe_customer_create_mock):
         response = self.client.post(self.url)
         self.assertEqual(200, response.status_code)
         self.assertIn("plan", response.context["form"].errors)
@@ -226,7 +226,7 @@ class SubscribeFormViewTest(TestCase):
 class ChangePlanViewTest(TestCase):
 
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890_01"))
-    def setUp(self, stripe_customer_mock):
+    def setUp(self, stripe_customer_create_mock):
         self.url = reverse("djstripe:change_plan")
         self.user1 = get_user_model().objects.create_user(username="testuser1",
                                                          email="test@example.com",
@@ -238,7 +238,7 @@ class ChangePlanViewTest(TestCase):
         Customer.get_or_create(subscriber=self.user1)
 
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_post_form_invalid(self, stripe_customer_mock):
+    def test_post_form_invalid(self, stripe_customer_create_mock):
         self.assertTrue(self.client.login(username="testuser1", password="123"))
         response = self.client.post(self.url)
         self.assertEqual(200, response.status_code)
@@ -246,7 +246,7 @@ class ChangePlanViewTest(TestCase):
         self.assertIn("This field is required.", response.context["form"].errors["plan"])
 
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890_02"))
-    def test_post_new_sub_no_proration(self, stripe_customer_mock):
+    def test_post_new_sub_no_proration(self, stripe_customer_create_mock):
         self.assertTrue(self.client.login(username="testuser2", password="123"))
         response = self.client.post(self.url, {"plan": "test0"})
         self.assertEqual(200, response.status_code)
