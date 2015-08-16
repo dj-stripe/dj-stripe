@@ -18,9 +18,10 @@ from stripe.error import StripeError, InvalidRequestError
 from djstripe.models import Customer
 from djstripe.sync import sync_subscriber, sync_plans
 
+from . import FAKE_CUSTOMER
+
 
 class TestSyncSubscriber(TestCase):
-    fake_stripe_customer = "test_stripe_customer"
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="testuser",
@@ -31,15 +32,15 @@ class TestSyncSubscriber(TestCase):
     @patch("djstripe.models.Customer._sync_invoices")
     @patch("djstripe.models.Customer._sync_current_subscription")
     @patch("djstripe.models.Customer._sync")
-    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock, return_value=fake_stripe_customer)
+    @patch("djstripe.models.Customer.api_retrieve", return_value=FAKE_CUSTOMER)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_sync_success(self, stripe_customer_create_mock, stripe_customer_mock,
+    def test_sync_success(self, stripe_customer_create_mock, api_retrieve_mock,
                           _sync_mock, _sync_current_subscription_mock, _sync_invoices_mock,
                           _sync_charges_mock):
 
         sync_subscriber(self.user)
         self.assertEqual(1, Customer.objects.count())
-        self.assertEqual(self.fake_stripe_customer, Customer.objects.get(subscriber=self.user).stripe_customer)
+        self.assertEqual(FAKE_CUSTOMER, Customer.objects.get(subscriber=self.user).api_retrieve())
 
         _sync_mock.assert_called_once_with()
         _sync_current_subscription_mock.assert_called_once_with()
@@ -47,9 +48,9 @@ class TestSyncSubscriber(TestCase):
         _sync_charges_mock.assert_called_once_with()
 
     @patch("djstripe.models.Customer._sync")
-    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock, return_value="test_stripe_customer")
+    @patch("djstripe.models.Customer.api_retrieve", return_value=FAKE_CUSTOMER)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_sync_fail(self, stripe_customer_create_mock, stripe_customer_mock, _sync_mock):
+    def test_sync_fail(self, stripe_customer_create_mock, api_retrieve_mock, _sync_mock):
         _sync_mock.side_effect = InvalidRequestError("No such customer:", "blah")
 
         sync_subscriber(self.user)

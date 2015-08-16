@@ -159,10 +159,10 @@ class TestSingleSubscription(TestCase):
             self.customer.current_subscription
 
     @patch("stripe.resource.Customer.update_subscription")
-    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
-    def test_subscribe(self, StripeCustomerMock, UpdateSubscriptionMock):
-        StripeCustomerMock.side_effect = [convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITHOUT_SUB),
-                                          convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC)]
+    @patch("djstripe.models.Customer.api_retrieve")
+    def test_subscribe(self, api_retrieve_mock, UpdateSubscriptionMock):
+        api_retrieve_mock.side_effect = [convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITHOUT_SUB),
+                                         convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC)]
         self.assertEqual(self.customer.has_active_subscription(), False)
         self.customer.subscribe("basic", charge_immediately=False)
         self.assertEqual(self.customer.has_active_subscription(), True)
@@ -171,10 +171,10 @@ class TestSingleSubscription(TestCase):
         self.assertEqual(sub.amount, decimal.Decimal("100.00"))
 
     @patch("stripe.resource.Customer.update_subscription")
-    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
-    def test_upgrade(self, StripeCustomerMock, UpdateSubscriptionMock):
-        StripeCustomerMock.side_effect = [convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC),
-                                          convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_GOLD)]
+    @patch("djstripe.models.Customer.api_retrieve")
+    def test_upgrade(self, api_retrieve_mock, UpdateSubscriptionMock):
+        api_retrieve_mock.side_effect = [convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC),
+                                         convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_GOLD)]
         create_subscription(self.customer)
         self.assertEqual(self.customer.has_active_subscription(), True)
         self.assertEqual(self.customer.current_subscription.plan, "basic")
@@ -184,14 +184,15 @@ class TestSingleSubscription(TestCase):
         self.assertEqual(sub.amount, decimal.Decimal("1000.00"))
         self.assertEqual(sub.plan, "gold")
 
-    def test_cancel_without_sub(self):
+    @patch("djstripe.models.Customer.api_retrieve")
+    def test_cancel_without_sub(self, api_retrieve_mock):
         with self.assertRaises(SubscriptionCancellationFailure):
             self.customer.cancel_subscription()
 
     @patch("stripe.resource.Customer.cancel_subscription", new_callable=PropertyMock)
-    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
-    def test_cancel_without_stripe_sub(self, StripeCustomerMock, CancelSubscriptionMock):
-        StripeCustomerMock.return_value = convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITHOUT_SUB)
+    @patch("djstripe.models.Customer.api_retrieve")
+    def test_cancel_without_stripe_sub(self, api_retrieve_mock, CancelSubscriptionMock):
+        api_retrieve_mock.return_value = convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITHOUT_SUB)
         CancelSubscriptionMock.side_effect = InvalidRequestError("No active subscriptions for customer: cus_xxxxxxxxxxxxxx", None)
         create_subscription(self.customer)
         self.assertEqual(self.customer.has_active_subscription(), True)
@@ -200,9 +201,9 @@ class TestSingleSubscription(TestCase):
             self.customer.cancel_subscription()
 
     @patch("stripe.resource.Customer.cancel_subscription")
-    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
-    def test_cancel_with_stripe_sub(self, StripeCustomerMock, CancelSubscriptionMock):
-        StripeCustomerMock.return_value = convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC)
+    @patch("djstripe.models.Customer.api_retrieve")
+    def test_cancel_with_stripe_sub(self, api_retrieve_mock, CancelSubscriptionMock):
+        api_retrieve_mock.return_value = convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC)
         CancelSubscriptionMock.return_value = convert_to_fake_stripe_object(DUMMY_SUB_BASIC_CANCELED)
         create_subscription(self.customer)
         self.assertEqual(self.customer.current_subscription.status, "trialing")
@@ -213,9 +214,9 @@ class TestSingleSubscription(TestCase):
         self.assertEqual(self.customer.current_subscription.canceled_at, convert_tstamp(CANCELED_TIME))
 
     @patch("stripe.resource.Customer.cancel_subscription")
-    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
-    def test_cancel_with_stripe_sub_future(self, stripe_customer_mock, cancel_subscription_mock):
-        stripe_customer_mock.return_value = convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC)
+    @patch("djstripe.models.Customer.api_retrieve")
+    def test_cancel_with_stripe_sub_future(self, api_retrieve_mock, cancel_subscription_mock):
+        api_retrieve_mock.return_value = convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC)
         cancel_subscription_mock.return_value = convert_to_fake_stripe_object(DUMMY_SUB_BASIC_CANCELED)
         subscription_instance = create_subscription(self.customer)
         subscription_instance.trial_end = timezone.now() + datetime.timedelta(days=5)
@@ -226,28 +227,28 @@ class TestSingleSubscription(TestCase):
         self.assertEqual(self.customer.current_subscription.status, "canceled")
 
     @patch("stripe.resource.Customer.update_subscription")
-    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
-    def test_update_quantity(self, StripeCustomerMock, UpdateSubscriptionMock):
+    @patch("djstripe.models.Customer.api_retrieve")
+    def test_update_quantity(self, api_retrieve_mock, UpdateSubscriptionMock):
         dummy_customer = copy.deepcopy(DUMMY_CUSTOMER_WITH_SUB_BASIC)
         dummy_customer["subscription"]["quantity"] = 2
-        StripeCustomerMock.side_effect = [convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC),
-                                          convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC),
-                                          convert_to_fake_stripe_object(dummy_customer)]
+        api_retrieve_mock.side_effect = [convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC),
+                                         convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC),
+                                        convert_to_fake_stripe_object(dummy_customer)]
         create_subscription(self.customer)
         self.customer.update_plan_quantity(2, charge_immediately=False)
         self.assertEqual(self.customer.current_subscription.quantity, 2)
 
-    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
-    def test_update_no_stripe_sub(self, StripeCustomerMock):
-        StripeCustomerMock.return_value = convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITHOUT_SUB)
+    @patch("djstripe.models.Customer.api_retrieve")
+    def test_update_no_stripe_sub(self, api_retrieve_mock):
+        api_retrieve_mock.return_value = convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITHOUT_SUB)
         create_subscription(self.customer)
         with self.assertRaises(SubscriptionUpdateFailure):
             self.customer.update_plan_quantity(2)
 
     @patch("stripe.resource.Customer.update_subscription")
-    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
-    def test_extend(self, StripeCustomerMock, UpdateSubscriptionMock):
-        StripeCustomerMock.return_value = convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC)
+    @patch("djstripe.models.Customer.api_retrieve")
+    def test_extend(self, api_retrieve_mock, UpdateSubscriptionMock):
+        api_retrieve_mock.return_value = convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC)
         subscription_instance = create_subscription(self.customer)
         subscription_instance.current_period_end = timezone.datetime.fromtimestamp(END_TIME, tz=timezone.utc)
         delta = timezone.timedelta(days=30)
@@ -261,9 +262,9 @@ class TestSingleSubscription(TestCase):
             self.customer.current_subscription.extend(delta)
 
     @patch("stripe.resource.Customer.update_subscription")
-    @patch("djstripe.models.Customer.stripe_customer", new_callable=PropertyMock)
-    def test_extend_with_trial(self, StripeCustomerMock, UpdateSubscriptionMock):
-        StripeCustomerMock.return_value = convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC)
+    @patch("djstripe.models.Customer.api_retrieve")
+    def test_extend_with_trial(self, api_retrieve_mock, UpdateSubscriptionMock):
+        api_retrieve_mock.return_value = convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC)
         subscription_instance = create_subscription(self.customer)
         subscription_instance.trial_end = timezone.now() + timezone.timedelta(days=5)
 
