@@ -76,9 +76,6 @@ class ChargeTest(TestCase):
         self.assertEqual("card_16YKQh2eZvKYlo2Cblc5Feoo", charge.source_stripe_id)
         self.assertEqual("card", charge.source_type)
 
-        self.assertEqual("4242", charge.card_last_4)
-        self.assertEqual("Visa", charge.card_kind)
-
     @patch("djstripe.models.Account.get_default_account")
     def test_sync_from_stripe_data_unsupported_source(self, default_account_mock):
         default_account_mock.return_value = self.account
