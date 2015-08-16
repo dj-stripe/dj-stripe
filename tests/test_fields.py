@@ -10,18 +10,25 @@
 
 from django.test.testcases import TestCase
 
-from djstripe.fields import StripeTextField, StripeDateTimeField
+from djstripe.fields import StripeTextField, StripeDateTimeField, StripeCurrencyField
 
 
 class TestDeprecatedField(TestCase):
     deprecated = StripeTextField(deprecated=True)
 
     def test_stripe_to_db(self):
-        self.deprecated.stripe_to_db(data="taco")
+        self.assertEqual(None, self.deprecated.stripe_to_db(data="taco"))
 
 
 class TestDeprecatedDateTimeField(TestCase):
     deprecated = StripeDateTimeField(deprecated=True)
 
     def test_stripe_to_db(self):
-        self.deprecated.stripe_to_db(data="salad")
+        self.assertEqual(None, self.deprecated.stripe_to_db(data="salad"))
+
+
+class TestStripeCurrencyField(TestCase):
+    noval = StripeCurrencyField(name="noval")
+
+    def test_stripe_to_db_none_val(self):
+        self.assertEqual(None, self.noval.stripe_to_db({"noval": None}))
