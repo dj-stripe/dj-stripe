@@ -39,7 +39,7 @@ class RestSubscriptionTest(APITestCase):
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     @patch("djstripe.models.Customer.update_card", autospec=True)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_create_subscription(self, stripe_customer_mock, update_card_mock, subscribe_mock):
+    def test_create_subscription(self, stripe_customer_create_mock, update_card_mock, subscribe_mock):
         self.assertEqual(0, Customer.objects.count())
         data = {
             "plan": "test0",
@@ -55,7 +55,7 @@ class RestSubscriptionTest(APITestCase):
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     @patch("djstripe.models.Customer.update_card", autospec=True)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_create_subscription_exception(self, stripe_customer_mock, update_card_mock, subscribe_mock):
+    def test_create_subscription_exception(self, stripe_customer_create_mock, update_card_mock, subscribe_mock):
         e = Exception
         subscribe_mock.side_effect = e
         data = {
