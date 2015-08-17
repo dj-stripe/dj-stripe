@@ -246,14 +246,26 @@ class Customer(StripeCustomer):
     def can_charge(self):
         return self.has_valid_card() and self.date_purged is None
 
-    def charge(self, amount, currency="usd", description=None, send_receipt=True, **kwargs):
-        """See ``Charge.create()``."""
+    def charge(self, amount, currency="usd", source=None, description=None, capture=True,
+               statement_descriptor=None, metadata=None, destination=None, shipping=None,
+               application_fee=None, send_receipt=True):
+        stripe_charge = super(Customer, self).charge(amount=amount,
+                                                     currency=currency,
+                                                     source=source,
+                                                     description=description,
+                                                     capture=capture,
+                                                     statement_descriptor=statement_descriptor,
+                                                     metadata=metadata,
+                                                     destination=destination,
+                                                     application_fee=application_fee,
+                                                     shipping=shipping)
 
-        charge_id = super(Customer, self).charge(amount, currency, description, send_receipt, **kwargs)
-        recorded_charge = self.record_charge(charge_id)
+        charge = Charge.sync_from_stripe_data(stripe_charge)
+
         if send_receipt:
-            recorded_charge.send_receipt()
-        return recorded_charge
+            charge.send_receipt()
+
+        return charge
 
     def record_charge(self, charge_id):
         data = Charge(stripe_id=charge_id).api_retrieve(charge_id)
@@ -314,7 +326,7 @@ class Customer(StripeCustomer):
         stripe_customer = self.api_retrieve()
 
         for charge in stripe_customer.charges(**kwargs).data:
-            self.record_charge(charge.id)
+            Charge.sync_from_stripe_data(charge)
 
     def _sync_current_subscription(self):
         stripe_customer = self.api_retrieve()
@@ -592,13 +604,11 @@ class Invoice(StripeInvoice):
         invoice.save()
 
         if data.get("charge"):
-            recorded_charge = invoice.customer.record_charge(data["charge"])
-            # record_charge calls sync_from_stripe_data() on the charge, which will attach the invoice
-            # recorded_charge.invoice = invoice
-            # recorded_charge.save()
+            stripe_charge = Charge(stripe_id=data["charge"])
+            charge = Charge.sync_from_stripe_data(stripe_charge)
 
             if send_receipt:
-                recorded_charge.send_receipt()
+                charge.send_receipt()
         return invoice
 
 

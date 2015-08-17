@@ -443,7 +443,7 @@ class StripeCustomer(StripeObject):
         return all([self.card_fingerprint, self.card_last_4, self.card_kind])
 
     def charge(self, amount, currency="usd", source=None, description=None, capture=True,
-               statement_descriptor=None, metadata=None, shipping=None):
+               statement_descriptor=None, metadata=None, destination=None, application_fee=None, shipping=None):
         """
         Creates a charge for this customer.
 
@@ -456,14 +456,18 @@ class StripeCustomer(StripeObject):
         :type source: StripeSource
         :param description: An arbitrary string.
         :type description: string
-        :param metadata: A set of key/value pairs useful for storing additional information.
-        :type metadata: dict
         :param capture: Whether or not to immediately capture the charge. When false, the charge issues an
                         authorization (or pre-authorization), and will need to be captured later. Uncaptured
                         charges expire in 7 days.
         :type capture: bool
         :param statement_descriptor: An arbitrary string to be displayed on the customer's credit card statement.
         :type statement_descriptor: string
+        :param metadata: A set of key/value pairs useful for storing additional information.
+        :type metadata: dict
+        :param destination: An account to make the charge on behalf of.
+        :type destination: Account
+        :param application_fee: A fee that will be applied to the charge and transfered to the platform owner's account.
+        :type application_fee: Decimal. Precision is 2; anything more will be ignored.
         """
         if not isinstance(amount, decimal.Decimal):
             raise ValueError("You must supply a decimal value representing dollars.")
@@ -472,14 +476,16 @@ class StripeCustomer(StripeObject):
             amount=int(amount * 100),  # Convert dollars into cents
             currency=currency,
             customer=self.stripe_id,
-            source=source,
+            source=source.stripe_id if source else None,  # Convert Source model to stripe_id
             description=description,
             statement_descriptor=statement_descriptor,
             metatdata=metadata,
+            destination=destination.stripe_id if source else None,  # Convert Source model to stripe_id
+            application_fee=int(amount * 100),  # Convert dollars into cents
             shipping=shipping,
         )
 
-        return new_charge["id"]
+        return new_charge
 
     def add_invoice_item(self, amount, currency="usd", invoice_id=None, description=None):
         """
