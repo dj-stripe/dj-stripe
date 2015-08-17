@@ -271,7 +271,7 @@ class StripeCharge(StripeObject):
     failure_message = StripeTextField(null=True, help_text="Message to user further explaining reason for charge failure if available.")
     shipping = StripeJSONField(null=True, help_text="Shipping information for the charge")
 
-    fee = StripeCurrencyField(null=True, stripe_name="balance_transaction.fee")
+    fee = StripeCurrencyField(null=True, nested_name="balance_transaction")
 
     # dj-stripe custom stripe fields. Don't try to send these.
     source_type = StripeCharField(max_length=20, null=True, stripe_name="source.object", help_text="The payment source type. If the payment source is supported by dj-stripe, a corresponding model is attached to this Charge via a foreign key matching this field.")
