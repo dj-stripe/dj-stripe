@@ -182,7 +182,7 @@ class Customer(StripeCustomer):
 
         try:
             return self.current_subscription.is_valid()
-        except CurrentSubscription.DoesNotExist:
+        except Subscription.DoesNotExist:
             return False
 
     def cancel_subscription(self, at_period_end=True):
@@ -190,7 +190,7 @@ class Customer(StripeCustomer):
 
         try:
             current_subscription = self.current_subscription
-        except CurrentSubscription.DoesNotExist:
+        except Subscription.DoesNotExist:
             raise SubscriptionCancellationFailure("Customer does not have current subscription")
 
         try:
@@ -342,7 +342,7 @@ class Customer(StripeCustomer):
                 current_subscription.save()
             else:
                 logger.debug('Creating subscription')
-                current_subscription = CurrentSubscription.objects.create(
+                current_subscription = Subscription.objects.create(
                     customer=self,
                     plan=djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id),
                     current_period_start=convert_tstamp(
@@ -374,11 +374,11 @@ class Customer(StripeCustomer):
             current_subscription.save()
 
             return current_subscription
-        elif current_subscription and current_subscription.status != CurrentSubscription.STATUS_CANCELLED:
+        elif current_subscription and current_subscription.status != Subscription.STATUS_CANCELLED:
             # Stripe says customer has no subscription but we think they have one.
             # This could happen if subscription is cancelled from Stripe Dashboard and webhook fails
             logger.debug('Cancelling subscription for %s' % self)
-            current_subscription.status = CurrentSubscription.STATUS_CANCELLED
+            current_subscription.status = Subscription.STATUS_CANCELLED
             current_subscription.save()
             return current_subscription
 
@@ -392,7 +392,7 @@ class Card(StripeCard):
 #     customer = models.ForeignKey("Customer", blank=True, related_name="subscriptions")
 
 
-class CurrentSubscription(TimeStampedModel):
+class Subscription(TimeStampedModel):
     # account = models.ForeignKey("Account", related_name="subscriptions")
 
     STATUS_TRIALING = "trialing"

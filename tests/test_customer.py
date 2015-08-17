@@ -22,22 +22,22 @@ from mock import patch, PropertyMock, MagicMock
 from stripe.error import InvalidRequestError
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
-from djstripe.models import Account, Customer, Charge, CurrentSubscription
+from djstripe.models import Account, Customer, Charge, Subscription
 
 from . import FAKE_CHARGE, FAKE_CUSTOMER, FAKE_INVOICE, FAKE_INVOICE_II, FAKE_INVOICE_III, DataList
 
 
 class TestCustomer(TestCase):
-    fake_current_subscription = CurrentSubscription(plan="test_plan",
+    fake_current_subscription = Subscription(plan="test_plan",
                                                     quantity=1,
                                                     start=timezone.now(),
                                                     amount=decimal.Decimal(25.00))
 
-    fake_current_subscription_cancelled_in_stripe = CurrentSubscription(plan="test_plan",
+    fake_current_subscription_cancelled_in_stripe = Subscription(plan="test_plan",
                                                                         quantity=1,
                                                                         start=timezone.now(),
                                                                         amount=decimal.Decimal(25.00),
-                                                                        status=CurrentSubscription.STATUS_ACTIVE)
+                                                                        status=Subscription.STATUS_ACTIVE)
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="patrick", email="patrick@gmail.com")
@@ -439,7 +439,7 @@ class TestCustomer(TestCase):
     @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=fake_current_subscription_cancelled_in_stripe)
     @patch("djstripe.models.Customer.api_retrieve", return_value=PropertyMock(subscription=None))
     def test_sync_current_subscription_subscription_cancelled_from_Stripe(self, api_retrieve_mock, customer_subscription_mock):
-        self.assertEqual(CurrentSubscription.STATUS_CANCELLED, self.customer._sync_current_subscription().status)
+        self.assertEqual(Subscription.STATUS_CANCELLED, self.customer._sync_current_subscription().status)
 
     @patch("djstripe.models.Customer.send_invoice")
     @patch("djstripe.models.Customer._sync_current_subscription")

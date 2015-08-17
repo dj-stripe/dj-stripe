@@ -17,7 +17,7 @@ from django.utils import timezone
 from mock import patch, PropertyMock
 from stripe import StripeError
 
-from djstripe.models import Customer, Event, CurrentSubscription
+from djstripe.models import Customer, Event, Subscription
 from tests import convert_to_fake_stripe_object
 
 
@@ -49,7 +49,7 @@ class EventTest(TestCase):
         "api_version": "2015-07-28",
     }
 
-    fake_current_subscription = CurrentSubscription(plan="test",
+    fake_current_subscription = Subscription(plan="test",
                                                     quantity=1,
                                                     start=timezone.now(),
                                                     amount=Decimal(25.00))
@@ -344,7 +344,7 @@ class EventTest(TestCase):
         )
 
         event.process()
-        self.assertTrue(current_subscription_mock.status, CurrentSubscription.STATUS_CANCELLED)
+        self.assertTrue(current_subscription_mock.status, Subscription.STATUS_CANCELLED)
         self.assertTrue(event.processed)
 
     @patch("stripe.Customer.retrieve")

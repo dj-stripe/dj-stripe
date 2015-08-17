@@ -11,7 +11,7 @@ from mock import patch, PropertyMock
 from stripe import InvalidRequestError
 
 from djstripe.exceptions import SubscriptionCancellationFailure, SubscriptionUpdateFailure
-from djstripe.models import convert_tstamp, Customer, CurrentSubscription
+from djstripe.models import convert_tstamp, Customer, Subscription
 from djstripe.settings import PAYMENTS_PLANS
 from tests import convert_to_fake_stripe_object
 
@@ -118,7 +118,7 @@ DUMMY_CUSTOMER_WITH_SUB_GOLD["subscription"] = DUMMY_SUB_GOLD_WITH_PLAN
 
 
 def create_subscription(customer, plan="basic"):
-    return CurrentSubscription.objects.create(
+    return Subscription.objects.create(
         customer=customer,
         plan=plan,
         quantity=1,
@@ -155,7 +155,7 @@ class TestSingleSubscription(TestCase):
         )
 
     def test_current_subscription_does_not_exist(self):
-        with self.assertRaises(CurrentSubscription.DoesNotExist):
+        with self.assertRaises(Subscription.DoesNotExist):
             self.customer.current_subscription
 
     @patch("stripe.resource.Customer.update_subscription")
@@ -274,15 +274,15 @@ class TestSingleSubscription(TestCase):
         UpdateSubscriptionMock.assert_called_once_with(prorate=False, trial_end=new_trial_end)
 
 
-class CurrentSubscriptionTest(TestCase):
+class SubscriptionTest(TestCase):
 
     def setUp(self):
         self.plan_id = "test"
-        self.current_subscription = CurrentSubscription.objects.create(plan=self.plan_id,
+        self.current_subscription = Subscription.objects.create(plan=self.plan_id,
                                                                        quantity=1,
                                                                        start=timezone.now(),
                                                                        amount=decimal.Decimal(25.00),
-                                                                       status=CurrentSubscription.STATUS_PAST_DUE)
+                                                                       status=Subscription.STATUS_PAST_DUE)
 
     def test_plan_display(self):
         self.assertEquals(PAYMENTS_PLANS[self.plan_id]["name"], self.current_subscription.plan_display())
@@ -294,11 +294,11 @@ class CurrentSubscriptionTest(TestCase):
         self.assertFalse(self.current_subscription.is_period_current())
 
     def test_is_status_temporarily_current_true(self):
-        current_subscription = CurrentSubscription.objects.create(plan=self.plan_id,
+        current_subscription = Subscription.objects.create(plan=self.plan_id,
                                                                   quantity=1,
                                                                   start=timezone.now(),
                                                                   amount=decimal.Decimal(25.00),
-                                                                  status=CurrentSubscription.STATUS_PAST_DUE,
+                                                                  status=Subscription.STATUS_PAST_DUE,
                                                                   canceled_at=timezone.now() + datetime.timedelta(days=5),
                                                                   cancel_at_period_end=True)
 

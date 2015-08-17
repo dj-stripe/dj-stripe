@@ -21,4 +21,8 @@ class Migration(migrations.Migration):
             old_name='kind',
             new_name='type',
         ),
+        migrations.RenameModel(
+            old_name='CurrentSubscription',
+            new_name='Subscription',
+        ),
     ]

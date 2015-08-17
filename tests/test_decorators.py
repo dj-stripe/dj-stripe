@@ -12,7 +12,7 @@ from django.utils import timezone
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
 from djstripe.decorators import subscription_payment_required
-from djstripe.models import Customer, CurrentSubscription
+from djstripe.models import Customer, Subscription
 
 
 class TestDeprecationWarning(AssertWarnsEnabledTestCase):
@@ -84,7 +84,7 @@ class TestSubscriptionPaymentRequired(TestCase):
             card_last_4="2342",
             card_kind="Visa"
         )
-        CurrentSubscription.objects.create(
+        Subscription.objects.create(
             customer=customer,
             plan="test",
             current_period_start=period_start,

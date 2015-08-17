@@ -7,7 +7,7 @@ Note: Django 1.4 support was dropped in #107
 from django.contrib import admin
 
 from .models import Event, EventProcessingException, Transfer, Charge, Plan
-from .models import Invoice, InvoiceItem, CurrentSubscription, Customer
+from .models import Invoice, InvoiceItem, Subscription, Customer
 
 
 # TODO: Convert all to use sources instead of cards
@@ -53,7 +53,7 @@ class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
     def lookups(self, request, model_admin):
         statuses = [
             [x, x.replace("_", " ").title()]
-            for x in CurrentSubscription.objects.all().values_list(
+            for x in Subscription.objects.all().values_list(
                 "status",
                 flat=True
             ).distinct()
@@ -153,8 +153,8 @@ admin.site.register(
 )
 
 
-class CurrentSubscriptionInline(admin.TabularInline):
-    model = CurrentSubscription
+class SubscriptionInline(admin.TabularInline):
+    model = Subscription
 
 
 def subscription_status(obj):
@@ -182,7 +182,7 @@ admin.site.register(
     search_fields=[
         "stripe_id"
     ],
-    inlines=[CurrentSubscriptionInline]
+    inlines=[SubscriptionInline]
 )
 
 

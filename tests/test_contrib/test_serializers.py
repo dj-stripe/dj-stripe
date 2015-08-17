@@ -16,7 +16,7 @@ from django.conf import settings
 
 from mock import patch, PropertyMock
 from djstripe.contrib.rest_framework.serializers import SubscriptionSerializer, CreateSubscriptionSerializer
-from djstripe.models import CurrentSubscription
+from djstripe.models import Subscription
 
 
 class SubscriptionSerializerTest(TestCase):
@@ -28,7 +28,7 @@ class SubscriptionSerializerTest(TestCase):
                 'plan': 'test0',
                 'quantity': 2,
                 'start': now,
-                'status': CurrentSubscription.STATUS_ACTIVE,
+                'status': Subscription.STATUS_ACTIVE,
                 'amount': settings.DJSTRIPE_PLANS['test0']['price'],
             }
         )
@@ -48,7 +48,7 @@ class SubscriptionSerializerTest(TestCase):
             data={
                 'plan': 'test0',
                 'start': now,
-                'status': CurrentSubscription.STATUS_ACTIVE,
+                'status': Subscription.STATUS_ACTIVE,
                 'amount': settings.DJSTRIPE_PLANS['test0']['price'],
             }
         )

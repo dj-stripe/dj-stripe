@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 
-from djstripe.models import Event, Transfer, Customer, CurrentSubscription, Charge
+from djstripe.models import Event, Transfer, Customer, Subscription, Charge
 from tests.test_transfer import TRANSFER_CREATED_TEST_DATA, TRANSFER_CREATED_TEST_DATA2
 
 
@@ -25,7 +25,7 @@ class CustomerManagerTest(TestCase):
                 card_last_4="2342",
                 card_kind="Visa"
             )
-            CurrentSubscription.objects.create(
+            Subscription.objects.create(
                 customer=customer,
                 plan="test",
                 current_period_start=period_start,
@@ -43,7 +43,7 @@ class CustomerManagerTest(TestCase):
             card_last_4="2342",
             card_kind="Visa"
         )
-        CurrentSubscription.objects.create(
+        Subscription.objects.create(
             customer=customer,
             plan="test",
             current_period_start=period_start,
@@ -62,7 +62,7 @@ class CustomerManagerTest(TestCase):
             card_last_4="2342",
             card_kind="Visa"
         )
-        CurrentSubscription.objects.create(
+        Subscription.objects.create(
             customer=customer,
             plan="test-2",
             current_period_start=period_start,

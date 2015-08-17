@@ -12,7 +12,7 @@ from django.utils import timezone
 
 from . import webhooks
 from . import settings as djstripe_settings
-from .models import Customer, CurrentSubscription, Charge, Transfer, Invoice
+from .models import Customer, Subscription, Charge, Transfer, Invoice
 
 
 # ---------------------------
@@ -51,7 +51,7 @@ def customer_webhook_handler(event, event_data, event_type, event_subtype):
     customer = event.customer
     if customer:
         if event_subtype == "subscription.deleted":
-            customer.current_subscription.status = CurrentSubscription.STATUS_CANCELLED
+            customer.current_subscription.status = Subscription.STATUS_CANCELLED
             customer.current_subscription.canceled_at = timezone.now()
             customer.current_subscription.save()
         elif event_subtype.startswith("subscription."):

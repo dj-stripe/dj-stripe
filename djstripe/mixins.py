@@ -14,7 +14,7 @@ from django.contrib import messages
 from django.shortcuts import redirect
 
 from . import settings as djstripe_settings
-from .models import Customer, CurrentSubscription
+from .models import Customer, Subscription
 from .utils import subscriber_has_active_subscription
 
 
@@ -55,5 +55,5 @@ class SubscriptionMixin(PaymentsContextMixin):
         context['is_plans_plural'] = bool(len(djstripe_settings.PLAN_CHOICES) > 1)
         context['customer'], created = Customer.get_or_create(
             subscriber=djstripe_settings.subscriber_request_callback(self.request))
-        context['CurrentSubscription'] = CurrentSubscription
+        context['Subscription'] = Subscription
         return context
