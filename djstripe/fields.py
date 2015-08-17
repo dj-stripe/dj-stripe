@@ -90,6 +90,8 @@ class StripeCurrencyField(StripeFieldMixin, models.DecimalField):
 
     def stripe_to_db(self, data):
         val = super(StripeCurrencyField, self).stripe_to_db(data)
+
+        # Note: 0 is a possible return value, which is 'falseish'
         if val is not None:
             return val / decimal.Decimal("100")
 
@@ -130,8 +132,11 @@ class StripeTextField(StripeFieldMixin, models.TextField):
 class StripeDateTimeField(StripeFieldMixin, models.DateTimeField):
 
     def stripe_to_db(self, data):
-        if not self.deprecated:
-            return convert_tstamp(super(StripeDateTimeField, self).stripe_to_db(data))
+        val = super(StripeDateTimeField, self).stripe_to_db(data)
+
+        # Note: 0 is a possible return value, which is 'falseish'
+        if val is not None:
+            return convert_tstamp(val)
 
 
 class StripeIntegerField(StripeFieldMixin, models.IntegerField):
