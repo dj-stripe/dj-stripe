@@ -167,6 +167,8 @@ class Customer(StripeCustomer):
             return False
 
     def cancel_subscription(self, at_period_end=True):
+        stripe_customer = self.api_retrieve()
+
         try:
             current_subscription = self.current_subscription
         except CurrentSubscription.DoesNotExist:
@@ -179,7 +181,7 @@ class Customer(StripeCustomer):
             """
             if self.current_subscription.trial_end and self.current_subscription.trial_end > timezone.now():
                 at_period_end = False
-            stripe_subscription = self.stripe_customer.cancel_subscription(at_period_end=at_period_end)
+            stripe_subscription = stripe_customer.cancel_subscription(at_period_end=at_period_end)
         except InvalidRequestError as exc:
             raise SubscriptionCancellationFailure("Customer's information is not current with Stripe.\n{}".format(str(exc)))
 
@@ -197,7 +199,7 @@ class Customer(StripeCustomer):
 
     def subscribe(self, plan, quantity=1, trial_days=None,
                   charge_immediately=True, prorate=djstripe_settings.PRORATION_POLICY):
-        stripe_customer = self.stripe_customer
+        stripe_customer = self.api_retrieve()
         """
         Trial_days corresponds to the value specified by the selected plan
         for the key trial_period_days.
@@ -258,7 +260,7 @@ class Customer(StripeCustomer):
 
     def update_card(self, token):
         # send new token to Stripe
-        stripe_customer = self.stripe_customer
+        stripe_customer = self.api_retrieve()
         stripe_customer.card = token
         stripe_customer.save()
 
@@ -269,7 +271,8 @@ class Customer(StripeCustomer):
         card_changed.send(sender=self, stripe_response=stripe_customer)
 
     def update_plan_quantity(self, quantity, charge_immediately=False):
-        stripe_subscription = self.stripe_customer.subscription
+        stripe_customer = self.api_retrieve()
+        stripe_subscription = stripe_customer.subscription
         if not stripe_subscription:
             self._sync_current_subscription()
             raise SubscriptionUpdateFailure("Customer does not have a subscription with Stripe")
@@ -284,15 +287,21 @@ class Customer(StripeCustomer):
         self.save()
 
     def _sync_invoices(self, **kwargs):
-        for invoice in self.stripe_customer.invoices(**kwargs).data:
+        stripe_customer = self.api_retrieve()
+
+        for invoice in stripe_customer.invoices(**kwargs).data:
             Invoice.sync_from_stripe_data(invoice, send_receipt=False)
 
     def _sync_charges(self, **kwargs):
-        for charge in self.stripe_customer.charges(**kwargs).data:
+        stripe_customer = self.api_retrieve()
+
+        for charge in stripe_customer.charges(**kwargs).data:
             self.record_charge(charge.id)
 
     def _sync_current_subscription(self):
-        stripe_subscription = getattr(self.stripe_customer, 'subscription', None)
+        stripe_customer = self.api_retrieve()
+
+        stripe_subscription = getattr(stripe_customer, 'subscription', None)
         current_subscription = getattr(self, 'current_subscription', None)
 
         if stripe_subscription:
@@ -430,7 +439,9 @@ class CurrentSubscription(TimeStampedModel):
 
         period_end += delta
 
-        self.customer.stripe_customer.update_subscription(
+        stripe_customer = self.customer.api_retrieve()
+
+        stripe_customer.update_subscription(
             prorate=False,
             trial_end=period_end,
         )

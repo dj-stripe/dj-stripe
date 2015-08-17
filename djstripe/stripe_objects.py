@@ -485,7 +485,7 @@ class StripeCustomer(StripeObject):
         )
 
     def _sync_card(self):
-        stripe_customer = self.stripe_customer
+        stripe_customer = self.api_retrieve()
 
         self.card_fingerprint = stripe_customer.active_card.fingerprint
         self.card_last_4 = stripe_customer.active_card.last4
@@ -494,7 +494,7 @@ class StripeCustomer(StripeObject):
         self.card_exp_year = stripe_customer.active_card.exp_year
 
     def _sync(self):
-        stripe_customer = self.stripe_customer
+        stripe_customer = self.api_retrieve()
 
         if getattr(stripe_customer, 'deleted', False):
             # Customer was deleted from stripe
