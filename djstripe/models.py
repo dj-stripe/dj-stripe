@@ -30,7 +30,6 @@ from .signals import webhook_processing_error
 from .stripe_objects import (StripeSource, StripeCharge, StripeCustomer, StripeCard, StripePlan,
                              StripeInvoice, StripeTransfer, StripeAccount, StripeEvent, StripeSubscription)
 from .utils import convert_tstamp
-from djstripe.stripe_objects import 
 
 logger = logging.getLogger(__name__)
 

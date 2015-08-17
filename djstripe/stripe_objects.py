@@ -231,7 +231,7 @@ class StripeObject(TimeStampedModel):
 
 
 class StripeSource(PolymorphicModel, StripeObject):
-    customer = models.ForeignKey("Customer", blank=True, related_name="sources")
+    customer = models.ForeignKey("Customer", related_name="sources")
 
 
 # ============================================================================ #
