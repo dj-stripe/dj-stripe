@@ -14,7 +14,7 @@ from djstripe.stripe_objects import StripeObject, StripeCharField, StripeBoolean
 
 
 SIMPLE_OBJ = {'id': 'yo', 'livemode': True}
-SIMPLE_OBJ_RESULT = {'stripe_id': 'yo', 'description': None, 'livemode': True, 'metadata': None}
+SIMPLE_OBJ_RESULT = {'stripe_id': 'yo', 'description': None, 'livemode': True, 'metadata': None, 'stripe_timestamp': None}
 
 
 class StripeObjectExceptionsTest(TestCase):
