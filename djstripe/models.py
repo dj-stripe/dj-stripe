@@ -139,7 +139,7 @@ class Customer(StripeCustomer):
 
     def purge(self):
         try:
-            self.stripe_customer.delete()
+            self._api_delete()
         except InvalidRequestError as exc:
             if str(exc).startswith("No such customer:"):
                 # The exception was thrown because the stripe customer was already
