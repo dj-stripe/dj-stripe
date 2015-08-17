@@ -231,7 +231,7 @@ class StripeObject(TimeStampedModel):
 
 
 class StripeSource(PolymorphicModel, StripeObject):
-    pass
+    customer = models.ForeignKey("Customer", blank=True, related_name="sources")
 
 
 # ============================================================================ #
@@ -399,26 +399,39 @@ class StripeCharge(StripeObject):
 
 
 class StripeCustomer(StripeObject):
+    """
+    Customer objects allow you to perform recurring charges and track multiple charges that are
+    associated with the same customer. (Source: https://stripe.com/docs/api/python#charges)
+
+    # = Mapping the values of this field isn't currently on our roadmap.
+        Please use the stripe dashboard to check the value of this field instead.
+
+    Fields not implemented:
+    * object: Unnecessary. Just check the model name.
+    * discount: #
+    * email: Unnecessary. See ``Customer.subscriber.email``.
+
+    Stripe API_VERSION: model fields and methods audited to 2015-07-28 - @kavdev
+    """
 
     class Meta:
         abstract = True
 
     stripe_api_name = "Customer"
 
-    card_fingerprint = StripeCharField(max_length=200, blank=True)
-    card_last_4 = StripeCharField(max_length=4, blank=True)
-    card_kind = StripeCharField(max_length=50, blank=True)
-    card_exp_month = StripePositiveIntegerField(blank=True, null=True)
-    card_exp_year = StripePositiveIntegerField(blank=True, null=True)
+    account_balance = StripeIntegerField(null=True, help_text="Current balance, if any, being stored on the customer's account. If negative, the customer has credit to apply to the next invoice. If positive, the customer has an amount owed that will be added to the next invoice. The balance does not refer to any unpaid invoices; it solely takes into account amounts that have yet to be successfully applied to any invoice. This balance is only taken into account for recurring charges.")
+    currency = StripeCharField(max_length=3, null=True, help_text="The currency the customer can be charged in for recurring billing purposes (subscriptions, invoices, invoice items).")
+    delinquent = StripeBooleanField(default=False, help_text="Whether or not the latest charge for the customer’s latest invoice has failed.")
 
-    @property
-    def stripe_customer(self):
-        return self.api_retrieve()
+    # Deprecated fields
+    card_fingerprint = StripeCharField(max_length=200, deprecated=True)
+    card_last_4 = StripeCharField(max_length=4, deprecated=True)
+    card_kind = StripeCharField(max_length=50, deprecated=True)
+    card_exp_month = StripePositiveIntegerField(deprecated=True)
+    card_exp_year = StripePositiveIntegerField(deprecated=True)
 
     def purge(self):
-        """
-        Delete all identifying information we have in this record
-        """
+        """Delete all identifying information we have in this record."""
         self.card_fingerprint = ""
         self.card_last_4 = ""
         self.card_kind = ""
@@ -426,26 +439,47 @@ class StripeCustomer(StripeObject):
         self.card_exp_year = None
 
     def has_valid_card(self):
+        """remove in favor of sources"""
         return all([self.card_fingerprint, self.card_last_4, self.card_kind])
 
-    def charge(self, amount, currency="usd", description=None, send_receipt=True, **kwargs):
+    def charge(self, amount, currency="usd", source=None, description=None, capture=True,
+               statement_descriptor=None, metadata=None, shipping=None):
         """
-        This method expects `amount` to be a Decimal type representing a
-        dollar amount. It will be converted to cents so any decimals beyond
-        two will be ignored.
+        Creates a charge for this customer.
+
+        :param amount: The amount to charge.
+        :type amount: Decimal. Precision is 2; anything more will be ignored.
+        :param currency: 3-letter ISO code for currency
+        :type currency: string
+        :param source: The source to use for this charge. Must be a source attributed to this customer. If None,
+                       the customer's default source is used.
+        :type source: StripeSource
+        :param description: An arbitrary string.
+        :type description: string
+        :param metadata: A set of key/value pairs useful for storing additional information.
+        :type metadata: dict
+        :param capture: Whether or not to immediately capture the charge. When false, the charge issues an
+                        authorization (or pre-authorization), and will need to be captured later. Uncaptured
+                        charges expire in 7 days.
+        :type capture: bool
+        :param statement_descriptor: An arbitrary string to be displayed on the customer's credit card statement.
+        :type statement_descriptor: string
         """
         if not isinstance(amount, decimal.Decimal):
-            raise ValueError(
-                "You must supply a decimal value representing dollars."
-            )
-        resp = StripeCharge._api_create(
+            raise ValueError("You must supply a decimal value representing dollars.")
+
+        new_charge = StripeCharge._api_create(
             amount=int(amount * 100),  # Convert dollars into cents
             currency=currency,
             customer=self.stripe_id,
+            source=source,
             description=description,
-            **kwargs
+            statement_descriptor=statement_descriptor,
+            metatdata=metadata,
+            shipping=shipping,
         )
-        return resp["id"]
+
+        return new_charge["id"]
 
     def add_invoice_item(self, amount, currency="usd", invoice_id=None, description=None):
         """

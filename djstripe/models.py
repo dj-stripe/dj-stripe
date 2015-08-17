@@ -27,8 +27,10 @@ from .managers import CustomerManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
-from .stripe_objects import StripeSource, StripeCharge, StripeCustomer, StripeCard, StripePlan, StripeInvoice, StripeTransfer, StripeAccount, StripeEvent
+from .stripe_objects import (StripeSource, StripeCharge, StripeCustomer, StripeCard, StripePlan,
+                             StripeInvoice, StripeTransfer, StripeAccount, StripeEvent, StripeSubscription)
 from .utils import convert_tstamp
+from djstripe.stripe_objects import 
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +105,15 @@ class Charge(StripeCharge):
 
 
 class Customer(StripeCustomer):
+    doc = """
+    Note: Sources and Subscriptions are attached via a ForeignKey on StripeSource.
+          Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
+    """
+    __doc__ = getattr(StripeCustomer, "__doc__") + doc
+
     # account = models.ForeignKey(Account, related_name="customers")
+
+    default_source = models.ForeignKey(StripeSource, null=True, related_name="customers")
 
     subscriber = models.OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
     date_purged = models.DateTimeField(null=True, editable=False)
@@ -154,7 +164,22 @@ class Customer(StripeCustomer):
         # Only way to delete a customer is to use SQL
         self.purge()
 
-    def has_active_subscription(self):
+    def has_active_subscription(self, plan=None):
+        """
+        (TODO: )
+
+        Checks to see if this customer has an active subscription to the given plan.
+
+        :param plan: The plan for which to check for an active subscription. If plan is None and
+                     there exists only one subscription, this method will check if that subscription
+                     is active. Calling this method with no plan and multiple subscriptions will throw
+                     an exception.
+        :type plan: Plan or string (plan ID)
+
+        :returns: True if there exists an active subscription, False otherwise.
+        :throws: 
+        """
+
         try:
             return self.current_subscription.is_valid()
         except CurrentSubscription.DoesNotExist:
@@ -223,11 +248,8 @@ class Customer(StripeCustomer):
         return self.has_valid_card() and self.date_purged is None
 
     def charge(self, amount, currency="usd", description=None, send_receipt=True, **kwargs):
-        """
-        This method expects `amount` to be a Decimal type representing a
-        dollar amount. It will be converted to cents so any decimals beyond
-        two will be ignored.
-        """
+        """See ``Charge.create()``."""
+
         charge_id = super(Customer, self).charge(amount, currency, description, send_receipt, **kwargs)
         recorded_charge = self.record_charge(charge_id)
         if send_receipt:
@@ -364,6 +386,10 @@ class Customer(StripeCustomer):
 class Card(StripeCard):
     # account = models.ForeignKey("Account", related_name="cards")
     pass
+
+
+# class Subscription(StripeSubscription):
+#     customer = models.ForeignKey("Customer", blank=True, related_name="subscriptions")
 
 
 class CurrentSubscription(TimeStampedModel):
