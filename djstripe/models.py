@@ -27,7 +27,7 @@ from .managers import CustomerManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
-from .stripe_objects import StripeCharge, StripeCustomer, StripeCard, StripePlan, StripeInvoice, StripeTransfer, StripeAccount, StripeEvent
+from .stripe_objects import StripeSource, StripeCharge, StripeCustomer, StripeCard, StripePlan, StripeInvoice, StripeTransfer, StripeAccount, StripeEvent
 from .utils import convert_tstamp
 
 logger = logging.getLogger(__name__)
@@ -40,10 +40,7 @@ class Charge(StripeCharge):
     invoice = models.ForeignKey("Invoice", null=True, related_name="charges", help_text="The invoice associated with this charge, if it exists.")
     transfer = models.ForeignKey("Transfer", null=True, help_text="The transfer to the destination account (only applicable if the charge was created using the destination parameter).")
 
-    card = models.ForeignKey("Card", null=True, related_name="charges")
-    # TODO: other sources
-    # bank_account = ForeignKey("BankAccount", null=True, related_name="charges")
-    # bitcoin_receiver = ForeignKey("BitcoinReceiver", null=True, related_name="charges")
+    source = models.ForeignKey(StripeSource, null=True, related_name="charges")
 
     receipt_sent = models.BooleanField(default=False)
 
@@ -102,7 +99,7 @@ class Charge(StripeCharge):
 
         # TODO: other sources
         if self.source_type == "card":
-            self.card = cls.stripe_object_to_source(target_cls=Card, data=data)
+            self.source = cls.stripe_object_to_source(target_cls=Card, data=data)
 
 
 class Customer(StripeCustomer):

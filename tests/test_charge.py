@@ -86,7 +86,7 @@ class ChargeTest(TestCase):
         charge = Charge.sync_from_stripe_data(fake_charge_copy)
         self.assertEqual("test_id", charge.source_stripe_id)
         self.assertEqual("unsupported", charge.source_type)
-        self.assertEqual(None, charge.card)
+        self.assertEqual(None, charge.source)
 
     @patch("djstripe.models.Account.get_default_account")
     def test_sync_from_stripe_data_no_customer(self, default_account_mock):

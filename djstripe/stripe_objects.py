@@ -24,6 +24,7 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 
 from model_utils.models import TimeStampedModel
+from polymorphic import PolymorphicModel
 
 from .context_managers import stripe_temporary_api_version
 from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, StripeCurrencyField,
@@ -215,10 +216,8 @@ class StripeObject(TimeStampedModel):
         return smart_text("<{list}>".format(list=", ".join(self.str_parts())))
 
 
-class StripeSource(StripeObject):
-
-    class Meta:
-        abstract = True
+class StripeSource(PolymorphicModel, StripeObject):
+    pass
 
 
 # ============================================================================ #
