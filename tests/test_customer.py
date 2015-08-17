@@ -24,20 +24,20 @@ from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
 from djstripe.models import Account, Customer, Charge, Subscription
 
-from . import FAKE_CHARGE, FAKE_CUSTOMER, FAKE_INVOICE, FAKE_INVOICE_II, FAKE_INVOICE_III, DataList
+from . import FAKE_CHARGE, FAKE_CUSTOMER, FAKE_ACCOUNT, FAKE_INVOICE, FAKE_INVOICE_II, FAKE_INVOICE_III, DataList
 
 
 class TestCustomer(TestCase):
     fake_current_subscription = Subscription(plan="test_plan",
-                                                    quantity=1,
-                                                    start=timezone.now(),
-                                                    amount=decimal.Decimal(25.00))
+                                             quantity=1,
+                                             start=timezone.now(),
+                                             amount=decimal.Decimal(25.00))
 
     fake_current_subscription_cancelled_in_stripe = Subscription(plan="test_plan",
-                                                                        quantity=1,
-                                                                        start=timezone.now(),
-                                                                        amount=decimal.Decimal(25.00),
-                                                                        status=Subscription.STATUS_ACTIVE)
+                                                                 quantity=1,
+                                                                 start=timezone.now(),
+                                                                 amount=decimal.Decimal(25.00),
+                                                                 status=Subscription.STATUS_ACTIVE)
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="patrick", email="patrick@gmail.com")
@@ -226,12 +226,12 @@ class TestCustomer(TestCase):
         self.customer.charge(
             amount=decimal.Decimal("10.00"),
             capture=True,
-            destination='a_stripe_client_id'
+            destination=FAKE_ACCOUNT,
         )
 
         _, kwargs = charge_create_mock.call_args
         self.assertEquals(kwargs["capture"], True)
-        self.assertEquals(kwargs["destination"], 'a_stripe_client_id')
+        self.assertEquals(kwargs["destination"], FAKE_ACCOUNT["id"])
 
     @patch("djstripe.models.djstripe_settings.trial_period_for_subscriber_callback", return_value="donkey")
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
