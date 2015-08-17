@@ -197,6 +197,20 @@ class StripeObject(TimeStampedModel):
         if "customer" in data and data["customer"]:
             return target_cls.get_or_create_from_stripe_object(data, "customer")[0]
 
+    @classmethod
+    def stripe_object_to_source(cls, target_cls, data):
+        """
+        Search the given manager for the source matching this StripeCharge object's ``source`` field.
+        Note that the source field is already expanded in each request, and that it is required.
+
+        :param target_cls: The target class
+        :type target_cls: StripeSource
+        :param data: stripe object
+        :type data: dict
+        """
+
+        return target_cls.get_or_create_from_stripe_object(data["source"])[0]
+
     def _sync(self, data):
         for attr, value in data.items():
             setattr(self, attr, value)
@@ -343,20 +357,6 @@ class StripeCharge(StripeObject):
 
         if "invoice" in data and data["invoice"]:
             return target_cls.get_or_create_from_stripe_object(data, "invoice")[0]
-
-    @classmethod
-    def stripe_object_to_source(cls, target_cls, data):
-        """
-        Search the given manager for the source matching this StripeCharge object's ``source`` field.
-        Note that the source field is already expanded in each request, and that it is required.
-
-        :param target_cls: The target class
-        :type target_cls: StripeSource
-        :param data: stripe object
-        :type data: dict
-        """
-
-        return target_cls.get_or_create_from_stripe_object(data["source"])[0]
 
     @classmethod
     def stripe_object_destination_to_account(cls, target_cls, data):
