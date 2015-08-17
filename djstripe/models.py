@@ -157,9 +157,6 @@ class Customer(StripeCustomer):
         # Only way to delete a customer is to use SQL
         self.purge()
 
-    def can_charge(self):
-        return self.has_valid_card() and self.date_purged is None
-
     def has_active_subscription(self):
         try:
             return self.current_subscription.is_valid()
@@ -224,6 +221,9 @@ class Customer(StripeCustomer):
         if charge_immediately:
             self.send_invoice()
         subscription_made.send(sender=self, plan=plan, stripe_response=resp)
+
+    def can_charge(self):
+        return self.has_valid_card() and self.date_purged is None
 
     def charge(self, amount, currency="usd", description=None, send_receipt=True, **kwargs):
         """
