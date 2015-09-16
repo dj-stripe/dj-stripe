@@ -606,8 +606,12 @@ class Charge(StripeCharge):
 
     objects = ChargeManager()
 
-    def refund(self, amount=None):
-        refunded_charge = super(Charge, self).refund(amount)
+    def refund(self, amount=None, **kwargs):
+        """
+        Refund an existing charge https://stripe.com/docs/api#create_refund
+        Stripe Connect information https://stripe.com/docs/connect/payments-fees#issuing-refunds
+        """
+        refunded_charge = super(Charge, self).refund(amount, **kwargs)
         return Charge.sync_from_stripe_data(refunded_charge)
 
     def capture(self):
