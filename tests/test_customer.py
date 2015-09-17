@@ -4,7 +4,7 @@
 
 .. moduleauthor:: Daniel Greenfeld (@pydanny)
 .. moduleauthor:: Alex Kavanaugh (@kavdev)
-.. moduleauthor:: Michael Thronhill (@mthornhill)
+.. moduleauthor:: Michael Thornhill (@mthornhill)
 
 """
 
