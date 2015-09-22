@@ -191,8 +191,8 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                 if PRORATION_POLICY_FOR_UPGRADES:
                     current_subscription_amount = customer.current_subscription.amount
                     selected_plan_name = form.cleaned_data["plan"]
-                    selected_plan = next(  # pragma: no cover
-                        (plan for plan in PLAN_LIST if plan["plan"] == selected_plan_name)  # pragma: no cover
+                    selected_plan = next(
+                        (plan for plan in PLAN_LIST if plan["plan"] == selected_plan_name)
                     )
                     selected_plan_price = selected_plan["price"] / decimal.Decimal("100")
 
