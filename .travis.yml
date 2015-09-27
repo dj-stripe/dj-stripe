@@ -1,8 +1,18 @@
 # Config file for automatic testing at travis-ci.org
 
+# Trying out new travis containers
+# http://docs.travis-ci.com/user/migrating-from-legacy/?utm_source=legacy-notice&utm_medium=banner&utm_campaign=legacy-upgrade
+sudo: false
+
 language: python
 
+# Leverage the pip cache
+cache:
+  directories:
+    - $HOME/.cache/pip
+
 python:
+  - 3.5
   - 3.4
   - 2.7
 
@@ -11,7 +21,7 @@ env:
   - DJANGO=1.8
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
-install: 
+install:
   - pip install -r requirements_test.txt
 
 before_script:
@@ -19,3 +29,9 @@ before_script:
 
 # command to run tests, e.g. python setup.py test
 script: python runtests.py
+
+# Running codecov
+before_install:
+  pip install codecov
+after_success:
+  codecov

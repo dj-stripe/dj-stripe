@@ -126,3 +126,54 @@ On the subscriber's customer object, use the charge method to generate a Stripe 
     customer.charge(amount)
 
 Source code for the Customer.charge method is at https://github.com/pydanny/dj-stripe/blob/master/djstripe/models.py#L573-L596
+
+REST API
+--------
+
+The subscriptions can be accessed through a REST API. Make sure you have
+Django Rest Framework installed
+(https://github.com/tomchristie/django-rest-framework).
+
+The REST API endpoints require an authenticated user. GET will provide the
+current subscription of the user. POST will create a new current subscription.
+DELETE will cancel the current subscription, based on the settings.
+
+- /subscription/ (GET)
+    - input
+        - None
+
+    - output (200)
+
+        - id (int)
+        - created (date)
+        - modified (date)
+        - plan (string)
+        - quantity (int)
+        - start (date)
+        - status (string)
+        - cancel_at_period_end (boolean)
+        - canceled_at (date)
+        - current_period_end (date)
+        - current_period_start (date)
+        - ended_at (date)
+        - trial_end (date)
+        - trial_start (date)
+        - amount (float)
+        - customer (int)
+
+
+- /subscription/ (POST)
+    - input
+        - stripe_token (string)
+        - plan (string)
+
+    - output (201)
+        - stripe_token (string)
+        - plan (string)
+
+- /subscription/ (DELETE)
+    - input
+        - None
+
+    - Output (204)
+        - None

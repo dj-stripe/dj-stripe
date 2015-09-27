@@ -3,7 +3,17 @@
 History
 =======
 
-0.6.0 (2015-06-??)
+0.7.0 (2015-09-22)
+---------------------
+* dj-stripe now responds to the invoice.created event (Thanks @wahuneke)
+* dj-stripe now cancels subscriptions and purges customers during sync if they were deleted from the stripe dashboard (Thanks @unformatt)
+* dj-stripe now checks for an active stripe subscription in the ``update_plan_quantity`` call (Thanks @ctrengove)
+* Event processing is now handled by "event handlers" - functions outside of models that respond to various event types and subtypes. Documentation on how to tie into the event handler system coming soon. (Thanks @wahuneke)
+* Experimental Python 3.5 support
+* Support for Django 1.6 and lower is now officially gone.
+* Much, much more!
+
+0.6.0 (2015-07-12)
 ---------------------
 
 * Support for Django 1.6 and lower is now deprecated.
@@ -12,6 +22,13 @@ History
 * InvoiceItems.plan can now be null (as it is with individual charges), resolving #140 (Thanks @awechsler and @MichelleGlauser for help troubleshooting)
 * Email templates are now packaged during distribution.
 * sync_plans now takes an optional api_key
+* 100% test coverage
+* Stripe ID is now returned as part of each model's str method (Thanks @areski)
+* Customer model now stores card expiration month and year (Thanks @jpadilla)
+* Ability to extend subscriptions (Thanks @TigerDX)
+* Support for plan heirarchies (Thanks @chrissmejia)
+* Rest API endpoints for Subscriptions [contrib] (Thanks @philippeluickx)
+* Admin interface search by email funtionality is removed (#221) (Thanks @jpadilla)
 
 0.5.0 (2015-05-25)
 ---------------------
@@ -66,7 +83,7 @@ History
 * Clarify documentation for redirects on app_name.
 * If settings.DEBUG is True, then django-debug-toolbar is exempt from redirect to subscription form.
 * Use collections.OrderedDict to ensure that plans are listed in order of price.
-* Add ``ordereddict`` library to support Python 2.6 users. 
+* Add ``ordereddict`` library to support Python 2.6 users.
 * Switch from ``__unicode__`` to ``__str__`` methods on models to better support Python 3.
 * Add ``python_2_unicode_compatible`` decorator to Models.
 * Check for PY3 so the ``unicode(self.user)`` in models.Customer doesn't blow up in Python 3.
@@ -127,7 +144,7 @@ History
 0.2.6 (2013-08-20)
 ----------------------
 
-* Changed name of division tag to djdiv. 
+* Changed name of division tag to djdiv.
 * Added ``safe_setting.py`` module to handle edge cases when working with custom user models.
 * Added cookbook page in the documentation.
 

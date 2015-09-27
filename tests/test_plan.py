@@ -14,7 +14,7 @@ class MockForm(object):
     cleaned_data = {}
 
 
-class TestPlan(TestCase):
+class TestPlanAdmin(TestCase):
 
     def setUp(self):
         self.plan = Plan.objects.create(
@@ -68,3 +68,28 @@ class TestPlan(TestCase):
                                    form=MockForm(), change=True)
 
         Plan.objects.get(name=self.plan.name)
+
+
+class PlanTest(TestCase):
+
+    def setUp(self):
+        self.test_name = "test_name"
+        self.test_stripe_id = "plan_xxxxxxxxxxxx"
+
+        self.plan = Plan(name=self.test_name, stripe_id=self.test_stripe_id)
+
+    @patch("djstripe.models.Plan.objects.create")
+    @patch("djstripe.models.Plan.api_create")
+    def test_create_with_metadata(self, ApiCreateMock, ObjectsCreateMock):
+        metadata = {'other_data': 'more_data'}
+        Plan.create(metadata=metadata, arg1=1, arg2=2, amount=1, stripe_id=1)
+        ApiCreateMock.assert_called_once_with(metadata=metadata, id=1, arg1=1, arg2=2, amount=100)
+        ObjectsCreateMock.assert_called_once_with(stripe_id=1, arg1=1, arg2=2, amount=1)
+
+    def test_str(self):
+        self.assertEqual("<test_name, stripe_id=plan_xxxxxxxxxxxx>", str(self.plan))
+
+    @patch("stripe.Plan.retrieve", return_value="soup")
+    def test_stripe_plan(self, plan_retrieve_mock):
+        self.assertEqual("soup", self.plan.stripe_plan)
+        plan_retrieve_mock.assert_called_once_with(self.test_stripe_id)
