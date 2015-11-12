@@ -57,27 +57,28 @@
                     </thead>
                     <tbody>
 
-                        {% for plan in plans %}
-                            <tr {% if plan.plan == subscription.plan %}
-        						{% if subscription.is_status_current and not subscription.is_status_temporarily_current and subscription.status != subscription.STATUS_TRIALING %}
-        							class="success"
-        						{% elif subscription.is_status_temporarily_current or subscription.status == subscription.STATUS_TRIALING %}
-        							class="warning"
-        						{% endif %}
-        					{% endif %}>
+                    {% for plan in plans %}
+                        <tr {% if plan.plan == subscription.plan %}
+                            {% if subscription.is_status_current and not subscription.is_status_temporarily_current and subscription.status != subscription.STATUS_TRIALING %}
+                                class="success"
+                            {% elif subscription.is_status_temporarily_current or subscription.status == subscription.STATUS_TRIALING %}
+                                class="warning"
+                            {% endif %}
+                        {% endif %}>
 
-                                <td>{{ plan.name }}</td>
-                                <td>{{ plan.interval.title }}ly</td>
-                                <td>{{ plan.description }}</td>
-                                <td>
-                                	{% if plan.plan == subscription.plan and subscription.status != subscription.STATUS_CANCELLED %}
-                                        <strong>Your plan</strong>
-                                    {% else %}
-                                        Not your plan
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
+                            <td>{{ plan.name }}</td>
+                            <td>{{ plan.interval.title }}ly</td>
+                            <td>{{ plan.description }}</td>
+                            <td>
+                                {% if plan.plan == subscription.plan and subscription.status != subscription.STATUS_CANCELLED %}
+                                    <strong>Your plan</strong>
+                                {% else %}
+                                    Not your plan
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+
                     </tbody>
                 </table>
             </div>
