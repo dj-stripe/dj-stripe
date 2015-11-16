@@ -39,8 +39,8 @@ def run_test_suite(args):
         USE_TZ=True,
         DATABASES={
             "default": {
-                "ENGINE": "django.db.backends.postgresql_psycopg2",
-                "NAME": "djstripe",
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': 'testdb.sqlite3',
                 "USER": "",
                 "PASSWORD": "",
                 "HOST": "",
@@ -74,7 +74,8 @@ def run_test_suite(args):
                 "description": "A test plan",
                 "price": 1000,  # $10.00
                 "currency": "usd",
-                "interval": "month"
+                "interval": "month",
+                "tag": "category1"
             },
             "test": {
                 "stripe_plan_id": "test_id",
@@ -82,7 +83,8 @@ def run_test_suite(args):
                 "description": "Another test plan",
                 "price": 2500,  # $25.00
                 "currency": "usd",
-                "interval": "month"
+                "interval": "month",
+                "tag": "category1"
             },
             "test2": {
                 "stripe_plan_id": "test_id_2",
@@ -90,7 +92,8 @@ def run_test_suite(args):
                 "description": "Yet Another test plan",
                 "price": 5000,  # $50.00
                 "currency": "usd",
-                "interval": "month"
+                "interval": "month",
+                "tag": "category1"
             },
             "test_deletion": {
                 "stripe_plan_id": "test_id_3",
@@ -98,7 +101,8 @@ def run_test_suite(args):
                 "description": "Test plan for deletion.",
                 "price": 5000,  # $50.00
                 "currency": "usd",
-                "interval": "month"
+                "interval": "month",
+                "tag": "category2"
             },
             "test_trial": {
                 "stripe_plan_id": "test_id_4",
@@ -107,6 +111,7 @@ def run_test_suite(args):
                 "price": 7000,  # $70.00
                 "currency": "usd",
                 "interval": "month",
+                "tag": "category2",
                 "trial_period_days": 7
             },
             "unidentified_test_plan": {
@@ -114,10 +119,11 @@ def run_test_suite(args):
                 "description": "A test plan with no ID.",
                 "price": 2500,  # $25.00
                 "currency": "usd",
-                "interval": "month"
+                "interval": "month",
+                "tag": "category2"
             }
         },
-        DJSTRIPE_PLAN_HIERARCHY = {
+        DJSTRIPE_PLAN_HIERARCHY={
             "bronze": {
                 "level": 1,
                 "plans": [
@@ -145,6 +151,18 @@ def run_test_suite(args):
             "test_url_name",
             "testapp_namespaced:test_url_namespaced",
         ),
+        DJSTRIPE_PLANS_TAGS={
+            "category1": {
+                "button_description": "Cat1",
+                "full_description": "This is a description of the first category",
+            },
+            "category2": {
+                "button_description": "Cat2",
+                "full_description": "This is a description of the second category",
+            },
+        },
+        DJSTRIPE_PLANS_TAGS_DEFAULT="category1",
+        DJSTRIPE_PLANS_LOGIN_URL="/login/",
     )
 
     # Avoid AppRegistryNotReady exception
