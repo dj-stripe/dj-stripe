@@ -5,7 +5,7 @@ Settings
 DJSTRIPE_DEFAULT_PLAN (=None)
 ====================================
 
-Payment plans default. 
+Payment plans default.
 
 Possibly deprecated in favor of model based plans.
 
@@ -17,7 +17,7 @@ Invoice emails come from this address.
 DJSTRIPE_PLANS (={})
 ===========================
 
-Payment plans. 
+Payment plans.
 
 Possibly deprecated in favor of model based plans.
 
@@ -33,6 +33,7 @@ Example:
             "price": 2499,  # $24.99
             "currency": "usd",
             "interval": "month",
+            "tag": "category1",
             "image": "img/pro-monthly.png"
         },
         "yearly": {
@@ -42,6 +43,7 @@ Example:
             "price": 19900,  # $199.00
             "currency": "usd",
             "interval": "year",
+            "tag": "category1",
             "image": "img/pro-yearly.png"
         }
     }
@@ -50,6 +52,8 @@ Example:
 
     Not all properties listed in the plans above are used by Stripe - i.e 'description' and 'image',
     which are used to display the plans description and related image within specific templates.
+    The setting 'tag' is used to filter and display categories for plans, 'tag' will show useful if you
+    have numerous plans and/or some are relevant for some specific users.
 
     Although any arbitrary property you require can be added to each plan listed in DJ_STRIPE_PLANS,
     only specific properties are used by Stripe. The full list of required and optional arguments can
@@ -60,7 +64,7 @@ Example:
 DJSTRIPE_PRORATION_POLICY (=False)
 ====================================
 
-By default, plans are not prorated in dj-stripe. Concretely, this is how this translates: 
+By default, plans are not prorated in dj-stripe. Concretely, this is how this translates:
 
 1) If a customer cancels their plan during a trial, the cancellation is effective right away.
 2) If a customer cancels their plan outside of a trial, their subscription remains active until the subscription's period end, and they do not receive a refund.
@@ -133,7 +137,7 @@ Example Model:
         name = CharField(max_length=200, unique=True)
         subdomain = CharField(max_length=63, unique=True, verbose_name="Organization Subdomain")
         owner = ForeignKey(settings.AUTH_USER_MODEL, related_name="organization_owner", verbose_name="Organization Owner")
-        
+
         @property
         def email(self):
             return self.owner.email
@@ -153,7 +157,7 @@ Examples:
 
     class DynamicOrganizationIDMiddleware(object):
         """ Adds the current organization's ID based on the subdomain."""
-    
+
         def process_request(self, request):
             subdomain = parse_subdomain(request.get_host())
 
@@ -163,7 +167,7 @@ Examples:
                 return TemplateResponse(request=request, template='404.html', status=404)
             else:
                 organization_id = organization.id
-    
+
             request.organization_id = organization_id
 
 `settings.py`
@@ -198,7 +202,7 @@ Examples:
         Adds a static trial period of 7 days to each subscriber's plan,
         unless they've accepted our month-long promotion.
         """
-        
+
         if subscriber.coupons.get(slug="monthlongtrial"):
             return 30
         else:
@@ -218,3 +222,57 @@ DJSTRIPE_CURRENCIES (=(('usd', 'U.S. Dollars',), ('gbp', 'Pounds (GBP)',), ('eur
 ==============================================================================================
 
 A Field.choices list of allowed currencies for Plan models.
+
+
+DJSTRIPE_PLANS_TAGS (={})
+===========================
+
+Provide full description and the button text for the payment plans tags.
+
+Example:
+
+.. code-block:: python
+
+    DJSTRIPE_PLANS_TAGS = {
+        "category1": {
+            "button_description": "Cat1",
+            "full_description": "This is a description of the first category",
+        },
+        "category2": {
+            "button_description": "Cat2",
+            "full_description": "This is a description of the second category",
+        },
+    }
+
+
+.. note:: Plan tags
+
+    Tagging on plans is useful if you have many plans and you want to provide to your user
+    an easy way to select subsets of your plans.
+
+
+DJSTRIPE_PLANS_TAGS_DEFAULT (=None)
+=============================================
+
+This setting allows to select the first plans that will be display on the subscribe views.
+
+Accepted values for DJSTRIPE_PLANS_TAGS_DEFAULT are the keys of 'DJSTRIPE_PLANS_TAGS'
+dictionary, e.g. 'category1', in this case only the 'DJSTRIPE_PLANS' with tag equal to
+'DJSTRIPE_PLANS_TAGS_DEFAULT' will be displayed.
+
+Example:
+
+.. code-block:: python
+
+    DJSTRIPE_PLANS_TAGS = "category1"
+
+
+DJSTRIPE_PLANS_LOGIN_URL (=None)
+=============================================
+
+This allows to set login url when landing on subscribe view without being logged.
+Example:
+
+.. code-block:: python
+
+    DJSTRIPE_PLANS_LOGIN_URL = "/login/"

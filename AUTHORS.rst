@@ -34,3 +34,4 @@ Contributors
 * Ben Whalley
 * nanvel
 * jRobb (@jamesbrobb)
+* Areski Belaid (@areski)

@@ -55,7 +55,8 @@ settings.configure(
             "description": "A test plan",
             "price": 1000,  # $10.00
             "currency": "usd",
-            "interval": "month"
+            "interval": "month",
+            "tag": "category1"
         },
         "test": {
             "stripe_plan_id": "test_id",
@@ -63,7 +64,8 @@ settings.configure(
             "description": "Another test plan",
             "price": 2500,  # $25.00
             "currency": "usd",
-            "interval": "month"
+            "interval": "month",
+            "tag": "category1"
         },
         "test2": {
             "stripe_plan_id": "test_id_2",
@@ -71,7 +73,8 @@ settings.configure(
             "description": "Yet Another test plan",
             "price": 5000,  # $50.00
             "currency": "usd",
-            "interval": "month"
+            "interval": "month",
+            "tag": "category1"
         },
         "test_deletion": {
             "stripe_plan_id": "test_id_3",
@@ -79,7 +82,8 @@ settings.configure(
             "description": "Test plan for deletion.",
             "price": 5000,  # $50.00
             "currency": "usd",
-            "interval": "month"
+            "interval": "month",
+            "tag": "category2"
         },
         "test_trial": {
             "stripe_plan_id": "test_id_4",
@@ -88,6 +92,7 @@ settings.configure(
             "price": 7000,  # $70.00
             "currency": "usd",
             "interval": "month",
+            "tag": "category2",
             "trial_period_days": 7
         },
         "unidentified_test_plan": {
@@ -95,7 +100,8 @@ settings.configure(
             "description": "A test plan with no ID.",
             "price": 2500,  # $25.00
             "currency": "usd",
-            "interval": "month"
+            "interval": "month",
+            "tag": "category2"
         }
     },
     DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS=(
@@ -103,6 +109,17 @@ settings.configure(
         "test_url_name",
         "testapp_namespaced:test_url_namespaced"
     ),
+    DJSTRIPE_PLANS_TAGS={
+        "category1": {
+            "button_description": "Cat1",
+            "full_description": "This is a description of the first category",
+        },
+        "category2": {
+            "button_description": "Cat2",
+            "full_description": "This is a description of the second category",
+        },
+    },
+    DJSTRIPE_PLANS_LOGIN_URL="/login/"
 )
 
 # Avoid AppRegistryNotReady exception
