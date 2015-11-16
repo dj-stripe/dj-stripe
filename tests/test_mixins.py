@@ -70,6 +70,12 @@ class TestPaymentsContextMixin(TestCase):
         self.assertIn("PAYMENT_PLANS", context, "PAYMENT_PLANS missing from context.")
         self.assertEqual(context["PAYMENT_PLANS"], djstripe_settings.PAYMENT_PLANS, "Incorrect PAYMENT_PLANS.")
 
+        self.assertIn("DJSTRIPE_PLANS_TAGS", context, "DJSTRIPE_PLANS_TAGS missing from context.")
+        self.assertEqual(context["DJSTRIPE_PLANS_TAGS"], djstripe_settings.DJSTRIPE_PLANS_TAGS, "Incorrect DJSTRIPE_PLANS_TAGS.")
+
+        self.assertIn("DJSTRIPE_PLANS_TAGS_DEFAULT", context, "DJSTRIPE_PLANS_TAGS_DEFAULT missing from context.")
+        self.assertEqual(context["DJSTRIPE_PLANS_TAGS_DEFAULT"], djstripe_settings.DJSTRIPE_PLANS_TAGS_DEFAULT, "Incorrect DJSTRIPE_PLANS_TAGS_DEFAULT.")
+
 
 class TestSubscriptionMixin(TestCase):
 

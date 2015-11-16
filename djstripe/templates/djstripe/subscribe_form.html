@@ -18,6 +18,22 @@
     <div class="alert alert-error">{{ view.error }}</div>
 {% endif %}
 
+{% if PLAN_TAGS and not SELECTED_TAG %}
+<div class="row">
+    <div class="col-xs-12">
+    <h4>Select your subscription type:</h4>
+    {% for plan_tag_k, plan_tag_v in PLAN_TAGS.items %}
+        <div class="col-sm-4 col-md-4 col-lg-3">
+            <button type="button" class="btn btn-info" id="button_{{ plan_tag_k }}">{{ plan_tag_v.button_description }}</button>
+            <br/>
+            {{ plan_tag_v.full_description }}
+        </div>
+    {% endfor %}
+    </div>
+</div>
+<hr/>
+{% endif %}
+
 <div class="row">
     {% for plan in PLAN_LIST %}
       {% with plan_count=PLAN_LIST|length %}
@@ -25,21 +41,21 @@
       {% endwith %}
             <form
               {% if not customer.current_subscription or customer.current_subscription.status == CurrentSubscription.STATUS_CANCELLED %}
-                  action="{% url 'djstripe:subscribe' %}" class="djstripe-subscribe"  
+                  action="{% url 'djstripe:subscribe' %}" class="djstripe-subscribe"
                   data-key="{{ STRIPE_PUBLIC_KEY }}"
                   data-amount="{{ plan.price }}"
                   data-name="{{ plan.name }}"
                   data-description="{{ plan.description }}"
               {% else %}
-                  data-stripe-key="{{ STRIPE_PUBLIC_KEY }}" 
+                  data-stripe-key="{{ STRIPE_PUBLIC_KEY }}"
                   action="{% url 'djstripe:change_plan' %}" class="djstripe-change-plan"
               {% endif %}
             method="POST">
 
-               
+
                 {% csrf_token %}
                 <input type="hidden" name="plan" value="{{ plan.plan }}" />
-                <input name="stripe_token" type="hidden" /> 
+                <input name="stripe_token" type="hidden" />
 
                 <!-- disable this when clicked -->
                 <button
@@ -70,12 +86,15 @@
 
 {% endblock content %}
 
+{% block footer %}
+{% endblock footer %}
+
 {% block javascript %}
 {{ block.super }}
 <script src="https://checkout.stripe.com/v2/checkout.js"></script>
 <script text="text/javascript">
     $(function() {
-        
+
         $('body').on("click", '.djstripe-subscribe button[type=submit]', function(e) {
           e.preventDefault();
           // retrieve current $(".djstripe-subscribe")
@@ -107,5 +126,31 @@
         {% endif %}
 
     });
+
+    // Code to show/hide tags div
+    {% if PLAN_TAGS and not SELECTED_TAG %}
+    $(function() {
+      // start by showing the default
+      {% for plan_tag_k in PLAN_TAGS %}
+        {% if plan_tag_k == PLAN_TAGS_DEFAULT %}
+          $(".div_{{ plan_tag_k }}").show();
+        {% else %}
+          $(".div_{{ plan_tag_k }}").hide();
+        {% endif %}
+      {% endfor %}
+      // main loop for tags
+      {% for plan_tag in PLAN_TAGS %}
+        $("#button_{{ plan_tag }}").click(function () {
+          {% for plan_tag_k in PLAN_TAGS %}
+            {% if plan_tag_k == plan_tag %}
+              $(".div_{{ plan_tag_k }}").show();
+            {% else %}
+              $(".div_{{ plan_tag_k }}").hide();
+            {% endif %}
+          {% endfor %}
+        });
+      {% endfor %}
+    });
+    {% endif %}
 </script>
 {% endblock javascript %}

@@ -32,6 +32,10 @@ urlpatterns = [
         name="account"
     ),
     url(
+        r'^subscribe/(?P<selected_tag>[a-z_]+)/$',
+        views.SubscriptionView.as_view()
+    ),
+    url(
         r"^subscribe/$",
         views.SubscribeFormView.as_view(),
         name="subscribe"

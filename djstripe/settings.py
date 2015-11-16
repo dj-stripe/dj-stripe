@@ -16,6 +16,11 @@ INVOICE_FROM_EMAIL = getattr(settings, "DJSTRIPE_INVOICE_FROM_EMAIL", "billing@e
 PAYMENTS_PLANS = getattr(settings, "DJSTRIPE_PLANS", {})
 PLAN_HIERARCHY = getattr(settings, "DJSTRIPE_PLAN_HIERARCHY", {})
 
+# For tag support
+DJSTRIPE_PLANS_TAGS = getattr(settings, "DJSTRIPE_PLANS_TAGS", {})
+DJSTRIPE_PLANS_TAGS_DEFAULT = getattr(settings, "DJSTRIPE_PLANS_TAGS_DEFAULT", None)
+DJSTRIPE_PLANS_LOGIN_URL = getattr(settings, "DJSTRIPE_PLANS_LOGIN_URL", 'None')
+
 # Sort the PAYMENT_PLANS dictionary ascending by price.
 PAYMENT_PLANS = OrderedDict(sorted(PAYMENTS_PLANS.items(), key=lambda t: t[1]['price']))
 PLAN_CHOICES = [(plan, PAYMENTS_PLANS[plan].get("name", plan)) for plan in PAYMENTS_PLANS]
