@@ -30,6 +30,7 @@ from .settings import PLAN_LIST
 from .settings import subscriber_request_callback
 from .settings import PRORATION_POLICY_FOR_UPGRADES
 from .settings import CANCELLATION_AT_PERIOD_END
+from .settings import DJSTRIPE_PLANS_LOGIN_URL
 from .sync import sync_subscriber
 
 
@@ -41,6 +42,7 @@ from .sync import sync_subscriber
 class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
     """Shows account details including customer and subscription details."""
     template_name = "djstripe/account.html"
+    login_url = DJSTRIPE_PLANS_LOGIN_URL
 
     def get_context_data(self, *args, **kwargs):
         context = super(AccountView, self).get_context_data(**kwargs)
@@ -62,6 +64,7 @@ class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
 class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
     """TODO: Needs to be refactored to leverage forms and context data."""
     template_name = "djstripe/change_card.html"
+    login_url = DJSTRIPE_PLANS_LOGIN_URL
 
     def get_object(self):
         if hasattr(self, "customer"):
@@ -107,6 +110,7 @@ class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
     template_name = "djstripe/history.html"
     model = Customer
     select_related = ["invoice"]
+    login_url = DJSTRIPE_PLANS_LOGIN_URL
 
     def get_object(self):
         customer, created = Customer.get_or_create(
@@ -115,9 +119,11 @@ class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
 
 
 class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
-    """TODO: Needs to be refactored to leverage context data."""
-
+    """
+    TODO: Needs to be refactored to leverage context data.
+    """
     template_name = "djstripe/includes/_history_table.html"
+    login_url = DJSTRIPE_PLANS_LOGIN_URL
 
     def post(self, request, *args, **kwargs):
         return render(
@@ -131,6 +137,14 @@ class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
 #                              Subscription Views                              #
 # ============================================================================ #
 
+class SubscriptionView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
+    template_name = "djstripe/subscribe_form.html"
+    login_url = DJSTRIPE_PLANS_LOGIN_URL
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)  # prepare context data
+        return render(request, self.template_name, context)
+
 
 class SubscribeFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
     """TODO: Add stripe_token to the form and use form_valid() instead of post()."""
@@ -139,6 +153,7 @@ class SubscribeFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionM
     template_name = "djstripe/subscribe_form.html"
     success_url = reverse_lazy("djstripe:history")
     form_valid_message = "You are now subscribed!"
+    login_url = DJSTRIPE_PLANS_LOGIN_URL
 
     def post(self, request, *args, **kwargs):
         """
@@ -174,6 +189,7 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
     template_name = "djstripe/subscribe_form.html"
     success_url = reverse_lazy("djstripe:history")
     form_valid_message = "You've just changed your plan!"
+    login_url = DJSTRIPE_PLANS_LOGIN_URL
 
     def post(self, request, *args, **kwargs):
         form = PlanForm(request.POST)
@@ -215,6 +231,7 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
     template_name = "djstripe/cancel_subscription.html"
     form_class = CancelSubscriptionForm
     success_url = reverse_lazy("djstripe:account")
+    login_url = DJSTRIPE_PLANS_LOGIN_URL
 
     def form_valid(self, form):
         customer, created = Customer.get_or_create(
