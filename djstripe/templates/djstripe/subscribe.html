@@ -23,7 +23,7 @@
     <div class="col-xs-12">
     <h4>Select your subscription type:</h4>
     {% for plan_tag_k, plan_tag_v in PLAN_TAGS.items %}
-        <div class="col-sm-4 col-md-4 col-lg-3">
+        <div class="col-xs-12 col-sm-6 col-md-5 col-lg-3 ">
             <button type="button" class="btn btn-info" id="button_{{ plan_tag_k }}">{{ plan_tag_v.button_description }}</button>
             <br/>
             {{ plan_tag_v.full_description }}
@@ -37,12 +37,11 @@
 <div class="row">
 {% for plan in PLAN_LIST %}
     {% with plan_count=PLAN_LIST|length %}
-    <div class="col-sm-4 col-md-4 col-lg-3 div_{{ plan.tag }}">
+    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-3 div_{{ plan.tag }}">
     {% endwith %}
         {% if customer.current_subscription.plan == plan.plan and customer.current_subscription.status != CurrentSubscription.STATUS_CANCELLED %}
             <div class="btn btn-default disabled">
             {% else %}
-            {% url 'djstripe:confirm' plan=plan.plan %}
             <a class="btn btn-primary" href="{% url 'djstripe:confirm' plan=plan.plan %}" role="button">
             {% endif %}
                 {% with image=plan.image|default:"img/default-plan-image.png" %}
@@ -60,6 +59,8 @@
                   <h4>Upgrade</h4>
                 {% elif customer.current_subscription.amount > plan.price|djdiv:100 %}
                   <h4>Downgrade</h4>
+                {% else %}
+                  <br/><p></p>
                 {% endif %}
             {% endif %}
     </div>

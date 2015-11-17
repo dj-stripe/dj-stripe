@@ -22,7 +22,7 @@
     <div class="col-xs-12">
         <form
         {% if not customer.current_subscription or customer.current_subscription.status == CurrentSubscription.STATUS_CANCELLED %}
-            action="{% url 'djstripe:subscribe' %}" class="djstripe-subscribe"
+            action="{% url 'djstripe:confirm' plan=plan.plan %}" class="djstripe-subscribe"
             data-key="{{ STRIPE_PUBLIC_KEY }}"
             data-amount="{{ plan.price }}"
             data-name="{{ plan.name }}"
