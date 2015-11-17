@@ -139,7 +139,7 @@ class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
 # ============================================================================ #
 
 class SubscriptionView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
-    template_name = "djstripe/subscribe_form.html"
+    template_name = "djstripe/subscribe.html"
     login_url = DJSTRIPE_PLANS_LOGIN_URL
 
     def get(self, request, *args, **kwargs):
