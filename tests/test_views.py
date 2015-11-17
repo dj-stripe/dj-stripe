@@ -182,6 +182,23 @@ class SyncHistoryViewTest(TestCase):
         self.assertEqual("pie", response.context["customer"].subscriber)
 
 
+class SubscriptionViewTest(TestCase):
+    fake_stripe_customer_id = "cus_xxx1234567890"
+
+    def setUp(self):
+        self.url = reverse("djstripe:subscribe_tag", args=['test_zyz'])
+        self.user = get_user_model().objects.create_user(username="testuser",
+                                                         email="test@example.com",
+                                                         password="123")
+        self.assertTrue(self.client.login(username="testuser", password="123"))
+
+    @patch("stripe.Customer.create", return_value=PropertyMock(id=fake_stripe_customer_id))
+    def test_get(self, sync_subscriber_mock):
+        response = self.client.get(self.url)
+        self.assertEqual("test_zyz", response.context['SELECTED_TAG'])
+        self.assertEqual("category1", response.context['PLAN_TAGS_DEFAULT'])
+
+
 class SubscribeFormViewTest(TestCase):
 
     def setUp(self):

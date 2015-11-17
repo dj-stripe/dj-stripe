@@ -54,7 +54,14 @@ class TestPaymentsContextMixin(TestCase):
             def get_context_data(self):
                 return {}
 
+        class TestSuperViewTag(object):
+            def get_context_data(self):
+                return {'selected_tag': 'test_zyz'}
+
         class TestView(PaymentsContextMixin, TestSuperView):
+            pass
+
+        class TestViewTag(PaymentsContextMixin, TestSuperViewTag):
             pass
 
         context = TestView().get_context_data()
@@ -69,6 +76,17 @@ class TestPaymentsContextMixin(TestCase):
 
         self.assertIn("PAYMENT_PLANS", context, "PAYMENT_PLANS missing from context.")
         self.assertEqual(context["PAYMENT_PLANS"], djstripe_settings.PAYMENT_PLANS, "Incorrect PAYMENT_PLANS.")
+
+        self.assertIn("PLAN_TAGS", context, "PLAN_TAGS missing from context.")
+        self.assertEqual(context["PLAN_TAGS"], djstripe_settings.DJSTRIPE_PLANS_TAGS, "Incorrect PLAN_TAGS.")
+
+        self.assertIn("PLAN_TAGS_DEFAULT", context, "PLAN_TAGS_DEFAULT missing from context.")
+        self.assertEqual(context["PLAN_TAGS_DEFAULT"], djstripe_settings.DJSTRIPE_PLANS_TAGS_DEFAULT, "Incorrect PLAN_TAGS_DEFAULT.")
+
+        self.assertIn("SELECTED_TAG", context, "SELECTED_TAG missing from context.")
+
+        context = TestViewTag().get_context_data()
+        self.assertEqual("test_zyz", context['SELECTED_TAG'], "Incorrect selected_tag from context.")
 
 
 class TestSubscriptionMixin(TestCase):

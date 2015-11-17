@@ -38,11 +38,20 @@ class PaymentsContextMixin(object):
 
     def get_context_data(self, **kwargs):
         context = super(PaymentsContextMixin, self).get_context_data(**kwargs)
+        selected_tag = context.get('selected_tag', False)
+        if selected_tag:
+            plan_list = [x for x in djstripe_settings.PLAN_LIST if x['tag'] == selected_tag]
+        else:
+            plan_list = djstripe_settings.PLAN_LIST
+
         context.update({
             "STRIPE_PUBLIC_KEY": settings.STRIPE_PUBLIC_KEY,
             "PLAN_CHOICES": djstripe_settings.PLAN_CHOICES,
-            "PLAN_LIST": djstripe_settings.PLAN_LIST,
-            "PAYMENT_PLANS": djstripe_settings.PAYMENTS_PLANS
+            "PLAN_LIST": plan_list,
+            "PAYMENT_PLANS": djstripe_settings.PAYMENTS_PLANS,
+            "PLAN_TAGS": djstripe_settings.DJSTRIPE_PLANS_TAGS,
+            "PLAN_TAGS_DEFAULT": djstripe_settings.DJSTRIPE_PLANS_TAGS_DEFAULT,
+            "SELECTED_TAG": selected_tag,
         })
         return context
 
