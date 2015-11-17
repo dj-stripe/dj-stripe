@@ -37,7 +37,7 @@
 <div class="row">
 {% for plan in PLAN_LIST %}
     {% with plan_count=PLAN_LIST|length %}
-    <div class="col-xs-{{ 12|djdiv:plan_count|floatformat }}">
+    <div class="col-sm-4 col-md-4 col-lg-3 div_{{ plan.tag }}">
     {% endwith %}
         <form
         {% if not customer.current_subscription or customer.current_subscription.status == CurrentSubscription.STATUS_CANCELLED %}
