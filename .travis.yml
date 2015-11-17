@@ -6,6 +6,10 @@ sudo: false
 
 language: python
 
+branches:
+  only:
+    - redux
+
 # Leverage the pip cache
 cache:
   directories:
