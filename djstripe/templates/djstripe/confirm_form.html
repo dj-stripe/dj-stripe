@@ -9,7 +9,7 @@
     <li><a href="{% url 'djstripe:account' %}">Home</a></li>
     <li class="active">Subscription</li>
 </ul>
-<h2>Choose a Subscription</h2>
+<h2>Confirm your Subscription</h2>
 
 {% if error %}
     <div class="alert alert-error">{{ error }}</div>
@@ -18,27 +18,8 @@
     <div class="alert alert-error">{{ view.error }}</div>
 {% endif %}
 
-{% if PLAN_TAGS and not SELECTED_TAG %}
 <div class="row">
     <div class="col-xs-12">
-    <h4>Select your subscription type:</h4>
-    {% for plan_tag_k, plan_tag_v in PLAN_TAGS.items %}
-        <div class="col-sm-4 col-md-4 col-lg-3">
-            <button type="button" class="btn btn-info" id="button_{{ plan_tag_k }}">{{ plan_tag_v.button_description }}</button>
-            <br/>
-            {{ plan_tag_v.full_description }}
-        </div>
-    {% endfor %}
-    </div>
-</div>
-<hr/>
-{% endif %}
-
-<div class="row">
-{% for plan in PLAN_LIST %}
-    {% with plan_count=PLAN_LIST|length %}
-    <div class="col-sm-4 col-md-4 col-lg-3 div_{{ plan.tag }}">
-    {% endwith %}
         <form
         {% if not customer.current_subscription or customer.current_subscription.status == CurrentSubscription.STATUS_CANCELLED %}
             action="{% url 'djstripe:subscribe' %}" class="djstripe-subscribe"
@@ -57,10 +38,7 @@
 
             <!-- disable this when clicked -->
             <button
-                {% if customer.current_subscription.plan == plan.plan and customer.current_subscription.status != CurrentSubscription.STATUS_CANCELLED %}
-                  disabled="true"
-                {% endif %}
-               type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary">
                 {% with image=plan.image|default:"img/default-plan-image.png" %}
                   <img src="{% static image %}" class="img-thumbnail" />
                 {% endwith %}
@@ -79,7 +57,6 @@
             {% endif %}
         </form>
     </div>
-{% endfor %}
 </div>
 
 {% endblock content %}
@@ -120,32 +97,6 @@
           var $form = $(this);
           $form.trigger("submit");
       });
-    {% endif %}
-
-    // Code to show/hide tags div
-    {% if PLAN_TAGS and not SELECTED_TAG %}
-    $(function() {
-      // start by showing the default
-      {% for plan_tag_k in PLAN_TAGS %}
-        {% if plan_tag_k == PLAN_TAGS_DEFAULT %}
-          $(".div_{{ plan_tag_k }}").show();
-        {% else %}
-          $(".div_{{ plan_tag_k }}").hide();
-        {% endif %}
-      {% endfor %}
-      // main loop for tags
-      {% for plan_tag in PLAN_TAGS %}
-        $("#button_{{ plan_tag }}").click(function () {
-          {% for plan_tag_k in PLAN_TAGS %}
-            {% if plan_tag_k == plan_tag %}
-              $(".div_{{ plan_tag_k }}").show();
-            {% else %}
-              $(".div_{{ plan_tag_k }}").hide();
-            {% endif %}
-          {% endfor %}
-        });
-      {% endfor %}
-    });
     {% endif %}
   });
 </script>

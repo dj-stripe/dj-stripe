@@ -27,6 +27,7 @@ from .models import Customer
 from .models import Event
 from .models import EventProcessingException
 from .settings import PLAN_LIST
+from .settings import PAYMENT_PLANS
 from .settings import subscriber_request_callback
 from .settings import PRORATION_POLICY_FOR_UPGRADES
 from .settings import CANCELLATION_AT_PERIOD_END
@@ -146,14 +147,40 @@ class SubscriptionView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMi
         return render(request, self.template_name, context)
 
 
-class SubscribeFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
+class SubscribeView(LoginRequiredMixin, SubscriptionMixin, TemplateView):
+    template_name = "djstripe/subscribe.html"
+    login_url = DJSTRIPE_PLANS_LOGIN_URL
+
+
+class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
     """TODO: Add stripe_token to the form and use form_valid() instead of post()."""
 
     form_class = PlanForm
-    template_name = "djstripe/subscribe_form.html"
+    template_name = "djstripe/confirm_form.html"
     success_url = reverse_lazy("djstripe:history")
     form_valid_message = "You are now subscribed!"
     login_url = DJSTRIPE_PLANS_LOGIN_URL
+
+    def get(self, request, *args, **kwargs):
+        plan_slug = self.kwargs['plan']
+        if plan_slug not in PAYMENT_PLANS:
+            return redirect("djstripe:subscribe")
+
+        plan = PAYMENT_PLANS[plan_slug]
+        customer, created = Customer.get_or_create(
+            subscriber=subscriber_request_callback(self.request))
+
+        if customer.current_subscription.plan == plan['plan'] and customer.current_subscription.status != CurrentSubscription.STATUS_CANCELLED:
+            message = "You already subscribed to this plan"
+            messages.info(request, message, fail_silently=True)
+            return redirect("djstripe:subscribe")
+
+        return super(ConfirmFormView, self).get(request, *args, **kwargs)
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(ConfirmFormView, self).get_context_data(**kwargs)
+        context['plan'] = PAYMENT_PLANS[self.kwargs['plan']]
+        return context
 
     def post(self, request, *args, **kwargs):
         """
@@ -182,11 +209,11 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
     TODO: This logic should be in form_valid() instead of post().
     TODO: Work in a trial_days kwarg
 
-    Also, this should be combined with SubscribeFormView.
+    Also, this should be combined with ConfirmFormView.
     """
 
     form_class = PlanForm
-    template_name = "djstripe/subscribe_form.html"
+    template_name = "djstripe/confirm_form.html"
     success_url = reverse_lazy("djstripe:history")
     form_valid_message = "You've just changed your plan!"
     login_url = DJSTRIPE_PLANS_LOGIN_URL

@@ -38,8 +38,13 @@ urlpatterns = [
     ),
     url(
         r"^subscribe/$",
-        views.SubscribeFormView.as_view(),
+        views.SubscribeView.as_view(),
         name="subscribe"
+    ),
+    url(
+        r"^confirm/(?P<plan>.+)$",
+        views.ConfirmFormView.as_view(),
+        name="confirm"
     ),
     url(
         r"^change/plan/$",
