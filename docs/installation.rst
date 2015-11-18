@@ -74,6 +74,12 @@ Add some payment plans:
 
 .. _here: https://stripe.com/docs/api/python#create_plan
 
+.. note:: The display order of the plans
+
+    If you prefer the plans to appear (in views) in the order given in the
+    `DJSTRIPE_PLANS` setting, use an `OrderedDict` from the `collections`
+    module in the standard library, rather than an ordinary dict.
+
 Add to the urls.py::
 
     url(r'^payments/', include('djstripe.urls', namespace="djstripe")),
