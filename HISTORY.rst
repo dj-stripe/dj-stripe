@@ -3,6 +3,12 @@
 History
 =======
 
+0.8.0 (2015-??-??)
+---------------------
+* better plan ordering documentation (Thanks @cjrh)
+* added a confirmation page when choosing a subscription (Thanks @chrissmejia, @areski)
+
+
 0.7.0 (2015-09-22)
 ---------------------
 * dj-stripe now responds to the invoice.created event (Thanks @wahuneke)
