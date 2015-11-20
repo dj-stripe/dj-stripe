@@ -183,7 +183,10 @@ class Customer(StripeCustomer):
         self.save()
 
     def str_parts(self):
-        return [smart_text(self.subscriber)] + super(Customer, self).str_parts()
+        return [
+            smart_text(self.subscriber),
+            "email={email}".format(email=self.subscriber.email),
+        ] + super(Customer, self).str_parts()
 
     def delete(self, using=None):
         # Only way to delete a customer is to use SQL
