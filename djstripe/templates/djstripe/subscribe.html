@@ -26,7 +26,7 @@
             {% if customer.current_subscription.plan == plan.plan and customer.current_subscription.status != CurrentSubscription.STATUS_CANCELLED %}
             <div class="btn btn-default disabled">
             {% else %}
-            <a class="btn btn-primary" href="{% url 'djstripe:confirm' plan=plan.stripe_plan_id %}" role="button">
+            <a class="btn btn-primary" href="{% url 'djstripe:confirm' plan=plan.plan %}" role="button">
             {% endif %}
                   {% with image=plan.image|default:"img/default-plan-image.png" %}
                     <img src="{% static image %}" class="img-thumbnail" />

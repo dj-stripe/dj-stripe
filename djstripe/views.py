@@ -149,8 +149,8 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
         customer, created = Customer.get_or_create(
             subscriber=subscriber_request_callback(self.request))
 
-        if customer.current_subscription.plan == plan['plan'] and customer.current_subscription.status != CurrentSubscription.STATUS_CANCELLED:
-            message = "You already own that subscription"
+        if hasattr(customer, "current_subscription") and customer.current_subscription.plan == plan['plan'] and customer.current_subscription.status != CurrentSubscription.STATUS_CANCELLED:
+            message = "You already subscribed to this plan"
             messages.info(request, message, fail_silently=True)
             return redirect("djstripe:subscribe")
 
