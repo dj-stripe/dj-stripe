@@ -7,10 +7,10 @@
 {{ block.super }}
 <ul class="breadcrumb">
   <li><a href="{% url 'djstripe:account' %}">Home</a></li>
-  <li class="active">Subscription</li>
+  <li><a href="{% url 'djstripe:subscribe' %}">Subscription</a></li>
+  <li class="active">Confirm</li>
 </ul>
-<h2>Choose a Subscription</h2>
-
+<h2>Confirm your Subscription</h2>
 {% if error %}
     <div class="alert alert-error">{{ error }}</div>
 {% endif %}
@@ -19,13 +19,10 @@
 {% endif %}
 
 <div class="row">
-    {% for plan in PLAN_LIST %}
-      {% with plan_count=PLAN_LIST|length %}
-        <div class="col-xs-{{ 12|djdiv:plan_count|floatformat }}">
-      {% endwith %}
+        <div class="col-xs-12">
             <form
               {% if not customer.current_subscription or customer.current_subscription.status == CurrentSubscription.STATUS_CANCELLED %}
-                  action="{% url 'djstripe:subscribe' %}" class="djstripe-subscribe"  
+                  action="{% url 'djstripe:confirm' plan=plan.plan %}" class="djstripe-subscribe"  
                   data-key="{{ STRIPE_PUBLIC_KEY }}"
                   data-amount="{{ plan.price }}"
                   data-name="{{ plan.name }}"
@@ -42,11 +39,7 @@
                 <input name="stripe_token" type="hidden" /> 
 
                 <!-- disable this when clicked -->
-                <button
-                  {% if customer.current_subscription.plan == plan.plan and customer.current_subscription.status != CurrentSubscription.STATUS_CANCELLED %}
-                    disabled="true"
-                  {% endif %}
-                 type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary">
                   {% with image=plan.image|default:"img/default-plan-image.png" %}
                     <img src="{% static image %}" class="img-thumbnail" />
                   {% endwith %}
@@ -65,7 +58,6 @@
               {% endif %}
             </form>
         </div>
-    {% endfor %}
 </div>
 
 {% endblock content %}
