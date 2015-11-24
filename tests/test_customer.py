@@ -161,6 +161,44 @@ class TestCustomer(TestCase):
         self.assertEquals(charge2.amount_refunded, decimal.Decimal("10.00"))
 
     @patch("stripe.Charge.retrieve")
+    def test_refund_charge_passes_extra_args(self, charge_retrieve_mock):
+        charge = Charge.objects.create(
+            stripe_id="ch_XXXXXX",
+            customer=self.customer,
+            card_last_4="4323",
+            card_kind="Visa",
+            amount=decimal.Decimal("10.00"),
+            paid=True,
+            refunded=False,
+            fee=decimal.Decimal("4.99"),
+            disputed=False
+        )
+        charge_retrieve_mock.return_value.refund.return_value = {
+            "id": "ch_XXXXXX",
+            "card": {
+                "last4": "4323",
+                "type": "Visa"
+            },
+            "amount": 1000,
+            "paid": True,
+            "refunded": True,
+            "captured": True,
+            "amount_refunded": 1000,
+            "fee": 499,
+            "dispute": None,
+            "created": 1363911708,
+            "customer": "cus_xxxxxxxxxxxxxxx"
+        }
+        charge.refund(
+            amount=decimal.Decimal("10.00"),
+            reverse_transfer=True,
+            refund_application_fee=False
+        )
+        _, kwargs = charge_retrieve_mock.return_value.refund.call_args
+        self.assertEquals(kwargs["reverse_transfer"], True)
+        self.assertEquals(kwargs["refund_application_fee"], False)
+
+    @patch("stripe.Charge.retrieve")
     def test_capture_charge(self, charge_retrieve_mock):
         charge = Charge.objects.create(
             stripe_id="ch_XXXXXX",
