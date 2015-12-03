@@ -30,7 +30,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         DJSTRIPE_UNSAFE_SUBSCRIBER_MODEL_DEPENDENCY,
-        (b'djstripe', '0007_auto_20150625_1243')
     ]
 
     operations = [
