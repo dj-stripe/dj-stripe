@@ -173,7 +173,7 @@ class Migration(migrations.Migration):
                 ('stripe_id', models.CharField(unique=True, max_length=50)),
                 ('name', models.CharField(max_length=100)),
                 ('currency', models.CharField(max_length=10, choices=[('usd', 'U.S. Dollars'), ('gbp', 'Pounds (GBP)'), ('eur', 'Euros')])),
-                ('interval', models.CharField(max_length=10, verbose_name='Interval type', choices=[('week', 'Week'), ('month', 'Month'), ('year', 'Year')])),
+                ('interval', models.CharField(max_length=10, verbose_name='Interval type', choices=[('day', 'Day'),('week', 'Week'), ('month', 'Month'), ('year', 'Year')])),
                 ('interval_count', models.IntegerField(default=1, null=True, verbose_name='Intervals between charges')),
                 ('amount', models.DecimalField(verbose_name='Amount (per period)', max_digits=7, decimal_places=2)),
                 ('trial_period_days', models.IntegerField(null=True)),
