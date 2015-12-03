@@ -183,7 +183,10 @@ class Customer(StripeCustomer):
         self.save()
 
     def str_parts(self):
-        return [smart_text(self.subscriber)] + super(Customer, self).str_parts()
+        return [
+            smart_text(self.subscriber),
+            "email={email}".format(email=self.subscriber.email),
+        ] + super(Customer, self).str_parts()
 
     def delete(self, using=None):
         # Only way to delete a customer is to use SQL
@@ -606,8 +609,12 @@ class Charge(StripeCharge):
 
     objects = ChargeManager()
 
-    def refund(self, amount=None):
-        refunded_charge = super(Charge, self).refund(amount)
+    def refund(self, amount=None, **kwargs):
+        """
+        Refund an existing charge https://stripe.com/docs/api#create_refund
+        Stripe Connect information https://stripe.com/docs/connect/payments-fees#issuing-refunds
+        """
+        refunded_charge = super(Charge, self).refund(amount, **kwargs)
         return Charge.sync_from_stripe_data(refunded_charge)
 
     def capture(self):

@@ -42,3 +42,5 @@ Contributors
 * Bill Huneke (@wahuneke)
 * Matt Shaw (@unformatt)
 * Chris Trengove (@ctrengove)
+* Caleb Hattingh (@cjrh)
+* Nicolas Delaby (@ticosax)

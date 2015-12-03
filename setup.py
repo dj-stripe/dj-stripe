@@ -1,11 +1,37 @@
 #!/usr/bin/env python
 
+import ast
 import os
 import sys
 
-import djstripe
 
-version = djstripe.__version__
+class MetadataFinder(ast.NodeVisitor):
+    def __init__(self):
+        self.version = None
+        self.summary = None
+        self.author = None
+        self.email = None
+        self.uri = None
+        self.licence = None
+
+    def visit_Assign(self, node):
+        if node.targets[0].id == '__version__':
+            self.version = node.value.s
+        elif node.targets[0].id == '__summary__':
+            self.summary = node.value.s
+        elif node.targets[0].id == '__author__':
+            self.author = node.value.s
+        elif node.targets[0].id == '__email__':
+            self.email = node.value.s
+        elif node.targets[0].id == '__uri__':
+            self.uri = node.value.s
+        elif node.targets[0].id == '__license__':
+            self.license = node.value.s
+
+
+with open(os.path.join('djstripe', '__init__.py')) as open_file:
+    finder = MetadataFinder()
+    finder.visit(ast.parse(open_file.read()))
 
 try:
     from setuptools import setup
@@ -19,7 +45,8 @@ if sys.argv[-1] == 'publish':
 
 if sys.argv[-1] == 'tag':
     print("Tagging the version on github:")
-    os.system("git tag -a %s -m 'version %s'" % (version, version))
+    os.system("git tag -a %s -m 'version %s'" % (finder.version,
+                                                 finder.version))
     os.system("git push --tags")
     sys.exit()
 
@@ -37,19 +64,19 @@ INSTALL_REQUIRES = [
 
 setup(
     name='dj-stripe',
-    version=version,
-    description=djstripe.__summary__,
+    version=finder.version,
+    description=finder.summary,
     long_description=readme + '\n\n' + history,
-    author=djstripe.__author__,
-    author_email=djstripe.__email__,
-    url=djstripe.__uri__,
+    author=finder.author,
+    author_email=finder.email,
+    url=finder.uri,
     packages=[
         'djstripe',
     ],
     package_dir={'djstripe': 'djstripe'},
     include_package_data=True,
     install_requires=INSTALL_REQUIRES,
-    license=djstripe.__license__,
+    license=finder.license,
     zip_safe=False,
     keywords='stripe django',
     classifiers=[

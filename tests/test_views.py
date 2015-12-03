@@ -182,24 +182,44 @@ class SyncHistoryViewTest(TestCase):
         self.assertEqual("pie", response.context["customer"].subscriber)
 
 
-class SubscribeFormViewTest(TestCase):
+class ConfirmFormViewTest(TestCase):
+    fake_stripe_customer_id = "cus_xxx1234567890"
 
     def setUp(self):
-        self.url = reverse("djstripe:subscribe")
+        self.plan = "test0"
+        self.url = reverse("djstripe:confirm", kwargs={'plan': self.plan})
         self.user = get_user_model().objects.create_user(username="testuser",
                                                          email="test@example.com",
                                                          password="123")
-        self.assertTrue(self.client.login(username="testuser", password="123"))
+        self.assertTrue(self.client.login(username="testuser", password="123"))       
+
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="something-else"))
+    @patch("stripe.Customer.create", return_value=PropertyMock(id=fake_stripe_customer_id))
+    def test_get_form_valid(self, djstripe_customer_customer_subscription_mock, stripe_create_customer_mock):
+        response = self.client.get(self.url)
+        self.assertEqual(200, response.status_code)
+
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test0"))
+    @patch("stripe.Customer.create", return_value=PropertyMock(id=fake_stripe_customer_id))
+    def test_get_form_unknown(self, djstripe_customer_customer_subscription_mock, stripe_create_customer_mock):
+        response = self.client.get(reverse("djstripe:confirm", kwargs={'plan': 'does-not-exist'}))
+        self.assertRedirects(response, reverse("djstripe:subscribe"))
+
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test0"))
+    @patch("stripe.Customer.create", return_value=PropertyMock(id=fake_stripe_customer_id))
+    def test_get_form_invalid(self, djstripe_customer_customer_subscription_mock, stripe_create_customer_mock):
+        response = self.client.get(self.url)
+        self.assertRedirects(response, reverse("djstripe:subscribe"))
 
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     @patch("djstripe.models.Customer.update_card", autospec=True)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
     def test_post_valid(self, stripe_customer_mock, update_card_mock, subscribe_mock):
         self.assertEqual(0, Customer.objects.count())
-        response = self.client.post(self.url, {"plan": "test0", "stripe_token": "cake"})
+        response = self.client.post(self.url, {"plan": self.plan, "stripe_token": "cake"})
         self.assertEqual(1, Customer.objects.count())
         update_card_mock.assert_called_once_with(self.user.customer, "cake")
-        subscribe_mock.assert_called_once_with(self.user.customer, "test0")
+        subscribe_mock.assert_called_once_with(self.user.customer, self.plan)
 
         self.assertRedirects(response, reverse("djstripe:history"))
 
@@ -209,7 +229,7 @@ class SubscribeFormViewTest(TestCase):
     def test_post_no_card(self, stripe_customer_mock, update_card_mock, subscribe_mock):
         update_card_mock.side_effect = stripe.StripeError("Invalid source object:")
 
-        response = self.client.post(self.url, {"plan": "test0"})
+        response = self.client.post(self.url, {"plan": self.plan})
         self.assertEqual(200, response.status_code)
         self.assertIn("form", response.context)
         self.assertIn("Invalid source object:", response.context["form"].errors["__all__"])

@@ -438,14 +438,15 @@ class StripeCharge(StripeObject):
             amount_to_refund = eligible_to_refund
         return int(amount_to_refund * 100)
 
-    def refund(self, amount=None):
+    def refund(self, amount=None, **kwargs):
         """
         Initiate a refund. If amount is not provided, then this will be a full refund
         :return: Stripe charge object
         :rtype: dict
         """
         charge_obj = self.api_retrieve().refund(
-            amount=self.calculate_refund_amount(amount=amount)
+            amount=self.calculate_refund_amount(amount=amount),
+            **kwargs
         )
         return charge_obj
 
