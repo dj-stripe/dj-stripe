@@ -668,7 +668,7 @@ class Charge(StripeCharge):
 
 
 INTERVALS = (
-    ('day','Day'), 
+    ('day', 'Day',),
     ('week', 'Week',),
     ('month', 'Month',),
     ('year', 'Year',))
