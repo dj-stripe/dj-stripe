@@ -1,5 +1,5 @@
 # dj-stripe requirements
-django>=1.7,<1.9
+django>=1.7
 stripe>=1.22.2
 django-model-utils>=2.2
 django-braces>=1.8.0
