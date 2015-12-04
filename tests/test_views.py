@@ -232,7 +232,7 @@ class ConfirmFormViewTest(TestCase):
         response = self.client.post(self.url, {"plan": self.plan})
         self.assertEqual(200, response.status_code)
         self.assertIn("form", response.context)
-        self.assertIn("Invalid source object:", response.context["form"].non_field_errors())
+        self.assertIn("Invalid source object:", response.context["form"].errors["__all__"])
 
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
     def test_post_form_invalid(self, stripe_customer_mock):
@@ -270,7 +270,7 @@ class ChangePlanViewTest(TestCase):
         response = self.client.post(self.url, {"plan": "test0"})
         self.assertEqual(200, response.status_code)
         self.assertIn("form", response.context)
-        self.assertIn("You must already be subscribed to a plan before you can change it.", response.context["form"].non_field_errors())
+        self.assertIn("You must already be subscribed to a plan before you can change it.", response.context["form"].errors["__all__"])
 
     @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", amount=Decimal(25.00)))
     @patch("djstripe.models.Customer.subscribe", autospec=True)
@@ -330,7 +330,7 @@ class ChangePlanViewTest(TestCase):
         response = self.client.post(self.url, {"plan": "test_deletion"})
         self.assertEqual(200, response.status_code)
         self.assertIn("form", response.context)
-        self.assertIn("No such plan: test_id_3", response.context["form"].non_field_errors())
+        self.assertIn("No such plan: test_id_3", response.context["form"].errors["__all__"])
 
 
 class CancelSubscriptionViewTest(TestCase):
