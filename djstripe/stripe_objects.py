@@ -510,6 +510,7 @@ class StripeCharge(StripeObject):
 
 
 INTERVALS = (
+    ('day', 'Day',),
     ('week', 'Week',),
     ('month', 'Month',),
     ('year', 'Year',))
