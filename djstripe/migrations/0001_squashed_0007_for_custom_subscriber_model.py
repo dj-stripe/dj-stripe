@@ -25,8 +25,10 @@ if DJSTRIPE_UNSAFE_SUBSCRIBER_MODEL != settings.AUTH_USER_MODEL:
 
 
 class Migration(migrations.Migration):
-
-    replaces = [(b'djstripe', '0001_initial'), (b'djstripe', '0002_auto_20150122_2000'), (b'djstripe', '0003_auto_20150128_0800'), (b'djstripe', '0004_auto_20150427_1609'), (b'djstripe', '0005_charge_captured'), (b'djstripe', '0006_auto_20150602_1934'), (b'djstripe', '0007_auto_20150625_1243')]
+    # not that squashmigrations generates [(b'djstripe', '0001_initial'),....
+    # but for django in python3.X it needs to be [('djstripe', '0001_initial'),.... in order for the dependency
+    # graph loader to remove the migrations this replaces
+    replaces = [('djstripe', '0001_initial'), ('djstripe', '0002_auto_20150122_2000'), ('djstripe', '0003_auto_20150128_0800'), ('djstripe', '0004_auto_20150427_1609'), ('djstripe', '0005_charge_captured'), ('djstripe', '0006_auto_20150602_1934'), ('djstripe', '0007_auto_20150625_1243')]
 
     dependencies = [
         DJSTRIPE_UNSAFE_SUBSCRIBER_MODEL_DEPENDENCY,
