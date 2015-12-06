@@ -3,7 +3,7 @@ Contributing
 ============
 
 Contributions are welcome, and they are greatly appreciated! Every
-little bit helps, and credit will always be given. 
+little bit helps, and credit will always be given.
 
 You can contribute in many ways:
 
@@ -35,7 +35,7 @@ is open to whoever wants to implement it.
 Write Documentation
 ~~~~~~~~~~~~~~~~~~~
 
-dj-stripe could always use more documentation, whether as part of the 
+dj-stripe could always use more documentation, whether as part of the
 official dj-stripe docs, in docstrings, or even on the web in blog posts,
 articles, and such.
 
@@ -74,13 +74,13 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
 
     $ git checkout -b name-of-your-bugfix-or-feature
 
-Now you can make your changes locally.
+   Now you can make your changes locally.
 
 6. When you're done making changes, check that your changes pass the tests, including
-testing other Python versions with tox. runtests will output both command line and 
-html coverage statistics and will warn you if your changes caused code coverage to drop.
-Note that if your system time is not in UTC, some tests will fail. If you want to ignore
-those tests, the --skip-utc command line option is available on runtests.py.::
+   testing other Python versions with tox. runtests will output both command line and
+   html coverage statistics and will warn you if your changes caused code coverage to drop.
+   Note that if your system time is not in UTC, some tests will fail. If you want to ignore
+   those tests, the --skip-utc command line option is available on runtests.py.::
 
     $ pip install -r requirements_test.txt
     $ python runtests.py
@@ -92,7 +92,7 @@ those tests, the --skip-utc command line option is available on runtests.py.::
     $ git commit -m "Your detailed description of your changes."
     $ git push origin name-of-your-bugfix-or-feature
 
-9. Submit a pull request through the GitHub website.
+8. Submit a pull request through the GitHub website.
 
 Pull Request Guidelines
 -----------------------
@@ -103,6 +103,6 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring.
 3. If the pull request makes changes to a model, include Django migrations (Django 1.7+).
-4. The pull request should work for Python 2.7 and 3.4. Check 
+4. The pull request should work for Python 2.7 and 3.4. Check
    https://travis-ci.org/pydanny/dj-stripe/pull_requests
    and make sure that the tests pass for all supported Python versions.
