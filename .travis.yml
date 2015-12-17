@@ -23,6 +23,7 @@ env:
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
   - pip install -r requirements_test.txt
+  - pip install -U Django==${DJANGO}
 
 before_script:
   - psql -U postgres -c 'CREATE DATABASE "djstripe";'
