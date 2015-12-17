@@ -15,10 +15,10 @@ it for reuse.
 
     # -*- coding: utf-8 -*-
 
-    from django.contrib.auth.models import AbstractUser 
+    from django.contrib.auth.models import AbstractUser
     from django.db import models
     from django.utils.functional import cached_property
-    
+
     from djstripe.utils import subscriber_has_active_subscription
 
 
@@ -50,7 +50,7 @@ Usage:
                 <a href="{% url 'things:update' %}">edit</a>
             </small>
         </p>
-    {% endif %}    
+    {% endif %}
     <p>{{ object.description }}</p>
 
     <!-- second use of request.user.has_active_subscription -->
@@ -65,7 +65,7 @@ Usage:
 
 Adding a custom plan that is outside of stripe
 -----------------------------------------------
- 
+
 Sometimes you want a custom plan for per-customer billing. Or perhaps you are providing a special free-for-open-source plan. In which case, `djstripe.settings.PLAN_CHOICES` is your friend:
 
 .. code-block:: python
@@ -118,7 +118,7 @@ On the subscriber's customer object, use the charge method to generate a Stripe 
     from djstripe.models import Customer
 
 
-    user = get_user_model().objects.get(id=1) 
+    user = get_user_model().objects.get(id=1)
 
     customer, created = Customer.get_or_create(subscriber=user)
 
@@ -177,3 +177,10 @@ DELETE will cancel the current subscription, based on the settings.
 
     - Output (204)
         - None
+
+Not in the Cookbook?
+=====================
+
+Cartwheel Web provides `commercial support`_ for dj-stripe and other open source packages.
+
+.. _`commercial support`:: https://www.cartwheelweb.com/open-source-commercial-support/
