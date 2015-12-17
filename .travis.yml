@@ -17,8 +17,8 @@ python:
   - 2.7
 
 env:
-  - DJANGO=1.7
-  - DJANGO=1.8
+  - DJANGO=1.7.10
+  - DJANGO=1.8.7
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
