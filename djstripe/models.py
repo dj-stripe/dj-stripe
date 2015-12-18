@@ -37,6 +37,9 @@ stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
 
 @python_2_unicode_compatible
 class EventProcessingException(TimeStampedModel):
+    """Tracks processing exceptions, storing Stack traces for easy reference
+        in the admin interface.
+    """
 
     event = models.ForeignKey("Event", null=True)
     data = models.TextField()
@@ -45,6 +48,11 @@ class EventProcessingException(TimeStampedModel):
 
     @classmethod
     def log(cls, data, exception, event):
+        """ Creates an instance of this model and saves it to the database.
+            :param data: The `http_body` of a `StripeException`
+            :param exception: An instance of `StripeException`
+            :param event: An instance of `Event`
+        """
         cls.objects.create(
             event=event,
             data=data or "",
