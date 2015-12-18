@@ -41,7 +41,7 @@ Features
 * Designed for easy implementation of post-registration subscription forms
 * Single-unit purchases
 * Works with Django 1.8, 1.7
-* Works with Python 3.4, 2.7
+* Works with Python 3.5, 3.4, 2.7
 * Works with Bootstrap 3
 * Built-in migrations
 * Dead-Easy installation
