@@ -9,7 +9,7 @@ Django + Stripe Made Easy
 * Subscription management
 * Subscription during registration
 * Single-unit purchases
-* Works with Django 1.8, 1.7
+* Works with Django ~=1.9.1, 1.8
 * Works with Python 3.4, 2.7
 * Works with Bootstrap 3
 * Built-in migrations

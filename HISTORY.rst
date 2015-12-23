@@ -8,6 +8,7 @@ History
 * better plan ordering documentation (Thanks @cjrh)
 * added a confirmation page when choosing a subscription (Thanks @chrissmejia, @areski)
 * setup.py reverse dependency fix (#258/#268) (Thanks @ticosax)
+* Dropped official support for Django 1.7 (no code changes were made)
 
 
 0.7.0 (2015-09-22)

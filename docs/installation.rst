@@ -15,7 +15,7 @@ Or, if you have virtualenvwrapper installed::
     $ pip install dj-stripe
 
 
-Or for development, first fork it and then:
+Or for development, first fork it and then::
 
     $ git clone https://github.com/<yourname>/dj-stripe/
     $ python setup.py develop
@@ -29,7 +29,7 @@ Add ``djstripe`` to your ``INSTALLED_APPS``:
 
 .. code-block:: python
 
-    INSTALLED_APPS +=(
+    INSTALLED_APPS += (
         "djstripe",
     )
 

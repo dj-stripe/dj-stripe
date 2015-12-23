@@ -215,9 +215,7 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                 if PRORATION_POLICY_FOR_UPGRADES:
                     current_subscription_amount = customer.current_subscription.amount
                     selected_plan_name = form.cleaned_data["plan"]
-                    selected_plan = next(
-                        (plan for plan in PLAN_LIST if plan["plan"] == selected_plan_name)
-                    )
+                    selected_plan = [plan for plan in PLAN_LIST if plan["plan"] == selected_plan_name][0]  # TODO: refactor
                     selected_plan_price = selected_plan["price"] / decimal.Decimal("100")
 
                     # Is it an upgrade?
