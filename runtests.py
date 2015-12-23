@@ -5,7 +5,7 @@ import sys
 import django
 from django.conf import settings
 
-from coverage import coverage
+from coverage import Coverage
 from termcolor import colored
 
 TESTS_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
@@ -28,7 +28,7 @@ def run_test_suite(args):
     enable_pep8 = not args.no_pep8
 
     if enable_coverage:
-        cov = coverage(config_file=True)
+        cov = Coverage(config_file=True)
         cov.erase()
         cov.start()
 
