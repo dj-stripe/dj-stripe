@@ -2,20 +2,20 @@
 -r requirements.txt
 
 # Testing tools
-unittest2>=1.0.1
+unittest2>=1.1.0
 coverage<=3.7.1
-flake8>=2.4.1
-mock>=1.0.1
-nose>=1.3.6
-django-nose>=1.4
-tox>=2.0.1
+flake8>=2.5.1
+mock>=1.3.0
+nose>=1.3.7
+django-nose>=1.4.2
+tox>=2.3.1
 termcolor>=1.1.0
 
 # Contrib packages
-djangorestframework>=3.1.2
+djangorestframework>=3.3.2
 
 # Database drivers
-psycopg2>=2.6
+psycopg2>=2.6.1
 
 # Packaging
 wheel>=0.26.0
