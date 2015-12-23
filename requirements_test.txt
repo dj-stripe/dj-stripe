@@ -1,9 +1,5 @@
 # dj-stripe requirements
-stripe>=1.22.2
-django-model-utils>=2.2
-django-braces>=1.8.0
-jsonfield>=1.0.3
-pytz>=2015.4
+-r requirements.txt
 
 # Testing tools
 unittest2>=1.0.1
