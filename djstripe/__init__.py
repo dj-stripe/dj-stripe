@@ -16,8 +16,8 @@ __license__ = "BSD"
 __license__ = "License :: OSI Approved :: BSD License"
 __copyright__ = "Copyright 2015 Daniel Greenfeld"
 
-if get_django_version() <= '1.6.x':
-    msg = "dj-stripe deprecation notice: Django 1.6 and lower are no longer\n" \
-        "supported. Please upgrade to Django 1.7 or higher.\n" \
-        "Reference: https://github.com/pydanny/dj-stripe/issues/173"
+if get_django_version() <= '1.7.x':
+    msg = "dj-stripe deprecation notice: Django 1.7 and lower are no longer\n" \
+        "supported. Please upgrade to Django 1.8 or higher.\n" \
+        "Reference: https://github.com/pydanny/dj-stripe/issues/275"
     warnings.warn(msg)
