@@ -183,4 +183,4 @@ Not in the Cookbook?
 
 Cartwheel Web provides `commercial support`_ for dj-stripe and other open source packages.
 
-.. _`commercial support`:: https://www.cartwheelweb.com/open-source-commercial-support/
+.. _commercial support: https://www.cartwheelweb.com/open-source-commercial-support/
