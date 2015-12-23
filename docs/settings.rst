@@ -213,6 +213,11 @@ Example Model:
             return self.owner.email
 
 
+DJSTRIPE_SUBSCRIBER_MODEL_MIGRATION_DEPENDENCY (="__first__")
+=================================================================
+If the model referenced in DJSTRIPE_SUBSCRIBER_MODEL is not created in the ``__first__`` migration of an app you can specify the migration name to depend on here. For example: "0003_here_the_subscriber_model_was_added"
+
+
 DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK (=None)
 ======================================================
 
