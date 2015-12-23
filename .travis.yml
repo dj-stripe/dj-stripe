@@ -16,13 +16,9 @@ python:
   - 3.4
   - 2.7
 
-env:
-  - DJANGO=1.8.7
-
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
   - pip install -r requirements_test.txt
-  - pip install -U Django==${DJANGO}
 
 before_script:
   - psql -U postgres -c 'CREATE DATABASE "djstripe";'
