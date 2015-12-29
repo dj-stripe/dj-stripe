@@ -4,7 +4,7 @@
 
 .. moduleauthor:: Daniel Greenfeld (@pydanny)
 .. moduleauthor:: Alex Kavanaugh (@kavdev)
-.. moduleauthor:: Michael Thronhill (@mthornhill)
+.. moduleauthor:: Michael Thornhill (@mthornhill)
 
 """
 
@@ -19,7 +19,7 @@ from mock import patch, PropertyMock, MagicMock
 import stripe
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
-from djstripe.models import Customer, Charge, CurrentSubscription
+from djstripe.models import Customer, Charge, CurrentSubscription, Invoice
 
 
 class TestCustomer(TestCase):
@@ -321,6 +321,33 @@ class TestCustomer(TestCase):
         )
         _, kwargs = charge_create_mock.call_args
         self.assertEquals(kwargs["amount"], 1000)
+
+    @patch("stripe.Charge.retrieve")
+    @patch("stripe.Charge.create")
+    def test_charge_doesnt_require_invoice(self, charge_create_mock, charge_retrieve_mock):
+        charge_retrieve_mock.return_value = charge_create_mock.return_value = {
+            "id": "ch_XXXXXX",
+            "card": {
+                "last4": "4323",
+                "type": "Visa"
+            },
+            "amount": 1000,
+            "paid": True,
+            "refunded": False,
+            "captured": True,
+            "fee": 499,
+            "dispute": None,
+            "created": 1363911708,
+            "customer": "cus_xxxxxxxxxxxxxxx",
+            "invoice": "in_30Kg7Arb0132UK",
+        }
+
+        try:
+            self.customer.charge(
+                amount=decimal.Decimal("10.00")
+            )
+        except Invoice.DoesNotExist:
+            self.fail(msg="Stripe Charge shouldn't require an Invoice")
 
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")

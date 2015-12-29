@@ -646,9 +646,12 @@ class Charge(StripeCharge):
         customer = cls.object_to_customer(Customer.stripe_objects, data)
         charge.customer = customer
 
-        invoice = cls.object_to_invoice(Invoice.stripe_objects, data)
-        if invoice:
-            charge.invoice = invoice
+        try:
+            invoice = cls.object_to_invoice(Invoice.stripe_objects, data)
+            if invoice:
+                charge.invoice = invoice
+        except Invoice.DoesNotExist:
+            logger.warning("No invoice {0} found for charge {1}".format(data.get('invoice'), data.get('id')))
 
         charge.save()
         return charge
