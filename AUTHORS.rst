@@ -44,3 +44,5 @@ Contributors
 * Chris Trengove (@ctrengove)
 * Caleb Hattingh (@cjrh)
 * Nicolas Delaby (@ticosax)
+* Michaël Krens (@michi88)
+* Yuri Prezument (@yprez)
