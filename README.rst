@@ -25,9 +25,6 @@ Badges
 .. image:: https://img.shields.io/github/license/pydanny/dj-stripe.svg?style=flat-square
         :target: https://github.com/pydanny/dj-stripe/blob/master/LICENSE
 
-.. image:: https://badges.gitter.im/Join Chat.svg
-        :target: https://gitter.im/pydanny/dj-stripe?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-
 
 Documentation
 -------------
