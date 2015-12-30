@@ -47,8 +47,8 @@ Features
 * Dead-Easy installation
 * Leverages the best of the 3rd party Django package ecosystem
 * `djstripe` namespace so you can have more than one payments related app
-* Documented (Making good progress)
-* Tested (Making good progress)
+* Documented
+* Tested
 
 Constraints
 ------------
@@ -110,13 +110,13 @@ Add to the urls.py:
 .. code-block:: python
 
     url(r'^payments/', include('djstripe.urls', namespace="djstripe")),
-    
+
 Run the commands::
 
     python manage.py migrate
-    
+
     python manage.py djstripe_init_customers
-    
+
     python manage.py djstripe_init_plans
 
 If you haven't already, add JQuery and the Bootstrap 3.0.0+ JS and CSS to your base template:
@@ -128,18 +128,18 @@ If you haven't already, add JQuery and the Bootstrap 3.0.0+ JS and CSS to your b
 
     <!-- Optional theme -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
-    
+
     <!-- Latest JQuery (IE9+) -->
     <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
 
     <!-- Latest compiled and minified JavaScript -->
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-    
+
 Also, if you don't have it already, add a javascript block to your base.html file:
 
 .. code-block:: html
 
-    {% block javascript %}{% endblock %} 
+    {% block javascript %}{% endblock %}
 
 
 Running the Tests
@@ -168,6 +168,5 @@ Similar Projects
 ----------------
 
 * https://github.com/eldarion/django-stripe-payments - The project that dj-stripe forked. It's an awesome project and worth checking out.
-* https://github.com/agiliq/merchant - A single charge payment processing system that also includes many other Gateways. Really nice but doesn't out-of-the-box handle the use case of subscription payments. 
-* https://github.com/GoodCloud/django-zebra - One of the first stripe payment systems for Django. 
-
+* https://github.com/agiliq/merchant - A single charge payment processing system that also includes many other Gateways. Really nice but doesn't out-of-the-box handle the use case of subscription payments.
+* https://github.com/GoodCloud/django-zebra - One of the first stripe payment systems for Django.
