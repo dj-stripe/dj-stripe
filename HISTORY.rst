@@ -3,7 +3,7 @@
 History
 =======
 
-0.8.0 (2015-12-29)
+0.8.0 (2015-12-30)
 ---------------------
 * better plan ordering documentation (Thanks @cjrh)
 * added a confirmation page when choosing a subscription (Thanks @chrissmejia, @areski)
