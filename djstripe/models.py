@@ -592,13 +592,12 @@ class Invoice(StripeInvoice):
         invoice.save()
 
         if data.get("charge"):
-            recorded_charge = invoice.customer.record_charge(data["charge"])
-            # record_charge calls sync_from_stripe_data() on the charge, which will attach the invoice
-            # recorded_charge.invoice = invoice
-            # recorded_charge.save()
+            stripe_charge = Charge(stripe_id=data["charge"]).api_retrieve()
+            charge = Charge.sync_from_stripe_data(stripe_charge)
 
             if send_receipt:
-                recorded_charge.send_receipt()
+                print("here")
+                charge.send_receipt()
         return invoice
 
 

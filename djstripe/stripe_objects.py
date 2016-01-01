@@ -472,20 +472,21 @@ class StripeCustomer(StripeObject):
         if not isinstance(amount, decimal.Decimal):
             raise ValueError("You must supply a decimal value representing dollars.")
 
-        new_charge = StripeCharge._api_create(
+        stripe_charge = StripeCharge._api_create(
             amount=int(amount * 100),  # Convert dollars into cents
             currency=currency,
             customer=self.stripe_id,
             source=source.stripe_id if source else None,  # Convert Source model to stripe_id
             description=description,
+            capture=capture,
             statement_descriptor=statement_descriptor,
             metatdata=metadata,
-            destination=destination.stripe_id if source else None,  # Convert Source model to stripe_id
+            destination=destination.stripe_id if destination else None,  # Convert Source model to stripe_id
             application_fee=int(amount * 100),  # Convert dollars into cents
             shipping=shipping,
         )
 
-        return new_charge
+        return stripe_charge
 
     def add_invoice_item(self, amount, currency="usd", invoice_id=None, description=None):
         """

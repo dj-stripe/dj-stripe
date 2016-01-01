@@ -20,7 +20,7 @@ from mock import patch
 from djstripe.event_handlers import invoice_webhook_handler
 from djstripe.models import Customer, Invoice, Charge, Event, Account
 
-from . import FAKE_INVOICE
+from . import FAKE_INVOICE, FAKE_INVOICE_II, FAKE_CHARGE_II
 
 
 class InvoiceTest(TestCase):
@@ -143,27 +143,21 @@ class InvoiceTest(TestCase):
         self.assertEqual("", invoice_item.plan)
 
     @patch("djstripe.models.Charge.send_receipt")
-    @patch("djstripe.models.Customer.record_charge")
-    def test_sync_from_stripe_data_with_charge(self, record_charge_mock, send_receipt_mock):
-        record_charge_mock.return_value = Charge(customer=self.customer)
+    @patch("djstripe.models.Charge.sync_from_stripe_data")
+    @patch("stripe.Charge.retrieve", return_value=FAKE_CHARGE_II)
+    def test_sync_from_stripe_data_with_charge(self, charge_retrieve_mock, sync_charge_mock, send_receipt_mock):
+        Invoice.sync_from_stripe_data(FAKE_INVOICE_II, send_receipt=True)
 
-        fake_invoice_with_charge = deepcopy(FAKE_INVOICE)
-        fake_invoice_with_charge["charge"] = "taco"
-
-        Invoice.sync_from_stripe_data(fake_invoice_with_charge)
-        record_charge_mock.assert_called_once_with("taco")
+        sync_charge_mock.assert_called_once_with(FAKE_CHARGE_II)
         send_receipt_mock.assert_called_once_with()
 
     @patch("djstripe.models.Charge.send_receipt")
-    @patch("djstripe.models.Customer.record_charge", return_value=Charge())
-    def test_sync_from_stripe_data_with_charge_no_receipt(self, record_charge_mock, send_receipt_mock):
-        record_charge_mock.return_value = Charge(customer=self.customer)
+    @patch("djstripe.models.Charge.sync_from_stripe_data")
+    @patch("stripe.Charge.retrieve", return_value=FAKE_CHARGE_II)
+    def test_sync_from_stripe_data_with_charge_no_receipt(self, charge_retrieve_mock, sync_charge_mock, send_receipt_mock):
+        Invoice.sync_from_stripe_data(FAKE_INVOICE_II, send_receipt=False)
 
-        fake_invoice_with_charge = deepcopy(FAKE_INVOICE)
-        fake_invoice_with_charge["charge"] = "taco1"
-
-        Invoice.sync_from_stripe_data(fake_invoice_with_charge, send_receipt=False)
-        record_charge_mock.assert_called_once_with("taco1")
+        sync_charge_mock.assert_called_once_with(FAKE_CHARGE_II)
         self.assertFalse(send_receipt_mock.called)
 
     @patch("djstripe.models.Invoice.sync_from_stripe_data")

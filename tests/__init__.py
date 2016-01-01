@@ -80,6 +80,32 @@ FAKE_CARD = {
     "customer": "cus_6lsBvm5rJ0zyHc"
 }
 
+FAKE_CARD_II = {
+    "id": "card_14Lc4K2eZvKYlo2CcXyAXlDR",
+    "object": "card",
+    "last4": "4242",
+    "brand": "Visa",
+    "funding": "credit",
+    "exp_month": 7,
+    "exp_year": 2015,
+    "country": "US",
+    "name": None,
+    "address_line1": None,
+    "address_line2": None,
+    "address_city": None,
+    "address_state": None,
+    "address_zip": None,
+    "address_country": None,
+    "cvc_check": None,
+    "address_line1_check": None,
+    "address_zip_check": None,
+    "tokenization_method": None,
+    "fingerprint": "Xt5EWLLDS7FJjR1c",
+    "dynamic_last4": None,
+    "metadata": {},
+    "customer": "cus_4UbFSo9tl62jqj"
+}
+
 
 class ChargeDict(dict):
 
@@ -125,6 +151,43 @@ FAKE_CHARGE = ChargeDict({
         "total_count": 0,
         "has_more": False,
         "url": "/v1/charges/ch_16YKQi2eZvKYlo2CrCuzbJQx/refunds",
+        "data": []
+    }
+})
+
+FAKE_CHARGE_II = ChargeDict({
+    "id": "ch_16ag432eZvKYlo2CGDe6lvVs",
+    "object": "charge",
+    "created": 1439788903,
+    "livemode": False,
+    "paid": False,
+    "status": "failed",
+    "amount": 3000,
+    "currency": "usd",
+    "refunded": False,
+    "source": deepcopy(FAKE_CARD_II),
+    "captured": False,
+    "balance_transaction": None,
+    "failure_message": "Your card has expired.",
+    "failure_code": "expired_card",
+    "amount_refunded": 0,
+    "customer": "cus_4UbFSo9tl62jqj",
+    "invoice": "in_16af5A2eZvKYlo2CJjANLL81",
+    "description": None,
+    "dispute": None,
+    "metadata": {},
+    "statement_descriptor": None,
+    "fraud_details": {},
+    "receipt_email": None,
+    "receipt_number": None,
+    "shipping": None,
+    "destination": None,
+    "application_fee": None,
+    "refunds": {
+        "object": "list",
+        "total_count": 0,
+        "has_more": False,
+        "url": "/v1/charges/ch_16ag432eZvKYlo2CGDe6lvVs/refunds",
         "data": []
     }
 })
@@ -365,14 +428,14 @@ FAKE_INVOICE = InvoiceDict({
 })
 
 FAKE_INVOICE_II = InvoiceDict({
-    "date": 1439308578,
-    "id": "in_16Yf6s2eZvKYlo2CG7FhvCos",
-    "period_start": 1436629839,
-    "period_end": 1439308239,
+    "date": 1439785128,
+    "id": "in_16af5A2eZvKYlo2CJjANLL81",
+    "period_start": 1439698371,
+    "period_end": 1439784771,
     "lines": {
         "data": [
             {
-                "id": "sub_6mFNgWRONpWxQU",
+                "id": "sub_6oJM1zfG5KhjTk",
                 "object": "line_item",
                 "type": "subscription",
                 "livemode": True,
@@ -380,8 +443,8 @@ FAKE_INVOICE_II = InvoiceDict({
                 "currency": "usd",
                 "proration": False,
                 "period": {
-                    "start": 1441993761,
-                    "end": 1444585761
+                    "start": 1442469907,
+                    "end": 1445061907
                 },
                 "subscription": None,
                 "quantity": 1,
@@ -395,26 +458,26 @@ FAKE_INVOICE_II = InvoiceDict({
         "object": "list",
         "url": "/v1/invoices/in_16Yf6s2eZvKYlo2CG7FhvCos/lines"
     },
-    "subtotal": 39859,
-    "total": 39859,
+    "subtotal": 3000,
+    "total": 3000,
     "customer": "cus_6lsBvm5rJ0zyHc",
     "object": "invoice",
     "attempted": True,
-    "closed": True,
+    "closed": False,
     "forgiven": False,
-    "paid": True,
+    "paid": False,
     "livemode": False,
     "attempt_count": 1,
-    "amount_due": 39859,
+    "amount_due": 3000,
     "currency": "usd",
     "starting_balance": 0,
     "ending_balance": 0,
-    "next_payment_attempt": None,
-    "webhooks_delivered_at": 1439308586,
-    "charge": "ch_16Yg4x2eZvKYlo2C344tXVAo",
+    "next_payment_attempt": 1440048103,
+    "webhooks_delivered_at": 1439785139,
+    "charge": FAKE_CHARGE_II["id"],
     "discount": None,
     "application_fee": None,
-    "subscription": "sub_5qtuFBcWG0JerR",
+    "subscription": "sub_4gmRwSQmlmUOs8",
     "tax_percent": None,
     "tax": None,
     "metadata": {},
@@ -422,6 +485,7 @@ FAKE_INVOICE_II = InvoiceDict({
     "description": None,
     "receipt_number": None
 })
+
 
 FAKE_INVOICE_III = InvoiceDict({
     "date": 1439425915,

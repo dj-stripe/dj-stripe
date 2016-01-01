@@ -244,7 +244,7 @@ class TestCustomer(TestCase):
         self.customer.charge(
             amount=decimal.Decimal("10.00"),
             capture=True,
-            destination=FAKE_ACCOUNT,
+            destination=PropertyMock(stripe_id=FAKE_ACCOUNT["id"]),
         )
 
         _, kwargs = charge_create_mock.call_args
@@ -501,13 +501,13 @@ class TestCustomer(TestCase):
         self.assertFalse(send_invoice_mock.called)
 
     @patch("djstripe.models.Charge.send_receipt")
-    @patch("djstripe.models.Customer.record_charge", return_value=Charge())
-    @patch("stripe.Charge.create", return_value={"id": "test_charge_id"})
-    def test_charge_not_send_receipt(self, charge_create_mock, record_charge_mock, send_receipt_mock):
-
+    @patch("djstripe.models.Charge.sync_from_stripe_data")
+    @patch("stripe.Charge.create", return_value=FAKE_CHARGE)
+    def test_charge_not_send_receipt(self, charge_create_mock, charge_sync_mock, send_receipt_mock):
         self.customer.charge(amount=decimal.Decimal("50.00"), send_receipt=False)
+
         self.assertTrue(charge_create_mock.called)
-        record_charge_mock.assert_called_once_with("test_charge_id")
+        charge_sync_mock.assert_called_once_with(FAKE_CHARGE)
         self.assertFalse(send_receipt_mock.called)
 
     @patch("stripe.InvoiceItem.create")

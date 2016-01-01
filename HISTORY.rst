@@ -14,7 +14,6 @@ History
 * Fixed "Invoice matching query does not exist" bug (#263) (Thanks @mthornhill)
 * Fixed duplicate content in account view (Thanks @areski)
 
-
 0.7.0 (2015-09-22)
 ---------------------
 * dj-stripe now responds to the invoice.created event (Thanks @wahuneke)
