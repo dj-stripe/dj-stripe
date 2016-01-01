@@ -3,6 +3,18 @@
 History
 =======
 
+0.8.0 (2015-12-30)
+---------------------
+* better plan ordering documentation (Thanks @cjrh)
+* added a confirmation page when choosing a subscription (Thanks @chrissmejia, @areski)
+* setup.py reverse dependency fix (#258/#268) (Thanks @ticosax)
+* Dropped official support for Django 1.7 (no code changes were made)
+* Python 3.5 support, Django 1.9.1 support
+* Migration improvements (Thanks @michi88)
+* Fixed "Invoice matching query does not exist" bug (#263) (Thanks @mthornhill)
+* Fixed duplicate content in account view (Thanks @areski)
+
+
 0.7.0 (2015-09-22)
 ---------------------
 * dj-stripe now responds to the invoice.created event (Thanks @wahuneke)

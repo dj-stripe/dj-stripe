@@ -4,7 +4,7 @@
 
 .. moduleauthor:: Daniel Greenfeld (@pydanny)
 .. moduleauthor:: Alex Kavanaugh (@kavdev)
-.. moduleauthor:: Michael Thronhill (@mthornhill)
+.. moduleauthor:: Michael Thornhill (@mthornhill)
 
 """
 
@@ -22,7 +22,7 @@ from mock import patch, PropertyMock, MagicMock
 from stripe.error import InvalidRequestError
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
-from djstripe.models import Account, Customer, Charge, Subscription
+from djstripe.models import Account, Customer, Charge, Subscription, Invoice
 
 from . import FAKE_CHARGE, FAKE_CUSTOMER, FAKE_ACCOUNT, FAKE_INVOICE, FAKE_INVOICE_II, FAKE_INVOICE_III, DataList
 
@@ -52,7 +52,7 @@ class TestCustomer(TestCase):
         self.account = Account.objects.create()
 
     def test_tostring(self):
-        self.assertEquals("<patrick, stripe_id=cus_6lsBvm5rJ0zyHc>", str(self.customer))
+        self.assertEquals("<patrick, email=patrick@gmail.com, stripe_id=cus_6lsBvm5rJ0zyHc>", str(self.customer))
 
     @patch("stripe.Customer.retrieve")
     def test_customer_purge_leaves_customer_record(self, customer_retrieve_fake):
@@ -210,6 +210,24 @@ class TestCustomer(TestCase):
 
         _, kwargs = charge_create_mock.call_args
         self.assertEquals(kwargs["amount"], 1000)
+
+    # TODO: Fix this to work correctly
+    @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Charge.retrieve")
+    @patch("stripe.Charge.create")
+    def test_charge_doesnt_require_invoice(self, charge_create_mock, charge_retrieve_mock, default_account_mock):
+        default_account_mock.return_value = self.account
+
+        fake_charge_copy = deepcopy(FAKE_CHARGE)
+        fake_charge_copy.update({"invoice": "in_30Kg7Arb0132UK", "amount": 1000})
+
+        charge_create_mock.return_value = fake_charge_copy
+        charge_retrieve_mock.return_value = fake_charge_copy
+
+        try:
+            self.customer.charge(amount=decimal.Decimal("10.00"))
+        except Invoice.DoesNotExist:
+            self.fail(msg="Stripe Charge shouldn't throw Invoice DoesNotExist.")
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
