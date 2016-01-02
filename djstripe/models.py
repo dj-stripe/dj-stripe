@@ -415,7 +415,7 @@ class Customer(StripeCustomer):
         dollar amount. It will be converted to cents so any decimals beyond
         two will be ignored.
         """
-        
+
         if send_receipt is None:
             send_receipt = getattr(settings, 'DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS', True)
 
