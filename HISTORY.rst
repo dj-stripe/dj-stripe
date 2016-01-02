@@ -3,6 +3,10 @@
 History
 =======
 
+0.9.0 (2016-??-??)
+---------------------
+* Charge receipts now take `DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS` into account (Thanks @r0fls)
+
 0.8.0 (2015-12-30)
 ---------------------
 * better plan ordering documentation (Thanks @cjrh)
