@@ -417,8 +417,8 @@ class Customer(StripeCustomer):
         """
         
         if send_receipt is None:
-            send_receipt = getattr(settings,'DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS',True)
-            
+            send_receipt = getattr(settings, 'DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS', True)
+
         charge_id = super(Customer, self).charge(amount, currency, description, send_receipt, **kwargs)
         recorded_charge = self.record_charge(charge_id)
         if send_receipt:
