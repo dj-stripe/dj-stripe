@@ -409,12 +409,16 @@ class Customer(StripeCustomer):
             self.send_invoice()
         subscription_made.send(sender=self, plan=plan, stripe_response=resp)
 
-    def charge(self, amount, currency="usd", description=None, send_receipt=True, **kwargs):
+    def charge(self, amount, currency="usd", description=None, send_receipt=None, **kwargs):
         """
         This method expects `amount` to be a Decimal type representing a
         dollar amount. It will be converted to cents so any decimals beyond
         two will be ignored.
         """
+
+        if send_receipt is None:
+            send_receipt = getattr(settings, 'DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS', True)
+
         charge_id = super(Customer, self).charge(amount, currency, description, send_receipt, **kwargs)
         recorded_charge = self.record_charge(charge_id)
         if send_receipt:
