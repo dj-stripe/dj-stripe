@@ -62,9 +62,9 @@ Step 2: Specify exempt URLS:
         "[spam]",  # Anything in the dj-spam namespace
     )
 
-Using this example any request on this site that isn't on the homepage, about, spam, or djstripe pages is redirected to ``djstripe.views.SubscribeFormView``/
+Using this example any request on this site that isn't on the homepage, about, spam, or djstripe pages is redirected to ``djstripe.views.SubscribeFormView``.
 
-.. note:: Adding app_names to applications.
+.. note::
 
     The extensive list of rules for this feature can be found at https://github.com/pydanny/dj-stripe/blob/master/djstripe/middleware.py.
 
