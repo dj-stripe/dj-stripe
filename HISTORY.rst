@@ -7,6 +7,7 @@ History
 ---------------------
 * Charge receipts now take `DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS` into account (Thanks @r0fls)
 * Clarified/modified installation documentation (Thanks @pydanny)
+* Corrected and revised ANONYMOUS_USER_ERROR_MSG (Thanks @pydanny)
 
 0.8.0 (2015-12-30)
 ---------------------
