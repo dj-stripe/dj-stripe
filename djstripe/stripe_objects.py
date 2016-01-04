@@ -430,6 +430,9 @@ class StripeCustomer(StripeObject):
     card_exp_month = StripePositiveIntegerField(deprecated=True)
     card_exp_year = StripePositiveIntegerField(deprecated=True)
 
+    # TODO: Customer -- add_card(source)
+    # TODO: Customer.list_sources() (with types).
+
     def purge(self):
         """Delete all identifying information we have in this record."""
         self.card_fingerprint = ""
@@ -438,8 +441,8 @@ class StripeCustomer(StripeObject):
         self.card_exp_month = None
         self.card_exp_year = None
 
+    # TODO: remove in favor of sources
     def has_valid_card(self):
-        """remove in favor of sources"""
         return all([self.card_fingerprint, self.card_last_4, self.card_kind])
 
     def charge(self, amount, currency="usd", source=None, description=None, capture=True,
@@ -476,12 +479,12 @@ class StripeCustomer(StripeObject):
             amount=int(amount * 100),  # Convert dollars into cents
             currency=currency,
             customer=self.stripe_id,
-            source=source.stripe_id if source else None,  # Convert Source model to stripe_id
+            source=source.stripe_id if source else None,  # Convert Source to stripe_id
             description=description,
             capture=capture,
             statement_descriptor=statement_descriptor,
             metatdata=metadata,
-            destination=destination.stripe_id if destination else None,  # Convert Source model to stripe_id
+            destination=destination.stripe_id if destination else None,  # Convert Account to stripe_id
             application_fee=int(amount * 100),  # Convert dollars into cents
             shipping=shipping,
         )
@@ -664,6 +667,8 @@ class StripeAccount(StripeObject):
         abstract = True
 
     stripe_api_name = "Account"
+
+    # Account -- add_card(external_account);
 
     @classmethod
     def get_connected_account_from_token(cls, access_token):

@@ -159,6 +159,7 @@ class Customer(StripeCustomer):
         self.date_purged = timezone.now()
         self.save()
 
+    # TODO: better docstring
     def delete(self, using=None):
         # Only way to delete a customer is to use SQL
         self.purge()
@@ -184,6 +185,7 @@ class Customer(StripeCustomer):
         except Subscription.DoesNotExist:
             return False
 
+    # TODO: Make work for multiple subscriptions (plan parameter)
     def cancel_subscription(self, at_period_end=True):
         stripe_customer = self.api_retrieve()
 
@@ -251,6 +253,7 @@ class Customer(StripeCustomer):
             recorded_charge.send_receipt()
         return recorded_charge
 
+    # TODO: necessary? 1) happens in super.charge, also should use method on charge.
     def record_charge(self, charge_id):
         data = Charge(stripe_id=charge_id).api_retrieve(charge_id)
         return Charge.sync_from_stripe_data(data)
@@ -272,6 +275,7 @@ class Customer(StripeCustomer):
                 if str(exc) != "Invoice is already paid":
                     raise exc
 
+    # TODO: Multiple sources, else default source
     def update_card(self, token):
         # send new token to Stripe
         stripe_customer = self.api_retrieve()
@@ -284,6 +288,7 @@ class Customer(StripeCustomer):
         self.save()
         card_changed.send(sender=self, stripe_response=stripe_customer)
 
+    # TODO: Get to Work with multiple plans
     def update_plan_quantity(self, quantity, charge_immediately=False):
         stripe_customer = self.api_retrieve()
         stripe_subscription = stripe_customer.subscription
@@ -296,6 +301,7 @@ class Customer(StripeCustomer):
             charge_immediately=charge_immediately
         )
 
+    # SYNC methods should be dropped in favor of the master sync infrastructure proposed
     def _sync(self):
         super(Customer, self)._sync()
         self.save()
