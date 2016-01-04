@@ -7,15 +7,14 @@ Get the distribution
 
 At the command line::
 
-    $ easy_install dj-stripe
+    $ pip install dj-stripe
 
 Or, if you have virtualenvwrapper installed::
 
     $ mkvirtualenv dj-stripe
     $ pip install dj-stripe
 
-
-Or for development, first fork it and then::
+Or, if you want to develop on ``djstripe`` itself::
 
     $ git clone https://github.com/<yourname>/dj-stripe/
     $ python setup.py develop
