@@ -3,6 +3,8 @@ from django.conf import settings
 from django.core.urlresolvers import resolve
 from django.shortcuts import redirect
 
+import fnmatch
+
 from .utils import subscriber_has_active_subscription
 from .settings import subscriber_request_callback
 
@@ -33,8 +35,9 @@ class SubscriptionPaymentMiddleware(object):
         * "[namespace]" means everything with this name is exempt
         * "namespace:name" means this namespaced URL is exempt
         * "name" means this URL is exempt
-        * The entire djtripe namespace is exempt
+        * The entire djstripe namespace is exempt
         * If settings.DEBUG is True, then django-debug-toolbar is exempt
+        * A 'fn:' prefix means the rest of the URL is fnmatch'd.
 
     Example::
 
@@ -68,6 +71,12 @@ class SubscriptionPaymentMiddleware(object):
 
         if match.url_name in EXEMPT:
             return
+
+        # Third, we check wildcards:
+        for exempt in [x for x in EXEMPT if x.startswith('fn:')]:
+            exempt = exempt.replace('fn:', '')
+            if fnmatch.fnmatch(request.path, exempt):
+                return
 
         # Finally, we check the subscriber's subscription status
         subscriber = subscriber_request_callback(request)

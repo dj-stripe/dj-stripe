@@ -57,6 +57,13 @@ class MiddlewareURLTest(TestCase):
         response = self.middleware.process_request(request)
         self.assertEqual(response, None)
 
+    def test_fnmatch(self):
+        request = self.factory.get("/test_fnmatch/extra_text/")
+        request.user = self.user
+
+        response = self.middleware.process_request(request)
+        self.assertEqual(response, None)
+
 
 class MiddlewareLogicTest(TestCase):
     urls = 'tests.test_urls'

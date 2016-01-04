@@ -144,6 +144,7 @@ def run_test_suite(args):
             "(admin)",
             "test_url_name",
             "testapp_namespaced:test_url_namespaced",
+            "fn:/test_fnmatch*"
         ),
     )
 
