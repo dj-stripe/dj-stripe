@@ -12,26 +12,26 @@
         </div>
     </div>
     <div class="row">
-        {% if customer.card_last_4 %}
-            <div class="col-xs-4">
-                <p>
-                    Credit Card on file.
-                    <a class="btn btn-info" data-toggle="modal" href="#show-card">Show Card</a>
-                </p>
-            </div>
-    
-            <div class="col-xs-4">
-                <p>
-                    <a class="btn btn-primary pull-right" href="{% url 'djstripe:change_card' %}">Change Card</a>
-                </p>
-            </div>
-            {% else %}
-            <div class="col-xs-4" style="margin-bottom:10px;">
-                <p>
-                    <a class="btn btn-primary pull-left" href="{% url 'djstripe:change_card' %}">Add Card</a>
-                </p>
-            </div>
-        {% endif %}
+    {% if customer.has_valid_card %}
+        <div class="col-xs-4">
+            <p>
+                Credit Card on file.
+                <a class="btn btn-info" data-toggle="modal" href="#show-card">Show Card</a>
+            </p>
+        </div>
+
+        <div class="col-xs-4">
+            <p>
+                <a class="btn btn-primary pull-right" href="{% url 'djstripe:change_card' %}">Change Card</a>
+            </p>
+        </div>
+        {% else %}
+        <div class="col-xs-4" style="margin-bottom:10px;">
+            <p>
+                <a class="btn btn-primary pull-left" href="{% url 'djstripe:change_card' %}">Add Card</a>
+            </p>
+        </div>
+    {% endif %}
     </div>
 
 
