@@ -24,7 +24,7 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 
 from model_utils.models import TimeStampedModel
-from polymorphic import PolymorphicModel
+from polymorphic.models import PolymorphicModel
 
 from .context_managers import stripe_temporary_api_version
 from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, StripeCurrencyField,
@@ -547,11 +547,64 @@ class StripeCustomer(StripeObject):
 
 
 class StripeCard(StripeSource):
+    """
+    You can store multiple cards on a customer in order to charge the customer later.
+    (Source: https://stripe.com/docs/api/python#cards)
+
+    # = Mapping the values of this field isn't currently on our roadmap.
+        Please use the stripe dashboard to check the value of this field instead.
+
+    Fields not implemented:
+    * object: Unnecessary. Just check the model name.
+    * recipient: On Stripe's deprecation path.
+    * account: #
+    * currency: #
+    * default_for_currency: #
+
+    Stripe API_VERSION: model fields and methods audited to 2015-07-28 - @kavdev
+    """
+
+    BRANDS = ["Visa", "American Express", "MasterCard", "Discover", "JCB", "Diners Club", "Unknown"]
+    BRAND_CHOICES = [(brand, brand) for brand in BRANDS]
+
+    FUNDING_TYPES = ["credit", "debit", "prepaid", "unknown"]
+    FUNDING_TYPE_CHOICES = [(funding_type, funding_type.title()) for funding_type in FUNDING_TYPES]
+
+    CARD_CHECK_RESULTS = ["pass", "fail", "unavailable", "unknown"]
+    CARD_CHECK_RESULT_CHOICES = [(card_check_result, card_check_result.title()) for card_check_result in CARD_CHECK_RESULTS]
+
+    TOKENIZATION_METHODS = ["apple_pay", "android_pay"]
+    TOKENIZATION_METHOD_CHOICES = [(tokenization_method, tokenization_method.replace("_", " ").title()) for tokenization_method in TOKENIZATION_METHODS]
 
     class Meta:
         abstract = True
 
     stripe_api_name = "Card"
+
+    brand = StripeCharField(max_length=16, choices=BRAND_CHOICES, help_text="Card brand.")
+    exp_month = StripeIntegerField(help_text="Card expiration month.")
+    exp_year = StripeIntegerField(help_text="Card expiration year.")
+    funding = StripeCharField(max_length=7, choices=FUNDING_TYPE_CHOICES, help_text="Card funding type.")
+    last4 = StripeCharField(max_length=4, help_text="Last four digits of Card number.")
+
+    address_city = StripeTextField(null=True, help_text="Billing address city.")
+    address_country = StripeTextField(null=True, help_text="Billing address country.")
+    address_line1 = StripeTextField(null=True, help_text="Billing address (Line 1).")
+    address_line1_check = StripeCharField(null=True, max_length=11, choices=CARD_CHECK_RESULT_CHOICES, help_text="If ``address_line1`` was provided, results of the check.")
+    address_line2 = StripeTextField(null=True, help_text="Billing address (Line 2).")
+    address_state = StripeTextField(null=True, help_text="Billing address state.")
+    address_zip = StripeTextField(null=True, help_text="Billing address zip code.")
+    address_zip_check = StripeCharField(null=True, max_length=11, choices=CARD_CHECK_RESULT_CHOICES, help_text="If ``address_zip`` was provided, results of the check.")
+
+    country = StripeCharField(max_length=2, help_text="Two-letter ISO code representing the country of the card.")
+    cvc_check = StripeCharField(null=True, max_length=11, choices=CARD_CHECK_RESULT_CHOICES, help_text="If a CVC was provided, results of the check.")
+    dynamic_last4 = StripeCharField(null=True, max_length=4, help_text="(For tokenized numbers only.) The last four digits of the device account number.")
+    name = StripeTextField(null=True, help_text="Cardholder name.")
+    tokenization_method = StripeCharField(null=True, max_length=11, choices=TOKENIZATION_METHOD_CHOICES, help_text="If the card number is tokenized, this is the method that was used.")
+    fingerprint = StripeTextField(stripe_required=False, help_text="Uniquely identifies this particular card number.")
+
+    # TODO: Card.update(**params)
+    # TODO: Card.delete()
 
 
 class StripeSubscription(StripeObject):
