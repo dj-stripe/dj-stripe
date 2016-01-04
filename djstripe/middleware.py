@@ -42,10 +42,10 @@ class SubscriptionPaymentMiddleware(object):
     Example::
 
         DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = (
-            "(allauth)",  # anything in the django-allauth URLConf
             "[blogs]",  # Anything in the blogs namespace
             "products:detail",  # A ProductDetail view you want shown to non-payers
             "home",  # Site homepage
+            "fn:/accounts*",  # anything in the accounts/ URL path
         )
     """
 

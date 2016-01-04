@@ -59,18 +59,14 @@ Step 2: Specify exempt URLS:
     DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = (
         'home',
         'about',
-        "(allauth)",  # anything in the django-allauth URLConf
-
+        "[spam]",  # Anything in the dj-spam namespace
     )
 
-Using this example any request on this site that isn't on the homepage, about, accounts, or djstripe pages is redirected to ``djstripe.views.SubscribeFormView``/
+Using this example any request on this site that isn't on the homepage, about, spam, or djstripe pages is redirected to ``djstripe.views.SubscribeFormView``/
 
-.. warning:: Adding app_names to applications.
+.. note:: Adding app_names to applications.
 
-    To make the ``(allauth)`` work, you may need to define an app_name in the ``include()`` function in the URLConf. For example::
-
-        # in urls.py
-        url(r'^accounts/', include('allauth.urls',  app_name="allauth")),
+    The extensive list of rules for this feature can be found at https://github.com/pydanny/dj-stripe/blob/master/djstripe/middleware.py.
 
 .. seealso::
 
