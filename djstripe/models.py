@@ -211,10 +211,6 @@ class Customer(StripeCustomer):
         cancelled.send(sender=self, stripe_response=stripe_subscription)
         return current_subscription
 
-    def cancel(self, at_period_end=True):
-        warnings.warn("Deprecated - Use ``cancel_subscription`` instead. This method will be removed in dj-stripe 1.0.", DeprecationWarning)
-        return self.cancel_subscription(at_period_end=at_period_end)
-
     def subscribe(self, plan, quantity=1, trial_days=None,
                   charge_immediately=True, prorate=djstripe_settings.PRORATION_POLICY):
         stripe_customer = self.api_retrieve()
