@@ -143,7 +143,7 @@ class InvoiceTest(TestCase):
         self.assertEqual("", invoice_item.plan)
 
     @patch("djstripe.models.Charge.send_receipt")
-    @patch("djstripe.models.Charge.sync_from_stripe_data")
+    @patch("djstripe.models.Charge.sync_from_stripe_data", return_value=Charge())
     @patch("stripe.Charge.retrieve", return_value=FAKE_CHARGE_II)
     def test_sync_from_stripe_data_with_charge(self, charge_retrieve_mock, sync_charge_mock, send_receipt_mock):
         Invoice.sync_from_stripe_data(FAKE_INVOICE_II, send_receipt=True)
@@ -152,7 +152,7 @@ class InvoiceTest(TestCase):
         send_receipt_mock.assert_called_once_with()
 
     @patch("djstripe.models.Charge.send_receipt")
-    @patch("djstripe.models.Charge.sync_from_stripe_data")
+    @patch("djstripe.models.Charge.sync_from_stripe_data", return_value=Charge())
     @patch("stripe.Charge.retrieve", return_value=FAKE_CHARGE_II)
     def test_sync_from_stripe_data_with_charge_no_receipt(self, charge_retrieve_mock, sync_charge_mock, send_receipt_mock):
         Invoice.sync_from_stripe_data(FAKE_INVOICE_II, send_receipt=False)

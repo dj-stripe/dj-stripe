@@ -106,6 +106,32 @@ FAKE_CARD_II = {
     "customer": "cus_4UbFSo9tl62jqj"
 }
 
+FAKE_CARD_III = {
+    "id": "card_17PLiR2eZvKYlo2CRwTCUAdZ",
+    "object": "card",
+    "last4": "1005",
+    "brand": "American Express",
+    "funding": "credit",
+    "exp_month": 7,
+    "exp_year": 2019,
+    "country": "US",
+    "name": None,
+    "address_line1": None,
+    "address_line2": None,
+    "address_city": None,
+    "address_state": None,
+    "address_zip": None,
+    "address_country": None,
+    "cvc_check": "unchecked",
+    "address_line1_check": None,
+    "address_zip_check": None,
+    "tokenization_method": None,
+    "fingerprint": "Xt5EWLLDS7FJjR1c",
+    "dynamic_last4": None,
+    "metadata": {},
+    "customer": None
+}
+
 
 class ChargeDict(dict):
 
@@ -281,6 +307,11 @@ FAKE_SUBSCRIPTION_II = {
 
 
 class CustomerDict(dict):
+
+    def charges(self, **kwargs):
+        return DataList(url="/v1/charges",
+                        has_more=False,
+                        data=[deepcopy(FAKE_CHARGE)])
 
     def invoices(self, **kwargs):
         return DataList(url="/v1/invoices",
@@ -586,9 +617,9 @@ FAKE_DISPUTE = {
         {
             "id": "txn_15RsQX2eZvKYlo2CUTLzmHcJ",
             "object": "balance_transaction",
-            "amount": -195,
+            "amount":-195,
             "currency": "usd",
-            "net": -1695,
+            "net":-1695,
             "type": "adjustment",
             "created": 1422915137,
             "available_on": 1423440000,

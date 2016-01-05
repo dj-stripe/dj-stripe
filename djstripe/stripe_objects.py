@@ -527,23 +527,12 @@ class StripeCustomer(StripeObject):
             invoice=invoice_id,
         )
 
-    def _sync_card(self):
-        stripe_customer = self.api_retrieve()
-
-        self.card_fingerprint = stripe_customer.active_card.fingerprint
-        self.card_last_4 = stripe_customer.active_card.last4
-        self.card_kind = stripe_customer.active_card.type
-        self.card_exp_month = stripe_customer.active_card.exp_month
-        self.card_exp_year = stripe_customer.active_card.exp_year
-
     def _sync(self):
         stripe_customer = self.api_retrieve()
 
         if getattr(stripe_customer, 'deleted', False):
             # Customer was deleted from stripe
             self.purge()
-        elif getattr(stripe_customer, 'active_card', None):
-            self._sync_card()
 
 
 class StripeCard(StripeSource):

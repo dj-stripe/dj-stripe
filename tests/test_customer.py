@@ -11,7 +11,6 @@
 from copy import deepcopy
 import datetime
 import decimal
-from unittest.case import skip
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -210,21 +209,23 @@ class TestCustomer(TestCase):
         _, kwargs = charge_create_mock.call_args
         self.assertEquals(kwargs["amount"], 1000)
 
-    # TODO: Fix this to work correctly
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")
-    def test_charge_doesnt_require_invoice(self, charge_create_mock, charge_retrieve_mock, default_account_mock):
+    @patch("stripe.Invoice.retrieve")
+    def test_charge_doesnt_require_invoice(self, invoice_retrieve_mock, charge_create_mock, charge_retrieve_mock, default_account_mock):
         default_account_mock.return_value = self.account
 
         fake_charge_copy = deepcopy(FAKE_CHARGE)
-        fake_charge_copy.update({"invoice": "in_30Kg7Arb0132UK", "amount": 1000})
+        fake_charge_copy.update({"invoice": "in_16YHls2eZvKYlo2CwwH968Mc", "amount": 2000})
+        fake_invoice_copy = deepcopy(FAKE_INVOICE)
 
         charge_create_mock.return_value = fake_charge_copy
         charge_retrieve_mock.return_value = fake_charge_copy
+        invoice_retrieve_mock.return_value = fake_invoice_copy
 
         try:
-            self.customer.charge(amount=decimal.Decimal("10.00"))
+            self.customer.charge(amount=decimal.Decimal("20.00"))
         except Invoice.DoesNotExist:
             self.fail(msg="Stripe Charge shouldn't throw Invoice DoesNotExist.")
 
@@ -271,6 +272,7 @@ class TestCustomer(TestCase):
         callback_mock.assert_called_once_with(user)
         subscribe_mock.assert_called_once_with(plan=default_plan_fake, trial_days="donkey")
 
+    # TODO: Update
     @patch("djstripe.models.Customer.api_retrieve")
     def test_update_card(self, api_retrieve_mock):
         api_retrieve_mock.return_value = PropertyMock(
@@ -285,11 +287,10 @@ class TestCustomer(TestCase):
 
         self.customer.update_card("test")
 
-        self.assertEqual("test_fingerprint", self.customer.card_fingerprint)
-        self.assertEqual("1234", self.customer.card_last_4)
-        self.assertEqual("test_type", self.customer.card_kind)
-        self.assertEqual(12, self.customer.card_exp_month)
-        self.assertEqual(2020, self.customer.card_exp_year)
+    # TODO: Update for removal
+    @patch("djstripe.models.Customer.api_retrieve", return_value=PropertyMock(deleted=False))
+    def test_sync_non_delted_customer(self, customer_retrieve_mock):
+        self.customer._sync()
 
     @patch("djstripe.models.Customer.invoices", new_callable=PropertyMock,
            return_value=PropertyMock(name="filter", filter=MagicMock(return_value=[MagicMock(name="inv", retry=MagicMock(name="retry", return_value="test"))])))
@@ -336,36 +337,6 @@ class TestCustomer(TestCase):
 
         invoice_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, customer=self.customer.stripe_id)
 
-    @skip  # Needs to be refactored to use sources
-    @patch("djstripe.models.Customer.api_retrieve", new_callable=PropertyMock)
-    def test_sync_active_card(self, api_retrieve_mock):
-        api_retrieve_mock.return_value = PropertyMock(
-            active_card=PropertyMock(
-                fingerprint="cherry",
-                last4="4429",
-                type="apple",
-                exp_month=12,
-                exp_year=2020,
-            ),
-            deleted=False
-        )
-
-        self.customer._sync()
-        self.assertEqual("cherry", self.customer.card_fingerprint)
-        self.assertEqual("4429", self.customer.card_last_4)
-        self.assertEqual("apple", self.customer.card_kind)
-        self.assertEqual(12, self.customer.card_exp_month)
-        self.assertEqual(2020, self.customer.card_exp_year)
-
-    @skip  # Needs to be refactored to use sources
-    @patch("djstripe.models.Customer.api_retrieve",
-           return_value=PropertyMock(active_card=None, deleted=False))
-    def test_sync_no_card(self, api_retrieve_mock):
-        self.customer._sync()
-        self.assertEqual("YYYYYYYY", self.customer.card_fingerprint)
-        self.assertEqual("2342", self.customer.card_last_4)
-        self.assertEqual("Visa", self.customer.card_kind)
-
     @patch("djstripe.models.Customer.api_retrieve",
            return_value=PropertyMock(deleted=True))
     def test_sync_deleted_in_stripe(self, api_retrieve_mock):
@@ -396,22 +367,14 @@ class TestCustomer(TestCase):
 
         self.assertFalse(sync_from_stripe_data_mock.called)
 
-    @skip  # TODO: Add charges hook to fakes
     @patch("djstripe.models.Customer.record_charge")
-    @patch("djstripe.models.Customer.api_retrieve",
-           return_value=PropertyMock(charges=MagicMock(return_value=PropertyMock(data=[PropertyMock(id="herbst"),
-                                                                                       PropertyMock(id="winter"),
-                                                                                       PropertyMock(id="fruehling"),
-                                                                                       PropertyMock(id="sommer")]))))
+    @patch("djstripe.models.Customer.api_retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_sync_charges(self, api_retrieve_mock, record_charge_mock):
         self.customer._sync_charges()
 
-        record_charge_mock.assert_any_call("herbst")
-        record_charge_mock.assert_any_call("winter")
-        record_charge_mock.assert_any_call("fruehling")
-        record_charge_mock.assert_any_call("sommer")
+        record_charge_mock.assert_any_call(FAKE_CHARGE["id"])
 
-        self.assertEqual(4, record_charge_mock.call_count)
+        self.assertEqual(1, record_charge_mock.call_count)
 
     @patch("djstripe.models.Customer.record_charge")
     @patch("djstripe.models.Customer.api_retrieve",
@@ -501,10 +464,12 @@ class TestCustomer(TestCase):
 
     @patch("djstripe.models.Charge.send_receipt")
     @patch("djstripe.models.Charge.sync_from_stripe_data")
+    @patch("stripe.Charge.retrieve", return_value=FAKE_CHARGE)
     @patch("stripe.Charge.create", return_value=FAKE_CHARGE)
-    def test_charge_not_send_receipt(self, charge_create_mock, charge_sync_mock, send_receipt_mock):
+    def test_charge_not_send_receipt(self, charge_create_mock, charge_retrieve_mock, charge_sync_mock, send_receipt_mock):
         self.customer.charge(amount=decimal.Decimal("50.00"), send_receipt=False)
 
+        self.assertFalse(charge_retrieve_mock.called)
         self.assertTrue(charge_create_mock.called)
         charge_sync_mock.assert_called_once_with(FAKE_CHARGE)
         self.assertFalse(send_receipt_mock.called)

@@ -5,7 +5,6 @@ import datetime
 import decimal
 import json
 import traceback as exception_traceback
-import warnings
 import logging
 
 from django.conf import settings
@@ -28,7 +27,7 @@ from .signals import WEBHOOK_SIGNALS
 from .signals import subscription_made, cancelled, card_changed
 from .signals import webhook_processing_error
 from .stripe_objects import (StripeSource, StripeCharge, StripeCustomer, StripeCard, StripePlan,
-                             StripeInvoice, StripeTransfer, StripeAccount, StripeEvent, StripeSubscription)
+                             StripeInvoice, StripeTransfer, StripeAccount, StripeEvent)
 from .utils import convert_tstamp
 
 logger = logging.getLogger(__name__)
@@ -177,7 +176,7 @@ class Customer(StripeCustomer):
         :type plan: Plan or string (plan ID)
 
         :returns: True if there exists an active subscription, False otherwise.
-        :throws: 
+        :throws:
         """
 
         try:
@@ -245,13 +244,13 @@ class Customer(StripeCustomer):
         return self.has_valid_card() and self.date_purged is None
 
     def charge(self, amount, currency="usd", description=None, send_receipt=True, **kwargs):
-        """See ``Charge.create()``."""
+        stripe_charge = super(Customer, self).charge(amount, currency, description, send_receipt, **kwargs)
+        charge = Charge.sync_from_stripe_data(stripe_charge)
 
-        charge_id = super(Customer, self).charge(amount, currency, description, send_receipt, **kwargs)
-        recorded_charge = self.record_charge(charge_id)
         if send_receipt:
-            recorded_charge.send_receipt()
-        return recorded_charge
+            charge.send_receipt()
+
+        return charge
 
     # TODO: necessary? 1) happens in super.charge, also should use method on charge.
     def record_charge(self, charge_id):
@@ -281,9 +280,6 @@ class Customer(StripeCustomer):
         stripe_customer = self.api_retrieve()
         stripe_customer.card = token
         stripe_customer.save()
-
-        # Download new card details from Stripe
-        self._sync_card()
 
         self.save()
         card_changed.send(sender=self, stripe_response=stripe_customer)
@@ -316,7 +312,7 @@ class Customer(StripeCustomer):
         stripe_customer = self.api_retrieve()
 
         for charge in stripe_customer.charges(**kwargs).data:
-            self.record_charge(charge.id)
+            self.record_charge(charge["id"])
 
     def _sync_current_subscription(self):
         stripe_customer = self.api_retrieve()
@@ -604,7 +600,6 @@ class Invoice(StripeInvoice):
             charge = Charge.sync_from_stripe_data(stripe_charge)
 
             if send_receipt:
-                print("here")
                 charge.send_receipt()
         return invoice
 

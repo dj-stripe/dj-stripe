@@ -79,7 +79,7 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
 
         customer = self.get_object()
         try:
-            send_invoice = customer.card_fingerprint == ""
+            send_invoice = not customer.card_fingerprint
             customer.update_card(
                 request.POST.get("stripe_token")
             )
@@ -145,11 +145,10 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
         if plan_slug not in PAYMENT_PLANS:
             return redirect("djstripe:subscribe")
 
-        plan = PAYMENT_PLANS[plan_slug]
         customer, created = Customer.get_or_create(
             subscriber=subscriber_request_callback(self.request))
 
-        if hasattr(customer, "current_subscription") and customer.current_subscription.plan == plan['plan'] and customer.current_subscription.status != CurrentSubscription.STATUS_CANCELLED:
+        if hasattr(customer, "current_subscription") and customer.current_subscription.plan == plan_slug and customer.current_subscription.status != Subscription.STATUS_CANCELLED:
             message = "You already subscribed to this plan"
             messages.info(request, message, fail_silently=True)
             return redirect("djstripe:subscribe")
