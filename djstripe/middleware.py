@@ -49,8 +49,6 @@ class SubscriptionPaymentMiddleware(object):
         )
     """
 
-    # TODO - needs tests
-
     def process_request(self, request):
 
         # First, if in DEBUG mode and with django-debug-toolbar, we skip
