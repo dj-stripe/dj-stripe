@@ -1,0 +1,98 @@
+{% extends "djstripe/base.html" %}
+{% load static djstripe_tags %}
+
+{% block title %}Choose a Subscription{% endblock title %}
+
+{% block content %}
+{{ block.super }}
+<ul class="breadcrumb">
+    <li><a href="{% url 'djstripe:account' %}">Home</a></li>
+    <li><a href="{% url 'djstripe:subscribe' %}">Subscription</a></li>
+    <li class="active">Confirm</li>
+</ul>
+<h2>Confirm your Subscription</h2>
+{% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+{% endif %}
+{% if view.error %}
+    <div class="alert alert-error">{{ view.error }}</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-xs-12">
+        <form
+        {% if not customer.current_subscription or customer.current_subscription.status == CurrentSubscription.STATUS_CANCELLED %}
+            action="{% url 'djstripe:confirm' plan=plan.plan %}" class="djstripe-subscribe"
+            data-key="{{ STRIPE_PUBLIC_KEY }}"
+            data-amount="{{ plan.price }}"
+            data-name="{{ plan.name }}"
+            data-description="{{ plan.description }}"
+        {% else %}
+            data-stripe-key="{{ STRIPE_PUBLIC_KEY }}"
+            action="{% url 'djstripe:change_plan' %}" class="djstripe-change-plan"
+        {% endif %}
+        method="POST">
+
+        {% csrf_token %}
+        <input type="hidden" name="plan" value="{{ plan.plan }}" />
+        <input name="stripe_token" type="hidden" />
+
+        <!-- disable this when clicked -->
+        <button type="submit" class="btn btn-primary">
+            {% with image=plan.image|default:"img/default-plan-image.png" %}
+                <img src="{% static image %}" class="img-thumbnail" />
+            {% endwith %}
+            <h3>{{ plan.name }}</h3>
+            <p>{{ plan.description }}</p>
+        </button>
+
+        {% if not customer.current_subscription or customer.current_subscription.status == CurrentSubscription.STATUS_CANCELLED %}
+          <!-- do nothing -->
+        {% elif customer.current_subscription.plan == plan.plan %}
+            <h4>Your Current Plan</h4>
+        {% elif customer.current_subscription.amount < plan.price|djdiv:100 %}
+            <h4>Upgrade</h4>
+        {% elif customer.current_subscription.amount > plan.price|djdiv:100 %}
+            <h4>Downgrade</h4>
+        {% endif %}
+        </form>
+    </div>
+</div>
+{% endblock content %}
+
+{% block javascript %}
+{{ block.super }}
+<script src="https://checkout.stripe.com/v2/checkout.js"></script>
+<script text="text/javascript">
+    $(function() {
+        $('body').on("click", '.djstripe-subscribe button[type=submit]', function(e) {
+            e.preventDefault();
+            // retrieve current $(".djstripe-subscribe")
+            var $form = $(e.target).parents('form'),
+            token = function(res) {
+                $form.find("input[name=stripe_token]").val(res.id);
+                $("button[type=submit]").attr("disabled", "true");
+                $('#in-progress').modal({"keyboard": false})
+                $('.progress-bar').animate({width:'+=100%'}, 2000);
+                $form.trigger("submit");
+            };
+            StripeCheckout.open({
+                key: "{{ STRIPE_PUBLIC_KEY }}",
+                name: 'Payment Method',
+                panelLabel: 'Add Payment Method',
+                token: token
+            });
+            return false;
+        });
+        {% if PLAN_LIST|length > 1 %}
+        $('.djstripe-change-plan').click(function(e){
+            $("button[type=submit]").attr("disabled", "true");
+            $('#in-progress').modal({"keyboard": false})
+            $('.progress-bar').animate({width:'+=100%'}, 2000);
+            var $form = $(this);
+            $form.trigger("submit");
+        });
+        {% endif %}
+    });
+</script>
+{% endblock javascript %}

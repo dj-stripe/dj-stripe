@@ -37,6 +37,9 @@ stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2012-11-07")
 
 @python_2_unicode_compatible
 class EventProcessingException(TimeStampedModel):
+    """Tracks processing exceptions, storing Stack traces for easy reference
+        in the admin interface.
+    """
 
     event = models.ForeignKey("Event", null=True)
     data = models.TextField()
@@ -45,6 +48,11 @@ class EventProcessingException(TimeStampedModel):
 
     @classmethod
     def log(cls, data, exception, event):
+        """ Creates an instance of this model and saves it to the database.
+            :param data: The `http_body` of a `StripeException`
+            :param exception: An instance of `StripeException`
+            :param event: An instance of `Event`
+        """
         cls.objects.create(
             event=event,
             data=data or "",
@@ -183,7 +191,10 @@ class Customer(StripeCustomer):
         self.save()
 
     def str_parts(self):
-        return [smart_text(self.subscriber)] + super(Customer, self).str_parts()
+        return [
+            smart_text(self.subscriber),
+            "email={email}".format(email=self.subscriber.email),
+        ] + super(Customer, self).str_parts()
 
     def delete(self, using=None):
         # Only way to delete a customer is to use SQL
@@ -398,12 +409,16 @@ class Customer(StripeCustomer):
             self.send_invoice()
         subscription_made.send(sender=self, plan=plan, stripe_response=resp)
 
-    def charge(self, amount, currency="usd", description=None, send_receipt=True, **kwargs):
+    def charge(self, amount, currency="usd", description=None, send_receipt=None, **kwargs):
         """
         This method expects `amount` to be a Decimal type representing a
         dollar amount. It will be converted to cents so any decimals beyond
         two will be ignored.
         """
+
+        if send_receipt is None:
+            send_receipt = getattr(settings, 'DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS', True)
+
         charge_id = super(Customer, self).charge(amount, currency, description, send_receipt, **kwargs)
         recorded_charge = self.record_charge(charge_id)
         if send_receipt:
@@ -606,8 +621,12 @@ class Charge(StripeCharge):
 
     objects = ChargeManager()
 
-    def refund(self, amount=None):
-        refunded_charge = super(Charge, self).refund(amount)
+    def refund(self, amount=None, **kwargs):
+        """
+        Refund an existing charge https://stripe.com/docs/api#create_refund
+        Stripe Connect information https://stripe.com/docs/connect/payments-fees#issuing-refunds
+        """
+        refunded_charge = super(Charge, self).refund(amount, **kwargs)
         return Charge.sync_from_stripe_data(refunded_charge)
 
     def capture(self):
@@ -631,9 +650,12 @@ class Charge(StripeCharge):
         customer = cls.object_to_customer(Customer.stripe_objects, data)
         charge.customer = customer
 
-        invoice = cls.object_to_invoice(Invoice.stripe_objects, data)
-        if invoice:
-            charge.invoice = invoice
+        try:
+            invoice = cls.object_to_invoice(Invoice.stripe_objects, data)
+            if invoice:
+                charge.invoice = invoice
+        except Invoice.DoesNotExist:
+            logger.warning("No invoice {0} found for charge {1}".format(data.get('invoice'), data.get('id')))
 
         charge.save()
         return charge

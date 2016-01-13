@@ -26,4 +26,10 @@ urlpatterns = [
 
     # Represents protected content
     url(r'^testapp_content/', include('tests.apps.testapp_content.urls')),
+    # For testing fnmatches
+    url(
+        r"test_fnmatch/extra_text/$",
+        empty_view,
+        name="test_fnmatch"
+    ),
 ]

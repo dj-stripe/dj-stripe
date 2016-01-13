@@ -1,4 +1,3 @@
-=======
 Credits
 =======
 
@@ -42,3 +41,8 @@ Contributors
 * Bill Huneke (@wahuneke)
 * Matt Shaw (@unformatt)
 * Chris Trengove (@ctrengove)
+* Caleb Hattingh (@cjrh)
+* Nicolas Delaby (@ticosax)
+* Michaël Krens (@michi88)
+* Yuri Prezument (@yprez)
+* Raphael Deem (@r0fls)

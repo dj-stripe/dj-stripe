@@ -4,7 +4,7 @@
 
 .. moduleauthor:: Daniel Greenfeld (@pydanny)
 .. moduleauthor:: Alex Kavanaugh (@kavdev)
-.. moduleauthor:: Michael Thronhill (@mthornhill)
+.. moduleauthor:: Michael Thornhill (@mthornhill)
 
 """
 
@@ -19,7 +19,7 @@ from mock import patch, PropertyMock, MagicMock
 import stripe
 from unittest2 import TestCase as AssertWarnsEnabledTestCase
 
-from djstripe.models import Customer, Charge, CurrentSubscription
+from djstripe.models import Customer, Charge, CurrentSubscription, Invoice
 
 
 class TestCustomer(TestCase):
@@ -45,7 +45,7 @@ class TestCustomer(TestCase):
         )
 
     def test_tostring(self):
-        self.assertEquals("<patrick, stripe_id=cus_xxxxxxxxxxxxxxx>", str(self.customer))
+        self.assertEquals("<patrick, email=patrick@gmail.com, stripe_id=cus_xxxxxxxxxxxxxxx>", str(self.customer))
 
     @patch("stripe.Customer.retrieve")
     def test_customer_purge_leaves_customer_record(self, customer_retrieve_fake):
@@ -159,6 +159,44 @@ class TestCustomer(TestCase):
         charge2 = Charge.objects.get(stripe_id="ch_XXXXXX")
         self.assertEquals(charge2.refunded, True)
         self.assertEquals(charge2.amount_refunded, decimal.Decimal("10.00"))
+
+    @patch("stripe.Charge.retrieve")
+    def test_refund_charge_passes_extra_args(self, charge_retrieve_mock):
+        charge = Charge.objects.create(
+            stripe_id="ch_XXXXXX",
+            customer=self.customer,
+            card_last_4="4323",
+            card_kind="Visa",
+            amount=decimal.Decimal("10.00"),
+            paid=True,
+            refunded=False,
+            fee=decimal.Decimal("4.99"),
+            disputed=False
+        )
+        charge_retrieve_mock.return_value.refund.return_value = {
+            "id": "ch_XXXXXX",
+            "card": {
+                "last4": "4323",
+                "type": "Visa"
+            },
+            "amount": 1000,
+            "paid": True,
+            "refunded": True,
+            "captured": True,
+            "amount_refunded": 1000,
+            "fee": 499,
+            "dispute": None,
+            "created": 1363911708,
+            "customer": "cus_xxxxxxxxxxxxxxx"
+        }
+        charge.refund(
+            amount=decimal.Decimal("10.00"),
+            reverse_transfer=True,
+            refund_application_fee=False
+        )
+        _, kwargs = charge_retrieve_mock.return_value.refund.call_args
+        self.assertEquals(kwargs["reverse_transfer"], True)
+        self.assertEquals(kwargs["refund_application_fee"], False)
 
     @patch("stripe.Charge.retrieve")
     def test_capture_charge(self, charge_retrieve_mock):
@@ -283,6 +321,33 @@ class TestCustomer(TestCase):
         )
         _, kwargs = charge_create_mock.call_args
         self.assertEquals(kwargs["amount"], 1000)
+
+    @patch("stripe.Charge.retrieve")
+    @patch("stripe.Charge.create")
+    def test_charge_doesnt_require_invoice(self, charge_create_mock, charge_retrieve_mock):
+        charge_retrieve_mock.return_value = charge_create_mock.return_value = {
+            "id": "ch_XXXXXX",
+            "card": {
+                "last4": "4323",
+                "type": "Visa"
+            },
+            "amount": 1000,
+            "paid": True,
+            "refunded": False,
+            "captured": True,
+            "fee": 499,
+            "dispute": None,
+            "created": 1363911708,
+            "customer": "cus_xxxxxxxxxxxxxxx",
+            "invoice": "in_30Kg7Arb0132UK",
+        }
+
+        try:
+            self.customer.charge(
+                amount=decimal.Decimal("10.00")
+            )
+        except Invoice.DoesNotExist:
+            self.fail(msg="Stripe Charge shouldn't require an Invoice")
 
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")

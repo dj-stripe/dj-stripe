@@ -27,6 +27,7 @@ from .models import Customer
 from .models import Event
 from .models import EventProcessingException
 from .settings import PLAN_LIST
+from .settings import PAYMENT_PLANS
 from .settings import subscriber_request_callback
 from .settings import PRORATION_POLICY_FOR_UPGRADES
 from .settings import CANCELLATION_AT_PERIOD_END
@@ -131,14 +132,33 @@ class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
 #                              Subscription Views                              #
 # ============================================================================ #
 
-
-class SubscribeFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
-    """TODO: Add stripe_token to the form and use form_valid() instead of post()."""
+class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
 
     form_class = PlanForm
-    template_name = "djstripe/subscribe_form.html"
+    template_name = "djstripe/confirm_form.html"
     success_url = reverse_lazy("djstripe:history")
     form_valid_message = "You are now subscribed!"
+
+    def get(self, request, *args, **kwargs):
+        plan_slug = self.kwargs['plan']
+        if plan_slug not in PAYMENT_PLANS:
+            return redirect("djstripe:subscribe")
+
+        plan = PAYMENT_PLANS[plan_slug]
+        customer, created = Customer.get_or_create(
+            subscriber=subscriber_request_callback(self.request))
+
+        if hasattr(customer, "current_subscription") and customer.current_subscription.plan == plan['plan'] and customer.current_subscription.status != CurrentSubscription.STATUS_CANCELLED:
+            message = "You already subscribed to this plan"
+            messages.info(request, message, fail_silently=True)
+            return redirect("djstripe:subscribe")
+
+        return super(ConfirmFormView, self).get(request, *args, **kwargs)
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(ConfirmFormView, self).get_context_data(**kwargs)
+        context['plan'] = PAYMENT_PLANS[self.kwargs['plan']]
+        return context
 
     def post(self, request, *args, **kwargs):
         """
@@ -156,22 +176,24 @@ class SubscribeFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionM
             except stripe.StripeError as exc:
                 form.add_error(None, str(exc))
                 return self.form_invalid(form)
-            # redirect to confirmation page
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
 
 
+class SubscribeView(LoginRequiredMixin, SubscriptionMixin, TemplateView):
+    template_name = "djstripe/subscribe.html"
+
+
 class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
     """
-    TODO: This logic should be in form_valid() instead of post().
     TODO: Work in a trial_days kwarg
 
-    Also, this should be combined with SubscribeFormView.
+    Also, this should be combined with ConfirmFormView.
     """
 
     form_class = PlanForm
-    template_name = "djstripe/subscribe_form.html"
+    template_name = "djstripe/confirm_form.html"
     success_url = reverse_lazy("djstripe:history")
     form_valid_message = "You've just changed your plan!"
 
@@ -191,9 +213,7 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                 if PRORATION_POLICY_FOR_UPGRADES:
                     current_subscription_amount = customer.current_subscription.amount
                     selected_plan_name = form.cleaned_data["plan"]
-                    selected_plan = next(
-                        (plan for plan in PLAN_LIST if plan["plan"] == selected_plan_name)
-                    )
+                    selected_plan = [plan for plan in PLAN_LIST if plan["plan"] == selected_plan_name][0]  # TODO: refactor
                     selected_plan_price = selected_plan["price"] / decimal.Decimal("100")
 
                     # Is it an upgrade?

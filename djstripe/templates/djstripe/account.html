@@ -12,53 +12,46 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-xs-4">
-            <p>
-                Credit Card on file.
-                <a class="btn btn-info" data-toggle="modal" href="#show-card">Show Card</a>
-            </p>
-        </div>
-        <div class="col-xs-4">
-            <p>
-                <a class="btn btn-primary pull-right" href="{% url 'djstripe:change_card' %}">Change Card</a>
-            </p>
-        </div>
+        {% if customer.has_valid_card %}
+            <div class="col-xs-4">
+                <p>
+                    Credit Card on file.
+                    <a class="btn btn-info" data-toggle="modal" href="#show-card">Show Card</a>
+                </p>
+            </div>
+
+            <div class="col-xs-4">
+                <p>
+                    <a class="btn btn-primary pull-right" href="{% url 'djstripe:change_card' %}">Change Card</a>
+                </p>
+            </div>
+        {% else %}
+            <div class="col-xs-4" style="margin-bottom:10px;">
+                <p>
+                    <a class="btn btn-primary pull-left" href="{% url 'djstripe:change_card' %}">Add Card</a>
+                </p>
+            </div>
+        {% endif %}
     </div>
 
 
-
-{% if subscription.is_status_current and not subscription.is_status_temporarily_current %}<p>Next billed on {{ subscription.current_period_end|date }}.</p>
-			<p>You can <a href="{% url 'djstripe:subscribe' %}">change</a> your plan
-				or <a href="{% url 'djstripe:cancel_subscription' %}">cancel</a> your subscription.
-    		</p>
-			{% else %}
-			<p>You can <a href="{% url 'djstripe:subscribe' %}">subscribe</a>.</p>
-    		{% endif %}
-    		<p>Or consult your <a href="{% url 'djstripe:history' %}">payment history</a>.</p>
-
+    {% if subscription.is_status_current and not subscription.is_status_temporarily_current %}
+        <p>Next billed on {{ subscription.current_period_end|date }}.</p>
+        <p>You can <a href="{% url 'djstripe:subscribe' %}">change</a> your plan
+        or <a href="{% url 'djstripe:cancel_subscription' %}">cancel</a> your subscription.
+        </p>
+    {% else %}
+        <p>You can <a href="{% url 'djstripe:subscribe' %}">subscribe</a>.</p>
+    {% endif %}
+    <p>Or consult your <a href="{% url 'djstripe:history' %}">payment history</a>.</p>
 
     {% if plans %}
         {# Show available plans #}
         <div class="row">
             <div class="col-xs-12">
                 <h2>Subscription</h2>
-            </div>  
-        </div>
-        <div class="row">
-            <div class="col-xs-6">
-            	{# Do not show next billing if subscription has been canceled although is still active #}
-            	{% if subscription.is_status_current and not subscription.is_status_temporarily_current %}
-            	<p>Next billed on {{ subscription.current_period_end|date }}.</p>
-            	<p>You can <a href="{% url 'djstripe:change_plan' %}">change</a> your plan
-					or <a href="{% url 'djstripe:cancel_subscription' %}">cancel</a> your subscription.
-    			</p>
-				{% else %}
-				<p>You can <a href="{% url 'djstripe:subscribe' %}">subscribe</a>.</p>
-    			{% endif %}
-    			<p>Or consult here your <a href="{% url 'djstripe:history' %}">payment history</a>.</p>
             </div>
         </div>
-
         <div class="row">
             <div class="col-xs-12">
                 <table class="table table-hover">
@@ -71,28 +64,26 @@
                         </tr>
                     </thead>
                     <tbody>
-                        
-                        {% for plan in plans %}
-                            <tr {% if plan.plan == subscription.plan %} 
-        						{% if subscription.is_status_current and not subscription.is_status_temporarily_current and subscription.status != subscription.STATUS_TRIALING %} 
-        							class="success" 
-        						{% elif subscription.is_status_temporarily_current or subscription.status == subscription.STATUS_TRIALING %} 
-        							class="warning" 
-        						{% endif %}
-        					{% endif %}>
-                            
-                                <td>{{ plan.name }}</td>
-                                <td>{{ plan.interval.title }}ly</td>
-                                <td>{{ plan.description }}</td>
-                                <td>
-                                	{% if plan.plan == subscription.plan and subscription.status != subscription.STATUS_CANCELLED %}
-                                        <strong>Your plan</strong>
-                                    {% else %}
-                                        Not your plan
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
+                    {% for plan in plans %}
+                        <tr {% if plan.plan == subscription.plan %}
+                            {% if subscription.is_status_current and not subscription.is_status_temporarily_current and subscription.status != subscription.STATUS_TRIALING %}
+                                class="success"
+                            {% elif subscription.is_status_temporarily_current or subscription.status == subscription.STATUS_TRIALING %}
+                                class="warning"
+                            {% endif %}
+                        {% endif %}>
+                            <td>{{ plan.name }}</td>
+                            <td>{{ plan.interval.title }}ly</td>
+                            <td>{{ plan.description }}</td>
+                            <td>
+                                {% if plan.plan == subscription.plan and subscription.status != subscription.STATUS_CANCELLED %}
+                                    <strong>Your plan</strong>
+                                {% else %}
+                                    Not your plan
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
                     </tbody>
                 </table>
             </div>
