@@ -300,7 +300,7 @@ class ChangePlanViewTest(TestCase):
         response = self.client.post(self.url, {"plan": "test2"})
         self.assertRedirects(response, reverse("djstripe:history"))
 
-        subscribe_mock.assert_called_once_with(self.user1.customer, "test2", prorate=True, prorate=False, trial_days=None, trial_end_date=None)
+        subscribe_mock.assert_called_once_with(self.user1.customer, "test2", prorate=True, trial_days=None, trial_end_date=None)
 
     @patch("djstripe.views.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
     @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", amount=Decimal(25.00)))
