@@ -238,14 +238,14 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                     if self.change_trial_policy == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_NEW:
                         # trial_days will be pulled from plan settings in customer.subscribe()
                         pass
-                    elif self.change_trial_policy == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_CONTINUE:
+                    if self.change_trial_policy == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_CONTINUE:
                         trial_end_date = current_trial_end_date
                         logger.debug('Carrying over trial from current plan that ends %s' % trial_end_date)
-                    elif self.change_trial_policy == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_END:
+                    if self.change_trial_policy == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_END:
                         logger.debug('Not allowing continuation of trial')
                         trial_days = 0
                         
-                elif not is_trialing and current_trial_end_date:
+                if not is_trialing and current_trial_end_date!=None:
                     # Plan is not trialing but plan has trial_end - that means that the user once had a trial.
                     if self.one_trial_per_customer:
                         logger.debug("Customer already had a trial, preventing another")
