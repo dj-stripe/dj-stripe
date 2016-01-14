@@ -27,7 +27,7 @@ def run_test_suite(args):
     skip_utc = args.skip_utc
     enable_coverage = not args.no_coverage
     enable_pep8 = not args.no_pep8
-    tests_to_run = args.run_tests or "."
+    tests_to_run = args.run_tests.split(',') if  args.run_tests else ["."]
 
     if enable_coverage:
         cov = Coverage(config_file=True)
@@ -171,7 +171,7 @@ def run_test_suite(args):
     from django_nose import NoseTestSuiteRunner
 
     test_runner = NoseTestSuiteRunner(verbosity=1)
-    failures = test_runner.run_tests([tests_to_run])
+    failures = test_runner.run_tests(tests_to_run)
 
     if failures:
         sys.exit(failures)

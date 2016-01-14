@@ -200,10 +200,8 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
     template_name = "djstripe/confirm_form.html"
     success_url = reverse_lazy("djstripe:history")
     form_valid_message = "You've just changed your plan!"
-
-    def get_change_trial_policy(self):
-        ''' Need this method so we can mock the value in testing '''
-        return PLAN_CHANGE_TRIAL_POLICY
+    change_trial_policy = PLAN_CHANGE_TRIAL_POLICY
+    one_trial_per_customer = ONE_TRIAL_PER_CUSTOMER
 
     def post(self, request, *args, **kwargs):
         form = PlanForm(request.POST)
@@ -218,6 +216,8 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                 prorate = False
                 trial_end_date = None
                 trial_days = None
+                is_trialing = False
+                current_trial_end_date = None
                 selected_plan_name = form.cleaned_data["plan"]
 
                 try:
@@ -229,28 +229,25 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                     logger.debug('Changing customer %s plan from %s to %s' % (customer.subscriber.email, current_subscription.plan, selected_plan_name))
                     is_trialing = current_subscription.is_status_trialing()
                     current_trial_end_date = current_subscription.trial_end
-                else:
-                    is_trialing = False
-                    current_trial_end_date = None
 
                 new_plan_trial_end = None
                 logger.debug("is_trialing: %s" % is_trialing)
                 logger.debug("current_trial_end_date: %s" % current_trial_end_date)
 
                 if is_trialing:
-                    change_trial_policy = self.get_change_trial_policy()
-                    if change_trial_policy == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_NEW:
+                    if self.change_trial_policy == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_NEW:
                         # trial_days will be pulled from plan settings in customer.subscribe()
                         pass
-                    elif change_trial_policy == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_CONTINUE:
+                    elif self.change_trial_policy == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_CONTINUE:
                         trial_end_date = current_trial_end_date
                         logger.debug('Carrying over trial from current plan that ends %s' % trial_end_date)
-                    elif change_trial_policy == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_END:
+                    elif self.change_trial_policy == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_END:
+                        logger.debug('Not allowing continuation of trial')
                         trial_days = 0
                         
                 elif not is_trialing and current_trial_end_date:
                     # Plan is not trialing but plan has trial_end - that means that the user once had a trial.
-                    if ONE_TRIAL_PER_CUSTOMER:
+                    if self.one_trial_per_customer:
                         logger.debug("Customer already had a trial, preventing another")
                         # TODO: Problem here is that new plan will not have trial_end. So if user changes plans
                         #       again, we won't catch this case. I'd say set previous trial_end on the new plan.

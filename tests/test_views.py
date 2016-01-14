@@ -245,6 +245,7 @@ class ConfirmFormViewTest(TestCase):
 class ChangePlanViewTest(TestCase):
 
     _trial_end_future = datetime.datetime.now()+datetime.timedelta(days=1)
+    _trial_end_past = datetime.datetime.now()-datetime.timedelta(days=1)
 
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890_01"))
     def setUp(self, stripe_customer_mock):
@@ -323,38 +324,53 @@ class ChangePlanViewTest(TestCase):
 
         subscribe_mock.assert_called_once_with(self.user1.customer, "test", prorate=False, trial_days=None, trial_end_date=None)
 
-    @patch("djstripe.views.ChangePlanView.get_change_trial_policy", return_value=CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_NEW)
+    @patch("djstripe.views.ChangePlanView.change_trial_policy", new_callable=PropertyMock, return_value=CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_NEW)
     @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", status=CurrentSubscription.STATUS_TRIALING, amount=Decimal(25.00), trial_end=_trial_end_future))
     @patch("djstripe.models.Customer.subscribe", autospec=True)
-    def test_change_sub_during_trial_new(self, subscribe_mock, current_subscription_mock, get_change_trial_policy_mock):
+    def test_change_sub_during_trial_new(self, subscribe_mock, current_subscription_mock, change_trial_policy_mock):
         self.assertTrue(self.client.login(username="testuser1", password="123"))
         response = self.client.post(self.url, {"plan": "test"})
         self.assertRedirects(response, reverse("djstripe:history"))
         subscribe_mock.assert_called_once_with(self.user1.customer, "test", prorate=False, trial_days=None, trial_end_date=None)
 
-    @patch("djstripe.views.ChangePlanView.get_change_trial_policy", return_value=CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_CONTINUE)
+    @patch("djstripe.views.ChangePlanView.change_trial_policy", new_callable=PropertyMock, return_value=CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_CONTINUE)
     @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", status=CurrentSubscription.STATUS_TRIALING, amount=Decimal(25.00), trial_end=_trial_end_future))
     @patch("djstripe.models.Customer.subscribe", autospec=True)
-    def test_change_sub_during_trial_continue(self, subscribe_mock, current_subscription_mock, get_change_trial_policy_mock):
+    def test_change_sub_during_trial_continue(self, subscribe_mock, current_subscription_mock, change_trial_policy_mock):
         self.assertTrue(self.client.login(username="testuser1", password="123"))
         response = self.client.post(self.url, {"plan": "test"})
         self.assertRedirects(response, reverse("djstripe:history"))
-
         subscribe_mock.assert_called_once_with(self.user1.customer, "test", prorate=False, trial_days=None, trial_end_date=self._trial_end_future)
 
-    @patch("djstripe.views.ChangePlanView.get_change_trial_policy", return_value=CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_END)
+    
+    @patch("djstripe.views.ChangePlanView.change_trial_policy", new_callable=PropertyMock, return_value=CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_END)
     @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", status=CurrentSubscription.STATUS_TRIALING, amount=Decimal(25.00), trial_end=_trial_end_future))
     @patch("djstripe.models.Customer.subscribe", autospec=True)
-    def test_change_sub_during_trial_end(self, subscribe_mock, current_subscription_mock, get_change_trial_policy_mock):
+    def test_change_sub_during_trial_end(self, subscribe_mock, current_subscription_mock, change_trial_policy_mock):
         self.assertTrue(self.client.login(username="testuser1", password="123"))
         response = self.client.post(self.url, {"plan": "test"})
         self.assertRedirects(response, reverse("djstripe:history"))
-
         subscribe_mock.assert_called_once_with(self.user1.customer, "test", prorate=False, trial_days=0, trial_end_date=None)
-    
-    def test_change_plan_view_get_change_trial_policy(self):
-        self.assertEquals(ChangePlanView().get_change_trial_policy(), djstripe_settings.PLAN_CHANGE_TRIAL_POLICY)
 
+    @patch("djstripe.views.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
+    @patch("djstripe.views.ChangePlanView.one_trial_per_customer", new_callable=PropertyMock, return_value=False)
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", status=CurrentSubscription.STATUS_ACTIVE, amount=Decimal(25.00), trial_end=_trial_end_past))
+    @patch("djstripe.models.Customer.subscribe", autospec=True)
+    def test_one_trial_per_customer_false(self, subscribe_mock, current_subscription_mock, one_trial_per_customer_mock, proration_policy_mock):
+        self.assertTrue(self.client.login(username="testuser1", password="123"))
+        response = self.client.post(self.url, {"plan": "test_trial"})
+        self.assertRedirects(response, reverse("djstripe:history"))
+        subscribe_mock.assert_called_once_with(self.user1.customer, "test_trial", prorate=True, trial_days=None, trial_end_date=None)
+
+    @patch("djstripe.views.ChangePlanView.one_trial_per_customer", new_callable=PropertyMock, return_value=True)
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", status=CurrentSubscription.STATUS_ACTIVE, amount=Decimal(25.00), trial_end=_trial_end_past))
+    @patch("djstripe.models.Customer.subscribe", autospec=True)
+    def test_one_trial_per_customer_true(self, subscribe_mock, current_subscription_mock, one_trial_per_customer_mock):
+        self.assertTrue(self.client.login(username="testuser1", password="123"))
+        response = self.client.post(self.url, {"plan": "test_trial"})
+        self.assertRedirects(response, reverse("djstripe:history"))
+        subscribe_mock.assert_called_once_with(self.user1.customer, "test_trial", prorate=False, trial_days=0, trial_end_date=None)
+   
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     def test_change_sub_stripe_error(self, subscribe_mock):
         subscribe_mock.side_effect = stripe.StripeError("No such plan: test_id_3")
