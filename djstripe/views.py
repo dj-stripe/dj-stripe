@@ -216,10 +216,19 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                 trial_days = None
                 selected_plan_name = form.cleaned_data["plan"]
 
-                logger.debug('Changing customer %s plan from %s to %s' % (customer.subscriber.email, customer.current_subscription.plan, selected_plan_name))
+                try:
+                    current_subscription = customer.current_subscription
+                except CurrentSubscription.DoesNotExist:
+                    current_subscription = None
 
-                is_trialing = customer.current_subscription.is_status_trialing()
-                current_trial_end_date = customer.current_subscription.trial_end
+                if current_subscription:
+                    logger.debug('Changing customer %s plan from %s to %s' % (customer.subscriber.email, current_subscription.plan, selected_plan_name))
+                    is_trialing = current_subscription.is_status_trialing()
+                    current_trial_end_date = current_subscription.trial_end
+                else:
+                    is_trialing = False
+                    current_trial_end_date = None
+
                 new_plan_trial_end = None
                 logger.debug("is_trialing: %s" % is_trialing)
                 logger.debug("current_trial_end_date: %s" % current_trial_end_date)
@@ -250,8 +259,8 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                 # When a customer upgrades their plan, and DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES is set to True,
                 # we force the proration of the current plan and use it towards the upgraded plan,
                 # no matter what DJSTRIPE_PRORATION_POLICY is set to.
-                if PRORATION_POLICY_FOR_UPGRADES:
-                    current_subscription_amount = customer.current_subscription.amount
+                if PRORATION_POLICY_FOR_UPGRADES and current_subscription:
+                    current_subscription_amount = current_subscription.amount
                     selected_plan = [plan for plan in PLAN_LIST if plan["plan"] == selected_plan_name][0]  # TODO: refactor
                     selected_plan_price = selected_plan["price"] / decimal.Decimal("100")
 
@@ -261,7 +270,7 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
 
                 customer.subscribe(selected_plan_name, prorate=prorate, trial_end_date=trial_end_date, trial_days=trial_days)
                 
-                # this doesn't work because it's overwritten when we sync with Stripe
+                # This doesn't work because it's overwritten when we sync with Stripe
                 #if new_plan_trial_end:
                     #customer.current_subscription.trial_end = new_plan_trial_end
                     #customer.current_subscription.save()
