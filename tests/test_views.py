@@ -6,7 +6,7 @@
 .. moduleauthor:: Alex Kavanaugh (@kavdev)
 
 """
-
+import datetime
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
@@ -19,7 +19,7 @@ from mock import patch, PropertyMock
 
 from djstripe import settings as djstripe_settings
 from djstripe.models import Customer, CurrentSubscription
-from djstripe.views import ChangeCardView, HistoryView
+from djstripe.views import ChangeCardView, HistoryView, ChangePlanView
 
 
 class AccountViewTest(TestCase):
@@ -244,6 +244,8 @@ class ConfirmFormViewTest(TestCase):
 
 class ChangePlanViewTest(TestCase):
 
+    _trial_end_future = datetime.datetime.now()+datetime.timedelta(days=1)
+
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890_01"))
     def setUp(self, stripe_customer_mock):
         self.url = reverse("djstripe:change_plan")
@@ -320,6 +322,38 @@ class ChangePlanViewTest(TestCase):
         self.assertRedirects(response, reverse("djstripe:history"))
 
         subscribe_mock.assert_called_once_with(self.user1.customer, "test", prorate=False, trial_days=None, trial_end_date=None)
+
+    @patch("djstripe.views.ChangePlanView.get_change_trial_policy", return_value=CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_NEW)
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", status=CurrentSubscription.STATUS_TRIALING, amount=Decimal(25.00), trial_end=_trial_end_future))
+    @patch("djstripe.models.Customer.subscribe", autospec=True)
+    def test_change_sub_during_trial_new(self, subscribe_mock, current_subscription_mock, get_change_trial_policy_mock):
+        self.assertTrue(self.client.login(username="testuser1", password="123"))
+        response = self.client.post(self.url, {"plan": "test"})
+        self.assertRedirects(response, reverse("djstripe:history"))
+        subscribe_mock.assert_called_once_with(self.user1.customer, "test", prorate=False, trial_days=None, trial_end_date=None)
+
+    @patch("djstripe.views.ChangePlanView.get_change_trial_policy", return_value=CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_CONTINUE)
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", status=CurrentSubscription.STATUS_TRIALING, amount=Decimal(25.00), trial_end=_trial_end_future))
+    @patch("djstripe.models.Customer.subscribe", autospec=True)
+    def test_change_sub_during_trial_continue(self, subscribe_mock, current_subscription_mock, get_change_trial_policy_mock):
+        self.assertTrue(self.client.login(username="testuser1", password="123"))
+        response = self.client.post(self.url, {"plan": "test"})
+        self.assertRedirects(response, reverse("djstripe:history"))
+
+        subscribe_mock.assert_called_once_with(self.user1.customer, "test", prorate=False, trial_days=None, trial_end_date=self._trial_end_future)
+
+    @patch("djstripe.views.ChangePlanView.get_change_trial_policy", return_value=CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_END)
+    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", status=CurrentSubscription.STATUS_TRIALING, amount=Decimal(25.00), trial_end=_trial_end_future))
+    @patch("djstripe.models.Customer.subscribe", autospec=True)
+    def test_change_sub_during_trial_end(self, subscribe_mock, current_subscription_mock, get_change_trial_policy_mock):
+        self.assertTrue(self.client.login(username="testuser1", password="123"))
+        response = self.client.post(self.url, {"plan": "test"})
+        self.assertRedirects(response, reverse("djstripe:history"))
+
+        subscribe_mock.assert_called_once_with(self.user1.customer, "test", prorate=False, trial_days=0, trial_end_date=None)
+    
+    def test_change_plan_view_get_change_trial_policy(self):
+        self.assertEquals(ChangePlanView().get_change_trial_policy(), djstripe_settings.PLAN_CHANGE_TRIAL_POLICY)
 
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     def test_change_sub_stripe_error(self, subscribe_mock):

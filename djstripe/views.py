@@ -201,6 +201,10 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
     success_url = reverse_lazy("djstripe:history")
     form_valid_message = "You've just changed your plan!"
 
+    def get_change_trial_policy(self):
+        ''' Need this method so we can mock the value in testing '''
+        return PLAN_CHANGE_TRIAL_POLICY
+
     def post(self, request, *args, **kwargs):
         form = PlanForm(request.POST)
         try:
@@ -234,14 +238,14 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                 logger.debug("current_trial_end_date: %s" % current_trial_end_date)
 
                 if is_trialing:
-                    logger.debug("PLAN_CHANGE_TRIAL_POLICY: %s" % PLAN_CHANGE_TRIAL_POLICY)
-                    if PLAN_CHANGE_TRIAL_POLICY == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_NEW:
+                    change_trial_policy = self.get_change_trial_policy()
+                    if change_trial_policy == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_NEW:
                         # trial_days will be pulled from plan settings in customer.subscribe()
                         pass
-                    elif PLAN_CHANGE_TRIAL_POLICY == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_CONTINUE:
+                    elif change_trial_policy == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_CONTINUE:
                         trial_end_date = current_trial_end_date
                         logger.debug('Carrying over trial from current plan that ends %s' % trial_end_date)
-                    elif PLAN_CHANGE_TRIAL_POLICY == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_END:
+                    elif change_trial_policy == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_END:
                         trial_days = 0
                         
                 elif not is_trialing and current_trial_end_date:
