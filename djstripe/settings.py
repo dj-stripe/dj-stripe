@@ -27,6 +27,16 @@ PRORATION_POLICY = getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False)
 PRORATION_POLICY_FOR_UPGRADES = getattr(settings, 'DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES', False)
 CANCELLATION_AT_PERIOD_END = not getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False)  # TODO - need to find a better way to do this
 
+# Values for PLAN_CHANGE_TRIAL_POLICY:
+#   - continue: e.g. If user has 3 days left on their trial and they change to another plan with a 7 day trial, set new plan to have a 3 day trial.
+#   - new:      e.g. If user has 3 days left on their trial and they change to another plan with a 7 day trial, set new plan to have a 7 day trial.
+#   - end:      e.g. If user has 3 days left on their trial and they change to another plan with a 7 day trial, they get no trial.
+PLAN_CHANGE_TRIAL_POLICY = getattr(settings, 'DJSTRIPE_PLAN_CHANGE_TRIAL_POLICY', 'continue')
+
+# If user is changing to another plan and user already had a trial but does not currently have a trial, prevent the new plan from having a trial.
+# Otherwise, user could hop around on trials forever. Defaults to False for backwards compatibility.
+ONE_TRIAL_PER_CUSTOMER = getattr(settings, 'DJSTRIPE_ONE_TRIAL_PER_CUSTOMER', False)
+
 SEND_INVOICE_RECEIPT_EMAILS = getattr(settings, "DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS", True)
 CURRENCIES = getattr(settings, "DJSTRIPE_CURRENCIES", (
     ('usd', 'U.S. Dollars',),

@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 import decimal
 import json
+import logging
 
 from django.contrib.auth import logout as auth_logout
 from django.contrib import messages
@@ -31,8 +32,11 @@ from .settings import PAYMENT_PLANS
 from .settings import subscriber_request_callback
 from .settings import PRORATION_POLICY_FOR_UPGRADES
 from .settings import CANCELLATION_AT_PERIOD_END
+from .settings import PLAN_CHANGE_TRIAL_POLICY
+from .settings import ONE_TRIAL_PER_CUSTOMER
 from .sync import sync_subscriber
 
+logger = logging.getLogger(__name__)
 
 # ============================================================================ #
 #                                 Account Views                                #
@@ -207,22 +211,61 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
 
         if form.is_valid():
             try:
+                prorate = False
+                trial_end_date = None
+                trial_days = None
+                selected_plan_name = form.cleaned_data["plan"]
+
+                logger.debug('Changing customer %s plan from %s to %s' % (customer.subscriber.email, customer.current_subscription.plan, selected_plan_name))
+
+                is_trialing = customer.current_subscription.is_status_trialing()
+                current_trial_end_date = customer.current_subscription.trial_end
+                new_plan_trial_end = None
+                logger.debug("is_trialing: %s" % is_trialing)
+                logger.debug("current_trial_end_date: %s" % current_trial_end_date)
+
+                if is_trialing:
+                    logger.debug("PLAN_CHANGE_TRIAL_POLICY: %s" % PLAN_CHANGE_TRIAL_POLICY)
+                    if PLAN_CHANGE_TRIAL_POLICY == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_NEW:
+                        # trial_days will be pulled from plan settings in customer.subscribe()
+                        pass
+                    elif PLAN_CHANGE_TRIAL_POLICY == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_CONTINUE:
+                        trial_end_date = current_trial_end_date
+                        logger.debug('Carrying over trial from current plan that ends %s' % trial_end_date)
+                    elif PLAN_CHANGE_TRIAL_POLICY == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_END:
+                        trial_days = 0
+                        
+                elif not is_trialing and current_trial_end_date:
+                    # Plan is not trialing but plan has trial_end - that means that the user once had a trial.
+                    if ONE_TRIAL_PER_CUSTOMER:
+                        logger.debug("Customer already had a trial, preventing another")
+                        # TODO: Problem here is that new plan will not have trial_end. So if user changes plans
+                        #       again, we won't catch this case. I'd say set previous trial_end on the new plan.
+                        #       or we'd have to add a property on the customer that indicates if they ever had a trial.
+                        trial_days = 0
+                        new_plan_trial_end = current_trial_end_date
+                    else:
+                        logger.debug("Allowing customer to start new trial")
+
                 # When a customer upgrades their plan, and DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES is set to True,
                 # we force the proration of the current plan and use it towards the upgraded plan,
                 # no matter what DJSTRIPE_PRORATION_POLICY is set to.
                 if PRORATION_POLICY_FOR_UPGRADES:
                     current_subscription_amount = customer.current_subscription.amount
-                    selected_plan_name = form.cleaned_data["plan"]
                     selected_plan = [plan for plan in PLAN_LIST if plan["plan"] == selected_plan_name][0]  # TODO: refactor
                     selected_plan_price = selected_plan["price"] / decimal.Decimal("100")
 
-                    # Is it an upgrade?
+                    # Is it an upgrade? then prorate
                     if selected_plan_price > current_subscription_amount:
-                        customer.subscribe(selected_plan_name, prorate=True)
-                    else:
-                        customer.subscribe(selected_plan_name)
-                else:
-                    customer.subscribe(form.cleaned_data["plan"])
+                        prorate = True
+
+                customer.subscribe(selected_plan_name, prorate=prorate, trial_end_date=trial_end_date, trial_days=trial_days)
+                
+                # this doesn't work because it's overwritten when we sync with Stripe
+                #if new_plan_trial_end:
+                    #customer.current_subscription.trial_end = new_plan_trial_end
+                    #customer.current_subscription.save()
+
             except stripe.StripeError as exc:
                 form.add_error(None, str(exc))
                 return self.form_invalid(form)

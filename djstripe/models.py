@@ -381,20 +381,26 @@ class Customer(StripeCustomer):
             charge_immediately=charge_immediately
         )
 
-    def subscribe(self, plan, quantity=1, trial_days=None,
+    def subscribe(self, plan, quantity=1, trial_days=None, trial_end_date=None,
                   charge_immediately=True, prorate=djstripe_settings.PRORATION_POLICY):
+        """
+        If you pass trial_days or trial_end_date, this will override trial_period_days value in plan settings.
+        If you pass trial_days=0, this will create a subscription with no trial period.
+        If you pass trial_days=None, trial_period_days from plan settings will be used.
+        """
+        assert trial_days==None or trial_end_date==None, "Don't pass both trial_days and trial_end_date"
         stripe_customer = self.stripe_customer
-        """
-        Trial_days corresponds to the value specified by the selected plan
-        for the key trial_period_days.
-        """
-        if ("trial_period_days" in djstripe_settings.PAYMENTS_PLANS[plan]):
-            trial_days = djstripe_settings.PAYMENTS_PLANS[plan]["trial_period_days"]
+
+        if trial_days==None and trial_end_date==None:
+            trial_days = djstripe_settings.PAYMENTS_PLANS[plan].get("trial_period_days",trial_days)
 
         if trial_days:
+            trial_end_date = timezone.now() + datetime.timedelta(days=trial_days)
+
+        if trial_end_date:
             resp = stripe_customer.update_subscription(
                 plan=djstripe_settings.PAYMENTS_PLANS[plan]["stripe_plan_id"],
-                trial_end=timezone.now() + datetime.timedelta(days=trial_days),
+                trial_end=trial_end_date,
                 prorate=prorate,
                 quantity=quantity
             )
@@ -437,6 +443,10 @@ class CurrentSubscription(TimeStampedModel):
     STATUS_CANCELLED = "canceled"
     STATUS_UNPAID = "unpaid"
 
+    PLAN_CHANGE_TRIAL_POLICY_NEW = 'new'
+    PLAN_CHANGE_TRIAL_POLICY_END = 'end'
+    PLAN_CHANGE_TRIAL_POLICY_CONTINUE = 'continue'
+
     customer = models.OneToOneField(
         Customer,
         related_name="current_subscription",
@@ -470,6 +480,9 @@ class CurrentSubscription(TimeStampedModel):
 
     def is_status_current(self):
         return self.status in [self.STATUS_TRIALING, self.STATUS_ACTIVE]
+
+    def is_status_trialing(self):
+        return self.status == self.STATUS_TRIALING
 
     def is_status_temporarily_current(self):
         """
