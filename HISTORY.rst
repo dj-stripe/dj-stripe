@@ -9,6 +9,7 @@ History
 * Clarified/modified installation documentation (Thanks @pydanny)
 * Corrected and revised ANONYMOUS_USER_ERROR_MSG (Thanks @pydanny)
 * Added fnmatching to `SubscriptionPaymentMiddleware` (Thanks @pydanny)
+* `SubscriptionPaymentMiddleware.process_request()` functionality broken up into multiple methods, making local customizations easier (Thanks @pydanny)
 
 0.8.0 (2015-12-30)
 ---------------------

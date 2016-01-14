@@ -51,32 +51,45 @@ class SubscriptionPaymentMiddleware(object):
 
     def process_request(self, request):
 
+        # Does the request match any of the docstring rules?
+        if self.is_matching_rule(request):
+            return
+
+        # Finally, we check the subscriber's subscription status
+        return self.check_subscription(request)
+
+    def is_matching_rule(self, request):
+        """Check according to the rules defined in the class docstring."""
         # First, if in DEBUG mode and with django-debug-toolbar, we skip
         #   this entire process.
         if settings.DEBUG and request.path.startswith("/__debug__"):
-            return
+            return True
 
         # Second we check against matches
         match = resolve(request.path)
         if "({0})".format(match.app_name) in EXEMPT:
-            return
+            return True
 
         if "[{0}]".format(match.namespace) in EXEMPT:
-            return
+            return True
 
         if "{0}:{1}".format(match.namespace, match.url_name) in EXEMPT:
-            return
+            return True
 
         if match.url_name in EXEMPT:
-            return
+            return True
 
         # Third, we check wildcards:
         for exempt in [x for x in EXEMPT if x.startswith('fn:')]:
             exempt = exempt.replace('fn:', '')
             if fnmatch.fnmatch(request.path, exempt):
-                return
+                return True
 
-        # Finally, we check the subscriber's subscription status
+        return False
+
+    def check_subscription(self, request):
+        """If the user lacks an active subscription, redirect to subscribe."""
+
         subscriber = subscriber_request_callback(request)
 
         if not subscriber_has_active_subscription(subscriber):
