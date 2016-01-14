@@ -117,7 +117,7 @@ def run_test_suite(args):
                 "interval": "month"
             }
         },
-        DJSTRIPE_PLAN_HIERARCHY = {
+        DJSTRIPE_PLAN_HIERARCHY={
             "bronze": {
                 "level": 1,
                 "plans": [
