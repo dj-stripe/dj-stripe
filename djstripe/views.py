@@ -220,17 +220,14 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                 current_trial_end_date = None
                 selected_plan_name = form.cleaned_data["plan"]
 
-                try:
-                    current_subscription = customer.current_subscription
-                except CurrentSubscription.DoesNotExist:
-                    current_subscription = None
+                current_subscription = getattr(customer, "current_subscription", None)
 
                 if current_subscription:
                     logger.debug('Changing customer %s plan from %s to %s' % (customer.subscriber.email, current_subscription.plan, selected_plan_name))
                     is_trialing = current_subscription.is_status_trialing()
                     current_trial_end_date = current_subscription.trial_end
 
-                new_plan_trial_end = None
+                # new_plan_trial_end = None
                 logger.debug("is_trialing: %s" % is_trialing)
                 logger.debug("current_trial_end_date: %s" % current_trial_end_date)
 
@@ -244,8 +241,8 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                     if self.change_trial_policy == CurrentSubscription.PLAN_CHANGE_TRIAL_POLICY_END:
                         logger.debug('Not allowing continuation of trial')
                         trial_days = 0
-                        
-                if not is_trialing and current_trial_end_date!=None:
+
+                if not is_trialing and current_trial_end_date is not None:
                     # Plan is not trialing but plan has trial_end - that means that the user once had a trial.
                     if self.one_trial_per_customer:
                         logger.debug("Customer already had a trial, preventing another")
@@ -253,7 +250,7 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                         #       again, we won't catch this case. I'd say set previous trial_end on the new plan.
                         #       or we'd have to add a property on the customer that indicates if they ever had a trial.
                         trial_days = 0
-                        new_plan_trial_end = current_trial_end_date
+                        # new_plan_trial_end = current_trial_end_date
                     else:
                         logger.debug("Allowing customer to start new trial")
 
@@ -270,11 +267,11 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                         prorate = True
 
                 customer.subscribe(selected_plan_name, prorate=prorate, trial_end_date=trial_end_date, trial_days=trial_days)
-                
+
                 # This doesn't work because it's overwritten when we sync with Stripe
-                #if new_plan_trial_end:
-                    #customer.current_subscription.trial_end = new_plan_trial_end
-                    #customer.current_subscription.save()
+                # if new_plan_trial_end:
+                #    customer.current_subscription.trial_end = new_plan_trial_end
+                #    customer.current_subscription.save()
 
             except stripe.StripeError as exc:
                 form.add_error(None, str(exc))

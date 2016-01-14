@@ -388,11 +388,11 @@ class Customer(StripeCustomer):
         If you pass trial_days=0, this will create a subscription with no trial period.
         If you pass trial_days=None, trial_period_days from plan settings will be used.
         """
-        assert trial_days==None or trial_end_date==None, "Don't pass both trial_days and trial_end_date"
+        assert trial_days is None or trial_end_date is None, "Don't pass both trial_days and trial_end_date"
         stripe_customer = self.stripe_customer
 
-        if trial_days==None and trial_end_date==None:
-            trial_days = djstripe_settings.PAYMENTS_PLANS[plan].get("trial_period_days",trial_days)
+        if trial_days is None and trial_end_date is None:
+            trial_days = djstripe_settings.PAYMENTS_PLANS[plan].get("trial_period_days", trial_days)
 
         if trial_days:
             trial_end_date = timezone.now() + datetime.timedelta(days=trial_days)

@@ -27,7 +27,7 @@ def run_test_suite(args):
     skip_utc = args.skip_utc
     enable_coverage = not args.no_coverage
     enable_pep8 = not args.no_pep8
-    tests_to_run = args.run_tests.split(',') if  args.run_tests else ["."]
+    tests_to_run = args.run_tests.split(',') if args.run_tests else ["."]
 
     if enable_coverage:
         cov = Coverage(config_file=True)
@@ -119,7 +119,7 @@ def run_test_suite(args):
                 "interval": "month"
             }
         },
-        DJSTRIPE_PLAN_HIERARCHY = {
+        DJSTRIPE_PLAN_HIERARCHY={
             "bronze": {
                 "level": 1,
                 "plans": [
