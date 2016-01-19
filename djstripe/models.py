@@ -390,7 +390,6 @@ class Card(StripeCard):
         else:
             raise ValidationError("A customer was not attached to this card.")
 
-
 # class Subscription(StripeSubscription):
 #     customer = models.ForeignKey("Customer", blank=True, related_name="subscriptions")
 

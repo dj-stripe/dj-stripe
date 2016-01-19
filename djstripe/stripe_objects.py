@@ -595,6 +595,16 @@ class StripeCard(StripeSource):
     # TODO: Card.update(**params)
     # TODO: Card.delete()
 
+    @classmethod
+    def create(cls, source=None, **kwargs):
+        response = cls._api_create(source=source, **kwargs)
+        return cls._create_from_stripe_object(response)
+
+    @property
+    def stripe_card(self):
+        """Return the plan data from Stripe."""
+        return self.api_retrieve()
+
 
 class StripeSubscription(StripeObject):
 
