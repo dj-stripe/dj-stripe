@@ -279,11 +279,15 @@ class Customer(StripeCustomer):
 
     # TODO: Multiple sources, else default source
     def update_card(self, token):
-        # send new token to Stripe
+        card = self.add_source(token)
+        self.set_dafault_card(card)
+
+    def set_dafault_card(self, card):
         stripe_customer = self.api_retrieve()
-        stripe_customer.card = token
+        stripe_customer.default_source = card.stripe_id
         stripe_customer.save()
 
+        self.default_source = card
         self.save()
         card_changed.send(sender=self, stripe_response=stripe_customer)
 
