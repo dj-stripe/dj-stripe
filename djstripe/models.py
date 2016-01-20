@@ -252,6 +252,9 @@ class Customer(StripeCustomer):
 
         return charge
 
+    def add_source(self, source, **kwargs):
+        return Card.sync_from_stripe_data(self._add_source(source=source, ))
+
     # TODO: necessary? 1) happens in super.charge, also should use method on charge.
     def record_charge(self, charge_id):
         data = Charge(stripe_id=charge_id).api_retrieve(charge_id)
@@ -458,7 +461,7 @@ class Subscription(TimeStampedModel):
         period_end = None
 
         if self.trial_end is not None and \
-           self.trial_end > timezone.now():
+                        self.trial_end > timezone.now():
             period_end = self.trial_end
         else:
             period_end = self.current_period_end
@@ -507,13 +510,13 @@ class Plan(StripePlan):
         # A few minor things are changed in the api-version of the create call
         api_kwargs = dict(kwargs)
         api_kwargs['id'] = api_kwargs['stripe_id']
-        del(api_kwargs['stripe_id'])
+        del (api_kwargs['stripe_id'])
         api_kwargs['amount'] = int(api_kwargs['amount'] * 100)
         cls._api_create(**api_kwargs)
 
         # If they passed in a 'metadata' arg, drop that here as it is only for api consumption
         if 'metadata' in kwargs:
-            del(kwargs['metadata'])
+            del (kwargs['metadata'])
         plan = Plan.objects.create(**kwargs)
 
         return plan
@@ -679,7 +682,6 @@ class Account(StripeAccount):
 
 @python_2_unicode_compatible
 class EventProcessingException(TimeStampedModel):
-
     event = models.ForeignKey("Event", null=True)
     data = models.TextField()
     message = models.CharField(max_length=500)
