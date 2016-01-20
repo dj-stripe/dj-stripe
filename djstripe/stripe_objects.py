@@ -16,6 +16,7 @@ This module defines abstract models which are then extended in models.py to prov
 dj-stripe functionality.
 """
 
+
 import decimal
 
 from django.conf import settings
@@ -31,8 +32,8 @@ from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, Str
                      StripeBooleanField, StripeNullBooleanField, StripeJSONField)
 from .managers import StripeObjectManager
 
-import stripe
 
+import stripe
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2013-02-11")
 
 
@@ -595,14 +596,23 @@ class StripeCard(StripeSource):
     tokenization_method = StripeCharField(null=True, max_length=11, choices=TOKENIZATION_METHOD_CHOICES, help_text="If the card number is tokenized, this is the method that was used.")
     fingerprint = StripeTextField(stripe_required=False, help_text="Uniquely identifies this particular card number.")
 
-    # TODO: Card.update(**params)
-    # TODO: Card.delete()
+    def delete(self, **kwargs):
+        self.api_retrieve().delete()
+        super(StripeCard, self).delete(**kwargs)
 
-    @classmethod
-    def create(cls, customer, source=None, **kwargs):
-        customer_from_api = customer.api_retrieve()
-        response = customer_from_api.sources.create(source=source, **kwargs)
-        return cls._create_from_stripe_object(response)
+    def update(self, **kwargs):
+        card = self.api_retrieve()
+        for param, value in kwargs.iteritems():
+            setattr(card, param, value)
+
+        response = card.save()
+        object_attrs = self._stripe_object_to_record(response)
+        super(StripeCard, self).update(**object_attrs)
+
+
+    def api_retrieve(self):
+        return self.customer.api_retrieve().sources.retrieve(self.stripe_id)
+
 
 class StripeSubscription(StripeObject):
 
@@ -613,6 +623,7 @@ class StripeSubscription(StripeObject):
 
 
 class StripePlan(StripeObject):
+
     class Meta:
         abstract = True
 
@@ -625,6 +636,7 @@ class StripePlan(StripeObject):
 
 
 class StripeInvoice(StripeObject):
+
     class Meta:
         abstract = True
 
@@ -664,6 +676,7 @@ class StripeInvoice(StripeObject):
 
 
 class StripeInvoiceItem(StripeObject):
+
     class Meta:
         abstract = True
 
@@ -671,6 +684,7 @@ class StripeInvoiceItem(StripeObject):
 
 
 class StripeTransfer(StripeObject):
+
     class Meta:
         abstract = True
 
@@ -708,6 +722,7 @@ class StripeTransfer(StripeObject):
 
 
 class StripeAccount(StripeObject):
+
     class Meta:
         abstract = True
 
