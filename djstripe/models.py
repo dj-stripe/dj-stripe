@@ -397,6 +397,17 @@ class Card(StripeCard):
         else:
             raise ValidationError("A customer was not attached to this card.")
 
+    def delete(self, **kwargs):
+        if self.customer.default_source == self:
+            remaining_sources = self.customer.sources.exclude(pk=self.pk)
+            new_default = remaining_sources.last()
+            if new_default:
+                self.customer.set_default_card(new_default)
+
+        super(Card, self).delete(**kwargs)
+
+
+
 
 # class Subscription(StripeSubscription):
 #     customer = models.ForeignKey("Customer", blank=True, related_name="subscriptions")
