@@ -253,7 +253,12 @@ class Customer(StripeCustomer):
         return charge
 
     def add_source(self, source, **kwargs):
-        return Card.sync_from_stripe_data(self._add_source(source=source, ))
+        card = Card.sync_from_stripe_data(self._add_source(source=source, ))
+
+        if self.sources.count() == 1:
+            self.set_default_card(card)
+
+        return card
 
     # TODO: necessary? 1) happens in super.charge, also should use method on charge.
     def record_charge(self, charge_id):
