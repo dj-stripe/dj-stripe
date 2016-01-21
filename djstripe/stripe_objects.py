@@ -433,6 +433,11 @@ class StripeCustomer(StripeObject):
     # TODO: Customer -- add_card(source)
     # TODO: Customer.list_sources() (with types).
 
+    def _add_source(self, source, **kwargs):
+        customer_from_api = self.api_retrieve()
+        return customer_from_api.sources.create(source=source, **kwargs)
+
+
     def purge(self):
         """Delete all identifying information we have in this record."""
         self.card_fingerprint = ""
@@ -441,9 +446,8 @@ class StripeCustomer(StripeObject):
         self.card_exp_month = None
         self.card_exp_year = None
 
-    # TODO: remove in favor of sources
     def has_valid_card(self):
-        return all([self.card_fingerprint, self.card_last_4, self.card_kind])
+        return self.sources.count() > 0
 
     def charge(self, amount, currency="usd", source=None, description=None, capture=True,
                statement_descriptor=None, metadata=None, destination=None, application_fee=None, shipping=None):
@@ -592,8 +596,22 @@ class StripeCard(StripeSource):
     tokenization_method = StripeCharField(null=True, max_length=11, choices=TOKENIZATION_METHOD_CHOICES, help_text="If the card number is tokenized, this is the method that was used.")
     fingerprint = StripeTextField(stripe_required=False, help_text="Uniquely identifies this particular card number.")
 
-    # TODO: Card.update(**params)
-    # TODO: Card.delete()
+    def delete(self, **kwargs):
+        self.api_retrieve().delete()
+        super(StripeCard, self).delete(**kwargs)
+
+    def update(self, **kwargs):
+        card = self.api_retrieve()
+        for param, value in kwargs.iteritems():
+            setattr(card, param, value)
+
+        response = card.save()
+        object_attrs = self._stripe_object_to_record(response)
+        super(StripeCard, self).update(**object_attrs)
+
+
+    def api_retrieve(self):
+        return self.customer.api_retrieve().sources.retrieve(self.stripe_id)
 
 
 class StripeSubscription(StripeObject):
