@@ -18,6 +18,7 @@ dj-stripe functionality.
 
 
 import decimal
+import json
 
 from django.conf import settings
 from django.db import models
@@ -64,6 +65,10 @@ class StripeObject(TimeStampedModel):
 
     class Meta:
         abstract = True
+
+    @property
+    def metadata_object(self):
+        return json.loads(self.metadata)
 
     @classmethod
     def _api(cls):

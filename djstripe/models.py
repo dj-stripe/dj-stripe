@@ -253,7 +253,7 @@ class Customer(StripeCustomer):
         return charge
 
     def add_source(self, source, **kwargs):
-        card = Card.sync_from_stripe_data(self._add_source(source=source, ))
+        card = Card.sync_from_stripe_data(self._add_source(source=source, **kwargs))
 
         if self.sources.count() == 1:
             self.set_default_card(card)
