@@ -193,7 +193,8 @@ class Customer(StripeCustomer):
     def str_parts(self):
         return [
             smart_text(self.subscriber),
-            "email={email}".format(email=self.subscriber.email),
+            "email={email}".format(email=self.subscriber.email
+                if hasattr(self.subscriber, 'email') else ''),
         ] + super(Customer, self).str_parts()
 
     def delete(self, using=None):
