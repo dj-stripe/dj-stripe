@@ -58,7 +58,10 @@ class SubscriptionRestView(APIView):
                     subscriber=subscriber_request_callback(self.request)
                 )
                 customer.update_card(serializer.data["stripe_token"])
-                customer.subscribe(serializer.data["plan"])
+                customer.subscribe(
+                    serializer.data["plan"],
+                    serializer.data.get("charge_immediately", True)
+                )
                 return Response(
                     serializer.data,
                     status=status.HTTP_201_CREATED
