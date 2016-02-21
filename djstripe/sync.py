@@ -5,7 +5,7 @@ from django.conf import settings
 
 import stripe
 
-from .models import Customer
+from .models import Customer, Plan
 
 
 def sync_subscriber(subscriber):
@@ -27,17 +27,32 @@ def sync_plans(api_key=settings.STRIPE_SECRET_KEY):
         stripe_plan = settings.DJSTRIPE_PLANS[plan]
         if stripe_plan.get("stripe_plan_id"):
             try:
-                stripe.Plan.create(
+                # what if we have a plan on our db site and not stripe
+                plan, created = Plan.get_or_create(
                     amount=stripe_plan["price"],
                     interval=stripe_plan["interval"],
                     name=stripe_plan["name"],
                     currency=stripe_plan["currency"],
-                    id=stripe_plan["stripe_plan_id"],
+                    stripe_id=stripe_plan["stripe_plan_id"],
                     interval_count=stripe_plan.get("interval_count"),
                     trial_period_days=stripe_plan.get("trial_period_days"),
-                    statement_descriptor=stripe_plan.get("statement_descriptor"),
                     metadata=stripe_plan.get("metadata")
                 )
-                print("Plan created for {0}".format(plan))
+                if created:
+                    print("Plan created for {0}".format(plan))
+                else:
+                    print("Plan in djstripe already exists: {0}".format(plan))
+                    print('Attempting stripe api plan creation...')
+                    stripe.Plan.create(
+                        amount=stripe_plan["price"],
+                        interval=stripe_plan["interval"],
+                        name=stripe_plan["name"],
+                        currency=stripe_plan["currency"],
+                        id=stripe_plan["stripe_plan_id"],
+                        interval_count=stripe_plan.get("interval_count"),
+                        trial_period_days=stripe_plan.get("trial_period_days"),
+                        statement_descriptor=stripe_plan.get("statement_descriptor"),
+                        metadata=stripe_plan.get("metadata")
+                    )
             except Exception as e:
                 print("ERROR: " + str(e))
