@@ -23,15 +23,24 @@
                 You do not currently have a card on file.
             {% endif %}
         </p>
-        
+
         {% if stripe_error %}
             <div class="alert alert-error">{{ stripe_error }}</div>
         {% endif %}
-        
-            
+
+
         <form action="{% url 'djstripe:change_card' %}" method="POST" id="change-card-form">
         {% csrf_token %}
           <span class="payment-errors"></span>
+
+
+          <div class="form-row">
+            <label>
+              <span>Cardholder Name</span>
+              <input type="text" size="40" autocomplete="off" data-stripe="name"/>
+            </label>
+          </div>
+
 
           <div class="form-row">
             <label>
