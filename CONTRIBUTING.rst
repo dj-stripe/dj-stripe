@@ -100,9 +100,10 @@ Pull Request Guidelines
 Before you submit a pull request, check that it meets these guidelines:
 
 1. The pull request should include tests.
-2. If the pull request adds functionality, the docs should be updated. Put
+2. The pull request must not drop code coverage below the current level.
+3. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring.
-3. If the pull request makes changes to a model, include Django migrations (Django 1.7+).
-4. The pull request should work for Python 2.7 and 3.4. Check
+4. If the pull request makes changes to a model, include Django migrations (Django 1.7+).
+5. The pull request should work for Python 2.7 and 3.4. Check
    https://travis-ci.org/pydanny/dj-stripe/pull_requests
    and make sure that the tests pass for all supported Python versions.
