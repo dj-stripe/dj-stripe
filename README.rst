@@ -46,6 +46,7 @@ Features
 * `djstripe` namespace so you can have more than one payments related app
 * Documented
 * Tested
+* Current API version (2012-11-07), in progress of being updated
 
 Constraints
 ------------
