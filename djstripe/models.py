@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 import datetime
 import decimal
 import json
-import traceback as exception_traceback
 import logging
 
 from django.conf import settings
@@ -15,10 +14,12 @@ from django.db import models
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
-
 from model_utils.models import TimeStampedModel
 from stripe.error import StripeError, InvalidRequestError
 
+import traceback as exception_traceback
+
+from . import event_handlers  # NOQA
 from . import settings as djstripe_settings
 from . import webhooks
 from .exceptions import SubscriptionCancellationFailure, SubscriptionUpdateFailure
@@ -29,6 +30,7 @@ from .signals import webhook_processing_error
 from .stripe_objects import (StripeSource, StripeCharge, StripeCustomer, StripeCard, StripePlan,
                              StripeInvoice, StripeTransfer, StripeAccount, StripeEvent)
 from .utils import convert_tstamp
+
 
 logger = logging.getLogger(__name__)
 
@@ -212,8 +214,7 @@ class Customer(StripeCustomer):
         cancelled.send(sender=self, stripe_response=stripe_subscription)
         return current_subscription
 
-    def subscribe(self, plan, quantity=1, trial_days=None,
-                  charge_immediately=True, prorate=djstripe_settings.PRORATION_POLICY):
+    def subscribe(self, plan, quantity=1, trial_days=None, charge_immediately=True, prorate=djstripe_settings.PRORATION_POLICY):
         stripe_customer = self.api_retrieve()
         """
         Trial_days corresponds to the value specified by the selected plan
@@ -782,4 +783,3 @@ class Event(StripeEvent):
 
 # Much like registering signal handlers. We import this module so that its registrations get picked up
 # the NO QA directive tells flake8 to not complain about the unused import
-from . import event_handlers  # NOQA
