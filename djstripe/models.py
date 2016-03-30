@@ -243,7 +243,10 @@ class Customer(StripeCustomer):
     def can_charge(self):
         return self.has_valid_card() and self.date_purged is None
 
-    def charge(self, amount, currency="usd", description=None, send_receipt=True, **kwargs):
+    def charge(self, amount, currency="usd", description=None, send_receipt=None, **kwargs):
+        if send_receipt is None:
+            send_receipt = getattr(settings, 'DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS', True)
+
         stripe_charge = super(Customer, self).charge(amount, currency, description, send_receipt, **kwargs)
         charge = Charge.sync_from_stripe_data(stripe_charge)
 

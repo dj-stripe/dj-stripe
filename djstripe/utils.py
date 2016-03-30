@@ -10,11 +10,11 @@ from django.conf import settings
 
 
 ANONYMOUS_USER_ERROR_MSG = (
-    "The subscription_payment_required decorator requires the user"
-    "be authenticated before use. Please use django.contrib.auth's"
-    "login_required decorator."
-    "Please read the warning at"
-    "http://dj-stripe.readthedocs.org/en/latest/usage.html#ongoing-subscriptions"
+    "dj-stripe's payment checking mechanisms require the user "
+    "be authenticated before use. Please use django.contrib.auth's "
+    "login_required decorator or a LoginRequiredMixin. "
+    "Please read the warning at "
+    "http://dj-stripe.readthedocs.org/en/latest/usage.html#ongoing-subscriptions."
 )
 
 

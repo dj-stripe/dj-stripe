@@ -133,7 +133,6 @@ class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
 # ============================================================================ #
 
 class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
-    """TODO: Add stripe_token to the form and use form_valid() instead of post()."""
 
     form_class = PlanForm
     template_name = "djstripe/confirm_form.html"
@@ -187,7 +186,6 @@ class SubscribeView(LoginRequiredMixin, SubscriptionMixin, TemplateView):
 
 class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
     """
-    TODO: This logic should be in form_valid() instead of post().
     TODO: Work in a trial_days kwarg
 
     Also, this should be combined with ConfirmFormView.

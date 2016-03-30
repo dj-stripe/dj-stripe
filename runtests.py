@@ -117,7 +117,7 @@ def run_test_suite(args):
                 "interval": "month"
             }
         },
-        DJSTRIPE_PLAN_HIERARCHY = {
+        DJSTRIPE_PLAN_HIERARCHY={
             "bronze": {
                 "level": 1,
                 "plans": [
@@ -144,6 +144,7 @@ def run_test_suite(args):
             "(admin)",
             "test_url_name",
             "testapp_namespaced:test_url_namespaced",
+            "fn:/test_fnmatch*"
         ),
     )
 
