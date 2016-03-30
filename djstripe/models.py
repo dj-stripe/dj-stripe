@@ -255,6 +255,14 @@ class Customer(StripeCustomer):
 
         return charge
 
+    def add_source(self, source, **kwargs):
+        card = Card.sync_from_stripe_data(self._add_source(source=source, **kwargs))
+
+        if self.sources.count() == 1:
+            self.set_default_card(card)
+
+        return card
+
     # TODO: necessary? 1) happens in super.charge, also should use method on charge.
     def record_charge(self, charge_id):
         data = Charge(stripe_id=charge_id).api_retrieve(charge_id)
@@ -279,11 +287,15 @@ class Customer(StripeCustomer):
 
     # TODO: Multiple sources, else default source
     def update_card(self, token):
-        # send new token to Stripe
+        card = self.add_source(token)
+        self.set_default_card(card)
+
+    def set_default_card(self, card):
         stripe_customer = self.api_retrieve()
-        stripe_customer.card = token
+        stripe_customer.default_source = card.stripe_id
         stripe_customer.save()
 
+        self.default_source = card
         self.save()
         card_changed.send(sender=self, stripe_response=stripe_customer)
 
@@ -393,6 +405,17 @@ class Card(StripeCard):
         else:
             raise ValidationError("A customer was not attached to this card.")
 
+    def delete(self, **kwargs):
+        if self.customer.default_source == self:
+            remaining_sources = self.customer.sources.exclude(pk=self.pk)
+            new_default = remaining_sources.last()
+            if new_default:
+                self.customer.set_default_card(new_default)
+
+        super(Card, self).delete(**kwargs)
+
+
+
 
 # class Subscription(StripeSubscription):
 #     customer = models.ForeignKey("Customer", blank=True, related_name="subscriptions")
@@ -461,7 +484,7 @@ class Subscription(TimeStampedModel):
         period_end = None
 
         if self.trial_end is not None and \
-           self.trial_end > timezone.now():
+                        self.trial_end > timezone.now():
             period_end = self.trial_end
         else:
             period_end = self.current_period_end
@@ -510,13 +533,13 @@ class Plan(StripePlan):
         # A few minor things are changed in the api-version of the create call
         api_kwargs = dict(kwargs)
         api_kwargs['id'] = api_kwargs['stripe_id']
-        del(api_kwargs['stripe_id'])
+        del (api_kwargs['stripe_id'])
         api_kwargs['amount'] = int(api_kwargs['amount'] * 100)
         cls._api_create(**api_kwargs)
 
         # If they passed in a 'metadata' arg, drop that here as it is only for api consumption
         if 'metadata' in kwargs:
-            del(kwargs['metadata'])
+            del (kwargs['metadata'])
         plan = Plan.objects.create(**kwargs)
 
         return plan
@@ -682,7 +705,6 @@ class Account(StripeAccount):
 
 @python_2_unicode_compatible
 class EventProcessingException(TimeStampedModel):
-
     event = models.ForeignKey("Event", null=True)
     data = models.TextField()
     message = models.CharField(max_length=500)
