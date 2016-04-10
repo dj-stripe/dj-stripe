@@ -8,3 +8,7 @@ class SubscriptionCancellationFailure(Exception):
 
 class SubscriptionUpdateFailure(Exception):
     pass
+
+
+class StripeObjectManipulationException(Exception):
+    pass
