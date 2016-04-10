@@ -113,6 +113,7 @@ class Customer(StripeCustomer):
 
     # account = models.ForeignKey(Account, related_name="customers")
 
+    # TODO: attach_objects_hook
     default_source = models.ForeignKey(StripeSource, null=True, related_name="customers")
 
     subscriber = models.OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
@@ -155,14 +156,27 @@ class Customer(StripeCustomer):
             else:
                 # The exception was raised for another reason, re-raise it
                 raise
+
         self.subscriber = None
+
+        # Delete associated sources
+        self.default_source = None
+        for source in self.sources.all():
+            source.remove()
+
         super(Customer, self).purge()
         self.date_purged = timezone.now()
         self.save()
 
-    # TODO: better docstring
-    def delete(self, using=None):
-        # Only way to delete a customer is to use SQL
+    # TODO: Override Queryset.delete() with a custom manager, since this doesn't get called in bulk deletes (or cascades, but that's another matter)
+    def delete(self, using=None, keep_parents=False):
+        """
+        Overriding the delete method to keep the customer in the records. All identifying information is removed via the purge() method.
+
+        The only way to delete a customer is to use SQL.
+
+        """
+
         self.purge()
 
     def has_active_subscription(self, plan=None):
@@ -241,14 +255,27 @@ class Customer(StripeCustomer):
             self.send_invoice()
         subscription_made.send(sender=self, plan=plan, stripe_response=resp)
 
+    # TODO: Get to Work with multiple plans
+    def update_plan_quantity(self, quantity, charge_immediately=False):
+        stripe_customer = self.api_retrieve()
+        stripe_subscription = stripe_customer.subscription
+        if not stripe_subscription:
+            self._sync_current_subscription()
+            raise SubscriptionUpdateFailure("Customer does not have a subscription with Stripe")
+        self.subscribe(
+            plan=djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id),
+            quantity=quantity,
+            charge_immediately=charge_immediately
+        )
+
     def can_charge(self):
         return self.has_valid_card() and self.date_purged is None
 
-    def charge(self, amount, currency="usd", description=None, send_receipt=None, **kwargs):
+    def charge(self, amount, currency="usd", send_receipt=None, **kwargs):
         if send_receipt is None:
             send_receipt = getattr(settings, 'DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS', True)
 
-        stripe_charge = super(Customer, self).charge(amount, currency, description, send_receipt, **kwargs)
+        stripe_charge = super(Customer, self).charge(amount=amount, currency=currency, **kwargs)
         charge = Charge.sync_from_stripe_data(stripe_charge)
 
         if send_receipt:
@@ -278,33 +305,27 @@ class Customer(StripeCustomer):
                 if str(exc) != "Invoice is already paid":
                     raise exc
 
-    # TODO: Multiple sources, else default source
-    def update_card(self, token):
-        # send new token to Stripe
-        stripe_customer = self.api_retrieve()
-        stripe_customer.card = token
-        stripe_customer.save()
+    def has_valid_card(self):
+        return self.default_source is not None
 
-        self.save()
-        card_changed.send(sender=self, stripe_response=stripe_customer)
+    def add_card(self, source, set_default=True):
+        new_stripe_card = super(Customer, self).add_card(source, set_default)
+        new_card = Card.sync_from_stripe_data(new_stripe_card)
 
-    # TODO: Get to Work with multiple plans
-    def update_plan_quantity(self, quantity, charge_immediately=False):
-        stripe_customer = self.api_retrieve()
-        stripe_subscription = stripe_customer.subscription
-        if not stripe_subscription:
-            self._sync_current_subscription()
-            raise SubscriptionUpdateFailure("Customer does not have a subscription with Stripe")
-        self.subscribe(
-            plan=djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id),
-            quantity=quantity,
-            charge_immediately=charge_immediately
-        )
+        # Change the default source
+        if set_default:
+            self.default_source = new_card
+            self.save()
+
+        return new_card
 
     # SYNC methods should be dropped in favor of the master sync infrastructure proposed
     def _sync(self):
-        super(Customer, self)._sync()
-        self.save()
+        stripe_customer = self.api_retrieve()
+
+        if getattr(stripe_customer, 'deleted', False):
+            # Customer was deleted from stripe
+            self.purge()
 
     def _sync_invoices(self, **kwargs):
         stripe_customer = self.api_retrieve()
@@ -393,6 +414,12 @@ class Card(StripeCard):
             self.customer = customer
         else:
             raise ValidationError("A customer was not attached to this card.")
+
+    def remove(self):
+        """Removes a card from this customer's account."""
+
+        self._api_delete()
+        self.delete()
 
 
 # class Subscription(StripeSubscription):

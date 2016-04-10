@@ -22,18 +22,19 @@ import decimal
 from django.conf import settings
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible, smart_text
-
 from model_utils.models import TimeStampedModel
 from polymorphic.models import PolymorphicModel
+import stripe
 
 from .context_managers import stripe_temporary_api_version
+from .exceptions import StripeObjectManipulationException
 from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, StripeCurrencyField,
                      StripeIntegerField, StripeTextField, StripePositiveIntegerField, StripeIdField,
                      StripeBooleanField, StripeNullBooleanField, StripeJSONField)
 from .managers import StripeObjectManager
+from .signals import card_changed
 
 
-import stripe
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2013-02-11")
 
 
@@ -211,8 +212,8 @@ class StripeObject(TimeStampedModel):
 
         return target_cls.get_or_create_from_stripe_object(data["source"])[0]
 
-    def _sync(self, data):
-        for attr, value in data.items():
+    def _sync(self, record_data):
+        for attr, value in record_data.items():
             setattr(self, attr, value)
 
     @classmethod
@@ -430,20 +431,38 @@ class StripeCustomer(StripeObject):
     card_exp_month = StripePositiveIntegerField(deprecated=True)
     card_exp_year = StripePositiveIntegerField(deprecated=True)
 
-    # TODO: Customer -- add_card(source)
-    # TODO: Customer.list_sources() (with types).
-
     def purge(self):
         """Delete all identifying information we have in this record."""
+
+        # Delete deprecated card details
         self.card_fingerprint = ""
         self.card_last_4 = ""
         self.card_kind = ""
         self.card_exp_month = None
         self.card_exp_year = None
 
-    # TODO: remove in favor of sources
-    def has_valid_card(self):
-        return all([self.card_fingerprint, self.card_last_4, self.card_kind])
+    def add_card(self, source, set_default=True):
+        """
+        Adds a card to this customer's account.
+
+        :param source: Either a token, like the ones returned by our Stripe.js, or a dictionary containing a user’s credit card details. Stripe will automatically validate the card.
+        :type source: string, dict
+        :param set_default: Whether or not to set the source as the customer's default source
+        :type set_default: boolean
+
+        """
+
+        stripe_customer = self.api_retrieve()
+        stripe_card = stripe_customer.sources.create(source=source)
+
+        if set_default:
+            stripe_customer.default_source = stripe_card["id"]
+            stripe_customer.save()
+
+            # Is this still a thing?
+            card_changed.send(sender=self, stripe_response=stripe_customer)
+
+        return stripe_card
 
     def charge(self, amount, currency="usd", source=None, description=None, capture=True,
                statement_descriptor=None, metadata=None, destination=None, application_fee=None, shipping=None):
@@ -455,8 +474,8 @@ class StripeCustomer(StripeObject):
         :param currency: 3-letter ISO code for currency
         :type currency: string
         :param source: The source to use for this charge. Must be a source attributed to this customer. If None,
-                       the customer's default source is used.
-        :type source: StripeSource
+                       the customer's default source is used. Can be either the id of the source or the source object itself.
+        :type source: string, StripeSource
         :param description: An arbitrary string.
         :type description: string
         :param capture: Whether or not to immediately capture the charge. When false, the charge issues an
@@ -471,15 +490,20 @@ class StripeCustomer(StripeObject):
         :type destination: Account
         :param application_fee: A fee that will be applied to the charge and transfered to the platform owner's account.
         :type application_fee: Decimal. Precision is 2; anything more will be ignored.
+    
         """
         if not isinstance(amount, decimal.Decimal):
             raise ValueError("You must supply a decimal value representing dollars.")
+
+        # Convert StripeSource to stripe_id
+        if source and isinstance(source, StripeSource):
+            source = source.stripe_id
 
         stripe_charge = StripeCharge._api_create(
             amount=int(amount * 100),  # Convert dollars into cents
             currency=currency,
             customer=self.stripe_id,
-            source=source.stripe_id if source else None,  # Convert Source to stripe_id
+            source=source,
             description=description,
             capture=capture,
             statement_descriptor=statement_descriptor,
@@ -526,13 +550,6 @@ class StripeCustomer(StripeObject):
             description=description,
             invoice=invoice_id,
         )
-
-    def _sync(self):
-        stripe_customer = self.api_retrieve()
-
-        if getattr(stripe_customer, 'deleted', False):
-            # Customer was deleted from stripe
-            self.purge()
 
 
 class StripeCard(StripeSource):
@@ -592,8 +609,16 @@ class StripeCard(StripeSource):
     tokenization_method = StripeCharField(null=True, max_length=11, choices=TOKENIZATION_METHOD_CHOICES, help_text="If the card number is tokenized, this is the method that was used.")
     fingerprint = StripeTextField(stripe_required=False, help_text="Uniquely identifies this particular card number.")
 
-    # TODO: Card.update(**params)
-    # TODO: Card.delete()
+    @classmethod
+    def _api(cls):
+        raise StripeObjectManipulationException("Cards must be manipulated through either a customer or an account.")
+
+    def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
+        # OVERRIDING the parent version of this function
+        # Cards must be manipulated through a customer or account.
+
+        # TODO: When managed accounts are supported, this method needs to check if either a customer or account is supplied to determine the correct object to use.
+        return self.customer.api_retrieve().sources.retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
 
 
 class StripeSubscription(StripeObject):
@@ -769,11 +794,11 @@ class StripeEvent(StripeObject):
     def str_parts(self):
         return [self.type] + super(StripeEvent, self).str_parts()
 
-    def api_retrieve(self):
+    def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
         # OVERRIDING the parent version of this function
         # Event retrieve is special. For Event we don't retrieve using djstripe's API version. We always retrieve
         # using the API version that was used to send the Event (which depends on the Stripe account holders settings
         with stripe_temporary_api_version(self.received_api_version):
-            stripe_event = super(StripeEvent, self).api_retrieve()
+            stripe_event = super(StripeEvent, self).api_retrieve(api_key)
 
         return stripe_event
