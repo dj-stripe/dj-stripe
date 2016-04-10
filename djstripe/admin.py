@@ -10,40 +10,38 @@ from .models import Event, EventProcessingException, Transfer, Charge, Plan
 from .models import Invoice, InvoiceItem, Subscription, Customer
 
 
-# TODO: Convert all to use sources instead of cards
-
-class CustomerHasCardListFilter(admin.SimpleListFilter):
-    title = "card presence"
-    parameter_name = "has_card"
+class CustomerHasSourceListFilter(admin.SimpleListFilter):
+    title = "source presence"
+    parameter_name = "has_source"
 
     def lookups(self, request, model_admin):
         return [
-            ["yes", "Has Card"],
-            ["no", "Does Not Have a Card"]
+            ["yes", "Has Source"],
+            ["no", "Does Not Have Source"]
         ]
 
     def queryset(self, request, queryset):
         if self.value() == "yes":
-            return queryset.exclude(card_fingerprint="")
+            return queryset.exclude(default_source=None)
         if self.value() == "no":
-            return queryset.filter(card_fingerprint="")
+            return queryset.filter(default_source=None)
 
 
-class InvoiceCustomerHasCardListFilter(admin.SimpleListFilter):
-    title = "card presence"
-    parameter_name = "has_card"
+class InvoiceCustomerHasSourceListFilter(admin.SimpleListFilter):
+    title = "source presence"
+    parameter_name = "has_source"
 
     def lookups(self, request, model_admin):
         return [
-            ["yes", "Has Card"],
-            ["no", "Does Not Have a Card"]
+            ["yes", "Has Source"],
+            ["no", "Does Not Have Source"]
         ]
 
     def queryset(self, request, queryset):
         if self.value() == "yes":
-            return queryset.exclude(customer__card_fingerprint="")
+            return queryset.exclude(customer__default_source=None)
         if self.value() == "no":
-            return queryset.filter(customer__card_fingerprint="")
+            return queryset.filter(customer__default_source=None)
 
 
 class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
@@ -95,14 +93,12 @@ admin.site.register(
     search_fields=[
         "stripe_id",
         "customer__stripe_id",
-        "card_last_4",
         "invoice__stripe_id"
     ],
     list_filter=[
         "paid",
         "disputed",
         "refunded",
-        "card_kind",
         "stripe_timestamp"
     ],
     raw_id_fields=[
@@ -169,14 +165,11 @@ admin.site.register(
     list_display=[
         "stripe_id",
         "subscriber",
-        "card_kind",
-        "card_last_4",
         subscription_status,
         "stripe_timestamp"
     ],
     list_filter=[
-        "card_kind",
-        CustomerHasCardListFilter,
+        CustomerHasSourceListFilter,
         CustomerSubscriptionStatusListFilter
     ],
     search_fields=[
@@ -190,10 +183,10 @@ class InvoiceItemInline(admin.TabularInline):
     model = InvoiceItem
 
 
-def customer_has_card(obj):
-    """ Returns True if the customer has a card attached to its account."""
-    return obj.customer.card_fingerprint != ""
-customer_has_card.short_description = "Customer Has Card"
+def customer_has_source(obj):
+    """ Returns True if the customer has a source attached to its account."""
+    return obj.customer.default_source is not None
+customer_has_source.short_description = "Customer Has Source"
 
 
 def customer_email(obj):
@@ -211,7 +204,7 @@ admin.site.register(
         "paid",
         "closed",
         customer_email,
-        customer_has_card,
+        customer_has_source,
         "period_start",
         "period_end",
         "subtotal",
@@ -223,7 +216,7 @@ admin.site.register(
         "customer__stripe_id"
     ],
     list_filter=[
-        InvoiceCustomerHasCardListFilter,
+        InvoiceCustomerHasSourceListFilter,
         "paid",
         "closed",
         "attempted",
