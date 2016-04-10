@@ -9,13 +9,13 @@
 
 from __future__ import unicode_literals
 
-from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ...settings import subscriber_request_callback, CANCELLATION_AT_PERIOD_END
 from ...models import Customer
+from ...settings import subscriber_request_callback, CANCELLATION_AT_PERIOD_END
 from .serializers import SubscriptionSerializer, CreateSubscriptionSerializer
 
 
@@ -63,10 +63,8 @@ class SubscriptionRestView(APIView):
                     serializer.data,
                     status=status.HTTP_201_CREATED
                 )
-
             except:
-                # TODO
-                # Better error messages
+                # TODO: Better error messages
                 return Response(
                     "Something went wrong processing the payment.",
                     status=status.HTTP_400_BAD_REQUEST
