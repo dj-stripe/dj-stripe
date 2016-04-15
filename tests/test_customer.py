@@ -20,9 +20,10 @@ from django.utils import timezone
 from mock import patch, PropertyMock, MagicMock
 from stripe.error import InvalidRequestError
 
-from djstripe.models import Account, Customer, Charge, Subscription, Invoice
+from djstripe.models import Account, Customer, Charge, Card, Subscription, Invoice
 
-from . import FAKE_CHARGE, FAKE_CUSTOMER, FAKE_ACCOUNT, FAKE_INVOICE, FAKE_INVOICE_II, FAKE_INVOICE_III, DataList
+from . import FAKE_CARD, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_ACCOUNT, FAKE_INVOICE, FAKE_INVOICE_II, FAKE_INVOICE_III, DataList
+from djstripe.stripe_objects import StripeSource
 
 
 class TestCustomer(TestCase):
@@ -39,13 +40,16 @@ class TestCustomer(TestCase):
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="patrick", email="patrick@gmail.com")
+
         self.customer = Customer.objects.create(
             subscriber=self.user,
             stripe_id="cus_6lsBvm5rJ0zyHc",
-            card_fingerprint="YYYYYYYY",
-            card_last_4="2342",
-            card_kind="Visa"
         )
+
+        self.card, _created = Card.get_or_create_from_stripe_object(data=FAKE_CARD)
+
+        self.customer.default_source = self.card
+        self.customer.save()
 
         self.account = Account.objects.create()
 
@@ -56,10 +60,10 @@ class TestCustomer(TestCase):
     def test_customer_purge_leaves_customer_record(self, customer_retrieve_fake):
         self.customer.purge()
         customer = Customer.objects.get(stripe_id=self.customer.stripe_id)
+
         self.assertTrue(customer.subscriber is None)
-        self.assertTrue(customer.card_fingerprint == "")
-        self.assertTrue(customer.card_last_4 == "")
-        self.assertTrue(customer.card_kind == "")
+        self.assertTrue(customer.default_source is None)
+        self.assertTrue(not customer.sources.all())
         self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
 
     @patch("stripe.Customer.retrieve")
@@ -67,9 +71,8 @@ class TestCustomer(TestCase):
         self.customer.delete()
         customer = Customer.objects.get(stripe_id=self.customer.stripe_id)
         self.assertTrue(customer.subscriber is None)
-        self.assertTrue(customer.card_fingerprint == "")
-        self.assertTrue(customer.card_last_4 == "")
-        self.assertTrue(customer.card_kind == "")
+        self.assertTrue(customer.default_source is None)
+        self.assertTrue(not customer.sources.all())
         self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
 
     @patch("stripe.Customer.retrieve")
@@ -79,12 +82,13 @@ class TestCustomer(TestCase):
         self.customer.purge()
         customer = Customer.objects.get(stripe_id=self.customer.stripe_id)
         self.assertTrue(customer.subscriber is None)
-        self.assertTrue(customer.card_fingerprint == "")
-        self.assertTrue(customer.card_last_4 == "")
-        self.assertTrue(customer.card_kind == "")
+        self.assertTrue(customer.default_source is None)
+        self.assertTrue(not customer.sources.all())
         self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
 
-        customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=None)
+        customer_retrieve_mock.assert_called_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=None)
+        self.assertEquals(2, customer_retrieve_mock.call_count)
+
 
     @patch("stripe.Customer.retrieve")
     def test_customer_delete_raises_unexpected_exception(self, customer_retrieve_mock):
@@ -97,6 +101,18 @@ class TestCustomer(TestCase):
 
     def test_can_charge(self):
         self.assertTrue(self.customer.can_charge())
+
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_add_card_set_default_true(self, customer_retrieve_mock):
+        self.customer.add_card("card_16YKQh2eZvKYlo2Cblc5Feoo")
+
+        customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=None)
+
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_add_card_set_default_false(self, customer_retrieve_mock):
+        self.customer.add_card("card_16YKQh2eZvKYlo2Cblc5Feoo", set_default=False)
+
+        customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=None)
 
     @patch("stripe.Customer.retrieve")
     def test_cannot_charge(self, customer_retrieve_fake):
@@ -251,6 +267,40 @@ class TestCustomer(TestCase):
         self.assertEquals(kwargs["capture"], True)
         self.assertEquals(kwargs["destination"], FAKE_ACCOUNT["id"])
 
+    @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Charge.retrieve")
+    @patch("stripe.Charge.create")
+    def test_charge_string_source(self, charge_create_mock, charge_retrieve_mock, default_account_mock):
+        default_account_mock.return_value = self.account
+
+        fake_charge_copy = deepcopy(FAKE_CHARGE)
+        fake_charge_copy.update({"invoice": None})
+
+        charge_create_mock.return_value = fake_charge_copy
+        charge_retrieve_mock.return_value = fake_charge_copy
+
+        self.customer.charge(
+            amount=decimal.Decimal("10.00"),
+            source=self.card.stripe_id,
+        )
+
+    @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Charge.retrieve")
+    @patch("stripe.Charge.create")
+    def test_charge_card_source(self, charge_create_mock, charge_retrieve_mock, default_account_mock):
+        default_account_mock.return_value = self.account
+
+        fake_charge_copy = deepcopy(FAKE_CHARGE)
+        fake_charge_copy.update({"invoice": None})
+
+        charge_create_mock.return_value = fake_charge_copy
+        charge_retrieve_mock.return_value = fake_charge_copy
+
+        self.customer.charge(
+            amount=decimal.Decimal("10.00"),
+            source=self.card,
+        )
+
     @patch("djstripe.models.djstripe_settings.trial_period_for_subscriber_callback", return_value="donkey")
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
     def test_create_trial_callback(self, customer_create_mock, callback_mock):
@@ -272,24 +322,9 @@ class TestCustomer(TestCase):
         callback_mock.assert_called_once_with(user)
         subscribe_mock.assert_called_once_with(plan=default_plan_fake, trial_days="donkey")
 
-    # TODO: Update
-    @patch("djstripe.models.Customer.api_retrieve")
-    def test_update_card(self, api_retrieve_mock):
-        api_retrieve_mock.return_value = PropertyMock(
-            active_card=PropertyMock(
-                fingerprint="test_fingerprint",
-                last4="1234",
-                type="test_type",
-                exp_month=12,
-                exp_year=2020
-            )
-        )
-
-        self.customer.update_card("test")
-
     # TODO: Update for removal
     @patch("djstripe.models.Customer.api_retrieve", return_value=PropertyMock(deleted=False))
-    def test_sync_non_delted_customer(self, customer_retrieve_mock):
+    def test_sync_non_deleted_customer(self, customer_retrieve_mock):
         self.customer._sync()
 
     @patch("djstripe.models.Customer.invoices", new_callable=PropertyMock,
@@ -343,9 +378,8 @@ class TestCustomer(TestCase):
         self.customer._sync()
         customer = Customer.objects.get(stripe_id=self.customer.stripe_id)
         self.assertTrue(customer.subscriber is None)
-        self.assertTrue(customer.card_fingerprint == "")
-        self.assertTrue(customer.card_last_4 == "")
-        self.assertTrue(customer.card_kind == "")
+        self.assertTrue(customer.default_source is None)
+        self.assertTrue(not customer.sources.all())
         self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
 
     @patch("djstripe.models.Invoice.sync_from_stripe_data")

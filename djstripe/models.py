@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import datetime
 import decimal
 import json
+import traceback as exception_traceback
 import logging
 
 from django.conf import settings
@@ -17,15 +18,12 @@ from django.utils.encoding import python_2_unicode_compatible, smart_text
 from model_utils.models import TimeStampedModel
 from stripe.error import StripeError, InvalidRequestError
 
-import traceback as exception_traceback
-
-from . import event_handlers  # NOQA
 from . import settings as djstripe_settings
 from . import webhooks
 from .exceptions import SubscriptionCancellationFailure, SubscriptionUpdateFailure
 from .managers import CustomerManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS
-from .signals import subscription_made, cancelled, card_changed
+from .signals import subscription_made, cancelled
 from .signals import webhook_processing_error
 from .stripe_objects import (StripeSource, StripeCharge, StripeCustomer, StripeCard, StripePlan,
                              StripeInvoice, StripeTransfer, StripeAccount, StripeEvent)
@@ -159,7 +157,7 @@ class Customer(StripeCustomer):
 
         self.subscriber = None
 
-        # Delete associated sources
+        # Remove sources
         self.default_source = None
         for source in self.sources.all():
             source.remove()
@@ -418,7 +416,14 @@ class Card(StripeCard):
     def remove(self):
         """Removes a card from this customer's account."""
 
-        self._api_delete()
+        try:
+            self._api_delete()
+        except InvalidRequestError as exc:
+            if str(exc).startswith("No such customer:"):
+                # The exception was thrown because the stripe customer was already
+                # deleted on the stripe side, ignore the exception
+                pass
+
         self.delete()
 
 
@@ -810,3 +815,4 @@ class Event(StripeEvent):
 
 # Much like registering signal handlers. We import this module so that its registrations get picked up
 # the NO QA directive tells flake8 to not complain about the unused import
+from . import event_handlers  # NOQA

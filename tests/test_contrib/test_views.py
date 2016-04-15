@@ -37,9 +37,9 @@ class RestSubscriptionTest(APITestCase):
         self.assertTrue(self.client.login(username="testuser", password="123"))
 
     @patch("djstripe.models.Customer.subscribe", autospec=True)
-    @patch("djstripe.models.Customer.update_card", autospec=True)
+    @patch("djstripe.models.Customer.add_card", autospec=True)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_create_subscription(self, stripe_customer_create_mock, update_card_mock, subscribe_mock):
+    def test_create_subscription(self, stripe_customer_create_mock, add_card_mock, subscribe_mock):
         self.assertEqual(0, Customer.objects.count())
         data = {
             "plan": "test0",
@@ -47,15 +47,15 @@ class RestSubscriptionTest(APITestCase):
         }
         response = self.client.post(self.url, data)
         self.assertEqual(1, Customer.objects.count())
-        update_card_mock.assert_called_once_with(self.user.customer, "cake")
+        add_card_mock.assert_called_once_with(self.user.customer, "cake")
         subscribe_mock.assert_called_once_with(self.user.customer, "test0")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data, data)
 
     @patch("djstripe.models.Customer.subscribe", autospec=True)
-    @patch("djstripe.models.Customer.update_card", autospec=True)
+    @patch("djstripe.models.Customer.add_card", autospec=True)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_create_subscription_exception(self, stripe_customer_create_mock, update_card_mock, subscribe_mock):
+    def test_create_subscription_exception(self, stripe_customer_create_mock, add_card_mock, subscribe_mock):
         e = Exception
         subscribe_mock.side_effect = e
         data = {

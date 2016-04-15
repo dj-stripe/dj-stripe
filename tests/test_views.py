@@ -81,48 +81,48 @@ class ChangeCardViewTest(TestCase):
     # Needs to be refactored to use sources
     @patch("djstripe.models.Customer.retry_unpaid_invoices", autospec=True)
     @patch("djstripe.models.Customer.send_invoice", autospec=True)
-    @patch("djstripe.models.Customer.update_card", autospec=True)
+    @patch("djstripe.models.Customer.add_card", autospec=True)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_post_new_card(self, stripe_customer_create_mock, update_card_mock, send_invoice_mock, retry_unpaid_invoices_mock):
+    def test_post_new_card(self, stripe_customer_create_mock, add_card_mock, send_invoice_mock, retry_unpaid_invoices_mock):
         self.client.post(self.url, {"stripe_token": "alpha"})
-        update_card_mock.assert_called_once_with(self.user.customer, "alpha")
+        add_card_mock.assert_called_once_with(self.user.customer, "alpha")
         send_invoice_mock.assert_called_with(self.user.customer)
         retry_unpaid_invoices_mock.assert_called_once_with(self.user.customer)
 
     # Needs to be refactored to use sources
     @patch("djstripe.models.Customer.retry_unpaid_invoices", autospec=True)
     @patch("djstripe.models.Customer.send_invoice", autospec=True)
-    @patch("djstripe.models.Customer.update_card", autospec=True)
+    @patch("djstripe.models.Customer.add_card", autospec=True)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_post_change_card(self, stripe_customer_create_mock, update_card_mock, send_invoice_mock, retry_unpaid_invoices_mock):
+    def test_post_change_card(self, stripe_customer_create_mock, add_card_mock, send_invoice_mock, retry_unpaid_invoices_mock):
         Customer.objects.get_or_create(subscriber=self.user, card_fingerprint="4449")
         self.assertEqual(1, Customer.objects.count())
 
         self.client.post(self.url, {"stripe_token": "beta"})
         self.assertEqual(1, Customer.objects.count())
-        update_card_mock.assert_called_once_with(self.user.customer, "beta")
+        add_card_mock.assert_called_once_with(self.user.customer, "beta")
         self.assertFalse(send_invoice_mock.called)
         retry_unpaid_invoices_mock.assert_called_once_with(self.user.customer)
 
     # Needs to be refactored to use sources
-    @patch("djstripe.models.Customer.update_card", autospec=True)
+    @patch("djstripe.models.Customer.add_card", autospec=True)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_post_card_error(self, stripe_create_customer_mock, update_card_mock):
-        update_card_mock.side_effect = StripeError("An error occurred while processing your card.")
+    def test_post_card_error(self, stripe_create_customer_mock, add_card_mock):
+        add_card_mock.side_effect = StripeError("An error occurred while processing your card.")
 
         response = self.client.post(self.url, {"stripe_token": "pie"})
-        update_card_mock.assert_called_once_with(self.user.customer, "pie")
+        add_card_mock.assert_called_once_with(self.user.customer, "pie")
         self.assertIn("stripe_error", response.context)
         self.assertIn("An error occurred while processing your card.", response.context["stripe_error"])
 
     # Needs to be refactored to use sources
-    @patch("djstripe.models.Customer.update_card", autospec=True)
+    @patch("djstripe.models.Customer.add_card", autospec=True)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_post_no_card(self, stripe_create_customer_mock, update_card_mock):
-        update_card_mock.side_effect = StripeError("Invalid source object:")
+    def test_post_no_card(self, stripe_create_customer_mock, add_card_mock):
+        add_card_mock.side_effect = StripeError("Invalid source object:")
 
         response = self.client.post(self.url)
-        update_card_mock.assert_called_once_with(self.user.customer, None)
+        add_card_mock.assert_called_once_with(self.user.customer, None)
         self.assertIn("stripe_error", response.context)
         self.assertIn("Invalid source object:", response.context["stripe_error"])
 
@@ -218,22 +218,22 @@ class ConfirmFormViewTest(TestCase):
         self.assertRedirects(response, reverse("djstripe:subscribe"))
 
     @patch("djstripe.models.Customer.subscribe", autospec=True)
-    @patch("djstripe.models.Customer.update_card", autospec=True)
+    @patch("djstripe.models.Customer.add_card", autospec=True)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_post_valid(self, stripe_customer_create_mock, update_card_mock, subscribe_mock):
+    def test_post_valid(self, stripe_customer_create_mock, add_card_mock, subscribe_mock):
         self.assertEqual(0, Customer.objects.count())
         response = self.client.post(self.url, {"plan": self.plan, "stripe_token": "cake"})
         self.assertEqual(1, Customer.objects.count())
-        update_card_mock.assert_called_once_with(self.user.customer, "cake")
+        add_card_mock.assert_called_once_with(self.user.customer, "cake")
         subscribe_mock.assert_called_once_with(self.user.customer, self.plan)
 
         self.assertRedirects(response, reverse("djstripe:history"))
 
     @patch("djstripe.models.Customer.subscribe", autospec=True)
-    @patch("djstripe.models.Customer.update_card", autospec=True)
+    @patch("djstripe.models.Customer.add_card", autospec=True)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_post_no_card(self, stripe_customer_create_mock, update_card_mock, subscribe_mock):
-        update_card_mock.side_effect = StripeError("Invalid source object:")
+    def test_post_no_card(self, stripe_customer_create_mock, add_card_mock, subscribe_mock):
+        add_card_mock.side_effect = StripeError("Invalid source object:")
 
         response = self.client.post(self.url, {"plan": self.plan})
         self.assertEqual(200, response.status_code)

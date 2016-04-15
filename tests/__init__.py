@@ -306,6 +306,13 @@ FAKE_SUBSCRIPTION_II = {
 }
 
 
+class Sources(dict):
+
+    def create(self, source):
+        for fake_card in [FAKE_CARD, FAKE_CARD_II, FAKE_CARD_III]:
+            if fake_card["id"] == source:
+                return fake_card
+
 class CustomerDict(dict):
 
     def charges(self, **kwargs):
@@ -321,6 +328,14 @@ class CustomerDict(dict):
     def update_subscription(self, **kwargs):
         self.update(kwargs)
         return self
+
+    def save(self):
+        pass
+
+    @property
+    def sources(self):
+        return Sources()
+
 
 FAKE_CUSTOMER = CustomerDict({
     "object": "customer",

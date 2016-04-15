@@ -80,7 +80,7 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
         customer = self.get_object()
         try:
             send_invoice = not customer.card_fingerprint
-            customer.update_card(
+            customer.add_card(
                 request.POST.get("stripe_token")
             )
             if send_invoice:
@@ -170,7 +170,7 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
             try:
                 customer, created = Customer.get_or_create(
                     subscriber=subscriber_request_callback(self.request))
-                customer.update_card(self.request.POST.get("stripe_token"))
+                customer.add_card(self.request.POST.get("stripe_token"))
                 customer.subscribe(form.cleaned_data["plan"])
             except StripeError as exc:
                 form.add_error(None, str(exc))

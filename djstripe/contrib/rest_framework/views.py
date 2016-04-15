@@ -57,7 +57,7 @@ class SubscriptionRestView(APIView):
                 customer, created = Customer.get_or_create(
                     subscriber=subscriber_request_callback(self.request)
                 )
-                customer.update_card(serializer.data["stripe_token"])
+                customer.add_card(serializer.data["stripe_token"])
                 customer.subscribe(serializer.data["plan"])
                 return Response(
                     serializer.data,

@@ -13,6 +13,7 @@ from django.test import TestCase
 
 from mock import patch
 
+from djstripe.exceptions import StripeObjectManipulationException
 from djstripe.models import Account, Card
 
 from . import FAKE_CARD_III
@@ -29,3 +30,7 @@ class CardTest(TestCase):
 
         with self.assertRaisesMessage(ValidationError, "A customer was not attached to this card."):
             Card.sync_from_stripe_data(deepcopy(FAKE_CARD_III))
+
+    def test_api_call(self):
+        with self.assertRaisesMessage(StripeObjectManipulationException, "Cards must be manipulated through either a customer or an account."):
+            Card._api()

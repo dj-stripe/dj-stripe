@@ -24,7 +24,6 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from model_utils.models import TimeStampedModel
 from polymorphic.models import PolymorphicModel
-import stripe
 
 from .context_managers import stripe_temporary_api_version
 from .exceptions import StripeObjectManipulationException
@@ -34,7 +33,7 @@ from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, Str
 from .managers import StripeObjectManager
 from .signals import card_changed
 
-
+import stripe
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2013-02-11")
 
 
@@ -490,7 +489,7 @@ class StripeCustomer(StripeObject):
         :type destination: Account
         :param application_fee: A fee that will be applied to the charge and transfered to the platform owner's account.
         :type application_fee: Decimal. Precision is 2; anything more will be ignored.
-    
+
         """
         if not isinstance(amount, decimal.Decimal):
             raise ValueError("You must supply a decimal value representing dollars.")
