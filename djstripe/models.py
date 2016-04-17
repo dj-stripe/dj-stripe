@@ -511,24 +511,8 @@ class Subscription(TimeStampedModel):
         self.customer._sync_current_subscription()
 
 
-INTERVALS = (
-    ('week', 'Week',),
-    ('month', 'Month',),
-    ('year', 'Year',))
-
-
 class Plan(StripePlan):
     # account = models.ForeignKey("Account", related_name="plans")
-
-    name = models.CharField(max_length=100, null=False)
-    currency = models.CharField(choices=djstripe_settings.CURRENCIES, max_length=10, null=False)
-    interval = models.CharField(max_length=10, choices=INTERVALS, verbose_name="Interval type", null=False)
-    interval_count = models.IntegerField(verbose_name="Intervals between charges", default=1, null=True)
-    amount = models.DecimalField(decimal_places=2, max_digits=7, verbose_name="Amount (per period)", null=False)
-    trial_period_days = models.IntegerField(null=True)
-
-    def str_parts(self):
-        return [smart_text(self.name)] + super(Plan, self).str_parts()
 
     @classmethod
     def get_or_create(cls, **kwargs):
@@ -539,7 +523,6 @@ class Plan(StripePlan):
 
     @classmethod
     def create(cls, **kwargs):
-
         # A few minor things are changed in the api-version of the create call
         api_kwargs = dict(kwargs)
         api_kwargs['id'] = api_kwargs['stripe_id']
@@ -547,13 +530,12 @@ class Plan(StripePlan):
         api_kwargs['amount'] = int(api_kwargs['amount'] * 100)
         cls._api_create(**api_kwargs)
 
-        # If they passed in a 'metadata' arg, drop that here as it is only for api consumption
-        if 'metadata' in kwargs:
-            del(kwargs['metadata'])
         plan = Plan.objects.create(**kwargs)
 
         return plan
 
+    # TODO: Move this type of update to the model's save() method so it happens automatically
+    # Also, block other fields from being saved.
     def update_name(self):
         """Update the name of the Plan in Stripe and in the db.
 

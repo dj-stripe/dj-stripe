@@ -608,6 +608,8 @@ class StripeCard(StripeSource):
     tokenization_method = StripeCharField(null=True, max_length=11, choices=TOKENIZATION_METHOD_CHOICES, help_text="If the card number is tokenized, this is the method that was used.")
     fingerprint = StripeTextField(stripe_required=False, help_text="Uniquely identifies this particular card number.")
 
+    # TODO: See if accepting a customer/account in the create call is reasonable.
+
     @classmethod
     def _api(cls):
         raise StripeObjectManipulationException("Cards must be manipulated through either a customer or an account.")
@@ -619,6 +621,14 @@ class StripeCard(StripeSource):
         # TODO: When managed accounts are supported, this method needs to check if either a customer or account is supplied to determine the correct object to use.
         return self.customer.api_retrieve().sources.retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
 
+    def str_parts(self):
+        return [
+            "brand={brand}".format(brand=self.brand),
+            "last4={last4}".format(last4=self.last4),
+            "exp_month={exp_month}".format(exp_month=self.exp_month),
+            "exp_year={exp_year}".format(exp_year=self.exp_year),
+        ] + super(StripeCard, self).str_parts()
+
 
 class StripeSubscription(StripeObject):
 
@@ -629,16 +639,39 @@ class StripeSubscription(StripeObject):
 
 
 class StripePlan(StripeObject):
+    """
+    A subscription plan contains the pricing information for different products and feature levels on your site.
+    (Source: https://stripe.com/docs/api/python#plans)
+
+    # = Mapping the values of this field isn't currently on our roadmap.
+        Please use the stripe dashboard to check the value of this field instead.
+
+    Fields not implemented:
+    * object: Unnecessary. Just check the model name.
+
+    Stripe API_VERSION: model fields and methods audited to 2015-07-28 - @kavdev
+    """
 
     class Meta:
         abstract = True
 
     stripe_api_name = "Plan"
 
-    @property
-    def stripe_plan(self):
-        """Return the plan data from Stripe."""
-        return self.api_retrieve()
+    INTERVAL_TYPES = ["day", "week", "month", "year"]
+    INTERVAL_TYPE_CHOICES = [(interval_type, interval_type.title()) for interval_type in INTERVAL_TYPES]
+
+    amount = StripeCurrencyField(help_text="Amount to be charged on the interval specified.")
+    currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code representing the currency in which the charge was made.")
+    interval = StripeCharField(max_length=5, choices=INTERVAL_TYPE_CHOICES, help_text="The frequency with which a subscription should be billed.")
+    interval_count = StripeIntegerField(null=True, help_text="The number of intervals (specified in the interval property) between each subscription billing.")
+    name = StripeTextField(help_text="Name of the plan, to be displayed on invoices and in the web interface.")
+    statement_descriptor = StripeCharField(max_length=22, null=True, help_text="An arbitrary string to be displayed on your customer’s credit card statement. The statement description may not include <>\"' characters, and will appear on your customer’s statement in capital letters. Non-ASCII characters are automatically stripped. While most banks display this information consistently, some may display it incorrectly or not at all.")
+    trial_period_days = StripeIntegerField(null=True, help_text="Number of trial period days granted when subscribing a customer to this plan. Null if the plan has no trial period.")
+
+    def str_parts(self):
+        return [
+            "name={name}".format(name=self.name),
+        ] + super(StripePlan, self).str_parts()
 
 
 class StripeInvoice(StripeObject):
