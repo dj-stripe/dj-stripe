@@ -384,7 +384,7 @@ class Card(StripeCard):
 
 class Subscription(StripeSubscription):
     # account = models.ForeignKey("Account", related_name="subscriptions")
-    customer = models.ForeignKey("Customer", blank=True, related_name="subscriptions", help_text="The customer associated with this subscription.")
+    customer = models.ForeignKey("Customer", related_name="subscriptions", help_text="The customer associated with this subscription.")
 
     def is_period_current(self):
         return self.current_period_end > timezone.now()

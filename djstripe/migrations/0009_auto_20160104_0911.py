@@ -570,4 +570,9 @@ class Migration(migrations.Migration):
             name='default_source',
             field=models.ForeignKey(to='djstripe.StripeSource', related_name='customers', null=True),
         ),
+        migrations.RenameField(
+            model_name='subscription',
+            old_name='plan',
+            new_name='old_plan_id',
+        ),
     ]
