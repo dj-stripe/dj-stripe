@@ -18,20 +18,21 @@ dj-stripe functionality.
 
 
 import decimal
+from copy import deepcopy
 
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from model_utils.models import TimeStampedModel
 from polymorphic.models import PolymorphicModel
 
 from .context_managers import stripe_temporary_api_version
 from .exceptions import StripeObjectManipulationException
-from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, StripeCurrencyField,
+from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, StripePercentField, StripeCurrencyField,
                      StripeIntegerField, StripeTextField, StripePositiveIntegerField, StripeIdField,
                      StripeBooleanField, StripeNullBooleanField, StripeJSONField)
 from .managers import StripeObjectManager
-from .signals import card_changed
 
 import stripe
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2013-02-11")
@@ -186,7 +187,7 @@ class StripeObject(TimeStampedModel):
     @classmethod
     def stripe_object_to_customer(cls, target_cls, data):
         """
-        Search the given manager for the Customer matching this StripeCharge object's ``customer`` field.
+        Search the given manager for the Customer matching this object's ``customer`` field.
 
         :param target_cls: The target class
         :type target_cls: StripeCustomer
@@ -200,7 +201,7 @@ class StripeObject(TimeStampedModel):
     @classmethod
     def stripe_object_to_source(cls, target_cls, data):
         """
-        Search the given manager for the source matching this StripeCharge object's ``source`` field.
+        Search the given manager for the source matching this object's ``source`` field.
         Note that the source field is already expanded in each request, and that it is required.
 
         :param target_cls: The target class
@@ -458,12 +459,9 @@ class StripeCustomer(StripeObject):
             stripe_customer.default_source = stripe_card["id"]
             stripe_customer.save()
 
-            # Is this still a thing?
-            card_changed.send(sender=self, stripe_response=stripe_customer)
-
         return stripe_card
 
-    def charge(self, amount, currency="usd", source=None, description=None, capture=True,
+    def charge(self, amount, currency, source=None, description=None, capture=None,
                statement_descriptor=None, metadata=None, destination=None, application_fee=None, shipping=None):
         """
         Creates a charge for this customer.
@@ -479,7 +477,7 @@ class StripeCustomer(StripeObject):
         :type description: string
         :param capture: Whether or not to immediately capture the charge. When false, the charge issues an
                         authorization (or pre-authorization), and will need to be captured later. Uncaptured
-                        charges expire in 7 days.
+                        charges expire in 7 days. Default is True
         :type capture: bool
         :param statement_descriptor: An arbitrary string to be displayed on the customer's credit card statement.
         :type statement_descriptor: string
@@ -491,6 +489,7 @@ class StripeCustomer(StripeObject):
         :type application_fee: Decimal. Precision is 2; anything more will be ignored.
 
         """
+
         if not isinstance(amount, decimal.Decimal):
             raise ValueError("You must supply a decimal value representing dollars.")
 
@@ -514,7 +513,45 @@ class StripeCustomer(StripeObject):
 
         return stripe_charge
 
-    def add_invoice_item(self, amount, currency="usd", invoice_id=None, description=None):
+    def subscribe(self, plan, coupon=None, trial_end=None, quantity=None, application_fee_percent=None, tax_percent=None, metadata=None):
+        """
+        Subscribes this customer to a plan. 
+
+        Parameters not implemented:
+        * source: Subscriptions use the customer's default source. Including the source parameter creates a new source for this customer and overrides the default source. This
+                  functionality is not desired; add a source to the customer before attempting to add a subscription.
+
+        :param plan: The plan to which to subscribe the customer.
+        :type plan: Plan or string (plan ID)
+        :param coupon: The code of the coupon to apply to this subscription. A coupon applied to a subscription will only affect invoices created for that particular subscription.
+        :type coupon: string
+        :param trial_end: The end datetime of the trial period the customer will get before being charged for the first time. If set, this will override the default trial
+                           period of the plan the customer is being subscribed to. The special value ``now`` can be provided to end the customer's trial immediately.
+        :type trial_end: datetime
+        :param quantity: The quantity applied to this subscription. Default is 1.
+        :type quantity: integer
+        :param application_fee_percent: This represents the percentage of the subscription invoice subtotal that will be transferred to the application owner’s Stripe account.
+                                        The request must be made with an OAuth key in order to set an application fee percentage.
+        :type application_fee_percent: Decimal. Precision is 2; anything more will be ignored. A positive decimal between 1 and 100.
+        :param tax_percent: This represents the percentage of the subscription invoice subtotal that will be calculated and added as tax to the final amount each billing period.
+        :type tax_percent: Decimal. Precision is 2; anything more will be ignored. A positive decimal between 1 and 100.
+        :param metadata: A set of key/value pairs useful for storing additional information.
+        :type metadata: dict
+        """
+
+        stripe_subscription = StripeSubscription._api_create(
+            plan=plan,
+            coupon=coupon,
+            trial_end=trial_end,  # Automatically gets onverted to a unix timestamp by stripe
+            quantity=quantity,
+            application_fee_percent=application_fee_percent,
+            tax_percent=tax_percent,
+            metadata=metadata
+        )
+
+        return stripe_subscription
+
+    def add_invoice_item(self, amount, currency, invoice_id=None, description=None):
         """
         Adds an arbitrary charge or credit to the customer's upcoming invoice.
         Different than creating a charge. Charges are separate bills that get
@@ -549,6 +586,20 @@ class StripeCustomer(StripeObject):
             description=description,
             invoice=invoice_id,
         )
+
+    @classmethod
+    def stripe_object_default_source_to_source(cls, target_cls, data):
+        """
+        Search the given manager for the source matching this StripeCharge object's ``default_source`` field.
+        Note that the source field is already expanded in each request, and that it is required.
+
+        :param target_cls: The target class
+        :type target_cls: StripeSource
+        :param data: stripe object
+        :type data: dict
+        """
+
+        return target_cls.get_or_create_from_stripe_object(data["default_source"])[0]
 
 
 class StripeCard(StripeSource):
@@ -629,13 +680,153 @@ class StripeCard(StripeSource):
             "exp_year={exp_year}".format(exp_year=self.exp_year),
         ] + super(StripeCard, self).str_parts()
 
+    @classmethod
+    def stripe_object_to_account(cls, target_cls, data):
+        """
+        Search the given manager for the Account matching this StripeCharge object's ``account`` field.
+
+        :param target_cls: The target class
+        :type target_cls: StripeAccount
+        :param data: stripe object
+        :type data: dict
+        """
+
+        if "account" in data and data["account"]:
+            return target_cls.get_or_create_from_stripe_object(data, "account")[0]
+
 
 class StripeSubscription(StripeObject):
+    """
+    Subscriptions allow you to charge a customer's card on a recurring basis. A subscription ties a customer to a particular plan you've created.
+    (Source: https://stripe.com/docs/api/python#subscriptions)
+
+    # = Mapping the values of this field isn't currently on our roadmap.
+        Please use the stripe dashboard to check the value of this field instead.
+
+    Fields not implemented:
+    * object: Unnecessary. Just check the model name.
+    * application_fee_percent: #
+    * discount: #
+
+    Stripe API_VERSION: model fields and methods audited to 2015-07-28 - @kavdev
+    """
 
     class Meta:
         abstract = True
 
     stripe_api_name = "Subscription"
+
+    STATUS_ACTIVE = "active"
+    STATUS_TRIALING = "trialing"
+    STATUS_PAST_DUE = "past_due"
+    STATUS_CANCELLED = "canceled"
+    STATUS_UNPAID = "unpaid"
+
+    STATUSES = [STATUS_TRIALING, STATUS_ACTIVE, STATUS_PAST_DUE, STATUS_CANCELLED, STATUS_UNPAID]
+    STATUS_CHOICES = [(status, status.replace("_", " ").title()) for status in STATUSES]
+
+    cancel_at_period_end = StripeBooleanField(default=False, help_text="If the subscription has been canceled with the ``at_period_end`` flag set to true, ``cancel_at_period_end`` on the subscription will be true. You can use this attribute to determine whether a subscription that has a status of active is scheduled to be canceled at the end of the current period.")
+    quantity = StripeIntegerField(help_text="The quantity applied to this subscription.")
+    start = StripeDateTimeField(help_text="Date the subscription started.")
+    status = StripeCharField(max_length=8, choices=STATUS_CHOICES, help_text="The status of this subscription.")
+    canceled_at = StripeDateTimeField(null=True, help_text="If the subscription has been canceled, the date of that cancellation.")
+    current_period_end = StripeDateTimeField(help_text="End of the current period for which the subscription has been invoiced. At the end of this period, a new invoice will be created.")
+    current_period_start = StripeDateTimeField(help_text="Start of the current period for which the subscription has been invoiced.")
+    ended_at = StripeDateTimeField(null=True, help_text="If the subscription has ended (either because it was canceled or because the customer was switched to a subscription to a new plan), the date the subscription ended.")
+    tax_percent = StripePercentField(null=True, help_text="A positive decimal (with at most two decimal places) between 1 and 100. This represents the percentage of the subscription invoice subtotal that will be calculated and added as tax to the final amount each billing period.")
+    trial_end = StripeDateTimeField(null=True, help_text="If the subscription has a trial, the end of that trial.")
+    trial_start = StripeDateTimeField(null=True, help_text="If the subscription has a trial, the beginning of that trial.")
+
+    # TODO: See if accepting a customer/account in the create call is reasonable.
+
+    @classmethod
+    def _api(cls):
+        raise StripeObjectManipulationException("Subscriptions must be manipulated through either a customer.")
+
+    def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
+        # OVERRIDING the parent version of this function
+        # Subscriptions must be manipulated through a customer.
+
+        return self.customer.api_retrieve().subscriptions.retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
+
+    def str_parts(self):
+        return [
+            "current_period_start={current_period_start}".format(current_period_start=self.current_period_start),
+            "current_period_end={current_period_end}".format(current_period_end=self.current_period_end),
+            "status={status}".format(status=self.status),
+            "quantity={quantity}".format(quantity=self.quantity),
+        ] + super(StripeSubscription, self).str_parts()
+
+    def update(self, plan=None, coupon=None, prorate=None, proration_date=None, trial_end=None, quantity=None, application_fee_percent=None, tax_percent=None, metadata=None):
+        """
+        See StripeCustomer.subscribe()
+
+        :param prorate: Whether or not to prorate when switching plans. Default is True.
+        :type prorate: boolean
+        :param proration_date: If set, the proration will be calculated as though the subscription was updated at the given time.
+                               This can be used to apply exactly the same proration that was previewed with upcoming invoice endpoint.
+                               It can also be used to implement custom proration logic, such as prorating by day instead of by second,
+                               by providing the time that you wish to use for proration calculations.
+        :type proration_date: datetime
+        """
+
+        kwargs = deepcopy(locals())
+        del kwargs["self"]
+
+        stripe_subscription = self.api_retrieve()
+
+        for kwarg, value in kwargs.items():
+            if value:
+                setattr(stripe_subscription, kwarg, value)
+
+        return stripe_subscription.save()
+
+    def extend(self, delta):
+        """
+        Extends this subscription by the provided delta.
+
+        :param delta: The timedelta by which to extend this subscription.
+        :type delta: timedelta
+
+        """
+
+        if delta.total_seconds() < 0:
+            raise ValueError("delta must be a positive timedelta.")
+
+        period_end = None
+
+        if self.trial_end is not None and self.trial_end > timezone.now():
+            period_end = self.trial_end
+        else:
+            period_end = self.current_period_end
+
+        period_end += delta
+
+        stripe_subscription = self.api_retrieve()
+        stripe_subscription.prorate = False
+        stripe_subscription.trial_end = period_end
+        stripe_subscription.save()
+
+        return stripe_subscription
+
+    def cancel(self, at_period_end=None):
+        """
+        Cancels this subscription. If you set the at_period_end parameter to true, the subscription will remain active until the end of the period,
+        at which point it will be canceled and not renewed. By default, the subscription is terminated immediately. In either case, the customer will not be
+        charged again for the subscription. Note, however, that any pending invoice items that you’ve created will still be charged for at the end of the period
+        unless manually deleted. If you’ve set the subscription to cancel at period end, any pending prorations will also be left in place and collected at the
+        end of the period, but if the subscription is set to cancel immediately, pending prorations will be removed.
+
+        By default, all unpaid invoices for the customer will be closed upon subscription cancellation. We do this in order to prevent unexpected payment retries
+        once the customer has canceled a subscription. However, you can reopen the invoices manually after subscription cancellation to have us proceed with automatic
+        retries, or you could even re-attempt payment yourself on all unpaid invoices before allowing the customer to cancel the subscription at all.
+
+        :param at_period_end: A flag that if set to true will delay the cancellation of the subscription until the end of the current period. Default is False.
+        :type at_period_end: boolean
+
+        """
+
+        return self._api_delete(at_period_end)
 
 
 class StripePlan(StripeObject):
@@ -672,6 +863,19 @@ class StripePlan(StripeObject):
         return [
             "name={name}".format(name=self.name),
         ] + super(StripePlan, self).str_parts()
+
+    @classmethod
+    def stripe_object_to_plan(cls, target_cls, data):
+        """
+        Search the given manager for the Plan matching this StripeCharge object's ``plan`` field.
+
+        :param target_cls: The target class
+        :type target_cls: StripePlan
+        :param data: stripe object
+        :type data: dict
+        """
+
+        return target_cls.get_or_create_from_stripe_object(data["plan"])[0]
 
 
 class StripeInvoice(StripeObject):

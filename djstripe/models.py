@@ -9,7 +9,7 @@ import logging
 
 from django.conf import settings
 from django.contrib.sites.models import Site
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, MultipleObjectsReturned
 from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
@@ -20,13 +20,12 @@ from stripe.error import StripeError, InvalidRequestError
 
 from . import settings as djstripe_settings
 from . import webhooks
-from .exceptions import SubscriptionCancellationFailure, SubscriptionUpdateFailure
+from .exceptions import SubscriptionCancellationFailure, SubscriptionUpdateFailure, MultipleSubscriptionException
 from .managers import CustomerManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS
-from .signals import subscription_made, cancelled
 from .signals import webhook_processing_error
-from .stripe_objects import (StripeSource, StripeCharge, StripeCustomer, StripeCard, StripePlan,
-                             StripeInvoice, StripeTransfer, StripeAccount, StripeEvent)
+from .stripe_objects import (StripeSource, StripeCharge, StripeCustomer, StripeCard, StripeSubscription,
+                             StripePlan, StripeInvoice, StripeTransfer, StripeAccount, StripeEvent)
 from .utils import convert_tstamp
 
 
@@ -111,7 +110,6 @@ class Customer(StripeCustomer):
 
     # account = models.ForeignKey(Account, related_name="customers")
 
-    # TODO: attach_objects_hook
     default_source = models.ForeignKey(StripeSource, null=True, related_name="customers")
 
     subscriber = models.OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
@@ -177,10 +175,12 @@ class Customer(StripeCustomer):
 
         self.purge()
 
+    def _plan_none_check(self, plan):
+        if self.subscriptions.count() != 1:
+            raise TypeError("plan cannot be None if more than one subscription exists for this customer.")
+
     def has_active_subscription(self, plan=None):
         """
-        (TODO: )
-
         Checks to see if this customer has an active subscription to the given plan.
 
         :param plan: The plan for which to check for an active subscription. If plan is None and
@@ -190,86 +190,105 @@ class Customer(StripeCustomer):
         :type plan: Plan or string (plan ID)
 
         :returns: True if there exists an active subscription, False otherwise.
-        :throws:
+        :throws: TypeError if plan is None and more than one subscription exists for this customer.
         """
 
         try:
-            return self.current_subscription.is_valid()
+            if plan is None:
+                self._plan_none_check(plan)
+
+                return self.subscriptions.first().is_valid()
+            else:
+                # Convert Plan to stripe_id
+                if isinstance(plan, Plan):
+                    plan = plan.stripe_id
+
+                return any([subscription.is_valid() for subscription in self.subscriptions.filter(plan__id=plan)])
         except Subscription.DoesNotExist:
             return False
 
-    # TODO: Make work for multiple subscriptions (plan parameter)
-    def cancel_subscription(self, at_period_end=True):
-        stripe_customer = self.api_retrieve()
+    @property
+    def subscription(self):
+        subscription_count = self.subscriptions.count()
+
+        if subscription_count == 0:
+            return None
+        elif subscription_count == 1:
+            return self.subscriptions.first()
+        else:
+            raise MultipleSubscriptionException("This customer has multiple subscriptions. Use Customer.subscriptions to access them.")
+
+    # TODO: Accept a coupon object when coupons are implemented
+    def subscribe(self, plan, charge_immediately=True, **kwargs):
+        """
+        See StripeCustomer.subscribe()
+
+        :param charge_immediately: Whether or not to charge for the subscription upon creation. If False, an invoice will be created at the end of this period.
+        :type charge_immediately: boolean
+        """
+
+        stripe_subscription = super(Customer, self).subscribe(plan, **kwargs)
+
+        if charge_immediately:
+            self.send_invoice()
+
+        return Subscription.sync_from_stripe_data(stripe_subscription)
+
+    def cancel_subscription(self, plan=None, at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END):
+        """
+        Cancels a customer’s subscription.
+
+        :param plan: The plan for which to cancel a subscription. If plan is None and there exists only one subscription, this method will cancel that subscription.
+                     Calling this method with no plan and multiple subscriptions will throw an exception.
+        :type plan: Plan or string (plan ID)
+        :param at_period_end: A flag that if set to true will delay the cancellation of the subscription until the end of the current period.
+        :type at_period_end: boolean
+        :throws: TypeError if plan is None and more than one subscription exists for this customer.
+        :throws: MultipleSubscriptionException if a customer has multiple subscriptions to the same plan.
+        :throws: SubscriptionCancellationFailure if the subscription for the given plan could not be cancelled.
+
+        NOTE: If a subscription is cancelled during a trial period, the at_period_end flag will be overridden to False so that the trial ends immediately and the customer's card isn't charged.
+        """
+
+        if plan is None:
+            self._plan_none_check(plan)
+
+            subscription = self.subscriptions.first()
+        else:
+            # Convert Plan to stripe_id
+            if isinstance(plan, Plan):
+                plan = plan.stripe_id
+
+            try:
+                subscription = self.subscriptions.get(plan__id=plan)
+            except Subscription.DoesNotExist:
+                raise SubscriptionCancellationFailure("Customer does not have a subscription.")
+            except MultipleObjectsReturned:
+                raise MultipleSubscriptionException("Customer has multiple subscriptions to the same plan. In order to cancel these subscriptions, use Subscription.cancel().")
 
         try:
-            current_subscription = self.current_subscription
-        except Subscription.DoesNotExist:
-            raise SubscriptionCancellationFailure("Customer does not have current subscription")
-
-        try:
-            """
-            If plan has trial days and customer cancels before trial period ends,
-            then end subscription now, i.e. at_period_end=False
-            """
-            if self.current_subscription.trial_end and self.current_subscription.trial_end > timezone.now():
+            # If plan has trial days and customer cancels before trial period ends, then end subscription now, i.e. at_period_end=False
+            if subscription.trial_end and subscription.trial_end > timezone.now():
                 at_period_end = False
-            stripe_subscription = stripe_customer.cancel_subscription(at_period_end=at_period_end)
+            stripe_subscription = subscription.cancel(at_period_end=at_period_end)
         except InvalidRequestError as exc:
             raise SubscriptionCancellationFailure("Customer's information is not current with Stripe.\n{}".format(str(exc)))
 
-        current_subscription.status = stripe_subscription.status
-        current_subscription.cancel_at_period_end = stripe_subscription.cancel_at_period_end
-        current_subscription.current_period_end = convert_tstamp(stripe_subscription, "current_period_end")
-        current_subscription.canceled_at = convert_tstamp(stripe_subscription, "canceled_at") or timezone.now()
-        current_subscription.save()
-        cancelled.send(sender=self, stripe_response=stripe_subscription)
-        return current_subscription
-
-    def subscribe(self, plan, quantity=1, trial_days=None, charge_immediately=True, prorate=djstripe_settings.PRORATION_POLICY):
-        stripe_customer = self.api_retrieve()
-        """
-        Trial_days corresponds to the value specified by the selected plan
-        for the key trial_period_days.
-        """
-        if ("trial_period_days" in djstripe_settings.PAYMENTS_PLANS[plan]):
-            trial_days = djstripe_settings.PAYMENTS_PLANS[plan]["trial_period_days"]
-
-        if trial_days:
-            resp = stripe_customer.update_subscription(
-                plan=djstripe_settings.PAYMENTS_PLANS[plan]["stripe_plan_id"],
-                trial_end=timezone.now() + datetime.timedelta(days=trial_days),
-                prorate=prorate,
-                quantity=quantity
-            )
-        else:
-            resp = stripe_customer.update_subscription(
-                plan=djstripe_settings.PAYMENTS_PLANS[plan]["stripe_plan_id"],
-                prorate=prorate,
-                quantity=quantity
-            )
-        self._sync_current_subscription()
-        if charge_immediately:
-            self.send_invoice()
-        subscription_made.send(sender=self, plan=plan, stripe_response=resp)
-
-    # TODO: Get to Work with multiple plans
-    def update_plan_quantity(self, quantity, charge_immediately=False):
-        stripe_customer = self.api_retrieve()
-        stripe_subscription = stripe_customer.subscription
-        if not stripe_subscription:
-            self._sync_current_subscription()
-            raise SubscriptionUpdateFailure("Customer does not have a subscription with Stripe")
-        self.subscribe(
-            plan=djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id),
-            quantity=quantity,
-            charge_immediately=charge_immediately
-        )
+        return Subscription.sync_from_stripe_data(stripe_subscription)
 
     def can_charge(self):
+        """Determines if this customer is able to be charged."""
+
         return self.has_valid_card() and self.date_purged is None
 
     def charge(self, amount, currency="usd", send_receipt=None, **kwargs):
+        """
+        See StripeCustomer.charge()
+
+        :param send_receipt: Whether or not to send a receipt for this charge. If blank, ``DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS`` is used.
+        :type send_receipt: boolean
+        """
+
         if send_receipt is None:
             send_receipt = getattr(settings, 'DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS', True)
 
@@ -280,11 +299,6 @@ class Customer(StripeCustomer):
             charge.send_receipt()
 
         return charge
-
-    # TODO: necessary? 1) happens in super.charge, also should use method on charge.
-    def record_charge(self, charge_id):
-        data = Charge(stripe_id=charge_id).api_retrieve(charge_id)
-        return Charge.sync_from_stripe_data(data)
 
     def send_invoice(self):
         try:
@@ -317,6 +331,11 @@ class Customer(StripeCustomer):
 
         return new_card
 
+    def attach_objects_hook(self, cls, data):
+        # TODO: other sources
+        if data["default_source"] == "card":
+            self.default_source = cls.stripe_object_default_source_to_source(target_cls=Card, data=data)
+
     # SYNC methods should be dropped in favor of the master sync infrastructure proposed
     def _sync(self):
         stripe_customer = self.api_retrieve()
@@ -335,76 +354,12 @@ class Customer(StripeCustomer):
         stripe_customer = self.api_retrieve()
 
         for charge in stripe_customer.charges(**kwargs).data:
-            self.record_charge(charge["id"])
-
-    def _sync_current_subscription(self):
-        stripe_customer = self.api_retrieve()
-
-        stripe_subscription = getattr(stripe_customer, 'subscription', None)
-        current_subscription = getattr(self, 'current_subscription', None)
-
-        if stripe_subscription:
-            if current_subscription:
-                logger.debug('Updating subscription')
-                current_subscription.plan = djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id)
-                current_subscription.current_period_start = convert_tstamp(
-                    stripe_subscription.current_period_start
-                )
-                current_subscription.current_period_end = convert_tstamp(
-                    stripe_subscription.current_period_end
-                )
-                current_subscription.amount = (stripe_subscription.plan.amount / decimal.Decimal("100"))
-                current_subscription.status = stripe_subscription.status
-                current_subscription.cancel_at_period_end = stripe_subscription.cancel_at_period_end
-                current_subscription.canceled_at = convert_tstamp(stripe_subscription, "canceled_at")
-                current_subscription.start = convert_tstamp(stripe_subscription.start)
-                current_subscription.quantity = stripe_subscription.quantity
-                current_subscription.save()
-            else:
-                logger.debug('Creating subscription')
-                current_subscription = Subscription.objects.create(
-                    customer=self,
-                    plan=djstripe_settings.plan_from_stripe_id(stripe_subscription.plan.id),
-                    current_period_start=convert_tstamp(
-                        stripe_subscription.current_period_start
-                    ),
-                    current_period_end=convert_tstamp(
-                        stripe_subscription.current_period_end
-                    ),
-                    amount=(stripe_subscription.plan.amount / decimal.Decimal("100")),
-                    status=stripe_subscription.status,
-                    cancel_at_period_end=stripe_subscription.cancel_at_period_end,
-                    canceled_at=convert_tstamp(stripe_subscription, "canceled_at"),
-                    start=convert_tstamp(stripe_subscription.start),
-                    quantity=stripe_subscription.quantity
-                )
-
-            if stripe_subscription.trial_start and stripe_subscription.trial_end:
-                current_subscription.trial_start = convert_tstamp(stripe_subscription.trial_start)
-                current_subscription.trial_end = convert_tstamp(stripe_subscription.trial_end)
-            else:
-                """
-                Avoids keeping old values for trial_start and trial_end
-                for cases where customer had a subscription with trial days
-                then one without that (s)he cancels.
-                """
-                current_subscription.trial_start = None
-                current_subscription.trial_end = None
-
-            current_subscription.save()
-
-            return current_subscription
-        elif current_subscription and current_subscription.status != Subscription.STATUS_CANCELLED:
-            # Stripe says customer has no subscription but we think they have one.
-            # This could happen if subscription is cancelled from Stripe Dashboard and webhook fails
-            logger.debug('Cancelling subscription for %s' % self)
-            current_subscription.status = Subscription.STATUS_CANCELLED
-            current_subscription.save()
-            return current_subscription
+            data = Charge(stripe_id=charge["id"]).api_retrieve(charge["id"])
+            Charge.sync_from_stripe_data(data)
 
 
 class Card(StripeCard):
-    # account = models.ForeignKey("Account", related_name="cards")
+    # account = models.ForeignKey("Account", null=True, related_name="cards")
 
     def attach_objects_hook(self, cls, data):
         customer = cls.stripe_object_to_customer(target_cls=Customer, data=data)
@@ -427,48 +382,15 @@ class Card(StripeCard):
         self.delete()
 
 
-# class Subscription(StripeSubscription):
-#     customer = models.ForeignKey("Customer", blank=True, related_name="subscriptions")
-
-
-class Subscription(TimeStampedModel):
+class Subscription(StripeSubscription):
     # account = models.ForeignKey("Account", related_name="subscriptions")
-
-    STATUS_TRIALING = "trialing"
-    STATUS_ACTIVE = "active"
-    STATUS_PAST_DUE = "past_due"
-    STATUS_CANCELLED = "canceled"
-    STATUS_UNPAID = "unpaid"
-
-    customer = models.OneToOneField(Customer, related_name="current_subscription", null=True)
-    plan = models.CharField(max_length=100)
-    quantity = models.IntegerField()
-    start = models.DateTimeField()
-    # trialing, active, past_due, canceled, or unpaid
-    # In progress of moving it to choices field
-    status = models.CharField(max_length=25)
-    cancel_at_period_end = models.BooleanField(default=False)
-    canceled_at = models.DateTimeField(null=True, blank=True)
-    current_period_end = models.DateTimeField(null=True)
-    current_period_start = models.DateTimeField(null=True)
-    ended_at = models.DateTimeField(null=True, blank=True)
-    trial_end = models.DateTimeField(null=True, blank=True)
-    trial_start = models.DateTimeField(null=True, blank=True)
-    amount = models.DecimalField(decimal_places=2, max_digits=7)
-
-    def plan_display(self):
-        return djstripe_settings.PAYMENTS_PLANS[self.plan]["name"]
-
-    def status_display(self):
-        return self.status.replace("_", " ").title()
+    customer = models.ForeignKey("Customer", blank=True, related_name="subscriptions", help_text="The customer associated with this subscription.")
 
     def is_period_current(self):
-        if self.current_period_end is None:
-            return False
         return self.current_period_end > timezone.now()
 
     def is_status_current(self):
-        return self.status in [self.STATUS_TRIALING, self.STATUS_ACTIVE]
+        return self.status in ["trialing", "active"]
 
     def is_status_temporarily_current(self):
         """
@@ -482,33 +404,28 @@ class Subscription(TimeStampedModel):
         if not self.is_status_current():
             return False
 
-        if self.cancel_at_period_end and not self.is_period_current():
+        if not self.is_period_current():
             return False
 
         return True
 
+    def update(self, prorate=djstripe_settings.PRORATION_POLICY, **kwargs):
+        """
+        See StripeSubscription.update()
+
+        Note: The default value for prorate is overridden by the DJSTRIPE_PRORATION_POLICY setting.
+        """
+
+        stripe_subscription = super(Subscription, self).update(prorate, **kwargs)
+        return Subscription.sync_from_stripe_data(stripe_subscription)
+
     def extend(self, delta):
-        if delta.total_seconds() < 0:
-            raise ValueError("delta should be a positive timedelta.")
+        stripe_subscription = super(Subscription, self).extend(delta)
+        return Subscription.sync_from_stripe_data(stripe_subscription)
 
-        period_end = None
-
-        if self.trial_end is not None and \
-           self.trial_end > timezone.now():
-            period_end = self.trial_end
-        else:
-            period_end = self.current_period_end
-
-        period_end += delta
-
-        stripe_customer = self.customer.api_retrieve()
-
-        stripe_customer.update_subscription(
-            prorate=False,
-            trial_end=period_end,
-        )
-
-        self.customer._sync_current_subscription()
+    def attach_objects_hook(self, cls, data):
+        self.customer = cls.stripe_object_to_customer(target_cls=Customer, data=data)
+        self.plan = cls.stripe_object_to_plan(target_cls=Plan, data=data)
 
 
 class Plan(StripePlan):

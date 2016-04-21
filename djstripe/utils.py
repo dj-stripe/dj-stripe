@@ -18,12 +18,7 @@ ANONYMOUS_USER_ERROR_MSG = (
 )
 
 
-def user_has_active_subscription(user):
-    warnings.warn("Deprecated - Use ``subscriber_has_active_subscription`` instead. This method will be removed in dj-stripe 1.0.", DeprecationWarning)
-    return subscriber_has_active_subscription(user)
-
-
-def subscriber_has_active_subscription(subscriber):
+def subscriber_has_active_subscription(subscriber, plan=None):
     """
     Helper function to check if a subscriber has an active subscription.
     Throws improperlyConfigured if the subscriber is an instance of AUTH_USER_MODEL
@@ -36,6 +31,15 @@ def subscriber_has_active_subscription(subscriber):
         * customer has active subscription
         * user.is_superuser
         * user.is_staff
+
+    :param subscriber: The subscriber for which to check for an active subscription.
+    :type subscriber: dj-stripe subscriber
+    :param plan: The plan for which to check for an active subscription. If plan is None and
+                 there exists only one subscription, this method will check if that subscription
+                 is active. Calling this method with no plan and multiple subscriptions will throw
+                 an exception.
+    :type plan: Plan or string (plan ID)
+
     """
 
     if isinstance(subscriber, AnonymousUser):
@@ -47,7 +51,7 @@ def subscriber_has_active_subscription(subscriber):
     from .models import Customer
 
     customer, created = Customer.get_or_create(subscriber)
-    if created or not customer.has_active_subscription():
+    if created or not customer.has_active_subscription(plan):
         return False
     return True
 

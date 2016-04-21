@@ -9,6 +9,7 @@
 import decimal
 
 from django.core.exceptions import ImproperlyConfigured, FieldError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from jsonfield import JSONField
@@ -75,6 +76,18 @@ class StripeFieldMixin(object):
                     result = None
 
             return result
+
+
+class StripePercentField(StripeFieldMixin, models.DecimalField):
+
+    def __init__(self, *args, **kwargs):
+        defaults = {
+            'decimal_places': 2,
+            'max_digits': 5,
+            'validators': [MinValueValidator(1.00), MaxValueValidator(100.00)]
+        }
+        defaults.update(kwargs)
+        super(StripePercentField, self).__init__(*args, **defaults)
 
 
 class StripeCurrencyField(StripeFieldMixin, models.DecimalField):
