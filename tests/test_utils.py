@@ -22,33 +22,9 @@ from djstripe.models import convert_tstamp, Customer, Subscription
 from djstripe.utils import subscriber_has_active_subscription, get_supported_currency_choices
 
 from unittest.case import SkipTest
-from unittest2 import TestCase as AssertWarnsEnabledTestCase
 from mock import patch
 
 from tests.apps.testapp.models import Organization
-
-
-class TestDeprecationWarning(AssertWarnsEnabledTestCase):
-    """
-    Tests the deprecation warning set in the decorators file.
-    See https://docs.python.org/3.4/library/warnings.html#testing-warnings
-    """
-
-    def setUp(self):
-        self.user = get_user_model().objects.create_user(username="pydanny",
-                                                         email="pydanny@gmail.com")
-        self.customer = Customer.objects.create(
-            subscriber=self.user,
-            stripe_id="cus_xxxxxxxxxxxxxxx",
-            card_fingerprint="YYYYYYYY",
-            card_last_4="2342",
-            card_kind="Visa"
-        )
-
-    def test_deprecation(self):
-        with self.assertWarns(DeprecationWarning):
-            from djstripe.utils import user_has_active_subscription
-            user_has_active_subscription(self.user)
 
 
 class TestTimestampConversion(TestCase):

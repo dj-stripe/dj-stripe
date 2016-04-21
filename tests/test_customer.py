@@ -125,23 +125,6 @@ class TestCustomer(TestCase):
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
-    def test_record_charge(self, charge_retrieve_mock, default_account_mock):
-        default_account_mock.return_value = self.account
-
-        fake_charge_copy = deepcopy(FAKE_CHARGE)
-        fake_charge_copy.update({"invoice": None})
-
-        charge_retrieve_mock.return_value = fake_charge_copy
-
-        recorded_charge = self.customer.record_charge(fake_charge_copy["id"])
-        self.assertEquals(Charge.objects.get(stripe_id=fake_charge_copy["id"]), recorded_charge)
-        self.assertEquals(recorded_charge.paid, True)
-        self.assertEquals(recorded_charge.disputed, False)
-        self.assertEquals(recorded_charge.refunded, False)
-        self.assertEquals(recorded_charge.amount_refunded, 0)
-
-    @patch("djstripe.models.Account.get_default_account")
-    @patch("stripe.Charge.retrieve")
     def test_refund_charge(self, charge_retrieve_mock, default_account_mock):
         default_account_mock.return_value = self.account
 
@@ -401,22 +384,32 @@ class TestCustomer(TestCase):
 
         self.assertFalse(sync_from_stripe_data_mock.called)
 
-    @patch("djstripe.models.Customer.record_charge")
+    @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Charge.retrieve")
     @patch("djstripe.models.Customer.api_retrieve", return_value=deepcopy(FAKE_CUSTOMER))
-    def test_sync_charges(self, api_retrieve_mock, record_charge_mock):
+    def test_sync_charges(self, api_retrieve_mock, charge_retrieve_mock, default_account_mock):
+        default_account_mock.return_value = self.account
+
+        fake_charge_copy = deepcopy(FAKE_CHARGE)
+        fake_charge_copy.update({"invoice": None})
+
+        charge_retrieve_mock.return_value = fake_charge_copy
+
         self.customer._sync_charges()
 
-        record_charge_mock.assert_any_call(FAKE_CHARGE["id"])
-
-        self.assertEqual(1, record_charge_mock.call_count)
-
-    @patch("djstripe.models.Customer.record_charge")
+    @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Charge.retrieve")
     @patch("djstripe.models.Customer.api_retrieve",
            return_value=PropertyMock(charges=MagicMock(return_value=PropertyMock(data=[]))))
-    def test_sync_charges_none(self, api_retrieve_mock, record_charge_mock):
-        self.customer._sync_charges()
+    def test_sync_charges_none(self, api_retrieve_mock, charge_retrieve_mock, default_account_mock):
+        default_account_mock.return_value = self.account
 
-        self.assertFalse(record_charge_mock.called)
+        fake_charge_copy = deepcopy(FAKE_CHARGE)
+        fake_charge_copy.update({"invoice": None})
+
+        charge_retrieve_mock.return_value = fake_charge_copy
+
+        self.customer._sync_charges()
 
     @patch("djstripe.models.Customer.api_retrieve", return_value=PropertyMock(subscription=None))
     def test_sync_current_subscription_no_stripe_subscription(self, api_retrieve_mock):
