@@ -5,3 +5,4 @@ django-polymorphic>=0.7.1
 jsonfield>=1.0.3
 pytz>=2015.7
 stripe>=1.27.1
+tqdm>=4.5.0

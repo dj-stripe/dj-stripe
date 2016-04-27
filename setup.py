@@ -60,6 +60,7 @@ INSTALL_REQUIRES = [
     'jsonfield>=1.0.3',
     'pytz>=2015.4',
     'stripe>=1.24.1',
+    'tqdm>=4.5.0',
 ]
 
 setup(
