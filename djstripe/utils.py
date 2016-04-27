@@ -103,3 +103,36 @@ def convert_tstamp(response, field_name=None):
     else:
         if field_name in response and response[field_name]:
             return datetime.datetime.fromtimestamp(response[field_name], tz)
+
+
+def simple_stripe_pagination_iterator(stripe_object, **kwargs):
+    """ A simple utility to iterate over parginated stripe object lists. Use this in place
+        of a direct stripe_object.all().
+
+        Note that ``limit``, ``starting_after``, and ``ending_before`` arguments to this function
+        are reserved. If these arguments are passed, they will be discarded.
+
+        See the Stripe API documentation for the stripe object to find out which filter kwargs are accepted.
+
+        :param stripe_object: A stripe object that supports the all() method.
+    """
+
+    reserved_kwargs = ["limit", "starting_after", "ending_before"]
+
+    # Discard any reserved kwargs that were passed in.
+    for kwarg in reserved_kwargs:
+        try:
+            del kwargs[kwarg]
+        except KeyError:
+            continue
+
+    stripe_object_list = stripe_object.all(limit=100, **kwargs)
+
+    for list_object in stripe_object_list["data"]:
+        yield list_object
+
+    while stripe_object_list["has_more"]:
+        stripe_object_list = stripe_object.all(limit=100, starting_after=stripe_object_list[-1], **kwargs)
+
+        for list_object in stripe_object_list["data"]:
+            yield list_object

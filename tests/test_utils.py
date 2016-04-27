@@ -19,7 +19,7 @@ from django.test.utils import override_settings
 from django.utils import timezone
 
 from djstripe.models import convert_tstamp, Customer, Subscription
-from djstripe.utils import subscriber_has_active_subscription, get_supported_currency_choices
+from djstripe.utils import subscriber_has_active_subscription, get_supported_currency_choices, simple_stripe_pagination_iterator
 
 from unittest.case import SkipTest
 from mock import patch
@@ -168,3 +168,29 @@ class TestGetSupportedCurrencyChoices(TestCase):
         self.assertGreaterEqual(len(currency_choices), 1, "Currency choices pull returned an empty list.")
         self.assertEqual(tuple, type(currency_choices[0]), "Currency choices are not tuples.")
         self.assertIn(("usd", "USD"), currency_choices, "USD not in currency choices.")
+
+
+class TestPaginationIterator(TestCase):
+    test_strings = ["start", "apple", "pie", "carrot", "cake", "dessert", "chocolate", "chip", "cookies", "end"]
+
+    class StripeTestObject(object):
+
+        def all(self, limit, starting_after=None):
+            if not starting_after:
+                return {"has_more": True, "data": self.test_strings[:3]}
+            elif starting_after == "pie":
+                return {"has_more": True, "data": self.test_strings[3:6]}
+            elif starting_after == "dessert":
+                return {"has_more": False, "data": self.test_strings[6:]}
+
+    def test_paginator_as_list(self):
+        expected_result = self.test_strings
+        stripe_object = self.StripeTestObject()
+
+        self.assertEqual(list(simple_stripe_pagination_iterator(stripe_object)), expected_result)
+
+    def test_paginator_as_iterator(self):
+        stripe_object = self.StripeTestObject()
+
+        for test_string in self.test_strings:
+            self.assertEqual(next(simple_stripe_pagination_iterator(stripe_object)), test_string)
