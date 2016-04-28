@@ -7,8 +7,8 @@
 
 """
 
-import datetime
-import decimal
+from datetime import datetime, timedelta
+from copy import deepcopy
 
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
@@ -25,6 +25,7 @@ from unittest.case import SkipTest
 from mock import patch
 
 from tests.apps.testapp.models import Organization
+from tests import FAKE_SUBSCRIPTION
 
 
 class TestTimestampConversion(TestCase):
@@ -33,14 +34,14 @@ class TestTimestampConversion(TestCase):
         stamp = convert_tstamp(1365567407)
         self.assertEquals(
             stamp,
-            datetime.datetime(2013, 4, 10, 4, 16, 47, tzinfo=timezone.utc)
+            datetime(2013, 4, 10, 4, 16, 47, tzinfo=timezone.utc)
         )
 
     def test_conversion_with_field_name(self):
         stamp = convert_tstamp({"my_date": 1365567407}, "my_date")
         self.assertEquals(
             stamp,
-            datetime.datetime(2013, 4, 10, 4, 16, 47, tzinfo=timezone.utc)
+            datetime(2013, 4, 10, 4, 16, 47, tzinfo=timezone.utc)
         )
 
     def test_conversion_with_invalid_field_name(self):
@@ -61,7 +62,7 @@ class TestTimestampConversion(TestCase):
         stamp = convert_tstamp(1365567407)
         self.assertEquals(
             stamp,
-            datetime.datetime(2013, 4, 10, 4, 16, 47),
+            datetime(2013, 4, 10, 4, 16, 47),
             "Is your system clock timezone in UTC? Change it, or run tests with '--skip-utc'."
         )
 
@@ -73,7 +74,7 @@ class TestTimestampConversion(TestCase):
         stamp = convert_tstamp({"my_date": 1365567407}, "my_date")
         self.assertEquals(
             stamp,
-            datetime.datetime(2013, 4, 10, 4, 16, 47),
+            datetime(2013, 4, 10, 4, 16, 47),
             "Is your system clock timezone in UTC? Change it, or run tests with '--skip-utc'."
         )
 
@@ -89,38 +90,18 @@ class TestTimestampConversion(TestCase):
 class TestUserHasActiveSubscription(TestCase):
 
     def setUp(self):
-        self.user = get_user_model().objects.create_user(username="pydanny",
-                                                         email="pydanny@gmail.com")
-        self.customer = Customer.objects.create(
-            subscriber=self.user,
-            stripe_id="cus_xxxxxxxxxxxxxxx",
-            card_fingerprint="YYYYYYYY",
-            card_last_4="2342",
-            card_kind="Visa"
-        )
+        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
+        self.customer = Customer.objects.create(subscriber=self.user, stripe_id="cus_6lsBvm5rJ0zyHc")
 
     def test_user_has_inactive_subscription(self):
         self.assertFalse(subscriber_has_active_subscription(self.user))
 
     def test_user_has_active_subscription(self):
-        # Make the customer have an active subscription
-        period_start = datetime.datetime(2013, 4, 1, tzinfo=timezone.utc)
-        period_end = datetime.datetime(2013, 4, 30, tzinfo=timezone.utc)
+        subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
+        subscription.current_period_end = timezone.now() + timedelta(days=10)
+        subscription.save()
 
-        # Start 'em off'
-        start = datetime.datetime(2013, 1, 1, 0, 0, 1)  # more realistic start
-        Subscription.objects.create(
-            customer=self.customer,
-            plan="test",
-            current_period_start=period_start,
-            current_period_end=period_end,
-            amount=(500 / decimal.Decimal("100.0")),
-            status="active",
-            start=start,
-            quantity=1
-        )
-
-        # Assert that the customer's subscription is action
+        # Assert that the customer's subscription is valid
         self.assertTrue(subscriber_has_active_subscription(self.user))
 
     def test_custom_subscriber(self):
@@ -129,6 +110,7 @@ class TestUserHasActiveSubscription(TestCase):
         for the current user. This causes a ValueError in this test because the
         database has already been established with auth.User.
         """
+
         subscriber = Organization.objects.create(email="email@test.com")
         self.assertRaises(ValueError, subscriber_has_active_subscription, subscriber)
 
@@ -137,7 +119,9 @@ class TestUserHasActiveSubscription(TestCase):
         This needs to throw an ImproperlyConfigured error so the developer
         can be guided to properly protect the subscription content.
         """
+
         anon_user = AnonymousUser()
+
         with self.assertRaises(ImproperlyConfigured):
             subscriber_has_active_subscription(anon_user)
 
@@ -177,11 +161,11 @@ class TestPaginationIterator(TestCase):
 
         def all(self, limit, starting_after=None):
             if not starting_after:
-                return {"has_more": True, "data": self.test_strings[:3]}
+                return {"has_more": True, "data": TestPaginationIterator.test_strings[:3]}
             elif starting_after == "pie":
-                return {"has_more": True, "data": self.test_strings[3:6]}
+                return {"has_more": True, "data": TestPaginationIterator.test_strings[3:6]}
             elif starting_after == "dessert":
-                return {"has_more": False, "data": self.test_strings[6:]}
+                return {"has_more": False, "data": TestPaginationIterator.test_strings[6:]}
 
     def test_paginator_as_list(self):
         expected_result = self.test_strings

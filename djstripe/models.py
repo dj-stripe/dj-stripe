@@ -26,7 +26,7 @@ from .signals import WEBHOOK_SIGNALS
 from .signals import webhook_processing_error
 from .stripe_objects import (StripeSource, StripeCharge, StripeCustomer, StripeCard, StripeSubscription,
                              StripePlan, StripeInvoice, StripeTransfer, StripeAccount, StripeEvent)
-from .utils import convert_tstamp
+from .utils import convert_tstamp, simple_stripe_pagination_iterator
 
 
 logger = logging.getLogger(__name__)
@@ -175,29 +175,34 @@ class Customer(StripeCustomer):
 
         self.purge()
 
-    def _plan_none_check(self, plan):
-        if self.subscriptions.count() != 1:
-            raise TypeError("plan cannot be None if more than one subscription exists for this customer.")
+    def _get_valid_subscriptions(self):
+        return [subscription for subscription in self.subscriptions.all() if subscription.is_valid()]
 
     def has_active_subscription(self, plan=None):
         """
         Checks to see if this customer has an active subscription to the given plan.
 
         :param plan: The plan for which to check for an active subscription. If plan is None and
-                     there exists only one subscription, this method will check if that subscription
-                     is active. Calling this method with no plan and multiple subscriptions will throw
+                     there exists only one active subscription, this method will check if that subscription
+                     is valid. Calling this method with no plan and multiple valid subscriptions for this customer will throw
                      an exception.
         :type plan: Plan or string (plan ID)
 
         :returns: True if there exists an active subscription, False otherwise.
-        :throws: TypeError if plan is None and more than one subscription exists for this customer.
+        :throws: TypeError if ``plan`` is None and more than one active subscription exists for this customer.
         """
 
         try:
             if plan is None:
-                self._plan_none_check(plan)
+                valid_subscriptions = self._get_valid_subscriptions()
 
-                return self.subscriptions.first().is_valid()
+                if len(valid_subscriptions) == 0:
+                    return False
+                elif len(valid_subscriptions) == 1:
+                    return True
+                else:
+                    raise TypeError("plan cannot be None if more than one valid subscription exists for this customer.")
+
             else:
                 # Convert Plan to stripe_id
                 if isinstance(plan, Plan):
@@ -239,11 +244,11 @@ class Customer(StripeCustomer):
         Cancels a customer’s subscription.
 
         :param plan: The plan for which to cancel a subscription. If plan is None and there exists only one subscription, this method will cancel that subscription.
-                     Calling this method with no plan and multiple subscriptions will throw an exception.
+                     Calling this method with no plan and multiple valid subscriptions for this customer will throw an exception.
         :type plan: Plan or string (plan ID)
         :param at_period_end: A flag that if set to true will delay the cancellation of the subscription until the end of the current period.
         :type at_period_end: boolean
-        :throws: TypeError if plan is None and more than one subscription exists for this customer.
+        :throws: TypeError if ``plan`` is None and more than one valid subscription exists for this customer.
         :throws: MultipleSubscriptionException if a customer has multiple subscriptions to the same plan.
         :throws: SubscriptionCancellationFailure if the subscription for the given plan could not be cancelled.
 
@@ -251,9 +256,12 @@ class Customer(StripeCustomer):
         """
 
         if plan is None:
-            self._plan_none_check(plan)
+            valid_subscriptions = self._get_valid_subscriptions()
 
-            subscription = self.subscriptions.first()
+            if len(valid_subscriptions) == 1:
+                subscription = valid_subscriptions[0]
+            else:
+                raise TypeError("plan cannot be None if more than one valid subscription exists for this customer.")
         else:
             # Convert Plan to stripe_id
             if isinstance(plan, Plan):
@@ -347,15 +355,20 @@ class Customer(StripeCustomer):
     def _sync_invoices(self, **kwargs):
         stripe_customer = self.api_retrieve()
 
-        for invoice in stripe_customer.invoices(**kwargs).data:
+        for invoice in simple_stripe_pagination_iterator(stripe_object=Invoice._api(), customer=stripe_customer, **kwargs):
             Invoice.sync_from_stripe_data(invoice, send_receipt=False)
 
     def _sync_charges(self, **kwargs):
         stripe_customer = self.api_retrieve()
 
-        for charge in stripe_customer.charges(**kwargs).data:
-            data = Charge(stripe_id=charge["id"]).api_retrieve(charge["id"])
-            Charge.sync_from_stripe_data(data)
+        for charge in simple_stripe_pagination_iterator(stripe_object=Charge._api(), customer=stripe_customer, **kwargs):
+            Charge.sync_from_stripe_data(charge)
+
+    def _sync_subscriptions(self, **kwargs):
+        stripe_customer = self.api_retrieve()
+
+        for subscription in simple_stripe_pagination_iterator(stripe_customer.subscriptions, **kwargs):
+            Subscription.sync_from_stripe_data(subscription)
 
 
 class Card(StripeCard):
@@ -385,6 +398,7 @@ class Card(StripeCard):
 class Subscription(StripeSubscription):
     # account = models.ForeignKey("Account", related_name="subscriptions")
     customer = models.ForeignKey("Customer", related_name="subscriptions", help_text="The customer associated with this subscription.")
+    plan = models.ForeignKey("Plan", related_name="subscriptions", help_text="The plan associated with this subscription.")
 
     def is_period_current(self):
         return self.current_period_end > timezone.now()

@@ -49,7 +49,7 @@ class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
             subscriber=subscriber_request_callback(self.request))
         context['customer'] = customer
         try:
-            context['subscription'] = customer.current_subscription
+            context['subscription'] = customer.subscription
         except Subscription.DoesNotExist:
             context['subscription'] = None
         context['plans'] = PLAN_LIST
@@ -147,7 +147,7 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
         customer, created = Customer.get_or_create(
             subscriber=subscriber_request_callback(self.request))
 
-        if hasattr(customer, "current_subscription") and customer.current_subscription.plan == plan_slug and customer.current_subscription.status != Subscription.STATUS_CANCELLED:
+        if hasattr(customer, "subscription") and customer.subscription.plan == plan_slug and customer.subscription.status != Subscription.STATUS_CANCELLED:
             message = "You already subscribed to this plan"
             messages.info(request, message, fail_silently=True)
             return redirect("djstripe:subscribe")
@@ -210,13 +210,13 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                 # we force the proration of the current plan and use it towards the upgraded plan,
                 # no matter what DJSTRIPE_PRORATION_POLICY is set to.
                 if PRORATION_POLICY_FOR_UPGRADES:
-                    current_subscription_amount = customer.current_subscription.amount
+                    subscription_amount = customer.subscription.amount
                     selected_plan_name = form.cleaned_data["plan"]
                     selected_plan = [plan for plan in PLAN_LIST if plan["plan"] == selected_plan_name][0]  # TODO: refactor
                     selected_plan_price = selected_plan["price"] / decimal.Decimal("100")
 
                     # Is it an upgrade?
-                    if selected_plan_price > current_subscription_amount:
+                    if selected_plan_price > subscription_amount:
                         customer.subscribe(selected_plan_name, prorate=True)
                     else:
                         customer.subscribe(selected_plan_name)
@@ -238,10 +238,10 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
     def form_valid(self, form):
         customer, created = Customer.get_or_create(
             subscriber=subscriber_request_callback(self.request))
-        current_subscription = customer.cancel_subscription(
+        subscription = customer.cancel_subscription(
             at_period_end=CANCELLATION_AT_PERIOD_END)
 
-        if current_subscription.status == current_subscription.STATUS_CANCELLED:
+        if subscription.status == subscription.STATUS_CANCELLED:
             # If no pro-rate, they get kicked right out.
             messages.info(self.request, "Your subscription is now cancelled.")
             # logout the user
@@ -250,7 +250,7 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
         else:
             # If pro-rate, they get some time to stay.
             messages.info(self.request, "Your subscription status is now '{status}' until '{period_end}'".format(
-                status=current_subscription.status, period_end=current_subscription.current_period_end)
+                status=subscription.status, period_end=subscription.current_period_end)
             )
 
         return super(CancelSubscriptionView, self).form_valid(form)

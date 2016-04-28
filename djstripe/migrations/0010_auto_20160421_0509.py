@@ -30,13 +30,15 @@ def resync_subscriptions(apps, schema_editor):
     print(serializers.serialize("json", Subscription.objects.all()))
     Subscription.objects.all().delete()
 
-    print("Re-syncing subscriptions. This could take a while.")
+    print("Re-syncing subscriptions. This may take a while.")
 
-    for customer in tqdm(Customer.objects.all()):
+    for customer in tqdm(iterable=Customer.objects.all(), desc="Sync", unit="customers"):
         customer_stripe_subscriptions = customer.api_retrieve(api_key=settings.STRIPE_SECRET_KEY).subscriptions
 
         for stripe_subscription in simple_stripe_pagination_iterator(customer_stripe_subscriptions):
             Subscription.sync_from_stripe_data(stripe_subscription)
+
+    print("Subscription re-sync complete.")
 
 
 class Migration(migrations.Migration):
@@ -58,6 +60,12 @@ class Migration(migrations.Migration):
             model_name='subscription',
             name='stripe_id',
             field=djstripe.fields.StripeIdField(default='dummy', max_length=50, unique=False),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name='subscription',
+            name='plan',
+            field=models.ForeignKey(null=True, related_name='subscriptions', to='djstripe.Plan', help_text='The plan associated with this subscription.'),
             preserve_default=False,
         ),
         migrations.AddField(
@@ -180,5 +188,10 @@ class Migration(migrations.Migration):
             model_name='subscription',
             name='stripe_id',
             field=djstripe.fields.StripeIdField(max_length=50, unique=True),
+        ),
+        migrations.AlterField(
+            model_name='subscription',
+            name='plan',
+            field=models.ForeignKey(related_name='subscriptions', help_text='The plan associated with this subscription.', to='djstripe.Plan'),
         ),
     ]

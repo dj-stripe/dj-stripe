@@ -28,19 +28,19 @@ class SubscriptionRestView(APIView):
 
     def get(self, request, format=None):
         """
-        Return the users current subscription.
+        Returns the customer's valid subscriptions.
         Returns with status code 200.
         """
 
         try:
-            customer, created = Customer.get_or_create(
+            customer, _created = Customer.get_or_create(
                 subscriber=subscriber_request_callback(self.request)
             )
-            subscription = customer.current_subscription
 
-            serializer = SubscriptionSerializer(subscription)
+            serializer = SubscriptionSerializer(
+                customer._get_valid_subscriptions()
+            )
             return Response(serializer.data)
-
         except:
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -54,7 +54,7 @@ class SubscriptionRestView(APIView):
 
         if serializer.is_valid():
             try:
-                customer, created = Customer.get_or_create(
+                customer, _created = Customer.get_or_create(
                     subscriber=subscriber_request_callback(self.request)
                 )
                 customer.add_card(serializer.data["stripe_token"])
@@ -79,7 +79,7 @@ class SubscriptionRestView(APIView):
         """
 
         try:
-            customer, created = Customer.get_or_create(
+            customer, _created = Customer.get_or_create(
                 subscriber=subscriber_request_callback(self.request)
             )
             customer.cancel_subscription(

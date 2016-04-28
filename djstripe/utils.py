@@ -132,6 +132,7 @@ def simple_stripe_pagination_iterator(stripe_object, **kwargs):
         yield list_object
 
     while stripe_object_list["has_more"]:
+        print(stripe_object_list)
         stripe_object_list = stripe_object.all(limit=100, starting_after=stripe_object_list[-1], **kwargs)
 
         for list_object in stripe_object_list["data"]:

@@ -431,6 +431,20 @@ class StripeCustomer(StripeObject):
     card_exp_month = StripePositiveIntegerField(deprecated=True)
     card_exp_year = StripePositiveIntegerField(deprecated=True)
 
+    @classmethod
+    def stripe_object_default_source_to_source(cls, target_cls, data):
+        """
+        Search the given manager for the source matching this StripeCharge object's ``default_source`` field.
+        Note that the source field is already expanded in each request, and that it is required.
+
+        :param target_cls: The target class
+        :type target_cls: StripeSource
+        :param data: stripe object
+        :type data: dict
+        """
+
+        return target_cls.get_or_create_from_stripe_object(data["default_source"])[0]
+
     def purge(self):
         """Delete all identifying information we have in this record."""
 
@@ -586,20 +600,6 @@ class StripeCustomer(StripeObject):
             description=description,
             invoice=invoice_id,
         )
-
-    @classmethod
-    def stripe_object_default_source_to_source(cls, target_cls, data):
-        """
-        Search the given manager for the source matching this StripeCharge object's ``default_source`` field.
-        Note that the source field is already expanded in each request, and that it is required.
-
-        :param target_cls: The target class
-        :type target_cls: StripeSource
-        :param data: stripe object
-        :type data: dict
-        """
-
-        return target_cls.get_or_create_from_stripe_object(data["default_source"])[0]
 
 
 class StripeCard(StripeSource):
@@ -757,6 +757,19 @@ class StripeSubscription(StripeObject):
             "quantity={quantity}".format(quantity=self.quantity),
         ] + super(StripeSubscription, self).str_parts()
 
+    @classmethod
+    def stripe_object_to_plan(cls, target_cls, data):
+        """
+        Search the given manager for the Plan matching this StripeCharge object's ``plan`` field.
+
+        :param target_cls: The target class
+        :type target_cls: StripePlan
+        :param data: stripe object
+        :type data: dict
+        """
+
+        return target_cls.get_or_create_from_stripe_object(data["plan"])[0]
+
     def update(self, plan=None, coupon=None, prorate=None, proration_date=None, trial_end=None, quantity=None, application_fee_percent=None, tax_percent=None, metadata=None):
         """
         See StripeCustomer.subscribe()
@@ -863,19 +876,6 @@ class StripePlan(StripeObject):
         return [
             "name={name}".format(name=self.name),
         ] + super(StripePlan, self).str_parts()
-
-    @classmethod
-    def stripe_object_to_plan(cls, target_cls, data):
-        """
-        Search the given manager for the Plan matching this StripeCharge object's ``plan`` field.
-
-        :param target_cls: The target class
-        :type target_cls: StripePlan
-        :param data: stripe object
-        :type data: dict
-        """
-
-        return target_cls.get_or_create_from_stripe_object(data["plan"])[0]
 
 
 class StripeInvoice(StripeObject):

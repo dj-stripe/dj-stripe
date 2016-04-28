@@ -63,7 +63,7 @@ class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
         if self.value() is None:
             return queryset.all()
         else:
-            return queryset.filter(current_subscription__status=self.value())
+            return queryset.filter(subscription__status=self.value())
 
 
 def send_charge_receipt(modeladmin, request, queryset):
@@ -154,7 +154,7 @@ class SubscriptionInline(admin.TabularInline):
 
 
 def subscription_status(obj):
-    return obj.current_subscription.status
+    return obj.subscription.status
 subscription_status.short_description = "Subscription Status"
 
 

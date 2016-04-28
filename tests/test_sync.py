@@ -30,12 +30,12 @@ class TestSyncSubscriber(TestCase):
 
     @patch("djstripe.models.Customer._sync_charges")
     @patch("djstripe.models.Customer._sync_invoices")
-    @patch("djstripe.models.Customer._sync_current_subscription")
+    @patch("djstripe.models.Customer._sync_subscriptions")
     @patch("djstripe.models.Customer._sync")
     @patch("djstripe.models.Customer.api_retrieve", return_value=FAKE_CUSTOMER)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
     def test_sync_success(self, stripe_customer_create_mock, api_retrieve_mock,
-                          _sync_mock, _sync_current_subscription_mock, _sync_invoices_mock,
+                          _sync_mock, _sync_subscriptions_mock, _sync_invoices_mock,
                           _sync_charges_mock):
 
         sync_subscriber(self.user)
@@ -43,7 +43,7 @@ class TestSyncSubscriber(TestCase):
         self.assertEqual(FAKE_CUSTOMER, Customer.objects.get(subscriber=self.user).api_retrieve())
 
         _sync_mock.assert_called_once_with()
-        _sync_current_subscription_mock.assert_called_once_with()
+        _sync_subscriptions_mock.assert_called_once_with()
         _sync_invoices_mock.assert_called_once_with()
         _sync_charges_mock.assert_called_once_with()
 

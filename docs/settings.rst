@@ -123,11 +123,11 @@ Example:
 
 .. code-block:: python
 
-    {% elif customer.current_subscription.plan == plan.plan %}
+    {% elif customer.subscription.plan == plan.plan %}
         <h4>Your Current Plan</h4>
-    {% elif customer.current_subscription|djstripe_plan_level < plan.plan|djstripe_plan_level %}
+    {% elif customer.subscription|djstripe_plan_level < plan.plan|djstripe_plan_level %}
         <h4>Upgrade</h4>
-    {% elif customer.current_subscription|djstripe_plan_level > plan.plan|djstripe_plan_level %}
+    {% elif customer.subscription|djstripe_plan_level > plan.plan|djstripe_plan_level %}
         <h4>Downgrade</h4>
     {% endif %}
     

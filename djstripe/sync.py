@@ -9,10 +9,10 @@ from .models import Customer, Plan
 
 
 def sync_subscriber(subscriber):
-    customer, created = Customer.get_or_create(subscriber=subscriber)
+    customer, _created = Customer.get_or_create(subscriber=subscriber)
     try:
         customer._sync()
-        customer._sync_current_subscription()
+        customer._sync_subscriptions()
         customer._sync_invoices()
         customer._sync_charges()
     except InvalidRequestError as e:

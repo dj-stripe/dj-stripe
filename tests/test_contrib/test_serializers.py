@@ -17,8 +17,9 @@ from django.conf import settings
 from mock import patch, PropertyMock
 from djstripe.contrib.rest_framework.serializers import SubscriptionSerializer, CreateSubscriptionSerializer
 from djstripe.models import Subscription
+from unittest.case import skip
 
-
+@skip
 class SubscriptionSerializerTest(TestCase):
 
     def test_valid_serializer(self):
@@ -56,7 +57,7 @@ class SubscriptionSerializerTest(TestCase):
         self.assertEqual(serializer.validated_data, {})
         self.assertEqual(serializer.errors, {'quantity': ['This field is required.']})
 
-
+@skip
 class CreateSubscriptionSerializerTest(TestCase):
 
     @patch("stripe.Token.create", return_value=PropertyMock(id="token_test"))
