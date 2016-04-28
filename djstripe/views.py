@@ -273,8 +273,7 @@ class WebHook(CsrfExemptMixin, View):
                 traceback=""
             )
         else:
-            event_data = Event(stripe_id=data["id"]).api_retrieve()
-            event = Event._create_from_stripe_object(event_data)
+            event = Event._create_from_stripe_object(data)
             event.validate()
             event.process()
         return HttpResponse()
