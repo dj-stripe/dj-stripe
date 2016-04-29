@@ -979,7 +979,7 @@ class StripeTransfer(StripeObject):
     destination_type = StripeCharField(stripe_name="type", max_length=14, choices=DESITNATION_TYPE_CHOICES, help_text="The type of the transfer destination.")
     application_fee = StripeTextField(null=True, help_text="Might be the ID of an application fee object. The Stripe API docs don't provide any information.")
     destination = StripeIdField(help_text="ID of the bank account, card, or Stripe account the transfer was sent to.")
-    destination_payment = StripeIdField(null=True, help_text="If the destination is a Stripe account, this will be the ID of the payment that the destination account received for the transfer.")
+    destination_payment = StripeIdField(stripe_required=False, help_text="If the destination is a Stripe account, this will be the ID of the payment that the destination account received for the transfer.")
     failure_code = StripeCharField(null=True, max_length=23, choices=FAILURE_CODE_CHOICES, help_text="Error code explaining reason for transfer failure if available. See https://stripe.com/docs/api/python#transfer_failures.")
     failure_message = StripeTextField(null=True, help_text="Message to user further explaining reason for transfer failure if available.")
     source_transaction = StripeIdField(null=True, help_text="ID of the charge (or other transaction) that was used to fund the transfer. If null, the transfer was funded from the available balance.")

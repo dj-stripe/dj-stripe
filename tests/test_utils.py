@@ -7,25 +7,23 @@
 
 """
 
-from datetime import datetime, timedelta
 from copy import deepcopy
+from datetime import datetime, timedelta
+from unittest.case import SkipTest
 
 from django.conf import settings
-from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import timezone
+from mock import patch
 
 from djstripe.models import convert_tstamp, Customer, Subscription
 from djstripe.utils import subscriber_has_active_subscription, get_supported_currency_choices, simple_stripe_pagination_iterator
-
-from unittest.case import SkipTest
-from mock import patch
-
-from tests.apps.testapp.models import Organization
 from tests import FAKE_SUBSCRIPTION
+from tests.apps.testapp.models import Organization
 
 
 class TestTimestampConversion(TestCase):
@@ -175,6 +173,7 @@ class TestPaginationIterator(TestCase):
 
     def test_paginator_as_iterator(self):
         stripe_object = self.StripeTestObject()
+        paginator = simple_stripe_pagination_iterator(stripe_object)
 
         for test_string in self.test_strings:
-            self.assertEqual(next(simple_stripe_pagination_iterator(stripe_object)), test_string)
+            self.assertEqual(next(paginator), test_string)

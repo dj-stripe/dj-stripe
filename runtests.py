@@ -47,6 +47,18 @@ def run_test_suite(args):
                 "PORT": "",
             },
         },
+        TEMPLATES=[
+            {
+                'BACKEND': 'django.template.backends.django.DjangoTemplates',
+                'DIRS': [],
+                'APP_DIRS': True,
+                'OPTIONS': {
+                    'context_processors': [
+                        'django.contrib.auth.context_processors.auth',
+                    ],
+                },
+            },
+        ],
         ROOT_URLCONF="tests.test_urls",
         INSTALLED_APPS=[
             "django.contrib.admin",
@@ -169,7 +181,33 @@ def run_test_suite(args):
     from django_nose import NoseTestSuiteRunner
 
     test_runner = NoseTestSuiteRunner(verbosity=1)
-    failures = test_runner.run_tests(["./tests/test_webhooks.py", "./tests/test_plan.py"])
+    failures = test_runner.run_tests(["./tests/test_account.py",
+                                      "./tests/test_admin.py",
+                                      "./tests/test_card.py",
+#                                       "./tests/test_charge.py",
+                                      "./tests/test_context_managers.py",
+                                      "./tests/test_customer.py",
+                                      "./tests/test_decorators.py",
+                                      "./tests/test_djstripe_tags.py",
+                                      "./tests/test_email.py",
+                                      "./tests/test_event_processing_exception.py",
+#                                       "./tests/test_event.py",
+                                      "./tests/test_fields.py",
+                                      "./tests/test_invoice.py",
+                                      "./tests/test_invoiceitem.py",  # Update to use fakes when the model is updated
+                                      "./tests/test_managers.py",
+                                      "./tests/test_middleware.py",
+                                      "./tests/test_mixins.py",  # Going to want to add new has_active(plan) logic here maybe
+                                      "./tests/test_plan.py",
+                                      "./tests/test_settings.py",
+                                      "./tests/test_stripe_object.py",
+#                                       "./tests/test_subscriptions.py",
+                                      "./tests/test_sync.py",
+#                                       "./tests/test_transfer.py",
+                                      "./tests/test_urls.py",
+                                      "./tests/test_utils.py",
+#                                       "./tests/test_views.py",
+                                      "./tests/test_webhooks.py"])
 
     if failures:
         sys.exit(failures)

@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-import warnings
 import datetime
 
-from django.core.exceptions import ImproperlyConfigured
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
+from django.core.exceptions import ImproperlyConfigured
 from django.utils import timezone
-from django.conf import settings
 
 
 ANONYMOUS_USER_ERROR_MSG = (
@@ -126,14 +125,13 @@ def simple_stripe_pagination_iterator(stripe_object, **kwargs):
         except KeyError:
             continue
 
-    stripe_object_list = stripe_object.all(limit=100, **kwargs)
+    stripe_object_list_response = stripe_object.all(limit=100, **kwargs)
 
-    for list_object in stripe_object_list["data"]:
+    for list_object in stripe_object_list_response["data"]:
         yield list_object
 
-    while stripe_object_list["has_more"]:
-        print(stripe_object_list)
-        stripe_object_list = stripe_object.all(limit=100, starting_after=stripe_object_list[-1], **kwargs)
+    while stripe_object_list_response["has_more"]:
+        stripe_object_list_response = stripe_object.all(limit=100, starting_after=stripe_object_list_response["data"][-1], **kwargs)
 
-        for list_object in stripe_object_list["data"]:
+        for list_object in stripe_object_list_response["data"]:
             yield list_object

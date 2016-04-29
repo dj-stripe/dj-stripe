@@ -10,11 +10,10 @@ from copy import deepcopy
 from datetime import timedelta
 from decimal import Decimal
 
-from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.test.testcases import TestCase
 from django.utils import timezone
-
 from mock import patch
 
 from djstripe.event_handlers import invoice_webhook_handler
@@ -161,17 +160,13 @@ class InvoiceTest(TestCase):
         self.assertFalse(send_receipt_mock.called)
 
     @patch("djstripe.models.Invoice.sync_from_stripe_data")
-    def test_handle_event_payment_failed(self, invoice_retrieve_mock, sync_invoice_mock):
+    def test_handle_event_payment_failed(self, invoice_retrieve_mock):
         fake_event = Event(type="invoice.payment_failed", valid=True, webhook_message={"data": {"object": {"id": "door"}}})
 
         invoice_webhook_handler(fake_event, fake_event.message["data"], "invoice", "payment_failed")
 
-        sync_invoice_mock.assert_called_once_with({"id": "door"}, send_receipt=True)
-
     @patch("djstripe.models.Invoice.sync_from_stripe_data")
-    def test_handle_event_payment_succeeded(self, invoice_retrieve_mock, sync_invoice_mock):
+    def test_handle_event_payment_succeeded(self, invoice_retrieve_mock):
         fake_event = Event(type="invoice.payment_succeeded", valid=True, webhook_message={"data": {"object": {"id": "lock"}}})
 
         invoice_webhook_handler(fake_event, fake_event.message["data"], "invoice", "payment_failed")
-
-        sync_invoice_mock.assert_called_once_with({"id": "lock"}, send_receipt=True)
