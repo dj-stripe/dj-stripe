@@ -248,16 +248,16 @@ FAKE_PLAN = {
 }
 
 FAKE_PLAN_II = {
-    "interval": "month",
+    "interval": "week",
     "name": "New plan name",
     "created": 1386247539,
-    "amount": 2000,
+    "amount": 4000,
     "currency": "usd",
-    "id": "gold21323",
+    "id": "silver41294",
     "object": "plan",
     "livemode": False,
     "interval_count": 1,
-    "trial_period_days": None,
+    "trial_period_days": 12,
     "metadata": {},
     "statement_descriptor": None
 }
@@ -716,7 +716,36 @@ FAKE_TRANSFER = {
         "url": "/v1/transfers/tr_16Y9BK2eZvKYlo2CR0ySu1BA/reversals",
         "data": []
     },
-    "balance_transaction": "txn_16Vswu2eZvKYlo2C9DlWEgM1",
+    "balance_transaction": {
+        "id": "txn_16g5h62eZvKYlo2CQ2AHA89s",
+        "object": "balance_transaction",
+        "amount": 65400,
+        "currency": "usd",
+        "net": 63473,
+        "type": "charge",
+        "created": 1441079064,
+        "available_on": 1441670400,
+        "status": "pending",
+        "fee": 1927,
+        "fee_details": [
+            {
+              "amount": 1927,
+              "currency": "usd",
+              "type": "stripe_fee",
+              "description": "Stripe processing fees",
+              "application": None
+            }
+        ],
+        "source": "ch_16g5h62eZvKYlo2CMRXkSqa0",
+        "description": None,
+        "sourced_transfers": {
+            "object": "list",
+            "total_count": 0,
+            "has_more": False,
+            "url": "/v1/transfers?source_transaction=ch_16g5h62eZvKYlo2CMRXkSqa0",
+            "data": []
+        }
+    },
     "destination": "acct_16Y9B9Fso9hLaeLu",
     "destination_payment": "py_16Y9BKFso9hLaeLueFmWAYUi",
     "description": "Test description - 1439185984",
@@ -738,6 +767,152 @@ FAKE_TRANSFER_REVERSAL = {
     "balance_transaction": "txn_103B0z2eZvKYlo2CPqgXjXDI",
     "metadata": {},
     "transfer": "tr_103B0z2eZvKYlo2CI9WMGvlV"
+}
+
+FAKE_TRANSFER_II = {
+    "id": "tr_16hTzv2eZvKYlo2CWuyMmuvV",
+    "object": "transfer",
+    "created": 1440420000,
+    "date": 1440420000,
+    "livemode": False,
+    "amount": 2000,
+    "currency": "usd",
+    "reversed": False,
+    "status": "paid",
+    "type": "bank_account",
+    "reversals": {
+        "object": "list",
+        "total_count": 0,
+        "has_more": False,
+        "url": "/v1/transfers/tr_16hTzv2eZvKYlo2CWuyMmuvV/reversals",
+        "data": []
+    },
+    "balance_transaction": {
+        "id": "txn_16g5h62eZvKYlo2CQ2AHA89s",
+        "object": "balance_transaction",
+        "amount": 2000,
+        "currency": "usd",
+        "net": 73,
+        "type": "charge",
+        "created": 1441079064,
+        "available_on": 1441670400,
+        "status": "pending",
+        "fee": 1927,
+        "fee_details": [
+            {
+              "amount": 1927,
+              "currency": "usd",
+              "type": "stripe_fee",
+              "description": "Stripe processing fees",
+              "application": None
+            }
+        ],
+        "source": "ch_16g5h62eZvKYlo2CMRXkSqa0",
+        "description": None,
+        "sourced_transfers": {
+            "object": "list",
+            "total_count": 0,
+            "has_more": False,
+            "url": "/v1/transfers?source_transaction=ch_16g5h62eZvKYlo2CMRXkSqa0",
+            "data": []
+        }
+    },
+    "bank_account": {
+        "object": "bank_account",
+        "id": "ba_16hTzo2eZvKYlo2CeSjfb0tS",
+        "last4": "6789",
+        "country": "US",
+        "currency": "usd",
+        "status": "new",
+        "fingerprint": "1JWtPxqbdX5Gamtc",
+        "routing_number": "110000000",
+        "bank_name": "STRIPE TEST BANK"
+    },
+    "destination": "ba_16hTzo2eZvKYlo2CeSjfb0tS",
+    "description": None,
+    "failure_message": None,
+    "failure_code": None,
+    "amount_reversed": 0,
+    "metadata": {
+        "foo": "bar"
+    },
+    "statement_descriptor": None,
+    "recipient": "rp_16hTzu2eZvKYlo2C9A5mgxEj",
+    "source_transaction": None,
+    "application_fee": None
+}
+
+FAKE_TRANSFER_III = {
+    "id": "tr_17O4U52eZvKYlo2CmyYbDAEy",
+    "object": "transfer",
+    "created": 1451560845,
+    "date": 1451560845,
+    "livemode": False,
+    "amount": 19010,
+    "currency": "usd",
+    "reversed": False,
+    "status": "paid",
+    "type": "bank_account",
+    "reversals": {
+        "object": "list",
+        "total_count": 0,
+        "has_more": False,
+        "url": "/v1/transfers/tr_17O4U52eZvKYlo2CmyYbDAEy/reversals",
+        "data": []
+    },
+    "balance_transaction": {
+        "id": "txn_16g5h62eZvKYlo2CQ2AHA89s",
+        "object": "balance_transaction",
+        "amount": 19010,
+        "currency": "usd",
+        "net": 17083,
+        "type": "charge",
+        "created": 1441079064,
+        "available_on": 1441670400,
+        "status": "pending",
+        "fee": 1927,
+        "fee_details": [
+            {
+              "amount": 1927,
+              "currency": "usd",
+              "type": "stripe_fee",
+              "description": "Stripe processing fees",
+              "application": None
+            }
+        ],
+        "source": "ch_16g5h62eZvKYlo2CMRXkSqa0",
+        "description": None,
+        "sourced_transfers": {
+            "object": "list",
+            "total_count": 0,
+            "has_more": False,
+            "url": "/v1/transfers?source_transaction=ch_16g5h62eZvKYlo2CMRXkSqa0",
+            "data": []
+        }
+    },
+    "bank_account": {
+        "object": "bank_account",
+        "id": "ba_17O4Tz2eZvKYlo2CMYsxroV5",
+        "last4": "6789",
+        "country": "US",
+        "currency": "usd",
+        "status": "new",
+        "fingerprint": "1JWtPxqbdX5Gamtc",
+        "routing_number": "110000000",
+        "bank_name": None
+    },
+    "destination": "ba_17O4Tz2eZvKYlo2CMYsxroV5",
+    "description": "Transfer+for+test@example.com",
+    "failure_message": None,
+    "failure_code": None,
+    "amount_reversed": 0,
+    "metadata": {
+        "foo": "bar"
+    },
+    "statement_descriptor": None,
+    "recipient": "rp_17O4U42eZvKYlo2CLk4upfDE",
+    "source_transaction": None,
+    "application_fee": None
 }
 
 FAKE_RECIPIENT = {
@@ -936,11 +1111,25 @@ FAKE_EVENT_CHARGE_SUCCEEDED = {
     "livemode": False,
     "type": "charge.succeeded",
     "data": {
-        "object": FAKE_CHARGE
+        "object": deepcopy(FAKE_CHARGE)
     },
     "object": "event",
     "pending_webhooks": 0,
     "request": "req_6lsB7hkicwhaDj",
+    "api_version": "2015-07-28"
+}
+
+FAKE_EVENT_TRANSFER_CREATED = {
+    "id": "evt_16igNU2eZvKYlo2CYyMkYvet",
+    "created": 1441696732,
+    "livemode": False,
+    "type": "transfer.created",
+    "data": {
+        "object": deepcopy(FAKE_TRANSFER)
+    },
+    "object": "event",
+    "pending_webhooks": 0,
+    "request": "req_6wZW9MskhYU15Y",
     "api_version": "2015-07-28"
 }
 

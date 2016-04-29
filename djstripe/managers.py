@@ -31,81 +31,42 @@ class StripeObjectManager(models.Manager):
         return self.get(stripe_id=data[field_name])
 
 
-class CustomerManager(models.Manager):
-    pass
+class SubscriptionManager(models.Manager):
 
-# TODO: Move to SubscriptionManager
+    def started_during(self, year, month):
+        return self.exclude(status="trialing").filter(start__year=year, start__month=month)
 
-#     def started_during(self, year, month):
-#         return self.exclude(
-#             subscription__status="trialing"
-#         ).filter(
-#             subscription__start__year=year,
-#             subscription__start__month=month
-#         )
-#
-#     def active(self):
-#         return self.filter(subscription__status="active")
-#
-#     def canceled(self):
-#         return self.filter(
-#             subscription__status="canceled"
-#         )
-#
-#     def canceled_during(self, year, month):
-#         return self.canceled().filter(
-#             subscription__canceled_at__year=year,
-#             subscription__canceled_at__month=month,
-#         )
-#
-#     def started_plan_summary_for(self, year, month):
-#         return self.started_during(year, month).values(
-#             "subscription__plan"
-#         ).order_by().annotate(
-#             count=models.Count("subscription__plan")
-#         )
-#
-#     def active_plan_summary(self):
-#         return self.active().values(
-#             "subscription__plan"
-#         ).order_by().annotate(
-#             count=models.Count("subscription__plan")
-#         )
-#
-#     def canceled_plan_summary_for(self, year, month):
-#         return self.canceled_during(year, month).values(
-#             "subscription__plan"
-#         ).order_by().annotate(
-#             count=models.Count("subscription__plan")
-#         )
-#
-#     def churn(self):
-#         canceled = self.canceled().count()
-#         active = self.active().count()
-#         return decimal.Decimal(str(canceled)) / decimal.Decimal(str(active))
+    def active(self):
+        return self.filter(status="active")
+
+    def canceled(self):
+        return self.filter(status="canceled")
+
+    def canceled_during(self, year, month):
+        return self.canceled().filter(canceled_at__year=year, canceled_at__month=month)
+
+    def started_plan_summary_for(self, year, month):
+        return self.started_during(year, month).values("plan").order_by().annotate(count=models.Count("plan"))
+
+    def active_plan_summary(self):
+        return self.active().values("plan").order_by().annotate(count=models.Count("plan"))
+
+    def canceled_plan_summary_for(self, year, month):
+        return self.canceled_during(year, month).values("plan").order_by().annotate(count=models.Count("plan"))
+
+    def churn(self):
+        canceled = self.canceled().count()
+        active = self.active().count()
+        return decimal.Decimal(str(canceled)) / decimal.Decimal(str(active))
 
 
 class TransferManager(models.Manager):
 
     def during(self, year, month):
-        return self.filter(
-            date__year=year,
-            date__month=month
-        )
+        return self.filter(date__year=year, date__month=month)
 
     def paid_totals_for(self, year, month):
-        return self.during(year, month).filter(
-            status="paid"
-        ).aggregate(
-            total_gross=models.Sum("charge_gross"),
-            total_net=models.Sum("net"),
-            total_charge_fees=models.Sum("charge_fees"),
-            total_adjustment_fees=models.Sum("adjustment_fees"),
-            total_refund_gross=models.Sum("refund_gross"),
-            total_refund_fees=models.Sum("refund_fees"),
-            total_validation_fees=models.Sum("validation_fees"),
-            total_amount=models.Sum("amount")
-        )
+        return self.during(year, month).filter(status="paid").aggregate(total_amount=models.Sum("amount"))
 
 
 class ChargeManager(models.Manager):

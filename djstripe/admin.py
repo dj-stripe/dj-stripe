@@ -232,7 +232,6 @@ admin.site.register(
 
 admin.site.register(
     Transfer,
-    raw_id_fields=["event"],
     readonly_fields=('stripe_timestamp',),
     list_display=[
         "stripe_id",
@@ -244,7 +243,6 @@ admin.site.register(
     ],
     search_fields=[
         "stripe_id",
-        "event__stripe_id"
     ]
 )
 

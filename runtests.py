@@ -2,11 +2,11 @@ from argparse import ArgumentParser
 import os
 import sys
 
+from coverage import Coverage
 import django
 from django.conf import settings
-
-from coverage import Coverage
 from termcolor import colored
+
 
 TESTS_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 TESTS_THRESHOLD = 100
@@ -169,7 +169,7 @@ def run_test_suite(args):
     from django_nose import NoseTestSuiteRunner
 
     test_runner = NoseTestSuiteRunner(verbosity=1)
-    failures = test_runner.run_tests(["."])
+    failures = test_runner.run_tests(["./tests/test_webhooks.py", "./tests/test_plan.py"])
 
     if failures:
         sys.exit(failures)

@@ -1,3 +1,4 @@
+from copy import deepcopy
 import datetime
 import decimal
 
@@ -5,14 +6,11 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 
-from djstripe.models import Event, Transfer, Customer, Subscription, Charge, Plan
-from tests.test_transfer import TRANSFER_CREATED_TEST_DATA, TRANSFER_CREATED_TEST_DATA2
-from tests import FAKE_PLAN, FAKE_PLAN_II
-from unittest.case import skip
+from djstripe.models import Transfer, Customer, Subscription, Charge, Plan
+from tests import FAKE_PLAN, FAKE_PLAN_II, FAKE_TRANSFER, FAKE_TRANSFER_II, FAKE_TRANSFER_III
 
 
-@skip
-class CustomerManagerTest(TestCase):
+class SubscriptionManagerTest(TestCase):
 
     def setUp(self):
         # create customers and current subscription records
@@ -71,99 +69,62 @@ class CustomerManagerTest(TestCase):
             quantity=1
         )
 
-#     def test_started_during_no_records(self):
-#         self.assertEquals(Customer.objects.started_during(2013, 4).count(), 0)
-#
-#     def test_started_during_has_records(self):
-#         self.assertEquals(
-#             Customer.objects.started_during(2013, 1).count(),
-#             12
-#         )
-#
-#     def test_canceled_during(self):
-#         self.assertEquals(
-#             Customer.objects.canceled_during(2013, 4).count(),
-#             1
-#         )
-#
-#     def test_canceled_all(self):
-#         self.assertEquals(
-#             Customer.objects.canceled().count(),
-#             1
-#         )
-#
-#     def test_active_all(self):
-#         self.assertEquals(
-#             Customer.objects.active().count(),
-#             11
-#         )
-#
-#     def test_started_plan_summary(self):
-#         for plan in Customer.objects.started_plan_summary_for(2013, 1):
-#             if plan["subscription__plan"] == self.plan:
-#                 self.assertEquals(plan["count"], 11)
-#             if plan["subscription__plan"] == self.plan2:
-#                 self.assertEquals(plan["count"], 1)
-#
-#     def test_active_plan_summary(self):
-#         for plan in Customer.objects.active_plan_summary():
-#             if plan["subscription__plan"] == self.plan:
-#                 self.assertEquals(plan["count"], 10)
-#             if plan["subscription__plan"] == self.plan2:
-#                 self.assertEquals(plan["count"], 1)
-#
-#     def test_canceled_plan_summary(self):
-#         for plan in Customer.objects.canceled_plan_summary_for(2013, 1):
-#             if plan["subscription__plan"] == self.plan:
-#                 self.assertEquals(plan["count"], 1)
-#             if plan["subscription__plan"] == self.plan2:
-#                 self.assertEquals(plan["count"], 0)
-#
-#     def test_churn(self):
-#         self.assertEquals(
-#             Customer.objects.churn(),
-#             decimal.Decimal("1") / decimal.Decimal("11")
-#         )
+    def test_started_during_no_records(self):
+        self.assertEquals(Subscription.objects.started_during(2013, 4).count(), 0)
+
+    def test_started_during_has_records(self):
+        self.assertEquals(Subscription.objects.started_during(2013, 1).count(), 12)
+
+    def test_canceled_during(self):
+        self.assertEquals(Subscription.objects.canceled_during(2013, 4).count(), 1)
+
+    def test_canceled_all(self):
+        self.assertEquals(
+            Subscription.objects.canceled().count(), 1)
+
+    def test_active_all(self):
+        self.assertEquals(Subscription.objects.active().count(), 11)
+
+    def test_started_plan_summary(self):
+        for plan in Subscription.objects.started_plan_summary_for(2013, 1):
+            if plan["plan"] == self.plan:
+                self.assertEquals(plan["count"], 11)
+            if plan["plan"] == self.plan2:
+                self.assertEquals(plan["count"], 1)
+
+    def test_active_plan_summary(self):
+        for plan in Subscription.objects.active_plan_summary():
+            if plan["plan"] == self.plan:
+                self.assertEquals(plan["count"], 10)
+            if plan["plan"] == self.plan2:
+                self.assertEquals(plan["count"], 1)
+
+    def test_canceled_plan_summary(self):
+        for plan in Subscription.objects.canceled_plan_summary_for(2013, 1):
+            if plan["plan"] == self.plan:
+                self.assertEquals(plan["count"], 1)
+            if plan["plan"] == self.plan2:
+                self.assertEquals(plan["count"], 0)
+
+    def test_churn(self):
+        self.assertEquals(
+            Subscription.objects.churn(),
+            decimal.Decimal("1") / decimal.Decimal("11")
+        )
 
 
 class TransferManagerTest(TestCase):
 
     def test_transfer_summary(self):
-        event = Event.objects.create(
-            stripe_id=TRANSFER_CREATED_TEST_DATA["id"],
-            type="transfer.created",
-            livemode=True,
-            webhook_message=TRANSFER_CREATED_TEST_DATA,
-            valid=True
-        )
-        event.process()
-        event = Event.objects.create(
-            stripe_id=TRANSFER_CREATED_TEST_DATA2["id"],
-            type="transfer.created",
-            livemode=True,
-            webhook_message=TRANSFER_CREATED_TEST_DATA2,
-            valid=True
-        )
-        event.process()
-        self.assertEquals(Transfer.objects.during(2012, 9).count(), 2)
-        totals = Transfer.objects.paid_totals_for(2012, 9)
+        Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER))
+        Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER_II))
+        Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER_III))
+
+        self.assertEquals(Transfer.objects.during(2015, 8).count(), 2)
+
+        totals = Transfer.objects.paid_totals_for(2015, 12)
         self.assertEquals(
-            totals["total_amount"], decimal.Decimal("19.10")
-        )
-        self.assertEquals(
-            totals["total_net"], decimal.Decimal("19.10")
-        )
-        self.assertEquals(
-            totals["total_charge_fees"], decimal.Decimal("0.90")
-        )
-        self.assertEquals(
-            totals["total_adjustment_fees"], decimal.Decimal("0")
-        )
-        self.assertEquals(
-            totals["total_refund_fees"], decimal.Decimal("0")
-        )
-        self.assertEquals(
-            totals["total_validation_fees"], decimal.Decimal("0")
+            totals["total_amount"], decimal.Decimal("190.10")
         )
 
 

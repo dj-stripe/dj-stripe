@@ -17,8 +17,8 @@ dj-stripe functionality.
 """
 
 
-import decimal
 from copy import deepcopy
+import decimal
 
 from django.conf import settings
 from django.db import models
@@ -26,6 +26,10 @@ from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from model_utils.models import TimeStampedModel
 from polymorphic.models import PolymorphicModel
+import stripe
+
+from djstripe.fields import StripeDateTimeField, StripeJSONField, \
+    StripeBooleanField, StripeTextField
 
 from .context_managers import stripe_temporary_api_version
 from .exceptions import StripeObjectManipulationException
@@ -34,7 +38,7 @@ from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, Str
                      StripeBooleanField, StripeNullBooleanField, StripeJSONField)
 from .managers import StripeObjectManager
 
-import stripe
+
 stripe.api_version = getattr(settings, "STRIPE_API_VERSION", "2013-02-11")
 
 
@@ -865,7 +869,7 @@ class StripePlan(StripeObject):
     INTERVAL_TYPE_CHOICES = [(interval_type, interval_type.title()) for interval_type in INTERVAL_TYPES]
 
     amount = StripeCurrencyField(help_text="Amount to be charged on the interval specified.")
-    currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code representing the currency in which the charge was made.")
+    currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code")
     interval = StripeCharField(max_length=5, choices=INTERVAL_TYPE_CHOICES, help_text="The frequency with which a subscription should be billed.")
     interval_count = StripeIntegerField(null=True, help_text="The number of intervals (specified in the interval property) between each subscription billing.")
     name = StripeTextField(help_text="Name of the plan, to be displayed on invoices and in the web interface.")
@@ -927,41 +931,83 @@ class StripeInvoiceItem(StripeObject):
 
 
 class StripeTransfer(StripeObject):
+    """
+    When Stripe sends you money or you initiate a transfer to a bank account, debit card, or connected Stripe account, a transfer object will be created.
+    (Source: https://stripe.com/docs/api/python#transfers)
+
+    # = Mapping the values of this field isn't currently on our roadmap.
+        Please use the stripe dashboard to check the value of this field instead.
+
+    Fields not implemented:
+    * object: Unnecessary. Just check the model name.
+
+    TODO: Link destination to Card, Account, or Bank Account Models
+
+    Stripe API_VERSION: model fields and methods audited to 2015-07-28 - @kavdev
+    """
 
     class Meta:
         abstract = True
 
     stripe_api_name = "Transfer"
+    expand_fields = ["balance_transaction"]
 
-    amount = StripeCurrencyField()
-    status = StripeCharField(max_length=25)
-    date = StripeDateTimeField(help_text="Date the transfer is scheduled to arrive at destination")
+    STATUS_PAID = "paid"
+    STATUS_PENDING = "pending"
+    STATUS_IN_TRANSIT = "in_transit"
+    STATUS_CANCELLED = "canceled"
+    STATUS_FAILED = "failed"
 
-    # The following fields are nested in the "summary" object
-    adjustment_count = StripeIntegerField(nested_name="summary")
-    adjustment_fees = StripeCurrencyField(nested_name="summary")
-    adjustment_gross = StripeCurrencyField(nested_name="summary")
-    charge_count = StripeIntegerField(nested_name="summary")
-    charge_fees = StripeCurrencyField(nested_name="summary")
-    charge_gross = StripeCurrencyField(nested_name="summary")
-    collected_fee_count = StripeIntegerField(nested_name="summary")
-    collected_fee_gross = StripeCurrencyField(nested_name="summary")
-    net = StripeCurrencyField(nested_name="summary")
-    refund_count = StripeIntegerField(nested_name="summary")
-    refund_fees = StripeCurrencyField(nested_name="summary")
-    refund_gross = StripeCurrencyField(nested_name="summary")
-    validation_count = StripeIntegerField(nested_name="summary")
-    validation_fees = StripeCurrencyField(nested_name="summary")
+    STATUSES = [STATUS_PAID, STATUS_PENDING, STATUS_IN_TRANSIT, STATUS_CANCELLED, STATUS_FAILED]
+    STATUS_CHOICES = [(status, status.replace("_", " ").title()) for status in STATUSES]
+
+    DESTINATION_TYPES = ["card", "bank_account", "stripe_account"]
+    DESITNATION_TYPE_CHOICES = [(destination_type, destination_type.replace("_", " ").title()) for destination_type in DESTINATION_TYPES]
+
+    FAILURE_CODES = ["insufficient_funds", "account_closed", "no_account", "invalid_account_number",
+                     "debit_not_authorized", "bank_ownership_changed", "account_frozen", "could_not_process",
+                     "bank_account_restricted", "invalid_currency"]
+    FAILURE_CODE_CHOICES = [(failure_code, failure_code.replace("_", " ").title()) for failure_code in FAILURE_CODES]
+
+    amount = StripeCurrencyField(help_text="The amount transferred")
+    amount_reversed = StripeCurrencyField(stripe_required=False, help_text="The amount reversed (can be less than the amount attribute on the transfer if a partial reversal was issued).")
+    currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code")
+    date = StripeDateTimeField(help_text="Date the transfer is scheduled to arrive in the bank. This doesn’t factor in delays like weekends or bank holidays.")
+    reversals = StripeJSONField(help_text="A list of reversals that have been applied to the transfer.")
+    reversed = StripeBooleanField(default=False, help_text="Whether or not the transfer has been fully reversed. If the transfer is only partially reversed, this attribute will still be false.")
+    status = StripeCharField(max_length=10, choices=STATUS_CHOICES, help_text="The current status of the transfer. A transfer will be pending until it is submitted to the bank, at which point it becomes in_transit. It will then change to paid if the transaction goes through. If it does not go through successfully, its status will change to failed or canceled.")
+    destination_type = StripeCharField(stripe_name="type", max_length=14, choices=DESITNATION_TYPE_CHOICES, help_text="The type of the transfer destination.")
+    application_fee = StripeTextField(null=True, help_text="Might be the ID of an application fee object. The Stripe API docs don't provide any information.")
+    destination = StripeIdField(help_text="ID of the bank account, card, or Stripe account the transfer was sent to.")
+    destination_payment = StripeIdField(null=True, help_text="If the destination is a Stripe account, this will be the ID of the payment that the destination account received for the transfer.")
+    failure_code = StripeCharField(null=True, max_length=23, choices=FAILURE_CODE_CHOICES, help_text="Error code explaining reason for transfer failure if available. See https://stripe.com/docs/api/python#transfer_failures.")
+    failure_message = StripeTextField(null=True, help_text="Message to user further explaining reason for transfer failure if available.")
+    source_transaction = StripeIdField(null=True, help_text="ID of the charge (or other transaction) that was used to fund the transfer. If null, the transfer was funded from the available balance.")
+    statement_descriptor = StripeCharField(max_length=22, null=True, help_text="An arbitrary string to be displayed on your customer’s credit card statement. The statement description may not include <>\"' characters, and will appear on your customer’s statement in capital letters. Non-ASCII characters are automatically stripped. While most banks display this information consistently, some may display it incorrectly or not at all.")
+
+    fee_details = StripeJSONField(null=True, nested_name="balance_transaction")
+
+    # DEPRECATED Fields
+    adjustment_count = StripeIntegerField(deprecated=True)
+    adjustment_fees = StripeCurrencyField(deprecated=True)
+    adjustment_gross = StripeCurrencyField(deprecated=True)
+    charge_count = StripeIntegerField(deprecated=True)
+    charge_fees = StripeCurrencyField(deprecated=True)
+    charge_gross = StripeCurrencyField(deprecated=True)
+    collected_fee_count = StripeIntegerField(deprecated=True)
+    collected_fee_gross = StripeCurrencyField(deprecated=True)
+    net = StripeCurrencyField(deprecated=True)
+    refund_count = StripeIntegerField(deprecated=True)
+    refund_fees = StripeCurrencyField(deprecated=True)
+    refund_gross = StripeCurrencyField(deprecated=True)
+    validation_count = StripeIntegerField(deprecated=True)
+    validation_fees = StripeCurrencyField(deprecated=True)
 
     def str_parts(self):
         return [
             "amount={amount}".format(amount=self.amount),
             "status={status}".format(status=self.status),
         ] + super(StripeTransfer, self).str_parts()
-
-    def update_status(self):
-        self.status = self.api_retrieve().status
-        self.save()
 
 
 class StripeAccount(StripeObject):

@@ -9,8 +9,8 @@ Implement webhook event handlers for all the models that need to respond to webh
 
 """
 
-from . import webhooks
 from . import settings as djstripe_settings
+from . import webhooks
 from .models import Charge, Customer, Card, Subscription, Plan, Transfer, Invoice
 
 
@@ -90,7 +90,7 @@ def invoice_webhook_handler(event, event_data, event_type, event_subtype):
 # ---------------------------
 @webhooks.handler(['plan'])
 def plan_webhook_handler(event, event_data, event_type, event_subtype):
-    Plan.sync_from_stripe_data(event_data["object"], send_receipt=djstripe_settings.SEND_INVOICE_RECEIPT_EMAILS)
+    Plan.sync_from_stripe_data(event_data["object"])
 
 
 # ---------------------------
@@ -98,5 +98,4 @@ def plan_webhook_handler(event, event_data, event_type, event_subtype):
 # ---------------------------
 @webhooks.handler(["transfer"])
 def transfer_webhook_handler(event, event_data, event_type, event_subtype):
-    # TODO: update when transfer is fixed
-    Transfer.process_transfer(event, event_data["object"])
+    Transfer.sync_from_stripe_data(event_data["object"])

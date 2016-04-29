@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 import datetime
 import decimal
 import json
-import traceback as exception_traceback
 import logging
 
 from django.conf import settings
@@ -18,10 +17,12 @@ from django.utils.encoding import python_2_unicode_compatible, smart_text
 from model_utils.models import TimeStampedModel
 from stripe.error import StripeError, InvalidRequestError
 
+import traceback as exception_traceback
+
 from . import settings as djstripe_settings
 from . import webhooks
 from .exceptions import SubscriptionCancellationFailure, SubscriptionUpdateFailure, MultipleSubscriptionException
-from .managers import CustomerManager, ChargeManager, TransferManager
+from .managers import SubscriptionManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS
 from .signals import webhook_processing_error
 from .stripe_objects import (StripeSource, StripeCharge, StripeCustomer, StripeCard, StripeSubscription,
@@ -114,8 +115,6 @@ class Customer(StripeCustomer):
 
     subscriber = models.OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
     date_purged = models.DateTimeField(null=True, editable=False)
-
-    objects = CustomerManager()
 
     def str_parts(self):
         return [smart_text(self.subscriber), "email={email}".format(email=self.subscriber.email)] + super(Customer, self).str_parts()
@@ -211,6 +210,16 @@ class Customer(StripeCustomer):
                 return any([subscription.is_valid() for subscription in self.subscriptions.filter(plan__id=plan)])
         except Subscription.DoesNotExist:
             return False
+
+    def has_any_active_subscription(self):
+        """
+        Checks to see if this customer has an active subscription to any plan.
+
+        :returns: True if there exists an active subscription, False otherwise.
+        :throws: TypeError if ``plan`` is None and more than one active subscription exists for this customer.
+        """
+
+        return len(self._get_valid_subscriptions()) != 0
 
     @property
     def subscription(self):
@@ -400,6 +409,8 @@ class Subscription(StripeSubscription):
     customer = models.ForeignKey("Customer", related_name="subscriptions", help_text="The customer associated with this subscription.")
     plan = models.ForeignKey("Plan", related_name="subscriptions", help_text="The plan associated with this subscription.")
 
+    objects = SubscriptionManager()
+
     def is_period_current(self):
         return self.current_period_end > timezone.now()
 
@@ -579,47 +590,7 @@ class InvoiceItem(TimeStampedModel):
 class Transfer(StripeTransfer):
     # account = models.ForeignKey("Account", related_name="transfers")
 
-    # DEPRECATED. Why do we need this?
-    event = models.ForeignKey("Event", null=True, related_name="transfers")
-
     objects = TransferManager()
-
-    @classmethod
-    def process_transfer(cls, event, stripe_object):
-        # TODO: Convert to get_or_create
-        try:
-            transfer = cls.stripe_objects.get_by_json(stripe_object)
-            created = False
-        except cls.DoesNotExist:
-            transfer = cls._create_from_stripe_object(stripe_object)
-            created = True
-
-        transfer.event = event
-
-        if created:
-            transfer.save()
-            for fee in stripe_object["summary"]["charge_fee_details"]:
-                transfer.charge_fee_details.create(
-                    amount=fee["amount"] / decimal.Decimal("100"),
-                    application=fee.get("application", ""),
-                    description=fee.get("description", ""),
-                    kind=fee["type"]
-                )
-        else:
-            transfer.status = stripe_object["status"]
-            transfer.save()
-
-        if event and event.type == "transfer.updated":
-            transfer.update_status()
-            transfer.save()
-
-
-class TransferChargeFee(TimeStampedModel):
-    transfer = models.ForeignKey(Transfer, related_name="charge_fee_details")
-    amount = models.DecimalField(decimal_places=2, max_digits=7)
-    application = models.TextField(null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
-    kind = models.CharField(max_length=150)
 
 
 class Account(StripeAccount):
@@ -628,7 +599,6 @@ class Account(StripeAccount):
 
 @python_2_unicode_compatible
 class EventProcessingException(TimeStampedModel):
-
     event = models.ForeignKey("Event", null=True)
     data = models.TextField()
     message = models.CharField(max_length=500)
@@ -676,14 +646,8 @@ class Event(StripeEvent):
         This function makes an API call to Stripe to re-download the Event data. It then
         marks this record's valid flag to True or False.
         """
-        event = self.api_retrieve()
-        validated_message = json.loads(
-            json.dumps(
-                event.to_dict(),
-                sort_keys=True,
-            )
-        )
-        self.valid = self.webhook_message == validated_message
+
+        self.valid = self.webhook_message == self.api_retrieve()["data"]
         self.save()
 
     def process(self):
@@ -694,6 +658,7 @@ class Event(StripeEvent):
         See event handlers registered in djstripe.event_handlers module (or handlers registered in djstripe plugins or
         contrib packages)
         """
+
         if self.valid and not self.processed:
             event_type, event_subtype = self.type.split(".", 1)
 
@@ -702,7 +667,7 @@ class Event(StripeEvent):
                 # except that some webhook handlers can have side effects outside of our local database, meaning that
                 # even if we rollback on our database, some updates may have been sent to Stripe, etc in resposne to
                 # webhooks...
-                webhooks.call_handlers(self, self.message["data"], event_type, event_subtype)
+                webhooks.call_handlers(self, self.message, event_type, event_subtype)
                 self.send_signal()
                 self.processed = True
                 self.save()
@@ -724,6 +689,15 @@ class Event(StripeEvent):
         signal = WEBHOOK_SIGNALS.get(self.type)
         if signal:
             return signal.send(sender=Event, event=self)
+
+
+# DEPRECATED
+class TransferChargeFee(TimeStampedModel):
+    transfer = models.ForeignKey(Transfer, related_name="charge_fee_details")
+    amount = models.DecimalField(decimal_places=2, max_digits=7)
+    application = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    kind = models.CharField(max_length=150)
 
 
 # Much like registering signal handlers. We import this module so that its registrations get picked up
