@@ -43,7 +43,7 @@ class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
 
     def get_context_data(self, *args, **kwargs):
         context = super(AccountView, self).get_context_data(**kwargs)
-        customer, created = Customer.get_or_create(
+        customer, _created = Customer.get_or_create(
             subscriber=subscriber_request_callback(self.request))
         context['customer'] = customer
         try:
@@ -65,7 +65,7 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
     def get_object(self):
         if hasattr(self, "customer"):
             return self.customer
-        self.customer, created = Customer.get_or_create(
+        self.customer, _created = Customer.get_or_create(
             subscriber=subscriber_request_callback(self.request))
         return self.customer
 
@@ -108,7 +108,7 @@ class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
     select_related = ["invoice"]
 
     def get_object(self):
-        customer, created = Customer.get_or_create(
+        customer, _created = Customer.get_or_create(
             subscriber=subscriber_request_callback(self.request))
         return customer
 
@@ -142,7 +142,7 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
         if plan_slug not in PAYMENT_PLANS:
             return redirect("djstripe:subscribe")
 
-        customer, created = Customer.get_or_create(
+        customer, _created = Customer.get_or_create(
             subscriber=subscriber_request_callback(self.request))
 
         if hasattr(customer, "subscription") and customer.subscription.plan == plan_slug and customer.subscription.status != Subscription.STATUS_CANCELLED:
@@ -166,7 +166,7 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
         form = self.get_form(form_class)
         if form.is_valid():
             try:
-                customer, created = Customer.get_or_create(
+                customer, _created = Customer.get_or_create(
                     subscriber=subscriber_request_callback(self.request))
                 customer.add_card(self.request.POST.get("stripe_token"))
                 customer.subscribe(form.cleaned_data["plan"])
@@ -234,7 +234,7 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
     success_url = reverse_lazy("djstripe:account")
 
     def form_valid(self, form):
-        customer, created = Customer.get_or_create(
+        customer, _created = Customer.get_or_create(
             subscriber=subscriber_request_callback(self.request))
         subscription = customer.cancel_subscription(
             at_period_end=CANCELLATION_AT_PERIOD_END)
