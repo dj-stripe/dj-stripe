@@ -1,44 +1,42 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+
 import decimal
 import json
-
-from django.contrib.auth import logout as auth_logout
-from django.contrib import messages
-from django.core.urlresolvers import reverse_lazy, reverse
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
-from django.views.generic import DetailView
-from django.views.generic import FormView
-from django.views.generic import TemplateView
-from django.views.generic import View
-from django.utils.encoding import smart_str
 
 from braces.views import CsrfExemptMixin
 from braces.views import FormValidMessageMixin
 from braces.views import LoginRequiredMixin
 from braces.views import SelectRelatedMixin
+from django.contrib import messages
+from django.contrib.auth import logout as auth_logout
+from django.core.urlresolvers import reverse_lazy, reverse
+from django.http import HttpResponse
+from django.shortcuts import render, redirect
+from django.utils.encoding import smart_str
+from django.views.generic import DetailView
+from django.views.generic import FormView
+from django.views.generic import TemplateView
+from django.views.generic import View
 from stripe.error import StripeError
 
 from .forms import PlanForm, CancelSubscriptionForm
 from .mixins import PaymentsContextMixin, SubscriptionMixin
-from .models import Subscription
 from .models import Customer
 from .models import Event
 from .models import EventProcessingException
-from .settings import PLAN_LIST
-from .settings import PAYMENT_PLANS
-from .settings import subscriber_request_callback
-from .settings import PRORATION_POLICY_FOR_UPGRADES
+from .models import Subscription
 from .settings import CANCELLATION_AT_PERIOD_END
+from .settings import PAYMENT_PLANS
+from .settings import PLAN_LIST
+from .settings import PRORATION_POLICY_FOR_UPGRADES
+from .settings import subscriber_request_callback
 from .sync import sync_subscriber
 
 
 # ============================================================================ #
 #                                 Account Views                                #
 # ============================================================================ #
-
-
 class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
     """Shows account details including customer and subscription details."""
     template_name = "djstripe/account.html"
@@ -273,7 +271,9 @@ class WebHook(CsrfExemptMixin, View):
                 traceback=""
             )
         else:
-            event = Event._create_from_stripe_object(data)
+            # Why are we re-retrieving the same data? To ensure the event data is in our API version. #116
+            event_data = Event(stripe_id=data["id"]).api_retrieve()
+            event = Event._create_from_stripe_object(event_data)
             event.validate()
             event.process()
         return HttpResponse()
