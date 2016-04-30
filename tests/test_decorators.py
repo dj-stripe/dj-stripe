@@ -1,3 +1,11 @@
+"""
+.. module:: dj-stripe.tests.test_decorators
+   :synopsis: dj-stripe Decorator Tests.
+
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
+
+"""
+
 from copy import deepcopy
 
 from django.contrib.auth import get_user_model

@@ -1,5 +1,13 @@
-from django.db.models.base import ModelBase
+"""
+.. module:: dj-stripe.tests.test_settings
+   :synopsis: dj-stripe Settings Tests.
+
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
+
+"""
+
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models.base import ModelBase
 from django.test import TestCase
 from django.test.utils import override_settings
 

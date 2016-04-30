@@ -1,3 +1,11 @@
+"""
+.. module:: dj-stripe.tests.test_middleware
+   :synopsis: dj-stripe Middleware Tests.
+
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
+
+"""
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase

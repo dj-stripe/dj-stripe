@@ -1,3 +1,11 @@
+"""
+.. module:: dj-stripe.tests.test_email
+   :synopsis: dj-stripe Email Tests.
+
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
+
+"""
+
 from copy import deepcopy
 import decimal
 

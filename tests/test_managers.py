@@ -1,3 +1,11 @@
+"""
+.. module:: dj-stripe.tests.test_managers
+   :synopsis: dj-stripe Model Manager Tests.
+
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
+
+"""
+
 from copy import deepcopy
 import datetime
 import decimal

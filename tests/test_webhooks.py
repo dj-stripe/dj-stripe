@@ -1,3 +1,11 @@
+"""
+.. module:: dj-stripe.tests.test_webhooks
+   :synopsis: dj-stripe Webhook Tests.
+
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
+
+"""
+
 from copy import deepcopy
 import decimal
 import json

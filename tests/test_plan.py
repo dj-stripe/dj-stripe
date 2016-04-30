@@ -1,3 +1,11 @@
+"""
+.. module:: dj-stripe.tests.test_plan
+   :synopsis: dj-stripe Plan Model Tests.
+
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
+
+"""
+
 from copy import deepcopy
 
 from django.conf import settings

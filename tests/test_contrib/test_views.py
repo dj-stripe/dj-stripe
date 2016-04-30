@@ -3,6 +3,7 @@
     :synopsis: dj-stripe Rest views for Subscription Tests.
 
 .. moduleauthor:: Philippe Luickx (@philippeluickx)
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
 
 """
 
@@ -11,16 +12,15 @@ from __future__ import unicode_literals
 from decimal import Decimal
 from unittest.case import skip
 
-from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
-
+from django.utils import timezone
 from mock import patch, PropertyMock
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from djstripe.models import Subscription, Customer
 from djstripe import settings as djstripe_settings
+from djstripe.models import Subscription, Customer
 
 
 class RestSubscriptionTest(APITestCase):

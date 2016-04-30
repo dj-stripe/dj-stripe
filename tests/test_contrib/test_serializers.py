@@ -3,6 +3,7 @@
     :synopsis: dj-stripe Serializer Tests.
 
 .. moduleauthor:: Philippe Luickx (@philippeluickx)
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
 
 """
 

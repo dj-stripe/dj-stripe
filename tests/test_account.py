@@ -1,6 +1,6 @@
 """
 .. module:: dj-stripe.tests.test_account
-   :synopsis: dj-stripe Charge Model Tests.
+   :synopsis: dj-stripe Account Tests.
 
 .. moduleauthor:: Alex Kavanaugh (@kavdev)
 
