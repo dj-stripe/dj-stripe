@@ -38,7 +38,7 @@ class SubscriptionRestView(APIView):
             )
 
             serializer = SubscriptionSerializer(
-                customer._get_valid_subscriptions()
+                customer.subscription
             )
             return Response(serializer.data)
         except:

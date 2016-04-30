@@ -9,6 +9,7 @@
 
 from __future__ import unicode_literals
 
+from copy import deepcopy
 from decimal import Decimal
 from unittest.case import skip
 
@@ -20,22 +21,20 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from djstripe import settings as djstripe_settings
-from djstripe.models import Subscription, Customer
+from djstripe.models import Subscription, Customer, Plan
+from tests import FAKE_SUBSCRIPTION, FAKE_PLAN
 
 
 class RestSubscriptionTest(APITestCase):
     """
     Test the REST api for subscriptions.
     """
+
     def setUp(self):
         self.url = reverse("rest_djstripe:subscription")
-        self.user = get_user_model().objects.create_user(
-            username="testuser",
-            email="test@example.com",
-            password="123"
-        )
+        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com", password="password")
 
-        self.assertTrue(self.client.login(username="testuser", password="123"))
+        self.assertTrue(self.client.login(username="pydanny", password="password"))
 
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     @patch("djstripe.models.Customer.add_card", autospec=True)
@@ -57,8 +56,7 @@ class RestSubscriptionTest(APITestCase):
     @patch("djstripe.models.Customer.add_card", autospec=True)
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
     def test_create_subscription_exception(self, stripe_customer_create_mock, add_card_mock, subscribe_mock):
-        e = Exception
-        subscribe_mock.side_effect = e
+        subscribe_mock.side_effect = Exception
         data = {
             "plan": "test0",
             "stripe_token": "cake",
@@ -70,50 +68,42 @@ class RestSubscriptionTest(APITestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-    @skip
     def test_get_subscription(self):
-        fake_customer = Customer.objects.create(
-            stripe_id="cus_xxx1234567890",
-            subscriber=self.user
-        )
-        Subscription.objects.create(
-            customer=fake_customer,
-            plan="test",
-            quantity=1,
-            start=timezone.now(),
-            amount=Decimal(25.00),
-            status="active",
-        )
+        Customer.objects.create(subscriber=self.user, stripe_id="cus_6lsBvm5rJ0zyHc")
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+        subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
 
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["plan"], "test")
-        self.assertEqual(response.data['status'], 'active')
-        self.assertEqual(response.data['cancel_at_period_end'], False)
+        self.assertEqual(response.data["plan"], plan.id)
+        self.assertEqual(response.data['status'], subscription.status)
+        self.assertEqual(response.data['cancel_at_period_end'], subscription.cancel_at_period_end)
 
-    @skip
-    # @patch("djstripe.models.Customer.cancel_subscription", return_value=Subscription(status=Subscription.STATUS_ACTIVE))
-    # @patch("djstripe.models.Customer._get_valid_subscriptions", new_callable=PropertyMock, return_value=[Subscription(plan="test", amount=Decimal(25.00), status="active")])
-    @patch("djstripe.models.Customer.subscribe", autospec=True)
-    def test_cancel_subscription(self, subscribe_mock, valid_subscriptions_mock, cancel_subscription_mock):
-        fake_customer = Customer.objects.create(
-            stripe_id="cus_xxx1234567890",
-            subscriber=self.user
-        )
-        Subscription.objects.create(
-            customer=fake_customer,
-            plan="test",
-            quantity=1,
-            start=timezone.now(),
-            amount=Decimal(25.00),
-            status="active",
-        )
+    @patch("djstripe.models.Customer.cancel_subscription")
+    def test_cancel_subscription(self, cancel_subscription_mock):
+        def _cancel_sub(*args, **kwargs):
+            subscription = Subscription.objects.first()
+            subscription.status = Subscription.STATUS_CANCELLED
+            subscription.canceled_at = timezone.now()
+            subscription.ended_at = timezone.now()
+            subscription.save()
+            return subscription
+
+        fake_cancelled_subscription = deepcopy(FAKE_SUBSCRIPTION)
+        Customer.objects.create(subscriber=self.user, stripe_id="cus_6lsBvm5rJ0zyHc")
+        subscription = Subscription.sync_from_stripe_data(fake_cancelled_subscription)
+
+        cancel_subscription_mock.side_effect = _cancel_sub
+
         self.assertEqual(1, Subscription.objects.count())
+        self.assertEqual(Subscription.objects.first().status, Subscription.STATUS_ACTIVE)
 
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
         # Cancelled means flagged as cancelled, so it should still be there
         self.assertEqual(1, Subscription.objects.count())
+        self.assertEqual(Subscription.objects.first().status, Subscription.STATUS_CANCELLED)
 
         cancel_subscription_mock.assert_called_once_with(
             at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END

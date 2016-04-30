@@ -210,8 +210,7 @@ def run_test_suite(args):
                                       "./tests/test_webhooks.py",
                                       "./tests/test_contrib/test_rest_framework_permissions.py",
                                       "./tests/test_contrib/test_serializers.py",
-#                                       "./tests/test_contrib/test_views.py"
-                                      ])
+                                      "./tests/test_contrib/test_views.py"])
 
     if failures:
         sys.exit(failures)
