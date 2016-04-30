@@ -1,16 +1,12 @@
-import datetime
-import decimal
-
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.test.utils import override_settings
-from django.utils import timezone
 
-from djstripe.models import Customer, Subscription
 from djstripe.middleware import SubscriptionPaymentMiddleware
-from tests import FAKE_SUBSCRIPTION
+from djstripe.models import Customer, Subscription
+from tests import FAKE_SUBSCRIPTION, FUTURE_DATE
 
 
 class MiddlewareURLTest(TestCase):
@@ -123,8 +119,7 @@ class MiddlewareLogicTest(TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_customer_has_active_subscription(self):
-        end_date = datetime.datetime(2100, 4, 30, tzinfo=timezone.utc)
-        self.subscription.current_period_end = end_date
+        self.subscription.current_period_end = FUTURE_DATE
         self.subscription.save()
 
         request = self.factory.get("/testapp_content/")

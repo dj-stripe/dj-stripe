@@ -8,38 +8,53 @@
 
 from __future__ import unicode_literals
 
+from copy import deepcopy
+from datetime import timedelta
 from decimal import Decimal
-
-from django.test import TestCase
-from django.utils import timezone
-from django.conf import settings
-
-from mock import patch, PropertyMock
-from djstripe.contrib.rest_framework.serializers import SubscriptionSerializer, CreateSubscriptionSerializer
-from djstripe.models import Subscription
 from unittest.case import skip
 
-@skip
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+from django.utils import timezone
+from mock import patch, PropertyMock
+
+from djstripe.contrib.rest_framework.serializers import SubscriptionSerializer, CreateSubscriptionSerializer
+from djstripe.models import Subscription, Plan, Customer
+from tests import FAKE_PLAN
+
+
 class SubscriptionSerializerTest(TestCase):
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username="patrick", email="patrick@gmail.com")
+        self.customer = Customer.objects.create(subscriber=self.user, stripe_id="cus_6lsBvm5rJ0zyHc")
+        self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
     def test_valid_serializer(self):
         now = timezone.now()
         serializer = SubscriptionSerializer(
             data={
-                'plan': 'test0',
+                'stripe_id': "sub_6lsC8pt7IcFpjA",
+                'customer': self.customer.id,
+                'plan': self.plan.id,
                 'quantity': 2,
                 'start': now,
                 'status': Subscription.STATUS_ACTIVE,
-                'amount': settings.DJSTRIPE_PLANS['test0']['price'],
+                'current_period_end': now + timedelta(days=5),
+                'current_period_start': now,
             }
         )
         self.assertTrue(serializer.is_valid())
         self.assertEqual(serializer.validated_data, {
-            'plan': 'test0',
+            'stripe_id': "sub_6lsC8pt7IcFpjA",
+            'customer': self.customer,
+            'plan': self.plan,
             'quantity': 2,
             'start': now,
-            'status': 'active',
-            'amount': Decimal('1000'),
+            'status': Subscription.STATUS_ACTIVE,
+            'current_period_end': now + timedelta(days=5),
+            'current_period_start': now,
         })
         self.assertEqual(serializer.errors, {})
 
@@ -47,37 +62,43 @@ class SubscriptionSerializerTest(TestCase):
         now = timezone.now()
         serializer = SubscriptionSerializer(
             data={
-                'plan': 'test0',
+                'stripe_id': "sub_6lsC8pt7IcFpjA",
+                'customer': self.customer.id,
+                'plan': self.plan.id,
                 'start': now,
                 'status': Subscription.STATUS_ACTIVE,
-                'amount': settings.DJSTRIPE_PLANS['test0']['price'],
+                'current_period_end': now + timedelta(days=5),
+                'current_period_start': now,
             }
         )
         self.assertFalse(serializer.is_valid())
         self.assertEqual(serializer.validated_data, {})
         self.assertEqual(serializer.errors, {'quantity': ['This field is required.']})
 
-@skip
+
 class CreateSubscriptionSerializerTest(TestCase):
+
+    def setUp(self):
+        self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
     @patch("stripe.Token.create", return_value=PropertyMock(id="token_test"))
     def test_valid_serializer(self, stripe_token_mock):
         token = stripe_token_mock(card={})
         serializer = CreateSubscriptionSerializer(
             data={
-                'plan': 'test0',
+                'plan': self.plan.stripe_id,
                 'stripe_token': token.id,
             }
         )
         self.assertTrue(serializer.is_valid())
-        self.assertEqual(serializer.validated_data['plan'], 'test0')
+        self.assertEqual(serializer.validated_data['plan'], str(self.plan.stripe_id))
         self.assertIn('stripe_token', serializer.validated_data)
         self.assertEqual(serializer.errors, {})
 
     def test_invalid_serializer(self):
         serializer = CreateSubscriptionSerializer(
             data={
-                'plan': 'test0',
+                'plan': self.plan.id,
             }
         )
         self.assertFalse(serializer.is_valid())

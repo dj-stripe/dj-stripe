@@ -1,5 +1,4 @@
-import datetime
-import decimal
+from copy import deepcopy
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
@@ -10,7 +9,7 @@ from django.test.client import RequestFactory
 
 from djstripe.decorators import subscription_payment_required
 from djstripe.models import Customer, Subscription
-from tests import FAKE_SUBSCRIPTION
+from tests import FAKE_SUBSCRIPTION, FUTURE_DATE
 
 
 class TestSubscriptionPaymentRequired(TestCase):
@@ -37,7 +36,7 @@ class TestSubscriptionPaymentRequired(TestCase):
 
     def test_user_unpaid(self):
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        Customer.objects.create(subscriber=user, stripe_id="cus_xxxxxxxxxxxx0")
+        Customer.objects.create(subscriber=user, stripe_id="cus_6lsBvm5rJ0zyHc")
 
         request = self.factory.get('/account/')
         request.user = user
@@ -48,7 +47,9 @@ class TestSubscriptionPaymentRequired(TestCase):
     def test_user_active_subscription(self):
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
         Customer.objects.create(subscriber=user, stripe_id="cus_6lsBvm5rJ0zyHc")
-        Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
+        subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
+        subscription.current_period_end = FUTURE_DATE
+        subscription.save()
 
         request = self.factory.get('/account/')
         request.user = user

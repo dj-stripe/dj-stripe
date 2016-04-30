@@ -237,9 +237,15 @@ class Customer(StripeCustomer):
         """
         See StripeCustomer.subscribe()
 
+        :param plan: The plan to which to subscribe the customer.
+        :type plan: Plan or string (plan ID)
         :param charge_immediately: Whether or not to charge for the subscription upon creation. If False, an invoice will be created at the end of this period.
         :type charge_immediately: boolean
         """
+
+        # Convert Plan to stripe_id
+        if isinstance(plan, Plan):
+            plan = plan.stripe_id
 
         stripe_subscription = super(Customer, self).subscribe(plan, **kwargs)
 
@@ -438,8 +444,15 @@ class Subscription(StripeSubscription):
         """
         See StripeSubscription.update()
 
+        :param plan: The plan to which to subscribe the customer.
+        :type plan: Plan or string (plan ID)
+
         Note: The default value for prorate is overridden by the DJSTRIPE_PRORATION_POLICY setting.
         """
+
+        # Convert Plan to stripe_id
+        if "plan" in kwargs and isinstance(kwargs["plan"], Plan):
+            kwargs.update({"plan": kwargs["plan"].stripe_id})
 
         stripe_subscription = super(Subscription, self).update(prorate, **kwargs)
         return Subscription.sync_from_stripe_data(stripe_subscription)

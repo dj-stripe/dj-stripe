@@ -533,14 +533,14 @@ class StripeCustomer(StripeObject):
 
     def subscribe(self, plan, coupon=None, trial_end=None, quantity=None, application_fee_percent=None, tax_percent=None, metadata=None):
         """
-        Subscribes this customer to a plan. 
+        Subscribes this customer to a plan.
 
         Parameters not implemented:
         * source: Subscriptions use the customer's default source. Including the source parameter creates a new source for this customer and overrides the default source. This
                   functionality is not desired; add a source to the customer before attempting to add a subscription.
 
         :param plan: The plan to which to subscribe the customer.
-        :type plan: Plan or string (plan ID)
+        :type plan: string (plan ID)
         :param coupon: The code of the coupon to apply to this subscription. A coupon applied to a subscription will only affect invoices created for that particular subscription.
         :type coupon: string
         :param trial_end: The end datetime of the trial period the customer will get before being charged for the first time. If set, this will override the default trial

@@ -1,14 +1,16 @@
 from copy import deepcopy
+from datetime import datetime
 
 from django.conf import settings
-
+from django.utils import timezone
 from stripe.resource import convert_to_stripe_object
+
+
+FUTURE_DATE = datetime(2100, 4, 30, tzinfo=timezone.utc)
 
 
 def convert_to_fake_stripe_object(response):
     return convert_to_stripe_object(resp=response, api_key=settings.STRIPE_SECRET_KEY, account="test_account")
-
-# Connected Stripe Object fakes.
 
 
 class DataList(object):
@@ -285,7 +287,7 @@ FAKE_SUBSCRIPTION = {
 }
 
 FAKE_SUBSCRIPTION_II = {
-    "id": "6mkwMbhaZF9jih",
+    "id": "sub_6mkwMbhaZF9jih",
     "plan": deepcopy(FAKE_PLAN_II),
     "object": "subscription",
     "start": 1386247539,
