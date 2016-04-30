@@ -7,6 +7,10 @@
 
 Implement webhook event handlers for all the models that need to respond to webhook events.
 
+NOTE: Event data is not guaranteed to be in the correct API version format. See #116.
+      When writing a webhook handler, make sure to first re-retrieve the object you wish to
+      process.
+
 """
 
 from . import settings as djstripe_settings
@@ -19,7 +23,8 @@ from .models import Charge, Customer, Card, Subscription, Plan, Transfer, Invoic
 # ---------------------------
 @webhooks.handler(['charge'])
 def charge_webhook_handler(event, event_data, event_type, event_subtype):
-    Charge.sync_from_stripe_data(event_data["object"])
+    versioned_charge_data = Charge(stripe_id=event_data["object"]["id"]).api_retrieve()
+    Charge.sync_from_stripe_data(versioned_charge_data)
 
 
 # ---------------------------
@@ -49,8 +54,6 @@ def customer_webhook_handler(event, event_data, event_type, event_subtype):
     if customer:
         if event_subtype in stripe_customer_crud_events:
             Customer.sync_from_stripe_data(event_data)
-        elif event_subtype.startswith("discount."):
-            pass  # TODO
         elif event_subtype.startswith("source."):
             source_type = event_data["object"]["object"]
 
@@ -64,18 +67,12 @@ def customer_webhook_handler(event, event_data, event_type, event_subtype):
 
 
 # ---------------------------
-# Coupon model events
-# ---------------------------
-
-# TODO
-
-
-# ---------------------------
 # Invoice model events
 # ---------------------------
 @webhooks.handler(['invoice'])
 def invoice_webhook_handler(event, event_data, event_type, event_subtype):
-    Invoice.sync_from_stripe_data(event_data["object"], send_receipt=djstripe_settings.SEND_INVOICE_RECEIPT_EMAILS)
+    versioned_invoice_data = Invoice(stripe_id=event_data["object"]["id"]).api_retrieve()
+    Invoice.sync_from_stripe_data(versioned_invoice_data, send_receipt=djstripe_settings.SEND_INVOICE_RECEIPT_EMAILS)
 
 
 # ---------------------------
@@ -90,7 +87,8 @@ def invoice_webhook_handler(event, event_data, event_type, event_subtype):
 # ---------------------------
 @webhooks.handler(['plan'])
 def plan_webhook_handler(event, event_data, event_type, event_subtype):
-    Plan.sync_from_stripe_data(event_data["object"])
+    versioned_plan_data = Plan(stripe_id=event_data["object"]["id"]).api_retrieve()
+    Plan.sync_from_stripe_data(versioned_plan_data)
 
 
 # ---------------------------
@@ -98,4 +96,5 @@ def plan_webhook_handler(event, event_data, event_type, event_subtype):
 # ---------------------------
 @webhooks.handler(["transfer"])
 def transfer_webhook_handler(event, event_data, event_type, event_subtype):
-    Transfer.sync_from_stripe_data(event_data["object"])
+    versioned_transfer_data = Transfer(stripe_id=event_data["object"]["id"]).api_retrieve()
+    Transfer.sync_from_stripe_data(versioned_transfer_data)

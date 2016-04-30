@@ -264,6 +264,7 @@ class WebHook(CsrfExemptMixin, View):
     def post(self, request, *args, **kwargs):
         body = smart_str(request.body)
         data = json.loads(body)
+
         if Event.stripe_objects.exists_by_json(data):
             EventProcessingException.objects.create(
                 data=data,
@@ -271,9 +272,7 @@ class WebHook(CsrfExemptMixin, View):
                 traceback=""
             )
         else:
-            # Why are we re-retrieving the same data? To ensure the event data is in our API version. #116
-            event_data = Event(stripe_id=data["id"]).api_retrieve()
-            event = Event._create_from_stripe_object(event_data)
+            event = Event._create_from_stripe_object(data)
             event.validate()
             event.process()
         return HttpResponse()

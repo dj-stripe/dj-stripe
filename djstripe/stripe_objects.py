@@ -1075,3 +1075,12 @@ class StripeEvent(StripeObject):
 
     def str_parts(self):
         return [self.type] + super(StripeEvent, self).str_parts()
+
+    def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
+        # OVERRIDING the parent version of this function
+        # Event retrieve is special. For Event we don't retrieve using djstripe's API version. We always retrieve
+        # using the API version that was used to send the Event (which depends on the Stripe account holders settings
+        with stripe_temporary_api_version(self.received_api_version):
+            stripe_event = super(StripeEvent, self).api_retrieve(api_key)
+
+        return stripe_event
