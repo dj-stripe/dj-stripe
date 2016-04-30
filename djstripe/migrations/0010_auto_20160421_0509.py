@@ -2,16 +2,16 @@
 """
     Since subscription IDs were not previously stored, a direct migration will leave us
     with a bunch of orphaned objects. It was decided [here](https://github.com/pydanny/dj-stripe/issues/162)
-    that a purge and re-sync would be the best option. No data that is not currently hosted on stripe will
-    be deleted. Anything stored locally
+    that a purge and re-sync would be the best option. No data that is currently available on stripe will
+    be deleted. Anything stored locally will be purged.
 """
 
 from __future__ import unicode_literals
 
 from django.core import serializers
+import django.core.validators
 from django.db import migrations, models
 from django.db.migrations.operations.special import RunPython
-import django.core.validators
 from tqdm import tqdm
 
 import djstripe.fields
