@@ -28,8 +28,8 @@ from tests import FAKE_PLAN
 class SubscriptionSerializerTest(TestCase):
 
     def setUp(self):
-        self.user = get_user_model().objects.create_user(username="patrick", email="patrick@gmail.com")
-        self.customer = Customer.objects.create(subscriber=self.user, stripe_id="cus_6lsBvm5rJ0zyHc")
+        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
+        self.customer = Customer.objects.create(subscriber=self.user, stripe_id="cus_6lsBvm5rJ0zyHc", currency="usd")
         self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
     def test_valid_serializer(self):

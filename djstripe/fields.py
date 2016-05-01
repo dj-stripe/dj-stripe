@@ -156,9 +156,5 @@ class StripeIntegerField(StripeFieldMixin, models.IntegerField):
     pass
 
 
-class StripePositiveIntegerField(StripeFieldMixin, models.PositiveIntegerField):
-    pass
-
-
 class StripeJSONField(StripeFieldMixin, JSONField):
     pass

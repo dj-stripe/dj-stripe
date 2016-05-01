@@ -4,6 +4,7 @@
    :synopsis: dj-stripe - webhook event handlers for the various models
 
 .. moduleauthor:: Bill Huneke (@wahuneke)
+.. moduleauthor:: Alex Kavanaugh (@akavanau)
 
 Implement webhook event handlers for all the models that need to respond to webhook events.
 
@@ -13,9 +14,8 @@ NOTE: Event data is not guaranteed to be in the correct API version format. See 
 
 """
 
-from . import settings as djstripe_settings
 from . import webhooks
-from .models import Charge, Customer, Card, Subscription, Plan, Transfer, Invoice
+from .models import Charge, Customer, Card, Subscription, Plan, Transfer, Invoice, InvoiceItem
 
 
 # ---------------------------
@@ -54,6 +54,8 @@ def customer_webhook_handler(event, event_data, event_type, event_subtype):
     if customer:
         if event_subtype in stripe_customer_crud_events:
             Customer.sync_from_stripe_data(event_data)
+        elif event_subtype.startswith("discount."):
+            pass  # TODO
         elif event_subtype.startswith("source."):
             source_type = event_data["object"]["object"]
 
@@ -72,14 +74,16 @@ def customer_webhook_handler(event, event_data, event_type, event_subtype):
 @webhooks.handler(['invoice'])
 def invoice_webhook_handler(event, event_data, event_type, event_subtype):
     versioned_invoice_data = Invoice(stripe_id=event_data["object"]["id"]).api_retrieve()
-    Invoice.sync_from_stripe_data(versioned_invoice_data, send_receipt=djstripe_settings.SEND_INVOICE_RECEIPT_EMAILS)
+    Invoice.sync_from_stripe_data(versioned_invoice_data)
 
 
 # ---------------------------
 # InvoiceItem model events
 # ---------------------------
-
-# TODO
+@webhooks.handler(['invoiceitem'])
+def invoiceitem_webhook_handler(event, event_data, event_type, event_subtype):
+    versioned_invoiceitem_data = InvoiceItem(stripe_id=event_data["object"]["id"]).api_retrieve()
+    InvoiceItem.sync_from_stripe_data(versioned_invoiceitem_data)
 
 
 # ---------------------------

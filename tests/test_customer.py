@@ -11,19 +11,18 @@
 from copy import deepcopy
 import datetime
 import decimal
+from unittest.case import skip
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
-
 from mock import patch, PropertyMock, MagicMock
 from stripe.error import InvalidRequestError
 
 from djstripe.models import Account, Customer, Charge, Card, Subscription, Invoice
 
 from . import FAKE_CARD, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_ACCOUNT, FAKE_INVOICE, FAKE_INVOICE_II, FAKE_INVOICE_III, DataList
-from unittest.case import skip
 
 
 @skip
@@ -40,12 +39,8 @@ class TestCustomer(TestCase):
 #                                                                  status=Subscription.STATUS_ACTIVE)
 
     def setUp(self):
-        self.user = get_user_model().objects.create_user(username="patrick", email="patrick@gmail.com")
-
-        self.customer = Customer.objects.create(
-            subscriber=self.user,
-            stripe_id="cus_6lsBvm5rJ0zyHc",
-        )
+        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
+        self.customer = Customer.objects.create(subscriber=self.user, stripe_id="cus_6lsBvm5rJ0zyHc", currency="usd")
 
         self.card, _created = Card.get_or_create_from_stripe_object(data=FAKE_CARD)
 

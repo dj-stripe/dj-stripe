@@ -89,7 +89,7 @@ class TestUserHasActiveSubscription(TestCase):
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        self.customer = Customer.objects.create(subscriber=self.user, stripe_id="cus_6lsBvm5rJ0zyHc")
+        self.customer = Customer.objects.create(subscriber=self.user, stripe_id="cus_6lsBvm5rJ0zyHc", currency="usd")
 
     def test_user_has_inactive_subscription(self):
         self.assertFalse(subscriber_has_active_subscription(self.user))

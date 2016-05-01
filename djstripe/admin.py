@@ -202,6 +202,7 @@ admin.site.register(
     list_display=[
         "stripe_id",
         "paid",
+        "forgiven",
         "closed",
         customer_email,
         customer_has_source,
@@ -218,9 +219,10 @@ admin.site.register(
     list_filter=[
         InvoiceCustomerHasSourceListFilter,
         "paid",
+        "forgiven",
         "closed",
         "attempted",
-        "attempts",
+        "attempt_count",
         "stripe_timestamp",
         "date",
         "period_end",

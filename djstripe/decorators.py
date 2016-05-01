@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import warnings
 from functools import wraps
 
 from django.utils.decorators import available_attrs

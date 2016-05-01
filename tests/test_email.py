@@ -23,8 +23,8 @@ from . import FAKE_CHARGE
 class EmailReceiptTest(TestCase):
 
     def setUp(self):
-        self.user = get_user_model().objects.create_user(username="patrick", email="patrick@gmail.com")
-        self.customer = Customer.objects.create(subscriber=self.user, stripe_id="cus_6lsBvm5rJ0zyHc")
+        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
+        self.customer = Customer.objects.create(subscriber=self.user, stripe_id="cus_6lsBvm5rJ0zyHc", currency="usd")
         self.account = Account.objects.create()
 
     @patch("djstripe.models.Account.get_default_account")

@@ -21,6 +21,11 @@ class Migration(migrations.Migration):
             old_name='kind',
             new_name='type',
         ),
+        migrations.RenameField(
+            model_name='invoice',
+            old_name='attempts',
+            new_name='attempt_count',
+        ),
         migrations.RenameModel(
             old_name='CurrentSubscription',
             new_name='Subscription',

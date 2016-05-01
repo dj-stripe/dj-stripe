@@ -2,11 +2,11 @@ import calendar
 import copy
 import datetime
 import decimal
+from unittest.case import skip
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
-
 from mock import patch, PropertyMock
 from stripe import InvalidRequestError
 
@@ -14,7 +14,6 @@ from djstripe.exceptions import SubscriptionCancellationFailure, SubscriptionUpd
 from djstripe.models import convert_tstamp, Customer, Subscription
 from djstripe.settings import PAYMENTS_PLANS
 from tests import convert_to_fake_stripe_object
-from unittest.case import skip
 
 
 def timestamp(year, month, day, hour, minute=0, second=0):
@@ -146,14 +145,8 @@ class TestSingleSubscription(TestCase):
         del PAYMENTS_PLANS["gold"]
 
     def setUp(self):
-        self.user = get_user_model().objects.create_user(username="chris")
-        self.customer = Customer.objects.create(
-            subscriber=self.user,
-            stripe_id="cus_xxxxxxxxxxxxxxx",
-            card_fingerprint="YYYYYYYY",
-            card_last_4="2342",
-            card_kind="Visa"
-        )
+        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
+        self.customer = Customer.objects.create(subscriber=self.user, stripe_id="cus_xxxxxxxxxxxxxxx", currency="usd")
 
     def test_current_subscription_does_not_exist(self):
         with self.assertRaises(Subscription.DoesNotExist):

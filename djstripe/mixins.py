@@ -53,7 +53,7 @@ class SubscriptionMixin(PaymentsContextMixin):
     def get_context_data(self, *args, **kwargs):
         context = super(SubscriptionMixin, self).get_context_data(**kwargs)
         context['is_plans_plural'] = bool(len(djstripe_settings.PLAN_CHOICES) > 1)
-        context['customer'], created = Customer.get_or_create(
+        context['customer'], _created = Customer.get_or_create(
             subscriber=djstripe_settings.subscriber_request_callback(self.request))
         context['Subscription'] = Subscription
         return context

@@ -1,3 +1,12 @@
+"""
+.. module:: dj-stripe.tests.__init__
+   :synopsis: dj-stripe test fakes
+
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
+
+A Fake or multiple fakes for each stripe object. Collected using API VERSION 2015-07-28
+"""
+
 from copy import deepcopy
 from datetime import datetime
 
@@ -314,6 +323,7 @@ class Sources(dict):
         for fake_card in [FAKE_CARD, FAKE_CARD_II, FAKE_CARD_III]:
             if fake_card["id"] == source:
                 return fake_card
+
 
 class CustomerDict(dict):
 

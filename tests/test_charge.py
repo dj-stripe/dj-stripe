@@ -24,7 +24,7 @@ from . import FAKE_CHARGE, FAKE_ACCOUNT
 class ChargeTest(TestCase):
 
     def setUp(self):
-        self.customer = Customer.objects.create(stripe_id="cus_6lsBvm5rJ0zyHc")
+        self.customer = Customer.objects.create(stripe_id="cus_6lsBvm5rJ0zyHc", currency="usd")
         self.invoice = Invoice.objects.create(stripe_id="in_7udnik28sj829dj",
                                               customer=self.customer,
                                               period_start=timezone.now(),

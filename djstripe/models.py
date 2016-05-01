@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import datetime
-import decimal
-import json
 import logging
 
 from django.conf import settings
@@ -21,17 +18,20 @@ import traceback as exception_traceback
 
 from . import settings as djstripe_settings
 from . import webhooks
-from .exceptions import SubscriptionCancellationFailure, SubscriptionUpdateFailure, MultipleSubscriptionException
+from .exceptions import SubscriptionCancellationFailure, MultipleSubscriptionException
 from .managers import SubscriptionManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS
 from .signals import webhook_processing_error
 from .stripe_objects import (StripeSource, StripeCharge, StripeCustomer, StripeCard, StripeSubscription,
-                             StripePlan, StripeInvoice, StripeTransfer, StripeAccount, StripeEvent)
-from .utils import convert_tstamp, simple_stripe_pagination_iterator
-
+                             StripePlan, StripeInvoice, StripeInvoiceItem, StripeTransfer, StripeAccount, StripeEvent)
+from .utils import simple_stripe_pagination_iterator
 
 logger = logging.getLogger(__name__)
 
+
+# ============================================================================ #
+#                               Core Resources                                 #
+# ============================================================================ #
 
 class Charge(StripeCharge):
     account = models.ForeignKey("Account", null=True, related_name="charges", help_text="The account the charge was made on behalf of. Null here indicates that this value was never set.")
@@ -104,7 +104,7 @@ class Charge(StripeCharge):
 
 class Customer(StripeCustomer):
     doc = """
-    Note: Sources and Subscriptions are attached via a ForeignKey on StripeSource.
+    Note: Sources and Subscriptions are attached via a ForeignKey on StripeSource and Subscription, respectively.
           Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
     """
     __doc__ = getattr(StripeCustomer, "__doc__") + doc
@@ -133,7 +133,7 @@ class Customer(StripeCustomer):
             trial_days = djstripe_settings.trial_period_for_subscriber_callback(subscriber)
 
         stripe_customer = cls._api_create(email=subscriber.email)
-        customer = Customer.objects.create(subscriber=subscriber, stripe_id=stripe_customer.id)
+        customer = Customer.objects.create(subscriber=subscriber, stripe_id=stripe_customer.id, currency="usd")
 
         if djstripe_settings.DEFAULT_PLAN and trial_days:
             customer.subscribe(plan=djstripe_settings.DEFAULT_PLAN, trial_days=trial_days)
@@ -308,7 +308,8 @@ class Customer(StripeCustomer):
         """
         See StripeCustomer.charge()
 
-        :param send_receipt: Whether or not to send a receipt for this charge. If blank, ``DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS`` is used.
+        :param send_receipt: Whether or not to send a receipt for this charge. If blank,
+                             ``DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS`` is used.
         :type send_receipt: boolean
         """
 
@@ -322,6 +323,35 @@ class Customer(StripeCustomer):
             charge.send_receipt()
 
         return charge
+
+    def add_invoice_item(self, amount, currency, **kwargs):
+        """
+        See StripeCustomer.add_invoice_item()
+
+        :param invoice: An existing invoice to add this invoice item to. When left blank, the invoice
+                        item will be added to the next upcoming scheduled invoice. Use this when adding
+                        invoice items in response to an invoice.created webhook. You cannot add an invoice
+                        item to an invoice that has already been paid, attempted or closed.
+        :type invoice: Invoice or string (invoice ID)
+        :param subscription: A subscription to add this invoice item to. When left blank, the invoice
+                             item will be be added to the next upcoming scheduled invoice. When set,
+                             scheduled invoices for subscriptions other than the specified subscription
+                             will ignore the invoice item. Use this when you want to express that an
+                             invoice item has been accrued within the context of a particular subscription.
+        :type subscription: Subscription or string (subscription ID)
+        """
+
+        # Convert Invoice to stripe_id
+        if "invoice" in kwargs and isinstance(kwargs["invoice"], Invoice):
+            kwargs.update({"invoice": kwargs["invoice"].stripe_id})
+
+        # Convert Subscription to stripe_id
+        if "subscription" in kwargs and isinstance(kwargs["subscription"], Subscription):
+            kwargs.update({"subscription": kwargs["subscription"].stripe_id})
+
+        stripe_invoiceitem = super(Customer, self).add_invoice_item(amount, currency, **kwargs)
+
+        return InvoiceItem.sync_from_stripe_data(stripe_invoiceitem)
 
     def send_invoice(self):
         try:
@@ -384,250 +414,6 @@ class Customer(StripeCustomer):
 
         for subscription in simple_stripe_pagination_iterator(stripe_customer.subscriptions, **kwargs):
             Subscription.sync_from_stripe_data(subscription)
-
-
-class Card(StripeCard):
-    # account = models.ForeignKey("Account", null=True, related_name="cards")
-
-    def attach_objects_hook(self, cls, data):
-        customer = cls.stripe_object_to_customer(target_cls=Customer, data=data)
-        if customer:
-            self.customer = customer
-        else:
-            raise ValidationError("A customer was not attached to this card.")
-
-    def remove(self):
-        """Removes a card from this customer's account."""
-
-        try:
-            self._api_delete()
-        except InvalidRequestError as exc:
-            if str(exc).startswith("No such customer:"):
-                # The exception was thrown because the stripe customer was already
-                # deleted on the stripe side, ignore the exception
-                pass
-
-        self.delete()
-
-
-class Subscription(StripeSubscription):
-    # account = models.ForeignKey("Account", related_name="subscriptions")
-    customer = models.ForeignKey("Customer", related_name="subscriptions", help_text="The customer associated with this subscription.")
-    plan = models.ForeignKey("Plan", related_name="subscriptions", help_text="The plan associated with this subscription.")
-
-    objects = SubscriptionManager()
-
-    def is_period_current(self):
-        return self.current_period_end > timezone.now()
-
-    def is_status_current(self):
-        return self.status in ["trialing", "active"]
-
-    def is_status_temporarily_current(self):
-        """
-        Status when customer canceled their latest subscription, one that does not prorate,
-        and therefore has a temporary active subscription until period end.
-        """
-
-        return self.canceled_at and self.start < self.canceled_at and self.cancel_at_period_end
-
-    def is_valid(self):
-        if not self.is_status_current():
-            return False
-
-        if not self.is_period_current():
-            return False
-
-        return True
-
-    def update(self, prorate=djstripe_settings.PRORATION_POLICY, **kwargs):
-        """
-        See StripeSubscription.update()
-
-        :param plan: The plan to which to subscribe the customer.
-        :type plan: Plan or string (plan ID)
-
-        Note: The default value for prorate is overridden by the DJSTRIPE_PRORATION_POLICY setting.
-        """
-
-        # Convert Plan to stripe_id
-        if "plan" in kwargs and isinstance(kwargs["plan"], Plan):
-            kwargs.update({"plan": kwargs["plan"].stripe_id})
-
-        stripe_subscription = super(Subscription, self).update(prorate, **kwargs)
-        return Subscription.sync_from_stripe_data(stripe_subscription)
-
-    def extend(self, delta):
-        stripe_subscription = super(Subscription, self).extend(delta)
-        return Subscription.sync_from_stripe_data(stripe_subscription)
-
-    def attach_objects_hook(self, cls, data):
-        self.customer = cls.stripe_object_to_customer(target_cls=Customer, data=data)
-        self.plan = cls.stripe_object_to_plan(target_cls=Plan, data=data)
-
-
-class Plan(StripePlan):
-    # account = models.ForeignKey("Account", related_name="plans")
-
-    @classmethod
-    def get_or_create(cls, **kwargs):
-        try:
-            return Plan.objects.get(stripe_id=kwargs['stripe_id']), False
-        except Plan.DoesNotExist:
-            return cls.create(**kwargs), True
-
-    @classmethod
-    def create(cls, **kwargs):
-        # A few minor things are changed in the api-version of the create call
-        api_kwargs = dict(kwargs)
-        api_kwargs['id'] = api_kwargs['stripe_id']
-        del(api_kwargs['stripe_id'])
-        api_kwargs['amount'] = int(api_kwargs['amount'] * 100)
-        cls._api_create(**api_kwargs)
-
-        plan = Plan.objects.create(**kwargs)
-
-        return plan
-
-    # TODO: Move this type of update to the model's save() method so it happens automatically
-    # Also, block other fields from being saved.
-    def update_name(self):
-        """Update the name of the Plan in Stripe and in the db.
-
-        - Assumes the object being called has the name attribute already
-          reset, but has not been saved.
-        - Stripe does not allow for update of any other Plan attributes besides
-          name.
-
-        """
-
-        p = self.api_retrieve()
-        p.name = self.name
-        p.save()
-
-        self.save()
-
-
-class Invoice(StripeInvoice):
-    # account = models.ForeignKey("Account", related_name="invoices")
-    customer = models.ForeignKey(Customer, related_name="invoices")
-
-    class Meta(object):
-        ordering = ["-date"]
-
-    def attach_objects_hook(self, cls, data):
-        customer = cls.stripe_object_to_customer(target_cls=Customer, data=data)
-        if customer:
-            self.customer = customer
-        else:
-            raise ValidationError("A customer was not attached to this charge.")
-
-    @classmethod
-    def sync_from_stripe_data(cls, data, send_receipt=True):
-        invoice = super(Invoice, cls).sync_from_stripe_data(data)
-
-        for item in data["lines"].get("data", []):
-            period_end = convert_tstamp(item["period"], "end")
-            period_start = convert_tstamp(item["period"], "start")
-            """
-            Period end of invoice is the period end of the latest invoiceitem.
-            """
-            invoice.period_end = period_end
-
-            if item.get("plan"):
-                plan = djstripe_settings.plan_from_stripe_id(item["plan"]["id"])
-            else:
-                plan = ""
-
-            inv_item, inv_item_created = invoice.items.get_or_create(
-                stripe_id=item["id"],
-                defaults=dict(
-                    amount=(item["amount"] / decimal.Decimal("100")),
-                    currency=item["currency"],
-                    proration=item["proration"],
-                    description=item.get("description") or "",
-                    line_type=item["type"],
-                    plan=plan,
-                    period_start=period_start,
-                    period_end=period_end,
-                    quantity=item.get("quantity"),
-                )
-            )
-            if not inv_item_created:
-                inv_item.amount = (item["amount"] / decimal.Decimal("100"))
-                inv_item.currency = item["currency"]
-                inv_item.proration = item["proration"]
-                inv_item.description = item.get("description") or ""
-                inv_item.line_type = item["type"]
-                inv_item.plan = plan
-                inv_item.period_start = period_start
-                inv_item.period_end = period_end
-                inv_item.quantity = item.get("quantity")
-                inv_item.save()
-
-        # Save invoice period end assignment.
-        invoice.save()
-
-        if data.get("charge"):
-            stripe_charge = Charge(stripe_id=data["charge"]).api_retrieve()
-            charge = Charge.sync_from_stripe_data(stripe_charge)
-
-            if send_receipt:
-                charge.send_receipt()
-        return invoice
-
-
-@python_2_unicode_compatible
-class InvoiceItem(TimeStampedModel):
-    # account = models.ForeignKey(Account, related_name="invoiceitems")
-
-    stripe_id = models.CharField(max_length=50)
-    invoice = models.ForeignKey(Invoice, related_name="items")
-    amount = models.DecimalField(decimal_places=2, max_digits=7)
-    currency = models.CharField(max_length=10)
-    period_start = models.DateTimeField()
-    period_end = models.DateTimeField()
-    proration = models.BooleanField(default=False)
-    line_type = models.CharField(max_length=50)
-    description = models.CharField(max_length=200, blank=True)
-    plan = models.CharField(max_length=100, null=True, blank=True)
-    quantity = models.IntegerField(null=True)
-
-    def __str__(self):
-        return smart_text("<amount={amount}, plan={plan}, stripe_id={stripe_id}>".format(amount=self.amount, plan=smart_text(self.plan), stripe_id=self.stripe_id))
-
-    def plan_display(self):
-        return djstripe_settings.PAYMENTS_PLANS[self.plan]["name"]
-
-
-class Transfer(StripeTransfer):
-    # account = models.ForeignKey("Account", related_name="transfers")
-
-    objects = TransferManager()
-
-
-class Account(StripeAccount):
-    pass
-
-
-@python_2_unicode_compatible
-class EventProcessingException(TimeStampedModel):
-    event = models.ForeignKey("Event", null=True)
-    data = models.TextField()
-    message = models.CharField(max_length=500)
-    traceback = models.TextField()
-
-    @classmethod
-    def log(cls, data, exception, event):
-        cls.objects.create(
-            event=event,
-            data=data or "",
-            message=str(exception),
-            traceback=exception_traceback.format_exc()
-        )
-
-    def __str__(self):
-        return smart_text("<{message}, pk={pk}, Event={event}>".format(message=self.message, pk=self.pk, event=self.event))
 
 
 class Event(StripeEvent):
@@ -704,13 +490,217 @@ class Event(StripeEvent):
             return signal.send(sender=Event, event=self)
 
 
-# DEPRECATED
-class TransferChargeFee(TimeStampedModel):
-    transfer = models.ForeignKey(Transfer, related_name="charge_fee_details")
-    amount = models.DecimalField(decimal_places=2, max_digits=7)
-    application = models.TextField(null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
-    kind = models.CharField(max_length=150)
+class Transfer(StripeTransfer):
+    # account = models.ForeignKey("Account", related_name="transfers")
+
+    objects = TransferManager()
+
+
+# ============================================================================ #
+#                                   Connect                                    #
+# ============================================================================ #
+
+class Account(StripeAccount):
+    pass
+
+
+# ============================================================================ #
+#                               Payment Methods                                #
+# ============================================================================ #
+
+class Card(StripeCard):
+    # account = models.ForeignKey("Account", null=True, related_name="cards")
+
+    def attach_objects_hook(self, cls, data):
+        customer = cls.stripe_object_to_customer(target_cls=Customer, data=data)
+        if customer:
+            self.customer = customer
+        else:
+            raise ValidationError("A customer was not attached to this card.")
+
+    def remove(self):
+        """Removes a card from this customer's account."""
+
+        try:
+            self._api_delete()
+        except InvalidRequestError as exc:
+            if str(exc).startswith("No such customer:"):
+                # The exception was thrown because the stripe customer was already
+                # deleted on the stripe side, ignore the exception
+                pass
+
+        self.delete()
+
+
+# ============================================================================ #
+#                                Subscriptions                                 #
+# ============================================================================ #
+
+
+class Invoice(StripeInvoice):
+    # account = models.ForeignKey("Account", related_name="invoices")
+    customer = models.ForeignKey(Customer, related_name="invoices", help_text="The customer associated with this invoice.")
+    charge = models.ForeignKey(Charge, null=True, related_name="invoices", help_text="The latest charge generated for this invoice, if any.")
+    subscription = models.ForeignKey("Subscription", null=True, related_name="invoices", help_text="The subscription that this invoice was prepared for, if any.")
+
+    class Meta(object):
+        ordering = ["-date"]
+
+    def attach_objects_hook(self, cls, data):
+        self.customer = cls.stripe_object_to_customer(target_cls=Customer, data=data)
+
+        charge = cls.stripe_object_to_charge(target_cls=Charge, data=data)
+        if charge:
+            if djstripe_settings.SEND_INVOICE_RECEIPT_EMAILS:
+                charge.send_receipt()
+
+            self.charge = charge
+
+        subscription = cls.stripe_object_to_subscription(target_cls=Subscription, data=data)
+        if subscription:
+            self.subscription = subscription
+
+
+class InvoiceItem(StripeInvoiceItem):
+    # account = models.ForeignKey(Account, related_name="invoiceitems")
+    customer = models.ForeignKey(Customer, related_name="invoiceitems", help_text="The customer associated with this invoiceitem.")
+    invoice = models.ForeignKey(Invoice, related_name="invoiceitems", help_text="The invoice to which this invoiceitem is attached.")
+    plan = models.ForeignKey("Plan", null=True, related_name="invoiceitems", help_text="If the invoice item is a proration, the plan of the subscription for which the proration was computed.")
+    subscription = models.ForeignKey("Subscription", null=True, related_name="invoiceitems", help_text="The subscription that this invoice item has been created for, if any.")
+
+    def attach_objects_hook(self, cls, data):
+        self.customer = cls.stripe_object_to_customer(target_cls=Customer, data=data)
+        self.invoice = cls.stripe_object_to_invoice(target_cls=Invoice, data=data)
+
+        plan = cls.stripe_object_to_plan(target_cls=Plan, data=data)
+        if plan:
+            self.plan = plan
+
+        subscription = cls.stripe_object_to_subscription(target_cls=Subscription, data=data)
+        if subscription:
+            self.subscription = subscription
+
+
+class Plan(StripePlan):
+    # account = models.ForeignKey("Account", related_name="plans")
+
+    @classmethod
+    def get_or_create(cls, **kwargs):
+        try:
+            return Plan.objects.get(stripe_id=kwargs['stripe_id']), False
+        except Plan.DoesNotExist:
+            return cls.create(**kwargs), True
+
+    @classmethod
+    def create(cls, **kwargs):
+        # A few minor things are changed in the api-version of the create call
+        api_kwargs = dict(kwargs)
+        api_kwargs['id'] = api_kwargs['stripe_id']
+        del(api_kwargs['stripe_id'])
+        api_kwargs['amount'] = int(api_kwargs['amount'] * 100)
+        cls._api_create(**api_kwargs)
+
+        plan = Plan.objects.create(**kwargs)
+
+        return plan
+
+    # TODO: Move this type of update to the model's save() method so it happens automatically
+    # Also, block other fields from being saved.
+    def update_name(self):
+        """Update the name of the Plan in Stripe and in the db.
+
+        - Assumes the object being called has the name attribute already
+          reset, but has not been saved.
+        - Stripe does not allow for update of any other Plan attributes besides
+          name.
+
+        """
+
+        p = self.api_retrieve()
+        p.name = self.name
+        p.save()
+
+        self.save()
+
+
+class Subscription(StripeSubscription):
+    # account = models.ForeignKey("Account", related_name="subscriptions")
+    customer = models.ForeignKey("Customer", related_name="subscriptions", help_text="The customer associated with this subscription.")
+    plan = models.ForeignKey("Plan", related_name="subscriptions", help_text="The plan associated with this subscription.")
+
+    objects = SubscriptionManager()
+
+    def is_period_current(self):
+        return self.current_period_end > timezone.now()
+
+    def is_status_current(self):
+        return self.status in ["trialing", "active"]
+
+    def is_status_temporarily_current(self):
+        """
+        Status when customer canceled their latest subscription, one that does not prorate,
+        and therefore has a temporary active subscription until period end.
+        """
+
+        return self.canceled_at and self.start < self.canceled_at and self.cancel_at_period_end
+
+    def is_valid(self):
+        if not self.is_status_current():
+            return False
+
+        if not self.is_period_current():
+            return False
+
+        return True
+
+    def update(self, prorate=djstripe_settings.PRORATION_POLICY, **kwargs):
+        """
+        See StripeSubscription.update()
+
+        :param plan: The plan to which to subscribe the customer.
+        :type plan: Plan or string (plan ID)
+
+        Note: The default value for prorate is overridden by the DJSTRIPE_PRORATION_POLICY setting.
+        """
+
+        # Convert Plan to stripe_id
+        if "plan" in kwargs and isinstance(kwargs["plan"], Plan):
+            kwargs.update({"plan": kwargs["plan"].stripe_id})
+
+        stripe_subscription = super(Subscription, self).update(prorate, **kwargs)
+        return Subscription.sync_from_stripe_data(stripe_subscription)
+
+    def extend(self, delta):
+        stripe_subscription = super(Subscription, self).extend(delta)
+        return Subscription.sync_from_stripe_data(stripe_subscription)
+
+    def attach_objects_hook(self, cls, data):
+        self.customer = cls.stripe_object_to_customer(target_cls=Customer, data=data)
+        self.plan = cls.stripe_object_to_plan(target_cls=Plan, data=data)
+
+
+# ============================================================================ #
+#                             DJ-STRIPE RESOURCES                              #
+# ============================================================================ #
+
+@python_2_unicode_compatible
+class EventProcessingException(TimeStampedModel):
+    event = models.ForeignKey("Event", null=True)
+    data = models.TextField()
+    message = models.CharField(max_length=500)
+    traceback = models.TextField()
+
+    @classmethod
+    def log(cls, data, exception, event):
+        cls.objects.create(
+            event=event,
+            data=data or "",
+            message=str(exception),
+            traceback=exception_traceback.format_exc()
+        )
+
+    def __str__(self):
+        return smart_text("<{message}, pk={pk}, Event={event}>".format(message=self.message, pk=self.pk, event=self.event))
 
 
 # Much like registering signal handlers. We import this module so that its registrations get picked up

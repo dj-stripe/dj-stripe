@@ -56,10 +56,7 @@ class EventTest(TestCase):
 
         self.user = get_user_model().objects.create_user(username="testuser",
                                                          email="testuser@gmail.com")
-        self.customer = Customer.objects.create(
-            stripe_id=self.message["data"]["object"]["customer"],
-            subscriber=self.user
-        )
+        self.customer = Customer.objects.create(subscriber=self.user, stripe_id=self.message["data"]["object"]["customer"], currency="usd")
 
     def test_tostring(self):
         event = Event.objects.create(

@@ -33,6 +33,7 @@ class SubscriptionManagerTest(TestCase):
             customer = Customer.objects.create(
                 subscriber=get_user_model().objects.create_user(username="patrick{0}".format(i), email="patrick{0}@gmail.com".format(i)),
                 stripe_id="cus_xxxxxxxxxxxxxx{0}".format(i),
+                currency="usd",
             )
 
             Subscription.objects.create(
@@ -49,6 +50,7 @@ class SubscriptionManagerTest(TestCase):
         customer = Customer.objects.create(
             subscriber=get_user_model().objects.create_user(username="patrick{0}".format(11), email="patrick{0}@gmail.com".format(11)),
             stripe_id="cus_xxxxxxxxxxxxxx{0}".format(11),
+            currency="usd",
         )
         Subscription.objects.create(
             stripe_id="sub_xxxxxxxxxxxxxx{0}".format(11),
@@ -65,6 +67,7 @@ class SubscriptionManagerTest(TestCase):
         customer = Customer.objects.create(
             subscriber=get_user_model().objects.create_user(username="patrick{0}".format(12), email="patrick{0}@gmail.com".format(12)),
             stripe_id="cus_xxxxxxxxxxxxxx{0}".format(12),
+            currency="usd",
         )
         Subscription.objects.create(
             stripe_id="sub_xxxxxxxxxxxxxx{0}".format(12),
@@ -139,7 +142,7 @@ class TransferManagerTest(TestCase):
 class ChargeManagerTest(TestCase):
 
     def setUp(self):
-        customer = Customer.objects.create(stripe_id="cus_XXXXXXX")
+        customer = Customer.objects.create(stripe_id="cus_XXXXXXX", currency="usd")
 
         self.march_charge = Charge.objects.create(
             stripe_id="ch_XXXXMAR1",
