@@ -1171,7 +1171,7 @@ class StripeSubscription(StripeObject):
     STATUSES = [STATUS_TRIALING, STATUS_ACTIVE, STATUS_PAST_DUE, STATUS_CANCELLED, STATUS_UNPAID]
     STATUS_CHOICES = [(status, status.replace("_", " ").title()) for status in STATUSES]
 
-    application_fee_percent = StripePercentField(help_text="A positive decimal that represents the fee percentage of the subscription invoice amount that will be transferred to the application owner’s Stripe account each billing period.")
+    application_fee_percent = StripePercentField(null=True, help_text="A positive decimal that represents the fee percentage of the subscription invoice amount that will be transferred to the application owner’s Stripe account each billing period.")
     cancel_at_period_end = StripeBooleanField(default=False, help_text="If the subscription has been canceled with the ``at_period_end`` flag set to true, ``cancel_at_period_end`` on the subscription will be true. You can use this attribute to determine whether a subscription that has a status of active is scheduled to be canceled at the end of the current period.")
     canceled_at = StripeDateTimeField(null=True, help_text="If the subscription has been canceled, the date of that cancellation. If the subscription was canceled with ``cancel_at_period_end``, canceled_at will still reflect the date of the initial cancellation request, not the end of the subscription period when the subscription is automatically moved to a canceled state.")
     current_period_end = StripeDateTimeField(help_text="End of the current period for which the subscription has been invoiced. At the end of this period, a new invoice will be created.")

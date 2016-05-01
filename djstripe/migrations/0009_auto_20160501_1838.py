@@ -384,8 +384,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='subscription',
             name='application_fee_percent',
-            field=djstripe.fields.StripePercentField(validators=[django.core.validators.MinValueValidator(1.0), django.core.validators.MaxValueValidator(100.0)], help_text='A positive decimal that represents the fee percentage of the subscription invoice amount that will be transferred to the application owner’s Stripe account each billing period.', max_digits=5, default=0.0, decimal_places=2),
-            preserve_default=False,
+            field=djstripe.fields.StripePercentField(validators=[django.core.validators.MinValueValidator(1.0), django.core.validators.MaxValueValidator(100.0)], help_text='A positive decimal that represents the fee percentage of the subscription invoice amount that will be transferred to the application owner’s Stripe account each billing period.', max_digits=5, decimal_places=2, null=True),
         ),
         migrations.AddField(
             model_name='subscription',
