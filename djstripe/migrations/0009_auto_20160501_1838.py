@@ -281,8 +281,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='invoice',
             name='next_payment_attempt',
-            field=djstripe.fields.StripeDateTimeField(help_text='The time at which payment will next be attempted.', default=datetime.datetime(2100, 1, 1, 0, 0)),
-            preserve_default=False,
+            field=djstripe.fields.StripeDateTimeField(help_text='The time at which payment will next be attempted.', null=True),
         ),
         migrations.AddField(
             model_name='invoice',

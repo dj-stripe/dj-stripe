@@ -68,7 +68,9 @@ def get_supported_currency_choices(api_key):
     stripe.api_key = api_key
 
     account = stripe.Account.retrieve()
-    return [(currency, currency.upper()) for currency in account["currencies_supported"]]
+    supported_payment_currencies = stripe.CountrySpec.retrieve(account["country"])["supported_payment_currencies"]
+
+    return [(currency, currency.upper()) for currency in supported_payment_currencies]
 
 
 def dict_nested_accessor(d, name):

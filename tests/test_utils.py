@@ -20,8 +20,8 @@ from django.test.utils import override_settings
 from django.utils import timezone
 from mock import patch
 
-from djstripe.models import convert_tstamp, Customer, Subscription
-from djstripe.utils import subscriber_has_active_subscription, get_supported_currency_choices, simple_stripe_pagination_iterator
+from djstripe.models import Customer, Subscription
+from djstripe.utils import subscriber_has_active_subscription, get_supported_currency_choices, simple_stripe_pagination_iterator, convert_tstamp
 from tests import FAKE_SUBSCRIPTION
 from tests.apps.testapp.models import Organization
 
@@ -138,7 +138,8 @@ class TestUserHasActiveSubscription(TestCase):
 
 class TestGetSupportedCurrencyChoices(TestCase):
 
-    @patch("stripe.Account.retrieve", return_value={"currencies_supported": ["usd", "cad", "eur"]})
+    @patch("stripe.CountrySpec.retrieve", return_value={"supported_payment_currencies": ["usd", "cad", "eur"]})
+    @patch("stripe.Account.retrieve", return_value={"country": "US"})
     def test_get_choices(self, stripe_account_retrieve_mock):
         """
         Simple test to test sure that at least one currency choice tuple is returned.

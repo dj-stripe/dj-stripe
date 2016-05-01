@@ -970,7 +970,7 @@ class StripeInvoice(StripeObject):
     date = StripeDateTimeField(help_text="The date on the invoice.")
     ending_balance = StripeIntegerField(null=True, help_text="Ending customer balance after attempting to pay invoice. If the invoice has not been attempted yet, this will be null.")
     forgiven = StripeBooleanField(default=False, help_text="Whether or not the invoice has been forgiven. Forgiving an invoice instructs us to update the subscription status as if the invoice were successfully paid. Once an invoice has been forgiven, it cannot be unforgiven or reopened.")
-    next_payment_attempt = StripeDateTimeField(help_text="The time at which payment will next be attempted.")
+    next_payment_attempt = StripeDateTimeField(null=True, help_text="The time at which payment will next be attempted.")
     paid = StripeBooleanField(default=False, help_text="The time at which payment will next be attempted.")
     period_end = StripeDateTimeField(help_text="End of the usage period during which invoice items were added to this invoice.")
     period_start = StripeDateTimeField(help_text="Start of the usage period during which invoice items were added to this invoice.")
