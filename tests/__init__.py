@@ -4,7 +4,10 @@
 
 .. moduleauthor:: Alex Kavanaugh (@kavdev)
 
-A Fake or multiple fakes for each stripe object. Collected using API VERSION 2015-07-28
+A Fake or multiple fakes for each stripe object.
+
+Originally collected using API VERSION 2015-07-28.
+Updated to API VERSION 2016-03-07 with bogus fields.
 """
 
 from copy import deepcopy
@@ -39,12 +42,10 @@ FAKE_BALANCE_TRANSACTION = {
     "id": "txn_16YKQi2eZvKYlo2CNx26h2Wz",
     "object": "balance_transaction",
     "amount": 3340,
-    "currency": "usd",
-    "net": 3213,
-    "type": "charge",
-    "created": 1439229084,
     "available_on": 1439769600,
-    "status": "pending",
+    "created": 1439229084,
+    "currency": "usd",
+    "description": "Charge for RelyMD consultation for Rakesh Mohan",
     "fee": 127,
     "fee_details": [
         {
@@ -52,95 +53,243 @@ FAKE_BALANCE_TRANSACTION = {
             "currency": "usd",
             "type": "stripe_fee",
             "description": "Stripe processing fees",
-            "application": None
+            "application": None,
         }
     ],
+    "net": 3213,
     "source": "ch_16YKQi2eZvKYlo2CrCuzbJQx",
-    "description": "Charge for RelyMD consultation for Rakesh Mohan",
     "sourced_transfers": {
         "object": "list",
         "total_count": 0,
         "has_more": False,
         "url": "/v1/transfers?source_transaction=ch_16YKQi2eZvKYlo2CrCuzbJQx",
         "data": []
-    }
+    },
+    "status": "pending",
+    "type": "charge",
+}
+
+FAKE_BALANCE_TRANSACTION_II = {
+    "id": "txn_16g5h62eZvKYlo2CQ2AHA89s",
+    "object": "balance_transaction",
+    "amount": 65400,
+    "available_on": 1441670400,
+    "created": 1441079064,
+    "currency": "usd",
+    "description": None,
+    "fee": 1927,
+    "fee_details": [
+        {
+          "amount": 1927,
+          "currency": "usd",
+          "type": "stripe_fee",
+          "description": "Stripe processing fees",
+          "application": None,
+        }
+    ],
+    "net": 63473,
+    "source": "ch_16g5h62eZvKYlo2CMRXkSqa0",
+    "sourced_transfers": {
+        "object": "list",
+        "total_count": 0,
+        "has_more": False,
+        "url": "/v1/transfers?source_transaction=ch_16g5h62eZvKYlo2CMRXkSqa0",
+        "data": [],
+    },
+    "status": "pending",
+    "type": "charge",
+}
+
+FAKE_BALANCE_TRANSACTION_III = {
+    "id": "txn_16g5h62eZvKYlo2CQ2AHA89s",
+    "object": "balance_transaction",
+    "amount": 2000,
+    "available_on": 1441670400,
+    "created": 1441079064,
+    "currency": "usd",
+    "description": None,
+    "fee": 1927,
+    "fee_details": [
+        {
+          "amount": 1927,
+          "currency": "usd",
+          "type": "stripe_fee",
+          "description": "Stripe processing fees",
+          "application": None,
+        }
+    ],
+    "net": 73,
+    "source": "ch_16g5h62eZvKYlo2CMRXkSqa0",
+    "sourced_transfers": {
+        "object": "list",
+        "total_count": 0,
+        "has_more": False,
+        "url": "/v1/transfers?source_transaction=ch_16g5h62eZvKYlo2CMRXkSqa0",
+        "data": [],
+    },
+    "status": "pending",
+    "type": "charge",
+}
+
+FAKE_BALANCE_TRANSACTION_IV = {
+    "id": "txn_16g5h62eZvKYlo2CQ2AHA89s",
+    "object": "balance_transaction",
+    "amount": 19010,
+    "available_on": 1441670400,
+    "created": 1441079064,
+    "currency": "usd",
+    "description": None,
+    "fee": 1927,
+    "fee_details": [
+        {
+          "amount": 1927,
+          "currency": "usd",
+          "type": "stripe_fee",
+          "description": "Stripe processing fees",
+          "application": None,
+        }
+    ],
+    "net": 17083,
+    "source": "ch_16g5h62eZvKYlo2CMRXkSqa0",
+    "sourced_transfers": {
+        "object": "list",
+        "total_count": 0,
+        "has_more": False,
+        "url": "/v1/transfers?source_transaction=ch_16g5h62eZvKYlo2CMRXkSqa0",
+        "data": [],
+    },
+    "status": "pending",
+    "type": "charge",
+}
+
+FAKE_BANK_ACCOUNT = {
+    "id": "ba_16hTzo2eZvKYlo2CeSjfb0tS",
+    "object": "bank_account",
+    "account_holder_name": None,
+    "account_holder_type": None,
+    "bank_name": "STRIPE TEST BANK",
+    "country": "US",
+    "currency": "usd",
+    "fingerprint": "1JWtPxqbdX5Gamtc",
+    "last4": "6789",
+    "routing_number": "110000000",
+    "status": "new",
+}
+
+FAKE_BANK_ACCOUNT_II = {
+    "id": "ba_17O4Tz2eZvKYlo2CMYsxroV5",
+    "object": "bank_account",
+    "account_holder_name": None,
+    "account_holder_type": None,
+    "bank_name": None,
+    "country": "US",
+    "currency": "usd",
+    "fingerprint": "1JWtPxqbdX5Gamtc",
+    "last4": "6789",
+    "routing_number": "110000000",
+    "status": "new",
 }
 
 FAKE_CARD = {
     "id": "card_16YKQh2eZvKYlo2Cblc5Feoo",
     "object": "card",
-    "last4": "4242",
-    "brand": "Visa",
-    "funding": "credit",
-    "exp_month": 12,
-    "exp_year": 2016,
-    "country": "US",
-    "name": "alex-nesnes@hotmail.fr",
-    "address_line1": None,
-    "address_line2": None,
     "address_city": None,
+    "address_country": None,
+    "address_line1": None,
+    "address_line1_check": None,
+    "address_line2": None,
     "address_state": None,
     "address_zip": None,
-    "address_country": None,
-    "cvc_check": "pass",
-    "address_line1_check": None,
     "address_zip_check": None,
-    "tokenization_method": None,
+    "brand": "Visa",
+    "country": "US",
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "cvc_check": "pass",
     "dynamic_last4": None,
+    "exp_month": 12,
+    "exp_year": 2016,
+    "funding": "credit",
+    "last4": "4242",
     "metadata": {},
-    "customer": "cus_6lsBvm5rJ0zyHc"
+    "name": "alex-nesnes@hotmail.fr",
+    "tokenization_method": None,
 }
 
 FAKE_CARD_II = {
     "id": "card_14Lc4K2eZvKYlo2CcXyAXlDR",
     "object": "card",
-    "last4": "4242",
-    "brand": "Visa",
-    "funding": "credit",
-    "exp_month": 7,
-    "exp_year": 2015,
-    "country": "US",
-    "name": None,
-    "address_line1": None,
-    "address_line2": None,
     "address_city": None,
+    "address_country": None,
+    "address_line1": None,
+    "address_line1_check": None,
+    "address_line2": None,
     "address_state": None,
     "address_zip": None,
-    "address_country": None,
-    "cvc_check": None,
-    "address_line1_check": None,
     "address_zip_check": None,
-    "tokenization_method": None,
-    "fingerprint": "Xt5EWLLDS7FJjR1c",
+    "brand": "Visa",
+    "country": "US",
+    "customer": "cus_4UbFSo9tl62jqj",
+    "cvc_check": None,
     "dynamic_last4": None,
+    "exp_month": 7,
+    "exp_year": 2015,
+    "fingerprint": "Xt5EWLLDS7FJjR1c",
+    "funding": "credit",
+    "last4": "4242",
     "metadata": {},
-    "customer": "cus_4UbFSo9tl62jqj"
+    "name": None,
+    "tokenization_method": None,
 }
 
 FAKE_CARD_III = {
     "id": "card_17PLiR2eZvKYlo2CRwTCUAdZ",
     "object": "card",
-    "last4": "1005",
-    "brand": "American Express",
-    "funding": "credit",
-    "exp_month": 7,
-    "exp_year": 2019,
-    "country": "US",
-    "name": None,
-    "address_line1": None,
-    "address_line2": None,
     "address_city": None,
+    "address_country": None,
+    "address_line1": None,
+    "address_line1_check": None,
+    "address_line2": None,
     "address_state": None,
     "address_zip": None,
-    "address_country": None,
-    "cvc_check": "unchecked",
-    "address_line1_check": None,
     "address_zip_check": None,
-    "tokenization_method": None,
-    "fingerprint": "Xt5EWLLDS7FJjR1c",
+    "brand": "American Express",
+    "country": "US",
+    "customer": None,
+    "cvc_check": "unchecked",
     "dynamic_last4": None,
+    "exp_month": 7,
+    "exp_year": 2019,
+    "fingerprint": "Xt5EWLLDS7FJjR1c",
+    "funding": "credit",
+    "last4": "1005",
     "metadata": {},
-    "customer": None
+    "name": None,
+    "tokenization_method": None,
+}
+
+FAKE_CARD_IV = {
+    "id": "card_186Qdm2eZvKYlo2CInjNRrRE",
+    "object": "card",
+    "address_city": None,
+    "address_country": None,
+    "address_line1": None,
+    "address_line1_check": None,
+    "address_line2": None,
+    "address_state": None,
+    "address_zip": None,
+    "address_zip_check": None,
+    "brand": "Visa",
+    "country": "US",
+    "customer": None,
+    "cvc_check": "unchecked",
+    "dynamic_last4": None,
+    "exp_month": 6,
+    "exp_year": 2018,
+    "funding": "credit",
+    "last4": "4242",
+    "metadata": {},
+    "name": None,
+    "tokenization_method": None,
 }
 
 
@@ -158,162 +307,152 @@ class ChargeDict(dict):
 FAKE_CHARGE = ChargeDict({
     "id": "ch_16YKQi2eZvKYlo2CrCuzbJQx",
     "object": "charge",
-    "created": 1439229084,
-    "livemode": False,
-    "paid": True,
-    "status": "succeeded",
     "amount": 2200,
-    "currency": "usd",
-    "refunded": False,
-    "source": deepcopy(FAKE_CARD),
-    "captured": True,
-    "balance_transaction": deepcopy(FAKE_BALANCE_TRANSACTION),
-    "failure_message": None,
-    "failure_code": None,
     "amount_refunded": 0,
+    "application_fee": None,
+    "balance_transaction": deepcopy(FAKE_BALANCE_TRANSACTION),
+    "captured": True,
+    "created": 1439229084,
+    "currency": "usd",
     "customer": "cus_6lsBvm5rJ0zyHc",
-    "invoice": "in_7udnik28sj829dj",
     "description": "VideoDoc consultation for ivanp0001 berkp0001",
+    "destination": None,
     "dispute": None,
-    "metadata": {},
-    "statement_descriptor": None,
+    "failure_code": None,
+    "failure_message": None,
     "fraud_details": {},
+    "invoice": "in_7udnik28sj829dj",
+    "livemode": False,
+    "metadata": {},
+    "order": None,
+    "paid": True,
     "receipt_email": None,
     "receipt_number": None,
-    "shipping": None,
-    "destination": None,
-    "application_fee": None,
+    "refunded": False,
     "refunds": {
         "object": "list",
         "total_count": 0,
         "has_more": False,
         "url": "/v1/charges/ch_16YKQi2eZvKYlo2CrCuzbJQx/refunds",
         "data": []
-    }
+    },
+    "shipping": None,
+    "source": deepcopy(FAKE_CARD),
+    "source_transfer": None,
+    "statement_descriptor": None,
+    "status": "succeeded",
 })
 
 FAKE_CHARGE_II = ChargeDict({
     "id": "ch_16ag432eZvKYlo2CGDe6lvVs",
     "object": "charge",
-    "created": 1439788903,
-    "livemode": False,
-    "paid": False,
-    "status": "failed",
     "amount": 3000,
-    "currency": "usd",
-    "refunded": False,
-    "source": deepcopy(FAKE_CARD_II),
-    "captured": False,
-    "balance_transaction": None,
-    "failure_message": "Your card has expired.",
-    "failure_code": "expired_card",
     "amount_refunded": 0,
+    "application_fee": None,
+    "balance_transaction": deepcopy(FAKE_BALANCE_TRANSACTION),
+    "captured": False,
+    "created": 1439788903,
+    "currency": "usd",
     "customer": "cus_4UbFSo9tl62jqj",
-    "invoice": "in_16af5A2eZvKYlo2CJjANLL81",
     "description": None,
+    "destination": None,
     "dispute": None,
-    "metadata": {},
-    "statement_descriptor": None,
+    "failure_code": "expired_card",
+    "failure_message": "Your card has expired.",
     "fraud_details": {},
+    "invoice": "in_16af5A2eZvKYlo2CJjANLL81",
+    "livemode": False,
+    "metadata": {},
+    "order": None,
+    "paid": False,
     "receipt_email": None,
     "receipt_number": None,
-    "shipping": None,
-    "destination": None,
-    "application_fee": None,
+    "refunded": False,
     "refunds": {
         "object": "list",
         "total_count": 0,
         "has_more": False,
         "url": "/v1/charges/ch_16ag432eZvKYlo2CGDe6lvVs/refunds",
-        "data": []
-    }
+        "data": [],
+    },
+    "shipping": None,
+    "source": deepcopy(FAKE_CARD_II),
+    "source_transfer": None,
+    "statement_descriptor": None,
+    "status": "failed",
 })
 
-
-FAKE_REFUND = {
-    "id": "re_16YJLj2eZvKYlo2CqZM3NdZ8",
-    "amount": 1999,
-    "currency": "usd",
-    "created": 1439224931,
-    "object": "refund",
-    "balance_transaction": None,
-    "metadata": {},
-    "charge": "ch_16Vm0n2eZvKYlo2C34QFbOLJ",
-    "receipt_number": None,
-    "reason": None
-}
-
 FAKE_PLAN = {
-    "interval": "month",
-    "name": "New plan name",
-    "created": 1386247539,
-    "amount": 2000,
-    "currency": "usd",
     "id": "gold21323",
     "object": "plan",
-    "livemode": False,
+    "amount": 2000,
+    "created": 1386247539,
+    "currency": "usd",
+    "interval": "month",
     "interval_count": 1,
-    "trial_period_days": None,
+    "livemode": False,
     "metadata": {},
-    "statement_descriptor": None
+    "name": "New plan name",
+    "statement_descriptor": None,
+    "trial_period_days": None,
 }
 
 FAKE_PLAN_II = {
-    "interval": "week",
-    "name": "New plan name",
-    "created": 1386247539,
-    "amount": 4000,
-    "currency": "usd",
     "id": "silver41294",
     "object": "plan",
-    "livemode": False,
+    "amount": 4000,
+    "created": 1386247539,
+    "currency": "usd",
+    "interval": "week",
     "interval_count": 1,
-    "trial_period_days": 12,
+    "livemode": False,
     "metadata": {},
-    "statement_descriptor": None
+    "name": "New plan name",
+    "statement_descriptor": None,
+    "trial_period_days": 12,
 }
 
 
 FAKE_SUBSCRIPTION = {
     "id": "sub_6lsC8pt7IcFpjA",
-    "plan": deepcopy(FAKE_PLAN),
     "object": "subscription",
+    "application_fee_percent": None,
+    "cancel_at_period_end": False,
+    "canceled_at": None,
+    "current_period_end": 1441907581,
+    "current_period_start": 1439229181,
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "discount": None,
+    "ended_at": None,
+    "metadata": {},
+    "plan": deepcopy(FAKE_PLAN),
+    "quantity": 1,
     "start": 1439229181,
     "status": "active",
-    "customer": "cus_6lsBvm5rJ0zyHc",
-    "cancel_at_period_end": False,
-    "current_period_start": 1439229181,
-    "current_period_end": 1441907581,
-    "ended_at": None,
-    "trial_start": None,
-    "trial_end": None,
-    "canceled_at": None,
-    "quantity": 1,
-    "application_fee_percent": None,
-    "discount": None,
     "tax_percent": None,
-    "metadata": {}
+    "trial_end": None,
+    "trial_start": None,
 }
 
 FAKE_SUBSCRIPTION_II = {
     "id": "sub_6mkwMbhaZF9jih",
-    "plan": deepcopy(FAKE_PLAN_II),
     "object": "subscription",
+    "application_fee_percent": None,
+    "cancel_at_period_end": False,
+    "canceled_at": None,
+    "current_period_end": 1442111228,
+    "current_period_start": 1439432828,
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "discount": None,
+    "ended_at": None,
+    "metadata": {},
+    "plan": deepcopy(FAKE_PLAN_II),
+    "quantity": 1,
     "start": 1386247539,
     "status": "active",
-    "customer": "cus_6lsBvm5rJ0zyHc",
-    "cancel_at_period_end": False,
-    "current_period_start": 1439432828,
-    "current_period_end": 1442111228,
-    "ended_at": None,
-    "trial_start": None,
-    "trial_end": None,
-    "canceled_at": None,
-    "quantity": 1,
-    "application_fee_percent": None,
-    "discount": None,
     "tax_percent": None,
-    "metadata": {}
+    "trial_end": None,
+    "trial_start": None,
 }
 
 
@@ -350,24 +489,20 @@ class CustomerDict(dict):
 
 
 FAKE_CUSTOMER = CustomerDict({
-    "object": "customer",
-    "created": 1439229084,
     "id": "cus_6lsBvm5rJ0zyHc",
-    "livemode": False,
-    "description": None,
-    "email": "virtumedix+ivanp0001@gmail.com",
-    "delinquent": False,
-    "metadata": {},
-    "subscriptions": {
-        "object": "list",
-        "total_count": 2,
-        "has_more": False,
-        "url": "/v1/customers/cus_6lsBvm5rJ0zyHc/subscriptions",
-        "data": [deepcopy(FAKE_SUBSCRIPTION), deepcopy(FAKE_SUBSCRIPTION_II)]
-    },
-    "discount": None,
+    "object": "customer",
     "account_balance": 0,
+    "business_vat_id": None,
+    "created": 1439229084,
     "currency": "usd",
+    "default_source": "card_16YKQh2eZvKYlo2Cblc5Feoo",
+    "delinquent": False,
+    "description": "Michael Smith",
+    "discount": None,
+    "email": "michael.smith@example.com",
+    "livemode": False,
+    "metadata": {},
+    "shipping": None,
     "sources": {
         "object": "list",
         "total_count": 1,
@@ -375,49 +510,15 @@ FAKE_CUSTOMER = CustomerDict({
         "url": "/v1/customers/cus_6lsBvm5rJ0zyHc/sources",
         "data": [deepcopy(FAKE_CARD)]
     },
-    "default_source": "card_16YKQh2eZvKYlo2Cblc5Feoo"
-})
-
-FAKE_COUPON = {
-    "id": "grandfathered",
-    "created": 1437556338,
-    "percent_off": 24,
-    "amount_off": None,
-    "currency": "usd",
-    "object": "coupon",
-    "livemode": False,
-    "duration": "forever",
-    "redeem_by": None,
-    "max_redemptions": None,
-    "times_redeemed": 2,
-    "duration_in_months": None,
-    "valid": True,
-    "metadata": {}
-}
-
-FAKE_DISCOUNT = {
-    "coupon": {
-        "id": "grandfathered",
-        "created": 1437556338,
-        "percent_off": 24,
-        "amount_off": None,
-        "currency": "usd",
-        "object": "coupon",
-        "livemode": False,
-        "duration": "forever",
-        "redeem_by": None,
-        "max_redemptions": None,
-        "times_redeemed": 2,
-        "duration_in_months": None,
-        "valid": True,
-        "metadata": {}
+    "subscriptions": {
+        "object": "list",
+        "total_count": 2,
+        "has_more": False,
+        "url": "/v1/customers/cus_6lsBvm5rJ0zyHc/subscriptions",
+        "data": [deepcopy(FAKE_SUBSCRIPTION), deepcopy(FAKE_SUBSCRIPTION_II)]
     },
-    "start": 1408104978,
-    "object": "discount",
-    "customer": "cus_6lsBvm5rJ0zyHc",
-    "subscription": "sub_4avT2dbwKJA3EL",
-    "end": None
-}
+
+})
 
 
 class InvoiceDict(dict):
@@ -426,784 +527,423 @@ class InvoiceDict(dict):
 
 
 FAKE_INVOICE = InvoiceDict({
-    "date": 1439218864,
     "id": "in_16YHls2eZvKYlo2CwwH968Mc",
-    "period_start": 1439132289,
-    "period_end": 1439218689,
+    "object": "invoice",
+    "amount_due": 2000,
+    "application_fee": None,
+    "attempt_count": 1,
+    "attempted": True,
+    "charge": "ch_16YIoj2eZvKYlo2CrPdYapBH",
+    "closed": True,
+    "currency": "usd",
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "date": 1439218864,
+    "description": None,
+    "discount": None,
+    "ending_balance": 0,
+    "forgiven": False,
     "lines": {
         "data": [
             {
                 "id": "sub_6lsC8pt7IcFpjA",
                 "object": "line_item",
-                "type": "subscription",
-                "livemode": True,
                 "amount": 2000,
                 "currency": "usd",
-                "proration": False,
+                "description": None,
+                "discountable": True,
+                "livemode": True,
+                "metadata": {},
                 "period": {
                     "start": 1441907581,
                     "end": 1444499581
                 },
-                "subscription": None,
-                "quantity": 1,
                 "plan": deepcopy(FAKE_PLAN),
-                "description": None,
-                "discountable": True,
-                "metadata": {
-                }
+                "proration": False,
+                "quantity": 1,
+                "subscription": None,
+                "type": "subscription",
             }
         ],
         "total_count": 1,
         "object": "list",
-        "url": "/v1/invoices/in_16YHls2eZvKYlo2CwwH968Mc/lines"
+        "url": "/v1/invoices/in_16YHls2eZvKYlo2CwwH968Mc/lines",
     },
-    "subtotal": 2000,
-    "total": 2000,
-    "customer": "cus_6lsBvm5rJ0zyHc",
-    "object": "invoice",
-    "attempted": True,
-    "closed": True,
-    "forgiven": False,
-    "paid": True,
     "livemode": False,
-    "attempt_count": 1,
-    "amount_due": 2000,
-    "currency": "usd",
-    "starting_balance": 0,
-    "ending_balance": 0,
-    "next_payment_attempt": None,
-    "webhooks_delivered_at": 1439218870,
-    "charge": "ch_16YIoj2eZvKYlo2CrPdYapBH",
-    "discount": None,
-    "application_fee": None,
-    "subscription": "sub_4Ryf0Qo0XKkQnY",
-    "tax_percent": None,
-    "tax": None,
     "metadata": {},
-    "statement_descriptor": None,
-    "description": None,
+    "next_payment_attempt": None,
+    "paid": True,
+    "period_end": 1439218689,
+    "period_start": 1439132289,
     "receipt_number": None,
+    "starting_balance": 0,
+    "statement_descriptor": None,
+    "subscription": "sub_4Ryf0Qo0XKkQnY",
+    "subtotal": 2000,
+    "tax": None,
+    "tax_percent": None,
+    "total": 2000,
+    "webhooks_delivered_at": 1439218870,
 })
 
 FAKE_INVOICE_II = InvoiceDict({
-    "date": 1439785128,
     "id": "in_16af5A2eZvKYlo2CJjANLL81",
-    "period_start": 1439698371,
-    "period_end": 1439784771,
+    "object": "invoice",
+    "amount_due": 3000,
+    "application_fee": None,
+    "attempt_count": 1,
+    "attempted": True,
+    "charge": FAKE_CHARGE_II["id"],
+    "closed": False,
+    "currency": "usd",
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "date": 1439785128,
+    "description": None,
+    "discount": None,
+    "ending_balance": 0,
+    "forgiven": False,
     "lines": {
         "data": [
             {
                 "id": "sub_6oJM1zfG5KhjTk",
                 "object": "line_item",
-                "type": "subscription",
-                "livemode": True,
                 "amount": 2000,
                 "currency": "usd",
-                "proration": False,
+                "description": None,
+                "discountable": True,
+                "livemode": True,
+                "metadata": {},
                 "period": {
                     "start": 1442469907,
                     "end": 1445061907
                 },
-                "subscription": None,
-                "quantity": 1,
                 "plan": deepcopy(FAKE_PLAN),
-                "description": None,
-                "discountable": True,
-                "metadata": {}
+                "proration": False,
+                "quantity": 1,
+                "subscription": None,
+                "type": "subscription",
             }
         ],
         "total_count": 1,
         "object": "list",
-        "url": "/v1/invoices/in_16Yf6s2eZvKYlo2CG7FhvCos/lines"
+        "url": "/v1/invoices/in_16Yf6s2eZvKYlo2CG7FhvCos/lines",
     },
-    "subtotal": 3000,
-    "total": 3000,
-    "customer": "cus_6lsBvm5rJ0zyHc",
-    "object": "invoice",
-    "attempted": True,
-    "closed": False,
-    "forgiven": False,
-    "paid": False,
     "livemode": False,
-    "attempt_count": 1,
-    "amount_due": 3000,
-    "currency": "usd",
-    "starting_balance": 0,
-    "ending_balance": 0,
-    "next_payment_attempt": 1440048103,
-    "webhooks_delivered_at": 1439785139,
-    "charge": FAKE_CHARGE_II["id"],
-    "discount": None,
-    "application_fee": None,
-    "subscription": "sub_4gmRwSQmlmUOs8",
-    "tax_percent": None,
-    "tax": None,
     "metadata": {},
+    "next_payment_attempt": 1440048103,
+    "paid": False,
+    "period_end": 1439784771,
+    "period_start": 1439698371,
+    "receipt_number": None,
+    "starting_balance": 0,
     "statement_descriptor": None,
-    "description": None,
-    "receipt_number": None
+    "subscription": "sub_4gmRwSQmlmUOs8",
+    "subtotal": 3000,
+    "tax": None,
+    "tax_percent": None,
+    "total": 3000,
+    "webhooks_delivered_at": 1439785139,
 })
 
 
 FAKE_INVOICE_III = InvoiceDict({
-    "date": 1439425915,
     "id": "in_16Z9dP2eZvKYlo2CgFHgFx2Z",
-    "period_start": 1436746171,
-    "period_end": 1439424571,
+    "object": "invoice",
+    "amount_due": 0,
+    "application_fee": None,
+    "attempt_count": 0,
+    "attempted": True,
+    "charge": None,
+    "closed": True,
+    "currency": "usd",
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "date": 1439425915,
+    "description": None,
+    "discount": None,
+    "ending_balance": 20,
+    "forgiven": False,
     "lines": {
         "data": [
             {
                 "id": "sub_6mkwMbhaZF9jih",
                 "object": "line_item",
-                "type": "subscription",
-                "livemode": True,
                 "amount": 2000,
                 "currency": "usd",
-                "proration": False,
+                "description": None,
+                "discountable": True,
+                "livemode": True,
+                "metadata": {},
                 "period": {
                     "start": 1442111228,
                     "end": 1444703228
                 },
-                "subscription": None,
-                "quantity": 1,
                 "plan": deepcopy(FAKE_PLAN),
-                "description": None,
-                "discountable": True,
-                "metadata": {}
+                "proration": False,
+                "quantity": 1,
+                "subscription": None,
+                "type": "subscription",
             }
         ],
         "total_count": 1,
         "object": "list",
-        "url": "/v1/invoices/in_16Z9dP2eZvKYlo2CgFHgFx2Z/lines"
+        "url": "/v1/invoices/in_16Z9dP2eZvKYlo2CgFHgFx2Z/lines",
     },
-    "subtotal": 20,
-    "total": 20,
-    "customer": "cus_6lsBvm5rJ0zyHc",
-    "object": "invoice",
-    "attempted": True,
-    "closed": True,
-    "forgiven": False,
-    "paid": True,
     "livemode": False,
-    "attempt_count": 0,
-    "amount_due": 0,
-    "currency": "usd",
-    "starting_balance": 0,
-    "ending_balance": 20,
-    "next_payment_attempt": None,
-    "webhooks_delivered_at": 1439426955,
-    "charge": None,
-    "discount": None,
-    "application_fee": None,
-    "subscription": "sub_6EFxeHf3aEjcOl",
-    "tax_percent": None,
-    "tax": None,
     "metadata": {},
+    "next_payment_attempt": None,
+    "paid": True,
+    "period_end": 1439424571,
+    "period_start": 1436746171,
+    "receipt_number": None,
+    "starting_balance": 0,
     "statement_descriptor": None,
-    "description": None,
-    "receipt_number": None
+    "subscription": "sub_6EFxeHf3aEjcOl",
+    "subtotal": 20,
+    "tax": None,
+    "tax_percent": None,
+    "total": 20,
+    "webhooks_delivered_at": 1439426955,
 })
 
 FAKE_INVOICEITEM = {
-    "object": "invoiceitem",
     "id": "ii_16XVTY2eZvKYlo2Cxz5n3RaS",
-    "date": 1439033216,
+    "object": "invoiceitem",
+
     "amount": 2000,
-    "livemode": False,
-    "proration": False,
     "currency": "usd",
     "customer": "cus_6lsBvm5rJ0zyHc",
-    "discountable": True,
+    "date": 1439033216,
     "description": "One-time setup fee",
+    "discountable": True,
+    "invoice": None,
+    "livemode": False,
     "metadata": {
         "key1": "value1",
         "key2": "value2"
     },
-    "invoice": None,
-    "subscription": None,
-    "quantity": None,
-    "plan": None,
     "period": {
         "start": 1439033216,
-        "end": 1439033216
-    }
-}
-
-FAKE_DISPUTE = {
-    "id": "dp_15RsQX2eZvKYlo2C0MFNUWJC",
-    "charge": "ch_15RsQR2eZvKYlo2CA8IfzCX0",
-    "amount": 195,
-    "created": 1422915137,
-    "status": "lost",
-    "livemode": False,
-    "currency": "usd",
-    "object": "dispute",
-    "reason": "general",
-    "is_charge_refundable": False,
-    "balance_transactions": [
-        {
-            "id": "txn_15RsQX2eZvKYlo2CUTLzmHcJ",
-            "object": "balance_transaction",
-            "amount":-195,
-            "currency": "usd",
-            "net":-1695,
-            "type": "adjustment",
-            "created": 1422915137,
-            "available_on": 1423440000,
-            "status": "available",
-            "fee": 1500,
-            "fee_details": [
-                {
-                    "amount": 1500,
-                    "currency": "usd",
-                    "type": "stripe_fee",
-                    "description": "Dispute fee",
-                    "application": None
-                }
-            ],
-            "source": "ch_15RsQR2eZvKYlo2CA8IfzCX0",
-            "description": "Chargeback withdrawal for ch_15RsQR2eZvKYlo2CA8IfzCX0",
-            "sourced_transfers": {
-                "object": "list",
-                "total_count": 0,
-                "has_more": False,
-                "url": "/v1/transfers?source_transaction=ad_15RsQX2eZvKYlo2CYlUxjQ32",
-                "data": []
-            }
-        }
-    ],
-    "evidence_details": {
-        "due_by": 1424303999,
-        "past_due": False,
-        "has_evidence": False,
-        "submission_count": 0
+        "end": 1439033216,
     },
-    "evidence": {
-        "product_description": None,
-        "customer_name": None,
-        "customer_email_address": None,
-        "customer_purchase_ip": None,
-        "customer_signature": None,
-        "billing_address": None,
-        "receipt": None,
-        "shipping_address": None,
-        "shipping_date": None,
-        "shipping_carrier": None,
-        "shipping_tracking_number": None,
-        "shipping_documentation": None,
-        "access_activity_log": None,
-        "service_date": None,
-        "service_documentation": None,
-        "duplicate_charge_id": None,
-        "duplicate_charge_explanation": None,
-        "duplicate_charge_documentation": None,
-        "refund_policy": None,
-        "refund_policy_disclosure": None,
-        "refund_refusal_explanation": None,
-        "cancellation_policy": None,
-        "cancellation_policy_disclosure": None,
-        "cancellation_rebuttal": None,
-        "customer_communication": None,
-        "uncategorized_text": None,
-        "uncategorized_file": None
-    },
-    "metadata": {}
+    "plan": None,
+    "proration": False,
+    "quantity": None,
+    "subscription": None,
 }
 
 FAKE_TRANSFER = {
     "id": "tr_16Y9BK2eZvKYlo2CR0ySu1BA",
     "object": "transfer",
-    "created": 1439185846,
-    "date": 1439185846,
-    "livemode": False,
     "amount": 100,
+    "amount_reversed": 0,
+    "application_fee": None,
+    "balance_transaction": deepcopy(FAKE_BALANCE_TRANSACTION_II),
+    "created": 1439185846,
     "currency": "usd",
-    "reversed": False,
-    "status": "paid",
-    "type": "stripe_account",
+    "date": 1439185846,
+    "description": "Test description - 1439185984",
+    "destination": "acct_16Y9B9Fso9hLaeLu",
+    "destination_payment": "py_16Y9BKFso9hLaeLueFmWAYUi",
+    "failure_code": None,
+    "failure_message": None,
+    "livemode": False,
+    "metadata": {},
+    "recipient": None,
     "reversals": {
         "object": "list",
         "total_count": 0,
         "has_more": False,
         "url": "/v1/transfers/tr_16Y9BK2eZvKYlo2CR0ySu1BA/reversals",
-        "data": []
+        "data": [],
     },
-    "balance_transaction": {
-        "id": "txn_16g5h62eZvKYlo2CQ2AHA89s",
-        "object": "balance_transaction",
-        "amount": 65400,
-        "currency": "usd",
-        "net": 63473,
-        "type": "charge",
-        "created": 1441079064,
-        "available_on": 1441670400,
-        "status": "pending",
-        "fee": 1927,
-        "fee_details": [
-            {
-              "amount": 1927,
-              "currency": "usd",
-              "type": "stripe_fee",
-              "description": "Stripe processing fees",
-              "application": None
-            }
-        ],
-        "source": "ch_16g5h62eZvKYlo2CMRXkSqa0",
-        "description": None,
-        "sourced_transfers": {
-            "object": "list",
-            "total_count": 0,
-            "has_more": False,
-            "url": "/v1/transfers?source_transaction=ch_16g5h62eZvKYlo2CMRXkSqa0",
-            "data": []
-        }
-    },
-    "destination": "acct_16Y9B9Fso9hLaeLu",
-    "destination_payment": "py_16Y9BKFso9hLaeLueFmWAYUi",
-    "description": "Test description - 1439185984",
-    "failure_message": None,
-    "failure_code": None,
-    "amount_reversed": 0,
-    "metadata": {},
-    "statement_descriptor": None,
-    "recipient": None,
+    "reversed": False,
     "source_transaction": None,
-    "application_fee": None
-}
-FAKE_TRANSFER_REVERSAL = {
-    "id": "trr_103B0z2eZvKYlo2CaV3bKTMx",
-    "amount": 1880,
-    "currency": "usd",
-    "created": 1387829133,
-    "object": "transfer_reversal",
-    "balance_transaction": "txn_103B0z2eZvKYlo2CPqgXjXDI",
-    "metadata": {},
-    "transfer": "tr_103B0z2eZvKYlo2CI9WMGvlV"
+    "source_type": "bank_account",
+    "statement_descriptor": None,
+    "status": "paid",
+    "type": "stripe_account",
 }
 
 FAKE_TRANSFER_II = {
     "id": "tr_16hTzv2eZvKYlo2CWuyMmuvV",
     "object": "transfer",
-    "created": 1440420000,
-    "date": 1440420000,
-    "livemode": False,
     "amount": 2000,
+    "amount_reversed": 0,
+    "application_fee": None,
+    "balance_transaction": deepcopy(FAKE_BALANCE_TRANSACTION_III),
+    "bank_account": deepcopy(FAKE_BANK_ACCOUNT),
+    "created": 1440420000,
     "currency": "usd",
-    "reversed": False,
-    "status": "paid",
-    "type": "bank_account",
+    "date": 1440420000,
+    "description": None,
+    "destination": "ba_16hTzo2eZvKYlo2CeSjfb0tS",
+    "failure_code": None,
+    "failure_message": None,
+    "livemode": False,
+    "metadata": {
+        "foo": "bar",
+    },
+    "recipient": "rp_16hTzu2eZvKYlo2C9A5mgxEj",
     "reversals": {
         "object": "list",
         "total_count": 0,
         "has_more": False,
         "url": "/v1/transfers/tr_16hTzv2eZvKYlo2CWuyMmuvV/reversals",
-        "data": []
+        "data": [],
     },
-    "balance_transaction": {
-        "id": "txn_16g5h62eZvKYlo2CQ2AHA89s",
-        "object": "balance_transaction",
-        "amount": 2000,
-        "currency": "usd",
-        "net": 73,
-        "type": "charge",
-        "created": 1441079064,
-        "available_on": 1441670400,
-        "status": "pending",
-        "fee": 1927,
-        "fee_details": [
-            {
-              "amount": 1927,
-              "currency": "usd",
-              "type": "stripe_fee",
-              "description": "Stripe processing fees",
-              "application": None
-            }
-        ],
-        "source": "ch_16g5h62eZvKYlo2CMRXkSqa0",
-        "description": None,
-        "sourced_transfers": {
-            "object": "list",
-            "total_count": 0,
-            "has_more": False,
-            "url": "/v1/transfers?source_transaction=ch_16g5h62eZvKYlo2CMRXkSqa0",
-            "data": []
-        }
-    },
-    "bank_account": {
-        "object": "bank_account",
-        "id": "ba_16hTzo2eZvKYlo2CeSjfb0tS",
-        "last4": "6789",
-        "country": "US",
-        "currency": "usd",
-        "status": "new",
-        "fingerprint": "1JWtPxqbdX5Gamtc",
-        "routing_number": "110000000",
-        "bank_name": "STRIPE TEST BANK"
-    },
-    "destination": "ba_16hTzo2eZvKYlo2CeSjfb0tS",
-    "description": None,
-    "failure_message": None,
-    "failure_code": None,
-    "amount_reversed": 0,
-    "metadata": {
-        "foo": "bar"
-    },
-    "statement_descriptor": None,
-    "recipient": "rp_16hTzu2eZvKYlo2C9A5mgxEj",
+    "reversed": False,
     "source_transaction": None,
-    "application_fee": None
+    "source_type": "card",
+    "statement_descriptor": None,
+    "status": "paid",
+    "type": "bank_account",
 }
 
 FAKE_TRANSFER_III = {
     "id": "tr_17O4U52eZvKYlo2CmyYbDAEy",
     "object": "transfer",
-    "created": 1451560845,
-    "date": 1451560845,
-    "livemode": False,
     "amount": 19010,
+    "amount_reversed": 0,
+    "application_fee": None,
+    "balance_transaction": deepcopy(FAKE_BALANCE_TRANSACTION_IV),
+    "bank_account": deepcopy(FAKE_BANK_ACCOUNT_II),
+    "created": 1451560845,
     "currency": "usd",
-    "reversed": False,
-    "status": "paid",
-    "type": "bank_account",
+    "date": 1451560845,
+    "description": "Transfer+for+test@example.com",
+    "destination": "ba_17O4Tz2eZvKYlo2CMYsxroV5",
+    "failure_code": None,
+    "failure_message": None,
+    "livemode": False,
+    "metadata": {
+        "foo2": "bar2",
+    },
+    "recipient": "rp_17O4U42eZvKYlo2CLk4upfDE",
     "reversals": {
         "object": "list",
         "total_count": 0,
         "has_more": False,
         "url": "/v1/transfers/tr_17O4U52eZvKYlo2CmyYbDAEy/reversals",
-        "data": []
+        "data": [],
     },
-    "balance_transaction": {
-        "id": "txn_16g5h62eZvKYlo2CQ2AHA89s",
-        "object": "balance_transaction",
-        "amount": 19010,
-        "currency": "usd",
-        "net": 17083,
-        "type": "charge",
-        "created": 1441079064,
-        "available_on": 1441670400,
-        "status": "pending",
-        "fee": 1927,
-        "fee_details": [
-            {
-              "amount": 1927,
-              "currency": "usd",
-              "type": "stripe_fee",
-              "description": "Stripe processing fees",
-              "application": None
-            }
-        ],
-        "source": "ch_16g5h62eZvKYlo2CMRXkSqa0",
-        "description": None,
-        "sourced_transfers": {
-            "object": "list",
-            "total_count": 0,
-            "has_more": False,
-            "url": "/v1/transfers?source_transaction=ch_16g5h62eZvKYlo2CMRXkSqa0",
-            "data": []
-        }
-    },
-    "bank_account": {
-        "object": "bank_account",
-        "id": "ba_17O4Tz2eZvKYlo2CMYsxroV5",
-        "last4": "6789",
-        "country": "US",
-        "currency": "usd",
-        "status": "new",
-        "fingerprint": "1JWtPxqbdX5Gamtc",
-        "routing_number": "110000000",
-        "bank_name": None
-    },
-    "destination": "ba_17O4Tz2eZvKYlo2CMYsxroV5",
-    "description": "Transfer+for+test@example.com",
-    "failure_message": None,
-    "failure_code": None,
-    "amount_reversed": 0,
-    "metadata": {
-        "foo": "bar"
-    },
-    "statement_descriptor": None,
-    "recipient": "rp_17O4U42eZvKYlo2CLk4upfDE",
+    "reversed": False,
     "source_transaction": None,
-    "application_fee": None
-}
-
-FAKE_RECIPIENT = {
-    "id": "rp_16UUrf2eZvKYlo2CGTJxYjum",
-    "object": "recipient",
-    "created": 1438315883,
-    "livemode": False,
-    "type": "individual",
-    "description": "A Desc",
-    "email": "email2@2.com",
-    "name": "Bob2 Jones2",
-    "verified": True,
-    "metadata": {},
-    "active_account": {
-        "object": "bank_account",
-        "id": "ba_16UUrc2eZvKYlo2CXJpDcffn",
-        "last4": "6789",
-        "country": "US",
-        "currency": "usd",
-        "status": "new",
-        "fingerprint": "j1CvuuIQNXSIdZuK",
-        "routing_number": "111000025",
-        "bank_name": "BANK OF AMERICA, N.A."
-    },
-    "cards": {
-        "object": "list",
-        "total_count": 0,
-        "has_more": False,
-        "url": "/v1/recipients/rp_16UUrf2eZvKYlo2CGTJxYjum/cards",
-        "data": []
-    },
-    "default_card": None,
-    "migrated_to": None
-}
-
-FAKE_BANK_ACCOUNT = {
-    "object": "bank_account",
-    "id": "ba_16YKSI2eZvKYlo2C5Gi4GZJF",
-    "last4": "6789",
-    "country": "US",
-    "currency": "usd",
-    "status": "new",
-    "fingerprint": "1JWtPxqbdX5Gamtc",
-    "routing_number": "110000000",
-    "bank_name": "STRIPE TEST BANK",
-    "account": "acct_1032D82eZvKYlo2C",
-    "default_for_currency": False,
-    "metadata": {}
-}
-
-FAKE_APPLICATION_FEE = {
-    "id": "fee_6lsCldw61KoYD2",
-    "object": "application_fee",
-    "created": 1439229182,
-    "livemode": False,
-    "amount": 100,
-    "currency": "usd",
-    "refunded": False,
-    "amount_refunded": 0,
-    "refunds": {
-        "object": "list",
-        "total_count": 0,
-        "has_more": False,
-        "url": "/v1/application_fees/fee_6lsCldw61KoYD2/refunds",
-        "data": []
-    },
-    "balance_transaction": "txn_16Vswu2eZvKYlo2C9DlWEgM1",
-    "account": "acct_1032D82eZvKYlo2C",
-    "application": "ca_6lsCbngMi6c27iDAWJUW0cQkr8u9VtTa",
-    "charge": "ch_16YKQi2eZvKYlo2CrCuzbJQx",
-    "originating_transaction": None
-}
-
-FAKE_APPLICATION_FEE_REVERSAL = {
-    "id": "fr_6lsCBm3XbQH0EN",
-    "amount": 100,
-    "currency": "usd",
-    "created": 1439229182,
-    "object": "fee_refund",
-    "balance_transaction": None,
-    "metadata": {},
-    "fee": "fee_6lsCldw61KoYD2"
+    "source_type": "card",
+    "statement_descriptor": None,
+    "status": "paid",
+    "type": "bank_account",
 }
 
 FAKE_ACCOUNT = {
     "id": "acct_1032D82eZvKYlo2C",
-    "email": "site@stripe.com",
-    "statement_descriptor": None,
-    "display_name": "Stripe.com",
-    "timezone": "US/Pacific",
-    "details_submitted": False,
-    "charges_enabled": False,
-    "transfers_enabled": False,
-    "currencies_supported": [
-        "usd",
-        "aed",
-        "afn",
-    ],
-    "default_currency": "usd",
-    "country": "US",
     "object": "account",
+    "business_logo": None,
     "business_name": "Stripe.com",
     "business_url": None,
-    "support_phone": None,
-    "business_logo": None,
-    "managed": False,
-    "product_description": None,
+    "charges_enabled": False,
+    "country": "US",
     "debit_negative_balances": True,
-    "bank_accounts": {
-        "object": "list",
-        "total_count": 0,
-        "has_more": False,
-        "url": "/v1/accounts/acct_1032D82eZvKYlo2C/bank_accounts",
-        "data": []
-    },
-    "external_accounts": {
-        "object": "list",
-        "total_count": 0,
-        "has_more": False,
-        "url": "/v1/accounts/acct_1032D82eZvKYlo2C/external_accounts",
-        "data": []
-    },
-    "verification": {
-        "fields_needed": [],
-        "due_by": None,
-        "disabled_reason": "other"
-    },
-    "transfer_schedule": {
-        "delay_days": 7,
-        "interval": "daily"
-    },
     "decline_charge_on": {
         "cvc_failure": False,
-        "avs_failure": False
+        "avs_failure": False,
     },
-    "tos_acceptance": {
-        "ip": None,
-        "date": None,
-        "user_agent": None
+    "default_currency": "usd",
+    "details_submitted": False,
+    "display_name": "Stripe.com",
+    "email": "site@stripe.com",
+    "external_accounts": {
+        "object": "list",
+        "data": [],
+        "has_more": False,
+        "total_count": 0,
+        "url": "/v1/accounts/acct_1032D82eZvKYlo2C/external_accounts",
     },
     "legal_entity": {
-        "type": None,
-        "business_name": None,
         "address": {
+            "city": None,
+            "country": "US",
             "line1": None,
             "line2": None,
-            "city": None,
-            "state": None,
             "postal_code": None,
-            "country": "US"
-        },
-        "first_name": None,
-        "last_name": None,
-        "personal_address": {
-            "line1": None,
-            "line2": None,
-            "city": None,
             "state": None,
-            "postal_code": None,
-            "country": None
         },
+        "business_name": None,
+        "business_tax_id_provided": False,
         "dob": {
             "day": None,
             "month": None,
             "year": None
         },
-        "additional_owners": None,
+        "first_name": None,
+        "last_name": None,
+        "personal_id_number_provided": False,
+        "ssn_last_4_provided": False,
+        "type": None,
         "verification": {
-            "status": "unverified",
+            "details": None,
+            "details_code": "failed_other",
             "document": None,
-            "details": None
-        }
-    }
-}
-
-FAKE_BALANCE = {
-    "pending": [
-        {
-            "amount": 75519026,
-            "currency": "usd"
-        }
-    ],
-    "available": [
-        {
-            "amount": 4680041949,
-            "currency": "usd"
-        }
-    ],
-    "livemode": False,
-    "object": "balance"
+            "status": "unverified",
+        },
+    },
+    "managed": False,
+    "product_description": None,
+    "statement_descriptor": None,
+    "support_emaile": None,
+    "support_phone": None,
+    "timezone": "US/Pacific",
+    "tos_acceptance": {
+        "date": None,
+        "ip": None,
+        "user_agent": None
+    },
+    "transfer_schedule": {
+        "delay_days": 7,
+        "interval": "daily"
+    },
+    "transfers_enabled": False,
+    "verification": {
+        "disabled_reason": "other",
+        "fields_needed": [],
+        "due_by": None,
+    },
 }
 
 FAKE_EVENT_CHARGE_SUCCEEDED = {
     "id": "evt_16YKQi2eZvKYlo2CT2oe5ff3",
+    "object": "event",
+    "api_version": "2016-03-07",
     "created": 1439229084,
-    "livemode": False,
-    "type": "charge.succeeded",
     "data": {
         "object": deepcopy(FAKE_CHARGE)
     },
-    "object": "event",
+    "livemode": False,
     "pending_webhooks": 0,
     "request": "req_6lsB7hkicwhaDj",
-    "api_version": "2015-07-28"
+    "type": "charge.succeeded",
+
 }
 
 FAKE_EVENT_TRANSFER_CREATED = {
     "id": "evt_16igNU2eZvKYlo2CYyMkYvet",
+    "object": "event",
+    "api_version": "2016-03-07",
     "created": 1441696732,
-    "livemode": False,
-    "type": "transfer.created",
     "data": {
         "object": deepcopy(FAKE_TRANSFER)
     },
-    "object": "event",
+    "livemode": False,
     "pending_webhooks": 0,
     "request": "req_6wZW9MskhYU15Y",
-    "api_version": "2015-07-28"
+    "type": "transfer.created",
 }
 
 FAKE_TOKEN = {
     "id": "tok_16YDIe2eZvKYlo2CPvqprIJd",
-    "livemode": False,
-    "created": 1439201676,
-    "used": False,
     "object": "token",
-    "type": "card",
-    "card": {
-        "id": "card_16YDIe2eZvKYlo2CjfYJvFTk",
-        "object": "card",
-        "last4": "4242",
-        "brand": "Visa",
-        "funding": "credit",
-        "exp_month": 8,
-        "exp_year": 2016,
-        "country": "US",
-        "name": None,
-        "address_line1": None,
-        "address_line2": None,
-        "address_city": None,
-        "address_state": None,
-        "address_zip": None,
-        "address_country": None,
-        "cvc_check": None,
-        "address_line1_check": None,
-        "address_zip_check": None,
-        "tokenization_method": None,
-        "dynamic_last4": None,
-        "metadata": {}
-    },
-    "client_ip": None
-}
-
-FAKE_BITCOIN_RECEIVER = {
-    "id": "btcrcv_16Y9hY2eZvKYlo2CLsYPSJqt",
-    "object": "bitcoin_receiver",
-    "created": 1439187844,
+    "card": deepcopy(FAKE_CARD),
+    "client_ip": None,
+    "created": 1439201676,
     "livemode": False,
-    "active": True,
-    "amount": 2000,
-    "amount_received": 2000,
-    "bitcoin_amount": 20000000,
-    "bitcoin_amount_received": 20000000,
-    "bitcoin_uri": "bitcoin:test_TI6fc7RLQuBhNs9AZ2Z7RgmLFpvMT?amount=0.20000000",
-    "currency": "usd",
-    "filled": True,
-    "inbound_address": "test_TI6fc7RLQuBhNs9AZ2Z7RgmLFpvMT",
-    "uncaptured_funds": True,
-    "description": "Donate to Developers",
-    "email": "1337alexpham@gmail.com",
-    "metadata": {},
-    "refund_address": None
-}
-
-TEST_FILE_UPLOAD = {
-    "id": "fil_15A3Gj2eZvKYlo2C0NxXGm4s",
-    "created": 1418666909,
-    "size": 1529506,
-    "purpose": "dispute_evidence",
-    "object": "file_upload",
-    "type": "pdf"
+    "type": "card",
+    "used": False,
 }
