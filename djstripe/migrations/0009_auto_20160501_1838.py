@@ -62,6 +62,10 @@ class Migration(migrations.Migration):
             name='card_last_4',
         ),
         migrations.RemoveField(
+            model_name='charge',
+            name='invoice',
+        ),
+        migrations.RemoveField(
             model_name='customer',
             name='card_exp_month',
         ),
@@ -543,11 +547,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='charge',
-            name='invoice',
-            field=models.ForeignKey(related_name='charges', null=True, to='djstripe.Invoice', help_text='The invoice associated with this charge, if it exists.'),
-        ),
-        migrations.AlterField(
-            model_name='charge',
             name='paid',
             field=djstripe.fields.StripeBooleanField(help_text='True if the charge succeeded, or was successfully authorized for later capture, False otherwise.', default=False),
         ),
@@ -620,7 +619,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='invoice',
             name='charge',
-            field=models.ForeignKey(related_name='invoices', null=True, to='djstripe.Charge', help_text='The latest charge generated for this invoice, if any.'),
+            field=models.OneToOneField(to='djstripe.Charge', related_name='invoice', null=True, help_text='The latest charge generated for this invoice, if any.'),
         ),
         migrations.AlterField(
             model_name='invoice',

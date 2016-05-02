@@ -7,7 +7,6 @@
 """
 
 from copy import deepcopy
-import decimal
 import json
 
 from django.core.urlresolvers import reverse
@@ -15,14 +14,15 @@ from django.test import TestCase
 from django.test.client import Client
 from mock import patch
 
-from djstripe.models import Event, EventProcessingException, Transfer
-from tests import FAKE_EVENT_TRANSFER_CREATED
+from djstripe.models import Event, EventProcessingException
+from tests import FAKE_EVENT_TRANSFER_CREATED, FAKE_TRANSFER
 
 
 class TestWebhook(TestCase):
 
+    @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
     @patch("stripe.Event.retrieve")
-    def test_webhook_with_transfer_event(self, event_retrieve_mock):
+    def test_webhook_with_transfer_event(self, event_retrieve_mock, transfer_retrieve_mock):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
 
@@ -34,8 +34,9 @@ class TestWebhook(TestCase):
         self.assertEquals(resp.status_code, 200)
         self.assertTrue(Event.objects.filter(type="transfer.created").exists())
 
+    @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
     @patch("stripe.Event.retrieve")
-    def test_webhook_with_transfer_event_duplicate(self, event_retrieve_mock):
+    def test_webhook_with_transfer_event_duplicate(self, event_retrieve_mock, transfer_retrieve_mock):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
 

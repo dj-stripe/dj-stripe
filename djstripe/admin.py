@@ -88,22 +88,21 @@ admin.site.register(
         "refunded",
         "fee",
         "receipt_sent",
-        "stripe_timestamp"
+        "stripe_timestamp",
     ],
     search_fields=[
         "stripe_id",
         "customer__stripe_id",
-        "invoice__stripe_id"
+        "invoice__stripe_id",
     ],
     list_filter=[
         "paid",
         "disputed",
         "refunded",
-        "stripe_timestamp"
+        "stripe_timestamp",
     ],
     raw_id_fields=[
         "customer",
-        "invoice"
     ],
     actions=(send_charge_receipt,),
 )

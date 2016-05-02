@@ -37,7 +37,6 @@ class Charge(StripeCharge):
     account = models.ForeignKey("Account", null=True, related_name="charges", help_text="The account the charge was made on behalf of. Null here indicates that this value was never set.")
 
     customer = models.ForeignKey("Customer", related_name="charges", help_text="The customer associated with this charge.")
-    invoice = models.ForeignKey("Invoice", null=True, related_name="charges", help_text="The invoice associated with this charge, if it exists.")
     transfer = models.ForeignKey("Transfer", null=True, help_text="The transfer to the destination account (only applicable if the charge was created using the destination parameter).")
 
     source = models.ForeignKey(StripeSource, null=True, related_name="charges")
@@ -81,10 +80,6 @@ class Charge(StripeCharge):
             self.customer = customer
         else:
             raise ValidationError("A customer was not attached to this charge.")
-
-        invoice = cls.stripe_object_to_invoice(target_cls=Invoice, data=data)
-        if invoice:
-            self.invoice = invoice
 
         transfer = cls.stripe_object_to_transfer(target_cls=Transfer, data=data)
         if transfer:
@@ -540,7 +535,7 @@ class Card(StripeCard):
 class Invoice(StripeInvoice):
     # account = models.ForeignKey("Account", related_name="invoices")
     customer = models.ForeignKey(Customer, related_name="invoices", help_text="The customer associated with this invoice.")
-    charge = models.ForeignKey(Charge, null=True, related_name="invoices", help_text="The latest charge generated for this invoice, if any.")
+    charge = models.OneToOneField(Charge, null=True, related_name="invoice", help_text="The latest charge generated for this invoice, if any.")
     subscription = models.ForeignKey("Subscription", null=True, related_name="invoices", help_text="The subscription that this invoice was prepared for, if any.")
 
     class Meta(object):

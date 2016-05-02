@@ -49,6 +49,7 @@ class StripeObject(TimeStampedModel):
     # e.g. "Event", "Charge", "Customer", etc.
     stripe_api_name = None
     expand_fields = None
+    _needs_customer = False
 
     objects = models.Manager()
     stripe_objects = StripeObjectManager()
@@ -179,7 +180,16 @@ class StripeObject(TimeStampedModel):
         except cls.DoesNotExist:
             # Grab the stripe data for a nested object
             if field_name != "id":
-                cls_instance = cls(stripe_id=data[field_name])
+                # Special circumstance for objects that can only be called through a customer.
+                # I'm sure this can be made more elegant eventually.
+                # If the customer doesn't already exist, this will throw an exception.
+                if cls._needs_customer:
+                    from .models import Customer
+                    customer = Customer.stripe_objects.get_by_json(data, field_name="customer")
+                    cls_instance = cls(stripe_id=data[field_name], customer=customer)
+                else:
+                    cls_instance = cls(stripe_id=data[field_name])
+
                 data = cls_instance.api_retrieve()
 
             return cls._create_from_stripe_object(data), True
@@ -866,6 +876,7 @@ class StripeCard(StripeSource):
         abstract = True
 
     stripe_api_name = "Card"
+    _needs_customer = True
 
     address_city = StripeTextField(null=True, help_text="Billing address city.")
     address_country = StripeTextField(null=True, help_text="Billing address country.")
@@ -949,6 +960,7 @@ class StripeCard(StripeSource):
         card.update(kwargs)
 
         return stripe.Token.create(card=card)
+
 
 # ============================================================================ #
 #                                Subscriptions                                 #
@@ -1036,7 +1048,8 @@ class StripeInvoice(StripeObject):
         if not self.paid and not self.forgiven and not self.closed:
             stripe_invoice = self.api_retrieve()
             updated_stripe_invoice = stripe_invoice.pay()  # pay() throws an exception if the charge is not successful.
-            self.sync_from_stripe_data(updated_stripe_invoice)
+            print(updated_stripe_invoice)
+            type(self).sync_from_stripe_data(updated_stripe_invoice)
             return True
         return False
 
@@ -1094,7 +1107,7 @@ class StripeInvoiceItem(StripeObject):
         return [
             "amount={amount}".format(amount=self.amount),
             "date={date}".format(date=self.date),
-        ] + super(StripeInvoice, self).str_parts()
+        ] + super(StripeInvoiceItem, self).str_parts()
 
 
 class StripePlan(StripeObject):
@@ -1161,6 +1174,7 @@ class StripeSubscription(StripeObject):
         abstract = True
 
     stripe_api_name = "Subscription"
+    _needs_customer = True
 
     STATUS_ACTIVE = "active"
     STATUS_TRIALING = "trialing"

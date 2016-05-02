@@ -194,10 +194,10 @@ def run_test_suite(args):
 #                                       "./tests/test_event.py",
                                       "./tests/test_fields.py",
                                       "./tests/test_invoice.py",
-                                      "./tests/test_invoiceitem.py",  # Update to use fakes when the model is updated
+                                      "./tests/test_invoiceitem.py",
                                       "./tests/test_managers.py",
                                       "./tests/test_middleware.py",
-                                      "./tests/test_mixins.py",  # Going to want to add new has_active(plan) logic here maybe
+                                      "./tests/test_mixins.py",
                                       "./tests/test_plan.py",
                                       "./tests/test_settings.py",
                                       "./tests/test_stripe_object.py",

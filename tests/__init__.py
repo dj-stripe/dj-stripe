@@ -455,13 +455,54 @@ FAKE_SUBSCRIPTION_II = {
     "trial_start": None,
 }
 
+FAKE_SUBSCRIPTION_III = {
+    "id": "sub_8NDptncNY485qZ",
+    "object": "subscription",
+    "application_fee_percent": None,
+    "cancel_at_period_end": False,
+    "canceled_at": None,
+    "current_period_end": 1464821382,
+    "current_period_start": 1462142982,
+    "customer": "cus_4UbFSo9tl62jqj",
+    "discount": None,
+    "ended_at": None,
+    "metadata": {},
+    "plan": deepcopy(FAKE_PLAN),
+    "quantity": 1,
+    "start": 1462142982,
+    "status": "active",
+    "tax_percent": None,
+    "trial_end": None,
+    "trial_start": None,
+}
+
 
 class Sources(dict):
+    card_fakes = [FAKE_CARD, FAKE_CARD_II, FAKE_CARD_III]
 
     def create(self, source):
-        for fake_card in [FAKE_CARD, FAKE_CARD_II, FAKE_CARD_III]:
+        for fake_card in self.card_fakes:
             if fake_card["id"] == source:
                 return fake_card
+
+    def retrieve(self, id, api_key, expand):
+        for fake_card in self.card_fakes:
+            if fake_card["id"] == id:
+                return fake_card
+
+
+class Subscriptions(dict):
+    subscription_fakes = [FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II, FAKE_SUBSCRIPTION_III]
+
+    def create(self, plan, **kwargs):
+        for fake_subscription in self.subscription_fakes:
+            if fake_subscription["plan"]["id"] == plan:
+                return fake_subscription
+
+    def retrieve(self, id, api_key, expand):
+        for fake_subscription in self.subscription_fakes:
+            if fake_subscription["id"] == id:
+                return fake_subscription
 
 
 class CustomerDict(dict):
@@ -474,7 +515,7 @@ class CustomerDict(dict):
     def invoices(self, **kwargs):
         return DataList(url="/v1/invoices",
                         has_more=False,
-                        data=[deepcopy(FAKE_INVOICE), deepcopy(FAKE_INVOICE_II), deepcopy(FAKE_INVOICE_III)])
+                        data=[deepcopy(FAKE_INVOICE), deepcopy(FAKE_INVOICE_III)])
 
     def update_subscription(self, **kwargs):
         self.update(kwargs)
@@ -487,6 +528,10 @@ class CustomerDict(dict):
     def sources(self):
         return Sources()
 
+    @property
+    def subscriptions(self):
+        return Subscriptions()
+
 
 FAKE_CUSTOMER = CustomerDict({
     "id": "cus_6lsBvm5rJ0zyHc",
@@ -495,7 +540,7 @@ FAKE_CUSTOMER = CustomerDict({
     "business_vat_id": None,
     "created": 1439229084,
     "currency": "usd",
-    "default_source": "card_16YKQh2eZvKYlo2Cblc5Feoo",
+    "default_source": FAKE_CARD["id"],
     "delinquent": False,
     "description": "Michael Smith",
     "discount": None,
@@ -521,9 +566,42 @@ FAKE_CUSTOMER = CustomerDict({
 })
 
 
+FAKE_CUSTOMER_II = CustomerDict({
+    "id": "cus_4UbFSo9tl62jqj",
+    "object": "customer",
+    "account_balance": 0,
+    "business_vat_id": None,
+    "created": 1439229084,
+    "currency": "usd",
+    "default_source": FAKE_CARD_II["id"],
+    "delinquent": False,
+    "description": "John Snow",
+    "discount": None,
+    "email": "john.snow@thewall.com",
+    "livemode": False,
+    "metadata": {},
+    "shipping": None,
+    "sources": {
+        "object": "list",
+        "total_count": 1,
+        "has_more": False,
+        "url": "/v1/customers/cus_4UbFSo9tl62jqj/sources",
+        "data": [deepcopy(FAKE_CARD_II)]
+    },
+    "subscriptions": {
+        "object": "list",
+        "total_count": 1,
+        "has_more": False,
+        "url": "/v1/customers/cus_4UbFSo9tl62jqj/subscriptions",
+        "data": [deepcopy(FAKE_SUBSCRIPTION_III)]
+    },
+
+})
+
+
 class InvoiceDict(dict):
     def pay(self):
-        return "fish"
+        return self
 
 
 FAKE_INVOICE = InvoiceDict({
@@ -533,7 +611,7 @@ FAKE_INVOICE = InvoiceDict({
     "application_fee": None,
     "attempt_count": 1,
     "attempted": True,
-    "charge": "ch_16YIoj2eZvKYlo2CrPdYapBH",
+    "charge": FAKE_CHARGE["id"],
     "closed": True,
     "currency": "usd",
     "customer": "cus_6lsBvm5rJ0zyHc",
@@ -545,7 +623,7 @@ FAKE_INVOICE = InvoiceDict({
     "lines": {
         "data": [
             {
-                "id": "sub_6lsC8pt7IcFpjA",
+                "id": FAKE_SUBSCRIPTION["id"],
                 "object": "line_item",
                 "amount": 2000,
                 "currency": "usd",
@@ -577,7 +655,7 @@ FAKE_INVOICE = InvoiceDict({
     "receipt_number": None,
     "starting_balance": 0,
     "statement_descriptor": None,
-    "subscription": "sub_4Ryf0Qo0XKkQnY",
+    "subscription": FAKE_SUBSCRIPTION["id"],
     "subtotal": 2000,
     "tax": None,
     "tax_percent": None,
@@ -595,7 +673,7 @@ FAKE_INVOICE_II = InvoiceDict({
     "charge": FAKE_CHARGE_II["id"],
     "closed": False,
     "currency": "usd",
-    "customer": "cus_6lsBvm5rJ0zyHc",
+    "customer": "cus_4UbFSo9tl62jqj",
     "date": 1439785128,
     "description": None,
     "discount": None,
@@ -604,7 +682,7 @@ FAKE_INVOICE_II = InvoiceDict({
     "lines": {
         "data": [
             {
-                "id": "sub_6oJM1zfG5KhjTk",
+                "id": FAKE_SUBSCRIPTION_III["id"],
                 "object": "line_item",
                 "amount": 2000,
                 "currency": "usd",
@@ -625,7 +703,7 @@ FAKE_INVOICE_II = InvoiceDict({
         ],
         "total_count": 1,
         "object": "list",
-        "url": "/v1/invoices/in_16Yf6s2eZvKYlo2CG7FhvCos/lines",
+        "url": "/v1/invoices/in_16af5A2eZvKYlo2CJjANLL81/lines",
     },
     "livemode": False,
     "metadata": {},
@@ -636,7 +714,7 @@ FAKE_INVOICE_II = InvoiceDict({
     "receipt_number": None,
     "starting_balance": 0,
     "statement_descriptor": None,
-    "subscription": "sub_4gmRwSQmlmUOs8",
+    "subscription": FAKE_SUBSCRIPTION_III["id"],
     "subtotal": 3000,
     "tax": None,
     "tax_percent": None,
@@ -664,7 +742,7 @@ FAKE_INVOICE_III = InvoiceDict({
     "lines": {
         "data": [
             {
-                "id": "sub_6mkwMbhaZF9jih",
+                "id": FAKE_SUBSCRIPTION["id"],
                 "object": "line_item",
                 "amount": 2000,
                 "currency": "usd",
@@ -696,7 +774,7 @@ FAKE_INVOICE_III = InvoiceDict({
     "receipt_number": None,
     "starting_balance": 0,
     "statement_descriptor": None,
-    "subscription": "sub_6EFxeHf3aEjcOl",
+    "subscription": FAKE_SUBSCRIPTION["id"],
     "subtotal": 20,
     "tax": None,
     "tax_percent": None,
@@ -707,14 +785,13 @@ FAKE_INVOICE_III = InvoiceDict({
 FAKE_INVOICEITEM = {
     "id": "ii_16XVTY2eZvKYlo2Cxz5n3RaS",
     "object": "invoiceitem",
-
     "amount": 2000,
     "currency": "usd",
-    "customer": "cus_6lsBvm5rJ0zyHc",
+    "customer": "cus_4UbFSo9tl62jqj",
     "date": 1439033216,
     "description": "One-time setup fee",
     "discountable": True,
-    "invoice": None,
+    "invoice": FAKE_INVOICE_II["id"],
     "livemode": False,
     "metadata": {
         "key1": "value1",

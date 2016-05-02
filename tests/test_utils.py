@@ -140,14 +140,12 @@ class TestGetSupportedCurrencyChoices(TestCase):
 
     @patch("stripe.CountrySpec.retrieve", return_value={"supported_payment_currencies": ["usd", "cad", "eur"]})
     @patch("stripe.Account.retrieve", return_value={"country": "US"})
-    def test_get_choices(self, stripe_account_retrieve_mock):
-        """
-        Simple test to test sure that at least one currency choice tuple is returned.
-        USD should always be an option.
-        """
+    def test_get_choices(self, stripe_account_retrieve_mock, stripe_countryspec_retrieve_mock):
+        # Simple test to test sure that at least one currency choice tuple is returned.
 
         currency_choices = get_supported_currency_choices(None)
         stripe_account_retrieve_mock.assert_called_once_with()
+        stripe_countryspec_retrieve_mock.assert_called_once_with("US")
         self.assertGreaterEqual(len(currency_choices), 1, "Currency choices pull returned an empty list.")
         self.assertEqual(tuple, type(currency_choices[0]), "Currency choices are not tuples.")
         self.assertIn(("usd", "USD"), currency_choices, "USD not in currency choices.")

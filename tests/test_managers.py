@@ -147,59 +147,100 @@ class ChargeManagerTest(TestCase):
         self.march_charge = Charge.objects.create(
             stripe_id="ch_XXXXMAR1",
             customer=customer,
-            stripe_timestamp=datetime.datetime(2015, 3, 31)
+            stripe_timestamp=datetime.datetime(2015, 3, 31),
+            amount=0,
+            amount_refunded=0,
+            currency="usd",
+            fee=0,
+            fee_details={},
+            status="pending",
         )
 
         self.april_charge_1 = Charge.objects.create(
             stripe_id="ch_XXXXAPR1",
             customer=customer,
-            paid=True,
+            stripe_timestamp=datetime.datetime(2015, 4, 1),
             amount=decimal.Decimal("20.15"),
+            amount_refunded=0,
+            currency="usd",
             fee=decimal.Decimal("4.90"),
-            stripe_timestamp=datetime.datetime(2015, 4, 1)
+            fee_details={},
+            status="succeeded",
+            paid=True,
         )
 
         self.april_charge_2 = Charge.objects.create(
             stripe_id="ch_XXXXAPR2",
             customer=customer,
-            paid=True,
+            stripe_timestamp=datetime.datetime(2015, 4, 18),
             amount=decimal.Decimal("10.35"),
             amount_refunded=decimal.Decimal("5.35"),
-            stripe_timestamp=datetime.datetime(2015, 4, 18)
+            currency="usd",
+            fee=0,
+            fee_details={},
+            status="succeeded",
+            paid=True,
         )
 
         self.april_charge_3 = Charge.objects.create(
             stripe_id="ch_XXXXAPR3",
             customer=customer,
-            paid=False,
+            stripe_timestamp=datetime.datetime(2015, 4, 30),
             amount=decimal.Decimal("100.00"),
             amount_refunded=decimal.Decimal("80.00"),
+            currency="usd",
             fee=decimal.Decimal("5.00"),
-            stripe_timestamp=datetime.datetime(2015, 4, 30)
+            fee_details={},
+            status="pending",
+            paid=False,
         )
 
         self.may_charge = Charge.objects.create(
             stripe_id="ch_XXXXMAY1",
             customer=customer,
-            stripe_timestamp=datetime.datetime(2015, 5, 1)
+            stripe_timestamp=datetime.datetime(2015, 5, 1),
+            amount=0,
+            amount_refunded=0,
+            currency="usd",
+            fee=0,
+            fee_details={},
+            status="pending",
         )
 
         self.november_charge = Charge.objects.create(
             stripe_id="ch_XXXXNOV1",
             customer=customer,
-            stripe_timestamp=datetime.datetime(2015, 11, 16)
+            stripe_timestamp=datetime.datetime(2015, 11, 16),
+            amount=0,
+            amount_refunded=0,
+            currency="usd",
+            fee=0,
+            fee_details={},
+            status="pending",
         )
 
         self.charge_2014 = Charge.objects.create(
             stripe_id="ch_XXXX20141",
             customer=customer,
-            stripe_timestamp=datetime.datetime(2014, 12, 31)
+            stripe_timestamp=datetime.datetime(2014, 12, 31),
+            amount=0,
+            amount_refunded=0,
+            currency="usd",
+            fee=0,
+            fee_details={},
+            status="pending",
         )
 
         self.charge_2016 = Charge.objects.create(
             stripe_id="ch_XXXX20161",
             customer=customer,
-            stripe_timestamp=datetime.datetime(2016, 1, 1)
+            stripe_timestamp=datetime.datetime(2016, 1, 1),
+            amount=0,
+            amount_refunded=0,
+            currency="usd",
+            fee=0,
+            fee_details={},
+            status="pending",
         )
 
     def test_is_during_april_2015(self):

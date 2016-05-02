@@ -7,166 +7,112 @@
 """
 
 from copy import deepcopy
-from datetime import timedelta
-from decimal import Decimal
 
 from django.conf import settings
-from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
-from django.utils import timezone
 from mock import patch
 
-from djstripe.event_handlers import invoice_webhook_handler
-from djstripe.models import Customer, Invoice, Charge, Event, Account
-
-from . import FAKE_INVOICE, FAKE_INVOICE_II, FAKE_CHARGE_II
+from djstripe.models import Customer, Invoice, Account
+from tests import FAKE_INVOICE, FAKE_CHARGE, FAKE_CUSTOMER
 
 
 class InvoiceTest(TestCase):
 
     def setUp(self):
-        self.customer = Customer.objects.create(stripe_id="cus_6lsBvm5rJ0zyHc", currency="usd")
-        self.invoice = Invoice.objects.create(stripe_id="in_16YHls2eZvKYlo2CwwH968Mc",
-                                              customer=self.customer,
-                                              period_start=timezone.now(),
-                                              period_end=timezone.now() + timedelta(days=5),
-                                              subtotal=Decimal("35.00"),
-                                              total=Decimal("50.00"),
-                                              date=timezone.now(),
-                                              charge="ch_16YIoj2eZvKYlo2CrPdYapBH")
         self.account = Account.objects.create()
+        user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
+        Customer.objects.create(subscriber=user, stripe_id="cus_6lsBvm5rJ0zyHc", currency="usd")
 
-    def test_tostring(self):
-        self.assertEquals("<total=50.00, paid=False, stripe_id=in_16YHls2eZvKYlo2CwwH968Mc>", str(self.invoice))
+    @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
+    def test_str(self, charge_retrieve_mock, customer_retrieve_mock, default_account_mock,):
+        default_account_mock.return_value = self.account
+        invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
 
-    @patch("djstripe.models.Invoice.sync_from_stripe_data")
-    @patch("stripe.Invoice.retrieve", return_value=FAKE_INVOICE)
-    def test_retry_true(self, invoice_retrieve_mock, invoice_sync_mock):
-        return_value = self.invoice.retry()
+        self.assertEqual(str(invoice), "<amount_due={amount_due}, date={date}, status={status}, stripe_id={stripe_id}>".format(
+            amount_due=invoice.amount_due,
+            date=invoice.date,
+            status=invoice.status,
+            stripe_id=invoice.stripe_id
+        ))
 
-        invoice_retrieve_mock.assert_called_once_with(id=self.invoice.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=None)
-        invoice_sync_mock.assert_called_once_with("fish")
+    @patch("stripe.Invoice.retrieve")
+    @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
+    def test_retry_true(self, charge_retrieve_mock, customer_retrieve_mock, default_account_mock, invoice_retrieve_mock):
+        default_account_mock.return_value = self.account
+
+        fake_invoice = deepcopy(FAKE_INVOICE)
+        fake_invoice.update({"paid": False, "closed": False})
+        invoice_retrieve_mock.return_value = fake_invoice
+
+        invoice = Invoice.sync_from_stripe_data(fake_invoice)
+        return_value = invoice.retry()
+
+        invoice_retrieve_mock.assert_called_once_with(id=invoice.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=None)
         self.assertTrue(return_value)
 
-    @patch("djstripe.models.Invoice.sync_from_stripe_data")
     @patch("stripe.Invoice.retrieve")
-    def test_retry_false(self, invoice_retrieve_mock, invoice_sync_mock):
-        invoice = self.invoice
-        invoice.pk = None
-        invoice.stripe_id = "inv_xxxxxxxx1234567"
-        invoice.paid = True
-        invoice.save()
+    @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
+    def test_retry_false(self, charge_retrieve_mock, customer_retrieve_mock, default_account_mock, invoice_retrieve_mock):
+        default_account_mock.return_value = self.account
 
+        fake_invoice = deepcopy(FAKE_INVOICE)
+        invoice_retrieve_mock.return_value = fake_invoice
+
+        invoice = Invoice.sync_from_stripe_data(fake_invoice)
         return_value = invoice.retry()
 
         self.assertFalse(invoice_retrieve_mock.called)
-        self.assertFalse(invoice_sync_mock.called)
         self.assertFalse(return_value)
 
-    def test_status_open(self):
-        status = self.invoice.status()
-        self.assertEqual("Open", status)
+    @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
+    def test_status_paid(self, charge_retrieve_mock, customer_retrieve_mock, default_account_mock):
+        default_account_mock.return_value = self.account
 
-    def test_status_paid(self):
-        invoice = self.invoice
-        invoice.pk = None
-        invoice.stripe_id = "inv_xxxxxxxx12345678"
-        invoice.paid = True
-        invoice.save()
+        invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
 
-        status = invoice.status()
-        self.assertEqual("Paid", status)
+        self.assertEqual(Invoice.STATUS_PAID, invoice.status)
 
-    def test_status_closed(self):
-        invoice = self.invoice
-        invoice.pk = None
-        invoice.stripe_id = "inv_xxxxxxxx123456789"
-        invoice.closed = True
-        invoice.save()
+    @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
+    def test_status_open(self, charge_retrieve_mock, customer_retrieve_mock, default_account_mock):
+        default_account_mock.return_value = self.account
 
-        status = invoice.status()
-        self.assertEqual("Closed", status)
+        invoice_data = deepcopy(FAKE_INVOICE)
+        invoice_data.update({"paid": False, "closed": False})
+        invoice = Invoice.sync_from_stripe_data(invoice_data)
 
-    def test_sync_from_stripe_data(self):
-        fake_invoice_no_charge = deepcopy(FAKE_INVOICE)
-        fake_invoice_no_charge.pop("charge", None)
+        self.assertEqual(Invoice.STATUS_OPEN, invoice.status)
 
-        invoice = Invoice.sync_from_stripe_data(fake_invoice_no_charge)
+    @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
+    def test_status_forgiven(self, charge_retrieve_mock, customer_retrieve_mock, default_account_mock):
+        default_account_mock.return_value = self.account
 
-        self.assertEqual("in_16YHls2eZvKYlo2CwwH968Mc", invoice.stripe_id)
-        self.assertEqual(True, invoice.attempted)
-        self.assertEqual(True, invoice.closed)
-        self.assertEqual(True, invoice.paid)
-        self.assertEqual(Decimal("20"), invoice.subtotal)
-        self.assertEqual(Decimal("20"), invoice.total)
-        self.assertEqual(None, invoice.charge)
+        invoice_data = deepcopy(FAKE_INVOICE)
+        invoice_data.update({"paid": False, "closed": False, "forgiven": True})
+        invoice = Invoice.sync_from_stripe_data(invoice_data)
 
-        self.assertEqual(1, invoice.items.count())
-        invoice_item = invoice.items.all()[0]
+        self.assertEqual(Invoice.STATUS_FORGIVEN, invoice.status)
 
-        self.assertEqual("sub_6lsC8pt7IcFpjA", invoice_item.stripe_id)
-        self.assertEqual(Decimal("20"), invoice_item.amount)
-        self.assertEqual("usd", invoice_item.currency)
-        self.assertEqual(False, invoice_item.proration)
-        self.assertEqual("", invoice_item.description)
-        self.assertEqual("subscription", invoice_item.line_type)
-        self.assertEqual(None, invoice_item.plan)
-        self.assertEqual(1, invoice_item.quantity)
+    @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
+    def test_status_closed(self, charge_retrieve_mock, customer_retrieve_mock, default_account_mock):
+        default_account_mock.return_value = self.account
 
-        # period_end is determined by latest invoice_item
-        self.assertEqual(invoice_item.period_end, invoice.period_end)
+        invoice_data = deepcopy(FAKE_INVOICE)
+        invoice_data.update({"paid": False})
+        invoice = Invoice.sync_from_stripe_data(invoice_data)
 
-        # Update invoice
-        Invoice.sync_from_stripe_data(fake_invoice_no_charge)
-
-    def test_sync_from_stripe_data_no_customer(self):
-        fake_invoice_no_customer = deepcopy(FAKE_INVOICE)
-        fake_invoice_no_customer.pop("charge", None)
-        fake_invoice_no_customer.pop("customer", None)
-
-        with self.assertRaisesMessage(ValidationError, "A customer was not attached to this charge."):
-            Invoice.sync_from_stripe_data(fake_invoice_no_customer)
-
-    @patch("stripe.Invoice.retrieve")
-    def test_sync_from_stripe_data_no_plan(self, invoice_retrieve_mock):
-        fake_invoice_no_plan = deepcopy(FAKE_INVOICE)
-        fake_invoice_no_plan.pop("charge", None)
-        fake_invoice_no_plan["lines"]["data"][0]["plan"] = None
-
-        invoice_retrieve_mock.return_value = fake_invoice_no_plan
-
-        invoice = Invoice.sync_from_stripe_data(fake_invoice_no_plan)
-        self.assertEqual(1, invoice.items.count())
-        invoice_item = invoice.items.all()[0]
-
-        self.assertEqual("", invoice_item.plan)
-
-    @patch("djstripe.models.Charge.send_receipt")
-    @patch("djstripe.models.Charge.sync_from_stripe_data", return_value=Charge())
-    @patch("stripe.Charge.retrieve", return_value=FAKE_CHARGE_II)
-    def test_sync_from_stripe_data_with_charge(self, charge_retrieve_mock, sync_charge_mock, send_receipt_mock):
-        Invoice.sync_from_stripe_data(FAKE_INVOICE_II, send_receipt=True)
-
-        sync_charge_mock.assert_called_once_with(FAKE_CHARGE_II)
-        send_receipt_mock.assert_called_once_with()
-
-    @patch("djstripe.models.Charge.send_receipt")
-    @patch("djstripe.models.Charge.sync_from_stripe_data", return_value=Charge())
-    @patch("stripe.Charge.retrieve", return_value=FAKE_CHARGE_II)
-    def test_sync_from_stripe_data_with_charge_no_receipt(self, charge_retrieve_mock, sync_charge_mock, send_receipt_mock):
-        Invoice.sync_from_stripe_data(FAKE_INVOICE_II, send_receipt=False)
-
-        sync_charge_mock.assert_called_once_with(FAKE_CHARGE_II)
-        self.assertFalse(send_receipt_mock.called)
-
-    @patch("djstripe.models.Invoice.sync_from_stripe_data")
-    def test_handle_event_payment_failed(self, invoice_retrieve_mock):
-        fake_event = Event(type="invoice.payment_failed", valid=True, webhook_message={"data": {"object": {"id": "door"}}})
-
-        invoice_webhook_handler(fake_event, fake_event.message["data"], "invoice", "payment_failed")
-
-    @patch("djstripe.models.Invoice.sync_from_stripe_data")
-    def test_handle_event_payment_succeeded(self, invoice_retrieve_mock):
-        fake_event = Event(type="invoice.payment_succeeded", valid=True, webhook_message={"data": {"object": {"id": "lock"}}})
-
-        invoice_webhook_handler(fake_event, fake_event.message["data"], "invoice", "payment_failed")
+        self.assertEqual(Invoice.STATUS_CLOSED, invoice.status)
