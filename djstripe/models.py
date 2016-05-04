@@ -385,13 +385,6 @@ class Customer(StripeCustomer):
             self.default_source = cls.stripe_object_default_source_to_source(target_cls=Card, data=data)
 
     # SYNC methods should be dropped in favor of the master sync infrastructure proposed
-    def _sync(self):
-        stripe_customer = self.api_retrieve()
-
-        if getattr(stripe_customer, 'deleted', False):
-            # Customer was deleted from stripe
-            self.purge()
-
     def _sync_invoices(self, **kwargs):
         stripe_customer = self.api_retrieve()
 
@@ -466,6 +459,7 @@ class Event(StripeEvent):
                 self.processed = True
                 self.save()
             except StripeError as exc:
+                raise
                 # TODO: What if we caught all exceptions or a broader range of exceptions here? How about DoesNotExist
                 # exceptions, for instance? or how about TypeErrors, KeyErrors, ValueErrors, etc?
                 EventProcessingException.log(

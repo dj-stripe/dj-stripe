@@ -16,7 +16,7 @@ from mock import patch
 from djstripe.models import Event, Charge, Transfer, Account, Plan, Customer, InvoiceItem, Invoice
 from tests import (FAKE_CUSTOMER, FAKE_CUSTOMER_II, FAKE_EVENT_CHARGE_SUCCEEDED, FAKE_EVENT_TRANSFER_CREATED,
                    FAKE_EVENT_PLAN_CREATED, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_INVOICE_II, FAKE_EVENT_INVOICEITEM_CREATED,
-                   FAKE_EVENT_INVOICE_CREATED)
+                   FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_CUSTOMER_CREATED)
 
 
 class TestChargeEvents(TestCase):
@@ -43,8 +43,79 @@ class TestChargeEvents(TestCase):
 
 class TestCustomerEvents(TestCase):
 
-    def test_customer_created(self):
-        pass
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
+
+    @patch("stripe.Customer.retrieve")
+    @patch("stripe.Event.retrieve")
+    def test_customer_created(self, event_retrieve_mock, customer_retreive_mock):
+        fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_CREATED)
+        event_retrieve_mock.return_value = fake_stripe_event
+        customer_retreive_mock.return_value = fake_stripe_event["data"]["object"]
+
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+
+        event.validate()
+        event.process()
+
+        customer = Customer.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
+        self.assertEquals(customer.account_balance, fake_stripe_event["data"]["object"]["account_balance"])
+        self.assertEquals(customer.currency, fake_stripe_event["data"]["object"]["currency"])
+
+    @patch("stripe.Customer.retrieve")
+    @patch("stripe.Event.retrieve")
+    def test_customer_created_no_customer_exists(self, event_retrieve_mock, customer_retreive_mock):
+        fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_CREATED)
+        event_retrieve_mock.return_value = fake_stripe_event
+        customer_retreive_mock.return_value = fake_stripe_event["data"]["object"]
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+
+        event.validate()
+        event.process()
+
+        self.assertFalse(Customer.objects.filter(stripe_id=fake_stripe_event["data"]["object"]["id"]).exists())
+
+    @patch("stripe.Customer.retrieve")
+    @patch("stripe.Event.retrieve")
+    def test_customer_deleted(self, event_retrieve_mock, customer_retreive_mock):
+        fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_CREATED)
+        fake_stripe_event["type"] = "customer.deleted"
+
+        event_retrieve_mock.return_value = fake_stripe_event
+        customer_retreive_mock.return_value = fake_stripe_event["data"]["object"]
+
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+
+        event.validate()
+        event.process()
+
+        customer = Customer.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
+        self.assertNotEqual(None, customer.date_purged)
+
+    @patch("stripe.Customer.retrieve")
+    @patch("stripe.Event.retrieve")
+    def test_customer_bogus_event_type(self, event_retrieve_mock, customer_retreive_mock):
+        fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_CREATED)
+        fake_stripe_event["type"] = "customer.praised"
+
+        event_retrieve_mock.return_value = fake_stripe_event
+        customer_retreive_mock.return_value = fake_stripe_event["data"]["object"]
+
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+
+        event.validate()
+        event.process()
+
+        customer = Customer.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
+        self.assertEqual(None, customer.account_balance)
+
 
 class TestInvoiceEvents(TestCase):
 

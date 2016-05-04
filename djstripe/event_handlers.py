@@ -48,24 +48,26 @@ def customer_event_attach(event, event_data, event_type, event_subtype):
 
 @webhooks.handler(['customer'])
 def customer_webhook_handler(event, event_data, event_type, event_subtype):
-    stripe_customer_crud_events = ["created", "updated", "deleted"]
 
     customer = event.customer
     if customer:
-        if event_subtype in stripe_customer_crud_events:
-            Customer.sync_from_stripe_data(event_data)
-        elif event_subtype.startswith("discount."):
-            pass  # TODO
+        if event_subtype in ["created", "updated"]:
+            versioned_customer_data = Customer(stripe_id=event_data["object"]["id"]).api_retrieve()
+            Customer.sync_from_stripe_data(versioned_customer_data)
+        elif event_subtype == "deleted":
+            customer.purge()
+#         elif event_subtype.startswith("discount."):
+#             pass  # TODO
         elif event_subtype.startswith("source."):
             source_type = event_data["object"]["object"]
 
             # TODO: other sources
             if source_type == "card":
-                Card.sync_from_stripe_data(event_data["object"])
+                versioned_card_data = Card(stripe_id=event_data["object"]["id"], customer=customer).api_retrieve()
+                Card.sync_from_stripe_data(versioned_card_data)
         elif event_subtype.startswith("subscription."):
-            Subscription.sync_from_stripe_data(event_data["object"])
-        elif event_subtype == "deleted":
-            customer.purge()
+            versioned_subscription_data = Subscription(stripe_id=event_data["object"]["id"], customer=customer).api_retrieve()
+            Subscription.sync_from_stripe_data(versioned_subscription_data)
 
 
 # ---------------------------

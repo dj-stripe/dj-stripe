@@ -524,6 +524,9 @@ class CustomerDict(dict):
     def save(self):
         pass
 
+    def delete(self):
+        pass
+
     @property
     def sources(self):
         return Sources()
@@ -997,6 +1000,20 @@ FAKE_EVENT_CHARGE_SUCCEEDED = {
     "pending_webhooks": 0,
     "request": "req_6lsB7hkicwhaDj",
     "type": "charge.succeeded",
+}
+
+FAKE_EVENT_CUSTOMER_CREATED = {
+    "id": "evt_38DHch3whaDvKYlo2CT2oe5ff3",
+    "object": "event",
+    "api_version": "2016-03-07",
+    "created": 1439229084,
+    "data": {
+        "object": deepcopy(FAKE_CUSTOMER)
+    },
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_6l38DHch3whaDj",
+    "type": "customer.created",
 }
 
 FAKE_EVENT_INVOICE_CREATED = {
