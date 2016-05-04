@@ -6,13 +6,13 @@
 
 """
 
+from copy import deepcopy
 import sys
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
-
-from mock import patch, PropertyMock
+from mock import patch
 from stripe.error import StripeError, InvalidRequestError
 
 from djstripe.models import Customer
@@ -32,8 +32,8 @@ class TestSyncSubscriber(TestCase):
     @patch("djstripe.models.Customer._sync_invoices")
     @patch("djstripe.models.Customer._sync_subscriptions")
     @patch("djstripe.models.Customer._sync")
-    @patch("djstripe.models.Customer.api_retrieve", return_value=FAKE_CUSTOMER)
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
+    @patch("djstripe.models.Customer.api_retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
     def test_sync_success(self, stripe_customer_create_mock, api_retrieve_mock,
                           _sync_mock, _sync_subscriptions_mock, _sync_invoices_mock,
                           _sync_charges_mock):
@@ -48,8 +48,8 @@ class TestSyncSubscriber(TestCase):
         _sync_charges_mock.assert_called_once_with()
 
     @patch("djstripe.models.Customer._sync")
-    @patch("djstripe.models.Customer.api_retrieve", return_value=FAKE_CUSTOMER)
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
+    @patch("djstripe.models.Customer.api_retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
     def test_sync_fail(self, stripe_customer_create_mock, api_retrieve_mock, _sync_mock):
         _sync_mock.side_effect = InvalidRequestError("No such customer:", "blah")
 

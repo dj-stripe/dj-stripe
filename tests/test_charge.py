@@ -13,10 +13,10 @@ from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.test.testcases import TestCase
 from django.utils import timezone
-
 from mock import patch
 
 from djstripe.models import Charge, Customer, Invoice, Account
+from tests import FAKE_TRANSFER
 
 from . import FAKE_CHARGE, FAKE_ACCOUNT
 
@@ -25,14 +25,6 @@ class ChargeTest(TestCase):
 
     def setUp(self):
         self.customer = Customer.objects.create(stripe_id="cus_6lsBvm5rJ0zyHc", currency="usd")
-        self.invoice = Invoice.objects.create(stripe_id="in_7udnik28sj829dj",
-                                              customer=self.customer,
-                                              period_start=timezone.now(),
-                                              period_end=timezone.now() + timedelta(days=5),
-                                              subtotal=Decimal("35.00"),
-                                              total=Decimal("50.00"),
-                                              date=timezone.now(),
-                                              charge="ch_16YKQi2eZvKYlo2CrCuzbJQx")
         self.account = Account.objects.create()
 
     def test_str(self):
@@ -64,7 +56,6 @@ class ChargeTest(TestCase):
 
         charge = Charge.sync_from_stripe_data(FAKE_CHARGE)
 
-        self.assertEqual(self.invoice, charge.invoice)
         self.assertEqual(Decimal("22"), charge.amount)
         self.assertEqual(True, charge.paid)
         self.assertEqual(False, charge.refunded)
@@ -104,45 +95,10 @@ class ChargeTest(TestCase):
     def test_sync_from_stripe_data_with_transfer(self, default_account_mock, transfer_retrieve_mock, charge_retrieve_mock):
         default_account_mock.return_value = self.account
 
-        fake_transfer = {
-            "amount": 455,
-            "currency": "usd",
-            "date": 1348876800,
-            "description": None,
-            "id": "tr_XXXXXXXXXXXX",
-            "livemode": True,
-            "object": "transfer",
-            "other_transfers": [],
-            "status": "paid",
-            "summary": {
-                "adjustment_count": 0,
-                "adjustment_fee_details": [],
-                "adjustment_fees": 0,
-                "adjustment_gross": 0,
-                "charge_count": 1,
-                "charge_fee_details": [{
-                    "amount": 45,
-                    "application": None,
-                    "currency": "usd",
-                    "description": None,
-                    "type": "stripe_fee"
-                }],
-                "charge_fees": 45,
-                "charge_gross": 500,
-                "collected_fee_count": 0,
-                "collected_fee_gross": 0,
-                "currency": "usd",
-                "net": 455,
-                "refund_count": 0,
-                "refund_fees": 0,
-                "refund_gross": 0,
-                "validation_count": 0,
-                "validation_fees": 0
-            }
-        }
+        fake_transfer = deepcopy(FAKE_TRANSFER)
 
         fake_charge_copy = deepcopy(FAKE_CHARGE)
-        fake_charge_copy.update({"transfer": fake_transfer})
+        fake_charge_copy.update({"transfer": fake_transfer["id"]})
 
         transfer_retrieve_mock.return_value = fake_transfer
         charge_retrieve_mock.return_value = fake_charge_copy
@@ -151,7 +107,7 @@ class ChargeTest(TestCase):
         self.assertTrue(created)
 
         self.assertNotEqual(None, charge.transfer)
-        self.assertEqual("tr_XXXXXXXXXXXX", charge.transfer.stripe_id)
+        self.assertEqual(fake_transfer["id"], charge.transfer.stripe_id)
 
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Account.retrieve")

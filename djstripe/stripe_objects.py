@@ -1048,7 +1048,6 @@ class StripeInvoice(StripeObject):
         if not self.paid and not self.forgiven and not self.closed:
             stripe_invoice = self.api_retrieve()
             updated_stripe_invoice = stripe_invoice.pay()  # pay() throws an exception if the charge is not successful.
-            print(updated_stripe_invoice)
             type(self).sync_from_stripe_data(updated_stripe_invoice)
             return True
         return False

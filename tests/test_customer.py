@@ -410,7 +410,7 @@ class TestCustomer(TestCase):
     def test_sync_current_subscription_no_stripe_subscription(self, api_retrieve_mock):
         self.assertEqual(None, self.customer._sync_current_subscription())
 
-    @patch("djstripe.models.djstripe_settings.plan_from_stripe_id", return_value="test_plan")
+#     @patch("djstripe.models.djstripe_settings.plan_from_stripe_id", return_value="test_plan")
     @patch("djstripe.models.convert_tstamp", return_value=timezone.make_aware(datetime.datetime(2015, 6, 19)))
     # @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=fake_current_subscription)
     @patch("djstripe.models.Customer.api_retrieve", return_value=PropertyMock(subscription=PropertyMock(plan=PropertyMock(id="fish", amount=5000),

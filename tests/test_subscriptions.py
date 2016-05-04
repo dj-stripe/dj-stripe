@@ -11,8 +11,9 @@ from mock import patch, PropertyMock
 from stripe import InvalidRequestError
 
 from djstripe.exceptions import SubscriptionCancellationFailure, SubscriptionUpdateFailure
-from djstripe.models import convert_tstamp, Customer, Subscription
+from djstripe.models import Customer, Subscription
 from djstripe.settings import PAYMENTS_PLANS
+from djstripe.utils import convert_tstamp
 from tests import convert_to_fake_stripe_object
 
 
@@ -277,12 +278,6 @@ class SubscriptionTest(TestCase):
                                                                        start=timezone.now(),
                                                                        amount=decimal.Decimal(25.00),
                                                                        status=Subscription.STATUS_PAST_DUE)
-
-    def test_plan_display(self):
-        self.assertEquals(PAYMENTS_PLANS[self.plan_id]["name"], self.current_subscription.plan_display())
-
-    def test_status_display(self):
-        self.assertEqual("Past Due", self.current_subscription.status_display())
 
     def test_is_period_current_no_current_period_end(self):
         self.assertFalse(self.current_subscription.is_period_current())

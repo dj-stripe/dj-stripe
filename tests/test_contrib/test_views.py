@@ -10,8 +10,6 @@
 from __future__ import unicode_literals
 
 from copy import deepcopy
-from decimal import Decimal
-from unittest.case import skip
 
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
@@ -22,7 +20,7 @@ from rest_framework.test import APITestCase
 
 from djstripe import settings as djstripe_settings
 from djstripe.models import Subscription, Customer, Plan
-from tests import FAKE_SUBSCRIPTION, FAKE_PLAN
+from tests import FAKE_SUBSCRIPTION, FAKE_PLAN, FAKE_CUSTOMER
 
 
 class RestSubscriptionTest(APITestCase):
@@ -33,12 +31,11 @@ class RestSubscriptionTest(APITestCase):
     def setUp(self):
         self.url = reverse("rest_djstripe:subscription")
         self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com", password="password")
-
         self.assertTrue(self.client.login(username="pydanny", password="password"))
 
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     @patch("djstripe.models.Customer.add_card", autospec=True)
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
+    @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
     def test_create_subscription(self, stripe_customer_create_mock, add_card_mock, subscribe_mock):
         self.assertEqual(0, Customer.objects.count())
         data = {
@@ -54,7 +51,7 @@ class RestSubscriptionTest(APITestCase):
 
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     @patch("djstripe.models.Customer.add_card", autospec=True)
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
+    @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
     def test_create_subscription_exception(self, stripe_customer_create_mock, add_card_mock, subscribe_mock):
         subscribe_mock.side_effect = Exception
         data = {

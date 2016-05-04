@@ -128,7 +128,7 @@ class Customer(StripeCustomer):
             trial_days = djstripe_settings.trial_period_for_subscriber_callback(subscriber)
 
         stripe_customer = cls._api_create(email=subscriber.email)
-        customer = Customer.objects.create(subscriber=subscriber, stripe_id=stripe_customer.id, currency="usd")
+        customer = Customer.objects.create(subscriber=subscriber, stripe_id=stripe_customer["id"], currency="usd")
 
         if djstripe_settings.DEFAULT_PLAN and trial_days:
             customer.subscribe(plan=djstripe_settings.DEFAULT_PLAN, trial_days=trial_days)
@@ -466,6 +466,7 @@ class Event(StripeEvent):
                 self.processed = True
                 self.save()
             except StripeError as exc:
+                raise
                 # TODO: What if we caught all exceptions or a broader range of exceptions here? How about DoesNotExist
                 # exceptions, for instance? or how about TypeErrors, KeyErrors, ValueErrors, etc?
                 EventProcessingException.log(
@@ -578,6 +579,9 @@ class InvoiceItem(StripeInvoiceItem):
 
 class Plan(StripePlan):
     # account = models.ForeignKey("Account", related_name="plans")
+
+    class Meta(object):
+        ordering = ["amount"]
 
     @classmethod
     def get_or_create(cls, **kwargs):
