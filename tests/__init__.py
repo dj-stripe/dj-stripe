@@ -997,7 +997,48 @@ FAKE_EVENT_CHARGE_SUCCEEDED = {
     "pending_webhooks": 0,
     "request": "req_6lsB7hkicwhaDj",
     "type": "charge.succeeded",
+}
 
+FAKE_EVENT_INVOICE_CREATED = {
+    "id": "evt_187IHD2eZvKYlo2C6YKQi2eZ",
+    "object": "event",
+    "api_version": "2016-03-07",
+    "created": 1462338623,
+    "data": {
+        "object": deepcopy(FAKE_INVOICE)
+    },
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_8O4sB7hkDobVT",
+    "type": "invoice.created",
+}
+
+FAKE_EVENT_INVOICEITEM_CREATED = {
+    "id": "evt_187IHD2eZvKYlo2C7SXedrZk",
+    "object": "event",
+    "api_version": "2016-03-07",
+    "created": 1462338623,
+    "data": {
+        "object": deepcopy(FAKE_INVOICEITEM)
+    },
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_8O4Qbs2EDobDVT",
+    "type": "invoiceitem.created",
+}
+
+FAKE_EVENT_PLAN_CREATED = {
+    "id": "evt_1877X72eZvKYlo2CLK6daFxu",
+    "object": "event",
+    "api_version": "2016-03-07",
+    "created": 1462297325,
+    "data": {
+        "object": deepcopy(FAKE_PLAN)
+    },
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_8NtJXPttxSvFyM",
+    "type": "plan.created",
 }
 
 FAKE_EVENT_TRANSFER_CREATED = {

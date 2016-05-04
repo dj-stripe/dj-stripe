@@ -181,8 +181,7 @@ def run_test_suite(args):
     from django_nose import NoseTestSuiteRunner
 
     test_runner = NoseTestSuiteRunner(verbosity=1)
-    failures = test_runner.run_tests(["."])  # "./tests/test_event.py",
-#                                       "./tests/test_subscriptions.py",)
+    failures = test_runner.run_tests(["."])
 
     if failures:
         sys.exit(failures)
