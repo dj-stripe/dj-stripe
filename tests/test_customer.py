@@ -22,25 +22,15 @@ from stripe.error import InvalidRequestError
 
 from djstripe.models import Account, Customer, Charge, Card, Subscription, Invoice
 
-from . import FAKE_CARD, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_ACCOUNT, FAKE_INVOICE, FAKE_INVOICE_II, FAKE_INVOICE_III, DataList
+from tests import FAKE_CARD, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_ACCOUNT, FAKE_INVOICE, FAKE_INVOICE_II, FAKE_INVOICE_III, DataList, \
+    FAKE_INVOICEITEM
 
 
-@skip
 class TestCustomer(TestCase):
-#     fake_current_subscription = Subscription(plan="test_plan",
-#                                              quantity=1,
-#                                              start=timezone.now(),
-#                                              amount=decimal.Decimal(25.00))
-#
-#     fake_current_subscription_cancelled_in_stripe = Subscription(plan="test_plan",
-#                                                                  quantity=1,
-#                                                                  start=timezone.now(),
-#                                                                  amount=decimal.Decimal(25.00),
-#                                                                  status=Subscription.STATUS_ACTIVE)
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        self.customer = Customer.objects.create(subscriber=self.user, stripe_id="cus_6lsBvm5rJ0zyHc", currency="usd")
+        self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
 
         self.card, _created = Card.get_or_create_from_stripe_object(data=FAKE_CARD)
 
@@ -49,8 +39,10 @@ class TestCustomer(TestCase):
 
         self.account = Account.objects.create()
 
-    def test_tostring(self):
-        self.assertEquals("<patrick, email=patrick@gmail.com, stripe_id=cus_6lsBvm5rJ0zyHc>", str(self.customer))
+    def test_str(self):
+        self.assertEqual("<{subscriber}, email={email}, stripe_id={stripe_id}>".format(
+            subscriber=str(self.user), email=self.user.email, stripe_id=FAKE_CUSTOMER["id"]
+        ), str(self.customer))
 
     @patch("stripe.Customer.retrieve")
     def test_customer_purge_leaves_customer_record(self, customer_retrieve_fake):
@@ -99,13 +91,13 @@ class TestCustomer(TestCase):
 
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_add_card_set_default_true(self, customer_retrieve_mock):
-        self.customer.add_card("card_16YKQh2eZvKYlo2Cblc5Feoo")
+        self.customer.add_card(FAKE_CARD["id"])
 
         customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=None)
 
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_add_card_set_default_false(self, customer_retrieve_mock):
-        self.customer.add_card("card_16YKQh2eZvKYlo2Cblc5Feoo", set_default=False)
+        self.customer.add_card(FAKE_CARD["id"], set_default=False)
 
         customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=None)
 
@@ -118,6 +110,7 @@ class TestCustomer(TestCase):
         with self.assertRaises(ValueError):
             self.customer.charge(10)
 
+    @skip
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     def test_refund_charge(self, charge_retrieve_mock, default_account_mock):
@@ -139,6 +132,7 @@ class TestCustomer(TestCase):
         self.assertEquals(refunded_charge.refunded, True)
         self.assertEquals(refunded_charge.amount_refunded, decimal.Decimal("22.00"))
 
+    @skip
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     def test_refund_charge_object_returned(self, charge_retrieve_mock, default_account_mock):
@@ -156,6 +150,7 @@ class TestCustomer(TestCase):
         self.assertEquals(refunded_charge.refunded, True)
         self.assertEquals(refunded_charge.amount_refunded, decimal.Decimal("22.00"))
 
+    @skip
     def test_calculate_refund_amount_full_refund(self):
         charge = Charge(
             stripe_id="ch_111111",
@@ -164,6 +159,7 @@ class TestCustomer(TestCase):
         )
         self.assertEquals(charge._calculate_refund_amount(), 50000)
 
+    @skip
     def test_calculate_refund_amount_partial_refund(self):
         charge = Charge(
             stripe_id="ch_111111",
@@ -175,6 +171,7 @@ class TestCustomer(TestCase):
             30000
         )
 
+    @skip
     def test_calculate_refund_above_max_refund(self):
         charge = Charge(
             stripe_id="ch_111111",
@@ -186,6 +183,7 @@ class TestCustomer(TestCase):
             50000
         )
 
+    @skip
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")
@@ -203,6 +201,7 @@ class TestCustomer(TestCase):
         _, kwargs = charge_create_mock.call_args
         self.assertEquals(kwargs["amount"], 1000)
 
+    @skip
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")
@@ -223,6 +222,7 @@ class TestCustomer(TestCase):
         except Invoice.DoesNotExist:
             self.fail(msg="Stripe Charge shouldn't throw Invoice DoesNotExist.")
 
+    @skip
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")
@@ -245,6 +245,7 @@ class TestCustomer(TestCase):
         self.assertEquals(kwargs["capture"], True)
         self.assertEquals(kwargs["destination"], FAKE_ACCOUNT["id"])
 
+    @skip
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")
@@ -262,6 +263,7 @@ class TestCustomer(TestCase):
             source=self.card.stripe_id,
         )
 
+    @skip
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")
@@ -279,6 +281,7 @@ class TestCustomer(TestCase):
             source=self.card,
         )
 
+    @skip
     @patch("djstripe.models.djstripe_settings.trial_period_for_subscriber_callback", return_value="donkey")
     @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
     def test_create_trial_callback(self, customer_create_mock, callback_mock):
@@ -288,6 +291,7 @@ class TestCustomer(TestCase):
         customer_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, email=user.email)
         callback_mock.assert_called_once_with(user)
 
+    @skip
     @patch("djstripe.models.Customer.subscribe")
     @patch("djstripe.models.djstripe_settings.DEFAULT_PLAN", new_callable=PropertyMock, return_value="schreck")
     @patch("djstripe.models.djstripe_settings.trial_period_for_subscriber_callback", return_value="donkey")
@@ -300,11 +304,8 @@ class TestCustomer(TestCase):
         callback_mock.assert_called_once_with(user)
         subscribe_mock.assert_called_once_with(plan=default_plan_fake, trial_days="donkey")
 
-    # TODO: Update for removal
-    @patch("djstripe.models.Customer.api_retrieve", return_value=PropertyMock(deleted=False))
-    def test_sync_non_deleted_customer(self, customer_retrieve_mock):
-        self.customer._sync()
-
+    @skip
+    # TODO Add retry, filter? to CustomerDict mock
     @patch("djstripe.models.Customer.invoices", new_callable=PropertyMock,
            return_value=PropertyMock(name="filter", filter=MagicMock(return_value=[MagicMock(name="inv", retry=MagicMock(name="retry", return_value="test"))])))
     @patch("djstripe.models.Customer._sync_invoices")
@@ -312,8 +313,8 @@ class TestCustomer(TestCase):
         self.customer.retry_unpaid_invoices()
 
         _sync_invoices_mock.assert_called_once_with()
-        # TODO: Figure out how to assert on filter and retry mocks
 
+    @skip
     @patch("djstripe.models.Customer.invoices", new_callable=PropertyMock,
        return_value=PropertyMock(name="filter", filter=MagicMock(return_value=[MagicMock(name="inv", retry=MagicMock(name="retry",
                                                                                                                      return_value="test",
@@ -325,6 +326,7 @@ class TestCustomer(TestCase):
         except:
             self.fail("Exception was unexpectedly raise.")
 
+    @skip
     @patch("djstripe.models.Customer.invoices", new_callable=PropertyMock,
        return_value=PropertyMock(name="filter", filter=MagicMock(return_value=[MagicMock(name="inv", retry=MagicMock(name="retry",
                                                                                                                      return_value="test",
@@ -334,6 +336,7 @@ class TestCustomer(TestCase):
         with self.assertRaisesMessage(InvalidRequestError, "This should fail!"):
             self.customer.retry_unpaid_invoices()
 
+    @skip
     @patch("stripe.Invoice.create")
     def test_send_invoice_success(self, invoice_create_mock):
         return_status = self.customer.send_invoice()
@@ -341,6 +344,7 @@ class TestCustomer(TestCase):
 
         invoice_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, customer=self.customer.stripe_id)
 
+    @skip
     @patch("stripe.Invoice.create")
     def test_send_invoice_failure(self, invoice_create_mock):
         invoice_create_mock.side_effect = InvalidRequestError("Invoice creation failed.", "blah")
@@ -350,35 +354,28 @@ class TestCustomer(TestCase):
 
         invoice_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, customer=self.customer.stripe_id)
 
-    @patch("djstripe.models.Customer.api_retrieve",
-           return_value=PropertyMock(deleted=True))
-    def test_sync_deleted_in_stripe(self, api_retrieve_mock):
-        self.customer._sync()
-        customer = Customer.objects.get(stripe_id=self.customer.stripe_id)
-        self.assertTrue(customer.subscriber is None)
-        self.assertTrue(customer.default_source is None)
-        self.assertTrue(not customer.sources.all())
-        self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
-
+    @skip
     @patch("djstripe.models.Invoice.sync_from_stripe_data")
     @patch("djstripe.models.Customer.api_retrieve", return_value=FAKE_CUSTOMER)
     def test_sync_invoices(self, api_retrieve_mock, sync_from_stripe_data_mock):
         self.customer._sync_invoices()
 
-        sync_from_stripe_data_mock.assert_any_call(FAKE_INVOICE, send_receipt=False)
-        sync_from_stripe_data_mock.assert_any_call(FAKE_INVOICE_II, send_receipt=False)
-        sync_from_stripe_data_mock.assert_any_call(FAKE_INVOICE_III, send_receipt=False)
+        sync_from_stripe_data_mock.assert_any_call(FAKE_INVOICE)
+        sync_from_stripe_data_mock.assert_any_call(FAKE_INVOICE_II)
+        sync_from_stripe_data_mock.assert_any_call(FAKE_INVOICE_III)
 
         self.assertEqual(3, sync_from_stripe_data_mock.call_count)
 
+    @skip
     @patch("djstripe.models.Invoice.sync_from_stripe_data")
-    @patch("tests.FAKE_CUSTOMER.invoices", return_value=DataList(data=[]))
+    @patch("tests.FAKE_CUSTOMER.invoices", return_value=DataList(data=[]))  # See this for above TODO; probably want to mock CustomerDict though
     @patch("djstripe.models.Customer.api_retrieve")
     def test_sync_invoices_none(self, api_retrieve_mock, customer_invoice_retrieve_mock, sync_from_stripe_data_mock):
         self.customer._sync_invoices()
 
         self.assertFalse(sync_from_stripe_data_mock.called)
 
+    @skip
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     @patch("djstripe.models.Customer.api_retrieve", return_value=deepcopy(FAKE_CUSTOMER))
@@ -392,10 +389,11 @@ class TestCustomer(TestCase):
 
         self.customer._sync_charges()
 
+    @skip
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     @patch("djstripe.models.Customer.api_retrieve",
-           return_value=PropertyMock(charges=MagicMock(return_value=PropertyMock(data=[]))))
+           return_value=PropertyMock(charges=MagicMock(return_value=PropertyMock(data=[]))))  # TODO: Fix this to mock CustomerDict
     def test_sync_charges_none(self, api_retrieve_mock, charge_retrieve_mock, default_account_mock):
         default_account_mock.return_value = self.account
 
@@ -406,52 +404,19 @@ class TestCustomer(TestCase):
 
         self.customer._sync_charges()
 
+    @skip
     @patch("djstripe.models.Customer.api_retrieve", return_value=PropertyMock(subscription=None))
     def test_sync_current_subscription_no_stripe_subscription(self, api_retrieve_mock):
-        self.assertEqual(None, self.customer._sync_current_subscription())
+        self.assertEqual(None, self.customer._sync_subscriptions())
 
-#     @patch("djstripe.models.djstripe_settings.plan_from_stripe_id", return_value="test_plan")
-    @patch("djstripe.models.convert_tstamp", return_value=timezone.make_aware(datetime.datetime(2015, 6, 19)))
-    # @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=fake_current_subscription)
-    @patch("djstripe.models.Customer.api_retrieve", return_value=PropertyMock(subscription=PropertyMock(plan=PropertyMock(id="fish", amount=5000),
-                                                                              quantity=5,
-                                                                              trial_start=False,
-                                                                              trial_end=False,
-                                                                              cancel_at_period_end=False,
-                                                                              status="tree")))
-    def test_sync_current_subscription_update_no_trial(self, api_retrieve_mock, customer_subscription_mock, convert_tstamp_fake, plan_getter_mock):
-        tz_test_time = timezone.make_aware(datetime.datetime(2015, 6, 19))
-
-        self.customer._sync_current_subscription()
-
-        plan_getter_mock.assert_called_with("fish")
-
-        self.assertEqual("test_plan", self.fake_current_subscription.plan)
-        self.assertEqual(decimal.Decimal("50.00"), self.fake_current_subscription.amount)
-        self.assertEqual("tree", self.fake_current_subscription.status)
-        self.assertEqual(5, self.fake_current_subscription.quantity)
-        self.assertEqual(False, self.fake_current_subscription.cancel_at_period_end)
-        self.assertEqual(tz_test_time, self.fake_current_subscription.canceled_at)
-        self.assertEqual(tz_test_time, self.fake_current_subscription.start)
-        self.assertEqual(tz_test_time, self.fake_current_subscription.current_period_start)
-        self.assertEqual(tz_test_time, self.fake_current_subscription.current_period_end)
-        self.assertEqual(None, self.fake_current_subscription.trial_start)
-        self.assertEqual(None, self.fake_current_subscription.trial_end)
-
-    # @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=fake_current_subscription_cancelled_in_stripe)
-    @patch("djstripe.models.Customer.api_retrieve", return_value=PropertyMock(subscription=None))
-    def test_sync_current_subscription_subscription_cancelled_from_Stripe(self, api_retrieve_mock, customer_subscription_mock):
-        self.assertEqual(Subscription.STATUS_CANCELLED, self.customer._sync_current_subscription().status)
-
+    @skip
     @patch("djstripe.models.Customer.send_invoice")
-    @patch("djstripe.models.Customer._sync_current_subscription")
     @patch("tests.FAKE_CUSTOMER.update_subscription")
     @patch("djstripe.models.Customer.api_retrieve", return_value=FAKE_CUSTOMER)
-    def test_subscribe_trial_plan(self, api_retrieve_mock, update_subscription_mock, _sync_subscription_mock, send_invoice_mock):
+    def test_subscribe_trial_plan(self, api_retrieve_mock, update_subscription_mock, send_invoice_mock):
         trial_days = 7  # From settings
 
         self.customer.subscribe(plan="test_trial")
-        _sync_subscription_mock.assert_called_once_with()
         send_invoice_mock.assert_called_once_with()
 
         _, call_kwargs = update_subscription_mock.call_args
@@ -459,15 +424,14 @@ class TestCustomer(TestCase):
         self.assertIn("trial_end", call_kwargs)
         self.assertLessEqual(call_kwargs["trial_end"], timezone.now() + datetime.timedelta(days=trial_days))
 
+    @skip
     @patch("djstripe.models.Customer.send_invoice")
-    @patch("djstripe.models.Customer._sync_current_subscription")
     @patch("tests.FAKE_CUSTOMER.update_subscription")
     @patch("djstripe.models.Customer.api_retrieve", return_value=FAKE_CUSTOMER)
-    def test_subscribe_trial_days_kwarg(self, api_retrieve_mock, update_subscription_mock, _sync_subscription_mock, send_invoice_mock):
+    def test_subscribe_trial_days_kwarg(self, api_retrieve_mock, update_subscription_mock, send_invoice_mock):
         trial_days = 9
 
         self.customer.subscribe(plan="test", trial_days=trial_days)
-        _sync_subscription_mock.assert_called_once_with()
         send_invoice_mock.assert_called_once_with()
 
         _, call_kwargs = update_subscription_mock.call_args
@@ -475,13 +439,11 @@ class TestCustomer(TestCase):
         self.assertIn("trial_end", call_kwargs)
         self.assertLessEqual(call_kwargs["trial_end"], timezone.now() + datetime.timedelta(days=trial_days))
 
+    @skip
     @patch("djstripe.models.Customer.send_invoice")
-    @patch("djstripe.models.Customer._sync_current_subscription")
-    # @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=fake_current_subscription)
     @patch("djstripe.models.Customer.api_retrieve", return_value=PropertyMock())
-    def test_subscribe_not_charge_immediately(self, api_retrieve_mock, customer_subscription_mock, _sync_subscription_mock, send_invoice_mock):
+    def test_subscribe_not_charge_immediately(self, api_retrieve_mock, customer_subscription_mock, send_invoice_mock):
         self.customer.subscribe(plan="test", charge_immediately=False)
-        _sync_subscription_mock.assert_called_once_with()
         self.assertFalse(send_invoice_mock.called)
 
     @patch("djstripe.models.Charge.send_receipt")
@@ -496,12 +458,22 @@ class TestCustomer(TestCase):
         charge_sync_mock.assert_called_once_with(FAKE_CHARGE)
         self.assertFalse(send_receipt_mock.called)
 
-    @patch("stripe.InvoiceItem.create")
-    def test_add_invoice_item(self, invoice_item_create_mock):
-        self.customer.add_invoice_item(amount=decimal.Decimal("50.00"), currency="eur", invoice_id=77, description="test")
+    @patch("djstripe.models.InvoiceItem.sync_from_stripe_data", return_value="pancakes")
+    @patch("stripe.InvoiceItem.create", return_value=deepcopy(FAKE_INVOICEITEM))
+    def test_add_invoice_item(self, invoiceitem_create_mock, invoiceitem_sync_mock):
+        invoiceitem = self.customer.add_invoice_item(amount=decimal.Decimal("50.00"), currency="eur", description="test", invoice=77, subscription=25)
+        self.assertEqual("pancakes", invoiceitem)
 
-        invoice_item_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, amount=5000, currency="eur", invoice=77, description="test", customer=self.customer.stripe_id)
+        invoiceitem_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, amount=5000, customer=self.customer.stripe_id, currency="eur", description="test", discountable=None, invoice=77, metadata=None, subscription=25)
+
+    @patch("djstripe.models.InvoiceItem.sync_from_stripe_data", return_value="pancakes")
+    @patch("stripe.InvoiceItem.create", return_value=deepcopy(FAKE_INVOICEITEM))
+    def test_add_invoice_item_djstripe_objects(self, invoiceitem_create_mock, invoiceitem_sync_mock):
+        invoiceitem = self.customer.add_invoice_item(amount=decimal.Decimal("50.00"), currency="eur", description="test", invoice=Invoice(stripe_id=77), subscription=Subscription(stripe_id=25))
+        self.assertEqual("pancakes", invoiceitem)
+
+        invoiceitem_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, amount=5000, customer=self.customer.stripe_id, currency="eur", description="test", discountable=None, invoice=77, metadata=None, subscription=25)
 
     def test_add_invoice_item_bad_decimal(self):
         with self.assertRaisesMessage(ValueError, "You must supply a decimal value representing dollars."):
-            self.customer.add_invoice_item(amount=5000)
+            self.customer.add_invoice_item(amount=5000, currency="usd")
