@@ -1016,6 +1016,34 @@ FAKE_EVENT_CUSTOMER_CREATED = {
     "type": "customer.created",
 }
 
+FAKE_EVENT_CUSTOMER_SOURCE_CREATED = {
+    "id": "evt_DvKYlo38huDvKYlo2C7SXedrZk",
+    "object": "event",
+    "api_version": "2016-03-07",
+    "created": 1439229084,
+    "data": {
+        "object": deepcopy(FAKE_CARD)
+    },
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_o3whaDvh3whaDj",
+    "type": "customer.source.created",
+}
+
+FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED = {
+    "id": "evt_38DHch3wHD2eZvKYlCT2oe5ff3",
+    "object": "event",
+    "api_version": "2016-03-07",
+    "created": 1439229084,
+    "data": {
+        "object": deepcopy(FAKE_SUBSCRIPTION)
+    },
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_6l87IHch3diaDj",
+    "type": "customer.subscription.created",
+}
+
 FAKE_EVENT_INVOICE_CREATED = {
     "id": "evt_187IHD2eZvKYlo2C6YKQi2eZ",
     "object": "event",

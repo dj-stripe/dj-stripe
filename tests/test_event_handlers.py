@@ -13,10 +13,11 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from mock import patch
 
-from djstripe.models import Event, Charge, Transfer, Account, Plan, Customer, InvoiceItem, Invoice
+from djstripe.models import Event, Charge, Transfer, Account, Plan, Customer, InvoiceItem, Invoice, Card, Subscription
 from tests import (FAKE_CUSTOMER, FAKE_CUSTOMER_II, FAKE_EVENT_CHARGE_SUCCEEDED, FAKE_EVENT_TRANSFER_CREATED,
                    FAKE_EVENT_PLAN_CREATED, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_INVOICE_II, FAKE_EVENT_INVOICEITEM_CREATED,
-                   FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_CUSTOMER_CREATED)
+                   FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_CUSTOMER_CREATED, FAKE_EVENT_CUSTOMER_SOURCE_CREATED,
+                   FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED, FAKE_PLAN)
 
 
 class TestChargeEvents(TestCase):
@@ -97,10 +98,64 @@ class TestCustomerEvents(TestCase):
         customer = Customer.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
         self.assertNotEqual(None, customer.date_purged)
 
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    @patch("stripe.Event.retrieve")
+    def test_customer_card_created(self, event_retrieve_mock, customer_retrieve_mock):
+        fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_SOURCE_CREATED)
+        event_retrieve_mock.return_value = fake_stripe_event
+
+        customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+
+        event.validate()
+        event.process()
+
+        card = Card.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
+        self.assertIn(card, customer.sources.all())
+        self.assertEqual(card.brand, fake_stripe_event["data"]["object"]["brand"])
+        self.assertEqual(card.last4, fake_stripe_event["data"]["object"]["last4"])
+
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    @patch("stripe.Event.retrieve")
+    def test_customer_unknown_source_created(self, event_retrieve_mock, customer_retrieve_mock):
+        fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_SOURCE_CREATED)
+        fake_stripe_event["data"]["object"]["object"] = "unknown"
+        event_retrieve_mock.return_value = fake_stripe_event
+
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+
+        event.validate()
+        event.process()
+
+        self.assertFalse(Card.objects.filter(stripe_id=fake_stripe_event["data"]["object"]["id"]).exists())
+
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    @patch("stripe.Event.retrieve")
+    def test_customer_subscription_created(self, event_retrieve_mock, customer_retrieve_mock, plan_retrieve_mock):
+        fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED)
+        event_retrieve_mock.return_value = fake_stripe_event
+
+        customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+
+        event.validate()
+        event.process()
+
+        subscription = Subscription.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
+        self.assertIn(subscription, customer.subscriptions.all())
+        self.assertEqual(subscription.status, fake_stripe_event["data"]["object"]["status"])
+        self.assertEqual(subscription.quantity, fake_stripe_event["data"]["object"]["quantity"])
+
     @patch("stripe.Customer.retrieve")
     @patch("stripe.Event.retrieve")
     def test_customer_bogus_event_type(self, event_retrieve_mock, customer_retreive_mock):
         fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_CREATED)
+        fake_stripe_event["data"]["object"]["customer"] = fake_stripe_event["data"]["object"]["id"]
         fake_stripe_event["type"] = "customer.praised"
 
         event_retrieve_mock.return_value = fake_stripe_event

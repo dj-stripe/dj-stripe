@@ -459,7 +459,6 @@ class Event(StripeEvent):
                 self.processed = True
                 self.save()
             except StripeError as exc:
-                raise
                 # TODO: What if we caught all exceptions or a broader range of exceptions here? How about DoesNotExist
                 # exceptions, for instance? or how about TypeErrors, KeyErrors, ValueErrors, etc?
                 EventProcessingException.log(

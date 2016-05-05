@@ -713,7 +713,9 @@ class StripeEvent(StripeObject):
     webhook_message = StripeJSONField(stripe_name="data", help_text="data received at webhook. data should be considered to be garbage until validity check is run and valid flag is set")
 
     def str_parts(self):
-        return [self.type] + super(StripeEvent, self).str_parts()
+        return [
+            "type={type}".format(type=self.type),
+        ] + super(StripeEvent, self).str_parts()
 
     def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
         # OVERRIDING the parent version of this function
