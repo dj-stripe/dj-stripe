@@ -17,14 +17,14 @@ from mock import patch
 
 from djstripe.models import Customer, Account
 
-from . import FAKE_CHARGE
+from tests import FAKE_CHARGE, FAKE_CUSTOMER
 
 
 class EmailReceiptTest(TestCase):
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        self.customer = Customer.objects.create(subscriber=self.user, stripe_id="cus_6lsBvm5rJ0zyHc", currency="usd")
+        self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
         self.account = Account.objects.create()
 
     @patch("djstripe.models.Account.get_default_account")

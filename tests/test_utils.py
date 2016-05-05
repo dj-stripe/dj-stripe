@@ -21,8 +21,8 @@ from django.utils import timezone
 from mock import patch
 
 from djstripe.models import Customer, Subscription
-from djstripe.utils import subscriber_has_active_subscription, get_supported_currency_choices, simple_stripe_pagination_iterator, convert_tstamp
-from tests import FAKE_SUBSCRIPTION
+from djstripe.utils import subscriber_has_active_subscription, get_supported_currency_choices, convert_tstamp
+from tests import FAKE_SUBSCRIPTION, FAKE_CUSTOMER
 from tests.apps.testapp.models import Organization
 
 
@@ -89,7 +89,7 @@ class TestUserHasActiveSubscription(TestCase):
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        self.customer = Customer.objects.create(subscriber=self.user, stripe_id="cus_6lsBvm5rJ0zyHc", currency="usd")
+        self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
 
     def test_user_has_inactive_subscription(self):
         self.assertFalse(subscriber_has_active_subscription(self.user))
@@ -149,30 +149,3 @@ class TestGetSupportedCurrencyChoices(TestCase):
         self.assertGreaterEqual(len(currency_choices), 1, "Currency choices pull returned an empty list.")
         self.assertEqual(tuple, type(currency_choices[0]), "Currency choices are not tuples.")
         self.assertIn(("usd", "USD"), currency_choices, "USD not in currency choices.")
-
-
-class TestPaginationIterator(TestCase):
-    test_strings = ["start", "apple", "pie", "carrot", "cake", "dessert", "chocolate", "chip", "cookies", "end"]
-
-    class StripeTestObject(object):
-
-        def all(self, limit, starting_after=None):
-            if not starting_after:
-                return {"has_more": True, "data": TestPaginationIterator.test_strings[:3]}
-            elif starting_after == "pie":
-                return {"has_more": True, "data": TestPaginationIterator.test_strings[3:6]}
-            elif starting_after == "dessert":
-                return {"has_more": False, "data": TestPaginationIterator.test_strings[6:]}
-
-    def test_paginator_as_list(self):
-        expected_result = self.test_strings
-        stripe_object = self.StripeTestObject()
-
-        self.assertEqual(list(simple_stripe_pagination_iterator(stripe_object)), expected_result)
-
-    def test_paginator_as_iterator(self):
-        stripe_object = self.StripeTestObject()
-        paginator = simple_stripe_pagination_iterator(stripe_object)
-
-        for test_string in self.test_strings:
-            self.assertEqual(next(paginator), test_string)

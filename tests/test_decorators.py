@@ -17,7 +17,7 @@ from django.test.client import RequestFactory
 
 from djstripe.decorators import subscription_payment_required
 from djstripe.models import Customer, Subscription
-from tests import FAKE_SUBSCRIPTION, FUTURE_DATE
+from tests import FAKE_SUBSCRIPTION, FUTURE_DATE, FAKE_CUSTOMER
 
 
 class TestSubscriptionPaymentRequired(TestCase):
@@ -44,7 +44,7 @@ class TestSubscriptionPaymentRequired(TestCase):
 
     def test_user_unpaid(self):
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        Customer.objects.create(subscriber=user, stripe_id="cus_6lsBvm5rJ0zyHc", currency="usd")
+        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
 
         request = self.factory.get('/account/')
         request.user = user
@@ -54,7 +54,7 @@ class TestSubscriptionPaymentRequired(TestCase):
 
     def test_user_active_subscription(self):
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        Customer.objects.create(subscriber=user, stripe_id="cus_6lsBvm5rJ0zyHc", currency="usd")
+        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
         subscription.current_period_end = FUTURE_DATE
         subscription.save()

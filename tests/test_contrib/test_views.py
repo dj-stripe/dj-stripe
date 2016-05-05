@@ -66,7 +66,7 @@ class RestSubscriptionTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_get_subscription(self):
-        Customer.objects.create(subscriber=self.user, stripe_id="cus_6lsBvm5rJ0zyHc", currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
 
@@ -87,7 +87,7 @@ class RestSubscriptionTest(APITestCase):
             return subscription
 
         fake_cancelled_subscription = deepcopy(FAKE_SUBSCRIPTION)
-        Customer.objects.create(subscriber=self.user, stripe_id="cus_6lsBvm5rJ0zyHc", currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
         subscription = Subscription.sync_from_stripe_data(fake_cancelled_subscription)
 
         cancel_subscription_mock.side_effect = _cancel_sub

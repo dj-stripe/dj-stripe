@@ -24,7 +24,6 @@ from .signals import WEBHOOK_SIGNALS
 from .signals import webhook_processing_error
 from .stripe_objects import (StripeSource, StripeCharge, StripeCustomer, StripeCard, StripeSubscription,
                              StripePlan, StripeInvoice, StripeInvoiceItem, StripeTransfer, StripeAccount, StripeEvent)
-from .utils import simple_stripe_pagination_iterator
 
 logger = logging.getLogger(__name__)
 
@@ -386,21 +385,15 @@ class Customer(StripeCustomer):
 
     # SYNC methods should be dropped in favor of the master sync infrastructure proposed
     def _sync_invoices(self, **kwargs):
-        stripe_customer = self.api_retrieve()
-
-        for invoice in simple_stripe_pagination_iterator(stripe_object=Invoice._api(), customer=stripe_customer, **kwargs):
+        for invoice in Invoice.api_list(customer=self.stripe_id, **kwargs):
             Invoice.sync_from_stripe_data(invoice, send_receipt=False)
 
     def _sync_charges(self, **kwargs):
-        stripe_customer = self.api_retrieve()
-
-        for charge in simple_stripe_pagination_iterator(stripe_object=Charge._api(), customer=stripe_customer, **kwargs):
+        for charge in Charge.api_list(customer=self.stripe_id, **kwargs):
             Charge.sync_from_stripe_data(charge)
 
     def _sync_subscriptions(self, **kwargs):
-        stripe_customer = self.api_retrieve()
-
-        for subscription in simple_stripe_pagination_iterator(stripe_customer.subscriptions, **kwargs):
+        for subscription in Subscription.api_list(customer=self.stripe_id, **kwargs):
             Subscription.sync_from_stripe_data(subscription)
 
 

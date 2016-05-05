@@ -9,8 +9,14 @@ class SubscriptionCancellationFailure(Exception):
 class SubscriptionUpdateFailure(Exception):
     pass
 
+
 class MultipleSubscriptionException(Exception):
     pass
 
+
 class StripeObjectManipulationException(Exception):
+    pass
+
+
+class CustomerDoesNotExistLocallyException(Exception):
     pass

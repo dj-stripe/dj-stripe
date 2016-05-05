@@ -20,10 +20,10 @@ from django.utils import timezone
 from mock import patch, PropertyMock, MagicMock
 from stripe.error import InvalidRequestError
 
-from djstripe.models import Account, Customer, Charge, Card, Subscription, Invoice
-
-from tests import FAKE_CARD, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_ACCOUNT, FAKE_INVOICE, FAKE_INVOICE_II, FAKE_INVOICE_III, DataList, \
-    FAKE_INVOICEITEM
+from djstripe.models import Account, Customer, Charge, Card, Subscription, Invoice, Plan
+from tests import (FAKE_CARD, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_ACCOUNT, FAKE_INVOICE, FAKE_INVOICE_II,
+                   FAKE_INVOICE_III, FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II,
+                   StripeList)
 
 
 class TestCustomer(TestCase):
@@ -368,7 +368,7 @@ class TestCustomer(TestCase):
 
     @skip
     @patch("djstripe.models.Invoice.sync_from_stripe_data")
-    @patch("tests.FAKE_CUSTOMER.invoices", return_value=DataList(data=[]))  # See this for above TODO; probably want to mock CustomerDict though
+    @patch("tests.FAKE_CUSTOMER.invoices", return_value=StripeList(data=[]))  # See this for above TODO; probably want to mock CustomerDict though
     @patch("djstripe.models.Customer.api_retrieve")
     def test_sync_invoices_none(self, api_retrieve_mock, customer_invoice_retrieve_mock, sync_from_stripe_data_mock):
         self.customer._sync_invoices()
@@ -404,46 +404,27 @@ class TestCustomer(TestCase):
 
         self.customer._sync_charges()
 
-    @skip
-    @patch("djstripe.models.Customer.api_retrieve", return_value=PropertyMock(subscription=None))
-    def test_sync_current_subscription_no_stripe_subscription(self, api_retrieve_mock):
-        self.assertEqual(None, self.customer._sync_subscriptions())
+    @patch("djstripe.models.Subscription.sync_from_stripe_data", autospec=True)
+    @patch("stripe.Subscription.list", return_value=StripeList(data=[deepcopy(FAKE_SUBSCRIPTION), deepcopy(FAKE_SUBSCRIPTION_II)]))
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_sync_subscriptions(self, customer_retrieve_mock, subscription_list_mock, subscription_sync_mock):
+        self.customer._sync_subscriptions()
+        self.assertEqual(2, subscription_sync_mock.call_count)
 
-    @skip
+    @patch("djstripe.models.Subscription.sync_from_stripe_data", autospec=True)
+    @patch("stripe.Subscription.list", return_value=StripeList(data=[]))
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_sync_subscriptions_none(self, customer_retrieve_mock, subscription_list_mock, subscription_sync_mock):
+        self.customer._sync_subscriptions()
+        self.assertEqual(0, subscription_sync_mock.call_count)
+
     @patch("djstripe.models.Customer.send_invoice")
-    @patch("tests.FAKE_CUSTOMER.update_subscription")
-    @patch("djstripe.models.Customer.api_retrieve", return_value=FAKE_CUSTOMER)
-    def test_subscribe_trial_plan(self, api_retrieve_mock, update_subscription_mock, send_invoice_mock):
-        trial_days = 7  # From settings
+    @patch("stripe.Subscription.create", return_value=deepcopy(FAKE_SUBSCRIPTION))
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_subscribe_not_charge_immediately(self, customer_retrieve_mock, subscription_create_mock, send_invoice_mock):
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
-        self.customer.subscribe(plan="test_trial")
-        send_invoice_mock.assert_called_once_with()
-
-        _, call_kwargs = update_subscription_mock.call_args
-
-        self.assertIn("trial_end", call_kwargs)
-        self.assertLessEqual(call_kwargs["trial_end"], timezone.now() + datetime.timedelta(days=trial_days))
-
-    @skip
-    @patch("djstripe.models.Customer.send_invoice")
-    @patch("tests.FAKE_CUSTOMER.update_subscription")
-    @patch("djstripe.models.Customer.api_retrieve", return_value=FAKE_CUSTOMER)
-    def test_subscribe_trial_days_kwarg(self, api_retrieve_mock, update_subscription_mock, send_invoice_mock):
-        trial_days = 9
-
-        self.customer.subscribe(plan="test", trial_days=trial_days)
-        send_invoice_mock.assert_called_once_with()
-
-        _, call_kwargs = update_subscription_mock.call_args
-
-        self.assertIn("trial_end", call_kwargs)
-        self.assertLessEqual(call_kwargs["trial_end"], timezone.now() + datetime.timedelta(days=trial_days))
-
-    @skip
-    @patch("djstripe.models.Customer.send_invoice")
-    @patch("djstripe.models.Customer.api_retrieve", return_value=PropertyMock())
-    def test_subscribe_not_charge_immediately(self, api_retrieve_mock, customer_subscription_mock, send_invoice_mock):
-        self.customer.subscribe(plan="test", charge_immediately=False)
+        self.customer.subscribe(plan=plan, charge_immediately=False)
         self.assertFalse(send_invoice_mock.called)
 
     @patch("djstripe.models.Charge.send_receipt")

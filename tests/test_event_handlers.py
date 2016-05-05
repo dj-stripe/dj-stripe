@@ -17,10 +17,14 @@ from djstripe.models import Event, Charge, Transfer, Account, Plan, Customer, In
 from tests import (FAKE_CUSTOMER, FAKE_CUSTOMER_II, FAKE_EVENT_CHARGE_SUCCEEDED, FAKE_EVENT_TRANSFER_CREATED,
                    FAKE_EVENT_PLAN_CREATED, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_INVOICE_II, FAKE_EVENT_INVOICEITEM_CREATED,
                    FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_CUSTOMER_CREATED, FAKE_EVENT_CUSTOMER_SOURCE_CREATED,
-                   FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED, FAKE_PLAN)
+                   FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_III)
+from djstripe.exceptions import CustomerDoesNotExistLocallyException
 
 
 class TestChargeEvents(TestCase):
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
 
     @patch("djstripe.models.Account.get_default_account")
     @patch('stripe.Customer.retrieve', return_value=deepcopy(FAKE_CUSTOMER))
@@ -31,6 +35,8 @@ class TestChargeEvents(TestCase):
         event_retrieve_mock.return_value = fake_stripe_event
         charge_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
         account_mock.return_value = Account.objects.create()
+
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
 
         event = Event.sync_from_stripe_data(fake_stripe_event)
 
@@ -133,9 +139,10 @@ class TestCustomerEvents(TestCase):
         self.assertFalse(Card.objects.filter(stripe_id=fake_stripe_event["data"]["object"]["id"]).exists())
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
+    @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     @patch("stripe.Event.retrieve")
-    def test_customer_subscription_created(self, event_retrieve_mock, customer_retrieve_mock, plan_retrieve_mock):
+    def test_customer_subscription_created(self, event_retrieve_mock, customer_retrieve_mock, subscription_retrieve_mock, plan_retrieve_mock):
         fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED)
         event_retrieve_mock.return_value = fake_stripe_event
 
@@ -176,16 +183,45 @@ class TestInvoiceEvents(TestCase):
 
     @patch("djstripe.models.Charge.send_receipt", autospec=True)
     @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
+    @patch("stripe.Invoice.retrieve")
+    @patch("stripe.Event.retrieve")
+    def test_invoice_created_no_existing_customer(self, event_retrieve_mock, invoice_retrieve_mock, charge_retrieve_mock,
+                             customer_retrieve_mock, subscription_retrieve_mock, default_account_mock, send_receipt_mock):
+        default_account_mock.return_value = Account.objects.create()
+
+        user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
+
+        # This is a different customer
+        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], currency="usd")
+
+        fake_stripe_event = deepcopy(FAKE_EVENT_INVOICE_CREATED)
+        event_retrieve_mock.return_value = fake_stripe_event
+
+        invoice_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+
+        event.validate()
+
+        with self.assertRaises(CustomerDoesNotExistLocallyException):
+            event.process()
+
+    @patch("djstripe.models.Charge.send_receipt", autospec=True)
+    @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
     @patch("stripe.Invoice.retrieve")
     @patch("stripe.Event.retrieve")
     def test_invoice_created(self, event_retrieve_mock, invoice_retrieve_mock, charge_retrieve_mock,
-                             customer_retrieve_mock, default_account_mock, send_receipt_mock):
+                             customer_retrieve_mock, subscription_retrieve_mock, default_account_mock, send_receipt_mock):
         default_account_mock.return_value = Account.objects.create()
 
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        Customer.objects.create(subscriber=user, stripe_id="cus_4UbFSo9tl62jqj", currency="usd")
+        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
 
         fake_stripe_event = deepcopy(FAKE_EVENT_INVOICE_CREATED)
         event_retrieve_mock.return_value = fake_stripe_event
@@ -205,17 +241,18 @@ class TestInvoiceEvents(TestCase):
 class TestInvoiceItemEvents(TestCase):
 
     @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION_III))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER_II))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE_II))
     @patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE_II))
     @patch("stripe.InvoiceItem.retrieve")
     @patch("stripe.Event.retrieve")
     def test_invoiceitem_created(self, event_retrieve_mock, invoiceitem_retrieve_mock, invoice_retrieve_mock,
-                                 charge_retrieve_mock, customer_retrieve_mock, default_account_mock):
+                                 charge_retrieve_mock, customer_retrieve_mock, subscription_retrieve_mock, default_account_mock):
         default_account_mock.return_value = Account.objects.create()
 
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        Customer.objects.create(subscriber=user, stripe_id="cus_4UbFSo9tl62jqj", currency="usd")
+        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], currency="usd")
 
         fake_stripe_event = deepcopy(FAKE_EVENT_INVOICEITEM_CREATED)
         event_retrieve_mock.return_value = fake_stripe_event

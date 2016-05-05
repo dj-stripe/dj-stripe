@@ -11,7 +11,7 @@ from .models import Customer, Plan
 def sync_subscriber(subscriber):
     customer, _created = Customer.get_or_create(subscriber=subscriber)
     try:
-        customer._sync()
+        customer.sync_from_stripe_data(customer.api_retrieve())
         customer._sync_subscriptions()
         customer._sync_invoices()
         customer._sync_charges()

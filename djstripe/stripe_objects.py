@@ -33,6 +33,7 @@ from .exceptions import StripeObjectManipulationException
 from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, StripePercentField, StripeCurrencyField,
                      StripeIntegerField, StripeTextField, StripeIdField, StripeBooleanField, StripeNullBooleanField, StripeJSONField)
 from .managers import StripeObjectManager
+from djstripe.exceptions import CustomerDoesNotExistLocallyException
 
 
 stripe.api_version = "2016-03-07"
@@ -91,9 +92,24 @@ class StripeObject(TimeStampedModel):
         return type(self)._api().retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
 
     @classmethod
+    def api_list(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
+        """
+        Call the stripe API's list operation for this model.
+
+        :param api_key: The api key to use for this request. Defualts to settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+
+        See Stripe documentation for accepted kwargs for each object.
+
+        :returns: an iterator over all items in the query
+        """
+
+        return cls._api().list(api_key=api_key, **kwargs).auto_paging_iter()
+
+    @classmethod
     def _api_create(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
         """
-        Call the stripe API's create operation for this model
+        Call the stripe API's create operation for this model.
 
         :param api_key: The api key to use for this request. Defualts to settings.STRIPE_SECRET_KEY.
         :type api_key: string
@@ -206,7 +222,11 @@ class StripeObject(TimeStampedModel):
         """
 
         if "customer" in data and data["customer"]:
-            return target_cls.get_or_create_from_stripe_object(data, "customer")[0]
+            # We never want to create a customer that doesn't already exist in our database.
+            try:
+                return target_cls.stripe_objects.get_by_json(data, "customer")
+            except target_cls.DoesNotExist:
+                raise CustomerDoesNotExistLocallyException("Because customers are tied to local users, djstripe will not create customers that do not already exist locally.")
 
     @classmethod
     def stripe_object_to_transfer(cls, target_cls, data):
@@ -610,6 +630,7 @@ class StripeCustomer(StripeObject):
 
         stripe_subscription = StripeSubscription._api_create(
             plan=plan,
+            customer=self.stripe_id,
             application_fee_percent=application_fee_percent,
             coupon=coupon,
             quantity=quantity,
@@ -1175,7 +1196,6 @@ class StripeSubscription(StripeObject):
         abstract = True
 
     stripe_api_name = "Subscription"
-    _needs_customer = True
 
     STATUS_ACTIVE = "active"
     STATUS_TRIALING = "trialing"
@@ -1198,18 +1218,6 @@ class StripeSubscription(StripeObject):
     tax_percent = StripePercentField(null=True, help_text="A positive decimal (with at most two decimal places) between 1 and 100. This represents the percentage of the subscription invoice subtotal that will be calculated and added as tax to the final amount each billing period.")
     trial_end = StripeDateTimeField(null=True, help_text="If the subscription has a trial, the end of that trial.")
     trial_start = StripeDateTimeField(null=True, help_text="If the subscription has a trial, the beginning of that trial.")
-
-    # TODO: See if accepting a customer/account in the create call is reasonable.
-
-    @classmethod
-    def _api(cls):
-        raise StripeObjectManipulationException("Subscriptions must be manipulated through either a customer.")
-
-    def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
-        # OVERRIDING the parent version of this function
-        # Subscriptions must be manipulated through a customer.
-
-        return self.customer.api_retrieve().subscriptions.retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
 
     def str_parts(self):
         return [

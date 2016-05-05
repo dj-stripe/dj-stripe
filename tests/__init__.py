@@ -25,17 +25,23 @@ def convert_to_fake_stripe_object(response):
     return convert_to_stripe_object(resp=response, api_key=settings.STRIPE_SECRET_KEY, account="test_account")
 
 
-class DataList(object):
-    """http://stackoverflow.com/a/2535952/1834570"""
-
-    __allowed = ("total_count", "has_more", "url", "data")
-
+class StripeList(dict):
     object = "list"
+    has_more = False
+    url = "/v1/fakes"
 
-    def __init__(self, **kwargs):
-        for key, value in kwargs.items():
-            if key in self.__allowed:
-                setattr(self, key, value)
+    def __init__(self, data):
+        self.data = data
+
+    def __getitem__(self, key):
+        return self.getattr(key)
+
+    def auto_paging_iter(self):
+        return self.data
+
+    @property
+    def total_count(self):
+        return len(self.data)
 
 
 FAKE_BALANCE_TRANSACTION = {
@@ -491,35 +497,7 @@ class Sources(dict):
                 return fake_card
 
 
-class Subscriptions(dict):
-    subscription_fakes = [FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II, FAKE_SUBSCRIPTION_III]
-
-    def create(self, plan, **kwargs):
-        for fake_subscription in self.subscription_fakes:
-            if fake_subscription["plan"]["id"] == plan:
-                return fake_subscription
-
-    def retrieve(self, id, api_key, expand):
-        for fake_subscription in self.subscription_fakes:
-            if fake_subscription["id"] == id:
-                return fake_subscription
-
-
 class CustomerDict(dict):
-
-    def charges(self, **kwargs):
-        return DataList(url="/v1/charges",
-                        has_more=False,
-                        data=[deepcopy(FAKE_CHARGE)])
-
-    def invoices(self, **kwargs):
-        return DataList(url="/v1/invoices",
-                        has_more=False,
-                        data=[deepcopy(FAKE_INVOICE), deepcopy(FAKE_INVOICE_III)])
-
-    def update_subscription(self, **kwargs):
-        self.update(kwargs)
-        return self
 
     def save(self):
         pass
@@ -530,10 +508,6 @@ class CustomerDict(dict):
     @property
     def sources(self):
         return Sources()
-
-    @property
-    def subscriptions(self):
-        return Subscriptions()
 
 
 FAKE_CUSTOMER = CustomerDict({
@@ -598,7 +572,6 @@ FAKE_CUSTOMER_II = CustomerDict({
         "url": "/v1/customers/cus_4UbFSo9tl62jqj/subscriptions",
         "data": [deepcopy(FAKE_SUBSCRIPTION_III)]
     },
-
 })
 
 

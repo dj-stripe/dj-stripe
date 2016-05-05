@@ -14,7 +14,7 @@ from django.test.utils import override_settings
 
 from djstripe.middleware import SubscriptionPaymentMiddleware
 from djstripe.models import Customer, Subscription
-from tests import FAKE_SUBSCRIPTION, FUTURE_DATE
+from tests import FAKE_SUBSCRIPTION, FUTURE_DATE, FAKE_CUSTOMER
 
 
 class MiddlewareURLTest(TestCase):
@@ -83,7 +83,7 @@ class MiddlewareLogicTest(TestCase):
         self.settings(ROOT_URLCONF=self.urlconf)
         self.factory = RequestFactory()
         self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        self.customer = Customer.objects.create(subscriber=self.user, stripe_id="cus_6lsBvm5rJ0zyHc", currency="usd")
+        self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
         self.subscription = Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
         self.middleware = SubscriptionPaymentMiddleware()
 

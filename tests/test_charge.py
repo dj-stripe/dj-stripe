@@ -16,7 +16,7 @@ from django.utils import timezone
 from mock import patch
 
 from djstripe.models import Charge, Customer, Invoice, Account
-from tests import FAKE_TRANSFER
+from tests import FAKE_TRANSFER, FAKE_CUSTOMER
 
 from . import FAKE_CHARGE, FAKE_ACCOUNT
 
@@ -24,7 +24,7 @@ from . import FAKE_CHARGE, FAKE_ACCOUNT
 class ChargeTest(TestCase):
 
     def setUp(self):
-        self.customer = Customer.objects.create(stripe_id="cus_6lsBvm5rJ0zyHc", currency="usd")
+        self.customer = Customer.objects.create(stripe_id=FAKE_CUSTOMER["id"], currency="usd")
         self.account = Account.objects.create()
 
     def test_str(self):
