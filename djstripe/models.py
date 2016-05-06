@@ -26,6 +26,7 @@ from .signals import webhook_processing_error
 from .stripe_objects import (StripeSource, StripeCharge, StripeCustomer, StripeCard, StripeSubscription,
                              StripePlan, StripeInvoice, StripeInvoiceItem, StripeTransfer, StripeAccount, StripeEvent)
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -630,7 +631,7 @@ class Subscription(StripeSubscription):
         return self.canceled_at and self.start < self.canceled_at and self.cancel_at_period_end
 
     def is_valid(self):
-        if not self.is_status_current():
+        if not (self.is_status_current() or self.is_status_temporarily_current()):
             return False
 
         if not self.is_period_current():

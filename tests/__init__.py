@@ -514,10 +514,12 @@ FAKE_SUBSCRIPTION_III = {
 }
 
 
-class Sources(dict):
-    card_fakes = [FAKE_CARD, FAKE_CARD_II, FAKE_CARD_III, FAKE_CARD_IV, FAKE_CARD_V]
+class Sources(object):
 
-    def create(self, source):
+    def __init__(self, card_fakes):
+        self.card_fakes = card_fakes
+
+    def create(self, source, api_key=None):
         for fake_card in self.card_fakes:
             if fake_card["id"] == source:
                 return fake_card
@@ -526,6 +528,9 @@ class Sources(dict):
         for fake_card in self.card_fakes:
             if fake_card["id"] == id:
                 return fake_card
+
+    def list(self, **kwargs):
+        return StripeList(data=self.card_fakes)
 
 
 class CustomerDict(dict):
@@ -538,7 +543,7 @@ class CustomerDict(dict):
 
     @property
     def sources(self):
-        return Sources()
+        return Sources(card_fakes=self["sources"]["data"])
 
 
 FAKE_CUSTOMER = CustomerDict({
@@ -561,7 +566,7 @@ FAKE_CUSTOMER = CustomerDict({
         "total_count": 1,
         "has_more": False,
         "url": "/v1/customers/cus_6lsBvm5rJ0zyHc/sources",
-        "data": [deepcopy(FAKE_CARD)]
+        "data": [deepcopy(FAKE_CARD), deepcopy(FAKE_CARD_V)]
     },
     "subscriptions": {
         "object": "list",

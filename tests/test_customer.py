@@ -9,21 +9,18 @@
 """
 
 from copy import deepcopy
-import datetime
 import decimal
-from unittest.case import skip
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from django.utils import timezone
-from mock import patch, PropertyMock, MagicMock
+from mock import patch
 from stripe.error import InvalidRequestError
 
 from djstripe.models import Account, Customer, Charge, Card, Subscription, Invoice, Plan
-from tests import (FAKE_CARD, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_ACCOUNT, FAKE_INVOICE, FAKE_INVOICE_II,
+from tests import (FAKE_CARD, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_ACCOUNT, FAKE_INVOICE,
                    FAKE_INVOICE_III, FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II,
-                   StripeList, FAKE_CARD_V, FAKE_CUSTOMER_II, FAKE_PLAN_II)
+                   StripeList, FAKE_CARD_V, FAKE_CUSTOMER_II)
 
 
 class TestCustomer(TestCase):
@@ -55,6 +52,18 @@ class TestCustomer(TestCase):
 
         self.assertEqual(None, customer.default_source)
         self.assertEqual(0, customer.sources.count())
+
+    @patch("stripe.Card.retrieve", return_value=FAKE_CUSTOMER_II["default_source"])
+    def test_customer_sync_non_local_card(self, card_retrieve_mock):
+        fake_customer = deepcopy(FAKE_CUSTOMER_II)
+
+        user = get_user_model().objects.create_user(username="testuser", email="testuser@gmail.com")
+        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], currency="usd")
+
+        customer = Customer.sync_from_stripe_data(fake_customer)
+
+        self.assertEqual(FAKE_CUSTOMER_II["default_source"]["id"], customer.default_source.stripe_id)
+        self.assertEqual(1, customer.sources.count())
 
     @patch("stripe.Customer.retrieve")
     def test_customer_purge_leaves_customer_record(self, customer_retrieve_fake):
@@ -134,7 +143,6 @@ class TestCustomer(TestCase):
         with self.assertRaises(ValueError):
             self.customer.charge(10)
 
-    @skip
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     def test_refund_charge(self, charge_retrieve_mock, default_account_mock):
@@ -156,7 +164,6 @@ class TestCustomer(TestCase):
         self.assertEquals(refunded_charge.refunded, True)
         self.assertEquals(refunded_charge.amount_refunded, decimal.Decimal("22.00"))
 
-    @skip
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     def test_refund_charge_object_returned(self, charge_retrieve_mock, default_account_mock):
@@ -174,7 +181,6 @@ class TestCustomer(TestCase):
         self.assertEquals(refunded_charge.refunded, True)
         self.assertEquals(refunded_charge.amount_refunded, decimal.Decimal("22.00"))
 
-    @skip
     def test_calculate_refund_amount_full_refund(self):
         charge = Charge(
             stripe_id="ch_111111",
@@ -183,7 +189,6 @@ class TestCustomer(TestCase):
         )
         self.assertEquals(charge._calculate_refund_amount(), 50000)
 
-    @skip
     def test_calculate_refund_amount_partial_refund(self):
         charge = Charge(
             stripe_id="ch_111111",
@@ -195,7 +200,6 @@ class TestCustomer(TestCase):
             30000
         )
 
-    @skip
     def test_calculate_refund_above_max_refund(self):
         charge = Charge(
             stripe_id="ch_111111",
@@ -207,7 +211,6 @@ class TestCustomer(TestCase):
             50000
         )
 
-    @skip
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")
@@ -225,7 +228,6 @@ class TestCustomer(TestCase):
         _, kwargs = charge_create_mock.call_args
         self.assertEquals(kwargs["amount"], 1000)
 
-    @skip
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")
@@ -234,7 +236,7 @@ class TestCustomer(TestCase):
         default_account_mock.return_value = self.account
 
         fake_charge_copy = deepcopy(FAKE_CHARGE)
-        fake_charge_copy.update({"invoice": "in_16YHls2eZvKYlo2CwwH968Mc", "amount": 2000})
+        fake_charge_copy.update({"invoice": FAKE_INVOICE["id"], "amount": FAKE_INVOICE["amount_due"]})
         fake_invoice_copy = deepcopy(FAKE_INVOICE)
 
         charge_create_mock.return_value = fake_charge_copy
@@ -246,7 +248,6 @@ class TestCustomer(TestCase):
         except Invoice.DoesNotExist:
             self.fail(msg="Stripe Charge shouldn't throw Invoice DoesNotExist.")
 
-    @skip
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")
@@ -262,14 +263,13 @@ class TestCustomer(TestCase):
         self.customer.charge(
             amount=decimal.Decimal("10.00"),
             capture=True,
-            destination=PropertyMock(stripe_id=FAKE_ACCOUNT["id"]),
+            destination=FAKE_ACCOUNT["id"],
         )
 
         _, kwargs = charge_create_mock.call_args
         self.assertEquals(kwargs["capture"], True)
         self.assertEquals(kwargs["destination"], FAKE_ACCOUNT["id"])
 
-    @skip
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")
@@ -287,7 +287,6 @@ class TestCustomer(TestCase):
             source=self.card.stripe_id,
         )
 
-    @skip
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")

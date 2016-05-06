@@ -28,12 +28,13 @@ from model_utils.models import TimeStampedModel
 from polymorphic.models import PolymorphicModel
 import stripe
 
+from djstripe.exceptions import CustomerDoesNotExistLocallyException
+
 from .context_managers import stripe_temporary_api_version
 from .exceptions import StripeObjectManipulationException
 from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, StripePercentField, StripeCurrencyField,
                      StripeIntegerField, StripeTextField, StripeIdField, StripeBooleanField, StripeNullBooleanField, StripeJSONField)
 from .managers import StripeObjectManager
-from djstripe.exceptions import CustomerDoesNotExistLocallyException
 
 
 stripe.api_version = "2016-03-07"
@@ -50,7 +51,6 @@ class StripeObject(TimeStampedModel):
     # e.g. "Event", "Charge", "Customer", etc.
     stripe_api_name = None
     expand_fields = None
-    _needs_customer = False
 
     objects = models.Manager()
     stripe_objects = StripeObjectManager()
@@ -196,16 +196,7 @@ class StripeObject(TimeStampedModel):
         except cls.DoesNotExist:
             # Grab the stripe data for a nested object
             if field_name != "id":
-                # Special circumstance for objects that can only be called through a customer.
-                # I'm sure this can be made more elegant eventually.
-                # If the customer doesn't already exist, this will throw an exception.
-                if cls._needs_customer:
-                    from .models import Customer
-                    customer = Customer.stripe_objects.get_by_json(data, field_name="customer")
-                    cls_instance = cls(stripe_id=data[field_name], customer=customer)
-                else:
-                    cls_instance = cls(stripe_id=data[field_name])
-
+                cls_instance = cls(stripe_id=data[field_name])
                 data = cls_instance.api_retrieve()
 
             return cls._create_from_stripe_object(data), True
@@ -260,6 +251,7 @@ class StripeObject(TimeStampedModel):
     def stripe_object_to_invoice(cls, target_cls, data):
         """
         Search the given manager for the Invoice matching this StripeCharge object's ``invoice`` field.
+        Note that the invoice field is required.
 
         :param target_cls: The target class
         :type target_cls: StripeInvoice
@@ -267,8 +259,7 @@ class StripeObject(TimeStampedModel):
         :type data: dict
         """
 
-        if "invoice" in data and data["invoice"]:
-            return target_cls.get_or_create_from_stripe_object(data, "invoice")[0]
+        return target_cls.get_or_create_from_stripe_object(data, "invoice")[0]
 
     @classmethod
     def stripe_object_to_subscription(cls, target_cls, data):
@@ -884,7 +875,6 @@ class StripeCard(StripeSource):
         abstract = True
 
     stripe_api_name = "Card"
-    _needs_customer = True
 
     address_city = StripeTextField(null=True, help_text="Billing address city.")
     address_country = StripeTextField(null=True, help_text="Billing address country.")
@@ -906,18 +896,42 @@ class StripeCard(StripeSource):
     name = StripeTextField(null=True, help_text="Cardholder name.")
     tokenization_method = StripeCharField(null=True, max_length=11, choices=TOKENIZATION_METHOD_CHOICES, help_text="If the card number is tokenized, this is the method that was used.")
 
-    # TODO: See if accepting a customer/account in the create call is reasonable.
-
-    @classmethod
-    def _api(cls):
-        raise StripeObjectManipulationException("Cards must be manipulated through either a customer or an account.")
-
     def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
         # OVERRIDING the parent version of this function
         # Cards must be manipulated through a customer or account.
-
         # TODO: When managed accounts are supported, this method needs to check if either a customer or account is supplied to determine the correct object to use.
+
         return self.customer.api_retrieve().sources.retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
+
+    @staticmethod
+    def _get_customer_from_kwargs(**kwargs):
+        if "customer" not in kwargs or not isinstance(kwargs["customer"], StripeCustomer):
+            raise StripeObjectManipulationException("Cards must be manipulated through a Customer. Pass a Customer object into this call.")
+
+        customer = kwargs["customer"]
+        del kwargs["customer"]
+
+        return customer, kwargs
+
+    @classmethod
+    def _api_create(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
+        # OVERRIDING the parent version of this function
+        # Cards must be manipulated through a customer or account.
+        # TODO: When managed accounts are supported, this method needs to check if either a customer or account is supplied to determine the correct object to use.
+
+        customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
+
+        return customer.api_retrieve().sources.create(api_key=api_key, **clean_kwargs)
+
+    @classmethod
+    def api_list(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
+        # OVERRIDING the parent version of this function
+        # Cards must be manipulated through a customer or account.
+        # TODO: When managed accounts are supported, this method needs to check if either a customer or account is supplied to determine the correct object to use.
+
+        customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
+
+        return customer.api_retrieve().sources.list(api_key=api_key, object="card", **clean_kwargs).auto_paging_iter()
 
     def str_parts(self):
         return [
@@ -927,22 +941,23 @@ class StripeCard(StripeSource):
             "exp_year={exp_year}".format(exp_year=self.exp_year),
         ] + super(StripeCard, self).str_parts()
 
+# TODO: Coming eventually
+#     @classmethod
+#     def stripe_object_to_account(cls, target_cls, data):
+#         """
+#         Search the given manager for the Account matching this StripeCharge object's ``account`` field.
+#
+#         :param target_cls: The target class
+#         :type target_cls: StripeAccount
+#         :param data: stripe object
+#         :type data: dict
+#         """
+#
+#         if "account" in data and data["account"]:
+#             return target_cls.get_or_create_from_stripe_object(data, "account")[0]
+
     @classmethod
-    def stripe_object_to_account(cls, target_cls, data):
-        """
-        Search the given manager for the Account matching this StripeCharge object's ``account`` field.
-
-        :param target_cls: The target class
-        :type target_cls: StripeAccount
-        :param data: stripe object
-        :type data: dict
-        """
-
-        if "account" in data and data["account"]:
-            return target_cls.get_or_create_from_stripe_object(data, "account")[0]
-
-    @classmethod
-    def create_token(self, number, exp_month, exp_year, cvc, **kwargs):
+    def create_token(cls, number, exp_month, exp_year, cvc, **kwargs):
         """
         Creates a single use token that wraps the details of a credit card. This token can be used in
         place of a credit card dictionary with any API method. These tokens can only be used once: by

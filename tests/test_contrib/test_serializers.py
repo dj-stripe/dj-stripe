@@ -11,10 +11,7 @@ from __future__ import unicode_literals
 
 from copy import deepcopy
 from datetime import timedelta
-from decimal import Decimal
-from unittest.case import skip
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone

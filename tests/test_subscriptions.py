@@ -1,4 +1,5 @@
 import calendar
+from copy import deepcopy
 import copy
 import datetime
 import decimal
@@ -14,7 +15,7 @@ from djstripe.exceptions import SubscriptionCancellationFailure, SubscriptionUpd
 from djstripe.models import Customer, Subscription
 from djstripe.settings import PAYMENTS_PLANS
 from djstripe.utils import convert_tstamp
-from tests import convert_to_fake_stripe_object
+from tests import convert_to_fake_stripe_object, FAKE_SUBSCRIPTION, FAKE_PLAN, FAKE_CUSTOMER
 
 
 def timestamp(year, month, day, hour, minute=0, second=0):
@@ -268,30 +269,63 @@ class TestSingleSubscription(TestCase):
         self.customer.current_subscription.extend(delta)
         UpdateSubscriptionMock.assert_called_once_with(prorate=False, trial_end=new_trial_end)
 
-@skip
+
 class SubscriptionTest(TestCase):
 
     def setUp(self):
-        self.plan_id = "test"
-        self.current_subscription = Subscription.objects.create(plan=self.plan_id,
-                                                                       quantity=1,
-                                                                       start=timezone.now(),
-                                                                       amount=decimal.Decimal(25.00),
-                                                                       status=Subscription.STATUS_PAST_DUE)
+        user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
+        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
 
-    def test_is_period_current_no_current_period_end(self):
-        self.assertFalse(self.current_subscription.is_period_current())
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_str(self, customer_retrieve_mock, plan_retreive_mock):
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
 
-    def test_is_status_temporarily_current_true(self):
-        current_subscription = Subscription.objects.create(plan=self.plan_id,
-                                                                  quantity=1,
-                                                                  start=timezone.now(),
-                                                                  amount=decimal.Decimal(25.00),
-                                                                  status=Subscription.STATUS_PAST_DUE,
-                                                                  canceled_at=timezone.now() + datetime.timedelta(days=5),
-                                                                  cancel_at_period_end=True)
+        self.assertEqual("<current_period_start={current_period_start}, current_period_end={current_period_end}, status={status}, quantity={quantity}, stripe_id={stripe_id}>".format(
+            current_period_start=subscription.current_period_start,
+            current_period_end=subscription.current_period_end,
+            status=subscription.status,
+            quantity=subscription.quantity,
+            stripe_id=subscription.stripe_id
+        ), str(subscription))
 
-        self.assertTrue(current_subscription.is_status_temporarily_current())
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_is_status_temporarily_current(self, customer_retrieve_mock, plan_retreive_mock):
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
+        subscription.status = Subscription.STATUS_CANCELLED
+        subscription.canceled_at = timezone.now() + datetime.timedelta(days=7)
+        subscription.current_period_end = timezone.now() + datetime.timedelta(days=7)
+        subscription.cancel_at_period_end = True
+        subscription.save()
 
-    def test_is_status_temporarily_current_false(self):
-        self.assertFalse(self.current_subscription.is_status_temporarily_current())
+        self.assertFalse(subscription.is_status_current())
+        self.assertTrue(subscription.is_status_temporarily_current())
+        self.assertTrue(subscription.is_valid())
+
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_is_status_temporarily_current_false(self, customer_retrieve_mock, plan_retreive_mock):
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
+        subscription.current_period_end = timezone.now() + datetime.timedelta(days=7)
+        subscription.save()
+
+        self.assertTrue(subscription.is_status_current())
+        self.assertFalse(subscription.is_status_temporarily_current())
+        self.assertTrue(subscription.is_valid())
+
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_is_status_temporarily_current_false_and_cancelled(self, customer_retrieve_mock, plan_retreive_mock):
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
+        subscription.status = Subscription.STATUS_CANCELLED
+        subscription.current_period_end = timezone.now() + datetime.timedelta(days=7)
+        subscription.save()
+
+        self.assertFalse(subscription.is_status_current())
+        self.assertFalse(subscription.is_status_temporarily_current())
+        self.assertFalse(subscription.is_valid())
