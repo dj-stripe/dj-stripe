@@ -11,7 +11,6 @@ from django.utils import timezone
 from mock import patch, PropertyMock
 from stripe import InvalidRequestError
 
-from djstripe.exceptions import SubscriptionCancellationFailure, SubscriptionUpdateFailure
 from djstripe.models import Customer, Subscription
 from djstripe.settings import PAYMENTS_PLANS
 from djstripe.utils import convert_tstamp
@@ -182,7 +181,7 @@ class TestSingleSubscription(TestCase):
 
     @patch("djstripe.models.Customer.api_retrieve")
     def test_cancel_without_sub(self, api_retrieve_mock):
-        with self.assertRaises(SubscriptionCancellationFailure):
+        with self.assertRaises(TypeError):
             self.customer.cancel_subscription()
 
     @patch("stripe.resource.Customer.cancel_subscription", new_callable=PropertyMock)
@@ -193,7 +192,7 @@ class TestSingleSubscription(TestCase):
         create_subscription(self.customer)
         self.assertEqual(self.customer.has_active_subscription(), True)
         self.assertEqual(self.customer.current_subscription.status, "trialing")
-        with self.assertRaises(SubscriptionCancellationFailure):
+        with self.assertRaises(TypeError):
             self.customer.cancel_subscription()
 
     @patch("stripe.resource.Customer.cancel_subscription")
@@ -215,7 +214,7 @@ class TestSingleSubscription(TestCase):
         api_retrieve_mock.return_value = convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC)
         cancel_subscription_mock.return_value = convert_to_fake_stripe_object(DUMMY_SUB_BASIC_CANCELED)
         subscription_instance = create_subscription(self.customer)
-        subscription_instance.trial_end = timezone.now() + datetime.timedelta(days=5)
+        subscription_instance.trial_end = timezone.now() + timezone.timedelta(days=5)
         subscription_instance.save()
 
         self.customer.cancel_subscription(at_period_end=True)
@@ -238,36 +237,8 @@ class TestSingleSubscription(TestCase):
     def test_update_no_stripe_sub(self, api_retrieve_mock):
         api_retrieve_mock.return_value = convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITHOUT_SUB)
         create_subscription(self.customer)
-        with self.assertRaises(SubscriptionUpdateFailure):
+        with self.assertRaises(TypeError):
             self.customer.update_plan_quantity(2)
-
-    @patch("stripe.resource.Customer.update_subscription")
-    @patch("djstripe.models.Customer.api_retrieve")
-    def test_extend(self, api_retrieve_mock, UpdateSubscriptionMock):
-        api_retrieve_mock.return_value = convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC)
-        subscription_instance = create_subscription(self.customer)
-        subscription_instance.current_period_end = timezone.datetime.fromtimestamp(END_TIME, tz=timezone.utc)
-        delta = timezone.timedelta(days=30)
-        self.customer.current_subscription.extend(delta)
-        UpdateSubscriptionMock.assert_called_once_with(prorate=False, trial_end=subscription_instance.current_period_end + delta)
-
-    def test_extend_negative_delta(self):
-        delta = timezone.timedelta(days=-30)
-        create_subscription(self.customer)
-        with self.assertRaises(ValueError):
-            self.customer.current_subscription.extend(delta)
-
-    @patch("stripe.resource.Customer.update_subscription")
-    @patch("djstripe.models.Customer.api_retrieve")
-    def test_extend_with_trial(self, api_retrieve_mock, UpdateSubscriptionMock):
-        api_retrieve_mock.return_value = convert_to_fake_stripe_object(DUMMY_CUSTOMER_WITH_SUB_BASIC)
-        subscription_instance = create_subscription(self.customer)
-        subscription_instance.trial_end = timezone.now() + timezone.timedelta(days=5)
-
-        delta = timezone.timedelta(days=30)
-        new_trial_end = subscription_instance.trial_end + delta
-        self.customer.current_subscription.extend(delta)
-        UpdateSubscriptionMock.assert_called_once_with(prorate=False, trial_end=new_trial_end)
 
 
 class SubscriptionTest(TestCase):
@@ -296,8 +267,8 @@ class SubscriptionTest(TestCase):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
         subscription.status = Subscription.STATUS_CANCELLED
-        subscription.canceled_at = timezone.now() + datetime.timedelta(days=7)
-        subscription.current_period_end = timezone.now() + datetime.timedelta(days=7)
+        subscription.canceled_at = timezone.now() + timezone.timedelta(days=7)
+        subscription.current_period_end = timezone.now() + timezone.timedelta(days=7)
         subscription.cancel_at_period_end = True
         subscription.save()
 
@@ -310,7 +281,7 @@ class SubscriptionTest(TestCase):
     def test_is_status_temporarily_current_false(self, customer_retrieve_mock, plan_retreive_mock):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
-        subscription.current_period_end = timezone.now() + datetime.timedelta(days=7)
+        subscription.current_period_end = timezone.now() + timezone.timedelta(days=7)
         subscription.save()
 
         self.assertTrue(subscription.is_status_current())
@@ -323,9 +294,47 @@ class SubscriptionTest(TestCase):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
         subscription.status = Subscription.STATUS_CANCELLED
-        subscription.current_period_end = timezone.now() + datetime.timedelta(days=7)
+        subscription.current_period_end = timezone.now() + timezone.timedelta(days=7)
         subscription.save()
 
         self.assertFalse(subscription.is_status_current())
         self.assertFalse(subscription.is_status_temporarily_current())
         self.assertFalse(subscription.is_valid())
+
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
+    @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_extend(self, customer_retrieve_mock, plan_retrieve_mock, subscription_retrieve_mock):
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
+
+        delta = timezone.timedelta(days=30)
+        extended_subscription = subscription.extend(delta)
+
+        self.assertNotEqual(None, extended_subscription.trial_end)
+
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
+    @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_extend_negative_delta(self, customer_retrieve_mock, plan_retrieve_mock, subscription_retrieve_mock):
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
+
+        with self.assertRaises(ValueError):
+            subscription.extend(timezone.timedelta(days=-30))
+
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
+    @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_extend_with_trial(self, customer_retrieve_mock, plan_retrieve_mock, subscription_retrieve_mock):
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
+        subscription.trial_end = timezone.now() + timezone.timedelta(days=5)
+        subscription.save()
+
+        delta = timezone.timedelta(days=30)
+        new_trial_end = subscription.trial_end + delta
+
+        extended_subscription = subscription.extend(delta)
+
+        self.assertEqual(new_trial_end.replace(microsecond=0), extended_subscription.trial_end)

@@ -8,7 +8,6 @@
 """
 
 from copy import deepcopy
-from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -193,7 +192,7 @@ class ConfirmFormViewTest(TestCase):
     def test_get_form_current_plan(self):
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
-        subscription.current_period_end = timezone.now() + timedelta(days=5)
+        subscription.current_period_end = timezone.now() + timezone.timedelta(days=5)
         subscription.save()
 
         response = self.client.get(self.url)
@@ -284,7 +283,7 @@ class ChangePlanViewTest(TestCase):
     def test_change_sub_with_proration_downgrade(self, subscription_update_mock, proration_policy_mock):
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION_II))
-        subscription.current_period_end = timezone.now() + timedelta(days=5)
+        subscription.current_period_end = timezone.now() + timezone.timedelta(days=5)
         subscription.save()
 
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
@@ -299,7 +298,7 @@ class ChangePlanViewTest(TestCase):
     def test_change_sub_with_proration_upgrade(self, subscription_update_mock, proration_policy_mock):
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
-        subscription.current_period_end = timezone.now() + timedelta(days=5)
+        subscription.current_period_end = timezone.now() + timezone.timedelta(days=5)
         subscription.save()
 
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN_II))
@@ -314,7 +313,7 @@ class ChangePlanViewTest(TestCase):
     def test_change_sub_with_proration_same_plan(self, subscription_update_mock, proration_policy_mock):
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
-        subscription.current_period_end = timezone.now() + timedelta(days=5)
+        subscription.current_period_end = timezone.now() + timezone.timedelta(days=5)
         subscription.save()
 
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
@@ -328,7 +327,7 @@ class ChangePlanViewTest(TestCase):
     def test_change_sub_same_plan(self, subscription_update_mock):
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
-        subscription.current_period_end = timezone.now() + timedelta(days=5)
+        subscription.current_period_end = timezone.now() + timezone.timedelta(days=5)
         subscription.save()
 
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
@@ -342,7 +341,7 @@ class ChangePlanViewTest(TestCase):
     def test_change_sub_stripe_error(self, subscription_update_mock):
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
-        subscription.current_period_end = timezone.now() + timedelta(days=5)
+        subscription.current_period_end = timezone.now() + timezone.timedelta(days=5)
         subscription.save()
 
         error_string = "No such plan: {plan_id}".format(plan_id=FAKE_PLAN["id"])
@@ -363,7 +362,7 @@ class CancelSubscriptionViewTest(TestCase):
         self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com", password="password")
         self.assertTrue(self.client.login(username="pydanny", password="password"))
 
-    @patch("djstripe.models.Customer.cancel_subscription")
+    @patch("djstripe.models.Subscription.cancel")
     def test_cancel_proration(self, cancel_subscription_mock):
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
         cancel_subscription_mock.return_value = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
@@ -375,7 +374,7 @@ class CancelSubscriptionViewTest(TestCase):
         self.assertTrue(self.user.is_authenticated())
 
     @patch("djstripe.views.auth_logout", autospec=True)
-    @patch("djstripe.models.Customer.cancel_subscription")
+    @patch("djstripe.models.Subscription.cancel")
     def test_cancel_no_proration(self, cancel_subscription_mock, logout_mock):
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
 

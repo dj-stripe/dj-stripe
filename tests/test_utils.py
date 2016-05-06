@@ -8,7 +8,7 @@
 """
 
 from copy import deepcopy
-from datetime import datetime, timedelta
+from datetime import datetime
 from unittest.case import SkipTest
 
 from django.conf import settings
@@ -96,7 +96,7 @@ class TestUserHasActiveSubscription(TestCase):
 
     def test_user_has_active_subscription(self):
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
-        subscription.current_period_end = timezone.now() + timedelta(days=10)
+        subscription.current_period_end = timezone.now() + timezone.timedelta(days=10)
         subscription.save()
 
         # Assert that the customer's subscription is valid

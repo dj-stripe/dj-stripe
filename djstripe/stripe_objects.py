@@ -1258,7 +1258,6 @@ class StripeSubscription(StripeObject):
 
         return target_cls.get_or_create_from_stripe_object(data["plan"])[0]
 
-
     def update(self, plan=None, application_fee_percent=None, coupon=None, prorate=None, proration_date=None,
                metadata=None, quantity=None, tax_percent=None, trial_end=None):
         """
@@ -1307,12 +1306,7 @@ class StripeSubscription(StripeObject):
 
         period_end += delta
 
-        stripe_subscription = self.api_retrieve()
-        stripe_subscription.prorate = False
-        stripe_subscription.trial_end = period_end
-        stripe_subscription.save()
-
-        return stripe_subscription
+        return StripeSubscription.update(self, prorate=False, trial_end=period_end)
 
     def cancel(self, at_period_end=None):
         """

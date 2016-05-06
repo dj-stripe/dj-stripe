@@ -208,7 +208,7 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
 
     def form_valid(self, form):
         customer, _created = Customer.get_or_create(subscriber=subscriber_request_callback(self.request))
-        subscription = customer.cancel_subscription()
+        subscription = customer.subscription.cancel()
 
         if subscription.status == subscription.STATUS_CANCELLED:
             # If no pro-rate, they get kicked right out.

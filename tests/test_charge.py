@@ -7,15 +7,13 @@
 """
 
 from copy import deepcopy
-from datetime import timedelta
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
 from django.test.testcases import TestCase
-from django.utils import timezone
 from mock import patch
 
-from djstripe.models import Charge, Customer, Invoice, Account
+from djstripe.models import Charge, Customer, Account
 from tests import FAKE_TRANSFER, FAKE_CUSTOMER
 
 from . import FAKE_CHARGE, FAKE_ACCOUNT

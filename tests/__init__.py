@@ -10,13 +10,13 @@ Originally collected using API VERSION 2015-07-28.
 Updated to API VERSION 2016-03-07 with bogus fields.
 """
 
+import calendar
 from copy import deepcopy
 from datetime import datetime
 
 from django.conf import settings
 from django.utils import timezone
 from stripe.resource import convert_to_stripe_object
-
 
 FUTURE_DATE = datetime(2100, 4, 30, tzinfo=timezone.utc)
 
@@ -200,7 +200,7 @@ FAKE_BANK_ACCOUNT_II = {
 class CardDict(dict):
 
     def delete(self):
-        pass
+        return self
 
 FAKE_CARD = CardDict({
     "id": "card_16YKQh2eZvKYlo2Cblc5Feoo",
@@ -450,7 +450,22 @@ FAKE_PLAN_II = {
 }
 
 
-FAKE_SUBSCRIPTION = {
+class SubscriptionDict(dict):
+
+    def __setattr__(self, name, value):
+        if type(value) == datetime:
+            value = calendar.timegm(value.timetuple())
+
+        self[name] = value
+
+    def delete(self):
+        return self
+
+    def save(self):
+        return self
+
+
+FAKE_SUBSCRIPTION = SubscriptionDict({
     "id": "sub_6lsC8pt7IcFpjA",
     "object": "subscription",
     "application_fee_percent": None,
@@ -469,9 +484,9 @@ FAKE_SUBSCRIPTION = {
     "tax_percent": None,
     "trial_end": None,
     "trial_start": None,
-}
+})
 
-FAKE_SUBSCRIPTION_II = {
+FAKE_SUBSCRIPTION_II = SubscriptionDict({
     "id": "sub_6mkwMbhaZF9jih",
     "object": "subscription",
     "application_fee_percent": None,
@@ -490,9 +505,9 @@ FAKE_SUBSCRIPTION_II = {
     "tax_percent": None,
     "trial_end": None,
     "trial_start": None,
-}
+})
 
-FAKE_SUBSCRIPTION_III = {
+FAKE_SUBSCRIPTION_III = SubscriptionDict({
     "id": "sub_8NDptncNY485qZ",
     "object": "subscription",
     "application_fee_percent": None,
@@ -511,7 +526,7 @@ FAKE_SUBSCRIPTION_III = {
     "tax_percent": None,
     "trial_end": None,
     "trial_start": None,
-}
+})
 
 
 class Sources(object):
@@ -536,10 +551,10 @@ class Sources(object):
 class CustomerDict(dict):
 
     def save(self):
-        pass
+        return self
 
     def delete(self):
-        pass
+        return self
 
     @property
     def sources(self):

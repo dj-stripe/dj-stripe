@@ -10,7 +10,6 @@
 from __future__ import unicode_literals
 
 from copy import deepcopy
-from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -39,7 +38,7 @@ class SubscriptionSerializerTest(TestCase):
                 'quantity': 2,
                 'start': now,
                 'status': Subscription.STATUS_ACTIVE,
-                'current_period_end': now + timedelta(days=5),
+                'current_period_end': now + timezone.timedelta(days=5),
                 'current_period_start': now,
             }
         )
@@ -51,7 +50,7 @@ class SubscriptionSerializerTest(TestCase):
             'quantity': 2,
             'start': now,
             'status': Subscription.STATUS_ACTIVE,
-            'current_period_end': now + timedelta(days=5),
+            'current_period_end': now + timezone.timedelta(days=5),
             'current_period_start': now,
         })
         self.assertEqual(serializer.errors, {})
@@ -65,7 +64,7 @@ class SubscriptionSerializerTest(TestCase):
                 'plan': self.plan.id,
                 'start': now,
                 'status': Subscription.STATUS_ACTIVE,
-                'current_period_end': now + timedelta(days=5),
+                'current_period_end': now + timezone.timedelta(days=5),
                 'current_period_start': now,
             }
         )

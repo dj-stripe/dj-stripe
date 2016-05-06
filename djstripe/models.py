@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from datetime import timedelta
 import logging
 
 from django.conf import settings
@@ -19,7 +18,7 @@ import traceback as exception_traceback
 
 from . import settings as djstripe_settings
 from . import webhooks
-from .exceptions import SubscriptionCancellationFailure, MultipleSubscriptionException
+from .exceptions import MultipleSubscriptionException
 from .managers import SubscriptionManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS
 from .signals import webhook_processing_error
@@ -132,7 +131,7 @@ class Customer(StripeCustomer):
         customer = Customer.objects.create(subscriber=subscriber, stripe_id=stripe_customer["id"], currency="usd")
 
         if djstripe_settings.DEFAULT_PLAN and trial_days:
-            customer.subscribe(plan=djstripe_settings.DEFAULT_PLAN, trial_end=timezone.now() + timedelta(days=trial_days))
+            customer.subscribe(plan=djstripe_settings.DEFAULT_PLAN, trial_end=timezone.now() + timezone.timedelta(days=trial_days))
 
         return customer
 
@@ -247,51 +246,6 @@ class Customer(StripeCustomer):
 
         if charge_immediately:
             self.send_invoice()
-
-        return Subscription.sync_from_stripe_data(stripe_subscription)
-
-    def cancel_subscription(self, plan=None, at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END):
-        """
-        Cancels a customer’s subscription.
-
-        :param plan: The plan for which to cancel a subscription. If plan is None and there exists only one subscription, this method will cancel that subscription.
-                     Calling this method with no plan and multiple valid subscriptions for this customer will throw an exception.
-        :type plan: Plan or string (plan ID)
-        :param at_period_end: A flag that if set to true will delay the cancellation of the subscription until the end of the current period.
-        :type at_period_end: boolean
-        :throws: TypeError if ``plan`` is None and more than one valid subscription exists for this customer.
-        :throws: MultipleSubscriptionException if a customer has multiple subscriptions to the same plan.
-        :throws: SubscriptionCancellationFailure if the subscription for the given plan could not be cancelled.
-
-        NOTE: If a subscription is cancelled during a trial period, the at_period_end flag will be overridden to False so that the trial ends immediately and the customer's card isn't charged.
-        """
-
-        if plan is None:
-            valid_subscriptions = self._get_valid_subscriptions()
-
-            if len(valid_subscriptions) == 1:
-                subscription = valid_subscriptions[0]
-            else:
-                raise TypeError("plan cannot be None if more than one valid subscription exists for this customer.")
-        else:
-            # Convert Plan to stripe_id
-            if isinstance(plan, Plan):
-                plan = plan.stripe_id
-
-            try:
-                subscription = self.subscriptions.get(plan__id=plan)
-            except Subscription.DoesNotExist:
-                raise SubscriptionCancellationFailure("Customer does not have a subscription.")
-            except MultipleObjectsReturned:
-                raise MultipleSubscriptionException("Customer has multiple subscriptions to the same plan. In order to cancel these subscriptions, use Subscription.cancel().")
-
-        try:
-            # If plan has trial days and customer cancels before trial period ends, then end subscription now, i.e. at_period_end=False
-            if subscription.trial_end and subscription.trial_end > timezone.now():
-                at_period_end = False
-            stripe_subscription = subscription.cancel(at_period_end=at_period_end)
-        except InvalidRequestError as exc:
-            raise SubscriptionCancellationFailure("Customer's information is not current with Stripe.\n{}".format(str(exc)))
 
         return Subscription.sync_from_stripe_data(stripe_subscription)
 
@@ -658,6 +612,21 @@ class Subscription(StripeSubscription):
 
     def extend(self, delta):
         stripe_subscription = super(Subscription, self).extend(delta)
+        return Subscription.sync_from_stripe_data(stripe_subscription)
+
+    def cancel(self, at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END):
+        """
+        See StripeSubscription.cancel()
+
+        NOTE: If a subscription is cancelled during a trial period, the ``at_period_end`` flag will be
+        overridden to False so that the trial ends immediately and the customer's card isn't charged.
+        """
+
+        # If plan has trial days and customer cancels before trial period ends, then end subscription now, i.e. at_period_end=False
+        if self.trial_end and self.trial_end > timezone.now():
+            at_period_end = False
+
+        stripe_subscription = super(Subscription, self).cancel(at_period_end=at_period_end)
         return Subscription.sync_from_stripe_data(stripe_subscription)
 
     def attach_objects_hook(self, cls, data):

@@ -76,7 +76,7 @@ class RestSubscriptionTest(APITestCase):
         self.assertEqual(response.data['status'], subscription.status)
         self.assertEqual(response.data['cancel_at_period_end'], subscription.cancel_at_period_end)
 
-    @patch("djstripe.models.Customer.cancel_subscription")
+    @patch("djstripe.models.Subscription.cancel")
     def test_cancel_subscription(self, cancel_subscription_mock):
         def _cancel_sub(*args, **kwargs):
             subscription = Subscription.objects.first()
@@ -88,7 +88,7 @@ class RestSubscriptionTest(APITestCase):
 
         fake_cancelled_subscription = deepcopy(FAKE_SUBSCRIPTION)
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
-        subscription = Subscription.sync_from_stripe_data(fake_cancelled_subscription)
+        Subscription.sync_from_stripe_data(fake_cancelled_subscription)
 
         cancel_subscription_mock.side_effect = _cancel_sub
 
