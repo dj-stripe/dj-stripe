@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from datetime import timedelta
 import logging
 
 from django.conf import settings
@@ -130,7 +131,7 @@ class Customer(StripeCustomer):
         customer = Customer.objects.create(subscriber=subscriber, stripe_id=stripe_customer["id"], currency="usd")
 
         if djstripe_settings.DEFAULT_PLAN and trial_days:
-            customer.subscribe(plan=djstripe_settings.DEFAULT_PLAN, trial_days=trial_days)
+            customer.subscribe(plan=djstripe_settings.DEFAULT_PLAN, trial_end=timezone.now() + timedelta(days=trial_days))
 
         return customer
 
@@ -380,13 +381,13 @@ class Customer(StripeCustomer):
 
     def attach_objects_hook(self, cls, data):
         # TODO: other sources
-        if data["default_source"] == "card":
+        if data["default_source"]["object"] == "card":
             self.default_source = cls.stripe_object_default_source_to_source(target_cls=Card, data=data)
 
     # SYNC methods should be dropped in favor of the master sync infrastructure proposed
     def _sync_invoices(self, **kwargs):
         for invoice in Invoice.api_list(customer=self.stripe_id, **kwargs):
-            Invoice.sync_from_stripe_data(invoice, send_receipt=False)
+            Invoice.sync_from_stripe_data(invoice)
 
     def _sync_charges(self, **kwargs):
         for charge in Charge.api_list(customer=self.stripe_id, **kwargs):

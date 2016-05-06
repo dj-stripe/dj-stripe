@@ -271,22 +271,6 @@ class StripeObject(TimeStampedModel):
             return target_cls.get_or_create_from_stripe_object(data, "invoice")[0]
 
     @classmethod
-    def stripe_object_to_plan(cls, target_cls, data):
-        """
-        Search the given manager for the Plan matching this StripeCharge object's ``plan`` field.
-        Note that the plan field is already expanded in each request.
-
-        :param target_cls: The target class
-        :type target_cls: StripePlan
-        :param data: stripe object
-        :type data: dict
-
-        """
-
-        if "plan" in data and data["plan"]:
-            return target_cls.get_or_create_from_stripe_object(data["plan"])[0]
-
-    @classmethod
     def stripe_object_to_subscription(cls, target_cls, data):
         """
         Search the given manager for the Subscription matching this object's ``subscription`` field.
@@ -482,6 +466,7 @@ class StripeCustomer(StripeObject):
         abstract = True
 
     stripe_api_name = "Customer"
+    expand_fields = ["default_source"]
 
     account_balance = StripeIntegerField(null=True, help_text="Current balance, if any, being stored on the customer's account. If negative, the customer has credit to apply to the next invoice. If positive, the customer has an amount owed that will be added to the next invoice. The balance does not refer to any unpaid invoices; it solely takes into account amounts that have yet to be successfully applied to any invoice. This balance is only taken into account for recurring charges.")
     business_vat_id = StripeCharField(max_length=20, null=True, help_text="The customer's VAT identification number.")
@@ -1131,6 +1116,22 @@ class StripeInvoiceItem(StripeObject):
             "date={date}".format(date=self.date),
         ] + super(StripeInvoiceItem, self).str_parts()
 
+    @classmethod
+    def stripe_object_to_plan(cls, target_cls, data):
+        """
+        Search the given manager for the Plan matching this StripeCharge object's ``plan`` field.
+
+        :param target_cls: The target class
+        :type target_cls: StripePlan
+        :param data: stripe object
+        :type data: dict
+
+        """
+
+        if "plan" in data and data["plan"]:
+            return target_cls.get_or_create_from_stripe_object(data, "plan")[0]
+
+
 
 class StripePlan(StripeObject):
     """
@@ -1226,6 +1227,22 @@ class StripeSubscription(StripeObject):
             "status={status}".format(status=self.status),
             "quantity={quantity}".format(quantity=self.quantity),
         ] + super(StripeSubscription, self).str_parts()
+
+    @classmethod
+    def stripe_object_to_plan(cls, target_cls, data):
+        """
+        Search the given manager for the Plan matching this StripeCharge object's ``plan`` field.
+        Note that the plan field is already expanded in each request and is required.
+
+        :param target_cls: The target class
+        :type target_cls: StripePlan
+        :param data: stripe object
+        :type data: dict
+
+        """
+
+        return target_cls.get_or_create_from_stripe_object(data["plan"])[0]
+
 
     def update(self, plan=None, application_fee_percent=None, coupon=None, prorate=None, proration_date=None,
                metadata=None, quantity=None, tax_percent=None, trial_end=None):

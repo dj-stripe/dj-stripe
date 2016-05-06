@@ -196,7 +196,13 @@ FAKE_BANK_ACCOUNT_II = {
     "status": "new",
 }
 
-FAKE_CARD = {
+
+class CardDict(dict):
+
+    def delete(self):
+        pass
+
+FAKE_CARD = CardDict({
     "id": "card_16YKQh2eZvKYlo2Cblc5Feoo",
     "object": "card",
     "address_city": None,
@@ -219,9 +225,9 @@ FAKE_CARD = {
     "metadata": {},
     "name": "alex-nesnes@hotmail.fr",
     "tokenization_method": None,
-}
+})
 
-FAKE_CARD_II = {
+FAKE_CARD_II = CardDict({
     "id": "card_14Lc4K2eZvKYlo2CcXyAXlDR",
     "object": "card",
     "address_city": None,
@@ -245,9 +251,9 @@ FAKE_CARD_II = {
     "metadata": {},
     "name": None,
     "tokenization_method": None,
-}
+})
 
-FAKE_CARD_III = {
+FAKE_CARD_III = CardDict({
     "id": "card_17PLiR2eZvKYlo2CRwTCUAdZ",
     "object": "card",
     "address_city": None,
@@ -271,9 +277,9 @@ FAKE_CARD_III = {
     "metadata": {},
     "name": None,
     "tokenization_method": None,
-}
+})
 
-FAKE_CARD_IV = {
+FAKE_CARD_IV = CardDict({
     "id": "card_186Qdm2eZvKYlo2CInjNRrRE",
     "object": "card",
     "address_city": None,
@@ -296,7 +302,32 @@ FAKE_CARD_IV = {
     "metadata": {},
     "name": None,
     "tokenization_method": None,
-}
+})
+
+FAKE_CARD_V = CardDict({
+    "id": "card_16YKQh2eZeZvKYlo2CInFeoo",
+    "object": "card",
+    "address_city": None,
+    "address_country": None,
+    "address_line1": None,
+    "address_line1_check": None,
+    "address_line2": None,
+    "address_state": None,
+    "address_zip": None,
+    "address_zip_check": None,
+    "brand": "Visa",
+    "country": "US",
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "cvc_check": "pass",
+    "dynamic_last4": None,
+    "exp_month": 5,
+    "exp_year": 2015,
+    "funding": "credit",
+    "last4": "4242",
+    "metadata": {},
+    "name": None,
+    "tokenization_method": None,
+})
 
 
 class ChargeDict(dict):
@@ -484,7 +515,7 @@ FAKE_SUBSCRIPTION_III = {
 
 
 class Sources(dict):
-    card_fakes = [FAKE_CARD, FAKE_CARD_II, FAKE_CARD_III]
+    card_fakes = [FAKE_CARD, FAKE_CARD_II, FAKE_CARD_III, FAKE_CARD_IV, FAKE_CARD_V]
 
     def create(self, source):
         for fake_card in self.card_fakes:
@@ -517,7 +548,7 @@ FAKE_CUSTOMER = CustomerDict({
     "business_vat_id": None,
     "created": 1439229084,
     "currency": "usd",
-    "default_source": FAKE_CARD["id"],
+    "default_source": deepcopy(FAKE_CARD),
     "delinquent": False,
     "description": "Michael Smith",
     "discount": None,
@@ -550,7 +581,7 @@ FAKE_CUSTOMER_II = CustomerDict({
     "business_vat_id": None,
     "created": 1439229084,
     "currency": "usd",
-    "default_source": FAKE_CARD_II["id"],
+    "default_source": deepcopy(FAKE_CARD_II),
     "delinquent": False,
     "description": "John Snow",
     "discount": None,
@@ -707,7 +738,7 @@ FAKE_INVOICE_III = InvoiceDict({
     "attempt_count": 0,
     "attempted": True,
     "charge": None,
-    "closed": True,
+    "closed": False,
     "currency": "usd",
     "customer": "cus_6lsBvm5rJ0zyHc",
     "date": 1439425915,
@@ -744,7 +775,7 @@ FAKE_INVOICE_III = InvoiceDict({
     "livemode": False,
     "metadata": {},
     "next_payment_attempt": None,
-    "paid": True,
+    "paid": False,
     "period_end": 1439424571,
     "period_start": 1436746171,
     "receipt_number": None,
