@@ -125,7 +125,7 @@ On the subscriber's customer object, use the charge method to generate a Stripe 
     amount = Decimal(10.00)
     customer.charge(amount)
 
-Source code for the Customer.charge method is at https://github.com/pydanny/dj-stripe/blob/master/djstripe/models.py#L573-L596
+Source code for the Customer.charge method is at https://github.com/pydanny/dj-stripe/blob/master/djstripe/models.py#L412-L430
 
 REST API
 --------
