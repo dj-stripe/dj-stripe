@@ -63,7 +63,7 @@ class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
         if self.value() is None:
             return queryset.all()
         else:
-            return queryset.filter(subscription__status=self.value())
+            return queryset.filter(subscriptions__status=self.value()).distinct()
 
 
 def send_charge_receipt(modeladmin, request, queryset):
