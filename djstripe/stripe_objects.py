@@ -753,10 +753,11 @@ class StripeTransfer(StripeObject):
     STATUS_PAID = "paid"
     STATUS_PENDING = "pending"
     STATUS_IN_TRANSIT = "in_transit"
-    STATUS_CANCELLED = "canceled"
+    STATUS_CANCELED = "canceled"
+    STATUS_CANCELLED = STATUS_CANCELED
     STATUS_FAILED = "failed"
 
-    STATUSES = [STATUS_PAID, STATUS_PENDING, STATUS_IN_TRANSIT, STATUS_CANCELLED, STATUS_FAILED]
+    STATUSES = [STATUS_PAID, STATUS_PENDING, STATUS_IN_TRANSIT, STATUS_CANCELED, STATUS_FAILED]
     STATUS_CHOICES = [(status, status.replace("_", " ").title()) for status in STATUSES]
 
     DESTINATION_TYPES = ["card", "bank_account", "stripe_account"]
@@ -1147,7 +1148,6 @@ class StripeInvoiceItem(StripeObject):
             return target_cls.get_or_create_from_stripe_object(data, "plan")[0]
 
 
-
 class StripePlan(StripeObject):
     """
     A subscription plan contains the pricing information for different products and feature levels on your site.
@@ -1216,10 +1216,11 @@ class StripeSubscription(StripeObject):
     STATUS_ACTIVE = "active"
     STATUS_TRIALING = "trialing"
     STATUS_PAST_DUE = "past_due"
-    STATUS_CANCELLED = "canceled"
+    STATUS_CANCELED = "canceled"
+    STATUS_CANCELLED = STATUS_CANCELED
     STATUS_UNPAID = "unpaid"
 
-    STATUSES = [STATUS_TRIALING, STATUS_ACTIVE, STATUS_PAST_DUE, STATUS_CANCELLED, STATUS_UNPAID]
+    STATUSES = [STATUS_TRIALING, STATUS_ACTIVE, STATUS_PAST_DUE, STATUS_CANCELED, STATUS_UNPAID]
     STATUS_CHOICES = [(status, status.replace("_", " ").title()) for status in STATUSES]
 
     application_fee_percent = StripePercentField(null=True, help_text="A positive decimal that represents the fee percentage of the subscription invoice amount that will be transferred to the application owner’s Stripe account each billing period.")

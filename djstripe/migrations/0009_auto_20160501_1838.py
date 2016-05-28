@@ -385,6 +385,10 @@ class Migration(migrations.Migration):
             name='stripe_timestamp',
             field=djstripe.fields.StripeDateTimeField(help_text='The datetime this object was created in stripe.', null=True),
         ),
+        migrations.AlterModelOptions(
+            name='plan',
+            options={'ordering': ['amount']},
+        ),
         migrations.AddField(
             model_name='subscription',
             name='application_fee_percent',
