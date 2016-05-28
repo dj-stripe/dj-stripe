@@ -5,7 +5,7 @@ import logging
 
 from django.conf import settings
 from django.contrib.sites.models import Site
-from django.core.exceptions import ValidationError, MultipleObjectsReturned
+from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
@@ -571,7 +571,7 @@ class Subscription(StripeSubscription):
     objects = SubscriptionManager()
 
     def is_period_current(self):
-        return self.current_period_end > timezone.now()
+        return self.current_period_end > timezone.now() or self.trial_end > timezone.now()
 
     def is_status_current(self):
         return self.status in ["trialing", "active"]
