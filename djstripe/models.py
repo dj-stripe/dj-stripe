@@ -571,7 +571,7 @@ class Subscription(StripeSubscription):
     objects = SubscriptionManager()
 
     def is_period_current(self):
-        return self.current_period_end > timezone.now() or self.trial_end > timezone.now()
+        return self.current_period_end > timezone.now() or (self.trial_end and self.trial_end > timezone.now())
 
     def is_status_current(self):
         return self.status in ["trialing", "active"]
