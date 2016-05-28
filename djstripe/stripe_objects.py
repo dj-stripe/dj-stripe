@@ -125,7 +125,7 @@ class StripeObject(TimeStampedModel):
         :type api_key: string
         """
 
-        self.api_retrieve(api_key).delete()
+        return self.api_retrieve(api_key).delete()
 
     def str_parts(self):
         """
