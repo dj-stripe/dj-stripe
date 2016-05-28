@@ -379,7 +379,7 @@ class CancelSubscriptionViewTest(TestCase):
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
 
         fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
-        fake_subscription.update({"status": Subscription.STATUS_CANCELLED})
+        fake_subscription.update({"status": Subscription.STATUS_CANCELED})
         cancel_subscription_mock.return_value = Subscription.sync_from_stripe_data(fake_subscription)
 
         response = self.client.post(self.url)

@@ -46,7 +46,7 @@
             <p>{{ plan.description }}</p>
         </button>
 
-        {% if not customer.subscription or customer.subscription.status == customer.subscription.STATUS_CANCELLED %}
+        {% if not customer.subscription or customer.subscription.status == customer.subscription.STATUS_CANCELED %}
           <!-- do nothing -->
         {% elif customer.subscription.plan == plan %}
             <h4>Your Current Plan</h4>

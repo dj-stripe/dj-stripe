@@ -80,7 +80,7 @@ class RestSubscriptionTest(APITestCase):
     def test_cancel_subscription(self, cancel_subscription_mock):
         def _cancel_sub(*args, **kwargs):
             subscription = Subscription.objects.first()
-            subscription.status = Subscription.STATUS_CANCELLED
+            subscription.status = Subscription.STATUS_CANCELED
             subscription.canceled_at = timezone.now()
             subscription.ended_at = timezone.now()
             subscription.save()
@@ -100,7 +100,7 @@ class RestSubscriptionTest(APITestCase):
 
         # Cancelled means flagged as cancelled, so it should still be there
         self.assertEqual(1, Subscription.objects.count())
-        self.assertEqual(Subscription.objects.first().status, Subscription.STATUS_CANCELLED)
+        self.assertEqual(Subscription.objects.first().status, Subscription.STATUS_CANCELED)
 
         cancel_subscription_mock.assert_called_once_with(
             at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END

@@ -18,7 +18,7 @@
         {% if not customer.subscription %}
             <p>You have no subscription on file.</p>
             <p>See your <a href="{% url 'djstripe:account' %}">account status</a> or better yet, <a href="{% url 'djstripe:subscribe' %}">subscribe</a>.</p>
-        {% elif customer.subscription.status == customer.subscription.STATUS_CANCELLED %}
+        {% elif customer.subscription.status == customer.subscription.STATUS_CANCELED %}
             <p>Your subscription has already been canceled.</p>
             <p>See your <a href="{% url 'djstripe:account' %}">account status</a> or better yet, get a <a href="{% url 'djstripe:subscribe' %}">fresh subscription</a>.</p>
         {% elif customer.subscription.is_status_temporarily_current %}
