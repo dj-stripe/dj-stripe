@@ -229,13 +229,12 @@ class SubscriptionTest(TestCase):
     def test_is_status_temporarily_current(self, customer_retrieve_mock, plan_retreive_mock):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
-        subscription.status = Subscription.STATUS_CANCELED
         subscription.canceled_at = timezone.now() + timezone.timedelta(days=7)
         subscription.current_period_end = timezone.now() + timezone.timedelta(days=7)
         subscription.cancel_at_period_end = True
         subscription.save()
 
-        self.assertFalse(subscription.is_status_current())
+        self.assertTrue(subscription.is_status_current())
         self.assertTrue(subscription.is_status_temporarily_current())
         self.assertTrue(subscription.is_valid())
         self.assertTrue(self.customer.has_active_subscription())
@@ -271,10 +270,14 @@ class SubscriptionTest(TestCase):
         self.assertFalse(self.customer.has_any_active_subscription())
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
-    @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
+    @patch("stripe.Subscription.retrieve")
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_extend(self, customer_retrieve_mock, subscription_retrieve_mock, plan_retrieve_mock):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription_fake["current_period_end"] = calendar.timegm((timezone.now() - timezone.timedelta(days=20)).timetuple())
+
+        subscription_retrieve_mock.return_value = subscription_fake
+
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
 
         delta = timezone.timedelta(days=30)
@@ -348,12 +351,15 @@ class SubscriptionTest(TestCase):
     @patch("stripe.Subscription.retrieve")
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_cancel_at_period_end(self, customer_retrieve_mock, subscription_retrieve_mock, plan_retrieve_mock):
+        current_period_end = timezone.now() + timezone.timedelta(days=7)
+
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
-        subscription.current_period_end = timezone.now() + timezone.timedelta(days=7)
+        subscription.current_period_end = current_period_end
         subscription.save()
 
         canceled_subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        canceled_subscription_fake["current_period_end"] = calendar.timegm(current_period_end.timetuple())
         canceled_subscription_fake["cancel_at_period_end"] = True
         canceled_subscription_fake["canceled_at"] = calendar.timegm(timezone.now().timetuple())
         subscription_retrieve_mock.return_value = canceled_subscription_fake  # retrieve().delete()
@@ -366,6 +372,7 @@ class SubscriptionTest(TestCase):
         self.assertEqual(Subscription.STATUS_ACTIVE, new_subscription.status)
         self.assertEqual(True, new_subscription.cancel_at_period_end)
         self.assertNotEqual(new_subscription.canceled_at, new_subscription.ended_at)
+        print("check here")
         self.assertTrue(new_subscription.is_valid())
         self.assertTrue(self.customer.has_active_subscription())
         self.assertTrue(self.customer.has_any_active_subscription())
