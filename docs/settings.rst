@@ -251,6 +251,8 @@ Examples:
 
     def organization_request_callback(request):
         """ Gets an organization instance from the id passed through ``request``"""
+        
+        from <models_path> import Organization  # Import models here to avoid an ``AppRegistryNotReady`` exception
         return Organization.objects.get(id=request.organization_id)
 
 
