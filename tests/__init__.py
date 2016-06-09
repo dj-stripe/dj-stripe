@@ -16,13 +16,8 @@ from datetime import datetime
 
 from django.conf import settings
 from django.utils import timezone
-from stripe.resource import convert_to_stripe_object
 
 FUTURE_DATE = datetime(2100, 4, 30, tzinfo=timezone.utc)
-
-
-def convert_to_fake_stripe_object(response):
-    return convert_to_stripe_object(resp=response, api_key=settings.STRIPE_SECRET_KEY, account="test_account")
 
 
 class StripeList(dict):
@@ -455,6 +450,12 @@ class SubscriptionDict(dict):
     def __setattr__(self, name, value):
         if type(value) == datetime:
             value = calendar.timegm(value.timetuple())
+
+        # Special case for plan
+        if name == "plan":
+            for plan in [FAKE_PLAN, FAKE_PLAN_II]:
+                if value == plan["id"]:
+                    value = plan
 
         self[name] = value
 
