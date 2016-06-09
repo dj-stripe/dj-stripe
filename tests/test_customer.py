@@ -8,15 +8,18 @@
 
 """
 
+import calendar
 from copy import deepcopy
 import decimal
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.utils import timezone
 from mock import patch
 from stripe.error import InvalidRequestError
 
+from djstripe.exceptions import MultipleSubscriptionException
 from djstripe.models import Account, Customer, Charge, Card, Subscription, Invoice, Plan
 from tests import (FAKE_CARD, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_ACCOUNT, FAKE_INVOICE,
                    FAKE_INVOICE_III, FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II,
@@ -455,6 +458,91 @@ class TestCustomer(TestCase):
 
         self.customer.subscribe(plan=plan, charge_immediately=False)
         self.assertFalse(send_invoice_mock.called)
+
+    @patch("djstripe.models.Customer.send_invoice")
+    @patch("stripe.Subscription.create", return_value=deepcopy(FAKE_SUBSCRIPTION))
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_subscribe_charge_immediately(self, customer_retrieve_mock, subscription_create_mock, send_invoice_mock):
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+
+        self.customer.subscribe(plan=plan, charge_immediately=True)
+        send_invoice_mock.assert_called()
+
+    @patch("djstripe.models.Customer.send_invoice")
+    @patch("stripe.Subscription.create", return_value=deepcopy(FAKE_SUBSCRIPTION))
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_subscribe_plan_string(self, customer_retrieve_mock, subscription_create_mock, send_invoice_mock):
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+
+        self.customer.subscribe(plan=plan.stripe_id, charge_immediately=True)
+        send_invoice_mock.assert_called()
+
+    @patch("stripe.Subscription.create")
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_subscription_shortcut_with_multiple_subscriptions(self, customer_retrieve_mock, subscription_create_mock):
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+        subscription_fake_duplicate = deepcopy(FAKE_SUBSCRIPTION)
+        subscription_fake_duplicate["id"] = "sub_6lsC8pt7IcF8jd"
+
+        subscription_create_mock.side_effect = [deepcopy(FAKE_SUBSCRIPTION), subscription_fake_duplicate]
+
+        self.customer.subscribe(plan=plan, charge_immediately=False)
+        self.customer.subscribe(plan=plan, charge_immediately=False)
+
+        self.assertEqual(2, self.customer.subscriptions.count())
+
+        with self.assertRaises(MultipleSubscriptionException):
+            self.customer.subscription
+
+    @patch("stripe.Subscription.create")
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_has_active_subscription_with_unspecified_plan_with_multiple_subscriptions(self, customer_retrieve_mock, subscription_create_mock):
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription_fake["current_period_end"] = calendar.timegm((timezone.now() + timezone.timedelta(days=7)).timetuple())
+
+        subscription_fake_duplicate = deepcopy(FAKE_SUBSCRIPTION)
+        subscription_fake_duplicate["current_period_end"] = calendar.timegm((timezone.now() + timezone.timedelta(days=7)).timetuple())
+        subscription_fake_duplicate["id"] = "sub_6lsC8pt7IcF8jd"
+
+        subscription_create_mock.side_effect = [subscription_fake, subscription_fake_duplicate]
+
+        self.customer.subscribe(plan=plan, charge_immediately=False)
+        self.customer.subscribe(plan=plan, charge_immediately=False)
+
+        self.assertEqual(2, self.customer.subscriptions.count())
+
+        with self.assertRaises(TypeError):
+            self.customer.has_active_subscription()
+
+    @patch("stripe.Subscription.create")
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_has_active_subscription_with_plan(self, customer_retrieve_mock, subscription_create_mock):
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription_fake["current_period_end"] = calendar.timegm((timezone.now() + timezone.timedelta(days=7)).timetuple())
+
+        subscription_create_mock.return_value = subscription_fake
+
+        self.customer.subscribe(plan=plan, charge_immediately=False)
+
+        self.customer.has_active_subscription(plan=plan)
+
+    @patch("stripe.Subscription.create")
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_has_active_subscription_with_plan_string(self, customer_retrieve_mock, subscription_create_mock):
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription_fake["current_period_end"] = calendar.timegm((timezone.now() + timezone.timedelta(days=7)).timetuple())
+
+        subscription_create_mock.return_value = subscription_fake
+
+        self.customer.subscribe(plan=plan, charge_immediately=False)
+
+        self.customer.has_active_subscription(plan=plan.stripe_id)
 
     @patch("djstripe.models.Charge.send_receipt")
     @patch("djstripe.models.Charge.sync_from_stripe_data")

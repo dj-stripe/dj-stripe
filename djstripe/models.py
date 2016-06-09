@@ -186,25 +186,22 @@ class Customer(StripeCustomer):
         :throws: TypeError if ``plan`` is None and more than one active subscription exists for this customer.
         """
 
-        try:
-            if plan is None:
-                valid_subscriptions = self._get_valid_subscriptions()
+        if plan is None:
+            valid_subscriptions = self._get_valid_subscriptions()
 
-                if len(valid_subscriptions) == 0:
-                    return False
-                elif len(valid_subscriptions) == 1:
-                    return True
-                else:
-                    raise TypeError("plan cannot be None if more than one valid subscription exists for this customer.")
-
+            if len(valid_subscriptions) == 0:
+                return False
+            elif len(valid_subscriptions) == 1:
+                return True
             else:
-                # Convert Plan to stripe_id
-                if isinstance(plan, Plan):
-                    plan = plan.stripe_id
+                raise TypeError("plan cannot be None if more than one valid subscription exists for this customer.")
 
-                return any([subscription.is_valid() for subscription in self.subscriptions.filter(plan__id=plan)])
-        except Subscription.DoesNotExist:
-            return False
+        else:
+            # Convert Plan to stripe_id
+            if isinstance(plan, Plan):
+                plan = plan.stripe_id
+
+            return any([subscription.is_valid() for subscription in self.subscriptions.filter(plan__stripe_id=plan)])
 
     def has_any_active_subscription(self):
         """
