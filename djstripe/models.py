@@ -465,6 +465,9 @@ class Card(StripeCard):
                 # The exception was thrown because the stripe customer was already
                 # deleted on the stripe side, ignore the exception
                 pass
+            else:
+                # The exception was raised for another reason, re-raise it
+                raise
 
         self.delete()
 

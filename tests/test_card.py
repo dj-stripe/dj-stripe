@@ -12,6 +12,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from mock.mock import patch
+from stripe.error import InvalidRequestError
 
 from djstripe.exceptions import StripeObjectManipulationException
 from djstripe.models import Account, Card, Customer
@@ -82,6 +83,58 @@ class CardTest(TestCase):
         stripe_card = Card._api_create(customer=customer, source=FAKE_CARD["id"])
 
         self.assertEqual(FAKE_CARD, stripe_card)
+
+    @patch("tests.CardDict.delete")
+    @patch("stripe.Card.retrieve", return_value=deepcopy(FAKE_CARD))
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_remove(self, customer_retrieve_mock, card_retrieve_mock, card_delete_mock):
+        user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
+        customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        stripe_card = Card._api_create(customer=customer, source=FAKE_CARD["id"])
+        Card.sync_from_stripe_data(stripe_card)
+
+        self.assertEqual(1, customer.sources.count())
+
+        card = customer.sources.all()[0]
+        card.remove()
+
+        self.assertEqual(0, customer.sources.count())
+        card_delete_mock.assert_called()
+
+    @patch("djstripe.models.Card._api_delete")
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_remove_exception(self, customer_retrieve_mock, card_delete_mock):
+        user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
+        customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        stripe_card = Card._api_create(customer=customer, source=FAKE_CARD["id"])
+        Card.sync_from_stripe_data(stripe_card)
+
+        card_delete_mock.side_effect = InvalidRequestError("No such customer:", "blah")
+
+        self.assertEqual(1, customer.sources.count())
+
+        card = customer.sources.all()[0]
+        card.remove()
+
+        self.assertEqual(0, customer.sources.count())
+        card_delete_mock.assert_called()
+
+    @patch("djstripe.models.Card._api_delete")
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_remove_unexpected_exception(self, customer_retrieve_mock, card_delete_mock):
+        user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
+        customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        stripe_card = Card._api_create(customer=customer, source=FAKE_CARD["id"])
+        Card.sync_from_stripe_data(stripe_card)
+
+        card_delete_mock.side_effect = InvalidRequestError("Unexpected Exception", "blah")
+
+        self.assertEqual(1, customer.sources.count())
+
+        card = customer.sources.all()[0]
+
+        with self.assertRaisesMessage(InvalidRequestError, "Unexpected Exception"):
+            card.remove()
 
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_api_list(self, customer_retrieve_mock):
