@@ -242,7 +242,7 @@ class Customer(StripeCustomer):
         if isinstance(plan, Plan):
             plan = plan.stripe_id
 
-        stripe_subscription = super(Customer, self).subscribe(plan, **kwargs)
+        stripe_subscription = super(Customer, self).subscribe(plan=plan, **kwargs)
 
         if charge_immediately:
             self.send_invoice()
@@ -299,7 +299,7 @@ class Customer(StripeCustomer):
         if "subscription" in kwargs and isinstance(kwargs["subscription"], Subscription):
             kwargs.update({"subscription": kwargs["subscription"].stripe_id})
 
-        stripe_invoiceitem = super(Customer, self).add_invoice_item(amount, currency, **kwargs)
+        stripe_invoiceitem = super(Customer, self).add_invoice_item(amount=amount, currency=currency, **kwargs)
 
         return InvoiceItem.sync_from_stripe_data(stripe_invoiceitem)
 
@@ -610,7 +610,7 @@ class Subscription(StripeSubscription):
         if "plan" in kwargs and isinstance(kwargs["plan"], Plan):
             kwargs.update({"plan": kwargs["plan"].stripe_id})
 
-        stripe_subscription = super(Subscription, self).update(prorate, **kwargs)
+        stripe_subscription = super(Subscription, self).update(prorate=prorate, **kwargs)
         return Subscription.sync_from_stripe_data(stripe_subscription)
 
     def extend(self, delta):
