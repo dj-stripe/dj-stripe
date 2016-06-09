@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import decimal
 import json
 
 from braces.views import CsrfExemptMixin, FormValidMessageMixin, LoginRequiredMixin, SelectRelatedMixin
@@ -17,7 +16,7 @@ from stripe.error import StripeError
 
 from .forms import PlanForm, CancelSubscriptionForm
 from .mixins import PaymentsContextMixin, SubscriptionMixin
-from .models import Customer, Event, EventProcessingException, Subscription, Plan
+from .models import Customer, Event, EventProcessingException, Plan
 from .settings import PRORATION_POLICY_FOR_UPGRADES, subscriber_request_callback
 from .sync import sync_subscriber
 

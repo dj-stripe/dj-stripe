@@ -106,5 +106,3 @@ def invoiceitem_webhook_handler(event, event_data, event_type, event_subtype):
 def plan_webhook_handler(event, event_data, event_type, event_subtype):
     versioned_plan_data = Plan(stripe_id=event_data["object"]["id"]).api_retrieve()
     Plan.sync_from_stripe_data(versioned_plan_data)
-
-

@@ -14,7 +14,7 @@ from django.contrib import messages
 from django.shortcuts import redirect
 
 from . import settings as djstripe_settings
-from .models import Plan, Customer, Subscription
+from .models import Plan, Customer
 from .utils import subscriber_has_active_subscription
 
 

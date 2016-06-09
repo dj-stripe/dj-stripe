@@ -104,4 +104,3 @@ def convert_tstamp(response, field_name=None):
     else:
         if field_name in response and response[field_name]:
             return datetime.datetime.fromtimestamp(response[field_name], tz)
-
