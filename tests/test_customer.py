@@ -408,42 +408,42 @@ class TestCustomer(TestCase):
 
         invoice_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, customer=self.customer.stripe_id)
 
-    @patch("djstripe.models.Invoice.sync_from_stripe_data", autospec=True)
+    @patch("djstripe.models.Invoice.sync_from_stripe_data")
     @patch("stripe.Invoice.list", return_value=StripeList(data=[deepcopy(FAKE_INVOICE), deepcopy(FAKE_INVOICE_III)]))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_sync_invoices(self, customer_retrieve_mock, invoice_list_mock, invoice_sync_mock):
         self.customer._sync_invoices()
         self.assertEqual(2, invoice_sync_mock.call_count)
 
-    @patch("djstripe.models.Invoice.sync_from_stripe_data", autospec=True)
+    @patch("djstripe.models.Invoice.sync_from_stripe_data")
     @patch("stripe.Invoice.list", return_value=StripeList(data=[]))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_sync_invoices_none(self, customer_retrieve_mock, invoice_list_mock, invoice_sync_mock):
         self.customer._sync_invoices()
         self.assertEqual(0, invoice_sync_mock.call_count)
 
-    @patch("djstripe.models.Charge.sync_from_stripe_data", autospec=True)
+    @patch("djstripe.models.Charge.sync_from_stripe_data")
     @patch("stripe.Charge.list", return_value=StripeList(data=[deepcopy(FAKE_CHARGE)]))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_sync_charges(self, customer_retrieve_mock, charge_list_mock, charge_sync_mock):
         self.customer._sync_charges()
         self.assertEqual(1, charge_sync_mock.call_count)
 
-    @patch("djstripe.models.Charge.sync_from_stripe_data", autospec=True)
+    @patch("djstripe.models.Charge.sync_from_stripe_data")
     @patch("stripe.Charge.list", return_value=StripeList(data=[]))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_sync_charges_none(self, customer_retrieve_mock, charge_list_mock, charge_sync_mock):
         self.customer._sync_charges()
         self.assertEqual(0, charge_sync_mock.call_count)
 
-    @patch("djstripe.models.Subscription.sync_from_stripe_data", autospec=True)
+    @patch("djstripe.models.Subscription.sync_from_stripe_data")
     @patch("stripe.Subscription.list", return_value=StripeList(data=[deepcopy(FAKE_SUBSCRIPTION), deepcopy(FAKE_SUBSCRIPTION_II)]))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_sync_subscriptions(self, customer_retrieve_mock, subscription_list_mock, subscription_sync_mock):
         self.customer._sync_subscriptions()
         self.assertEqual(2, subscription_sync_mock.call_count)
 
-    @patch("djstripe.models.Subscription.sync_from_stripe_data", autospec=True)
+    @patch("djstripe.models.Subscription.sync_from_stripe_data")
     @patch("stripe.Subscription.list", return_value=StripeList(data=[]))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_sync_subscriptions_none(self, customer_retrieve_mock, subscription_list_mock, subscription_sync_mock):
