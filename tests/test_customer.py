@@ -327,7 +327,8 @@ class TestCustomer(TestCase):
         customer_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, email=user.email)
         callback_mock.assert_called_once_with(user)
 
-        subscribe_mock.assert_called_once()
+        self.assertTrue(subscribe_mock.called)
+        self.assertTrue(1, subscribe_mock.call_count)
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
@@ -466,7 +467,7 @@ class TestCustomer(TestCase):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
         self.customer.subscribe(plan=plan, charge_immediately=True)
-        send_invoice_mock.assert_called()
+        self.assertTrue(send_invoice_mock.called)
 
     @patch("djstripe.models.Customer.send_invoice")
     @patch("stripe.Subscription.create", return_value=deepcopy(FAKE_SUBSCRIPTION))
@@ -475,7 +476,7 @@ class TestCustomer(TestCase):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
         self.customer.subscribe(plan=plan.stripe_id, charge_immediately=True)
-        send_invoice_mock.assert_called()
+        self.assertTrue(send_invoice_mock.called)
 
     @patch("stripe.Subscription.create")
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))

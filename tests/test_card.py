@@ -99,7 +99,7 @@ class CardTest(TestCase):
         card.remove()
 
         self.assertEqual(0, customer.sources.count())
-        card_delete_mock.assert_called()
+        self.assertTrue(card_delete_mock.called)
 
     @patch("djstripe.models.Card._api_delete")
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
@@ -117,7 +117,7 @@ class CardTest(TestCase):
         card.remove()
 
         self.assertEqual(0, customer.sources.count())
-        card_delete_mock.assert_called()
+        self.assertTrue(card_delete_mock.called)
 
     @patch("djstripe.models.Card._api_delete")
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
