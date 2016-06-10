@@ -31,9 +31,3 @@ before_install:
   pip install codecov
 after_success:
   codecov
-
-# Because Python 3.5 does not want to play nicely with current versions of Django
-matrix:
-  exclude:
-    - python: 3.5
-      env: DJANGO=1.8.7

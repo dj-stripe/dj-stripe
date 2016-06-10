@@ -338,16 +338,16 @@ class Customer(StripeCustomer):
 
     # SYNC methods should be dropped in favor of the master sync infrastructure proposed
     def _sync_invoices(self, **kwargs):
-        for invoice in Invoice.api_list(customer=self.stripe_id, **kwargs):
-            Invoice.sync_from_stripe_data(invoice)
+        for stripe_invoice in Invoice.api_list(customer=self.stripe_id, **kwargs):
+            Invoice.sync_from_stripe_data(stripe_invoice)
 
     def _sync_charges(self, **kwargs):
-        for charge in Charge.api_list(customer=self.stripe_id, **kwargs):
-            Charge.sync_from_stripe_data(charge)
+        for stripe_charge in Charge.api_list(customer=self.stripe_id, **kwargs):
+            Charge.sync_from_stripe_data(stripe_charge)
 
     def _sync_subscriptions(self, **kwargs):
-        for subscription in Subscription.api_list(customer=self.stripe_id, **kwargs):
-            Subscription.sync_from_stripe_data(subscription)
+        for stripe_subscription in Subscription.api_list(customer=self.stripe_id, **kwargs):
+            Subscription.sync_from_stripe_data(stripe_subscription)
 
 
 class Event(StripeEvent):
