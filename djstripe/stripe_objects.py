@@ -1328,4 +1328,4 @@ class StripeSubscription(StripeObject):
 
         """
 
-        return self._api_delete(at_period_end)
+        return self._api_delete(at_period_end=at_period_end)
