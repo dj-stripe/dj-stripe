@@ -333,7 +333,7 @@ class Customer(StripeCustomer):
 
     def attach_objects_hook(self, cls, data):
         # TODO: other sources
-        if data["default_source"]["object"] == "card":
+        if data["default_source"] and data["default_source"]["object"] == "card":
             self.default_source = cls.stripe_object_default_source_to_source(target_cls=Card, data=data)
 
     # SYNC methods should be dropped in favor of the master sync infrastructure proposed

@@ -354,8 +354,9 @@ class StripeCharge(StripeObject):
     statement_descriptor = StripeCharField(max_length=22, null=True, help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement description may not include <>\"' characters, and will appear on your customer's statement in capital letters. Non-ASCII characters are automatically stripped. While most banks display this information consistently, some may display it incorrectly or not at all.")
     status = StripeCharField(max_length=10, choices=STATUS_CHOICES, help_text="The status of the payment.")
 
-    fee = StripeCurrencyField(nested_name="balance_transaction")
-    fee_details = StripeJSONField(nested_name="balance_transaction")
+    # Balance transaction can be null if the charge failed
+    fee = StripeCurrencyField(stripe_required=False, nested_name="balance_transaction")
+    fee_details = StripeJSONField(stripe_required=False, nested_name="balance_transaction")
 
     # dj-stripe custom stripe fields. Don't try to send these.
     source_type = StripeCharField(max_length=20, null=True, stripe_name="source.object", help_text="The payment source type. If the payment source is supported by dj-stripe, a corresponding model is attached to this Charge via a foreign key matching this field.")
@@ -461,7 +462,7 @@ class StripeCustomer(StripeObject):
 
     account_balance = StripeIntegerField(null=True, help_text="Current balance, if any, being stored on the customer's account. If negative, the customer has credit to apply to the next invoice. If positive, the customer has an amount owed that will be added to the next invoice. The balance does not refer to any unpaid invoices; it solely takes into account amounts that have yet to be successfully applied to any invoice. This balance is only taken into account for recurring charges.")
     business_vat_id = StripeCharField(max_length=20, null=True, help_text="The customer's VAT identification number.")
-    currency = StripeCharField(max_length=3, help_text="The currency the customer can be charged in for recurring billing purposes (subscriptions, invoices, invoice items).")
+    currency = StripeCharField(max_length=3, null=True, help_text="The currency the customer can be charged in for recurring billing purposes (subscriptions, invoices, invoice items).")
     delinquent = StripeBooleanField(default=False, help_text="Whether or not the latest charge for the customer's latest invoice has failed.")
     shipping = StripeJSONField(null=True, help_text="Shipping information associated with the customer.")
 
@@ -786,8 +787,9 @@ class StripeTransfer(StripeObject):
     statement_descriptor = StripeCharField(max_length=22, null=True, help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement description may not include <>\"' characters, and will appear on your customer's statement in capital letters. Non-ASCII characters are automatically stripped. While most banks display this information consistently, some may display it incorrectly or not at all.")
     status = StripeCharField(max_length=10, choices=STATUS_CHOICES, help_text="The current status of the transfer. A transfer will be pending until it is submitted to the bank, at which point it becomes in_transit. It will then change to paid if the transaction goes through. If it does not go through successfully, its status will change to failed or canceled.")
 
-    fee = StripeCurrencyField(nested_name="balance_transaction")
-    fee_details = StripeJSONField(nested_name="balance_transaction")
+    # Balance transaction can be null if the transfer failed
+    fee = StripeCurrencyField(stripe_required=False, nested_name="balance_transaction")
+    fee_details = StripeJSONField(stripe_required=False, nested_name="balance_transaction")
 
     # DEPRECATED Fields
     adjustment_count = StripeIntegerField(deprecated=True)
