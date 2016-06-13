@@ -459,7 +459,10 @@ class SubscriptionDict(dict):
 
         self[name] = value
 
-    def delete(self):
+    def delete(self, **kwargs):
+        if "at_period_end" in kwargs:
+            self["cancel_at_period_end"] = kwargs["at_period_end"]
+
         return self
 
     def save(self):
