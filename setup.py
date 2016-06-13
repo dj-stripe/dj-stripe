@@ -39,8 +39,8 @@ except ImportError:
     from distutils.core import setup
 
 if sys.argv[-1] == 'publish':
-    os.system('python setup.py sdist upload')
-    os.system('python setup.py bdist_wheel upload')
+    os.system('python setup.py sdist upload --sign')
+    os.system('python setup.py bdist_wheel upload --sign')
     sys.exit()
 
 if sys.argv[-1] == 'tag':

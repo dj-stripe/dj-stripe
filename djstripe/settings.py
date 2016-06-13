@@ -56,9 +56,6 @@ def get_subscriber_model():
     This method attempts to pull that model from settings, and falls back to
     AUTH_USER_MODEL if DJSTRIPE_SUBSCRIBER_MODEL is not set.
 
-    Note: Django 1.4 support was dropped in #107
-          https://github.com/pydanny/dj-stripe/pull/107
-
     Returns the subscriber model that is active in this project.
     """
 

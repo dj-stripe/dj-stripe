@@ -29,7 +29,6 @@ Contents
    usage
    settings
    cookbook
-   migrating_to_djstripe
    contributing
    authors
    history
