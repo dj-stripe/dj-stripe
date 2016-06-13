@@ -117,7 +117,7 @@ class StripeObject(TimeStampedModel):
 
         return cls._api().create(api_key=api_key, **kwargs)
 
-    def _api_delete(self, api_key=settings.STRIPE_SECRET_KEY):
+    def _api_delete(self, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
         """
         Call the stripe API's delete operation for this model
 
@@ -125,7 +125,7 @@ class StripeObject(TimeStampedModel):
         :type api_key: string
         """
 
-        return self.api_retrieve(api_key).delete()
+        return self.api_retrieve(api_key).delete(**kwargs)
 
     def str_parts(self):
         """
