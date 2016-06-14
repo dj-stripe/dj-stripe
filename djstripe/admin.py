@@ -149,6 +149,11 @@ class SubscriptionInline(admin.TabularInline):
 
 
 def subscription_status(customer):
+    """
+    Returns a string representation of the customer's subscription status.
+    If the customer does not have a subscription, an empty string is returned.
+    """
+
     if customer.subscription:
         return customer.subscription.status
     else:
