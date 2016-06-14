@@ -148,8 +148,11 @@ class SubscriptionInline(admin.TabularInline):
     model = Subscription
 
 
-def subscription_status(obj):
-    return obj.subscription.status
+def subscription_status(customer):
+    if customer.subscription:
+        return customer.subscription.status
+    else:
+        return ""
 subscription_status.short_description = "Subscription Status"
 
 
