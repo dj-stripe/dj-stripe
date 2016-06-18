@@ -9,16 +9,6 @@ At the command line::
 
     $ pip install dj-stripe
 
-Or, if you have virtualenvwrapper installed::
-
-    $ mkvirtualenv dj-stripe
-    $ pip install dj-stripe
-
-Or, if you want to develop on ``djstripe`` itself::
-
-    $ git clone https://github.com/<yourname>/dj-stripe/
-    $ python setup.py develop
-
 
 Configuration
 ---------------
@@ -28,9 +18,9 @@ Add ``djstripe`` to your ``INSTALLED_APPS``:
 
 .. code-block:: python
 
-    INSTALLED_APPS += (
+    INSTALLED_APPS += [
         "djstripe",
-    )
+    ]
 
 Add your stripe keys:
 
