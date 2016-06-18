@@ -158,6 +158,34 @@ def subscription_status(customer):
 subscription_status.short_description = "Subscription Status"
 
 
+def cancel_subscription(modeladmin, request, queryset):
+    """Cancels a subscription."""
+
+    for subscription in queryset:
+        subscription.cancel()
+cancel_subscription.short_description = "Cancel selected subscriptions"
+
+admin.site.register(
+    Subscription,
+    raw_id_fields=[
+        "customer",
+        "plan",
+    ],
+    list_display=[
+        "stripe_id",
+        "status",
+        "stripe_timestamp",
+    ],
+    list_filter=[
+        "status",
+    ],
+    search_fields=[
+        "stripe_id",
+    ],
+    actions=[cancel_subscription]
+)
+
+
 admin.site.register(
     Customer,
     raw_id_fields=["subscriber"],
