@@ -73,7 +73,6 @@ def send_charge_receipt(modeladmin, request, queryset):
 
 admin.site.register(
     Charge,
-    readonly_fields=('stripe_timestamp',),
     list_display=[
         "stripe_id",
         "customer",
@@ -105,7 +104,6 @@ admin.site.register(
 
 admin.site.register(
     EventProcessingException,
-    readonly_fields=('created',),
     list_display=[
         "message",
         "event",
@@ -121,7 +119,6 @@ admin.site.register(
 admin.site.register(
     Event,
     raw_id_fields=["customer"],
-    readonly_fields=('stripe_timestamp',),
     list_display=[
         "stripe_id",
         "type",
@@ -164,7 +161,6 @@ subscription_status.short_description = "Subscription Status"
 admin.site.register(
     Customer,
     raw_id_fields=["subscriber"],
-    readonly_fields=('stripe_timestamp',),
     list_display=[
         "stripe_id",
         "subscriber",
@@ -237,7 +233,6 @@ admin.site.register(
 
 admin.site.register(
     Transfer,
-    readonly_fields=('stripe_timestamp',),
     list_display=[
         "stripe_id",
         "amount",
