@@ -39,7 +39,7 @@ class ChargeTest(TestCase):
 
         charge_retrieve_mock.return_value = fake_charge_no_invoice
 
-        charge, created = Charge.get_or_create_from_stripe_object(fake_charge_no_invoice)
+        charge, created = Charge._get_or_create_from_stripe_object(fake_charge_no_invoice)
         self.assertTrue(created)
 
         captured_charge = charge.capture()
@@ -101,7 +101,7 @@ class ChargeTest(TestCase):
         transfer_retrieve_mock.return_value = fake_transfer
         charge_retrieve_mock.return_value = fake_charge_copy
 
-        charge, created = Charge.get_or_create_from_stripe_object(fake_charge_copy)
+        charge, created = Charge._get_or_create_from_stripe_object(fake_charge_copy)
         self.assertTrue(created)
 
         self.assertNotEqual(None, charge.transfer)
@@ -117,7 +117,7 @@ class ChargeTest(TestCase):
 
         charge_retrieve_mock.return_value = fake_charge_copy
 
-        charge, created = Charge.get_or_create_from_stripe_object(fake_charge_copy)
+        charge, created = Charge._get_or_create_from_stripe_object(fake_charge_copy)
         self.assertTrue(created)
 
         self.assertEqual(2, Account.objects.count())

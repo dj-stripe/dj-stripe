@@ -136,7 +136,7 @@ class StripeObject(TimeStampedModel):
         return ["stripe_id={id}".format(id=self.stripe_id)]
 
     @classmethod
-    def manipulate_stripe_object_hook(cls, data):
+    def _manipulate_stripe_object_hook(cls, data):
         """
         Gets called by this object's stripe object conversion method just before conversion.
         Use this to populate custom fields in a StripeObject from stripe data.
@@ -160,7 +160,7 @@ class StripeObject(TimeStampedModel):
         :rtype: dict
         """
 
-        manipulated_data = cls.manipulate_stripe_object_hook(data)
+        manipulated_data = cls._manipulate_stripe_object_hook(data)
 
         result = dict()
         # Iterate over all the fields that we know are related to Stripe, let each field work its own magic
@@ -169,7 +169,7 @@ class StripeObject(TimeStampedModel):
 
         return result
 
-    def attach_objects_hook(self, cls, data):
+    def _attach_objects_hook(self, cls, data):
         """
         Gets called by this object's create and sync methods just before save.
         Use this to populate fields before the model is saved.
@@ -184,13 +184,13 @@ class StripeObject(TimeStampedModel):
         :type data: dict
         """
         instance = cls(**cls._stripe_object_to_record(data))
-        instance.attach_objects_hook(cls, data)
+        instance._attach_objects_hook(cls, data)
         instance.save()
 
         return instance
 
     @classmethod
-    def get_or_create_from_stripe_object(cls, data, field_name="id"):
+    def _get_or_create_from_stripe_object(cls, data, field_name="id"):
         try:
             return cls.stripe_objects.get_by_json(data, field_name), False
         except cls.DoesNotExist:
@@ -202,7 +202,7 @@ class StripeObject(TimeStampedModel):
             return cls._create_from_stripe_object(data), True
 
     @classmethod
-    def stripe_object_to_customer(cls, target_cls, data):
+    def _stripe_object_to_customer(cls, target_cls, data):
         """
         Search the given manager for the Customer matching this object's ``customer`` field.
 
@@ -220,7 +220,7 @@ class StripeObject(TimeStampedModel):
                 raise CustomerDoesNotExistLocallyException("Because customers are tied to local users, djstripe will not create customers that do not already exist locally.")
 
     @classmethod
-    def stripe_object_to_transfer(cls, target_cls, data):
+    def _stripe_object_to_transfer(cls, target_cls, data):
         """
         Search the given manager for the Transfer matching this StripeCharge object's ``transfer`` field.
 
@@ -231,10 +231,10 @@ class StripeObject(TimeStampedModel):
         """
 
         if "transfer" in data and data["transfer"]:
-            return target_cls.get_or_create_from_stripe_object(data, "transfer")[0]
+            return target_cls._get_or_create_from_stripe_object(data, "transfer")[0]
 
     @classmethod
-    def stripe_object_to_source(cls, target_cls, data):
+    def _stripe_object_to_source(cls, target_cls, data):
         """
         Search the given manager for the source matching this object's ``source`` field.
         Note that the source field is already expanded in each request, and that it is required.
@@ -245,10 +245,10 @@ class StripeObject(TimeStampedModel):
         :type data: dict
         """
 
-        return target_cls.get_or_create_from_stripe_object(data["source"])[0]
+        return target_cls._get_or_create_from_stripe_object(data["source"])[0]
 
     @classmethod
-    def stripe_object_to_invoice(cls, target_cls, data):
+    def _stripe_object_to_invoice(cls, target_cls, data):
         """
         Search the given manager for the Invoice matching this StripeCharge object's ``invoice`` field.
         Note that the invoice field is required.
@@ -259,10 +259,10 @@ class StripeObject(TimeStampedModel):
         :type data: dict
         """
 
-        return target_cls.get_or_create_from_stripe_object(data, "invoice")[0]
+        return target_cls._get_or_create_from_stripe_object(data, "invoice")[0]
 
     @classmethod
-    def stripe_object_to_subscription(cls, target_cls, data):
+    def _stripe_object_to_subscription(cls, target_cls, data):
         """
         Search the given manager for the Subscription matching this object's ``subscription`` field.
 
@@ -273,7 +273,7 @@ class StripeObject(TimeStampedModel):
         """
 
         if "subscription" in data and data["subscription"]:
-            return target_cls.get_or_create_from_stripe_object(data, "subscription")[0]
+            return target_cls._get_or_create_from_stripe_object(data, "subscription")[0]
 
     def _sync(self, record_data):
         for attr, value in record_data.items():
@@ -281,11 +281,18 @@ class StripeObject(TimeStampedModel):
 
     @classmethod
     def sync_from_stripe_data(cls, data):
-        instance, created = cls.get_or_create_from_stripe_object(data)
+        """
+        Syncs this object from the stripe data provided.
+
+        :param data: stripe object
+        :type data: dict
+        """
+
+        instance, created = cls._get_or_create_from_stripe_object(data)
 
         if not created:
             instance._sync(cls._stripe_object_to_record(data))
-            instance.attach_objects_hook(cls, data)
+            instance._attach_objects_hook(cls, data)
             instance.save()
 
         return instance
@@ -413,7 +420,7 @@ class StripeCharge(StripeObject):
         return self.api_retrieve().capture()
 
     @classmethod
-    def stripe_object_destination_to_account(cls, target_cls, data):
+    def _stripe_object_destination_to_account(cls, target_cls, data):
         """
         Search the given manager for the Account matching this StripeCharge object's ``destination`` field.
 
@@ -424,10 +431,10 @@ class StripeCharge(StripeObject):
         """
 
         if "destination" in data and data["destination"]:
-            return target_cls.get_or_create_from_stripe_object(data, "destination")[0]
+            return target_cls._get_or_create_from_stripe_object(data, "destination")[0]
 
     @classmethod
-    def manipulate_stripe_object_hook(cls, data):
+    def _manipulate_stripe_object_hook(cls, data):
         data["disputed"] = data["dispute"] is not None
 
         # Assessments reported by you have the key user_report and, if set,
@@ -467,7 +474,7 @@ class StripeCustomer(StripeObject):
     shipping = StripeJSONField(null=True, help_text="Shipping information associated with the customer.")
 
     @classmethod
-    def stripe_object_default_source_to_source(cls, target_cls, data):
+    def _stripe_object_default_source_to_source(cls, target_cls, data):
         """
         Search the given manager for the source matching this StripeCharge object's ``default_source`` field.
         Note that the source field is already expanded in each request, and that it is required.
@@ -478,7 +485,7 @@ class StripeCustomer(StripeObject):
         :type data: dict
         """
 
-        return target_cls.get_or_create_from_stripe_object(data["default_source"])[0]
+        return target_cls._get_or_create_from_stripe_object(data["default_source"])[0]
 
     def purge(self):
         """Delete all identifying information we have in this record."""
@@ -831,13 +838,13 @@ class StripeAccount(StripeObject):
     def get_connected_account_from_token(cls, access_token):
         account_data = cls._api().retrieve(api_key=access_token)
 
-        return cls.get_or_create_from_stripe_object(account_data)[0]
+        return cls._get_or_create_from_stripe_object(account_data)[0]
 
     @classmethod
     def get_default_account(cls):
         account_data = cls._api().retrieve(api_key=settings.STRIPE_SECRET_KEY)
 
-        return cls.get_or_create_from_stripe_object(account_data)[0]
+        return cls._get_or_create_from_stripe_object(account_data)[0]
 
 
 # ============================================================================ #
@@ -957,7 +964,7 @@ class StripeCard(StripeSource):
 #         """
 #
 #         if "account" in data and data["account"]:
-#             return target_cls.get_or_create_from_stripe_object(data, "account")[0]
+#             return target_cls._get_or_create_from_stripe_object(data, "account")[0]
 
     @classmethod
     def create_token(cls, number, exp_month, exp_year, cvc, **kwargs):
@@ -1055,7 +1062,7 @@ class StripeInvoice(StripeObject):
         ] + super(StripeInvoice, self).str_parts()
 
     @classmethod
-    def stripe_object_to_charge(cls, target_cls, data):
+    def _stripe_object_to_charge(cls, target_cls, data):
         """
         Search the given manager for the Charge matching this object's ``charge`` field.
 
@@ -1066,7 +1073,7 @@ class StripeInvoice(StripeObject):
         """
 
         if "charge" in data and data["charge"]:
-            return target_cls.get_or_create_from_stripe_object(data, "charge")[0]
+            return target_cls._get_or_create_from_stripe_object(data, "charge")[0]
 
     def retry(self):
         """ Retry payment on this invoice if it isn't paid, closed, or forgiven."""
@@ -1135,7 +1142,7 @@ class StripeInvoiceItem(StripeObject):
         ] + super(StripeInvoiceItem, self).str_parts()
 
     @classmethod
-    def stripe_object_to_plan(cls, target_cls, data):
+    def _stripe_object_to_plan(cls, target_cls, data):
         """
         Search the given manager for the Plan matching this StripeCharge object's ``plan`` field.
 
@@ -1147,7 +1154,7 @@ class StripeInvoiceItem(StripeObject):
         """
 
         if "plan" in data and data["plan"]:
-            return target_cls.get_or_create_from_stripe_object(data, "plan")[0]
+            return target_cls._get_or_create_from_stripe_object(data, "plan")[0]
 
 
 class StripePlan(StripeObject):
@@ -1247,7 +1254,7 @@ class StripeSubscription(StripeObject):
         ] + super(StripeSubscription, self).str_parts()
 
     @classmethod
-    def stripe_object_to_plan(cls, target_cls, data):
+    def _stripe_object_to_plan(cls, target_cls, data):
         """
         Search the given manager for the Plan matching this StripeCharge object's ``plan`` field.
         Note that the plan field is already expanded in each request and is required.
@@ -1259,7 +1266,7 @@ class StripeSubscription(StripeObject):
 
         """
 
-        return target_cls.get_or_create_from_stripe_object(data["plan"])[0]
+        return target_cls._get_or_create_from_stripe_object(data["plan"])[0]
 
     def update(self, plan=None, application_fee_percent=None, coupon=None, prorate=None, proration_date=None,
                metadata=None, quantity=None, tax_percent=None, trial_end=None):

@@ -32,7 +32,7 @@ class TestCustomer(TestCase):
         self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
         self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
 
-        self.card, _created = Card.get_or_create_from_stripe_object(data=FAKE_CARD)
+        self.card, _created = Card._get_or_create_from_stripe_object(data=FAKE_CARD)
 
         self.customer.default_source = self.card
         self.customer.save()
@@ -156,12 +156,12 @@ class TestCustomer(TestCase):
 
         charge_retrieve_mock.return_value = fake_charge_no_invoice
 
-        charge, created = Charge.get_or_create_from_stripe_object(fake_charge_no_invoice)
+        charge, created = Charge._get_or_create_from_stripe_object(fake_charge_no_invoice)
         self.assertTrue(created)
 
         charge.refund()
 
-        refunded_charge, created2 = Charge.get_or_create_from_stripe_object(fake_charge_no_invoice)
+        refunded_charge, created2 = Charge._get_or_create_from_stripe_object(fake_charge_no_invoice)
         self.assertFalse(created2)
 
         self.assertEquals(refunded_charge.refunded, True)
@@ -177,7 +177,7 @@ class TestCustomer(TestCase):
 
         charge_retrieve_mock.return_value = fake_charge_no_invoice
 
-        charge, created = Charge.get_or_create_from_stripe_object(fake_charge_no_invoice)
+        charge, created = Charge._get_or_create_from_stripe_object(fake_charge_no_invoice)
         self.assertTrue(created)
 
         refunded_charge = charge.refund()

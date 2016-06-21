@@ -74,19 +74,19 @@ class Charge(StripeCharge):
             self.receipt_sent = num_sent > 0
             self.save()
 
-    def attach_objects_hook(self, cls, data):
-        customer = cls.stripe_object_to_customer(target_cls=Customer, data=data)
+    def _attach_objects_hook(self, cls, data):
+        customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
         if customer:
             self.customer = customer
         else:
             raise ValidationError("A customer was not attached to this charge.")
 
-        transfer = cls.stripe_object_to_transfer(target_cls=Transfer, data=data)
+        transfer = cls._stripe_object_to_transfer(target_cls=Transfer, data=data)
         if transfer:
             self.transfer = transfer
 
         # Set the account on this object.
-        destination_account = cls.stripe_object_destination_to_account(target_cls=Account, data=data)
+        destination_account = cls._stripe_object_destination_to_account(target_cls=Account, data=data)
         if destination_account:
             self.account = destination_account
         else:
@@ -94,7 +94,7 @@ class Charge(StripeCharge):
 
         # TODO: other sources
         if self.source_type == "card":
-            self.source = cls.stripe_object_to_source(target_cls=Card, data=data)
+            self.source = cls._stripe_object_to_source(target_cls=Card, data=data)
 
 
 class Customer(StripeCustomer):
@@ -333,10 +333,10 @@ class Customer(StripeCustomer):
 
         return new_card
 
-    def attach_objects_hook(self, cls, data):
+    def _attach_objects_hook(self, cls, data):
         # TODO: other sources
         if data["default_source"] and data["default_source"]["object"] == "card":
-            self.default_source = cls.stripe_object_default_source_to_source(target_cls=Card, data=data)
+            self.default_source = cls._stripe_object_default_source_to_source(target_cls=Card, data=data)
 
     # SYNC methods should be dropped in favor of the master sync infrastructure proposed
     def _sync_invoices(self, **kwargs):
@@ -447,8 +447,8 @@ class Account(StripeAccount):
 class Card(StripeCard):
     # account = models.ForeignKey("Account", null=True, related_name="cards")
 
-    def attach_objects_hook(self, cls, data):
-        customer = cls.stripe_object_to_customer(target_cls=Customer, data=data)
+    def _attach_objects_hook(self, cls, data):
+        customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
         if customer:
             self.customer = customer
         else:
@@ -485,17 +485,17 @@ class Invoice(StripeInvoice):
     class Meta(object):
         ordering = ["-date"]
 
-    def attach_objects_hook(self, cls, data):
-        self.customer = cls.stripe_object_to_customer(target_cls=Customer, data=data)
+    def _attach_objects_hook(self, cls, data):
+        self.customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
 
-        charge = cls.stripe_object_to_charge(target_cls=Charge, data=data)
+        charge = cls._stripe_object_to_charge(target_cls=Charge, data=data)
         if charge:
             if djstripe_settings.SEND_INVOICE_RECEIPT_EMAILS:
                 charge.send_receipt()
 
             self.charge = charge
 
-        subscription = cls.stripe_object_to_subscription(target_cls=Subscription, data=data)
+        subscription = cls._stripe_object_to_subscription(target_cls=Subscription, data=data)
         if subscription:
             self.subscription = subscription
 
@@ -507,15 +507,15 @@ class InvoiceItem(StripeInvoiceItem):
     plan = models.ForeignKey("Plan", null=True, related_name="invoiceitems", help_text="If the invoice item is a proration, the plan of the subscription for which the proration was computed.")
     subscription = models.ForeignKey("Subscription", null=True, related_name="invoiceitems", help_text="The subscription that this invoice item has been created for, if any.")
 
-    def attach_objects_hook(self, cls, data):
-        self.customer = cls.stripe_object_to_customer(target_cls=Customer, data=data)
-        self.invoice = cls.stripe_object_to_invoice(target_cls=Invoice, data=data)
+    def _attach_objects_hook(self, cls, data):
+        self.customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
+        self.invoice = cls._stripe_object_to_invoice(target_cls=Invoice, data=data)
 
-        plan = cls.stripe_object_to_plan(target_cls=Plan, data=data)
+        plan = cls._stripe_object_to_plan(target_cls=Plan, data=data)
         if plan:
             self.plan = plan
 
-        subscription = cls.stripe_object_to_subscription(target_cls=Subscription, data=data)
+        subscription = cls._stripe_object_to_subscription(target_cls=Subscription, data=data)
         if subscription:
             self.subscription = subscription
 
@@ -631,9 +631,9 @@ class Subscription(StripeSubscription):
         stripe_subscription = super(Subscription, self).cancel(at_period_end=at_period_end)
         return Subscription.sync_from_stripe_data(stripe_subscription)
 
-    def attach_objects_hook(self, cls, data):
-        self.customer = cls.stripe_object_to_customer(target_cls=Customer, data=data)
-        self.plan = cls.stripe_object_to_plan(target_cls=Plan, data=data)
+    def _attach_objects_hook(self, cls, data):
+        self.customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
+        self.plan = cls._stripe_object_to_plan(target_cls=Plan, data=data)
 
 
 # ============================================================================ #
