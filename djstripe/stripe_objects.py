@@ -501,63 +501,6 @@ Fields not implemented:
         self.card_exp_month = None
         self.card_exp_year = None
 
-    def charge(self, amount, currency, application_fee=None, capture=None, description=None, destination=None,
-               metadata=None, shipping=None, source=None, statement_descriptor=None):
-        """
-        Creates a charge for this customer.
-
-        Parameters not implemented:
-        *  receipt_email: Since this is a charge on a customer, the customer's email address is used.
-
-        :param amount: The amount to charge.
-        :type amount: Decimal. Precision is 2; anything more will be ignored.
-        :param currency: 3-letter ISO code for currency
-        :type currency: string
-        :param application_fee: A fee that will be applied to the charge and transfered to the platform owner's account.
-        :type application_fee: Decimal. Precision is 2; anything more will be ignored.
-        :param capture: Whether or not to immediately capture the charge. When false, the charge issues an
-                        authorization (or pre-authorization), and will need to be captured later. Uncaptured
-                        charges expire in 7 days. Default is True
-        :type capture: bool
-        :param description: An arbitrary string.
-        :type description: string
-        :param destination: An account to make the charge on behalf of.
-        :type destination: Account
-        :param metadata: A set of key/value pairs useful for storing additional information.
-        :type metadata: dict
-        :param shipping: Shipping information for the charge.
-        :type shipping: dict
-        :param source: The source to use for this charge. Must be a source attributed to this customer. If None,
-                       the customer's default source is used. Can be either the id of the source or the source object itself.
-        :type source: string, StripeSource
-        :param statement_descriptor: An arbitrary string to be displayed on the customer's credit card statement.
-        :type statement_descriptor: string
-
-        """
-
-        if not isinstance(amount, decimal.Decimal):
-            raise ValueError("You must supply a decimal value representing dollars.")
-
-        # Convert StripeSource to stripe_id
-        if source and isinstance(source, StripeSource):
-            source = source.stripe_id
-
-        stripe_charge = StripeCharge._api_create(
-            amount=int(amount * 100),  # Convert dollars into cents
-            currency=currency,
-            application_fee=int(amount * 100),  # Convert dollars into cents
-            capture=capture,
-            description=description,
-            destination=destination,
-            metatdata=metadata,
-            shipping=shipping,
-            customer=self.stripe_id,
-            source=source,
-            statement_descriptor=statement_descriptor,
-        )
-
-        return stripe_charge
-
     def subscribe(self, plan, application_fee_percent=None, coupon=None, quantity=None, metadata=None,
                   tax_percent=None, trial_end=None):
         """
@@ -614,6 +557,63 @@ Fields not implemented:
         )
 
         return stripe_subscription
+
+    def charge(self, amount, currency, application_fee=None, capture=None, description=None, destination=None,
+               metadata=None, shipping=None, source=None, statement_descriptor=None):
+        """
+        Creates a charge for this customer.
+
+        Parameters not implemented:
+        *  receipt_email: Since this is a charge on a customer, the customer's email address is used.
+
+        :param amount: The amount to charge.
+        :type amount: Decimal. Precision is 2; anything more will be ignored.
+        :param currency: 3-letter ISO code for currency
+        :type currency: string
+        :param application_fee: A fee that will be applied to the charge and transfered to the platform owner's account.
+        :type application_fee: Decimal. Precision is 2; anything more will be ignored.
+        :param capture: Whether or not to immediately capture the charge. When false, the charge issues an
+                        authorization (or pre-authorization), and will need to be captured later. Uncaptured
+                        charges expire in 7 days. Default is True
+        :type capture: bool
+        :param description: An arbitrary string.
+        :type description: string
+        :param destination: An account to make the charge on behalf of.
+        :type destination: Account
+        :param metadata: A set of key/value pairs useful for storing additional information.
+        :type metadata: dict
+        :param shipping: Shipping information for the charge.
+        :type shipping: dict
+        :param source: The source to use for this charge. Must be a source attributed to this customer. If None,
+                       the customer's default source is used. Can be either the id of the source or the source object itself.
+        :type source: string, StripeSource
+        :param statement_descriptor: An arbitrary string to be displayed on the customer's credit card statement.
+        :type statement_descriptor: string
+
+        """
+
+        if not isinstance(amount, decimal.Decimal):
+            raise ValueError("You must supply a decimal value representing dollars.")
+
+        # Convert StripeSource to stripe_id
+        if source and isinstance(source, StripeSource):
+            source = source.stripe_id
+
+        stripe_charge = StripeCharge._api_create(
+            amount=int(amount * 100),  # Convert dollars into cents
+            currency=currency,
+            application_fee=int(amount * 100),  # Convert dollars into cents
+            capture=capture,
+            description=description,
+            destination=destination,
+            metatdata=metadata,
+            shipping=shipping,
+            customer=self.stripe_id,
+            source=source,
+            statement_descriptor=statement_descriptor,
+        )
+
+        return stripe_charge
 
     def add_invoice_item(self, amount, currency, description=None, discountable=None, invoice=None,
                          metadata=None, subscription=None):
