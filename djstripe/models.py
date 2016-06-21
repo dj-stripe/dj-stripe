@@ -107,7 +107,7 @@ class Charge(StripeCharge):
 class Customer(StripeCustomer):
     doc = """
 
-Note: Sources and Subscriptions are attached via a ForeignKey on StripeSource and Subscription, respectively.
+.. note:: Sources and Subscriptions are attached via a ForeignKey on StripeSource and Subscription, respectively. \
 Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
     """
     __doc__ = getattr(StripeCustomer, "__doc__") + doc
@@ -253,17 +253,8 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
             raise MultipleSubscriptionException("This customer has multiple subscriptions. Use Customer.subscriptions to access them.")
 
     # TODO: Accept a coupon object when coupons are implemented
-    # @method_doc_inherit
+    @method_doc_inherit
     def subscribe(self, plan, charge_immediately=True, **kwargs):
-        """
-        See StripeCustomer.subscribe()
-
-        :param plan: The plan to which to subscribe the customer.
-        :type plan: Plan or string (plan ID)
-        :param charge_immediately: Whether or not to charge for the subscription upon creation. If False, an invoice will be created at the end of this period.
-        :type charge_immediately: boolean
-        """
-
         # Convert Plan to stripe_id
         if isinstance(plan, Plan):
             plan = plan.stripe_id

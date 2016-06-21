@@ -85,7 +85,7 @@ class StripeObject(TimeStampedModel):
         """
         Call the stripe API's retrieve operation for this model.
 
-        :param api_key: The api key to use for this request. Defualts to settings.STRIPE_SECRET_KEY.
+        :param api_key: The api key to use for this request. Defaults to settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
 
@@ -332,7 +332,7 @@ Fields not implemented:
 * refunds: #
 * source_transfer: #
 
-Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+.. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     STATUS_SUCCEEDED = "succeeded"
@@ -451,17 +451,18 @@ Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
 class StripeCustomer(StripeObject):
     """
 Customer objects allow you to perform recurring charges and track multiple charges that are
-associated with the same customer. (Source: https://stripe.com/docs/api/python#charges)
+associated with the same customer. (Source: https://stripe.com/docs/api/python#customers)
 
 # = Mapping the values of this field isn't currently on our roadmap.
     Please use the stripe dashboard to check the value of this field instead.
 
 Fields not implemented:
+
 * object: Unnecessary. Just check the model name.
 * discount: #
 * email: Unnecessary. See ``Customer.subscriber.email``.
 
-Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+.. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
@@ -563,12 +564,14 @@ Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
         Subscribes this customer to a plan.
 
         Parameters not implemented:
-        * source: Subscriptions use the customer's default source. Including the source parameter creates
-                  a new source for this customer and overrides the default source. This functionality is not
-                  desired; add a source to the customer before attempting to add a subscription.
+
+        * source: Subscriptions use the customer's default source. Including the source parameter creates \
+                  a new source for this customer and overrides the default source. This functionality is not \
+                  desired; add a source to the customer before attempting to add a subscription. \
+
 
         :param plan: The plan to which to subscribe the customer.
-        :type plan: string (plan ID)
+        :type plan: Plan or string (plan ID)
         :param application_fee_percent: This represents the percentage of the subscription invoice subtotal
                                         that will be transferred to the application owner's Stripe account.
                                         The request must be made with an OAuth key in order to set an
@@ -591,7 +594,12 @@ Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
                           customer is being subscribed to. The special value ``now`` can be provided to end
                           the customer's trial immediately.
         :type trial_end: datetime
+        :param charge_immediately: Whether or not to charge for the subscription upon creation. If False, an invoice will be created at the end of this period.
+        :type charge_immediately: boolean
 
+        .. Notes:
+        .. ``charge_immediately`` is only available on ``Customer.subscribe()``
+        .. if you're using ``StripeCustomer.subscribe()`` instead of ``Customer.subscribe()``, ``plan`` can only be a string
         """
 
         stripe_subscription = StripeSubscription._api_create(
@@ -707,7 +715,7 @@ class StripeEvent(StripeObject):
     * object: Unnecessary. Just check the model name.
     * pending_webhooks: Unnecessary. Use the dashboard.
 
-    Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
@@ -752,7 +760,7 @@ class StripeTransfer(StripeObject):
 
     TODO: Link destination to Card, Account, or Bank Account Models
 
-    Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
@@ -869,7 +877,7 @@ class StripeCard(StripeSource):
     * currency: #
     * default_for_currency: #
 
-    Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     BRANDS = ["Visa", "American Express", "MasterCard", "Discover", "JCB", "Diners Club", "Unknown"]
@@ -1028,7 +1036,7 @@ class StripeInvoice(StripeObject):
     * receipt_number: Unnecessary. Use the dashboard. Create a feature request if this is functionality you need.
     * webhooks_delivered_at: Unnecessary. Create a feature request if this is functionality you need.
 
-    Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
@@ -1121,7 +1129,7 @@ class StripeInvoiceItem(StripeObject):
     Fields not implemented:
     * object: Unnecessary. Just check the model name.
 
-    Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
@@ -1171,7 +1179,7 @@ class StripePlan(StripeObject):
     Fields not implemented:
     * object: Unnecessary. Just check the model name.
 
-    Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
@@ -1217,7 +1225,7 @@ class StripeSubscription(StripeObject):
     * object: Unnecessary. Just check the model name.
     * discount: #
 
-    Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
