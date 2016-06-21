@@ -321,16 +321,16 @@ are identified by a unique random ID. (Source: https://stripe.com/docs/api/pytho
 
 Fields not implemented:
 
-* object: Unnecessary. Just check the model name.
-* application_fee: #. Coming soon with stripe connect functionality
-* balance_transaction: #
-* dispute: #; Mapped to a ``disputed`` boolean.
-* fraud_details: Mapped to a ``fraudulent`` boolean.
-* order: #
-* receipt_email: Unnecessary. Use Customer.email. Create a feature request if this is functionality you need.
-* receipt_number: Unnecessary. Use the dashboard. Create a feature request if this is functionality you need.
-* refunds: #
-* source_transfer: #
+* **object** – Unnecessary. Just check the model name.
+* **application_fee** – #. Coming soon with stripe connect functionality
+* **balance_transaction** – #
+* **dispute** – #; Mapped to a ``disputed`` boolean.
+* **fraud_details** – Mapped to a ``fraudulent`` boolean.
+* **order** – #
+* **receipt_email** – Unnecessary. Use Customer.email. Create a feature request if this is functionality you need.
+* **receipt_number** – Unnecessary. Use the dashboard. Create a feature request if this is functionality you need.
+* **refunds** – #
+* **source_transfer** – #
 
 .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
@@ -458,9 +458,9 @@ associated with the same customer. (Source: https://stripe.com/docs/api/python#c
 
 Fields not implemented:
 
-* object: Unnecessary. Just check the model name.
-* discount: #
-* email: Unnecessary. See ``Customer.subscriber.email``.
+* **object** – Unnecessary. Just check the model name.
+* **discount** – #
+* **email** – Unnecessary. Use ``Customer.subscriber.email``.
 
 .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
@@ -508,7 +508,7 @@ Fields not implemented:
 
         Parameters not implemented:
 
-        * source: Subscriptions use the customer's default source. Including the source parameter creates \
+        * **source** – Subscriptions use the customer's default source. Including the source parameter creates \
                   a new source for this customer and overrides the default source. This functionality is not \
                   desired; add a source to the customer before attempting to add a subscription. \
 
@@ -564,7 +564,9 @@ Fields not implemented:
         Creates a charge for this customer.
 
         Parameters not implemented:
-        *  receipt_email: Since this is a charge on a customer, the customer's email address is used.
+
+        * **receipt_email** – Since this is a charge on a customer, the customer's email address is used.
+
 
         :param amount: The amount to charge.
         :type amount: Decimal. Precision is 2; anything more will be ignored.
@@ -589,7 +591,12 @@ Fields not implemented:
         :type source: string, StripeSource
         :param statement_descriptor: An arbitrary string to be displayed on the customer's credit card statement.
         :type statement_descriptor: string
+        :param send_receipt: Whether or not to send a receipt for this charge. If blank,
+                             ``DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS`` is used.
+        :type send_receipt: boolean
 
+        .. Notes:
+        .. ``send_receipt`` is only available on ``Customer.charge()``
         """
 
         if not isinstance(amount, decimal.Decimal):
@@ -632,21 +639,22 @@ Fields not implemented:
         :param discountable: Controls whether discounts apply to this invoice item. Defaults to False for
                              prorations or negative invoice items, and True for all other invoice items.
         :type discountable: boolean
-        :param invoice: The ID of an existing invoice to add this invoice item to.
-                        When left blank, the invoice item will be added to the next upcoming
-                        scheduled invoice. Use this when adding invoice items in response
-                        to an ``invoice.created`` webhook. You cannot add an invoice item to
-                        an invoice that has already been paid, attempted or closed.
-        :type invoice: string (invoice ID)
+        :param invoice: An existing invoice to add this invoice item to. When left blank, the invoice
+                        item will be added to the next upcoming scheduled invoice. Use this when adding
+                        invoice items in response to an ``invoice.created`` webhook. You cannot add an invoice
+                        item to an invoice that has already been paid, attempted or closed.
+        :type invoice: Invoice or string (invoice ID)
         :param metadata: A set of key/value pairs useful for storing additional information.
         :type metadata: dict
-        :param subscription: The ID of a subscription to add this invoice item to. When left blank,
-                             the invoice item will be be added to the next upcoming scheduled invoice.
-                             When set, scheduled invoices for subscriptions other than the specified
-                             subscription will ignore the invoice item. Use this when you want to express
-                             that an invoice item has been accrued within the context of a particular
-                             subscription.
-        :type subscription: string (invoice ID)
+        :param subscription: A subscription to add this invoice item to. When left blank, the invoice
+                             item will be be added to the next upcoming scheduled invoice. When set,
+                             scheduled invoices for subscriptions other than the specified subscription
+                             will ignore the invoice item. Use this when you want to express that an
+                             invoice item has been accrued within the context of a particular subscription.
+        :type subscription: Subscription or string (subscription ID)
+
+        .. Notes:
+        .. if you're using ``StripeCustomer.add_invoice_item()`` instead of ``Customer.add_invoice_item()``, ``invoice`` and ``subscriptions`` can only be strings
         """
 
         if not isinstance(amount, decimal.Decimal):

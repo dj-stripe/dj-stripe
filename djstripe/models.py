@@ -271,16 +271,8 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
         return self.has_valid_source() and self.date_purged is None
 
-    # @method_doc_inherit
+    @method_doc_inherit
     def charge(self, amount, currency="usd", send_receipt=None, **kwargs):
-        """
-        See StripeCustomer.charge()
-
-        :param send_receipt: Whether or not to send a receipt for this charge. If blank,
-                             ``DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS`` is used.
-        :type send_receipt: boolean
-        """
-
         if send_receipt is None:
             send_receipt = getattr(settings, 'DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS', True)
 
@@ -292,24 +284,8 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
         return charge
 
-    # @method_doc_inherit
+    @method_doc_inherit
     def add_invoice_item(self, amount, currency, **kwargs):
-        """
-        See StripeCustomer.add_invoice_item()
-
-        :param invoice: An existing invoice to add this invoice item to. When left blank, the invoice
-                        item will be added to the next upcoming scheduled invoice. Use this when adding
-                        invoice items in response to an invoice.created webhook. You cannot add an invoice
-                        item to an invoice that has already been paid, attempted or closed.
-        :type invoice: Invoice or string (invoice ID)
-        :param subscription: A subscription to add this invoice item to. When left blank, the invoice
-                             item will be be added to the next upcoming scheduled invoice. When set,
-                             scheduled invoices for subscriptions other than the specified subscription
-                             will ignore the invoice item. Use this when you want to express that an
-                             invoice item has been accrued within the context of a particular subscription.
-        :type subscription: Subscription or string (subscription ID)
-        """
-
         # Convert Invoice to stripe_id
         if "invoice" in kwargs and isinstance(kwargs["invoice"], Invoice):
             kwargs.update({"invoice": kwargs["invoice"].stripe_id})
