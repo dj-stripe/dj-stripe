@@ -497,27 +497,6 @@ class StripeCustomer(StripeObject):
         self.card_exp_month = None
         self.card_exp_year = None
 
-    def add_card(self, source, set_default=True):
-        """
-        Adds a card to this customer's account.
-
-        :param source: Either a token, like the ones returned by our Stripe.js, or a dictionary containing a
-                       user's credit card details. Stripe will automatically validate the card.
-        :type source: string, dict
-        :param set_default: Whether or not to set the source as the customer's default source
-        :type set_default: boolean
-
-        """
-
-        stripe_customer = self.api_retrieve()
-        stripe_card = stripe_customer.sources.create(source=source)
-
-        if set_default:
-            stripe_customer.default_source = stripe_card["id"]
-            stripe_customer.save()
-
-        return stripe_card
-
     def charge(self, amount, currency, application_fee=None, capture=None, description=None, destination=None,
                metadata=None, shipping=None, source=None, statement_descriptor=None):
         """
@@ -674,6 +653,27 @@ class StripeCustomer(StripeObject):
         )
 
         return stripe_invoiceitem
+
+    def add_card(self, source, set_default=True):
+        """
+        Adds a card to this customer's account.
+
+        :param source: Either a token, like the ones returned by our Stripe.js, or a dictionary containing a
+                       user's credit card details. Stripe will automatically validate the card.
+        :type source: string, dict
+        :param set_default: Whether or not to set the source as the customer's default source
+        :type set_default: boolean
+
+        """
+
+        stripe_customer = self.api_retrieve()
+        stripe_card = stripe_customer.sources.create(source=source)
+
+        if set_default:
+            stripe_customer.default_source = stripe_card["id"]
+            stripe_customer.save()
+
+        return stripe_card
 
 
 class StripeEvent(StripeObject):
