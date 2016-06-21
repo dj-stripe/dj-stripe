@@ -106,8 +106,9 @@ class Charge(StripeCharge):
 
 class Customer(StripeCustomer):
     doc = """
-    Note: Sources and Subscriptions are attached via a ForeignKey on StripeSource and Subscription, respectively.
-          Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
+
+Note: Sources and Subscriptions are attached via a ForeignKey on StripeSource and Subscription, respectively.
+Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
     """
     __doc__ = getattr(StripeCustomer, "__doc__") + doc
 
@@ -118,11 +119,19 @@ class Customer(StripeCustomer):
     subscriber = models.OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
     date_purged = models.DateTimeField(null=True, editable=False)
 
+    @method_doc_inherit
     def str_parts(self):
         return [smart_text(self.subscriber), "email={email}".format(email=self.subscriber.email)] + super(Customer, self).str_parts()
 
     @classmethod
     def get_or_create(cls, subscriber):
+        """
+        Get or create a dj-stripe customer.
+
+        :param subscriber: The subscriber model instance for which to get or create a customer.
+        :type subscriber: User
+        """
+
         try:
             return Customer.objects.get(subscriber=subscriber), False
         except Customer.DoesNotExist:
@@ -142,6 +151,7 @@ class Customer(StripeCustomer):
 
         return customer
 
+    @method_doc_inherit
     def purge(self):
         try:
             self._api_delete()
@@ -177,6 +187,8 @@ class Customer(StripeCustomer):
         self.purge()
 
     def _get_valid_subscriptions(self):
+        """ Get a list of this customer's valid subscriptions."""
+
         return [subscription for subscription in self.subscriptions.all() if subscription.is_valid()]
 
     def has_active_subscription(self, plan=None):
@@ -222,6 +234,15 @@ class Customer(StripeCustomer):
 
     @property
     def subscription(self):
+        """
+        Shortcut to get this customer's subscription.
+
+        :returns: None if the customer has no subscriptions, the subscription if
+                  the customer has a subscription.
+        :raises MultipleSubscriptionException: Raised if the customer has multiple subscriptions.
+                In this case, use ``Customer.subscriptions`` instead.
+        """
+
         subscription_count = self.subscriptions.count()
 
         if subscription_count == 0:
@@ -232,6 +253,7 @@ class Customer(StripeCustomer):
             raise MultipleSubscriptionException("This customer has multiple subscriptions. Use Customer.subscriptions to access them.")
 
     # TODO: Accept a coupon object when coupons are implemented
+    # @method_doc_inherit
     def subscribe(self, plan, charge_immediately=True, **kwargs):
         """
         See StripeCustomer.subscribe()
@@ -258,6 +280,7 @@ class Customer(StripeCustomer):
 
         return self.has_valid_source() and self.date_purged is None
 
+    # @method_doc_inherit
     def charge(self, amount, currency="usd", send_receipt=None, **kwargs):
         """
         See StripeCustomer.charge()
@@ -278,6 +301,7 @@ class Customer(StripeCustomer):
 
         return charge
 
+    # @method_doc_inherit
     def add_invoice_item(self, amount, currency, **kwargs):
         """
         See StripeCustomer.add_invoice_item()
@@ -308,14 +332,22 @@ class Customer(StripeCustomer):
         return InvoiceItem.sync_from_stripe_data(stripe_invoiceitem)
 
     def send_invoice(self):
+        """
+        Pay and send the customer's latest invoice.
+
+        :returns: True if an invoice was able to be created and paid, False otherwise
+                  (typically if there was nothing to invoice).
+        """
         try:
             invoice = Invoice._api_create(customer=self.stripe_id)
             invoice.pay()
             return True
-        except InvalidRequestError:
+        except InvalidRequestError:  # TODO: Check this for a more specific error message.
             return False  # There was nothing to invoice
 
     def retry_unpaid_invoices(self):
+        """ Attempt to retry collecting payment on the customer's unpaid invoices."""
+
         self._sync_invoices()
         for invoice in self.invoices.filter(paid=False, closed=False):
             try:
@@ -329,6 +361,7 @@ class Customer(StripeCustomer):
 
         return self.default_source is not None
 
+    @method_doc_inherit
     def add_card(self, source, set_default=True):
         new_stripe_card = super(Customer, self).add_card(source, set_default)
         new_card = Card.sync_from_stripe_data(new_stripe_card)

@@ -450,18 +450,18 @@ Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
 
 class StripeCustomer(StripeObject):
     """
-    Customer objects allow you to perform recurring charges and track multiple charges that are
-    associated with the same customer. (Source: https://stripe.com/docs/api/python#charges)
+Customer objects allow you to perform recurring charges and track multiple charges that are
+associated with the same customer. (Source: https://stripe.com/docs/api/python#charges)
 
-    # = Mapping the values of this field isn't currently on our roadmap.
-        Please use the stripe dashboard to check the value of this field instead.
+# = Mapping the values of this field isn't currently on our roadmap.
+    Please use the stripe dashboard to check the value of this field instead.
 
-    Fields not implemented:
-    * object: Unnecessary. Just check the model name.
-    * discount: #
-    * email: Unnecessary. See ``Customer.subscriber.email``.
+Fields not implemented:
+* object: Unnecessary. Just check the model name.
+* discount: #
+* email: Unnecessary. See ``Customer.subscriber.email``.
 
-    Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
