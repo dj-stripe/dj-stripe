@@ -11,6 +11,7 @@ from django.db import models
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
+from doc_inherit import method_doc_inherit
 from model_utils.models import TimeStampedModel
 from stripe.error import StripeError, InvalidRequestError
 
@@ -34,26 +35,32 @@ logger = logging.getLogger(__name__)
 # ============================================================================ #
 
 class Charge(StripeCharge):
+    __doc__ = getattr(StripeCharge, "__doc__")
+
     account = models.ForeignKey("Account", null=True, related_name="charges", help_text="The account the charge was made on behalf of. Null here indicates that this value was never set.")
 
     customer = models.ForeignKey("Customer", related_name="charges", help_text="The customer associated with this charge.")
     transfer = models.ForeignKey("Transfer", null=True, help_text="The transfer to the destination account (only applicable if the charge was created using the destination parameter).")
 
-    source = models.ForeignKey(StripeSource, null=True, related_name="charges")
+    source = models.ForeignKey(StripeSource, null=True, related_name="charges", help_text="The source used for this charge.")
 
-    receipt_sent = models.BooleanField(default=False)
+    receipt_sent = models.BooleanField(default=False, help_text="Whether or not a receipt was sent for this charge.")
 
     objects = ChargeManager()
 
+    @method_doc_inherit
     def refund(self, amount=None, reason=None):
         refunded_charge = super(Charge, self).refund(amount, reason)
         return Charge.sync_from_stripe_data(refunded_charge)
 
+    @method_doc_inherit
     def capture(self):
         captured_charge = super(Charge, self).capture()
         return Charge.sync_from_stripe_data(captured_charge)
 
     def send_receipt(self):
+        """Send a receipt for this charge."""
+
         if not self.receipt_sent:
             site = Site.objects.get_current()
             protocol = getattr(settings, "DEFAULT_HTTP_PROTOCOL", "http")

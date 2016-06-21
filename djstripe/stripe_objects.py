@@ -24,6 +24,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
+from doc_inherit import method_doc_inherit
 from model_utils.models import TimeStampedModel
 from polymorphic.models import PolymorphicModel
 import stripe
@@ -82,7 +83,7 @@ class StripeObject(TimeStampedModel):
 
     def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
         """
-        Implement very commonly used API function 'retrieve'.
+        Call the stripe API's retrieve operation for this model.
 
         :param api_key: The api key to use for this request. Defualts to settings.STRIPE_SECRET_KEY.
         :type api_key: string
@@ -311,26 +312,27 @@ class StripeSource(PolymorphicModel, StripeObject):
 
 class StripeCharge(StripeObject):
     """
-    To charge a credit or a debit card, you create a charge object. You can
-    retrieve and refund individual charges as well as list all charges. Charges
-    are identified by a unique random ID. (Source: https://stripe.com/docs/api/python#charges)
+To charge a credit or a debit card, you create a charge object. You can
+retrieve and refund individual charges as well as list all charges. Charges
+are identified by a unique random ID. (Source: https://stripe.com/docs/api/python#charges)
 
-    # = Mapping the values of this field isn't currently on our roadmap.
-        Please use the stripe dashboard to check the value of this field instead.
+# = Mapping the values of this field isn't currently on our roadmap.
+    Please use the stripe dashboard to check the value of this field instead.
 
-    Fields not implemented:
-    * object: Unnecessary. Just check the model name.
-    * application_fee: #. Coming soon with stripe connect functionality
-    * balance_transaction: #
-    * dispute: #; Mapped to a ``disputed`` boolean.
-    * fraud_details: Mapped to a ``fraudulent`` boolean.
-    * order: #
-    * receipt_email: Unnecessary. Use Customer.email. Create a feature request if this is functionality you need.
-    * receipt_number: Unnecessary. Use the dashboard. Create a feature request if this is functionality you need.
-    * refunds: #
-    * source_transfer: #
+Fields not implemented:
 
-    Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+* object: Unnecessary. Just check the model name.
+* application_fee: #. Coming soon with stripe connect functionality
+* balance_transaction: #
+* dispute: #; Mapped to a ``disputed`` boolean.
+* fraud_details: Mapped to a ``fraudulent`` boolean.
+* order: #
+* receipt_email: Unnecessary. Use Customer.email. Create a feature request if this is functionality you need.
+* receipt_number: Unnecessary. Use the dashboard. Create a feature request if this is functionality you need.
+* refunds: #
+* source_transfer: #
+
+Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     STATUS_SUCCEEDED = "succeeded"
@@ -371,6 +373,7 @@ class StripeCharge(StripeObject):
     disputed = StripeBooleanField(default=False, help_text="Whether or not this charge is disputed.")
     fraudulent = StripeBooleanField(default=False, help_text="Whether or not this charge was marked as fraudulent.")
 
+    @method_doc_inherit
     def str_parts(self):
         return [
             "amount={amount}".format(amount=self.amount),
