@@ -249,7 +249,7 @@ class Customer(StripeCustomer):
     def can_charge(self):
         """Determines if this customer is able to be charged."""
 
-        return self.has_valid_card() and self.date_purged is None
+        return self.has_valid_source() and self.date_purged is None
 
     def charge(self, amount, currency="usd", send_receipt=None, **kwargs):
         """
@@ -317,7 +317,9 @@ class Customer(StripeCustomer):
                 if str(exc) != "Invoice is already paid":
                     raise exc
 
-    def has_valid_card(self):
+    def has_valid_source(self):
+        """ Check whether the customer has a valid payment source."""
+
         return self.default_source is not None
 
     def add_card(self, source, set_default=True):
