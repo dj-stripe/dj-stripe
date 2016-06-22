@@ -41,7 +41,7 @@ articles, and such.
 
 If you are adding to dj-stripe's documentation, you can see your changes by changing
 into the ``docs`` directory, running ``make html`` (or ``make.bat html`` if you're
-developing on Windows) from the command line, and then opening ``docs/_build/index.html``
+developing on Windows) from the command line, and then opening ``docs/_build/html/index.html``
 in a web browser.
 
 Submit Feedback

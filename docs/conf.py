@@ -302,9 +302,9 @@ def process_docstring(app, what, name, obj, options, lines):
         # Grab the field list from the meta class
         fields = obj._meta.get_fields()
 
-        for field in [_field for _field in fields if _field.name not in ["id", "created", "modified"]]:
+        for field in [_field for _field in fields if _field.name not in ["id", "created", "modified", "polymorphic_ctype"]]:
             # Skip ManyToOneRel and ManyToManyRel fields which have no 'verbose_name' or 'help_text'
-            if not hasattr(field, 'verbose_name'):
+            if not hasattr(field, 'verbose_name') or (hasattr(field, 'deprecated') and field.deprecated):
                 continue
 
             # Decode and strip any html out of the field's help text

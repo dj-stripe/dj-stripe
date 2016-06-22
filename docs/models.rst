@@ -55,3 +55,102 @@ Customer
     .. automethod:: djstripe.models.Customer.str_parts
     .. automethod:: djstripe.stripe_objects.StripeObject.sync_from_stripe_data
 
+
+Event
+-----
+.. autoclass:: djstripe.models.Event
+    
+    .. automethod:: djstripe.stripe_objects.StripeObject.api_list
+    .. automethod:: djstripe.models.Event.api_retrieve
+    
+    .. autoattribute:: djstripe.models.Event.message
+    .. automethod:: djstripe.models.Event.validate
+    .. automethod:: djstripe.models.Event.process
+    
+    .. automethod:: djstripe.models.Event.str_parts
+    .. automethod:: djstripe.stripe_objects.StripeObject.sync_from_stripe_data
+
+
+Transfer
+--------
+.. autoclass:: djstripe.models.Transfer
+    
+    .. automethod:: djstripe.stripe_objects.StripeObject.api_list
+    .. automethod:: djstripe.models.Transfer.api_retrieve
+    
+    .. autoattribute:: djstripe.models.Transfer.STATUS_PAID
+    .. autoattribute:: djstripe.models.Transfer.STATUS_PENDING
+    .. autoattribute:: djstripe.models.Transfer.STATUS_IN_TRANSIT
+    .. autoattribute:: djstripe.models.Transfer.STATUS_CANCELED
+    .. autoattribute:: djstripe.models.Transfer.STATUS_CANCELLED
+    .. autoattribute:: djstripe.models.Transfer.STATUS_FAILED
+    .. autoattribute:: djstripe.models.Transfer.DESTINATION_TYPES
+    .. autoattribute:: djstripe.models.Transfer.SOURCE_TYPES
+    .. autoattribute:: djstripe.models.Transfer.FAILURE_CODES
+    
+    .. automethod:: djstripe.models.Transfer.str_parts
+    .. automethod:: djstripe.stripe_objects.StripeObject.sync_from_stripe_data
+
+
+Card
+----
+.. autoclass:: djstripe.models.Card
+    
+    .. automethod:: djstripe.stripe_objects.StripeObject.api_list
+    .. automethod:: djstripe.models.Card.api_retrieve
+    
+    .. autoattribute:: djstripe.models.Card.BRANDS
+    .. autoattribute:: djstripe.models.Card.FUNDING_TYPES
+    .. autoattribute:: djstripe.models.Card.CARD_CHECK_RESULTS
+    .. autoattribute:: djstripe.models.Card.TOKENIZATION_METHODS
+    
+    .. automethod:: djstripe.models.Card.remove
+    .. automethod:: djstripe.stripe_objects.StripeCard.create_token
+    
+    .. automethod:: djstripe.models.Card.str_parts
+    .. automethod:: djstripe.stripe_objects.StripeObject.sync_from_stripe_data
+
+
+Invoice
+-------
+.. autoclass:: djstripe.models.Invoice
+    
+    .. automethod:: djstripe.stripe_objects.StripeObject.api_list
+    .. automethod:: djstripe.models.Invoice.api_retrieve
+    
+    .. autoattribute:: djstripe.models.Invoice.STATUS_PAID
+    .. autoattribute:: djstripe.models.Invoice.STATUS_FORGIVEN
+    .. autoattribute:: djstripe.models.Invoice.STATUS_CLOSED
+    .. autoattribute:: djstripe.models.Invoice.STATUS_OPEN
+    .. autoattribute:: djstripe.models.Invoice.status
+    
+    .. automethod:: djstripe.models.Invoice.retry
+    
+    .. automethod:: djstripe.models.Invoice.str_parts
+    .. automethod:: djstripe.stripe_objects.StripeObject.sync_from_stripe_data
+
+
+InvoiceItem
+-----------
+.. autoclass:: djstripe.models.InvoiceItem
+    
+    .. automethod:: djstripe.stripe_objects.StripeObject.api_list
+    .. automethod:: djstripe.models.InvoiceItem.api_retrieve
+    
+    .. automethod:: djstripe.models.InvoiceItem.str_parts
+    .. automethod:: djstripe.stripe_objects.StripeObject.sync_from_stripe_data
+
+
+Plan
+----
+.. autoclass:: djstripe.models.Plan
+    
+    .. automethod:: djstripe.stripe_objects.StripeObject.api_list
+    .. automethod:: djstripe.models.Plan.api_retrieve
+    
+    .. automethod:: djstripe.models.Plan.get_or_create
+    
+    .. automethod:: djstripe.models.Plan.str_parts
+    .. automethod:: djstripe.stripe_objects.StripeObject.sync_from_stripe_data
+
+

@@ -24,7 +24,6 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
-from doc_inherit import method_doc_inherit
 from model_utils.models import TimeStampedModel
 from polymorphic.models import PolymorphicModel
 import stripe
@@ -373,7 +372,6 @@ Fields not implemented:
     disputed = StripeBooleanField(default=False, help_text="Whether or not this charge is disputed.")
     fraudulent = StripeBooleanField(default=False, help_text="Whether or not this charge was marked as fraudulent.")
 
-    @method_doc_inherit
     def str_parts(self):
         return [
             "amount={amount}".format(amount=self.amount),
@@ -697,33 +695,35 @@ Fields not implemented:
 
 class StripeEvent(StripeObject):
     """
-    Events are POSTed to our webhook url. They provide information about a Stripe event that just happened. Events
-    are processed in detail by their respective models (charge events by the Charge model, etc).
+Events are POSTed to our webhook url. They provide information about a Stripe event that just happened. Events
+are processed in detail by their respective models (charge events by the Charge model, etc).
 
-    Events are initially _UNTRUSTED_, as it is possible for any web entity to post any data to our webhook url. Data
-    posted may be valid Stripe information, garbage, or even malicious. The 'valid' flag in this model monitors this.
+Events are initially **UNTRUSTED**, as it is possible for any web entity to post any data to our webhook url. Data
+posted may be valid Stripe information, garbage, or even malicious. The 'valid' flag in this model monitors this.
 
-    API VERSIONING
-    ====
-    This is a tricky matter when it comes to webhooks. See the discussion here:
-        https://groups.google.com/a/lists.stripe.com/forum/#!topic/api-discuss/h5Y6gzNBZp8
+**API VERSIONING**
 
-    In this discussion, it is noted that Webhooks are produced in one API version, which will usually be
-    different from the version supported by Stripe plugins (such as djstripe). The solution, described there,
-    is:
+This is a tricky matter when it comes to webhooks. See the discussion here_.
 
-        1) validate the receipt of a webhook event by doing an event get using the API version of the received hook event.
-        2) retrieve the referenced object (e.g. the Charge, the Customer, etc) using the plugin's supported API version.
-        3) process that event using the retrieved object which will, only now, be in a format that you are certain to understand
+.. _here: https://groups.google.com/a/lists.stripe.com/forum/#!topic/api-discuss/h5Y6gzNBZp8
 
-    # = Mapping the values of this field isn't currently on our roadmap.
-        Please use the stripe dashboard to check the value of this field instead.
+In this discussion, it is noted that Webhooks are produced in one API version, which will usually be
+different from the version supported by Stripe plugins (such as djstripe). The solution, described there,
+is:
 
-    Fields not implemented:
-    * object: Unnecessary. Just check the model name.
-    * pending_webhooks: Unnecessary. Use the dashboard.
+    1) validate the receipt of a webhook event by doing an event get using the API version of the received hook event.
+    2) retrieve the referenced object (e.g. the Charge, the Customer, etc) using the plugin's supported API version.
+    3) process that event using the retrieved object which will, only now, be in a format that you are certain to understand
 
-    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+# = Mapping the values of this field isn't currently on our roadmap.
+    Please use the stripe dashboard to check the value of this field instead.
+
+Fields not implemented:
+
+* **object** – Unnecessary. Just check the model name.
+* **pending_webhooks** – Unnecessary. Use the dashboard.
+
+.. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
@@ -753,22 +753,23 @@ class StripeEvent(StripeObject):
 
 class StripeTransfer(StripeObject):
     """
-    When Stripe sends you money or you initiate a transfer to a bank account, debit card, or
-    connected Stripe account, a transfer object will be created.
-    (Source: https://stripe.com/docs/api/python#transfers)
+When Stripe sends you money or you initiate a transfer to a bank account, debit card, or
+connected Stripe account, a transfer object will be created.
+(Source: https://stripe.com/docs/api/python#transfers)
 
-    # = Mapping the values of this field isn't currently on our roadmap.
-        Please use the stripe dashboard to check the value of this field instead.
+# = Mapping the values of this field isn't currently on our roadmap.
+    Please use the stripe dashboard to check the value of this field instead.
 
-    Fields not implemented:
-    * object: Unnecessary. Just check the model name.
-    * application_fee: #
-    * balance_transaction: #
-    * reversals: #
+Fields not implemented:
 
-    TODO: Link destination to Card, Account, or Bank Account Models
+* **object** – Unnecessary. Just check the model name.
+* **application_fee** – #
+* **balance_transaction** – #
+* **reversals** – #
 
-    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+.. TODO: Link destination to Card, Account, or Bank Account Models
+
+.. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
@@ -872,20 +873,21 @@ class StripeAccount(StripeObject):
 
 class StripeCard(StripeSource):
     """
-    You can store multiple cards on a customer in order to charge the customer later.
-    (Source: https://stripe.com/docs/api/python#cards)
+You can store multiple cards on a customer in order to charge the customer later.
+(Source: https://stripe.com/docs/api/python#cards)
 
-    # = Mapping the values of this field isn't currently on our roadmap.
-        Please use the stripe dashboard to check the value of this field instead.
+# = Mapping the values of this field isn't currently on our roadmap.
+    Please use the stripe dashboard to check the value of this field instead.
 
-    Fields not implemented:
-    * object: Unnecessary. Just check the model name.
-    * recipient: On Stripe's deprecation path.
-    * account: #
-    * currency: #
-    * default_for_currency: #
+Fields not implemented:
 
-    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+* **object** –  Unnecessary. Just check the model name.
+* **recipient** –  On Stripe's deprecation path.
+* **account** –  #
+* **currency** –  #
+* **default_for_currency** –  #
+
+.. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     BRANDS = ["Visa", "American Express", "MasterCard", "Discover", "JCB", "Diners Club", "Unknown"]
@@ -1020,31 +1022,32 @@ class StripeCard(StripeSource):
 
 class StripeInvoice(StripeObject):
     """
-    Invoices are statements of what a customer owes for a particular billing period, including subscriptions,
-    invoice items, and any automatic proration adjustments if necessary.
+Invoices are statements of what a customer owes for a particular billing period, including subscriptions,
+invoice items, and any automatic proration adjustments if necessary.
 
-    Once an invoice is created, payment is automatically attempted. Note that the payment, while automatic,
-    does not happen exactly at the time of invoice creation. If you have configured webhooks, the invoice
-    will wait until one hour after the last webhook is successfully sent (or the last webhook times out after failing).
+Once an invoice is created, payment is automatically attempted. Note that the payment, while automatic,
+does not happen exactly at the time of invoice creation. If you have configured webhooks, the invoice
+will wait until one hour after the last webhook is successfully sent (or the last webhook times out after failing).
 
-    Any customer credit on the account is applied before determining how much is due for that invoice (the amount that
-    will be actually charged). If the amount due for the invoice is less than 50 cents (the minimum for a charge), we
-    add the amount to the customer's running account balance to be added to the next invoice. If this amount is negative,
-    it will act as a credit to offset the next invoice. Note that the customer account balance does not include unpaid
-    invoices; it only includes balances that need to be taken into account when calculating the amount due for the next invoice.
-    (Source: https://stripe.com/docs/api/python#invoices)
+Any customer credit on the account is applied before determining how much is due for that invoice (the amount that
+will be actually charged). If the amount due for the invoice is less than 50 cents (the minimum for a charge), we
+add the amount to the customer's running account balance to be added to the next invoice. If this amount is negative,
+it will act as a credit to offset the next invoice. Note that the customer account balance does not include unpaid
+invoices; it only includes balances that need to be taken into account when calculating the amount due for the next invoice.
+(Source: https://stripe.com/docs/api/python#invoices)
 
-    # = Mapping the values of this field isn't currently on our roadmap.
-        Please use the stripe dashboard to check the value of this field instead.
+# = Mapping the values of this field isn't currently on our roadmap.
+    Please use the stripe dashboard to check the value of this field instead.
 
-    Fields not implemented:
-    * object: Unnecessary. Just check the model name.
-    * discount: #
-    * lines: Unnecessary. Check Subscription and InvoiceItems directly.
-    * receipt_number: Unnecessary. Use the dashboard. Create a feature request if this is functionality you need.
-    * webhooks_delivered_at: Unnecessary. Create a feature request if this is functionality you need.
+Fields not implemented:
 
-    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+* **object** – Unnecessary. Just check the model name.
+* **discount** – #
+* **lines** – Unnecessary. Check Subscription and InvoiceItems directly.
+* **receipt_number** – Unnecessary. Use the dashboard. Create a feature request if this is functionality you need.
+* **webhooks_delivered_at** – Unnecessary. Create a feature request if this is functionality you need.
+
+.. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
@@ -1126,18 +1129,19 @@ class StripeInvoice(StripeObject):
 
 class StripeInvoiceItem(StripeObject):
     """
-    Sometimes you want to add a charge or credit to a customer but only actually charge the customer's
-    card at the end of a regular billing cycle. This is useful for combining several charges to
-    minimize per-transaction fees or having Stripe tabulate your usage-based billing totals.
-    (Source: https://stripe.com/docs/api/python#invoiceitems)
+Sometimes you want to add a charge or credit to a customer but only actually charge the customer's
+card at the end of a regular billing cycle. This is useful for combining several charges to
+minimize per-transaction fees or having Stripe tabulate your usage-based billing totals.
+(Source: https://stripe.com/docs/api/python#invoiceitems)
 
-    # = Mapping the values of this field isn't currently on our roadmap.
-        Please use the stripe dashboard to check the value of this field instead.
+# = Mapping the values of this field isn't currently on our roadmap.
+    Please use the stripe dashboard to check the value of this field instead.
 
-    Fields not implemented:
-    * object: Unnecessary. Just check the model name.
+Fields not implemented:
 
-    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+* **object** – Unnecessary. Just check the model name.
+
+.. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
@@ -1178,16 +1182,17 @@ class StripeInvoiceItem(StripeObject):
 
 class StripePlan(StripeObject):
     """
-    A subscription plan contains the pricing information for different products and feature levels on your site.
-    (Source: https://stripe.com/docs/api/python#plans)
+A subscription plan contains the pricing information for different products and feature levels on your site.
+(Source: https://stripe.com/docs/api/python#plans)
 
-    # = Mapping the values of this field isn't currently on our roadmap.
-        Please use the stripe dashboard to check the value of this field instead.
+# = Mapping the values of this field isn't currently on our roadmap.
+    Please use the stripe dashboard to check the value of this field instead.
 
-    Fields not implemented:
-    * object: Unnecessary. Just check the model name.
+Fields not implemented:
 
-    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+* **object** – Unnecessary. Just check the model name.
+
+.. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
@@ -1214,26 +1219,26 @@ class StripePlan(StripeObject):
 
 class StripeSubscription(StripeObject):
     """
-    Subscriptions allow you to charge a customer's card on a recurring basis. A subscription ties a
-    customer to a particular plan you've created.
+Subscriptions allow you to charge a customer's card on a recurring basis. A subscription ties a
+customer to a particular plan you've created.
 
-    A subscription still in its trial period is ``trialing`` and moves to ``active`` when the trial period is over.
-    When payment to renew the subscription fails, the subscription becomes ``past_due``. After Stripe has exhausted
-    all payment retry attempts, the subscription ends up with a status of either ``canceled`` or ``unpaid`` depending
-    on your retry settings. Note that when a subscription has a status of ``unpaid``, no subsequent invoices will be
-    attempted (invoices will be created, but then immediately automatically closed. Additionally, updating customer
-    card details will not lead to Stripe retrying the latest invoice.). After receiving updated card details from a
-    customer, you may choose to reopen and pay their closed invoices.
-    (Source: https://stripe.com/docs/api/python#subscriptions)
+A subscription still in its trial period is ``trialing`` and moves to ``active`` when the trial period is over.
+When payment to renew the subscription fails, the subscription becomes ``past_due``. After Stripe has exhausted
+all payment retry attempts, the subscription ends up with a status of either ``canceled`` or ``unpaid`` depending
+on your retry settings. Note that when a subscription has a status of ``unpaid``, no subsequent invoices will be
+attempted (invoices will be created, but then immediately automatically closed. Additionally, updating customer
+card details will not lead to Stripe retrying the latest invoice.). After receiving updated card details from a
+customer, you may choose to reopen and pay their closed invoices.
+(Source: https://stripe.com/docs/api/python#subscriptions)
 
-    # = Mapping the values of this field isn't currently on our roadmap.
-        Please use the stripe dashboard to check the value of this field instead.
+# = Mapping the values of this field isn't currently on our roadmap.
+    Please use the stripe dashboard to check the value of this field instead.
 
-    Fields not implemented:
-    * object: Unnecessary. Just check the model name.
-    * discount: #
+Fields not implemented:
+* **object** – Unnecessary. Just check the model name.
+* **discount** – #
 
-    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+.. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:

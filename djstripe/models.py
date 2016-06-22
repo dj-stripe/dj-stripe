@@ -11,7 +11,7 @@ from django.db import models
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
-from doc_inherit import method_doc_inherit
+from doc_inherit import class_doc_inherit
 from model_utils.models import TimeStampedModel
 from stripe.error import StripeError, InvalidRequestError
 
@@ -34,6 +34,8 @@ logger = logging.getLogger(__name__)
 #                               Core Resources                                 #
 # ============================================================================ #
 
+
+@class_doc_inherit
 class Charge(StripeCharge):
     __doc__ = getattr(StripeCharge, "__doc__")
 
@@ -48,12 +50,10 @@ class Charge(StripeCharge):
 
     objects = ChargeManager()
 
-    @method_doc_inherit
     def refund(self, amount=None, reason=None):
         refunded_charge = super(Charge, self).refund(amount, reason)
         return Charge.sync_from_stripe_data(refunded_charge)
 
-    @method_doc_inherit
     def capture(self):
         captured_charge = super(Charge, self).capture()
         return Charge.sync_from_stripe_data(captured_charge)
@@ -104,6 +104,7 @@ class Charge(StripeCharge):
             self.source = cls._stripe_object_to_source(target_cls=Card, data=data)
 
 
+@class_doc_inherit
 class Customer(StripeCustomer):
     doc = """
 
@@ -119,7 +120,6 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
     subscriber = models.OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
     date_purged = models.DateTimeField(null=True, editable=False)
 
-    @method_doc_inherit
     def str_parts(self):
         return [smart_text(self.subscriber), "email={email}".format(email=self.subscriber.email)] + super(Customer, self).str_parts()
 
@@ -151,7 +151,6 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
         return customer
 
-    @method_doc_inherit
     def purge(self):
         try:
             self._api_delete()
@@ -253,7 +252,6 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
             raise MultipleSubscriptionException("This customer has multiple subscriptions. Use Customer.subscriptions to access them.")
 
     # TODO: Accept a coupon object when coupons are implemented
-    @method_doc_inherit
     def subscribe(self, plan, charge_immediately=True, **kwargs):
         # Convert Plan to stripe_id
         if isinstance(plan, Plan):
@@ -271,7 +269,6 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
         return self.has_valid_source() and self.date_purged is None
 
-    @method_doc_inherit
     def charge(self, amount, currency="usd", send_receipt=None, **kwargs):
         if send_receipt is None:
             send_receipt = getattr(settings, 'DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS', True)
@@ -284,7 +281,6 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
         return charge
 
-    @method_doc_inherit
     def add_invoice_item(self, amount, currency, **kwargs):
         # Convert Invoice to stripe_id
         if "invoice" in kwargs and isinstance(kwargs["invoice"], Invoice):
@@ -328,7 +324,6 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
         return self.default_source is not None
 
-    @method_doc_inherit
     def add_card(self, source, set_default=True):
         new_stripe_card = super(Customer, self).add_card(source, set_default)
         new_card = Card.sync_from_stripe_data(new_stripe_card)
@@ -359,7 +354,10 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
             Subscription.sync_from_stripe_data(stripe_subscription)
 
 
+@class_doc_inherit
 class Event(StripeEvent):
+    __doc__ = getattr(StripeEvent, "__doc__")
+
     # account = models.ForeignKey(Account, related_name="events")
 
     customer = models.ForeignKey("Customer", null=True,
@@ -377,6 +375,8 @@ class Event(StripeEvent):
 
     @property
     def message(self):
+        """ The event's data if the event is valid, None otherwise."""
+
         return self.webhook_message if self.valid else None
 
     def validate(self):
@@ -410,7 +410,7 @@ class Event(StripeEvent):
                 # even if we rollback on our database, some updates may have been sent to Stripe, etc in resposne to
                 # webhooks...
                 webhooks.call_handlers(self, self.message, event_type, event_subtype)
-                self.send_signal()
+                self._send_signal()
                 self.processed = True
                 self.save()
             except StripeError as exc:
@@ -427,13 +427,16 @@ class Event(StripeEvent):
                     exception=exc
                 )
 
-    def send_signal(self):
+    def _send_signal(self):
         signal = WEBHOOK_SIGNALS.get(self.type)
         if signal:
             return signal.send(sender=Event, event=self)
 
 
+@class_doc_inherit
 class Transfer(StripeTransfer):
+    __doc__ = getattr(StripeTransfer, "__doc__")
+
     # account = models.ForeignKey("Account", related_name="transfers")
 
     objects = TransferManager()
@@ -451,7 +454,10 @@ class Account(StripeAccount):
 #                               Payment Methods                                #
 # ============================================================================ #
 
+@class_doc_inherit
 class Card(StripeCard):
+    __doc__ = getattr(StripeCard, "__doc__")
+
     # account = models.ForeignKey("Account", null=True, related_name="cards")
 
     def _attach_objects_hook(self, cls, data):
@@ -483,7 +489,10 @@ class Card(StripeCard):
 # ============================================================================ #
 
 
+@class_doc_inherit
 class Invoice(StripeInvoice):
+    __doc__ = getattr(StripeInvoice, "__doc__")
+
     # account = models.ForeignKey("Account", related_name="invoices")
     customer = models.ForeignKey(Customer, related_name="invoices", help_text="The customer associated with this invoice.")
     charge = models.OneToOneField(Charge, null=True, related_name="invoice", help_text="The latest charge generated for this invoice, if any.")
@@ -507,7 +516,10 @@ class Invoice(StripeInvoice):
             self.subscription = subscription
 
 
+@class_doc_inherit
 class InvoiceItem(StripeInvoiceItem):
+    __doc__ = getattr(StripeInvoiceItem, "__doc__")
+
     # account = models.ForeignKey(Account, related_name="invoiceitems")
     customer = models.ForeignKey(Customer, related_name="invoiceitems", help_text="The customer associated with this invoiceitem.")
     invoice = models.ForeignKey(Invoice, related_name="invoiceitems", help_text="The invoice to which this invoiceitem is attached.")
@@ -527,7 +539,10 @@ class InvoiceItem(StripeInvoiceItem):
             self.subscription = subscription
 
 
+@class_doc_inherit
 class Plan(StripePlan):
+    __doc__ = getattr(StripePlan, "__doc__")
+
     # account = models.ForeignKey("Account", related_name="plans")
 
     class Meta(object):
@@ -535,6 +550,8 @@ class Plan(StripePlan):
 
     @classmethod
     def get_or_create(cls, **kwargs):
+        """ Get or create a Plan."""
+
         try:
             return Plan.objects.get(stripe_id=kwargs['stripe_id']), False
         except Plan.DoesNotExist:
@@ -572,7 +589,10 @@ class Plan(StripePlan):
         self.save()
 
 
+@class_doc_inherit
 class Subscription(StripeSubscription):
+    __doc__ = getattr(StripeSubscription, "__doc__")
+
     # account = models.ForeignKey("Account", related_name="subscriptions")
     customer = models.ForeignKey("Customer", related_name="subscriptions", help_text="The customer associated with this subscription.")
     plan = models.ForeignKey("Plan", related_name="subscriptions", help_text="The plan associated with this subscription.")
