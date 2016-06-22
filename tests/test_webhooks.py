@@ -103,3 +103,15 @@ class TestWebhookHandlers(TestCase):
         self.assertEqual(2, global_func_mock.call_count)  # called each time
         self.assertEqual(1, func_mock.call_count)
         func_mock.assert_called_with(ANY, ANY, 'foo', 'bar')
+
+    def test_global_handler_registration_with_function(self):
+        func_mock = Mock()
+        handler_all(func_mock)
+        call_handlers(Mock(), {'data': 'foo'}, 'wib', 'ble')  # handled
+        self.assertEqual(1, func_mock.call_count)
+
+    def test_event_handle_registation_with_string(self):
+        func_mock = Mock()
+        handler('foo')(func_mock)
+        call_handlers(Mock(), {'data': 'foo'}, 'foo', 'bar')  # handled
+        self.assertEqual(1, func_mock.call_count)
