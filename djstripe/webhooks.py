@@ -24,6 +24,9 @@ There is also a "global registry" which is just a list of processors (as defined
 NOTE: global processors are called before other processors
 """
 from collections import defaultdict
+from django.utils import six
+import functools
+import itertools
 
 __all__ = ['handler', 'handler_all', 'call_handlers']
 
@@ -37,23 +40,33 @@ def handler(event_types):
     Decorator which registers a function as a webhook handler for the given
     types of webhook events
     """
-    def decorator(f):
+    if isinstance(event_types, six.string_types):
+        event_types = [event_types]
+
+    def decorator(func):
         for event_type in event_types:
-            registrations[event_type].append(f)
-        return f
+            registrations[event_type].append(func)
+        return func
 
     return decorator
 
 
-def handler_all(f):
+def handler_all(func=None):
     """
     Decorator which registers a function as a webhook handler for ALL webhook
     events
     """
-    registrations_global.append(f)
-    return f
+    if not func:
+        return functools.partial(handler_all)
+
+    registrations_global.append(func)
+    return func
 
 
 def call_handlers(event, event_data, event_type, event_subtype):
-    for handler_func in registrations_global + registrations[event_type]:
+    qualified_event_type = "%s.%s" % (event_type, event_subtype)
+    for handler_func in itertools.chain(
+            registrations_global,
+            registrations[event_type],
+            registrations[qualified_event_type]):
         handler_func(event, event_data, event_type, event_subtype)
