@@ -320,16 +320,16 @@ are identified by a unique random ID. (Source: https://stripe.com/docs/api/pytho
 
 Fields not implemented:
 
-* **object** – Unnecessary. Just check the model name.
-* **application_fee** – #. Coming soon with stripe connect functionality
-* **balance_transaction** – #
-* **dispute** – #; Mapped to a ``disputed`` boolean.
-* **fraud_details** – Mapped to a ``fraudulent`` boolean.
-* **order** – #
-* **receipt_email** – Unnecessary. Use Customer.email. Create a feature request if this is functionality you need.
-* **receipt_number** – Unnecessary. Use the dashboard. Create a feature request if this is functionality you need.
-* **refunds** – #
-* **source_transfer** – #
+* **object** - Unnecessary. Just check the model name.
+* **application_fee** - #. Coming soon with stripe connect functionality
+* **balance_transaction** - #
+* **dispute** - #; Mapped to a ``disputed`` boolean.
+* **fraud_details** - Mapped to a ``fraudulent`` boolean.
+* **order** - #
+* **receipt_email** - Unnecessary. Use Customer.email. Create a feature request if this is functionality you need.
+* **receipt_number** - Unnecessary. Use the dashboard. Create a feature request if this is functionality you need.
+* **refunds** - #
+* **source_transfer** - #
 
 .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
@@ -456,9 +456,9 @@ associated with the same customer. (Source: https://stripe.com/docs/api/python#c
 
 Fields not implemented:
 
-* **object** – Unnecessary. Just check the model name.
-* **discount** – #
-* **email** – Unnecessary. Use ``Customer.subscriber.email``.
+* **object** - Unnecessary. Just check the model name.
+* **discount** - #
+* **email** - Unnecessary. Use ``Customer.subscriber.email``.
 
 .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
@@ -506,7 +506,7 @@ Fields not implemented:
 
         Parameters not implemented:
 
-        * **source** – Subscriptions use the customer's default source. Including the source parameter creates \
+        * **source** - Subscriptions use the customer's default source. Including the source parameter creates \
                   a new source for this customer and overrides the default source. This functionality is not \
                   desired; add a source to the customer before attempting to add a subscription. \
 
@@ -563,7 +563,7 @@ Fields not implemented:
 
         Parameters not implemented:
 
-        * **receipt_email** – Since this is a charge on a customer, the customer's email address is used.
+        * **receipt_email** - Since this is a charge on a customer, the customer's email address is used.
 
 
         :param amount: The amount to charge.
@@ -720,8 +720,8 @@ is:
 
 Fields not implemented:
 
-* **object** – Unnecessary. Just check the model name.
-* **pending_webhooks** – Unnecessary. Use the dashboard.
+* **object** - Unnecessary. Just check the model name.
+* **pending_webhooks** - Unnecessary. Use the dashboard.
 
 .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
@@ -762,10 +762,10 @@ connected Stripe account, a transfer object will be created.
 
 Fields not implemented:
 
-* **object** – Unnecessary. Just check the model name.
-* **application_fee** – #
-* **balance_transaction** – #
-* **reversals** – #
+* **object** - Unnecessary. Just check the model name.
+* **application_fee** - #
+* **balance_transaction** - #
+* **reversals** - #
 
 .. TODO: Link destination to Card, Account, or Bank Account Models
 
@@ -881,11 +881,11 @@ You can store multiple cards on a customer in order to charge the customer later
 
 Fields not implemented:
 
-* **object** –  Unnecessary. Just check the model name.
-* **recipient** –  On Stripe's deprecation path.
-* **account** –  #
-* **currency** –  #
-* **default_for_currency** –  #
+* **object** -  Unnecessary. Just check the model name.
+* **recipient** -  On Stripe's deprecation path.
+* **account** -  #
+* **currency** -  #
+* **default_for_currency** -  #
 
 .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
@@ -1041,11 +1041,11 @@ invoices; it only includes balances that need to be taken into account when calc
 
 Fields not implemented:
 
-* **object** – Unnecessary. Just check the model name.
-* **discount** – #
-* **lines** – Unnecessary. Check Subscription and InvoiceItems directly.
-* **receipt_number** – Unnecessary. Use the dashboard. Create a feature request if this is functionality you need.
-* **webhooks_delivered_at** – Unnecessary. Create a feature request if this is functionality you need.
+* **object** - Unnecessary. Just check the model name.
+* **discount** - #
+* **lines** - Unnecessary. Check Subscription and InvoiceItems directly.
+* **receipt_number** - Unnecessary. Use the dashboard. Create a feature request if this is functionality you need.
+* **webhooks_delivered_at** - Unnecessary. Create a feature request if this is functionality you need.
 
 .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
@@ -1139,7 +1139,7 @@ minimize per-transaction fees or having Stripe tabulate your usage-based billing
 
 Fields not implemented:
 
-* **object** – Unnecessary. Just check the model name.
+* **object** - Unnecessary. Just check the model name.
 
 .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
@@ -1190,7 +1190,7 @@ A subscription plan contains the pricing information for different products and 
 
 Fields not implemented:
 
-* **object** – Unnecessary. Just check the model name.
+* **object** - Unnecessary. Just check the model name.
 
 .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
@@ -1235,8 +1235,8 @@ customer, you may choose to reopen and pay their closed invoices.
     Please use the stripe dashboard to check the value of this field instead.
 
 Fields not implemented:
-* **object** – Unnecessary. Just check the model name.
-* **discount** – #
+* **object** - Unnecessary. Just check the model name.
+* **discount** - #
 
 .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
