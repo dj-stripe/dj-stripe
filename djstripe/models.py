@@ -600,20 +600,30 @@ class Subscription(StripeSubscription):
     objects = SubscriptionManager()
 
     def is_period_current(self):
+        """ Returns True if this subscription's period is current, false otherwise."""
+
         return self.current_period_end > timezone.now() or (self.trial_end and self.trial_end > timezone.now())
 
     def is_status_current(self):
+        """ Returns True if this subscription's status is current (active or trialing), false otherwise."""
+
         return self.status in ["trialing", "active"]
 
     def is_status_temporarily_current(self):
         """
-        Status when customer canceled their latest subscription, one that does not prorate,
-        and therefore has a temporary active subscription until period end.
+        A status is temporarily current when the subscription is canceled with the ``at_period_end`` flag.
+        The subscription is still active, but is technically canceled and we're just waiting for it to run out.
+
+        You could use this method to give customers limited service after they've canceled. For example, a video
+        on demand service could only allow customers to download their libraries  and do nothing else when their
+        subscription is temporarily current.
         """
 
         return self.canceled_at and self.start < self.canceled_at and self.cancel_at_period_end
 
     def is_valid(self):
+        """ Returns True if this subscription's status and period are current, false otherwise."""
+
         if not self.is_status_current():
             return False
 
@@ -623,15 +633,6 @@ class Subscription(StripeSubscription):
         return True
 
     def update(self, prorate=djstripe_settings.PRORATION_POLICY, **kwargs):
-        """
-        See StripeSubscription.update()
-
-        :param plan: The plan to which to subscribe the customer.
-        :type plan: Plan or string (plan ID)
-
-        Note: The default value for prorate is overridden by the DJSTRIPE_PRORATION_POLICY setting.
-        """
-
         # Convert Plan to stripe_id
         if "plan" in kwargs and isinstance(kwargs["plan"], Plan):
             kwargs.update({"plan": kwargs["plan"].stripe_id})
@@ -644,13 +645,6 @@ class Subscription(StripeSubscription):
         return Subscription.sync_from_stripe_data(stripe_subscription)
 
     def cancel(self, at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END):
-        """
-        See StripeSubscription.cancel()
-
-        NOTE: If a subscription is cancelled during a trial period, the ``at_period_end`` flag will be
-        overridden to False so that the trial ends immediately and the customer's card isn't charged.
-        """
-
         # If plan has trial days and customer cancels before trial period ends, then end subscription now, i.e. at_period_end=False
         if self.trial_end and self.trial_end > timezone.now():
             at_period_end = False

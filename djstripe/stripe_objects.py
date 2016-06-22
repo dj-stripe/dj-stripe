@@ -1235,6 +1235,7 @@ customer, you may choose to reopen and pay their closed invoices.
     Please use the stripe dashboard to check the value of this field instead.
 
 Fields not implemented:
+
 * **object** - Unnecessary. Just check the model name.
 * **discount** - #
 
@@ -1295,8 +1296,10 @@ Fields not implemented:
     def update(self, plan=None, application_fee_percent=None, coupon=None, prorate=None, proration_date=None,
                metadata=None, quantity=None, tax_percent=None, trial_end=None):
         """
-        See StripeCustomer.subscribe()
+        See `Customer.subscribe() <#djstripe.models.Customer.subscribe>`__
 
+        :param plan: The plan to which to subscribe the customer.
+        :type plan: Plan or string (plan ID)
         :param prorate: Whether or not to prorate when switching plans. Default is True.
         :type prorate: boolean
         :param proration_date: If set, the proration will be calculated as though the subscription was updated at the given time.
@@ -1305,7 +1308,12 @@ Fields not implemented:
                                by providing the time that you wish to use for proration calculations.
         :type proration_date: datetime
 
-        **Updating a subscription by changing the plan or quantity generates a new Subscription object.**
+        .. note:: The default value for ``prorate`` is overridden by the DJSTRIPE_PRORATION_POLICY setting.
+
+        .. important:: Updating a subscription by changing the plan or quantity creates a new ``Subscription`` in Stripe (and dj-stripe).
+
+        .. Notes:
+        .. if you're using ``StripeSubscription.update()`` instead of ``Subscription.update()``, ``plan`` can only be a string
         """
 
         kwargs = deepcopy(locals())
@@ -1356,6 +1364,9 @@ Fields not implemented:
 
         :param at_period_end: A flag that if set to true will delay the cancellation of the subscription until the end of the current period. Default is False.
         :type at_period_end: boolean
+
+        .. important:: If a subscription is cancelled during a trial period, the ``at_period_end`` flag will be \
+        overridden to False so that the trial ends immediately and the customer's card isn't charged.
 
         """
 
