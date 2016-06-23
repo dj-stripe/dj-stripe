@@ -151,4 +151,3 @@ class InvoiceTest(TestCase):
         invoice = Invoice.sync_from_stripe_data(invoice_data)
 
         self.assertEqual(None, invoice.subscription)
-
