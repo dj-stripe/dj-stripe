@@ -1,4 +1,13 @@
 # -*- coding: utf-8 -*-
+"""
+.. module:: djstripe.admin
+   :synopsis: dj-stripe - Django Administration interface definitions
+
+.. moduleauthor:: Daniel Greenfeld (@pydanny)
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
+.. moduleauthor:: Lee Skillen (@lskillen)
+
+"""
 
 from django.contrib import admin
 
@@ -116,6 +125,31 @@ admin.site.register(
     ],
 )
 
+
+def reprocess_events(modeladmin, request, queryset):
+    """ Re-processes the selected webhook events.
+
+    Note that this isn't idempotent, so any side-effects that are produced from
+    the event being handled will be multiplied (for example, an event handler
+    that sends emails will send duplicates; an event handler that adds 1 to a
+    total count will be a count higher than it was, etc.)
+
+    There aren't any event handlers with adverse side-effects built within
+    dj-stripe, but there might be within your own event handlers, third-party
+    plugins, contrib code, etc.
+    """
+    processed = 0
+    for event in queryset:
+        if event.process(force=True):
+            processed += 1
+
+    modeladmin.message_user(
+        request,
+        "{processed}/{total} event(s) successfully re-processed.".format(
+            processed=processed, total=queryset.count()))
+reprocess_events.short_description = "Re-process selected webhook events"
+
+
 admin.site.register(
     Event,
     raw_id_fields=["customer"],
@@ -137,6 +171,9 @@ admin.site.register(
         "stripe_id",
         "customer__stripe_id",
         "validated_message"
+    ],
+    actions=[
+        reprocess_events
     ],
 )
 
