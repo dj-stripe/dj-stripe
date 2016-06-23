@@ -4,6 +4,7 @@
    :synopsis: dj-stripe - Utils related to processing or registering for webhooks
 
 .. moduleauthor:: Bill Huneke (@wahuneke)
+.. moduleauthor:: Lee Skillen (@lskillen)
 
 A model registers itself here if it wants to be in the list of processing
 functions for a particular webhook. Each processor will have the ability
@@ -94,7 +95,10 @@ def call_handlers(event, event_data, event_type, event_subtype):
     :param event_subtype: The event sub-type, e.g. 'updated'.
     :type event_subtype: string (`str`/`unicode`)
     """
-    qualified_event_type = "%s.%s" % (event_type, event_subtype)
+    qualified_event_type = (
+        "{event_type}.{event_subtype}".format(
+            event_type=event_type, event_subtype=event_subtype))
+
     for handler_func in itertools.chain(
             registrations_global,
             registrations[event_type],

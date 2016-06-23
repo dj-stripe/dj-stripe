@@ -3,6 +3,7 @@
    :synopsis: dj-stripe Webhook Tests.
 
 .. moduleauthor:: Alex Kavanaugh (@kavdev)
+.. moduleauthor:: Lee Skillen (@lskillen)
 
 """
 
