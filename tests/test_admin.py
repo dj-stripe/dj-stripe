@@ -11,11 +11,11 @@ from copy import deepcopy
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from mock import patch
+from mock import Mock, patch
 import six
 
-from djstripe.admin import subscription_status
-from djstripe.models import Customer, Subscription
+from djstripe.admin import reprocess_events, subscription_status
+from djstripe.models import Customer, Event, Subscription
 from tests import FAKE_CUSTOMER, FAKE_PLAN, FAKE_SUBSCRIPTION
 
 
@@ -51,3 +51,27 @@ class TestAdminSite(TestCase):
         customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
 
         self.assertEqual("", subscription_status(customer))
+
+
+class TestAdminReprocessEvents(TestCase):
+
+    def test_reprocess_events(self):
+        event1 = Mock(spec=Event)
+        event1.process.return_value = True  # processed
+        event2 = Mock(spec=Event)
+        event2.process.return_value = False  # not processed
+        events = [event1, event2]
+
+        modeladmin_mock = Mock()
+        request_mock = Mock()
+        queryset = Mock()
+        queryset.__iter__ = Mock(return_value=iter(events))
+        queryset.count.return_value = len(events)
+        reprocess_events(modeladmin_mock, request_mock, queryset)
+
+        event1.process.assert_called_with(force=True)
+        event2.process.assert_called_with(force=True)
+
+        modeladmin_mock.message_user.assert_called_with(
+            request_mock,
+            "1/2 event(s) successfully re-processed.")

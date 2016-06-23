@@ -392,16 +392,25 @@ class Event(StripeEvent):
         self.valid = self.webhook_message == self.api_retrieve()["data"]
         self.save()
 
-    def process(self):
+    def process(self, force=False):
         """
-        Call whatever webhook event handlers have registered for this event, based on event "type" and
-        event "sub type"
+        Invokes any webhook handlers that have been registered for this event
+        based on event type or event sub-type.
 
-        See event handlers registered in djstripe.event_handlers module (or handlers registered in djstripe plugins or
-        contrib packages)
+        See event handlers registered in the ``djstripe.event_handlers`` module
+        (or handlers registered in djstripe plugins or contrib packages).
+
+        :param force: If True, force the event to be processed by webhook
+        handlers, even if the event has already been processed previously.
+        :type force: bool
+        :returns: True if the webhook was processed successfully or was
+        previously processed successfully.
+        :rtype: bool
         """
+        if not self.valid:
+            return False
 
-        if self.valid and not self.processed:
+        if not self.processed or force:
             event_type, event_subtype = self.type.split(".", 1)
 
             try:
@@ -412,10 +421,10 @@ class Event(StripeEvent):
                 webhooks.call_handlers(self, self.message, event_type, event_subtype)
                 self._send_signal()
                 self.processed = True
-                self.save()
             except StripeError as exc:
                 # TODO: What if we caught all exceptions or a broader range of exceptions here? How about DoesNotExist
                 # exceptions, for instance? or how about TypeErrors, KeyErrors, ValueErrors, etc?
+                self.processed = False
                 EventProcessingException.log(
                     data=exc.http_body,
                     exception=exc,
@@ -426,6 +435,13 @@ class Event(StripeEvent):
                     data=exc.http_body,
                     exception=exc
                 )
+
+            # Saving here now because a previously processed webhook may no
+            # longer be processsed successfully if a re-process was forced but
+            # an event handle was broken.
+            self.save()
+
+        return self.processed
 
     def _send_signal(self):
         signal = WEBHOOK_SIGNALS.get(self.type)
