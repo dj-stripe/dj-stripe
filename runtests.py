@@ -17,6 +17,7 @@ def main():
     parser.add_argument("--skip-utc", action="store_true", help="Skip any tests that require the system timezone to be in UTC.")
     parser.add_argument("--no-coverage", action="store_true", help="Disable checking for 100% code coverage (Not advised).")
     parser.add_argument("--no-pep8", action="store_true", help="Disable checking for pep8 errors (Not advised).")
+    parser.add_argument("tests", nargs='*', default=['.'])
     args = parser.parse_args()
 
     run_test_suite(args)
@@ -26,6 +27,7 @@ def run_test_suite(args):
     skip_utc = args.skip_utc
     enable_coverage = not args.no_coverage
     enable_pep8 = not args.no_pep8
+    tests = args.tests
 
     if enable_coverage:
         cov = Coverage(config_file=True)
@@ -181,7 +183,7 @@ def run_test_suite(args):
     from django_nose import NoseTestSuiteRunner
 
     test_runner = NoseTestSuiteRunner(verbosity=1)
-    failures = test_runner.run_tests(["."])
+    failures = test_runner.run_tests(tests)
 
     if failures:
         sys.exit(failures)

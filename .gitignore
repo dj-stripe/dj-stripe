@@ -47,3 +47,6 @@ htmlcov
 
 # OSX
 .DS_Store
+
+# Virtualenv
+.venv

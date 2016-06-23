@@ -14,7 +14,7 @@ from copy import deepcopy
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.utils import timezone
-from mock import patch, PropertyMock
+from mock import patch
 from rest_framework import status
 from rest_framework.test import APITestCase
 
