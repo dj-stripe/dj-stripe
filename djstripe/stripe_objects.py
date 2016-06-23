@@ -5,6 +5,7 @@
 
 .. moduleauthor:: Bill Huneke (@wahuneke)
 .. moduleauthor:: Alex Kavanaugh (@kavdev)
+.. moduleauthor:: Lee Skillen (@lskillen)
 
 This module is an effort to isolate (as much as possible) the API dependent code in one
 place. Primarily this is:
@@ -19,14 +20,16 @@ dj-stripe functionality.
 
 from copy import deepcopy
 import decimal
+import sys
 
 from django.conf import settings
 from django.db import models
-from django.utils import timezone
+from django.utils import six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from model_utils.models import TimeStampedModel
 from polymorphic.models import PolymorphicModel
 import stripe
+from stripe.error import InvalidRequestError
 
 from djstripe.exceptions import CustomerDoesNotExistLocallyException
 
@@ -178,28 +181,47 @@ class StripeObject(TimeStampedModel):
         pass
 
     @classmethod
-    def _create_from_stripe_object(cls, data):
+    def _create_from_stripe_object(cls, data, save=True):
         """
-        Create a model instance using the given data object from Stripe
+        Instantiates a model instance using the provided data object received
+        from Stripe, and saves it to the database if specified.
+        :param data: The data dictionary received from the Stripe API.
         :type data: dict
+        :param save: If True, the object is saved after instantiation.
+        :type save: bool
+        :returns: The instantiated object.
         """
         instance = cls(**cls._stripe_object_to_record(data))
         instance._attach_objects_hook(cls, data)
-        instance.save()
-
+        if save:
+            instance.save()
         return instance
 
     @classmethod
-    def _get_or_create_from_stripe_object(cls, data, field_name="id"):
+    def _get_or_create_from_stripe_object(cls, data, field_name="id",
+                                          refetch=True, save=True):
+        field = data.get(field_name)
+
+        if isinstance(field, six.string_types):
+            # A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}
+            stripe_id = field
+        elif field:
+            # A field like {"subscription": {"id": sub_6lsC8pt7IcFpjA", ...}}
+            data = field
+            stripe_id = field.get("id")
+        else:
+            # An empty field - We need to return nothing here because there is
+            # no way of knowing what needs to be fetched!
+            return None, False
+
         try:
-            return cls.stripe_objects.get_by_json(data, field_name), False
+            return cls.stripe_objects.get(stripe_id=stripe_id), False
         except cls.DoesNotExist:
-            # Grab the stripe data for a nested object
-            if field_name != "id":
-                cls_instance = cls(stripe_id=data[field_name])
+            if refetch and field_name != "id":
+                cls_instance = cls(stripe_id=stripe_id)
                 data = cls_instance.api_retrieve()
 
-            return cls._create_from_stripe_object(data), True
+        return cls._create_from_stripe_object(data, save=save), True
 
     @classmethod
     def _stripe_object_to_customer(cls, target_cls, data):
@@ -260,6 +282,54 @@ class StripeObject(TimeStampedModel):
         """
 
         return target_cls._get_or_create_from_stripe_object(data, "invoice")[0]
+
+    @classmethod
+    def _stripe_object_to_invoice_items(cls, target_cls, data, invoice):
+        """
+        Retrieves InvoiceItems for an invoice.
+
+        If the invoice item doesn't exist already then it is created.
+
+        If the invoice is an upcoming invoice that doesn't persist to the
+        database (i.e. ephermeral) then the invoice items are also not saved.
+
+        :param target_cls: The target class to instantiate per invoice item.
+        :type target_cls: ``StripeInvoiceItem``
+        :param data: The data dictionary received from the Stripe API.
+        :type data: dict
+        """
+        lines = data.get("lines")
+        if not lines:
+            return []
+
+        items = []
+        for line in lines.get("data", []):
+            if invoice.stripe_id:
+                save = True
+                line.setdefault("invoice", invoice.stripe_id)
+
+                if line.get("type") == "subscription":
+                    # Lines for subscriptions need to be keyed based on invoice and
+                    # subscription, because their id is *just* the subscription
+                    # when received from Stripe.  This means that future updates to
+                    # a subscription will change previously saved invoices - Doing
+                    # the composite key avoids this.
+                    if not line["id"].startswith(invoice.stripe_id):
+                        line["id"] = "{invoice_id}-{sub_id}".format(
+                            invoice_id=invoice.stripe_id,
+                            sub_id=line["id"])
+            else:
+                # Don't save invoice items for ephemeral invoices
+                save = False
+
+            line.setdefault("customer", invoice.customer.stripe_id)
+            line.setdefault("date", int(invoice.date.strftime("%s")))
+
+            item = target_cls._get_or_create_from_stripe_object(
+                line, refetch=False, save=save)[0]
+            items.append(item)
+
+        return items
 
     @classmethod
     def _stripe_object_to_subscription(cls, target_cls, data):
@@ -1096,6 +1166,61 @@ Fields not implemented:
 
         if "charge" in data and data["charge"]:
             return target_cls._get_or_create_from_stripe_object(data, "charge")[0]
+
+    @classmethod
+    def upcoming(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
+        """
+        Gets the upcoming preview invoice (singular) for a customer.
+
+        As per the Stripe docs: "At any time, you can preview the upcoming
+        invoice for a customer. This will show you all the charges that are
+        pending, including subscription renewal charges, invoice item charges,
+        etc. It will also show you any discount that is applicable to the
+        customer."
+
+        See for details: https://stripe.com/docs/api#upcoming_invoice
+
+        :param customer: The identifier of the customer whose upcoming invoice
+        you'd like to retrieve.
+        :param coupon: The code of the coupon to apply.
+        :param subscription: The identifier of the subscription to retrieve an
+        invoice for.
+        :param subscription_plan: If set, the invoice returned will preview
+        updating the subscription given to this plan, or creating a new
+        subscription to this plan if no subscription is given.
+        :param subscription_prorate: If previewing an update to a subscription,
+        this decides whether the preview will show the result of applying
+        prorations or not.
+        :param subscription_proration_date: f previewing an update to a
+        subscription, and doing proration, subscription_proration_date forces
+        the proration to be calculated as though the update was done at the
+        specified time.
+        :param subscription_quantity: If provided, the invoice returned will
+        preview updating or creating a subscription with that quantity.
+        :param subscription_trial_end: If provided, the invoice returned will
+        preview updating or creating a subscription with that trial end.
+        :returns: The upcoming preview invoice.
+        :rtype: ``djstripe.models.UpcomingInvoice``
+        """
+        from . models import Invoice, UpcomingInvoice
+        if not issubclass(cls, UpcomingInvoice):
+            if cls is Invoice:
+                cls = UpcomingInvoice
+            else:
+                assert False, (
+                    "Class argument needs to be derived from UpcomingInvoice")
+
+        try:
+            data = cls._api().upcoming(api_key=api_key, **kwargs)
+        except InvalidRequestError as ex:
+            if str(ex) != "Nothing to invoice for customer":
+                six.reraise(*sys.exc_info())
+            return
+
+        # Workaround for "id" being missing (upcoming invoices don't persist).
+        data["id"] = "upcoming"
+
+        return cls._create_from_stripe_object(data, save=False)
 
     def retry(self):
         """ Retry payment on this invoice if it isn't paid, closed, or forgiven."""

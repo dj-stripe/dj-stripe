@@ -22,6 +22,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from doc_inherit import class_doc_inherit
+from mock_django.query import QuerySetMock
 from model_utils.models import TimeStampedModel
 from stripe.error import StripeError, InvalidRequestError
 
@@ -541,6 +542,76 @@ class Invoice(StripeInvoice):
         if subscription:
             self.subscription = subscription
 
+        self._attach_invoice_items(cls, data)
+
+    def _attach_invoice_items(self, cls, data):
+        if not self.pk:
+            # InvoiceItems need a saved invoice because they're associated via
+            # a RelatedManager.  It might be better to make this pattern more
+            # generic with some sort-of _attach_objects_post_save_hook().
+            self.save()
+
+        cls._stripe_object_to_invoice_items(InvoiceItem, data, self)
+
+    @property
+    def plan(self):
+        """ Gets the associated plan for this invoice.
+
+        In order to provide a consistent view of invoices, it is necessary to
+        examine the invoice items for the associated subscription plan rather
+        than the top-level link.  The reason for this is that the subscription
+        plan when requested by the customer, but the invoice item plan will
+        remain the same.  This makes it difficult to work with an invoice
+        history if the plan is expected to remain consistent (e.g. for creating
+        downloadable invoices).
+
+        :returns: The associated plan for the invoice.
+        :rtype: ``djstripe.models.Plan``
+        """
+        for item in self.invoiceitems.all():
+            if item.plan:
+                return item.plan
+
+        if self.subscription:
+            return self.subscription.plan
+
+
+@class_doc_inherit
+class UpcomingInvoice(Invoice):
+    __doc__ = getattr(Invoice, "__doc__")
+
+    def __init__(self, *args, **kwargs):
+        super(UpcomingInvoice, self).__init__(*args, **kwargs)
+        self._items = []
+
+    def _attach_invoice_items(self, cls, data):
+        self._items = cls._stripe_object_to_invoice_items(InvoiceItem, data, self)
+
+    @property
+    def invoiceitems(self):
+        """ Gets the invoice items associated with this upcoming invoice.
+
+        This differs from normal (non-upcoming) invoices, in that upcoming
+        invoices are in-memory and do not persist to the database.  Therefore,
+        all of the data comes from the Stripe API itself.
+
+        Instead of returning a normal queryset for the invoiceitems, this will
+        return a mock of a queryset, but with the data fetched from Stripe - It
+        will act like a normal queryset, but mutation will silently fail.
+        """
+        return QuerySetMock(InvoiceItem, *self._items)
+
+    @property
+    def stripe_id(self):
+        return None
+
+    @stripe_id.setter
+    def stripe_id(self, value):
+        return  # noop
+
+    def save(self, *args, **kwargs):
+        return  # noop
+
 
 @class_doc_inherit
 class InvoiceItem(StripeInvoiceItem):
@@ -548,13 +619,17 @@ class InvoiceItem(StripeInvoiceItem):
 
     # account = models.ForeignKey(Account, related_name="invoiceitems")
     customer = models.ForeignKey(Customer, related_name="invoiceitems", help_text="The customer associated with this invoiceitem.")
-    invoice = models.ForeignKey(Invoice, related_name="invoiceitems", help_text="The invoice to which this invoiceitem is attached.")
+    invoice = models.ForeignKey(Invoice, null=True, related_name="invoiceitems", help_text="The invoice to which this invoiceitem is attached.")
     plan = models.ForeignKey("Plan", null=True, related_name="invoiceitems", help_text="If the invoice item is a proration, the plan of the subscription for which the proration was computed.")
     subscription = models.ForeignKey("Subscription", null=True, related_name="invoiceitems", help_text="The subscription that this invoice item has been created for, if any.")
 
     def _attach_objects_hook(self, cls, data):
-        self.customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
-        self.invoice = cls._stripe_object_to_invoice(target_cls=Invoice, data=data)
+        customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
+
+        invoice = cls._stripe_object_to_invoice(target_cls=Invoice, data=data)
+        if invoice:
+            self.invoice = invoice
+            customer = customer or invoice.customer
 
         plan = cls._stripe_object_to_plan(target_cls=Plan, data=data)
         if plan:
@@ -563,6 +638,9 @@ class InvoiceItem(StripeInvoiceItem):
         subscription = cls._stripe_object_to_subscription(target_cls=Subscription, data=data)
         if subscription:
             self.subscription = subscription
+            customer = customer or subscription.customer
+
+        self.customer = customer
 
 
 @class_doc_inherit
