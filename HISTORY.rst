@@ -10,8 +10,9 @@ History
 * Corrected and revised ANONYMOUS_USER_ERROR_MSG (Thanks @pydanny)
 * Added fnmatching to `SubscriptionPaymentMiddleware` (Thanks @pydanny)
 * `SubscriptionPaymentMiddleware.process_request()` functionality broken up into multiple methods, making local customizations easier (Thanks @pydanny)
-* runtests now accepts positional arguments for declaring which tests to run (Thanks @lskillen)
-* Fully qualified events are now supported by event handlers as strings e.g. 'customer.subscription.deleted' (Thanks @lskillen)
+* runtests now accepts positional arguments for declaring which tests to run (Thanks @lskillen) #315
+* Fully qualified events are now supported by event handlers as strings e.g. 'customer.subscription.deleted' (Thanks @lskillen) #317
+* It is now possible to reprocess events in both code and the admin interface (Thanks @lskillen) #318 
 
 0.8.0 (2015-12-30)
 ---------------------
