@@ -3,13 +3,15 @@
 History
 =======
 
-0.9.0 (2016-??-??)
+1.0.0 (2016-??-??)
 ---------------------
 * Charge receipts now take `DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS` into account (Thanks @r0fls)
 * Clarified/modified installation documentation (Thanks @pydanny)
 * Corrected and revised ANONYMOUS_USER_ERROR_MSG (Thanks @pydanny)
 * Added fnmatching to `SubscriptionPaymentMiddleware` (Thanks @pydanny)
 * `SubscriptionPaymentMiddleware.process_request()` functionality broken up into multiple methods, making local customizations easier (Thanks @pydanny)
+* runtests now accepts positional arguments for declaring which tests to run (Thanks @lskillen)
+* Fully qualified events are now supported by event handlers as strings e.g. 'customer.subscription.deleted' (Thanks @lskillen)
 
 0.8.0 (2015-12-30)
 ---------------------
