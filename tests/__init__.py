@@ -14,7 +14,6 @@ import calendar
 from copy import deepcopy
 from datetime import datetime
 
-from django.conf import settings
 from django.utils import timezone
 
 FUTURE_DATE = datetime(2100, 4, 30, tzinfo=timezone.utc)

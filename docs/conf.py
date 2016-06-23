@@ -29,7 +29,7 @@ cwd = os.getcwd()
 parent = os.path.dirname(cwd)
 sys.path.append(parent)
 
-import djstripe
+import djstripe  # noqa
 
 settings.configure(
     INSTALLED_APPS=[
