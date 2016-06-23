@@ -214,7 +214,7 @@ def run_test_suite(args):
         print("----------------------------------------------------------------------")
 
         from subprocess import call
-        flake_result = call(["flake8", ".", "--count", "--exclude", ".venv"])
+        flake_result = call(["flake8", ".", "--count"])
         if flake_result != 0:
             sys.stderr.write("pep8 errors detected.\n")
             sys.stderr.write(colored(text="\nYOUR CHANGES HAVE INTRODUCED PEP8 ERRORS!\n\n", color="red", attrs=["bold"]))
