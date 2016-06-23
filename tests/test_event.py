@@ -4,6 +4,7 @@
 
 .. moduleauthor:: Daniel Greenfeld (@pydanny)
 .. moduleauthor:: Alex Kavanaugh (@kavdev)
+.. moduleauthor:: Lee Skillen (@lskillen)
 
 """
 

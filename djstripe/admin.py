@@ -1,4 +1,13 @@
 # -*- coding: utf-8 -*-
+"""
+.. module:: djstripe.admin
+   :synopsis: dj-stripe - Django Administration interface definitions
+
+.. moduleauthor:: Daniel Greenfeld (@pydanny)
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
+.. moduleauthor:: Lee Skillen (@lskillen)
+
+"""
 
 from django.contrib import admin
 

@@ -3,6 +3,7 @@
    :synopsis: dj-stripe Admin Tests.
 
 .. moduleauthor:: Oleksandr (@nanvel)
+.. moduleauthor:: Lee Skillen (@lskillen)
 
 """
 

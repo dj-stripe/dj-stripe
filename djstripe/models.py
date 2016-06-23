@@ -1,4 +1,14 @@
 # -*- coding: utf-8 -*-
+"""
+.. module:: djstripe.models
+   :synopsis: dj-stripe - Django ORM model definitions
+
+.. moduleauthor:: Daniel Greenfeld (@pydanny)
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
+.. moduleauthor:: Lee Skillen (@lskillen)
+
+"""
+
 from __future__ import unicode_literals
 
 import logging
