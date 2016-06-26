@@ -99,7 +99,9 @@ class TestCustomer(TestCase):
         self.assertTrue(not customer.sources.all())
         self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
 
-        customer_retrieve_mock.assert_called_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=['default_source'])
+        customer_retrieve_mock.assert_called_with(
+            self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY,
+            expand=['default_source'])
         self.assertEquals(2, customer_retrieve_mock.call_count)
 
     @patch("stripe.Customer.retrieve")
@@ -109,7 +111,9 @@ class TestCustomer(TestCase):
         with self.assertRaisesMessage(InvalidRequestError, "Unexpected Exception"):
             self.customer.purge()
 
-        customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=['default_source'])
+        customer_retrieve_mock.assert_called_once_with(
+            self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY,
+            expand=['default_source'])
 
     def test_can_charge(self):
         self.assertTrue(self.customer.can_charge())
