@@ -38,10 +38,19 @@ class EventTest(TestCase):
         ), str(event))
 
     @patch('djstripe.models.EventProcessingException.log')
-    def test_stripe_error(self, event_exception_log_mock):
+    def test_process_event_with_log_stripe_error(self, event_exception_log_mock):
         event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
         self.call_handlers.side_effect = StripeError("Boom!")
         self.assertFalse(event.process())
+        self.assertTrue(event_exception_log_mock.called)
+        self.assertFalse(event.processed)
+
+    @patch('djstripe.models.EventProcessingException.log')
+    def test_process_event_with_raise_stripe_error(self, event_exception_log_mock):
+        event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
+        self.call_handlers.side_effect = StripeError("Boom!")
+        with self.assertRaises(StripeError):
+            event.process(raise_exception=True)
         self.assertTrue(event_exception_log_mock.called)
         self.assertFalse(event.processed)
 

@@ -222,7 +222,7 @@ DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK (=None)
 ==================================================
 
 If you choose to use a custom subscriber model, you'll need a way to pull it from ``request``. That's where this callback comes in.
-It must be a callable that takes a request object and returns an instance of DJSTRIPE_SUBSCRIBER_MODEL
+It must be a callable or importable string to a callable that takes a request object and returns an instance of DJSTRIPE_SUBSCRIBER_MODEL
 
 Examples:
 
@@ -263,7 +263,7 @@ DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK (=None)
 
 Used by ``djstripe.models.Customer`` only when creating stripe customers when you have a default plan set via ``DJSTRIPE_DEFAULT_PLAN``.
 
-This is called to dynamically add a trial period to a subscriber's plan. It must be a callable that takes a subscriber object and returns the number of days the trial period should last.
+This is called to dynamically add a trial period to a subscriber's plan. It must be a callable or importable string to a callable that takes a subscriber object and returns the number of days the trial period should last.
 
 Examples:
 
@@ -294,6 +294,48 @@ DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")
 This is where you can set *Stripe.com* to send webhook response. You can set this to what you want to prevent unnecessary hijinks from unfriendly people.
 
 As this is embedded in the URLConf, this must be a resolvable regular expression.
+
+DJSTRIPE_WEBHOOK_EVENT_CALLBACK (=None)
+=======================================
+
+Webhook event callbacks allow an application to take control of what happens when an event from Stripe is received.
+It must be a callable or importable string to a callable that takes an event object.
+
+One suggestion is to put the event onto a task queue (such as celery) for asynchronous processing.
+
+Examples:
+
+`callbacks.py`
+
+.. code-block:: python
+
+    def webhook_event_callback(event):
+        """ Dispatches the event to celery for processing. """
+        from . import tasks
+        # Ansychronous hand-off to celery so that we can continue immediately
+        tasks.process_webhook_event.s(event).apply_async()
+
+`tasks.py`
+
+.. code-block:: python
+
+    from djstripe.models import StripeError
+
+    @shared_task(bind=True)
+    def process_webhook_event(self, event):
+        """ Processes events from Stripe asynchronously. """
+        log.debug("Processing Stripe event: %s", str(event))
+        try:
+            event.process(raise_exception=True):
+        except StripeError as exc:
+            log.error("Failed to process Stripe event: %s", str(event))
+            raise self.retry(exc=exc, countdown=60)  # retry after 60 seconds
+
+`settings.py`
+
+.. code-block:: python
+
+    DJSTRIPE_WEBHOOK_EVENT_CALLBACK = 'callbacks.webhook_event_callback'
 
 DJSTRIPE_CURRENCIES (=(('usd', 'U.S. Dollars',), ('gbp', 'Pounds (GBP)',), ('eur', 'Euros',)))
 ==============================================================================================

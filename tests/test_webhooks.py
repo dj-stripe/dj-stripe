@@ -16,7 +16,7 @@ from django.test import TestCase
 from django.test.client import Client
 from mock import call, patch, Mock, PropertyMock, ANY
 
-from djstripe import webhooks
+from djstripe import views, webhooks
 from djstripe.models import Event, EventProcessingException
 from djstripe.webhooks import handler, handler_all, call_handlers
 from tests import FAKE_EVENT_TRANSFER_CREATED, FAKE_TRANSFER
@@ -37,6 +37,25 @@ class TestWebhook(TestCase):
         )
         self.assertEquals(resp.status_code, 200)
         self.assertTrue(Event.objects.filter(type="transfer.created").exists())
+
+    @patch.object(views, 'WEBHOOK_EVENT_CALLBACK',
+                  return_value=lambda event: event.process())
+    @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
+    @patch("stripe.Event.retrieve")
+    def test_webhook_with_custom_callback(self,
+            event_retrieve_mock, transfer_retrieve_mock,
+            webhook_event_callback_mock):
+        fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+        event_retrieve_mock.return_value = fake_event
+
+        resp = Client().post(
+            reverse("djstripe:webhook"),
+            json.dumps(fake_event),
+            content_type="application/json"
+        )
+        self.assertEquals(resp.status_code, 200)
+        event = Event.objects.get(type="transfer.created")
+        webhook_event_callback_mock.called_once_with(event)
 
     @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
     @patch("stripe.Event.retrieve")

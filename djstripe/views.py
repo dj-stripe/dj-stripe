@@ -17,7 +17,9 @@ from stripe.error import StripeError
 from .forms import PlanForm, CancelSubscriptionForm
 from .mixins import PaymentsContextMixin, SubscriptionMixin
 from .models import Customer, Event, EventProcessingException, Plan
-from .settings import PRORATION_POLICY_FOR_UPGRADES, subscriber_request_callback
+from .settings import (
+    PRORATION_POLICY_FOR_UPGRADES, WEBHOOK_EVENT_CALLBACK,
+    subscriber_request_callback)
 from .sync import sync_subscriber
 
 
@@ -244,5 +246,10 @@ class WebHook(CsrfExemptMixin, View):
         else:
             event = Event._create_from_stripe_object(data)
             event.validate()
-            event.process()
+
+            if WEBHOOK_EVENT_CALLBACK:
+                WEBHOOK_EVENT_CALLBACK(event)
+            else:
+                event.process()
+
         return HttpResponse()
