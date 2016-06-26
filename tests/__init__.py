@@ -1043,6 +1043,13 @@ FAKE_EVENT_CUSTOMER_CREATED = {
     "type": "customer.created",
 }
 
+FAKE_EVENT_CUSTOMER_DELETED = (
+    deepcopy(FAKE_EVENT_CUSTOMER_CREATED))
+FAKE_EVENT_CUSTOMER_DELETED.update({
+    "id": "evt_38DHch3whaDvKYlo2jksfsFFxy",
+    "type": "customer.deleted"
+})
+
 FAKE_EVENT_CUSTOMER_SOURCE_CREATED = {
     "id": "evt_DvKYlo38huDvKYlo2C7SXedrZk",
     "object": "event",
@@ -1056,6 +1063,19 @@ FAKE_EVENT_CUSTOMER_SOURCE_CREATED = {
     "request": "req_o3whaDvh3whaDj",
     "type": "customer.source.created",
 }
+
+FAKE_EVENT_CUSTOMER_SOURCE_DELETED = (
+    deepcopy(FAKE_EVENT_CUSTOMER_SOURCE_CREATED))
+FAKE_EVENT_CUSTOMER_SOURCE_DELETED.update({
+    "id": "evt_DvKYlo38huDvKYlo2C7SXedrYk",
+    "type": "customer.source.deleted"
+})
+
+FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE = (
+    deepcopy(FAKE_EVENT_CUSTOMER_SOURCE_DELETED))
+FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE.update({
+    "id": "evt_DvKYlo38huDvKYlo2C7SXedzAk",
+})
 
 FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED = {
     "id": "evt_38DHch3wHD2eZvKYlCT2oe5ff3",
@@ -1071,6 +1091,12 @@ FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED = {
     "type": "customer.subscription.created",
 }
 
+FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED = (
+    deepcopy(FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED))
+FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED.update({
+    "id": "evt_38DHch3wHD2eZvKYlCT2oeryaf",
+    "type": "customer.subscription.deleted"})
+
 FAKE_EVENT_INVOICE_CREATED = {
     "id": "evt_187IHD2eZvKYlo2C6YKQi2eZ",
     "object": "event",
@@ -1084,6 +1110,12 @@ FAKE_EVENT_INVOICE_CREATED = {
     "request": "req_8O4sB7hkDobVT",
     "type": "invoice.created",
 }
+
+FAKE_EVENT_INVOICE_DELETED = (
+    deepcopy(FAKE_EVENT_INVOICE_CREATED))
+FAKE_EVENT_INVOICE_DELETED.update({
+    "id": "evt_187IHD2eZvKYlo2Cjkjsr34H",
+    "type": "invoice.deleted"})
 
 FAKE_EVENT_INVOICEITEM_CREATED = {
     "id": "evt_187IHD2eZvKYlo2C7SXedrZk",
@@ -1099,6 +1131,12 @@ FAKE_EVENT_INVOICEITEM_CREATED = {
     "type": "invoiceitem.created",
 }
 
+FAKE_EVENT_INVOICEITEM_DELETED = (
+    deepcopy(FAKE_EVENT_INVOICEITEM_CREATED))
+FAKE_EVENT_INVOICEITEM_DELETED.update({
+    "id": "evt_187IHD2eZvKYloJfdsnnfs34",
+    "type": "invoiceitem.deleted"})
+
 FAKE_EVENT_PLAN_CREATED = {
     "id": "evt_1877X72eZvKYlo2CLK6daFxu",
     "object": "event",
@@ -1113,6 +1151,12 @@ FAKE_EVENT_PLAN_CREATED = {
     "type": "plan.created",
 }
 
+FAKE_EVENT_PLAN_DELETED = (
+    deepcopy(FAKE_EVENT_PLAN_CREATED))
+FAKE_EVENT_PLAN_DELETED.update({
+    "id": "evt_1877X72eZvKYl2jkds32jJFc",
+    "type": "plan.deleted"})
+
 FAKE_EVENT_TRANSFER_CREATED = {
     "id": "evt_16igNU2eZvKYlo2CYyMkYvet",
     "object": "event",
@@ -1126,6 +1170,12 @@ FAKE_EVENT_TRANSFER_CREATED = {
     "request": "req_6wZW9MskhYU15Y",
     "type": "transfer.created",
 }
+
+FAKE_EVENT_TRANSFER_DELETED = (
+    deepcopy(FAKE_EVENT_TRANSFER_CREATED))
+FAKE_EVENT_TRANSFER_DELETED.update({
+    "id": "evt_16igNU2eZvKjklfsdjk232Mf",
+    "type": "transfer.deleted"})
 
 FAKE_TOKEN = {
     "id": "tok_16YDIe2eZvKYlo2CPvqprIJd",

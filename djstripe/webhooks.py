@@ -95,12 +95,17 @@ def call_handlers(event, event_data, event_type, event_subtype):
     :param event_subtype: The event sub-type, e.g. 'updated'.
     :type event_subtype: string (`str`/`unicode`)
     """
-    qualified_event_type = (
-        "{event_type}.{event_subtype}".format(
-            event_type=event_type, event_subtype=event_subtype))
 
-    for handler_func in itertools.chain(
-            registrations_global,
-            registrations[event_type],
-            registrations[qualified_event_type]):
+    chain = [registrations_global]
+
+    # Build up a list of handlers with each qualified part of the event
+    # type and subtype.  For example, "customer.subscription.created" creates:
+    #   1. "customer"
+    #   2. "customer.subscription"
+    #   3. "customer.subscription.created"
+    for k, _ in enumerate(event.parts):
+        qualified_event_type = ".".join(event.parts[:(k + 1)])
+        chain.append(registrations[qualified_event_type])
+
+    for handler_func in itertools.chain(*chain):
         handler_func(event, event_data, event_type, event_subtype)

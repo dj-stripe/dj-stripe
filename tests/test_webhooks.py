@@ -14,7 +14,7 @@ import json
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import Client
-from mock import patch, Mock, ANY
+from mock import call, patch, Mock, PropertyMock, ANY
 
 from djstripe import webhooks
 from djstripe.models import Event, EventProcessingException
@@ -80,39 +80,60 @@ class TestWebhookHandlers(TestCase):
     def test_global_handler_registration(self):
         func_mock = Mock()
         handler_all()(func_mock)
-        call_handlers(Mock(), {'data': 'foo'}, 'wib', 'ble')  # handled
+        self._call_handlers("wib.ble", {"data": "foo"})  # handled
         self.assertEqual(1, func_mock.call_count)
+        func_mock.assert_called_with(ANY, ANY, "wib", "ble")
 
     def test_event_handler_registration(self):
         global_func_mock = Mock()
         handler_all()(global_func_mock)
         func_mock = Mock()
-        handler(['foo'])(func_mock)
-        call_handlers(Mock(), {'data': 'foo'}, 'foo', 'bar')  # handled
-        call_handlers(Mock(), {'data': 'foo'}, 'bar', 'foo')  # not handled
+        handler(["foo"])(func_mock)
+        self._call_handlers("foo.bar", {"data": "foo"})  # handled
+        self._call_handlers("bar.foo", {"data": "foo"})  # not handled
         self.assertEqual(2, global_func_mock.call_count)  # called each time
         self.assertEqual(1, func_mock.call_count)
-        func_mock.assert_called_with(ANY, ANY, 'foo', 'bar')
+        func_mock.assert_called_with(ANY, ANY, "foo", "bar")
 
     def test_event_subtype_handler_registration(self):
         global_func_mock = Mock()
         handler_all()(global_func_mock)
         func_mock = Mock()
-        handler(['foo.bar'])(func_mock)
-        call_handlers(Mock(), {'data': 'foo'}, 'foo', 'bar')  # handled
-        call_handlers(Mock(), {'data': 'foo'}, 'foo', 'baz')  # not handled
-        self.assertEqual(2, global_func_mock.call_count)  # called each time
-        self.assertEqual(1, func_mock.call_count)
-        func_mock.assert_called_with(ANY, ANY, 'foo', 'bar')
+        handler(["foo.bar"])(func_mock)
+        self._call_handlers("foo.bar", {"data": "foo"})  # handled
+        self._call_handlers("foo.bar.wib", {"data": "foo"})  # handled
+        self._call_handlers("foo.baz", {"data": "foo"})  # not handled
+        self.assertEqual(3, global_func_mock.call_count)  # called each time
+        self.assertEqual(2, func_mock.call_count)
+        func_mock.assert_has_calls([
+            call(ANY, ANY, "foo", "bar"),
+            call(ANY, ANY, "foo", "bar.wib")])
 
     def test_global_handler_registration_with_function(self):
         func_mock = Mock()
         handler_all(func_mock)
-        call_handlers(Mock(), {'data': 'foo'}, 'wib', 'ble')  # handled
+        self._call_handlers("wib.ble", {"data": "foo"})  # handled
         self.assertEqual(1, func_mock.call_count)
+        func_mock.assert_called_with(ANY, ANY, "wib", "ble")
 
     def test_event_handle_registation_with_string(self):
         func_mock = Mock()
-        handler('foo')(func_mock)
-        call_handlers(Mock(), {'data': 'foo'}, 'foo', 'bar')  # handled
+        handler("foo")(func_mock)
+        self._call_handlers("foo.bar", {"data": "foo"})  # handled
         self.assertEqual(1, func_mock.call_count)
+        func_mock.assert_called_with(ANY, ANY, "foo", "bar")
+
+    #
+    # Helpers
+    #
+
+    @staticmethod
+    def _call_handlers(event_spec, data):
+        event = Mock(spec=Event)
+        event_parts = event_spec.split(".")
+        event_type = event_parts[0]
+        event_subtype = ".".join(event_parts[1:])
+        type(event).parts = PropertyMock(return_value=event_parts)
+        type(event).event_type = PropertyMock(return_value=event_type)
+        type(event).event_subtype = PropertyMock(return_value=event_subtype)
+        return call_handlers(event, data, event_type, event_subtype)
