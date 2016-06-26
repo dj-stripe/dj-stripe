@@ -419,6 +419,7 @@ class Event(StripeEvent):
         previously processed successfully.
         :rtype: bool
         """
+
         if not self.valid:
             return False
 
@@ -428,8 +429,7 @@ class Event(StripeEvent):
                 # except that some webhook handlers can have side effects outside of our local database, meaning that
                 # even if we rollback on our database, some updates may have been sent to Stripe, etc in resposne to
                 # webhooks...
-                webhooks.call_handlers(
-                    self, self.message, self.event_type, self.event_subtype)
+                webhooks.call_handlers(self, self.message, self.event_type, self.event_subtype)
                 self._send_signal()
                 self.processed = True
             except StripeError as exc:

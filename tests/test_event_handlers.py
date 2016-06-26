@@ -15,23 +15,16 @@ from django.test import TestCase
 from mock import patch
 
 from djstripe.exceptions import CustomerDoesNotExistLocallyException
-from djstripe.models import (
-    Event, Charge, Transfer, Account, Plan, Customer,
-    InvoiceItem, Invoice, Card, Subscription)
-from tests import (
-    FAKE_CARD, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_CUSTOMER, FAKE_CUSTOMER_II,
-    FAKE_EVENT_CHARGE_SUCCEEDED, FAKE_EVENT_CUSTOMER_CREATED,
-    FAKE_EVENT_CUSTOMER_DELETED, FAKE_EVENT_CUSTOMER_SOURCE_CREATED,
-    FAKE_EVENT_CUSTOMER_SOURCE_DELETED,
-    FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE,
-    FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED,
-    FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED, FAKE_EVENT_INVOICE_CREATED,
-    FAKE_EVENT_INVOICE_DELETED, FAKE_EVENT_INVOICEITEM_CREATED,
-    FAKE_EVENT_INVOICEITEM_DELETED, FAKE_EVENT_PLAN_CREATED,
-    FAKE_EVENT_PLAN_DELETED, FAKE_EVENT_TRANSFER_CREATED,
-    FAKE_EVENT_TRANSFER_DELETED, FAKE_INVOICE, FAKE_INVOICE_II,
-    FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_III,
-    FAKE_TRANSFER)
+from djstripe.models import Event, Charge, Transfer, Account, Plan, Customer, InvoiceItem, Invoice, Card, Subscription
+from tests import (FAKE_CARD, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_CUSTOMER, FAKE_CUSTOMER_II,
+                   FAKE_EVENT_CHARGE_SUCCEEDED, FAKE_EVENT_CUSTOMER_CREATED,
+                   FAKE_EVENT_CUSTOMER_DELETED, FAKE_EVENT_CUSTOMER_SOURCE_CREATED,
+                   FAKE_EVENT_CUSTOMER_SOURCE_DELETED, FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE,
+                   FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED, FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED,
+                   FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_INVOICE_DELETED, FAKE_EVENT_INVOICEITEM_CREATED,
+                   FAKE_EVENT_INVOICEITEM_DELETED, FAKE_EVENT_PLAN_CREATED, FAKE_EVENT_PLAN_DELETED,
+                   FAKE_EVENT_TRANSFER_CREATED, FAKE_EVENT_TRANSFER_DELETED, FAKE_INVOICE, FAKE_INVOICE_II,
+                   FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_III, FAKE_TRANSFER)
 
 
 class EventTestCase(TestCase):
@@ -42,11 +35,14 @@ class EventTestCase(TestCase):
     @patch('stripe.Event.retrieve')
     def _create_event(self, event_data, event_retrieve_mock, patch_data=None):
         event_data = deepcopy(event_data)
+
         if patch_data:
             event_data.update(patch_data)
+
         event_retrieve_mock.return_value = event_data
         event = Event.sync_from_stripe_data(event_data)
         event.validate()
+
         return event
 
 
@@ -314,10 +310,8 @@ class TestInvoiceEvents(EventTestCase):
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
     @patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
-    def test_invoice_deleted(
-            self, invoice_retrieve_mock, charge_retrieve_mock,
-            customer_retrieve_mock, subscription_retrieve_mock,
-            default_account_mock, send_receipt_mock):
+    def test_invoice_deleted(self, invoice_retrieve_mock, charge_retrieve_mock, customer_retrieve_mock,
+                             subscription_retrieve_mock, default_account_mock, send_receipt_mock):
         default_account_mock.return_value = Account.objects.create()
 
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
