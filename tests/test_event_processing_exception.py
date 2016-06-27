@@ -37,6 +37,8 @@ class TestEventProcessingException(TestCase):
             "livemode": True,
             "object": "event",
             "pending_webhooks": 1,
+            "request": "bla",
+            "api_version": "2015-07-28",
             "type": "ping"
         }
 
@@ -60,15 +62,17 @@ class TestEventProcessingException(TestCase):
             "id": "evt_xxxxxxxxxxxxx",
             "livemode": True,
             "object": "event",
+            "request": "bla",
+            "api_version": "2015-07-28",
             "pending_webhooks": 1,
             "type": "ping"
         }
 
         self.event = Event.objects.create(
             stripe_id=self.msg["id"],
-            kind="ping",
+            type="ping",
             webhook_message=self.msg,
-            validated_message=self.msg
+            message=self.msg
         )
 
     def test_tostring(self):
@@ -88,7 +92,7 @@ class TestEventProcessingException(TestCase):
         # It may be too strict to assert the pk? Maybe incr field not reset in some psql implementations?
         # self.assertIn('<Error in transmission., pk=1, Event=<ping, stripe_id=evt_xxxxxxxxxxxxx>>', str(exception))
         self.assertIn('<Error in transmission., pk=', str(exception))
-        self.assertIn(', Event=<ping, stripe_id=evt_xxxxxxxxxxxxx>>', str(exception))
+        self.assertIn(', Event=<type=ping, stripe_id=evt_xxxxxxxxxxxxx>>', str(exception))
 
     def test_non_crud_link_customer_on_non_customer(self):
         self.event.process()

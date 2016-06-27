@@ -39,14 +39,13 @@ except ImportError:
     from distutils.core import setup
 
 if sys.argv[-1] == 'publish':
-    os.system('python setup.py sdist upload')
-    os.system('python setup.py bdist_wheel upload')
+    os.system('python setup.py sdist upload --sign')
+    os.system('python setup.py bdist_wheel upload --sign')
     sys.exit()
 
 if sys.argv[-1] == 'tag':
     print("Tagging the version on github:")
-    os.system("git tag -a %s -m 'version %s'" % (finder.version,
-                                                 finder.version))
+    os.system("git tag -a %s -m 'version %s'" % (finder.version, finder.version))
     os.system("git push --tags")
     sys.exit()
 
@@ -55,11 +54,13 @@ history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 INSTALL_REQUIRES = [
     'django!=1.9,>=1.8',
-    'stripe>=1.22.2',
-    'django-model-utils>=2.2',
-    'django-braces>=1.8.0',
+    'django-braces>=1.8.1',
+    'django-model-utils>=2.3.1',
+    'django-polymorphic>=0.7.1',
     'jsonfield>=1.0.3',
-    'pytz>=2015.4'
+    'pytz>=2015.4',
+    'stripe>=1.24.1',
+    'tqdm>=4.5.0',
 ]
 
 setup(

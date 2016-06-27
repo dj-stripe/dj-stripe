@@ -7,140 +7,47 @@
 """
 
 from copy import deepcopy
+import decimal
 
 from django.test.testcases import TestCase
-
-from mock import patch, PropertyMock
+from mock import patch
 
 from djstripe.models import Event, Transfer
-
-
-TRANSFER_CREATED_TEST_DATA = {
-    "created": 1348360173,
-    "data": {
-        "object": {
-            "amount": 455,
-            "currency": "usd",
-            "date": 1348876800,
-            "description": None,
-            "id": "tr_XXXXXXXXXXXX",
-            "object": "transfer",
-            "other_transfers": [],
-            "status": "paid",
-            "summary": {
-                "adjustment_count": 0,
-                "adjustment_fee_details": [],
-                "adjustment_fees": 0,
-                "adjustment_gross": 0,
-                "charge_count": 1,
-                "charge_fee_details": [{
-                    "amount": 45,
-                    "application": None,
-                    "currency": "usd",
-                    "description": None,
-                    "type": "stripe_fee"
-                }],
-                "charge_fees": 45,
-                "charge_gross": 500,
-                "collected_fee_count": 0,
-                "collected_fee_gross": 0,
-                "currency": "usd",
-                "net": 455,
-                "refund_count": 0,
-                "refund_fees": 0,
-                "refund_gross": 0,
-                "validation_count": 0,
-                "validation_fees": 0
-            }
-        }
-    },
-    "id": "evt_XXXXXXXXXXXX",
-    "livemode": True,
-    "object": "event",
-    "pending_webhooks": 1,
-    "type": "transfer.created"
-}
-
-TRANSFER_CREATED_TEST_DATA2 = {
-    "created": 1348360173,
-    "data": {
-        "object": {
-            "amount": 1455,
-            "currency": "usd",
-            "date": 1348876800,
-            "description": None,
-            "id": "tr_XXXXXXXXXXX2",
-            "object": "transfer",
-            "other_transfers": [],
-            "status": "paid",
-            "summary": {
-                "adjustment_count": 0,
-                "adjustment_fee_details": [],
-                "adjustment_fees": 0,
-                "adjustment_gross": 0,
-                "charge_count": 1,
-                "charge_fee_details": [{
-                    "amount": 45,
-                    "application": None,
-                    "currency": "usd",
-                    "description": None,
-                    "type": "stripe_fee"
-                }],
-                "charge_fees": 45,
-                "charge_gross": 1500,
-                "collected_fee_count": 0,
-                "collected_fee_gross": 0,
-                "currency": "usd",
-                "net": 1455,
-                "refund_count": 0,
-                "refund_fees": 0,
-                "refund_gross": 0,
-                "validation_count": 0,
-                "validation_fees": 0
-            }
-        }
-    },
-    "id": "evt_XXXXXXXXXXXY",
-    "livemode": True,
-    "object": "event",
-    "pending_webhooks": 1,
-    "type": "transfer.created"
-}
+from tests import FAKE_EVENT_TRANSFER_CREATED
 
 
 class TransferTest(TestCase):
 
-    @patch('stripe.Transfer.retrieve', return_value=PropertyMock(status="fish"))
-    def test_update_transfer(self, transfer_receive_mock):
-        TRANSFER_UPDATED_TEST_DATA = deepcopy(TRANSFER_CREATED_TEST_DATA)
-        TRANSFER_UPDATED_TEST_DATA["type"] = "transfer.updated"
-        TRANSFER_UPDATED_TEST_DATA["data"]["object"]["id"] = "salmon"
+    @patch('stripe.Transfer.retrieve')
+    @patch("stripe.Event.retrieve")
+    def test_update_transfer(self, event_retrieve_mock, transfer_retrieve_mock):
+        fake_event_created = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+
+        fake_event_updated = deepcopy(fake_event_created)
+        fake_event_updated.update({"id": "evt_000000000000000000000000"})
+        fake_event_updated.update({"type": "transfer.updated"})
+        fake_event_updated["data"]["object"]["amount"] = 3057
+        fake_event_updated["data"]["object"]["status"] = "fish"
+
+        event_retrieve_mock.side_effect = [fake_event_created, fake_event_updated]
+        transfer_retrieve_mock.side_effect = [fake_event_created["data"]["object"], fake_event_updated["data"]["object"]]
 
         # Create transfer
-        created_event = Event.objects.create(
-            stripe_id=TRANSFER_CREATED_TEST_DATA["id"],
-            kind="transfer.created",
-            livemode=True,
-            webhook_message=TRANSFER_CREATED_TEST_DATA,
-            validated_message=TRANSFER_CREATED_TEST_DATA,
-            valid=True
-        )
+        created_event = Event.sync_from_stripe_data(fake_event_created)
+        created_event.validate()
         created_event.process()
 
         # Signal a transfer update
-        updated_event = Event.objects.create(
-            stripe_id="evt_test_update",
-            kind="transfer.updated",
-            livemode=True,
-            webhook_message=TRANSFER_UPDATED_TEST_DATA,
-            validated_message=TRANSFER_UPDATED_TEST_DATA,
-            valid=True
-        )
+        updated_event = Event.sync_from_stripe_data(fake_event_updated)
+        updated_event.validate()
         updated_event.process()
 
-        transfer_instance = Transfer.objects.get(stripe_id="salmon")
-        transfer_receive_mock.assert_called_once_with(transfer_instance.stripe_id)
-        self.assertEqual(transfer_instance.status, "fish")
+        transfer_instance = Transfer.objects.get(status="fish")
+        self.assertEqual(2, transfer_retrieve_mock.call_count)
 
-        # Test to string
-        self.assertEquals("<amount=4.55, status=fish, stripe_id=salmon>", str(transfer_instance))
+        # Test to string to ensure data was updated
+        self.assertEquals("<amount={amount}, status={status}, stripe_id={stripe_id}>".format(
+            amount=fake_event_updated["data"]["object"]["amount"] / decimal.Decimal("100"),
+            status=fake_event_updated["data"]["object"]["status"],
+            stripe_id=fake_event_updated["data"]["object"]["id"]
+        ), str(transfer_instance))

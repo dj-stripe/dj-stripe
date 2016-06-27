@@ -19,28 +19,28 @@
 {% endif %}
 
 <div class="row">
-    {% for plan in PLAN_LIST %}
-      {% with plan_count=PLAN_LIST|length %}
+    {% for plan in plans %}
+      {% with plan_count=plans.count %}
         <div class="col-xs-{{ 12|djdiv:plan_count|floatformat }}">
       {% endwith %}
-            {% if customer.current_subscription.plan == plan.plan and customer.current_subscription.status != CurrentSubscription.STATUS_CANCELLED %}
+            {% if customer.subscription.plan == plan and customer.subscription.is_valid %}
             <div class="btn btn-default disabled">
             {% else %}
-            <a class="btn btn-primary" href="{% url 'djstripe:confirm' plan=plan.plan %}" role="button">
+            <a class="btn btn-primary" href="{% url 'djstripe:confirm' plan_id=plan.id %}" role="button">
             {% endif %}
                   {% with image=plan.image|default:"img/default-plan-image.png" %}
                     <img src="{% static image %}" class="img-thumbnail" />
                   {% endwith %}
                   <h3>{{ plan.name }}</h3>
                   <p>{{ plan.description }}</p>
-            {% if customer.current_subscription.plan == plan.plan and customer.current_subscription.status != CurrentSubscription.STATUS_CANCELLED %}
+            {% if customer.subscription.plan == plan and customer.subscription.is_valid %}
             </div>
             <h4>Your Current Plan</h4>
             {% else %}
             </a>
-              {% if customer.current_subscription.amount < plan.price|djdiv:100 %}
+              {% if customer.subscription.plan.amount < plan.amount %}
                 <h4>Upgrade</h4>
-              {% elif customer.current_subscription.amount > plan.price|djdiv:100 %}
+              {% elif customer.subscription.plan.amount > plan.amount %}
                 <h4>Downgrade</h4>
               {% endif %}
             {% endif %}

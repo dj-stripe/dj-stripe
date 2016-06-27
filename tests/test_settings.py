@@ -1,9 +1,17 @@
-from django.db.models.base import ModelBase
+"""
+.. module:: dj-stripe.tests.test_settings
+   :synopsis: dj-stripe Settings Tests.
+
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
+
+"""
+
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models.base import ModelBase
 from django.test import TestCase
 from django.test.utils import override_settings
 
-from djstripe.settings import get_subscriber_model, plan_from_stripe_id
+from djstripe.settings import get_subscriber_model
 
 
 class TestSubscriberModelRetrievalMethod(TestCase):
@@ -41,15 +49,3 @@ class TestSubscriberModelRetrievalMethod(TestCase):
     @override_settings(DJSTRIPE_SUBSCRIBER_MODEL='testapp.Organization', DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK=5)
     def test_bad_callback(self):
         self.assertRaisesMessage(ImproperlyConfigured, "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be callable.", get_subscriber_model)
-
-
-class TestSettings(TestCase):
-
-    def test_plan_from_stripe_ID(self):
-        plan = plan_from_stripe_id("test_id")
-        self.assertEqual("test", plan)
-
-    @override_settings(DJSTRIPE_PLANS={})
-    def test_empty_plans(self):
-        plan = plan_from_stripe_id("test_id")
-        self.assertEqual(None, plan)

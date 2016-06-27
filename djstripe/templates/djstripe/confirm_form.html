@@ -24,10 +24,10 @@
             <p>Please add valid card <a href="{% url 'djstripe:account' %}">here</a></p>
         {% else %}
             <form
-            {% if not customer.current_subscription or customer.current_subscription.status == CurrentSubscription.STATUS_CANCELLED %}
-                action="{% url 'djstripe:confirm' plan=plan.plan %}" class="djstripe-subscribe"
+            {% if not customer.subscription or not customer.subscription.is_valid %}
+                action="{% url 'djstripe:confirm' plan_id=plan.id %}" class="djstripe-subscribe"
                 data-key="{{ STRIPE_PUBLIC_KEY }}"
-                data-amount="{{ plan.price }}"
+                data-amount="{{ plan.amount }}"
                 data-name="{{ plan.name }}"
                 data-description="{{ plan.description }}"
             {% else %}
@@ -37,7 +37,7 @@
             method="POST">
 
             {% csrf_token %}
-            <input type="hidden" name="plan" value="{{ plan.plan }}" />
+            <input type="hidden" name="plan" value="{{ plan.id }}" />
             <input name="stripe_token" type="hidden" />
 
             <!-- disable this when clicked -->
@@ -49,13 +49,13 @@
                 <p>{{ plan.description }}</p>
             </button>
 
-            {% if not customer.current_subscription or customer.current_subscription.status == CurrentSubscription.STATUS_CANCELLED %}
+            {% if not customer.subscription or customer.subscription.status == customer.subscription.STATUS_CANCELED %}
               <!-- do nothing -->
-            {% elif customer.current_subscription.plan == plan.plan %}
+            {% elif customer.subscription.plan == plan %}
                 <h4>Your Current Plan</h4>
-            {% elif customer.current_subscription.amount < plan.price|djdiv:100 %}
+            {% elif customer.subscription.plan.amount < plan.amount %}
                 <h4>Upgrade</h4>
-            {% elif customer.current_subscription.amount > plan.price|djdiv:100 %}
+            {% elif customer.subscription.plan.amount > plan.amount %}
                 <h4>Downgrade</h4>
             {% endif %}
             </form>
@@ -88,7 +88,7 @@
             });
             return false;
         });
-        {% if PLAN_LIST|length > 1 %}
+        {% if plans.count > 1 %}
         $('.djstripe-change-plan').click(function(e){
             $("button[type=submit]").attr("disabled", "true");
             $('#in-progress').modal({"keyboard": false})

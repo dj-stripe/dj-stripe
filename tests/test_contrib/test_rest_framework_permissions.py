@@ -3,6 +3,7 @@ from django.test import TestCase
 from django.test.client import RequestFactory
 
 from djstripe.models import Customer
+from tests import FAKE_CUSTOMER
 
 try:
     import rest_framework
@@ -15,15 +16,8 @@ if rest_framework:
     class TestUserHasActiveSubscription(TestCase):
 
         def setUp(self):
-            self.user = get_user_model().objects.create_user(username="pydanny",
-                                                             email="pydanny@gmail.com")
-            self.customer = Customer.objects.create(
-                subscriber=self.user,
-                stripe_id="cus_xxxxxxxxxxxxxxx",
-                card_fingerprint="YYYYYYYY",
-                card_last_4="2342",
-                card_kind="Visa"
-            )
+            self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
+            self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
 
         def test_no_user_in_request(self):
             request = RequestFactory().get('djstripe/')

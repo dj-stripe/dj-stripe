@@ -9,11 +9,11 @@
 
 from django import forms
 
-from .settings import PLAN_CHOICES
+from .models import Plan
 
 
 class PlanForm(forms.Form):
-    plan = forms.ChoiceField(choices=PLAN_CHOICES)
+    plan = forms.ModelChoiceField(queryset=Plan.objects.all())
 
 
 class CancelSubscriptionForm(forms.Form):
