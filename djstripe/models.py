@@ -346,6 +346,16 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
         return new_card
 
+    def upcoming_invoice(self, **kwargs):
+        """ Gets the upcoming preview invoice (singular) for this customer.
+
+        See `StripeInvoice.upcoming() <#djstripe.stripe_objects.StripeInvoice.upcoming>`__
+        The ``customer`` argument to the ``upcoming()`` call is automatically set by this method.
+        """
+
+        kwargs['customer'] = self
+        return Invoice.upcoming(**kwargs)
+
     def _attach_objects_hook(self, cls, data):
         # TODO: other sources
         if data["default_source"] and data["default_source"]["object"] == "card":
@@ -542,35 +552,41 @@ class Invoice(StripeInvoice):
         if subscription:
             self.subscription = subscription
 
-        self._attach_invoice_items(cls, data)
+    def _attach_objects_post_save_hook(self, cls, data):
+        # InvoiceItems need a saved invoice because they're associated via a
+        # RelatedManager, so this must be done as part of the post save hook.
+        cls._stripe_object_to_invoice_items(target_cls=InvoiceItem, data=data, invoice=self)
 
-    def _attach_invoice_items(self, cls, data):
-        if not self.pk:
-            # InvoiceItems need a saved invoice because they're associated via
-            # a RelatedManager.  It might be better to make this pattern more
-            # generic with some sort-of _attach_objects_post_save_hook().
-            self.save()
+    @classmethod
+    def upcoming(cls, **kwargs):
+        upcoming_stripe_invoice = StripeInvoice.upcoming(**kwargs)
 
-        cls._stripe_object_to_invoice_items(InvoiceItem, data, self)
+        if upcoming_stripe_invoice:
+            return UpcomingInvoice._create_from_stripe_object(upcoming_stripe_invoice, save=False)
 
     @property
     def plan(self):
         """ Gets the associated plan for this invoice.
 
-        In order to provide a consistent view of invoices, it is necessary to
-        examine the invoice items for the associated subscription plan rather
-        than the top-level link.  The reason for this is that the subscription
-        plan when requested by the customer, but the invoice item plan will
-        remain the same.  This makes it difficult to work with an invoice
-        history if the plan is expected to remain consistent (e.g. for creating
-        downloadable invoices).
+        In order to provide a consistent view of invoices, the plan object
+        should be taken from the first invoice item that has one, rather than
+        using the plan associated with the subscription.
+
+        Subscriptions (and their associated plan) are updated by the customer
+        and represent what is current, but invoice items are immutable within
+        the invoice and stay static/unchanged.
+
+        In other words, a plan retrieved from an invoice item will represent
+        the plan as it was at the time an invoice was issued.  The plan
+        retrieved from the subscription will be the currently active plan.
 
         :returns: The associated plan for the invoice.
         :rtype: ``djstripe.models.Plan``
         """
-        for item in self.invoiceitems.all():
-            if item.plan:
-                return item.plan
+
+        for invoiceitem in self.invoiceitems.all():
+            if invoiceitem.plan:
+                return invoiceitem.plan
 
         if self.subscription:
             return self.subscription.plan
@@ -582,24 +598,26 @@ class UpcomingInvoice(Invoice):
 
     def __init__(self, *args, **kwargs):
         super(UpcomingInvoice, self).__init__(*args, **kwargs)
-        self._items = []
+        self._invoiceitems = []
 
-    def _attach_invoice_items(self, cls, data):
-        self._items = cls._stripe_object_to_invoice_items(InvoiceItem, data, self)
+    def _attach_objects_hook(self, cls, data):
+        super(UpcomingInvoice, self)._attach_objects_hook(cls, data)
+        self._invoiceitems = cls._stripe_object_to_invoice_items(target_cls=InvoiceItem, data=data, invoice=self)
 
     @property
     def invoiceitems(self):
         """ Gets the invoice items associated with this upcoming invoice.
 
         This differs from normal (non-upcoming) invoices, in that upcoming
-        invoices are in-memory and do not persist to the database.  Therefore,
+        invoices are in-memory and do not persist to the database. Therefore,
         all of the data comes from the Stripe API itself.
 
         Instead of returning a normal queryset for the invoiceitems, this will
         return a mock of a queryset, but with the data fetched from Stripe - It
         will act like a normal queryset, but mutation will silently fail.
         """
-        return QuerySetMock(InvoiceItem, *self._items)
+
+        return QuerySetMock(InvoiceItem, *self._invoiceitems)
 
     @property
     def stripe_id(self):
