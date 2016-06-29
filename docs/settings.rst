@@ -319,7 +319,7 @@ Examples:
 
 .. code-block:: python
 
-    from djstripe.models import StripeError
+    from stripe.error import StripeError
 
     @shared_task(bind=True)
     def process_webhook_event(self, event):

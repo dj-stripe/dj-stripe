@@ -38,8 +38,7 @@ class TestWebhook(TestCase):
         self.assertEquals(resp.status_code, 200)
         self.assertTrue(Event.objects.filter(type="transfer.created").exists())
 
-    @patch.object(views, 'WEBHOOK_EVENT_CALLBACK',
-                  return_value=lambda event: event.process())
+    @patch.object(views.djstripe_settings, 'WEBHOOK_EVENT_CALLBACK', return_value=(lambda event: event.process()))
     @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
     @patch("stripe.Event.retrieve")
     def test_webhook_with_custom_callback(self,
@@ -86,13 +85,11 @@ class TestWebhook(TestCase):
 class TestWebhookHandlers(TestCase):
     def setUp(self):
         # Reset state of registrations per test
-        patcher = patch.object(
-            webhooks, 'registrations', new_callable=lambda: defaultdict(list))
+        patcher = patch.object(webhooks, 'registrations', new_callable=(lambda: defaultdict(list)))
         self.addCleanup(patcher.stop)
         self.registrations = patcher.start()
 
-        patcher = patch.object(
-            webhooks, 'registrations_global', new_callable=list)
+        patcher = patch.object(webhooks, 'registrations_global', new_callable=list)
         self.addCleanup(patcher.stop)
         self.registrations_global = patcher.start()
 

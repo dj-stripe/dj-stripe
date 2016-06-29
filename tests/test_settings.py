@@ -53,13 +53,13 @@ class TestSubscriberModelRetrievalMethod(TestCase):
     def test_bad_callback(self):
         self.assertRaisesMessage(ImproperlyConfigured, "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be callable.", get_subscriber_model)
 
-    @override_settings(DJSTRIPE_TEST_CALLBACK=lambda: "ok")
+    @override_settings(DJSTRIPE_TEST_CALLBACK=(lambda: "ok"))
     def test_get_callback_function_with_valid_func_callable(self):
         func = get_callback_function("DJSTRIPE_TEST_CALLBACK")
         self.assertEquals("ok", func())
 
     @override_settings(DJSTRIPE_TEST_CALLBACK='foo.valid_callback')
-    @patch.object(settings, 'import_string', return_value=lambda: "ok")
+    @patch.object(settings, 'import_string', return_value=(lambda: "ok"))
     def test_get_callback_function_with_valid_string_callable(self, import_string_mock):
         func = get_callback_function("DJSTRIPE_TEST_CALLBACK")
         self.assertEquals("ok", func())

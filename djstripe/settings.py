@@ -20,7 +20,15 @@ def get_callback_function(setting_name, default=None):
     is already a callable function, that value is used - If the setting value
     is a string, an attempt is made to import it.  Anything else will result in
     a failed import causing ImportError to be raised.
+
+    :param setting_name: The name of the setting to resolve a callback from.
+    :type setting_name: string (``str``/``unicode``)
+    :param default: The default to return if setting isn't populated.
+    :type default: ``bool``
+    :returns: The resolved callback function (if any).
+    :type: ``callable``
     """
+
     func = getattr(settings, setting_name, None)
     if not func:
         return default
@@ -32,16 +40,13 @@ def get_callback_function(setting_name, default=None):
         func = import_string(func)
 
     if not callable(func):
-        raise ImproperlyConfigured(
-            "{name} must be callable.".format(name=setting_name))
+        raise ImproperlyConfigured("{name} must be callable.".format(name=setting_name))
 
     return func
 
 
-subscriber_request_callback = (
-    get_callback_function(
-        "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK",
-        default=lambda request: request.user))
+subscriber_request_callback = get_callback_function("DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK",
+                                                    default=(lambda request: request.user))
 
 INVOICE_FROM_EMAIL = getattr(settings, "DJSTRIPE_INVOICE_FROM_EMAIL", "billing@example.com")
 PAYMENTS_PLANS = getattr(settings, "DJSTRIPE_PLANS", {})
@@ -74,8 +79,7 @@ DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
 # Webhook event callbacks allow an application to take control of what happens
 # when an event from Stripe is received.  One suggestion is to put the event
 # onto a task queue (such as celery) for asynchronous processing.
-WEBHOOK_EVENT_CALLBACK = (
-    get_callback_function("DJSTRIPE_WEBHOOK_EVENT_CALLBACK"))
+WEBHOOK_EVENT_CALLBACK = get_callback_function("DJSTRIPE_WEBHOOK_EVENT_CALLBACK")
 
 
 def _check_subscriber_for_email_address(subscriber_model, message):
