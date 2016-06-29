@@ -89,7 +89,7 @@ class StripeObject(TimeStampedModel):
         """
 
         # Run stripe.X.retreive(id)
-        return type(self)._api().retrieve(self.stripe_id, api_key=api_key, expand=self.expand_fields)
+        return type(self)._api().retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
 
     @classmethod
     def api_list(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):

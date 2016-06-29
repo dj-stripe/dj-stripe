@@ -87,6 +87,5 @@ class PlanTest(TestCase):
     @patch("stripe.Plan.retrieve", return_value="soup")
     def test_stripe_plan(self, plan_retrieve_mock):
         self.assertEqual("soup", self.plan.api_retrieve())
-        plan_retrieve_mock.assert_called_once_with(
-            self.plan_data["id"], api_key=settings.STRIPE_SECRET_KEY,
-            expand=None)
+        plan_retrieve_mock.assert_called_once_with(id=self.plan_data["id"], api_key=settings.STRIPE_SECRET_KEY,
+                                                   expand=None)
