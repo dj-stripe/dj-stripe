@@ -5,6 +5,7 @@
 
 .. moduleauthor:: Bill Huneke (@wahuneke)
 .. moduleauthor:: Alex Kavanaugh (@akavanau)
+.. moduleauthor:: Lee Skillen (@lskillen)
 
 Implement webhook event handlers for all the models that need to respond to webhook events.
 
@@ -17,92 +18,164 @@ NOTE: Event data is not guaranteed to be in the correct API version format. See 
 from . import webhooks
 from .models import Charge, Customer, Card, Subscription, Plan, Transfer, Invoice, InvoiceItem
 
-STRIPE_CRUD_EVENTS = ["created", "updated", "deleted"]
 
-
-# ---------------------------
-# Charge model events
-# ---------------------------
-@webhooks.handler(['charge'])
-def charge_webhook_handler(event, event_data, event_type, event_subtype):
-    versioned_charge_data = Charge(stripe_id=event_data["object"]["id"]).api_retrieve()
-    Charge.sync_from_stripe_data(versioned_charge_data)
-
-
-# ---------------------------
-# Customer model events
-# ---------------------------
 @webhooks.handler_all
 def customer_event_attach(event, event_data, event_type, event_subtype):
+    """ Makes the related customer available on the event for all handlers. """
 
-    if event_type == "customer" and event_subtype in STRIPE_CRUD_EVENTS:
-        stripe_customer_id = event_data["object"]["id"]
+    event.customer = None
+    crud_type = CrudType.determine(event_subtype, exact=True)
+
+    if event_type == "customer" and crud_type.valid:
+        customer_stripe_id = event_data["object"]["id"]
     else:
-        stripe_customer_id = event_data["object"].get("customer", None)
+        customer_stripe_id = event_data["object"].get("customer", None)
 
-    if stripe_customer_id:
+    if customer_stripe_id:
         try:
-            event.customer = Customer.objects.get(stripe_id=stripe_customer_id)
+            event.customer = Customer.objects.get(stripe_id=customer_stripe_id)
         except Customer.DoesNotExist:
             pass
 
 
-@webhooks.handler(['customer'])
+@webhooks.handler("customer")
 def customer_webhook_handler(event, event_data, event_type, event_subtype):
+    """ Handles updates for customer objects. """
 
-    customer = event.customer
-    if customer:
-        if event_subtype in STRIPE_CRUD_EVENTS:
-            versioned_customer_data = Customer(stripe_id=event_data["object"]["id"]).api_retrieve()
-            Customer.sync_from_stripe_data(versioned_customer_data)
-
-            if event_subtype == "deleted":
-                customer.purge()
-#         elif event_subtype.startswith("discount."):
-#             pass  # TODO
-        elif event_subtype.startswith("source."):
-            source_type = event_data["object"]["object"]
-
-            # TODO: other sources
-            if source_type == "card":
-                versioned_card_data = Card(stripe_id=event_data["object"]["id"], customer=customer).api_retrieve()
-                Card.sync_from_stripe_data(versioned_card_data)
-        elif event_subtype.startswith("subscription."):
-            versioned_subscription_data = Subscription(stripe_id=event_data["object"]["id"], customer=customer).api_retrieve()
-            Subscription.sync_from_stripe_data(versioned_subscription_data)
+    crud_type = CrudType.determine(event_subtype, exact=True)
+    if crud_type.valid and event.customer:
+        # As customers are tied to local users, djstripe will not create
+        # customers that do not already exist locally.
+        _handle_crud_type_event(target_cls=Customer, event_data=event_data, event_subtype=event_subtype, crud_type=crud_type)
 
 
-# ---------------------------
-# Transfer model events
-# ---------------------------
-@webhooks.handler(["transfer"])
-def transfer_webhook_handler(event, event_data, event_type, event_subtype):
-    versioned_transfer_data = Transfer(stripe_id=event_data["object"]["id"]).api_retrieve()
-    Transfer.sync_from_stripe_data(versioned_transfer_data)
+@webhooks.handler("customer.source")
+def customer_source_webhook_handler(
+        event, event_data, event_type, event_subtype):
+    """ Handles updates for customer source objects. """
+
+    source_type = event_data["object"]["object"]
+
+    # TODO: other sources
+    if source_type == "card":
+        _handle_crud_type_event(target_cls=Card, event_data=event_data, event_subtype=event_subtype, customer=event.customer)
 
 
-# ---------------------------
-# Invoice model events
-# ---------------------------
-@webhooks.handler(['invoice'])
-def invoice_webhook_handler(event, event_data, event_type, event_subtype):
-    versioned_invoice_data = Invoice(stripe_id=event_data["object"]["id"]).api_retrieve()
-    Invoice.sync_from_stripe_data(versioned_invoice_data)
+@webhooks.handler("customer.subscription")
+def customer_subscription_webhook_handler(event, event_data, event_type, event_subtype):
+    """ Handles updates for customer subscription objects. """
+
+    _handle_crud_type_event(target_cls=Subscription, event_data=event_data, event_subtype=event_subtype, customer=event.customer)
 
 
-# ---------------------------
-# InvoiceItem model events
-# ---------------------------
-@webhooks.handler(['invoiceitem'])
-def invoiceitem_webhook_handler(event, event_data, event_type, event_subtype):
-    versioned_invoiceitem_data = InvoiceItem(stripe_id=event_data["object"]["id"]).api_retrieve()
-    InvoiceItem.sync_from_stripe_data(versioned_invoiceitem_data)
+@webhooks.handler(["transfer", "charge", "invoice", "invoiceitem", "plan"])
+def other_object_webhook_handler(event, event_data, event_type, event_subtype):
+    """ Handles updates for transfer, charge, invoice, invoiceitem and plan objects. """
+
+    target_cls = {
+        "charge": Charge,
+        "invoice": Invoice,
+        "invoiceitem": InvoiceItem,
+        "plan": Plan,
+        "transfer": Transfer
+    }.get(event_type)
+
+    _handle_crud_type_event(target_cls=target_cls, event_data=event_data, event_subtype=event_subtype, customer=event.customer)
 
 
-# ---------------------------
-# Plan model events
-# ---------------------------
-@webhooks.handler(['plan'])
-def plan_webhook_handler(event, event_data, event_type, event_subtype):
-    versioned_plan_data = Plan(stripe_id=event_data["object"]["id"]).api_retrieve()
-    Plan.sync_from_stripe_data(versioned_plan_data)
+#
+# Helpers
+#
+
+class CrudType(object):
+    """ Helper object to determine CRUD-like event state. """
+
+    created = False
+    updated = False
+    deleted = False
+
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    @property
+    def valid(self):
+        """ Returns True if this is a CRUD-like event. """
+
+        return self.created or self.updated or self.deleted
+
+    @classmethod
+    def determine(cls, event_subtype, exact=False):
+        """
+        Determines if the event subtype is a crud_type (without the 'R') event.
+
+        :param event_subtype: The event subtype to examine.
+        :type event_subtype: string (``str``/`unicode``)
+        :param exact: If True, match crud_type to event subtype string exactly.
+        :param type: ``bool``
+        :returns: The CrudType state object.
+        :rtype: ``CrudType``
+        """
+
+        def check(crud_type_event):
+            if exact:
+                return event_subtype == crud_type_event
+            else:
+                return event_subtype.endswith(crud_type_event)
+
+        created = updated = deleted = False
+
+        if check("updated"):
+            updated = True
+        elif check("created"):
+            created = True
+        elif check("deleted"):
+            deleted = True
+
+        return cls(created=created, updated=updated, deleted=deleted)
+
+
+def _handle_crud_type_event(target_cls, event_data, event_subtype, stripe_id=None, customer=None, crud_type=None):
+    """
+    Helper to process crud_type-like events for objects.
+
+    Non-deletes (creates, updates and "anything else" events) are treated as
+    update_or_create events - The object will be retrieved locally, then it is
+    synchronised with the Stripe API for parity.
+
+    Deletes only occur for delete events and cause the object to be deleted
+    from the local database, if it existed.  If it doesn't exist then it is
+    ignored (but the event processing still succeeds).
+
+    :param target_cls: The djstripe model being handled.
+    :type: ``djstripe.stripe_objects.StripeObject``
+    :param event_data: The event object data received from the Stripe API.
+    :param event_subtype: The event subtype string.
+    :param stripe_id: The object Stripe ID - If not provided then this is
+    retrieved from the event object data by "object.id" key.
+    :param customer: The customer object which is passed on object creation.
+    :param crud_type: The CrudType object - If not provided it is determined
+    based on the event subtype string.
+    :returns: The object (if any) and the event CrudType.
+    :rtype: ``tuple(obj, CrudType)``
+    """
+
+    crud_type = crud_type or CrudType.determine(event_subtype)
+    stripe_id = stripe_id or event_data["object"]["id"]
+    obj = None
+
+    if crud_type.deleted:
+        try:
+            obj = target_cls.objects.get(stripe_id=stripe_id)
+            obj.delete()
+        except target_cls.DoesNotExist:
+            pass
+    else:
+        # Any other event type (creates, updates, etc.)
+        kwargs = {"stripe_id": stripe_id}
+        if customer:
+            kwargs["customer"] = customer
+        data = target_cls(**kwargs).api_retrieve()
+        obj = target_cls.sync_from_stripe_data(data)
+
+    return obj, crud_type

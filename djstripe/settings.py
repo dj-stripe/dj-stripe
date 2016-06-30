@@ -6,10 +6,47 @@ import sys
 from django.apps import apps as django_apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.utils import six
+from django.utils.module_loading import import_string
 
 PY3 = sys.version > "3"
 
-subscriber_request_callback = getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK", (lambda request: request.user))
+
+def get_callback_function(setting_name, default=None):
+    """
+    Resolves a callback function based on a setting name.
+
+    If the setting value isn't set, default is returned.  If the setting value
+    is already a callable function, that value is used - If the setting value
+    is a string, an attempt is made to import it.  Anything else will result in
+    a failed import causing ImportError to be raised.
+
+    :param setting_name: The name of the setting to resolve a callback from.
+    :type setting_name: string (``str``/``unicode``)
+    :param default: The default to return if setting isn't populated.
+    :type default: ``bool``
+    :returns: The resolved callback function (if any).
+    :type: ``callable``
+    """
+
+    func = getattr(settings, setting_name, None)
+    if not func:
+        return default
+
+    if callable(func):
+        return func
+
+    if isinstance(func, six.string_types):
+        func = import_string(func)
+
+    if not callable(func):
+        raise ImproperlyConfigured("{name} must be callable.".format(name=setting_name))
+
+    return func
+
+
+subscriber_request_callback = get_callback_function("DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK",
+                                                    default=(lambda request: request.user))
 
 INVOICE_FROM_EMAIL = getattr(settings, "DJSTRIPE_INVOICE_FROM_EMAIL", "billing@example.com")
 PAYMENTS_PLANS = getattr(settings, "DJSTRIPE_PLANS", {})
@@ -33,12 +70,16 @@ DEFAULT_PLAN = getattr(settings, "DJSTRIPE_DEFAULT_PLAN", None)
 
 # Try to find the new settings variable first. If that fails, revert to the
 # old variable.
-trial_period_for_subscriber_callback = getattr(settings,
-    "DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK",
-    getattr(settings, "DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK", None)
-)
+trial_period_for_subscriber_callback = (
+    get_callback_function("DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK") or
+    get_callback_function("DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK"))
 
 DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
+
+# Webhook event callbacks allow an application to take control of what happens
+# when an event from Stripe is received.  One suggestion is to put the event
+# onto a task queue (such as celery) for asynchronous processing.
+WEBHOOK_EVENT_CALLBACK = get_callback_function("DJSTRIPE_WEBHOOK_EVENT_CALLBACK")
 
 
 def _check_subscriber_for_email_address(subscriber_model, message):
@@ -82,10 +123,10 @@ def get_subscriber_model():
     _check_subscriber_for_email_address(subscriber_model, "DJSTRIPE_SUBSCRIBER_MODEL must have an email attribute.")
 
     # Custom user model detected. Make sure the callback is configured.
-    if hasattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK"):
-        if not callable(getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK")):
-            raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be callable.")
-    else:
-        raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be implemented if a DJSTRIPE_SUBSCRIBER_MODEL is defined.")
+    func = get_callback_function("DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK")
+    if not func:
+        raise ImproperlyConfigured(
+            "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be implemented "
+            "if a DJSTRIPE_SUBSCRIBER_MODEL is defined.")
 
     return subscriber_model

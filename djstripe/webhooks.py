@@ -51,6 +51,7 @@ def handler(event_types):
     :param event_types: The event type(s) or sub-type(s) that should be handled.
     :type event_types: A sequence (`list`) or string (`str`/`unicode`).
     """
+
     if isinstance(event_types, six.string_types):
         event_types = [event_types]
 
@@ -67,10 +68,12 @@ def handler_all(func=None):
     Decorator which registers a function as a webhook handler for ALL webhook
     events, regardless of event type or sub-type.
     """
+
     if not func:
         return functools.partial(handler_all)
 
     registrations_global.append(func)
+
     return func
 
 
@@ -87,20 +90,25 @@ def call_handlers(event, event_data, event_type, event_subtype):
     Handlers within each group are invoked in order of registration.
 
     :param event: The event model object.
-    :type event: `djstripe.models.Event`
+    :type event: ``djstripe.models.Event``
     :param event_data: The raw data for the event.
-    :type event_data: `dict`
+    :type event_data: ``dict``
     :param event_type: The event type, e.g. 'customer'.
-    :type event_type: string (`str`/`unicode`)
+    :type event_type: string (``str``/``unicode``)
     :param event_subtype: The event sub-type, e.g. 'updated'.
-    :type event_subtype: string (`str`/`unicode`)
+    :type event_subtype: string (``str``/`unicode``)
     """
-    qualified_event_type = (
-        "{event_type}.{event_subtype}".format(
-            event_type=event_type, event_subtype=event_subtype))
 
-    for handler_func in itertools.chain(
-            registrations_global,
-            registrations[event_type],
-            registrations[qualified_event_type]):
+    chain = [registrations_global]
+
+    # Build up a list of handlers with each qualified part of the event
+    # type and subtype.  For example, "customer.subscription.created" creates:
+    #   1. "customer"
+    #   2. "customer.subscription"
+    #   3. "customer.subscription.created"
+    for index, _ in enumerate(event.parts):
+        qualified_event_type = ".".join(event.parts[:(index + 1)])
+        chain.append(registrations[qualified_event_type])
+
+    for handler_func in itertools.chain(*chain):
         handler_func(event, event_data, event_type, event_subtype)

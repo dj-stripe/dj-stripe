@@ -5,6 +5,7 @@
 .. moduleauthor:: Daniel Greenfeld (@pydanny)
 .. moduleauthor:: Alex Kavanaugh (@kavdev)
 .. moduleauthor:: Michael Thornhill (@mthornhill)
+.. moduleauthor:: Lee Skillen (@lskillen)
 
 """
 
@@ -16,14 +17,14 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
-from mock import patch
+from mock import patch, ANY
 from stripe.error import InvalidRequestError
 
 from djstripe.exceptions import MultipleSubscriptionException
 from djstripe.models import Account, Customer, Charge, Card, Subscription, Invoice, Plan
 from tests import (FAKE_CARD, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_ACCOUNT, FAKE_INVOICE,
                    FAKE_INVOICE_III, FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II,
-                   StripeList, FAKE_CARD_V, FAKE_CUSTOMER_II)
+                   StripeList, FAKE_CARD_V, FAKE_CUSTOMER_II, FAKE_UPCOMING_INVOICE)
 
 
 class TestCustomer(TestCase):
@@ -99,7 +100,8 @@ class TestCustomer(TestCase):
         self.assertTrue(not customer.sources.all())
         self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
 
-        customer_retrieve_mock.assert_called_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=['default_source'])
+        customer_retrieve_mock.assert_called_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY,
+                                                  expand=['default_source'])
         self.assertEquals(2, customer_retrieve_mock.call_count)
 
     @patch("stripe.Customer.retrieve")
@@ -109,7 +111,8 @@ class TestCustomer(TestCase):
         with self.assertRaisesMessage(InvalidRequestError, "Unexpected Exception"):
             self.customer.purge()
 
-        customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=['default_source'])
+        customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY,
+                                                       expand=['default_source'])
 
     def test_can_charge(self):
         self.assertTrue(self.customer.can_charge())
@@ -576,3 +579,27 @@ class TestCustomer(TestCase):
     def test_add_invoice_item_bad_decimal(self):
         with self.assertRaisesMessage(ValueError, "You must supply a decimal value representing dollars."):
             self.customer.add_invoice_item(amount=5000, currency="usd")
+
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
+    @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
+    @patch("stripe.Invoice.upcoming", return_value=deepcopy(FAKE_UPCOMING_INVOICE))
+    def test_upcoming_invoice(self, invoice_upcoming_mock, subscription_retrieve_mock, plan_retrieve_mock):
+        invoice = self.customer.upcoming_invoice()
+        self.assertIsNotNone(invoice)
+        self.assertIsNone(invoice.stripe_id)
+        self.assertIsNone(invoice.save())
+
+        subscription_retrieve_mock.assert_called_once_with(api_key=ANY, expand=ANY, id=FAKE_SUBSCRIPTION["id"])
+        plan_retrieve_mock.assert_not_called()
+
+        items = invoice.invoiceitems.all()
+        self.assertEquals(1, len(items))
+        self.assertEquals(FAKE_SUBSCRIPTION["id"], items[0].stripe_id)
+
+        self.assertIsNotNone(invoice.plan)
+        self.assertEquals(FAKE_PLAN["id"], invoice.plan.stripe_id)
+
+        invoice._invoiceitems = []
+        items = invoice.invoiceitems.all()
+        self.assertEquals(0, len(items))
+        self.assertIsNotNone(invoice.plan)

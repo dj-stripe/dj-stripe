@@ -3,6 +3,7 @@
    :synopsis: dj-stripe test fakes
 
 .. moduleauthor:: Alex Kavanaugh (@kavdev)
+.. moduleauthor:: Lee Skillen (@lskillen)
 
 A Fake or multiple fakes for each stripe object.
 
@@ -542,7 +543,7 @@ class Sources(object):
             if fake_card["id"] == source:
                 return fake_card
 
-    def retrieve(self, id, api_key, expand):
+    def retrieve(self, id, expand=None):
         for fake_card in self.card_fakes:
             if fake_card["id"] == id:
                 return fake_card
@@ -812,16 +813,100 @@ FAKE_INVOICE_III = InvoiceDict({
     "webhooks_delivered_at": 1439426955,
 })
 
+FAKE_UPCOMING_INVOICE = InvoiceDict({
+    "id": "in",
+    "object": "invoice",
+    "amount_due": 2000,
+    "application_fee": None,
+    "attempt_count": 1,
+    "attempted": False,
+    "charge": None,
+    "closed": False,
+    "currency": "usd",
+    "customer": FAKE_CUSTOMER["id"],
+    "date": 1439218864,
+    "description": None,
+    "discount": None,
+    "ending_balance": None,
+    "forgiven": False,
+    "lines": {
+        "data": [
+            {
+                "id": FAKE_SUBSCRIPTION["id"],
+                "object": "line_item",
+                "amount": 2000,
+                "currency": "usd",
+                "description": None,
+                "discountable": True,
+                "livemode": True,
+                "metadata": {},
+                "period": {
+                    "start": 1441907581,
+                    "end": 1444499581
+                },
+                "plan": deepcopy(FAKE_PLAN),
+                "proration": False,
+                "quantity": 1,
+                "subscription": None,
+                "type": "subscription",
+            }
+        ],
+        "total_count": 1,
+        "object": "list",
+        "url": "/v1/invoices/in_16YHls2eZvKYlo2CwwH968Mc/lines",
+    },
+    "livemode": False,
+    "metadata": {},
+    "next_payment_attempt": 1439218689,
+    "paid": False,
+    "period_end": 1439218689,
+    "period_start": 1439132289,
+    "receipt_number": None,
+    "starting_balance": 0,
+    "statement_descriptor": None,
+    "subscription": FAKE_SUBSCRIPTION["id"],
+    "subtotal": 2000,
+    "tax": None,
+    "tax_percent": None,
+    "total": 2000,
+    "webhooks_delivered_at": 1439218870,
+})
+
 FAKE_INVOICEITEM = {
     "id": "ii_16XVTY2eZvKYlo2Cxz5n3RaS",
     "object": "invoiceitem",
     "amount": 2000,
     "currency": "usd",
-    "customer": "cus_4UbFSo9tl62jqj",
+    "customer": FAKE_CUSTOMER_II["id"],
     "date": 1439033216,
     "description": "One-time setup fee",
     "discountable": True,
     "invoice": FAKE_INVOICE_II["id"],
+    "livemode": False,
+    "metadata": {
+        "key1": "value1",
+        "key2": "value2"
+    },
+    "period": {
+        "start": 1439033216,
+        "end": 1439033216,
+    },
+    "plan": None,
+    "proration": False,
+    "quantity": None,
+    "subscription": None,
+}
+
+FAKE_INVOICEITEM_II = {
+    "id": "ii_16XVTY2eZvKYlo2Cxz5n3RaS",
+    "object": "invoiceitem",
+    "amount": 2000,
+    "currency": "usd",
+    "customer": FAKE_CUSTOMER["id"],
+    "date": 1439033216,
+    "description": "One-time setup fee",
+    "discountable": True,
+    "invoice": FAKE_INVOICE["id"],
     "livemode": False,
     "metadata": {
         "key1": "value1",
@@ -1043,6 +1128,12 @@ FAKE_EVENT_CUSTOMER_CREATED = {
     "type": "customer.created",
 }
 
+FAKE_EVENT_CUSTOMER_DELETED = deepcopy(FAKE_EVENT_CUSTOMER_CREATED)
+FAKE_EVENT_CUSTOMER_DELETED.update({
+    "id": "evt_38DHch3whaDvKYlo2jksfsFFxy",
+    "type": "customer.deleted"
+})
+
 FAKE_EVENT_CUSTOMER_SOURCE_CREATED = {
     "id": "evt_DvKYlo38huDvKYlo2C7SXedrZk",
     "object": "event",
@@ -1056,6 +1147,17 @@ FAKE_EVENT_CUSTOMER_SOURCE_CREATED = {
     "request": "req_o3whaDvh3whaDj",
     "type": "customer.source.created",
 }
+
+FAKE_EVENT_CUSTOMER_SOURCE_DELETED = deepcopy(FAKE_EVENT_CUSTOMER_SOURCE_CREATED)
+FAKE_EVENT_CUSTOMER_SOURCE_DELETED.update({
+    "id": "evt_DvKYlo38huDvKYlo2C7SXedrYk",
+    "type": "customer.source.deleted"
+})
+
+FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE = deepcopy(FAKE_EVENT_CUSTOMER_SOURCE_DELETED)
+FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE.update({
+    "id": "evt_DvKYlo38huDvKYlo2C7SXedzAk",
+})
 
 FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED = {
     "id": "evt_38DHch3wHD2eZvKYlCT2oe5ff3",
@@ -1071,6 +1173,11 @@ FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED = {
     "type": "customer.subscription.created",
 }
 
+FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED = deepcopy(FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED)
+FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED.update({
+    "id": "evt_38DHch3wHD2eZvKYlCT2oeryaf",
+    "type": "customer.subscription.deleted"})
+
 FAKE_EVENT_INVOICE_CREATED = {
     "id": "evt_187IHD2eZvKYlo2C6YKQi2eZ",
     "object": "event",
@@ -1084,6 +1191,11 @@ FAKE_EVENT_INVOICE_CREATED = {
     "request": "req_8O4sB7hkDobVT",
     "type": "invoice.created",
 }
+
+FAKE_EVENT_INVOICE_DELETED = deepcopy(FAKE_EVENT_INVOICE_CREATED)
+FAKE_EVENT_INVOICE_DELETED.update({
+    "id": "evt_187IHD2eZvKYlo2Cjkjsr34H",
+    "type": "invoice.deleted"})
 
 FAKE_EVENT_INVOICEITEM_CREATED = {
     "id": "evt_187IHD2eZvKYlo2C7SXedrZk",
@@ -1099,6 +1211,11 @@ FAKE_EVENT_INVOICEITEM_CREATED = {
     "type": "invoiceitem.created",
 }
 
+FAKE_EVENT_INVOICEITEM_DELETED = deepcopy(FAKE_EVENT_INVOICEITEM_CREATED)
+FAKE_EVENT_INVOICEITEM_DELETED.update({
+    "id": "evt_187IHD2eZvKYloJfdsnnfs34",
+    "type": "invoiceitem.deleted"})
+
 FAKE_EVENT_PLAN_CREATED = {
     "id": "evt_1877X72eZvKYlo2CLK6daFxu",
     "object": "event",
@@ -1113,6 +1230,11 @@ FAKE_EVENT_PLAN_CREATED = {
     "type": "plan.created",
 }
 
+FAKE_EVENT_PLAN_DELETED = deepcopy(FAKE_EVENT_PLAN_CREATED)
+FAKE_EVENT_PLAN_DELETED.update({
+    "id": "evt_1877X72eZvKYl2jkds32jJFc",
+    "type": "plan.deleted"})
+
 FAKE_EVENT_TRANSFER_CREATED = {
     "id": "evt_16igNU2eZvKYlo2CYyMkYvet",
     "object": "event",
@@ -1126,6 +1248,11 @@ FAKE_EVENT_TRANSFER_CREATED = {
     "request": "req_6wZW9MskhYU15Y",
     "type": "transfer.created",
 }
+
+FAKE_EVENT_TRANSFER_DELETED = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+FAKE_EVENT_TRANSFER_DELETED.update({
+    "id": "evt_16igNU2eZvKjklfsdjk232Mf",
+    "type": "transfer.deleted"})
 
 FAKE_TOKEN = {
     "id": "tok_16YDIe2eZvKYlo2CPvqprIJd",

@@ -51,6 +51,7 @@ Customer
     .. automethod:: djstripe.models.Customer.retry_unpaid_invoices
     .. automethod:: djstripe.models.Customer.has_valid_source
     .. automethod:: djstripe.models.Customer.add_card
+    .. automethod:: djstripe.models.Customer.upcoming_invoice
     
     .. automethod:: djstripe.models.Customer.str_parts
     .. automethod:: djstripe.stripe_objects.StripeObject.sync_from_stripe_data
@@ -123,8 +124,10 @@ Invoice
     .. autoattribute:: djstripe.models.Invoice.STATUS_CLOSED
     .. autoattribute:: djstripe.models.Invoice.STATUS_OPEN
     .. autoattribute:: djstripe.models.Invoice.status
+    .. autoattribute:: djstripe.models.Invoice.plan
     
     .. automethod:: djstripe.models.Invoice.retry
+    .. automethod:: djstripe.models.Invoice.upcoming
     
     .. automethod:: djstripe.models.Invoice.str_parts
     .. automethod:: djstripe.stripe_objects.StripeObject.sync_from_stripe_data
