@@ -12,7 +12,12 @@ History
 * `SubscriptionPaymentMiddleware.process_request()` functionality broken up into multiple methods, making local customizations easier (Thanks @pydanny)
 * Fully qualified events are now supported by event handlers as strings e.g. 'customer.subscription.deleted' (Thanks @lskillen) #316
 * runtests now accepts positional arguments for declaring which tests to run (Thanks @lskillen) #317
-* It is now possible to reprocess events in both code and the admin interface (Thanks @lskillen) #318 
+* It is now possible to reprocess events in both code and the admin interface (Thanks @lskillen) #318
+* The confirm page now checks that a valid card exists. (Thanks @scream4ik) #325
+* Added support for viewing upcoming invoices (Thanks @lskillen) #320
+* Event handler improvements and bugfixes (Thanks @lskillen) #321
+* API list() method bugfixes (Thanks @lskillen) #322
+* Added support for a custom webhook event handler (Thanks @lskillen) #323
 
 0.8.0 (2015-12-30)
 ---------------------
