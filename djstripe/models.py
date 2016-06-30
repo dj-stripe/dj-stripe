@@ -21,6 +21,7 @@ from django.db import models
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
+from django.utils.functional import cached_property
 from doc_inherit import class_doc_inherit
 from mock_django.query import QuerySetMock
 from model_utils.models import TimeStampedModel
@@ -126,7 +127,9 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
     # account = models.ForeignKey(Account, related_name="customers")
 
-    default_source = models.ForeignKey(StripeSource, null=True, related_name="customers")
+    default_source = models.ForeignKey(
+        StripeSource, null=True, related_name="customers",
+        on_delete=models.SET_NULL)
 
     subscriber = models.OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
     date_purged = models.DateTimeField(null=True, editable=False)
@@ -332,7 +335,6 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
     def has_valid_source(self):
         """ Check whether the customer has a valid payment source."""
-
         return self.default_source is not None
 
     def add_card(self, source, set_default=True):
@@ -428,18 +430,17 @@ class Event(StripeEvent):
         previously processed successfully.
         :rtype: bool
         """
+
         if not self.valid:
             return False
 
         if not self.processed or force:
-            event_type, event_subtype = self.type.split(".", 1)
-
             try:
                 # TODO: would it make sense to wrap the next 4 lines in a transaction.atomic context? Yes it would,
                 # except that some webhook handlers can have side effects outside of our local database, meaning that
                 # even if we rollback on our database, some updates may have been sent to Stripe, etc in resposne to
                 # webhooks...
-                webhooks.call_handlers(self, self.message, event_type, event_subtype)
+                webhooks.call_handlers(self, self.message, self.event_type, self.event_subtype)
                 self._send_signal()
                 self.processed = True
             except StripeError as exc:
@@ -468,6 +469,21 @@ class Event(StripeEvent):
         signal = WEBHOOK_SIGNALS.get(self.type)
         if signal:
             return signal.send(sender=Event, event=self)
+
+    @cached_property
+    def parts(self):
+        """ Gets the event type/subtype as a list of parts. """
+        return str(self.type).split(".")
+
+    @cached_property
+    def event_type(self):
+        """ Gets the event type string. """
+        return self.parts[0]
+
+    @cached_property
+    def event_subtype(self):
+        """ Gets the event subtype string. """
+        return ".".join(self.parts[1:])
 
 
 @class_doc_inherit
