@@ -7,3 +7,4 @@ pytz>=2015.7
 stripe~=1.35.0
 tqdm>=4.7.4
 python-doc-inherit~=0.3.0
+mock-django~=0.6.10

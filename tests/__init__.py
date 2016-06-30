@@ -3,6 +3,7 @@
    :synopsis: dj-stripe test fakes
 
 .. moduleauthor:: Alex Kavanaugh (@kavdev)
+.. moduleauthor:: Lee Skillen (@lskillen)
 
 A Fake or multiple fakes for each stripe object.
 
@@ -812,16 +813,100 @@ FAKE_INVOICE_III = InvoiceDict({
     "webhooks_delivered_at": 1439426955,
 })
 
+FAKE_UPCOMING_INVOICE = InvoiceDict({
+    "id": "in",
+    "object": "invoice",
+    "amount_due": 2000,
+    "application_fee": None,
+    "attempt_count": 1,
+    "attempted": False,
+    "charge": None,
+    "closed": False,
+    "currency": "usd",
+    "customer": FAKE_CUSTOMER["id"],
+    "date": 1439218864,
+    "description": None,
+    "discount": None,
+    "ending_balance": None,
+    "forgiven": False,
+    "lines": {
+        "data": [
+            {
+                "id": FAKE_SUBSCRIPTION["id"],
+                "object": "line_item",
+                "amount": 2000,
+                "currency": "usd",
+                "description": None,
+                "discountable": True,
+                "livemode": True,
+                "metadata": {},
+                "period": {
+                    "start": 1441907581,
+                    "end": 1444499581
+                },
+                "plan": deepcopy(FAKE_PLAN),
+                "proration": False,
+                "quantity": 1,
+                "subscription": None,
+                "type": "subscription",
+            }
+        ],
+        "total_count": 1,
+        "object": "list",
+        "url": "/v1/invoices/in_16YHls2eZvKYlo2CwwH968Mc/lines",
+    },
+    "livemode": False,
+    "metadata": {},
+    "next_payment_attempt": 1439218689,
+    "paid": False,
+    "period_end": 1439218689,
+    "period_start": 1439132289,
+    "receipt_number": None,
+    "starting_balance": 0,
+    "statement_descriptor": None,
+    "subscription": FAKE_SUBSCRIPTION["id"],
+    "subtotal": 2000,
+    "tax": None,
+    "tax_percent": None,
+    "total": 2000,
+    "webhooks_delivered_at": 1439218870,
+})
+
 FAKE_INVOICEITEM = {
     "id": "ii_16XVTY2eZvKYlo2Cxz5n3RaS",
     "object": "invoiceitem",
     "amount": 2000,
     "currency": "usd",
-    "customer": "cus_4UbFSo9tl62jqj",
+    "customer": FAKE_CUSTOMER_II["id"],
     "date": 1439033216,
     "description": "One-time setup fee",
     "discountable": True,
     "invoice": FAKE_INVOICE_II["id"],
+    "livemode": False,
+    "metadata": {
+        "key1": "value1",
+        "key2": "value2"
+    },
+    "period": {
+        "start": 1439033216,
+        "end": 1439033216,
+    },
+    "plan": None,
+    "proration": False,
+    "quantity": None,
+    "subscription": None,
+}
+
+FAKE_INVOICEITEM_II = {
+    "id": "ii_16XVTY2eZvKYlo2Cxz5n3RaS",
+    "object": "invoiceitem",
+    "amount": 2000,
+    "currency": "usd",
+    "customer": FAKE_CUSTOMER["id"],
+    "date": 1439033216,
+    "description": "One-time setup fee",
+    "discountable": True,
+    "invoice": FAKE_INVOICE["id"],
     "livemode": False,
     "metadata": {
         "key1": "value1",

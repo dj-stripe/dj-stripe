@@ -129,8 +129,12 @@ class StripeIdField(StripeCharField):
     """A field with enough space to hold any stripe ID."""
 
     def __init__(self, *args, **kwargs):
+        # As per: https://stripe.com/docs/upgrades
+        # You can safely assume object IDs we generate will never exceed 255
+        # characters, but you should be able to handle IDs of up to that
+        # length.
         defaults = {
-            'max_length': 50,
+            'max_length': 255,
             'blank': False,
             'null': False,
         }
