@@ -543,7 +543,7 @@ class Sources(object):
             if fake_card["id"] == source:
                 return fake_card
 
-    def retrieve(self, id, api_key, expand):
+    def retrieve(self, id, expand=None):
         for fake_card in self.card_fakes:
             if fake_card["id"] == id:
                 return fake_card

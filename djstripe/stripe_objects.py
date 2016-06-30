@@ -128,7 +128,7 @@ class StripeObject(TimeStampedModel):
         :type api_key: string
         """
 
-        return self.api_retrieve(api_key).delete(**kwargs)
+        return self.api_retrieve(api_key=api_key).delete(**kwargs)
 
     def str_parts(self):
         """
@@ -1027,7 +1027,7 @@ Fields not implemented:
         # Cards must be manipulated through a customer or account.
         # TODO: When managed accounts are supported, this method needs to check if either a customer or account is supplied to determine the correct object to use.
 
-        return self.customer.api_retrieve().sources.retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
+        return self.customer.api_retrieve(api_key=api_key).sources.retrieve(self.stripe_id, expand=self.expand_fields)
 
     @staticmethod
     def _get_customer_from_kwargs(**kwargs):
