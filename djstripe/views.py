@@ -14,10 +14,10 @@ from django.utils.encoding import smart_str
 from django.views.generic import DetailView, FormView, TemplateView, View
 from stripe.error import StripeError
 
+from . import settings as djstripe_settings
 from .forms import PlanForm, CancelSubscriptionForm
 from .mixins import PaymentsContextMixin, SubscriptionMixin
 from .models import Customer, Event, EventProcessingException, Plan
-from .settings import PRORATION_POLICY_FOR_UPGRADES, subscriber_request_callback
 from .sync import sync_subscriber
 
 
@@ -41,7 +41,7 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
         if hasattr(self, "customer"):
             return self.customer
         self.customer, _created = Customer.get_or_create(
-            subscriber=subscriber_request_callback(self.request))
+            subscriber=djstripe_settings.subscriber_request_callback(self.request))
         return self.customer
 
     def post(self, request, *args, **kwargs):
@@ -84,7 +84,7 @@ class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
 
     def get_object(self):
         customer, _created = Customer.get_or_create(
-            subscriber=subscriber_request_callback(self.request))
+            subscriber=djstripe_settings.subscriber_request_callback(self.request))
         return customer
 
 
@@ -97,7 +97,7 @@ class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
         return render(
             request,
             self.template_name,
-            {"customer": sync_subscriber(subscriber_request_callback(request))}
+            {"customer": sync_subscriber(djstripe_settings.subscriber_request_callback(request))}
         )
 
 
@@ -118,7 +118,7 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
         if not Plan.objects.filter(id=plan_id).exists():
             return HttpResponseNotFound()
 
-        customer, _created = Customer.get_or_create(subscriber=subscriber_request_callback(self.request))
+        customer, _created = Customer.get_or_create(subscriber=djstripe_settings.subscriber_request_callback(self.request))
 
         if customer.subscription and str(customer.subscription.plan.id) == plan_id and customer.subscription.is_valid():
             message = "You already subscribed to this plan"
@@ -141,7 +141,7 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
         form = self.get_form(form_class)
         if form.is_valid():
             try:
-                customer, _created = Customer.get_or_create(subscriber=subscriber_request_callback(self.request))
+                customer, _created = Customer.get_or_create(subscriber=djstripe_settings.subscriber_request_callback(self.request))
                 customer.add_card(self.request.POST.get("stripe_token"))
                 customer.subscribe(form.cleaned_data["plan"])
             except StripeError as exc:
@@ -171,7 +171,7 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
     def post(self, request, *args, **kwargs):
         form = PlanForm(request.POST)
 
-        customer, _created = Customer.get_or_create(subscriber=subscriber_request_callback(self.request))
+        customer, _created = Customer.get_or_create(subscriber=djstripe_settings.subscriber_request_callback(self.request))
 
         if not customer.subscription:
             form.add_error(None, "You must already be subscribed to a plan before you can change it.")
@@ -184,7 +184,7 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
                 # When a customer upgrades their plan, and DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES is set to True,
                 # we force the proration of the current plan and use it towards the upgraded plan,
                 # no matter what DJSTRIPE_PRORATION_POLICY is set to.
-                if PRORATION_POLICY_FOR_UPGRADES:
+                if djstripe_settings.PRORATION_POLICY_FOR_UPGRADES:
                     # Is it an upgrade?
                     if selected_plan.amount > customer.subscription.plan.amount:
                         customer.subscription.update(plan=selected_plan, prorate=True)
@@ -206,7 +206,7 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
     success_url = reverse_lazy("djstripe:account")
 
     def form_valid(self, form):
-        customer, _created = Customer.get_or_create(subscriber=subscriber_request_callback(self.request))
+        customer, _created = Customer.get_or_create(subscriber=djstripe_settings.subscriber_request_callback(self.request))
         subscription = customer.subscription.cancel()
 
         if subscription.status == subscription.STATUS_CANCELED:
@@ -244,5 +244,10 @@ class WebHook(CsrfExemptMixin, View):
         else:
             event = Event._create_from_stripe_object(data)
             event.validate()
-            event.process()
+
+            if djstripe_settings.WEBHOOK_EVENT_CALLBACK:
+                djstripe_settings.WEBHOOK_EVENT_CALLBACK(event)
+            else:
+                event.process()
+
         return HttpResponse()

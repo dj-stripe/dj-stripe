@@ -19,7 +19,7 @@ from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
-from django.utils import timezone
+from django.utils import six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.functional import cached_property
 from doc_inherit import class_doc_inherit
@@ -415,7 +415,7 @@ class Event(StripeEvent):
         self.valid = self.webhook_message == self.api_retrieve()["data"]
         self.save()
 
-    def process(self, force=False):
+    def process(self, force=False, raise_exception=False):
         """
         Invokes any webhook handlers that have been registered for this event
         based on event type or event sub-type.
@@ -426,6 +426,9 @@ class Event(StripeEvent):
         :param force: If True, force the event to be processed by webhook
         handlers, even if the event has already been processed previously.
         :type force: bool
+        :param raise_exception: If True, any Stripe errors raised during
+        processing will be raised to the caller after logging the exception.
+        :type raise_exception: bool
         :returns: True if the webhook was processed successfully or was
         previously processed successfully.
         :rtype: bool
@@ -435,6 +438,8 @@ class Event(StripeEvent):
             return False
 
         if not self.processed or force:
+            exc_value = None
+
             try:
                 # TODO: would it make sense to wrap the next 4 lines in a transaction.atomic context? Yes it would,
                 # except that some webhook handlers can have side effects outside of our local database, meaning that
@@ -446,6 +451,7 @@ class Event(StripeEvent):
             except StripeError as exc:
                 # TODO: What if we caught all exceptions or a broader range of exceptions here? How about DoesNotExist
                 # exceptions, for instance? or how about TypeErrors, KeyErrors, ValueErrors, etc?
+                exc_value = exc
                 self.processed = False
                 EventProcessingException.log(
                     data=exc.http_body,
@@ -462,6 +468,9 @@ class Event(StripeEvent):
             # longer be processsed successfully if a re-process was forced but
             # an event handle was broken.
             self.save()
+
+            if exc_value and raise_exception:
+                six.reraise(StripeError, exc_value)
 
         return self.processed
 

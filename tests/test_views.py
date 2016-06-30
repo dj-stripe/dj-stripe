@@ -278,7 +278,7 @@ class ChangePlanViewTest(TestCase):
 
         subscription_update_mock.assert_called_once_with(subscription, plan=plan)
 
-    @patch("djstripe.views.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
+    @patch("djstripe.views.djstripe_settings.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
     @patch("djstripe.models.Subscription.update", autospec=True)
     def test_change_sub_with_proration_downgrade(self, subscription_update_mock, proration_policy_mock):
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
@@ -293,7 +293,7 @@ class ChangePlanViewTest(TestCase):
 
         subscription_update_mock.assert_called_once_with(subscription, plan=plan)
 
-    @patch("djstripe.views.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
+    @patch("djstripe.views.djstripe_settings.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
     @patch("djstripe.models.Subscription.update", autospec=True)
     def test_change_sub_with_proration_upgrade(self, subscription_update_mock, proration_policy_mock):
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
@@ -308,7 +308,7 @@ class ChangePlanViewTest(TestCase):
 
         subscription_update_mock.assert_called_once_with(subscription, plan=plan, prorate=True)
 
-    @patch("djstripe.views.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
+    @patch("djstripe.views.djstripe_settings.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
     @patch("djstripe.models.Subscription.update", autospec=True)
     def test_change_sub_with_proration_same_plan(self, subscription_update_mock, proration_policy_mock):
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
