@@ -565,7 +565,7 @@ Fields not implemented:
     expand_fields = ["default_source"]
 
     account_balance = StripeIntegerField(null=True, help_text="Current balance, if any, being stored on the customer's account. If negative, the customer has credit to apply to the next invoice. If positive, the customer has an amount owed that will be added to the next invoice. The balance does not refer to any unpaid invoices; it solely takes into account amounts that have yet to be successfully applied to any invoice. This balance is only taken into account for recurring charges.")
-    business_vat_id = StripeCharField(max_length=20, null=True, help_text="The customer's VAT identification number.")
+    business_vat_id = StripeCharField(max_length=20, null=True, help_text="The customer's VAT identification number.", stripe_required=False)
     currency = StripeCharField(max_length=3, null=True, help_text="The currency the customer can be charged in for recurring billing purposes (subscriptions, invoices, invoice items).")
     delinquent = StripeBooleanField(default=False, help_text="Whether or not the latest charge for the customer's latest invoice has failed.")
     shipping = StripeJSONField(null=True, help_text="Shipping information associated with the customer.")
