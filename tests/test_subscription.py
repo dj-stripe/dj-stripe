@@ -8,6 +8,7 @@
 
 import calendar
 from copy import deepcopy
+from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -144,6 +145,21 @@ class SubscriptionTest(TestCase):
         new_subscription = subscription.update(quantity=4)
 
         self.assertEqual(4, new_subscription.quantity)
+
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
+    @patch("stripe.Subscription.retrieve")
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_update_set_empty_value(self, customer_retrieve_mock, subscription_retrieve_mock, plan_retrieve_mock):
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription_fake.update({'tax_percent': Decimal(20.0)})
+        subscription_retrieve_mock.return_value = subscription_fake
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
+
+        self.assertEqual(Decimal(20.0), subscription.tax_percent)
+
+        new_subscription = subscription.update(tax_percent=Decimal(0.0))
+
+        self.assertEqual(Decimal(0.0), new_subscription.tax_percent)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
