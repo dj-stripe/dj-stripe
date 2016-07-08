@@ -1,5 +1,6 @@
 """
-.. module:: dj-stripe.tests.test_admin
+.. module:: dj-stripe.tests.test_admin.
+
    :synopsis: dj-stripe Admin Tests.
 
 .. moduleauthor:: Oleksandr (@nanvel)
@@ -30,7 +31,6 @@ class TestAdminSite(TestCase):
         Search for errors like this:
         Bad search field <customer__user__username> for Customer model.
         """
-
         for _model, model_admin in six.iteritems(admin.site._registry):
             for search_field in getattr(model_admin, 'search_fields', []):
                 model_name = model_admin.model.__name__

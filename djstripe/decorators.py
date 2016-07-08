@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+"""
+.. module:: djstripe.decorators.
+
+   :synopsis: dj-stripe Decorators.
+
+.. moduleauthor:: @pydanny, and @audreyr
+
+"""
 from __future__ import unicode_literals
 
 from functools import wraps
@@ -12,11 +20,11 @@ from .settings import subscriber_request_callback
 
 def subscriber_passes_pay_test(test_func, plan=None, pay_page="djstripe:subscribe"):
     """
-    Decorator for views that checks that the subscriber passes the given test for a "Paid Feature",
-    redirecting to the pay form if necessary. The test should be a callable
+    Decorator for views that checks the subscriber passes the given test for a "Paid Feature".
+
+    Redirects to the pay form if necessary. The test should be a callable
     that takes the subscriber object and returns True if the subscriber passes.
     """
-
     def decorator(view_func):
         @wraps(view_func, assigned=available_attrs(view_func))
         def _wrapped_view(request, *args, **kwargs):
@@ -30,10 +38,10 @@ def subscriber_passes_pay_test(test_func, plan=None, pay_page="djstripe:subscrib
 
 def subscription_payment_required(function=None, plan=None, pay_page="djstripe:subscribe"):
     """
-    Decorator for views that require subscription payment, redirecting to the
-    subscribe page if necessary.
-    """
+    Decorator for views that require subscription payment.
 
+    Redirects to the subscribe page if necessary.
+    """
     actual_decorator = subscriber_passes_pay_test(
         subscriber_has_active_subscription,
         plan=plan,

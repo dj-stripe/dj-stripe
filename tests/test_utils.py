@@ -1,5 +1,6 @@
 """
-.. module:: dj-stripe.tests.test_utils
+.. module:: dj-stripe.tests.test_utils.
+
    :synopsis: dj-stripe Utilities Tests.
 
 .. moduleauthor:: Daniel Greenfeld (@pydanny)
@@ -108,16 +109,15 @@ class TestUserHasActiveSubscription(TestCase):
         for the current user. This causes a ValueError in this test because the
         database has already been established with auth.User.
         """
-
         subscriber = Organization.objects.create(email="email@test.com")
         self.assertRaises(ValueError, subscriber_has_active_subscription, subscriber)
 
     def test_anonymous_user(self):
         """
-        This needs to throw an ImproperlyConfigured error so the developer
-        can be guided to properly protect the subscription content.
-        """
+        Raise an ImproperlyConfigured error.
 
+        Happens so the developer can be guided to properly protect the subscription content.
+        """
         anon_user = AnonymousUser()
 
         with self.assertRaises(ImproperlyConfigured):

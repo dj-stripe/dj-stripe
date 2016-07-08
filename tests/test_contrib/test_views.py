@@ -1,5 +1,6 @@
 """
-.. module:: dj-stripe.tests.test_contrib.test_views
+.. module:: dj-stripe.tests.test_contrib.test_views.
+
     :synopsis: dj-stripe Rest views for Subscription Tests.
 
 .. moduleauthor:: Philippe Luickx (@philippeluickx)
@@ -24,9 +25,7 @@ from tests import FAKE_SUBSCRIPTION, FAKE_PLAN, FAKE_CUSTOMER
 
 
 class RestSubscriptionTest(APITestCase):
-    """
-    Test the REST api for subscriptions.
-    """
+    """Test the REST api for subscriptions."""
 
     def setUp(self):
         self.url = reverse("rest_djstripe:subscription")
@@ -177,9 +176,8 @@ class RestSubscriptionTest(APITestCase):
 
 
 class RestSubscriptionNotLoggedInTest(APITestCase):
-    """
-    Test the exceptions thrown by the subscription rest views.
-    """
+    """Test the exceptions thrown by the subscription rest views."""
+
     def setUp(self):
         self.url = reverse("rest_djstripe:subscription")
 

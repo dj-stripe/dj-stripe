@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+"""
+.. module:: djstripe.webhooks.
+
+  :synopsis: dj-stripe - Utility functions used for syncing data.
+
+.. moduleauthor:: @kavdev, @pydanny, @wahuneke
+"""
 from __future__ import unicode_literals
 
 from django.conf import settings
@@ -9,6 +16,7 @@ from .models import Customer, Plan
 
 
 def sync_subscriber(subscriber):
+    """Sync a Customer with Stripe api data."""
     customer, _created = Customer.get_or_create(subscriber=subscriber)
     try:
         customer.sync_from_stripe_data(customer.api_retrieve())
@@ -21,6 +29,7 @@ def sync_subscriber(subscriber):
 
 
 def sync_plans():
+    """Sync plans with Stripe api data."""
     for plan in settings.DJSTRIPE_PLANS:
         stripe_plan = settings.DJSTRIPE_PLANS[plan]
         if stripe_plan.get("stripe_plan_id"):

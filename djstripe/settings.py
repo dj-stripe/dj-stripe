@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+"""
+.. module:: djstripe.settings.
+
+   :synopsis: dj-stripe settings
+
+.. moduleauthor:: @kavdev, @pydanny, @lskillen, and @chrissmejia
+"""
 from __future__ import unicode_literals
 
 import sys
@@ -14,7 +21,7 @@ PY3 = sys.version > "3"
 
 def get_callback_function(setting_name, default=None):
     """
-    Resolves a callback function based on a setting name.
+    Resolve a callback function based on a setting name.
 
     If the setting value isn't set, default is returned.  If the setting value
     is already a callable function, that value is used - If the setting value
@@ -28,7 +35,6 @@ def get_callback_function(setting_name, default=None):
     :returns: The resolved callback function (if any).
     :type: ``callable``
     """
-
     func = getattr(settings, setting_name, None)
     if not func:
         return default
@@ -84,7 +90,6 @@ WEBHOOK_EVENT_CALLBACK = get_callback_function("DJSTRIPE_WEBHOOK_EVENT_CALLBACK"
 
 def _check_subscriber_for_email_address(subscriber_model, message):
     """Ensure the custom model has an ``email`` field or property."""
-
     if (("email" not in [field_.name for field_ in subscriber_model._meta.get_fields()]) and
             not hasattr(subscriber_model, 'email')):
         raise ImproperlyConfigured(message)
@@ -92,15 +97,15 @@ def _check_subscriber_for_email_address(subscriber_model, message):
 
 def get_subscriber_model():
     """
+    Attempt to pull settings.DJSTRIPE_SUBSCRIBER_MODEL.
+
     Users have the option of specifying a custom subscriber model via the
     DJSTRIPE_SUBSCRIBER_MODEL setting.
 
-    This method attempts to pull that model from settings, and falls back to
-    AUTH_USER_MODEL if DJSTRIPE_SUBSCRIBER_MODEL is not set.
+    This methods falls back to AUTH_USER_MODEL if DJSTRIPE_SUBSCRIBER_MODEL is not set.
 
     Returns the subscriber model that is active in this project.
     """
-
     SUBSCRIBER_MODEL = getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", None)
 
     # Check if a subscriber model is specified. If not, fall back and exit.

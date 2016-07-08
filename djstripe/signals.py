@@ -1,4 +1,13 @@
 # -*- coding: utf-8 -*-
+"""
+.. module:: djstripe.signals.
+
+   :synopsis: dj-stripe - signals are sent for each event Stripe sends to the app
+
+.. moduleauthor:: @kavdev, @pydanny
+
+Stripe docs for Webhooks: https://stripe.com/docs/webhooks
+"""
 from django.dispatch import Signal
 
 

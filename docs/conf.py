@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-#
 # complexity documentation build configuration file, created by
 # sphinx-quickstart on Tue Jul  9 22:26:36 2013.
 #
@@ -10,6 +9,7 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
+"""Configuration file for djstripe documentation."""
 
 import inspect
 import os
@@ -290,9 +290,9 @@ texinfo_documents = [
 def process_docstring(app, what, name, obj, options, lines):
     """
     Auto list fields from django models.
+
     https://djangosnippets.org/snippets/2533/#c5977
     """
-
     # This causes import errors if left outside the function
     from django.db import models
 
@@ -336,5 +336,5 @@ def process_docstring(app, what, name, obj, options, lines):
 
 
 def setup(app):
-    # Register the docstring processor with sphinx
+    """Register the docstring processor with sphinx."""
     app.connect('autodoc-process-docstring', process_docstring)

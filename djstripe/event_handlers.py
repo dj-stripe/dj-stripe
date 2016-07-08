@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-.. module:: djstripe.event_handlers
+.. module:: djstripe.event_handlers.
+
    :synopsis: dj-stripe - webhook event handlers for the various models
 
 .. moduleauthor:: Bill Huneke (@wahuneke)
 .. moduleauthor:: Alex Kavanaugh (@akavanau)
 .. moduleauthor:: Lee Skillen (@lskillen)
 
-Implement webhook event handlers for all the models that need to respond to webhook events.
+Stripe docs for Events: https://stripe.com/docs/api#events
+Stripe docs for Webhooks: https://stripe.com/docs/webhooks
+
+TODO: Implement webhook event handlers for all the models that need to respond to webhook events.
 
 NOTE: Event data is not guaranteed to be in the correct API version format. See #116.
       When writing a webhook handler, make sure to first re-retrieve the object you wish to
@@ -21,8 +25,10 @@ from .models import Charge, Customer, Card, Subscription, Plan, Transfer, Invoic
 
 @webhooks.handler_all
 def customer_event_attach(event, event_data, event_type, event_subtype):
-    """ Makes the related customer available on the event for all handlers. """
+    """Make the related customer available on the event for all handlers to use.
 
+    Does not create Customer objects.
+    """
     event.customer = None
     crud_type = CrudType.determine(event_subtype, exact=True)
 
@@ -40,8 +46,14 @@ def customer_event_attach(event, event_data, event_type, event_subtype):
 
 @webhooks.handler("customer")
 def customer_webhook_handler(event, event_data, event_type, event_subtype):
-    """ Handles updates for customer objects. """
+    """Handle updates to customer objects.
 
+    First determines the crud_type and then handles the event if a customer exists locally.
+    As customers are tied to local users, djstripe will not create customers that
+    do not already exist locally.
+
+    Docs and eg. customer webhook response: https://stripe.com/docs/api#customer_object
+    """
     crud_type = CrudType.determine(event_subtype, exact=True)
     if crud_type.valid and event.customer:
         # As customers are tied to local users, djstripe will not create
@@ -55,13 +67,14 @@ def customer_webhook_handler(event, event_data, event_type, event_subtype):
 
 
 @webhooks.handler("customer.source")
-def customer_source_webhook_handler(
-        event, event_data, event_type, event_subtype):
-    """ Handles updates for customer source objects. """
+def customer_source_webhook_handler(event, event_data, event_type, event_subtype):
+    """Handle updates to customer payment-source objects.
 
+    Docs: https://stripe.com/docs/api#customer_object-sources.
+    """
     source_type = event_data["object"]["object"]
 
-    # TODO: other sources
+    # TODO: handle other types of sources (https://stripe.com/docs/api#customer_object-sources)
     if source_type == "card":
         _handle_crud_type_event(
             target_cls=Card,
@@ -73,8 +86,10 @@ def customer_source_webhook_handler(
 
 @webhooks.handler("customer.subscription")
 def customer_subscription_webhook_handler(event, event_data, event_type, event_subtype):
-    """ Handles updates for customer subscription objects. """
+    """Handle updates to customer subscription objects.
 
+    Docs and eg. subscription webhook response: https://stripe.com/docs/api#subscription_object
+    """
     _handle_crud_type_event(
         target_cls=Subscription,
         event_data=event_data,
@@ -85,8 +100,14 @@ def customer_subscription_webhook_handler(event, event_data, event_type, event_s
 
 @webhooks.handler(["transfer", "charge", "invoice", "invoiceitem", "plan"])
 def other_object_webhook_handler(event, event_data, event_type, event_subtype):
-    """ Handles updates for transfer, charge, invoice, invoiceitem and plan objects. """
+    """Handle updates to transfer, charge, invoice, invoiceitem and plan objects.
 
+    Docs for:
+    - charge: https://stripe.com/docs/api#charges
+    - invoice: https://stripe.com/docs/api#invoices
+    - invoiceitem: https://stripe.com/docs/api#invoiceitems
+    - plan: https://stripe.com/docs/api#plans
+    """
     target_cls = {
         "charge": Charge,
         "invoice": Invoice,
@@ -108,26 +129,26 @@ def other_object_webhook_handler(event, event_data, event_type, event_subtype):
 #
 
 class CrudType(object):
-    """ Helper object to determine CRUD-like event state. """
+    """Helper object to determine CRUD-like event state."""
 
     created = False
     updated = False
     deleted = False
 
     def __init__(self, **kwargs):
+        """Set attributes."""
         for k, v in kwargs.items():
             setattr(self, k, v)
 
     @property
     def valid(self):
-        """ Returns True if this is a CRUD-like event. """
-
+        """Return True if this is a CRUD-like event."""
         return self.created or self.updated or self.deleted
 
     @classmethod
     def determine(cls, event_subtype, exact=False):
         """
-        Determines if the event subtype is a crud_type (without the 'R') event.
+        Determine if the event subtype is a crud_type (without the 'R') event.
 
         :param event_subtype: The event subtype to examine.
         :type event_subtype: string (``str``/`unicode``)
@@ -136,7 +157,6 @@ class CrudType(object):
         :returns: The CrudType state object.
         :rtype: ``CrudType``
         """
-
         def check(crud_type_event):
             if exact:
                 return event_subtype == crud_type_event
@@ -179,7 +199,6 @@ def _handle_crud_type_event(target_cls, event_data, event_subtype, stripe_id=Non
     :returns: The object (if any) and the event CrudType.
     :rtype: ``tuple(obj, CrudType)``
     """
-
     crud_type = crud_type or CrudType.determine(event_subtype)
     stripe_id = stripe_id or event_data["object"]["id"]
     obj = None
