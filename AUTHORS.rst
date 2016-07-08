@@ -48,4 +48,5 @@ Contributors
 * Raphael Deem (@r0fls)
 * Irfan Ahmad (@erfaan)
 * Lee Skillen (@lskillen)
-* Slava Kyrachevsky (@scream4ik) 
+* Slava Kyrachevsky (@scream4ik)
+* Alec Brunelle (@aleccool213)
