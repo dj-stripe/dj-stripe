@@ -166,6 +166,8 @@ DELETE will cancel the current subscription, based on the settings.
     - input
         - stripe_token (string)
         - plan (string)
+        - charge_immediately (boolean, optional)
+          - Does not send an invoice to the Customer immediately 
 
     - output (201)
         - stripe_token (string)

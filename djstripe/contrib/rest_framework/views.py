@@ -50,13 +50,21 @@ class SubscriptionRestView(APIView):
 
         if serializer.is_valid():
             try:
-                customer, _created = Customer.get_or_create(subscriber=subscriber_request_callback(self.request))
+                customer, created = Customer.get_or_create(
+                    subscriber=subscriber_request_callback(self.request)
+                )
                 customer.add_card(serializer.data["stripe_token"])
-                customer.subscribe(serializer.data["plan"])
+                customer.subscribe(
+                    serializer.data["plan"],
+                    serializer.data.get("charge_immediately", True)
+                )
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             except:
                 # TODO: Better error messages
-                return Response("Something went wrong processing the payment.", status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    "Something went wrong processing the payment.",
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
