@@ -1481,7 +1481,7 @@ Fields not implemented:
         stripe_subscription = self.api_retrieve()
 
         for kwarg, value in kwargs.items():
-            if value:
+            if value is not None:
                 setattr(stripe_subscription, kwarg, value)
 
         return stripe_subscription.save()
