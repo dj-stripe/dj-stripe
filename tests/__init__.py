@@ -11,13 +11,16 @@ Originally collected using API VERSION 2015-07-28.
 Updated to API VERSION 2016-03-07 with bogus fields.
 """
 
-import calendar
 from copy import deepcopy
 from datetime import datetime
 
-from django.utils import timezone
+from django.utils import timezone, dateformat
 
 FUTURE_DATE = datetime(2100, 4, 30, tzinfo=timezone.utc)
+
+
+def datetime_to_unix(datetime_):
+    return int(dateformat.format(datetime_, 'U'))
 
 
 class StripeList(dict):
@@ -449,7 +452,7 @@ class SubscriptionDict(dict):
 
     def __setattr__(self, name, value):
         if type(value) == datetime:
-            value = calendar.timegm(value.timetuple())
+            value = datetime_to_unix(value)
 
         # Special case for plan
         if name == "plan":

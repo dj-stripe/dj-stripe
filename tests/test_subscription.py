@@ -6,7 +6,6 @@
 
 """
 
-import calendar
 from copy import deepcopy
 from decimal import Decimal
 
@@ -16,7 +15,7 @@ from django.utils import timezone
 from mock import patch
 
 from djstripe.models import Customer, Subscription, Plan
-from tests import FAKE_SUBSCRIPTION, FAKE_PLAN, FAKE_CUSTOMER, FAKE_PLAN_II
+from tests import FAKE_SUBSCRIPTION, FAKE_PLAN, FAKE_CUSTOMER, FAKE_PLAN_II, datetime_to_unix
 
 
 class SubscriptionTest(TestCase):
@@ -89,7 +88,7 @@ class SubscriptionTest(TestCase):
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_extend(self, customer_retrieve_mock, subscription_retrieve_mock, plan_retrieve_mock):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_fake["current_period_end"] = calendar.timegm((timezone.now() - timezone.timedelta(days=20)).timetuple())
+        subscription_fake["current_period_end"] = datetime_to_unix(timezone.now() - timezone.timedelta(days=20))
 
         subscription_retrieve_mock.return_value = subscription_fake
 
@@ -184,7 +183,7 @@ class SubscriptionTest(TestCase):
         subscription.current_period_end = timezone.now() + timezone.timedelta(days=7)
         subscription.save()
 
-        cancel_timestamp = calendar.timegm(timezone.now().timetuple())
+        cancel_timestamp = datetime_to_unix(timezone.now())
         canceled_subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         canceled_subscription_fake["status"] = Subscription.STATUS_CANCELED
         canceled_subscription_fake["canceled_at"] = cancel_timestamp
@@ -215,8 +214,8 @@ class SubscriptionTest(TestCase):
         subscription.save()
 
         canceled_subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
-        canceled_subscription_fake["current_period_end"] = calendar.timegm(current_period_end.timetuple())
-        canceled_subscription_fake["canceled_at"] = calendar.timegm(timezone.now().timetuple())
+        canceled_subscription_fake["current_period_end"] = datetime_to_unix(current_period_end)
+        canceled_subscription_fake["canceled_at"] = datetime_to_unix(timezone.now())
         subscription_retrieve_mock.return_value = canceled_subscription_fake  # retrieve().delete()
 
         self.assertTrue(self.customer.has_active_subscription())
@@ -240,7 +239,7 @@ class SubscriptionTest(TestCase):
         subscription.trial_end = timezone.now() + timezone.timedelta(days=7)
         subscription.save()
 
-        cancel_timestamp = calendar.timegm(timezone.now().timetuple())
+        cancel_timestamp = datetime_to_unix(timezone.now())
         canceled_subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         canceled_subscription_fake["status"] = Subscription.STATUS_CANCELED
         canceled_subscription_fake["canceled_at"] = cancel_timestamp

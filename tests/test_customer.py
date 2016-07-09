@@ -9,7 +9,6 @@
 
 """
 
-import calendar
 from copy import deepcopy
 import decimal
 
@@ -24,7 +23,8 @@ from djstripe.exceptions import MultipleSubscriptionException
 from djstripe.models import Account, Customer, Charge, Card, Subscription, Invoice, Plan
 from tests import (FAKE_CARD, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_ACCOUNT, FAKE_INVOICE,
                    FAKE_INVOICE_III, FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II,
-                   StripeList, FAKE_CARD_V, FAKE_CUSTOMER_II, FAKE_UPCOMING_INVOICE)
+                   StripeList, FAKE_CARD_V, FAKE_CUSTOMER_II, FAKE_UPCOMING_INVOICE,
+    datetime_to_unix)
 
 
 class TestCustomer(TestCase):
@@ -504,10 +504,10 @@ class TestCustomer(TestCase):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_fake["current_period_end"] = calendar.timegm((timezone.now() + timezone.timedelta(days=7)).timetuple())
+        subscription_fake["current_period_end"] = datetime_to_unix(timezone.now() + timezone.timedelta(days=7))
 
         subscription_fake_duplicate = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_fake_duplicate["current_period_end"] = calendar.timegm((timezone.now() + timezone.timedelta(days=7)).timetuple())
+        subscription_fake_duplicate["current_period_end"] = datetime_to_unix(timezone.now() + timezone.timedelta(days=7))
         subscription_fake_duplicate["id"] = "sub_6lsC8pt7IcF8jd"
 
         subscription_create_mock.side_effect = [subscription_fake, subscription_fake_duplicate]
@@ -526,7 +526,7 @@ class TestCustomer(TestCase):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_fake["current_period_end"] = calendar.timegm((timezone.now() + timezone.timedelta(days=7)).timetuple())
+        subscription_fake["current_period_end"] = datetime_to_unix(timezone.now() + timezone.timedelta(days=7))
 
         subscription_create_mock.return_value = subscription_fake
 
@@ -540,7 +540,7 @@ class TestCustomer(TestCase):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_fake["current_period_end"] = calendar.timegm((timezone.now() + timezone.timedelta(days=7)).timetuple())
+        subscription_fake["current_period_end"] = datetime_to_unix(timezone.now() + timezone.timedelta(days=7))
 
         subscription_create_mock.return_value = subscription_fake
 
