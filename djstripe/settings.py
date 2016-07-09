@@ -85,7 +85,7 @@ WEBHOOK_EVENT_CALLBACK = get_callback_function("DJSTRIPE_WEBHOOK_EVENT_CALLBACK"
 def _check_subscriber_for_email_address(subscriber_model, message):
     """Ensure the custom model has an ``email`` field or property."""
 
-    if ("email" not in subscriber_model._meta.get_all_field_names()) and not hasattr(subscriber_model, 'email'):
+    if ("email" not in [field_.name for field_ in subscriber_model._meta.get_fields()]) and not hasattr(subscriber_model, 'email'):
         raise ImproperlyConfigured(message)
 
 
