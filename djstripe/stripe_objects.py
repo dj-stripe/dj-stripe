@@ -1205,6 +1205,8 @@ Fields not implemented:
         etc. It will also show you any discount that is applicable to the
         customer. (Source: https://stripe.com/docs/api#upcoming_invoice)
 
+        .. important:: Note that when you are viewing an upcoming invoice, you are simply viewing a preview.
+
         :param customer: The identifier of the customer whose upcoming invoice \
         you'd like to retrieve.
         :type customer: Customer or string (customer ID)
