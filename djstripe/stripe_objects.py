@@ -1199,44 +1199,43 @@ Fields not implemented:
         """
         Gets the upcoming preview invoice (singular) for a customer.
 
-        As per the Stripe docs: "At any time, you can preview the upcoming
+        At any time, you can preview the upcoming
         invoice for a customer. This will show you all the charges that are
         pending, including subscription renewal charges, invoice item charges,
         etc. It will also show you any discount that is applicable to the
-        customer."
+        customer. (Source: https://stripe.com/docs/api#upcoming_invoice)
 
-        See for details: https://stripe.com/docs/api#upcoming_invoice
-
-        :param customer: The identifier of the customer whose upcoming invoice
+        :param customer: The identifier of the customer whose upcoming invoice \
         you'd like to retrieve.
-        :type customer: ``djstripe.models.Customer``
+        :type customer: Customer or string (customer ID)
         :param coupon: The code of the coupon to apply.
-        :type customer: ``str``
-        :param subscription: The identifier of the subscription to retrieve an
+        :type customer: str
+        :param subscription: The identifier of the subscription to retrieve an \
         invoice for.
-        :type customer: ``djstripe.models.Subscription`` or ``str`` (id)
-        :param subscription_plan: If set, the invoice returned will preview
-        updating the subscription given to this plan, or creating a new
+        :type subscription: Subscription or string (subscription ID)
+        :param subscription_plan: If set, the invoice returned will preview \
+        updating the subscription given to this plan, or creating a new \
         subscription to this plan if no subscription is given.
-        :type subscription_plan: ``djstripe.models.Subscription`` or ``str`` (id)
-        :param subscription_prorate: If previewing an update to a subscription,
-        this decides whether the preview will show the result of applying
+        :type subscription_plan: Plan or string (plan ID)
+        :param subscription_prorate: If previewing an update to a subscription, \
+        this decides whether the preview will show the result of applying \
         prorations or not.
-        :type subscription_prorate: ``bool``
-        :param subscription_proration_date: If previewing an update to a
-        subscription, and doing proration, subscription_proration_date forces
-        the proration to be calculated as though the update was done at the
+        :type subscription_prorate: bool
+        :param subscription_proration_date: If previewing an update to a \
+        subscription, and doing proration, subscription_proration_date forces \
+        the proration to be calculated as though the update was done at the \
         specified time.
-        :type subscription_proration_date: ``datetime``
-        :param subscription_quantity: If provided, the invoice returned will
+        :type subscription_proration_date: datetime
+        :param subscription_quantity: If provided, the invoice returned will \
         preview updating or creating a subscription with that quantity.
-        :type subscription_proration_quantity: ``int``
-        :param subscription_trial_end: If provided, the invoice returned will
+        :type subscription_proration_quantity: int
+        :param subscription_trial_end: If provided, the invoice returned will \
         preview updating or creating a subscription with that trial end.
-        :type subscription_trial_end: ``datetime``
+        :type subscription_trial_end: datetime
         :returns: The upcoming preview invoice.
-        :rtype: ``djstripe.models.UpcomingInvoice``
+        :rtype: UpcomingInvoice
         """
+
         try:
             upcoming_stripe_invoice = cls._api().upcoming(
                 api_key=api_key, customer=customer,

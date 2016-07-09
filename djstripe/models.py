@@ -351,7 +351,8 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
     def upcoming_invoice(self, **kwargs):
         """ Gets the upcoming preview invoice (singular) for this customer.
 
-        See `StripeInvoice.upcoming() <#djstripe.stripe_objects.StripeInvoice.upcoming>`__
+        See `Invoice.upcoming() <#djstripe.models.Invoice.upcoming>`__.
+
         The ``customer`` argument to the ``upcoming()`` call is automatically set by this method.
         """
 
