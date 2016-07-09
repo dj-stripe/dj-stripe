@@ -12,6 +12,7 @@
 from __future__ import unicode_literals
 
 import logging
+import sys
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -174,7 +175,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
                 pass
             else:
                 # The exception was raised for another reason, re-raise it
-                raise
+                six.reraise(*sys.exc_info())
 
         self.subscriber = None
 
@@ -330,7 +331,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
                 invoice.retry()  # Always retry unpaid invoices
             except InvalidRequestError as exc:
                 if str(exc) != "Invoice is already paid":
-                    raise exc
+                    six.reraise(*sys.exc_info())
 
     def has_valid_source(self):
         """ Check whether the customer has a valid payment source."""
@@ -541,7 +542,7 @@ class Card(StripeCard):
                 pass
             else:
                 # The exception was raised for another reason, re-raise it
-                raise
+                six.reraise(*sys.exc_info())
 
         self.delete()
 

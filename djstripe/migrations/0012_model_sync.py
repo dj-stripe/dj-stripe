@@ -8,6 +8,7 @@ from tqdm import tqdm
 from djstripe.exceptions import CustomerDoesNotExistLocallyException
 from stripe.error import InvalidRequestError
 from django.db.utils import IntegrityError
+from django.utils import six
 
 
 def resync_subscriptions(apps, schema_editor):
@@ -163,7 +164,7 @@ def sync_customers(apps, schema_editor):
                 tqdm.write("There was an error while syncing customer ({customer_id}).".format(customer_id=customer.stripe_id))
             except IntegrityError:
                 print(customer.api_retrieve())
-                raise
+                six.reraise(*sys.exc_info())
 
         print("Customer sync complete.")
 
