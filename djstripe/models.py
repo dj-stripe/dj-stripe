@@ -585,6 +585,18 @@ class Invoice(StripeInvoice):
 
     @classmethod
     def upcoming(cls, **kwargs):
+        # Convert Customer to stripe_id
+        if "customer" in kwargs and isinstance(kwargs["customer"], Customer):
+            kwargs.update({"customer": kwargs["customer"].stripe_id})
+
+        # Convert Subscription to stripe_id
+        if "subscription" in kwargs and isinstance(kwargs["subscription"], Subscription):
+            kwargs.update({"subscription": kwargs["subscription"].stripe_id})
+
+        # Convert Plan to stripe_id
+        if "subscription_plan" in kwargs and isinstance(kwargs["subscription_plan"], Plan):
+            kwargs.update({"subscription_plan": kwargs["subscription_plan"].stripe_id})
+
         upcoming_stripe_invoice = StripeInvoice.upcoming(**kwargs)
 
         if upcoming_stripe_invoice:

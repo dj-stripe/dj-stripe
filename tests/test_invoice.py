@@ -14,7 +14,8 @@ from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
 from mock import patch, ANY
 
-from djstripe.models import Customer, Invoice, Account, UpcomingInvoice
+from djstripe.models import Customer, Invoice, Account, UpcomingInvoice, \
+    Subscription, Plan
 from djstripe.models import InvalidRequestError
 
 from tests import FAKE_INVOICE, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_SUBSCRIPTION, FAKE_PLAN, FAKE_INVOICEITEM_II, FAKE_UPCOMING_INVOICE
@@ -253,6 +254,36 @@ class InvoiceTest(TestCase):
         items = invoice.invoiceitems.all()
         self.assertEquals(0, len(items))
         self.assertIsNotNone(invoice.plan)
+
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
+    @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
+    @patch("stripe.Invoice.upcoming", return_value=deepcopy(FAKE_UPCOMING_INVOICE))
+    def test_upcoming_invoice_with_subscription(self, invoice_upcoming_mock, subscription_retrieve_mock, plan_retrieve_mock):
+        invoice = Invoice.upcoming(subscription=Subscription(stripe_id=FAKE_SUBSCRIPTION["id"]))
+        self.assertIsNotNone(invoice)
+        self.assertIsNone(invoice.stripe_id)
+        self.assertIsNone(invoice.save())
+
+        subscription_retrieve_mock.assert_called_once_with(api_key=ANY, expand=ANY, id=FAKE_SUBSCRIPTION["id"])
+        plan_retrieve_mock.assert_not_called()
+
+        self.assertIsNotNone(invoice.plan)
+        self.assertEquals(FAKE_PLAN["id"], invoice.plan.stripe_id)
+
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
+    @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
+    @patch("stripe.Invoice.upcoming", return_value=deepcopy(FAKE_UPCOMING_INVOICE))
+    def test_upcoming_invoice_with_subscription_plan(self, invoice_upcoming_mock, subscription_retrieve_mock, plan_retrieve_mock):
+        invoice = Invoice.upcoming(subscription_plan=Plan(stripe_id=FAKE_PLAN["id"]))
+        self.assertIsNotNone(invoice)
+        self.assertIsNone(invoice.stripe_id)
+        self.assertIsNone(invoice.save())
+
+        subscription_retrieve_mock.assert_called_once_with(api_key=ANY, expand=ANY, id=FAKE_SUBSCRIPTION["id"])
+        plan_retrieve_mock.assert_not_called()
+
+        self.assertIsNotNone(invoice.plan)
+        self.assertEquals(FAKE_PLAN["id"], invoice.plan.stripe_id)
 
     @patch("stripe.Invoice.upcoming", side_effect=InvalidRequestError("Nothing to invoice for customer", None))
     def test_no_upcoming_invoices(self, invoice_upcoming_mock):

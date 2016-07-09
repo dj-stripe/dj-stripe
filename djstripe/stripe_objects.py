@@ -1209,7 +1209,7 @@ Fields not implemented:
         you'd like to retrieve.
         :type customer: Customer or string (customer ID)
         :param coupon: The code of the coupon to apply.
-        :type customer: str
+        :type coupon: str
         :param subscription: The identifier of the subscription to retrieve an \
         invoice for.
         :type subscription: Subscription or string (subscription ID)
@@ -1228,7 +1228,7 @@ Fields not implemented:
         :type subscription_proration_date: datetime
         :param subscription_quantity: If provided, the invoice returned will \
         preview updating or creating a subscription with that quantity.
-        :type subscription_proration_quantity: int
+        :type subscription_quantity: int
         :param subscription_trial_end: If provided, the invoice returned will \
         preview updating or creating a subscription with that trial end.
         :type subscription_trial_end: datetime
