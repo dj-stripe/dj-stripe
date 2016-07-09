@@ -25,3 +25,4 @@ class CreateSubscriptionSerializer(serializers.Serializer):
 
     stripe_token = serializers.CharField(max_length=200)
     plan = serializers.CharField(max_length=50)
+    charge_immediately = serializers.NullBooleanField(required=False)

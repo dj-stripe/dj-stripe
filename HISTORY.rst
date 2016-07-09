@@ -18,6 +18,7 @@ History
 * Event handler improvements and bugfixes (Thanks @lskillen) #321
 * API list() method bugfixes (Thanks @lskillen) #322
 * Added support for a custom webhook event handler (Thanks @lskillen) #323
+* Django REST Framework contrib package improvements (Thanks @aleccool213) #334
 
 0.8.0 (2015-12-30)
 ---------------------

@@ -56,7 +56,8 @@ class Charge(StripeCharge):
     customer = models.ForeignKey("Customer", related_name="charges", help_text="The customer associated with this charge.")
     transfer = models.ForeignKey("Transfer", null=True, help_text="The transfer to the destination account (only applicable if the charge was created using the destination parameter).")
 
-    source = models.ForeignKey(StripeSource, null=True, related_name="charges", help_text="The source used for this charge.")
+    source = models.ForeignKey(StripeSource, null=True, related_name="charges", on_delete=models.SET_NULL,
+                               help_text="The source used for this charge.")
 
     receipt_sent = models.BooleanField(default=False, help_text="Whether or not a receipt was sent for this charge.")
 
@@ -127,9 +128,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
     # account = models.ForeignKey(Account, related_name="customers")
 
-    default_source = models.ForeignKey(
-        StripeSource, null=True, related_name="customers",
-        on_delete=models.SET_NULL)
+    default_source = models.ForeignKey(StripeSource, null=True, related_name="customers", on_delete=models.SET_NULL)
 
     subscriber = models.OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
     date_purged = models.DateTimeField(null=True, editable=False)
@@ -559,7 +558,8 @@ class Invoice(StripeInvoice):
     # account = models.ForeignKey("Account", related_name="invoices")
     customer = models.ForeignKey(Customer, related_name="invoices", help_text="The customer associated with this invoice.")
     charge = models.OneToOneField(Charge, null=True, related_name="invoice", help_text="The latest charge generated for this invoice, if any.")
-    subscription = models.ForeignKey("Subscription", null=True, related_name="invoices", help_text="The subscription that this invoice was prepared for, if any.")
+    subscription = models.ForeignKey("Subscription", null=True, related_name="invoices", on_delete=models.SET_NULL,
+                                     help_text="The subscription that this invoice was prepared for, if any.")
 
     class Meta(object):
         ordering = ["-date"]
@@ -676,8 +676,10 @@ class InvoiceItem(StripeInvoiceItem):
     # account = models.ForeignKey(Account, related_name="invoiceitems")
     customer = models.ForeignKey(Customer, related_name="invoiceitems", help_text="The customer associated with this invoiceitem.")
     invoice = models.ForeignKey(Invoice, null=True, related_name="invoiceitems", help_text="The invoice to which this invoiceitem is attached.")
-    plan = models.ForeignKey("Plan", null=True, related_name="invoiceitems", help_text="If the invoice item is a proration, the plan of the subscription for which the proration was computed.")
-    subscription = models.ForeignKey("Subscription", null=True, related_name="invoiceitems", help_text="The subscription that this invoice item has been created for, if any.")
+    plan = models.ForeignKey("Plan", null=True, related_name="invoiceitems", on_delete=models.SET_NULL,
+                             help_text="If the invoice item is a proration, the plan of the subscription for which the proration was computed.")
+    subscription = models.ForeignKey("Subscription", null=True, related_name="invoiceitems", on_delete=models.SET_NULL,
+                                     help_text="The subscription that this invoice item has been created for, if any.")
 
     def _attach_objects_hook(self, cls, data):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
