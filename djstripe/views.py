@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import json
+import logging
 
 from braces.views import CsrfExemptMixin, FormValidMessageMixin, LoginRequiredMixin, SelectRelatedMixin
 from django.contrib import messages
@@ -19,6 +20,8 @@ from .forms import PlanForm, CancelSubscriptionForm
 from .mixins import PaymentsContextMixin, SubscriptionMixin
 from .models import Customer, Event, EventProcessingException, Plan
 from .sync import sync_subscriber
+
+logger = logging.getLogger(__name__)
 
 
 # ============================================================================ #
@@ -106,7 +109,6 @@ class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
 # ============================================================================ #
 
 class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
-
     form_class = PlanForm
     template_name = "djstripe/confirm_form.html"
     success_url = reverse_lazy("djstripe:history")
@@ -118,7 +120,8 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
         if not Plan.objects.filter(id=plan_id).exists():
             return HttpResponseNotFound()
 
-        customer, _created = Customer.get_or_create(subscriber=djstripe_settings.subscriber_request_callback(self.request))
+        customer, _created = Customer.get_or_create(
+            subscriber=djstripe_settings.subscriber_request_callback(self.request))
 
         if customer.subscription and str(customer.subscription.plan.id) == plan_id and customer.subscription.is_valid():
             message = "You already subscribed to this plan"
@@ -141,7 +144,8 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
         form = self.get_form(form_class)
         if form.is_valid():
             try:
-                customer, _created = Customer.get_or_create(subscriber=djstripe_settings.subscriber_request_callback(self.request))
+                customer, _created = Customer.get_or_create(
+                    subscriber=djstripe_settings.subscriber_request_callback(self.request))
                 customer.add_card(self.request.POST.get("stripe_token"))
                 customer.subscribe(form.cleaned_data["plan"])
             except StripeError as exc:
@@ -171,7 +175,8 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
     def post(self, request, *args, **kwargs):
         form = PlanForm(request.POST)
 
-        customer, _created = Customer.get_or_create(subscriber=djstripe_settings.subscriber_request_callback(self.request))
+        customer, _created = Customer.get_or_create(
+            subscriber=djstripe_settings.subscriber_request_callback(self.request))
 
         if not customer.subscription:
             form.add_error(None, "You must already be subscribed to a plan before you can change it.")
@@ -206,7 +211,8 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
     success_url = reverse_lazy("djstripe:account")
 
     def form_valid(self, form):
-        customer, _created = Customer.get_or_create(subscriber=djstripe_settings.subscriber_request_callback(self.request))
+        customer, _created = Customer.get_or_create(
+            subscriber=djstripe_settings.subscriber_request_callback(self.request))
         subscription = customer.subscription.cancel()
 
         if subscription.status == subscription.STATUS_CANCELED:
@@ -219,7 +225,7 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
             # If pro-rate, they get some time to stay.
             messages.info(self.request, "Your subscription status is now '{status}' until '{period_end}'".format(
                 status=subscription.status, period_end=subscription.current_period_end)
-            )
+                          )
 
         return super(CancelSubscriptionView, self).form_valid(form)
 
@@ -230,7 +236,6 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
 
 
 class WebHook(CsrfExemptMixin, View):
-
     def post(self, request, *args, **kwargs):
         body = smart_str(request.body)
         data = json.loads(body)
@@ -244,10 +249,18 @@ class WebHook(CsrfExemptMixin, View):
         else:
             event = Event._create_from_stripe_object(data)
             event.validate()
-
-            if djstripe_settings.WEBHOOK_EVENT_CALLBACK:
-                djstripe_settings.WEBHOOK_EVENT_CALLBACK(event)
-            else:
-                event.process()
+            try:
+                if djstripe_settings.WEBHOOK_EVENT_CALLBACK:
+                    djstripe_settings.WEBHOOK_EVENT_CALLBACK(event)
+                else:
+                    event.process()
+            except Exception:
+                # All webhooks should never return 500 error because Stripe then will disable the webhook.
+                # We are relogging the exception to the logging framework, so if you use for example Sentry it will
+                # still be logged there.
+                #
+                # Nevertheless, the exception is also logged as EventProcessingException which you can check
+                # in admin panel
+                logger.error('Error while processing webhook from Stripe!', exc_info=True)
 
         return HttpResponse()
