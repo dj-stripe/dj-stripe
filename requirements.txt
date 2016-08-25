@@ -1,4 +1,4 @@
-django!=1.9,>=1.8  # Django has a regression in 1.9, see #275
+django!=1.9,>=1.8,<1.10  # Django has a regression in 1.9, see #275
 django-braces>=1.9.0
 django-model-utils>=2.4
 django-polymorphic>=0.7.1

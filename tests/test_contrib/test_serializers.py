@@ -92,6 +92,20 @@ class CreateSubscriptionSerializerTest(TestCase):
         self.assertIn('stripe_token', serializer.validated_data)
         self.assertEqual(serializer.errors, {})
 
+    @patch("stripe.Token.create", return_value=PropertyMock(id="token_test"))
+    def test_valid_serializer_non_required_fields(self, stripe_token_mock):
+        """Test the CreateSubscriptionSerializer is_valid method."""
+        token = stripe_token_mock(card={})
+        serializer = CreateSubscriptionSerializer(
+            data={
+                'plan': self.plan.stripe_id,
+                'stripe_token': token.id,
+                'charge_immediately': True,
+                'tax_percent': 13.00,
+            }
+        )
+        self.assertTrue(serializer.is_valid())
+
     def test_invalid_serializer(self):
         serializer = CreateSubscriptionSerializer(
             data={
