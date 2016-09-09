@@ -178,7 +178,7 @@ class Customer(StripeCustomer):
         try:
             self.stripe_customer.delete()
         except stripe.InvalidRequestError as exc:
-            if str(exc).startswith("No such customer:"):
+            if str(exc).find("No such customer:") >= 0:
                 # The exception was thrown because the stripe customer was already
                 # deleted on the stripe side, ignore the exception
                 pass
