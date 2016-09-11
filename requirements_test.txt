@@ -1,10 +1,10 @@
 -r requirements.txt
 
 # Testing tools
-coverage>=4.1
-django-nose>=1.4.2
-flake8>=2.5.1
-mock>=1.3.0
+coverage>=4.2
+django-nose>=1.4.4
+flake8>=3.0.4
+mock>=2.0.0
 nose>=1.3.7
 termcolor>=1.1.0
 tox>=2.3.1
@@ -13,10 +13,10 @@ tox>=2.3.1
 sphinx_rtd_theme==0.1.9
 
 # Contrib packages
-djangorestframework>=3.3.2
+djangorestframework>=3.4.6
 
 # Database drivers
-psycopg2>=2.6.1
+psycopg2>=2.6.2
 
 # Packaging
-wheel>=0.26.0
+wheel>=0.29.0
