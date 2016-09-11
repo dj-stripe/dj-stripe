@@ -536,7 +536,7 @@ Fields not implemented:
         # Assessments reported by you have the key user_report and, if set,
         # possible values of safe and fraudulent. Assessments from Stripe have
         # the key stripe_report and, if set, the value fraudulent.
-        data["fraudulent"] = data["fraud_details"] and list(data["fraud_details"].values())[0] == "fraudulent"
+        data["fraudulent"] = bool(data["fraud_details"]) and list(data["fraud_details"].values())[0] == "fraudulent"
 
         return data
 
