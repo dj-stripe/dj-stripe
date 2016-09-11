@@ -72,7 +72,6 @@ class TestEventProcessingException(TestCase):
             stripe_id=self.msg["id"],
             type="ping",
             webhook_message=self.msg,
-            message=self.msg
         )
 
     def test_tostring(self):
