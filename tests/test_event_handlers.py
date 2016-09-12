@@ -192,7 +192,8 @@ class TestCustomerEvents(EventTestCase):
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     @patch("stripe.Event.retrieve")
-    def test_customer_subscription_created(self, event_retrieve_mock, customer_retrieve_mock, subscription_retrieve_mock, plan_retrieve_mock):
+    def test_customer_subscription_created(self, event_retrieve_mock, customer_retrieve_mock,
+                                           subscription_retrieve_mock, plan_retrieve_mock):
         fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED)
         event_retrieve_mock.return_value = fake_stripe_event
 
@@ -255,8 +256,9 @@ class TestInvoiceEvents(EventTestCase):
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
     @patch("stripe.Invoice.retrieve")
     @patch("stripe.Event.retrieve")
-    def test_invoice_created_no_existing_customer(self, event_retrieve_mock, invoice_retrieve_mock, charge_retrieve_mock,
-                             customer_retrieve_mock, subscription_retrieve_mock, default_account_mock, send_receipt_mock):
+    def test_invoice_created_no_existing_customer(self, event_retrieve_mock, invoice_retrieve_mock,
+                                                  charge_retrieve_mock, customer_retrieve_mock,
+                                                  subscription_retrieve_mock, default_account_mock, send_receipt_mock):
         default_account_mock.return_value = Account.objects.create()
 
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
@@ -284,7 +286,8 @@ class TestInvoiceEvents(EventTestCase):
     @patch("stripe.Invoice.retrieve")
     @patch("stripe.Event.retrieve")
     def test_invoice_created(self, event_retrieve_mock, invoice_retrieve_mock, charge_retrieve_mock,
-                             customer_retrieve_mock, subscription_retrieve_mock, default_account_mock, send_receipt_mock):
+                             customer_retrieve_mock, subscription_retrieve_mock, default_account_mock,
+                             send_receipt_mock):
         default_account_mock.return_value = Account.objects.create()
 
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
@@ -301,7 +304,10 @@ class TestInvoiceEvents(EventTestCase):
         event.process()
 
         invoice = Invoice.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
-        self.assertEquals(invoice.amount_due, fake_stripe_event["data"]["object"]["amount_due"] / decimal.Decimal("100"))
+        self.assertEquals(
+            invoice.amount_due,
+            fake_stripe_event["data"]["object"]["amount_due"] / decimal.Decimal("100")
+        )
         self.assertEquals(invoice.paid, fake_stripe_event["data"]["object"]["paid"])
 
     @patch("djstripe.models.Charge.send_receipt", autospec=True)
@@ -339,7 +345,8 @@ class TestInvoiceItemEvents(EventTestCase):
     @patch("stripe.InvoiceItem.retrieve")
     @patch("stripe.Event.retrieve")
     def test_invoiceitem_created(self, event_retrieve_mock, invoiceitem_retrieve_mock, invoice_retrieve_mock,
-                                 charge_retrieve_mock, customer_retrieve_mock, subscription_retrieve_mock, default_account_mock):
+                                 charge_retrieve_mock, customer_retrieve_mock, subscription_retrieve_mock,
+                                 default_account_mock):
         default_account_mock.return_value = Account.objects.create()
 
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")

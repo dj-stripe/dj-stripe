@@ -23,11 +23,19 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='charge',
             name='source',
-            field=models.ForeignKey(help_text='The source used for this charge.', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='charges', to='djstripe.StripeSource'),
+            field=models.ForeignKey(help_text='The source used for this charge.', null=True,
+                                    on_delete=django.db.models.deletion.CASCADE, related_name='charges',
+                                    to='djstripe.StripeSource'),
         ),
         migrations.AlterField(
             model_name='subscription',
             name='application_fee_percent',
-            field=djstripe.fields.StripePercentField(decimal_places=2, help_text=b'A positive decimal that represents the fee percentage of the subscription invoice amount that will be transferred to the application owner\xe2\x80\x99s Stripe account each billing period.', max_digits=5, null=True, validators=[django.core.validators.MinValueValidator(1.0), django.core.validators.MaxValueValidator(100.0)]),
+            field=djstripe.fields.StripePercentField(
+                decimal_places=2,
+                help_text='A positive decimal that represents the fee percentage of the subscription invoice amount \
+                that will be transferred to the application owner\xe2\x80\x99s Stripe account each billing period.',
+                max_digits=5, null=True,
+                validators=[django.core.validators.MinValueValidator(1.0),
+                            django.core.validators.MaxValueValidator(100.0)]),
         ),
     ]

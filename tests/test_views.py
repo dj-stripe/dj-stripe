@@ -28,7 +28,11 @@ class AccountViewTest(TestCase):
 
     def setUp(self):
         self.url = reverse("djstripe:account")
-        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com", password="password")
+        self.user = get_user_model().objects.create_user(
+            username="pydanny",
+            email="pydanny@gmail.com",
+            password="password"
+        )
         self.assertTrue(self.client.login(username="pydanny", password="password"))
 
         Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
@@ -64,7 +68,11 @@ class ChangeCardViewTest(TestCase):
 
     def setUp(self):
         self.url = reverse("djstripe:change_card")
-        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com", password="password")
+        self.user = get_user_model().objects.create_user(
+            username="pydanny",
+            email="pydanny@gmail.com",
+            password="password"
+        )
         self.assertTrue(self.client.login(username="pydanny", password="password"))
 
     @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
@@ -77,7 +85,8 @@ class ChangeCardViewTest(TestCase):
     @patch("djstripe.models.Customer.send_invoice", autospec=True)
     @patch("djstripe.models.Customer.add_card", autospec=True)
     @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
-    def test_post_new_card(self, stripe_customer_create_mock, add_card_mock, send_invoice_mock, retry_unpaid_invoices_mock):
+    def test_post_new_card(self, stripe_customer_create_mock, add_card_mock, send_invoice_mock,
+                           retry_unpaid_invoices_mock):
         self.client.post(self.url, {"stripe_token": "alpha"})
         add_card_mock.assert_called_once_with(self.user.customer, "alpha")
         send_invoice_mock.assert_called_with(self.user.customer)
@@ -147,7 +156,11 @@ class HistoryViewTest(TestCase):
 
     def setUp(self):
         self.url = reverse("djstripe:history")
-        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com", password="password")
+        self.user = get_user_model().objects.create_user(
+            username="pydanny",
+            email="pydanny@gmail.com",
+            password="password"
+        )
         self.assertTrue(self.client.login(username="pydanny", password="password"))
 
     @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
@@ -169,7 +182,11 @@ class SyncHistoryViewTest(TestCase):
 
     def setUp(self):
         self.url = reverse("djstripe:sync_history")
-        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com", password="password")
+        self.user = get_user_model().objects.create_user(
+            username="pydanny",
+            email="pydanny@gmail.com",
+            password="password"
+        )
         self.assertTrue(self.client.login(username="pydanny", password="password"))
 
     @patch("djstripe.views.sync_subscriber", new_callable=PropertyMock, return_value=PropertyMock(subscriber="pie"))
@@ -186,7 +203,11 @@ class ConfirmFormViewTest(TestCase):
     def setUp(self):
         self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
         self.url = reverse("djstripe:confirm", kwargs={"plan_id": self.plan.id})
-        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com", password="password")
+        self.user = get_user_model().objects.create_user(
+            username="pydanny",
+            email="pydanny@gmail.com",
+            password="password"
+        )
         self.assertTrue(self.client.login(username="pydanny", password="password"))
 
     def test_get_form_current_plan(self):
@@ -247,7 +268,11 @@ class ChangePlanViewTest(TestCase):
 
     def setUp(self):
         self.url = reverse("djstripe:change_plan")
-        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com", password="password")
+        self.user = get_user_model().objects.create_user(
+            username="pydanny",
+            email="pydanny@gmail.com",
+            password="password"
+        )
         self.assertTrue(self.client.login(username="pydanny", password="password"))
 
     def test_post_form_invalid(self):
@@ -264,7 +289,10 @@ class ChangePlanViewTest(TestCase):
         response = self.client.post(self.url)
         self.assertEqual(200, response.status_code)
         self.assertIn("form", response.context)
-        self.assertIn("You must already be subscribed to a plan before you can change it.", response.context["form"].errors["__all__"])
+        self.assertIn(
+            "You must already be subscribed to a plan before you can change it.",
+            response.context["form"].errors["__all__"]
+        )
 
     @patch("djstripe.models.Subscription.update", autospec=True)
     def test_change_sub_no_proration(self, subscription_update_mock):
@@ -359,7 +387,11 @@ class CancelSubscriptionViewTest(TestCase):
     def setUp(self):
         self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
         self.url = reverse("djstripe:cancel_subscription")
-        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com", password="password")
+        self.user = get_user_model().objects.create_user(
+            username="pydanny",
+            email="pydanny@gmail.com",
+            password="password"
+        )
         self.assertTrue(self.client.login(username="pydanny", password="password"))
 
     @patch("djstripe.models.Subscription.cancel")

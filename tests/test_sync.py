@@ -62,41 +62,51 @@ class TestSyncPlans(TestCase):
         sync_plans()
         self.assertTrue("Plan created for test", sys.stdout.getvalue().strip())
 
-        plan_create_mock.assert_any_call(api_key=settings.STRIPE_SECRET_KEY,
-                                        amount=1000,
-                                        interval="month",
-                                        name="Test Plan 0",
-                                        currency="usd",
-                                        id="test_id_0")
+        plan_create_mock.assert_any_call(
+            api_key=settings.STRIPE_SECRET_KEY,
+            amount=1000,
+            interval="month",
+            name="Test Plan 0",
+            currency="usd",
+            id="test_id_0"
+        )
 
-        plan_create_mock.assert_any_call(api_key=settings.STRIPE_SECRET_KEY,
-                                        amount=2500,
-                                        interval="month",
-                                        name="Test Plan 1",
-                                        currency="usd",
-                                        id="test_id")
+        plan_create_mock.assert_any_call(
+            api_key=settings.STRIPE_SECRET_KEY,
+            amount=2500,
+            interval="month",
+            name="Test Plan 1",
+            currency="usd",
+            id="test_id"
+        )
 
-        plan_create_mock.assert_any_call(api_key=settings.STRIPE_SECRET_KEY,
-                                        amount=5000,
-                                        interval="month",
-                                        name="Test Plan 2",
-                                        currency="usd",
-                                        id="test_id_2")
+        plan_create_mock.assert_any_call(
+            api_key=settings.STRIPE_SECRET_KEY,
+            amount=5000,
+            interval="month",
+            name="Test Plan 2",
+            currency="usd",
+            id="test_id_2"
+        )
 
-        plan_create_mock.assert_any_call(api_key=settings.STRIPE_SECRET_KEY,
-                                        amount=5000,
-                                        interval="month",
-                                        name="Test Plan 3",
-                                        currency="usd",
-                                        id="test_id_3")
+        plan_create_mock.assert_any_call(
+            api_key=settings.STRIPE_SECRET_KEY,
+            amount=5000,
+            interval="month",
+            name="Test Plan 3",
+            currency="usd",
+            id="test_id_3"
+        )
 
-        plan_create_mock.assert_any_call(api_key=settings.STRIPE_SECRET_KEY,
-                                        amount=7000,
-                                        interval="month",
-                                        name="Test Plan 4",
-                                        currency="usd",
-                                        id="test_id_4",
-                                        trial_period_days=7)
+        plan_create_mock.assert_any_call(
+            api_key=settings.STRIPE_SECRET_KEY,
+            amount=7000,
+            interval="month",
+            name="Test Plan 4",
+            currency="usd",
+            id="test_id_4",
+            trial_period_days=7
+        )
 
         self.assertEqual(5, plan_create_mock.call_count)
 

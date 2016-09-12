@@ -43,13 +43,16 @@ class CardTest(TestCase):
         fake_card = deepcopy(FAKE_CARD)
         card = Card.sync_from_stripe_data(fake_card)
 
-        self.assertEqual("<brand={brand}, last4={last4}, exp_month={exp_month}, exp_year={exp_year}, stripe_id={stripe_id}>".format(
-            brand=fake_card["brand"],
-            last4=fake_card["last4"],
-            exp_month=fake_card["exp_month"],
-            exp_year=fake_card["exp_year"],
-            stripe_id=fake_card["id"]
-        ), str(card))
+        self.assertEqual(
+            "<brand={brand}, last4={last4}, exp_month={exp_month}, exp_year={exp_year}, stripe_id={stripe_id}>".format(
+                brand=fake_card["brand"],
+                last4=fake_card["last4"],
+                exp_month=fake_card["exp_month"],
+                exp_year=fake_card["exp_year"],
+                stripe_id=fake_card["id"]
+            ),
+            str(card)
+        )
 
     @patch("stripe.Token.create")
     def test_card_create_token(self, token_create_mock):

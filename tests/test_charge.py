@@ -90,7 +90,8 @@ class ChargeTest(TestCase):
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Transfer.retrieve")
     @patch("djstripe.models.Account.get_default_account")
-    def test_sync_from_stripe_data_with_transfer(self, default_account_mock, transfer_retrieve_mock, charge_retrieve_mock):
+    def test_sync_from_stripe_data_with_transfer(self, default_account_mock, transfer_retrieve_mock,
+                                                 charge_retrieve_mock):
         default_account_mock.return_value = self.account
 
         fake_transfer = deepcopy(FAKE_TRANSFER)

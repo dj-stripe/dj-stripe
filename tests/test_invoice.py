@@ -18,7 +18,8 @@ from djstripe.models import Customer, Invoice, Account, UpcomingInvoice, \
     Subscription, Plan
 from djstripe.models import InvalidRequestError
 
-from tests import FAKE_INVOICE, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_SUBSCRIPTION, FAKE_PLAN, FAKE_INVOICEITEM_II, FAKE_UPCOMING_INVOICE
+from tests import (FAKE_INVOICE, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_SUBSCRIPTION, FAKE_PLAN, FAKE_INVOICEITEM_II,
+                   FAKE_UPCOMING_INVOICE)
 
 
 class InvoiceTest(TestCase):
@@ -35,18 +36,22 @@ class InvoiceTest(TestCase):
         default_account_mock.return_value = self.account
         invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
 
-        self.assertEqual(str(invoice), "<amount_due={amount_due}, date={date}, status={status}, stripe_id={stripe_id}>".format(
-            amount_due=invoice.amount_due,
-            date=invoice.date,
-            status=invoice.status,
-            stripe_id=invoice.stripe_id
-        ))
+        self.assertEqual(
+            "<amount_due={amount_due}, date={date}, status={status}, stripe_id={stripe_id}>".format(
+                amount_due=invoice.amount_due,
+                date=invoice.date,
+                status=invoice.status,
+                stripe_id=invoice.stripe_id
+            ),
+            str(invoice)
+        )
 
     @patch("stripe.Invoice.retrieve")
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-    def test_retry_true(self, charge_retrieve_mock, subscription_retrieve_mock, default_account_mock, invoice_retrieve_mock):
+    def test_retry_true(self, charge_retrieve_mock, subscription_retrieve_mock, default_account_mock,
+                        invoice_retrieve_mock):
         default_account_mock.return_value = self.account
 
         fake_invoice = deepcopy(FAKE_INVOICE)
@@ -64,7 +69,8 @@ class InvoiceTest(TestCase):
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-    def test_retry_false(self, charge_retrieve_mock, subscription_retrieve_mock, default_account_mock, invoice_retrieve_mock):
+    def test_retry_false(self, charge_retrieve_mock, subscription_retrieve_mock, default_account_mock,
+                         invoice_retrieve_mock):
         default_account_mock.return_value = self.account
 
         fake_invoice = deepcopy(FAKE_INVOICE)
@@ -127,7 +133,8 @@ class InvoiceTest(TestCase):
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-    def test_sync_send_emails_false(self, charge_retrieve_mock, subscription_retrieve_mock, default_account_mock, send_receipt_mock, settings_fake):
+    def test_sync_send_emails_false(self, charge_retrieve_mock, subscription_retrieve_mock, default_account_mock,
+                                    send_receipt_mock, settings_fake):
         default_account_mock.return_value = self.account
         settings_fake.SEND_INVOICE_RECEIPT_EMAILS = False
 
@@ -140,7 +147,8 @@ class InvoiceTest(TestCase):
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-    def test_sync_no_subscription(self, charge_retrieve_mock, subscription_retrieve_mock, plan_retrieve_mock, default_account_mock):
+    def test_sync_no_subscription(self, charge_retrieve_mock, subscription_retrieve_mock, plan_retrieve_mock,
+                                  default_account_mock):
         default_account_mock.return_value = self.account
 
         invoice_data = deepcopy(FAKE_INVOICE)
@@ -157,7 +165,8 @@ class InvoiceTest(TestCase):
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-    def test_invoice_with_subscription_invoice_items(self, charge_retrieve_mock, subscription_retrieve_mock, default_account_mock):
+    def test_invoice_with_subscription_invoice_items(self, charge_retrieve_mock, subscription_retrieve_mock,
+                                                     default_account_mock):
         default_account_mock.return_value = self.account
 
         invoice_data = deepcopy(FAKE_INVOICE)
@@ -165,13 +174,15 @@ class InvoiceTest(TestCase):
 
         items = invoice.invoiceitems.all()
         self.assertEquals(1, len(items))
-        item_id = "{invoice_id}-{subscription_id}".format(invoice_id=invoice.stripe_id, subscription_id=FAKE_SUBSCRIPTION["id"])
+        item_id = "{invoice_id}-{subscription_id}".format(invoice_id=invoice.stripe_id,
+                                                          subscription_id=FAKE_SUBSCRIPTION["id"])
         self.assertEquals(item_id, items[0].stripe_id)
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-    def test_invoice_with_no_invoice_items(self, charge_retrieve_mock, subscription_retrieve_mock, default_account_mock):
+    def test_invoice_with_no_invoice_items(self, charge_retrieve_mock, subscription_retrieve_mock,
+                                           default_account_mock):
         default_account_mock.return_value = self.account
 
         invoice_data = deepcopy(FAKE_INVOICE)
@@ -184,7 +195,8 @@ class InvoiceTest(TestCase):
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-    def test_invoice_with_non_subscription_invoice_items(self, charge_retrieve_mock, subscription_retrieve_mock, default_account_mock):
+    def test_invoice_with_non_subscription_invoice_items(self, charge_retrieve_mock, subscription_retrieve_mock,
+                                                         default_account_mock):
         default_account_mock.return_value = self.account
 
         invoice_data = deepcopy(FAKE_INVOICE)
@@ -198,7 +210,8 @@ class InvoiceTest(TestCase):
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-    def test_invoice_plan_from_invoice_items(self, charge_retrieve_mock, subscription_retrieve_mock, default_account_mock):
+    def test_invoice_plan_from_invoice_items(self, charge_retrieve_mock, subscription_retrieve_mock,
+                                             default_account_mock):
         default_account_mock.return_value = self.account
 
         invoice_data = deepcopy(FAKE_INVOICE)
@@ -210,7 +223,8 @@ class InvoiceTest(TestCase):
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-    def test_invoice_plan_from_subscription(self, charge_retrieve_mock, subscription_retrieve_mock, default_account_mock):
+    def test_invoice_plan_from_subscription(self, charge_retrieve_mock, subscription_retrieve_mock,
+                                            default_account_mock):
         default_account_mock.return_value = self.account
 
         invoice_data = deepcopy(FAKE_INVOICE)
@@ -258,7 +272,8 @@ class InvoiceTest(TestCase):
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Invoice.upcoming", return_value=deepcopy(FAKE_UPCOMING_INVOICE))
-    def test_upcoming_invoice_with_subscription(self, invoice_upcoming_mock, subscription_retrieve_mock, plan_retrieve_mock):
+    def test_upcoming_invoice_with_subscription(self, invoice_upcoming_mock, subscription_retrieve_mock,
+                                                plan_retrieve_mock):
         invoice = Invoice.upcoming(subscription=Subscription(stripe_id=FAKE_SUBSCRIPTION["id"]))
         self.assertIsNotNone(invoice)
         self.assertIsNone(invoice.stripe_id)
@@ -273,7 +288,8 @@ class InvoiceTest(TestCase):
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Invoice.upcoming", return_value=deepcopy(FAKE_UPCOMING_INVOICE))
-    def test_upcoming_invoice_with_subscription_plan(self, invoice_upcoming_mock, subscription_retrieve_mock, plan_retrieve_mock):
+    def test_upcoming_invoice_with_subscription_plan(self, invoice_upcoming_mock, subscription_retrieve_mock,
+                                                     plan_retrieve_mock):
         invoice = Invoice.upcoming(subscription_plan=Plan(stripe_id=FAKE_PLAN["id"]))
         self.assertIsNotNone(invoice)
         self.assertIsNone(invoice.stripe_id)

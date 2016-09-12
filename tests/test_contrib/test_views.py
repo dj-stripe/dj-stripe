@@ -30,7 +30,11 @@ class RestSubscriptionTest(APITestCase):
 
     def setUp(self):
         self.url = reverse("rest_djstripe:subscription")
-        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com", password="password")
+        self.user = get_user_model().objects.create_user(
+            username="pydanny",
+            email="pydanny@gmail.com",
+            password="password"
+        )
         self.assertTrue(self.client.login(username="pydanny", password="password"))
 
     @patch("djstripe.models.Customer.subscribe", autospec=True)

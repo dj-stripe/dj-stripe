@@ -29,7 +29,8 @@ def resync_subscriptions(apps, schema_editor):
     stripe.api_version = "2016-03-07"
 
     if Subscription.objects.count():
-        print("Purging subscriptions. Don't worry, all active subscriptions will be re-synced from stripe. Just in case you didn't get the memo, we'll print out a json representation of each object for your records:")
+        print("Purging subscriptions. Don't worry, all active subscriptions will be re-synced from stripe. Just in \
+        case you didn't get the memo, we'll print out a json representation of each object for your records:")
         print(serializers.serialize("json", Subscription.objects.all()))
         Subscription.objects.all().delete()
 
@@ -39,7 +40,9 @@ def resync_subscriptions(apps, schema_editor):
             try:
                 Subscription.sync_from_stripe_data(stripe_subscription)
             except CustomerDoesNotExistLocallyException:
-                tqdm.write("The customer for this subscription ({subscription_id}) does not exist locally (so we won't sync the subscription). You'll want to figure out how that happened.".format(subscription_id=stripe_subscription['id']))
+                tqdm.write("The customer for this subscription ({subscription_id}) does not exist locally (so we \
+                won't sync the subscription). You'll want to figure out how that \
+                happened.".format(subscription_id=stripe_subscription['id']))
 
         print("Subscription re-sync complete.")
 
@@ -47,9 +50,10 @@ def resync_subscriptions(apps, schema_editor):
 def resync_invoiceitems(apps, schema_editor):
     """
     Since invoiceitem IDs were not previously stored (the ``stripe_id`` field held the id of the linked subsription),
-    a direct migration will leave us with a bunch of orphaned objects. It was decided [here](https://github.com/kavdev/dj-stripe/issues/162)
-    that a purge and re-sync would be the best option for subscriptions. That's being extended to InvoiceItems.
-    No data that is currently available on stripe will be deleted. Anything stored locally will be purged.
+    a direct migration will leave us with a bunch of orphaned objects. It was decided
+    [here](https://github.com/kavdev/dj-stripe/issues/162) that a purge and re-sync would be the best option for
+    subscriptions. That's being extended to InvoiceItems. No data that is currently available on stripe will be
+    deleted. Anything stored locally will be purged.
     """
 
     # This is okay, since we're only doing a forward migration.
@@ -59,7 +63,8 @@ def resync_invoiceitems(apps, schema_editor):
     stripe.api_version = "2016-03-07"
 
     if InvoiceItem.objects.count():
-        print("Purging invoiceitems. Don't worry, all invoiceitems will be re-synced from stripe. Just in case you didn't get the memo, we'll print out a json representation of each object for your records:")
+        print("Purging invoiceitems. Don't worry, all invoiceitems will be re-synced from stripe. Just in case you \
+        didn't get the memo, we'll print out a json representation of each object for your records:")
         print(serializers.serialize("json", InvoiceItem.objects.all()))
         InvoiceItem.objects.all().delete()
 
@@ -69,7 +74,9 @@ def resync_invoiceitems(apps, schema_editor):
             try:
                 InvoiceItem.sync_from_stripe_data(stripe_invoiceitem)
             except CustomerDoesNotExistLocallyException:
-                tqdm.write("The customer for this invoiceitem ({invoiceitem_id}) does not exist locally (so we won't sync the invoiceitem). You'll want to figure out how that happened.".format(invoiceitem_id=stripe_invoiceitem['id']))
+                tqdm.write("The customer for this invoiceitem ({invoiceitem_id}) does not exist \
+                locally (so we won't sync the invoiceitem). You'll want to figure out how that \
+                happened.".format(invoiceitem_id=stripe_invoiceitem['id']))
 
         print("InvoiceItem re-sync complete.")
 
@@ -107,7 +114,8 @@ def sync_invoices(apps, schema_editor):
             try:
                 Invoice.sync_from_stripe_data(invoice.api_retrieve())
             except InvalidRequestError:
-                tqdm.write("There was an error while syncing invoice ({invoice_id}).".format(invoice_id=invoice.stripe_id))
+                tqdm.write("There was an error while syncing invoice \
+                ({invoice_id}).".format(invoice_id=invoice.stripe_id))
 
         print("Invoice sync complete.")
 
@@ -126,7 +134,8 @@ def sync_transfers(apps, schema_editor):
             try:
                 Transfer.sync_from_stripe_data(transfer)
             except InvalidRequestError:
-                tqdm.write("There was an error while syncing transfer ({transfer_id}).".format(transfer_id=transfer.stripe_id))
+                tqdm.write("There was an error while syncing transfer \
+                ({transfer_id}).".format(transfer_id=transfer.stripe_id))
 
         print("Transfer sync complete.")
 
@@ -164,7 +173,8 @@ def sync_customers(apps, schema_editor):
             try:
                 Customer.sync_from_stripe_data(customer.api_retrieve())
             except InvalidRequestError:
-                tqdm.write("There was an error while syncing customer ({customer_id}).".format(customer_id=customer.stripe_id))
+                tqdm.write("There was an error while syncing customer \
+                ({customer_id}).".format(customer_id=customer.stripe_id))
             except IntegrityError:
                 print(customer.api_retrieve())
                 six.reraise(*sys.exc_info())

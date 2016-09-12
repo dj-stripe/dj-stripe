@@ -13,8 +13,17 @@ from django.test import TestCase
 from djstripe.stripe_objects import StripeObject, StripeCharField, StripeBooleanField
 
 
-SIMPLE_OBJ = {'id': 'yo', 'livemode': True}
-SIMPLE_OBJ_RESULT = {'stripe_id': 'yo', 'description': None, 'livemode': True, 'metadata': None, 'stripe_timestamp': None}
+SIMPLE_OBJ = {
+    'id': 'yo',
+    'livemode': True
+}
+SIMPLE_OBJ_RESULT = {
+    'stripe_id': 'yo',
+    'description': None,
+    'livemode': True,
+    'metadata': None,
+    'stripe_timestamp': None
+}
 
 
 class StripeObjectExceptionsTest(TestCase):

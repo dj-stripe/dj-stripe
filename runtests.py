@@ -1,7 +1,7 @@
-from argparse import ArgumentParser
 import os
 import sys
 
+from argparse import ArgumentParser
 from coverage import Coverage
 import django
 from django.conf import settings
@@ -14,8 +14,16 @@ TESTS_THRESHOLD = 100
 
 def main():
     parser = ArgumentParser(description='Run the dj-stripe Test Suite.')
-    parser.add_argument("--skip-utc", action="store_true", help="Skip any tests that require the system timezone to be in UTC.")
-    parser.add_argument("--no-coverage", action="store_true", help="Disable checking for 100% code coverage (Not advised).")
+    parser.add_argument(
+        "--skip-utc",
+        action="store_true",
+        help="Skip any tests that require the system timezone to be in UTC."
+    )
+    parser.add_argument(
+        "--no-coverage",
+        action="store_true",
+        help="Disable checking for 100% code coverage (Not advised)."
+    )
     parser.add_argument("--no-pep8", action="store_true", help="Disable checking for pep8 errors (Not advised).")
     parser.add_argument("tests", nargs='*', default=['.'])
     args = parser.parse_args()
@@ -36,7 +44,7 @@ def run_test_suite(args):
 
     settings.configure(
         DJSTRIPE_TESTS_SKIP_UTC=skip_utc,
-        TIME_ZONE='America/Los_Angeles',
+        TIME_ZONE='UTC',
         DEBUG=True,
         USE_TZ=True,
         DATABASES={
@@ -182,7 +190,7 @@ def run_test_suite(args):
 
     from django_nose import NoseTestSuiteRunner
 
-    test_runner = NoseTestSuiteRunner(verbosity=1)
+    test_runner = NoseTestSuiteRunner(verbosity=1, keepdb=True, failfast=True)
     failures = test_runner.run_tests(tests)
 
     if failures:
@@ -204,7 +212,8 @@ def run_test_suite(args):
             sys.exit(1)
     else:
         # Announce disabled coverage run
-        sys.stdout.write(colored(text="\nStep 2: Generating coverage results [SKIPPED].", color="yellow", attrs=["bold"]))
+        sys.stdout.write(colored(text="\nStep 2: Generating coverage results [SKIPPED].",
+                                 color="yellow", attrs=["bold"]))
 
     if enable_pep8:
         # Announce flake8 run
@@ -217,20 +226,23 @@ def run_test_suite(args):
         flake_result = call(["flake8", ".", "--count"])
         if flake_result != 0:
             sys.stderr.write("pep8 errors detected.\n")
-            sys.stderr.write(colored(text="\nYOUR CHANGES HAVE INTRODUCED PEP8 ERRORS!\n\n", color="red", attrs=["bold"]))
+            sys.stderr.write(colored(text="\nYOUR CHANGES HAVE INTRODUCED PEP8 ERRORS!\n\n",
+                                     color="red", attrs=["bold"]))
             sys.exit(flake_result)
-        else:
-            print("None")
     else:
         # Announce disabled coverage run
-        sys.stdout.write(colored(text="\nStep 3: Checking for pep8 errors [SKIPPED].\n", color="yellow", attrs=["bold"]))
+        sys.stdout.write(colored(text="\nStep 3: Checking for pep8 errors [SKIPPED].\n",
+                                 color="yellow", attrs=["bold"]))
 
     # Announce success
     if enable_coverage and enable_pep8:
-        sys.stdout.write(colored(text="\nTests completed successfully with no errors. Congrats!\n", color="green", attrs=["bold"]))
+        sys.stdout.write(colored(text="\nTests completed successfully with no errors. Congrats!\n",
+                                 color="green", attrs=["bold"]))
     else:
-        sys.stdout.write(colored(text="\nTests completed successfully, but some step(s) were skipped!\n", color="green", attrs=["bold"]))
-        sys.stdout.write(colored(text="Don't push without running the skipped step(s).\n", color="red", attrs=["bold"]))
+        sys.stdout.write(colored(text="\nTests completed successfully, but some step(s) were skipped!\n",
+                                 color="green", attrs=["bold"]))
+        sys.stdout.write(colored(text="Don't push without running the skipped step(s).\n",
+                                 color="red", attrs=["bold"]))
 
 if __name__ == "__main__":
     main()

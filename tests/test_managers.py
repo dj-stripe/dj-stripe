@@ -24,14 +24,17 @@ class SubscriptionManagerTest(TestCase):
         # create customers and current subscription records
         period_start = datetime.datetime(2013, 4, 1, tzinfo=timezone.utc)
         period_end = datetime.datetime(2013, 4, 30, tzinfo=timezone.utc)
-        start = datetime.datetime(2013, 1, 1, 0, 0, 1)  # more realistic start
+        start = datetime.datetime(2013, 1, 1, 0, 0, 1, tzinfo=timezone.utc)  # more realistic start
 
         self.plan = Plan.sync_from_stripe_data(FAKE_PLAN)
         self.plan2 = Plan.sync_from_stripe_data(FAKE_PLAN_II)
 
         for i in range(10):
             customer = Customer.objects.create(
-                subscriber=get_user_model().objects.create_user(username="patrick{0}".format(i), email="patrick{0}@gmail.com".format(i)),
+                subscriber=get_user_model().objects.create_user(
+                    username="patrick{0}".format(i),
+                    email="patrick{0}@gmail.com".format(i)
+                ),
                 stripe_id="cus_xxxxxxxxxxxxxx{0}".format(i),
                 currency="usd",
             )
@@ -48,7 +51,10 @@ class SubscriptionManagerTest(TestCase):
             )
 
         customer = Customer.objects.create(
-            subscriber=get_user_model().objects.create_user(username="patrick{0}".format(11), email="patrick{0}@gmail.com".format(11)),
+            subscriber=get_user_model().objects.create_user(
+                username="patrick{0}".format(11),
+                email="patrick{0}@gmail.com".format(11)
+            ),
             stripe_id="cus_xxxxxxxxxxxxxx{0}".format(11),
             currency="usd",
         )
@@ -65,7 +71,10 @@ class SubscriptionManagerTest(TestCase):
         )
 
         customer = Customer.objects.create(
-            subscriber=get_user_model().objects.create_user(username="patrick{0}".format(12), email="patrick{0}@gmail.com".format(12)),
+            subscriber=get_user_model().objects.create_user(
+                username="patrick{0}".format(12),
+                email="patrick{0}@gmail.com".format(12)
+            ),
             stripe_id="cus_xxxxxxxxxxxxxx{0}".format(12),
             currency="usd",
         )
@@ -147,7 +156,7 @@ class ChargeManagerTest(TestCase):
         self.march_charge = Charge.objects.create(
             stripe_id="ch_XXXXMAR1",
             customer=customer,
-            stripe_timestamp=datetime.datetime(2015, 3, 31),
+            stripe_timestamp=datetime.datetime(2015, 3, 31, tzinfo=timezone.utc),
             amount=0,
             amount_refunded=0,
             currency="usd",
@@ -159,7 +168,7 @@ class ChargeManagerTest(TestCase):
         self.april_charge_1 = Charge.objects.create(
             stripe_id="ch_XXXXAPR1",
             customer=customer,
-            stripe_timestamp=datetime.datetime(2015, 4, 1),
+            stripe_timestamp=datetime.datetime(2015, 4, 1, tzinfo=timezone.utc),
             amount=decimal.Decimal("20.15"),
             amount_refunded=0,
             currency="usd",
@@ -172,7 +181,7 @@ class ChargeManagerTest(TestCase):
         self.april_charge_2 = Charge.objects.create(
             stripe_id="ch_XXXXAPR2",
             customer=customer,
-            stripe_timestamp=datetime.datetime(2015, 4, 18),
+            stripe_timestamp=datetime.datetime(2015, 4, 18, tzinfo=timezone.utc),
             amount=decimal.Decimal("10.35"),
             amount_refunded=decimal.Decimal("5.35"),
             currency="usd",
@@ -185,7 +194,7 @@ class ChargeManagerTest(TestCase):
         self.april_charge_3 = Charge.objects.create(
             stripe_id="ch_XXXXAPR3",
             customer=customer,
-            stripe_timestamp=datetime.datetime(2015, 4, 30),
+            stripe_timestamp=datetime.datetime(2015, 4, 30, tzinfo=timezone.utc),
             amount=decimal.Decimal("100.00"),
             amount_refunded=decimal.Decimal("80.00"),
             currency="usd",
@@ -198,7 +207,7 @@ class ChargeManagerTest(TestCase):
         self.may_charge = Charge.objects.create(
             stripe_id="ch_XXXXMAY1",
             customer=customer,
-            stripe_timestamp=datetime.datetime(2015, 5, 1),
+            stripe_timestamp=datetime.datetime(2015, 5, 1, tzinfo=timezone.utc),
             amount=0,
             amount_refunded=0,
             currency="usd",
@@ -210,7 +219,7 @@ class ChargeManagerTest(TestCase):
         self.november_charge = Charge.objects.create(
             stripe_id="ch_XXXXNOV1",
             customer=customer,
-            stripe_timestamp=datetime.datetime(2015, 11, 16),
+            stripe_timestamp=datetime.datetime(2015, 11, 16, tzinfo=timezone.utc),
             amount=0,
             amount_refunded=0,
             currency="usd",
@@ -222,7 +231,7 @@ class ChargeManagerTest(TestCase):
         self.charge_2014 = Charge.objects.create(
             stripe_id="ch_XXXX20141",
             customer=customer,
-            stripe_timestamp=datetime.datetime(2014, 12, 31),
+            stripe_timestamp=datetime.datetime(2014, 12, 31, tzinfo=timezone.utc),
             amount=0,
             amount_refunded=0,
             currency="usd",
@@ -234,7 +243,7 @@ class ChargeManagerTest(TestCase):
         self.charge_2016 = Charge.objects.create(
             stripe_id="ch_XXXX20161",
             customer=customer,
-            stripe_timestamp=datetime.datetime(2016, 1, 1),
+            stripe_timestamp=datetime.datetime(2016, 1, 1, tzinfo=timezone.utc),
             amount=0,
             amount_refunded=0,
             currency="usd",
@@ -262,4 +271,7 @@ class ChargeManagerTest(TestCase):
 
         self.assertEqual(decimal.Decimal("30.50"), paid_totals["total_amount"], "Total amount is not correct.")
         self.assertEqual(decimal.Decimal("4.90"), paid_totals["total_fee"], "Total fees is not correct.")
-        self.assertEqual(decimal.Decimal("5.35"), paid_totals["total_refunded"], "Total amount refunded is not correct.")
+        self.assertEqual(
+            decimal.Decimal("5.35"),
+            paid_totals["total_refunded"], "Total amount refunded is not correct."
+        )

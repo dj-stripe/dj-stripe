@@ -76,7 +76,8 @@ class TestEventProcessingException(TestCase):
 
     def test_tostring(self):
         # Not sure if this is normal, but self.exception returns:
-        # AssertionError: '<IOError, pk=1, Event=ping - evt_xxxxxxxxxxxxx>' != '<Error in transmission., pk=1, Event=ping - evt_xxxxxxxxxxxxx>'
+        # AssertionError: '<IOError, pk=1, Event=ping - evt_xxxxxxxxxxxxx>' != '<Error in transmission.,
+        #                  pk=1, Event=ping - evt_xxxxxxxxxxxxx>'
         # - <IOError, pk=1, Event=ping - evt_xxxxxxxxxxxxx>
         # ?  --
         # + <Error in transmission., pk=1, Event=<ping, stripe_id=evt_xxxxxxxxxxxxx>>

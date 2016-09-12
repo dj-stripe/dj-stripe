@@ -118,9 +118,12 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
         if not Plan.objects.filter(id=plan_id).exists():
             return HttpResponseNotFound()
 
-        customer, _created = Customer.get_or_create(subscriber=djstripe_settings.subscriber_request_callback(self.request))
+        customer, _created = Customer.get_or_create(
+            subscriber=djstripe_settings.subscriber_request_callback(self.request)
+        )
 
-        if customer.subscription and str(customer.subscription.plan.id) == plan_id and customer.subscription.is_valid():
+        if (customer.subscription and str(customer.subscription.plan.id) == plan_id and
+                customer.subscription.is_valid()):
             message = "You already subscribed to this plan"
             messages.info(request, message, fail_silently=True)
             return redirect("djstripe:subscribe")
@@ -141,7 +144,9 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
         form = self.get_form(form_class)
         if form.is_valid():
             try:
-                customer, _created = Customer.get_or_create(subscriber=djstripe_settings.subscriber_request_callback(self.request))
+                customer, _created = Customer.get_or_create(
+                    subscriber=djstripe_settings.subscriber_request_callback(self.request)
+                )
                 customer.add_card(self.request.POST.get("stripe_token"))
                 customer.subscribe(form.cleaned_data["plan"])
             except StripeError as exc:
@@ -171,7 +176,9 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
     def post(self, request, *args, **kwargs):
         form = PlanForm(request.POST)
 
-        customer, _created = Customer.get_or_create(subscriber=djstripe_settings.subscriber_request_callback(self.request))
+        customer, _created = Customer.get_or_create(
+            subscriber=djstripe_settings.subscriber_request_callback(self.request)
+        )
 
         if not customer.subscription:
             form.add_error(None, "You must already be subscribed to a plan before you can change it.")
@@ -206,7 +213,9 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
     success_url = reverse_lazy("djstripe:account")
 
     def form_valid(self, form):
-        customer, _created = Customer.get_or_create(subscriber=djstripe_settings.subscriber_request_callback(self.request))
+        customer, _created = Customer.get_or_create(
+            subscriber=djstripe_settings.subscriber_request_callback(self.request)
+        )
         subscription = customer.subscription.cancel()
 
         if subscription.status == subscription.STATUS_CANCELED:

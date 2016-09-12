@@ -30,7 +30,10 @@ class TransferTest(TestCase):
         fake_event_updated["data"]["object"]["status"] = "fish"
 
         event_retrieve_mock.side_effect = [fake_event_created, fake_event_updated]
-        transfer_retrieve_mock.side_effect = [fake_event_created["data"]["object"], fake_event_updated["data"]["object"]]
+        transfer_retrieve_mock.side_effect = [
+            fake_event_created["data"]["object"],
+            fake_event_updated["data"]["object"]
+        ]
 
         # Create transfer
         created_event = Event.sync_from_stripe_data(fake_event_created)

@@ -13,7 +13,8 @@ from django.test.testcases import TestCase
 from mock import patch
 
 from djstripe.models import Customer, InvoiceItem, Account
-from tests import FAKE_INVOICEITEM, FAKE_INVOICE_II, FAKE_CHARGE_II, FAKE_CUSTOMER_II, FAKE_SUBSCRIPTION_III, FAKE_PLAN_II
+from tests import (FAKE_INVOICEITEM, FAKE_INVOICE_II, FAKE_CHARGE_II, FAKE_CUSTOMER_II, FAKE_SUBSCRIPTION_III,
+                   FAKE_PLAN_II)
 
 
 class InvoiceItemTest(TestCase):
@@ -29,7 +30,8 @@ class InvoiceItemTest(TestCase):
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER_II))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE_II))
     @patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE_II))
-    def test_str(self, invoice_retrieve_mock, charge_retrieve_mock, customer_retrieve_mock, subscription_retrieve_mock, default_account_mock):
+    def test_str(self, invoice_retrieve_mock, charge_retrieve_mock, customer_retrieve_mock, subscription_retrieve_mock,
+                 default_account_mock):
         default_account_mock.return_value = self.account
 
         invoiceitem_data = deepcopy(FAKE_INVOICEITEM)
@@ -46,7 +48,8 @@ class InvoiceItemTest(TestCase):
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER_II))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE_II))
     @patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE_II))
-    def test_sync_with_subscription(self, invoice_retrieve_mock, charge_retrieve_mock, customer_retrieve_mock, subscription_retrieve_mock, default_account_mock):
+    def test_sync_with_subscription(self, invoice_retrieve_mock, charge_retrieve_mock, customer_retrieve_mock,
+                                    subscription_retrieve_mock, default_account_mock):
         default_account_mock.return_value = self.account
 
         invoiceitem_data = deepcopy(FAKE_INVOICEITEM)
@@ -61,7 +64,8 @@ class InvoiceItemTest(TestCase):
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER_II))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE_II))
     @patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE_II))
-    def test_sync_proration(self, invoice_retrieve_mock, charge_retrieve_mock, customer_retrieve_mock, subscription_retrieve_mock, plan_retrieve_mock, default_account_mock):
+    def test_sync_proration(self, invoice_retrieve_mock, charge_retrieve_mock, customer_retrieve_mock,
+                            subscription_retrieve_mock, plan_retrieve_mock, default_account_mock):
         default_account_mock.return_value = self.account
 
         invoiceitem_data = deepcopy(FAKE_INVOICEITEM)

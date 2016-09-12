@@ -46,7 +46,12 @@ def customer_webhook_handler(event, event_data, event_type, event_subtype):
     if crud_type.valid and event.customer:
         # As customers are tied to local users, djstripe will not create
         # customers that do not already exist locally.
-        _handle_crud_type_event(target_cls=Customer, event_data=event_data, event_subtype=event_subtype, crud_type=crud_type)
+        _handle_crud_type_event(
+            target_cls=Customer,
+            event_data=event_data,
+            event_subtype=event_subtype,
+            crud_type=crud_type
+        )
 
 
 @webhooks.handler("customer.source")
@@ -58,14 +63,24 @@ def customer_source_webhook_handler(
 
     # TODO: other sources
     if source_type == "card":
-        _handle_crud_type_event(target_cls=Card, event_data=event_data, event_subtype=event_subtype, customer=event.customer)
+        _handle_crud_type_event(
+            target_cls=Card,
+            event_data=event_data,
+            event_subtype=event_subtype,
+            customer=event.customer
+        )
 
 
 @webhooks.handler("customer.subscription")
 def customer_subscription_webhook_handler(event, event_data, event_type, event_subtype):
     """ Handles updates for customer subscription objects. """
 
-    _handle_crud_type_event(target_cls=Subscription, event_data=event_data, event_subtype=event_subtype, customer=event.customer)
+    _handle_crud_type_event(
+        target_cls=Subscription,
+        event_data=event_data,
+        event_subtype=event_subtype,
+        customer=event.customer
+    )
 
 
 @webhooks.handler(["transfer", "charge", "invoice", "invoiceitem", "plan"])
@@ -80,7 +95,12 @@ def other_object_webhook_handler(event, event_data, event_type, event_subtype):
         "transfer": Transfer
     }.get(event_type)
 
-    _handle_crud_type_event(target_cls=target_cls, event_data=event_data, event_subtype=event_subtype, customer=event.customer)
+    _handle_crud_type_event(
+        target_cls=target_cls,
+        event_data=event_data,
+        event_subtype=event_subtype,
+        customer=event.customer
+    )
 
 
 #

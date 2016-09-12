@@ -30,7 +30,8 @@ class EmailReceiptTest(TestCase):
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")
-    def test_email_reciept_renders_amount_properly(self, charge_create_mock, charge_retrieve_mock, default_account_mock):
+    def test_email_reciept_renders_amount_properly(self, charge_create_mock, charge_retrieve_mock,
+                                                   default_account_mock):
         default_account_mock.return_value = self.account
 
         fake_charge_copy = deepcopy(FAKE_CHARGE)

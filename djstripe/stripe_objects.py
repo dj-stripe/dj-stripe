@@ -36,7 +36,8 @@ from djstripe.exceptions import CustomerDoesNotExistLocallyException
 from .context_managers import stripe_temporary_api_version
 from .exceptions import StripeObjectManipulationException
 from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, StripePercentField, StripeCurrencyField,
-                     StripeIntegerField, StripeTextField, StripeIdField, StripeBooleanField, StripeNullBooleanField, StripeJSONField)
+                     StripeIntegerField, StripeTextField, StripeIdField, StripeBooleanField, StripeNullBooleanField,
+                     StripeJSONField)
 from .managers import StripeObjectManager
 
 
@@ -59,13 +60,25 @@ class StripeObject(TimeStampedModel):
     stripe_objects = StripeObjectManager()
 
     stripe_id = StripeIdField(unique=True, stripe_name='id')
-    livemode = StripeNullBooleanField(default=False, null=True, stripe_required=False,
-                                      help_text="Null here indicates that the livemode status is unknown "
-                                                "or was previously unrecorded. Otherwise, this field indicates "
-                                                "whether this record comes from Stripe test mode or live "
-                                                "mode operation.")
-    stripe_timestamp = StripeDateTimeField(null=True, stripe_required=False, stripe_name="created", help_text="The datetime this object was created in stripe.")
-    metadata = StripeJSONField(blank=True, stripe_required=False, help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.")
+    livemode = StripeNullBooleanField(
+        default=False,
+        null=True,
+        stripe_required=False,
+        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, "
+        "this field indicates whether this record comes from Stripe test mode or live mode operation."
+    )
+    stripe_timestamp = StripeDateTimeField(
+        null=True,
+        stripe_required=False,
+        stripe_name="created",
+        help_text="The datetime this object was created in stripe."
+    )
+    metadata = StripeJSONField(
+        blank=True,
+        stripe_required=False,
+        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional "
+        "information about an object in a structured format."
+    )
     description = StripeTextField(blank=True, stripe_required=False, help_text="A description of this object.")
 
     class Meta:
@@ -260,7 +273,8 @@ class StripeObject(TimeStampedModel):
             try:
                 return target_cls.stripe_objects.get_by_json(data, "customer")
             except target_cls.DoesNotExist:
-                raise CustomerDoesNotExistLocallyException("Because customers are tied to local users, djstripe will not create customers that do not already exist locally.")
+                raise CustomerDoesNotExistLocallyException("Because customers are tied to local users, djstripe will "
+                                                           "not create customers that do not already exist locally.")
 
     @classmethod
     def _stripe_object_to_transfer(cls, target_cls, data):
@@ -446,15 +460,46 @@ Fields not implemented:
     expand_fields = ["balance_transaction"]
 
     amount = StripeCurrencyField(help_text="Amount charged.")
-    amount_refunded = StripeCurrencyField(help_text="Amount refunded (can be less than the amount attribute on the charge if a partial refund was issued).")
-    captured = StripeBooleanField(default=False, help_text="If the charge was created without capturing, this boolean represents whether or not it is still uncaptured or has since been captured.")
-    currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code representing the currency in which the charge was made.")
-    failure_code = StripeCharField(max_length=30, null=True, choices=CARD_ERROR_CODE_CHOICES, help_text="Error code explaining reason for charge failure if available.")
-    failure_message = StripeTextField(null=True, help_text="Message to user further explaining reason for charge failure if available.")
-    paid = StripeBooleanField(default=False, help_text="True if the charge succeeded, or was successfully authorized for later capture, False otherwise.")
-    refunded = StripeBooleanField(default=False, help_text="Whether or not the charge has been fully refunded. If the charge is only partially refunded, this attribute will still be false.")
+    amount_refunded = StripeCurrencyField(
+        help_text="Amount refunded (can be less than the amount attribute on the charge "
+        "if a partial refund was issued)."
+    )
+    captured = StripeBooleanField(
+        default=False,
+        help_text="If the charge was created without capturing, this boolean represents whether or not it is still "
+        "uncaptured or has since been captured."
+    )
+    currency = StripeCharField(
+        max_length=3,
+        help_text="Three-letter ISO currency code representing the currency in which the charge was made."
+    )
+    failure_code = StripeCharField(
+        max_length=30,
+        null=True,
+        choices=CARD_ERROR_CODE_CHOICES,
+        help_text="Error code explaining reason for charge failure if available."
+    )
+    failure_message = StripeTextField(
+        null=True,
+        help_text="Message to user further explaining reason for charge failure if available."
+    )
+    paid = StripeBooleanField(
+        default=False,
+        help_text="True if the charge succeeded, or was successfully authorized for later capture, False otherwise."
+    )
+    refunded = StripeBooleanField(
+        default=False,
+        help_text="Whether or not the charge has been fully refunded. If the charge is only partially refunded, "
+        "this attribute will still be false."
+    )
     shipping = StripeJSONField(null=True, help_text="Shipping information for the charge")
-    statement_descriptor = StripeCharField(max_length=22, null=True, help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement description may not include <>\"' characters, and will appear on your customer's statement in capital letters. Non-ASCII characters are automatically stripped. While most banks display this information consistently, some may display it incorrectly or not at all.")
+    statement_descriptor = StripeCharField(
+        max_length=22, null=True,
+        help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement "
+        "description may not include <>\"' characters, and will appear on your customer's statement in capital "
+        "letters. Non-ASCII characters are automatically stripped. While most banks display this information "
+        "consistently, some may display it incorrectly or not at all."
+    )
     status = StripeCharField(max_length=10, choices=STATUS_CHOICES, help_text="The status of the payment.")
 
     # Balance transaction can be null if the charge failed
@@ -462,7 +507,13 @@ Fields not implemented:
     fee_details = StripeJSONField(stripe_required=False, nested_name="balance_transaction")
 
     # dj-stripe custom stripe fields. Don't try to send these.
-    source_type = StripeCharField(max_length=20, null=True, stripe_name="source.object", help_text="The payment source type. If the payment source is supported by dj-stripe, a corresponding model is attached to this Charge via a foreign key matching this field.")
+    source_type = StripeCharField(
+        max_length=20,
+        null=True,
+        stripe_name="source.object",
+        help_text="The payment source type. If the payment source is supported by dj-stripe, a corresponding model is "
+        "attached to this Charge via a foreign key matching this field."
+    )
     source_stripe_id = StripeIdField(null=True, stripe_name="source.id", help_text="The payment source id.")
     disputed = StripeBooleanField(default=False, help_text="Whether or not this charge is disputed.")
     fraudulent = StripeBooleanField(default=False, help_text="Whether or not this charge was marked as fraudulent.")
@@ -564,10 +615,30 @@ Fields not implemented:
     stripe_api_name = "Customer"
     expand_fields = ["default_source"]
 
-    account_balance = StripeIntegerField(null=True, help_text="Current balance, if any, being stored on the customer's account. If negative, the customer has credit to apply to the next invoice. If positive, the customer has an amount owed that will be added to the next invoice. The balance does not refer to any unpaid invoices; it solely takes into account amounts that have yet to be successfully applied to any invoice. This balance is only taken into account for recurring charges.")
-    business_vat_id = StripeCharField(max_length=20, null=True, help_text="The customer's VAT identification number.", stripe_required=False)
-    currency = StripeCharField(max_length=3, null=True, help_text="The currency the customer can be charged in for recurring billing purposes (subscriptions, invoices, invoice items).")
-    delinquent = StripeBooleanField(default=False, help_text="Whether or not the latest charge for the customer's latest invoice has failed.")
+    account_balance = StripeIntegerField(
+        null=True,
+        help_text="Current balance, if any, being stored on the customer's account. If negative, the customer has "
+        "credit to apply to the next invoice. If positive, the customer has an amount owed that will be added to the "
+        "next invoice. The balance does not refer to any unpaid invoices; it solely takes into account amounts that "
+        "have yet to be successfully applied to any invoice. This balance is only taken into account for recurring "
+        "charges."
+    )
+    business_vat_id = StripeCharField(
+        max_length=20,
+        null=True,
+        stripe_required=False,
+        help_text="The customer's VAT identification number.",
+    )
+    currency = StripeCharField(
+        max_length=3,
+        null=True,
+        help_text="The currency the customer can be charged in for recurring billing purposes (subscriptions, "
+        "invoices, invoice items)."
+    )
+    delinquent = StripeBooleanField(
+        default=False,
+        help_text="Whether or not the latest charge for the customer's latest invoice has failed."
+    )
     shipping = StripeJSONField(null=True, help_text="Shipping information associated with the customer.")
 
     @classmethod
@@ -630,12 +701,14 @@ Fields not implemented:
                           customer is being subscribed to. The special value ``now`` can be provided to end
                           the customer's trial immediately.
         :type trial_end: datetime
-        :param charge_immediately: Whether or not to charge for the subscription upon creation. If False, an invoice will be created at the end of this period.
+        :param charge_immediately: Whether or not to charge for the subscription upon creation. If False, an
+                                   invoice will be created at the end of this period.
         :type charge_immediately: boolean
 
         .. Notes:
         .. ``charge_immediately`` is only available on ``Customer.subscribe()``
-        .. if you're using ``StripeCustomer.subscribe()`` instead of ``Customer.subscribe()``, ``plan`` can only be a string
+        .. if you're using ``StripeCustomer.subscribe()`` instead of ``Customer.subscribe()``, ``plan`` \
+        can only be a string
         """
 
         stripe_subscription = StripeSubscription._api_create(
@@ -665,7 +738,8 @@ Fields not implemented:
         :type amount: Decimal. Precision is 2; anything more will be ignored.
         :param currency: 3-letter ISO code for currency
         :type currency: string
-        :param application_fee: A fee that will be applied to the charge and transfered to the platform owner's account.
+        :param application_fee: A fee that will be applied to the charge and transfered to the platform owner's
+                                account.
         :type application_fee: Decimal. Precision is 2; anything more will be ignored.
         :param capture: Whether or not to immediately capture the charge. When false, the charge issues an
                         authorization (or pre-authorization), and will need to be captured later. Uncaptured
@@ -680,7 +754,8 @@ Fields not implemented:
         :param shipping: Shipping information for the charge.
         :type shipping: dict
         :param source: The source to use for this charge. Must be a source attributed to this customer. If None,
-                       the customer's default source is used. Can be either the id of the source or the source object itself.
+                       the customer's default source is used. Can be either the id of the source or the source object
+                       itself.
         :type source: string, StripeSource
         :param statement_descriptor: An arbitrary string to be displayed on the customer's credit card statement.
         :type statement_descriptor: string
@@ -747,7 +822,8 @@ Fields not implemented:
         :type subscription: Subscription or string (subscription ID)
 
         .. Notes:
-        .. if you're using ``StripeCustomer.add_invoice_item()`` instead of ``Customer.add_invoice_item()``, ``invoice`` and ``subscriptions`` can only be strings
+        .. if you're using ``StripeCustomer.add_invoice_item()`` instead of ``Customer.add_invoice_item()``, \
+        ``invoice`` and ``subscriptions`` can only be strings
         """
 
         if not isinstance(amount, decimal.Decimal):
@@ -808,7 +884,8 @@ is:
 
     1) validate the receipt of a webhook event by doing an event get using the API version of the received hook event.
     2) retrieve the referenced object (e.g. the Charge, the Customer, etc) using the plugin's supported API version.
-    3) process that event using the retrieved object which will, only now, be in a format that you are certain to understand
+    3) process that event using the retrieved object which will, only now, be in a format that you are certain to \
+    understand
 
 # = Mapping the values of this field isn't currently on our roadmap.
     Please use the stripe dashboard to check the value of this field instead.
@@ -827,9 +904,24 @@ Fields not implemented:
     stripe_api_name = "Event"
 
     type = StripeCharField(max_length=250, help_text="Stripe's event description code")
-    request_id = StripeCharField(max_length=50, null=True, blank=True, stripe_name="request", help_text="Information about the request that triggered this event, for traceability purposes. If empty string then this is an old entry without that data. If Null then this is not an old entry, but a Stripe 'automated' event with no associated request.")
-    received_api_version = StripeCharField(max_length=15, blank=True, stripe_name="api_version", help_text="the API version at which the event data was rendered. Blank for old entries only, all new entries will have this value")
-    webhook_message = StripeJSONField(stripe_name="data", help_text="data received at webhook. data should be considered to be garbage until validity check is run and valid flag is set")
+    request_id = StripeCharField(
+        max_length=50,
+        null=True,
+        blank=True,
+        stripe_name="request",
+        help_text="Information about the request that triggered this event, for traceability purposes. If empty "
+        "string then this is an old entry without that data. If Null then this is not an old entry, but a Stripe "
+        "'automated' event with no associated request."
+    )
+    received_api_version = StripeCharField(
+        max_length=15, blank=True, stripe_name="api_version", help_text="the API version at which the event data was "
+        "rendered. Blank for old entries only, all new entries will have this value"
+    )
+    webhook_message = StripeJSONField(
+        stripe_name="data",
+        help_text="data received at webhook. data should be considered to be garbage until validity check is run "
+        "and valid flag is set"
+    )
 
     def str_parts(self):
         return [
@@ -884,7 +976,9 @@ Fields not implemented:
     STATUS_CHOICES = [(status, status.replace("_", " ").title()) for status in STATUSES]
 
     DESTINATION_TYPES = ["card", "bank_account", "stripe_account"]
-    DESITNATION_TYPE_CHOICES = [(destination_type, destination_type.replace("_", " ").title()) for destination_type in DESTINATION_TYPES]
+    DESITNATION_TYPE_CHOICES = [
+        (destination_type, destination_type.replace("_", " ").title()) for destination_type in DESTINATION_TYPES
+    ]
 
     SOURCE_TYPES = ["card", "bank_account", "bitcoin_reciever", "alipay_account"]
     SOURCE_TYPE_CHOICES = [(source_type, source_type.replace("_", " ").title()) for source_type in SOURCE_TYPES]
@@ -895,19 +989,69 @@ Fields not implemented:
     FAILURE_CODE_CHOICES = [(failure_code, failure_code.replace("_", " ").title()) for failure_code in FAILURE_CODES]
 
     amount = StripeCurrencyField(help_text="The amount transferred")
-    amount_reversed = StripeCurrencyField(stripe_required=False, help_text="The amount reversed (can be less than the amount attribute on the transfer if a partial reversal was issued).")
+    amount_reversed = StripeCurrencyField(
+        stripe_required=False,
+        help_text="The amount reversed (can be less than the amount attribute on the transfer if a partial "
+        "reversal was issued)."
+    )
     currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code.")
-    date = StripeDateTimeField(help_text="Date the transfer is scheduled to arrive in the bank. This doesn't factor in delays like weekends or bank holidays.")
+    date = StripeDateTimeField(
+        help_text="Date the transfer is scheduled to arrive in the bank. This doesn't factor in delays like "
+        "weekends or bank holidays."
+    )
     destination = StripeIdField(help_text="ID of the bank account, card, or Stripe account the transfer was sent to.")
-    destination_payment = StripeIdField(stripe_required=False, help_text="If the destination is a Stripe account, this will be the ID of the payment that the destination account received for the transfer.")
-    destination_type = StripeCharField(stripe_name="type", max_length=14, choices=DESITNATION_TYPE_CHOICES, help_text="The type of the transfer destination.")
-    failure_code = StripeCharField(null=True, max_length=23, choices=FAILURE_CODE_CHOICES, help_text="Error code explaining reason for transfer failure if available. See https://stripe.com/docs/api/python#transfer_failures.")
-    failure_message = StripeTextField(null=True, help_text="Message to user further explaining reason for transfer failure if available.")
-    reversed = StripeBooleanField(default=False, help_text="Whether or not the transfer has been fully reversed. If the transfer is only partially reversed, this attribute will still be false.")
-    source_transaction = StripeIdField(null=True, help_text="ID of the charge (or other transaction) that was used to fund the transfer. If null, the transfer was funded from the available balance.")
-    source_type = StripeCharField(max_length=16, choices=SOURCE_TYPE_CHOICES, help_text="The source balance from which this transfer came.")
-    statement_descriptor = StripeCharField(max_length=22, null=True, help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement description may not include <>\"' characters, and will appear on your customer's statement in capital letters. Non-ASCII characters are automatically stripped. While most banks display this information consistently, some may display it incorrectly or not at all.")
-    status = StripeCharField(max_length=10, choices=STATUS_CHOICES, help_text="The current status of the transfer. A transfer will be pending until it is submitted to the bank, at which point it becomes in_transit. It will then change to paid if the transaction goes through. If it does not go through successfully, its status will change to failed or canceled.")
+    destination_payment = StripeIdField(
+        stripe_required=False,
+        help_text="If the destination is a Stripe account, this will be the ID of the payment that the destination "
+        "account received for the transfer."
+    )
+    destination_type = StripeCharField(
+        stripe_name="type",
+        max_length=14,
+        choices=DESITNATION_TYPE_CHOICES,
+        help_text="The type of the transfer destination."
+    )
+    failure_code = StripeCharField(
+        null=True,
+        max_length=23,
+        choices=FAILURE_CODE_CHOICES,
+        help_text="Error code explaining reason for transfer failure if available. "
+        "See https://stripe.com/docs/api/python#transfer_failures."
+    )
+    failure_message = StripeTextField(
+        null=True,
+        help_text="Message to user further explaining reason for transfer failure if available."
+    )
+    reversed = StripeBooleanField(
+        default=False,
+        help_text="Whether or not the transfer has been fully reversed. If the transfer is only partially "
+        "reversed, this attribute will still be false."
+    )
+    source_transaction = StripeIdField(
+        null=True,
+        help_text="ID of the charge (or other transaction) that was used to fund the transfer. "
+        "If null, the transfer was funded from the available balance."
+    )
+    source_type = StripeCharField(
+        max_length=16,
+        choices=SOURCE_TYPE_CHOICES,
+        help_text="The source balance from which this transfer came."
+    )
+    statement_descriptor = StripeCharField(
+        max_length=22,
+        null=True,
+        help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement "
+        "description may not include <>\"' characters, and will appear on your customer's statement in capital "
+        "letters. Non-ASCII characters are automatically stripped. While most banks display this information "
+        "consistently, some may display it incorrectly or not at all."
+    )
+    status = StripeCharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        help_text="The current status of the transfer. A transfer will be pending until it is submitted to the bank, "
+        "at which point it becomes in_transit. It will then change to paid if the transaction goes through. "
+        "If it does not go through successfully, its status will change to failed or canceled."
+    )
 
     # Balance transaction can be null if the transfer failed
     fee = StripeCurrencyField(stripe_required=False, nested_name="balance_transaction")
@@ -992,10 +1136,15 @@ Fields not implemented:
     FUNDING_TYPE_CHOICES = [(funding_type, funding_type.title()) for funding_type in FUNDING_TYPES]
 
     CARD_CHECK_RESULTS = ["pass", "fail", "unavailable", "unknown"]
-    CARD_CHECK_RESULT_CHOICES = [(card_check_result, card_check_result.title()) for card_check_result in CARD_CHECK_RESULTS]
+    CARD_CHECK_RESULT_CHOICES = [
+        (card_check_result, card_check_result.title()) for card_check_result in CARD_CHECK_RESULTS
+    ]
 
     TOKENIZATION_METHODS = ["apple_pay", "android_pay"]
-    TOKENIZATION_METHOD_CHOICES = [(tokenization_method, tokenization_method.replace("_", " ").title()) for tokenization_method in TOKENIZATION_METHODS]
+    TOKENIZATION_METHOD_CHOICES = [
+        (tokenization_method, tokenization_method.replace("_", " ").title())
+        for tokenization_method in TOKENIZATION_METHODS
+    ]
 
     class Meta:
         abstract = True
@@ -1005,34 +1154,60 @@ Fields not implemented:
     address_city = StripeTextField(null=True, help_text="Billing address city.")
     address_country = StripeTextField(null=True, help_text="Billing address country.")
     address_line1 = StripeTextField(null=True, help_text="Billing address (Line 1).")
-    address_line1_check = StripeCharField(null=True, max_length=11, choices=CARD_CHECK_RESULT_CHOICES, help_text="If ``address_line1`` was provided, results of the check.")
+    address_line1_check = StripeCharField(
+        null=True,
+        max_length=11,
+        choices=CARD_CHECK_RESULT_CHOICES,
+        help_text="If ``address_line1`` was provided, results of the check."
+    )
     address_line2 = StripeTextField(null=True, help_text="Billing address (Line 2).")
     address_state = StripeTextField(null=True, help_text="Billing address state.")
     address_zip = StripeTextField(null=True, help_text="Billing address zip code.")
-    address_zip_check = StripeCharField(null=True, max_length=11, choices=CARD_CHECK_RESULT_CHOICES, help_text="If ``address_zip`` was provided, results of the check.")
+    address_zip_check = StripeCharField(
+        null=True,
+        max_length=11,
+        choices=CARD_CHECK_RESULT_CHOICES,
+        help_text="If ``address_zip`` was provided, results of the check."
+    )
     brand = StripeCharField(max_length=16, choices=BRAND_CHOICES, help_text="Card brand.")
     country = StripeCharField(max_length=2, help_text="Two-letter ISO code representing the country of the card.")
-    cvc_check = StripeCharField(null=True, max_length=11, choices=CARD_CHECK_RESULT_CHOICES, help_text="If a CVC was provided, results of the check.")
-    dynamic_last4 = StripeCharField(null=True, max_length=4, help_text="(For tokenized numbers only.) The last four digits of the device account number.")
+    cvc_check = StripeCharField(
+        null=True,
+        max_length=11,
+        choices=CARD_CHECK_RESULT_CHOICES,
+        help_text="If a CVC was provided, results of the check."
+    )
+    dynamic_last4 = StripeCharField(
+        null=True,
+        max_length=4,
+        help_text="(For tokenized numbers only.) The last four digits of the device account number."
+    )
     exp_month = StripeIntegerField(help_text="Card expiration month.")
     exp_year = StripeIntegerField(help_text="Card expiration year.")
     fingerprint = StripeTextField(stripe_required=False, help_text="Uniquely identifies this particular card number.")
     funding = StripeCharField(max_length=7, choices=FUNDING_TYPE_CHOICES, help_text="Card funding type.")
     last4 = StripeCharField(max_length=4, help_text="Last four digits of Card number.")
     name = StripeTextField(null=True, help_text="Cardholder name.")
-    tokenization_method = StripeCharField(null=True, max_length=11, choices=TOKENIZATION_METHOD_CHOICES, help_text="If the card number is tokenized, this is the method that was used.")
+    tokenization_method = StripeCharField(
+        null=True,
+        max_length=11,
+        choices=TOKENIZATION_METHOD_CHOICES,
+        help_text="If the card number is tokenized, this is the method that was used."
+    )
 
     def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
         # OVERRIDING the parent version of this function
         # Cards must be manipulated through a customer or account.
-        # TODO: When managed accounts are supported, this method needs to check if either a customer or account is supplied to determine the correct object to use.
+        # TODO: When managed accounts are supported, this method needs to check if either a customer or
+        #       account is supplied to determine the correct object to use.
 
         return self.customer.api_retrieve(api_key=api_key).sources.retrieve(self.stripe_id, expand=self.expand_fields)
 
     @staticmethod
     def _get_customer_from_kwargs(**kwargs):
         if "customer" not in kwargs or not isinstance(kwargs["customer"], StripeCustomer):
-            raise StripeObjectManipulationException("Cards must be manipulated through a Customer. Pass a Customer object into this call.")
+            raise StripeObjectManipulationException("Cards must be manipulated through a Customer. "
+                                                    "Pass a Customer object into this call.")
 
         customer = kwargs["customer"]
         del kwargs["customer"]
@@ -1043,7 +1218,8 @@ Fields not implemented:
     def _api_create(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
         # OVERRIDING the parent version of this function
         # Cards must be manipulated through a customer or account.
-        # TODO: When managed accounts are supported, this method needs to check if either a customer or account is supplied to determine the correct object to use.
+        # TODO: When managed accounts are supported, this method needs to check if either a customer or
+        #       account is supplied to determine the correct object to use.
 
         customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
 
@@ -1053,7 +1229,8 @@ Fields not implemented:
     def api_list(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
         # OVERRIDING the parent version of this function
         # Cards must be manipulated through a customer or account.
-        # TODO: When managed accounts are supported, this method needs to check if either a customer or account is supplied to determine the correct object to use.
+        # TODO: When managed accounts are supported, this method needs to check if either a customer or
+        #       account is supplied to determine the correct object to use.
 
         customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
 
@@ -1128,7 +1305,8 @@ Any customer credit on the account is applied before determining how much is due
 will be actually charged). If the amount due for the invoice is less than 50 cents (the minimum for a charge), we
 add the amount to the customer's running account balance to be added to the next invoice. If this amount is negative,
 it will act as a credit to offset the next invoice. Note that the customer account balance does not include unpaid
-invoices; it only includes balances that need to be taken into account when calculating the amount due for the next invoice.
+invoices; it only includes balances that need to be taken into account when calculating the amount due for the next
+invoice.
 (Source: https://stripe.com/docs/api/python#invoices)
 
 # = Mapping the values of this field isn't currently on our roadmap.
@@ -1150,25 +1328,92 @@ Fields not implemented:
 
     stripe_api_name = "Invoice"
 
-    amount_due = StripeCurrencyField(help_text="Final amount due at this time for this invoice. If the invoice's total is smaller than the minimum charge amount, for example, or if there is account credit that can be applied to the invoice, the amount_due may be 0. If there is a positive starting_balance for the invoice (the customer owes money), the amount_due will also take that into account. The charge that gets generated for the invoice will be for the amount specified in amount_due.")
-    application_fee = StripeCurrencyField(null=True, help_text="The fee in cents that will be applied to the invoice and transferred to the application owner's Stripe account when the invoice is paid.")
-    attempt_count = StripeIntegerField(help_text="Number of payment attempts made for this invoice, from the perspective of the payment retry schedule. Any payment attempt counts as the first attempt, and subsequently only automatic retries increment the attempt count. In other words, manual payment attempts after the first attempt do not affect the retry schedule.")
-    attempted = StripeBooleanField(default=False, help_text="Whether or not an attempt has been made to pay the invoice. An invoice is not attempted until 1 hour after the ``invoice.created`` webhook, for example, so you might not want to display that invoice as unpaid to your users.")
-    closed = StripeBooleanField(default=False, help_text="Whether or not the invoice is still trying to collect payment. An invoice is closed if it's either paid or it has been marked closed. A closed invoice will no longer attempt to collect payment.")
+    amount_due = StripeCurrencyField(
+        help_text="Final amount due at this time for this invoice. If the invoice's total is smaller than the minimum "
+        "charge amount, for example, or if there is account credit that can be applied to the invoice, the amount_due "
+        "may be 0. If there is a positive starting_balance for the invoice (the customer owes money), the amount_due "
+        "will also take that into account. The charge that gets generated for the invoice will be for the amount "
+        "specified in amount_due."
+    )
+    application_fee = StripeCurrencyField(
+        null=True,
+        help_text="The fee in cents that will be applied to the invoice and transferred to the application owner's "
+        "Stripe account when the invoice is paid."
+    )
+    attempt_count = StripeIntegerField(
+        help_text="Number of payment attempts made for this invoice, from the perspective of the payment retry "
+        "schedule. Any payment attempt counts as the first attempt, and subsequently only automatic retries "
+        "increment the attempt count. In other words, manual payment attempts after the first attempt do not affect "
+        "the retry schedule."
+    )
+    attempted = StripeBooleanField(
+        default=False,
+        help_text="Whether or not an attempt has been made to pay the invoice. An invoice is not attempted until 1 "
+        "hour after the ``invoice.created`` webhook, for example, so you might not want to display that invoice as "
+        "unpaid to your users."
+    )
+    closed = StripeBooleanField(
+        default=False,
+        help_text="Whether or not the invoice is still trying to collect payment. An invoice is closed if it's either "
+        "paid or it has been marked closed. A closed invoice will no longer attempt to collect payment."
+    )
     currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code.")
     date = StripeDateTimeField(help_text="The date on the invoice.")
-    ending_balance = StripeIntegerField(null=True, help_text="Ending customer balance after attempting to pay invoice. If the invoice has not been attempted yet, this will be null.")
-    forgiven = StripeBooleanField(default=False, help_text="Whether or not the invoice has been forgiven. Forgiving an invoice instructs us to update the subscription status as if the invoice were successfully paid. Once an invoice has been forgiven, it cannot be unforgiven or reopened.")
-    next_payment_attempt = StripeDateTimeField(null=True, help_text="The time at which payment will next be attempted.")
-    paid = StripeBooleanField(default=False, help_text="The time at which payment will next be attempted.")
-    period_end = StripeDateTimeField(help_text="End of the usage period during which invoice items were added to this invoice.")
-    period_start = StripeDateTimeField(help_text="Start of the usage period during which invoice items were added to this invoice.")
-    starting_balance = StripeIntegerField(help_text="Starting customer balance before attempting to pay invoice. If the invoice has not been attempted yet, this will be the current customer balance.")
-    statement_descriptor = StripeCharField(max_length=22, null=True, help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement description may not include <>\"' characters, and will appear on your customer's statement in capital letters. Non-ASCII characters are automatically stripped. While most banks display this information consistently, some may display it incorrectly or not at all.")
-    subscription_proration_date = StripeDateTimeField(stripe_required=False, help_text="Only set for upcoming invoices that preview prorations. The time used to calculate prorations.")
-    subtotal = StripeCurrencyField(help_text="Only set for upcoming invoices that preview prorations. The time used to calculate prorations.")
-    tax = StripeCurrencyField(null=True, help_text="The amount of tax included in the total, calculated from ``tax_percent`` and the subtotal. If no ``tax_percent`` is defined, this value will be null.")
-    tax_percent = StripePercentField(null=True, help_text="This percentage of the subtotal has been added to the total amount of the invoice, including invoice line items and discounts. This field is inherited from the subscription's ``tax_percent`` field, but can be changed before the invoice is paid. This field defaults to null.")
+    ending_balance = StripeIntegerField(
+        null=True,
+        help_text="Ending customer balance after attempting to pay invoice. If the invoice has not been attempted "
+        "yet, this will be null."
+    )
+    forgiven = StripeBooleanField(
+        default=False,
+        help_text="Whether or not the invoice has been forgiven. Forgiving an invoice instructs us to update the "
+        "subscription status as if the invoice were successfully paid. Once an invoice has been forgiven, it cannot "
+        "be unforgiven or reopened."
+    )
+    next_payment_attempt = StripeDateTimeField(
+        null=True,
+        help_text="The time at which payment will next be attempted."
+    )
+    paid = StripeBooleanField(
+        default=False,
+        help_text="The time at which payment will next be attempted."
+    )
+    period_end = StripeDateTimeField(
+        help_text="End of the usage period during which invoice items were added to this invoice."
+    )
+    period_start = StripeDateTimeField(
+        help_text="Start of the usage period during which invoice items were added to this invoice."
+    )
+    starting_balance = StripeIntegerField(
+        help_text="Starting customer balance before attempting to pay invoice. If the invoice has not been attempted "
+        "yet, this will be the current customer balance."
+    )
+    statement_descriptor = StripeCharField(
+        max_length=22,
+        null=True,
+        help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement "
+        "description may not include <>\"' characters, and will appear on your customer's statement in capital "
+        "letters. Non-ASCII characters are automatically stripped. While most banks display this information "
+        "consistently, some may display it incorrectly or not at all."
+    )
+    subscription_proration_date = StripeDateTimeField(
+        stripe_required=False,
+        help_text="Only set for upcoming invoices that preview prorations. The time used to calculate prorations."
+    )
+    subtotal = StripeCurrencyField(
+        help_text="Only set for upcoming invoices that preview prorations. The time used to calculate prorations."
+    )
+    tax = StripeCurrencyField(
+        null=True,
+        help_text="The amount of tax included in the total, calculated from ``tax_percent`` and the subtotal. If no "
+        "``tax_percent`` is defined, this value will be null."
+    )
+    tax_percent = StripePercentField(
+        null=True,
+        help_text="This percentage of the subtotal has been added to the total amount of the invoice, including "
+        "invoice line items and discounts. This field is inherited from the subscription's ``tax_percent`` field, "
+        "but can be changed before the invoice is paid. This field defaults to null."
+    )
     total = StripeCurrencyField("Total after discount.")
 
     def str_parts(self):
@@ -1312,11 +1557,28 @@ Fields not implemented:
     amount = StripeCurrencyField(help_text="Amount invoiced.")
     currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code.")
     date = StripeDateTimeField(help_text="The date on the invoiceitem.")
-    discountable = StripeBooleanField(default=False, help_text="If True, discounts will apply to this invoice item. Always False for prorations.")
-    period_end = StripeDateTimeField(stripe_name="period.end", help_text="Might be the date when this invoiceitem's invoice was sent.")
-    period_start = StripeDateTimeField(stripe_name="period.start", help_text="Might be the date when this invoiceitem was added to the invoice")
-    proration = StripeBooleanField(default=False, help_text="Whether or not the invoice item was created automatically as a proration adjustment when the customer switched plans.")
-    quantity = StripeIntegerField(stripe_required=False, help_text="If the invoice item is a proration, the quantity of the subscription for which the proration was computed.")
+    discountable = StripeBooleanField(
+        default=False,
+        help_text="If True, discounts will apply to this invoice item. Always False for prorations."
+    )
+    period_end = StripeDateTimeField(
+        stripe_name="period.end",
+        help_text="Might be the date when this invoiceitem's invoice was sent."
+    )
+    period_start = StripeDateTimeField(
+        stripe_name="period.start",
+        help_text="Might be the date when this invoiceitem was added to the invoice"
+    )
+    proration = StripeBooleanField(
+        default=False,
+        help_text="Whether or not the invoice item was created automatically as a proration adjustment when the "
+        "customer switched plans."
+    )
+    quantity = StripeIntegerField(
+        stripe_required=False,
+        help_text="If the invoice item is a proration, the quantity of the subscription for which the proration "
+        "was computed."
+    )
 
     def str_parts(self):
         return [
@@ -1365,11 +1627,29 @@ Fields not implemented:
 
     amount = StripeCurrencyField(help_text="Amount to be charged on the interval specified.")
     currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code")
-    interval = StripeCharField(max_length=5, choices=INTERVAL_TYPE_CHOICES, help_text="The frequency with which a subscription should be billed.")
-    interval_count = StripeIntegerField(null=True, help_text="The number of intervals (specified in the interval property) between each subscription billing.")
+    interval = StripeCharField(
+        max_length=5,
+        choices=INTERVAL_TYPE_CHOICES,
+        help_text="The frequency with which a subscription should be billed."
+    )
+    interval_count = StripeIntegerField(
+        null=True,
+        help_text="The number of intervals (specified in the interval property) between each subscription billing."
+    )
     name = StripeTextField(help_text="Name of the plan, to be displayed on invoices and in the web interface.")
-    statement_descriptor = StripeCharField(max_length=22, null=True, help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement description may not include <>\"' characters, and will appear on your customer's statement in capital letters. Non-ASCII characters are automatically stripped. While most banks display this information consistently, some may display it incorrectly or not at all.")
-    trial_period_days = StripeIntegerField(null=True, help_text="Number of trial period days granted when subscribing a customer to this plan. Null if the plan has no trial period.")
+    statement_descriptor = StripeCharField(
+        max_length=22,
+        null=True,
+        help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement "
+        "description may not include <>\"' characters, and will appear on your customer's statement in capital "
+        "letters. Non-ASCII characters are automatically stripped. While most banks display this information "
+        "consistently, some may display it incorrectly or not at all."
+    )
+    trial_period_days = StripeIntegerField(
+        null=True,
+        help_text="Number of trial period days granted when subscribing a customer to this plan. "
+        "Null if the plan has no trial period."
+    )
 
     def str_parts(self):
         return [
@@ -1417,18 +1697,50 @@ Fields not implemented:
     STATUSES = [STATUS_TRIALING, STATUS_ACTIVE, STATUS_PAST_DUE, STATUS_CANCELED, STATUS_UNPAID]
     STATUS_CHOICES = [(status, status.replace("_", " ").title()) for status in STATUSES]
 
-    application_fee_percent = StripePercentField(null=True, help_text="A positive decimal that represents the fee percentage of the subscription invoice amount that will be transferred to the application owner’s Stripe account each billing period.")
-    cancel_at_period_end = StripeBooleanField(default=False, help_text="If the subscription has been canceled with the ``at_period_end`` flag set to true, ``cancel_at_period_end`` on the subscription will be true. You can use this attribute to determine whether a subscription that has a status of active is scheduled to be canceled at the end of the current period.")
-    canceled_at = StripeDateTimeField(null=True, help_text="If the subscription has been canceled, the date of that cancellation. If the subscription was canceled with ``cancel_at_period_end``, canceled_at will still reflect the date of the initial cancellation request, not the end of the subscription period when the subscription is automatically moved to a canceled state.")
-    current_period_end = StripeDateTimeField(help_text="End of the current period for which the subscription has been invoiced. At the end of this period, a new invoice will be created.")
-    current_period_start = StripeDateTimeField(help_text="Start of the current period for which the subscription has been invoiced.")
-    ended_at = StripeDateTimeField(null=True, help_text="If the subscription has ended (either because it was canceled or because the customer was switched to a subscription to a new plan), the date the subscription ended.")
+    application_fee_percent = StripePercentField(
+        null=True,
+        help_text="A positive decimal that represents the fee percentage of the subscription invoice amount that "
+        "will be transferred to the application owner’s Stripe account each billing period."
+    )
+    cancel_at_period_end = StripeBooleanField(
+        default=False,
+        help_text="If the subscription has been canceled with the ``at_period_end`` flag set to true, "
+        "``cancel_at_period_end`` on the subscription will be true. You can use this attribute to determine whether "
+        "a subscription that has a status of active is scheduled to be canceled at the end of the current period."
+    )
+    canceled_at = StripeDateTimeField(
+        null=True,
+        help_text="If the subscription has been canceled, the date of that cancellation. If the subscription was "
+        "canceled with ``cancel_at_period_end``, canceled_at will still reflect the date of the initial cancellation "
+        "request, not the end of the subscription period when the subscription is automatically moved to a canceled "
+        "state."
+    )
+    current_period_end = StripeDateTimeField(
+        help_text="End of the current period for which the subscription has been invoiced. At the end of this period, "
+        "a new invoice will be created."
+    )
+    current_period_start = StripeDateTimeField(
+        help_text="Start of the current period for which the subscription has been invoiced."
+    )
+    ended_at = StripeDateTimeField(
+        null=True,
+        help_text="If the subscription has ended (either because it was canceled or because the customer was switched "
+        "to a subscription to a new plan), the date the subscription ended."
+    )
     quantity = StripeIntegerField(help_text="The quantity applied to this subscription.")
     start = StripeDateTimeField(help_text="Date the subscription started.")
     status = StripeCharField(max_length=8, choices=STATUS_CHOICES, help_text="The status of this subscription.")
-    tax_percent = StripePercentField(null=True, help_text="A positive decimal (with at most two decimal places) between 1 and 100. This represents the percentage of the subscription invoice subtotal that will be calculated and added as tax to the final amount each billing period.")
+    tax_percent = StripePercentField(
+        null=True,
+        help_text="A positive decimal (with at most two decimal places) between 1 and 100. This represents the "
+        "percentage of the subscription invoice subtotal that will be calculated and added as tax to the final "
+        "amount each billing period."
+    )
     trial_end = StripeDateTimeField(null=True, help_text="If the subscription has a trial, the end of that trial.")
-    trial_start = StripeDateTimeField(null=True, help_text="If the subscription has a trial, the beginning of that trial.")
+    trial_start = StripeDateTimeField(
+        null=True,
+        help_text="If the subscription has a trial, the beginning of that trial."
+    )
 
     def str_parts(self):
         return [
@@ -1462,18 +1774,21 @@ Fields not implemented:
         :type plan: Plan or string (plan ID)
         :param prorate: Whether or not to prorate when switching plans. Default is True.
         :type prorate: boolean
-        :param proration_date: If set, the proration will be calculated as though the subscription was updated at the given time.
-                               This can be used to apply exactly the same proration that was previewed with upcoming invoice endpoint.
-                               It can also be used to implement custom proration logic, such as prorating by day instead of by second,
-                               by providing the time that you wish to use for proration calculations.
+        :param proration_date: If set, the proration will be calculated as though the subscription was updated at the
+                               given time. This can be used to apply exactly the same proration that was previewed
+                               with upcoming invoice endpoint. It can also be used to implement custom proration
+                               logic, such as prorating by day instead of by second, by providing the time that you
+                               wish to use for proration calculations.
         :type proration_date: datetime
 
         .. note:: The default value for ``prorate`` is overridden by the DJSTRIPE_PRORATION_POLICY setting.
 
-        .. important:: Updating a subscription by changing the plan or quantity creates a new ``Subscription`` in Stripe (and dj-stripe).
+        .. important:: Updating a subscription by changing the plan or quantity creates a new ``Subscription`` in \
+        Stripe (and dj-stripe).
 
         .. Notes:
-        .. if you're using ``StripeSubscription.update()`` instead of ``Subscription.update()``, ``plan`` can only be a string
+        .. if you're using ``StripeSubscription.update()`` instead of ``Subscription.update()``, ``plan`` can only \
+        be a string
         """
 
         kwargs = deepcopy(locals())
@@ -1512,17 +1827,22 @@ Fields not implemented:
 
     def cancel(self, at_period_end=None):
         """
-        Cancels this subscription. If you set the at_period_end parameter to true, the subscription will remain active until the end of the period,
-        at which point it will be canceled and not renewed. By default, the subscription is terminated immediately. In either case, the customer will not be
-        charged again for the subscription. Note, however, that any pending invoice items that you've created will still be charged for at the end of the period
-        unless manually deleted. If you've set the subscription to cancel at period end, any pending prorations will also be left in place and collected at the
-        end of the period, but if the subscription is set to cancel immediately, pending prorations will be removed.
+        Cancels this subscription. If you set the at_period_end parameter to true, the subscription will remain active
+        until the end of the period, at which point it will be canceled and not renewed. By default, the subscription
+        is terminated immediately. In either case, the customer will not be charged again for the subscription. Note,
+        however, that any pending invoice items that you've created will still be charged for at the end of the period
+        unless manually deleted. If you've set the subscription to cancel at period end, any pending prorations will
+        also be left in place and collected at the end of the period, but if the subscription is set to cancel
+        immediately, pending prorations will be removed.
 
-        By default, all unpaid invoices for the customer will be closed upon subscription cancellation. We do this in order to prevent unexpected payment retries
-        once the customer has canceled a subscription. However, you can reopen the invoices manually after subscription cancellation to have us proceed with automatic
-        retries, or you could even re-attempt payment yourself on all unpaid invoices before allowing the customer to cancel the subscription at all.
+        By default, all unpaid invoices for the customer will be closed upon subscription cancellation. We do this in
+        order to prevent unexpected payment retries once the customer has canceled a subscription. However, you can
+        reopen the invoices manually after subscription cancellation to have us proceed with automatic retries, or you
+        could even re-attempt payment yourself on all unpaid invoices before allowing the customer to cancel the
+        subscription at all.
 
-        :param at_period_end: A flag that if set to true will delay the cancellation of the subscription until the end of the current period. Default is False.
+        :param at_period_end: A flag that if set to true will delay the cancellation of the subscription until the end
+                              of the current period. Default is False.
         :type at_period_end: boolean
 
         .. important:: If a subscription is cancelled during a trial period, the ``at_period_end`` flag will be \

@@ -30,13 +30,17 @@ class SubscriptionTest(TestCase):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
 
-        self.assertEqual("<current_period_start={current_period_start}, current_period_end={current_period_end}, status={status}, quantity={quantity}, stripe_id={stripe_id}>".format(
-            current_period_start=subscription.current_period_start,
-            current_period_end=subscription.current_period_end,
-            status=subscription.status,
-            quantity=subscription.quantity,
-            stripe_id=subscription.stripe_id
-        ), str(subscription))
+        self.assertEqual(
+            "<current_period_start={current_period_start}, current_period_end={current_period_end}, status={status}, "
+            "quantity={quantity}, stripe_id={stripe_id}>".format(
+                current_period_start=subscription.current_period_start,
+                current_period_end=subscription.current_period_end,
+                status=subscription.status,
+                quantity=subscription.quantity,
+                stripe_id=subscription.stripe_id
+            ),
+            str(subscription)
+        )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
@@ -233,7 +237,8 @@ class SubscriptionTest(TestCase):
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
     @patch("stripe.Subscription.retrieve")
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
-    def test_cancel_during_trial_sets_at_period_end(self, customer_retrieve_mock, subscription_retrieve_mock, plan_retrieve_mock):
+    def test_cancel_during_trial_sets_at_period_end(self, customer_retrieve_mock, subscription_retrieve_mock,
+                                                    plan_retrieve_mock):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
         subscription.trial_end = timezone.now() + timezone.timedelta(days=7)

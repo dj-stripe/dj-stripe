@@ -92,7 +92,7 @@ def dict_nested_accessor(d, name):
 
 def convert_tstamp(response, field_name=None):
     """
-    Intended for use converting from a Stripe API timestamp resposne into a native date
+    Intended for use converting from a Stripe API timestamp response into a native date
 
     :rtype: datetime
     """

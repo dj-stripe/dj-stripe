@@ -82,10 +82,16 @@ class PlanTest(TestCase):
         object_create_mock.assert_called_once_with(metadata=metadata, stripe_id=1, arg1=1, arg2=2, amount=1)
 
     def test_str(self):
-        self.assertEqual("<name={name}, stripe_id={stripe_id}>".format(name=self.plan_data["name"], stripe_id=self.plan_data["id"]), str(self.plan))
+        self.assertEqual("<name={name}, stripe_id={stripe_id}>".format(
+            name=self.plan_data["name"],
+            stripe_id=self.plan_data["id"]), str(self.plan)
+        )
 
     @patch("stripe.Plan.retrieve", return_value="soup")
     def test_stripe_plan(self, plan_retrieve_mock):
         self.assertEqual("soup", self.plan.api_retrieve())
-        plan_retrieve_mock.assert_called_once_with(id=self.plan_data["id"], api_key=settings.STRIPE_SECRET_KEY,
-                                                   expand=None)
+        plan_retrieve_mock.assert_called_once_with(
+            id=self.plan_data["id"],
+            api_key=settings.STRIPE_SECRET_KEY,
+            expand=None
+        )

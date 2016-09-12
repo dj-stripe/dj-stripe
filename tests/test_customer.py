@@ -23,8 +23,7 @@ from djstripe.exceptions import MultipleSubscriptionException
 from djstripe.models import Account, Customer, Charge, Card, Subscription, Invoice, Plan
 from tests import (FAKE_CARD, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_ACCOUNT, FAKE_INVOICE,
                    FAKE_INVOICE_III, FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II,
-                   StripeList, FAKE_CARD_V, FAKE_CUSTOMER_II, FAKE_UPCOMING_INVOICE,
-    datetime_to_unix)
+                   StripeList, FAKE_CARD_V, FAKE_CUSTOMER_II, FAKE_UPCOMING_INVOICE, datetime_to_unix)
 
 
 class TestCustomer(TestCase):
@@ -238,7 +237,8 @@ class TestCustomer(TestCase):
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Charge.create")
     @patch("stripe.Invoice.retrieve")
-    def test_charge_doesnt_require_invoice(self, invoice_retrieve_mock, charge_create_mock, charge_retrieve_mock, default_account_mock):
+    def test_charge_doesnt_require_invoice(self, invoice_retrieve_mock, charge_create_mock, charge_retrieve_mock,
+                                           default_account_mock):
         default_account_mock.return_value = self.account
 
         fake_charge_copy = deepcopy(FAKE_CHARGE)
@@ -401,7 +401,10 @@ class TestCustomer(TestCase):
         return_status = self.customer.send_invoice()
         self.assertTrue(return_status)
 
-        invoice_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, customer=self.customer.stripe_id)
+        invoice_create_mock.assert_called_once_with(
+            api_key=settings.STRIPE_SECRET_KEY,
+            customer=self.customer.stripe_id
+        )
 
     @patch("stripe.Invoice.create")
     def test_send_invoice_failure(self, invoice_create_mock):
@@ -410,7 +413,10 @@ class TestCustomer(TestCase):
         return_status = self.customer.send_invoice()
         self.assertFalse(return_status)
 
-        invoice_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, customer=self.customer.stripe_id)
+        invoice_create_mock.assert_called_once_with(
+            api_key=settings.STRIPE_SECRET_KEY,
+            customer=self.customer.stripe_id
+        )
 
     @patch("djstripe.models.Invoice.sync_from_stripe_data")
     @patch("stripe.Invoice.list", return_value=StripeList(data=[deepcopy(FAKE_INVOICE), deepcopy(FAKE_INVOICE_III)]))
@@ -441,7 +447,8 @@ class TestCustomer(TestCase):
         self.assertEqual(0, charge_sync_mock.call_count)
 
     @patch("djstripe.models.Subscription.sync_from_stripe_data")
-    @patch("stripe.Subscription.list", return_value=StripeList(data=[deepcopy(FAKE_SUBSCRIPTION), deepcopy(FAKE_SUBSCRIPTION_II)]))
+    @patch("stripe.Subscription.list", return_value=StripeList(data=[deepcopy(FAKE_SUBSCRIPTION),
+                                                                     deepcopy(FAKE_SUBSCRIPTION_II)]))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_sync_subscriptions(self, customer_retrieve_mock, subscription_list_mock, subscription_sync_mock):
         self.customer._sync_subscriptions()
@@ -457,7 +464,8 @@ class TestCustomer(TestCase):
     @patch("djstripe.models.Customer.send_invoice")
     @patch("stripe.Subscription.create", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
-    def test_subscribe_not_charge_immediately(self, customer_retrieve_mock, subscription_create_mock, send_invoice_mock):
+    def test_subscribe_not_charge_immediately(self, customer_retrieve_mock, subscription_create_mock,
+                                              send_invoice_mock):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
         self.customer.subscribe(plan=plan, charge_immediately=False)
@@ -500,14 +508,16 @@ class TestCustomer(TestCase):
 
     @patch("stripe.Subscription.create")
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
-    def test_has_active_subscription_with_unspecified_plan_with_multiple_subscriptions(self, customer_retrieve_mock, subscription_create_mock):
+    def test_has_active_subscription_with_unspecified_plan_with_multiple_subscriptions(self, customer_retrieve_mock,
+                                                                                       subscription_create_mock):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription_fake["current_period_end"] = datetime_to_unix(timezone.now() + timezone.timedelta(days=7))
 
         subscription_fake_duplicate = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_fake_duplicate["current_period_end"] = datetime_to_unix(timezone.now() + timezone.timedelta(days=7))
+        subscription_fake_duplicate["current_period_end"] = datetime_to_unix(timezone.now() +
+                                                                             timezone.timedelta(days=7))
         subscription_fake_duplicate["id"] = "sub_6lsC8pt7IcF8jd"
 
         subscription_create_mock.side_effect = [subscription_fake, subscription_fake_duplicate]
@@ -552,7 +562,8 @@ class TestCustomer(TestCase):
     @patch("djstripe.models.Charge.sync_from_stripe_data")
     @patch("stripe.Charge.retrieve", return_value=FAKE_CHARGE)
     @patch("stripe.Charge.create", return_value=FAKE_CHARGE)
-    def test_charge_not_send_receipt(self, charge_create_mock, charge_retrieve_mock, charge_sync_mock, send_receipt_mock):
+    def test_charge_not_send_receipt(self, charge_create_mock, charge_retrieve_mock, charge_sync_mock,
+                                     send_receipt_mock):
         self.customer.charge(amount=decimal.Decimal("50.00"), send_receipt=False)
 
         self.assertFalse(charge_retrieve_mock.called)
@@ -563,18 +574,50 @@ class TestCustomer(TestCase):
     @patch("djstripe.models.InvoiceItem.sync_from_stripe_data", return_value="pancakes")
     @patch("stripe.InvoiceItem.create", return_value=deepcopy(FAKE_INVOICEITEM))
     def test_add_invoice_item(self, invoiceitem_create_mock, invoiceitem_sync_mock):
-        invoiceitem = self.customer.add_invoice_item(amount=decimal.Decimal("50.00"), currency="eur", description="test", invoice=77, subscription=25)
+        invoiceitem = self.customer.add_invoice_item(
+            amount=decimal.Decimal("50.00"),
+            currency="eur",
+            description="test",
+            invoice=77,
+            subscription=25,
+        )
         self.assertEqual("pancakes", invoiceitem)
 
-        invoiceitem_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, amount=5000, customer=self.customer.stripe_id, currency="eur", description="test", discountable=None, invoice=77, metadata=None, subscription=25)
+        invoiceitem_create_mock.assert_called_once_with(
+            api_key=settings.STRIPE_SECRET_KEY,
+            amount=5000,
+            customer=self.customer.stripe_id,
+            currency="eur",
+            description="test",
+            discountable=None,
+            invoice=77,
+            metadata=None,
+            subscription=25,
+        )
 
     @patch("djstripe.models.InvoiceItem.sync_from_stripe_data", return_value="pancakes")
     @patch("stripe.InvoiceItem.create", return_value=deepcopy(FAKE_INVOICEITEM))
     def test_add_invoice_item_djstripe_objects(self, invoiceitem_create_mock, invoiceitem_sync_mock):
-        invoiceitem = self.customer.add_invoice_item(amount=decimal.Decimal("50.00"), currency="eur", description="test", invoice=Invoice(stripe_id=77), subscription=Subscription(stripe_id=25))
+        invoiceitem = self.customer.add_invoice_item(
+            amount=decimal.Decimal("50.00"),
+            currency="eur",
+            description="test",
+            invoice=Invoice(stripe_id=77),
+            subscription=Subscription(stripe_id=25),
+        )
         self.assertEqual("pancakes", invoiceitem)
 
-        invoiceitem_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, amount=5000, customer=self.customer.stripe_id, currency="eur", description="test", discountable=None, invoice=77, metadata=None, subscription=25)
+        invoiceitem_create_mock.assert_called_once_with(
+            api_key=settings.STRIPE_SECRET_KEY,
+            amount=5000,
+            customer=self.customer.stripe_id,
+            currency="eur",
+            description="test",
+            discountable=None,
+            invoice=77,
+            metadata=None,
+            subscription=25,
+        )
 
     def test_add_invoice_item_bad_decimal(self):
         with self.assertRaisesMessage(ValueError, "You must supply a decimal value representing dollars."):

@@ -18,7 +18,9 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
-from django.db import models
+from django.db.models.fields.related import ForeignKey, OneToOneField
+from django.db.models.deletion import SET_NULL
+from django.db.models.fields import BooleanField, DateTimeField, NullBooleanField, TextField, CharField
 from django.template.loader import render_to_string
 from django.utils import six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
@@ -52,15 +54,33 @@ logger = logging.getLogger(__name__)
 class Charge(StripeCharge):
     __doc__ = getattr(StripeCharge, "__doc__")
 
-    account = models.ForeignKey("Account", null=True, related_name="charges", help_text="The account the charge was made on behalf of. Null here indicates that this value was never set.")
+    account = ForeignKey(
+        "Account", null=True,
+        related_name="charges",
+        help_text="The account the charge was made on behalf of. Null here indicates that this value was never set."
+    )
 
-    customer = models.ForeignKey("Customer", related_name="charges", help_text="The customer associated with this charge.")
-    transfer = models.ForeignKey("Transfer", null=True, help_text="The transfer to the destination account (only applicable if the charge was created using the destination parameter).")
+    customer = ForeignKey(
+        "Customer",
+        related_name="charges",
+        help_text="The customer associated with this charge."
+    )
+    transfer = ForeignKey(
+        "Transfer",
+        null=True,
+        help_text="The transfer to the destination account (only applicable if the charge was created using the "
+        "destination parameter)."
+    )
 
-    source = models.ForeignKey(StripeSource, null=True, related_name="charges", on_delete=models.SET_NULL,
-                               help_text="The source used for this charge.")
+    source = ForeignKey(
+        StripeSource,
+        null=True,
+        related_name="charges",
+        on_delete=SET_NULL,
+        help_text="The source used for this charge."
+    )
 
-    receipt_sent = models.BooleanField(default=False, help_text="Whether or not a receipt was sent for this charge.")
+    receipt_sent = BooleanField(default=False, help_text="Whether or not a receipt was sent for this charge.")
 
     objects = ChargeManager()
 
@@ -127,15 +147,16 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
     """
     __doc__ = getattr(StripeCustomer, "__doc__") + doc
 
-    # account = models.ForeignKey(Account, related_name="customers")
+    # account = ForeignKey(Account, related_name="customers")
 
-    default_source = models.ForeignKey(StripeSource, null=True, related_name="customers", on_delete=models.SET_NULL)
+    default_source = ForeignKey(StripeSource, null=True, related_name="customers", on_delete=SET_NULL)
 
-    subscriber = models.OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
-    date_purged = models.DateTimeField(null=True, editable=False)
+    subscriber = OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
+    date_purged = DateTimeField(null=True, editable=False)
 
     def str_parts(self):
-        return [smart_text(self.subscriber), "email={email}".format(email=self.subscriber.email)] + super(Customer, self).str_parts()
+        return ([smart_text(self.subscriber), "email={email}".format(email=self.subscriber.email)] +
+                super(Customer, self).str_parts())
 
     @classmethod
     def get_or_create(cls, subscriber):
@@ -161,7 +182,10 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         customer = Customer.objects.create(subscriber=subscriber, stripe_id=stripe_customer["id"], currency="usd")
 
         if djstripe_settings.DEFAULT_PLAN and trial_days:
-            customer.subscribe(plan=djstripe_settings.DEFAULT_PLAN, trial_end=timezone.now() + timezone.timedelta(days=trial_days))
+            customer.subscribe(
+                plan=djstripe_settings.DEFAULT_PLAN,
+                trial_end=timezone.now() + timezone.timedelta(days=trial_days)
+            )
 
         return customer
 
@@ -188,10 +212,12 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         self.date_purged = timezone.now()
         self.save()
 
-    # TODO: Override Queryset.delete() with a custom manager, since this doesn't get called in bulk deletes (or cascades, but that's another matter)
+    # TODO: Override Queryset.delete() with a custom manager, since this doesn't get called in bulk deletes
+    #       (or cascades, but that's another matter)
     def delete(self, using=None, keep_parents=False):
         """
-        Overriding the delete method to keep the customer in the records. All identifying information is removed via the purge() method.
+        Overriding the delete method to keep the customer in the records. All identifying information is removed
+        via the purge() method.
 
         The only way to delete a customer is to use SQL.
 
@@ -210,8 +236,8 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
         :param plan: The plan for which to check for an active subscription. If plan is None and
                      there exists only one active subscription, this method will check if that subscription
-                     is valid. Calling this method with no plan and multiple valid subscriptions for this customer will throw
-                     an exception.
+                     is valid. Calling this method with no plan and multiple valid subscriptions for this customer will
+                     throw an exception.
         :type plan: Plan or string (plan ID)
 
         :returns: True if there exists an active subscription, False otherwise.
@@ -263,7 +289,8 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         elif subscription_count == 1:
             return self.subscriptions.first()
         else:
-            raise MultipleSubscriptionException("This customer has multiple subscriptions. Use Customer.subscriptions to access them.")
+            raise MultipleSubscriptionException("This customer has multiple subscriptions. Use Customer.subscriptions "
+                                                "to access them.")
 
     # TODO: Accept a coupon object when coupons are implemented
     def subscribe(self, plan, charge_immediately=True, **kwargs):
@@ -351,7 +378,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
     def upcoming_invoice(self, **kwargs):
         """ Gets the upcoming preview invoice (singular) for this customer.
 
-        See `Invoice.upcoming() <#djstripe.models.Invoice.upcoming>`__.
+        See `Invoice.upcoming() <#djstripe.Invoice.upcoming>`__.
 
         The ``customer`` argument to the ``upcoming()`` call is automatically set by this method.
         """
@@ -382,20 +409,25 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 class Event(StripeEvent):
     __doc__ = getattr(StripeEvent, "__doc__")
 
-    # account = models.ForeignKey(Account, related_name="events")
+    # account = ForeignKey(Account, related_name="events")
 
-    customer = models.ForeignKey("Customer", null=True,
-                                 help_text="In the event that there is a related customer, this will point to that "
-                                           "Customer record")
-    valid = models.NullBooleanField(null=True,
-                                    help_text="Tri-state bool. Null == validity not yet confirmed. Otherwise, this "
-                                              "field indicates that this event was checked via stripe api and found "
-                                              "to be either authentic (valid=True) or in-authentic (possibly "
-                                              "malicious)")
+    customer = ForeignKey(
+        "Customer",
+        null=True,
+        help_text="In the event that there is a related customer, this will point to that Customer record"
+    )
+    valid = NullBooleanField(
+        null=True,
+        help_text="Tri-state bool. Null == validity not yet confirmed. Otherwise, this field indicates that this "
+        "event was checked via stripe api and found to be either authentic (valid=True) or in-authentic (possibly "
+        "malicious)"
+    )
 
-    processed = models.BooleanField(default=False, help_text="If validity is performed, webhook event processor(s) "
-                                                             "may run to take further action on the event. Once these "
-                                                             "have run, this is set to True.")
+    processed = BooleanField(
+        default=False,
+        help_text="If validity is performed, webhook event processor(s) may run to take further action on the event. "
+        "Once these have run, this is set to True."
+    )
 
     @property
     def message(self):
@@ -500,7 +532,7 @@ class Event(StripeEvent):
 class Transfer(StripeTransfer):
     __doc__ = getattr(StripeTransfer, "__doc__")
 
-    # account = models.ForeignKey("Account", related_name="transfers")
+    # account = ForeignKey("Account", related_name="transfers")
 
     objects = TransferManager()
 
@@ -521,7 +553,7 @@ class Account(StripeAccount):
 class Card(StripeCard):
     __doc__ = getattr(StripeCard, "__doc__")
 
-    # account = models.ForeignKey("Account", null=True, related_name="cards")
+    # account = ForeignKey("Account", null=True, related_name="cards")
 
     def _attach_objects_hook(self, cls, data):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
@@ -556,11 +588,25 @@ class Card(StripeCard):
 class Invoice(StripeInvoice):
     __doc__ = getattr(StripeInvoice, "__doc__")
 
-    # account = models.ForeignKey("Account", related_name="invoices")
-    customer = models.ForeignKey(Customer, related_name="invoices", help_text="The customer associated with this invoice.")
-    charge = models.OneToOneField(Charge, null=True, related_name="invoice", help_text="The latest charge generated for this invoice, if any.")
-    subscription = models.ForeignKey("Subscription", null=True, related_name="invoices", on_delete=models.SET_NULL,
-                                     help_text="The subscription that this invoice was prepared for, if any.")
+    # account = ForeignKey("Account", related_name="invoices")
+    customer = ForeignKey(
+        Customer,
+        related_name="invoices",
+        help_text="The customer associated with this invoice."
+    )
+    charge = OneToOneField(
+        Charge,
+        null=True,
+        related_name="invoice",
+        help_text="The latest charge generated for this invoice, if any."
+    )
+    subscription = ForeignKey(
+        "Subscription",
+        null=True,
+        related_name="invoices",
+        on_delete=SET_NULL,
+        help_text="The subscription that this invoice was prepared for, if any."
+    )
 
     class Meta(object):
         ordering = ["-date"]
@@ -620,7 +666,7 @@ class Invoice(StripeInvoice):
         retrieved from the subscription will be the currently active plan.
 
         :returns: The associated plan for the invoice.
-        :rtype: ``djstripe.models.Plan``
+        :rtype: ``djstripe.Plan``
         """
 
         for invoiceitem in self.invoiceitems.all():
@@ -674,13 +720,33 @@ class UpcomingInvoice(Invoice):
 class InvoiceItem(StripeInvoiceItem):
     __doc__ = getattr(StripeInvoiceItem, "__doc__")
 
-    # account = models.ForeignKey(Account, related_name="invoiceitems")
-    customer = models.ForeignKey(Customer, related_name="invoiceitems", help_text="The customer associated with this invoiceitem.")
-    invoice = models.ForeignKey(Invoice, null=True, related_name="invoiceitems", help_text="The invoice to which this invoiceitem is attached.")
-    plan = models.ForeignKey("Plan", null=True, related_name="invoiceitems", on_delete=models.SET_NULL,
-                             help_text="If the invoice item is a proration, the plan of the subscription for which the proration was computed.")
-    subscription = models.ForeignKey("Subscription", null=True, related_name="invoiceitems", on_delete=models.SET_NULL,
-                                     help_text="The subscription that this invoice item has been created for, if any.")
+    # account = ForeignKey(Account, related_name="invoiceitems")
+    customer = ForeignKey(
+        Customer,
+        related_name="invoiceitems",
+        help_text="The customer associated with this invoiceitem."
+    )
+    invoice = ForeignKey(
+        Invoice,
+        null=True,
+        related_name="invoiceitems",
+        help_text="The invoice to which this invoiceitem is attached."
+    )
+    plan = ForeignKey(
+        "Plan",
+        null=True,
+        related_name="invoiceitems",
+        on_delete=SET_NULL,
+        help_text="If the invoice item is a proration, the plan of the subscription for which the proration was "
+        "computed."
+    )
+    subscription = ForeignKey(
+        "Subscription",
+        null=True,
+        related_name="invoiceitems",
+        on_delete=SET_NULL,
+        help_text="The subscription that this invoice item has been created for, if any."
+    )
 
     def _attach_objects_hook(self, cls, data):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
@@ -706,7 +772,7 @@ class InvoiceItem(StripeInvoiceItem):
 class Plan(StripePlan):
     __doc__ = getattr(StripePlan, "__doc__")
 
-    # account = models.ForeignKey("Account", related_name="plans")
+    # account = ForeignKey("Account", related_name="plans")
 
     class Meta(object):
         ordering = ["amount"]
@@ -756,9 +822,17 @@ class Plan(StripePlan):
 class Subscription(StripeSubscription):
     __doc__ = getattr(StripeSubscription, "__doc__")
 
-    # account = models.ForeignKey("Account", related_name="subscriptions")
-    customer = models.ForeignKey("Customer", related_name="subscriptions", help_text="The customer associated with this subscription.")
-    plan = models.ForeignKey("Plan", related_name="subscriptions", help_text="The plan associated with this subscription.")
+    # account = ForeignKey("Account", related_name="subscriptions")
+    customer = ForeignKey(
+        "Customer",
+        related_name="subscriptions",
+        help_text="The customer associated with this subscription."
+    )
+    plan = ForeignKey(
+        "Plan",
+        related_name="subscriptions",
+        help_text="The plan associated with this subscription."
+    )
 
     objects = SubscriptionManager()
 
@@ -808,7 +882,8 @@ class Subscription(StripeSubscription):
         return Subscription.sync_from_stripe_data(stripe_subscription)
 
     def cancel(self, at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END):
-        # If plan has trial days and customer cancels before trial period ends, then end subscription now, i.e. at_period_end=False
+        # If plan has trial days and customer cancels before trial period ends, then end subscription now,
+        #     i.e. at_period_end=False
         if self.trial_end and self.trial_end > timezone.now():
             at_period_end = False
 
@@ -826,10 +901,10 @@ class Subscription(StripeSubscription):
 
 @python_2_unicode_compatible
 class EventProcessingException(TimeStampedModel):
-    event = models.ForeignKey("Event", null=True)
-    data = models.TextField()
-    message = models.CharField(max_length=500)
-    traceback = models.TextField()
+    event = ForeignKey("Event", null=True)
+    data = TextField()
+    message = CharField(max_length=500)
+    traceback = TextField()
 
     @classmethod
     def log(cls, data, exception, event):
@@ -841,8 +916,11 @@ class EventProcessingException(TimeStampedModel):
         )
 
     def __str__(self):
-        return smart_text("<{message}, pk={pk}, Event={event}>".format(message=self.message, pk=self.pk, event=self.event))
-
+        return smart_text("<{message}, pk={pk}, Event={event}>".format(
+            message=self.message,
+            pk=self.pk,
+            event=self.event
+        ))
 
 # Much like registering signal handlers. We import this module so that its registrations get picked up
 # the NO QA directive tells flake8 to not complain about the unused import

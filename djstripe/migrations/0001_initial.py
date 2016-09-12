@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
-import jsonfield.fields
-import django.utils.timezone
 from django.conf import settings
+from django.db import models, migrations
+import django.utils.timezone
+import jsonfield.fields
 import model_utils.fields
 
 
@@ -19,8 +19,10 @@ class Migration(migrations.Migration):
             name='Charge',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
-                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now,
+                                                                verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now,
+                                                                      verbose_name='modified', editable=False)),
                 ('stripe_id', models.CharField(unique=True, max_length=50)),
                 ('card_last_4', models.CharField(max_length=4, blank=True)),
                 ('card_kind', models.CharField(max_length=50, blank=True)),
@@ -43,8 +45,10 @@ class Migration(migrations.Migration):
             name='CurrentSubscription',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
-                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now,
+                                                                verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now,
+                                                                      verbose_name='modified', editable=False)),
                 ('plan', models.CharField(max_length=100)),
                 ('quantity', models.IntegerField()),
                 ('start', models.DateTimeField()),
@@ -67,8 +71,10 @@ class Migration(migrations.Migration):
             name='Customer',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
-                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now,
+                                                                verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now,
+                                                                      verbose_name='modified', editable=False)),
                 ('stripe_id', models.CharField(unique=True, max_length=50)),
                 ('card_fingerprint', models.CharField(max_length=200, blank=True)),
                 ('card_last_4', models.CharField(max_length=4, blank=True)),
@@ -85,8 +91,10 @@ class Migration(migrations.Migration):
             name='Event',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
-                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now,
+                                                                verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now,
+                                                                      verbose_name='modified', editable=False)),
                 ('stripe_id', models.CharField(unique=True, max_length=50)),
                 ('kind', models.CharField(max_length=250)),
                 ('livemode', models.BooleanField(default=False)),
@@ -105,8 +113,10 @@ class Migration(migrations.Migration):
             name='EventProcessingException',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
-                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now,
+                                                                verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now,
+                                                                      verbose_name='modified', editable=False)),
                 ('data', models.TextField()),
                 ('message', models.CharField(max_length=500)),
                 ('traceback', models.TextField()),
@@ -121,8 +131,10 @@ class Migration(migrations.Migration):
             name='Invoice',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
-                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now,
+                                                                verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now,
+                                                                      verbose_name='modified', editable=False)),
                 ('stripe_id', models.CharField(max_length=50)),
                 ('attempted', models.NullBooleanField()),
                 ('attempts', models.PositiveIntegerField(null=True)),
@@ -145,8 +157,10 @@ class Migration(migrations.Migration):
             name='InvoiceItem',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
-                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now,
+                                                                verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now,
+                                                                      verbose_name='modified', editable=False)),
                 ('stripe_id', models.CharField(max_length=50)),
                 ('amount', models.DecimalField(max_digits=7, decimal_places=2)),
                 ('currency', models.CharField(max_length=10)),
@@ -168,13 +182,18 @@ class Migration(migrations.Migration):
             name='Plan',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
-                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now,
+                                                                verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now,
+                                                                      verbose_name='modified', editable=False)),
                 ('stripe_id', models.CharField(unique=True, max_length=50)),
                 ('name', models.CharField(max_length=100)),
-                ('currency', models.CharField(max_length=10, choices=[('usd', 'U.S. Dollars'), ('gbp', 'Pounds (GBP)'), ('eur', 'Euros')])),
-                ('interval', models.CharField(max_length=10, verbose_name='Interval type', choices=[('week', 'Week'), ('month', 'Month'), ('year', 'Year')])),
-                ('interval_count', models.IntegerField(default=1, null=True, verbose_name='Intervals between charges')),
+                ('currency', models.CharField(max_length=10, choices=[('usd', 'U.S. Dollars'),
+                                                                      ('gbp', 'Pounds (GBP)'), ('eur', 'Euros')])),
+                ('interval', models.CharField(max_length=10, verbose_name='Interval type',
+                                              choices=[('week', 'Week'), ('month', 'Month'), ('year', 'Year')])),
+                ('interval_count', models.IntegerField(default=1, null=True,
+                                                       verbose_name='Intervals between charges')),
                 ('amount', models.DecimalField(verbose_name='Amount (per period)', max_digits=7, decimal_places=2)),
                 ('trial_period_days', models.IntegerField(null=True)),
             ],
@@ -187,8 +206,10 @@ class Migration(migrations.Migration):
             name='Transfer',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
-                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now,
+                                                                verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now,
+                                                                      verbose_name='modified', editable=False)),
                 ('stripe_id', models.CharField(unique=True, max_length=50)),
                 ('amount', models.DecimalField(max_digits=7, decimal_places=2)),
                 ('status', models.CharField(max_length=25)),
@@ -219,8 +240,10 @@ class Migration(migrations.Migration):
             name='TransferChargeFee',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, verbose_name='created', editable=False)),
-                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, verbose_name='modified', editable=False)),
+                ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now,
+                                                                verbose_name='created', editable=False)),
+                ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now,
+                                                                      verbose_name='modified', editable=False)),
                 ('amount', models.DecimalField(max_digits=7, decimal_places=2)),
                 ('application', models.TextField(null=True, blank=True)),
                 ('description', models.TextField(null=True, blank=True)),

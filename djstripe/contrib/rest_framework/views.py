@@ -26,7 +26,7 @@ class SubscriptionRestView(APIView):
 
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, format=None):
+    def get(self, request, **kwargs):
         """
         Returns the customer's valid subscriptions.
         Returns with status code 200.
@@ -40,7 +40,7 @@ class SubscriptionRestView(APIView):
         except:
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def post(self, request, format=None):
+    def post(self, request, **kwargs):
         """
         Create a new current subscription for the user.
         Returns with status code 201.
@@ -50,7 +50,7 @@ class SubscriptionRestView(APIView):
 
         if serializer.is_valid():
             try:
-                customer, created = Customer.get_or_create(
+                customer, _created = Customer.get_or_create(
                     subscriber=subscriber_request_callback(self.request)
                 )
                 customer.add_card(serializer.data["stripe_token"])
@@ -68,7 +68,7 @@ class SubscriptionRestView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, format=None):
+    def delete(self, request, **kwargs):
         """
         Marks the users current subscription as cancelled.
         Returns with status code 204.

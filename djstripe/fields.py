@@ -113,7 +113,8 @@ class StripeBooleanField(StripeFieldMixin, models.BooleanField):
 
     def __init__(self, *args, **kwargs):
         if kwargs.get("deprecated", False):
-            raise ImproperlyConfigured("Boolean field cannot be deprecated. Change field type to StripeNullBooleanField")
+            raise ImproperlyConfigured("Boolean field cannot be deprecated. Change field type to "
+                                       "StripeNullBooleanField")
         super(StripeBooleanField, self).__init__(*args, **kwargs)
 
 

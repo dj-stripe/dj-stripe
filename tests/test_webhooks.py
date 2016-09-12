@@ -7,8 +7,8 @@
 
 """
 
-from copy import deepcopy
 from collections import defaultdict
+from copy import deepcopy
 import json
 
 from django.core.urlresolvers import reverse
@@ -41,9 +41,8 @@ class TestWebhook(TestCase):
     @patch.object(views.djstripe_settings, 'WEBHOOK_EVENT_CALLBACK', return_value=(lambda event: event.process()))
     @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
     @patch("stripe.Event.retrieve")
-    def test_webhook_with_custom_callback(self,
-            event_retrieve_mock, transfer_retrieve_mock,
-            webhook_event_callback_mock):
+    def test_webhook_with_custom_callback(self, event_retrieve_mock, transfer_retrieve_mock,
+                                          webhook_event_callback_mock):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
 

@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='charge',
             name='source_stripe_id',
-            field=djstripe.fields.StripeIdField(help_text=b'The payment source id.', max_length=255, null=True),
+            field=djstripe.fields.StripeIdField(help_text='The payment source id.', max_length=255, null=True),
         ),
         migrations.AlterField(
             model_name='charge',
@@ -66,17 +66,22 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='transfer',
             name='destination',
-            field=djstripe.fields.StripeIdField(help_text=b'ID of the bank account, card, or Stripe account the transfer was sent to.', max_length=255),
+            field=djstripe.fields.StripeIdField(help_text='ID of the bank account, card, or Stripe account the \
+            transfer was sent to.', max_length=255),
         ),
         migrations.AlterField(
             model_name='transfer',
             name='destination_payment',
-            field=djstripe.fields.StripeIdField(help_text=b'If the destination is a Stripe account, this will be the ID of the payment that the destination account received for the transfer.', max_length=255, null=True),
+            field=djstripe.fields.StripeIdField(help_text='If the destination is a Stripe account, this will be the \
+            ID of the payment that the destination account received for the transfer.', max_length=255, null=True),
         ),
         migrations.AlterField(
             model_name='transfer',
             name='source_transaction',
-            field=djstripe.fields.StripeIdField(help_text=b'ID of the charge (or other transaction) that was used to fund the transfer. If null, the transfer was funded from the available balance.', max_length=255, null=True),
+            field=djstripe.fields.StripeIdField(
+                help_text='ID of the charge (or other transaction) that was used to \
+                fund the transfer. If null, the transfer was funded from the available balance.',
+                max_length=255, null=True),
         ),
         migrations.AlterField(
             model_name='transfer',
