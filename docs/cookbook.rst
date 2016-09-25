@@ -125,7 +125,7 @@ On the subscriber's customer object, use the charge method to generate a Stripe 
     amount = Decimal(10.00)
     customer.charge(amount)
 
-Source code for the Customer.charge method is at https://github.com/pydanny/dj-stripe/blob/master/djstripe/models.py#L412-L430
+Source code for the Customer.charge method is at https://github.com/kavdev/dj-stripe/blob/master/djstripe/models.py
 
 REST API
 --------
@@ -166,6 +166,8 @@ DELETE will cancel the current subscription, based on the settings.
     - input
         - stripe_token (string)
         - plan (string)
+        - charge_immediately (boolean, optional)
+          - Does not send an invoice to the Customer immediately 
 
     - output (201)
         - stripe_token (string)

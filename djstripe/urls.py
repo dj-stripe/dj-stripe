@@ -37,7 +37,7 @@ urlpatterns = [
         name="subscribe"
     ),
     url(
-        r"^confirm/(?P<plan>.+)$",
+        r"^confirm/(?P<plan_id>.+)/$",
         views.ConfirmFormView.as_view(),
         name="confirm"
     ),

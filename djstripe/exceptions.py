@@ -2,9 +2,13 @@
 from __future__ import unicode_literals
 
 
-class SubscriptionCancellationFailure(Exception):
+class MultipleSubscriptionException(Exception):
     pass
 
 
-class SubscriptionUpdateFailure(Exception):
+class StripeObjectManipulationException(Exception):
+    pass
+
+
+class CustomerDoesNotExistLocallyException(Exception):
     pass
