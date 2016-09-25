@@ -193,7 +193,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         try:
             self._api_delete()
         except InvalidRequestError as exc:
-            if str(exc).startswith("No such customer:"):
+            if "No such customer:" in str(exc):
                 # The exception was thrown because the stripe customer was already
                 # deleted on the stripe side, ignore the exception
                 pass
