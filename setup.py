@@ -1,12 +1,15 @@
 #!/usr/bin/env python
-
+"""Module distribution metadata for djstripe."""
 import ast
 import os
 import sys
 
 
 class MetadataFinder(ast.NodeVisitor):
+    """Inserts extra metadata for use with djstripe."""
+
     def __init__(self):
+        """Assign class variables."""
         self.version = None
         self.summary = None
         self.author = None
@@ -15,6 +18,7 @@ class MetadataFinder(ast.NodeVisitor):
         self.licence = None
 
     def visit_Assign(self, node):
+        """Assign class variables based on node.targets."""
         if node.targets[0].id == '__version__':
             self.version = node.value.s
         elif node.targets[0].id == '__summary__':

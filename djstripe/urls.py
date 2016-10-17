@@ -1,21 +1,25 @@
 # -*- coding: utf-8 -*-
 """
-Wire this into the root URLConf this way::
+.. module:: djstripe.webhooks.
 
-    url(r'^stripe/', include('djstripe.urls', namespace="djstripe")),
-    # url can be changed
-    # Call to 'djstripe.urls' and 'namespace' must stay as is
+  :synopsis: dj-stripe - Urls related to the djstripe app.
 
-Call it from reverse()::
+  Wire this into the root URLConf this way::
 
-    reverse("djstripe:subscribe")
+      url(r'^stripe/', include('djstripe.urls', namespace="djstripe")),
+      # url can be changed
+      # Call to 'djstripe.urls' and 'namespace' must stay as is
 
-Call from url tag::
+  Call it from reverse()::
 
-    {% url 'djstripe:subscribe' %}
+      reverse("djstripe:subscribe")
 
+  Call from url tag::
+
+      {% url 'djstripe:subscribe' %}
+
+.. moduleauthor:: @pydanny
 """
-
 from __future__ import unicode_literals
 from django.conf.urls import url
 

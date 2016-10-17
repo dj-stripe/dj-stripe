@@ -21,7 +21,6 @@ def resync_subscriptions(apps, schema_editor):
     that a purge and re-sync would be the best option. No data that is currently available on stripe will
     be deleted. Anything stored locally will be purged.
     """
-
     # This is okay, since we're only doing a forward migration.
     from djstripe.models import Subscription
 
@@ -55,7 +54,6 @@ def resync_invoiceitems(apps, schema_editor):
     subscriptions. That's being extended to InvoiceItems. No data that is currently available on stripe will be
     deleted. Anything stored locally will be purged.
     """
-
     # This is okay, since we're only doing a forward migration.
     from djstripe.models import InvoiceItem
 

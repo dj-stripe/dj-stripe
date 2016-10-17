@@ -1,5 +1,6 @@
 """
-.. module:: dj-stripe.tests.test_contrib.test_serializers
+.. module:: dj-stripe.tests.test_contrib.test_serializers.
+
     :synopsis: dj-stripe Serializer Tests.
 
 .. moduleauthor:: Philippe Luickx (@philippeluickx)

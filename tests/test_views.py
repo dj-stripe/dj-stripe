@@ -1,5 +1,6 @@
 """
-.. module:: dj-stripe.tests.test_views
+.. module:: dj-stripe.tests.test_views.
+
    :synopsis: dj-stripe View Tests.
 
 .. moduleauthor:: Daniel Greenfeld (@pydanny)

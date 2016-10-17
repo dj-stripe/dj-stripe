@@ -1,4 +1,5 @@
-"""
+"""A module containing test fakes for dj-stripe.
+
 .. module:: dj-stripe.tests.__init__
    :synopsis: dj-stripe test fakes
 
