@@ -67,7 +67,7 @@ def plan_from_stripe_id(stripe_id):
 def _check_subscriber_for_email_address(subscriber_model, message):
     """Ensure the custom model has an ``email`` field or property."""
 
-    if ("email" not in subscriber_model._meta.get_all_field_names()) and not hasattr(subscriber_model, 'email'):
+    if ('email' not in [f.name for f in subscriber_model._meta.get_fields()]) and not hasattr(subscriber_model, 'email'):
         raise ImproperlyConfigured(message)
 
 
