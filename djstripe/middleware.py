@@ -1,4 +1,13 @@
 # -*- coding: utf-8 -*-
+"""
+.. module:: djstripe.middleware.
+
+   :synopsis: dj-stripe middleware
+
+   Refer to SubscriptionPaymentMiddleware docstring for more info.
+
+.. moduleauthor:: @kavdev, @pydanny, @wahuneke
+"""
 from django.conf import settings
 from django.core.urlresolvers import resolve
 from django.shortcuts import redirect
@@ -29,6 +38,8 @@ EXEMPT.append("[djstripe]")
 
 class SubscriptionPaymentMiddleware(object):
     """
+    Used to redirect users from subcription-locked request destinations.
+
     Rules:
 
         * "(app_name)" means everything from this app is exempt
@@ -50,12 +61,13 @@ class SubscriptionPaymentMiddleware(object):
     """
 
     def process_request(self, request):
+        """Check the subscriber's subscription status.
 
-        # Does the request match any of the docstring rules?
+        Returns early if request doesnt match rules in docstring.
+        """
         if self.is_matching_rule(request):
             return
 
-        # Finally, we check the subscriber's subscription status
         return self.check_subscription(request)
 
     def is_matching_rule(self, request):
@@ -88,8 +100,7 @@ class SubscriptionPaymentMiddleware(object):
         return False
 
     def check_subscription(self, request):
-        """If the user lacks an active subscription, redirect to subscribe."""
-
+        """Redirect to subscribe if the user lacks an active subscription."""
         subscriber = subscriber_request_callback(request)
 
         if not subscriber_has_active_subscription(subscriber):
