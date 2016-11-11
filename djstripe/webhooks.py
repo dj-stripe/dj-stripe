@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-.. module:: djstripe.webhooks
-   :synopsis: dj-stripe - Utils related to processing or registering for webhooks
+.. module:: djstripe.webhooks.
+
+  :synopsis: dj-stripe - Utils related to processing or registering for webhooks
 
 .. moduleauthor:: Bill Huneke (@wahuneke)
 .. moduleauthor:: Lee Skillen (@lskillen)
@@ -22,7 +23,7 @@ member.
 
 There is also a "global registry" which is just a list of processors (as defined above)
 
-NOTE: global processors are called before other processors
+NOTE: global processors are called before other processors.
 """
 from collections import defaultdict
 import functools
@@ -39,19 +40,19 @@ registrations_global = list()
 
 def handler(event_types):
     """
-    Decorator which registers a function as a webhook handler for the specified
-    event types (e.g. 'customer') or fully qualified event sub-types (e.g.
-    'customer.subscription.deleted').
+    Decorator that registers a function as a webhook handler.
 
-    If an event type is specified then the handler will receive callbacks for
+    Functions can be registered for event types (e.g. 'customer') or
+    fully qualified event sub-types (e.g. 'customer.subscription.deleted').
+
+    If an event type is specified the handler will receive callbacks for
     ALL webhook events of that type.  For example, if 'customer' is specified
-    then the handler will receive events for 'customer.subscription.created',
+    the handler will receive events for 'customer.subscription.created',
     'customer.subscription.updated', etc.
 
     :param event_types: The event type(s) or sub-type(s) that should be handled.
     :type event_types: A sequence (`list`) or string (`str`/`unicode`).
     """
-
     if isinstance(event_types, six.string_types):
         event_types = [event_types]
 
@@ -65,10 +66,10 @@ def handler(event_types):
 
 def handler_all(func=None):
     """
-    Decorator which registers a function as a webhook handler for ALL webhook
-    events, regardless of event type or sub-type.
-    """
+    Decorator that registers a function as a webhook handler for ALL webhook events.
 
+    Handles all webhooks regardless of event type or sub-type.
+    """
     if not func:
         return functools.partial(handler_all)
 
@@ -79,7 +80,7 @@ def handler_all(func=None):
 
 def call_handlers(event, event_data, event_type, event_subtype):
     """
-    Invokes all handlers for the provided event type/sub-type.
+    Invoke all handlers for the provided event type/sub-type.
 
     The handlers are invoked in the following order:
 
@@ -98,7 +99,6 @@ def call_handlers(event, event_data, event_type, event_subtype):
     :param event_subtype: The event sub-type, e.g. 'updated'.
     :type event_subtype: string (``str``/`unicode``)
     """
-
     chain = [registrations_global]
 
     # Build up a list of handlers with each qualified part of the event
