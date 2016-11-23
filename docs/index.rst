@@ -10,14 +10,14 @@ Django + Stripe Made Easy
 * Subscription during registration
 * Single-unit purchases
 * Works with Django ~=1.9.1, 1.8
-* Works with Python 3.4, 2.7
+* Works with Python 3.5, 3.4, 2.7
 * Works with Bootstrap 3
 * Built-in migrations
 * Dead-Easy installation
 * Leverages in the best of the 3rd party Django package ecosystem.
-* `djstripe` namespace so you can have more than one payments related app.
+* `djstripe` namespace so you can have more than one payments-related app.
 * Documented (Making good progress)
-* Tested (Making good progress)
+* Tested (100% coverage)
 
 Contents
 ---------
@@ -27,9 +27,9 @@ Contents
 
    installation
    usage
+   models
    settings
    cookbook
-   migrating_to_djstripe
    contributing
    authors
    history

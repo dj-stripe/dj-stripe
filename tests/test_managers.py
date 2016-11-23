@@ -1,3 +1,12 @@
+"""
+.. module:: dj-stripe.tests.test_managers
+   :synopsis: dj-stripe Model Manager Tests.
+
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
+
+"""
+
+from copy import deepcopy
 import datetime
 import decimal
 
@@ -5,128 +14,112 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 
-from djstripe.models import Event, Transfer, Customer, CurrentSubscription, Charge
-from tests.test_transfer import TRANSFER_CREATED_TEST_DATA, TRANSFER_CREATED_TEST_DATA2
+from djstripe.models import Transfer, Customer, Subscription, Charge, Plan
+from tests import FAKE_PLAN, FAKE_PLAN_II, FAKE_TRANSFER, FAKE_TRANSFER_II, FAKE_TRANSFER_III
 
 
-class CustomerManagerTest(TestCase):
+class SubscriptionManagerTest(TestCase):
 
     def setUp(self):
         # create customers and current subscription records
         period_start = datetime.datetime(2013, 4, 1, tzinfo=timezone.utc)
         period_end = datetime.datetime(2013, 4, 30, tzinfo=timezone.utc)
         start = datetime.datetime(2013, 1, 1, 0, 0, 1)  # more realistic start
+
+        self.plan = Plan.sync_from_stripe_data(FAKE_PLAN)
+        self.plan2 = Plan.sync_from_stripe_data(FAKE_PLAN_II)
+
         for i in range(10):
             customer = Customer.objects.create(
-                subscriber=get_user_model().objects.create_user(username="patrick{0}".format(i),
-                                                              email="patrick{0}@gmail.com".format(i)),
+                subscriber=get_user_model().objects.create_user(username="patrick{0}".format(i), email="patrick{0}@gmail.com".format(i)),
                 stripe_id="cus_xxxxxxxxxxxxxx{0}".format(i),
-                card_fingerprint="YYYYYYYY",
-                card_last_4="2342",
-                card_kind="Visa"
+                currency="usd",
             )
-            CurrentSubscription.objects.create(
+
+            Subscription.objects.create(
+                stripe_id="sub_xxxxxxxxxxxxxx{0}".format(i),
                 customer=customer,
-                plan="test",
+                plan=self.plan,
                 current_period_start=period_start,
                 current_period_end=period_end,
-                amount=(500 / decimal.Decimal("100.0")),
                 status="active",
                 start=start,
                 quantity=1
             )
+
         customer = Customer.objects.create(
-            subscriber=get_user_model().objects.create_user(username="patrick{0}".format(11),
-                                                          email="patrick{0}@gmail.com".format(11)),
+            subscriber=get_user_model().objects.create_user(username="patrick{0}".format(11), email="patrick{0}@gmail.com".format(11)),
             stripe_id="cus_xxxxxxxxxxxxxx{0}".format(11),
-            card_fingerprint="YYYYYYYY",
-            card_last_4="2342",
-            card_kind="Visa"
+            currency="usd",
         )
-        CurrentSubscription.objects.create(
+        Subscription.objects.create(
+            stripe_id="sub_xxxxxxxxxxxxxx{0}".format(11),
             customer=customer,
-            plan="test",
+            plan=self.plan,
             current_period_start=period_start,
             current_period_end=period_end,
-            amount=(500 / decimal.Decimal("100.0")),
             status="canceled",
             canceled_at=period_end,
             start=start,
             quantity=1
         )
+
         customer = Customer.objects.create(
-            subscriber=get_user_model().objects.create_user(username="patrick{0}".format(12),
-                                                          email="patrick{0}@gmail.com".format(12)),
+            subscriber=get_user_model().objects.create_user(username="patrick{0}".format(12), email="patrick{0}@gmail.com".format(12)),
             stripe_id="cus_xxxxxxxxxxxxxx{0}".format(12),
-            card_fingerprint="YYYYYYYY",
-            card_last_4="2342",
-            card_kind="Visa"
+            currency="usd",
         )
-        CurrentSubscription.objects.create(
+        Subscription.objects.create(
+            stripe_id="sub_xxxxxxxxxxxxxx{0}".format(12),
             customer=customer,
-            plan="test-2",
+            plan=self.plan2,
             current_period_start=period_start,
             current_period_end=period_end,
-            amount=(500 / decimal.Decimal("100.0")),
             status="active",
             start=start,
             quantity=1
         )
 
     def test_started_during_no_records(self):
-        self.assertEquals(
-            Customer.objects.started_during(2013, 4).count(),
-            0
-        )
+        self.assertEquals(Subscription.objects.started_during(2013, 4).count(), 0)
 
     def test_started_during_has_records(self):
-        self.assertEquals(
-            Customer.objects.started_during(2013, 1).count(),
-            12
-        )
+        self.assertEquals(Subscription.objects.started_during(2013, 1).count(), 12)
 
     def test_canceled_during(self):
-        self.assertEquals(
-            Customer.objects.canceled_during(2013, 4).count(),
-            1
-        )
+        self.assertEquals(Subscription.objects.canceled_during(2013, 4).count(), 1)
 
     def test_canceled_all(self):
         self.assertEquals(
-            Customer.objects.canceled().count(),
-            1
-        )
+            Subscription.objects.canceled().count(), 1)
 
     def test_active_all(self):
-        self.assertEquals(
-            Customer.objects.active().count(),
-            11
-        )
+        self.assertEquals(Subscription.objects.active().count(), 11)
 
     def test_started_plan_summary(self):
-        for plan in Customer.objects.started_plan_summary_for(2013, 1):
-            if plan["current_subscription__plan"] == "test":
+        for plan in Subscription.objects.started_plan_summary_for(2013, 1):
+            if plan["plan"] == self.plan:
                 self.assertEquals(plan["count"], 11)
-            if plan["current_subscription__plan"] == "test-2":
+            if plan["plan"] == self.plan2:
                 self.assertEquals(plan["count"], 1)
 
     def test_active_plan_summary(self):
-        for plan in Customer.objects.active_plan_summary():
-            if plan["current_subscription__plan"] == "test":
+        for plan in Subscription.objects.active_plan_summary():
+            if plan["plan"] == self.plan:
                 self.assertEquals(plan["count"], 10)
-            if plan["current_subscription__plan"] == "test-2":
+            if plan["plan"] == self.plan2:
                 self.assertEquals(plan["count"], 1)
 
     def test_canceled_plan_summary(self):
-        for plan in Customer.objects.canceled_plan_summary_for(2013, 1):
-            if plan["current_subscription__plan"] == "test":
+        for plan in Subscription.objects.canceled_plan_summary_for(2013, 1):
+            if plan["plan"] == self.plan:
                 self.assertEquals(plan["count"], 1)
-            if plan["current_subscription__plan"] == "test-2":
+            if plan["plan"] == self.plan2:
                 self.assertEquals(plan["count"], 0)
 
     def test_churn(self):
         self.assertEquals(
-            Customer.objects.churn(),
+            Subscription.objects.churn(),
             decimal.Decimal("1") / decimal.Decimal("11")
         )
 
@@ -134,107 +127,120 @@ class CustomerManagerTest(TestCase):
 class TransferManagerTest(TestCase):
 
     def test_transfer_summary(self):
-        event = Event.objects.create(
-            stripe_id=TRANSFER_CREATED_TEST_DATA["id"],
-            kind="transfer.created",
-            livemode=True,
-            webhook_message=TRANSFER_CREATED_TEST_DATA,
-            validated_message=TRANSFER_CREATED_TEST_DATA,
-            valid=True
-        )
-        event.process()
-        event = Event.objects.create(
-            stripe_id=TRANSFER_CREATED_TEST_DATA2["id"],
-            kind="transfer.created",
-            livemode=True,
-            webhook_message=TRANSFER_CREATED_TEST_DATA2,
-            validated_message=TRANSFER_CREATED_TEST_DATA2,
-            valid=True
-        )
-        event.process()
-        self.assertEquals(Transfer.objects.during(2012, 9).count(), 2)
-        totals = Transfer.objects.paid_totals_for(2012, 9)
+        Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER))
+        Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER_II))
+        Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER_III))
+
+        self.assertEquals(Transfer.objects.during(2015, 8).count(), 2)
+
+        totals = Transfer.objects.paid_totals_for(2015, 12)
         self.assertEquals(
-            totals["total_amount"], decimal.Decimal("19.10")
-        )
-        self.assertEquals(
-            totals["total_net"], decimal.Decimal("19.10")
-        )
-        self.assertEquals(
-            totals["total_charge_fees"], decimal.Decimal("0.90")
-        )
-        self.assertEquals(
-            totals["total_adjustment_fees"], decimal.Decimal("0")
-        )
-        self.assertEquals(
-            totals["total_refund_fees"], decimal.Decimal("0")
-        )
-        self.assertEquals(
-            totals["total_validation_fees"], decimal.Decimal("0")
+            totals["total_amount"], decimal.Decimal("190.10")
         )
 
 
 class ChargeManagerTest(TestCase):
 
     def setUp(self):
-        customer = Customer.objects.create(stripe_id="cus_XXXXXXX")
+        customer = Customer.objects.create(stripe_id="cus_XXXXXXX", currency="usd")
 
         self.march_charge = Charge.objects.create(
             stripe_id="ch_XXXXMAR1",
             customer=customer,
-            charge_created=datetime.datetime(2015, 3, 31)
+            stripe_timestamp=datetime.datetime(2015, 3, 31),
+            amount=0,
+            amount_refunded=0,
+            currency="usd",
+            fee=0,
+            fee_details={},
+            status="pending",
         )
 
         self.april_charge_1 = Charge.objects.create(
             stripe_id="ch_XXXXAPR1",
             customer=customer,
-            paid=True,
+            stripe_timestamp=datetime.datetime(2015, 4, 1),
             amount=decimal.Decimal("20.15"),
+            amount_refunded=0,
+            currency="usd",
             fee=decimal.Decimal("4.90"),
-            charge_created=datetime.datetime(2015, 4, 1)
+            fee_details={},
+            status="succeeded",
+            paid=True,
         )
 
         self.april_charge_2 = Charge.objects.create(
             stripe_id="ch_XXXXAPR2",
             customer=customer,
-            paid=True,
+            stripe_timestamp=datetime.datetime(2015, 4, 18),
             amount=decimal.Decimal("10.35"),
             amount_refunded=decimal.Decimal("5.35"),
-            charge_created=datetime.datetime(2015, 4, 18)
+            currency="usd",
+            fee=0,
+            fee_details={},
+            status="succeeded",
+            paid=True,
         )
 
         self.april_charge_3 = Charge.objects.create(
             stripe_id="ch_XXXXAPR3",
             customer=customer,
-            paid=False,
+            stripe_timestamp=datetime.datetime(2015, 4, 30),
             amount=decimal.Decimal("100.00"),
             amount_refunded=decimal.Decimal("80.00"),
+            currency="usd",
             fee=decimal.Decimal("5.00"),
-            charge_created=datetime.datetime(2015, 4, 30)
+            fee_details={},
+            status="pending",
+            paid=False,
         )
 
         self.may_charge = Charge.objects.create(
             stripe_id="ch_XXXXMAY1",
             customer=customer,
-            charge_created=datetime.datetime(2015, 5, 1)
+            stripe_timestamp=datetime.datetime(2015, 5, 1),
+            amount=0,
+            amount_refunded=0,
+            currency="usd",
+            fee=0,
+            fee_details={},
+            status="pending",
         )
 
         self.november_charge = Charge.objects.create(
             stripe_id="ch_XXXXNOV1",
             customer=customer,
-            charge_created=datetime.datetime(2015, 11, 16)
+            stripe_timestamp=datetime.datetime(2015, 11, 16),
+            amount=0,
+            amount_refunded=0,
+            currency="usd",
+            fee=0,
+            fee_details={},
+            status="pending",
         )
 
         self.charge_2014 = Charge.objects.create(
             stripe_id="ch_XXXX20141",
             customer=customer,
-            charge_created=datetime.datetime(2014, 12, 31)
+            stripe_timestamp=datetime.datetime(2014, 12, 31),
+            amount=0,
+            amount_refunded=0,
+            currency="usd",
+            fee=0,
+            fee_details={},
+            status="pending",
         )
 
         self.charge_2016 = Charge.objects.create(
             stripe_id="ch_XXXX20161",
             customer=customer,
-            charge_created=datetime.datetime(2016, 1, 1)
+            stripe_timestamp=datetime.datetime(2016, 1, 1),
+            amount=0,
+            amount_refunded=0,
+            currency="usd",
+            fee=0,
+            fee_details={},
+            status="pending",
         )
 
     def test_is_during_april_2015(self):

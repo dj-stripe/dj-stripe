@@ -13,7 +13,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/pydanny/dj-stripe/issues.
+Report bugs at https://github.com/kavdev/dj-stripe/issues.
 
 If you are reporting a bug, please include:
 
@@ -39,10 +39,15 @@ dj-stripe could always use more documentation, whether as part of the
 official dj-stripe docs, in docstrings, or even on the web in blog posts,
 articles, and such.
 
+If you are adding to dj-stripe's documentation, you can see your changes by changing
+into the ``docs`` directory, running ``make html`` (or ``make.bat html`` if you're
+developing on Windows) from the command line, and then opening ``docs/_build/html/index.html``
+in a web browser.
+
 Submit Feedback
 ~~~~~~~~~~~~~~~
 
-The best way to send feedback is to file an issue at https://github.com/pydanny/dj-stripe/issues.
+The best way to send feedback is to file an issue at https://github.com/kavdev/dj-stripe/issues.
 
 If you are proposing a feature:
 
@@ -100,9 +105,10 @@ Pull Request Guidelines
 Before you submit a pull request, check that it meets these guidelines:
 
 1. The pull request should include tests.
-2. If the pull request adds functionality, the docs should be updated. Put
+2. The pull request must not drop code coverage below the current level.
+3. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring.
-3. If the pull request makes changes to a model, include Django migrations (Django 1.7+).
-4. The pull request should work for Python 2.7 and 3.4. Check
-   https://travis-ci.org/pydanny/dj-stripe/pull_requests
+4. If the pull request makes changes to a model, include Django migrations (Django 1.7+).
+5. The pull request should work for Python 2.7 and 3.4. Check
+   https://travis-ci.org/kavdev/dj-stripe/pull_requests
    and make sure that the tests pass for all supported Python versions.

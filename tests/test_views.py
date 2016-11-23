@@ -7,120 +7,123 @@
 
 """
 
-from decimal import Decimal
+from copy import deepcopy
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
 from django.test.testcases import TestCase
-
-import stripe
+from django.utils import timezone
 from mock import patch, PropertyMock
+from stripe.error import StripeError
 
-from djstripe import settings as djstripe_settings
-from djstripe.models import Customer, CurrentSubscription
+from djstripe.models import Customer, Subscription, Plan
+from djstripe.stripe_objects import StripeSource
 from djstripe.views import ChangeCardView, HistoryView
+from tests import FAKE_CUSTOMER, FAKE_SUBSCRIPTION, FAKE_PLAN, FAKE_PLAN_II, FAKE_SUBSCRIPTION_II
 
 
 class AccountViewTest(TestCase):
-    fake_stripe_customer_id = "cus_xxx1234567890"
 
     def setUp(self):
         self.url = reverse("djstripe:account")
-        self.user = get_user_model().objects.create_user(username="testuser",
-                                                         email="test@example.com",
-                                                         password="123")
-        self.assertTrue(self.client.login(username="testuser", password="123"))
+        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com", password="password")
+        self.assertTrue(self.client.login(username="pydanny", password="password"))
 
-    @patch("stripe.Customer.create", return_value=PropertyMock(id=fake_stripe_customer_id))
+        Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+        Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN_II))
+
+    @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
     def test_autocreate_customer(self, stripe_create_customer_mock):
         self.assertEqual(Customer.objects.count(), 0)
 
         response = self.client.get(self.url)
 
         # simply visiting the page should generate a new customer record.
-        stripe_create_customer_mock.assert_called_once_with(email=self.user.email)
+        stripe_create_customer_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, email=self.user.email)
 
-        self.assertEqual(self.fake_stripe_customer_id, response.context["customer"].stripe_id)
+        self.assertEqual(FAKE_CUSTOMER["id"], response.context["customer"].stripe_id)
         self.assertEqual(self.user, response.context["customer"].subscriber)
         self.assertEqual(Customer.objects.count(), 1)
 
-    @patch("stripe.Customer.create", return_value=PropertyMock(id=fake_stripe_customer_id))
-    def test_plan_list_context(self, stripe_create_customer_mock):
+    @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_plans_context(self, stripe_create_customer_mock):
         response = self.client.get(self.url)
-        self.assertEqual(djstripe_settings.PLAN_LIST, response.context["plans"])
+        self.assertEqual(list(Plan.objects.all()), list(response.context["plans"]))
 
-    @patch("stripe.Customer.create", return_value=PropertyMock(id=fake_stripe_customer_id))
-    def test_subscription_context(self, stripe_create_customer_mock):
-        response = self.client.get(self.url)
-        self.assertEqual(None, response.context["subscription"])
+    def test_subscription_context_with_plan(self):
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
 
-    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test_plan_07"))
-    @patch("stripe.Customer.create", return_value=PropertyMock(id=fake_stripe_customer_id))
-    def test_subscription_context_with_plan(self, djstripe_customer_customer_subscription_mock, stripe_create_customer_mock):
         response = self.client.get(self.url)
-        self.assertEqual("test_plan_07", response.context["subscription"].plan)
+        self.assertEqual(FAKE_SUBSCRIPTION["plan"]["id"], response.context["customer"].subscription.plan.stripe_id)
 
 
 class ChangeCardViewTest(TestCase):
 
     def setUp(self):
         self.url = reverse("djstripe:change_card")
-        self.user = get_user_model().objects.create_user(username="testuser",
-                                                         email="test@example.com",
-                                                         password="123")
-        self.assertTrue(self.client.login(username="testuser", password="123"))
+        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com", password="password")
+        self.assertTrue(self.client.login(username="pydanny", password="password"))
 
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
+    @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
     def test_get(self, stripe_create_customer_mock):
         response = self.client.get(self.url)
         self.assertEqual(200, response.status_code)
 
+    # Needs to be refactored to use sources
     @patch("djstripe.models.Customer.retry_unpaid_invoices", autospec=True)
     @patch("djstripe.models.Customer.send_invoice", autospec=True)
-    @patch("djstripe.models.Customer.update_card", autospec=True)
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_post_new_card(self, stripe_customer_mock, update_card_mock, send_invoice_mock, retry_unpaid_invoices_mock):
+    @patch("djstripe.models.Customer.add_card", autospec=True)
+    @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_post_new_card(self, stripe_customer_create_mock, add_card_mock, send_invoice_mock, retry_unpaid_invoices_mock):
         self.client.post(self.url, {"stripe_token": "alpha"})
-        update_card_mock.assert_called_once_with(self.user.customer, "alpha")
+        add_card_mock.assert_called_once_with(self.user.customer, "alpha")
         send_invoice_mock.assert_called_with(self.user.customer)
         retry_unpaid_invoices_mock.assert_called_once_with(self.user.customer)
 
+    # Needs to be refactored to use sources
     @patch("djstripe.models.Customer.retry_unpaid_invoices", autospec=True)
     @patch("djstripe.models.Customer.send_invoice", autospec=True)
-    @patch("djstripe.models.Customer.update_card", autospec=True)
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_post_change_card(self, stripe_customer_mock, update_card_mock, send_invoice_mock, retry_unpaid_invoices_mock):
-        Customer.objects.get_or_create(subscriber=self.user, card_fingerprint="4449")
+    @patch("djstripe.models.Customer.add_card", autospec=True)
+    def test_post_change_card(self, add_card_mock, send_invoice_mock, retry_unpaid_invoices_mock):
+        customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        source = StripeSource.objects.create(customer=customer)
+        customer.default_source = source
+        customer.save()
+
         self.assertEqual(1, Customer.objects.count())
 
         self.client.post(self.url, {"stripe_token": "beta"})
         self.assertEqual(1, Customer.objects.count())
-        update_card_mock.assert_called_once_with(self.user.customer, "beta")
+        add_card_mock.assert_called_once_with(self.user.customer, "beta")
         self.assertFalse(send_invoice_mock.called)
         retry_unpaid_invoices_mock.assert_called_once_with(self.user.customer)
 
-    @patch("djstripe.models.Customer.update_card", autospec=True)
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_post_card_error(self, stripe_create_customer_mock, update_card_mock):
-        update_card_mock.side_effect = stripe.StripeError("An error occurred while processing your card.")
+    # Needs to be refactored to use sources
+    @patch("djstripe.models.Customer.add_card", autospec=True)
+    @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_post_card_error(self, stripe_create_customer_mock, add_card_mock):
+        add_card_mock.side_effect = StripeError("An error occurred while processing your card.")
 
         response = self.client.post(self.url, {"stripe_token": "pie"})
-        update_card_mock.assert_called_once_with(self.user.customer, "pie")
+        add_card_mock.assert_called_once_with(self.user.customer, "pie")
         self.assertIn("stripe_error", response.context)
         self.assertIn("An error occurred while processing your card.", response.context["stripe_error"])
 
-    @patch("djstripe.models.Customer.update_card", autospec=True)
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_post_no_card(self, stripe_create_customer_mock, update_card_mock):
-        update_card_mock.side_effect = stripe.StripeError("Invalid source object:")
+    # Needs to be refactored to use sources
+    @patch("djstripe.models.Customer.add_card", autospec=True)
+    @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_post_no_card(self, stripe_create_customer_mock, add_card_mock):
+        add_card_mock.side_effect = StripeError("Invalid source object:")
 
         response = self.client.post(self.url)
-        update_card_mock.assert_called_once_with(self.user.customer, None)
+        add_card_mock.assert_called_once_with(self.user.customer, None)
         self.assertIn("stripe_error", response.context)
         self.assertIn("Invalid source object:", response.context["stripe_error"])
 
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
+    @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
     def test_get_object(self, stripe_create_customer_mock):
         view_instance = ChangeCardView()
         request = RequestFactory()
@@ -144,12 +147,10 @@ class HistoryViewTest(TestCase):
 
     def setUp(self):
         self.url = reverse("djstripe:history")
-        self.user = get_user_model().objects.create_user(username="testuser",
-                                                         email="test@example.com",
-                                                         password="123")
-        self.assertTrue(self.client.login(username="testuser", password="123"))
+        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com", password="password")
+        self.assertTrue(self.client.login(username="pydanny", password="password"))
 
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
+    @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
     def test_get_object(self, stripe_create_customer_mock):
         view_instance = HistoryView()
         request = RequestFactory()
@@ -158,7 +159,7 @@ class HistoryViewTest(TestCase):
         view_instance.request = request
         object_a = view_instance.get_object()
 
-        stripe_create_customer_mock.assert_called_once_with(email=self.user.email)
+        stripe_create_customer_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, email=self.user.email)
 
         customer_instance = Customer.objects.get(subscriber=self.user)
         self.assertEqual(customer_instance, object_a)
@@ -168,10 +169,8 @@ class SyncHistoryViewTest(TestCase):
 
     def setUp(self):
         self.url = reverse("djstripe:sync_history")
-        self.user = get_user_model().objects.create_user(username="testuser",
-                                                         email="test@example.com",
-                                                         password="123")
-        self.assertTrue(self.client.login(username="testuser", password="123"))
+        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com", password="password")
+        self.assertTrue(self.client.login(username="pydanny", password="password"))
 
     @patch("djstripe.views.sync_subscriber", new_callable=PropertyMock, return_value=PropertyMock(subscriber="pie"))
     def test_post(self, sync_subscriber_mock):
@@ -183,59 +182,61 @@ class SyncHistoryViewTest(TestCase):
 
 
 class ConfirmFormViewTest(TestCase):
-    fake_stripe_customer_id = "cus_xxx1234567890"
 
     def setUp(self):
-        self.plan = "test0"
-        self.url = reverse("djstripe:confirm", kwargs={'plan': self.plan})
-        self.user = get_user_model().objects.create_user(username="testuser",
-                                                         email="test@example.com",
-                                                         password="123")
-        self.assertTrue(self.client.login(username="testuser", password="123"))       
+        self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+        self.url = reverse("djstripe:confirm", kwargs={"plan_id": self.plan.id})
+        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com", password="password")
+        self.assertTrue(self.client.login(username="pydanny", password="password"))
 
-    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="something-else"))
-    @patch("stripe.Customer.create", return_value=PropertyMock(id=fake_stripe_customer_id))
-    def test_get_form_valid(self, djstripe_customer_customer_subscription_mock, stripe_create_customer_mock):
+    def test_get_form_current_plan(self):
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
+        subscription.current_period_end = timezone.now() + timezone.timedelta(days=5)
+        subscription.save()
+
+        response = self.client.get(self.url)
+        self.assertRedirects(response, reverse("djstripe:subscribe"))
+
+    def test_get_form_no_current_plan(self):
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
+
         response = self.client.get(self.url)
         self.assertEqual(200, response.status_code)
 
-    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test0"))
-    @patch("stripe.Customer.create", return_value=PropertyMock(id=fake_stripe_customer_id))
-    def test_get_form_unknown(self, djstripe_customer_customer_subscription_mock, stripe_create_customer_mock):
-        response = self.client.get(reverse("djstripe:confirm", kwargs={'plan': 'does-not-exist'}))
-        self.assertRedirects(response, reverse("djstripe:subscribe"))
-
-    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test0"))
-    @patch("stripe.Customer.create", return_value=PropertyMock(id=fake_stripe_customer_id))
-    def test_get_form_invalid(self, djstripe_customer_customer_subscription_mock, stripe_create_customer_mock):
-        response = self.client.get(self.url)
-        self.assertRedirects(response, reverse("djstripe:subscribe"))
+    def test_get_form_unknown_plan_id(self):
+        response = self.client.get(reverse("djstripe:confirm", kwargs={'plan_id': (-1)}))
+        self.assertEqual(404, response.status_code)
 
     @patch("djstripe.models.Customer.subscribe", autospec=True)
-    @patch("djstripe.models.Customer.update_card", autospec=True)
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_post_valid(self, stripe_customer_mock, update_card_mock, subscribe_mock):
-        self.assertEqual(0, Customer.objects.count())
-        response = self.client.post(self.url, {"plan": self.plan, "stripe_token": "cake"})
+    @patch("djstripe.models.Customer.add_card", autospec=True)
+    def test_post_valid(self, add_card_mock, subscribe_mock):
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+
         self.assertEqual(1, Customer.objects.count())
-        update_card_mock.assert_called_once_with(self.user.customer, "cake")
+        response = self.client.post(self.url, {"plan": self.plan.id, "stripe_token": "cake"})
+
+        self.assertEqual(1, Customer.objects.count())
+        add_card_mock.assert_called_once_with(self.user.customer, "cake")
         subscribe_mock.assert_called_once_with(self.user.customer, self.plan)
 
         self.assertRedirects(response, reverse("djstripe:history"))
 
     @patch("djstripe.models.Customer.subscribe", autospec=True)
-    @patch("djstripe.models.Customer.update_card", autospec=True)
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_post_no_card(self, stripe_customer_mock, update_card_mock, subscribe_mock):
-        update_card_mock.side_effect = stripe.StripeError("Invalid source object:")
+    @patch("djstripe.models.Customer.add_card", autospec=True)
+    def test_post_no_card(self, add_card_mock, subscribe_mock):
+        add_card_mock.side_effect = StripeError("Invalid source object:")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
 
-        response = self.client.post(self.url, {"plan": self.plan})
+        response = self.client.post(self.url, {"plan": self.plan.id})
         self.assertEqual(200, response.status_code)
         self.assertIn("form", response.context)
         self.assertIn("Invalid source object:", response.context["form"].errors["__all__"])
 
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_post_form_invalid(self, stripe_customer_mock):
+    def test_post_form_invalid(self):
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+
         response = self.client.post(self.url)
         self.assertEqual(200, response.status_code)
         self.assertIn("plan", response.context["form"].errors)
@@ -244,119 +245,146 @@ class ConfirmFormViewTest(TestCase):
 
 class ChangePlanViewTest(TestCase):
 
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890_01"))
-    def setUp(self, stripe_customer_mock):
+    def setUp(self):
         self.url = reverse("djstripe:change_plan")
-        self.user1 = get_user_model().objects.create_user(username="testuser1",
-                                                         email="test@example.com",
-                                                         password="123")
-        self.user2 = get_user_model().objects.create_user(username="testuser2",
-                                                         email="test@example.com",
-                                                         password="123")
+        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com", password="password")
+        self.assertTrue(self.client.login(username="pydanny", password="password"))
 
-        Customer.get_or_create(subscriber=self.user1)
+    def test_post_form_invalid(self):
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
 
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    def test_post_form_invalid(self, stripe_customer_mock):
-        self.assertTrue(self.client.login(username="testuser1", password="123"))
         response = self.client.post(self.url)
         self.assertEqual(200, response.status_code)
         self.assertIn("plan", response.context["form"].errors)
         self.assertIn("This field is required.", response.context["form"].errors["plan"])
 
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890_02"))
-    def test_post_new_sub_no_proration(self, stripe_customer_mock):
-        self.assertTrue(self.client.login(username="testuser2", password="123"))
-        response = self.client.post(self.url, {"plan": "test0"})
+    def test_post_new_sub_no_proration(self):
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        response = self.client.post(self.url)
         self.assertEqual(200, response.status_code)
         self.assertIn("form", response.context)
         self.assertIn("You must already be subscribed to a plan before you can change it.", response.context["form"].errors["__all__"])
 
-    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", amount=Decimal(25.00)))
-    @patch("djstripe.models.Customer.subscribe", autospec=True)
-    def test_change_sub_no_proration(self, subscribe_mock, current_subscription_mock):
-        self.assertTrue(self.client.login(username="testuser1", password="123"))
-        response = self.client.post(self.url, {"plan": "test0"})
+    @patch("djstripe.models.Subscription.update", autospec=True)
+    def test_change_sub_no_proration(self, subscription_update_mock):
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
+
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN_II))
+
+        response = self.client.post(self.url, {"plan": plan.id})
         self.assertRedirects(response, reverse("djstripe:history"))
 
-        subscribe_mock.assert_called_once_with(self.user1.customer, "test0")
+        subscription_update_mock.assert_called_once_with(subscription, plan=plan)
 
-    @patch("djstripe.views.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
-    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", amount=Decimal(25.00)))
-    @patch("djstripe.models.Customer.subscribe", autospec=True)
-    def test_change_sub_with_proration_downgrade(self, subscribe_mock, current_subscription_mock, proration_policy_mock):
-        self.assertTrue(self.client.login(username="testuser1", password="123"))
-        response = self.client.post(self.url, {"plan": "test0"})
+    @patch("djstripe.views.djstripe_settings.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
+    @patch("djstripe.models.Subscription.update", autospec=True)
+    def test_change_sub_with_proration_downgrade(self, subscription_update_mock, proration_policy_mock):
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION_II))
+        subscription.current_period_end = timezone.now() + timezone.timedelta(days=5)
+        subscription.save()
+
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+
+        response = self.client.post(self.url, {"plan": plan.id})
         self.assertRedirects(response, reverse("djstripe:history"))
 
-        subscribe_mock.assert_called_once_with(self.user1.customer, "test0")
+        subscription_update_mock.assert_called_once_with(subscription, plan=plan)
 
-    @patch("djstripe.views.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
-    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", amount=Decimal(25.00)))
-    @patch("djstripe.models.Customer.subscribe", autospec=True)
-    def test_change_sub_with_proration_upgrade(self, subscribe_mock, current_subscription_mock, proration_policy_mock):
-        self.assertTrue(self.client.login(username="testuser1", password="123"))
+    @patch("djstripe.views.djstripe_settings.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
+    @patch("djstripe.models.Subscription.update", autospec=True)
+    def test_change_sub_with_proration_upgrade(self, subscription_update_mock, proration_policy_mock):
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
+        subscription.current_period_end = timezone.now() + timezone.timedelta(days=5)
+        subscription.save()
 
-        response = self.client.post(self.url, {"plan": "test2"})
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN_II))
+
+        response = self.client.post(self.url, {"plan": plan.id})
         self.assertRedirects(response, reverse("djstripe:history"))
 
-        subscribe_mock.assert_called_once_with(self.user1.customer, "test2", prorate=True)
+        subscription_update_mock.assert_called_once_with(subscription, plan=plan, prorate=True)
 
-    @patch("djstripe.views.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
-    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", amount=Decimal(25.00)))
-    @patch("djstripe.models.Customer.subscribe", autospec=True)
-    def test_change_sub_with_proration_same_plan(self, subscribe_mock, current_subscription_mock, proration_policy_mock):
-        self.assertTrue(self.client.login(username="testuser1", password="123"))
-        response = self.client.post(self.url, {"plan": "test"})
+    @patch("djstripe.views.djstripe_settings.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
+    @patch("djstripe.models.Subscription.update", autospec=True)
+    def test_change_sub_with_proration_same_plan(self, subscription_update_mock, proration_policy_mock):
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
+        subscription.current_period_end = timezone.now() + timezone.timedelta(days=5)
+        subscription.save()
+
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+
+        response = self.client.post(self.url, {"plan": plan.id})
         self.assertRedirects(response, reverse("djstripe:history"))
 
-        subscribe_mock.assert_called_once_with(self.user1.customer, "test")
+        subscription_update_mock.assert_called_once_with(subscription, plan=plan)
 
-    @patch("djstripe.models.Customer.current_subscription", new_callable=PropertyMock, return_value=CurrentSubscription(plan="test", amount=Decimal(25.00)))
-    @patch("djstripe.models.Customer.subscribe", autospec=True)
-    def test_change_sub_same_plan(self, subscribe_mock, current_subscription_mock):
-        self.assertTrue(self.client.login(username="testuser1", password="123"))
-        response = self.client.post(self.url, {"plan": "test"})
+    @patch("djstripe.models.Subscription.update", autospec=True)
+    def test_change_sub_same_plan(self, subscription_update_mock):
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
+        subscription.current_period_end = timezone.now() + timezone.timedelta(days=5)
+        subscription.save()
+
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+
+        response = self.client.post(self.url, {"plan": plan.id})
         self.assertRedirects(response, reverse("djstripe:history"))
 
-        subscribe_mock.assert_called_once_with(self.user1.customer, "test")
+        subscription_update_mock.assert_called_once_with(subscription, plan=plan)
 
-    @patch("djstripe.models.Customer.subscribe", autospec=True)
-    def test_change_sub_stripe_error(self, subscribe_mock):
-        subscribe_mock.side_effect = stripe.StripeError("No such plan: test_id_3")
+    @patch("djstripe.models.Subscription.update", autospec=True)
+    def test_change_sub_stripe_error(self, subscription_update_mock):
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
+        subscription.current_period_end = timezone.now() + timezone.timedelta(days=5)
+        subscription.save()
 
-        self.assertTrue(self.client.login(username="testuser1", password="123"))
+        error_string = "No such plan: {plan_id}".format(plan_id=FAKE_PLAN["id"])
+        subscription_update_mock.side_effect = StripeError(error_string)
 
-        response = self.client.post(self.url, {"plan": "test_deletion"})
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+
+        response = self.client.post(self.url, {"plan": plan.id})
         self.assertEqual(200, response.status_code)
         self.assertIn("form", response.context)
-        self.assertIn("No such plan: test_id_3", response.context["form"].errors["__all__"])
+        self.assertIn(error_string, response.context["form"].errors["__all__"])
 
 
 class CancelSubscriptionViewTest(TestCase):
     def setUp(self):
+        self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
         self.url = reverse("djstripe:cancel_subscription")
-        self.user = get_user_model().objects.create_user(username="testuser",
-                                                         email="test@example.com",
-                                                         password="123")
-        self.assertTrue(self.client.login(username="testuser", password="123"))
+        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com", password="password")
+        self.assertTrue(self.client.login(username="pydanny", password="password"))
 
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    @patch("djstripe.models.Customer.cancel_subscription", return_value=CurrentSubscription(status=CurrentSubscription.STATUS_ACTIVE))
-    def test_cancel_proration(self, cancel_subscription_mock, stripe_create_customer_mock):
+    @patch("djstripe.models.Subscription.cancel")
+    def test_cancel_proration(self, cancel_subscription_mock):
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        cancel_subscription_mock.return_value = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
+
         response = self.client.post(self.url)
 
-        cancel_subscription_mock.assert_called_once_with(at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END)
+        cancel_subscription_mock.assert_called_once_with()
         self.assertRedirects(response, reverse("djstripe:account"))
         self.assertTrue(self.user.is_authenticated())
 
     @patch("djstripe.views.auth_logout", autospec=True)
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
-    @patch("djstripe.models.Customer.cancel_subscription", return_value=CurrentSubscription(status=CurrentSubscription.STATUS_CANCELLED))
-    def test_cancel_no_proration(self, cancel_subscription_mock, stripe_create_customer_mock, logout_mock):
+    @patch("djstripe.models.Subscription.cancel")
+    def test_cancel_no_proration(self, cancel_subscription_mock, logout_mock):
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+
+        fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
+        fake_subscription.update({"status": Subscription.STATUS_CANCELED})
+        cancel_subscription_mock.return_value = Subscription.sync_from_stripe_data(fake_subscription)
+
         response = self.client.post(self.url)
 
-        cancel_subscription_mock.assert_called_once_with(at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END)
+        cancel_subscription_mock.assert_called_once_with()
         self.assertEqual(response.status_code, 302)
 
         self.assertTrue(logout_mock.called)

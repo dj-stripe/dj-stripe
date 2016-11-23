@@ -3,13 +3,22 @@
 History
 =======
 
-0.9.0 (2016-??-??)
+1.0.0 (2016-??-??)
 ---------------------
 * Charge receipts now take `DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS` into account (Thanks @r0fls)
 * Clarified/modified installation documentation (Thanks @pydanny)
 * Corrected and revised ANONYMOUS_USER_ERROR_MSG (Thanks @pydanny)
 * Added fnmatching to `SubscriptionPaymentMiddleware` (Thanks @pydanny)
 * `SubscriptionPaymentMiddleware.process_request()` functionality broken up into multiple methods, making local customizations easier (Thanks @pydanny)
+* Fully qualified events are now supported by event handlers as strings e.g. 'customer.subscription.deleted' (Thanks @lskillen) #316
+* runtests now accepts positional arguments for declaring which tests to run (Thanks @lskillen) #317
+* It is now possible to reprocess events in both code and the admin interface (Thanks @lskillen) #318
+* The confirm page now checks that a valid card exists. (Thanks @scream4ik) #325
+* Added support for viewing upcoming invoices (Thanks @lskillen) #320
+* Event handler improvements and bugfixes (Thanks @lskillen) #321
+* API list() method bugfixes (Thanks @lskillen) #322
+* Added support for a custom webhook event handler (Thanks @lskillen) #323
+* Django REST Framework contrib package improvements (Thanks @aleccool213) #334
 
 0.8.0 (2015-12-30)
 ---------------------
@@ -21,7 +30,6 @@ History
 * Migration improvements (Thanks @michi88)
 * Fixed "Invoice matching query does not exist" bug (#263) (Thanks @mthornhill)
 * Fixed duplicate content in account view (Thanks @areski)
-
 
 0.7.0 (2015-09-22)
 ---------------------

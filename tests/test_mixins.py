@@ -6,16 +6,18 @@
 
 """
 
+from copy import deepcopy
+
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.http.request import HttpRequest
 from django.test.client import RequestFactory
 from django.test.testcases import TestCase
-
-import stripe
-from mock import patch, PropertyMock
+from mock import patch
 
 from djstripe.mixins import SubscriptionPaymentRequiredMixin, PaymentsContextMixin, SubscriptionMixin
+from djstripe.models import Plan
+from tests import FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II
 
 
 class TestSubscriptionPaymentRequiredMixin(TestCase):
@@ -48,7 +50,6 @@ class TestPaymentsContextMixin(TestCase):
 
     def test_get_context_data(self):
         from django.conf import settings
-        from djstripe import settings as djstripe_settings
 
         class TestSuperView(object):
             def get_context_data(self):
@@ -61,19 +62,17 @@ class TestPaymentsContextMixin(TestCase):
         self.assertIn("STRIPE_PUBLIC_KEY", context, "STRIPE_PUBLIC_KEY missing from context.")
         self.assertEqual(context["STRIPE_PUBLIC_KEY"], settings.STRIPE_PUBLIC_KEY, "Incorrect STRIPE_PUBLIC_KEY.")
 
-        self.assertIn("PLAN_CHOICES", context, "PLAN_CHOICES missing from context.")
-        self.assertEqual(context["PLAN_CHOICES"], djstripe_settings.PLAN_CHOICES, "Incorrect PLAN_CHOICES.")
-
-        self.assertIn("PLAN_LIST", context, "PLAN_LIST missing from context.")
-        self.assertEqual(context["PLAN_LIST"], djstripe_settings.PLAN_LIST, "Incorrect PLAN_LIST.")
-
-        self.assertIn("PAYMENT_PLANS", context, "PAYMENT_PLANS missing from context.")
-        self.assertEqual(context["PAYMENT_PLANS"], djstripe_settings.PAYMENT_PLANS, "Incorrect PAYMENT_PLANS.")
+        self.assertIn("plans", context, "pans missing from context.")
+        self.assertEqual(list(Plan.objects.all()), list(context["plans"]), "Incorrect plans.")
 
 
 class TestSubscriptionMixin(TestCase):
 
-    @patch("stripe.Customer.create", return_value=PropertyMock(id="cus_xxx1234567890"))
+    def setUp(self):
+        Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+        Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN_II))
+
+    @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
     def test_get_context_data(self, stripe_create_customer_mock):
 
         class TestSuperView(object):
@@ -93,5 +92,3 @@ class TestSubscriptionMixin(TestCase):
         self.assertTrue(context["is_plans_plural"], "Incorrect is_plans_plural.")
 
         self.assertIn("customer", context, "customer missing from context.")
-
-        self.assertIn("CurrentSubscription", context, "CurrentSubscription missing from context.")

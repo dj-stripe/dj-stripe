@@ -11,7 +11,7 @@ CUSTOMER: {% block customer_name %}{{ charge.customer.subscriber }}{% endblock %
 
 DETAILS
 -------
-{{ charge.customer.current_subscription.plan_display }} - ${{ charge.amount|floatformat:2 }}
+{{ charge.customer.subscription.plan.name }} - ${{ charge.amount|floatformat:2 }}
 
 TOTAL: ${{ charge.amount|floatformat:2 }} USD
 PAID BY CREDIT CARD: -${{ charge.amount|floatformat:2 }}

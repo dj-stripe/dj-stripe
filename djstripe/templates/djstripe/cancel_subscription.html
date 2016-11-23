@@ -15,15 +15,15 @@
 <div class="row">
     <div class="col-xs-12">
         <h2>Cancel Subscription</h2>
-        {% if not customer.current_subscription %}
+        {% if not customer.subscription %}
             <p>You have no subscription on file.</p>
             <p>See your <a href="{% url 'djstripe:account' %}">account status</a> or better yet, <a href="{% url 'djstripe:subscribe' %}">subscribe</a>.</p>
-        {% elif customer.current_subscription.status == customer.current_subscription.STATUS_CANCELLED %}
+        {% elif customer.subscription.status == customer.subscription.STATUS_CANCELED %}
             <p>Your subscription has already been canceled.</p>
             <p>See your <a href="{% url 'djstripe:account' %}">account status</a> or better yet, get a <a href="{% url 'djstripe:subscribe' %}">fresh subscription</a>.</p>
-        {% elif customer.current_subscription.is_status_temporarily_current %}
+        {% elif customer.subscription.is_status_temporarily_current %}
             <p>Your subscription has already been canceled.</p>
-            <p>However, you can still use the site for another {{ customer.current_subscription.current_period_end|timeuntil }}.</p>
+            <p>However, you can still use the site for another {{ customer.subscription.current_period_end|timeuntil }}.</p>
         {% else %}
             <p class="lead">
               Are you sure you want to cancel your subscription?

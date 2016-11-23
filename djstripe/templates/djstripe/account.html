@@ -12,7 +12,7 @@
         </div>
     </div>
     <div class="row">
-        {% if customer.has_valid_card %}
+        {% if customer.has_valid_source %}
             <div class="col-xs-4">
                 <p>
                     Credit Card on file.
@@ -65,7 +65,7 @@
                     </thead>
                     <tbody>
                     {% for plan in plans %}
-                        <tr {% if plan.plan == subscription.plan %}
+                        <tr {% if plan == subscription.plan %}
                             {% if subscription.is_status_current and not subscription.is_status_temporarily_current and subscription.status != subscription.STATUS_TRIALING %}
                                 class="success"
                             {% elif subscription.is_status_temporarily_current or subscription.status == subscription.STATUS_TRIALING %}
@@ -76,7 +76,7 @@
                             <td>{{ plan.interval.title }}ly</td>
                             <td>{{ plan.description }}</td>
                             <td>
-                                {% if plan.plan == subscription.plan and subscription.status != subscription.STATUS_CANCELLED %}
+                                {% if plan == subscription.plan and subscription.status != subscription.STATUS_CANCELED %}
                                     <strong>Your plan</strong>
                                 {% else %}
                                     Not your plan
@@ -102,8 +102,8 @@
           <h4 class="modal-title">Card on File</h4>
         </div>
         <div class="modal-body">
-            <p><strong>Type:</strong> {{ customer.card_kind }}</p>
-            <p><strong>Last 4 Digits:</strong> {{ customer.card_last_4 }}</p>
+            <p><strong>Brand:</strong> {{ customer.default_source.brand }}</p>
+            <p><strong>Last 4 Digits:</strong> {{ customer.default_source.last4 }}</p>
             <p><small>For security, your card information is stored on <a href="https://stripe.com">stripe.com</a>.</small></p>
         </div>
         <div class="modal-footer">

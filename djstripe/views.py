@@ -1,59 +1,32 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import decimal
+
 import json
 
-from django.contrib.auth import logout as auth_logout
+from braces.views import CsrfExemptMixin, FormValidMessageMixin, LoginRequiredMixin, SelectRelatedMixin
 from django.contrib import messages
+from django.contrib.auth import logout as auth_logout
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponse
+from django.http.response import HttpResponseNotFound
 from django.shortcuts import render, redirect
-from django.views.generic import DetailView
-from django.views.generic import FormView
-from django.views.generic import TemplateView
-from django.views.generic import View
 from django.utils.encoding import smart_str
+from django.views.generic import DetailView, FormView, TemplateView, View
+from stripe.error import StripeError
 
-from braces.views import CsrfExemptMixin
-from braces.views import FormValidMessageMixin
-from braces.views import LoginRequiredMixin
-from braces.views import SelectRelatedMixin
-import stripe
-
+from . import settings as djstripe_settings
 from .forms import PlanForm, CancelSubscriptionForm
 from .mixins import PaymentsContextMixin, SubscriptionMixin
-from .models import CurrentSubscription
-from .models import Customer
-from .models import Event
-from .models import EventProcessingException
-from .settings import PLAN_LIST
-from .settings import PAYMENT_PLANS
-from .settings import subscriber_request_callback
-from .settings import PRORATION_POLICY_FOR_UPGRADES
-from .settings import CANCELLATION_AT_PERIOD_END
+from .models import Customer, Event, EventProcessingException, Plan
 from .sync import sync_subscriber
 
 
 # ============================================================================ #
 #                                 Account Views                                #
 # ============================================================================ #
-
-
-class AccountView(LoginRequiredMixin, SelectRelatedMixin, TemplateView):
+class AccountView(LoginRequiredMixin, SelectRelatedMixin, SubscriptionMixin, PaymentsContextMixin, TemplateView):
     """Shows account details including customer and subscription details."""
     template_name = "djstripe/account.html"
-
-    def get_context_data(self, *args, **kwargs):
-        context = super(AccountView, self).get_context_data(**kwargs)
-        customer, created = Customer.get_or_create(
-            subscriber=subscriber_request_callback(self.request))
-        context['customer'] = customer
-        try:
-            context['subscription'] = customer.current_subscription
-        except CurrentSubscription.DoesNotExist:
-            context['subscription'] = None
-        context['plans'] = PLAN_LIST
-        return context
 
 
 # ============================================================================ #
@@ -67,8 +40,8 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
     def get_object(self):
         if hasattr(self, "customer"):
             return self.customer
-        self.customer, created = Customer.get_or_create(
-            subscriber=subscriber_request_callback(self.request))
+        self.customer, _created = Customer.get_or_create(
+            subscriber=djstripe_settings.subscriber_request_callback(self.request))
         return self.customer
 
     def post(self, request, *args, **kwargs):
@@ -79,14 +52,14 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
 
         customer = self.get_object()
         try:
-            send_invoice = customer.card_fingerprint == ""
-            customer.update_card(
+            send_invoice = not customer.default_source
+            customer.add_card(
                 request.POST.get("stripe_token")
             )
             if send_invoice:
                 customer.send_invoice()
             customer.retry_unpaid_invoices()
-        except stripe.StripeError as exc:
+        except StripeError as exc:
             messages.info(request, "Stripe Error")
             return render(
                 request,
@@ -110,8 +83,8 @@ class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
     select_related = ["invoice"]
 
     def get_object(self):
-        customer, created = Customer.get_or_create(
-            subscriber=subscriber_request_callback(self.request))
+        customer, _created = Customer.get_or_create(
+            subscriber=djstripe_settings.subscriber_request_callback(self.request))
         return customer
 
 
@@ -124,7 +97,7 @@ class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
         return render(
             request,
             self.template_name,
-            {"customer": sync_subscriber(subscriber_request_callback(request))}
+            {"customer": sync_subscriber(djstripe_settings.subscriber_request_callback(request))}
         )
 
 
@@ -140,15 +113,14 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
     form_valid_message = "You are now subscribed!"
 
     def get(self, request, *args, **kwargs):
-        plan_slug = self.kwargs['plan']
-        if plan_slug not in PAYMENT_PLANS:
-            return redirect("djstripe:subscribe")
+        plan_id = self.kwargs['plan_id']
 
-        plan = PAYMENT_PLANS[plan_slug]
-        customer, created = Customer.get_or_create(
-            subscriber=subscriber_request_callback(self.request))
+        if not Plan.objects.filter(id=plan_id).exists():
+            return HttpResponseNotFound()
 
-        if hasattr(customer, "current_subscription") and customer.current_subscription.plan == plan['plan'] and customer.current_subscription.status != CurrentSubscription.STATUS_CANCELLED:
+        customer, _created = Customer.get_or_create(subscriber=djstripe_settings.subscriber_request_callback(self.request))
+
+        if customer.subscription and str(customer.subscription.plan.id) == plan_id and customer.subscription.is_valid():
             message = "You already subscribed to this plan"
             messages.info(request, message, fail_silently=True)
             return redirect("djstripe:subscribe")
@@ -157,7 +129,7 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
 
     def get_context_data(self, *args, **kwargs):
         context = super(ConfirmFormView, self).get_context_data(**kwargs)
-        context['plan'] = PAYMENT_PLANS[self.kwargs['plan']]
+        context['plan'] = Plan.objects.get(id=self.kwargs['plan_id'])
         return context
 
     def post(self, request, *args, **kwargs):
@@ -169,11 +141,10 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
         form = self.get_form(form_class)
         if form.is_valid():
             try:
-                customer, created = Customer.get_or_create(
-                    subscriber=subscriber_request_callback(self.request))
-                customer.update_card(self.request.POST.get("stripe_token"))
+                customer, _created = Customer.get_or_create(subscriber=djstripe_settings.subscriber_request_callback(self.request))
+                customer.add_card(self.request.POST.get("stripe_token"))
                 customer.subscribe(form.cleaned_data["plan"])
-            except stripe.StripeError as exc:
+            except StripeError as exc:
                 form.add_error(None, str(exc))
                 return self.form_invalid(form)
             return self.form_valid(form)
@@ -199,31 +170,29 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
 
     def post(self, request, *args, **kwargs):
         form = PlanForm(request.POST)
-        try:
-            customer = subscriber_request_callback(request).customer
-        except Customer.DoesNotExist as exc:
+
+        customer, _created = Customer.get_or_create(subscriber=djstripe_settings.subscriber_request_callback(self.request))
+
+        if not customer.subscription:
             form.add_error(None, "You must already be subscribed to a plan before you can change it.")
             return self.form_invalid(form)
 
         if form.is_valid():
             try:
+                selected_plan = form.cleaned_data["plan"]
+
                 # When a customer upgrades their plan, and DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES is set to True,
                 # we force the proration of the current plan and use it towards the upgraded plan,
                 # no matter what DJSTRIPE_PRORATION_POLICY is set to.
-                if PRORATION_POLICY_FOR_UPGRADES:
-                    current_subscription_amount = customer.current_subscription.amount
-                    selected_plan_name = form.cleaned_data["plan"]
-                    selected_plan = [plan for plan in PLAN_LIST if plan["plan"] == selected_plan_name][0]  # TODO: refactor
-                    selected_plan_price = selected_plan["price"] / decimal.Decimal("100")
-
+                if djstripe_settings.PRORATION_POLICY_FOR_UPGRADES:
                     # Is it an upgrade?
-                    if selected_plan_price > current_subscription_amount:
-                        customer.subscribe(selected_plan_name, prorate=True)
+                    if selected_plan.amount > customer.subscription.plan.amount:
+                        customer.subscription.update(plan=selected_plan, prorate=True)
                     else:
-                        customer.subscribe(selected_plan_name)
+                        customer.subscription.update(plan=selected_plan)
                 else:
-                    customer.subscribe(form.cleaned_data["plan"])
-            except stripe.StripeError as exc:
+                    customer.subscription.update(plan=selected_plan)
+            except StripeError as exc:
                 form.add_error(None, str(exc))
                 return self.form_invalid(form)
             return self.form_valid(form)
@@ -237,12 +206,10 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
     success_url = reverse_lazy("djstripe:account")
 
     def form_valid(self, form):
-        customer, created = Customer.get_or_create(
-            subscriber=subscriber_request_callback(self.request))
-        current_subscription = customer.cancel_subscription(
-            at_period_end=CANCELLATION_AT_PERIOD_END)
+        customer, _created = Customer.get_or_create(subscriber=djstripe_settings.subscriber_request_callback(self.request))
+        subscription = customer.subscription.cancel()
 
-        if current_subscription.status == current_subscription.STATUS_CANCELLED:
+        if subscription.status == subscription.STATUS_CANCELED:
             # If no pro-rate, they get kicked right out.
             messages.info(self.request, "Your subscription is now cancelled.")
             # logout the user
@@ -251,7 +218,7 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
         else:
             # If pro-rate, they get some time to stay.
             messages.info(self.request, "Your subscription status is now '{status}' until '{period_end}'".format(
-                status=current_subscription.status, period_end=current_subscription.current_period_end)
+                status=subscription.status, period_end=subscription.current_period_end)
             )
 
         return super(CancelSubscriptionView, self).form_valid(form)
@@ -267,6 +234,7 @@ class WebHook(CsrfExemptMixin, View):
     def post(self, request, *args, **kwargs):
         body = smart_str(request.body)
         data = json.loads(body)
+
         if Event.stripe_objects.exists_by_json(data):
             EventProcessingException.objects.create(
                 data=data,
@@ -274,7 +242,12 @@ class WebHook(CsrfExemptMixin, View):
                 traceback=""
             )
         else:
-            event = Event.create_from_stripe_object(data)
+            event = Event._create_from_stripe_object(data)
             event.validate()
-            event.process()
+
+            if djstripe_settings.WEBHOOK_EVENT_CALLBACK:
+                djstripe_settings.WEBHOOK_EVENT_CALLBACK(event)
+            else:
+                event.process()
+
         return HttpResponse()
