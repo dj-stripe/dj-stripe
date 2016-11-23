@@ -193,6 +193,8 @@ def reprocess_events(modeladmin, request, queryset):
         request,
         "{processed}/{total} event(s) successfully re-processed.".format(
             processed=processed, total=queryset.count()))
+
+
 reprocess_events.short_description = "Re-process selected webhook events"
 
 
@@ -240,6 +242,8 @@ def subscription_status(customer):
         return customer.subscription.status
     else:
         return ""
+
+
 subscription_status.short_description = "Subscription Status"
 
 
@@ -247,6 +251,8 @@ def cancel_subscription(modeladmin, request, queryset):
     """Cancel a subscription."""
     for subscription in queryset:
         subscription.cancel()
+
+
 cancel_subscription.short_description = "Cancel selected subscriptions"
 
 admin.site.register(
@@ -299,12 +305,16 @@ class InvoiceItemInline(admin.TabularInline):
 def customer_has_source(obj):
     """Return True if the customer has a source attached to its account."""
     return obj.customer.default_source is not None
+
+
 customer_has_source.short_description = "Customer Has Source"
 
 
 def customer_email(obj):
     """Return a string representation of the customer's email."""
     return str(obj.customer.subscriber.email)
+
+
 customer_email.short_description = "Customer"
 
 
@@ -385,5 +395,6 @@ class PlanAdmin(admin.ModelAdmin):
                 'trial_period_days'])
 
         return readonly_fields
+
 
 admin.site.register(Plan, PlanAdmin)

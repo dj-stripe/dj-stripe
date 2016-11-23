@@ -7,6 +7,7 @@ from django.http import HttpResponse
 def testview(request):
     return HttpResponse()
 
+
 urlpatterns = [
     url(
         r"^$",
