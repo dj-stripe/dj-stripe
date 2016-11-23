@@ -11,6 +11,7 @@ admin.autodiscover()
 def empty_view(request):
     return HttpResponse
 
+
 urlpatterns = [
     url(r'^home/', empty_view, name="home"),
     url(r'^admin/', include(admin.site.urls)),
