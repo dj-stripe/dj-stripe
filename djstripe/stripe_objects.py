@@ -798,7 +798,7 @@ class StripeCustomer(StripeObject):
         stripe_charge = StripeCharge._api_create(
             amount=int(amount * 100),  # Convert dollars into cents
             currency=currency,
-            application_fee=int(amount * 100),  # Convert dollars into cents
+            application_fee=int(application_fee * 100) if application_fee else None,  # Convert dollars into cents
             capture=capture,
             description=description,
             destination=destination,
