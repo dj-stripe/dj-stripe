@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+"""
+.. module:: djstripe.management.commands.djstripe_sync_customers.
+
+   :synopsis: dj-stripe - sync_customer command.
+
+.. moduleauthor:: @kavdev, @pydanny, @shvechikov
+
+"""
 from __future__ import unicode_literals
 
 from django.core.management.base import BaseCommand
@@ -8,10 +16,12 @@ from ...sync import sync_subscriber
 
 
 class Command(BaseCommand):
+    """Sync subscriber data with stripe."""
 
-    help = "Sync subscriber data with stripe"
+    help = "Sync subscriber data with stripe."
 
     def handle(self, *args, **options):
+        """Call sync_subscriber on Subscribers without customers associated to them."""
         qs = get_subscriber_model().objects.filter(customer__isnull=True)
         count = 0
         total = qs.count()
