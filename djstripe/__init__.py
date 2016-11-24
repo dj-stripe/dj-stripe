@@ -1,3 +1,8 @@
+"""
+.. module:: djstripe.
+
+  :synopsis: dj-stripe - Django + Stripe Made Easy
+"""
 from __future__ import unicode_literals
 import warnings
 
