@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-.. module:: dj-stripe.contrib.rest_framework.urls
-    :synopsis: dj-stripe url REST routing for Subscription.
+.. module:: dj-stripe.contrib.rest_framework.urls.
+
+    :synopsis: URL routes for the dj-stripe REST API.
 
 .. moduleauthor:: Philippe Luickx (@philippeluickx)
 

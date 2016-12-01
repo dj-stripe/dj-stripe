@@ -28,6 +28,8 @@ def djdiv(value, arg):
             return value / arg
         except Exception:
             return ''
+
+
 division.is_safe = False
 
 
