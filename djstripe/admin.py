@@ -16,6 +16,29 @@ from .models import Event, EventProcessingException, Transfer, Charge, Plan
 from .models import Invoice, InvoiceItem, Subscription, Customer
 
 
+class StripeObjectAdmin(admin.ModelAdmin):
+    date_hierarchy = "stripe_timestamp"
+    readonly_fields = [
+        'stripe_id',
+        'livemode',
+        'stripe_timestamp',
+    ]
+
+    def get_fieldsets(self, request, obj=None):
+        return (
+            (None, {
+                'fields': (
+                    'stripe_id',
+                    'livemode',
+                    'stripe_timestamp',
+                )
+            }),
+            (self.model.__name__, {
+                'fields': self.get_fields(request, obj),
+            }),
+        )
+
+
 class CustomerHasSourceListFilter(admin.SimpleListFilter):
     """A SimpleListFilter used with Customer admin."""
 
@@ -126,9 +149,9 @@ def send_charge_receipt(modeladmin, request, queryset):
         charge.send_receipt()
 
 
-admin.site.register(
-    Charge,
-    list_display=[
+@admin.register(Charge)
+class ChargeAdmin(StripeObjectAdmin):
+    list_display = [
         "stripe_id",
         "customer",
         "amount",
@@ -139,37 +162,66 @@ admin.site.register(
         "fee",
         "receipt_sent",
         "stripe_timestamp",
-    ],
-    search_fields=[
+    ]
+    search_fields = [
         "stripe_id",
         "customer__stripe_id",
         "invoice__stripe_id",
-    ],
-    list_filter=[
+    ]
+    list_filter = [
         "paid",
         "disputed",
         "refunded",
         "stripe_timestamp",
-    ],
-    raw_id_fields=[
+    ]
+    raw_id_fields = [
         "customer",
-    ],
-    actions=(send_charge_receipt,),
-)
+    ]
+    fields = [
+        "amount",
+        "amount_refunded",
+        "captured",
+        "currency",
+        "failure_code",
+        "failure_message",
+        "paid",
+        "refunded",
+        "shipping",
+        "statement_descriptor",
+        "status",
+        "fee",
+        "fee_details",
+        "source_type",
+        "source_stripe_id",
+        "disputed",
+        "fraudulent",
+        "account",
+        "customer",
+        "transfer",
+        "source",
+    ]
+    actions = [send_charge_receipt]
 
-admin.site.register(
-    EventProcessingException,
-    list_display=[
+
+@admin.register(EventProcessingException)
+class EventProcessingExceptionAdmin(admin.ModelAdmin):
+    date_hierarchy = "created"
+    list_display = [
         "message",
         "event",
-        "created"
-    ],
-    search_fields=[
+        "created",
+    ]
+    search_fields = [
         "message",
         "traceback",
-        "data"
-    ],
-)
+        "data",
+    ]
+    fields = [
+        "event",
+        "data",
+        "message",
+        "traceback",
+    ]
 
 
 def reprocess_events(modeladmin, request, queryset):
@@ -198,38 +250,44 @@ def reprocess_events(modeladmin, request, queryset):
 reprocess_events.short_description = "Re-process selected webhook events"
 
 
-admin.site.register(
-    Event,
-    raw_id_fields=["customer"],
-    list_display=[
+@admin.register(Event)
+class EventAdmin(StripeObjectAdmin):
+    raw_id_fields = ["customer"]
+    list_display = [
         "stripe_id",
         "type",
         "livemode",
         "valid",
         "processed",
-        "stripe_timestamp"
-    ],
-    list_filter=[
+        "stripe_timestamp",
+    ]
+    list_filter = [
         "type",
         "created",
         "valid",
-        "processed"
-    ],
-    search_fields=[
+        "processed",
+    ]
+    search_fields = [
         "stripe_id",
         "customer__stripe_id",
-        "validated_message"
-    ],
-    actions=[
-        reprocess_events
-    ],
-)
+        "validated_message",
+    ]
+    actions = [reprocess_events]
+    fields = [
+        'type',
+        'request_id',
+        'received_api_version',
+        'webhook_message',
+        'customer',
+        'valid',
+        'processed',
+    ]
 
 
 class SubscriptionInline(admin.TabularInline):
     """A TabularInline for use models.Subscription."""
-
     model = Subscription
+    extra = 0
 
 
 def subscription_status(customer):
@@ -255,50 +313,78 @@ def cancel_subscription(modeladmin, request, queryset):
 
 cancel_subscription.short_description = "Cancel selected subscriptions"
 
-admin.site.register(
-    Subscription,
-    raw_id_fields=[
+
+@admin.register(Subscription)
+class SubscriptionAdmin(StripeObjectAdmin):
+    raw_id_fields = [
         "customer",
         "plan",
-    ],
-    list_display=[
+    ]
+    list_display = [
         "stripe_id",
         "status",
         "stripe_timestamp",
-    ],
-    list_filter=[
+    ]
+    list_filter = [
         "status",
-    ],
-    search_fields=[
+    ]
+    search_fields = [
         "stripe_id",
-    ],
-    actions=[cancel_subscription]
-)
+    ]
+    fields = [
+        "application_fee_percent",
+        "cancel_at_period_end",
+        "canceled_at",
+        "current_period_start",
+        "current_period_end",
+        "ended_at",
+        "quantity",
+        "start",
+        "status",
+        "tax_percent",
+        "trial_end",
+        "trial_start",
+        "customer",
+        "plan",
+    ]
+    actions = [cancel_subscription]
 
 
-admin.site.register(
-    Customer,
-    raw_id_fields=["subscriber"],
-    list_display=[
+@admin.register(Customer)
+class CustomerAdmin(StripeObjectAdmin):
+    raw_id_fields = ["subscriber"]
+    list_display = [
         "stripe_id",
         "subscriber",
         subscription_status,
         "stripe_timestamp"
-    ],
-    list_filter=[
+    ]
+    list_filter = [
         CustomerHasSourceListFilter,
         CustomerSubscriptionStatusListFilter
-    ],
-    search_fields=[
+    ]
+    search_fields = [
         "stripe_id"
-    ],
-    inlines=[SubscriptionInline]
-)
+    ]
+    fields = [
+        "account_balance",
+        "business_vat_id",
+        "currency",
+        "delinquent",
+        "shipping",
+        "default_source",
+        "subscriber",
+        "date_purged",
+    ]
+    inlines = [SubscriptionInline]
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = list(super(CustomerAdmin, self).get_readonly_fields(request, obj))
+        return readonly_fields + ["date_purged"]
 
 
 class InvoiceItemInline(admin.TabularInline):
     """A TabularInline for use models.InvoiceItem."""
-
     model = InvoiceItem
 
 
@@ -318,11 +404,10 @@ def customer_email(obj):
 customer_email.short_description = "Customer"
 
 
-admin.site.register(
-    Invoice,
-    raw_id_fields=["customer"],
-    readonly_fields=('stripe_timestamp',),
-    list_display=[
+@admin.register(Invoice)
+class InvoiceAdmin(StripeObjectAdmin):
+    raw_id_fields = ["customer"]
+    list_display = [
         "stripe_id",
         "paid",
         "forgiven",
@@ -333,13 +418,13 @@ admin.site.register(
         "period_end",
         "subtotal",
         "total",
-        "stripe_timestamp"
-    ],
-    search_fields=[
+        "stripe_timestamp",
+    ]
+    search_fields = [
         "stripe_id",
-        "customer__stripe_id"
-    ],
-    list_filter=[
+        "customer__stripe_id",
+    ]
+    list_filter = [
         InvoiceCustomerHasSourceListFilter,
         "paid",
         "forgiven",
@@ -349,30 +434,81 @@ admin.site.register(
         "stripe_timestamp",
         "date",
         "period_end",
-        "total"
-    ],
-    inlines=[InvoiceItemInline]
-)
+        "total",
+    ]
+    fields = [
+        "amount_due",
+        "application_fee",
+        "attempt_count",
+        "attempted",
+        "closed",
+        "currency",
+        "data",
+        "ending_balance",
+        "forgiven",
+        "next_payment_attempt",
+        "paid",
+        "period_end",
+        "period_start",
+        "starting_balance",
+        "statement_descriptor",
+        "subscription_proration_date",
+        "subtotal",
+        "tax",
+        "tax_percent",
+        "total",
+        "customer",
+        "charge",
+        "subscription",
+    ]
+    inlines = [InvoiceItemInline]
 
 
-admin.site.register(
-    Transfer,
-    list_display=[
+@admin.register(Transfer)
+class TransferAdmin(StripeObjectAdmin):
+    list_display = [
         "stripe_id",
         "amount",
         "status",
         "date",
         "description",
-        "stripe_timestamp"
-    ],
-    search_fields=[
+        "stripe_timestamp",
+    ]
+    search_fields = [
         "stripe_id",
     ]
-)
+    fields = [
+        "amount",
+        "amount_reversed",
+        "currency",
+        "date",
+        "destination",
+        "destination_payment",
+        "destination_type",
+        "failure_code",
+        "failure_message",
+        "reversed",
+        "source_transaction",
+        "source_type",
+        "statement_descriptor",
+        "status",
+        "fee",
+        "fee_details",
+    ]
 
 
-class PlanAdmin(admin.ModelAdmin):
+@admin.register(Plan)
+class PlanAdmin(StripeObjectAdmin):
     """An Admin for use with models.Plan."""
+    fields = [
+        "amount",
+        "currency",
+        "interval",
+        "interval_count",
+        "name",
+        "statement_descriptor",
+        "trial_period_days",
+    ]
 
     def save_model(self, request, obj, form, change):
         """Update or create objects using our custom methods that sync with Stripe."""
@@ -384,10 +520,9 @@ class PlanAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         """Return extra readonly_fields."""
-        readonly_fields = list(self.readonly_fields)
+        readonly_fields = list(super(PlanAdmin, self).get_readonly_fields(request, obj))
         if obj:
             readonly_fields.extend([
-                'stripe_id',
                 'amount',
                 'currency',
                 'interval',
@@ -395,6 +530,3 @@ class PlanAdmin(admin.ModelAdmin):
                 'trial_period_days'])
 
         return readonly_fields
-
-
-admin.site.register(Plan, PlanAdmin)
