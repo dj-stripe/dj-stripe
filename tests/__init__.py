@@ -200,6 +200,7 @@ class CardDict(dict):
     def delete(self):
         return self
 
+
 FAKE_CARD = CardDict({
     "id": "card_16YKQh2eZvKYlo2Cblc5Feoo",
     "object": "card",

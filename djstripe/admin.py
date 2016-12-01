@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-.. module:: djstripe.admin
+.. module:: djstripe.admin.
+
    :synopsis: dj-stripe - Django Administration interface definitions
 
 .. moduleauthor:: Daniel Greenfeld (@pydanny)
@@ -16,16 +17,32 @@ from .models import Invoice, InvoiceItem, Subscription, Customer
 
 
 class CustomerHasSourceListFilter(admin.SimpleListFilter):
+    """A SimpleListFilter used with Customer admin."""
+
     title = "source presence"
     parameter_name = "has_source"
 
     def lookups(self, request, model_admin):
+        """
+        Return a list of tuples.
+
+        The first element in each tuple is the coded value for the option that will
+        appear in the URL query. The second element is the
+        human-readable name for the option that will appear
+        in the right sidebar.
+        source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
+        """
         return [
             ["yes", "Has Source"],
             ["no", "Does Not Have Source"]
         ]
 
     def queryset(self, request, queryset):
+        """
+        Return the filtered queryset based on the value provided in the query string.
+
+        source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
+        """
         if self.value() == "yes":
             return queryset.exclude(default_source=None)
         if self.value() == "no":
@@ -33,16 +50,32 @@ class CustomerHasSourceListFilter(admin.SimpleListFilter):
 
 
 class InvoiceCustomerHasSourceListFilter(admin.SimpleListFilter):
+    """A SimpleListFilter used with Invoice admin."""
+
     title = "source presence"
     parameter_name = "has_source"
 
     def lookups(self, request, model_admin):
+        """
+        Return a list of tuples.
+
+        The first element in each tuple is the coded value for the option that will
+        appear in the URL query. The second element is the
+        human-readable name for the option that will appear
+        in the right sidebar.
+        source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
+        """
         return [
             ["yes", "Has Source"],
             ["no", "Does Not Have Source"]
         ]
 
     def queryset(self, request, queryset):
+        """
+        Return the filtered queryset based on the value provided in the query string.
+
+        source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
+        """
         if self.value() == "yes":
             return queryset.exclude(customer__default_source=None)
         if self.value() == "no":
@@ -50,10 +83,21 @@ class InvoiceCustomerHasSourceListFilter(admin.SimpleListFilter):
 
 
 class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
+    """A SimpleListFilter used with Customer admin."""
+
     title = "subscription status"
     parameter_name = "sub_status"
 
     def lookups(self, request, model_admin):
+        """
+        Return a list of tuples.
+
+        The first element in each tuple is the coded value for the option that will
+        appear in the URL query. The second element is the
+        human-readable name for the option that will appear
+        in the right sidebar.
+        source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
+        """
         statuses = [
             [x, x.replace("_", " ").title()]
             for x in Subscription.objects.all().values_list(
@@ -65,6 +109,11 @@ class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
         return statuses
 
     def queryset(self, request, queryset):
+        """
+        Return the filtered queryset based on the value provided in the query string.
+
+        source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
+        """
         if self.value() is None:
             return queryset.all()
         else:
@@ -72,10 +121,7 @@ class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
 
 
 def send_charge_receipt(modeladmin, request, queryset):
-    """
-    Function for sending receipts from the admin if a receipt is not sent for
-    a specific charge.
-    """
+    """Function for sending receipts from the admin if a receipt is not sent for a specific charge."""
     for charge in queryset:
         charge.send_receipt()
 
@@ -127,7 +173,7 @@ admin.site.register(
 
 
 def reprocess_events(modeladmin, request, queryset):
-    """ Re-processes the selected webhook events.
+    """Re-process the selected webhook events.
 
     Note that this isn't idempotent, so any side-effects that are produced from
     the event being handled will be multiplied (for example, an event handler
@@ -147,6 +193,8 @@ def reprocess_events(modeladmin, request, queryset):
         request,
         "{processed}/{total} event(s) successfully re-processed.".format(
             processed=processed, total=queryset.count()))
+
+
 reprocess_events.short_description = "Re-process selected webhook events"
 
 
@@ -179,27 +227,32 @@ admin.site.register(
 
 
 class SubscriptionInline(admin.TabularInline):
+    """A TabularInline for use models.Subscription."""
+
     model = Subscription
 
 
 def subscription_status(customer):
     """
-    Returns a string representation of the customer's subscription status.
+    Return a string representation of the customer's subscription status.
+
     If the customer does not have a subscription, an empty string is returned.
     """
-
     if customer.subscription:
         return customer.subscription.status
     else:
         return ""
+
+
 subscription_status.short_description = "Subscription Status"
 
 
 def cancel_subscription(modeladmin, request, queryset):
-    """Cancels a subscription."""
-
+    """Cancel a subscription."""
     for subscription in queryset:
         subscription.cancel()
+
+
 cancel_subscription.short_description = "Cancel selected subscriptions"
 
 admin.site.register(
@@ -244,18 +297,24 @@ admin.site.register(
 
 
 class InvoiceItemInline(admin.TabularInline):
+    """A TabularInline for use models.InvoiceItem."""
+
     model = InvoiceItem
 
 
 def customer_has_source(obj):
-    """ Returns True if the customer has a source attached to its account."""
+    """Return True if the customer has a source attached to its account."""
     return obj.customer.default_source is not None
+
+
 customer_has_source.short_description = "Customer Has Source"
 
 
 def customer_email(obj):
-    """ Returns a string representation of the customer's email."""
+    """Return a string representation of the customer's email."""
     return str(obj.customer.subscriber.email)
+
+
 customer_email.short_description = "Customer"
 
 
@@ -313,11 +372,10 @@ admin.site.register(
 
 
 class PlanAdmin(admin.ModelAdmin):
+    """An Admin for use with models.Plan."""
 
     def save_model(self, request, obj, form, change):
-        """Update or create objects using our custom methods that
-        sync with Stripe."""
-
+        """Update or create objects using our custom methods that sync with Stripe."""
         if change:
             obj.update_name()
 
@@ -325,6 +383,7 @@ class PlanAdmin(admin.ModelAdmin):
             Plan.get_or_create(**form.cleaned_data)
 
     def get_readonly_fields(self, request, obj=None):
+        """Return extra readonly_fields."""
         readonly_fields = list(self.readonly_fields)
         if obj:
             readonly_fields.extend([
@@ -336,5 +395,6 @@ class PlanAdmin(admin.ModelAdmin):
                 'trial_period_days'])
 
         return readonly_fields
+
 
 admin.site.register(Plan, PlanAdmin)
