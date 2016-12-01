@@ -1,9 +1,9 @@
 """Module used to run tests for dj-stripe."""
 
+from argparse import ArgumentParser
 import os
 import sys
 
-from argparse import ArgumentParser
 from coverage import Coverage
 import django
 from django.conf import settings
@@ -249,6 +249,7 @@ def run_test_suite(args):
                                  color="green", attrs=["bold"]))
         sys.stdout.write(colored(text="Don't push without running the skipped step(s).\n",
                                  color="red", attrs=["bold"]))
+
 
 if __name__ == "__main__":
     main()

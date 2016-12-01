@@ -18,7 +18,7 @@ flake8-docstrings>=1.0.2
 sphinx_rtd_theme==0.1.9
 
 # Contrib packages
-djangorestframework>=3.4.6
+djangorestframework==3.4.6
 
 # Database drivers
 psycopg2>=2.6.2
