@@ -63,7 +63,7 @@ class SubscriptionPaymentMiddleware(object):
     def process_request(self, request):
         """Check the subscriber's subscription status.
 
-        Returns early if request doesnt match rules in docstring.
+        Returns early if request does not outlined in this middleware's docstring.
         """
         if self.is_matching_rule(request):
             return
@@ -100,7 +100,7 @@ class SubscriptionPaymentMiddleware(object):
         return False
 
     def check_subscription(self, request):
-        """Redirect to subscribe if the user lacks an active subscription."""
+        """Redirect to the subscribe page if the user lacks an active subscription."""
         subscriber = subscriber_request_callback(request)
 
         if not subscriber_has_active_subscription(subscriber):

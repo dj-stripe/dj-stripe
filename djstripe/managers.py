@@ -52,7 +52,7 @@ class SubscriptionManager(models.Manager):
         return self.filter(status="canceled")
 
     def canceled_during(self, year, month):
-        """Return canceled Subscriptions which were canceled during a certain time range."""
+        """Return Subscriptions canceled during a certain time range."""
         return self.canceled().filter(canceled_at__year=year, canceled_at__month=month)
 
     def started_plan_summary_for(self, year, month):
@@ -64,7 +64,7 @@ class SubscriptionManager(models.Manager):
         return self.active().values("plan").order_by().annotate(count=models.Count("plan"))
 
     def canceled_plan_summary_for(self, year, month):
-        """Return canceled Subscriptions between a time range with plan counts annotated."""
+        """Return Subscriptions canceled within a time range with plan counts annotated."""
         return self.canceled_during(year, month).values("plan").order_by().annotate(count=models.Count("plan"))
 
     def churn(self):
