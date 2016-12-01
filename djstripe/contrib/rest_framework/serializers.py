@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-.. module:: dj-stripe.contrib.rest_framework.serializers
-    :synopsis: dj-stripe Serializer for Subscription.
+.. module:: dj-stripe.contrib.rest_framework.serializers.
+
+    :synopsis: dj-stripe - Serializers to be used with the dj-stripe REST API.
 
 .. moduleauthor:: Philippe Luickx (@philippeluickx)
 
@@ -16,8 +17,11 @@ from djstripe.models import Subscription
 
 
 class SubscriptionSerializer(ModelSerializer):
+    """A serializer used for the Subscription model."""
 
     class Meta(object):
+        """Model class options."""
+
         model = Subscription
 
 
