@@ -181,7 +181,7 @@ class StripeDateTimeField(StripeFieldMixin, models.DateTimeField):
     """A field used to define a DateTimeField value according to djstripe logic."""
 
     def stripe_to_db(self, data):
-        """Override super().stripe_to_db function."""
+        """Convert the raw timestamp value to a DateTime representation."""
         val = super(StripeDateTimeField, self).stripe_to_db(data)
 
         # Note: 0 is a possible return value, which is 'falseish'
