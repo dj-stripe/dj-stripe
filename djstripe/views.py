@@ -165,7 +165,7 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
         Handle POST requests.
 
         Instantiates a form instance with the passed POST variables and
-        then checked for validity.
+        then checks for validity.
         """
         form_class = self.get_form_class()
         form = self.get_form(form_class)
@@ -243,7 +243,7 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
 
 
 class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
-    """A view used to cancel a Customers subscription."""
+    """A view used to cancel a Customer's subscription."""
 
     template_name = "djstripe/cancel_subscription.html"
     form_class = CancelSubscriptionForm
@@ -283,7 +283,7 @@ class WebHook(CsrfExemptMixin, View):
         """
         Create an Event object based on request data.
 
-        Creates an EventProcessingException when Event is duplicate.
+        Creates an EventProcessingException if the webhook Event is a duplicate.
         """
         body = smart_str(request.body)
         data = json.loads(body)

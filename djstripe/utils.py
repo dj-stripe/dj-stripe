@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-.. module:: djstripe.webhooks.
+.. module:: djstripe.utils.
 
   :synopsis: dj-stripe - Utility functions related to the djstripe app.
 
@@ -98,7 +98,7 @@ def dict_nested_accessor(d, name):
 
 def convert_tstamp(response, field_name=None):
     """
-    Intended for use converting from a Stripe API timestamp response into a native date.
+    Convert a Stripe API timestamp response (unix epoch) to a native datetime.
 
     :rtype: datetime
     """

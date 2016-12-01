@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-.. module:: djstripe.webhooks.
+.. module:: djstripe.urls.
 
   :synopsis: dj-stripe - Urls related to the djstripe app.
 

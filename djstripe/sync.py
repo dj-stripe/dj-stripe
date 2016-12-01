@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-.. module:: djstripe.webhooks.
+.. module:: djstripe.sync.
 
   :synopsis: dj-stripe - Utility functions used for syncing data.
 
