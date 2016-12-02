@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+"""
+.. module:: djstripe.utils.
+
+  :synopsis: dj-stripe - Utility functions related to the djstripe app.
+
+.. moduleauthor:: @kavdev, @pydanny, @wahuneke
+"""
 import datetime
 
 from django.conf import settings
@@ -20,6 +27,7 @@ ANONYMOUS_USER_ERROR_MSG = (
 def subscriber_has_active_subscription(subscriber, plan=None):
     """
     Helper function to check if a subscriber has an active subscription.
+
     Throws improperlyConfigured if the subscriber is an instance of AUTH_USER_MODEL
     and get_user_model().is_anonymous == True.
 
@@ -40,7 +48,6 @@ def subscriber_has_active_subscription(subscriber, plan=None):
     :type plan: Plan or string (plan ID)
 
     """
-
     if isinstance(subscriber, AnonymousUser):
         raise ImproperlyConfigured(ANONYMOUS_USER_ERROR_MSG)
 
@@ -57,13 +64,11 @@ def subscriber_has_active_subscription(subscriber, plan=None):
 
 def get_supported_currency_choices(api_key):
     """
-    Pulls a stripe account's supported currencies and returns a choices tuple of
-    those supported currencies.
+    Pull a stripe account's supported currencies and returns a choices tuple of those supported currencies.
 
     :param api_key: The api key associated with the account from which to pull data.
     :type api_key: str
     """
-
     import stripe
     stripe.api_key = api_key
 
@@ -76,6 +81,7 @@ def get_supported_currency_choices(api_key):
 def dict_nested_accessor(d, name):
     """
     Access a dictionary value, possibly in a nested dictionary.
+
     >>> dict_nested_accessor({'id': 'joe'}, 'id')
     "joe"
     >>> dict_nested_accessor({'inner': {'id': 'joe'}}, 'inner.id')
@@ -92,7 +98,7 @@ def dict_nested_accessor(d, name):
 
 def convert_tstamp(response, field_name=None):
     """
-    Intended for use converting from a Stripe API timestamp response into a native date
+    Convert a Stripe API timestamp response (unix epoch) to a native datetime.
 
     :rtype: datetime
     """
