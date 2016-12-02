@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-.. module:: djstripe.fields
+.. module:: djstripe.fields.
+
    :synopsis: dj-stripe Custom Field Definitions
 
 .. moduleauthor:: Bill Huneke (@wahuneke)
@@ -19,8 +20,10 @@ from .utils import dict_nested_accessor, convert_tstamp
 
 class StripeFieldMixin(object):
     """
-    Custom fields for all Stripe data. This allows keeping track of which database fields are suitable for sending
-    to or receiving from Stripe. Also, allows a few handy extra parameters
+    Custom fields for all Stripe data.
+
+    This allows keeping track of which database fields are suitable for
+    sending to or receiving from Stripe. Also, allows a few handy extra parameters.
     """
 
     # Used if the name at stripe is different from the name in our database
@@ -45,6 +48,12 @@ class StripeFieldMixin(object):
     deprecated = False
 
     def __init__(self, *args, **kwargs):
+        """
+        Assign class instance variables based on kwargs.
+
+        Assign extra class instance variables if stripe_required is defined or
+        if deprecated is defined.
+        """
         self.stripe_name = kwargs.pop('stripe_name', self.stripe_name)
         self.nested_name = kwargs.pop('nested_name', self.nested_name)
         self.stripe_required = kwargs.pop('stripe_required', self.stripe_required)
@@ -58,6 +67,7 @@ class StripeFieldMixin(object):
         super(StripeFieldMixin, self).__init__(*args, **kwargs)
 
     def stripe_to_db(self, data):
+        """Try converting stripe fields to defined database fields."""
         if not self.deprecated:
             try:
                 if self.stripe_name:
@@ -79,8 +89,10 @@ class StripeFieldMixin(object):
 
 
 class StripePercentField(StripeFieldMixin, models.DecimalField):
+    """A field used to define a percent according to djstripe logic."""
 
     def __init__(self, *args, **kwargs):
+        """Assign default args to this field."""
         defaults = {
             'decimal_places': 2,
             'max_digits': 5,
@@ -91,9 +103,14 @@ class StripePercentField(StripeFieldMixin, models.DecimalField):
 
 
 class StripeCurrencyField(StripeFieldMixin, models.DecimalField):
-    """Stripe is always in cents. djstripe stores everything in dollars."""
+    """
+    A field used to define currency according to djstripe logic.
+
+    Stripe is always in cents. djstripe stores everything in dollars.
+    """
 
     def __init__(self, *args, **kwargs):
+        """Assign default args to this field."""
         defaults = {
             'decimal_places': 2,
             'max_digits': 7,
@@ -102,6 +119,7 @@ class StripeCurrencyField(StripeFieldMixin, models.DecimalField):
         super(StripeCurrencyField, self).__init__(*args, **defaults)
 
     def stripe_to_db(self, data):
+        """Convert the raw value to decimal representation."""
         val = super(StripeCurrencyField, self).stripe_to_db(data)
 
         # Note: 0 is a possible return value, which is 'falseish'
@@ -110,8 +128,10 @@ class StripeCurrencyField(StripeFieldMixin, models.DecimalField):
 
 
 class StripeBooleanField(StripeFieldMixin, models.BooleanField):
+    """A field used to define a boolean value according to djstripe logic."""
 
     def __init__(self, *args, **kwargs):
+        """Throw an error when a user tries to deprecate."""
         if kwargs.get("deprecated", False):
             raise ImproperlyConfigured("Boolean field cannot be deprecated. Change field type to "
                                        "StripeNullBooleanField")
@@ -119,10 +139,14 @@ class StripeBooleanField(StripeFieldMixin, models.BooleanField):
 
 
 class StripeNullBooleanField(StripeFieldMixin, models.NullBooleanField):
+    """A field used to define a NullBooleanField value according to djstripe logic."""
+
     pass
 
 
 class StripeCharField(StripeFieldMixin, models.CharField):
+    """A field used to define a CharField value according to djstripe logic."""
+
     pass
 
 
@@ -130,10 +154,14 @@ class StripeIdField(StripeCharField):
     """A field with enough space to hold any stripe ID."""
 
     def __init__(self, *args, **kwargs):
-        # As per: https://stripe.com/docs/upgrades
-        # You can safely assume object IDs we generate will never exceed 255
-        # characters, but you should be able to handle IDs of up to that
-        # length.
+        """
+        Assign default args to this field.
+
+        As per: https://stripe.com/docs/upgrades
+        You can safely assume object IDs we generate will never exceed 255
+        characters, but you should be able to handle IDs of up to that
+        length.
+        """
         defaults = {
             'max_length': 255,
             'blank': False,
@@ -144,12 +172,16 @@ class StripeIdField(StripeCharField):
 
 
 class StripeTextField(StripeFieldMixin, models.TextField):
+    """A field used to define a TextField value according to djstripe logic."""
+
     pass
 
 
 class StripeDateTimeField(StripeFieldMixin, models.DateTimeField):
+    """A field used to define a DateTimeField value according to djstripe logic."""
 
     def stripe_to_db(self, data):
+        """Convert the raw timestamp value to a DateTime representation."""
         val = super(StripeDateTimeField, self).stripe_to_db(data)
 
         # Note: 0 is a possible return value, which is 'falseish'
@@ -158,8 +190,12 @@ class StripeDateTimeField(StripeFieldMixin, models.DateTimeField):
 
 
 class StripeIntegerField(StripeFieldMixin, models.IntegerField):
+    """A field used to define a IntegerField value according to djstripe logic."""
+
     pass
 
 
 class StripeJSONField(StripeFieldMixin, JSONField):
+    """A field used to define a JSONField value according to djstripe logic."""
+
     pass
