@@ -22,7 +22,7 @@ def subscriber_passes_pay_test(test_func, plan=None, pay_page="djstripe:subscrib
     """
     Decorator for views that checks the subscriber passes the given test for a "Paid Feature".
 
-    Redirects to the `pay_page` if necessary. The test should be a callable
+    Redirects to `pay_page` if necessary. The test should be a callable
     that takes the subscriber object and returns True if the subscriber passes.
     """
     def decorator(view_func):
