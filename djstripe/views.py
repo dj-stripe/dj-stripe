@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+"""
+.. module:: djstripe.webhooks.
+
+  :synopsis: dj-stripe - Views related to the djstripe app.
+
+.. moduleauthor:: @kavdev, @pydanny, @lskillen, @wahuneke, @dollydagr, @chrissmejia
+"""
 from __future__ import unicode_literals
 
 import json
@@ -24,8 +31,10 @@ from .sync import sync_subscriber
 # ============================================================================ #
 #                                 Account Views                                #
 # ============================================================================ #
+
 class AccountView(LoginRequiredMixin, SelectRelatedMixin, SubscriptionMixin, PaymentsContextMixin, TemplateView):
     """Shows account details including customer and subscription details."""
+
     template_name = "djstripe/account.html"
 
 
@@ -35,21 +44,25 @@ class AccountView(LoginRequiredMixin, SelectRelatedMixin, SubscriptionMixin, Pay
 
 class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
     """TODO: Needs to be refactored to leverage forms and context data."""
+
     template_name = "djstripe/change_card.html"
 
     def get_object(self):
+        """
+        Return a Customer object.
+
+        Ether returns the Customer object from the current class instance or
+        uses get_or_create.
+        """
         if hasattr(self, "customer"):
             return self.customer
         self.customer, _created = Customer.get_or_create(
-            subscriber=djstripe_settings.subscriber_request_callback(self.request))
+            subscriber=djstripe_settings.subscriber_request_callback(self.request)
+        )
         return self.customer
 
     def post(self, request, *args, **kwargs):
-        """
-        TODO: Raise a validation error when a stripe token isn't passed.
-            Should be resolved when a form is used.
-        """
-
+        """TODO: Raise a validation error when a stripe token isn't passed. Should be resolved when a form is used."""
         customer = self.get_object()
         try:
             send_invoice = not customer.default_source
@@ -73,18 +86,22 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
         return redirect(self.get_post_success_url())
 
     def get_post_success_url(self):
-        """ Makes it easier to do custom dj-stripe integrations. """
+        """Make it easier to do custom dj-stripe integrations."""
         return reverse("djstripe:account")
 
 
 class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
+    """A view used to return customer history of invoices."""
+
     template_name = "djstripe/history.html"
     model = Customer
     select_related = ["invoice"]
 
     def get_object(self):
+        """Return a Customer object."""
         customer, _created = Customer.get_or_create(
-            subscriber=djstripe_settings.subscriber_request_callback(self.request))
+            subscriber=djstripe_settings.subscriber_request_callback(self.request)
+        )
         return customer
 
 
@@ -94,6 +111,7 @@ class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
     template_name = "djstripe/includes/_history_table.html"
 
     def post(self, request, *args, **kwargs):
+        """Render the template while injecting extra context."""
         return render(
             request,
             self.template_name,
@@ -106,6 +124,7 @@ class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
 # ============================================================================ #
 
 class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
+    """A view used to confirm customers into a subscription plan."""
 
     form_class = PlanForm
     template_name = "djstripe/confirm_form.html"
@@ -113,6 +132,11 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
     form_valid_message = "You are now subscribed!"
 
     def get(self, request, *args, **kwargs):
+        """Override ConfirmFormView GET to perform extra validation.
+
+        - Returns 404 when no plan exists.
+        - Redirects to djstripe:subscribe when customer is already subscribed to this plan.
+        """
         plan_id = self.kwargs['plan_id']
 
         if not Plan.objects.filter(id=plan_id).exists():
@@ -131,14 +155,17 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
         return super(ConfirmFormView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, *args, **kwargs):
+        """Return ConfirmFormView's context with plan_id."""
         context = super(ConfirmFormView, self).get_context_data(**kwargs)
         context['plan'] = Plan.objects.get(id=self.kwargs['plan_id'])
         return context
 
     def post(self, request, *args, **kwargs):
         """
-        Handles POST requests, instantiating a form instance with the passed
-        POST variables and then checked for validity.
+        Handle POST requests.
+
+        Instantiates a form instance with the passed POST variables and
+        then checks for validity.
         """
         form_class = self.get_form_class()
         form = self.get_form(form_class)
@@ -158,12 +185,16 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
 
 
 class SubscribeView(LoginRequiredMixin, SubscriptionMixin, TemplateView):
+    """A view to render the subscribe template."""
+
     template_name = "djstripe/subscribe.html"
 
 
 class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
     """
-    TODO: Work in a trial_days kwarg
+    A view used to change a Customers plan.
+
+    TODO: Work in a trial_days kwarg.
 
     Also, this should be combined with ConfirmFormView.
     """
@@ -174,6 +205,10 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
     form_valid_message = "You've just changed your plan!"
 
     def post(self, request, *args, **kwargs):
+        """Handle a Customer changing a plan.
+
+        Handles upgrading a plan as well. Throws an error when Customer is not subscribed to any plan.
+        """
         form = PlanForm(request.POST)
 
         customer, _created = Customer.get_or_create(
@@ -208,11 +243,14 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
 
 
 class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
+    """A view used to cancel a Customer's subscription."""
+
     template_name = "djstripe/cancel_subscription.html"
     form_class = CancelSubscriptionForm
     success_url = reverse_lazy("djstripe:account")
 
     def form_valid(self, form):
+        """Handle canceling the Customer's subscription."""
         customer, _created = Customer.get_or_create(
             subscriber=djstripe_settings.subscriber_request_callback(self.request)
         )
@@ -239,8 +277,14 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
 
 
 class WebHook(CsrfExemptMixin, View):
+    """A view used to handle webhooks."""
 
     def post(self, request, *args, **kwargs):
+        """
+        Create an Event object based on request data.
+
+        Creates an EventProcessingException if the webhook Event is a duplicate.
+        """
         body = smart_str(request.body)
         data = json.loads(body)
 
