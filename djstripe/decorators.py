@@ -40,7 +40,7 @@ def subscription_payment_required(function=None, plan=None, pay_page="djstripe:s
     """
     Decorator for views that require subscription payment.
 
-    Redirects to the `pay_page` if necessary.
+    Redirects to `pay_page` if necessary.
     """
     actual_decorator = subscriber_passes_pay_test(
         subscriber_has_active_subscription,
