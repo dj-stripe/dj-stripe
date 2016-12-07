@@ -11,6 +11,7 @@ tox>=2.3.1
 
 # Docs
 sphinx_rtd_theme==0.1.9
+sphinx-autobuild==0.6.0
 
 # Contrib packages
 djangorestframework==3.4.6
