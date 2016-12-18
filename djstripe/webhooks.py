@@ -45,8 +45,8 @@ def handler(event_types):
     Functions can be registered for event types (e.g. 'customer') or
     fully qualified event sub-types (e.g. 'customer.subscription.deleted').
 
-    If an event type is specified the handler will receive callbacks for
-    ALL webhook events of that type.  For example, if 'customer' is specified
+    If an event type is specified, the handler will receive callbacks for
+    ALL webhook events of that type.  For example, if 'customer' is specified,
     the handler will receive events for 'customer.subscription.created',
     'customer.subscription.updated', etc.
 
