@@ -20,7 +20,7 @@
 
 <div class="row">
     <div class="col-xs-12">
-        {% if not customer.has_valid_card %}
+        {% if not customer.has_valid_source %}
             <p>Please add valid card <a href="{% url 'djstripe:account' %}">here</a></p>
         {% else %}
             <form

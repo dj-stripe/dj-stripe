@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-.. module:: dj-stripe.contrib.rest_framework.views
-    :synopsis: dj-stripe REST views for Subscription.
+.. module:: dj-stripe.contrib.rest_framework.views.
+
+    :synopsis: Views for the dj-stripe REST API.
 
 .. moduleauthor:: Philippe Luickx (@philippeluickx)
 
@@ -20,18 +21,16 @@ from .serializers import SubscriptionSerializer, CreateSubscriptionSerializer
 
 
 class SubscriptionRestView(APIView):
-    """
-    A REST API for Stripes implementation in the backend
-    """
+    """API Endpoints for the Subscription object."""
 
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, **kwargs):
         """
-        Returns the customer's valid subscriptions.
+        Return the customer's valid subscriptions.
+
         Returns with status code 200.
         """
-
         try:
             customer, _created = Customer.get_or_create(subscriber=subscriber_request_callback(self.request))
 
@@ -43,9 +42,9 @@ class SubscriptionRestView(APIView):
     def post(self, request, **kwargs):
         """
         Create a new current subscription for the user.
+
         Returns with status code 201.
         """
-
         serializer = CreateSubscriptionSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -70,10 +69,10 @@ class SubscriptionRestView(APIView):
 
     def delete(self, request, **kwargs):
         """
-        Marks the users current subscription as cancelled.
+        Mark the customers current subscription as cancelled.
+
         Returns with status code 204.
         """
-
         try:
             customer, _created = Customer.get_or_create(subscriber=subscriber_request_callback(self.request))
             customer.subscription.cancel(at_period_end=CANCELLATION_AT_PERIOD_END)
