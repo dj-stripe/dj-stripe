@@ -14,15 +14,19 @@ Configuration
 ---------------
 
 
-Add ``djstripe`` to your ``INSTALLED_APPS``:
+Add ``djstripe`` to your ``INSTALLED_APPS``. You will also need the `sites` framework enabled.:
 
 .. code-block:: python
 
+    SITE_ID = 1
+
     INSTALLED_APPS += [
+        'django.contrib.sites',
+        # ...,
         "djstripe",
     ]
 
-Add your stripe keys:
+Add your Stripe keys:
 
 .. code-block:: python
 
@@ -69,9 +73,37 @@ Add some payment plans:
     `DJSTRIPE_PLANS` setting, use an `OrderedDict` from the `collections`
     module in the standard library, rather than an ordinary dict.
 
-Add to the urls.py::
+Add the following to the `urlpatterns` in your `urls.py` to expose payment views and the webhook endpoint:
+
+.. code-block:: python
 
     url(r'^payments/', include('djstripe.urls', namespace="djstripe")),
+
+.. note:: Using the inbuilt dj-stripe views
+
+    There must be a `base.html` template on your template loader path with `javascript` and `content` blocks present
+    for the dj-stripe views' templates to extend.
+
+    .. code-block:: html
+
+        {% block content %}{% endblock %}
+        {% block javascript %}{% endblock %}
+
+    If you haven't already, add JQuery and the Bootstrap 3.0.0+ JS and CSS to your base template as well:
+
+    .. code-block:: html
+
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+        <!-- Optional theme -->
+        <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+
+        <!-- Latest JQuery (IE9+) -->
+        <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
 Run the commands::
 
@@ -80,29 +112,6 @@ Run the commands::
     python manage.py djstripe_init_customers
 
     python manage.py djstripe_init_plans
-
-If you haven't already, add JQuery and the Bootstrap 3.0.0+ JS and CSS to your base template:
-
-.. code-block:: html
-
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
-
-    <!-- Latest JQuery (IE9+) -->
-    <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
-
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-
-Also, if you don't have it already, add a javascript block to your base.html file:
-
-.. code-block:: html
-
-    {% block javascript %}{% endblock %}
-
 
 Running Tests
 --------------
