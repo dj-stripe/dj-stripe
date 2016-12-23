@@ -57,14 +57,16 @@ readme = open('README.rst').read()
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 INSTALL_REQUIRES = [
-    'django!=1.9,>=1.8',
-    'django-braces>=1.8.1',
-    'django-model-utils>=2.3.1',
-    'django-polymorphic>=0.7.1',
+    'django!=1.9,>=1.8',  # Django has a regression in 1.9, see #275
+    'django-braces>=1.9.0',
+    'django-model-utils>=2.5.2',
+    'django-polymorphic>=1.0',
     'jsonfield>=1.0.3',
-    'pytz>=2015.4',
-    'stripe>=1.24.1',
-    'tqdm>=4.5.0',
+    'pytz>=2016.6.1',
+    'stripe>=1.41.1',
+    'tqdm>=4.8.4',
+    'python-doc-inherit~=0.3.0',
+    'mock-django~=0.6.10',
 ]
 
 setup(
