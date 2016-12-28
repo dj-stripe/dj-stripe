@@ -1,20 +1,21 @@
 =========
 Settings
 =========
+Prepend the settings with ``DJSTRIPE_`` in place of the caret ``^``. Namespace prefix was ommited here for legibility.
 
-DJSTRIPE_DEFAULT_PLAN (=None)
+^DEFAULT_PLAN (=None)
 ====================================
 
 Payment plans default. 
 
 Possibly deprecated in favor of model based plans.
 
-DJSTRIPE_INVOICE_FROM_EMAIL (="billing@example.com")
+^INVOICE_FROM_EMAIL (="billing@example.com")
 ======================================================
 
 Invoice emails come from this address.
 
-DJSTRIPE_PLANS (={})
+^PLANS (={})
 ===========================
 
 Payment plans. 
@@ -57,7 +58,7 @@ Example:
 
 .. _here: https://stripe.com/docs/api/python#create_plan
 
-DJSTRIPE_PLAN_HIERARCHY (={})
+^PLAN_HIERARCHY (={})
 ===========================
 
 Payment plans levels. 
@@ -131,7 +132,7 @@ Example:
         <h4>Downgrade</h4>
     {% endif %}
     
-DJSTRIPE_PRORATION_POLICY (=False)
+^PRORATION_POLICY (=False)
 ====================================
 
 By default, plans are not prorated in dj-stripe. Concretely, this is how this translates: 
@@ -142,21 +143,21 @@ By default, plans are not prorated in dj-stripe. Concretely, this is how this tr
 
 Assigning ``True`` to ``DJSTRIPE_PRORATION_POLICY`` reverses the functioning of item 2 (plan cancellation) by making a cancellation effective right away and refunding the unused balance to the customer, and affects the functioning of item 3 (plan change) by prorating the previous customer's plan towards their new plan's amount.
 
-DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES (=False)
+^PRORATION_POLICY_FOR_UPGRADES (=False)
 ======================================================
 
 By default, the plan change policy described in item 3 above holds also for plan upgrades.
 
 Assigning ``True`` to ``DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES`` allows dj-stripe to prorate plans in the specific case of an upgrade. Therefore, if a customer upgrades their plan, their new plan is effective right away, and they get billed for the new plan's amount minus the unused balance from their previous plan.
 
-DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS (=True)
+^SEND_INVOICE_RECEIPT_EMAILS (=True)
 =============================================
 
 By default dj-stripe sends emails for each receipt. You can turn this off by
 setting this value to ``False``.
 
 
-DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS (=())
+^SUBSCRIPTION_REQUIRED_EXCEPTION_URLS (=())
 ======================================================
 
 Used by ``djstripe.middleware.SubscriptionPaymentMiddleware``
@@ -189,7 +190,7 @@ Example:
         url(r'^accounts/', include('allauth.urls',  app_name="allauth")),
 
 
-DJSTRIPE_SUBSCRIBER_MODEL (=settings.AUTH_USER_MODEL)
+^SUBSCRIBER_MODEL (=settings.AUTH_USER_MODEL)
 ======================================================
 
 If the AUTH_USER_MODEL doesn't represent the object your application's subscription holder, you may define a subscriber model to use here. It should be a string in the form of 'app.model'.
@@ -213,12 +214,12 @@ Example Model:
             return self.owner.email
 
 
-DJSTRIPE_SUBSCRIBER_MODEL_MIGRATION_DEPENDENCY (="__first__")
+^SUBSCRIBER_MODEL_MIGRATION_DEPENDENCY (="__first__")
 =================================================================
 If the model referenced in DJSTRIPE_SUBSCRIBER_MODEL is not created in the ``__first__`` migration of an app you can specify the migration name to depend on here. For example: "0003_here_the_subscriber_model_was_added"
 
 
-DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK (=None)
+^SUBSCRIBER_MODEL_REQUEST_CALLBACK (=None)
 ======================================================
 
 If you choose to use a custom subscriber model, you'll need a way to pull it from ``request``. That's where this callback comes in.
@@ -256,7 +257,7 @@ Examples:
 
 .. note:: This callback only becomes active when ``DJSTRIPE_SUBSCRIBER_MODEL`` is set.
 
-DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK (=None)
+^TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK (=None)
 ======================================================
 
 Used by ``djstripe.models.Customer`` only when creating stripe customers.
@@ -286,14 +287,14 @@ Examples:
 .. note:: This setting was named ``DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK`` prior to version 0.4
 
 
-DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")
+^WEBHOOK_URL (=r"^webhook/$")
 =============================================
 
 This is where you can set *Stripe.com* to send webhook response. You can set this to what you want to prevent unnecessary hijinks from unfriendly people.
 
 As this is embedded in the URLConf, this must be a resolvable regular expression.
 
-DJSTRIPE_CURRENCIES (=(('usd', 'U.S. Dollars',), ('gbp', 'Pounds (GBP)',), ('eur', 'Euros',)))
+^CURRENCIES (=(('usd', 'U.S. Dollars',), ('gbp', 'Pounds (GBP)',), ('eur', 'Euros',)))
 ==============================================================================================
 
 A Field.choices list of allowed currencies for Plan models.
