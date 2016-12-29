@@ -141,6 +141,14 @@ class Charge(StripeCharge):  # noqa
             self.source = cls._stripe_object_to_source(target_cls=Card, data=data)
 
 
+def on_subscriber_delete_purge_customers(collector, field, sub_objs, using):
+    """ Ensure that all customers attached to subscriber are purged on deletion. """
+    for obj in sub_objs:
+        obj.purge()
+
+    SET_NULL(collector, field, sub_objs, using)
+
+
 @class_doc_inherit
 class Customer(StripeCustomer):
     """
@@ -158,7 +166,8 @@ class Customer(StripeCustomer):
 
     default_source = ForeignKey(StripeSource, null=True, related_name="customers", on_delete=SET_NULL)
 
-    subscriber = OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
+    subscriber = OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True,
+                               on_delete=on_subscriber_delete_purge_customers)
     date_purged = DateTimeField(null=True, editable=False)
 
     def str_parts(self):
@@ -940,6 +949,7 @@ class EventProcessingException(TimeStampedModel):
             pk=self.pk,
             event=self.event
         ))
+
 
 # Much like registering signal handlers. We import this module so that its registrations get picked up
 # the NO QA directive tells flake8 to not complain about the unused import

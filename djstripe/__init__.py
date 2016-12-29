@@ -12,10 +12,10 @@ __title__ = "dj-stripe"
 __summary__ = "Django + Stripe Made Easy"
 __uri__ = "https://github.com/kavdev/dj-stripe/"
 
-__version__ = "0.9.0.dev0"
+__version__ = "1.0.0.dev0"
 
 __author__ = "Alexander Kavanaugh"
-__email__ = "contact@kavdev.io"
+__email__ = "alex@kavdev.io"
 
 __license__ = "BSD"
 __license__ = "License :: OSI Approved :: BSD License"
