@@ -646,3 +646,9 @@ class TestCustomer(TestCase):
         items = invoice.invoiceitems.all()
         self.assertEquals(0, len(items))
         self.assertIsNotNone(invoice.plan)
+
+    @patch("stripe.Customer.retrieve")
+    def test_delete_subscriber_purges_customer(self, customer_retrieve_mock):
+        self.user.delete()
+        customer = Customer.objects.get(stripe_id=FAKE_CUSTOMER["id"])
+        self.assertIsNotNone(customer.date_purged)
