@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-.. module:: djstripe.stripe_objects
+.. module:: djstripe.stripe_objects.
+
    :synopsis: dj-stripe - Abstract model definitions to provide our view of Stripe's objects
 
 .. moduleauthor:: Bill Huneke (@wahuneke)
@@ -51,7 +52,13 @@ stripe.api_version = "2016-03-07"
 
 @python_2_unicode_compatible
 class StripeObject(TimeStampedModel):
-    # This must be defined in descendants of this model/mixin
+    """
+    The base class for all stripe objects.
+
+    Holds the core functionality when dealing with serialization and api calls.
+    """
+
+    # This must be defined in descendants of this model/mixin.
     # e.g. "Event", "Charge", "Customer", etc.
     stripe_api_name = None
     expand_fields = None
@@ -82,13 +89,19 @@ class StripeObject(TimeStampedModel):
     description = StripeTextField(blank=True, stripe_required=False, help_text="A description of this object.")
 
     class Meta:
+        """Meta class options.
+
+        To be inherited from djstripe models.
+        """
+
         abstract = True
 
     @classmethod
     def _api(cls):
         """
-        Get the api object for this type of stripe object (requires
-        stripe_api_name attribute to be set on model).
+        Get the api object for this type of stripe object.
+
+        Requires stripe_api_name attribute to be set on model.
         """
         if cls.stripe_api_name is None:
             raise NotImplementedError("StripeObject descendants are required to define "
@@ -103,7 +116,6 @@ class StripeObject(TimeStampedModel):
         :param api_key: The api key to use for this request. Defaults to settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
-
         # Run stripe.X.retreive(id)
         return type(self)._api().retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
 
@@ -119,7 +131,6 @@ class StripeObject(TimeStampedModel):
 
         :returns: an iterator over all items in the query
         """
-
         return cls._api().list(api_key=api_key, **kwargs).auto_paging_iter()
 
     @classmethod
@@ -130,22 +141,20 @@ class StripeObject(TimeStampedModel):
         :param api_key: The api key to use for this request. Defualts to settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
-
         return cls._api().create(api_key=api_key, **kwargs)
 
     def _api_delete(self, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
         """
-        Call the stripe API's delete operation for this model
+        Call the stripe API's delete operation for this model.
 
         :param api_key: The api key to use for this request. Defualts to settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
-
         return self.api_retrieve(api_key=api_key).delete(**kwargs)
 
     def str_parts(self):
         """
-        Extend this to add information to the string representation of the object
+        Extend this to add information to the string representation of the object.
 
         :rtype: list of str
         """
@@ -154,7 +163,8 @@ class StripeObject(TimeStampedModel):
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
         """
-        Gets called by this object's stripe object conversion method just before conversion.
+        Get called by this object's stripe object conversion method just before conversion.
+
         Use this to populate custom fields in a StripeObject from stripe data.
         """
         return data
@@ -162,9 +172,9 @@ class StripeObject(TimeStampedModel):
     @classmethod
     def _stripe_object_to_record(cls, data):
         """
-        This takes an object, as it is formatted in Stripe's current API for our object
-        type. In return, it provides a dict. The dict can be used to create a record or
-        to update a record
+        Return a dict based on an object formatted in Stripe's current API.
+
+        The dict can be used to create a record or to update a record.
 
         This function takes care of mapping from one field name to another, converting
         from cents to dollars, converting timestamps, and eliminating unused fields
@@ -175,7 +185,6 @@ class StripeObject(TimeStampedModel):
         :return: All the members from the input, translated, mutated, etc
         :rtype: dict
         """
-
         manipulated_data = cls._manipulate_stripe_object_hook(data)
 
         result = dict()
@@ -187,33 +196,34 @@ class StripeObject(TimeStampedModel):
 
     def _attach_objects_hook(self, cls, data):
         """
-        Gets called by this object's create and sync methods just before save.
+        Get called by this object's create and sync methods just before save.
+
         Use this to populate fields before the model is saved.
 
         :param cls: The target class for the instantiated object.
         :param data: The data dictionary received from the Stripe API.
         :type data: dict
         """
-
         pass
 
     def _attach_objects_post_save_hook(self, cls, data):
         """
-        Gets called by this object's create and sync methods just after save.
+        Get called by this object's create and sync methods just after save.
+
         Use this to populate fields after the model is saved.
 
         :param cls: The target class for the instantiated object.
         :param data: The data dictionary received from the Stripe API.
         :type data: dict
         """
-
         pass
 
     @classmethod
     def _create_from_stripe_object(cls, data, save=True):
         """
-        Instantiates a model instance using the provided data object received
-        from Stripe, and saves it to the database if specified.
+        Instantiate a model instance using the provided data object received from Stripe.
+
+        Save it to the database if specified.
 
         :param data: The data dictionary received from the Stripe API.
         :type data: dict
@@ -221,7 +231,6 @@ class StripeObject(TimeStampedModel):
         :type save: bool
         :returns: The instantiated object.
         """
-
         instance = cls(**cls._stripe_object_to_record(data))
         instance._attach_objects_hook(cls, data)
 
@@ -267,7 +276,6 @@ class StripeObject(TimeStampedModel):
         :param data: stripe object
         :type data: dict
         """
-
         if "customer" in data and data["customer"]:
             # We never want to create a customer that doesn't already exist in our database.
             try:
@@ -286,7 +294,6 @@ class StripeObject(TimeStampedModel):
         :param data: stripe object
         :type data: dict
         """
-
         if "transfer" in data and data["transfer"]:
             return target_cls._get_or_create_from_stripe_object(data, "transfer")[0]
 
@@ -294,6 +301,7 @@ class StripeObject(TimeStampedModel):
     def _stripe_object_to_source(cls, target_cls, data):
         """
         Search the given manager for the source matching this object's ``source`` field.
+
         Note that the source field is already expanded in each request, and that it is required.
 
         :param target_cls: The target class
@@ -301,13 +309,13 @@ class StripeObject(TimeStampedModel):
         :param data: stripe object
         :type data: dict
         """
-
         return target_cls._get_or_create_from_stripe_object(data["source"])[0]
 
     @classmethod
     def _stripe_object_to_invoice(cls, target_cls, data):
         """
         Search the given manager for the Invoice matching this StripeCharge object's ``invoice`` field.
+
         Note that the invoice field is required.
 
         :param target_cls: The target class
@@ -315,13 +323,12 @@ class StripeObject(TimeStampedModel):
         :param data: stripe object
         :type data: dict
         """
-
         return target_cls._get_or_create_from_stripe_object(data, "invoice")[0]
 
     @classmethod
     def _stripe_object_to_invoice_items(cls, target_cls, data, invoice):
         """
-        Retrieves InvoiceItems for an invoice.
+        Retrieve InvoiceItems for an invoice.
 
         If the invoice item doesn't exist already then it is created.
 
@@ -335,7 +342,6 @@ class StripeObject(TimeStampedModel):
         :param invoice: The invoice object that should hold the invoice items.
         :type invoice: ``djstripe.models.Invoice``
         """
-
         lines = data.get("lines")
         if not lines:
             return []
@@ -379,7 +385,6 @@ class StripeObject(TimeStampedModel):
         :param data: stripe object
         :type data: dict
         """
-
         if "subscription" in data and data["subscription"]:
             return target_cls._get_or_create_from_stripe_object(data, "subscription")[0]
 
@@ -390,12 +395,11 @@ class StripeObject(TimeStampedModel):
     @classmethod
     def sync_from_stripe_data(cls, data):
         """
-        Syncs this object from the stripe data provided.
+        Sync this object from the stripe data provided.
 
         :param data: stripe object
         :type data: dict
         """
-
         instance, created = cls._get_or_create_from_stripe_object(data)
 
         if not created:
@@ -407,10 +411,13 @@ class StripeObject(TimeStampedModel):
         return instance
 
     def __str__(self):
+        """Return string repr of StripeObject."""
         return smart_text("<{list}>".format(list=", ".join(self.str_parts())))
 
 
 class StripeSource(PolymorphicModel, StripeObject):
+    """Base class for payment sources eg. StripeCard."""
+
     customer = models.ForeignKey("Customer", related_name="sources")
 
 
@@ -420,27 +427,29 @@ class StripeSource(PolymorphicModel, StripeObject):
 
 class StripeCharge(StripeObject):
     """
-To charge a credit or a debit card, you create a charge object. You can
-retrieve and refund individual charges as well as list all charges. Charges
-are identified by a unique random ID. (Source: https://stripe.com/docs/api/python#charges)
+    A representation of a Stripe charge object.
 
-# = Mapping the values of this field isn't currently on our roadmap.
-    Please use the stripe dashboard to check the value of this field instead.
+    To charge a credit or a debit card, you create a charge object. You can
+    retrieve and refund individual charges as well as list all charges. Charges
+    are identified by a unique random ID. (Source: https://stripe.com/docs/api/python#charges)
 
-Fields not implemented:
+    # = Mapping the values of this field isn't currently on our roadmap.
+        Please use the stripe dashboard to check the value of this field instead.
 
-* **object** - Unnecessary. Just check the model name.
-* **application_fee** - #. Coming soon with stripe connect functionality
-* **balance_transaction** - #
-* **dispute** - #; Mapped to a ``disputed`` boolean.
-* **fraud_details** - Mapped to a ``fraudulent`` boolean.
-* **order** - #
-* **receipt_email** - Unnecessary. Use Customer.email. Create a feature request if this is functionality you need.
-* **receipt_number** - Unnecessary. Use the dashboard. Create a feature request if this is functionality you need.
-* **refunds** - #
-* **source_transfer** - #
+    Fields not implemented:
 
-.. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    * **object** - Unnecessary. Just check the model name.
+    * **application_fee** - #. Coming soon with stripe connect functionality
+    * **balance_transaction** - #
+    * **dispute** - #; Mapped to a ``disputed`` boolean.
+    * **fraud_details** - Mapped to a ``fraudulent`` boolean.
+    * **order** - #
+    * **receipt_email** - Unnecessary. Use Customer.email. Create a feature request if this is functionality you need.
+    * **receipt_number** - Unnecessary. Use the dashboard. Create a feature request if this is functionality you need.
+    * **refunds** - #
+    * **source_transfer** - #
+
+    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     STATUS_SUCCEEDED = "succeeded"
@@ -454,6 +463,11 @@ Fields not implemented:
     CARD_ERROR_CODE_CHOICES = [(error_code, error_code.replace("_", " ").title()) for error_code in CARD_ERROR_CODES]
 
     class Meta:
+        """Meta class options.
+
+        To be inherited from djstripe models.
+        """
+
         abstract = True
 
     stripe_api_name = "Charge"
@@ -519,6 +533,7 @@ Fields not implemented:
     fraudulent = StripeBooleanField(default=False, help_text="Whether or not this charge was marked as fraudulent.")
 
     def str_parts(self):
+        """Return a nice string repr of this data object."""
         return [
             "amount={amount}".format(amount=self.amount),
             "paid={paid}".format(paid=smart_text(self.paid)),
@@ -526,8 +541,9 @@ Fields not implemented:
 
     def _calculate_refund_amount(self, amount=None):
         """
+        Return the amount that can be refuned in CENTS as an int.
+
         :rtype: int
-        :return: amount that can be refunded, in CENTS
         """
         eligible_to_refund = self.amount - (self.amount_refunded or 0)
         if amount:
@@ -559,11 +575,12 @@ Fields not implemented:
 
     def capture(self):
         """
-        Capture the payment of an existing, uncaptured, charge. This is the second half of the two-step payment flow,
+        Capture the payment of an existing, uncaptured, charge.
+
+        This is the second half of the two-step payment flow,
         where first you created a charge with the capture option set to false.
         See https://stripe.com/docs/api#capture_charge
         """
-
         return self.api_retrieve().capture()
 
     @classmethod
@@ -576,7 +593,6 @@ Fields not implemented:
         :param data: stripe object
         :type data: dict
         """
-
         if "destination" in data and data["destination"]:
             return target_cls._get_or_create_from_stripe_object(data, "destination")[0]
 
@@ -594,22 +610,30 @@ Fields not implemented:
 
 class StripeCustomer(StripeObject):
     """
-Customer objects allow you to perform recurring charges and track multiple charges that are
-associated with the same customer. (Source: https://stripe.com/docs/api/python#customers)
+    Customer objects allow you to perform recurring charges.
 
-# = Mapping the values of this field isn't currently on our roadmap.
-    Please use the stripe dashboard to check the value of this field instead.
+    It also lets you track multiple charges that are associated with the same customer.
 
-Fields not implemented:
+    (Source: https://stripe.com/docs/api/python#customers)
 
-* **object** - Unnecessary. Just check the model name.
-* **discount** - #
-* **email** - Unnecessary. Use ``Customer.subscriber.email``.
+    # = Mapping the values of this field isn't currently on our roadmap.
+        Please use the stripe dashboard to check the value of this field instead.
 
-.. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    Fields not implemented:
+
+    * **object** - Unnecessary. Just check the model name.
+    * **discount** - #
+    * **email** - Unnecessary. Use ``Customer.subscriber.email``.
+
+    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
+        """Meta class options.
+
+        To be inherited from djstripe models.
+        """
+
         abstract = True
 
     stripe_api_name = "Customer"
@@ -645,6 +669,7 @@ Fields not implemented:
     def _stripe_object_default_source_to_source(cls, target_cls, data):
         """
         Search the given manager for the source matching this StripeCharge object's ``default_source`` field.
+
         Note that the source field is already expanded in each request, and that it is required.
 
         :param target_cls: The target class
@@ -652,12 +677,10 @@ Fields not implemented:
         :param data: stripe object
         :type data: dict
         """
-
         return target_cls._get_or_create_from_stripe_object(data["default_source"])[0]
 
     def purge(self):
         """Delete all identifying information we have in this record."""
-
         # Delete deprecated card details
         self.card_fingerprint = ""
         self.card_last_4 = ""
@@ -667,14 +690,14 @@ Fields not implemented:
 
     def subscribe(self, plan, application_fee_percent=None, coupon=None, quantity=None, metadata=None,
                   tax_percent=None, trial_end=None):
-        """
-        Subscribes this customer to a plan.
+        r"""
+        Subscribe this customer to a plan.
 
         Parameters not implemented:
 
-        * **source** - Subscriptions use the customer's default source. Including the source parameter creates \
-                  a new source for this customer and overrides the default source. This functionality is not \
-                  desired; add a source to the customer before attempting to add a subscription. \
+        * **source** - Subscriptions use the customer's default source. Including the source parameter creates
+                  a new source for this customer and overrides the default source. This functionality is not
+                  desired; add a source to the customer before attempting to add a subscription.
 
 
         :param plan: The plan to which to subscribe the customer.
@@ -710,7 +733,6 @@ Fields not implemented:
         .. if you're using ``StripeCustomer.subscribe()`` instead of ``Customer.subscribe()``, ``plan`` \
         can only be a string
         """
-
         stripe_subscription = StripeSubscription._api_create(
             plan=plan,
             customer=self.stripe_id,
@@ -727,7 +749,7 @@ Fields not implemented:
     def charge(self, amount, currency, application_fee=None, capture=None, description=None, destination=None,
                metadata=None, shipping=None, source=None, statement_descriptor=None):
         """
-        Creates a charge for this customer.
+        Create a charge for this customer.
 
         Parameters not implemented:
 
@@ -766,7 +788,6 @@ Fields not implemented:
         .. Notes:
         .. ``send_receipt`` is only available on ``Customer.charge()``
         """
-
         if not isinstance(amount, decimal.Decimal):
             raise ValueError("You must supply a decimal value representing dollars.")
 
@@ -792,8 +813,9 @@ Fields not implemented:
 
     def add_invoice_item(self, amount, currency, description=None, discountable=None, invoice=None,
                          metadata=None, subscription=None):
-        """
-        Adds an arbitrary charge or credit to the customer's upcoming invoice.
+        r"""
+        Add an arbitrary charge or credit to the customer's upcoming invoice.
+
         Different than creating a charge. Charges are separate bills that get
         processed immediately. Invoice items are appended to the customer's next
         invoice. This is extremely useful when adding surcharges to subscriptions.
@@ -825,7 +847,6 @@ Fields not implemented:
         .. if you're using ``StripeCustomer.add_invoice_item()`` instead of ``Customer.add_invoice_item()``, \
         ``invoice`` and ``subscriptions`` can only be strings
         """
-
         if not isinstance(amount, decimal.Decimal):
             raise ValueError("You must supply a decimal value representing dollars.")
 
@@ -844,7 +865,7 @@ Fields not implemented:
 
     def add_card(self, source, set_default=True):
         """
-        Adds a card to this customer's account.
+        Add a card to this customer's account.
 
         :param source: Either a token, like the ones returned by our Stripe.js, or a dictionary containing a
                        user's credit card details. Stripe will automatically validate the card.
@@ -853,7 +874,6 @@ Fields not implemented:
         :type set_default: boolean
 
         """
-
         stripe_customer = self.api_retrieve()
         stripe_card = stripe_customer.sources.create(source=source)
 
@@ -865,40 +885,52 @@ Fields not implemented:
 
 
 class StripeEvent(StripeObject):
-    """
-Events are POSTed to our webhook url. They provide information about a Stripe event that just happened. Events
-are processed in detail by their respective models (charge events by the Charge model, etc).
+    r"""
+    A model which represents a Stripe Event object.
 
-Events are initially **UNTRUSTED**, as it is possible for any web entity to post any data to our webhook url. Data
-posted may be valid Stripe information, garbage, or even malicious. The 'valid' flag in this model monitors this.
+    Events are POSTed to our webhook url. They provide information about a Stripe event that just happened. Events
+    are processed in detail by their respective models (charge events by the Charge model, etc).
 
-**API VERSIONING**
+    Events are initially **UNTRUSTED**, as it is possible for any web entity to post any data to our webhook url. Data
+    posted may be valid Stripe information, garbage, or even malicious. The 'valid' flag in this model monitors this.
 
-This is a tricky matter when it comes to webhooks. See the discussion here_.
+    **API VERSIONING**
 
-.. _here: https://groups.google.com/a/lists.stripe.com/forum/#!topic/api-discuss/h5Y6gzNBZp8
+    This is a tricky matter when it comes to webhooks. See the discussion here_.
 
-In this discussion, it is noted that Webhooks are produced in one API version, which will usually be
-different from the version supported by Stripe plugins (such as djstripe). The solution, described there,
-is:
+    .. _here: https://groups.google.com/a/lists.stripe.com/forum/#!topic/api-discuss/h5Y6gzNBZp8
 
-    1) validate the receipt of a webhook event by doing an event get using the API version of the received hook event.
-    2) retrieve the referenced object (e.g. the Charge, the Customer, etc) using the plugin's supported API version.
-    3) process that event using the retrieved object which will, only now, be in a format that you are certain to \
-    understand
+        1) validate the receipt of a webhook event by doing an event get using
+        the API version of the received hook event.
+        2) retrieve the referenced object (e.g. the Charge, the Customer, etc) using
+        the plugin's supported API version.
+        3) process that event using the retrieved object which will, only now, be in a format that you are certain to \
+        understand
 
-# = Mapping the values of this field isn't currently on our roadmap.
-    Please use the stripe dashboard to check the value of this field instead.
+        1) validate the receipt of a webhook event by doing an event get using
+        the API version of the received hook event.
+        2) retrieve the referenced object (e.g. the Charge, the Customer, etc) using the
+        plugin's supported API version.
+        3) process that event using the retrieved object which will, only now, be in a format that you are certain
+        to understand.
 
-Fields not implemented:
+    # = Mapping the values of this field isn't currently on our roadmap.
+        Please use the stripe dashboard to check the value of this field instead.
 
-* **object** - Unnecessary. Just check the model name.
-* **pending_webhooks** - Unnecessary. Use the dashboard.
+    Fields not implemented:
 
-.. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    * **object** - Unnecessary. Just check the model name.
+    * **pending_webhooks** - Unnecessary. Use the dashboard.
+
+    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
+        """Meta class options.
+
+        To be inherited from djstripe models.
+        """
+
         abstract = True
 
     stripe_api_name = "Event"
@@ -924,12 +956,13 @@ Fields not implemented:
     )
 
     def str_parts(self):
+        """Return a nice string repr of this data object."""
         return [
             "type={type}".format(type=self.type),
         ] + super(StripeEvent, self).str_parts()
 
-    def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
-        # OVERRIDING the parent version of this function
+    def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):  # noqa: D102
+        # OVERRIDING the parent version of this function.
         # Event retrieve is special. For Event we don't retrieve using djstripe's API version. We always retrieve
         # using the API version that was used to send the Event (which depends on the Stripe account holders settings
         with stripe_temporary_api_version(self.received_api_version):
@@ -940,26 +973,33 @@ Fields not implemented:
 
 class StripeTransfer(StripeObject):
     """
-When Stripe sends you money or you initiate a transfer to a bank account, debit card, or
-connected Stripe account, a transfer object will be created.
-(Source: https://stripe.com/docs/api/python#transfers)
+    A model which represents a Stripe Transfer object.
 
-# = Mapping the values of this field isn't currently on our roadmap.
-    Please use the stripe dashboard to check the value of this field instead.
+    When Stripe sends you money or you initiate a transfer to a bank account, debit card, or
+    connected Stripe account, a transfer object will be created.
+    (Source: https://stripe.com/docs/api/python#transfers)
 
-Fields not implemented:
+    # = Mapping the values of this field isn't currently on our roadmap.
+        Please use the stripe dashboard to check the value of this field instead.
 
-* **object** - Unnecessary. Just check the model name.
-* **application_fee** - #
-* **balance_transaction** - #
-* **reversals** - #
+    Fields not implemented:
 
-.. TODO: Link destination to Card, Account, or Bank Account Models
+    * **object** - Unnecessary. Just check the model name.
+    * **application_fee** - #
+    * **balance_transaction** - #
+    * **reversals** - #
 
-.. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    .. TODO: Link destination to Card, Account, or Bank Account Models
+
+    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
+        """Meta class options.
+
+        To be inherited from djstripe models.
+        """
+
         abstract = True
 
     stripe_api_name = "Transfer"
@@ -1074,6 +1114,7 @@ Fields not implemented:
     validation_fees = StripeCurrencyField(deprecated=True)
 
     def str_parts(self):
+        """Return a nice string repr of this data object."""
         return [
             "amount={amount}".format(amount=self.amount),
             "status={status}".format(status=self.status),
@@ -1085,8 +1126,14 @@ Fields not implemented:
 # ============================================================================ #
 
 class StripeAccount(StripeObject):
+    """Documentation coming soon."""
 
     class Meta:
+        """Meta class options.
+
+        To be inherited from djstripe models.
+        """
+
         abstract = True
 
     stripe_api_name = "Account"
@@ -1095,12 +1142,14 @@ class StripeAccount(StripeObject):
 
     @classmethod
     def get_connected_account_from_token(cls, access_token):
+        """Return a StripeAccount object from access_token."""
         account_data = cls._api().retrieve(api_key=access_token)
 
         return cls._get_or_create_from_stripe_object(account_data)[0]
 
     @classmethod
     def get_default_account(cls):
+        """Return the default StripeAccount from Stripe api."""
         account_data = cls._api().retrieve(api_key=settings.STRIPE_SECRET_KEY)
 
         return cls._get_or_create_from_stripe_object(account_data)[0]
@@ -1112,21 +1161,24 @@ class StripeAccount(StripeObject):
 
 class StripeCard(StripeSource):
     """
-You can store multiple cards on a customer in order to charge the customer later.
-(Source: https://stripe.com/docs/api/python#cards)
+    A model which represents a Stripe Card object.
 
-# = Mapping the values of this field isn't currently on our roadmap.
-    Please use the stripe dashboard to check the value of this field instead.
+    You can store multiple cards on a customer in order to charge the customer later.
 
-Fields not implemented:
+    (Source: https://stripe.com/docs/api/python#cards)
 
-* **object** -  Unnecessary. Just check the model name.
-* **recipient** -  On Stripe's deprecation path.
-* **account** -  #
-* **currency** -  #
-* **default_for_currency** -  #
+    # = Mapping the values of this field isn't currently on our roadmap.
+        Please use the stripe dashboard to check the value of this field instead.
 
-.. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    Fields not implemented:
+
+    * **object** -  Unnecessary. Just check the model name.
+    * **recipient** -  On Stripe's deprecation path.
+    * **account** -  #
+    * **currency** -  #
+    * **default_for_currency** -  #
+
+    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     BRANDS = ["Visa", "American Express", "MasterCard", "Discover", "JCB", "Diners Club", "Unknown"]
@@ -1147,6 +1199,11 @@ Fields not implemented:
     ]
 
     class Meta:
+        """Meta class options.
+
+        To be inherited from djstripe models.
+        """
+
         abstract = True
 
     stripe_api_name = "Card"
@@ -1195,12 +1252,11 @@ Fields not implemented:
         help_text="If the card number is tokenized, this is the method that was used."
     )
 
-    def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
+    def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):  # noqa: D102
         # OVERRIDING the parent version of this function
         # Cards must be manipulated through a customer or account.
         # TODO: When managed accounts are supported, this method needs to check if either a customer or
         #       account is supplied to determine the correct object to use.
-
         return self.customer.api_retrieve(api_key=api_key).sources.retrieve(self.stripe_id, expand=self.expand_fields)
 
     @staticmethod
@@ -1220,23 +1276,22 @@ Fields not implemented:
         # Cards must be manipulated through a customer or account.
         # TODO: When managed accounts are supported, this method needs to check if either a customer or
         #       account is supplied to determine the correct object to use.
-
         customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
 
         return customer.api_retrieve().sources.create(api_key=api_key, **clean_kwargs)
 
     @classmethod
-    def api_list(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
+    def api_list(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):  # noqa: D102
         # OVERRIDING the parent version of this function
         # Cards must be manipulated through a customer or account.
         # TODO: When managed accounts are supported, this method needs to check if either a customer or
         #       account is supplied to determine the correct object to use.
-
         customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
 
         return customer.api_retrieve().sources.list(api_key=api_key, object="card", **clean_kwargs).auto_paging_iter()
 
     def str_parts(self):
+        """Return a nice string repr of this data object."""
         return [
             "brand={brand}".format(brand=self.brand),
             "last4={last4}".format(last4=self.last4),
@@ -1262,9 +1317,10 @@ Fields not implemented:
     @classmethod
     def create_token(cls, number, exp_month, exp_year, cvc, **kwargs):
         """
-        Creates a single use token that wraps the details of a credit card. This token can be used in
-        place of a credit card dictionary with any API method. These tokens can only be used once: by
-        creating a new charge object, or attaching them to a customer.
+        Create a single use token that wraps the details of a credit card.
+
+        This token can be used in place of a credit card dictionary with any API method.
+        These tokens can only be used once: by creating a new charge object, or attaching them to a customer.
         (Source: https://stripe.com/docs/api/python#create_card_token)
 
         :param exp_month: The card's expiration month.
@@ -1276,7 +1332,6 @@ Fields not implemented:
         :param cvc: Card security code.
         :type cvc: string
         """
-
         card = {
             "number": number,
             "exp_month": exp_month,
@@ -1294,36 +1349,43 @@ Fields not implemented:
 
 class StripeInvoice(StripeObject):
     """
-Invoices are statements of what a customer owes for a particular billing period, including subscriptions,
-invoice items, and any automatic proration adjustments if necessary.
+    A Representation of a Stripe Invoice object.
 
-Once an invoice is created, payment is automatically attempted. Note that the payment, while automatic,
-does not happen exactly at the time of invoice creation. If you have configured webhooks, the invoice
-will wait until one hour after the last webhook is successfully sent (or the last webhook times out after failing).
+    Invoices are statements of what a customer owes for a particular billing period, including subscriptions,
+    invoice items, and any automatic proration adjustments if necessary.
 
-Any customer credit on the account is applied before determining how much is due for that invoice (the amount that
-will be actually charged). If the amount due for the invoice is less than 50 cents (the minimum for a charge), we
-add the amount to the customer's running account balance to be added to the next invoice. If this amount is negative,
-it will act as a credit to offset the next invoice. Note that the customer account balance does not include unpaid
-invoices; it only includes balances that need to be taken into account when calculating the amount due for the next
-invoice.
-(Source: https://stripe.com/docs/api/python#invoices)
+    Once an invoice is created, payment is automatically attempted. Note that the payment, while automatic,
+    does not happen exactly at the time of invoice creation. If you have configured webhooks, the invoice
+    will wait until one hour after the last webhook is successfully sent (or the last webhook times out after failing).
 
-# = Mapping the values of this field isn't currently on our roadmap.
-    Please use the stripe dashboard to check the value of this field instead.
+    Any customer credit on the account is applied before determining how much is due for that invoice (the amount that
+    will be actually charged). If the amount due for the invoice is less than 50 cents (the minimum for a charge), we
+    add the amount to the customer's running account balance to be added to the next invoice.
+    If this amount is negative, it will act as a credit to offset the next invoice. Note that the
+    customer account balance does not include unpaid invoices;
+    it only includes balances that need to be taken into account when calculating the amount due for the next invoice.
+    (Source: https://stripe.com/docs/api/python#invoices)
 
-Fields not implemented:
+    # = Mapping the values of this field isn't currently on our roadmap.
+        Please use the stripe dashboard to check the value of this field instead.
 
-* **object** - Unnecessary. Just check the model name.
-* **discount** - #
-* **lines** - Unnecessary. Check Subscription and InvoiceItems directly.
-* **receipt_number** - Unnecessary. Use the dashboard. Create a feature request if this is functionality you need.
-* **webhooks_delivered_at** - Unnecessary. Create a feature request if this is functionality you need.
+    Fields not implemented:
 
-.. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    * **object** - Unnecessary. Just check the model name.
+    * **discount** - #
+    * **lines** - Unnecessary. Check Subscription and InvoiceItems directly.
+    * **receipt_number** - Unnecessary. Use the dashboard. Create a feature request if this is functionality you need.
+    * **webhooks_delivered_at** - Unnecessary. Create a feature request if this is functionality you need.
+
+    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
+        """Meta class options.
+
+        To be inherited from djstripe models.
+        """
+
         abstract = True
 
     stripe_api_name = "Invoice"
@@ -1417,6 +1479,7 @@ Fields not implemented:
     total = StripeCurrencyField("Total after discount.")
 
     def str_parts(self):
+        """Return a nice string repr of this data object."""
         return [
             "amount_due={amount_due}".format(amount_due=self.amount_due),
             "date={date}".format(date=self.date),
@@ -1433,7 +1496,6 @@ Fields not implemented:
         :param data: stripe object
         :type data: dict
         """
-
         if "charge" in data and data["charge"]:
             return target_cls._get_or_create_from_stripe_object(data, "charge")[0]
 
@@ -1441,8 +1503,8 @@ Fields not implemented:
     def upcoming(cls, api_key=settings.STRIPE_SECRET_KEY, customer=None, coupon=None, subscription=None,
                  subscription_plan=None, subscription_prorate=None, subscription_proration_date=None,
                  subscription_quantity=None, subscription_trial_end=None, **kwargs):
-        """
-        Gets the upcoming preview invoice (singular) for a customer.
+        r"""
+        Get the upcoming preview invoice (singular) for a customer.
 
         At any time, you can preview the upcoming
         invoice for a customer. This will show you all the charges that are
@@ -1452,7 +1514,7 @@ Fields not implemented:
 
         .. important:: Note that when you are viewing an upcoming invoice, you are simply viewing a preview.
 
-        :param customer: The identifier of the customer whose upcoming invoice \
+        :param customer: The identifier of the customer whose upcoming invoice
         you'd like to retrieve.
         :type customer: Customer or string (customer ID)
         :param coupon: The code of the coupon to apply.
@@ -1464,8 +1526,8 @@ Fields not implemented:
         updating the subscription given to this plan, or creating a new \
         subscription to this plan if no subscription is given.
         :type subscription_plan: Plan or string (plan ID)
-        :param subscription_prorate: If previewing an update to a subscription, \
-        this decides whether the preview will show the result of applying \
+        :param subscription_prorate: If previewing an update to a subscription,
+        this decides whether the preview will show the result of applying
         prorations or not.
         :type subscription_prorate: bool
         :param subscription_proration_date: If previewing an update to a \
@@ -1482,7 +1544,6 @@ Fields not implemented:
         :returns: The upcoming preview invoice.
         :rtype: UpcomingInvoice
         """
-
         try:
             upcoming_stripe_invoice = cls._api().upcoming(
                 api_key=api_key, customer=customer,
@@ -1503,8 +1564,7 @@ Fields not implemented:
         return upcoming_stripe_invoice
 
     def retry(self):
-        """ Retry payment on this invoice if it isn't paid, closed, or forgiven."""
-
+        """Retry payment on this invoice if it isn't paid, closed, or forgiven."""
         if not self.paid and not self.forgiven and not self.closed:
             stripe_invoice = self.api_retrieve()
             updated_stripe_invoice = stripe_invoice.pay()  # pay() throws an exception if the charge is not successful.
@@ -1519,10 +1579,12 @@ Fields not implemented:
 
     @property
     def status(self):
-        """ Attempts to label this invoice with a status. Note that an invoice can be more than one of the choices.
-            We just set a priority on which status appears.
         """
+        Attempt to label this invoice with a status.
 
+        Note that an invoice can be more than one of the choices.
+        We just set a priority on which status appears.
+        """
         if self.paid:
             return self.STATUS_PAID
         if self.forgiven:
@@ -1534,22 +1596,29 @@ Fields not implemented:
 
 class StripeInvoiceItem(StripeObject):
     """
-Sometimes you want to add a charge or credit to a customer but only actually charge the customer's
-card at the end of a regular billing cycle. This is useful for combining several charges to
-minimize per-transaction fees or having Stripe tabulate your usage-based billing totals.
-(Source: https://stripe.com/docs/api/python#invoiceitems)
+    Representation of a Stripe InvoiceItem object.
 
-# = Mapping the values of this field isn't currently on our roadmap.
-    Please use the stripe dashboard to check the value of this field instead.
+    Sometimes you want to add a charge or credit to a customer but only actually charge the customer's
+    card at the end of a regular billing cycle. This is useful for combining several charges to
+    minimize per-transaction fees or having Stripe tabulate your usage-based billing totals.
+    (Source: https://stripe.com/docs/api/python#invoiceitems)
 
-Fields not implemented:
+    # = Mapping the values of this field isn't currently on our roadmap.
+        Please use the stripe dashboard to check the value of this field instead.
 
-* **object** - Unnecessary. Just check the model name.
+    Fields not implemented:
 
-.. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    * **object** - Unnecessary. Just check the model name.
+
+    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
+        """Meta class options.
+
+        To be inherited from djstripe models.
+        """
+
         abstract = True
 
     stripe_api_name = "InvoiceItem"
@@ -1581,6 +1650,7 @@ Fields not implemented:
     )
 
     def str_parts(self):
+        """Return a nice string repr of this data object."""
         return [
             "amount={amount}".format(amount=self.amount),
             "date={date}".format(date=self.date),
@@ -1597,27 +1667,33 @@ Fields not implemented:
         :type data: dict
 
         """
-
         if "plan" in data and data["plan"]:
             return target_cls._get_or_create_from_stripe_object(data, "plan")[0]
 
 
 class StripePlan(StripeObject):
     """
-A subscription plan contains the pricing information for different products and feature levels on your site.
-(Source: https://stripe.com/docs/api/python#plans)
+    Representation of a Stripe Plan object.
 
-# = Mapping the values of this field isn't currently on our roadmap.
-    Please use the stripe dashboard to check the value of this field instead.
+    A subscription plan contains the pricing information for different products and feature levels on your site.
+    (Source: https://stripe.com/docs/api/python#plans)
 
-Fields not implemented:
+    # = Mapping the values of this field isn't currently on our roadmap.
+        Please use the stripe dashboard to check the value of this field instead.
 
-* **object** - Unnecessary. Just check the model name.
+    Fields not implemented:
 
-.. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    * **object** - Unnecessary. Just check the model name.
+
+    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
+        """Meta class options.
+
+        To be inherited from djstripe models.
+        """
+
         abstract = True
 
     stripe_api_name = "Plan"
@@ -1652,6 +1728,7 @@ Fields not implemented:
     )
 
     def str_parts(self):
+        """Return a nice string repr of this data object."""
         return [
             "name={name}".format(name=self.name),
         ] + super(StripePlan, self).str_parts()
@@ -1659,30 +1736,37 @@ Fields not implemented:
 
 class StripeSubscription(StripeObject):
     """
-Subscriptions allow you to charge a customer's card on a recurring basis. A subscription ties a
-customer to a particular plan you've created.
+    Representation of a Stripe Subscription object.
 
-A subscription still in its trial period is ``trialing`` and moves to ``active`` when the trial period is over.
-When payment to renew the subscription fails, the subscription becomes ``past_due``. After Stripe has exhausted
-all payment retry attempts, the subscription ends up with a status of either ``canceled`` or ``unpaid`` depending
-on your retry settings. Note that when a subscription has a status of ``unpaid``, no subsequent invoices will be
-attempted (invoices will be created, but then immediately automatically closed. Additionally, updating customer
-card details will not lead to Stripe retrying the latest invoice.). After receiving updated card details from a
-customer, you may choose to reopen and pay their closed invoices.
-(Source: https://stripe.com/docs/api/python#subscriptions)
+    Subscriptions allow you to charge a customer's card on a recurring basis. A subscription ties a
+    customer to a particular plan you've created.
 
-# = Mapping the values of this field isn't currently on our roadmap.
-    Please use the stripe dashboard to check the value of this field instead.
+    A subscription still in its trial period is ``trialing`` and moves to ``active`` when the trial period is over.
+    When payment to renew the subscription fails, the subscription becomes ``past_due``. After Stripe has exhausted
+    all payment retry attempts, the subscription ends up with a status of either ``canceled`` or ``unpaid`` depending
+    on your retry settings. Note that when a subscription has a status of ``unpaid``, no subsequent invoices will be
+    attempted (invoices will be created, but then immediately automatically closed. Additionally, updating customer
+    card details will not lead to Stripe retrying the latest invoice.). After receiving updated card details from a
+    customer, you may choose to reopen and pay their closed invoices.
+    (Source: https://stripe.com/docs/api/python#subscriptions)
 
-Fields not implemented:
+    # = Mapping the values of this field isn't currently on our roadmap.
+        Please use the stripe dashboard to check the value of this field instead.
 
-* **object** - Unnecessary. Just check the model name.
-* **discount** - #
+    Fields not implemented:
 
-.. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    * **object** - Unnecessary. Just check the model name.
+    * **discount** - #
+
+    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
     class Meta:
+        """Meta class options.
+
+        To be inherited from djstripe models.
+        """
+
         abstract = True
 
     stripe_api_name = "Subscription"
@@ -1743,6 +1827,7 @@ Fields not implemented:
     )
 
     def str_parts(self):
+        """Return a nice string repr of this data object."""
         return [
             "current_period_start={current_period_start}".format(current_period_start=self.current_period_start),
             "current_period_end={current_period_end}".format(current_period_end=self.current_period_end),
@@ -1754,6 +1839,7 @@ Fields not implemented:
     def _stripe_object_to_plan(cls, target_cls, data):
         """
         Search the given manager for the Plan matching this StripeCharge object's ``plan`` field.
+
         Note that the plan field is already expanded in each request and is required.
 
         :param target_cls: The target class
@@ -1762,13 +1848,14 @@ Fields not implemented:
         :type data: dict
 
         """
-
         return target_cls._get_or_create_from_stripe_object(data["plan"])[0]
 
     def update(self, plan=None, application_fee_percent=None, coupon=None, prorate=None, proration_date=None,
                metadata=None, quantity=None, tax_percent=None, trial_end=None):
-        """
-        See `Customer.subscribe() <#djstripe.models.Customer.subscribe>`__
+        r"""
+        Update the Subscription object.
+
+        For example usage, see `Customer.subscribe() <#djstripe.models.Customer.subscribe>`__
 
         :param plan: The plan to which to subscribe the customer.
         :type plan: Plan or string (plan ID)
@@ -1790,7 +1877,6 @@ Fields not implemented:
         .. if you're using ``StripeSubscription.update()`` instead of ``Subscription.update()``, ``plan`` can only \
         be a string
         """
-
         kwargs = deepcopy(locals())
         del kwargs["self"]
 
@@ -1804,13 +1890,12 @@ Fields not implemented:
 
     def extend(self, delta):
         """
-        Extends this subscription by the provided delta.
+        Extend this subscription by the provided delta.
 
         :param delta: The timedelta by which to extend this subscription.
         :type delta: timedelta
 
         """
-
         if delta.total_seconds() < 0:
             raise ValueError("delta must be a positive timedelta.")
 
@@ -1827,7 +1912,9 @@ Fields not implemented:
 
     def cancel(self, at_period_end=None):
         """
-        Cancels this subscription. If you set the at_period_end parameter to true, the subscription will remain active
+        Cancel this subscription.
+
+        If you set the at_period_end parameter to true, the subscription will remain active
         until the end of the period, at which point it will be canceled and not renewed. By default, the subscription
         is terminated immediately. In either case, the customer will not be charged again for the subscription. Note,
         however, that any pending invoice items that you've created will still be charged for at the end of the period
@@ -1845,9 +1932,8 @@ Fields not implemented:
                               of the current period. Default is False.
         :type at_period_end: boolean
 
-        .. important:: If a subscription is cancelled during a trial period, the ``at_period_end`` flag will be \
+        .. important:: If a subscription is cancelled during a trial period, the ``at_period_end`` flag will be
         overridden to False so that the trial ends immediately and the customer's card isn't charged.
 
         """
-
         return self._api_delete(at_period_end=at_period_end)
