@@ -6,12 +6,12 @@ Django + Stripe Made Easy
 Badges
 ------
 
-.. image:: https://img.shields.io/travis/kavdev/dj-stripe/master.svg?style=flat-square
+.. image:: https://img.shields.io/travis/kavdev/dj-stripe/1.0.0.svg?style=flat-square
         :target: https://travis-ci.org/kavdev/dj-stripe
-.. image:: https://img.shields.io/codecov/c/github/kavdev/dj-stripe/master.svg?style=flat-square
-        :target: http://codecov.io/github/kavdev/dj-stripe?branch=master
+.. image:: https://img.shields.io/codecov/c/github/kavdev/dj-stripe/1.0.0.svg?style=flat-square
+        :target: http://codecov.io/github/kavdev/dj-stripe?branch=1.0.0
 .. image:: https://img.shields.io/requires/github/kavdev/dj-stripe.svg?style=flat-square
-        :target: https://requires.io/github/kavdev/dj-stripe/requirements/?branch=master
+        :target: https://requires.io/github/kavdev/dj-stripe/requirements/?branch=1.0.0
 .. image:: https://img.shields.io/codacy/3c99e13eda1c4dea9f993b362e4ea816.svg?style=flat-square
         :target: https://www.codacy.com/app/kavanaugh-development/dj-stripe/dashboard
 
