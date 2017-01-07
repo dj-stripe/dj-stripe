@@ -68,7 +68,7 @@ class Charge(StripeCharge):
     )
     transfer = ForeignKey(
         "Transfer",
-        null=True, on_delete=models.CASCADE,
+        null=True, on_delete=models.CASCADE, blank=True,
         help_text="The transfer to the destination account (only applicable if the charge was created using the "
         "destination parameter)."
     )
@@ -423,7 +423,7 @@ class Event(StripeEvent):
 
     customer = ForeignKey(
         "Customer",
-        null=True, on_delete=models.CASCADE,
+        null=True,
         help_text="In the event that there is a related customer, this will point to that Customer record"
     )
     valid = NullBooleanField(
@@ -606,13 +606,13 @@ class Invoice(StripeInvoice):
     )
     charge = OneToOneField(
         Charge,
-        null=True, on_delete=models.CASCADE,
+        null=True,
         related_name="invoice",
         help_text="The latest charge generated for this invoice, if any."
     )
     subscription = ForeignKey(
         "Subscription",
-        null=True,
+        null=True, blank=True,
         related_name="invoices",
         on_delete=SET_NULL,
         help_text="The subscription that this invoice was prepared for, if any."
@@ -911,10 +911,10 @@ class Subscription(StripeSubscription):
 
 @python_2_unicode_compatible
 class EventProcessingException(TimeStampedModel):
-    event = ForeignKey("Event", on_delete=models.CASCADE, null=True)
+    event = ForeignKey("Event", null=True)
     data = TextField()
     message = CharField(max_length=500)
-    traceback = TextField()
+    traceback = TextField(blank=True)
 
     @classmethod
     def log(cls, data, exception, event):
