@@ -18,6 +18,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
+from django.db import models
 from django.db.models.fields.related import ForeignKey, OneToOneField
 from django.db.models.deletion import SET_NULL
 from django.db.models.fields import BooleanField, DateTimeField, NullBooleanField, TextField, CharField
@@ -55,19 +56,19 @@ class Charge(StripeCharge):
     __doc__ = getattr(StripeCharge, "__doc__")
 
     account = ForeignKey(
-        "Account", null=True,
+        "Account", on_delete=models.CASCADE, null=True,
         related_name="charges",
         help_text="The account the charge was made on behalf of. Null here indicates that this value was never set."
     )
 
     customer = ForeignKey(
-        "Customer",
+        "Customer", on_delete=models.CASCADE,
         related_name="charges",
         help_text="The customer associated with this charge."
     )
     transfer = ForeignKey(
         "Transfer",
-        null=True,
+        null=True, on_delete=models.CASCADE,
         help_text="The transfer to the destination account (only applicable if the charge was created using the "
         "destination parameter)."
     )
@@ -422,7 +423,7 @@ class Event(StripeEvent):
 
     customer = ForeignKey(
         "Customer",
-        null=True,
+        null=True, on_delete=models.CASCADE,
         help_text="In the event that there is a related customer, this will point to that Customer record"
     )
     valid = NullBooleanField(
@@ -599,13 +600,13 @@ class Invoice(StripeInvoice):
 
     # account = ForeignKey("Account", related_name="invoices")
     customer = ForeignKey(
-        Customer,
+        Customer, on_delete=models.CASCADE,
         related_name="invoices",
         help_text="The customer associated with this invoice."
     )
     charge = OneToOneField(
         Charge,
-        null=True,
+        null=True, on_delete=models.CASCADE,
         related_name="invoice",
         help_text="The latest charge generated for this invoice, if any."
     )
@@ -731,12 +732,12 @@ class InvoiceItem(StripeInvoiceItem):
 
     # account = ForeignKey(Account, related_name="invoiceitems")
     customer = ForeignKey(
-        Customer,
+        Customer, on_delete=models.CASCADE,
         related_name="invoiceitems",
         help_text="The customer associated with this invoiceitem."
     )
     invoice = ForeignKey(
-        Invoice,
+        Invoice, on_delete=models.CASCADE,
         null=True,
         related_name="invoiceitems",
         help_text="The invoice to which this invoiceitem is attached."
@@ -833,12 +834,12 @@ class Subscription(StripeSubscription):
 
     # account = ForeignKey("Account", related_name="subscriptions")
     customer = ForeignKey(
-        "Customer",
+        "Customer", on_delete=models.CASCADE,
         related_name="subscriptions",
         help_text="The customer associated with this subscription."
     )
     plan = ForeignKey(
-        "Plan",
+        "Plan", on_delete=models.CASCADE,
         related_name="subscriptions",
         help_text="The plan associated with this subscription."
     )
@@ -910,7 +911,7 @@ class Subscription(StripeSubscription):
 
 @python_2_unicode_compatible
 class EventProcessingException(TimeStampedModel):
-    event = ForeignKey("Event", null=True)
+    event = ForeignKey("Event", on_delete=models.CASCADE, null=True)
     data = TextField()
     message = CharField(max_length=500)
     traceback = TextField()

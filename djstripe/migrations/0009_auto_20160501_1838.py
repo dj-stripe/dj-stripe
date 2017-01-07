@@ -5,6 +5,7 @@ import datetime
 
 import django.core.validators
 from django.db import migrations, models
+import django.db.models.deletion
 import django.utils.timezone
 import model_utils.fields
 
@@ -74,7 +75,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Card',
             fields=[
-                ('stripesource_ptr', models.OneToOneField(serialize=False, parent_link=True, primary_key=True,
+                ('stripesource_ptr', models.OneToOneField(serialize=False, parent_link=True, primary_key=True, on_delete=django.db.models.deletion.CASCADE,
                                                           to='djstripe.StripeSource', auto_created=True)),
                 ('address_city', djstripe.fields.StripeTextField(help_text='Billing address city.', null=True)),
                 ('address_country', djstripe.fields.StripeTextField(help_text='Billing address country.', null=True)),
@@ -179,14 +180,14 @@ class Migration(migrations.Migration):
             model_name='charge',
             name='account',
             field=models.ForeignKey(
-                related_name='charges', null=True, to='djstripe.Account',
+                related_name='charges', on_delete=django.db.models.deletion.CASCADE, null=True, to='djstripe.Account',
                 help_text='The account the charge was made on behalf of. Null here indicates that this value was \
                 never set.'),
         ),
         migrations.AddField(
             model_name='charge',
             name='source',
-            field=models.ForeignKey(related_name='charges', null=True, to='djstripe.StripeSource'),
+            field=models.ForeignKey(related_name='charges', on_delete=django.db.models.deletion.CASCADE, null=True, to='djstripe.StripeSource'),
         ),
         migrations.AddField(
             model_name='charge',
@@ -278,7 +279,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='charge',
             name='transfer',
-            field=models.ForeignKey(null=True, to='djstripe.Transfer',
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='djstripe.Transfer',
                                     help_text='The transfer to the destination account (only applicable if the \
                                     charge was created using the destination parameter).'),
         ),
@@ -479,6 +480,7 @@ class Migration(migrations.Migration):
             name='subscription',
             field=models.ForeignKey(
                 related_name='invoices',
+                on_delete=django.db.models.deletion.CASCADE,
                 null=True,
                 to='djstripe.Subscription',
                 help_text='The subscription that this invoice was prepared for, if any.'),
@@ -513,7 +515,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='invoiceitem',
             name='customer',
-            field=models.ForeignKey(related_name='invoiceitems', default=1, to='djstripe.Customer',
+            field=models.ForeignKey(related_name='invoiceitems', on_delete=django.db.models.deletion.CASCADE, default=1, to='djstripe.Customer',
                                     help_text='The customer associated with this invoiceitem.'),
             preserve_default=False,
         ),
@@ -558,6 +560,7 @@ class Migration(migrations.Migration):
             name='subscription',
             field=models.ForeignKey(
                 related_name='invoiceitems',
+                on_delete=django.db.models.deletion.CASCADE,
                 null=True,
                 to='djstripe.Subscription',
                 help_text='The subscription that this invoice item has been created for, if any.'),
@@ -787,18 +790,18 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='stripesource',
             name='customer',
-            field=models.ForeignKey(related_name='sources', to='djstripe.Customer'),
+            field=models.ForeignKey(related_name='sources', on_delete=django.db.models.deletion.CASCADE, to='djstripe.Customer'),
         ),
         migrations.AddField(
             model_name='stripesource',
             name='polymorphic_ctype',
-            field=models.ForeignKey(related_name='polymorphic_djstripe.stripesource_set+',
+            field=models.ForeignKey(related_name='polymorphic_djstripe.stripesource_set+', on_delete=django.db.models.deletion.CASCADE,
                                     to='contenttypes.ContentType', editable=False, null=True),
         ),
         migrations.AddField(
             model_name='customer',
             name='default_source',
-            field=models.ForeignKey(related_name='customers', null=True, to='djstripe.StripeSource'),
+            field=models.ForeignKey(related_name='customers', on_delete=django.db.models.deletion.CASCADE, null=True, to='djstripe.StripeSource'),
         ),
         migrations.DeleteModel(
             name='TransferChargeFee',
