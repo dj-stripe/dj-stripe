@@ -24,12 +24,23 @@ Contents
 
 .. toctree::
    :maxdepth: 2
+   :caption: Getting Started
 
    installation
+
+.. toctree::
+   :maxdepth: 2
+   :caption: User Guide
+
    usage
    models
    settings
    cookbook
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Project
+
    contributing
    authors
    history
