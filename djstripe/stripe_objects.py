@@ -411,7 +411,7 @@ class StripeObject(TimeStampedModel):
 
 
 class StripeSource(PolymorphicModel, StripeObject):
-    customer = models.ForeignKey("Customer", related_name="sources")
+    customer = models.ForeignKey("Customer", on_delete=models.CASCADE, related_name="sources")
 
 
 # ============================================================================ #
@@ -1700,7 +1700,7 @@ Fields not implemented:
     application_fee_percent = StripePercentField(
         null=True,
         help_text="A positive decimal that represents the fee percentage of the subscription invoice amount that "
-        "will be transferred to the application owner’s Stripe account each billing period."
+        "will be transferred to the application owner's Stripe account each billing period."
     )
     cancel_at_period_end = StripeBooleanField(
         default=False,

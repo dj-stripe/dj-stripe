@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import datetime
 
 from django.db import migrations, models
+import django.db.models.deletion
 from django.utils import timezone
 
 import djstripe.fields
@@ -27,6 +28,7 @@ class Migration(migrations.Migration):
             model_name='event',
             name='customer',
             field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
                 null=True,
                 to='djstripe.Customer',
                 help_text='In the event that there is a related customer, this will point to that Customer record'),
@@ -106,7 +108,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='invoice',
             name='charge',
-            field=models.OneToOneField(to='djstripe.Charge', related_name='invoice', null=True,
+            field=models.OneToOneField(to='djstripe.Charge', on_delete=django.db.models.deletion.CASCADE, related_name='invoice', null=True,
                                        help_text='The latest charge generated for this invoice, if any.'),
         ),
 
@@ -121,7 +123,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='invoice',
             name='customer',
-            field=models.ForeignKey(related_name='invoices', to='djstripe.Customer',
+            field=models.ForeignKey(related_name='invoices', on_delete=django.db.models.deletion.CASCADE, to='djstripe.Customer',
                                     help_text='The customer associated with this invoice.'),
         ),
         migrations.AlterField(
@@ -185,7 +187,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='invoiceitem',
             name='invoice',
-            field=models.ForeignKey(related_name='invoiceitems', to='djstripe.Invoice',
+            field=models.ForeignKey(related_name='invoiceitems', on_delete=django.db.models.deletion.CASCADE, to='djstripe.Invoice',
                                     help_text='The invoice to which this invoiceitem is attached.'),
         ),
         migrations.AlterField(
@@ -218,6 +220,7 @@ class Migration(migrations.Migration):
             name='plan',
             field=models.ForeignKey(
                 related_name='invoiceitems',
+                on_delete=django.db.models.deletion.CASCADE,
                 null=True,
                 to='djstripe.Plan',
                 help_text='If the invoice item is a proration, the plan of the subscription for which the \
@@ -341,7 +344,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='subscription',
             name='customer',
-            field=models.ForeignKey(related_name='subscriptions', default=1, to='djstripe.Customer',
+            field=models.ForeignKey(related_name='subscriptions', on_delete=django.db.models.deletion.CASCADE, default=1, to='djstripe.Customer',
                                     help_text='The customer associated with this subscription.'),
             preserve_default=False,
         ),
@@ -368,7 +371,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='subscription',
             name='plan',
-            field=models.ForeignKey(related_name='subscriptions', default=1, to='djstripe.Plan',
+            field=models.ForeignKey(related_name='subscriptions', on_delete=django.db.models.deletion.CASCADE, default=1, to='djstripe.Plan',
                                     help_text='The plan associated with this subscription.'),
             preserve_default=False,
         ),
@@ -527,7 +530,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='charge',
             name='customer',
-            field=models.ForeignKey(related_name='charges', to='djstripe.Customer',
+            field=models.ForeignKey(related_name='charges', on_delete=django.db.models.deletion.CASCADE, to='djstripe.Customer',
                                     help_text='The customer associated with this charge.'),
         ),
         migrations.AlterField(

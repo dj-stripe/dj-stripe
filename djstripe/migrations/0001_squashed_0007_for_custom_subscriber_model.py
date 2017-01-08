@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.conf import settings
 from django.db import models, migrations
+import django.db.models.deletion
 import django.utils.timezone
 import jsonfield.fields
 import model_utils.fields
@@ -105,7 +106,7 @@ class Migration(migrations.Migration):
                 ('card_last_4', models.CharField(max_length=4, blank=True)),
                 ('card_kind', models.CharField(max_length=50, blank=True)),
                 ('date_purged', models.DateTimeField(null=True, editable=False)),
-                ('subscriber', models.OneToOneField(null=True, to=DJSTRIPE_UNSAFE_SUBSCRIBER_MODEL)),
+                ('subscriber', models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE, to=DJSTRIPE_UNSAFE_SUBSCRIBER_MODEL)),
             ],
             options={
                 'abstract': False,
@@ -126,7 +127,7 @@ class Migration(migrations.Migration):
                 ('validated_message', jsonfield.fields.JSONField(null=True)),
                 ('valid', models.NullBooleanField()),
                 ('processed', models.BooleanField(default=False)),
-                ('customer', models.ForeignKey(to='djstripe.Customer', null=True)),
+                ('customer', models.ForeignKey(to='djstripe.Customer', on_delete=django.db.models.deletion.CASCADE, null=True)),
             ],
             options={
                 'abstract': False,
@@ -143,7 +144,7 @@ class Migration(migrations.Migration):
                 ('data', models.TextField()),
                 ('message', models.CharField(max_length=500)),
                 ('traceback', models.TextField()),
-                ('event', models.ForeignKey(to='djstripe.Event', null=True)),
+                ('event', models.ForeignKey(to='djstripe.Event', on_delete=django.db.models.deletion.CASCADE, null=True)),
             ],
             options={
                 'abstract': False,
@@ -168,7 +169,7 @@ class Migration(migrations.Migration):
                 ('total', models.DecimalField(max_digits=7, decimal_places=2)),
                 ('date', models.DateTimeField()),
                 ('charge', models.CharField(max_length=50, blank=True)),
-                ('customer', models.ForeignKey(related_name='invoices', to='djstripe.Customer')),
+                ('customer', models.ForeignKey(related_name='invoices', on_delete=django.db.models.deletion.CASCADE, to='djstripe.Customer')),
             ],
             options={
                 'ordering': ['-date'],
@@ -192,7 +193,7 @@ class Migration(migrations.Migration):
                 ('description', models.CharField(max_length=200, blank=True)),
                 ('plan', models.CharField(max_length=100, null=True, blank=True)),
                 ('quantity', models.IntegerField(null=True)),
-                ('invoice', models.ForeignKey(related_name='items', to='djstripe.Invoice')),
+                ('invoice', models.ForeignKey(related_name='items', on_delete=django.db.models.deletion.CASCADE, to='djstripe.Invoice')),
             ],
             options={
                 'abstract': False,
@@ -248,7 +249,7 @@ class Migration(migrations.Migration):
                 ('refund_gross', models.DecimalField(max_digits=7, decimal_places=2)),
                 ('validation_count', models.IntegerField()),
                 ('validation_fees', models.DecimalField(max_digits=7, decimal_places=2)),
-                ('event', models.ForeignKey(related_name='transfers', to='djstripe.Event')),
+                ('event', models.ForeignKey(related_name='transfers', on_delete=django.db.models.deletion.CASCADE, to='djstripe.Event')),
             ],
             options={
                 'abstract': False,
@@ -266,7 +267,7 @@ class Migration(migrations.Migration):
                 ('application', models.TextField(null=True, blank=True)),
                 ('description', models.TextField(null=True, blank=True)),
                 ('kind', models.CharField(max_length=150)),
-                ('transfer', models.ForeignKey(related_name='charge_fee_details', to='djstripe.Transfer')),
+                ('transfer', models.ForeignKey(related_name='charge_fee_details', on_delete=django.db.models.deletion.CASCADE, to='djstripe.Transfer')),
             ],
             options={
                 'abstract': False,
@@ -275,17 +276,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='currentsubscription',
             name='customer',
-            field=models.OneToOneField(related_name='current_subscription', null=True, to='djstripe.Customer'),
+            field=models.OneToOneField(related_name='current_subscription', on_delete=django.db.models.deletion.CASCADE, null=True, to='djstripe.Customer'),
         ),
         migrations.AddField(
             model_name='charge',
             name='customer',
-            field=models.ForeignKey(related_name='charges', to='djstripe.Customer'),
+            field=models.ForeignKey(related_name='charges', on_delete=django.db.models.deletion.CASCADE, to='djstripe.Customer'),
         ),
         migrations.AddField(
             model_name='charge',
             name='invoice',
-            field=models.ForeignKey(related_name='charges', to='djstripe.Invoice', null=True),
+            field=models.ForeignKey(related_name='charges', on_delete=django.db.models.deletion.CASCADE, to='djstripe.Invoice', null=True),
         ),
         migrations.AlterField(
             model_name='event',
