@@ -444,6 +444,7 @@ Fields not implemented:
     """
 
     STATUS_SUCCEEDED = "succeeded"
+    STATUS_PENDING = "pending"
     STATUS_FAILED = "failed"
 
     STATUS_CHOICES = [(status, status.title()) for status in [STATUS_SUCCEEDED, STATUS_FAILED]]
