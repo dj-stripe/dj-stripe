@@ -782,7 +782,7 @@ Fields not implemented:
             capture=capture,
             description=description,
             destination=destination,
-            metatdata=metadata,
+            metadata=metadata,
             shipping=shipping,
             customer=self.stripe_id,
             source=source,
