@@ -58,4 +58,5 @@ class SubscriptionMixin(PaymentsContextMixin):
         context['is_plans_plural'] = Plan.objects.count() > 1
         context['customer'], _created = Customer.get_or_create(
             subscriber=djstripe_settings.subscriber_request_callback(self.request))
+        context['subscription'] = context['customer'].subscription
         return context
