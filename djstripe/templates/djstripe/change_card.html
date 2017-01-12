@@ -16,9 +16,9 @@
     <div class="col-xs-12">
         <h2>Current Card</h2>
         <p class="lead">
-            {% if customer.card_kind and customer.card_last_4 %}
-                Current card on file is a <strong>{{ customer.card_kind }}</strong>
-                ending in the digits <strong>{{ customer.card_last_4 }}</strong>.
+            {% if customer.default_source.brand and customer.default_source.last4 %}
+                Current card on file is a <strong>{{ customer.default_source.brand }}</strong>
+                ending in the digits <strong>{{ customer.default_source.last4 }}</strong>.
             {% else %}
                 You do not currently have a card on file.
             {% endif %}
