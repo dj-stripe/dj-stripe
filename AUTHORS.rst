@@ -51,3 +51,4 @@ Contributors
 * Slava Kyrachevsky (@scream4ik)
 * Alec Brunelle (@aleccool213)
 * James Hiew (@jameshiew)
+* Dan Koch (@dmkoch)
