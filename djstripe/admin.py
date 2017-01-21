@@ -443,7 +443,7 @@ class InvoiceAdmin(StripeObjectAdmin):
         "attempted",
         "closed",
         "currency",
-        "data",
+        "date",
         "ending_balance",
         "forgiven",
         "next_payment_attempt",
