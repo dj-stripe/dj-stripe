@@ -18,11 +18,23 @@ from .models import Invoice, InvoiceItem, Subscription, Customer
 
 class StripeObjectAdmin(admin.ModelAdmin):
     date_hierarchy = "stripe_timestamp"
-    readonly_fields = [
+    fields = [
         'stripe_id',
         'livemode',
         'stripe_timestamp',
     ]
+
+    def has_add_permission(self, request):
+        # Stripe objects shouldn't be initially created from the admin panel
+        return False
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = list(super(StripeObjectAdmin, self).get_readonly_fields(request, obj))
+        if obj:
+            for field in StripeObjectAdmin.fields:
+                if field not in readonly_fields:
+                    readonly_fields.append(field)
+        return readonly_fields
 
     def get_fieldsets(self, request, obj=None):
         return (
@@ -177,7 +189,7 @@ class ChargeAdmin(StripeObjectAdmin):
     raw_id_fields = [
         "customer",
     ]
-    fields = [
+    fields = readonly_fields = (
         "amount",
         "amount_refunded",
         "captured",
@@ -199,7 +211,7 @@ class ChargeAdmin(StripeObjectAdmin):
         "customer",
         "transfer",
         "source",
-    ]
+    )
     actions = [send_charge_receipt]
 
 
@@ -216,12 +228,15 @@ class EventProcessingExceptionAdmin(admin.ModelAdmin):
         "traceback",
         "data",
     ]
-    fields = [
+    fields = readonly_fields = (
         "event",
         "data",
         "message",
         "traceback",
-    ]
+    )
+
+    def has_add_permission(self, request):
+        return False
 
 
 def reprocess_events(modeladmin, request, queryset):
@@ -273,7 +288,7 @@ class EventAdmin(StripeObjectAdmin):
         "validated_message",
     ]
     actions = [reprocess_events]
-    fields = [
+    fields = readonly_fields = (
         'type',
         'request_id',
         'received_api_version',
@@ -281,13 +296,7 @@ class EventAdmin(StripeObjectAdmin):
         'customer',
         'valid',
         'processed',
-    ]
-
-
-class SubscriptionInline(admin.TabularInline):
-    """A TabularInline for use models.Subscription."""
-    model = Subscription
-    extra = 0
+    )
 
 
 def subscription_status(customer):
@@ -331,7 +340,7 @@ class SubscriptionAdmin(StripeObjectAdmin):
     search_fields = [
         "stripe_id",
     ]
-    fields = [
+    fields = readonly_fields = (
         "application_fee_percent",
         "cancel_at_period_end",
         "canceled_at",
@@ -346,8 +355,22 @@ class SubscriptionAdmin(StripeObjectAdmin):
         "trial_start",
         "customer",
         "plan",
-    ]
+    )
     actions = [cancel_subscription]
+
+
+class SubscriptionInline(admin.TabularInline):
+    """A TabularInline for use models.Subscription."""
+    model = Subscription
+    extra = 0
+    fields = readonly_fields = (
+        'stripe_id',
+        'livemode',
+        'stripe_timestamp',
+    ) + SubscriptionAdmin.readonly_fields
+
+    def has_add_permission(self, request):
+        return False
 
 
 @admin.register(Customer)
@@ -366,7 +389,7 @@ class CustomerAdmin(StripeObjectAdmin):
     search_fields = [
         "stripe_id"
     ]
-    fields = [
+    fields = readonly_fields = (
         "account_balance",
         "business_vat_id",
         "currency",
@@ -375,17 +398,35 @@ class CustomerAdmin(StripeObjectAdmin):
         "default_source",
         "subscriber",
         "date_purged",
-    ]
+    )
     inlines = [SubscriptionInline]
-
-    def get_readonly_fields(self, request, obj=None):
-        readonly_fields = list(super(CustomerAdmin, self).get_readonly_fields(request, obj))
-        return readonly_fields + ["date_purged"]
 
 
 class InvoiceItemInline(admin.TabularInline):
     """A TabularInline for use models.InvoiceItem."""
     model = InvoiceItem
+    extra = 0
+    fields = readonly_fields = (
+        'stripe_id',
+        'livemode',
+        'stripe_timestamp',
+    ) + (
+        'amount',
+        'currency',
+        'date',
+        'discountable',
+        'period_end',
+        'period_start',
+        'proration',
+        'quantity',
+        'customer',
+        'invoice',
+        'plan',
+        'subscription',
+    )
+
+    def has_add_permission(self, request):
+        return False
 
 
 def customer_has_source(obj):
@@ -436,7 +477,7 @@ class InvoiceAdmin(StripeObjectAdmin):
         "period_end",
         "total",
     ]
-    fields = [
+    fields = readonly_fields = (
         "amount_due",
         "application_fee",
         "attempt_count",
@@ -460,7 +501,7 @@ class InvoiceAdmin(StripeObjectAdmin):
         "customer",
         "charge",
         "subscription",
-    ]
+    )
     inlines = [InvoiceItemInline]
 
 
@@ -477,7 +518,7 @@ class TransferAdmin(StripeObjectAdmin):
     search_fields = [
         "stripe_id",
     ]
-    fields = [
+    fields = readonly_fields = (
         "amount",
         "amount_reversed",
         "currency",
@@ -494,7 +535,7 @@ class TransferAdmin(StripeObjectAdmin):
         "status",
         "fee",
         "fee_details",
-    ]
+    )
 
 
 @admin.register(Plan)
