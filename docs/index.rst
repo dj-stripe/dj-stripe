@@ -47,6 +47,7 @@ Contents
    contributing
    authors
    history
+   support
 
 Constraints
 ------------
