@@ -1,30 +1,5 @@
-=====
-Usage
-=====
-
-Nearly every project breaks payment types into two broad categories, and will support either or both:
-
-1. Ongoing Subscriptions (Well supported)
-2. Individual Checkouts (Early, undocumented support)
-
-Subscribing a customer to a plan
---------------------------------
-
-No content... `yet <https://github.com/kavdev/dj-stripe/issues/307/>`_
-
-Checking if a customer has a subscription
------------------------------------------
-
-No content... `yet <https://github.com/kavdev/dj-stripe/issues/307/>`_
-
-
-Creating a one-off charge for a customer
-----------------------------------------
-
-No content... `yet <https://github.com/kavdev/dj-stripe/issues/307/>`_
-
 Restricting access to only active subscribers
----------------------------------------------
+=============================================
 
 dj-stripe provides three methods to support constraining views to be only accessible to users with active subscriptions:
 
@@ -40,7 +15,7 @@ Any project can use one or more of these methods to control access.
 
 
 Constraining Entire Sites
-^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------
 
 If you want to quickly constrain an entire site, the ``djstripe.middleware.SubscriptionPaymentMiddleware`` middleware does the following to user requests:
 
@@ -89,7 +64,7 @@ Using this example any request on this site that isn't on the homepage, about, s
     * :doc:`settings`
 
 Constraining Class-Based Views
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------
 
 If you want to quickly constrain a single Class-Based View, the ``djstripe.decorators.subscription_payment_required`` decorator does the following to user requests:
 
@@ -135,7 +110,7 @@ If you are unfamiliar with this technique please read the following documentatio
 
 
 Constraining Function-Based Views
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------
 
 If you want to quickly constrain a single Function-Based View, the ``djstripe.decorators.subscription_payment_required`` decorator does the following to user requests:
 
@@ -167,7 +142,7 @@ If you want to quickly constrain a single Function-Based View, the ``djstripe.de
 
 
 Don't do this!
-^^^^^^^^^^^^^^
+--------------
 
 Described is an anti-pattern. View logic belongs in views.py, not urls.py.
 
@@ -210,42 +185,3 @@ Described is an anti-pattern. View logic belongs in views.py, not urls.py.
     )
 
 
-
-Managing subscriptions and payment sources
-------------------------------------------
-
-Extending subscriptions
-^^^^^^^^^^^^^^^^^^^^^^^
-
-``Subscription.extend(*delta*)``
-
-Subscriptions can be extended by using the ``Subscription.extend`` method, which takes a positive ``timedelta`` as its only property. This method is useful if you want to offer time-cards, gift-cards, or some other external way of subscribing users or extending subscriptions, while keeping the billing handling within Stripe.
-
-.. warning::
-
-    Subscription extensions are achieved by manipulating the ``trial_end`` of the subscription instance, which means that Stripe will change the status to ``trialing``.
-
-Creating Invoices
------------------
-
-No content... `yet <https://github.com/kavdev/dj-stripe/issues/307/>`_
-
-Adding line items to invoices
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-No content... `yet <https://github.com/kavdev/dj-stripe/issues/307/>`_
-
-Running reports
----------------
-
-No content... `yet <https://github.com/kavdev/dj-stripe/issues/307/>`_
-
-Webhooks
---------
-
-No content... `yet <https://github.com/kavdev/dj-stripe/issues/307/>`_
-
-Manually syncing data with Stripe
----------------------------------
-
-No content... `yet <https://github.com/kavdev/dj-stripe/issues/307/>`_

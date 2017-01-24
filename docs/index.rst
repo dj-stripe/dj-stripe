@@ -30,9 +30,17 @@ Contents
 .. toctree::
    :caption: Usage
 
-   usage
-   settings
-   cookbook
+   usage/checking_customer_subscription
+   usage/subscribing_customers.rst
+   usage/one_off_charges.rst
+   usage/restricting_access.rst
+   usage/managing_subscriptions.rst
+   usage/creating_invoices.rst
+   usage/running_reports.rst
+   usage/webhooks.rst
+   usage/manually_syncing_with_stripe.rst
+.. settings
+.. cookbook
 
 .. toctree::
    :caption: Reference
