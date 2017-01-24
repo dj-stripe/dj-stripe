@@ -9,6 +9,7 @@
 from __future__ import unicode_literals
 
 import json
+import logging
 
 from braces.views import CsrfExemptMixin, FormValidMessageMixin, LoginRequiredMixin, SelectRelatedMixin
 from django.contrib import messages
@@ -26,11 +27,14 @@ from .forms import PlanForm, CancelSubscriptionForm
 from .mixins import PaymentsContextMixin, SubscriptionMixin
 from .models import Customer, Event, EventProcessingException, Plan
 from .sync import sync_subscriber
+from .webhooks import TEST_EVENT_ID
 
+logger = logging.getLogger(__name__)
 
 # ============================================================================ #
 #                                 Account Views                                #
 # ============================================================================ #
+
 
 class AccountView(LoginRequiredMixin, SelectRelatedMixin, SubscriptionMixin, PaymentsContextMixin, TemplateView):
     """Shows account details including customer and subscription details."""
@@ -287,6 +291,10 @@ class WebHook(CsrfExemptMixin, View):
         """
         body = smart_str(request.body)
         data = json.loads(body)
+
+        if data['id'] == TEST_EVENT_ID:
+            logger.info("Test webhook received: {}".format(data['type']))
+            return HttpResponse()
 
         if Event.stripe_objects.exists_by_json(data):
             EventProcessingException.objects.create(

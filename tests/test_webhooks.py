@@ -18,8 +18,8 @@ from mock import call, patch, Mock, PropertyMock, ANY
 
 from djstripe import views, webhooks
 from djstripe.models import Event, EventProcessingException
-from djstripe.webhooks import handler, handler_all, call_handlers
-from tests import FAKE_EVENT_TRANSFER_CREATED, FAKE_TRANSFER
+from djstripe.webhooks import handler, handler_all, call_handlers, TEST_EVENT_ID
+from tests import FAKE_EVENT_TRANSFER_CREATED, FAKE_TRANSFER, FAKE_EVENT_TEST_CHARGE_SUCCEEDED
 
 
 class TestWebhook(TestCase):
@@ -37,6 +37,15 @@ class TestWebhook(TestCase):
         )
         self.assertEquals(resp.status_code, 200)
         self.assertTrue(Event.objects.filter(type="transfer.created").exists())
+
+    def test_webhook_with_test_event(self):
+        resp = Client().post(
+            reverse("djstripe:webhook"),
+            json.dumps(FAKE_EVENT_TEST_CHARGE_SUCCEEDED),
+            content_type="application/json"
+        )
+        self.assertEquals(resp.status_code, 200)
+        self.assertFalse(Event.objects.filter(stripe_id=TEST_EVENT_ID).exists())
 
     @patch.object(views.djstripe_settings, 'WEBHOOK_EVENT_CALLBACK', return_value=(lambda event: event.process()))
     @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))

@@ -37,6 +37,8 @@ __all__ = ['handler', 'handler_all', 'call_handlers']
 registrations = defaultdict(list)
 registrations_global = list()
 
+TEST_EVENT_ID = 'evt_00000000000000'
+
 
 def handler(event_types):
     """
