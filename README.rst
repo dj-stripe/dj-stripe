@@ -69,8 +69,12 @@ Add ``djstripe`` to your ``INSTALLED_APPS``:
 
 .. code-block:: python
 
-    INSTALLED_APPS +=(
+    INSTALLED_APPS =(
+        ...
+        "django.contrib.sites"
+        ...
         "djstripe",
+        ...
     )
 
 Add your stripe keys:
