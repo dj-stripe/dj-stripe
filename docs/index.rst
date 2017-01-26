@@ -39,7 +39,6 @@ Contents
    usage/running_reports.rst
    usage/webhooks.rst
    usage/manually_syncing_with_stripe.rst
-.. settings
 .. cookbook
 
 .. toctree::
@@ -48,6 +47,7 @@ Contents
 
    models
    api/*
+   settings
 
 .. toctree::
    :caption: Project
