@@ -16,6 +16,8 @@ from datetime import datetime
 
 from django.utils import timezone, dateformat
 
+from djstripe.webhooks import TEST_EVENT_ID
+
 FUTURE_DATE = datetime(2100, 4, 30, tzinfo=timezone.utc)
 
 
@@ -1115,6 +1117,9 @@ FAKE_EVENT_CHARGE_SUCCEEDED = {
     "request": "req_6lsB7hkicwhaDj",
     "type": "charge.succeeded",
 }
+
+FAKE_EVENT_TEST_CHARGE_SUCCEEDED = deepcopy(FAKE_EVENT_CHARGE_SUCCEEDED)
+FAKE_EVENT_TEST_CHARGE_SUCCEEDED['id'] = TEST_EVENT_ID
 
 FAKE_EVENT_CUSTOMER_CREATED = {
     "id": "evt_38DHch3whaDvKYlo2CT2oe5ff3",
