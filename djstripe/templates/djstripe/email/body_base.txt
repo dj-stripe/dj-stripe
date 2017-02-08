@@ -13,7 +13,7 @@ DETAILS
 -------
 {{ charge.customer.subscription.plan.name }} - ${{ charge.amount|floatformat:2 }}
 
-TOTAL: ${{ charge.amount|floatformat:2 }} USD
+TOTAL: ${{ charge.amount|floatformat:2 }} {{ charge.currency|upper }}
 PAID BY CREDIT CARD: -${{ charge.amount|floatformat:2 }}
 ========================================================
 {% else %}{% if charge.refunded %}Your credit card ending in {{ charge.card_last_4 }} was refunded ${{ charge.amount|floatformat:2 }}.
