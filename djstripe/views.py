@@ -11,9 +11,10 @@ from __future__ import unicode_literals
 import json
 import logging
 
-from braces.views import CsrfExemptMixin, FormValidMessageMixin, LoginRequiredMixin, SelectRelatedMixin
+from braces.views import CsrfExemptMixin, FormValidMessageMixin, SelectRelatedMixin
 from django.contrib import messages
 from django.contrib.auth import logout as auth_logout, REDIRECT_FIELD_NAME
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponse
 from django.http.response import HttpResponseNotFound
