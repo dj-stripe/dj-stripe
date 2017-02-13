@@ -8,15 +8,11 @@
 """
 from __future__ import unicode_literals
 
-import sys
-
 from django.apps import apps as django_apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import six
 from django.utils.module_loading import import_string
-
-PY3 = sys.version > "3"
 
 
 def get_callback_function(setting_name, default=None):
