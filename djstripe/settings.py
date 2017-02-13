@@ -66,9 +66,6 @@ def _get_idempotency_key(object_type, action, livemode):
 get_idempotency_key = get_callback_function("DJSTRIPE_IDEMPOTENCY_KEY_CALLBACK", _get_idempotency_key)
 
 
-PAYMENTS_PLANS = getattr(settings, "DJSTRIPE_PLANS", {})
-PLAN_HIERARCHY = getattr(settings, "DJSTRIPE_PLAN_HIERARCHY", {})
-
 PRORATION_POLICY = getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False)
 PRORATION_POLICY_FOR_UPGRADES = getattr(settings, 'DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES', False)
 CANCELLATION_AT_PERIOD_END = not getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False)

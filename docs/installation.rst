@@ -111,8 +111,6 @@ Run the commands::
 
     python manage.py djstripe_init_customers
 
-    python manage.py djstripe_init_plans
-
 Running Tests
 --------------
 
