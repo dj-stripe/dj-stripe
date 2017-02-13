@@ -5,7 +5,7 @@ Settings
 DJSTRIPE_DEFAULT_PLAN (=None)
 =============================
 
-Payment plans default. 
+Payment plans default.
 
 Possibly deprecated in favor of model based plans.
 
@@ -17,7 +17,7 @@ Invoice emails come from this address.
 DJSTRIPE_PLANS (={})
 ====================
 
-Payment plans. 
+Payment plans.
 
 Possibly deprecated in favor of model based plans.
 
@@ -60,7 +60,7 @@ Example:
 DJSTRIPE_PLAN_HIERARCHY (={})
 =============================
 
-Payment plans levels. 
+Payment plans levels.
 
 Allows you to set levels of access to the plans.
 
@@ -130,11 +130,11 @@ Example:
     {% elif customer.subscription|djstripe_plan_level > plan.plan|djstripe_plan_level %}
         <h4>Downgrade</h4>
     {% endif %}
-    
+
 DJSTRIPE_PRORATION_POLICY (=False)
 ==================================
 
-By default, plans are not prorated in dj-stripe. Concretely, this is how this translates: 
+By default, plans are not prorated in dj-stripe. Concretely, this is how this translates:
 
 1) If a customer cancels their plan during a trial, the cancellation is effective right away.
 2) If a customer cancels their plan outside of a trial, their subscription remains active until the subscription's period end, and they do not receive a refund.
@@ -207,7 +207,7 @@ Example Model:
         name = CharField(max_length=200, unique=True)
         subdomain = CharField(max_length=63, unique=True, verbose_name="Organization Subdomain")
         owner = ForeignKey(settings.AUTH_USER_MODEL, related_name="organization_owner", verbose_name="Organization Owner")
-        
+
         @property
         def email(self):
             return self.owner.email
@@ -232,7 +232,7 @@ Examples:
 
     class DynamicOrganizationIDMiddleware(object):
         """ Adds the current organization's ID based on the subdomain."""
-    
+
         def process_request(self, request):
             subdomain = parse_subdomain(request.get_host())
 
@@ -242,7 +242,7 @@ Examples:
                 return TemplateResponse(request=request, template='404.html', status=404)
             else:
                 organization_id = organization.id
-    
+
             request.organization_id = organization_id
 
 `settings.py`
@@ -251,7 +251,7 @@ Examples:
 
     def organization_request_callback(request):
         """ Gets an organization instance from the id passed through ``request``"""
-        
+
         from <models_path> import Organization  # Import models here to avoid an ``AppRegistryNotReady`` exception
         return Organization.objects.get(id=request.organization_id)
 
@@ -279,7 +279,7 @@ Examples:
         Adds a static trial period of 7 days to each subscriber's plan,
         unless they've accepted our month-long promotion.
         """
-        
+
         if subscriber.coupons.get(slug="monthlongtrial"):
             return 30
         else:
@@ -336,8 +336,3 @@ Examples:
 .. code-block:: python
 
     DJSTRIPE_WEBHOOK_EVENT_CALLBACK = 'callbacks.webhook_event_callback'
-
-DJSTRIPE_CURRENCIES (=(('usd', 'U.S. Dollars',), ('gbp', 'Pounds (GBP)',), ('eur', 'Euros',)))
-==============================================================================================
-
-A Field.choices list of allowed currencies for Plan models.
