@@ -14,7 +14,7 @@ from .. import settings as djstripe_settings
 register = Library()
 
 
-@register.filter
+@register.filter(is_safe=False)
 def djdiv(value, arg):
     """
     Divide the value by the arg, using Python 3-style division that returns floats.
@@ -28,9 +28,6 @@ def djdiv(value, arg):
             return value / arg
         except Exception:
             return ''
-
-
-division.is_safe = False
 
 
 @register.filter(name='djstripe_plan_level')
