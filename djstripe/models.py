@@ -411,6 +411,10 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         for stripe_charge in Charge.api_list(customer=self.stripe_id, **kwargs):
             Charge.sync_from_stripe_data(stripe_charge)
 
+    def _sync_cards(self, **kwargs):
+        for stripe_card in Card.api_list(customer=self, **kwargs):
+            Card.sync_from_stripe_data(stripe_card)
+
     def _sync_subscriptions(self, **kwargs):
         for stripe_subscription in Subscription.api_list(customer=self.stripe_id, **kwargs):
             Subscription.sync_from_stripe_data(stripe_subscription)
