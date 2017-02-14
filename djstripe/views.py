@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 # ============================================================================ #
 
 
-class AccountView(LoginRequiredMixin, SelectRelatedMixin, SubscriptionMixin, PaymentsContextMixin, TemplateView):
+class AccountView(LoginRequiredMixin, SubscriptionMixin, PaymentsContextMixin, TemplateView):
     """Shows account details including customer and subscription details."""
 
     template_name = "djstripe/account.html"
