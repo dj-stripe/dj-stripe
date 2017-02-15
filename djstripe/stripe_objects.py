@@ -1838,3 +1838,10 @@ Fields not implemented:
         """
 
         return self._api_delete(at_period_end=at_period_end)
+
+    def reactivate(self):
+        """
+        Reactivates this subscription.
+        Only usable on subscriptions that will cancel at period end.
+        """
+        return self.update(plan=self.plan)
