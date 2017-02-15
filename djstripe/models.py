@@ -283,15 +283,13 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
                 In this case, use ``Customer.subscriptions`` instead.
         """
 
-        subscription_count = self.subscriptions.count()
+        subscriptions = self.subscriptions.exclude(status="canceled")
 
-        if subscription_count == 0:
-            return None
-        elif subscription_count == 1:
-            return self.subscriptions.first()
-        else:
+        if subscriptions.count() > 1:
             raise MultipleSubscriptionException("This customer has multiple subscriptions. Use Customer.subscriptions "
                                                 "to access them.")
+        else:
+            return subscriptions.first()
 
     # TODO: Accept a coupon object when coupons are implemented
     def subscribe(self, plan, charge_immediately=True, **kwargs):
