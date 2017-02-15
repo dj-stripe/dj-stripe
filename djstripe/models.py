@@ -398,7 +398,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
             Card.sync_from_stripe_data(stripe_card)
 
     def _sync_subscriptions(self, **kwargs):
-        for stripe_subscription in Subscription.api_list(customer=self.stripe_id, **kwargs):
+        for stripe_subscription in Subscription.api_list(customer=self.stripe_id, status="all", **kwargs):
             Subscription.sync_from_stripe_data(stripe_subscription)
 
 
