@@ -564,10 +564,12 @@ class PlanAdmin(StripeObjectAdmin):
         readonly_fields = list(super(PlanAdmin, self).get_readonly_fields(request, obj))
         if obj:
             readonly_fields.extend([
-                'amount',
-                'currency',
-                'interval',
-                'interval_count',
-                'trial_period_days'])
+                "amount",
+                "currency",
+                "interval",
+                "interval_count",
+                "statement_descriptor",
+                "trial_period_days",
+            ])
 
         return readonly_fields
