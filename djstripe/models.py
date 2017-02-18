@@ -857,6 +857,20 @@ class Plan(StripePlan):
 
         return plan
 
+    @property
+    def human_readable_price(self):
+        amount = get_friendly_currency_amount(self.amount, self.currency)
+        interval_count = self.interval_count
+
+        if interval_count == 1:
+            interval = self.interval
+            template = "{amount}/{interval}"
+        else:
+            interval = {"day": "days", "week": "weeks", "month": "months", "year": "years"}[self.interval]
+            template = "{amount} every {interval_count} {interval}"
+
+        return template.format(amount=amount, interval=interval, interval_count=interval_count)
+
     # TODO: Move this type of update to the model's save() method so it happens automatically
     # Also, block other fields from being saved.
     def update_name(self):
