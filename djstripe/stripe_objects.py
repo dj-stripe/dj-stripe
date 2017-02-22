@@ -1235,7 +1235,7 @@ Fields not implemented:
 
         customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
 
-        return customer.api_retrieve().sources.list(api_key=api_key, object="card", **clean_kwargs).auto_paging_iter()
+        return customer.api_retrieve(api_key=api_key).sources.list(object="card", **clean_kwargs).auto_paging_iter()
 
     def str_parts(self):
         return [
