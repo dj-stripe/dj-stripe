@@ -139,14 +139,6 @@ class Charge(StripeCharge):
             self.source = cls._stripe_object_to_source(target_cls=Card, data=data)
 
 
-def on_subscriber_delete_purge_customers(collector, field, sub_objs, using):
-    """ Ensure that all customers attached to subscriber are purged on deletion. """
-    for obj in sub_objs:
-        obj.purge()
-
-    SET_NULL(collector, field, sub_objs, using)
-
-
 @class_doc_inherit
 class Customer(StripeCustomer):
     doc = """
@@ -160,13 +152,22 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
     default_source = ForeignKey(StripeSource, null=True, related_name="customers", on_delete=SET_NULL)
 
-    subscriber = OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True,
-                               on_delete=on_subscriber_delete_purge_customers)
+    subscriber = OneToOneField(djstripe_settings.get_subscriber_model_string(), null=True,
+                               on_delete=SET_NULL, related_name="customer")
     date_purged = DateTimeField(null=True, editable=False)
 
     def str_parts(self):
-        return ([smart_text(self.subscriber), "email={email}".format(email=self.subscriber.email)] +
-                super(Customer, self).str_parts())
+        parts = []
+
+        if self.subscriber:
+            parts.append(smart_text(self.subscriber))
+            parts.append("email={email}".format(email=self.subscriber.email))
+        else:
+            parts.append("(deleted)")
+
+        parts.extend(super(Customer, self).str_parts())
+
+        return parts
 
     @classmethod
     def get_or_create(cls, subscriber):
