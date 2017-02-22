@@ -13,12 +13,13 @@ import logging
 
 from braces.views import CsrfExemptMixin, FormValidMessageMixin, LoginRequiredMixin, SelectRelatedMixin
 from django.contrib import messages
-from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import logout as auth_logout, REDIRECT_FIELD_NAME
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponse
 from django.http.response import HttpResponseNotFound
 from django.shortcuts import render, redirect
 from django.utils.encoding import smart_str
+from django.utils.http import is_safe_url
 from django.views.generic import DetailView, FormView, TemplateView, View
 from stripe.error import StripeError
 
@@ -252,6 +253,24 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
     template_name = "djstripe/cancel_subscription.html"
     form_class = CancelSubscriptionForm
     success_url = reverse_lazy("djstripe:account")
+    redirect_url = reverse_lazy("home")
+
+    # messages
+    subscription_cancel_message = "Your subscription is now cancelled."
+    subscription_status_message = "Your subscription status is now '{status}' until '{period_end}'"
+
+    def get_redirect_url(self):
+        """
+        Return the URL to redirect to when canceling is successful.
+        Looks in query string for ?next, ensuring it is on the same domain.
+        """
+        next = self.request.GET.get(REDIRECT_FIELD_NAME)
+
+        # is_safe_url() will ensure we don't redirect to another domain
+        if next and is_safe_url(next):
+            return next
+        else:
+            return self.redirect_url
 
     def form_valid(self, form):
         """Handle canceling the Customer's subscription."""
@@ -261,18 +280,23 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
         subscription = customer.subscription.cancel()
 
         if subscription.status == subscription.STATUS_CANCELED:
-            # If no pro-rate, they get kicked right out.
-            messages.info(self.request, "Your subscription is now cancelled.")
-            # logout the user
-            auth_logout(self.request)
-            return redirect("home")
+            return self.status_cancel()
         else:
             # If pro-rate, they get some time to stay.
-            messages.info(self.request, "Your subscription status is now '{status}' until '{period_end}'".format(
+            messages.info(self.request, self.subscription_status_message.format(
                 status=subscription.status, period_end=subscription.current_period_end)
             )
 
         return super(CancelSubscriptionView, self).form_valid(form)
+
+    def status_cancel(self):
+        """Triggered when the subscription is immediately canceled (not pro-rated)"""
+        # If no pro-rate, they get kicked right out.
+        messages.info(self.request, self.subscription_cancel_message)
+        # logout the user
+        auth_logout(self.request)
+        # Redirect to next url
+        return redirect(self.get_redirect_url())
 
 
 # ============================================================================ #
