@@ -25,7 +25,8 @@ History
 * Added inline documentation to pretty much everything and enforced docsytle via flake8 (Thanks @aleccool213)
 * Fixed outdated method call in template (Thanks @kandoio) #391
 * Customer is correctly purged when subscriber is deleted, regardless of how the deletion happened (Thanks @lskillen) #396
-* Test webhooks are now properly captured and logged. No more bounced requests to Stripe! #408 (Thanks @jameshiew)
+* Test webhooks are now properly captured and logged. No more bounced requests to Stripe! (Thanks @jameshiew) #408
+* CancelSubscriptionView redirect is now more flexible (Thanks @jleclanche) #418
 
 0.8.0 (2015-12-30)
 ---------------------
