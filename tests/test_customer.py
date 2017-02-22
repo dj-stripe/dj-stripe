@@ -652,3 +652,11 @@ class TestCustomer(TestCase):
         self.user.delete()
         customer = Customer.objects.get(stripe_id=FAKE_CUSTOMER["id"])
         self.assertIsNotNone(customer.date_purged)
+        self.assertEqual(["(deleted)", "stripe_id=cus_6lsBvm5rJ0zyHc"], customer.str_parts())
+
+    @patch("stripe.Customer.retrieve")
+    def test_delete_subscriber_without_customer_is_noop(self, customer_retrieve_mock):
+        customer = self.user.customer
+        self.user.customer = None
+        self.user.delete()
+        self.assertIsNone(customer.date_purged)

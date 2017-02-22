@@ -88,11 +88,9 @@ DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
 WEBHOOK_EVENT_CALLBACK = get_callback_function("DJSTRIPE_WEBHOOK_EVENT_CALLBACK")
 
 
-def _check_subscriber_for_email_address(subscriber_model, message):
-    """Ensure the custom model has an ``email`` field or property."""
-    if (("email" not in [field_.name for field_ in subscriber_model._meta.get_fields()]) and
-            not hasattr(subscriber_model, 'email')):
-        raise ImproperlyConfigured(message)
+def get_subscriber_model_string():
+    """Get the configured subscriber model as a module path string."""
+    return getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", settings.AUTH_USER_MODEL)
 
 
 def get_subscriber_model():
@@ -106,34 +104,27 @@ def get_subscriber_model():
 
     Returns the subscriber model that is active in this project.
     """
-    SUBSCRIBER_MODEL = getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", None)
-
-    # Check if a subscriber model is specified. If not, fall back and exit.
-    if not SUBSCRIBER_MODEL:
-        from django.contrib.auth import get_user_model
-        subscriber_model = get_user_model()
-        _check_subscriber_for_email_address(subscriber_model, "The customer user model must have an email attribute.")
-
-        return subscriber_model
-
-    subscriber_model = None
+    model_name = get_subscriber_model_string()
 
     # Attempt a Django 1.7 app lookup
     try:
-        subscriber_model = django_apps.get_model(SUBSCRIBER_MODEL)
+        subscriber_model = django_apps.get_model(model_name)
     except ValueError:
         raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL must be of the form 'app_label.model_name'.")
     except LookupError:
         raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL refers to model '{model}' "
-                                   "that has not been installed.".format(model=SUBSCRIBER_MODEL))
+                                   "that has not been installed.".format(model=model_name))
 
-    _check_subscriber_for_email_address(subscriber_model, "DJSTRIPE_SUBSCRIBER_MODEL must have an email attribute.")
+    if (("email" not in [field_.name for field_ in subscriber_model._meta.get_fields()]) and
+            not hasattr(subscriber_model, 'email')):
+        raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL must have an email attribute.")
 
-    # Custom user model detected. Make sure the callback is configured.
-    func = get_callback_function("DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK")
-    if not func:
-        raise ImproperlyConfigured(
-            "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be implemented "
-            "if a DJSTRIPE_SUBSCRIBER_MODEL is defined.")
+    if model_name != settings.AUTH_USER_MODEL:
+        # Custom user model detected. Make sure the callback is configured.
+        func = get_callback_function("DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK")
+        if not func:
+            raise ImproperlyConfigured(
+                "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be implemented "
+                "if a DJSTRIPE_SUBSCRIBER_MODEL is defined.")
 
     return subscriber_model
