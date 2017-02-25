@@ -141,12 +141,15 @@ class Charge(StripeCharge):
 
 @class_doc_inherit
 class Customer(StripeCustomer):
-    doc = """
-
-.. note:: Sources and Subscriptions are attached via a ForeignKey on StripeSource and Subscription, respectively. \
-Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
     """
-    __doc__ = getattr(StripeCustomer, "__doc__") + doc
+    A model extending StripeCustomer providing dj-stripe functionality.
+
+    .. note:: Sources and Subscriptions are attached via a ForeignKey on StripeSource and Subscription, respectively.
+    Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
+    """
+
+    # append docstring to super class docstring
+    __doc__ += getattr(StripeCustomer, "__doc__")
 
     # account = ForeignKey(Account, related_name="customers")
 
@@ -157,6 +160,11 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
     date_purged = DateTimeField(null=True, editable=False)
 
     def str_parts(self):
+        """
+        Return a string repr of this data object.
+
+        Includes subscriber object.
+        """
         parts = []
 
         if self.subscriber:
@@ -177,7 +185,6 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         :param subscriber: The subscriber model instance for which to get or create a customer.
         :type subscriber: User
         """
-
         try:
             return Customer.objects.get(subscriber=subscriber), False
         except Customer.DoesNotExist:
@@ -185,6 +192,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
     @classmethod
     def create(cls, subscriber):
+        """Create a Customer using subscriber and default trial/plan settings."""
         trial_days = None
         if djstripe_settings.trial_period_for_subscriber_callback:
             trial_days = djstripe_settings.trial_period_for_subscriber_callback(subscriber)
@@ -200,7 +208,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
         return customer
 
-    def purge(self):
+    def purge(self): # noqa
         try:
             self._api_delete()
         except InvalidRequestError as exc:
@@ -227,23 +235,20 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
     #       (or cascades, but that's another matter)
     def delete(self, using=None, keep_parents=False):
         """
-        Overriding the delete method to keep the customer in the records. All identifying information is removed
-        via the purge() method.
+        Overriding the delete method to keep the customer in the records.
 
+        All identifying information is removed via the purge() method.
         The only way to delete a customer is to use SQL.
-
         """
-
         self.purge()
 
     def _get_valid_subscriptions(self):
-        """ Get a list of this customer's valid subscriptions."""
-
+        """Get a list of this customer's valid subscriptions."""
         return [subscription for subscription in self.subscriptions.all() if subscription.is_valid()]
 
     def has_active_subscription(self, plan=None):
         """
-        Checks to see if this customer has an active subscription to the given plan.
+        Check to see if this customer has an active subscription to the given plan.
 
         :param plan: The plan for which to check for an active subscription. If plan is None and
                      there exists only one active subscription, this method will check if that subscription
@@ -254,7 +259,6 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         :returns: True if there exists an active subscription, False otherwise.
         :throws: TypeError if ``plan`` is None and more than one active subscription exists for this customer.
         """
-
         if plan is None:
             valid_subscriptions = self._get_valid_subscriptions()
 
@@ -274,7 +278,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
     def has_any_active_subscription(self):
         """
-        Checks to see if this customer has an active subscription to any plan.
+        Check to see if this customer has an active subscription to any plan.
 
         :returns: True if there exists an active subscription, False otherwise.
         :throws: TypeError if ``plan`` is None and more than one active subscription exists for this customer.
@@ -304,8 +308,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
                                                 "to access them.")
 
     # TODO: Accept a coupon object when coupons are implemented
-    def subscribe(self, plan, charge_immediately=True, **kwargs):
-        # Convert Plan to stripe_id
+    def subscribe(self, plan, charge_immediately=True, **kwargs): # noqa
         if isinstance(plan, Plan):
             plan = plan.stripe_id
 
@@ -317,11 +320,10 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         return Subscription.sync_from_stripe_data(stripe_subscription)
 
     def can_charge(self):
-        """Determines if this customer is able to be charged."""
-
+        """Determine if this customer is able to be charged."""
         return self.has_valid_source() and self.date_purged is None
 
-    def charge(self, amount, currency="usd", send_receipt=None, **kwargs):
+    def charge(self, amount, currency="usd", send_receipt=None, **kwargs): # noqa
         if send_receipt is None:
             send_receipt = getattr(settings, 'DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS', True)
 
@@ -333,7 +335,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
         return charge
 
-    def add_invoice_item(self, amount, currency, **kwargs):
+    def add_invoice_item(self, amount, currency, **kwargs): # noqa
         # Convert Invoice to stripe_id
         if "invoice" in kwargs and isinstance(kwargs["invoice"], Invoice):
             kwargs.update({"invoice": kwargs["invoice"].stripe_id})
@@ -361,8 +363,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
             return False  # There was nothing to invoice
 
     def retry_unpaid_invoices(self):
-        """ Attempt to retry collecting payment on the customer's unpaid invoices."""
-
+        """Attempt to retry collecting payment on the customer's unpaid invoices."""
         self._sync_invoices()
         for invoice in self.invoices.filter(paid=False, closed=False):
             try:
@@ -372,10 +373,14 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
                     six.reraise(*sys.exc_info())
 
     def has_valid_source(self):
-        """ Check whether the customer has a valid payment source."""
+        """Check whether the customer has a valid payment source."""
         return self.default_source is not None
 
     def add_card(self, source, set_default=True):
+        """Add a new card to this Customer.
+
+        Accepts set_default which will change the default card to the newly created.
+        """
         new_stripe_card = super(Customer, self).add_card(source, set_default)
         new_card = Card.sync_from_stripe_data(new_stripe_card)
 
@@ -387,13 +392,12 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         return new_card
 
     def upcoming_invoice(self, **kwargs):
-        """ Gets the upcoming preview invoice (singular) for this customer.
+        """Get the upcoming preview invoice (singular) for this customer.
 
         See `Invoice.upcoming() <#djstripe.Invoice.upcoming>`__.
 
         The ``customer`` argument to the ``upcoming()`` call is automatically set by this method.
         """
-
         kwargs['customer'] = self
         return Invoice.upcoming(**kwargs)
 
