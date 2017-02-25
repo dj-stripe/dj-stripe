@@ -5,6 +5,9 @@ language: python
 python:
   - 3.5
 
+addons:
+  postgresql: "9.4"
+
 env:
   - TOXENV=py27
   - TOXENV=py34
