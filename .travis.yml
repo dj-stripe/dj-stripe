@@ -2,8 +2,7 @@
 sudo: false
 language: python
 
-python:
-  - 3.5
+python: "3.6"
 
 addons:
   postgresql: "9.4"
@@ -12,6 +11,17 @@ env:
   - TOXENV=py27
   - TOXENV=py34
   - TOXENV=py35
+  - TOXENV=py36
+
+matrix:
+  fast_finish: true
+  include:
+    - python: "3.5"
+      env: TOXENV=py35
+  exclude:
+    - python: "3.6"
+      env: TOXENV=py35
+
 
 # Leverage the pip cache
 cache:
