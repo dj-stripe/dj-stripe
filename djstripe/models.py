@@ -728,7 +728,8 @@ class UpcomingInvoice(Invoice):
 
 
 @class_doc_inherit
-class InvoiceItem(StripeInvoiceItem):
+class InvoiceItem(StripeInvoiceItem): # noqa
+
     __doc__ = getattr(StripeInvoiceItem, "__doc__")
 
     # account = ForeignKey(Account, related_name="invoiceitems")
@@ -780,18 +781,18 @@ class InvoiceItem(StripeInvoiceItem):
 
 
 @class_doc_inherit
-class Plan(StripePlan):
+class Plan(StripePlan): # noqa
+
     __doc__ = getattr(StripePlan, "__doc__")
 
     # account = ForeignKey("Account", related_name="plans")
 
-    class Meta(object):
+    class Meta(object): # noqa
         ordering = ["amount"]
 
     @classmethod
     def get_or_create(cls, **kwargs):
-        """ Get or create a Plan."""
-
+        """Get or create a Plan."""
         try:
             return Plan.objects.get(stripe_id=kwargs['stripe_id']), False
         except Plan.DoesNotExist:
@@ -799,7 +800,7 @@ class Plan(StripePlan):
 
     @classmethod
     def create(cls, **kwargs):
-        # A few minor things are changed in the api-version of the create call
+        """Change a few minor things for api create call."""
         api_kwargs = dict(kwargs)
         api_kwargs['id'] = api_kwargs['stripe_id']
         del(api_kwargs['stripe_id'])
@@ -813,15 +814,14 @@ class Plan(StripePlan):
     # TODO: Move this type of update to the model's save() method so it happens automatically
     # Also, block other fields from being saved.
     def update_name(self):
-        """Update the name of the Plan in Stripe and in the db.
+        """
+        Update the name of the Plan in Stripe and in the db.
 
         - Assumes the object being called has the name attribute already
           reset, but has not been saved.
         - Stripe does not allow for update of any other Plan attributes besides
           name.
-
         """
-
         p = self.api_retrieve()
         p.name = self.name
         p.save()
@@ -830,7 +830,8 @@ class Plan(StripePlan):
 
 
 @class_doc_inherit
-class Subscription(StripeSubscription):
+class Subscription(StripeSubscription): # noqa
+
     __doc__ = getattr(StripeSubscription, "__doc__")
 
     # account = ForeignKey("Account", related_name="subscriptions")
@@ -848,30 +849,27 @@ class Subscription(StripeSubscription):
     objects = SubscriptionManager()
 
     def is_period_current(self):
-        """ Returns True if this subscription's period is current, false otherwise."""
-
+        """Return True if this subscription's period is current, false otherwise."""
         return self.current_period_end > timezone.now() or (self.trial_end and self.trial_end > timezone.now())
 
     def is_status_current(self):
-        """ Returns True if this subscription's status is current (active or trialing), false otherwise."""
-
+        """Return True if this subscription's status is current (active or trialing), false otherwise."""
         return self.status in ["trialing", "active"]
 
     def is_status_temporarily_current(self):
         """
         A status is temporarily current when the subscription is canceled with the ``at_period_end`` flag.
+
         The subscription is still active, but is technically canceled and we're just waiting for it to run out.
 
         You could use this method to give customers limited service after they've canceled. For example, a video
         on demand service could only allow customers to download their libraries  and do nothing else when their
         subscription is temporarily current.
         """
-
         return self.canceled_at and self.start < self.canceled_at and self.cancel_at_period_end
 
     def is_valid(self):
-        """ Returns True if this subscription's status and period are current, false otherwise."""
-
+        """Return True if this subscription's status and period are current, false otherwise."""
         if not self.is_status_current():
             return False
 
@@ -880,7 +878,7 @@ class Subscription(StripeSubscription):
 
         return True
 
-    def update(self, prorate=djstripe_settings.PRORATION_POLICY, **kwargs):
+    def update(self, prorate=djstripe_settings.PRORATION_POLICY, **kwargs): # noqa
         # Convert Plan to stripe_id
         if "plan" in kwargs and isinstance(kwargs["plan"], Plan):
             kwargs.update({"plan": kwargs["plan"].stripe_id})
@@ -888,13 +886,13 @@ class Subscription(StripeSubscription):
         stripe_subscription = super(Subscription, self).update(prorate=prorate, **kwargs)
         return Subscription.sync_from_stripe_data(stripe_subscription)
 
-    def extend(self, delta):
+    def extend(self, delta): # noqa
         stripe_subscription = super(Subscription, self).extend(delta)
         return Subscription.sync_from_stripe_data(stripe_subscription)
 
-    def cancel(self, at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END):
-        # If plan has trial days and customer cancels before trial period ends, then end subscription now,
-        #     i.e. at_period_end=False
+    def cancel(self, at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END): # noqa
+        # If plan has trial days and customer cancels before trial period ends,
+        # then end subscription now, i.e. at_period_end=False
         if self.trial_end and self.trial_end > timezone.now():
             at_period_end = False
 
