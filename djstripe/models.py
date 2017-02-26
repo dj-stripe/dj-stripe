@@ -159,12 +159,7 @@ class Customer(StripeCustomer):
                                on_delete=SET_NULL, related_name="customer")
     date_purged = DateTimeField(null=True, editable=False)
 
-    def str_parts(self):
-        """
-        Return a string repr of this data object.
-
-        Includes subscriber object.
-        """
+    def str_parts(self):  # noqa: D102
         parts = []
 
         if self.subscriber:
@@ -208,7 +203,7 @@ class Customer(StripeCustomer):
 
         return customer
 
-    def purge(self): # noqa
+    def purge(self):  # noqa: D102
         try:
             self._api_delete()
         except InvalidRequestError as exc:
@@ -335,7 +330,7 @@ class Customer(StripeCustomer):
 
         return charge
 
-    def add_invoice_item(self, amount, currency, **kwargs): # noqa
+    def add_invoice_item(self, amount, currency, **kwargs):  # noqa: D102
         # Convert Invoice to stripe_id
         if "invoice" in kwargs and isinstance(kwargs["invoice"], Invoice):
             kwargs.update({"invoice": kwargs["invoice"].stripe_id})
@@ -376,11 +371,7 @@ class Customer(StripeCustomer):
         """Check whether the customer has a valid payment source."""
         return self.default_source is not None
 
-    def add_card(self, source, set_default=True):
-        """Add a new card to this Customer.
-
-        Accepts set_default which will change the default card to the newly created.
-        """
+    def add_card(self, source, set_default=True):  # noqa: D102
         new_stripe_card = super(Customer, self).add_card(source, set_default)
         new_card = Card.sync_from_stripe_data(new_stripe_card)
 
