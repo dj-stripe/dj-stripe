@@ -70,14 +70,6 @@ PRORATION_POLICY = getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False)
 PRORATION_POLICY_FOR_UPGRADES = getattr(settings, 'DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES', False)
 CANCELLATION_AT_PERIOD_END = not getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False)
 
-DEFAULT_PLAN = getattr(settings, "DJSTRIPE_DEFAULT_PLAN", None)
-
-# Try to find the new settings variable first. If that fails, revert to the
-# old variable.
-trial_period_for_subscriber_callback = (
-    get_callback_function("DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK") or
-    get_callback_function("DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK"))
-
 DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
 
 # Webhook event callbacks allow an application to take control of what happens

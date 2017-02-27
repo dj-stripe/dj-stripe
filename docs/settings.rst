@@ -27,14 +27,6 @@ For more information on API versioning, see the `stripe documentation`_.
 .. _stripe documentation: https://stripe.com/docs/upgrades
 
 
-DJSTRIPE_DEFAULT_PLAN (=None)
-=============================
-
-Payment plans default.
-
-Possibly deprecated in favor of model based plans.
-
-
 DJSTRIPE_IDEMPOTENCY_KEY_CALLBACK (=djstripe.settings._get_idempotency_key)
 ===========================================================================
 
@@ -177,35 +169,6 @@ Examples:
 
 
 .. note:: This callback only becomes active when ``DJSTRIPE_SUBSCRIBER_MODEL`` is set.
-
-DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK (=None)
-=====================================================
-
-Used by ``djstripe.models.Customer`` only when creating stripe customers when you have a default plan set via ``DJSTRIPE_DEFAULT_PLAN``.
-
-This is called to dynamically add a trial period to a subscriber's plan. It must be a callable or importable string to a callable that takes a subscriber object and returns the number of days the trial period should last.
-
-Examples:
-
-.. code-block:: python
-
-    def static_trial_period(subscriber):
-        """ Adds a static trial period of 7 days to each subscriber's account."""
-        return 7
-
-
-    def dynamic_trial_period(subscriber):
-        """
-        Adds a static trial period of 7 days to each subscriber's plan,
-        unless they've accepted our month-long promotion.
-        """
-
-        if subscriber.coupons.get(slug="monthlongtrial"):
-            return 30
-        else:
-            return 7
-
-.. note:: This setting was named ``DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK`` prior to version 0.4
 
 
 DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")
