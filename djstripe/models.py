@@ -24,7 +24,6 @@ from django.db.models.fields.related import ForeignKey, OneToOneField
 from django.utils import six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.functional import cached_property
-from doc_inherit import class_doc_inherit
 from stripe.error import InvalidRequestError, StripeError
 
 from . import settings as djstripe_settings
@@ -49,10 +48,7 @@ logger = logging.getLogger(__name__)
 # ============================================================================ #
 
 
-@class_doc_inherit
 class Charge(StripeCharge):
-    __doc__ = getattr(StripeCharge, "__doc__")
-
     account = ForeignKey(
         "Account", on_delete=models.CASCADE, null=True,
         related_name="charges",
@@ -119,7 +115,6 @@ class Charge(StripeCharge):
             self.source = cls._stripe_object_to_source(target_cls=Card, data=data)
 
 
-@class_doc_inherit
 class Coupon(StripeCoupon):
     @property
     def human_readable_amount(self):
@@ -142,7 +137,6 @@ class Coupon(StripeCoupon):
         return "{amount} {duration}".format(amount=self.human_readable_amount, duration=duration)
 
 
-@class_doc_inherit
 @python_2_unicode_compatible
 class Customer(StripeCustomer):
     doc = """
@@ -150,8 +144,6 @@ class Customer(StripeCustomer):
 .. note:: Sources and Subscriptions are attached via a ForeignKey on StripeSource and Subscription, respectively. \
 Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
     """
-    __doc__ = getattr(StripeCustomer, "__doc__") + doc
-
     # account = ForeignKey(Account, related_name="customers")
 
     default_source = ForeignKey(StripeSource, null=True, related_name="customers", on_delete=SET_NULL)
@@ -507,10 +499,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
             Subscription.sync_from_stripe_data(stripe_subscription)
 
 
-@class_doc_inherit
 class Event(StripeEvent):
-    __doc__ = getattr(StripeEvent, "__doc__")
-
     # account = ForeignKey(Account, related_name="events")
 
     customer = ForeignKey(
@@ -659,10 +648,7 @@ class Payout(StripePayout):
     # failure_balance_transaction = ForeignKey("Transaction", null=True)
 
 
-@class_doc_inherit
 class Transfer(StripeTransfer):
-    __doc__ = getattr(StripeTransfer, "__doc__")
-
     # account = ForeignKey("Account", related_name="transfers")
 
     objects = TransferManager()
@@ -680,10 +666,7 @@ class Account(StripeAccount):
 #                               Payment Methods                                #
 # ============================================================================ #
 
-@class_doc_inherit
 class Card(StripeCard):
-    __doc__ = getattr(StripeCard, "__doc__")
-
     # account = ForeignKey("Account", null=True, related_name="cards")
 
     def _attach_objects_hook(self, cls, data):
@@ -722,10 +705,7 @@ class Card(StripeCard):
 # ============================================================================ #
 
 
-@class_doc_inherit
 class Invoice(StripeInvoice):
-    __doc__ = getattr(StripeInvoice, "__doc__")
-
     # account = ForeignKey("Account", related_name="invoices")
     customer = ForeignKey(
         Customer, on_delete=models.CASCADE,
@@ -815,10 +795,7 @@ class Invoice(StripeInvoice):
             return self.subscription.plan
 
 
-@class_doc_inherit
 class UpcomingInvoice(Invoice):
-    __doc__ = getattr(Invoice, "__doc__")
-
     def __init__(self, *args, **kwargs):
         super(UpcomingInvoice, self).__init__(*args, **kwargs)
         self._invoiceitems = []
@@ -857,10 +834,7 @@ class UpcomingInvoice(Invoice):
         return  # noop
 
 
-@class_doc_inherit
 class InvoiceItem(StripeInvoiceItem):
-    __doc__ = getattr(StripeInvoiceItem, "__doc__")
-
     # account = ForeignKey(Account, related_name="invoiceitems")
     customer = ForeignKey(
         Customer, on_delete=models.CASCADE,
@@ -918,11 +892,8 @@ class InvoiceItem(StripeInvoiceItem):
         return self.invoice.get_stripe_dashboard_url()
 
 
-@class_doc_inherit
 @python_2_unicode_compatible
 class Plan(StripePlan):
-    __doc__ = getattr(StripePlan, "__doc__")
-
     # account = ForeignKey("Account", related_name="plans")
 
     class Meta(object):
@@ -986,10 +957,7 @@ class Plan(StripePlan):
         self.save()
 
 
-@class_doc_inherit
 class Subscription(StripeSubscription):
-    __doc__ = getattr(StripeSubscription, "__doc__")
-
     # account = ForeignKey("Account", related_name="subscriptions")
     customer = ForeignKey(
         "Customer", on_delete=models.CASCADE,
