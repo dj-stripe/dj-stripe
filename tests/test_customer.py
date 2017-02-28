@@ -139,7 +139,7 @@ class TestCustomer(TestCase):
         self.assertEqual(1, Card.objects.count())
         self.assertEqual(FAKE_CARD["id"], self.customer.default_source.stripe_id)
 
-    @patch("stripe.Customer.retrieve")
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_cannot_charge(self, customer_retrieve_fake):
         self.customer.delete()
         self.assertFalse(self.customer.can_charge())
