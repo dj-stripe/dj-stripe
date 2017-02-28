@@ -54,6 +54,13 @@ class TestSyncSubscriber(TestCase):
 
         self.assertEqual("ERROR: No such customer:", sys.stdout.getvalue().strip())
 
+    def test_sync_deleted_customer(self):
+        stripe_id = FAKE_CUSTOMER["id"]
+        customer = Customer.objects.create(subscriber=self.user, stripe_id=stripe_id)
+        assert Customer.objects.filter(stripe_id=customer.stripe_id).count() == 1
+        Customer.sync_from_stripe_data({"id": stripe_id, "deleted": True})
+        assert Customer.objects.filter(stripe_id=customer.stripe_id).count() == 0
+
 
 class TestSyncPlans(TestCase):
 
