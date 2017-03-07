@@ -158,6 +158,9 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
     )
     date_purged = DateTimeField(null=True, editable=False)
 
+    class Meta:
+        unique_together = ("subscriber", "livemode")
+
     def str_parts(self):
         parts = []
 
