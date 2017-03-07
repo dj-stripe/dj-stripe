@@ -9,41 +9,13 @@
 from copy import deepcopy
 
 from django.contrib.auth import get_user_model
-from django.core.urlresolvers import reverse
-from django.http.request import HttpRequest
 from django.test.client import RequestFactory
 from django.test.testcases import TestCase
 from mock import patch
 
-from djstripe.mixins import SubscriptionPaymentRequiredMixin, PaymentsContextMixin, SubscriptionMixin
+from djstripe.mixins import PaymentsContextMixin, SubscriptionMixin
 from djstripe.models import Plan
 from tests import FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II
-
-
-class TestSubscriptionPaymentRequiredMixin(TestCase):
-
-    def setUp(self):
-        self.request = HttpRequest()
-        self.user = get_user_model().objects.create(username="x", email="user@test.com")
-        self.superuser = get_user_model().objects.create(username="y", email="superuser@test.com", is_superuser=True)
-
-    @patch("djstripe.mixins.subscriber_has_active_subscription", return_value=False)
-    def test_dispatch_inactive_subscription(self, subscriber_has_active_subscription_mock):
-        self.request.user = self.user
-
-        mixin = SubscriptionPaymentRequiredMixin()
-
-        response = mixin.dispatch(self.request)
-        self.assertEqual(response.url, reverse("djstripe:subscribe"))
-
-        subscriber_has_active_subscription_mock.assert_called_once_with(self.user)
-
-    @patch("djstripe.mixins.subscriber_has_active_subscription", return_value=True)
-    def test_dispatch_active_subscription(self, subscriber_has_active_subscription_mock):
-        self.request.user = self.superuser
-
-        mixin = SubscriptionPaymentRequiredMixin()
-        self.assertRaises(AttributeError, mixin.dispatch, self.request)
 
 
 class TestPaymentsContextMixin(TestCase):
