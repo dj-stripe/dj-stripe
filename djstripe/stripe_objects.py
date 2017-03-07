@@ -656,16 +656,6 @@ Fields not implemented:
 
         return target_cls._get_or_create_from_stripe_object(data["default_source"])[0]
 
-    def purge(self):
-        """Delete all identifying information we have in this record."""
-
-        # Delete deprecated card details
-        self.card_fingerprint = ""
-        self.card_last_4 = ""
-        self.card_kind = ""
-        self.card_exp_month = None
-        self.card_exp_year = None
-
     def subscribe(self, plan, application_fee_percent=None, coupon=None, quantity=None, metadata=None,
                   tax_percent=None, trial_end=None):
         """
