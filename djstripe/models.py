@@ -586,8 +586,8 @@ class Card(StripeCard):
         try:
             self._api_delete()
         except InvalidRequestError as exc:
-            if str(exc).startswith("No such customer:"):
-                # The exception was thrown because the stripe customer was already
+            if "No such source:" in str(exc) or "No such customer:" in str(exc):
+                # The exception was thrown because the stripe customer or card was already
                 # deleted on the stripe side, ignore the exception
                 pass
             else:
