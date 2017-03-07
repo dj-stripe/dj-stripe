@@ -416,7 +416,16 @@ class CancelSubscriptionViewTest(TestCase):
 
         response = self.client.post(self.url)
 
-        cancel_subscription_mock.assert_called_once_with()
+        self.assertEqual(response.status_code, 302)
+
+    @patch("djstripe.views.auth_logout", autospec=True)
+    @patch("djstripe.models.Subscription.cancel")
+    def test_cancel_no_subscription(self, cancel_subscription_mock, logout_mock):
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+
+        response = self.client.post(self.url)
+
+        cancel_subscription_mock.assert_not_called()
         self.assertEqual(response.status_code, 302)
 
         self.assertTrue(logout_mock.called)
@@ -432,7 +441,6 @@ class CancelSubscriptionViewTest(TestCase):
 
         response = self.client.post(self.url + "?next=/test")
 
-        cancel_subscription_mock.assert_called_once_with()
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, "/test")
 

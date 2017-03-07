@@ -277,6 +277,12 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
         customer, _created = Customer.get_or_create(
             subscriber=djstripe_settings.subscriber_request_callback(self.request)
         )
+
+        if not customer.subscription:
+            # This will trigger if the customer does not have a subscription,
+            # or it is already canceled. Do as if the subscription cancels successfully.
+            return self.status_cancel()
+
         subscription = customer.subscription.cancel()
 
         if subscription.status == subscription.STATUS_CANCELED:
