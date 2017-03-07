@@ -27,6 +27,8 @@ History
 * Customer is correctly purged when subscriber is deleted, regardless of how the deletion happened (Thanks @lskillen) #396
 * Test webhooks are now properly captured and logged. No more bounced requests to Stripe! (Thanks @jameshiew) #408
 * CancelSubscriptionView redirect is now more flexible (Thanks @jleclanche) #418
+* Customer.sync_cards() (Thanks @jleclanche) #438
+* Many stability fixes, bugfixes, and code cleanup (Thanks @jleclanche)
 
 0.8.0 (2015-12-30)
 ---------------------
