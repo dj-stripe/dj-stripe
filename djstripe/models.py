@@ -175,16 +175,19 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         return parts
 
     @classmethod
-    def get_or_create(cls, subscriber):
+    def get_or_create(cls, subscriber, livemode=djstripe_settings.STRIPE_LIVE_MODE):
         """
         Get or create a dj-stripe customer.
 
         :param subscriber: The subscriber model instance for which to get or create a customer.
         :type subscriber: User
+
+        :param livemode: Whether to get the subscriber in live or test mode.
+        :type livemode: bool
         """
 
         try:
-            return Customer.objects.get(subscriber=subscriber), False
+            return Customer.objects.get(subscriber=subscriber, livemode=livemode), False
         except Customer.DoesNotExist:
             return cls.create(subscriber), True
 
