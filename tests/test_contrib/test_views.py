@@ -55,8 +55,9 @@ class RestSubscriptionTest(APITestCase):
         }
         response = self.client.post(self.url, data)
         self.assertEqual(1, Customer.objects.count())
-        add_card_mock.assert_called_once_with(self.user.customer, "cake")
-        subscribe_mock.assert_called_once_with(self.user.customer, "test0", True)
+        customer = Customer.objects.get()
+        add_card_mock.assert_called_once_with(customer, "cake")
+        subscribe_mock.assert_called_once_with(customer, "test0", True)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data, data)
 
@@ -76,7 +77,9 @@ class RestSubscriptionTest(APITestCase):
             "charge_immediately": False,
         }
         response = self.client.post(self.url, data)
-        subscribe_mock.assert_called_once_with(self.user.customer, "test0", False)
+        self.assertEqual(1, Customer.objects.count())
+        customer = Customer.objects.get()
+        subscribe_mock.assert_called_once_with(customer, "test0", False)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data, data)
 

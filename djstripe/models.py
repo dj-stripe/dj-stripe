@@ -152,8 +152,10 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
     default_source = ForeignKey(StripeSource, null=True, related_name="customers", on_delete=SET_NULL)
 
-    subscriber = OneToOneField(djstripe_settings.get_subscriber_model_string(), null=True,
-                               on_delete=SET_NULL, related_name="customer")
+    subscriber = ForeignKey(
+        djstripe_settings.get_subscriber_model_string(), null=True,
+        on_delete=SET_NULL, related_name="djstripe_customers"
+    )
     date_purged = DateTimeField(null=True, editable=False)
 
     def str_parts(self):

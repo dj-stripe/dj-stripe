@@ -88,9 +88,11 @@ class ChangeCardViewTest(TestCase):
     def test_post_new_card(self, stripe_customer_create_mock, add_card_mock, send_invoice_mock,
                            retry_unpaid_invoices_mock):
         self.client.post(self.url, {"stripe_token": "alpha"})
-        add_card_mock.assert_called_once_with(self.user.customer, "alpha")
-        send_invoice_mock.assert_called_with(self.user.customer)
-        retry_unpaid_invoices_mock.assert_called_once_with(self.user.customer)
+        self.assertEqual(1, Customer.objects.count())
+        customer = Customer.objects.get()
+        add_card_mock.assert_called_once_with(customer, "alpha")
+        send_invoice_mock.assert_called_with(customer)
+        retry_unpaid_invoices_mock.assert_called_once_with(customer)
 
     # Needs to be refactored to use sources
     @patch("djstripe.models.Customer.retry_unpaid_invoices", autospec=True)
@@ -106,9 +108,9 @@ class ChangeCardViewTest(TestCase):
 
         self.client.post(self.url, {"stripe_token": "beta"})
         self.assertEqual(1, Customer.objects.count())
-        add_card_mock.assert_called_once_with(self.user.customer, "beta")
+        add_card_mock.assert_called_once_with(customer, "beta")
         self.assertFalse(send_invoice_mock.called)
-        retry_unpaid_invoices_mock.assert_called_once_with(self.user.customer)
+        retry_unpaid_invoices_mock.assert_called_once_with(customer)
 
     # Needs to be refactored to use sources
     @patch("djstripe.models.Customer.add_card", autospec=True)
@@ -117,7 +119,9 @@ class ChangeCardViewTest(TestCase):
         add_card_mock.side_effect = StripeError("An error occurred while processing your card.")
 
         response = self.client.post(self.url, {"stripe_token": "pie"})
-        add_card_mock.assert_called_once_with(self.user.customer, "pie")
+        self.assertEqual(1, Customer.objects.count())
+        customer = Customer.objects.get()
+        add_card_mock.assert_called_once_with(customer, "pie")
         self.assertIn("stripe_error", response.context)
         self.assertIn("An error occurred while processing your card.", response.context["stripe_error"])
 
@@ -128,7 +132,9 @@ class ChangeCardViewTest(TestCase):
         add_card_mock.side_effect = StripeError("Invalid source object:")
 
         response = self.client.post(self.url)
-        add_card_mock.assert_called_once_with(self.user.customer, None)
+        self.assertEqual(1, Customer.objects.count())
+        customer = Customer.objects.get()
+        add_card_mock.assert_called_once_with(customer, None)
         self.assertIn("stripe_error", response.context)
         self.assertIn("Invalid source object:", response.context["stripe_error"])
 
@@ -239,8 +245,9 @@ class ConfirmFormViewTest(TestCase):
         response = self.client.post(self.url, {"plan": self.plan.id, "stripe_token": "cake"})
 
         self.assertEqual(1, Customer.objects.count())
-        add_card_mock.assert_called_once_with(self.user.customer, "cake")
-        subscribe_mock.assert_called_once_with(self.user.customer, self.plan)
+        customer = Customer.objects.get()
+        add_card_mock.assert_called_once_with(customer, "cake")
+        subscribe_mock.assert_called_once_with(customer, self.plan)
 
         self.assertRedirects(response, reverse("djstripe:history"))
 

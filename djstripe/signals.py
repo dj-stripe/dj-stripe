@@ -11,7 +11,6 @@
 Stripe docs for Webhooks: https://stripe.com/docs/webhooks
 """
 
-from django.core.exceptions import ObjectDoesNotExist
 from django.dispatch import Signal, receiver
 from django.db.models.signals import pre_delete
 from . import settings as djstripe_settings
@@ -86,9 +85,5 @@ WEBHOOK_SIGNALS = dict([
 @receiver(pre_delete, sender=djstripe_settings.get_subscriber_model_string())
 def on_delete_subscriber_purge_customer(instance=None, **kwargs):
     """ Purge associated customers when the subscriber is deleted. """
-    try:
-        customer = instance.customer
-    except (AttributeError, ObjectDoesNotExist):
-        return
-
-    customer.purge()
+    for customer in instance.djstripe_customers.all():
+        customer.purge()

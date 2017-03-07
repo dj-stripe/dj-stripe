@@ -656,7 +656,6 @@ class TestCustomer(TestCase):
 
     @patch("stripe.Customer.retrieve")
     def test_delete_subscriber_without_customer_is_noop(self, customer_retrieve_mock):
-        customer = self.user.customer
-        self.user.customer = None
         self.user.delete()
-        self.assertIsNone(customer.date_purged)
+        for customer in self.user.djstripe_customers.all():
+            self.assertIsNone(customer.date_purged)
