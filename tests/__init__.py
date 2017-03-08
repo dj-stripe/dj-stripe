@@ -642,6 +642,10 @@ FAKE_CUSTOMER_II = CustomerDict({
 })
 
 
+FAKE_CUSTOMER_DEFAULT_SOURCE_STRING = deepcopy(FAKE_CUSTOMER)
+FAKE_CUSTOMER_DEFAULT_SOURCE_STRING["default_source"] = FAKE_CARD["id"]
+
+
 class InvoiceDict(dict):
     def pay(self):
         return self

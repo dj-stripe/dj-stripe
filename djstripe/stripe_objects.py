@@ -657,20 +657,6 @@ Fields not implemented:
     )
     shipping = StripeJSONField(null=True, help_text="Shipping information associated with the customer.")
 
-    @classmethod
-    def _stripe_object_default_source_to_source(cls, target_cls, data):
-        """
-        Search the given manager for the source matching this StripeCharge object's ``default_source`` field.
-        Note that the source field is already expanded in each request, and that it is required.
-
-        :param target_cls: The target class
-        :type target_cls: StripeSource
-        :param data: stripe object
-        :type data: dict
-        """
-
-        return target_cls._get_or_create_from_stripe_object(data["default_source"])[0]
-
     def subscribe(self, plan, application_fee_percent=None, coupon=None, quantity=None, metadata=None,
                   tax_percent=None, trial_end=None):
         """
