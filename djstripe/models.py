@@ -65,7 +65,7 @@ class Charge(StripeCharge):
     )
 
     customer = ForeignKey(
-        "Customer", on_delete=models.CASCADE,
+        "Customer", on_delete=models.CASCADE, null=True,
         related_name="charges",
         help_text="The customer associated with this charge."
     )
