@@ -88,6 +88,10 @@ DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
 WEBHOOK_EVENT_CALLBACK = get_callback_function("DJSTRIPE_WEBHOOK_EVENT_CALLBACK")
 
 
+# Determines whether we are in live mode or test mode, based on the value of the public key.
+STRIPE_LIVE_MODE = getattr(settings, "STRIPE_PUBLIC_KEY", "").startswith("pk_live_")
+
+
 def get_subscriber_model_string():
     """Get the configured subscriber model as a module path string."""
     return getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", settings.AUTH_USER_MODEL)

@@ -152,9 +152,14 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
     default_source = ForeignKey(StripeSource, null=True, related_name="customers", on_delete=SET_NULL)
 
-    subscriber = OneToOneField(djstripe_settings.get_subscriber_model_string(), null=True,
-                               on_delete=SET_NULL, related_name="customer")
+    subscriber = ForeignKey(
+        djstripe_settings.get_subscriber_model_string(), null=True,
+        on_delete=SET_NULL, related_name="djstripe_customers"
+    )
     date_purged = DateTimeField(null=True, editable=False)
+
+    class Meta:
+        unique_together = ("subscriber", "livemode")
 
     def str_parts(self):
         parts = []
@@ -170,16 +175,19 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         return parts
 
     @classmethod
-    def get_or_create(cls, subscriber):
+    def get_or_create(cls, subscriber, livemode=djstripe_settings.STRIPE_LIVE_MODE):
         """
         Get or create a dj-stripe customer.
 
         :param subscriber: The subscriber model instance for which to get or create a customer.
         :type subscriber: User
+
+        :param livemode: Whether to get the subscriber in live or test mode.
+        :type livemode: bool
         """
 
         try:
-            return Customer.objects.get(subscriber=subscriber), False
+            return Customer.objects.get(subscriber=subscriber, livemode=livemode), False
         except Customer.DoesNotExist:
             return cls.create(subscriber), True
 
