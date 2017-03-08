@@ -123,8 +123,6 @@ class Charge(StripeCharge):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
         if customer:
             self.customer = customer
-        else:
-            raise ValidationError("A customer was not attached to this charge.")
 
         transfer = cls._stripe_object_to_transfer(target_cls=Transfer, data=data)
         if transfer:
