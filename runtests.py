@@ -1,3 +1,5 @@
+"""Module used to run tests for dj-stripe."""
+
 from argparse import ArgumentParser
 import os
 import sys
@@ -13,6 +15,7 @@ TESTS_THRESHOLD = 100
 
 
 def main():
+    """Parse arguments and run main test suite."""
     parser = ArgumentParser(description='Run the dj-stripe Test Suite.')
     parser.add_argument(
         "--skip-utc",
@@ -32,6 +35,10 @@ def main():
 
 
 def run_test_suite(args):
+    """Main dj-stripe test suite.
+
+    Configures settings, runs tests with coverage, runs flake8.
+    """
     skip_utc = args.skip_utc
     enable_coverage = not args.no_coverage
     enable_pep8 = not args.no_pep8
@@ -214,7 +221,6 @@ def run_test_suite(args):
         # Announce disabled coverage run
         sys.stdout.write(colored(text="\nStep 2: Generating coverage results [SKIPPED].",
                                  color="yellow", attrs=["bold"]))
-
     if enable_pep8:
         # Announce flake8 run
         sys.stdout.write(colored(text="\nStep 3: Checking for pep8 errors.\n\n", color="yellow", attrs=["bold"]))
