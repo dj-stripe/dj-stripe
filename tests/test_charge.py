@@ -66,6 +66,23 @@ class ChargeTest(TestCase):
         self.assertEqual("card", charge.source_type)
 
     @patch("djstripe.models.Account.get_default_account")
+    def test_sync_from_stripe_data_max_amount(self, default_account_mock):
+        default_account_mock.return_value = self.account
+
+        fake_charge_copy = deepcopy(FAKE_CHARGE)
+        # https://support.stripe.com/questions/what-is-the-maximum-amount-i-can-charge-with-stripe
+        fake_charge_copy.update({"amount": 99999999})
+
+        charge = Charge.sync_from_stripe_data(fake_charge_copy)
+
+        self.assertEqual(Decimal("999999.99"), charge.amount)
+        self.assertEqual(True, charge.paid)
+        self.assertEqual(False, charge.refunded)
+        self.assertEqual(True, charge.captured)
+        self.assertEqual(False, charge.disputed)
+        self.assertEqual(0, charge.amount_refunded)
+
+    @patch("djstripe.models.Account.get_default_account")
     def test_sync_from_stripe_data_unsupported_source(self, default_account_mock):
         default_account_mock.return_value = self.account
 

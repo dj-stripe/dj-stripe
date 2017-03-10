@@ -113,7 +113,7 @@ class StripeCurrencyField(StripeFieldMixin, models.DecimalField):
         """Assign default args to this field."""
         defaults = {
             'decimal_places': 2,
-            'max_digits': 7,
+            'max_digits': 8,
         }
         defaults.update(kwargs)
         super(StripeCurrencyField, self).__init__(*args, **defaults)
