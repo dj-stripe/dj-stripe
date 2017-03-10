@@ -143,6 +143,15 @@ class StripeObjectAdmin(admin.ModelAdmin):
     def get_search_fields(self, request):
         return self.search_fields + ("stripe_id", )
 
+    def get_fieldsets(self, request, obj=None):
+        common_fields = ("livemode", "stripe_id", "stripe_timestamp")
+        # Have to remove the fields from the common set, otherwise they'll show up twice.
+        fields = [f for f in self.get_fields(request, obj) if f not in common_fields]
+        return (
+            (None, {"fields": common_fields}),
+            (self.model.__name__, {"fields": fields}),
+        )
+
 
 def reprocess_events(modeladmin, request, queryset):
     """Re-process the selected webhook events.
