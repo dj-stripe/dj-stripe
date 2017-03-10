@@ -273,6 +273,10 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         return len(self._get_valid_subscriptions()) != 0
 
     @property
+    def valid_subscriptions(self):
+        return self.subscriptions.exclude(status="canceled")
+
+    @property
     def subscription(self):
         """
         Shortcut to get this customer's subscription.
@@ -283,7 +287,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
                 In this case, use ``Customer.subscriptions`` instead.
         """
 
-        subscriptions = self.subscriptions.exclude(status="canceled")
+        subscriptions = self.valid_subscriptions
 
         if subscriptions.count() > 1:
             raise MultipleSubscriptionException("This customer has multiple subscriptions. Use Customer.subscriptions "
