@@ -22,11 +22,10 @@ matrix:
     - python: "3.6"
       env: TOXENV=py35
 
-
-# Leverage the pip cache
 cache:
   directories:
     - $HOME/.cache/pip
+    - $TRAVIS_BUILD_DIR/.tox
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
