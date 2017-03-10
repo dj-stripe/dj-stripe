@@ -29,8 +29,6 @@ from polymorphic.models import PolymorphicModel
 import stripe
 from stripe.error import InvalidRequestError
 
-from djstripe.exceptions import CustomerDoesNotExistLocallyException
-
 from . import settings as djstripe_settings
 from .context_managers import stripe_temporary_api_version
 from .exceptions import StripeObjectManipulationException
@@ -289,12 +287,7 @@ class StripeObject(models.Model):
         """
 
         if "customer" in data and data["customer"]:
-            # We never want to create a customer that doesn't already exist in our database.
-            try:
-                return target_cls.stripe_objects.get_by_json(data, "customer")
-            except target_cls.DoesNotExist:
-                raise CustomerDoesNotExistLocallyException("Because customers are tied to local users, djstripe will "
-                                                           "not create customers that do not already exist locally.")
+            return target_cls._get_or_create_from_stripe_object(data, "customer")[0]
 
     @classmethod
     def _stripe_object_to_transfer(cls, target_cls, data):
