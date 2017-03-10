@@ -19,4 +19,4 @@ class IdempotencyKeyTest(TestCase):
         self.assertEquals(IdempotencyKey.objects.count(), 3)
         key1_obj = IdempotencyKey.objects.get(action="customer:create:1", livemode=False)
         self.assertFalse(key1_obj.is_expired)
-        self.assertEquals(str(key1_obj), key1_obj.uuid)
+        self.assertEquals(str(key1_obj), str(key1_obj.uuid))

@@ -12,8 +12,8 @@
 from django.contrib import admin
 
 from .models import (
-    Charge, Customer, Event, EventProcessingException, Invoice, InvoiceItem,
-    Plan, Subscription, Transfer
+    Charge, Customer, Event, EventProcessingException, IdempotencyKey, Invoice,
+    InvoiceItem, Plan, Subscription, Transfer
 )
 
 
@@ -119,6 +119,13 @@ class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
             return queryset.all()
         else:
             return queryset.filter(subscriptions__status=self.value()).distinct()
+
+
+@admin.register(IdempotencyKey)
+class IdempotencyKeyAdmin(admin.ModelAdmin):
+    list_display = ("uuid", "action", "created", "is_expired", "livemode")
+    list_filter = ("livemode", )
+    search_fields = ("uuid", "action")
 
 
 @admin.register(EventProcessingException)
