@@ -191,12 +191,12 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
             return cls.create(subscriber), True
 
     @classmethod
-    def create(cls, subscriber):
+    def create(cls, subscriber, idempotency_key=None):
         trial_days = None
         if djstripe_settings.trial_period_for_subscriber_callback:
             trial_days = djstripe_settings.trial_period_for_subscriber_callback(subscriber)
 
-        stripe_customer = cls._api_create(email=subscriber.email)
+        stripe_customer = cls._api_create(email=subscriber.email, idempotency_key=idempotency_key)
         customer, created = Customer.objects.get_or_create(
             stripe_id=stripe_customer["id"],
             defaults={"subscriber": subscriber, "currency": "usd"}
