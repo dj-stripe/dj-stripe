@@ -12,6 +12,7 @@
 from __future__ import unicode_literals
 
 import logging
+import uuid
 import sys
 
 from django.conf import settings
@@ -19,9 +20,11 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMessage
 from django.db import models
+from django.db.models.fields import (
+    BooleanField, CharField, DateTimeField, NullBooleanField, TextField, UUIDField
+)
 from django.db.models.fields.related import ForeignKey, OneToOneField
 from django.db.models.deletion import SET_NULL
-from django.db.models.fields import BooleanField, DateTimeField, NullBooleanField, TextField, CharField
 from django.template.loader import render_to_string
 from django.utils import six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
@@ -188,7 +191,9 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         try:
             return Customer.objects.get(subscriber=subscriber, livemode=livemode), False
         except Customer.DoesNotExist:
-            return cls.create(subscriber), True
+            action = "customer:create:%s" % (subscriber.pk)
+            idempotency_key, _ = IdempotencyKey.objects.get_or_create(action=action)
+            return cls.create(subscriber, idempotency_key=str(idempotency_key.uuid)), True
 
     @classmethod
     def create(cls, subscriber, idempotency_key=None):
@@ -922,6 +927,16 @@ class Subscription(StripeSubscription):
 # ============================================================================ #
 #                             DJ-STRIPE RESOURCES                              #
 # ============================================================================ #
+
+@python_2_unicode_compatible
+class IdempotencyKey(models.Model):
+    uuid = UUIDField(max_length=36, primary_key=True, editable=False, default=uuid.uuid4)
+    action = CharField(unique=True, max_length=100)
+    created = DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return str(self.uuid)
+
 
 @python_2_unicode_compatible
 class EventProcessingException(models.Model):
