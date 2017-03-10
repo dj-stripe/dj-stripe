@@ -127,6 +127,9 @@ class EventProcessingExceptionAdmin(admin.ModelAdmin):
     raw_id_fields = ("event", )
     search_fields = ("message", "traceback", "data")
 
+    def has_add_permission(self, request):
+        return False
+
 
 class StripeObjectAdmin(admin.ModelAdmin):
     """Base class for all StripeObject-based model admins"""
@@ -268,6 +271,9 @@ class EventAdmin(StripeObjectAdmin):
     list_filter = ("type", "created", "valid", "processed")
     actions = (reprocess_events, )
     # radio_fields = {"valid": admin.HORIZONTAL}
+
+    def has_add_permission(self, request):
+        return False
 
 
 @admin.register(Invoice)
