@@ -14,6 +14,7 @@ from __future__ import unicode_literals
 import logging
 import uuid
 import sys
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -936,6 +937,10 @@ class IdempotencyKey(models.Model):
 
     def __str__(self):
         return str(self.uuid)
+
+    @property
+    def is_expired(self):
+        return timezone.now() > self.created + timedelta(hours=24)
 
 
 @python_2_unicode_compatible
