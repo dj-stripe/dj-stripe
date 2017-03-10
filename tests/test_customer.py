@@ -317,7 +317,8 @@ class TestCustomer(TestCase):
         Customer.create(user, idempotency_key="foo")
 
         create_mock.assert_called_once_with(
-            api_key=settings.STRIPE_SECRET_KEY, email=user.email, idempotency_key="foo"
+            api_key=settings.STRIPE_SECRET_KEY, email=user.email, idempotency_key="foo",
+            metadata={"djstripe_subscriber": user.id}
         )
         callback_mock.assert_called_once_with(user)
 
@@ -330,7 +331,8 @@ class TestCustomer(TestCase):
         Customer.create(user, idempotency_key="foo")
 
         create_mock.assert_called_once_with(
-            api_key=settings.STRIPE_SECRET_KEY, email=user.email, idempotency_key="foo"
+            api_key=settings.STRIPE_SECRET_KEY, email=user.email, idempotency_key="foo",
+            metadata={"djstripe_subscriber": user.id}
         )
         callback_mock.assert_called_once_with(user)
 

@@ -51,7 +51,8 @@ class AccountViewTest(TestCase):
 
         # simply visiting the page should generate a new customer record.
         stripe_create_customer_mock.assert_called_once_with(
-            api_key=settings.STRIPE_SECRET_KEY, email=self.user.email, idempotency_key="foo"
+            api_key=settings.STRIPE_SECRET_KEY, email=self.user.email, idempotency_key="foo",
+            metadata={"djstripe_subscriber": self.user.id}
         )
 
         self.assertEqual(FAKE_CUSTOMER["id"], response.context["customer"].stripe_id)
@@ -187,7 +188,8 @@ class HistoryViewTest(TestCase):
         object_a = view_instance.get_object()
 
         stripe_create_customer_mock.assert_called_once_with(
-            api_key=settings.STRIPE_SECRET_KEY, email=self.user.email, idempotency_key="foo"
+            api_key=settings.STRIPE_SECRET_KEY, email=self.user.email, idempotency_key="foo",
+            metadata={"djstripe_subscriber": self.user.id}
         )
 
         customer_instance = Customer.objects.get(subscriber=self.user)

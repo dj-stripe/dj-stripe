@@ -202,7 +202,11 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         if djstripe_settings.trial_period_for_subscriber_callback:
             trial_days = djstripe_settings.trial_period_for_subscriber_callback(subscriber)
 
-        stripe_customer = cls._api_create(email=subscriber.email, idempotency_key=idempotency_key)
+        stripe_customer = cls._api_create(
+            email=subscriber.email,
+            idempotency_key=idempotency_key,
+            metadata={"djstripe_subscriber": subscriber.pk}
+        )
         customer, created = Customer.objects.get_or_create(
             stripe_id=stripe_customer["id"],
             defaults={"subscriber": subscriber, "currency": "usd"}
