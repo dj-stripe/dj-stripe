@@ -87,8 +87,7 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
    Note that if your system time is not in UTC, some tests will fail. If you want to ignore
    those tests, the --skip-utc command line option is available on runtests.py.::
 
-    $ pip install -r requirements_test.txt
-    $ python runtests.py
+    $ pip install -r tests/requirements.txt
     $ tox
 
 7. Commit your changes and push your branch to GitHub::
