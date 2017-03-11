@@ -11,7 +11,7 @@ from __future__ import unicode_literals
 import json
 import logging
 
-from braces.views import CsrfExemptMixin, FormValidMessageMixin, SelectRelatedMixin
+from braces.views import FormValidMessageMixin, SelectRelatedMixin
 from django.contrib import messages
 from django.contrib.auth import logout as auth_logout, REDIRECT_FIELD_NAME
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -19,8 +19,10 @@ from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponse
 from django.http.response import HttpResponseNotFound
 from django.shortcuts import render, redirect
+from django.utils.decorators import method_decorator
 from django.utils.encoding import smart_str
 from django.utils.http import is_safe_url
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView, FormView, TemplateView, View
 from stripe.error import StripeError
 
@@ -111,7 +113,8 @@ class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
         return customer
 
 
-class SyncHistoryView(CsrfExemptMixin, LoginRequiredMixin, View):
+@method_decorator(csrf_exempt, name="dispatch")
+class SyncHistoryView(LoginRequiredMixin, View):
     """TODO: Needs to be refactored to leverage context data."""
 
     template_name = "djstripe/includes/_history_table.html"
@@ -311,7 +314,8 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
 # ============================================================================ #
 
 
-class WebHook(CsrfExemptMixin, View):
+@method_decorator(csrf_exempt, name="dispatch")
+class WebHook(View):
     """A view used to handle webhooks."""
 
     def post(self, request, *args, **kwargs):
