@@ -9,25 +9,36 @@ addons:
 
 env:
   - TOXENV=py27-django110
+  - TOXENV=py27-django111
   - TOXENV=py34-django110
+  - TOXENV=py34-django111
   - TOXENV=py35-django110
-  - TOXENV=py36-django110
+  - TOXENV=py35-django111
+  - TOXENV=py36-django111
 
 matrix:
   fast_finish: true
   include:
     - python: "3.5"
       env: TOXENV=py35-django110
+    - python: "3.5"
+      env: TOXENV=py35-django111
   exclude:
     - python: "3.6"
       env: TOXENV=py35-django110
+    - python: "3.6"
+      env: TOXENV=py35-django111
+  allow_failures:
+    - env: TOXENV=py27-django111
+    - env: TOXENV=py34-django111
+    - env: TOXENV=py35-django111
+    - env: TOXENV=py36-django111
 
 cache:
   directories:
     - $HOME/.cache/pip
     - $TRAVIS_BUILD_DIR/.tox
 
-# command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
   - pip install tox codecov
 
