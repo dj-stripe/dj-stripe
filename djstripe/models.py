@@ -476,8 +476,17 @@ class Event(StripeEvent):
         This function makes an API call to Stripe to re-download the Event data. It then
         marks this record's valid flag to True or False.
         """
+        if self.livemode is None:
+            # Livemode is unknown. Use the default secret key.
+            api_key = djstripe_settings.STRIPE_SECRET_KEY
+        elif self.livemode:
+            # Livemode is true, use the live secret key
+            api_key = djstripe_settings.LIVE_API_KEY
+        else:
+            # Livemode is false, use the test secret key
+            api_key = djstripe_settings.TEST_API_KEY
 
-        self.valid = self.webhook_message == self.api_retrieve()["data"]
+        self.valid = self.webhook_message == self.api_retrieve(api_key=api_key)["data"]
         self.save()
 
     def process(self, force=False, raise_exception=False):
