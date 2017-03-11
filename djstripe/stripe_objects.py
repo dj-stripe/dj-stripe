@@ -22,7 +22,6 @@ from copy import deepcopy
 import decimal
 import sys
 
-from django.conf import settings
 from django.db import models
 from django.utils import dateformat, six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
@@ -32,6 +31,7 @@ from stripe.error import InvalidRequestError
 
 from djstripe.exceptions import CustomerDoesNotExistLocallyException
 
+from . import settings
 from .context_managers import stripe_temporary_api_version
 from .exceptions import StripeObjectManipulationException
 from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, StripePercentField, StripeCurrencyField,
