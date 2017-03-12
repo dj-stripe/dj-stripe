@@ -9,6 +9,30 @@ Payment plans default.
 
 Possibly deprecated in favor of model based plans.
 
+
+DJSTRIPE_IDEMPOTENCY_KEY_CALLBACK (=djstripe.settings._get_idempotency_key)
+===========================================================================
+
+A function which will return an idempotency key for a particular object_type
+and action pair. By default, this is set to a function which will create a
+``djstripe.IdempotencyKey`` object and return its ``uuid``.
+You may want to customize this if you want to give your idempotency keys a
+different lifecycle than they normally would get.
+
+The function takes the following signature:
+
+.. code-block:: python
+
+    def get_idempotency_key(object_type: str, action: str, livemode: bool):
+        return "<idempotency key>"
+
+The function MUST return a string suitably random for the object_type/action
+pair, and usable in the Stripe ``Idempotency-Key`` HTTP header.
+For more information, see the `stripe documentation`_.
+
+.. _stripe documentation: https://stripe.com/docs/api/curl#idempotent_requests
+
+
 DJSTRIPE_INVOICE_FROM_EMAIL (="billing@example.com")
 ====================================================
 
