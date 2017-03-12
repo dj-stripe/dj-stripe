@@ -103,13 +103,26 @@ class StripeObject(models.Model):
                 stripe_id=self.stripe_id
             )
 
-    def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
+    @property
+    def default_api_key(self):
+        if self.livemode is None:
+            # Livemode is unknown. Use the default secret key.
+            return settings.STRIPE_SECRET_KEY
+        elif self.livemode:
+            # Livemode is true, use the live secret key
+            return settings.LIVE_API_KEY
+        else:
+            # Livemode is false, use the test secret key
+            return settings.TEST_API_KEY
+
+    def api_retrieve(self, api_key=None):
         """
         Call the stripe API's retrieve operation for this model.
 
         :param api_key: The api key to use for this request. Defaults to settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
+        api_key = api_key or self.default_api_key
 
         return self.stripe_class.retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
 
@@ -139,13 +152,14 @@ class StripeObject(models.Model):
 
         return cls.stripe_class.create(api_key=api_key, **kwargs)
 
-    def _api_delete(self, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_delete(self, api_key=None, **kwargs):
         """
         Call the stripe API's delete operation for this model
 
         :param api_key: The api key to use for this request. Defualts to settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
+        api_key = api_key or self.default_api_key
 
         return self.api_retrieve(api_key=api_key).delete(**kwargs)
 
@@ -928,10 +942,11 @@ Fields not implemented:
             "type={type}".format(type=self.type),
         ] + super(StripeEvent, self).str_parts()
 
-    def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
+    def api_retrieve(self, api_key=None):
         # OVERRIDING the parent version of this function
         # Event retrieve is special. For Event we don't retrieve using djstripe's API version. We always retrieve
         # using the API version that was used to send the Event (which depends on the Stripe account holders settings
+        api_key = api_key or self.default_api_key
         with stripe_temporary_api_version(self.received_api_version):
             stripe_event = super(StripeEvent, self).api_retrieve(api_key)
 
@@ -1196,11 +1211,12 @@ Fields not implemented:
         help_text="If the card number is tokenized, this is the method that was used."
     )
 
-    def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
+    def api_retrieve(self, api_key=None):
         # OVERRIDING the parent version of this function
         # Cards must be manipulated through a customer or account.
         # TODO: When managed accounts are supported, this method needs to check if
         # either a customer or account is supplied to determine the correct object to use.
+        api_key = api_key or self.default_api_key
         customer = self.customer.api_retrieve(api_key=api_key)
 
         # If the customer is deleted, the sources attribute will be absent.
