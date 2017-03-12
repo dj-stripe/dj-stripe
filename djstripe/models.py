@@ -192,9 +192,9 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         try:
             return Customer.objects.get(subscriber=subscriber, livemode=livemode), False
         except Customer.DoesNotExist:
-            action = "customer:create:%s" % (subscriber.pk)
-            idempotency_key, _ = IdempotencyKey.objects.get_or_create(action=action)
-            return cls.create(subscriber, idempotency_key=str(idempotency_key.uuid)), True
+            action = "create:{}".format(subscriber.pk)
+            idempotency_key = djstripe_settings.get_idempotency_key("customer", action, livemode)
+            return cls.create(subscriber, idempotency_key=idempotency_key), True
 
     @classmethod
     def create(cls, subscriber, idempotency_key=None):

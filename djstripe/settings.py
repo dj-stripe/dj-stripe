@@ -50,6 +50,17 @@ def get_callback_function(setting_name, default=None):
 subscriber_request_callback = get_callback_function("DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK",
                                                     default=(lambda request: request.user))
 
+
+def _get_idempotency_key(object_type, action, livemode):
+    from .models import IdempotencyKey
+    action = "{}:{}".format(object_type, action)
+    idempotency_key, _created = IdempotencyKey.objects.get_or_create(action=action)
+    return str(idempotency_key.uuid)
+
+
+get_idempotency_key = get_callback_function("DJSTRIPE_IDEMPOTENCY_KEY_CALLBACK", _get_idempotency_key)
+
+
 INVOICE_FROM_EMAIL = getattr(settings, "DJSTRIPE_INVOICE_FROM_EMAIL", "billing@example.com")
 PAYMENTS_PLANS = getattr(settings, "DJSTRIPE_PLANS", {})
 PLAN_HIERARCHY = getattr(settings, "DJSTRIPE_PLAN_HIERARCHY", {})
