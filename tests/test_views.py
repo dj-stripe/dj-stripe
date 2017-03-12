@@ -43,13 +43,16 @@ class AccountViewTest(TestCase):
         Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN_II))
 
     @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
-    def test_autocreate_customer(self, stripe_create_customer_mock):
+    @patch("djstripe.models.djstripe_settings.get_idempotency_key", return_value="foo")
+    def test_autocreate_customer(self, idempotency_key_mock, stripe_create_customer_mock):
         self.assertEqual(Customer.objects.count(), 0)
 
         response = self.client.get(self.url)
 
         # simply visiting the page should generate a new customer record.
-        stripe_create_customer_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, email=self.user.email)
+        stripe_create_customer_mock.assert_called_once_with(
+            api_key=settings.STRIPE_SECRET_KEY, email=self.user.email, idempotency_key="foo"
+        )
 
         self.assertEqual(FAKE_CUSTOMER["id"], response.context["customer"].stripe_id)
         self.assertEqual(self.user, response.context["customer"].subscriber)
@@ -173,8 +176,9 @@ class HistoryViewTest(TestCase):
         )
         self.assertTrue(self.client.login(username="pydanny", password="password"))
 
+    @patch("djstripe.models.djstripe_settings.get_idempotency_key", return_value="foo")
     @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
-    def test_get_object(self, stripe_create_customer_mock):
+    def test_get_object(self, stripe_create_customer_mock, idempotency_key_mock):
         view_instance = HistoryView()
         request = RequestFactory()
         request.user = self.user
@@ -182,7 +186,9 @@ class HistoryViewTest(TestCase):
         view_instance.request = request
         object_a = view_instance.get_object()
 
-        stripe_create_customer_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, email=self.user.email)
+        stripe_create_customer_mock.assert_called_once_with(
+            api_key=settings.STRIPE_SECRET_KEY, email=self.user.email, idempotency_key="foo"
+        )
 
         customer_instance = Customer.objects.get(subscriber=self.user)
         self.assertEqual(customer_instance, object_a)

@@ -312,22 +312,26 @@ class TestCustomer(TestCase):
 
     @patch("djstripe.models.djstripe_settings.trial_period_for_subscriber_callback", return_value=7)
     @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER_II))
-    def test_create_trial_callback_without_default_plan(self, customer_create_mock, callback_mock):
+    def test_create_trial_callback_without_default_plan(self, create_mock, callback_mock):
         user = get_user_model().objects.create_user(username="test", email="test@gmail.com")
-        Customer.create(user)
+        Customer.create(user, idempotency_key="foo")
 
-        customer_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, email=user.email)
+        create_mock.assert_called_once_with(
+            api_key=settings.STRIPE_SECRET_KEY, email=user.email, idempotency_key="foo"
+        )
         callback_mock.assert_called_once_with(user)
 
     @patch("djstripe.models.Customer.subscribe")
     @patch("djstripe.models.djstripe_settings.DEFAULT_PLAN")
     @patch("djstripe.models.djstripe_settings.trial_period_for_subscriber_callback", return_value=7)
     @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER_II))
-    def test_create_default_plan(self, customer_create_mock, callback_mock, default_plan_fake, subscribe_mock):
+    def test_create_default_plan(self, create_mock, callback_mock, default_plan_fake, subscribe_mock):
         user = get_user_model().objects.create_user(username="test", email="test@gmail.com")
-        Customer.create(user)
+        Customer.create(user, idempotency_key="foo")
 
-        customer_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, email=user.email)
+        create_mock.assert_called_once_with(
+            api_key=settings.STRIPE_SECRET_KEY, email=user.email, idempotency_key="foo"
+        )
         callback_mock.assert_called_once_with(user)
 
         self.assertTrue(subscribe_mock.called)
