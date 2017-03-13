@@ -37,7 +37,7 @@ Features
 * Subscription management
 * Designed for easy implementation of post-registration subscription forms
 * Single-unit purchases
-* Works with Django ~=1.9.1, 1.8
+* Works with Django >= 1.10
 * Works with Python 3.5, 3.4, 2.7
 * Works with Bootstrap 3
 * Built-in migrations
@@ -150,8 +150,8 @@ Running the Tests
 Assuming the tests are run against PostgreSQL::
 
     createdb djstripe
-    pip install -r requirements_test.txt
-    python runtests.py
+    pip install -r tests/requirements.txt
+    tox
 
 Follows Best Practices
 ======================

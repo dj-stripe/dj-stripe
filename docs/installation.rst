@@ -119,5 +119,5 @@ Running Tests
 Assuming the tests are run against PostgreSQL::
 
     createdb djstripe
-    pip install -r requirements_test.txt
-    python runtests.py
+    pip install -r tests/requirements.txt
+    tox
