@@ -10,7 +10,7 @@
 from copy import deepcopy
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user, get_user_model
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
 from django.test.testcases import TestCase
@@ -412,9 +412,8 @@ class CancelSubscriptionViewTest(TestCase):
         self.assertRedirects(response, reverse("djstripe:account"))
         self.assertTrue(self.user.is_authenticated())
 
-    @patch("djstripe.views.auth_logout", autospec=True)
     @patch("djstripe.models.Subscription.cancel")
-    def test_cancel_no_proration(self, cancel_subscription_mock, logout_mock):
+    def test_cancel_no_proration(self, cancel_subscription_mock):
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
 
         fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
@@ -425,21 +424,18 @@ class CancelSubscriptionViewTest(TestCase):
 
         self.assertEqual(response.status_code, 302)
 
-    @patch("djstripe.views.auth_logout", autospec=True)
     @patch("djstripe.models.Subscription.cancel")
-    def test_cancel_no_subscription(self, cancel_subscription_mock, logout_mock):
+    def test_cancel_no_subscription(self, cancel_subscription_mock):
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
 
         response = self.client.post(self.url)
 
         cancel_subscription_mock.assert_not_called()
         self.assertEqual(response.status_code, 302)
+        self.assertTrue(get_user(self.client).is_anonymous)
 
-        self.assertTrue(logout_mock.called)
-
-    @patch("djstripe.views.auth_logout", autospec=True)
     @patch("djstripe.models.Subscription.cancel")
-    def test_cancel_no_proration_next_url(self, cancel_subscription_mock, logout_mock):
+    def test_cancel_no_proration_next_url(self, cancel_subscription_mock):
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
 
         fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
@@ -451,4 +447,4 @@ class CancelSubscriptionViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, "/test")
 
-        self.assertTrue(logout_mock.called)
+        self.assertTrue(get_user(self.client).is_anonymous)
