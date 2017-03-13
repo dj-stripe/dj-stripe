@@ -52,8 +52,8 @@ stripe.api_version = "2016-03-07"
 @python_2_unicode_compatible
 class StripeObject(TimeStampedModel):
     # This must be defined in descendants of this model/mixin
-    # e.g. "Event", "Charge", "Customer", etc.
-    stripe_api_name = None
+    # e.g. Event, Charge, Customer, etc.
+    stripe_class = None
     expand_fields = None
 
     objects = models.Manager()
@@ -84,18 +84,6 @@ class StripeObject(TimeStampedModel):
     class Meta:
         abstract = True
 
-    @classmethod
-    def _api(cls):
-        """
-        Get the api object for this type of stripe object (requires
-        stripe_api_name attribute to be set on model).
-        """
-        if cls.stripe_api_name is None:
-            raise NotImplementedError("StripeObject descendants are required to define "
-                                      "the stripe_api_name attribute")
-        # e.g. stripe.Event, stripe.Charge, etc
-        return getattr(stripe, cls.stripe_api_name)
-
     def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
         """
         Call the stripe API's retrieve operation for this model.
@@ -104,8 +92,7 @@ class StripeObject(TimeStampedModel):
         :type api_key: string
         """
 
-        # Run stripe.X.retreive(id)
-        return type(self)._api().retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
+        return self.stripe_class.retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
 
     @classmethod
     def api_list(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
@@ -120,7 +107,7 @@ class StripeObject(TimeStampedModel):
         :returns: an iterator over all items in the query
         """
 
-        return cls._api().list(api_key=api_key, **kwargs).auto_paging_iter()
+        return cls.stripe_class.list(api_key=api_key, **kwargs).auto_paging_iter()
 
     @classmethod
     def _api_create(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
@@ -131,7 +118,7 @@ class StripeObject(TimeStampedModel):
         :type api_key: string
         """
 
-        return cls._api().create(api_key=api_key, **kwargs)
+        return cls.stripe_class.create(api_key=api_key, **kwargs)
 
     def _api_delete(self, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
         """
@@ -457,7 +444,7 @@ Fields not implemented:
     class Meta:
         abstract = True
 
-    stripe_api_name = "Charge"
+    stripe_class = stripe.Charge
     expand_fields = ["balance_transaction"]
 
     amount = StripeCurrencyField(help_text="Amount charged.")
@@ -613,7 +600,7 @@ Fields not implemented:
     class Meta:
         abstract = True
 
-    stripe_api_name = "Customer"
+    stripe_class = stripe.Customer
     expand_fields = ["default_source"]
 
     account_balance = StripeIntegerField(
@@ -892,7 +879,7 @@ Fields not implemented:
     class Meta:
         abstract = True
 
-    stripe_api_name = "Event"
+    stripe_class = stripe.Event
 
     type = StripeCharField(max_length=250, help_text="Stripe's event description code")
     request_id = StripeCharField(
@@ -953,7 +940,7 @@ Fields not implemented:
     class Meta:
         abstract = True
 
-    stripe_api_name = "Transfer"
+    stripe_class = stripe.Transfer
     expand_fields = ["balance_transaction"]
 
     STATUS_PAID = "paid"
@@ -1080,19 +1067,19 @@ class StripeAccount(StripeObject):
     class Meta:
         abstract = True
 
-    stripe_api_name = "Account"
+    stripe_class = stripe.Account
 
     # Account -- add_card(external_account);
 
     @classmethod
     def get_connected_account_from_token(cls, access_token):
-        account_data = cls._api().retrieve(api_key=access_token)
+        account_data = cls.stripe_class.retrieve(api_key=access_token)
 
         return cls._get_or_create_from_stripe_object(account_data)[0]
 
     @classmethod
     def get_default_account(cls):
-        account_data = cls._api().retrieve(api_key=settings.STRIPE_SECRET_KEY)
+        account_data = cls.stripe_class.retrieve(api_key=settings.STRIPE_SECRET_KEY)
 
         return cls._get_or_create_from_stripe_object(account_data)[0]
 
@@ -1140,7 +1127,7 @@ Fields not implemented:
     class Meta:
         abstract = True
 
-    stripe_api_name = "Card"
+    stripe_class = stripe.Card
 
     address_city = StripeTextField(null=True, help_text="Billing address city.")
     address_country = StripeTextField(null=True, help_text="Billing address country.")
@@ -1324,7 +1311,7 @@ Fields not implemented:
     class Meta:
         abstract = True
 
-    stripe_api_name = "Invoice"
+    stripe_class = stripe.Invoice
 
     amount_due = StripeCurrencyField(
         help_text="Final amount due at this time for this invoice. If the invoice's total is smaller than the minimum "
@@ -1482,7 +1469,7 @@ Fields not implemented:
         """
 
         try:
-            upcoming_stripe_invoice = cls._api().upcoming(
+            upcoming_stripe_invoice = cls.stripe_class.upcoming(
                 api_key=api_key, customer=customer,
                 coupon=coupon, subscription=subscription,
                 subscription_plan=subscription_plan,
@@ -1550,7 +1537,7 @@ Fields not implemented:
     class Meta:
         abstract = True
 
-    stripe_api_name = "InvoiceItem"
+    stripe_class = stripe.InvoiceItem
 
     amount = StripeCurrencyField(help_text="Amount invoiced.")
     currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code.")
@@ -1618,7 +1605,7 @@ Fields not implemented:
     class Meta:
         abstract = True
 
-    stripe_api_name = "Plan"
+    stripe_class = stripe.Plan
 
     INTERVAL_TYPES = ["day", "week", "month", "year"]
     INTERVAL_TYPE_CHOICES = [(interval_type, interval_type.title()) for interval_type in INTERVAL_TYPES]
@@ -1683,7 +1670,7 @@ Fields not implemented:
     class Meta:
         abstract = True
 
-    stripe_api_name = "Subscription"
+    stripe_class = stripe.Subscription
 
     STATUS_ACTIVE = "active"
     STATUS_TRIALING = "trialing"
