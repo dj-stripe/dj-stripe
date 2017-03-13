@@ -61,7 +61,7 @@ class StripeObject(models.Model):
 
     stripe_id = StripeIdField(unique=True, stripe_name='id')
     livemode = StripeNullBooleanField(
-        default=False,
+        default=None,
         null=True,
         stripe_required=False,
         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, "
@@ -110,10 +110,10 @@ class StripeObject(models.Model):
             return djstripe_settings.STRIPE_SECRET_KEY
         elif self.livemode:
             # Livemode is true, use the live secret key
-            return djstripe_settings.LIVE_API_KEY
+            return djstripe_settings.LIVE_API_KEY or djstripe_settings.STRIPE_SECRET_KEY
         else:
             # Livemode is false, use the test secret key
-            return djstripe_settings.TEST_API_KEY
+            return djstripe_settings.TEST_API_KEY or djstripe_settings.STRIPE_SECRET_KEY
 
     def api_retrieve(self, api_key=None):
         """
