@@ -230,7 +230,6 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         for source in self.sources.all():
             source.remove()
 
-        super(Customer, self).purge()
         self.date_purged = timezone.now()
         self.save()
 
