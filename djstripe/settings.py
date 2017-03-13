@@ -8,15 +8,11 @@
 """
 from __future__ import unicode_literals
 
-import sys
-
 from django.apps import apps as django_apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import six
 from django.utils.module_loading import import_string
-
-PY3 = sys.version > "3"
 
 
 def get_callback_function(setting_name, default=None):
@@ -58,19 +54,11 @@ INVOICE_FROM_EMAIL = getattr(settings, "DJSTRIPE_INVOICE_FROM_EMAIL", "billing@e
 PAYMENTS_PLANS = getattr(settings, "DJSTRIPE_PLANS", {})
 PLAN_HIERARCHY = getattr(settings, "DJSTRIPE_PLAN_HIERARCHY", {})
 
-PASSWORD_INPUT_RENDER_VALUE = getattr(settings, 'DJSTRIPE_PASSWORD_INPUT_RENDER_VALUE', False)
-PASSWORD_MIN_LENGTH = getattr(settings, 'DJSTRIPE_PASSWORD_MIN_LENGTH', 6)
-
 PRORATION_POLICY = getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False)
 PRORATION_POLICY_FOR_UPGRADES = getattr(settings, 'DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES', False)
 CANCELLATION_AT_PERIOD_END = not getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False)
 
 SEND_INVOICE_RECEIPT_EMAILS = getattr(settings, "DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS", True)
-CURRENCIES = getattr(settings, "DJSTRIPE_CURRENCIES", (
-    ('usd', 'U.S. Dollars',),
-    ('gbp', 'Pounds (GBP)',),
-    ('eur', 'Euros',))
-)
 
 DEFAULT_PLAN = getattr(settings, "DJSTRIPE_DEFAULT_PLAN", None)
 
