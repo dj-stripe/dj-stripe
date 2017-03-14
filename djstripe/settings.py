@@ -54,7 +54,7 @@ subscriber_request_callback = get_callback_function("DJSTRIPE_SUBSCRIBER_MODEL_R
 def _get_idempotency_key(object_type, action, livemode):
     from .models import IdempotencyKey
     action = "{}:{}".format(object_type, action)
-    idempotency_key, _created = IdempotencyKey.objects.get_or_create(action=action)
+    idempotency_key, _created = IdempotencyKey.objects.get_or_create(action=action, livemode=livemode)
     return str(idempotency_key.uuid)
 
 

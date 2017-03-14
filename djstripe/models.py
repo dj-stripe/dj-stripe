@@ -932,8 +932,12 @@ class Subscription(StripeSubscription):
 @python_2_unicode_compatible
 class IdempotencyKey(models.Model):
     uuid = UUIDField(max_length=36, primary_key=True, editable=False, default=uuid.uuid4)
-    action = CharField(unique=True, max_length=100)
+    action = CharField(max_length=100)
+    livemode = BooleanField(help_text="Whether the key was used in live or test mode.")
     created = DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("action", "livemode")
 
     def __str__(self):
         return str(self.uuid)
