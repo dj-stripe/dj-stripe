@@ -105,6 +105,20 @@ class CardTest(TestCase):
         self.assertEqual(0, customer.sources.count())
         self.assertTrue(card_delete_mock.called)
 
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_remove_already_deleted_card(self, customer_retrieve_mock):
+        user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
+        customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
+        stripe_card = Card._api_create(customer=customer, source=FAKE_CARD["id"])
+        Card.sync_from_stripe_data(stripe_card)
+
+        self.assertEqual(customer.sources.count(), 1)
+        card_object = customer.sources.first()
+        Card.objects.filter(stripe_id=stripe_card["id"]).delete()
+        self.assertEqual(customer.sources.count(), 0)
+        card_object.remove()
+        self.assertEqual(customer.sources.count(), 0)
+
     @patch("djstripe.models.Card._api_delete")
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_remove_no_such_source(self, customer_retrieve_mock, card_delete_mock):

@@ -590,7 +590,11 @@ class Card(StripeCard):
                 # The exception was raised for another reason, re-raise it
                 six.reraise(*sys.exc_info())
 
-        self.delete()
+        try:
+            self.delete()
+        except StripeCard.DoesNotExist:
+            # The card has already been deleted (potentially during the API call)
+            pass
 
 
 # ============================================================================ #
