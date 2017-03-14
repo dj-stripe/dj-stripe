@@ -21,7 +21,11 @@ from stripe.error import StripeError
 from djstripe.models import Customer, Subscription, Plan
 from djstripe.stripe_objects import StripeSource
 from djstripe.views import ChangeCardView, HistoryView
-from tests import FAKE_CUSTOMER, FAKE_SUBSCRIPTION, FAKE_PLAN, FAKE_PLAN_II, FAKE_SUBSCRIPTION_II
+from tests import (
+    FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II, FAKE_SUBSCRIPTION,
+    FAKE_SUBSCRIPTION_CANCELED, FAKE_SUBSCRIPTION_CANCELED_AT_PERIOD_END,
+    FAKE_SUBSCRIPTION_II
+)
 
 
 class AccountViewTest(TestCase):
@@ -401,30 +405,41 @@ class CancelSubscriptionViewTest(TestCase):
         )
         self.assertTrue(self.client.login(username="pydanny", password="password"))
 
-    @patch("djstripe.models.Subscription.cancel")
-    def test_cancel_proration(self, cancel_subscription_mock):
+    @patch("djstripe.stripe_objects.StripeSubscription.cancel", return_value=FAKE_SUBSCRIPTION_CANCELED)
+    def test_cancel(self, cancel_subscription_mock):
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
-        cancel_subscription_mock.return_value = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
+        Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
 
         response = self.client.post(self.url)
 
-        cancel_subscription_mock.assert_called_once_with()
+        cancel_subscription_mock.assert_called_once_with(at_period_end=True)
+        self.assertRedirects(response, reverse("home"))
+        self.assertTrue(self.user.is_authenticated())
+
+    @patch("djstripe.stripe_objects.StripeSubscription.cancel", return_value=FAKE_SUBSCRIPTION_CANCELED_AT_PERIOD_END)
+    def test_cancel_at_period_end(self, cancel_subscription_mock):
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
+
+        response = self.client.post(self.url)
+
+        cancel_subscription_mock.assert_called_once_with(at_period_end=True)
         self.assertRedirects(response, reverse("djstripe:account"))
         self.assertTrue(self.user.is_authenticated())
 
-    @patch("djstripe.models.Subscription.cancel")
-    def test_cancel_no_proration(self, cancel_subscription_mock):
+    @patch("djstripe.stripe_objects.StripeSubscription.cancel", return_value=FAKE_SUBSCRIPTION_CANCELED)
+    def test_cancel_next_url(self, cancel_subscription_mock):
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
 
-        fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
-        fake_subscription.update({"status": Subscription.STATUS_CANCELED})
-        cancel_subscription_mock.return_value = Subscription.sync_from_stripe_data(fake_subscription)
-
-        response = self.client.post(self.url)
+        response = self.client.post(self.url + "?next=/test")
 
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/test")
 
-    @patch("djstripe.models.Subscription.cancel")
+        self.assertTrue(get_user(self.client).is_anonymous)
+
+    @patch("djstripe.stripe_objects.StripeSubscription.cancel")
     def test_cancel_no_subscription(self, cancel_subscription_mock):
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
 
@@ -432,19 +447,4 @@ class CancelSubscriptionViewTest(TestCase):
 
         cancel_subscription_mock.assert_not_called()
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(get_user(self.client).is_anonymous)
-
-    @patch("djstripe.models.Subscription.cancel")
-    def test_cancel_no_proration_next_url(self, cancel_subscription_mock):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
-
-        fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
-        fake_subscription.update({"status": Subscription.STATUS_CANCELED})
-        cancel_subscription_mock.return_value = Subscription.sync_from_stripe_data(fake_subscription)
-
-        response = self.client.post(self.url + "?next=/test")
-
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, "/test")
-
         self.assertTrue(get_user(self.client).is_anonymous)

@@ -496,6 +496,14 @@ FAKE_SUBSCRIPTION = SubscriptionDict({
     "trial_start": None,
 })
 
+FAKE_SUBSCRIPTION_CANCELED = deepcopy(FAKE_SUBSCRIPTION)
+FAKE_SUBSCRIPTION_CANCELED["status"] = "canceled"
+FAKE_SUBSCRIPTION_CANCELED["canceled_at"] = 1440907580
+
+FAKE_SUBSCRIPTION_CANCELED_AT_PERIOD_END = deepcopy(FAKE_SUBSCRIPTION)
+FAKE_SUBSCRIPTION_CANCELED_AT_PERIOD_END["canceled_at"] = 1440907580
+FAKE_SUBSCRIPTION_CANCELED_AT_PERIOD_END["cancel_at_period_end"] = True
+
 FAKE_SUBSCRIPTION_II = SubscriptionDict({
     "id": "sub_6mkwMbhaZF9jih",
     "object": "subscription",
