@@ -7,11 +7,11 @@
 
 """
 
+import time
 from copy import deepcopy
 from datetime import datetime
-from unittest.case import SkipTest
+from unittest import skipIf
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ImproperlyConfigured
@@ -26,63 +26,42 @@ from tests import FAKE_SUBSCRIPTION, FAKE_CUSTOMER
 from tests.apps.testapp.models import Organization
 
 
+TZ_IS_UTC = time.tzname == ("UTC", "UTC")
+
+
 class TestTimestampConversion(TestCase):
 
     def test_conversion_without_field_name(self):
         stamp = convert_tstamp(1365567407)
-        self.assertEquals(
-            stamp,
-            datetime(2013, 4, 10, 4, 16, 47, tzinfo=timezone.utc)
-        )
+        self.assertEquals(stamp, datetime(2013, 4, 10, 4, 16, 47, tzinfo=timezone.utc))
 
     def test_conversion_with_field_name(self):
         stamp = convert_tstamp({"my_date": 1365567407}, "my_date")
-        self.assertEquals(
-            stamp,
-            datetime(2013, 4, 10, 4, 16, 47, tzinfo=timezone.utc)
-        )
+        self.assertEquals(stamp, datetime(2013, 4, 10, 4, 16, 47, tzinfo=timezone.utc))
 
     def test_conversion_with_invalid_field_name(self):
         stamp = convert_tstamp({"my_date": 1365567407}, "foo")
-        self.assertEquals(
-            stamp,
-            None
-        )
+        self.assertEquals(stamp, None)
 
     # NOTE: These next two tests will fail if your system clock is not in UTC
     # Travis CI is, and coverage is good, so...
 
+    @skipIf(not TZ_IS_UTC, "Skipped because timezone is not UTC.")
     @override_settings(USE_TZ=False)
     def test_conversion_without_field_name_no_tz(self):
-        if settings.DJSTRIPE_TESTS_SKIP_UTC:
-            raise SkipTest("UTC test skipped via command-line arg.")
-
         stamp = convert_tstamp(1365567407)
-        self.assertEquals(
-            stamp,
-            datetime(2013, 4, 10, 4, 16, 47),
-            "Is your system clock timezone in UTC? Change it, or run tests with '--skip-utc'."
-        )
+        self.assertEquals(stamp, datetime(2013, 4, 10, 4, 16, 47))
 
+    @skipIf(not TZ_IS_UTC, "Skipped because timezone is not UTC.")
     @override_settings(USE_TZ=False)
     def test_conversion_with_field_name_no_tz(self):
-        if settings.DJSTRIPE_TESTS_SKIP_UTC:
-            raise SkipTest("UTC test skipped via command-line arg.")
-
         stamp = convert_tstamp({"my_date": 1365567407}, "my_date")
-        self.assertEquals(
-            stamp,
-            datetime(2013, 4, 10, 4, 16, 47),
-            "Is your system clock timezone in UTC? Change it, or run tests with '--skip-utc'."
-        )
+        self.assertEquals(stamp, datetime(2013, 4, 10, 4, 16, 47))
 
     @override_settings(USE_TZ=False)
     def test_conversion_with_invalid_field_name_no_tz(self):
         stamp = convert_tstamp({"my_date": 1365567407}, "foo")
-        self.assertEquals(
-            stamp,
-            None,
-        )
+        self.assertEquals(stamp, None)
 
 
 class TestUserHasActiveSubscription(TestCase):

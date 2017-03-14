@@ -15,11 +15,6 @@ TESTS_THRESHOLD = 100
 def main():
     parser = ArgumentParser(description='Run the dj-stripe Test Suite.')
     parser.add_argument(
-        "--skip-utc",
-        action="store_true",
-        help="Skip any tests that require the system timezone to be in UTC."
-    )
-    parser.add_argument(
         "--no-coverage",
         action="store_true",
         help="Disable checking for 100% code coverage (Not advised)."
@@ -32,7 +27,6 @@ def main():
 
 
 def run_test_suite(args):
-    skip_utc = args.skip_utc
     enable_coverage = not args.no_coverage
     enable_pep8 = not args.no_pep8
     tests = args.tests
@@ -43,10 +37,10 @@ def run_test_suite(args):
         cov.start()
 
     settings.configure(
-        DJSTRIPE_TESTS_SKIP_UTC=skip_utc,
-        TIME_ZONE='UTC',
         DEBUG=True,
         USE_TZ=True,
+        TIME_ZONE="UTC",
+        SITE_ID=1,
         DATABASES={
             "default": {
                 "ENGINE": "django.db.backends.postgresql_psycopg2",
@@ -86,7 +80,6 @@ def run_test_suite(args):
             "django.contrib.auth.middleware.AuthenticationMiddleware",
             "django.contrib.messages.middleware.MessageMiddleware"
         ),
-        SITE_ID=1,
         STRIPE_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", ""),
         STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", ""),
         DJSTRIPE_PLANS={
