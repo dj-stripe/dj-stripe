@@ -70,6 +70,24 @@ class TestCustomer(TestCase):
         self.assertEqual(None, customer.default_source)
         self.assertEqual(0, customer.sources.count())
 
+    def test_customer_sync_has_subscriber_metadata(self):
+        user = get_user_model().objects.create(username="test_metadata", id=12345)
+
+        fake_customer = deepcopy(FAKE_CUSTOMER)
+        fake_customer["metadata"] = {"djstripe_subscriber": "12345"}
+        customer = Customer.sync_from_stripe_data(fake_customer)
+
+        self.assertEqual(customer.subscriber, user)
+        self.assertEqual(customer.metadata, {"djstripe_subscriber": "12345"})
+
+    def test_customer_sync_has_bad_subscriber_metadata(self):
+        fake_customer = deepcopy(FAKE_CUSTOMER)
+        fake_customer["metadata"] = {"djstripe_subscriber": "does_not_exist"}
+        customer = Customer.sync_from_stripe_data(fake_customer)
+
+        self.assertEqual(customer.subscriber, None)
+        self.assertEqual(customer.metadata, {"djstripe_subscriber": "does_not_exist"})
+
     @patch("stripe.Card.retrieve", return_value=FAKE_CUSTOMER_II["default_source"])
     def test_customer_sync_non_local_card(self, card_retrieve_mock):
         fake_customer = deepcopy(FAKE_CUSTOMER_II)
