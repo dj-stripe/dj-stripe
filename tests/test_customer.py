@@ -44,6 +44,17 @@ class TestCustomer(TestCase):
             subscriber=str(self.user), email=self.user.email, stripe_id=FAKE_CUSTOMER["id"]
         ), str(self.customer))
 
+    def test_customer_dashboard_url(self):
+        expected_url = "https://dashboard.stripe.com/test/customers/{}".format(self.customer.stripe_id)
+        self.assertEqual(self.customer.get_stripe_dashboard_url(), expected_url)
+
+        self.customer.livemode = True
+        expected_url = "https://dashboard.stripe.com/customers/{}".format(self.customer.stripe_id)
+        self.assertEqual(self.customer.get_stripe_dashboard_url(), expected_url)
+
+        unsaved_customer = Customer()
+        self.assertEqual(unsaved_customer.get_stripe_dashboard_url(), "")
+
     def test_customer_sync_unsupported_source(self):
         fake_customer = deepcopy(FAKE_CUSTOMER_II)
         fake_customer["default_source"]["object"] = "fish"

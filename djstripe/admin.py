@@ -141,6 +141,8 @@ class EventProcessingExceptionAdmin(admin.ModelAdmin):
 class StripeObjectAdmin(admin.ModelAdmin):
     """Base class for all StripeObject-based model admins"""
 
+    change_form_template = "djstripe/admin/change_form.html"
+
     def get_list_display(self, request):
         return ("stripe_id", ) + self.list_display + ("stripe_timestamp", "livemode")
 

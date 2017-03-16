@@ -35,6 +35,7 @@ class CardTest(TestCase):
         card = Card.sync_from_stripe_data(deepcopy(FAKE_CARD))
 
         self.assertEqual(customer, card.customer)
+        self.assertEqual(card.get_stripe_dashboard_url(), customer.get_stripe_dashboard_url())
 
     def test_str(self):
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")

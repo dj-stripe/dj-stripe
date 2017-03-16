@@ -35,6 +35,7 @@ class InvoiceTest(TestCase):
     def test_str(self, charge_retrieve_mock, subscription_retrive_mock, default_account_mock):
         default_account_mock.return_value = self.account
         invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
+        self.assertEqual(invoice.get_stripe_dashboard_url(), self.customer.get_stripe_dashboard_url())
 
         self.assertEqual(
             "<amount_due={amount_due}, date={date}, status={status}, stripe_id={stripe_id}>".format(
@@ -253,6 +254,7 @@ class InvoiceTest(TestCase):
         self.assertIsNotNone(invoice)
         self.assertIsNone(invoice.stripe_id)
         self.assertIsNone(invoice.save())
+        self.assertEquals(invoice.get_stripe_dashboard_url(), "")
 
         subscription_retrieve_mock.assert_called_once_with(api_key=ANY, expand=ANY, id=FAKE_SUBSCRIPTION["id"])
         plan_retrieve_mock.assert_not_called()

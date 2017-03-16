@@ -36,6 +36,7 @@ class InvoiceItemTest(TestCase):
 
         invoiceitem_data = deepcopy(FAKE_INVOICEITEM)
         invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
+        self.assertEqual(invoiceitem.get_stripe_dashboard_url(), invoiceitem.invoice.get_stripe_dashboard_url())
 
         self.assertEqual(str(invoiceitem), "<amount={amount}, date={date}, stripe_id={stripe_id}>".format(
             amount=invoiceitem.amount,

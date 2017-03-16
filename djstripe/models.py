@@ -596,6 +596,9 @@ class Card(StripeCard):
         else:
             raise ValidationError("A customer was not attached to this card.")
 
+    def get_stripe_dashboard_url(self):
+        return self.customer.get_stripe_dashboard_url()
+
     def remove(self):
         """Removes a card from this customer's account."""
 
@@ -644,6 +647,9 @@ class Invoice(StripeInvoice):
 
     class Meta(object):
         ordering = ["-date"]
+
+    def get_stripe_dashboard_url(self):
+        return self.customer.get_stripe_dashboard_url()
 
     def _attach_objects_hook(self, cls, data):
         self.customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
@@ -718,6 +724,9 @@ class UpcomingInvoice(Invoice):
     def __init__(self, *args, **kwargs):
         super(UpcomingInvoice, self).__init__(*args, **kwargs)
         self._invoiceitems = []
+
+    def get_stripe_dashboard_url(self):
+        return ""
 
     def _attach_objects_hook(self, cls, data):
         super(UpcomingInvoice, self)._attach_objects_hook(cls, data)
@@ -800,6 +809,9 @@ class InvoiceItem(StripeInvoiceItem):
             customer = customer or subscription.customer
 
         self.customer = customer
+
+    def get_stripe_dashboard_url(self):
+        return self.invoice.get_stripe_dashboard_url()
 
 
 @class_doc_inherit
