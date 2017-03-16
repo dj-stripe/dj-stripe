@@ -99,6 +99,14 @@ if hasattr(settings, "STRIPE_SECRET_KEY"):
 else:
     STRIPE_SECRET_KEY = LIVE_API_KEY if STRIPE_LIVE_MODE else TEST_API_KEY
 
+# Default public key
+if hasattr(settings, "STRIPE_PUBLIC_KEY"):
+    STRIPE_PUBLIC_KEY = settings.STRIPE_PUBLIC_KEY
+elif STRIPE_LIVE_MODE:
+    STRIPE_PUBLIC_KEY = getattr(settings, "STRIPE_LIVE_PUBLIC_KEY", "")
+else:
+    STRIPE_PUBLIC_KEY = getattr(settings, "STRIPE_TEST_PUBLIC_KEY", "")
+
 
 def get_subscriber_model_string():
     """Get the configured subscriber model as a module path string."""
