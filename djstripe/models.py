@@ -199,7 +199,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         stripe_customer = cls._api_create(email=subscriber.email)
         customer, created = Customer.objects.get_or_create(
             stripe_id=stripe_customer["id"],
-            defaults={"subscriber": subscriber, "currency": "usd"}
+            defaults={"subscriber": subscriber}
         )
 
         if djstripe_settings.DEFAULT_PLAN and trial_days:
