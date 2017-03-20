@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-.. module:: djstripe.models
+.. module:: djstripe.models.
+
    :synopsis: dj-stripe - Django ORM model definitions
 
 .. moduleauthor:: Daniel Greenfeld (@pydanny)
@@ -52,7 +53,8 @@ logger = logging.getLogger(__name__)
 
 
 @class_doc_inherit
-class Charge(StripeCharge):
+class Charge(StripeCharge): # noqa
+
     __doc__ = getattr(StripeCharge, "__doc__")
 
     account = ForeignKey(
@@ -86,16 +88,17 @@ class Charge(StripeCharge):
     objects = ChargeManager()
 
     def refund(self, amount=None, reason=None):
+        """Obtain a refund amount and sync with Stripe."""
         refunded_charge = super(Charge, self).refund(amount, reason)
         return Charge.sync_from_stripe_data(refunded_charge)
 
     def capture(self):
+        """Obtain a capture amount and sync with Stripe."""
         captured_charge = super(Charge, self).capture()
         return Charge.sync_from_stripe_data(captured_charge)
 
     def send_receipt(self):
         """Send a receipt for this charge."""
-
         if not self.receipt_sent:
             site = Site.objects.get_current()
             protocol = getattr(settings, "DEFAULT_HTTP_PROTOCOL", "http")
@@ -926,6 +929,8 @@ class Subscription(StripeSubscription):
 
 @python_2_unicode_compatible
 class EventProcessingException(TimeStampedModel):
+    """A model which is used to keep track of exceptions being thrown in dj-stripe."""
+
     event = ForeignKey("Event", on_delete=models.CASCADE, null=True)
     data = TextField()
     message = CharField(max_length=500)
@@ -933,6 +938,7 @@ class EventProcessingException(TimeStampedModel):
 
     @classmethod
     def log(cls, data, exception, event):
+        """Create an EventProcessingException."""
         cls.objects.create(
             event=event,
             data=data or "",
@@ -940,7 +946,7 @@ class EventProcessingException(TimeStampedModel):
             traceback=exception_traceback.format_exc()
         )
 
-    def __str__(self):
+    def __str__(self): # noqa
         return smart_text("<{message}, pk={pk}, Event={event}>".format(
             message=self.message,
             pk=self.pk,
