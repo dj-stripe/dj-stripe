@@ -1638,6 +1638,10 @@ Fields not implemented:
         "Null if the plan has no trial period."
     )
 
+    @property
+    def amount_in_cents(self):
+        return self.amount * 100
+
     def str_parts(self):
         return [
             "name={name}".format(name=self.name),
