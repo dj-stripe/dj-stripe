@@ -120,3 +120,9 @@ def get_subscriber_model():
                 "if a DJSTRIPE_SUBSCRIBER_MODEL is defined.")
 
     return subscriber_model
+
+
+ZERO_DECIMAL_CURRENCIES = set([
+    "bif", "clp", "djf", "gnf", "jpy", "kmf", "krw", "mga", "pyg", "rwf",
+    "vnd", "vuv", "xaf", "xof", "xpf",
+])
