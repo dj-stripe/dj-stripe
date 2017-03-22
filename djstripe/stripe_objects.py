@@ -26,7 +26,6 @@ from django.conf import settings
 from django.db import models
 from django.utils import dateformat, six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
-from model_utils.models import TimeStampedModel
 from polymorphic.models import PolymorphicModel
 import stripe
 from stripe.error import InvalidRequestError
@@ -50,7 +49,7 @@ stripe.api_version = "2016-03-07"
 
 
 @python_2_unicode_compatible
-class StripeObject(TimeStampedModel):
+class StripeObject(models.Model):
     # This must be defined in descendants of this model/mixin
     # e.g. Event, Charge, Customer, etc.
     stripe_class = None
@@ -80,6 +79,9 @@ class StripeObject(TimeStampedModel):
         "information about an object in a structured format."
     )
     description = StripeTextField(blank=True, stripe_required=False, help_text="A description of this object.")
+
+    created = models.DateTimeField(auto_now_add=True, editable=False)
+    modified = models.DateTimeField(auto_now=True, editable=False)
 
     class Meta:
         abstract = True
