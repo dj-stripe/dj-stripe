@@ -28,7 +28,6 @@ from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.functional import cached_property
 from doc_inherit import class_doc_inherit
 from mock_django.query import QuerySetMock
-from model_utils.models import TimeStampedModel
 from stripe.error import StripeError, InvalidRequestError
 
 import traceback as exception_traceback
@@ -925,11 +924,14 @@ class Subscription(StripeSubscription):
 # ============================================================================ #
 
 @python_2_unicode_compatible
-class EventProcessingException(TimeStampedModel):
+class EventProcessingException(models.Model):
     event = ForeignKey("Event", on_delete=models.CASCADE, null=True)
     data = TextField()
     message = CharField(max_length=500)
     traceback = TextField()
+
+    created = DateTimeField(auto_now_add=True, editable=False)
+    modified = DateTimeField(auto_now=True, editable=False)
 
     @classmethod
     def log(cls, data, exception, event):
