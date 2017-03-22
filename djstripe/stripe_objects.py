@@ -22,6 +22,7 @@ from copy import deepcopy
 import decimal
 import sys
 
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import dateformat, six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
@@ -32,9 +33,12 @@ from stripe.error import InvalidRequestError
 from . import settings as djstripe_settings
 from .context_managers import stripe_temporary_api_version
 from .exceptions import StripeObjectManipulationException
-from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, StripePercentField, StripeCurrencyField,
-                     StripeIntegerField, StripeTextField, StripeIdField, StripeBooleanField, StripeNullBooleanField,
-                     StripeJSONField)
+from .fields import (
+    StripeBooleanField, StripeCharField, StripeCurrencyField, StripeDateTimeField,
+    StripeFieldMixin, StripeIdField, StripeIntegerField, StripeJSONField,
+    StripeNullBooleanField, StripePercentField, StripePositiveIntegerField,
+    StripeTextField
+)
 from .managers import StripeObjectManager
 
 
@@ -1283,6 +1287,55 @@ Fields not implemented:
         card.update(kwargs)
 
         return stripe.Token.create(card=card)
+
+
+class StripeCoupon(StripeObject):
+
+    DURATION_FOREVER = "forever"
+    DURATION_ONCE = "once"
+    DURATION_REPEATING = "repeating"
+
+    DURATIONS = [DURATION_FOREVER, DURATION_ONCE, DURATION_REPEATING]
+    DURATION_CHOICES = [(duration, duration.replace("_", " ").title()) for duration in DURATIONS]
+
+    class Meta:
+        abstract = True
+        unique_together = ("stripe_id", "livemode")
+
+    stripe_class = stripe.Coupon
+    stripe_dashboard_item_name = "coupons"
+
+    stripe_id = StripeIdField(stripe_name="id", max_length=500)
+    amount_off = StripeCurrencyField(
+        null=True, blank=True,
+        help_text="Amount that will be taken off the subtotal of any invoices for this customer."
+    )
+    currency = StripeCharField(null=True, blank=True, max_length=3, help_text="Three-letter ISO currency code")
+    duration = StripeCharField(
+        max_length=9, choices=DURATION_CHOICES,
+        help_text="Describes how long a customer who applies this coupon will get the discount."
+    )
+    duration_in_months = StripePositiveIntegerField(
+        null=True, blank=True,
+        help_text="If `duration` is `repeating`, the number of months the coupon applies."
+    )
+    max_redemptions = StripePositiveIntegerField(
+        null=True, blank=True,
+        help_text="Maximum number of times this coupon can be redeemed, in total, before it is no longer valid."
+    )
+    # This is not a StripePercentField. Only integer values between 1 and 100 are possible.
+    percent_off = StripePositiveIntegerField(
+        null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(100)]
+    )
+    redeem_by = StripeDateTimeField(
+        null=True, blank=True,
+        help_text="Date after which the coupon can no longer be redeemed. Max 5 years in the future."
+    )
+    times_redeemed = StripePositiveIntegerField(
+        editable=False, default=0,
+        help_text="Number of times this coupon has been applied to a customer."
+    )
+    # valid = StripeBooleanField(editable=False)
 
 
 # ============================================================================ #

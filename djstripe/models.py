@@ -36,10 +36,12 @@ from . import settings as djstripe_settings
 from . import webhooks
 from .exceptions import MultipleSubscriptionException
 from .managers import SubscriptionManager, ChargeManager, TransferManager
-from .signals import WEBHOOK_SIGNALS
-from .signals import webhook_processing_error
-from .stripe_objects import (StripeSource, StripeCharge, StripeCustomer, StripeCard, StripeSubscription,
-                             StripePlan, StripeInvoice, StripeInvoiceItem, StripeTransfer, StripeAccount, StripeEvent)
+from .signals import WEBHOOK_SIGNALS, webhook_processing_error
+from .stripe_objects import (
+    StripeAccount, StripeCard, StripeCharge, StripeCoupon, StripeCustomer,
+    StripeEvent, StripeInvoice, StripeInvoiceItem, StripePlan, StripeSource,
+    StripeSubscription, StripeTransfer
+)
 
 
 logger = logging.getLogger(__name__)
@@ -111,6 +113,11 @@ class Charge(StripeCharge):
         # TODO: other sources
         if self.source_type == "card":
             self.source = cls._stripe_object_to_source(target_cls=Card, data=data)
+
+
+@class_doc_inherit
+class Coupon(StripeCoupon):
+    pass
 
 
 @class_doc_inherit
