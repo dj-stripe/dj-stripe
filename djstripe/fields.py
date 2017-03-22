@@ -195,6 +195,12 @@ class StripeIntegerField(StripeFieldMixin, models.IntegerField):
     pass
 
 
+class StripePositiveIntegerField(StripeFieldMixin, models.PositiveIntegerField):
+    """A field used to define a PositiveIntegerField value according to djstripe logic."""
+
+    pass
+
+
 class StripeJSONField(StripeFieldMixin, JSONField):
     """A field used to define a JSONField value according to djstripe logic."""
 
