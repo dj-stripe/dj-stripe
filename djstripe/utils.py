@@ -96,6 +96,13 @@ def dict_nested_accessor(d, name):
         return d[name]
 
 
+def clear_expired_idempotency_keys():
+    from .models import IdempotencyKey
+
+    threshold = timezone.now() - datetime.timedelta(hours=24)
+    IdempotencyKey.objects.filter(created__lt=threshold).delete()
+
+
 def convert_tstamp(response, field_name=None):
     """
     Convert a Stripe API timestamp response (unix epoch) to a native datetime.
