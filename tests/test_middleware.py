@@ -83,7 +83,7 @@ class MiddlewareLogicTest(TestCase):
         self.settings(ROOT_URLCONF=self.urlconf)
         self.factory = RequestFactory()
         self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         self.subscription = Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
         self.middleware = SubscriptionPaymentMiddleware()
 

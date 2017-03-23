@@ -117,7 +117,7 @@ class RestSubscriptionTest(APITestCase):
 
         Should return the correct data.
         """
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
 
@@ -150,7 +150,7 @@ class RestSubscriptionTest(APITestCase):
             return subscription
 
         fake_cancelled_subscription = deepcopy(FAKE_SUBSCRIPTION)
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         Subscription.sync_from_stripe_data(fake_cancelled_subscription)
 
         cancel_subscription_mock.side_effect = _cancel_sub

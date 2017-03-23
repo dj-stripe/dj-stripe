@@ -30,7 +30,7 @@ class TestCustomer(TestCase):
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
         self.card, _created = Card._get_or_create_from_stripe_object(data=FAKE_CARD)
 
@@ -60,7 +60,7 @@ class TestCustomer(TestCase):
         fake_customer["default_source"]["object"] = "fish"
 
         user = get_user_model().objects.create_user(username="testuser", email="testuser@gmail.com")
-        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], currency="usd")
+        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], livemode=False)
 
         customer = Customer.sync_from_stripe_data(fake_customer)
 
@@ -72,7 +72,7 @@ class TestCustomer(TestCase):
         fake_customer = deepcopy(FAKE_CUSTOMER_II)
 
         user = get_user_model().objects.create_user(username="testuser", email="testuser@gmail.com")
-        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], currency="usd")
+        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], livemode=False)
 
         customer = Customer.sync_from_stripe_data(fake_customer)
 

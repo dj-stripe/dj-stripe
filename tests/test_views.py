@@ -65,7 +65,7 @@ class AccountViewTest(TestCase):
         self.assertEqual(list(Plan.objects.all()), list(response.context["plans"]))
 
     def test_subscription_context_with_plan(self):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
 
         response = self.client.get(self.url)
@@ -107,7 +107,7 @@ class ChangeCardViewTest(TestCase):
     @patch("djstripe.models.Customer.send_invoice", autospec=True)
     @patch("djstripe.models.Customer.add_card", autospec=True)
     def test_post_change_card(self, add_card_mock, send_invoice_mock, retry_unpaid_invoices_mock):
-        customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         source = StripeSource.objects.create(customer=customer)
         customer.default_source = source
         customer.save()
@@ -229,7 +229,7 @@ class ConfirmFormViewTest(TestCase):
         self.assertTrue(self.client.login(username="pydanny", password="password"))
 
     def test_get_form_current_plan(self):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
         subscription.current_period_end = timezone.now() + timezone.timedelta(days=5)
         subscription.save()
@@ -238,7 +238,7 @@ class ConfirmFormViewTest(TestCase):
         self.assertRedirects(response, reverse("djstripe:subscribe"))
 
     def test_get_form_no_current_plan(self):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
 
         response = self.client.get(self.url)
@@ -251,7 +251,7 @@ class ConfirmFormViewTest(TestCase):
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     @patch("djstripe.models.Customer.add_card", autospec=True)
     def test_post_valid(self, add_card_mock, subscribe_mock):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
         self.assertEqual(1, Customer.objects.count())
         response = self.client.post(self.url, {"plan": self.plan.id, "stripe_token": "cake"})
@@ -267,7 +267,7 @@ class ConfirmFormViewTest(TestCase):
     @patch("djstripe.models.Customer.add_card", autospec=True)
     def test_post_no_card(self, add_card_mock, subscribe_mock):
         add_card_mock.side_effect = StripeError("Invalid source object:")
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
         response = self.client.post(self.url, {"plan": self.plan.id})
         self.assertEqual(200, response.status_code)
@@ -275,7 +275,7 @@ class ConfirmFormViewTest(TestCase):
         self.assertIn("Invalid source object:", response.context["form"].errors["__all__"])
 
     def test_post_form_invalid(self):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
         response = self.client.post(self.url)
         self.assertEqual(200, response.status_code)
@@ -295,7 +295,7 @@ class ChangePlanViewTest(TestCase):
         self.assertTrue(self.client.login(username="pydanny", password="password"))
 
     def test_post_form_invalid(self):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
 
         response = self.client.post(self.url)
@@ -304,7 +304,7 @@ class ChangePlanViewTest(TestCase):
         self.assertIn("This field is required.", response.context["form"].errors["plan"])
 
     def test_post_new_sub_no_proration(self):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         response = self.client.post(self.url)
         self.assertEqual(200, response.status_code)
         self.assertIn("form", response.context)
@@ -315,7 +315,7 @@ class ChangePlanViewTest(TestCase):
 
     @patch("djstripe.models.Subscription.update", autospec=True)
     def test_change_sub_no_proration(self, subscription_update_mock):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
 
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN_II))
@@ -328,7 +328,7 @@ class ChangePlanViewTest(TestCase):
     @patch("djstripe.views.djstripe_settings.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
     @patch("djstripe.models.Subscription.update", autospec=True)
     def test_change_sub_with_proration_downgrade(self, subscription_update_mock, proration_policy_mock):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION_II))
         subscription.current_period_end = timezone.now() + timezone.timedelta(days=5)
         subscription.save()
@@ -343,7 +343,7 @@ class ChangePlanViewTest(TestCase):
     @patch("djstripe.views.djstripe_settings.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
     @patch("djstripe.models.Subscription.update", autospec=True)
     def test_change_sub_with_proration_upgrade(self, subscription_update_mock, proration_policy_mock):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
         subscription.current_period_end = timezone.now() + timezone.timedelta(days=5)
         subscription.save()
@@ -358,7 +358,7 @@ class ChangePlanViewTest(TestCase):
     @patch("djstripe.views.djstripe_settings.PRORATION_POLICY_FOR_UPGRADES", return_value=True)
     @patch("djstripe.models.Subscription.update", autospec=True)
     def test_change_sub_with_proration_same_plan(self, subscription_update_mock, proration_policy_mock):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
         subscription.current_period_end = timezone.now() + timezone.timedelta(days=5)
         subscription.save()
@@ -372,7 +372,7 @@ class ChangePlanViewTest(TestCase):
 
     @patch("djstripe.models.Subscription.update", autospec=True)
     def test_change_sub_same_plan(self, subscription_update_mock):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
         subscription.current_period_end = timezone.now() + timezone.timedelta(days=5)
         subscription.save()
@@ -386,7 +386,7 @@ class ChangePlanViewTest(TestCase):
 
     @patch("djstripe.models.Subscription.update", autospec=True)
     def test_change_sub_stripe_error(self, subscription_update_mock):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
         subscription.current_period_end = timezone.now() + timezone.timedelta(days=5)
         subscription.save()
@@ -415,7 +415,7 @@ class CancelSubscriptionViewTest(TestCase):
 
     @patch("djstripe.stripe_objects.StripeSubscription.cancel", return_value=FAKE_SUBSCRIPTION_CANCELED)
     def test_cancel(self, cancel_subscription_mock):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
 
         response = self.client.post(self.url)
@@ -426,7 +426,7 @@ class CancelSubscriptionViewTest(TestCase):
 
     @patch("djstripe.stripe_objects.StripeSubscription.cancel", return_value=FAKE_SUBSCRIPTION_CANCELED_AT_PERIOD_END)
     def test_cancel_at_period_end(self, cancel_subscription_mock):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
 
         response = self.client.post(self.url)
@@ -437,7 +437,7 @@ class CancelSubscriptionViewTest(TestCase):
 
     @patch("djstripe.stripe_objects.StripeSubscription.cancel", return_value=FAKE_SUBSCRIPTION_CANCELED)
     def test_cancel_next_url(self, cancel_subscription_mock):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
 
         response = self.client.post(self.url + "?next=/test")
@@ -449,7 +449,7 @@ class CancelSubscriptionViewTest(TestCase):
 
     @patch("djstripe.stripe_objects.StripeSubscription.cancel")
     def test_cancel_no_subscription(self, cancel_subscription_mock):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
         response = self.client.post(self.url)
 
