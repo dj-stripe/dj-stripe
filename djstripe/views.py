@@ -11,13 +11,11 @@ from __future__ import unicode_literals
 import json
 import logging
 
-from braces.views import FormValidMessageMixin
 from django.contrib import messages
 from django.contrib.auth import logout as auth_logout, REDIRECT_FIELD_NAME
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponse
-from django.http.response import HttpResponseNotFound
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.utils.encoding import smart_str
@@ -27,9 +25,9 @@ from django.views.generic import DetailView, FormView, TemplateView, View
 from stripe.error import StripeError
 
 from . import settings as djstripe_settings
-from .forms import PlanForm, CancelSubscriptionForm
+from .forms import CancelSubscriptionForm
 from .mixins import PaymentsContextMixin, SubscriptionMixin
-from .models import Customer, Event, EventProcessingException, Plan
+from .models import Customer, Event, EventProcessingException
 from .webhooks import TEST_EVENT_ID
 
 logger = logging.getLogger(__name__)
@@ -100,67 +98,6 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
 # ============================================================================ #
 #                              Subscription Views                              #
 # ============================================================================ #
-
-class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
-    """A view used to confirm customers into a subscription plan."""
-
-    form_class = PlanForm
-    template_name = "djstripe/confirm_form.html"
-    success_url = reverse_lazy("djstripe:account")
-    form_valid_message = "You are now subscribed!"
-
-    def get(self, request, *args, **kwargs):
-        """Override ConfirmFormView GET to perform extra validation.
-
-        - Returns 404 when no plan exists.
-        - Redirects to djstripe:subscribe when customer is already subscribed to this plan.
-        """
-        plan_id = self.kwargs['plan_id']
-
-        if not Plan.objects.filter(id=plan_id).exists():
-            return HttpResponseNotFound()
-
-        customer, _created = Customer.get_or_create(
-            subscriber=djstripe_settings.subscriber_request_callback(self.request)
-        )
-
-        if (customer.subscription and str(customer.subscription.plan.id) == plan_id and
-                customer.subscription.is_valid()):
-            message = "You already subscribed to this plan"
-            messages.info(request, message, fail_silently=True)
-            return redirect("djstripe:subscribe")
-
-        return super(ConfirmFormView, self).get(request, *args, **kwargs)
-
-    def get_context_data(self, *args, **kwargs):
-        """Return ConfirmFormView's context with plan_id."""
-        context = super(ConfirmFormView, self).get_context_data(**kwargs)
-        context['plan'] = Plan.objects.get(id=self.kwargs['plan_id'])
-        return context
-
-    def post(self, request, *args, **kwargs):
-        """
-        Handle POST requests.
-
-        Instantiates a form instance with the passed POST variables and
-        then checks for validity.
-        """
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        if form.is_valid():
-            try:
-                customer, _created = Customer.get_or_create(
-                    subscriber=djstripe_settings.subscriber_request_callback(self.request)
-                )
-                customer.add_card(self.request.POST.get("stripe_token"))
-                customer.subscribe(form.cleaned_data["plan"])
-            except StripeError as exc:
-                form.add_error(None, str(exc))
-                return self.form_invalid(form)
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
-
 
 class SubscribeView(LoginRequiredMixin, SubscriptionMixin, TemplateView):
     """A view to render the subscribe template."""

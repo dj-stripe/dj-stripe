@@ -14,7 +14,6 @@ from django.contrib.auth import get_user, get_user_model
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
 from django.test.testcases import TestCase
-from django.utils import timezone
 from mock import patch
 from stripe.error import StripeError
 
@@ -163,73 +162,6 @@ class ChangeCardViewTest(TestCase):
         view_instance = ChangeCardView()
         url = view_instance.get_post_success_url()
         self.assertEqual(reverse("djstripe:account"), url)
-
-
-class ConfirmFormViewTest(TestCase):
-
-    def setUp(self):
-        self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-        self.url = reverse("djstripe:confirm", kwargs={"plan_id": self.plan.id})
-        self.user = get_user_model().objects.create_user(
-            username="pydanny",
-            email="pydanny@gmail.com",
-            password="password"
-        )
-        self.assertTrue(self.client.login(username="pydanny", password="password"))
-
-    def test_get_form_current_plan(self):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
-        subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
-        subscription.current_period_end = timezone.now() + timezone.timedelta(days=5)
-        subscription.save()
-
-        response = self.client.get(self.url)
-        self.assertRedirects(response, reverse("djstripe:subscribe"))
-
-    def test_get_form_no_current_plan(self):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
-        Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
-
-        response = self.client.get(self.url)
-        self.assertEqual(200, response.status_code)
-
-    def test_get_form_unknown_plan_id(self):
-        response = self.client.get(reverse("djstripe:confirm", kwargs={'plan_id': (-1)}))
-        self.assertEqual(404, response.status_code)
-
-    @patch("djstripe.models.Customer.subscribe", autospec=True)
-    @patch("djstripe.models.Customer.add_card", autospec=True)
-    def test_post_valid(self, add_card_mock, subscribe_mock):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
-
-        self.assertEqual(1, Customer.objects.count())
-        response = self.client.post(self.url, {"plan": self.plan.id, "stripe_token": "cake"})
-
-        self.assertEqual(1, Customer.objects.count())
-        customer = Customer.objects.get()
-        add_card_mock.assert_called_once_with(customer, "cake")
-        subscribe_mock.assert_called_once_with(customer, self.plan)
-
-        self.assertRedirects(response, reverse("djstripe:account"))
-
-    @patch("djstripe.models.Customer.subscribe", autospec=True)
-    @patch("djstripe.models.Customer.add_card", autospec=True)
-    def test_post_no_card(self, add_card_mock, subscribe_mock):
-        add_card_mock.side_effect = StripeError("Invalid source object:")
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
-
-        response = self.client.post(self.url, {"plan": self.plan.id})
-        self.assertEqual(200, response.status_code)
-        self.assertIn("form", response.context)
-        self.assertIn("Invalid source object:", response.context["form"].errors["__all__"])
-
-    def test_post_form_invalid(self):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
-
-        response = self.client.post(self.url)
-        self.assertEqual(200, response.status_code)
-        self.assertIn("plan", response.context["form"].errors)
-        self.assertIn("This field is required.", response.context["form"].errors["plan"])
 
 
 class CancelSubscriptionViewTest(TestCase):
