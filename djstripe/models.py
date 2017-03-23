@@ -209,7 +209,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         )
         customer, created = Customer.objects.get_or_create(
             stripe_id=stripe_customer["id"],
-            defaults={"subscriber": subscriber, "currency": "usd"}
+            defaults={"subscriber": subscriber, "livemode": stripe_customer["livemode"]}
         )
 
         if djstripe_settings.DEFAULT_PLAN and trial_days:
