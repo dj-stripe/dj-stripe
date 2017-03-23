@@ -60,11 +60,6 @@ urlpatterns = [
         views.CancelSubscriptionView.as_view(),
         name="cancel_subscription"
     ),
-    url(
-        r"^history/$",
-        views.HistoryView.as_view(),
-        name="history"
-    ),
 
     # Webhook
     url(

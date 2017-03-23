@@ -11,7 +11,7 @@ from __future__ import unicode_literals
 import json
 import logging
 
-from braces.views import FormValidMessageMixin, SelectRelatedMixin
+from braces.views import FormValidMessageMixin
 from django.contrib import messages
 from django.contrib.auth import logout as auth_logout, REDIRECT_FIELD_NAME
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -97,21 +97,6 @@ class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
         return reverse("djstripe:account")
 
 
-class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
-    """A view used to return customer history of invoices."""
-
-    template_name = "djstripe/history.html"
-    model = Customer
-    select_related = ["invoice"]
-
-    def get_object(self):
-        """Return a Customer object."""
-        customer, _created = Customer.get_or_create(
-            subscriber=djstripe_settings.subscriber_request_callback(self.request)
-        )
-        return customer
-
-
 # ============================================================================ #
 #                              Subscription Views                              #
 # ============================================================================ #
@@ -121,7 +106,7 @@ class ConfirmFormView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMix
 
     form_class = PlanForm
     template_name = "djstripe/confirm_form.html"
-    success_url = reverse_lazy("djstripe:history")
+    success_url = reverse_lazy("djstripe:account")
     form_valid_message = "You are now subscribed!"
 
     def get(self, request, *args, **kwargs):
@@ -194,7 +179,7 @@ class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixi
 
     form_class = PlanForm
     template_name = "djstripe/confirm_form.html"
-    success_url = reverse_lazy("djstripe:history")
+    success_url = reverse_lazy("djstripe:account")
     form_valid_message = "You've just changed your plan!"
 
     def post(self, request, *args, **kwargs):

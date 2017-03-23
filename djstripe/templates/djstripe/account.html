@@ -43,7 +43,6 @@
     {% else %}
         <p>You can <a href="{% url 'djstripe:subscribe' %}">subscribe</a>.</p>
     {% endif %}
-    <p>Or consult your <a href="{% url 'djstripe:history' %}">payment history</a>.</p>
 
     {% if plans %}
         {# Show available plans #}
@@ -88,9 +87,6 @@
                 </table>
             </div>
         </div>
-    {% else %}
-        {# No plans so just show payment history #}
-        {% include "djstripe/includes/_history_table.html" %}
     {% endif %}
 </div>
 

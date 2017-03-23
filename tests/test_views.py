@@ -20,7 +20,7 @@ from stripe.error import StripeError
 
 from djstripe.models import Customer, Subscription, Plan
 from djstripe.stripe_objects import StripeSource
-from djstripe.views import ChangeCardView, HistoryView
+from djstripe.views import ChangeCardView
 from tests import (
     FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II, FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_CANCELED, FAKE_SUBSCRIPTION_CANCELED_AT_PERIOD_END,
@@ -166,36 +166,6 @@ class ChangeCardViewTest(TestCase):
         self.assertEqual(reverse("djstripe:account"), url)
 
 
-class HistoryViewTest(TestCase):
-
-    def setUp(self):
-        self.url = reverse("djstripe:history")
-        self.user = get_user_model().objects.create_user(
-            username="pydanny",
-            email="pydanny@gmail.com",
-            password="password"
-        )
-        self.assertTrue(self.client.login(username="pydanny", password="password"))
-
-    @patch("djstripe.models.djstripe_settings.get_idempotency_key", return_value="foo")
-    @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
-    def test_get_object(self, stripe_create_customer_mock, idempotency_key_mock):
-        view_instance = HistoryView()
-        request = RequestFactory()
-        request.user = self.user
-
-        view_instance.request = request
-        object_a = view_instance.get_object()
-
-        stripe_create_customer_mock.assert_called_once_with(
-            api_key=settings.STRIPE_SECRET_KEY, email=self.user.email, idempotency_key="foo",
-            metadata={"djstripe_subscriber": self.user.id}
-        )
-
-        customer_instance = Customer.objects.get(subscriber=self.user)
-        self.assertEqual(customer_instance, object_a)
-
-
 class ConfirmFormViewTest(TestCase):
 
     def setUp(self):
@@ -241,7 +211,7 @@ class ConfirmFormViewTest(TestCase):
         add_card_mock.assert_called_once_with(customer, "cake")
         subscribe_mock.assert_called_once_with(customer, self.plan)
 
-        self.assertRedirects(response, reverse("djstripe:history"))
+        self.assertRedirects(response, reverse("djstripe:account"))
 
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     @patch("djstripe.models.Customer.add_card", autospec=True)
@@ -301,7 +271,7 @@ class ChangePlanViewTest(TestCase):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN_II))
 
         response = self.client.post(self.url, {"plan": plan.id})
-        self.assertRedirects(response, reverse("djstripe:history"))
+        self.assertRedirects(response, reverse("djstripe:account"))
 
         subscription_update_mock.assert_called_once_with(subscription, plan=plan)
 
@@ -316,7 +286,7 @@ class ChangePlanViewTest(TestCase):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
         response = self.client.post(self.url, {"plan": plan.id})
-        self.assertRedirects(response, reverse("djstripe:history"))
+        self.assertRedirects(response, reverse("djstripe:account"))
 
         subscription_update_mock.assert_called_once_with(subscription, plan=plan)
 
@@ -331,7 +301,7 @@ class ChangePlanViewTest(TestCase):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN_II))
 
         response = self.client.post(self.url, {"plan": plan.id})
-        self.assertRedirects(response, reverse("djstripe:history"))
+        self.assertRedirects(response, reverse("djstripe:account"))
 
         subscription_update_mock.assert_called_once_with(subscription, plan=plan, prorate=True)
 
@@ -346,7 +316,7 @@ class ChangePlanViewTest(TestCase):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
         response = self.client.post(self.url, {"plan": plan.id})
-        self.assertRedirects(response, reverse("djstripe:history"))
+        self.assertRedirects(response, reverse("djstripe:account"))
 
         subscription_update_mock.assert_called_once_with(subscription, plan=plan)
 
@@ -360,7 +330,7 @@ class ChangePlanViewTest(TestCase):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
         response = self.client.post(self.url, {"plan": plan.id})
-        self.assertRedirects(response, reverse("djstripe:history"))
+        self.assertRedirects(response, reverse("djstripe:account"))
 
         subscription_update_mock.assert_called_once_with(subscription, plan=plan)
 
