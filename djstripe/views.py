@@ -30,7 +30,6 @@ from . import settings as djstripe_settings
 from .forms import PlanForm, CancelSubscriptionForm
 from .mixins import PaymentsContextMixin, SubscriptionMixin
 from .models import Customer, Event, EventProcessingException, Plan
-from .sync import sync_subscriber
 from .webhooks import TEST_EVENT_ID
 
 logger = logging.getLogger(__name__)
@@ -111,21 +110,6 @@ class HistoryView(LoginRequiredMixin, SelectRelatedMixin, DetailView):
             subscriber=djstripe_settings.subscriber_request_callback(self.request)
         )
         return customer
-
-
-@method_decorator(csrf_exempt, name="dispatch")
-class SyncHistoryView(LoginRequiredMixin, View):
-    """TODO: Needs to be refactored to leverage context data."""
-
-    template_name = "djstripe/includes/_history_table.html"
-
-    def post(self, request, *args, **kwargs):
-        """Render the template while injecting extra context."""
-        return render(
-            request,
-            self.template_name,
-            {"customer": sync_subscriber(djstripe_settings.subscriber_request_callback(request))}
-        )
 
 
 # ============================================================================ #

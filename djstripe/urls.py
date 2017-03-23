@@ -66,14 +66,6 @@ urlpatterns = [
         name="history"
     ),
 
-
-    # Web services
-    url(
-        r"^a/sync/history/$",
-        views.SyncHistoryView.as_view(),
-        name="sync_history"
-    ),
-
     # Webhook
     url(
         app_settings.DJSTRIPE_WEBHOOK_URL,

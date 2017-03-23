@@ -15,7 +15,7 @@ from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
 from django.test.testcases import TestCase
 from django.utils import timezone
-from mock import patch, PropertyMock
+from mock import patch
 from stripe.error import StripeError
 
 from djstripe.models import Customer, Subscription, Plan
@@ -194,26 +194,6 @@ class HistoryViewTest(TestCase):
 
         customer_instance = Customer.objects.get(subscriber=self.user)
         self.assertEqual(customer_instance, object_a)
-
-
-class SyncHistoryViewTest(TestCase):
-
-    def setUp(self):
-        self.url = reverse("djstripe:sync_history")
-        self.user = get_user_model().objects.create_user(
-            username="pydanny",
-            email="pydanny@gmail.com",
-            password="password"
-        )
-        self.assertTrue(self.client.login(username="pydanny", password="password"))
-
-    @patch("djstripe.views.sync_subscriber", new_callable=PropertyMock, return_value=PropertyMock(subscriber="pie"))
-    def test_post(self, sync_subscriber_mock):
-        response = self.client.post(self.url)
-
-        sync_subscriber_mock.assert_called_once_with(self.user)
-
-        self.assertEqual("pie", response.context["customer"].subscriber)
 
 
 class ConfirmFormViewTest(TestCase):

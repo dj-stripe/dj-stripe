@@ -13,15 +13,3 @@
     </div>
 </div>
 {% endblock content %}
-
-{% block javascript %}
-{{ block.super }}
-<script>
-    $(function() {
-        $.post("{% url 'djstripe:sync_history' %}", function(data) {
-            $('#history-table').html(data);
-            $('.in-progress-gif').hide();
-        });
-    });
-</script>
-{% endblock javascript %}

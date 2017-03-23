@@ -114,25 +114,3 @@
   </div><!-- /.modal -->
 
 {% endblock content %}
-
-{% block javascript %}
-{{ block.super }}
-{% if plans %}
-    <script>
-        $(function() {
-            $.post("{% url 'djstripe:sync_history' %}", function(data) {
-                $('#history-table').html(data);
-            });
-        });
-    </script>
-{% else %}
-    <script>
-        $(function() {
-            $.post("{% url 'djstripe:sync_history' %}", function(data) {
-                $('#history-table').html(data);
-                $('.in-progress-gif').hide();
-            });
-        });
-    </script>
-{% endif %}
-{% endblock javascript %}
