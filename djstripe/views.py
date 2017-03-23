@@ -168,58 +168,6 @@ class SubscribeView(LoginRequiredMixin, SubscriptionMixin, TemplateView):
     template_name = "djstripe/subscribe.html"
 
 
-class ChangePlanView(LoginRequiredMixin, FormValidMessageMixin, SubscriptionMixin, FormView):
-    """
-    A view used to change a Customers plan.
-
-    TODO: Work in a trial_days kwarg.
-
-    Also, this should be combined with ConfirmFormView.
-    """
-
-    form_class = PlanForm
-    template_name = "djstripe/confirm_form.html"
-    success_url = reverse_lazy("djstripe:account")
-    form_valid_message = "You've just changed your plan!"
-
-    def post(self, request, *args, **kwargs):
-        """Handle a Customer changing a plan.
-
-        Handles upgrading a plan as well. Throws an error when Customer is not subscribed to any plan.
-        """
-        form = PlanForm(request.POST)
-
-        customer, _created = Customer.get_or_create(
-            subscriber=djstripe_settings.subscriber_request_callback(self.request)
-        )
-
-        if not customer.subscription:
-            form.add_error(None, "You must already be subscribed to a plan before you can change it.")
-            return self.form_invalid(form)
-
-        if form.is_valid():
-            try:
-                selected_plan = form.cleaned_data["plan"]
-
-                # When a customer upgrades their plan, and DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES is set to True,
-                # we force the proration of the current plan and use it towards the upgraded plan,
-                # no matter what DJSTRIPE_PRORATION_POLICY is set to.
-                if djstripe_settings.PRORATION_POLICY_FOR_UPGRADES:
-                    # Is it an upgrade?
-                    if selected_plan.amount > customer.subscription.plan.amount:
-                        customer.subscription.update(plan=selected_plan, prorate=True)
-                    else:
-                        customer.subscription.update(plan=selected_plan)
-                else:
-                    customer.subscription.update(plan=selected_plan)
-            except StripeError as exc:
-                form.add_error(None, str(exc))
-                return self.form_invalid(form)
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
-
-
 class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
     """A view used to cancel a Customer's subscription."""
 

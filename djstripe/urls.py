@@ -46,11 +46,6 @@ urlpatterns = [
         name="confirm"
     ),
     url(
-        r"^change/plan/$",
-        views.ChangePlanView.as_view(),
-        name="change_plan"
-    ),
-    url(
         r"^change/cards/$",
         views.ChangeCardView.as_view(),
         name="change_card"

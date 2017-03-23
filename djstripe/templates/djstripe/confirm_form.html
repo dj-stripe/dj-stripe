@@ -30,9 +30,6 @@
                 data-amount="{{ plan.amount }}"
                 data-name="{{ plan.name }}"
                 data-description="{{ plan.description }}"
-            {% else %}
-                data-stripe-key="{{ STRIPE_PUBLIC_KEY }}"
-                action="{% url 'djstripe:change_plan' %}" class="djstripe-change-plan"
             {% endif %}
             method="POST">
 
