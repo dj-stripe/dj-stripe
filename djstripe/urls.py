@@ -41,11 +41,6 @@ urlpatterns = [
         name="subscribe"
     ),
     url(
-        r"^change/cards/$",
-        views.ChangeCardView.as_view(),
-        name="change_card"
-    ),
-    url(
         r"^cancel/subscription/$",
         views.CancelSubscriptionView.as_view(),
         name="cancel_subscription"

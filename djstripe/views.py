@@ -14,15 +14,14 @@ import logging
 from django.contrib import messages
 from django.contrib.auth import logout as auth_logout, REDIRECT_FIELD_NAME
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.urlresolvers import reverse_lazy, reverse
+from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.utils.encoding import smart_str
 from django.utils.http import is_safe_url
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import DetailView, FormView, TemplateView, View
-from stripe.error import StripeError
+from django.views.generic import FormView, TemplateView, View
 
 from . import settings as djstripe_settings
 from .forms import CancelSubscriptionForm
@@ -41,58 +40,6 @@ class AccountView(LoginRequiredMixin, SubscriptionMixin, PaymentsContextMixin, T
     """Shows account details including customer and subscription details."""
 
     template_name = "djstripe/account.html"
-
-
-# ============================================================================ #
-#                                 Billing Views                                #
-# ============================================================================ #
-
-class ChangeCardView(LoginRequiredMixin, PaymentsContextMixin, DetailView):
-    """TODO: Needs to be refactored to leverage forms and context data."""
-
-    template_name = "djstripe/change_card.html"
-
-    def get_object(self):
-        """
-        Return a Customer object.
-
-        Ether returns the Customer object from the current class instance or
-        uses get_or_create.
-        """
-        if hasattr(self, "customer"):
-            return self.customer
-        self.customer, _created = Customer.get_or_create(
-            subscriber=djstripe_settings.subscriber_request_callback(self.request)
-        )
-        return self.customer
-
-    def post(self, request, *args, **kwargs):
-        """TODO: Raise a validation error when a stripe token isn't passed. Should be resolved when a form is used."""
-        customer = self.get_object()
-        try:
-            send_invoice = not customer.default_source
-            customer.add_card(
-                request.POST.get("stripe_token")
-            )
-            if send_invoice:
-                customer.send_invoice()
-            customer.retry_unpaid_invoices()
-        except StripeError as exc:
-            messages.info(request, "Stripe Error")
-            return render(
-                request,
-                self.template_name,
-                {
-                    "customer": self.get_object(),
-                    "stripe_error": str(exc)
-                }
-            )
-        messages.info(request, "Your card is now updated.")
-        return redirect(self.get_post_success_url())
-
-    def get_post_success_url(self):
-        """Make it easier to do custom dj-stripe integrations."""
-        return reverse("djstripe:account")
 
 
 # ============================================================================ #

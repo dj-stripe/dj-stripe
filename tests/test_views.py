@@ -12,14 +12,10 @@ from copy import deepcopy
 from django.conf import settings
 from django.contrib.auth import get_user, get_user_model
 from django.core.urlresolvers import reverse
-from django.test.client import RequestFactory
 from django.test.testcases import TestCase
 from mock import patch
-from stripe.error import StripeError
 
 from djstripe.models import Customer, Subscription, Plan
-from djstripe.stripe_objects import StripeSource
-from djstripe.views import ChangeCardView
 from tests import (
     FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II, FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_CANCELED, FAKE_SUBSCRIPTION_CANCELED_AT_PERIOD_END
@@ -68,100 +64,6 @@ class AccountViewTest(TestCase):
 
         response = self.client.get(self.url)
         self.assertEqual(FAKE_SUBSCRIPTION["plan"]["id"], response.context["customer"].subscription.plan.stripe_id)
-
-
-class ChangeCardViewTest(TestCase):
-
-    def setUp(self):
-        self.url = reverse("djstripe:change_card")
-        self.user = get_user_model().objects.create_user(
-            username="pydanny",
-            email="pydanny@gmail.com",
-            password="password"
-        )
-        self.assertTrue(self.client.login(username="pydanny", password="password"))
-
-    @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
-    def test_get(self, stripe_create_customer_mock):
-        response = self.client.get(self.url)
-        self.assertEqual(200, response.status_code)
-
-    # Needs to be refactored to use sources
-    @patch("djstripe.models.Customer.retry_unpaid_invoices", autospec=True)
-    @patch("djstripe.models.Customer.send_invoice", autospec=True)
-    @patch("djstripe.models.Customer.add_card", autospec=True)
-    @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
-    def test_post_new_card(self, stripe_customer_create_mock, add_card_mock, send_invoice_mock,
-                           retry_unpaid_invoices_mock):
-        self.client.post(self.url, {"stripe_token": "alpha"})
-        self.assertEqual(1, Customer.objects.count())
-        customer = Customer.objects.get()
-        add_card_mock.assert_called_once_with(customer, "alpha")
-        send_invoice_mock.assert_called_with(customer)
-        retry_unpaid_invoices_mock.assert_called_once_with(customer)
-
-    # Needs to be refactored to use sources
-    @patch("djstripe.models.Customer.retry_unpaid_invoices", autospec=True)
-    @patch("djstripe.models.Customer.send_invoice", autospec=True)
-    @patch("djstripe.models.Customer.add_card", autospec=True)
-    def test_post_change_card(self, add_card_mock, send_invoice_mock, retry_unpaid_invoices_mock):
-        customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
-        source = StripeSource.objects.create(customer=customer)
-        customer.default_source = source
-        customer.save()
-
-        self.assertEqual(1, Customer.objects.count())
-
-        self.client.post(self.url, {"stripe_token": "beta"})
-        self.assertEqual(1, Customer.objects.count())
-        add_card_mock.assert_called_once_with(customer, "beta")
-        self.assertFalse(send_invoice_mock.called)
-        retry_unpaid_invoices_mock.assert_called_once_with(customer)
-
-    # Needs to be refactored to use sources
-    @patch("djstripe.models.Customer.add_card", autospec=True)
-    @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
-    def test_post_card_error(self, stripe_create_customer_mock, add_card_mock):
-        add_card_mock.side_effect = StripeError("An error occurred while processing your card.")
-
-        response = self.client.post(self.url, {"stripe_token": "pie"})
-        self.assertEqual(1, Customer.objects.count())
-        customer = Customer.objects.get()
-        add_card_mock.assert_called_once_with(customer, "pie")
-        self.assertIn("stripe_error", response.context)
-        self.assertIn("An error occurred while processing your card.", response.context["stripe_error"])
-
-    # Needs to be refactored to use sources
-    @patch("djstripe.models.Customer.add_card", autospec=True)
-    @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
-    def test_post_no_card(self, stripe_create_customer_mock, add_card_mock):
-        add_card_mock.side_effect = StripeError("Invalid source object:")
-
-        response = self.client.post(self.url)
-        self.assertEqual(1, Customer.objects.count())
-        customer = Customer.objects.get()
-        add_card_mock.assert_called_once_with(customer, None)
-        self.assertIn("stripe_error", response.context)
-        self.assertIn("Invalid source object:", response.context["stripe_error"])
-
-    @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
-    def test_get_object(self, stripe_create_customer_mock):
-        view_instance = ChangeCardView()
-        request = RequestFactory()
-        request.user = self.user
-
-        view_instance.request = request
-        object_a = view_instance.get_object()
-        object_b = view_instance.get_object()
-
-        customer_instance = Customer.objects.get(subscriber=self.user)
-        self.assertEqual(customer_instance, object_a)
-        self.assertEqual(object_a, object_b)
-
-    def test_get_success_url(self):
-        view_instance = ChangeCardView()
-        url = view_instance.get_post_success_url()
-        self.assertEqual(reverse("djstripe:account"), url)
 
 
 class CancelSubscriptionViewTest(TestCase):
