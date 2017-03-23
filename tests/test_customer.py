@@ -83,6 +83,16 @@ class TestCustomer(TestCase):
         self.assertEqual(1, customer.sources.count())
 
     @patch("stripe.Card.retrieve", return_value=FAKE_CARD)
+    def test_customer_sync_no_sources(self, customer_mock):
+        self.customer.sources.all().delete()
+
+        fake_customer = deepcopy(FAKE_CUSTOMER)
+        fake_customer["default_source"] = None
+        customer = Customer.sync_from_stripe_data(fake_customer)
+        self.assertEqual(customer.sources.count(), 0)
+        self.assertEqual(customer.default_source, None)
+
+    @patch("stripe.Card.retrieve", return_value=FAKE_CARD)
     def test_customer_sync_default_source_string(self, customer_mock):
         fake_customer = deepcopy(FAKE_CUSTOMER_DEFAULT_SOURCE_STRING)
         customer = Customer.sync_from_stripe_data(fake_customer)
