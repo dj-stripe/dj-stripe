@@ -42,6 +42,7 @@ from .stripe_objects import (
     StripeEvent, StripeInvoice, StripeInvoiceItem, StripePlan, StripeSource,
     StripeSubscription, StripeTransfer
 )
+from .utils import get_friendly_currency_amount
 
 
 logger = logging.getLogger(__name__)
@@ -117,7 +118,25 @@ class Charge(StripeCharge):
 
 @class_doc_inherit
 class Coupon(StripeCoupon):
-    pass
+    @property
+    def human_readable_amount(self):
+        if self.percent_off:
+            amount = "{percent_off}%".format(percent_off=self.percent_off)
+        else:
+            amount = get_friendly_currency_amount(self.amount_off or 0, self.currency)
+        return "{amount} off".format(amount=amount)
+
+    @property
+    def human_readable(self):
+        if self.duration == self.DURATION_REPEATING:
+            if self.duration_in_months == 1:
+                duration = "for {duration_in_months} month"
+            else:
+                duration = "for {duration_in_months} months"
+            duration = duration.format(duration_in_months=self.duration_in_months)
+        else:
+            duration = self.duration
+        return "{amount} {duration}".format(amount=self.human_readable_amount, duration=duration)
 
 
 @class_doc_inherit
