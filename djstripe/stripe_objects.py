@@ -1838,3 +1838,16 @@ Fields not implemented:
         """
 
         return self._api_delete(at_period_end=at_period_end)
+
+    def reactivate(self):
+        """
+        Reactivates this subscription.
+
+        If a customer’s subscription is canceled with ``at_period_end`` set to True and it has not yet reached the end
+        of the billing period, it can be reactivated. Subscriptions canceled immediately cannot be reactivated.
+        (Source: https://stripe.com/docs/subscriptions/canceling-pausing)
+
+        .. warning:: Reactivating a fully canceled Subscription will fail silently. Be sure to check the returned \
+        Subscription's status.
+        """
+        return self.update(plan=self.plan)
