@@ -277,7 +277,7 @@ class CouponAdmin(StripeObjectAdmin):
 
 @admin.register(Customer)
 class CustomerAdmin(StripeObjectAdmin):
-    raw_id_fields = ("subscriber", "default_source")
+    raw_id_fields = ("subscriber", "default_source", "coupon")
     list_display = ("subscriber", subscription_status)
     list_filter = (CustomerHasSourceListFilter, CustomerSubscriptionStatusListFilter)
     inlines = (SubscriptionInline, )

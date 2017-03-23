@@ -35,6 +35,7 @@ import traceback as exception_traceback
 from . import settings as djstripe_settings
 from . import webhooks
 from .exceptions import MultipleSubscriptionException
+from .fields import StripeDateTimeField
 from .managers import SubscriptionManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS, webhook_processing_error
 from .stripe_objects import (
@@ -157,6 +158,16 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         on_delete=SET_NULL, related_name="djstripe_customers"
     )
     date_purged = DateTimeField(null=True, editable=False)
+
+    coupon = ForeignKey(Coupon, null=True, on_delete=SET_NULL)
+    coupon_start = StripeDateTimeField(
+        null=True, editable=False, stripe_name="discount.start", stripe_required=False,
+        help_text="If a coupon is present, the date at which it was applied."
+    )
+    coupon_end = StripeDateTimeField(
+        null=True, editable=False, stripe_name="discount.end", stripe_required=False,
+        help_text="If a coupon is present and has a limited duration, the date that the discount will end."
+    )
 
     djstripe_subscriber_key = "djstripe_subscriber"
 
@@ -419,7 +430,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         kwargs['customer'] = self
         return Invoice.upcoming(**kwargs)
 
-    def _attach_objects_post_save_hook(self, cls, data):
+    def _attach_objects_post_save_hook(self, cls, data):  # noqa (function complexity)
         save = False
 
         # Have to create sources before we handle the default_source
@@ -441,7 +452,17 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
             if source and source != self.default_source:
                 self.default_source = source
-                self.save()
+                save = True
+
+        discount = data.get("discount")
+        if discount:
+            coupon, _created = Coupon._get_or_create_from_stripe_object(discount, "coupon")
+            if coupon and coupon != self.coupon:
+                self.coupon = coupon
+                save = True
+
+        if save:
+            self.save()
 
     def _attach_objects_hook(self, cls, data):
         # When we save a customer to Stripe, we add a reference to its Django PK
