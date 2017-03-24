@@ -143,11 +143,3 @@ class ChargeTest(TestCase):
         account = Account.objects.get(stripe_id=FAKE_ACCOUNT["id"])
 
         self.assertEqual(account, charge.account)
-
-    @patch("djstripe.models.Site.objects.get_current")
-    def test_send_receipt_not_sent(self, get_current_mock):
-        charge = Charge(receipt_sent=True)
-        charge.send_receipt()
-
-        # Assert the condition caused exit
-        self.assertFalse(get_current_mock.called)

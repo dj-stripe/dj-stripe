@@ -772,12 +772,6 @@ Fields not implemented:
         :type source: string, StripeSource
         :param statement_descriptor: An arbitrary string to be displayed on the customer's credit card statement.
         :type statement_descriptor: string
-        :param send_receipt: Whether or not to send a receipt for this charge. If blank,
-                             ``DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS`` is used.
-        :type send_receipt: boolean
-
-        .. Notes:
-        .. ``send_receipt`` is only available on ``Customer.charge()``
         """
 
         if not isinstance(amount, decimal.Decimal):

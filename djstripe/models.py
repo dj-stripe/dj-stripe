@@ -16,17 +16,13 @@ import uuid
 import sys
 from datetime import timedelta
 
-from django.conf import settings
-from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
-from django.core.mail import EmailMessage
 from django.db import models
 from django.db.models.fields import (
     BooleanField, CharField, DateTimeField, NullBooleanField, TextField, UUIDField
 )
 from django.db.models.fields.related import ForeignKey, OneToOneField
 from django.db.models.deletion import SET_NULL
-from django.template.loader import render_to_string
 from django.utils import six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.functional import cached_property
@@ -95,29 +91,6 @@ class Charge(StripeCharge):
     def capture(self):
         captured_charge = super(Charge, self).capture()
         return Charge.sync_from_stripe_data(captured_charge)
-
-    def send_receipt(self):
-        """Send a receipt for this charge."""
-
-        if not self.receipt_sent:
-            site = Site.objects.get_current()
-            protocol = getattr(settings, "DEFAULT_HTTP_PROTOCOL", "http")
-            ctx = {
-                "charge": self,
-                "site": site,
-                "protocol": protocol,
-            }
-            subject = render_to_string("djstripe/email/subject.txt", ctx)
-            subject = subject.strip()
-            message = render_to_string("djstripe/email/body.txt", ctx)
-            num_sent = EmailMessage(
-                subject,
-                message,
-                to=[self.customer.subscriber.email],
-                from_email=djstripe_settings.INVOICE_FROM_EMAIL
-            ).send()
-            self.receipt_sent = num_sent > 0
-            self.save()
 
     def _attach_objects_hook(self, cls, data):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
@@ -338,15 +311,9 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
         return self.has_valid_source() and self.date_purged is None
 
-    def charge(self, amount, currency="usd", send_receipt=None, **kwargs):
-        if send_receipt is None:
-            send_receipt = getattr(settings, 'DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS', True)
-
+    def charge(self, amount, currency="usd", **kwargs):
         stripe_charge = super(Customer, self).charge(amount=amount, currency=currency, **kwargs)
         charge = Charge.sync_from_stripe_data(stripe_charge)
-
-        if send_receipt:
-            charge.send_receipt()
 
         return charge
 
@@ -654,9 +621,6 @@ class Invoice(StripeInvoice):
 
         charge = cls._stripe_object_to_charge(target_cls=Charge, data=data)
         if charge:
-            if djstripe_settings.SEND_INVOICE_RECEIPT_EMAILS:
-                charge.send_receipt()
-
             self.charge = charge
 
         subscription = cls._stripe_object_to_subscription(target_cls=Subscription, data=data)

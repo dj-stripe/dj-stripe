@@ -575,19 +575,6 @@ class TestCustomer(TestCase):
 
         self.customer.has_active_subscription(plan=plan.stripe_id)
 
-    @patch("djstripe.models.Charge.send_receipt")
-    @patch("djstripe.models.Charge.sync_from_stripe_data")
-    @patch("stripe.Charge.retrieve", return_value=FAKE_CHARGE)
-    @patch("stripe.Charge.create", return_value=FAKE_CHARGE)
-    def test_charge_not_send_receipt(self, charge_create_mock, charge_retrieve_mock, charge_sync_mock,
-                                     send_receipt_mock):
-        self.customer.charge(amount=decimal.Decimal("50.00"), send_receipt=False)
-
-        self.assertFalse(charge_retrieve_mock.called)
-        self.assertTrue(charge_create_mock.called)
-        charge_sync_mock.assert_called_once_with(FAKE_CHARGE)
-        self.assertFalse(send_receipt_mock.called)
-
     @patch("djstripe.models.InvoiceItem.sync_from_stripe_data", return_value="pancakes")
     @patch("stripe.InvoiceItem.create", return_value=deepcopy(FAKE_INVOICEITEM))
     def test_add_invoice_item(self, invoiceitem_create_mock, invoiceitem_sync_mock):
