@@ -35,7 +35,7 @@ class MiddlewareURLTest(TestCase):
         self.assertEqual(response, None)
 
     def test_namespace(self):
-        request = self.factory.get("/djstripe/")
+        request = self.factory.get("/djstripe/webhook/")
         request.user = self.user
         request.urlconf = self.urlconf
 
@@ -88,7 +88,7 @@ class MiddlewareLogicTest(TestCase):
         self.middleware = SubscriptionPaymentMiddleware()
 
     def test_anonymous(self):
-        request = self.factory.get("/djstripe/")
+        request = self.factory.get("/djstripe/webhook/")
         request.user = AnonymousUser()
         request.urlconf = self.urlconf
 
@@ -99,7 +99,7 @@ class MiddlewareLogicTest(TestCase):
         self.user.is_staff = True
         self.user.save()
 
-        request = self.factory.get("/djstripe/")
+        request = self.factory.get("/djstripe/webhook/")
         request.user = self.user
         request.urlconf = self.urlconf
 
@@ -110,7 +110,7 @@ class MiddlewareLogicTest(TestCase):
         self.user.is_superuser = True
         self.user.save()
 
-        request = self.factory.get("/djstripe/")
+        request = self.factory.get("/djstripe/webhook/")
         request.user = self.user
         request.urlconf = self.urlconf
 

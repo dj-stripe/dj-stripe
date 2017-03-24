@@ -5,10 +5,6 @@
 
 {% block content %}
 {{ block.super }}
-<ul class="breadcrumb">
-  <li><a href="{% url 'djstripe:account' %}">Home</a></li>
-  <li class="active">Subscription</li>
-</ul>
 <h2>Choose a Subscription</h2>
 
 {% if error %}

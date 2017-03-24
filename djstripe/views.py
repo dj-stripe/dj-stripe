@@ -25,21 +25,11 @@ from django.views.generic import FormView, TemplateView, View
 
 from . import settings as djstripe_settings
 from .forms import CancelSubscriptionForm
-from .mixins import PaymentsContextMixin, SubscriptionMixin
+from .mixins import SubscriptionMixin
 from .models import Customer, Event, EventProcessingException
 from .webhooks import TEST_EVENT_ID
 
 logger = logging.getLogger(__name__)
-
-# ============================================================================ #
-#                                 Account Views                                #
-# ============================================================================ #
-
-
-class AccountView(LoginRequiredMixin, SubscriptionMixin, PaymentsContextMixin, TemplateView):
-    """Shows account details including customer and subscription details."""
-
-    template_name = "djstripe/account.html"
 
 
 # ============================================================================ #
@@ -57,7 +47,7 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
 
     template_name = "djstripe/cancel_subscription.html"
     form_class = CancelSubscriptionForm
-    success_url = reverse_lazy("djstripe:account")
+    success_url = reverse_lazy("home")
     redirect_url = reverse_lazy("home")
 
     # messages

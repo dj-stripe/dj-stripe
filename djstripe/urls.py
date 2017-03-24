@@ -31,11 +31,6 @@ urlpatterns = [
 
     # HTML views
     url(
-        r"^$",
-        views.AccountView.as_view(),
-        name="account"
-    ),
-    url(
         r"^subscribe/$",
         views.SubscribeView.as_view(),
         name="subscribe"
