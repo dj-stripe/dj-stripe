@@ -108,6 +108,9 @@ else:
     STRIPE_PUBLIC_KEY = getattr(settings, "STRIPE_TEST_PUBLIC_KEY", "")
 
 
+SUBSCRIPTION_REDIRECT = getattr(settings, "DJSTRIPE_SUBSCRIPTION_REDIRECT", "djstripe:subscribe")
+
+
 def get_subscriber_model_string():
     """Get the configured subscriber model as a module path string."""
     return getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", settings.AUTH_USER_MODEL)
