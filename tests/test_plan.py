@@ -97,3 +97,4 @@ class PlanTest(TestCase):
         )
         plan = Plan.sync_from_stripe_data(stripe_plan)
         assert plan.amount_in_cents == plan.amount * 100
+        assert isinstance(plan.amount_in_cents, int)
