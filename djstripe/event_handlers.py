@@ -20,7 +20,10 @@ NOTE: Event data is not guaranteed to be in the correct API version format. See 
 """
 
 from . import webhooks
-from .models import Charge, Customer, Card, Subscription, Plan, Transfer, Invoice, InvoiceItem
+from .models import (
+    Card, Charge, Coupon, Customer, Invoice, InvoiceItem, Plan, Subscription,
+    Transfer
+)
 
 
 @webhooks.handler_all
@@ -98,18 +101,20 @@ def customer_subscription_webhook_handler(event, event_data, event_type, event_s
     )
 
 
-@webhooks.handler(["transfer", "charge", "invoice", "invoiceitem", "plan"])
+@webhooks.handler(["transfer", "charge", "coupon", "invoice", "invoiceitem", "plan"])
 def other_object_webhook_handler(event, event_data, event_type, event_subtype):
     """Handle updates to transfer, charge, invoice, invoiceitem and plan objects.
 
     Docs for:
     - charge: https://stripe.com/docs/api#charges
+    - coupon: https://stripe.com/docs/api#coupons
     - invoice: https://stripe.com/docs/api#invoices
     - invoiceitem: https://stripe.com/docs/api#invoiceitems
     - plan: https://stripe.com/docs/api#plans
     """
     target_cls = {
         "charge": Charge,
+        "coupon": Coupon,
         "invoice": Invoice,
         "invoiceitem": InvoiceItem,
         "plan": Plan,
