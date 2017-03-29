@@ -626,7 +626,6 @@ FAKE_CUSTOMER = CustomerDict({
         "url": "/v1/customers/cus_6lsBvm5rJ0zyHc/subscriptions",
         "data": [deepcopy(FAKE_SUBSCRIPTION), deepcopy(FAKE_SUBSCRIPTION_II)]
     },
-
 })
 
 
@@ -659,6 +658,16 @@ FAKE_CUSTOMER_II = CustomerDict({
         "data": [deepcopy(FAKE_SUBSCRIPTION_III)]
     },
 })
+
+
+FAKE_DISCOUNT_CUSTOMER = {
+    "object": "discount",
+    "coupon": deepcopy(FAKE_COUPON),
+    "customer": FAKE_CUSTOMER["id"],
+    "start": 1493206114,
+    "end": None,
+    "subscription": None,
+}
 
 
 class InvoiceDict(dict):

@@ -20,11 +20,12 @@ from mock import patch, ANY
 from stripe.error import InvalidRequestError
 
 from djstripe.exceptions import MultipleSubscriptionException
-from djstripe.models import Account, Customer, Charge, Card, Subscription, Invoice, Plan
+from djstripe.models import Account, Coupon, Customer, Charge, Card, Subscription, Invoice, Plan
 from tests import (
-    FAKE_ACCOUNT, FAKE_CARD, FAKE_CARD_V, FAKE_CHARGE, FAKE_CUSTOMER,
-    FAKE_CUSTOMER_II, FAKE_INVOICE, FAKE_INVOICEITEM, FAKE_INVOICE_III, FAKE_PLAN,
-    FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II, FAKE_UPCOMING_INVOICE, StripeList, datetime_to_unix
+    FAKE_ACCOUNT, FAKE_CARD, FAKE_CARD_V, FAKE_CHARGE, FAKE_COUPON, FAKE_CUSTOMER,
+    FAKE_CUSTOMER_II, FAKE_DISCOUNT_CUSTOMER, FAKE_INVOICE, FAKE_INVOICEITEM,
+    FAKE_INVOICE_III, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II,
+    FAKE_UPCOMING_INVOICE, StripeList, datetime_to_unix
 )
 
 
@@ -489,6 +490,38 @@ class TestCustomer(TestCase):
             api_key=settings.STRIPE_SECRET_KEY,
             customer=self.customer.stripe_id
         )
+
+    @patch("stripe.Coupon.retrieve", return_value=deepcopy(FAKE_COUPON))
+    def test_sync_customer_with_discount(self, coupon_retrieve_mock):
+        self.assertIsNone(self.customer.coupon)
+        fake_customer = deepcopy(FAKE_CUSTOMER)
+        fake_customer["discount"] = deepcopy(FAKE_DISCOUNT_CUSTOMER)
+        customer = Customer.sync_from_stripe_data(fake_customer)
+        self.assertEqual(customer.coupon.stripe_id, FAKE_COUPON["id"])
+        self.assertIsNotNone(customer.coupon_start)
+        self.assertIsNone(customer.coupon_end)
+
+    @patch("stripe.Coupon.retrieve", return_value=deepcopy(FAKE_COUPON))
+    def test_sync_customer_discount_already_present(self, coupon_retrieve_mock):
+        fake_customer = deepcopy(FAKE_CUSTOMER)
+        fake_customer["discount"] = deepcopy(FAKE_DISCOUNT_CUSTOMER)
+
+        # Set the customer's coupon to be what we'll sync
+        customer = Customer.objects.get(stripe_id=FAKE_CUSTOMER["id"])
+        customer.coupon = Coupon.sync_from_stripe_data(FAKE_COUPON)
+        customer.save()
+
+        customer = Customer.sync_from_stripe_data(fake_customer)
+        self.assertEqual(customer.coupon.stripe_id, FAKE_COUPON["id"])
+
+    def test_sync_customer_delete_discount(self):
+        test_coupon = Coupon.sync_from_stripe_data(FAKE_COUPON)
+        self.customer.coupon = test_coupon
+        self.customer.save()
+        self.assertEqual(self.customer.coupon.stripe_id, FAKE_COUPON["id"])
+
+        customer = Customer.sync_from_stripe_data(FAKE_CUSTOMER)
+        self.assertEqual(customer.coupon, None)
 
     @patch("djstripe.models.Invoice.sync_from_stripe_data")
     @patch("stripe.Invoice.list", return_value=StripeList(data=[deepcopy(FAKE_INVOICE), deepcopy(FAKE_INVOICE_III)]))

@@ -474,6 +474,9 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
             if coupon and coupon != self.coupon:
                 self.coupon = coupon
                 save = True
+        elif self.coupon:
+            self.coupon = None
+            save = True
 
         if save:
             self.save()
