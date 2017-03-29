@@ -200,6 +200,20 @@ class TestCustomer(TestCase):
         with self.assertRaises(ValueError):
             self.customer.charge(10)
 
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_add_coupon_by_id(self, customer_retrieve_mock):
+        self.assertEquals(self.customer.coupon, None)
+        self.customer.add_coupon(FAKE_COUPON["id"])
+        customer_retrieve_mock.assert_called_once()
+
+    @patch("stripe.Coupon.retrieve", return_value=deepcopy(FAKE_COUPON))
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_add_coupon_by_object(self, customer_retrieve_mock, coupon_retrieve_mock):
+        self.assertEquals(self.customer.coupon, None)
+        coupon = Coupon.sync_from_stripe_data(FAKE_COUPON)
+        self.customer.add_coupon(coupon)
+        customer_retrieve_mock.assert_called_once()
+
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
     def test_refund_charge(self, charge_retrieve_mock, default_account_mock):

@@ -419,6 +419,20 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
         return new_card
 
+    def add_coupon(self, coupon):
+        """
+        Add a coupon to a Customer.
+
+        The coupon can be a Coupon object, or a valid Stripe Coupon ID.
+        """
+        if isinstance(coupon, Coupon):
+            coupon = coupon.stripe_id
+
+        stripe_customer = self.api_retrieve()
+        stripe_customer.coupon = coupon
+        stripe_customer.save()
+        return self.__class__.sync_from_stripe_data(stripe_customer)
+
     def upcoming_invoice(self, **kwargs):
         """ Gets the upcoming preview invoice (singular) for this customer.
 
