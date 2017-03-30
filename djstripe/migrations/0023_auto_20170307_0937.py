@@ -6,6 +6,9 @@ from django.conf import settings
 from django.db import migrations, models
 
 
+DJSTRIPE_SUBSCRIBER_MODEL = getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", settings.AUTH_USER_MODEL)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -17,7 +20,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='customer',
             name='subscriber',
-            field=models.ForeignKey(null=True, on_delete=models.SET_NULL, related_name='djstripe_customers', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(null=True, on_delete=models.SET_NULL, related_name='djstripe_customers', to=DJSTRIPE_SUBSCRIBER_MODEL),
         ),
         migrations.AlterUniqueTogether(
             name='customer',
