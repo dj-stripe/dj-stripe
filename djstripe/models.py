@@ -65,7 +65,7 @@ class Charge(StripeCharge):
     )
 
     customer = ForeignKey(
-        "Customer", on_delete=models.CASCADE,
+        "Customer", on_delete=models.CASCADE, null=True,
         related_name="charges",
         help_text="The customer associated with this charge."
     )
@@ -123,8 +123,6 @@ class Charge(StripeCharge):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
         if customer:
             self.customer = customer
-        else:
-            raise ValidationError("A customer was not attached to this charge.")
 
         transfer = cls._stripe_object_to_transfer(target_cls=Transfer, data=data)
         if transfer:

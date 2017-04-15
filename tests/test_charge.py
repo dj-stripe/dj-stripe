@@ -9,7 +9,6 @@
 from copy import deepcopy
 from decimal import Decimal
 
-from django.core.exceptions import ValidationError
 from django.test.testcases import TestCase
 from mock import patch
 
@@ -101,8 +100,10 @@ class ChargeTest(TestCase):
         fake_charge_copy = deepcopy(FAKE_CHARGE)
         fake_charge_copy.pop("customer", None)
 
-        with self.assertRaisesMessage(ValidationError, "A customer was not attached to this charge."):
-            Charge.sync_from_stripe_data(fake_charge_copy)
+        Charge.sync_from_stripe_data(fake_charge_copy)
+        assert Charge.objects.count() == 1
+        charge = Charge.objects.get()
+        assert charge.customer is None
 
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Transfer.retrieve")
