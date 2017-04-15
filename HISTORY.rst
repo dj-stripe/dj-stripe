@@ -32,6 +32,7 @@ History
 * Customer.sync_cards() (Thanks @jleclanche) #438
 * Many stability fixes, bugfixes, and code cleanup (Thanks @jleclanche)
 * Improved admin interface (Thanks @jleclanche with @jameshiew) #451
+* Added Stripe Dashboard link to admin change panel (Thanks @jleclanche) #465
 * Implemented ``Plan.amount_in_cents`` (Thanks @jleclanche) #466
 * Implemented ``Subscription.reactivate()`` (Thanks @jleclanche) #470
 

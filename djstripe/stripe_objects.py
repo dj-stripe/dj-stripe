@@ -54,6 +54,7 @@ class StripeObject(models.Model):
     # e.g. Event, Charge, Customer, etc.
     stripe_class = None
     expand_fields = None
+    stripe_dashboard_item_name = ""
 
     objects = models.Manager()
     stripe_objects = StripeObjectManager()
@@ -85,6 +86,22 @@ class StripeObject(models.Model):
 
     class Meta:
         abstract = True
+
+    def get_stripe_dashboard_url(self):
+        """Get the stripe dashboard url for this object."""
+        base_url = "https://dashboard.stripe.com/"
+
+        if not self.livemode:
+            base_url += "test/"
+
+        if not self.stripe_dashboard_item_name or not self.stripe_id:
+            return ""
+        else:
+            return "{base_url}{item}/{stripe_id}".format(
+                base_url=base_url,
+                item=self.stripe_dashboard_item_name,
+                stripe_id=self.stripe_id
+            )
 
     def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
         """
@@ -448,6 +465,7 @@ Fields not implemented:
 
     stripe_class = stripe.Charge
     expand_fields = ["balance_transaction"]
+    stripe_dashboard_item_name = "payments"
 
     amount = StripeCurrencyField(help_text="Amount charged.")
     amount_refunded = StripeCurrencyField(
@@ -604,6 +622,7 @@ Fields not implemented:
 
     stripe_class = stripe.Customer
     expand_fields = ["default_source"]
+    stripe_dashboard_item_name = "customers"
 
     account_balance = StripeIntegerField(
         null=True,
@@ -882,6 +901,7 @@ Fields not implemented:
         abstract = True
 
     stripe_class = stripe.Event
+    stripe_dashboard_item_name = "events"
 
     type = StripeCharField(max_length=250, help_text="Stripe's event description code")
     request_id = StripeCharField(
@@ -944,6 +964,7 @@ Fields not implemented:
 
     stripe_class = stripe.Transfer
     expand_fields = ["balance_transaction"]
+    stripe_dashboard_item_name = "transfers"
 
     STATUS_PAID = "paid"
     STATUS_PENDING = "pending"
@@ -1314,6 +1335,7 @@ Fields not implemented:
         abstract = True
 
     stripe_class = stripe.Invoice
+    stripe_dashboard_item_name = "invoices"
 
     amount_due = StripeCurrencyField(
         help_text="Final amount due at this time for this invoice. If the invoice's total is smaller than the minimum "
@@ -1608,6 +1630,7 @@ Fields not implemented:
         abstract = True
 
     stripe_class = stripe.Plan
+    stripe_dashboard_item_name = "plans"
 
     INTERVAL_TYPES = ["day", "week", "month", "year"]
     INTERVAL_TYPE_CHOICES = [(interval_type, interval_type.title()) for interval_type in INTERVAL_TYPES]
@@ -1677,6 +1700,7 @@ Fields not implemented:
         abstract = True
 
     stripe_class = stripe.Subscription
+    stripe_dashboard_item_name = "subscriptions"
 
     STATUS_ACTIVE = "active"
     STATUS_TRIALING = "trialing"
