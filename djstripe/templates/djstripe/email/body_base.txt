@@ -1,4 +1,4 @@
-{% if charge.paid %}Your {{ site.name }} account was successfully charged ${{ charge.amount|floatformat:2 }} to the credit card ending in {{ charge.card_last_4 }}. The invoice below is for your records.
+{% if charge.paid %}Your {{ site.name }} account was successfully charged {{ charge.amount|floatformat:2 }} {{ charge.currency|upper }} to the credit card ending in {{ charge.card_last_4 }}. The invoice below is for your records.
 
 
 ========================================================
@@ -11,13 +11,13 @@ CUSTOMER: {% block customer_name %}{{ charge.customer.subscriber }}{% endblock %
 
 DETAILS
 -------
-{{ charge.customer.subscription.plan.name }} - ${{ charge.amount|floatformat:2 }}
+{{ charge.customer.subscription.plan.name }} - {{ charge.amount|floatformat:2 }}
 
-TOTAL: ${{ charge.amount|floatformat:2 }} USD
-PAID BY CREDIT CARD: -${{ charge.amount|floatformat:2 }}
+TOTAL: {{ charge.amount|floatformat:2 }} {{ charge.currency|upper }}
+PAID BY CREDIT CARD: -{{ charge.amount|floatformat:2 }} {{ charge.currency|upper }}
 ========================================================
-{% else %}{% if charge.refunded %}Your credit card ending in {{ charge.card_last_4 }} was refunded ${{ charge.amount|floatformat:2 }}.
-{% else %}We are sorry, but we failed to charge your credit card ending in {{ charge.card_last_4 }} for the amount ${{ charge.amount|floatformat:2 }}.
+{% else %}{% if charge.refunded %}Your credit card ending in {{ charge.card_last_4 }} was refunded {{ charge.amount|floatformat:2 }} {{ charge.currency|upper }}.
+{% else %}We are sorry, but we failed to charge your credit card ending in {{ charge.card_last_4 }} for the amount {{ charge.amount|floatformat:2 }} {{ charge.currency|upper }}.
 {% endif %}{% endif %}
 
 Please contact us with any questions regarding this invoice.
