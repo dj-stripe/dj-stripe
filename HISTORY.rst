@@ -31,6 +31,7 @@ History
 * CancelSubscriptionView redirect is now more flexible (Thanks @jleclanche) #418
 * Customer.sync_cards() (Thanks @jleclanche) #438
 * Many stability fixes, bugfixes, and code cleanup (Thanks @jleclanche)
+* Support syncing cancelled subscriptions (Thanks @jleclanche) #443
 * Improved admin interface (Thanks @jleclanche with @jameshiew) #451
 * Support concurrent TEST + LIVE API keys (Fix webhook event processing for both modes) (Thanks @jleclanche) #461
 * Added Stripe Dashboard link to admin change panel (Thanks @jleclanche) #465
