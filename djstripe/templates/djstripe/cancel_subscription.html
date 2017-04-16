@@ -5,22 +5,11 @@
 {% block content %}
 <div class="row">
     <div class="col-xs-12">
-        <ul class="breadcrumb">
-          <li><a href="{% url 'djstripe:account' %}">Home</a></li>
-          <li class="active">Cancel Subscription</li>
-        </ul>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-xs-12">
         <h2>Cancel Subscription</h2>
         {% if not customer.subscription %}
             <p>You have no subscription on file.</p>
-            <p>See your <a href="{% url 'djstripe:account' %}">account status</a> or better yet, <a href="{% url 'djstripe:subscribe' %}">subscribe</a>.</p>
         {% elif customer.subscription.status == customer.subscription.STATUS_CANCELED %}
             <p>Your subscription has already been canceled.</p>
-            <p>See your <a href="{% url 'djstripe:account' %}">account status</a> or better yet, get a <a href="{% url 'djstripe:subscribe' %}">fresh subscription</a>.</p>
         {% elif customer.subscription.is_status_temporarily_current %}
             <p>Your subscription has already been canceled.</p>
             <p>However, you can still use the site for another {{ customer.subscription.current_period_end|timeuntil }}.</p>
@@ -39,7 +28,6 @@
             <h3>Are you sure you want to cancel?</h3>
             <form action="{% url 'djstripe:cancel_subscription' %}" method="post" id="cancel-form">
                 {% csrf_token %}
-                <a href="{% url 'djstripe:account' %}" class="btn btn-primary">I change my mind!</a>
                 <button class="btn btn-danger">Cancel my subscription!</button>
             </form>
         {% endif %}
