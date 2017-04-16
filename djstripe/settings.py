@@ -87,8 +87,25 @@ DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
 WEBHOOK_EVENT_CALLBACK = get_callback_function("DJSTRIPE_WEBHOOK_EVENT_CALLBACK")
 
 
-# Determines whether we are in live mode or test mode, based on the value of the public key.
-STRIPE_LIVE_MODE = getattr(settings, "STRIPE_PUBLIC_KEY", "").startswith("pk_live_")
+TEST_API_KEY = getattr(settings, "STRIPE_TEST_SECRET_KEY", "")
+LIVE_API_KEY = getattr(settings, "STRIPE_LIVE_SECRET_KEY", "")
+
+# Determines whether we are in live mode or test mode
+STRIPE_LIVE_MODE = getattr(settings, "STRIPE_LIVE_MODE", False)
+
+# Default secret key
+if hasattr(settings, "STRIPE_SECRET_KEY"):
+    STRIPE_SECRET_KEY = settings.STRIPE_SECRET_KEY
+else:
+    STRIPE_SECRET_KEY = LIVE_API_KEY if STRIPE_LIVE_MODE else TEST_API_KEY
+
+# Default public key
+if hasattr(settings, "STRIPE_PUBLIC_KEY"):
+    STRIPE_PUBLIC_KEY = settings.STRIPE_PUBLIC_KEY
+elif STRIPE_LIVE_MODE:
+    STRIPE_PUBLIC_KEY = getattr(settings, "STRIPE_LIVE_PUBLIC_KEY", "")
+else:
+    STRIPE_PUBLIC_KEY = getattr(settings, "STRIPE_TEST_PUBLIC_KEY", "")
 
 
 def get_subscriber_model_string():

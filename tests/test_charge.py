@@ -21,7 +21,7 @@ from . import FAKE_CHARGE, FAKE_ACCOUNT
 class ChargeTest(TestCase):
 
     def setUp(self):
-        self.customer = Customer.objects.create(stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        self.customer = Customer.objects.create(stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         self.account = Account.objects.create()
 
     def test_str(self):

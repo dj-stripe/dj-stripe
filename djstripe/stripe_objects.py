@@ -22,7 +22,6 @@ from copy import deepcopy
 import decimal
 import sys
 
-from django.conf import settings
 from django.db import models
 from django.utils import dateformat, six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
@@ -32,6 +31,7 @@ from stripe.error import InvalidRequestError
 
 from djstripe.exceptions import CustomerDoesNotExistLocallyException
 
+from . import settings as djstripe_settings
 from .context_managers import stripe_temporary_api_version
 from .exceptions import StripeObjectManipulationException
 from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, StripePercentField, StripeCurrencyField,
@@ -61,7 +61,7 @@ class StripeObject(models.Model):
 
     stripe_id = StripeIdField(unique=True, stripe_name='id')
     livemode = StripeNullBooleanField(
-        default=False,
+        default=None,
         null=True,
         stripe_required=False,
         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, "
@@ -103,22 +103,35 @@ class StripeObject(models.Model):
                 stripe_id=self.stripe_id
             )
 
-    def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
+    @property
+    def default_api_key(self):
+        if self.livemode is None:
+            # Livemode is unknown. Use the default secret key.
+            return djstripe_settings.STRIPE_SECRET_KEY
+        elif self.livemode:
+            # Livemode is true, use the live secret key
+            return djstripe_settings.LIVE_API_KEY or djstripe_settings.STRIPE_SECRET_KEY
+        else:
+            # Livemode is false, use the test secret key
+            return djstripe_settings.TEST_API_KEY or djstripe_settings.STRIPE_SECRET_KEY
+
+    def api_retrieve(self, api_key=None):
         """
         Call the stripe API's retrieve operation for this model.
 
         :param api_key: The api key to use for this request. Defaults to settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
+        api_key = api_key or self.default_api_key
 
         return self.stripe_class.retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
 
     @classmethod
-    def api_list(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
+    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
         """
         Call the stripe API's list operation for this model.
 
-        :param api_key: The api key to use for this request. Defualts to settings.STRIPE_SECRET_KEY.
+        :param api_key: The api key to use for this request. Defualts to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
 
         See Stripe documentation for accepted kwargs for each object.
@@ -129,23 +142,24 @@ class StripeObject(models.Model):
         return cls.stripe_class.list(api_key=api_key, **kwargs).auto_paging_iter()
 
     @classmethod
-    def _api_create(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
         """
         Call the stripe API's create operation for this model.
 
-        :param api_key: The api key to use for this request. Defualts to settings.STRIPE_SECRET_KEY.
+        :param api_key: The api key to use for this request. Defualts to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
 
         return cls.stripe_class.create(api_key=api_key, **kwargs)
 
-    def _api_delete(self, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_delete(self, api_key=None, **kwargs):
         """
         Call the stripe API's delete operation for this model
 
-        :param api_key: The api key to use for this request. Defualts to settings.STRIPE_SECRET_KEY.
+        :param api_key: The api key to use for this request. Defualts to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
+        api_key = api_key or self.default_api_key
 
         return self.api_retrieve(api_key=api_key).delete(**kwargs)
 
@@ -928,10 +942,11 @@ Fields not implemented:
             "type={type}".format(type=self.type),
         ] + super(StripeEvent, self).str_parts()
 
-    def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
+    def api_retrieve(self, api_key=None):
         # OVERRIDING the parent version of this function
         # Event retrieve is special. For Event we don't retrieve using djstripe's API version. We always retrieve
         # using the API version that was used to send the Event (which depends on the Stripe account holders settings
+        api_key = api_key or self.default_api_key
         with stripe_temporary_api_version(self.received_api_version):
             stripe_event = super(StripeEvent, self).api_retrieve(api_key)
 
@@ -1102,7 +1117,7 @@ class StripeAccount(StripeObject):
 
     @classmethod
     def get_default_account(cls):
-        account_data = cls.stripe_class.retrieve(api_key=settings.STRIPE_SECRET_KEY)
+        account_data = cls.stripe_class.retrieve(api_key=djstripe_settings.STRIPE_SECRET_KEY)
 
         return cls._get_or_create_from_stripe_object(account_data)[0]
 
@@ -1196,11 +1211,12 @@ Fields not implemented:
         help_text="If the card number is tokenized, this is the method that was used."
     )
 
-    def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
+    def api_retrieve(self, api_key=None):
         # OVERRIDING the parent version of this function
         # Cards must be manipulated through a customer or account.
         # TODO: When managed accounts are supported, this method needs to check if
         # either a customer or account is supplied to determine the correct object to use.
+        api_key = api_key or self.default_api_key
         customer = self.customer.api_retrieve(api_key=api_key)
 
         # If the customer is deleted, the sources attribute will be absent.
@@ -1223,7 +1239,7 @@ Fields not implemented:
         return customer, kwargs
 
     @classmethod
-    def _api_create(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
         # OVERRIDING the parent version of this function
         # Cards must be manipulated through a customer or account.
         # TODO: When managed accounts are supported, this method needs to check if either a customer or
@@ -1234,7 +1250,7 @@ Fields not implemented:
         return customer.api_retrieve().sources.create(api_key=api_key, **clean_kwargs)
 
     @classmethod
-    def api_list(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
+    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
         # OVERRIDING the parent version of this function
         # Cards must be manipulated through a customer or account.
         # TODO: When managed accounts are supported, this method needs to check if either a customer or
@@ -1447,7 +1463,7 @@ Fields not implemented:
             return target_cls._get_or_create_from_stripe_object(data, "charge")[0]
 
     @classmethod
-    def upcoming(cls, api_key=settings.STRIPE_SECRET_KEY, customer=None, coupon=None, subscription=None,
+    def upcoming(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, customer=None, coupon=None, subscription=None,
                  subscription_plan=None, subscription_prorate=None, subscription_proration_date=None,
                  subscription_quantity=None, subscription_trial_end=None, **kwargs):
         """
