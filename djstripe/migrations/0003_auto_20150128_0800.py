@@ -21,6 +21,6 @@ class Migration(migrations.Migration):
             model_name='customer',
             name='subscriber',
             field=models.OneToOneField(null=True, to=DJSTRIPE_UNSAFE_SUBSCRIBER_MODEL),
-            preserve_default=True,
+           # preserve_default=True,
         ),
     ]
