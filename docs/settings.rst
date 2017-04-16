@@ -32,12 +32,6 @@ For more information, see the `stripe documentation`_.
 
 .. _stripe documentation: https://stripe.com/docs/api/curl#idempotent_requests
 
-
-DJSTRIPE_INVOICE_FROM_EMAIL (="billing@example.com")
-====================================================
-
-Invoice emails come from this address.
-
 DJSTRIPE_PLANS (={})
 ====================
 
@@ -172,12 +166,6 @@ DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES (=False)
 By default, the plan change policy described in item 3 above holds also for plan upgrades.
 
 Assigning ``True`` to ``DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES`` allows dj-stripe to prorate plans in the specific case of an upgrade. Therefore, if a customer upgrades their plan, their new plan is effective right away, and they get billed for the new plan's amount minus the unused balance from their previous plan.
-
-DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS (=True)
-============================================
-
-By default dj-stripe sends emails for each receipt. You can turn this off by
-setting this value to ``False``.
 
 
 DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS (=())

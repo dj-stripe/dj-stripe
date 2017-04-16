@@ -129,21 +129,6 @@ class InvoiceTest(TestCase):
 
         self.assertEqual(Invoice.STATUS_CLOSED, invoice.status)
 
-    @patch("djstripe.models.djstripe_settings", autospec=True)
-    @patch("djstripe.models.Charge.send_receipt")
-    @patch("djstripe.models.Account.get_default_account")
-    @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-    def test_sync_send_emails_false(self, charge_retrieve_mock, subscription_retrieve_mock, default_account_mock,
-                                    send_receipt_mock, settings_fake):
-        default_account_mock.return_value = self.account
-        settings_fake.SEND_INVOICE_RECEIPT_EMAILS = False
-
-        invoice_data = deepcopy(FAKE_INVOICE)
-        Invoice.sync_from_stripe_data(invoice_data)
-
-        self.assertFalse(send_receipt_mock.called)
-
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))

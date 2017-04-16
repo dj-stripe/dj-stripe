@@ -249,7 +249,6 @@ class TestCustomerEvents(EventTestCase):
 
 class TestInvoiceEvents(EventTestCase):
 
-    @patch("djstripe.models.Charge.send_receipt", autospec=True)
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
@@ -258,7 +257,7 @@ class TestInvoiceEvents(EventTestCase):
     @patch("stripe.Event.retrieve")
     def test_invoice_created_no_existing_customer(self, event_retrieve_mock, invoice_retrieve_mock,
                                                   charge_retrieve_mock, customer_retrieve_mock,
-                                                  subscription_retrieve_mock, default_account_mock, send_receipt_mock):
+                                                  subscription_retrieve_mock, default_account_mock):
         default_account_mock.return_value = Account.objects.create()
 
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
@@ -278,7 +277,6 @@ class TestInvoiceEvents(EventTestCase):
         with self.assertRaises(CustomerDoesNotExistLocallyException):
             event.process()
 
-    @patch("djstripe.models.Charge.send_receipt", autospec=True)
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
@@ -286,8 +284,7 @@ class TestInvoiceEvents(EventTestCase):
     @patch("stripe.Invoice.retrieve")
     @patch("stripe.Event.retrieve")
     def test_invoice_created(self, event_retrieve_mock, invoice_retrieve_mock, charge_retrieve_mock,
-                             customer_retrieve_mock, subscription_retrieve_mock, default_account_mock,
-                             send_receipt_mock):
+                             customer_retrieve_mock, subscription_retrieve_mock, default_account_mock):
         default_account_mock.return_value = Account.objects.create()
 
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
@@ -310,14 +307,13 @@ class TestInvoiceEvents(EventTestCase):
         )
         self.assertEquals(invoice.paid, fake_stripe_event["data"]["object"]["paid"])
 
-    @patch("djstripe.models.Charge.send_receipt", autospec=True)
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
     @patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
     def test_invoice_deleted(self, invoice_retrieve_mock, charge_retrieve_mock, customer_retrieve_mock,
-                             subscription_retrieve_mock, default_account_mock, send_receipt_mock):
+                             subscription_retrieve_mock, default_account_mock):
         default_account_mock.return_value = Account.objects.create()
 
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
