@@ -203,3 +203,47 @@ Subscriptions can be extended by using the ``CurrentSubscription.extend`` method
 .. warning::
 
     Subscription extensions are achieved by manipulating the ``trial_end`` of the subscription instance, which means that Stripe will change the status to ``trialing``.
+
+Customizing templates
+=====================
+
+Templates can be customized by copying one or more of them into the project's `TEMPLATES` folder, under a new folder `djstripe`, and editing accordingly. Frequently this folder is specified in the settings file as
+
+.. code-block:: python
+
+    TEMPLATES = [
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': [
+                join(BASE_DIR, 'templates'),  # <--- This folder
+    <snip>
+
+**Example:**
+
+If you look in the template `subscribe_form.html`, you will see a loop that iterates over all the plans, and
+sets the bootstrap class to be a function of the number of plans using a template tag:
+
+.. code-block:: html
+
+    <snip>
+    <div class="row">
+        {% for plan in PLAN_LIST %}
+        {% with plan_count=PLAN_LIST|length %}
+            <div class="col-xs-{{ 12|djdiv:plan_count|floatformat }}">
+        {% endwith %}
+    <snip>
+
+If you have many plans, the bootstrap column class becomes too small and you might prefer the bootstrap columns to wrap.
+In this case, you may prefer to specify a particular CSS class. You can copy the template file to your
+project TEMPLATES folder, i.e. `proj/templates/djstripe/subscribe_form.html` and make your change:
+
+.. code-block:: html
+
+    <snip>
+    <div class="row">
+        {% for plan in PLAN_LIST %}
+        {% with plan_count=PLAN_LIST|length %}
+            <div class="col-sm-4">
+        {% endwith %}
+    <snip>
+
