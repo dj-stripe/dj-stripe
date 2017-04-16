@@ -273,6 +273,10 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         return len(self._get_valid_subscriptions()) != 0
 
     @property
+    def valid_subscriptions(self):
+        return self.subscriptions.exclude(status="canceled")
+
+    @property
     def subscription(self):
         """
         Shortcut to get this customer's subscription.
@@ -283,15 +287,13 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
                 In this case, use ``Customer.subscriptions`` instead.
         """
 
-        subscription_count = self.subscriptions.count()
+        subscriptions = self.valid_subscriptions
 
-        if subscription_count == 0:
-            return None
-        elif subscription_count == 1:
-            return self.subscriptions.first()
-        else:
+        if subscriptions.count() > 1:
             raise MultipleSubscriptionException("This customer has multiple subscriptions. Use Customer.subscriptions "
                                                 "to access them.")
+        else:
+            return subscriptions.first()
 
     # TODO: Accept a coupon object when coupons are implemented
     def subscribe(self, plan, charge_immediately=True, **kwargs):
@@ -400,7 +402,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
             Card.sync_from_stripe_data(stripe_card)
 
     def _sync_subscriptions(self, **kwargs):
-        for stripe_subscription in Subscription.api_list(customer=self.stripe_id, **kwargs):
+        for stripe_subscription in Subscription.api_list(customer=self.stripe_id, status="all", **kwargs):
             Subscription.sync_from_stripe_data(stripe_subscription)
 
 
