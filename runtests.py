@@ -19,7 +19,6 @@ def main():
         action="store_true",
         help="Disable checking for 100% code coverage (Not advised)."
     )
-    parser.add_argument("--no-pep8", action="store_true", help="Disable checking for pep8 errors (Not advised).")
     parser.add_argument("tests", nargs='*', default=['.'])
     args = parser.parse_args()
 
@@ -28,7 +27,6 @@ def main():
 
 def run_test_suite(args):
     enable_coverage = not args.no_coverage
-    enable_pep8 = not args.no_pep8
     tests = args.tests
 
     if enable_coverage:
@@ -208,27 +206,8 @@ def run_test_suite(args):
         sys.stdout.write(colored(text="\nStep 2: Generating coverage results [SKIPPED].",
                                  color="yellow", attrs=["bold"]))
 
-    if enable_pep8:
-        # Announce flake8 run
-        sys.stdout.write(colored(text="\nStep 3: Checking for pep8 errors.\n\n", color="yellow", attrs=["bold"]))
-
-        print("pep8 errors:")
-        print("----------------------------------------------------------------------")
-
-        from subprocess import call
-        flake_result = call(["flake8", ".", "--count"])
-        if flake_result != 0:
-            sys.stderr.write("pep8 errors detected.\n")
-            sys.stderr.write(colored(text="\nYOUR CHANGES HAVE INTRODUCED PEP8 ERRORS!\n\n",
-                                     color="red", attrs=["bold"]))
-            sys.exit(flake_result)
-    else:
-        # Announce disabled coverage run
-        sys.stdout.write(colored(text="\nStep 3: Checking for pep8 errors [SKIPPED].\n",
-                                 color="yellow", attrs=["bold"]))
-
     # Announce success
-    if enable_coverage and enable_pep8:
+    if enable_coverage:
         sys.stdout.write(colored(text="\nTests completed successfully with no errors. Congrats!\n",
                                  color="green", attrs=["bold"]))
     else:
