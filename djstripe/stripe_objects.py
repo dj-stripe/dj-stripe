@@ -29,8 +29,6 @@ from polymorphic.models import PolymorphicModel
 import stripe
 from stripe.error import InvalidRequestError
 
-from djstripe.exceptions import CustomerDoesNotExistLocallyException
-
 from . import settings as djstripe_settings
 from .context_managers import stripe_temporary_api_version
 from .exceptions import StripeObjectManipulationException
@@ -289,12 +287,7 @@ class StripeObject(models.Model):
         """
 
         if "customer" in data and data["customer"]:
-            # We never want to create a customer that doesn't already exist in our database.
-            try:
-                return target_cls.stripe_objects.get_by_json(data, "customer")
-            except target_cls.DoesNotExist:
-                raise CustomerDoesNotExistLocallyException("Because customers are tied to local users, djstripe will "
-                                                           "not create customers that do not already exist locally.")
+            return target_cls._get_or_create_from_stripe_object(data, "customer")[0]
 
     @classmethod
     def _stripe_object_to_transfer(cls, target_cls, data):
@@ -663,20 +656,6 @@ Fields not implemented:
         help_text="Whether or not the latest charge for the customer's latest invoice has failed."
     )
     shipping = StripeJSONField(null=True, help_text="Shipping information associated with the customer.")
-
-    @classmethod
-    def _stripe_object_default_source_to_source(cls, target_cls, data):
-        """
-        Search the given manager for the source matching this StripeCharge object's ``default_source`` field.
-        Note that the source field is already expanded in each request, and that it is required.
-
-        :param target_cls: The target class
-        :type target_cls: StripeSource
-        :param data: stripe object
-        :type data: dict
-        """
-
-        return target_cls._get_or_create_from_stripe_object(data["default_source"])[0]
 
     def subscribe(self, plan, application_fee_percent=None, coupon=None, quantity=None, metadata=None,
                   tax_percent=None, trial_end=None):

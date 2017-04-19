@@ -14,7 +14,6 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from mock import patch
 
-from djstripe.exceptions import CustomerDoesNotExistLocallyException
 from djstripe.models import Event, Charge, Transfer, Account, Plan, Customer, InvoiceItem, Invoice, Card, Subscription
 from tests import (FAKE_CARD, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_CUSTOMER, FAKE_CUSTOMER_II,
                    FAKE_EVENT_CHARGE_SUCCEEDED, FAKE_EVENT_CUSTOMER_CREATED,
@@ -253,17 +252,12 @@ class TestInvoiceEvents(EventTestCase):
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-    @patch("stripe.Invoice.retrieve")
+    @patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
     @patch("stripe.Event.retrieve")
     def test_invoice_created_no_existing_customer(self, event_retrieve_mock, invoice_retrieve_mock,
                                                   charge_retrieve_mock, customer_retrieve_mock,
                                                   subscription_retrieve_mock, default_account_mock):
         default_account_mock.return_value = Account.objects.create()
-
-        user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-
-        # This is a different customer
-        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], livemode=False)
 
         fake_stripe_event = deepcopy(FAKE_EVENT_INVOICE_CREATED)
         event_retrieve_mock.return_value = fake_stripe_event
@@ -273,9 +267,10 @@ class TestInvoiceEvents(EventTestCase):
         event = Event.sync_from_stripe_data(fake_stripe_event)
 
         event.validate()
-
-        with self.assertRaises(CustomerDoesNotExistLocallyException):
-            event.process()
+        event.process()
+        self.assertEquals(Customer.objects.count(), 1)
+        customer = Customer.objects.get()
+        self.assertEquals(customer.subscriber, None)
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))

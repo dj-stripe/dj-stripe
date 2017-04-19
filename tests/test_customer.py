@@ -21,9 +21,12 @@ from stripe.error import InvalidRequestError
 
 from djstripe.exceptions import MultipleSubscriptionException
 from djstripe.models import Account, Customer, Charge, Card, Subscription, Invoice, Plan
-from tests import (FAKE_CARD, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_ACCOUNT, FAKE_INVOICE,
-                   FAKE_INVOICE_III, FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II,
-                   StripeList, FAKE_CARD_V, FAKE_CUSTOMER_II, FAKE_UPCOMING_INVOICE, datetime_to_unix)
+from tests import (
+    FAKE_ACCOUNT, FAKE_CARD, FAKE_CARD_V, FAKE_CHARGE, FAKE_CUSTOMER,
+    FAKE_CUSTOMER_DEFAULT_SOURCE_STRING, FAKE_CUSTOMER_II, FAKE_INVOICE,
+    FAKE_INVOICEITEM, FAKE_INVOICE_III, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II,
+    FAKE_UPCOMING_INVOICE, StripeList, datetime_to_unix
+)
 
 
 class TestCustomer(TestCase):
@@ -78,6 +81,23 @@ class TestCustomer(TestCase):
 
         self.assertEqual(FAKE_CUSTOMER_II["default_source"]["id"], customer.default_source.stripe_id)
         self.assertEqual(1, customer.sources.count())
+
+    @patch("stripe.Card.retrieve", return_value=FAKE_CARD)
+    def test_customer_sync_no_sources(self, customer_mock):
+        self.customer.sources.all().delete()
+
+        fake_customer = deepcopy(FAKE_CUSTOMER)
+        fake_customer["default_source"] = None
+        customer = Customer.sync_from_stripe_data(fake_customer)
+        self.assertEqual(customer.sources.count(), 0)
+        self.assertEqual(customer.default_source, None)
+
+    @patch("stripe.Card.retrieve", return_value=FAKE_CARD)
+    def test_customer_sync_default_source_string(self, customer_mock):
+        fake_customer = deepcopy(FAKE_CUSTOMER_DEFAULT_SOURCE_STRING)
+        customer = Customer.sync_from_stripe_data(fake_customer)
+        self.assertEqual(customer.default_source.stripe_id, FAKE_CARD["id"])
+        self.assertEqual(customer.sources.count(), 1)
 
     @patch("stripe.Customer.retrieve")
     def test_customer_purge_leaves_customer_record(self, customer_retrieve_fake):
