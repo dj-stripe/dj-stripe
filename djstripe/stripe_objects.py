@@ -1673,7 +1673,7 @@ Fields not implemented:
 
     @property
     def amount_in_cents(self):
-        return self.amount * 100
+        return int(self.amount * 100)
 
     def str_parts(self):
         return [
