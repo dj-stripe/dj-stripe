@@ -122,7 +122,10 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
     """
     __doc__ = getattr(StripeCustomer, "__doc__") + doc
 
-    # account = ForeignKey(Account, related_name="customers")
+    account = ForeignKey(
+        "Account", on_delete=models.CASCADE, null=True,
+        related_name="customers",
+    )
 
     default_source = ForeignKey(StripeSource, null=True, related_name="customers", on_delete=SET_NULL)
 
@@ -149,7 +152,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         return parts
 
     @classmethod
-    def get_or_create(cls, subscriber, livemode=djstripe_settings.STRIPE_LIVE_MODE):
+    def get_or_create(cls, subscriber, account=None, livemode=djstripe_settings.STRIPE_LIVE_MODE):
         """
         Get or create a dj-stripe customer.
 
@@ -161,25 +164,30 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         """
 
         try:
-            return Customer.objects.get(subscriber=subscriber, livemode=livemode), False
+            return Customer.objects.get(subscriber=subscriber, account=account, livemode=livemode), False
         except Customer.DoesNotExist:
             action = "create:{}".format(subscriber.pk)
             idempotency_key = djstripe_settings.get_idempotency_key("customer", action, livemode)
-            return cls.create(subscriber, idempotency_key=idempotency_key), True
+            return cls.create(subscriber, account, idempotency_key=idempotency_key), True
 
     @classmethod
-    def create(cls, subscriber, idempotency_key=None):
+    def create(cls, subscriber, account=None, idempotency_key=None):
         trial_days = None
         if djstripe_settings.trial_period_for_subscriber_callback:
             trial_days = djstripe_settings.trial_period_for_subscriber_callback(subscriber)
 
+        optional = dict()
+        if account is not None:
+            optional['stripe_account'] = account.stripe_id
         stripe_customer = cls._api_create(
             email=subscriber.email,
             idempotency_key=idempotency_key,
-            metadata={"djstripe_subscriber": subscriber.pk}
+            metadata={"djstripe_subscriber": subscriber.pk},
+            **optional
         )
         customer, created = Customer.objects.get_or_create(
             stripe_id=stripe_customer["id"],
+            account=account,
             defaults={"subscriber": subscriber, "livemode": stripe_customer["livemode"]}
         )
 
@@ -314,6 +322,8 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         return self.has_valid_source() and self.date_purged is None
 
     def charge(self, amount, currency="usd", **kwargs):
+        if self.account and self.account.stripe_id:
+            kwargs['stripe_account'] = self.account.stripe_id
         stripe_charge = super(Customer, self).charge(amount=amount, currency=currency, **kwargs)
         charge = Charge.sync_from_stripe_data(stripe_charge)
 
