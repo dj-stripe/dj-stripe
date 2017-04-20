@@ -273,8 +273,16 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         return len(self._get_valid_subscriptions()) != 0
 
     @property
+    def active_subscriptions(self):
+        """Returns active subscriptions (subscriptions with an active status that end in the future)."""
+        return self.subscriptions.filter(
+            status=StripeSubscription.STATUS_ACTIVE, current_period_end__gt=timezone.now()
+        )
+
+    @property
     def valid_subscriptions(self):
-        return self.subscriptions.exclude(status="canceled")
+        """Returns this cusotmer's valid subscriptions (subscriptions that aren't cancelled."""
+        return self.subscriptions.exclude(status=StripeSubscription.STATUS_CANCELED)
 
     @property
     def subscription(self):
