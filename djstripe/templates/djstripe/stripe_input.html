@@ -1,4 +1,0 @@
-<input type="{{ type }}" {% if value %} value="{{ value }}"{% endif %}{% if required %} required{% endif %}{% include "floppyforms/attrs.html" %}{% if datalist %} list="{{ attrs.id }}_list"{% endif %}>{% if datalist %}
-<datalist id="{{ attrs.id }}_list">{% for item in datalist %}
-    <option value="{{ item }}">{% endfor %}
-</datalist>{% endif %}

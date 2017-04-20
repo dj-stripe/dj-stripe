@@ -11,14 +11,14 @@ from __future__ import unicode_literals
 
 from functools import wraps
 
-from django.utils.decorators import available_attrs
 from django.shortcuts import redirect
+from django.utils.decorators import available_attrs
 
+from .settings import SUBSCRIPTION_REDIRECT, subscriber_request_callback
 from .utils import subscriber_has_active_subscription
-from .settings import subscriber_request_callback
 
 
-def subscriber_passes_pay_test(test_func, plan=None, pay_page="djstripe:subscribe"):
+def subscriber_passes_pay_test(test_func, plan=None, pay_page=SUBSCRIPTION_REDIRECT):
     """
     Decorator for views that checks the subscriber passes the given test for a "Paid Feature".
 
@@ -36,7 +36,7 @@ def subscriber_passes_pay_test(test_func, plan=None, pay_page="djstripe:subscrib
     return decorator
 
 
-def subscription_payment_required(function=None, plan=None, pay_page="djstripe:subscribe"):
+def subscription_payment_required(function=None, plan=None, pay_page=SUBSCRIPTION_REDIRECT):
     """
     Decorator for views that require subscription payment.
 

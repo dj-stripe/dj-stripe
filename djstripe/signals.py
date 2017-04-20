@@ -4,11 +4,16 @@
 
    :synopsis: dj-stripe - signals are sent for each event Stripe sends to the app
 
-.. moduleauthor:: @kavdev, @pydanny
+.. moduleauthor:: Daniel Greenfeld (@pydanny)
+.. moduleauthor:: Alex Kavanaugh (@kavdev)
+.. moduleauthor:: Lee Skillen (@lskillen)
 
 Stripe docs for Webhooks: https://stripe.com/docs/webhooks
 """
-from django.dispatch import Signal
+
+from django.dispatch import Signal, receiver
+from django.db.models.signals import pre_delete
+from . import settings as djstripe_settings
 
 
 webhook_processing_error = Signal(providing_args=["data", "exception"])
@@ -75,3 +80,10 @@ WEBHOOK_SIGNALS = dict([
         "ping"
     ]
 ])
+
+
+@receiver(pre_delete, sender=djstripe_settings.get_subscriber_model_string())
+def on_delete_subscriber_purge_customer(instance=None, **kwargs):
+    """ Purge associated customers when the subscriber is deleted. """
+    for customer in instance.djstripe_customers.all():
+        customer.purge()

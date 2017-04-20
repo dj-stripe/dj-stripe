@@ -27,14 +27,6 @@ class StripeObjectManager(models.Manager):
         """
         return self.filter(stripe_id=data["id"]).exists()
 
-    def get_by_json(self, data, field_name="id"):
-        """Retreive a matching stripe object based on a Stripe object received from Stripe in JSON format.
-
-        :param data: Stripe event object parsed from a JSON string into an object
-        :type data: dict
-        """
-        return self.get(stripe_id=data[field_name])
-
 
 class SubscriptionManager(models.Manager):
     """Manager used in models.Subscription."""

@@ -1,14 +1,10 @@
 {% extends "djstripe/base.html" %}
-{% load static djstripe_tags %}
+{% load static %}
 
 {% block title %}Choose a Subscription{% endblock title %}
 
 {% block content %}
 {{ block.super }}
-<ul class="breadcrumb">
-  <li><a href="{% url 'djstripe:account' %}">Home</a></li>
-  <li class="active">Subscription</li>
-</ul>
 <h2>Choose a Subscription</h2>
 
 {% if error %}
@@ -21,7 +17,7 @@
 <div class="row">
     {% for plan in plans %}
       {% with plan_count=plans.count %}
-        <div class="col-xs-{{ 12|djdiv:plan_count|floatformat }}">
+        <div class="col-xs-12">
       {% endwith %}
             {% if customer.subscription.plan == plan and customer.subscription.is_valid %}
             <div class="btn btn-default disabled">

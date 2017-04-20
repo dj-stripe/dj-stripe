@@ -22,7 +22,7 @@ class SubscriptionTest(TestCase):
 
     def setUp(self):
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        self.customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        self.customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
@@ -262,3 +262,30 @@ class SubscriptionTest(TestCase):
         self.assertFalse(new_subscription.is_valid())
         self.assertFalse(self.customer.has_active_subscription())
         self.assertFalse(self.customer.has_any_active_subscription())
+
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
+    @patch("stripe.Subscription.retrieve")
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_cancel_and_reactivate(self, customer_retrieve_mock, subscription_retrieve_mock, plan_retrieve_mock):
+        current_period_end = timezone.now() + timezone.timedelta(days=7)
+
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
+        subscription.current_period_end = current_period_end
+        subscription.save()
+
+        canceled_subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        canceled_subscription_fake["current_period_end"] = datetime_to_unix(current_period_end)
+        canceled_subscription_fake["canceled_at"] = datetime_to_unix(timezone.now())
+        subscription_retrieve_mock.return_value = canceled_subscription_fake
+
+        self.assertTrue(self.customer.has_active_subscription())
+        self.assertTrue(self.customer.has_any_active_subscription())
+
+        new_subscription = subscription.cancel(at_period_end=True)
+        self.assertEqual(new_subscription.cancel_at_period_end, True)
+
+        new_subscription.reactivate()
+        subscription_reactivate_fake = deepcopy(FAKE_SUBSCRIPTION)
+        reactivated_subscription = Subscription.sync_from_stripe_data(subscription_reactivate_fake)
+        self.assertEqual(reactivated_subscription.cancel_at_period_end, False)

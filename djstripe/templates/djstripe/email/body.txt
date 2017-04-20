@@ -1,1 +1,0 @@
-{% extends "djstripe/email/body_base.txt" %}

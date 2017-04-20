@@ -27,14 +27,6 @@ SIMPLE_OBJ_RESULT = {
 
 
 class StripeObjectExceptionsTest(TestCase):
-    def test_missing_apiname(self):
-        # This class fails to provide a stripe_api_name attribute
-        class MissingApiName(StripeObject):
-            pass
-
-        with self.assertRaises(NotImplementedError):
-            MissingApiName._api()
-
     def test_deprecated_boolean(self):
         with self.assertRaises(ImproperlyConfigured):
             class DeprecatedBool(StripeObject):
@@ -48,11 +40,11 @@ class StripeObjectExceptionsTest(TestCase):
             HasRequiredField._stripe_object_to_record(SIMPLE_OBJ)
 
     def test_missing_nonrequired_field(self):
-        class HasRequiredField(StripeObject):
+        class HasNotRequiredField(StripeObject):
             im_not_optional = StripeCharField(stripe_required=False)
 
         # Should be no exception here
-        obj = HasRequiredField._stripe_object_to_record(SIMPLE_OBJ)
+        obj = HasNotRequiredField._stripe_object_to_record(SIMPLE_OBJ)
         self.assertEqual(obj['im_not_optional'], None)
 
 
@@ -60,7 +52,7 @@ class StripeObjectBasicTest(TestCase):
     def test_basic_val_to_db(self):
         # Instantiate a stripeobject model class
         class BasicModel(StripeObject):
-            stripe_api_name = "hello"
+            pass
 
         result = BasicModel._stripe_object_to_record(SIMPLE_OBJ)
         self.assertEqual(result, SIMPLE_OBJ_RESULT)

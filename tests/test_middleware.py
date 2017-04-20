@@ -35,7 +35,7 @@ class MiddlewareURLTest(TestCase):
         self.assertEqual(response, None)
 
     def test_namespace(self):
-        request = self.factory.get("/djstripe/")
+        request = self.factory.get("/djstripe/webhook/")
         request.user = self.user
         request.urlconf = self.urlconf
 
@@ -83,12 +83,12 @@ class MiddlewareLogicTest(TestCase):
         self.settings(ROOT_URLCONF=self.urlconf)
         self.factory = RequestFactory()
         self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         self.subscription = Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
         self.middleware = SubscriptionPaymentMiddleware()
 
     def test_anonymous(self):
-        request = self.factory.get("/djstripe/")
+        request = self.factory.get("/djstripe/webhook/")
         request.user = AnonymousUser()
         request.urlconf = self.urlconf
 
@@ -99,7 +99,7 @@ class MiddlewareLogicTest(TestCase):
         self.user.is_staff = True
         self.user.save()
 
-        request = self.factory.get("/djstripe/")
+        request = self.factory.get("/djstripe/webhook/")
         request.user = self.user
         request.urlconf = self.urlconf
 
@@ -110,7 +110,7 @@ class MiddlewareLogicTest(TestCase):
         self.user.is_superuser = True
         self.user.save()
 
-        request = self.factory.get("/djstripe/")
+        request = self.factory.get("/djstripe/webhook/")
         request.user = self.user
         request.urlconf = self.urlconf
 

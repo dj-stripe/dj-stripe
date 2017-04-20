@@ -11,8 +11,6 @@ from django.utils import six
 from stripe.error import InvalidRequestError
 from tqdm import tqdm
 
-from djstripe.exceptions import CustomerDoesNotExistLocallyException
-
 
 def resync_subscriptions(apps, schema_editor):
     """
@@ -37,9 +35,9 @@ def resync_subscriptions(apps, schema_editor):
         print("Re-syncing subscriptions. This may take a while.")
 
         for stripe_subscription in tqdm(iterable=Subscription.api_list(), desc="Sync", unit=" subscriptions"):
-            try:
-                Subscription.sync_from_stripe_data(stripe_subscription)
-            except CustomerDoesNotExistLocallyException:
+            subscription = Subscription.sync_from_stripe_data(stripe_subscription)
+
+            if not subscription.customer:
                 tqdm.write("The customer for this subscription ({subscription_id}) does not exist locally (so we \
                 won't sync the subscription). You'll want to figure out how that \
                 happened.".format(subscription_id=stripe_subscription['id']))
@@ -71,9 +69,9 @@ def resync_invoiceitems(apps, schema_editor):
         print("Re-syncing invoiceitems. This may take a while.")
 
         for stripe_invoiceitem in tqdm(iterable=InvoiceItem.api_list(), desc="Sync", unit=" invoiceitems"):
-            try:
-                InvoiceItem.sync_from_stripe_data(stripe_invoiceitem)
-            except CustomerDoesNotExistLocallyException:
+            invoice = InvoiceItem.sync_from_stripe_data(stripe_invoiceitem)
+
+            if not invoice.customer:
                 tqdm.write("The customer for this invoiceitem ({invoiceitem_id}) does not exist \
                 locally (so we won't sync the invoiceitem). You'll want to figure out how that \
                 happened.".format(invoiceitem_id=stripe_invoiceitem['id']))

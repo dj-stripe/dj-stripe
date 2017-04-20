@@ -5,6 +5,8 @@ History
 
 1.0.0 (2016-??-??)
 ---------------------
+* BACKWARDS-INCOMPATIBLE: dj-stripe now supports test-mode and live-mode Customer objects concurrently.
+  As a result, the User.customer One-to-One reverse-relationship is now the User.djstripe_customers RelatedManager. (Thanks @jleclanche) #440
 * Charge receipts now take `DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS` into account (Thanks @r0fls)
 * Clarified/modified installation documentation (Thanks @pydanny)
 * Corrected and revised ANONYMOUS_USER_ERROR_MSG (Thanks @pydanny)
@@ -25,7 +27,17 @@ History
 * Added inline documentation to pretty much everything and enforced docsytle via flake8 (Thanks @aleccool213)
 * Fixed outdated method call in template (Thanks @kandoio) #391
 * Customer is correctly purged when subscriber is deleted, regardless of how the deletion happened (Thanks @lskillen) #396
-* Test webhooks are now properly captured and logged. No more bounced requests to Stripe! #408 (Thanks @jameshiew)
+* Test webhooks are now properly captured and logged. No more bounced requests to Stripe! (Thanks @jameshiew) #408
+* CancelSubscriptionView redirect is now more flexible (Thanks @jleclanche) #418
+* Customer.sync_cards() (Thanks @jleclanche) #438
+* Many stability fixes, bugfixes, and code cleanup (Thanks @jleclanche)
+* Support syncing cancelled subscriptions (Thanks @jleclanche) #443
+* Improved admin interface (Thanks @jleclanche with @jameshiew) #451
+* Support concurrent TEST + LIVE API keys (Fix webhook event processing for both modes) (Thanks @jleclanche) #461
+* Added Stripe Dashboard link to admin change panel (Thanks @jleclanche) #465
+* Implemented ``Plan.amount_in_cents`` (Thanks @jleclanche) #466
+* Implemented ``Subscription.reactivate()`` (Thanks @jleclanche) #470
+
 
 0.8.0 (2015-12-30)
 ---------------------

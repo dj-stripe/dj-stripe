@@ -21,16 +21,19 @@ from stripe.error import InvalidRequestError
 
 from djstripe.exceptions import MultipleSubscriptionException
 from djstripe.models import Account, Customer, Charge, Card, Subscription, Invoice, Plan
-from tests import (FAKE_CARD, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_ACCOUNT, FAKE_INVOICE,
-                   FAKE_INVOICE_III, FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II,
-                   StripeList, FAKE_CARD_V, FAKE_CUSTOMER_II, FAKE_UPCOMING_INVOICE, datetime_to_unix)
+from tests import (
+    FAKE_ACCOUNT, FAKE_CARD, FAKE_CARD_V, FAKE_CHARGE, FAKE_CUSTOMER,
+    FAKE_CUSTOMER_DEFAULT_SOURCE_STRING, FAKE_CUSTOMER_II, FAKE_INVOICE,
+    FAKE_INVOICEITEM, FAKE_INVOICE_III, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II,
+    FAKE_UPCOMING_INVOICE, StripeList, datetime_to_unix
+)
 
 
 class TestCustomer(TestCase):
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
         self.card, _created = Card._get_or_create_from_stripe_object(data=FAKE_CARD)
 
@@ -44,12 +47,23 @@ class TestCustomer(TestCase):
             subscriber=str(self.user), email=self.user.email, stripe_id=FAKE_CUSTOMER["id"]
         ), str(self.customer))
 
+    def test_customer_dashboard_url(self):
+        expected_url = "https://dashboard.stripe.com/test/customers/{}".format(self.customer.stripe_id)
+        self.assertEqual(self.customer.get_stripe_dashboard_url(), expected_url)
+
+        self.customer.livemode = True
+        expected_url = "https://dashboard.stripe.com/customers/{}".format(self.customer.stripe_id)
+        self.assertEqual(self.customer.get_stripe_dashboard_url(), expected_url)
+
+        unsaved_customer = Customer()
+        self.assertEqual(unsaved_customer.get_stripe_dashboard_url(), "")
+
     def test_customer_sync_unsupported_source(self):
         fake_customer = deepcopy(FAKE_CUSTOMER_II)
         fake_customer["default_source"]["object"] = "fish"
 
         user = get_user_model().objects.create_user(username="testuser", email="testuser@gmail.com")
-        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], currency="usd")
+        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], livemode=False)
 
         customer = Customer.sync_from_stripe_data(fake_customer)
 
@@ -61,12 +75,29 @@ class TestCustomer(TestCase):
         fake_customer = deepcopy(FAKE_CUSTOMER_II)
 
         user = get_user_model().objects.create_user(username="testuser", email="testuser@gmail.com")
-        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], currency="usd")
+        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], livemode=False)
 
         customer = Customer.sync_from_stripe_data(fake_customer)
 
         self.assertEqual(FAKE_CUSTOMER_II["default_source"]["id"], customer.default_source.stripe_id)
         self.assertEqual(1, customer.sources.count())
+
+    @patch("stripe.Card.retrieve", return_value=FAKE_CARD)
+    def test_customer_sync_no_sources(self, customer_mock):
+        self.customer.sources.all().delete()
+
+        fake_customer = deepcopy(FAKE_CUSTOMER)
+        fake_customer["default_source"] = None
+        customer = Customer.sync_from_stripe_data(fake_customer)
+        self.assertEqual(customer.sources.count(), 0)
+        self.assertEqual(customer.default_source, None)
+
+    @patch("stripe.Card.retrieve", return_value=FAKE_CARD)
+    def test_customer_sync_default_source_string(self, customer_mock):
+        fake_customer = deepcopy(FAKE_CUSTOMER_DEFAULT_SOURCE_STRING)
+        customer = Customer.sync_from_stripe_data(fake_customer)
+        self.assertEqual(customer.default_source.stripe_id, FAKE_CARD["id"])
+        self.assertEqual(customer.sources.count(), 1)
 
     @patch("stripe.Customer.retrieve")
     def test_customer_purge_leaves_customer_record(self, customer_retrieve_fake):
@@ -139,7 +170,7 @@ class TestCustomer(TestCase):
         self.assertEqual(1, Card.objects.count())
         self.assertEqual(FAKE_CARD["id"], self.customer.default_source.stripe_id)
 
-    @patch("stripe.Customer.retrieve")
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_cannot_charge(self, customer_retrieve_fake):
         self.customer.delete()
         self.assertFalse(self.customer.can_charge())
@@ -312,22 +343,28 @@ class TestCustomer(TestCase):
 
     @patch("djstripe.models.djstripe_settings.trial_period_for_subscriber_callback", return_value=7)
     @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER_II))
-    def test_create_trial_callback_without_default_plan(self, customer_create_mock, callback_mock):
+    def test_create_trial_callback_without_default_plan(self, create_mock, callback_mock):
         user = get_user_model().objects.create_user(username="test", email="test@gmail.com")
-        Customer.create(user)
+        Customer.create(user, idempotency_key="foo")
 
-        customer_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, email=user.email)
+        create_mock.assert_called_once_with(
+            api_key=settings.STRIPE_SECRET_KEY, email=user.email, idempotency_key="foo",
+            metadata={"djstripe_subscriber": user.id}
+        )
         callback_mock.assert_called_once_with(user)
 
     @patch("djstripe.models.Customer.subscribe")
     @patch("djstripe.models.djstripe_settings.DEFAULT_PLAN")
     @patch("djstripe.models.djstripe_settings.trial_period_for_subscriber_callback", return_value=7)
     @patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER_II))
-    def test_create_default_plan(self, customer_create_mock, callback_mock, default_plan_fake, subscribe_mock):
+    def test_create_default_plan(self, create_mock, callback_mock, default_plan_fake, subscribe_mock):
         user = get_user_model().objects.create_user(username="test", email="test@gmail.com")
-        Customer.create(user)
+        Customer.create(user, idempotency_key="foo")
 
-        customer_create_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY, email=user.email)
+        create_mock.assert_called_once_with(
+            api_key=settings.STRIPE_SECRET_KEY, email=user.email, idempotency_key="foo",
+            metadata={"djstripe_subscriber": user.id}
+        )
         callback_mock.assert_called_once_with(user)
 
         self.assertTrue(subscribe_mock.called)
@@ -558,19 +595,6 @@ class TestCustomer(TestCase):
 
         self.customer.has_active_subscription(plan=plan.stripe_id)
 
-    @patch("djstripe.models.Charge.send_receipt")
-    @patch("djstripe.models.Charge.sync_from_stripe_data")
-    @patch("stripe.Charge.retrieve", return_value=FAKE_CHARGE)
-    @patch("stripe.Charge.create", return_value=FAKE_CHARGE)
-    def test_charge_not_send_receipt(self, charge_create_mock, charge_retrieve_mock, charge_sync_mock,
-                                     send_receipt_mock):
-        self.customer.charge(amount=decimal.Decimal("50.00"), send_receipt=False)
-
-        self.assertFalse(charge_retrieve_mock.called)
-        self.assertTrue(charge_create_mock.called)
-        charge_sync_mock.assert_called_once_with(FAKE_CHARGE)
-        self.assertFalse(send_receipt_mock.called)
-
     @patch("djstripe.models.InvoiceItem.sync_from_stripe_data", return_value="pancakes")
     @patch("stripe.InvoiceItem.create", return_value=deepcopy(FAKE_INVOICEITEM))
     def test_add_invoice_item(self, invoiceitem_create_mock, invoiceitem_sync_mock):
@@ -652,3 +676,10 @@ class TestCustomer(TestCase):
         self.user.delete()
         customer = Customer.objects.get(stripe_id=FAKE_CUSTOMER["id"])
         self.assertIsNotNone(customer.date_purged)
+        self.assertEqual(["(deleted)", "stripe_id=cus_6lsBvm5rJ0zyHc"], customer.str_parts())
+
+    @patch("stripe.Customer.retrieve")
+    def test_delete_subscriber_without_customer_is_noop(self, customer_retrieve_mock):
+        self.user.delete()
+        for customer in self.user.djstripe_customers.all():
+            self.assertIsNone(customer.date_purged)

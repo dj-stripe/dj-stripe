@@ -87,11 +87,14 @@ class PlanTest(TestCase):
             stripe_id=self.plan_data["id"]), str(self.plan)
         )
 
-    @patch("stripe.Plan.retrieve", return_value="soup")
+    @patch("stripe.Plan.retrieve", return_value=FAKE_PLAN)
     def test_stripe_plan(self, plan_retrieve_mock):
-        self.assertEqual("soup", self.plan.api_retrieve())
+        stripe_plan = self.plan.api_retrieve()
         plan_retrieve_mock.assert_called_once_with(
             id=self.plan_data["id"],
             api_key=settings.STRIPE_SECRET_KEY,
             expand=None
         )
+        plan = Plan.sync_from_stripe_data(stripe_plan)
+        assert plan.amount_in_cents == plan.amount * 100
+        assert isinstance(plan.amount_in_cents, int)

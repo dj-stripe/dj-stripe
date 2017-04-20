@@ -1,23 +1,17 @@
--r requirements.txt
-
 # Testing tools
 coverage>=4.2
 django-nose>=1.4.4
-flake8>=3.0.4
 mock>=2.0.0
 nose>=1.3.7
 termcolor>=1.1.0
 tox>=2.3.1
 
 # Docs
-sphinx_rtd_theme==0.1.9
-sphinx-autobuild==0.6.0
+sphinx_rtd_theme>=0.1.9
+sphinx-autobuild>=0.6.0
 
 # Contrib packages
-djangorestframework==3.4.6
+djangorestframework>=3.6.2
 
 # Database drivers
 psycopg2>=2.6.2
-
-# Packaging
-wheel>=0.29.0

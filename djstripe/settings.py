@@ -8,15 +8,11 @@
 """
 from __future__ import unicode_literals
 
-import sys
-
 from django.apps import apps as django_apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import six
 from django.utils.module_loading import import_string
-
-PY3 = sys.version > "3"
 
 
 def get_callback_function(setting_name, default=None):
@@ -54,23 +50,23 @@ def get_callback_function(setting_name, default=None):
 subscriber_request_callback = get_callback_function("DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK",
                                                     default=(lambda request: request.user))
 
-INVOICE_FROM_EMAIL = getattr(settings, "DJSTRIPE_INVOICE_FROM_EMAIL", "billing@example.com")
+
+def _get_idempotency_key(object_type, action, livemode):
+    from .models import IdempotencyKey
+    action = "{}:{}".format(object_type, action)
+    idempotency_key, _created = IdempotencyKey.objects.get_or_create(action=action, livemode=livemode)
+    return str(idempotency_key.uuid)
+
+
+get_idempotency_key = get_callback_function("DJSTRIPE_IDEMPOTENCY_KEY_CALLBACK", _get_idempotency_key)
+
+
 PAYMENTS_PLANS = getattr(settings, "DJSTRIPE_PLANS", {})
 PLAN_HIERARCHY = getattr(settings, "DJSTRIPE_PLAN_HIERARCHY", {})
-
-PASSWORD_INPUT_RENDER_VALUE = getattr(settings, 'DJSTRIPE_PASSWORD_INPUT_RENDER_VALUE', False)
-PASSWORD_MIN_LENGTH = getattr(settings, 'DJSTRIPE_PASSWORD_MIN_LENGTH', 6)
 
 PRORATION_POLICY = getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False)
 PRORATION_POLICY_FOR_UPGRADES = getattr(settings, 'DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES', False)
 CANCELLATION_AT_PERIOD_END = not getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False)
-
-SEND_INVOICE_RECEIPT_EMAILS = getattr(settings, "DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS", True)
-CURRENCIES = getattr(settings, "DJSTRIPE_CURRENCIES", (
-    ('usd', 'U.S. Dollars',),
-    ('gbp', 'Pounds (GBP)',),
-    ('eur', 'Euros',))
-)
 
 DEFAULT_PLAN = getattr(settings, "DJSTRIPE_DEFAULT_PLAN", None)
 
@@ -88,11 +84,33 @@ DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
 WEBHOOK_EVENT_CALLBACK = get_callback_function("DJSTRIPE_WEBHOOK_EVENT_CALLBACK")
 
 
-def _check_subscriber_for_email_address(subscriber_model, message):
-    """Ensure the custom model has an ``email`` field or property."""
-    if (("email" not in [field_.name for field_ in subscriber_model._meta.get_fields()]) and
-            not hasattr(subscriber_model, 'email')):
-        raise ImproperlyConfigured(message)
+TEST_API_KEY = getattr(settings, "STRIPE_TEST_SECRET_KEY", "")
+LIVE_API_KEY = getattr(settings, "STRIPE_LIVE_SECRET_KEY", "")
+
+# Determines whether we are in live mode or test mode
+STRIPE_LIVE_MODE = getattr(settings, "STRIPE_LIVE_MODE", False)
+
+# Default secret key
+if hasattr(settings, "STRIPE_SECRET_KEY"):
+    STRIPE_SECRET_KEY = settings.STRIPE_SECRET_KEY
+else:
+    STRIPE_SECRET_KEY = LIVE_API_KEY if STRIPE_LIVE_MODE else TEST_API_KEY
+
+# Default public key
+if hasattr(settings, "STRIPE_PUBLIC_KEY"):
+    STRIPE_PUBLIC_KEY = settings.STRIPE_PUBLIC_KEY
+elif STRIPE_LIVE_MODE:
+    STRIPE_PUBLIC_KEY = getattr(settings, "STRIPE_LIVE_PUBLIC_KEY", "")
+else:
+    STRIPE_PUBLIC_KEY = getattr(settings, "STRIPE_TEST_PUBLIC_KEY", "")
+
+
+SUBSCRIPTION_REDIRECT = getattr(settings, "DJSTRIPE_SUBSCRIPTION_REDIRECT", "djstripe:subscribe")
+
+
+def get_subscriber_model_string():
+    """Get the configured subscriber model as a module path string."""
+    return getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", settings.AUTH_USER_MODEL)
 
 
 def get_subscriber_model():
@@ -106,34 +124,33 @@ def get_subscriber_model():
 
     Returns the subscriber model that is active in this project.
     """
-    SUBSCRIBER_MODEL = getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", None)
-
-    # Check if a subscriber model is specified. If not, fall back and exit.
-    if not SUBSCRIBER_MODEL:
-        from django.contrib.auth import get_user_model
-        subscriber_model = get_user_model()
-        _check_subscriber_for_email_address(subscriber_model, "The customer user model must have an email attribute.")
-
-        return subscriber_model
-
-    subscriber_model = None
+    model_name = get_subscriber_model_string()
 
     # Attempt a Django 1.7 app lookup
     try:
-        subscriber_model = django_apps.get_model(SUBSCRIBER_MODEL)
+        subscriber_model = django_apps.get_model(model_name)
     except ValueError:
         raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL must be of the form 'app_label.model_name'.")
     except LookupError:
         raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL refers to model '{model}' "
-                                   "that has not been installed.".format(model=SUBSCRIBER_MODEL))
+                                   "that has not been installed.".format(model=model_name))
 
-    _check_subscriber_for_email_address(subscriber_model, "DJSTRIPE_SUBSCRIBER_MODEL must have an email attribute.")
+    if (("email" not in [field_.name for field_ in subscriber_model._meta.get_fields()]) and
+            not hasattr(subscriber_model, 'email')):
+        raise ImproperlyConfigured("DJSTRIPE_SUBSCRIBER_MODEL must have an email attribute.")
 
-    # Custom user model detected. Make sure the callback is configured.
-    func = get_callback_function("DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK")
-    if not func:
-        raise ImproperlyConfigured(
-            "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be implemented "
-            "if a DJSTRIPE_SUBSCRIBER_MODEL is defined.")
+    if model_name != settings.AUTH_USER_MODEL:
+        # Custom user model detected. Make sure the callback is configured.
+        func = get_callback_function("DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK")
+        if not func:
+            raise ImproperlyConfigured(
+                "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be implemented "
+                "if a DJSTRIPE_SUBSCRIBER_MODEL is defined.")
 
     return subscriber_model
+
+
+ZERO_DECIMAL_CURRENCIES = set([
+    "bif", "clp", "djf", "gnf", "jpy", "kmf", "krw", "mga", "pyg", "rwf",
+    "vnd", "vuv", "xaf", "xof", "xpf",
+])

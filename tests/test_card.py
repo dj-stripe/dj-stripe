@@ -30,15 +30,16 @@ class CardTest(TestCase):
 
     def test_create_card_finds_customer(self):
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
         card = Card.sync_from_stripe_data(deepcopy(FAKE_CARD))
 
         self.assertEqual(customer, card.customer)
+        self.assertEqual(card.get_stripe_dashboard_url(), customer.get_stripe_dashboard_url())
 
     def test_str(self):
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
         fake_card = deepcopy(FAKE_CARD)
         card = Card.sync_from_stripe_data(fake_card)
@@ -82,7 +83,7 @@ class CardTest(TestCase):
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_api_create(self, customer_retrieve_mock):
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         stripe_card = Card._api_create(customer=customer, source=FAKE_CARD["id"])
 
         self.assertEqual(FAKE_CARD, stripe_card)
@@ -92,7 +93,7 @@ class CardTest(TestCase):
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_remove(self, customer_retrieve_mock, card_retrieve_mock, card_delete_mock):
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         stripe_card = Card._api_create(customer=customer, source=FAKE_CARD["id"])
         Card.sync_from_stripe_data(stripe_card)
 
@@ -106,9 +107,27 @@ class CardTest(TestCase):
 
     @patch("djstripe.models.Card._api_delete")
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
-    def test_remove_exception(self, customer_retrieve_mock, card_delete_mock):
+    def test_remove_no_such_source(self, customer_retrieve_mock, card_delete_mock):
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
+        stripe_card = Card._api_create(customer=customer, source=FAKE_CARD["id"])
+        Card.sync_from_stripe_data(stripe_card)
+
+        card_delete_mock.side_effect = InvalidRequestError("No such source:", "blah")
+
+        self.assertEqual(1, customer.sources.count())
+
+        card = customer.sources.all()[0]
+        card.remove()
+
+        self.assertEqual(0, customer.sources.count())
+        self.assertTrue(card_delete_mock.called)
+
+    @patch("djstripe.models.Card._api_delete")
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+    def test_remove_no_such_customer(self, customer_retrieve_mock, card_delete_mock):
+        user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
+        customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         stripe_card = Card._api_create(customer=customer, source=FAKE_CARD["id"])
         Card.sync_from_stripe_data(stripe_card)
 
@@ -126,7 +145,7 @@ class CardTest(TestCase):
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_remove_unexpected_exception(self, customer_retrieve_mock, card_delete_mock):
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         stripe_card = Card._api_create(customer=customer, source=FAKE_CARD["id"])
         Card.sync_from_stripe_data(stripe_card)
 
@@ -142,7 +161,7 @@ class CardTest(TestCase):
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_api_list(self, customer_retrieve_mock):
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         card_list = Card.api_list(customer=customer)
 
         self.assertEqual([FAKE_CARD, FAKE_CARD_V], card_list)

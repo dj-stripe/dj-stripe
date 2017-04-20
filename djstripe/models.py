@@ -12,23 +12,22 @@
 from __future__ import unicode_literals
 
 import logging
+import uuid
 import sys
+from datetime import timedelta
 
-from django.conf import settings
-from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
-from django.core.mail import EmailMessage
 from django.db import models
+from django.db.models.fields import (
+    BooleanField, CharField, DateTimeField, NullBooleanField, TextField, UUIDField
+)
 from django.db.models.fields.related import ForeignKey, OneToOneField
 from django.db.models.deletion import SET_NULL
-from django.db.models.fields import BooleanField, DateTimeField, NullBooleanField, TextField, CharField
-from django.template.loader import render_to_string
 from django.utils import six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.functional import cached_property
 from doc_inherit import class_doc_inherit
 from mock_django.query import QuerySetMock
-from model_utils.models import TimeStampedModel
 from stripe.error import StripeError, InvalidRequestError
 
 import traceback as exception_traceback
@@ -62,7 +61,7 @@ class Charge(StripeCharge):
     )
 
     customer = ForeignKey(
-        "Customer", on_delete=models.CASCADE,
+        "Customer", on_delete=models.CASCADE, null=True,
         related_name="charges",
         help_text="The customer associated with this charge."
     )
@@ -93,35 +92,10 @@ class Charge(StripeCharge):
         captured_charge = super(Charge, self).capture()
         return Charge.sync_from_stripe_data(captured_charge)
 
-    def send_receipt(self):
-        """Send a receipt for this charge."""
-
-        if not self.receipt_sent:
-            site = Site.objects.get_current()
-            protocol = getattr(settings, "DEFAULT_HTTP_PROTOCOL", "http")
-            ctx = {
-                "charge": self,
-                "site": site,
-                "protocol": protocol,
-            }
-            subject = render_to_string("djstripe/email/subject.txt", ctx)
-            subject = subject.strip()
-            message = render_to_string("djstripe/email/body.txt", ctx)
-            num_sent = EmailMessage(
-                subject,
-                message,
-                to=[self.customer.subscriber.email],
-                from_email=djstripe_settings.INVOICE_FROM_EMAIL
-            ).send()
-            self.receipt_sent = num_sent > 0
-            self.save()
-
     def _attach_objects_hook(self, cls, data):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
         if customer:
             self.customer = customer
-        else:
-            raise ValidationError("A customer was not attached to this charge.")
 
         transfer = cls._stripe_object_to_transfer(target_cls=Transfer, data=data)
         if transfer:
@@ -139,14 +113,6 @@ class Charge(StripeCharge):
             self.source = cls._stripe_object_to_source(target_cls=Card, data=data)
 
 
-def on_subscriber_delete_purge_customers(collector, field, sub_objs, using):
-    """ Ensure that all customers attached to subscriber are purged on deletion. """
-    for obj in sub_objs:
-        obj.purge()
-
-    SET_NULL(collector, field, sub_objs, using)
-
-
 @class_doc_inherit
 class Customer(StripeCustomer):
     doc = """
@@ -160,36 +126,62 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
     default_source = ForeignKey(StripeSource, null=True, related_name="customers", on_delete=SET_NULL)
 
-    subscriber = OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True,
-                               on_delete=on_subscriber_delete_purge_customers)
+    subscriber = ForeignKey(
+        djstripe_settings.get_subscriber_model_string(), null=True,
+        on_delete=SET_NULL, related_name="djstripe_customers"
+    )
     date_purged = DateTimeField(null=True, editable=False)
 
+    class Meta:
+        unique_together = ("subscriber", "livemode")
+
     def str_parts(self):
-        return ([smart_text(self.subscriber), "email={email}".format(email=self.subscriber.email)] +
-                super(Customer, self).str_parts())
+        parts = []
+
+        if self.subscriber:
+            parts.append(smart_text(self.subscriber))
+            parts.append("email={email}".format(email=self.subscriber.email))
+        else:
+            parts.append("(deleted)")
+
+        parts.extend(super(Customer, self).str_parts())
+
+        return parts
 
     @classmethod
-    def get_or_create(cls, subscriber):
+    def get_or_create(cls, subscriber, livemode=djstripe_settings.STRIPE_LIVE_MODE):
         """
         Get or create a dj-stripe customer.
 
         :param subscriber: The subscriber model instance for which to get or create a customer.
         :type subscriber: User
+
+        :param livemode: Whether to get the subscriber in live or test mode.
+        :type livemode: bool
         """
 
         try:
-            return Customer.objects.get(subscriber=subscriber), False
+            return Customer.objects.get(subscriber=subscriber, livemode=livemode), False
         except Customer.DoesNotExist:
-            return cls.create(subscriber), True
+            action = "create:{}".format(subscriber.pk)
+            idempotency_key = djstripe_settings.get_idempotency_key("customer", action, livemode)
+            return cls.create(subscriber, idempotency_key=idempotency_key), True
 
     @classmethod
-    def create(cls, subscriber):
+    def create(cls, subscriber, idempotency_key=None):
         trial_days = None
         if djstripe_settings.trial_period_for_subscriber_callback:
             trial_days = djstripe_settings.trial_period_for_subscriber_callback(subscriber)
 
-        stripe_customer = cls._api_create(email=subscriber.email)
-        customer = Customer.objects.create(subscriber=subscriber, stripe_id=stripe_customer["id"], currency="usd")
+        stripe_customer = cls._api_create(
+            email=subscriber.email,
+            idempotency_key=idempotency_key,
+            metadata={"djstripe_subscriber": subscriber.pk}
+        )
+        customer, created = Customer.objects.get_or_create(
+            stripe_id=stripe_customer["id"],
+            defaults={"subscriber": subscriber, "livemode": stripe_customer["livemode"]}
+        )
 
         if djstripe_settings.DEFAULT_PLAN and trial_days:
             customer.subscribe(
@@ -218,7 +210,6 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         for source in self.sources.all():
             source.remove()
 
-        super(Customer, self).purge()
         self.date_purged = timezone.now()
         self.save()
 
@@ -282,6 +273,10 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         return len(self._get_valid_subscriptions()) != 0
 
     @property
+    def valid_subscriptions(self):
+        return self.subscriptions.exclude(status="canceled")
+
+    @property
     def subscription(self):
         """
         Shortcut to get this customer's subscription.
@@ -292,15 +287,13 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
                 In this case, use ``Customer.subscriptions`` instead.
         """
 
-        subscription_count = self.subscriptions.count()
+        subscriptions = self.valid_subscriptions
 
-        if subscription_count == 0:
-            return None
-        elif subscription_count == 1:
-            return self.subscriptions.first()
-        else:
+        if subscriptions.count() > 1:
             raise MultipleSubscriptionException("This customer has multiple subscriptions. Use Customer.subscriptions "
                                                 "to access them.")
+        else:
+            return subscriptions.first()
 
     # TODO: Accept a coupon object when coupons are implemented
     def subscribe(self, plan, charge_immediately=True, **kwargs):
@@ -320,15 +313,9 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
         return self.has_valid_source() and self.date_purged is None
 
-    def charge(self, amount, currency="usd", send_receipt=None, **kwargs):
-        if send_receipt is None:
-            send_receipt = getattr(settings, 'DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS', True)
-
+    def charge(self, amount, currency="usd", **kwargs):
         stripe_charge = super(Customer, self).charge(amount=amount, currency=currency, **kwargs)
         charge = Charge.sync_from_stripe_data(stripe_charge)
-
-        if send_receipt:
-            charge.send_receipt()
 
         return charge
 
@@ -396,10 +383,20 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         kwargs['customer'] = self
         return Invoice.upcoming(**kwargs)
 
-    def _attach_objects_hook(self, cls, data):
-        # TODO: other sources
-        if data["default_source"] and data["default_source"]["object"] == "card":
-            self.default_source = cls._stripe_object_default_source_to_source(target_cls=Card, data=data)
+    def _attach_objects_post_save_hook(self, cls, data):
+        default_source = data.get("default_source")
+
+        if default_source:
+            # TODO: other sources
+            if not isinstance(default_source, dict) or default_source.get("object") == "card":
+                source, created = Card._get_or_create_from_stripe_object(data, "default_source", refetch=False)
+            else:
+                logger.warn("Unsupported source type on %r: %r", self, default_source)
+                source = None
+
+            if source and source != self.default_source:
+                self.default_source = source
+                self.save()
 
     # SYNC methods should be dropped in favor of the master sync infrastructure proposed
     def _sync_invoices(self, **kwargs):
@@ -410,8 +407,12 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         for stripe_charge in Charge.api_list(customer=self.stripe_id, **kwargs):
             Charge.sync_from_stripe_data(stripe_charge)
 
+    def _sync_cards(self, **kwargs):
+        for stripe_card in Card.api_list(customer=self, **kwargs):
+            Card.sync_from_stripe_data(stripe_card)
+
     def _sync_subscriptions(self, **kwargs):
-        for stripe_subscription in Subscription.api_list(customer=self.stripe_id, **kwargs):
+        for stripe_subscription in Subscription.api_list(customer=self.stripe_id, status="all", **kwargs):
             Subscription.sync_from_stripe_data(stripe_subscription)
 
 
@@ -572,14 +573,17 @@ class Card(StripeCard):
         else:
             raise ValidationError("A customer was not attached to this card.")
 
+    def get_stripe_dashboard_url(self):
+        return self.customer.get_stripe_dashboard_url()
+
     def remove(self):
         """Removes a card from this customer's account."""
 
         try:
             self._api_delete()
         except InvalidRequestError as exc:
-            if str(exc).startswith("No such customer:"):
-                # The exception was thrown because the stripe customer was already
+            if "No such source:" in str(exc) or "No such customer:" in str(exc):
+                # The exception was thrown because the stripe customer or card was already
                 # deleted on the stripe side, ignore the exception
                 pass
             else:
@@ -621,14 +625,14 @@ class Invoice(StripeInvoice):
     class Meta(object):
         ordering = ["-date"]
 
+    def get_stripe_dashboard_url(self):
+        return self.customer.get_stripe_dashboard_url()
+
     def _attach_objects_hook(self, cls, data):
         self.customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
 
         charge = cls._stripe_object_to_charge(target_cls=Charge, data=data)
         if charge:
-            if djstripe_settings.SEND_INVOICE_RECEIPT_EMAILS:
-                charge.send_receipt()
-
             self.charge = charge
 
         subscription = cls._stripe_object_to_subscription(target_cls=Subscription, data=data)
@@ -694,6 +698,9 @@ class UpcomingInvoice(Invoice):
     def __init__(self, *args, **kwargs):
         super(UpcomingInvoice, self).__init__(*args, **kwargs)
         self._invoiceitems = []
+
+    def get_stripe_dashboard_url(self):
+        return ""
 
     def _attach_objects_hook(self, cls, data):
         super(UpcomingInvoice, self)._attach_objects_hook(cls, data)
@@ -776,6 +783,9 @@ class InvoiceItem(StripeInvoiceItem):
             customer = customer or subscription.customer
 
         self.customer = customer
+
+    def get_stripe_dashboard_url(self):
+        return self.invoice.get_stripe_dashboard_url()
 
 
 @class_doc_inherit
@@ -910,11 +920,32 @@ class Subscription(StripeSubscription):
 # ============================================================================ #
 
 @python_2_unicode_compatible
-class EventProcessingException(TimeStampedModel):
+class IdempotencyKey(models.Model):
+    uuid = UUIDField(max_length=36, primary_key=True, editable=False, default=uuid.uuid4)
+    action = CharField(max_length=100)
+    livemode = BooleanField(help_text="Whether the key was used in live or test mode.")
+    created = DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("action", "livemode")
+
+    def __str__(self):
+        return str(self.uuid)
+
+    @property
+    def is_expired(self):
+        return timezone.now() > self.created + timedelta(hours=24)
+
+
+@python_2_unicode_compatible
+class EventProcessingException(models.Model):
     event = ForeignKey("Event", on_delete=models.CASCADE, null=True)
     data = TextField()
     message = CharField(max_length=500)
     traceback = TextField()
+
+    created = DateTimeField(auto_now_add=True, editable=False)
+    modified = DateTimeField(auto_now=True, editable=False)
 
     @classmethod
     def log(cls, data, exception, event):

@@ -9,7 +9,7 @@ admin.autodiscover()
 
 
 def empty_view(request):
-    return HttpResponse
+    return HttpResponse()
 
 
 urlpatterns = [

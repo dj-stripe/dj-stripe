@@ -20,7 +20,7 @@ if rest_framework:
             self.customer = Customer.objects.create(
                 subscriber=self.user,
                 stripe_id=FAKE_CUSTOMER["id"],
-                currency="usd"
+                livemode=False
             )
 
         def test_no_user_in_request(self):

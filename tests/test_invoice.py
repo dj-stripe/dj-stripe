@@ -27,7 +27,7 @@ class InvoiceTest(TestCase):
     def setUp(self):
         self.account = Account.objects.create()
         self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
@@ -35,6 +35,7 @@ class InvoiceTest(TestCase):
     def test_str(self, charge_retrieve_mock, subscription_retrive_mock, default_account_mock):
         default_account_mock.return_value = self.account
         invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
+        self.assertEqual(invoice.get_stripe_dashboard_url(), self.customer.get_stripe_dashboard_url())
 
         self.assertEqual(
             "<amount_due={amount_due}, date={date}, status={status}, stripe_id={stripe_id}>".format(
@@ -127,21 +128,6 @@ class InvoiceTest(TestCase):
         invoice = Invoice.sync_from_stripe_data(invoice_data)
 
         self.assertEqual(Invoice.STATUS_CLOSED, invoice.status)
-
-    @patch("djstripe.models.djstripe_settings", autospec=True)
-    @patch("djstripe.models.Charge.send_receipt")
-    @patch("djstripe.models.Account.get_default_account")
-    @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-    def test_sync_send_emails_false(self, charge_retrieve_mock, subscription_retrieve_mock, default_account_mock,
-                                    send_receipt_mock, settings_fake):
-        default_account_mock.return_value = self.account
-        settings_fake.SEND_INVOICE_RECEIPT_EMAILS = False
-
-        invoice_data = deepcopy(FAKE_INVOICE)
-        Invoice.sync_from_stripe_data(invoice_data)
-
-        self.assertFalse(send_receipt_mock.called)
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
@@ -253,6 +239,7 @@ class InvoiceTest(TestCase):
         self.assertIsNotNone(invoice)
         self.assertIsNone(invoice.stripe_id)
         self.assertIsNone(invoice.save())
+        self.assertEquals(invoice.get_stripe_dashboard_url(), "")
 
         subscription_retrieve_mock.assert_called_once_with(api_key=ANY, expand=ANY, id=FAKE_SUBSCRIPTION["id"])
         plan_retrieve_mock.assert_not_called()

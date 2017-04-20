@@ -1,1 +1,0 @@
-[{{ site.name }}] Payment Receipt (Invoice #{{ charge.pk }})

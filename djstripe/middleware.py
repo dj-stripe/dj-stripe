@@ -15,19 +15,13 @@ from django.shortcuts import redirect
 import fnmatch
 
 from .utils import subscriber_has_active_subscription
-from .settings import subscriber_request_callback
+from .settings import subscriber_request_callback, SUBSCRIPTION_REDIRECT
 
 
 DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = getattr(
     settings,
     "DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS",
     ()
-)
-
-DJSTRIPE_SUBSCRIPTION_REDIRECT = getattr(
-    settings,
-    "DJSTRIPE_SUBSCRIPTION_REDIRECT",
-    "djstripe:subscribe"
 )
 
 
@@ -104,4 +98,4 @@ class SubscriptionPaymentMiddleware(object):
         subscriber = subscriber_request_callback(request)
 
         if not subscriber_has_active_subscription(subscriber):
-            return redirect(DJSTRIPE_SUBSCRIPTION_REDIRECT)
+            return redirect(SUBSCRIPTION_REDIRECT)

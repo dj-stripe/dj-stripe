@@ -14,7 +14,6 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from mock import patch
 
-from djstripe.exceptions import CustomerDoesNotExistLocallyException
 from djstripe.models import Event, Charge, Transfer, Account, Plan, Customer, InvoiceItem, Invoice, Card, Subscription
 from tests import (FAKE_CARD, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_CUSTOMER, FAKE_CUSTOMER_II,
                    FAKE_EVENT_CHARGE_SUCCEEDED, FAKE_EVENT_CUSTOMER_CREATED,
@@ -61,7 +60,7 @@ class TestChargeEvents(EventTestCase):
         charge_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
         account_mock.return_value = Account.objects.create()
 
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
         event = Event.sync_from_stripe_data(fake_stripe_event)
 
@@ -85,7 +84,7 @@ class TestCustomerEvents(EventTestCase):
         event_retrieve_mock.return_value = fake_stripe_event
         customer_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
 
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
         event = Event.sync_from_stripe_data(fake_stripe_event)
 
@@ -112,7 +111,7 @@ class TestCustomerEvents(EventTestCase):
 
     @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER)
     def test_customer_deleted(self, customer_retrieve_mock):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         event = self._create_event(FAKE_EVENT_CUSTOMER_CREATED)
         self.assertTrue(event.process())
 
@@ -128,7 +127,7 @@ class TestCustomerEvents(EventTestCase):
         fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_SOURCE_CREATED)
         event_retrieve_mock.return_value = fake_stripe_event
 
-        customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
         event = Event.sync_from_stripe_data(fake_stripe_event)
 
@@ -147,7 +146,7 @@ class TestCustomerEvents(EventTestCase):
         fake_stripe_event["data"]["object"]["object"] = "unknown"
         event_retrieve_mock.return_value = fake_stripe_event
 
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
         event = Event.sync_from_stripe_data(fake_stripe_event)
 
@@ -159,7 +158,7 @@ class TestCustomerEvents(EventTestCase):
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_customer_default_source_deleted(self, customer_retrieve_mock):
         event = self._create_event(FAKE_EVENT_CUSTOMER_SOURCE_CREATED)
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         self.assertTrue(event.process())
 
         card = Card.objects.get(stripe_id=FAKE_CARD["id"])
@@ -179,7 +178,7 @@ class TestCustomerEvents(EventTestCase):
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_customer_source_double_delete(self, customer_retrieve_mock):
         event = self._create_event(FAKE_EVENT_CUSTOMER_SOURCE_CREATED)
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         self.assertTrue(event.process())
 
         event = self._create_event(FAKE_EVENT_CUSTOMER_SOURCE_DELETED)
@@ -197,7 +196,7 @@ class TestCustomerEvents(EventTestCase):
         fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED)
         event_retrieve_mock.return_value = fake_stripe_event
 
-        customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
         event = Event.sync_from_stripe_data(fake_stripe_event)
 
@@ -214,7 +213,7 @@ class TestCustomerEvents(EventTestCase):
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_customer_subscription_deleted(
             self, customer_retrieve_mock, subscription_retrieve_mock, plan_retrieve_mock):
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
         event = self._create_event(FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED)
         self.assertTrue(event.process())
 
@@ -236,7 +235,7 @@ class TestCustomerEvents(EventTestCase):
         event_retrieve_mock.return_value = fake_stripe_event
         customer_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
 
-        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
         event = Event.sync_from_stripe_data(fake_stripe_event)
 
@@ -249,22 +248,16 @@ class TestCustomerEvents(EventTestCase):
 
 class TestInvoiceEvents(EventTestCase):
 
-    @patch("djstripe.models.Charge.send_receipt", autospec=True)
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-    @patch("stripe.Invoice.retrieve")
+    @patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
     @patch("stripe.Event.retrieve")
     def test_invoice_created_no_existing_customer(self, event_retrieve_mock, invoice_retrieve_mock,
                                                   charge_retrieve_mock, customer_retrieve_mock,
-                                                  subscription_retrieve_mock, default_account_mock, send_receipt_mock):
+                                                  subscription_retrieve_mock, default_account_mock):
         default_account_mock.return_value = Account.objects.create()
-
-        user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-
-        # This is a different customer
-        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], currency="usd")
 
         fake_stripe_event = deepcopy(FAKE_EVENT_INVOICE_CREATED)
         event_retrieve_mock.return_value = fake_stripe_event
@@ -274,11 +267,11 @@ class TestInvoiceEvents(EventTestCase):
         event = Event.sync_from_stripe_data(fake_stripe_event)
 
         event.validate()
+        event.process()
+        self.assertEquals(Customer.objects.count(), 1)
+        customer = Customer.objects.get()
+        self.assertEquals(customer.subscriber, None)
 
-        with self.assertRaises(CustomerDoesNotExistLocallyException):
-            event.process()
-
-    @patch("djstripe.models.Charge.send_receipt", autospec=True)
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
@@ -286,12 +279,11 @@ class TestInvoiceEvents(EventTestCase):
     @patch("stripe.Invoice.retrieve")
     @patch("stripe.Event.retrieve")
     def test_invoice_created(self, event_retrieve_mock, invoice_retrieve_mock, charge_retrieve_mock,
-                             customer_retrieve_mock, subscription_retrieve_mock, default_account_mock,
-                             send_receipt_mock):
+                             customer_retrieve_mock, subscription_retrieve_mock, default_account_mock):
         default_account_mock.return_value = Account.objects.create()
 
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
         fake_stripe_event = deepcopy(FAKE_EVENT_INVOICE_CREATED)
         event_retrieve_mock.return_value = fake_stripe_event
@@ -310,18 +302,17 @@ class TestInvoiceEvents(EventTestCase):
         )
         self.assertEquals(invoice.paid, fake_stripe_event["data"]["object"]["paid"])
 
-    @patch("djstripe.models.Charge.send_receipt", autospec=True)
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
     @patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
     def test_invoice_deleted(self, invoice_retrieve_mock, charge_retrieve_mock, customer_retrieve_mock,
-                             subscription_retrieve_mock, default_account_mock, send_receipt_mock):
+                             subscription_retrieve_mock, default_account_mock):
         default_account_mock.return_value = Account.objects.create()
 
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], currency="usd")
+        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
         event = self._create_event(FAKE_EVENT_INVOICE_CREATED)
         self.assertTrue(event.process())
@@ -350,7 +341,7 @@ class TestInvoiceItemEvents(EventTestCase):
         default_account_mock.return_value = Account.objects.create()
 
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], currency="usd")
+        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], livemode=False)
 
         fake_stripe_event = deepcopy(FAKE_EVENT_INVOICEITEM_CREATED)
         event_retrieve_mock.return_value = fake_stripe_event
@@ -378,7 +369,7 @@ class TestInvoiceItemEvents(EventTestCase):
         default_account_mock.return_value = Account.objects.create()
 
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], currency="usd")
+        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], livemode=False)
 
         event = self._create_event(FAKE_EVENT_INVOICEITEM_CREATED)
         self.assertTrue(event.process())

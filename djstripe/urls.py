@@ -31,47 +31,14 @@ urlpatterns = [
 
     # HTML views
     url(
-        r"^$",
-        views.AccountView.as_view(),
-        name="account"
-    ),
-    url(
         r"^subscribe/$",
         views.SubscribeView.as_view(),
         name="subscribe"
     ),
     url(
-        r"^confirm/(?P<plan_id>.+)/$",
-        views.ConfirmFormView.as_view(),
-        name="confirm"
-    ),
-    url(
-        r"^change/plan/$",
-        views.ChangePlanView.as_view(),
-        name="change_plan"
-    ),
-    url(
-        r"^change/cards/$",
-        views.ChangeCardView.as_view(),
-        name="change_card"
-    ),
-    url(
         r"^cancel/subscription/$",
         views.CancelSubscriptionView.as_view(),
         name="cancel_subscription"
-    ),
-    url(
-        r"^history/$",
-        views.HistoryView.as_view(),
-        name="history"
-    ),
-
-
-    # Web services
-    url(
-        r"^a/sync/history/$",
-        views.SyncHistoryView.as_view(),
-        name="sync_history"
     ),
 
     # Webhook

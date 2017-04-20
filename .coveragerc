@@ -6,7 +6,7 @@ omit =
     djstripe/migrations/*
     djstripe/management/*
     djstripe/admin.py
-    djstripe/*__init__.py
+    djstripe/checks.py
 
 [html]
 directory = cover

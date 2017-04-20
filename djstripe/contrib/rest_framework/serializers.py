@@ -23,6 +23,7 @@ class SubscriptionSerializer(ModelSerializer):
         """Model class options."""
 
         model = Subscription
+        fields = "__all__"
 
 
 class CreateSubscriptionSerializer(serializers.Serializer):

@@ -22,17 +22,14 @@ from copy import deepcopy
 import decimal
 import sys
 
-from django.conf import settings
 from django.db import models
 from django.utils import dateformat, six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
-from model_utils.models import TimeStampedModel
 from polymorphic.models import PolymorphicModel
 import stripe
 from stripe.error import InvalidRequestError
 
-from djstripe.exceptions import CustomerDoesNotExistLocallyException
-
+from . import settings as djstripe_settings
 from .context_managers import stripe_temporary_api_version
 from .exceptions import StripeObjectManipulationException
 from .fields import (StripeFieldMixin, StripeCharField, StripeDateTimeField, StripePercentField, StripeCurrencyField,
@@ -50,18 +47,19 @@ stripe.api_version = "2016-03-07"
 
 
 @python_2_unicode_compatible
-class StripeObject(TimeStampedModel):
+class StripeObject(models.Model):
     # This must be defined in descendants of this model/mixin
-    # e.g. "Event", "Charge", "Customer", etc.
-    stripe_api_name = None
+    # e.g. Event, Charge, Customer, etc.
+    stripe_class = None
     expand_fields = None
+    stripe_dashboard_item_name = ""
 
     objects = models.Manager()
     stripe_objects = StripeObjectManager()
 
     stripe_id = StripeIdField(unique=True, stripe_name='id')
     livemode = StripeNullBooleanField(
-        default=False,
+        default=None,
         null=True,
         stripe_required=False,
         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, "
@@ -81,38 +79,57 @@ class StripeObject(TimeStampedModel):
     )
     description = StripeTextField(blank=True, stripe_required=False, help_text="A description of this object.")
 
+    created = models.DateTimeField(auto_now_add=True, editable=False)
+    modified = models.DateTimeField(auto_now=True, editable=False)
+
     class Meta:
         abstract = True
 
-    @classmethod
-    def _api(cls):
-        """
-        Get the api object for this type of stripe object (requires
-        stripe_api_name attribute to be set on model).
-        """
-        if cls.stripe_api_name is None:
-            raise NotImplementedError("StripeObject descendants are required to define "
-                                      "the stripe_api_name attribute")
-        # e.g. stripe.Event, stripe.Charge, etc
-        return getattr(stripe, cls.stripe_api_name)
+    def get_stripe_dashboard_url(self):
+        """Get the stripe dashboard url for this object."""
+        base_url = "https://dashboard.stripe.com/"
 
-    def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
+        if not self.livemode:
+            base_url += "test/"
+
+        if not self.stripe_dashboard_item_name or not self.stripe_id:
+            return ""
+        else:
+            return "{base_url}{item}/{stripe_id}".format(
+                base_url=base_url,
+                item=self.stripe_dashboard_item_name,
+                stripe_id=self.stripe_id
+            )
+
+    @property
+    def default_api_key(self):
+        if self.livemode is None:
+            # Livemode is unknown. Use the default secret key.
+            return djstripe_settings.STRIPE_SECRET_KEY
+        elif self.livemode:
+            # Livemode is true, use the live secret key
+            return djstripe_settings.LIVE_API_KEY or djstripe_settings.STRIPE_SECRET_KEY
+        else:
+            # Livemode is false, use the test secret key
+            return djstripe_settings.TEST_API_KEY or djstripe_settings.STRIPE_SECRET_KEY
+
+    def api_retrieve(self, api_key=None):
         """
         Call the stripe API's retrieve operation for this model.
 
         :param api_key: The api key to use for this request. Defaults to settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
+        api_key = api_key or self.default_api_key
 
-        # Run stripe.X.retreive(id)
-        return type(self)._api().retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
+        return self.stripe_class.retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
 
     @classmethod
-    def api_list(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
+    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
         """
         Call the stripe API's list operation for this model.
 
-        :param api_key: The api key to use for this request. Defualts to settings.STRIPE_SECRET_KEY.
+        :param api_key: The api key to use for this request. Defualts to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
 
         See Stripe documentation for accepted kwargs for each object.
@@ -120,26 +137,27 @@ class StripeObject(TimeStampedModel):
         :returns: an iterator over all items in the query
         """
 
-        return cls._api().list(api_key=api_key, **kwargs).auto_paging_iter()
+        return cls.stripe_class.list(api_key=api_key, **kwargs).auto_paging_iter()
 
     @classmethod
-    def _api_create(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
         """
         Call the stripe API's create operation for this model.
 
-        :param api_key: The api key to use for this request. Defualts to settings.STRIPE_SECRET_KEY.
+        :param api_key: The api key to use for this request. Defualts to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
 
-        return cls._api().create(api_key=api_key, **kwargs)
+        return cls.stripe_class.create(api_key=api_key, **kwargs)
 
-    def _api_delete(self, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_delete(self, api_key=None, **kwargs):
         """
         Call the stripe API's delete operation for this model
 
-        :param api_key: The api key to use for this request. Defualts to settings.STRIPE_SECRET_KEY.
+        :param api_key: The api key to use for this request. Defualts to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
+        api_key = api_key or self.default_api_key
 
         return self.api_retrieve(api_key=api_key).delete(**kwargs)
 
@@ -269,12 +287,7 @@ class StripeObject(TimeStampedModel):
         """
 
         if "customer" in data and data["customer"]:
-            # We never want to create a customer that doesn't already exist in our database.
-            try:
-                return target_cls.stripe_objects.get_by_json(data, "customer")
-            except target_cls.DoesNotExist:
-                raise CustomerDoesNotExistLocallyException("Because customers are tied to local users, djstripe will "
-                                                           "not create customers that do not already exist locally.")
+            return target_cls._get_or_create_from_stripe_object(data, "customer")[0]
 
     @classmethod
     def _stripe_object_to_transfer(cls, target_cls, data):
@@ -457,8 +470,9 @@ Fields not implemented:
     class Meta:
         abstract = True
 
-    stripe_api_name = "Charge"
+    stripe_class = stripe.Charge
     expand_fields = ["balance_transaction"]
+    stripe_dashboard_item_name = "payments"
 
     amount = StripeCurrencyField(help_text="Amount charged.")
     amount_refunded = StripeCurrencyField(
@@ -613,8 +627,9 @@ Fields not implemented:
     class Meta:
         abstract = True
 
-    stripe_api_name = "Customer"
+    stripe_class = stripe.Customer
     expand_fields = ["default_source"]
+    stripe_dashboard_item_name = "customers"
 
     account_balance = StripeIntegerField(
         null=True,
@@ -641,30 +656,6 @@ Fields not implemented:
         help_text="Whether or not the latest charge for the customer's latest invoice has failed."
     )
     shipping = StripeJSONField(null=True, help_text="Shipping information associated with the customer.")
-
-    @classmethod
-    def _stripe_object_default_source_to_source(cls, target_cls, data):
-        """
-        Search the given manager for the source matching this StripeCharge object's ``default_source`` field.
-        Note that the source field is already expanded in each request, and that it is required.
-
-        :param target_cls: The target class
-        :type target_cls: StripeSource
-        :param data: stripe object
-        :type data: dict
-        """
-
-        return target_cls._get_or_create_from_stripe_object(data["default_source"])[0]
-
-    def purge(self):
-        """Delete all identifying information we have in this record."""
-
-        # Delete deprecated card details
-        self.card_fingerprint = ""
-        self.card_last_4 = ""
-        self.card_kind = ""
-        self.card_exp_month = None
-        self.card_exp_year = None
 
     def subscribe(self, plan, application_fee_percent=None, coupon=None, quantity=None, metadata=None,
                   tax_percent=None, trial_end=None):
@@ -761,12 +752,6 @@ Fields not implemented:
         :type source: string, StripeSource
         :param statement_descriptor: An arbitrary string to be displayed on the customer's credit card statement.
         :type statement_descriptor: string
-        :param send_receipt: Whether or not to send a receipt for this charge. If blank,
-                             ``DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS`` is used.
-        :type send_receipt: boolean
-
-        .. Notes:
-        .. ``send_receipt`` is only available on ``Customer.charge()``
         """
 
         if not isinstance(amount, decimal.Decimal):
@@ -905,7 +890,8 @@ Fields not implemented:
     class Meta:
         abstract = True
 
-    stripe_api_name = "Event"
+    stripe_class = stripe.Event
+    stripe_dashboard_item_name = "events"
 
     type = StripeCharField(max_length=250, help_text="Stripe's event description code")
     request_id = StripeCharField(
@@ -932,10 +918,11 @@ Fields not implemented:
             "type={type}".format(type=self.type),
         ] + super(StripeEvent, self).str_parts()
 
-    def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
+    def api_retrieve(self, api_key=None):
         # OVERRIDING the parent version of this function
         # Event retrieve is special. For Event we don't retrieve using djstripe's API version. We always retrieve
         # using the API version that was used to send the Event (which depends on the Stripe account holders settings
+        api_key = api_key or self.default_api_key
         with stripe_temporary_api_version(self.received_api_version):
             stripe_event = super(StripeEvent, self).api_retrieve(api_key)
 
@@ -966,8 +953,9 @@ Fields not implemented:
     class Meta:
         abstract = True
 
-    stripe_api_name = "Transfer"
+    stripe_class = stripe.Transfer
     expand_fields = ["balance_transaction"]
+    stripe_dashboard_item_name = "transfers"
 
     STATUS_PAID = "paid"
     STATUS_PENDING = "pending"
@@ -1093,19 +1081,19 @@ class StripeAccount(StripeObject):
     class Meta:
         abstract = True
 
-    stripe_api_name = "Account"
+    stripe_class = stripe.Account
 
     # Account -- add_card(external_account);
 
     @classmethod
     def get_connected_account_from_token(cls, access_token):
-        account_data = cls._api().retrieve(api_key=access_token)
+        account_data = cls.stripe_class.retrieve(api_key=access_token)
 
         return cls._get_or_create_from_stripe_object(account_data)[0]
 
     @classmethod
     def get_default_account(cls):
-        account_data = cls._api().retrieve(api_key=settings.STRIPE_SECRET_KEY)
+        account_data = cls.stripe_class.retrieve(api_key=djstripe_settings.STRIPE_SECRET_KEY)
 
         return cls._get_or_create_from_stripe_object(account_data)[0]
 
@@ -1153,7 +1141,7 @@ Fields not implemented:
     class Meta:
         abstract = True
 
-    stripe_api_name = "Card"
+    stripe_class = stripe.Card
 
     address_city = StripeTextField(null=True, help_text="Billing address city.")
     address_country = StripeTextField(null=True, help_text="Billing address country.")
@@ -1199,13 +1187,21 @@ Fields not implemented:
         help_text="If the card number is tokenized, this is the method that was used."
     )
 
-    def api_retrieve(self, api_key=settings.STRIPE_SECRET_KEY):
+    def api_retrieve(self, api_key=None):
         # OVERRIDING the parent version of this function
         # Cards must be manipulated through a customer or account.
-        # TODO: When managed accounts are supported, this method needs to check if either a customer or
-        #       account is supplied to determine the correct object to use.
+        # TODO: When managed accounts are supported, this method needs to check if
+        # either a customer or account is supplied to determine the correct object to use.
+        api_key = api_key or self.default_api_key
+        customer = self.customer.api_retrieve(api_key=api_key)
 
-        return self.customer.api_retrieve(api_key=api_key).sources.retrieve(self.stripe_id, expand=self.expand_fields)
+        # If the customer is deleted, the sources attribute will be absent.
+        # eg. {"id": "cus_XXXXXXXX", "deleted": True}
+        if "sources" not in customer:
+            # We fake a native stripe InvalidRequestError so that it's caught like an invalid ID error.
+            raise InvalidRequestError("No such source: %s" % (self.stripe_id), "id")
+
+        return customer.sources.retrieve(self.stripe_id, expand=self.expand_fields)
 
     @staticmethod
     def _get_customer_from_kwargs(**kwargs):
@@ -1219,7 +1215,7 @@ Fields not implemented:
         return customer, kwargs
 
     @classmethod
-    def _api_create(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
         # OVERRIDING the parent version of this function
         # Cards must be manipulated through a customer or account.
         # TODO: When managed accounts are supported, this method needs to check if either a customer or
@@ -1230,7 +1226,7 @@ Fields not implemented:
         return customer.api_retrieve().sources.create(api_key=api_key, **clean_kwargs)
 
     @classmethod
-    def api_list(cls, api_key=settings.STRIPE_SECRET_KEY, **kwargs):
+    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
         # OVERRIDING the parent version of this function
         # Cards must be manipulated through a customer or account.
         # TODO: When managed accounts are supported, this method needs to check if either a customer or
@@ -1238,7 +1234,7 @@ Fields not implemented:
 
         customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
 
-        return customer.api_retrieve().sources.list(api_key=api_key, object="card", **clean_kwargs).auto_paging_iter()
+        return customer.api_retrieve(api_key=api_key).sources.list(object="card", **clean_kwargs).auto_paging_iter()
 
     def str_parts(self):
         return [
@@ -1330,7 +1326,8 @@ Fields not implemented:
     class Meta:
         abstract = True
 
-    stripe_api_name = "Invoice"
+    stripe_class = stripe.Invoice
+    stripe_dashboard_item_name = "invoices"
 
     amount_due = StripeCurrencyField(
         help_text="Final amount due at this time for this invoice. If the invoice's total is smaller than the minimum "
@@ -1442,7 +1439,7 @@ Fields not implemented:
             return target_cls._get_or_create_from_stripe_object(data, "charge")[0]
 
     @classmethod
-    def upcoming(cls, api_key=settings.STRIPE_SECRET_KEY, customer=None, coupon=None, subscription=None,
+    def upcoming(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, customer=None, coupon=None, subscription=None,
                  subscription_plan=None, subscription_prorate=None, subscription_proration_date=None,
                  subscription_quantity=None, subscription_trial_end=None, **kwargs):
         """
@@ -1488,7 +1485,7 @@ Fields not implemented:
         """
 
         try:
-            upcoming_stripe_invoice = cls._api().upcoming(
+            upcoming_stripe_invoice = cls.stripe_class.upcoming(
                 api_key=api_key, customer=customer,
                 coupon=coupon, subscription=subscription,
                 subscription_plan=subscription_plan,
@@ -1556,7 +1553,7 @@ Fields not implemented:
     class Meta:
         abstract = True
 
-    stripe_api_name = "InvoiceItem"
+    stripe_class = stripe.InvoiceItem
 
     amount = StripeCurrencyField(help_text="Amount invoiced.")
     currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code.")
@@ -1624,7 +1621,8 @@ Fields not implemented:
     class Meta:
         abstract = True
 
-    stripe_api_name = "Plan"
+    stripe_class = stripe.Plan
+    stripe_dashboard_item_name = "plans"
 
     INTERVAL_TYPES = ["day", "week", "month", "year"]
     INTERVAL_TYPE_CHOICES = [(interval_type, interval_type.title()) for interval_type in INTERVAL_TYPES]
@@ -1654,6 +1652,10 @@ Fields not implemented:
         help_text="Number of trial period days granted when subscribing a customer to this plan. "
         "Null if the plan has no trial period."
     )
+
+    @property
+    def amount_in_cents(self):
+        return int(self.amount * 100)
 
     def str_parts(self):
         return [
@@ -1689,7 +1691,8 @@ Fields not implemented:
     class Meta:
         abstract = True
 
-    stripe_api_name = "Subscription"
+    stripe_class = stripe.Subscription
+    stripe_dashboard_item_name = "subscriptions"
 
     STATUS_ACTIVE = "active"
     STATUS_TRIALING = "trialing"
@@ -1855,3 +1858,16 @@ Fields not implemented:
         """
 
         return self._api_delete(at_period_end=at_period_end)
+
+    def reactivate(self):
+        """
+        Reactivates this subscription.
+
+        If a customer’s subscription is canceled with ``at_period_end`` set to True and it has not yet reached the end
+        of the billing period, it can be reactivated. Subscriptions canceled immediately cannot be reactivated.
+        (Source: https://stripe.com/docs/subscriptions/canceling-pausing)
+
+        .. warning:: Reactivating a fully canceled Subscription will fail silently. Be sure to check the returned \
+        Subscription's status.
+        """
+        return self.update(plan=self.plan)

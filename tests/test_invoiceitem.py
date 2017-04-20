@@ -23,7 +23,7 @@ class InvoiceItemTest(TestCase):
         self.account = Account.objects.create()
 
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], currency="usd")
+        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], livemode=False)
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION_III))
@@ -36,6 +36,7 @@ class InvoiceItemTest(TestCase):
 
         invoiceitem_data = deepcopy(FAKE_INVOICEITEM)
         invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
+        self.assertEqual(invoiceitem.get_stripe_dashboard_url(), invoiceitem.invoice.get_stripe_dashboard_url())
 
         self.assertEqual(str(invoiceitem), "<amount={amount}, date={date}, stripe_id={stripe_id}>".format(
             amount=invoiceitem.amount,
