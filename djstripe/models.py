@@ -36,10 +36,13 @@ from . import settings as djstripe_settings
 from . import webhooks
 from .exceptions import MultipleSubscriptionException
 from .managers import SubscriptionManager, ChargeManager, TransferManager
-from .signals import WEBHOOK_SIGNALS
-from .signals import webhook_processing_error
-from .stripe_objects import (StripeSource, StripeCharge, StripeCustomer, StripeCard, StripeSubscription,
-                             StripePlan, StripeInvoice, StripeInvoiceItem, StripeTransfer, StripeAccount, StripeEvent)
+from .signals import WEBHOOK_SIGNALS, webhook_processing_error
+from .stripe_objects import (
+    StripeAccount, StripeCard, StripeCharge, StripeCoupon, StripeCustomer,
+    StripeEvent, StripeInvoice, StripeInvoiceItem, StripePlan, StripeSource,
+    StripeSubscription, StripeTransfer
+)
+from .utils import get_friendly_currency_amount
 
 
 logger = logging.getLogger(__name__)
@@ -111,6 +114,29 @@ class Charge(StripeCharge):
         # TODO: other sources
         if self.source_type == "card":
             self.source = cls._stripe_object_to_source(target_cls=Card, data=data)
+
+
+@class_doc_inherit
+class Coupon(StripeCoupon):
+    @property
+    def human_readable_amount(self):
+        if self.percent_off:
+            amount = "{percent_off}%".format(percent_off=self.percent_off)
+        else:
+            amount = get_friendly_currency_amount(self.amount_off or 0, self.currency)
+        return "{amount} off".format(amount=amount)
+
+    @property
+    def human_readable(self):
+        if self.duration == self.DURATION_REPEATING:
+            if self.duration_in_months == 1:
+                duration = "for {duration_in_months} month"
+            else:
+                duration = "for {duration_in_months} months"
+            duration = duration.format(duration_in_months=self.duration_in_months)
+        else:
+            duration = self.duration
+        return "{amount} {duration}".format(amount=self.human_readable_amount, duration=duration)
 
 
 @class_doc_inherit

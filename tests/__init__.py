@@ -420,6 +420,25 @@ FAKE_CHARGE_II = ChargeDict({
     "status": "failed",
 })
 
+
+FAKE_COUPON = {
+    "id": "fake-coupon-1",
+    "object": "coupon",
+    "amount_off": None,
+    "created": 1490157071,
+    "currency": None,
+    "duration": "once",
+    "duration_in_months": None,
+    "livemode": False,
+    "max_redemptions": None,
+    "metadata": {},
+    "percent_off": 1,
+    "redeem_by": None,
+    "times_redeemed": 0,
+    "valid": True,
+}
+
+
 FAKE_PLAN = {
     "id": "gold21323",
     "object": "plan",

@@ -12,8 +12,8 @@
 from django.contrib import admin
 
 from .models import (
-    Charge, Customer, Event, EventProcessingException, IdempotencyKey, Invoice,
-    InvoiceItem, Plan, Subscription, Transfer
+    Charge, Coupon, Customer, Event, EventProcessingException, IdempotencyKey,
+    Invoice, InvoiceItem, Plan, Subscription, Transfer
 )
 
 
@@ -263,6 +263,16 @@ class ChargeAdmin(StripeObjectAdmin):
         "status", "paid", "disputed", "refunded", "fraudulent", "captured",
     )
     raw_id_fields = ("customer", "source", "transfer")
+
+
+@admin.register(Coupon)
+class CouponAdmin(StripeObjectAdmin):
+    list_display = (
+        "amount_off", "percent_off", "duration", "duration_in_months",
+        "redeem_by", "max_redemptions", "times_redeemed"
+    )
+    list_filter = ("duration", "redeem_by")
+    radio_fields = {"duration": admin.HORIZONTAL}
 
 
 @admin.register(Customer)
