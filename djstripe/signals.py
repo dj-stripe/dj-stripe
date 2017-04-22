@@ -16,6 +16,29 @@ from django.db.models.signals import pre_delete
 from . import settings as djstripe_settings
 
 
+def stripe_receiver(signal, **kwargs):
+    """
+    A stripe version of the django signal receiver::
+
+        @stripe_receiver('account.updated')
+        def signal_receiver(event, **kwargs):
+            ...
+
+        @stripe_receiver(['customer.created', 'customer.updated'])
+        def signal_receiver(event, **kwargs):
+            ...
+    """
+    def _decorator(func):
+        if isinstance(signal, (list, tuple)):
+            for s in signal:
+                WEBHOOK_SIGNALS[s].connect(func, **kwargs)
+        else:
+            WEBHOOK_SIGNALS[signal].connect(func, **kwargs)
+        return func
+
+    return _decorator
+
+
 webhook_processing_error = Signal(providing_args=["data", "exception"])
 
 # A signal for each Event type. See https://stripe.com/docs/api#event_types
