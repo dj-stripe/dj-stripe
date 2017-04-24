@@ -1907,7 +1907,21 @@ Fields not implemented:
 
         """
 
-        return self._api_delete(at_period_end=at_period_end)
+        try:
+            stripe_subscription = self._api_delete(at_period_end=at_period_end)
+        except InvalidRequestError as exc:
+            if "No such subscription:" in str(exc):
+                # cancel() works by deleting the subscription. The object still
+                # exists in Stripe however, and can still be retrieved.
+                # If the subscription was already canceled (status=canceled),
+                # that api_retrieve() call will fail with "No such subscription".
+                # However, this may also happen if the subscription legitimately
+                # does not exist, in which case the following line will re-raise.
+                stripe_subscription = self.api_retrieve()
+            else:
+                six.reraise(*sys.exc_info())
+
+        return stripe_subscription
 
     def reactivate(self):
         """
