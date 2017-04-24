@@ -10,8 +10,6 @@
 
 from __future__ import unicode_literals
 
-from django.conf import settings
-
 from . import settings as djstripe_settings
 from .models import Plan, Customer
 
@@ -23,7 +21,7 @@ class PaymentsContextMixin(object):
         """Inject STRIPE_PUBLIC_KEY and plans into context_data."""
         context = super(PaymentsContextMixin, self).get_context_data(**kwargs)
         context.update({
-            "STRIPE_PUBLIC_KEY": settings.STRIPE_PUBLIC_KEY,
+            "STRIPE_PUBLIC_KEY": djstripe_settings.STRIPE_PUBLIC_KEY,
             "plans": Plan.objects.all(),
         })
         return context
