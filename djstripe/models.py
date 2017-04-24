@@ -158,6 +158,8 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
     )
     date_purged = DateTimeField(null=True, editable=False)
 
+    djstripe_subscriber_key = "djstripe_subscriber"
+
     class Meta:
         unique_together = ("subscriber", "livemode")
 
@@ -202,7 +204,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         stripe_customer = cls._api_create(
             email=subscriber.email,
             idempotency_key=idempotency_key,
-            metadata={"djstripe_subscriber": subscriber.pk}
+            metadata={cls.djstripe_subscriber_key: subscriber.pk}
         )
         customer, created = Customer.objects.get_or_create(
             stripe_id=stripe_customer["id"],
@@ -431,6 +433,21 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
             if source and source != self.default_source:
                 self.default_source = source
                 self.save()
+
+    def _attach_objects_hook(self, cls, data):
+        # When we save a customer to Stripe, we add a reference to its Django PK
+        # in the `django_account` key. If we find that, we re-attach that PK.
+        subscriber_id = data.get("metadata", {}).get(self.djstripe_subscriber_key)
+        if subscriber_id:
+            cls = djstripe_settings.get_subscriber_model()
+            try:
+                # We have to perform a get(), instead of just attaching the PK
+                # blindly as the object may have been deleted or not exist.
+                # Attempting to save that would cause an IntegrityError.
+                self.subscriber = cls.objects.get(pk=subscriber_id)
+            except (cls.DoesNotExist, ValueError):
+                logger.warn("Could not find subscriber %r matching customer %r" % (subscriber_id, self.stripe_id))
+                self.subscriber = None
 
     # SYNC methods should be dropped in favor of the master sync infrastructure proposed
     def _sync_invoices(self, **kwargs):
