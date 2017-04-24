@@ -337,7 +337,7 @@ class PlanAdmin(StripeObjectAdmin):
 class SubscriptionAdmin(StripeObjectAdmin):
     raw_id_fields = ("customer", )
     list_display = ("customer", "status")
-    list_filter = ("status", )
+    list_filter = ("status", "cancel_at_period_end")
     actions = (cancel_subscription, )
 
 

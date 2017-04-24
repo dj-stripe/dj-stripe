@@ -11,29 +11,9 @@
 from __future__ import unicode_literals
 
 from django.conf import settings
-from django.contrib import messages
-from django.shortcuts import redirect
 
 from . import settings as djstripe_settings
 from .models import Plan, Customer
-from .utils import subscriber_has_active_subscription
-
-
-class SubscriptionPaymentRequiredMixin(object):
-    """
-    Check if the subscriber has an active subscription.
-
-    If not, redirect to the subscription page.
-    """
-
-    def dispatch(self, request, *args, **kwargs):
-        """Redirect user to djstripe:subscribe if account is inactive."""
-        if not subscriber_has_active_subscription(djstripe_settings.subscriber_request_callback(request)):
-            message = "Your account is inactive. Please renew your subscription"
-            messages.info(request, message, fail_silently=True)
-            return redirect("djstripe:subscribe")
-
-        return super(SubscriptionPaymentRequiredMixin, self).dispatch(request, *args, **kwargs)
 
 
 class PaymentsContextMixin(object):
