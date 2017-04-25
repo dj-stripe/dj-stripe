@@ -13,9 +13,13 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 from mock import patch
+from stripe.error import InvalidRequestError
 
 from djstripe.models import Customer, Subscription, Plan
-from tests import FAKE_SUBSCRIPTION, FAKE_PLAN, FAKE_CUSTOMER, FAKE_PLAN_II, datetime_to_unix
+from tests import (
+    datetime_to_unix, FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II,
+    FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_CANCELED
+)
 
 
 class SubscriptionTest(TestCase):
@@ -300,3 +304,25 @@ class SubscriptionTest(TestCase):
         subscription_reactivate_fake = deepcopy(FAKE_SUBSCRIPTION)
         reactivated_subscription = Subscription.sync_from_stripe_data(subscription_reactivate_fake)
         self.assertEqual(reactivated_subscription.cancel_at_period_end, False)
+
+    @patch("djstripe.stripe_objects.StripeSubscription._api_delete")
+    @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION_CANCELED))
+    def test_cancel_already_canceled(self, subscription_retrieve_mock, subscription_delete_mock):
+        subscription_delete_mock.side_effect = InvalidRequestError("No such subscription: sub_xxxx", "blah")
+
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
+
+        self.assertEqual(Subscription.objects.filter(status="canceled").count(), 0)
+        subscription.cancel()
+        self.assertEqual(Subscription.objects.filter(status="canceled").count(), 1)
+
+    @patch("djstripe.stripe_objects.StripeSubscription._api_delete")
+    def test_cancel_error_in_cancel(self, subscription_delete_mock):
+        subscription_delete_mock.side_effect = InvalidRequestError("Unexpected error", "blah")
+
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
+
+        with self.assertRaises(InvalidRequestError):
+            subscription.cancel()
