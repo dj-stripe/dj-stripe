@@ -258,10 +258,14 @@ class StripeObject(models.Model):
     @classmethod
     def _get_or_create_from_stripe_object(cls, data, field_name="id", refetch=True, save=True):
         field = data.get(field_name)
+        is_nested_data = field_name != "id"
+        should_expand = False
 
         if isinstance(field, six.string_types):
             # A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}
             stripe_id = field
+            # We'll have to expand if the field is not "id" (= is nested)
+            should_expand = is_nested_data
         elif field:
             # A field like {"subscription": {"id": sub_6lsC8pt7IcFpjA", ...}}
             data = field
@@ -274,9 +278,21 @@ class StripeObject(models.Model):
         try:
             return cls.stripe_objects.get(stripe_id=stripe_id), False
         except cls.DoesNotExist:
-            if refetch and field_name != "id":
+            if is_nested_data and refetch:
+                # This is what `data` usually looks like:
+                # {"id": "cus_XXXX", "default_source": "card_XXXX"}
+                # Leaving the default field_name ("id") will get_or_create the customer.
+                # If field_name="default_source", we get_or_create the card instead.
                 cls_instance = cls(stripe_id=stripe_id)
                 data = cls_instance.api_retrieve()
+                should_expand = False
+
+        # The next thing to happen will be the "create from stripe object" call.
+        # At this point, if we don't have data to start with (field is a str),
+        # *and* we didn't refetch by id, then `should_expand` is True and we
+        # don't have the data to actually create the object.
+        # If this happens when syncing Stripe data, it's a djstripe bug. Report it!
+        assert not should_expand, "No data to create {} from {}".format(cls.__name__, field_name)
 
         return cls._create_from_stripe_object(data, save=save), True
 
