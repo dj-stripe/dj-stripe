@@ -23,9 +23,8 @@ from djstripe.exceptions import MultipleSubscriptionException
 from djstripe.models import Account, Customer, Charge, Card, Subscription, Invoice, Plan
 from tests import (
     FAKE_ACCOUNT, FAKE_CARD, FAKE_CARD_V, FAKE_CHARGE, FAKE_CUSTOMER,
-    FAKE_CUSTOMER_DEFAULT_SOURCE_STRING, FAKE_CUSTOMER_II, FAKE_INVOICE,
-    FAKE_INVOICEITEM, FAKE_INVOICE_III, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II,
-    FAKE_UPCOMING_INVOICE, StripeList, datetime_to_unix
+    FAKE_CUSTOMER_II, FAKE_INVOICE, FAKE_INVOICEITEM, FAKE_INVOICE_III, FAKE_PLAN,
+    FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II, FAKE_UPCOMING_INVOICE, StripeList, datetime_to_unix
 )
 
 
@@ -60,15 +59,15 @@ class TestCustomer(TestCase):
 
     def test_customer_sync_unsupported_source(self):
         fake_customer = deepcopy(FAKE_CUSTOMER_II)
-        fake_customer["default_source"]["object"] = "fish"
+        fake_customer["default_source"]["object"] = fake_customer["sources"]["data"][0]["object"] = "fish"
 
-        user = get_user_model().objects.create_user(username="testuser", email="testuser@gmail.com")
-        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], livemode=False)
-
-        customer = Customer.sync_from_stripe_data(fake_customer)
-
-        self.assertEqual(None, customer.default_source)
+        user = get_user_model().objects.create_user(username="test_user_sync_unsupported_source")
+        customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], livemode=False)
         self.assertEqual(0, customer.sources.count())
+
+        synced_customer = Customer.sync_from_stripe_data(fake_customer)
+        self.assertEqual(0, synced_customer.sources.count())
+        self.assertEqual(None, synced_customer.default_source)
 
     def test_customer_sync_has_subscriber_metadata(self):
         user = get_user_model().objects.create(username="test_metadata", id=12345)
@@ -91,31 +90,35 @@ class TestCustomer(TestCase):
     @patch("stripe.Card.retrieve", return_value=FAKE_CUSTOMER_II["default_source"])
     def test_customer_sync_non_local_card(self, card_retrieve_mock):
         fake_customer = deepcopy(FAKE_CUSTOMER_II)
+        fake_customer["id"] = fake_customer["sources"]["data"][0]["customer"] = "cus_test_sync_non_local_card"
 
-        user = get_user_model().objects.create_user(username="testuser", email="testuser@gmail.com")
-        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], livemode=False)
-
+        user = get_user_model().objects.create_user(username="test_user_sync_non_local_card")
+        Customer.objects.create(subscriber=user, stripe_id=fake_customer["id"], livemode=False)
         customer = Customer.sync_from_stripe_data(fake_customer)
 
-        self.assertEqual(FAKE_CUSTOMER_II["default_source"]["id"], customer.default_source.stripe_id)
-        self.assertEqual(1, customer.sources.count())
+        self.assertEqual(customer.sources.count(), 1)
+        self.assertEqual(customer.default_source.stripe_id, fake_customer["default_source"]["id"])
 
-    @patch("stripe.Card.retrieve", return_value=FAKE_CARD)
-    def test_customer_sync_no_sources(self, customer_mock):
-        self.customer.sources.all().delete()
-
+    def test_customer_sync_no_sources(self):
         fake_customer = deepcopy(FAKE_CUSTOMER)
+        fake_customer["id"] = "cus_test_sync_no_sources"
         fake_customer["default_source"] = None
+        fake_customer["sources"] = None
+
+        user = get_user_model().objects.create_user(username="test_user_sync_non_local_card")
+        Customer.objects.create(subscriber=user, stripe_id=fake_customer["id"], livemode=False)
         customer = Customer.sync_from_stripe_data(fake_customer)
+
         self.assertEqual(customer.sources.count(), 0)
         self.assertEqual(customer.default_source, None)
 
-    @patch("stripe.Card.retrieve", return_value=FAKE_CARD)
-    def test_customer_sync_default_source_string(self, customer_mock):
-        fake_customer = deepcopy(FAKE_CUSTOMER_DEFAULT_SOURCE_STRING)
-        customer = Customer.sync_from_stripe_data(fake_customer)
-        self.assertEqual(customer.default_source.stripe_id, FAKE_CARD["id"])
-        self.assertEqual(customer.sources.count(), 1)
+    def test_customer_sync_default_source_string(self):
+        Customer.objects.all().delete()
+        customer_fake = deepcopy(FAKE_CUSTOMER)
+        customer_fake["default_source"] = customer_fake["sources"]["data"][0]["id"] = "card_sync_source_string"
+        customer = Customer.sync_from_stripe_data(customer_fake)
+        self.assertEqual(customer.default_source.stripe_id, customer_fake["default_source"])
+        self.assertEqual(customer.sources.count(), 2)
 
     @patch("stripe.Customer.retrieve")
     def test_customer_purge_leaves_customer_record(self, customer_retrieve_fake):

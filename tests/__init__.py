@@ -614,7 +614,7 @@ FAKE_CUSTOMER = CustomerDict({
     "shipping": None,
     "sources": {
         "object": "list",
-        "total_count": 1,
+        "total_count": 2,
         "has_more": False,
         "url": "/v1/customers/cus_6lsBvm5rJ0zyHc/sources",
         "data": [deepcopy(FAKE_CARD), deepcopy(FAKE_CARD_V)]
@@ -659,10 +659,6 @@ FAKE_CUSTOMER_II = CustomerDict({
         "data": [deepcopy(FAKE_SUBSCRIPTION_III)]
     },
 })
-
-
-FAKE_CUSTOMER_DEFAULT_SOURCE_STRING = deepcopy(FAKE_CUSTOMER)
-FAKE_CUSTOMER_DEFAULT_SOURCE_STRING["default_source"] = FAKE_CARD["id"]
 
 
 class InvoiceDict(dict):
