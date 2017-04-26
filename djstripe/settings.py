@@ -16,6 +16,9 @@ from django.utils.dateparse import date_re
 from django.utils.module_loading import import_string
 
 
+DEFAULT_STRIPE_API_VERSION = '2017-02-14'
+
+
 def get_callback_function(setting_name, default=None):
     """
     Resolve a callback function based on a setting name.
@@ -153,17 +156,18 @@ def get_subscriber_model():
 
 def get_api_version():
     """Get the desired API version to use for Stripe requests."""
-    version = getattr(settings, 'DJSTRIPE_API_VERSION', None) or '2017-02-14'
+    setting = 'STRIPE_API_VERSION'
+    version = getattr(settings, setting, None) or DEFAULT_STRIPE_API_VERSION
 
     if version == 'latest':
         version = None
     else:
         if not date_re.match(version):
             raise ImproperlyConfigured(
-                "STRIPE_VERSION must be a valid date in the form of "
-                "'YYYY-MM-DD', or the value 'latest' to specify the latest "
-                "version of the API as configured in your Stripe account. "
-                "Value provided: '{}'".format(version))
+                "{} must be a valid date in the form of 'YYYY-MM-DD', or "
+                "the value 'latest' to specify the latest version of the "
+                "API as configured in your Stripe account. "
+                "Value provided: '{}'".format(setting, version))
 
     return version
 

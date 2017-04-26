@@ -121,19 +121,19 @@ class TestSubscriberModelRetrievalMethod(TestCase):
 
 class TestGetApiVersion(TestCase):
 
-    @override_settings(DJSTRIPE_API_VERSION=None)
+    @override_settings(STRIPE_API_VERSION=None)
     def test_with_default(self):
-        self.assertEquals('2017-02-14', get_api_version())
+        self.assertEquals(djstripe_settings.DEFAULT_STRIPE_API_VERSION, get_api_version())
 
-    @override_settings(DJSTRIPE_API_VERSION='latest')
+    @override_settings(STRIPE_API_VERSION='latest')
     def test_with_latest(self):
         self.assertIsNone(get_api_version())
 
-    @override_settings(DJSTRIPE_API_VERSION='2016-03-07')
+    @override_settings(STRIPE_API_VERSION='2016-03-07')
     def test_with_valid_date(self):
         self.assertEquals('2016-03-07', get_api_version())
 
-    @override_settings(DJSTRIPE_API_VERSION='foobar')
+    @override_settings(STRIPE_API_VERSION='foobar')
     def test_with_invalid_date(self):
         err = 'must be a valid date'
         with self.assertRaisesRegexp(ImproperlyConfigured, err):

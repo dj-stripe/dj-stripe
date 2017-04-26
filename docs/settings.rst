@@ -2,20 +2,19 @@
 Settings
 =========
 
-DJSTRIPE_API_VERSION (='2017-02-14')
-====================================
+STRIPE_API_VERSION (='2017-02-14')
+==================================
 
 The API version used to communicate with the Stripe API is configurable, and
 defaults to the latest version that has been tested as working. Using a value
-other than the default is allowed, as a string in the format of YYYY-MM-DD, and
-it is also possible to specify `'latest'` in order to use the value configured
-in your Stripe account.
+other than the default is allowed, as a string in the format of YYYY-MM-DD, or
+specify `None` to use the value configured in your Stripe account.
 
 For example, you can specify `'2017-01-27'` to use that API version:
 
 .. code-block:: python
 
-    DJSTRIPE_API_VERSION = '2017-01-27'
+    STRIPE_API_VERSION = '2017-01-27'
 
 However you do so at your own risk, as using a value other than the default
 might result in incompatibilities between Stripe and this library, especially
