@@ -42,7 +42,12 @@ from .fields import (
 from .managers import StripeObjectManager
 
 
-stripe.api_version = "2016-03-07"
+def set_stripe_api_version():
+    """Override the default API version used by the Stripe library."""
+    stripe.api_version = djstripe_settings.get_api_version()
+
+
+set_stripe_api_version()
 
 
 # ============================================================================ #

@@ -13,8 +13,8 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from mock import patch
 
-from djstripe import settings
-from djstripe.settings import get_subscriber_model, get_callback_function
+from djstripe import settings as djstripe_settings
+from djstripe.settings import get_api_version, get_callback_function, get_subscriber_model
 
 
 class TestSubscriberModelRetrievalMethod(TestCase):
@@ -95,7 +95,7 @@ class TestSubscriberModelRetrievalMethod(TestCase):
         self.assertEquals("ok", func())
 
     @override_settings(DJSTRIPE_TEST_CALLBACK='foo.valid_callback')
-    @patch.object(settings, 'import_string', return_value=(lambda: "ok"))
+    @patch.object(djstripe_settings, 'import_string', return_value=(lambda: "ok"))
     def test_get_callback_function_with_valid_string_callable(self, import_string_mock):
         func = get_callback_function("DJSTRIPE_TEST_CALLBACK")
         self.assertEquals("ok", func())
@@ -107,7 +107,7 @@ class TestSubscriberModelRetrievalMethod(TestCase):
             get_callback_function("DJSTRIPE_TEST_CALLBACK")
 
     @override_settings(DJSTRIPE_TEST_CALLBACK='foo.invalid_callback')
-    @patch.object(settings, 'import_string', return_value="not_callable")
+    @patch.object(djstripe_settings, 'import_string', return_value="not_callable")
     def test_get_callback_function_with_non_callable_string(self, import_string_mock):
         with self.assertRaises(ImproperlyConfigured):
             get_callback_function("DJSTRIPE_TEST_CALLBACK")
@@ -117,3 +117,24 @@ class TestSubscriberModelRetrievalMethod(TestCase):
     def test_get_callback_function_(self):
         with self.assertRaises(ImportError):
             get_callback_function("DJSTRIPE_TEST_CALLBACK")
+
+
+class TestGetApiVersion(TestCase):
+
+    @override_settings(DJSTRIPE_API_VERSION=None)
+    def test_with_default(self):
+        self.assertEquals('2017-02-14', get_api_version())
+
+    @override_settings(DJSTRIPE_API_VERSION='latest')
+    def test_with_latest(self):
+        self.assertIsNone(get_api_version())
+
+    @override_settings(DJSTRIPE_API_VERSION='2016-03-07')
+    def test_with_valid_date(self):
+        self.assertEquals('2016-03-07', get_api_version())
+
+    @override_settings(DJSTRIPE_API_VERSION='foobar')
+    def test_with_invalid_date(self):
+        err = 'must be a valid date'
+        with self.assertRaisesRegexp(ImproperlyConfigured, err):
+            get_api_version()
