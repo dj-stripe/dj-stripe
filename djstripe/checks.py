@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-.. module:: djstripe.context_managers.
+.. module:: djstripe.checks.
 
-   :synopsis: dj-stripe Context Managers
+   :synopsis: dj-stripe System Checks
 
 .. moduleauthor:: Alex Kavanaugh (@akavanau)
 .. moduleauthor:: Jerome Leclanche (@jleclanche)

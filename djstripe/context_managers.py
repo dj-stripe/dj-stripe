@@ -6,6 +6,7 @@
 
 .. moduleauthor:: Bill Huneke (@wahuneke)
 .. moduleauthor:: Alex Kavanaugh (@akavanau)
+.. moduleauthor:: Lee Skillen (@lskillen)
 
 """
 
