@@ -14,6 +14,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.utils import six
 from django.utils.dateparse import date_re
 from django.utils.module_loading import import_string
+import stripe
 
 
 DEFAULT_STRIPE_API_VERSION = '2017-02-14'
@@ -112,6 +113,12 @@ else:
 SUBSCRIPTION_REDIRECT = getattr(settings, "DJSTRIPE_SUBSCRIPTION_REDIRECT", "djstripe:subscribe")
 
 
+ZERO_DECIMAL_CURRENCIES = set([
+    "bif", "clp", "djf", "gnf", "jpy", "kmf", "krw", "mga", "pyg", "rwf",
+    "vnd", "vuv", "xaf", "xof", "xpf",
+])
+
+
 def get_subscriber_model_string():
     """Get the configured subscriber model as a module path string."""
     return getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", settings.AUTH_USER_MODEL)
@@ -154,25 +161,36 @@ def get_subscriber_model():
     return subscriber_model
 
 
-def get_api_version():
+def get_stripe_api_version():
     """Get the desired API version to use for Stripe requests."""
-    setting = 'STRIPE_API_VERSION'
-    version = getattr(settings, setting, None) or DEFAULT_STRIPE_API_VERSION
-
-    if version == 'latest':
-        version = None
-    else:
-        if not date_re.match(version):
-            raise ImproperlyConfigured(
-                "{} must be a valid date in the form of 'YYYY-MM-DD', or "
-                "the value 'latest' to specify the latest version of the "
-                "API as configured in your Stripe account. "
-                "Value provided: '{}'".format(setting, version))
-
-    return version
+    version = getattr(settings, 'STRIPE_API_VERSION', stripe.api_version)
+    return version or DEFAULT_STRIPE_API_VERSION
 
 
-ZERO_DECIMAL_CURRENCIES = set([
-    "bif", "clp", "djf", "gnf", "jpy", "kmf", "krw", "mga", "pyg", "rwf",
-    "vnd", "vuv", "xaf", "xof", "xpf",
-])
+def set_stripe_api_version(version=get_stripe_api_version(), validate=True):
+    """
+    Set the desired API version to use for Stripe requests.
+
+    :param version: The version to set for the Stripe API.
+    :type version: ``str``
+    :param validate: If True validate the value for the specified version).
+    :type validate: ``bool``
+    """
+    if validate:
+        check_stripe_api_version(version)
+
+    stripe.api_version = version
+
+
+def check_stripe_api_version(version):
+    """
+    Check the API version is formatted correctly for Stripe.
+
+    :param version: The version to set for the Stripe API.
+    :type version: ``str``
+    :raises ImproperlyConfigured: If the version is not formatted correctly.
+    """
+    if not date_re.match(version):
+        raise ImproperlyConfigured(
+            "The Stripe API version must be a valid date in the form of "
+            "'YYYY-MM-DD'. Value provided: '{}'.".format(version))

@@ -14,7 +14,11 @@ from django.test.utils import override_settings
 from mock import patch
 
 from djstripe import settings as djstripe_settings
-from djstripe.settings import get_api_version, get_callback_function, get_subscriber_model
+from djstripe.settings import (
+    get_callback_function, get_subscriber_model, get_stripe_api_version,
+    set_stripe_api_version)
+
+import stripe
 
 
 class TestSubscriberModelRetrievalMethod(TestCase):
@@ -119,22 +123,37 @@ class TestSubscriberModelRetrievalMethod(TestCase):
             get_callback_function("DJSTRIPE_TEST_CALLBACK")
 
 
-class TestGetApiVersion(TestCase):
+@override_settings(STRIPE_API_VERSION=None)
+class TestGetStripeApiVersion(TestCase):
 
-    @override_settings(STRIPE_API_VERSION=None)
     def test_with_default(self):
-        self.assertEquals(djstripe_settings.DEFAULT_STRIPE_API_VERSION, get_api_version())
-
-    @override_settings(STRIPE_API_VERSION='latest')
-    def test_with_latest(self):
-        self.assertIsNone(get_api_version())
+        self.assertEquals(
+            djstripe_settings.DEFAULT_STRIPE_API_VERSION,
+            get_stripe_api_version())
 
     @override_settings(STRIPE_API_VERSION='2016-03-07')
-    def test_with_valid_date(self):
-        self.assertEquals('2016-03-07', get_api_version())
+    def test_with_override(self):
+        self.assertEquals('2016-03-07', get_stripe_api_version())
 
-    @override_settings(STRIPE_API_VERSION='foobar')
+
+@override_settings(STRIPE_API_VERSION=None)
+class TestSetStripeApiVersion(TestCase):
+
+    def test_with_default(self):
+        djstripe_settings.set_stripe_api_version()
+        self.assertEquals(
+            djstripe_settings.DEFAULT_STRIPE_API_VERSION,
+            stripe.api_version)
+
+    def test_with_valid_date(self):
+        djstripe_settings.set_stripe_api_version(version='2016-03-07')
+        self.assertEquals('2016-03-07', stripe.api_version)
+
     def test_with_invalid_date(self):
         err = 'must be a valid date'
         with self.assertRaisesRegexp(ImproperlyConfigured, err):
-            get_api_version()
+            set_stripe_api_version(version='foobar')
+
+    def test_with_invalid_date_and_no_validation(self):
+        set_stripe_api_version(version='foobar', validate=False)
+        self.assertEquals('foobar', stripe.api_version)

@@ -42,12 +42,8 @@ from .fields import (
 from .managers import StripeObjectManager
 
 
-def set_stripe_api_version():
-    """Override the default API version used by the Stripe library."""
-    stripe.api_version = djstripe_settings.get_api_version()
-
-
-set_stripe_api_version()
+# Override the default API version used by the Stripe library.
+djstripe_settings.set_stripe_api_version()
 
 
 # ============================================================================ #
@@ -929,7 +925,11 @@ Fields not implemented:
         # Event retrieve is special. For Event we don't retrieve using djstripe's API version. We always retrieve
         # using the API version that was used to send the Event (which depends on the Stripe account holders settings
         api_key = api_key or self.default_api_key
-        with stripe_temporary_api_version(self.received_api_version):
+        api_version = self.received_api_version
+
+        # Stripe API version validation is bypassed because we assume what
+        # Stripe passes us is a sane and usable value.
+        with stripe_temporary_api_version(api_version, validate=False):
             stripe_event = super(StripeEvent, self).api_retrieve(api_key)
 
         return stripe_event
