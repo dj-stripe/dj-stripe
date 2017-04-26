@@ -420,8 +420,17 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         return Invoice.upcoming(**kwargs)
 
     def _attach_objects_post_save_hook(self, cls, data):
-        default_source = data.get("default_source")
+        save = False
 
+        # Have to create sources before we handle the default_source
+        if data["sources"]:
+            for source in data["sources"]["data"]:
+                if not isinstance(source, dict) or source.get("object") == "card":
+                    Card._get_or_create_from_stripe_object(source)
+                else:
+                    logger.warn("Unsupported source type on %r: %r", self, source)
+
+        default_source = data.get("default_source")
         if default_source:
             # TODO: other sources
             if not isinstance(default_source, dict) or default_source.get("object") == "card":
