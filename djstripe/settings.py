@@ -167,7 +167,7 @@ def get_stripe_api_version():
     return version or DEFAULT_STRIPE_API_VERSION
 
 
-def set_stripe_api_version(version=get_stripe_api_version(), validate=True):
+def set_stripe_api_version(version=None, validate=True):
     """
     Set the desired API version to use for Stripe requests.
 
@@ -176,6 +176,8 @@ def set_stripe_api_version(version=get_stripe_api_version(), validate=True):
     :param validate: If True validate the value for the specified version).
     :type validate: ``bool``
     """
+    version = version or get_stripe_api_version()
+
     if validate:
         check_stripe_api_version(version)
 
