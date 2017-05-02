@@ -2,6 +2,31 @@
 Settings
 =========
 
+STRIPE_API_VERSION (='2017-02-14')
+==================================
+
+The API version used to communicate with the Stripe API is configurable, and
+defaults to the latest version that has been tested as working. Using a value
+other than the default is allowed, as a string in the format of YYYY-MM-DD.
+
+For example, you can specify `'2017-01-27'` to use that API version:
+
+.. code-block:: python
+
+    STRIPE_API_VERSION = '2017-01-27'
+
+However you do so at your own risk, as using a value other than the default
+might result in incompatibilities between Stripe and this library, especially
+if Stripe has labelled the differences between API versions as "Major". Even
+small differences such as a new enumeration value might cause issues.
+
+For this reason it is best to assume that only the default version is supported.
+
+For more information on API versioning, see the `stripe documentation`_.
+
+.. _stripe documentation: https://stripe.com/docs/upgrades
+
+
 DJSTRIPE_DEFAULT_PLAN (=None)
 =============================
 
