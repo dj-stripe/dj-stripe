@@ -10,14 +10,17 @@
 
 """
 
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 import sys
 
 import django
 
+from django.apps import apps
 from django.conf import settings
+from django.db import connections
+from django.db.utils import OperationalError
 
 
 DEFAULT_SETTINGS = dict(
@@ -48,6 +51,37 @@ DEFAULT_SETTINGS = dict(
 )
 
 
+def check_migrations():
+    from django.db.migrations.autodetector import MigrationAutodetector
+    from django.db.migrations.executor import MigrationExecutor
+    from django.db.migrations.state import ProjectState
+
+    changed = set()
+
+    print("Checking dj-stripe migrations...")
+    for db in settings.DATABASES.keys():
+        try:
+            executor = MigrationExecutor(connections[db])
+        except OperationalError:
+            sys.exit("Unable to check migrations: "
+                     "cannot connect to database.")
+
+        autodetector = MigrationAutodetector(
+            executor.loader.project_state(),
+            ProjectState.from_apps(apps),
+        )
+        changed.update(
+            autodetector.changes(graph=executor.loader.graph).keys())
+
+    if changed and 'djstripe' in changed:
+        sys.exit(
+            "A migration file is missing, please run the "
+            "following to generate one: python makemigrations.py"
+        )
+    else:
+        print("All migration files present.")
+
+
 def run(*args):
     """
     Check and/or create dj-stripe Django migrations.
@@ -70,9 +104,7 @@ def run(*args):
         is_check = False
 
     if is_check:
-        django.core.management.call_command(
-            'djstripe_has_missing_migrations', *args
-        )
+        check_migrations()
     else:
         django.core.management.call_command(
             'makemigrations', 'djstripe', *args
