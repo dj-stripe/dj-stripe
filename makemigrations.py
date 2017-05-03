@@ -62,16 +62,19 @@ def check_migrations():
     for db in settings.DATABASES.keys():
         try:
             executor = MigrationExecutor(connections[db])
-        except OperationalError:
-            sys.exit("Unable to check migrations: "
-                     "cannot connect to database.")
+        except OperationalError as ex:
+            sys.exit(
+                "Unable to check migrations due to database: {}".format(ex)
+            )
 
         autodetector = MigrationAutodetector(
             executor.loader.project_state(),
             ProjectState.from_apps(apps),
         )
+
         changed.update(
-            autodetector.changes(graph=executor.loader.graph).keys())
+            autodetector.changes(graph=executor.loader.graph).keys()
+        )
 
     if changed and 'djstripe' in changed:
         sys.exit(
