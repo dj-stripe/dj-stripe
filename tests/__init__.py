@@ -1195,6 +1195,32 @@ FAKE_EVENT_CUSTOMER_DELETED.update({
     "type": "customer.deleted"
 })
 
+FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED = {
+    "id": "AGBWvF5zBm4sMCsLLPZrw9XX",
+    "type": "customer.discount.created",
+    "api_version": "2017-02-14",
+    "created": 1439229084,
+    "object": "discount",
+    "pending_webhooks": 0,
+    "request": "req_6l38DHch3whaDj",
+    "data": {
+        "object": deepcopy(FAKE_DISCOUNT_CUSTOMER),
+    }
+}
+
+FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED = {
+    "id": "AGBWvF5zBm4sMCsLLPZrw9XX",
+    "type": "customer.discount.deleted",
+    "api_version": "2017-02-14",
+    "created": 1439229084,
+    "object": "discount",
+    "pending_webhooks": 0,
+    "request": "req_6l38DHch3whaDj",
+    "data": {
+        "object": deepcopy(FAKE_DISCOUNT_CUSTOMER),
+    }
+}
+
 FAKE_EVENT_CUSTOMER_SOURCE_CREATED = {
     "id": "evt_DvKYlo38huDvKYlo2C7SXedrZk",
     "object": "event",
