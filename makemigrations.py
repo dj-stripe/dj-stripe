@@ -5,7 +5,6 @@
 
    Based on: https://github.com/pinax/pinax-stripe/blob/master/makemigrations.py
 
-.. moduleauthor:: Alex Kavanaugh (@kavdev)
 .. moduleauthor:: Lee Skillen (@lskillen)
 
 """
@@ -78,8 +77,8 @@ def check_migrations():
 
     if changed and 'djstripe' in changed:
         sys.exit(
-            "A migration file is missing, please run the "
-            "following to generate one: python makemigrations.py"
+            "A migration file is missing. Please run "
+            "'python makemigrations.py' to generate it."
         )
     else:
         print("All migration files present.")
