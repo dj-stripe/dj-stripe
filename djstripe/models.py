@@ -544,6 +544,14 @@ class Event(StripeEvent):
 
         return self.webhook_message if self.valid else None
 
+    def _attach_objects_hook(self, cls, data):
+        if self.received_api_version is None:
+            # as of api version 2017-02-14, the account.application.deauthorized
+            # event sends None as api_version.
+            # If we receive that, store an empty string instead.
+            # Remove this hack if this gets fixed upstream.
+            self.received_api_version = ""
+
     def validate(self):
         """
         The original contents of the Event message comes from a POST to the webhook endpoint. This data

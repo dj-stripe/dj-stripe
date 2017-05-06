@@ -7,23 +7,35 @@
 
 """
 
-from copy import deepcopy
 import decimal
+from copy import deepcopy
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from mock import patch
 
-from djstripe.models import Event, Charge, Transfer, Account, Plan, Customer, InvoiceItem, Invoice, Card, Subscription
-from tests import (FAKE_CARD, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_CUSTOMER, FAKE_CUSTOMER_II,
-                   FAKE_EVENT_CHARGE_SUCCEEDED, FAKE_EVENT_CUSTOMER_CREATED,
-                   FAKE_EVENT_CUSTOMER_DELETED, FAKE_EVENT_CUSTOMER_SOURCE_CREATED,
-                   FAKE_EVENT_CUSTOMER_SOURCE_DELETED, FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE,
-                   FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED, FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED,
-                   FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_INVOICE_DELETED, FAKE_EVENT_INVOICEITEM_CREATED,
-                   FAKE_EVENT_INVOICEITEM_DELETED, FAKE_EVENT_PLAN_CREATED, FAKE_EVENT_PLAN_DELETED,
-                   FAKE_EVENT_TRANSFER_CREATED, FAKE_EVENT_TRANSFER_DELETED, FAKE_INVOICE, FAKE_INVOICE_II,
-                   FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_III, FAKE_TRANSFER)
+from djstripe.models import (
+    Account, Card, Charge, Customer, Event, Invoice, InvoiceItem, Plan,
+    Subscription, Transfer
+)
+from tests import (
+    FAKE_CARD, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_CUSTOMER, FAKE_CUSTOMER_II,
+    FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED,
+    FAKE_EVENT_CHARGE_SUCCEEDED,
+    FAKE_EVENT_CUSTOMER_CREATED, FAKE_EVENT_CUSTOMER_DELETED,
+    FAKE_EVENT_CUSTOMER_SOURCE_CREATED,
+    FAKE_EVENT_CUSTOMER_SOURCE_DELETED,
+    FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE,
+    FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED,
+    FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED,
+    FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_INVOICE_DELETED,
+    FAKE_EVENT_INVOICEITEM_CREATED,
+    FAKE_EVENT_INVOICEITEM_DELETED, FAKE_EVENT_PLAN_CREATED,
+    FAKE_EVENT_PLAN_DELETED, FAKE_EVENT_TRANSFER_CREATED,
+    FAKE_EVENT_TRANSFER_DELETED, FAKE_INVOICE, FAKE_INVOICE_II,
+    FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION,
+    FAKE_SUBSCRIPTION_III, FAKE_TRANSFER
+)
 
 
 class EventTestCase(TestCase):
@@ -43,6 +55,16 @@ class EventTestCase(TestCase):
         event.validate()
 
         return event
+
+
+class TestAccountEvents(EventTestCase):
+    @patch("stripe.Event.retrieve")
+    def test_account_deauthorized_event(self, event_retrieve_mock):
+        fake_stripe_event = deepcopy(FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED)
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.validate()
+        event.process()
 
 
 class TestChargeEvents(EventTestCase):

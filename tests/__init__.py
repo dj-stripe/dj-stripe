@@ -1140,6 +1140,24 @@ FAKE_ACCOUNT = {
     },
 }
 
+FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED = {
+    "id": "evt_XXXXXXXXXXXXXXXXXXXXXXXX",
+    "type": "account.application.deauthorized",
+    "pending_webhooks": 0,
+    "livemode": False,
+    "request": None,
+    "api_version": None,
+    "created": 1493823371,
+    "object": "event",
+    "data": {
+        "object": {
+            "id": "ca_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "object": "application",
+            "name": "Test Connect Application",
+        }
+    },
+}
+
 FAKE_EVENT_CHARGE_SUCCEEDED = {
     "id": "evt_16YKQi2eZvKYlo2CT2oe5ff3",
     "object": "event",
