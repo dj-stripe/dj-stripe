@@ -129,7 +129,7 @@ class WebHook(View):
                 traceback=""
             )
         else:
-            event = Event._create_from_stripe_object(data)
+            event = Event._create_from_stripe_object(data, save=False)
             event.validate()
 
             if djstripe_settings.WEBHOOK_EVENT_CALLBACK:
