@@ -112,6 +112,10 @@ def convert_tstamp(response):
 
     :rtype: datetime
     """
+    if response is None:
+        # Allow passing None to convert_tstamp()
+        return response
+
     # Overrides the set timezone to UTC - I think...
     tz = timezone.utc if settings.USE_TZ else None
 
