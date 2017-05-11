@@ -106,7 +106,7 @@ def clear_expired_idempotency_keys():
     IdempotencyKey.objects.filter(created__lt=threshold).delete()
 
 
-def convert_tstamp(response, field_name=None):
+def convert_tstamp(response):
     """
     Convert a Stripe API timestamp response (unix epoch) to a native datetime.
 
@@ -115,11 +115,7 @@ def convert_tstamp(response, field_name=None):
     # Overrides the set timezone to UTC - I think...
     tz = timezone.utc if settings.USE_TZ else None
 
-    if not field_name:
-        return datetime.datetime.fromtimestamp(response, tz)
-    else:
-        if field_name in response and response[field_name]:
-            return datetime.datetime.fromtimestamp(response[field_name], tz)
+    return datetime.datetime.fromtimestamp(response, tz)
 
 
 # TODO: Finish this.
