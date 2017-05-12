@@ -6,6 +6,9 @@
 
 .. moduleauthor:: @kavdev, @pydanny, @wahuneke
 """
+
+from __future__ import unicode_literals
+
 import datetime
 
 from django.conf import settings
@@ -117,3 +120,18 @@ def convert_tstamp(response, field_name=None):
     else:
         if field_name in response and response[field_name]:
             return datetime.datetime.fromtimestamp(response[field_name], tz)
+
+
+# TODO: Finish this.
+CURRENCY_SIGILS = {
+    "CAD": "$",
+    "EUR": "€",
+    "GBP": "£",
+    "USD": "$",
+}
+
+
+def get_friendly_currency_amount(amount, currency):
+    currency = currency.upper()
+    sigil = CURRENCY_SIGILS.get(currency, "")
+    return "{sigil}{amount} {currency}".format(sigil=sigil, amount=amount, currency=currency)

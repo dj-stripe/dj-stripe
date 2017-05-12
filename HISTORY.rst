@@ -37,6 +37,8 @@ History
 * Added Stripe Dashboard link to admin change panel (Thanks @jleclanche) #465
 * Implemented ``Plan.amount_in_cents`` (Thanks @jleclanche) #466
 * Implemented ``Subscription.reactivate()`` (Thanks @jleclanche) #470
+* Added ``Plan.human_readable_price`` (Thanks @jleclanche) #498
+* (Re)attach the Subscriber when we find it's id attached to a customer on Customer sync (Thanks @jleclanche) #500
 
 
 0.8.0 (2015-12-30)

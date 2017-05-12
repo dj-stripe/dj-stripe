@@ -36,10 +36,13 @@ from . import settings as djstripe_settings
 from . import webhooks
 from .exceptions import MultipleSubscriptionException
 from .managers import SubscriptionManager, ChargeManager, TransferManager
-from .signals import WEBHOOK_SIGNALS
-from .signals import webhook_processing_error
-from .stripe_objects import (StripeSource, StripeCharge, StripeCustomer, StripeCard, StripeSubscription,
-                             StripePlan, StripeInvoice, StripeInvoiceItem, StripeTransfer, StripeAccount, StripeEvent)
+from .signals import WEBHOOK_SIGNALS, webhook_processing_error
+from .stripe_objects import (
+    StripeAccount, StripeCard, StripeCharge, StripeCoupon, StripeCustomer,
+    StripeEvent, StripeInvoice, StripeInvoiceItem, StripePlan, StripeSource,
+    StripeSubscription, StripeTransfer
+)
+from .utils import get_friendly_currency_amount
 
 
 logger = logging.getLogger(__name__)
@@ -114,6 +117,29 @@ class Charge(StripeCharge):
 
 
 @class_doc_inherit
+class Coupon(StripeCoupon):
+    @property
+    def human_readable_amount(self):
+        if self.percent_off:
+            amount = "{percent_off}%".format(percent_off=self.percent_off)
+        else:
+            amount = get_friendly_currency_amount(self.amount_off or 0, self.currency)
+        return "{amount} off".format(amount=amount)
+
+    @property
+    def human_readable(self):
+        if self.duration == self.DURATION_REPEATING:
+            if self.duration_in_months == 1:
+                duration = "for {duration_in_months} month"
+            else:
+                duration = "for {duration_in_months} months"
+            duration = duration.format(duration_in_months=self.duration_in_months)
+        else:
+            duration = self.duration
+        return "{amount} {duration}".format(amount=self.human_readable_amount, duration=duration)
+
+
+@class_doc_inherit
 class Customer(StripeCustomer):
     doc = """
 
@@ -134,6 +160,8 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         on_delete=SET_NULL, related_name="djstripe_customers"
     )
     date_purged = DateTimeField(null=True, editable=False)
+
+    djstripe_subscriber_key = "djstripe_subscriber"
 
     class Meta:
         unique_together = ("subscriber", "livemode")
@@ -182,7 +210,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         stripe_customer = cls._api_create(
             email=subscriber.email,
             idempotency_key=idempotency_key,
-            metadata={"djstripe_subscriber": subscriber.pk},
+            metadata={cls.djstripe_subscriber_key: subscriber.pk},
             **optional
         )
         customer, created = Customer.objects.get_or_create(
@@ -281,8 +309,16 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         return len(self._get_valid_subscriptions()) != 0
 
     @property
+    def active_subscriptions(self):
+        """Returns active subscriptions (subscriptions with an active status that end in the future)."""
+        return self.subscriptions.filter(
+            status=StripeSubscription.STATUS_ACTIVE, current_period_end__gt=timezone.now()
+        )
+
+    @property
     def valid_subscriptions(self):
-        return self.subscriptions.exclude(status="canceled")
+        """Returns this cusotmer's valid subscriptions (subscriptions that aren't cancelled."""
+        return self.subscriptions.exclude(status=StripeSubscription.STATUS_CANCELED)
 
     @property
     def subscription(self):
@@ -407,6 +443,21 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
             if source and source != self.default_source:
                 self.default_source = source
                 self.save()
+
+    def _attach_objects_hook(self, cls, data):
+        # When we save a customer to Stripe, we add a reference to its Django PK
+        # in the `django_account` key. If we find that, we re-attach that PK.
+        subscriber_id = data.get("metadata", {}).get(self.djstripe_subscriber_key)
+        if subscriber_id:
+            cls = djstripe_settings.get_subscriber_model()
+            try:
+                # We have to perform a get(), instead of just attaching the PK
+                # blindly as the object may have been deleted or not exist.
+                # Attempting to save that would cause an IntegrityError.
+                self.subscriber = cls.objects.get(pk=subscriber_id)
+            except (cls.DoesNotExist, ValueError):
+                logger.warn("Could not find subscriber %r matching customer %r" % (subscriber_id, self.stripe_id))
+                self.subscriber = None
 
     # SYNC methods should be dropped in favor of the master sync infrastructure proposed
     def _sync_invoices(self, **kwargs):
@@ -600,7 +651,11 @@ class Card(StripeCard):
                 # The exception was raised for another reason, re-raise it
                 six.reraise(*sys.exc_info())
 
-        self.delete()
+        try:
+            self.delete()
+        except StripeCard.DoesNotExist:
+            # The card has already been deleted (potentially during the API call)
+            pass
 
 
 # ============================================================================ #
@@ -828,6 +883,20 @@ class Plan(StripePlan):
         plan = Plan.objects.create(**kwargs)
 
         return plan
+
+    @property
+    def human_readable_price(self):
+        amount = get_friendly_currency_amount(self.amount, self.currency)
+        interval_count = self.interval_count
+
+        if interval_count == 1:
+            interval = self.interval
+            template = "{amount}/{interval}"
+        else:
+            interval = {"day": "days", "week": "weeks", "month": "months", "year": "years"}[self.interval]
+            template = "{amount} every {interval_count} {interval}"
+
+        return template.format(amount=amount, interval=interval, interval_count=interval_count)
 
     # TODO: Move this type of update to the model's save() method so it happens automatically
     # Also, block other fields from being saved.

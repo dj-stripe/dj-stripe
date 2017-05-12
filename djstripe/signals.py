@@ -38,6 +38,7 @@ WEBHOOK_SIGNALS = dict([
         "bitcoin.receiver.transaction.created",
         "charge.captured",
         "charge.failed",
+        "charge.pending",
         "charge.refunded",
         "charge.succeeded",
         "charge.updated",
