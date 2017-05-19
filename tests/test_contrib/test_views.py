@@ -168,7 +168,7 @@ class RestSubscriptionTest(APITestCase):
         cancel_subscription_mock.assert_called_once_with(
             at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END
         )
-        self.assertTrue(self.user.is_authenticated())
+        self.assertTrue(self.user.is_authenticated)
 
     def test_cancel_subscription_exception(self):
         """Test a DELETE to the SubscriptionRestView.

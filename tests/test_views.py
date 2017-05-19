@@ -41,7 +41,7 @@ class CancelSubscriptionViewTest(TestCase):
 
         cancel_subscription_mock.assert_called_once_with(at_period_end=True)
         self.assertRedirects(response, reverse("home"))
-        self.assertTrue(self.user.is_authenticated())
+        self.assertTrue(self.user.is_authenticated)
 
     @patch("djstripe.stripe_objects.StripeSubscription.cancel", return_value=FAKE_SUBSCRIPTION_CANCELED_AT_PERIOD_END)
     def test_cancel_at_period_end(self, cancel_subscription_mock):
@@ -52,7 +52,7 @@ class CancelSubscriptionViewTest(TestCase):
 
         cancel_subscription_mock.assert_called_once_with(at_period_end=True)
         self.assertRedirects(response, reverse("home"))
-        self.assertTrue(self.user.is_authenticated())
+        self.assertTrue(self.user.is_authenticated)
 
     @patch("djstripe.stripe_objects.StripeSubscription.cancel", return_value=FAKE_SUBSCRIPTION_CANCELED)
     def test_cancel_next_url(self, cancel_subscription_mock):
