@@ -11,9 +11,9 @@ from collections import defaultdict
 from copy import deepcopy
 import json
 
-from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import Client
+from django.urls import reverse
 from mock import call, patch, Mock, PropertyMock, ANY
 
 from djstripe import views, webhooks

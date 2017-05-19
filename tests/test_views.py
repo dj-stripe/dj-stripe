@@ -10,8 +10,8 @@
 from copy import deepcopy
 
 from django.contrib.auth import get_user, get_user_model
-from django.core.urlresolvers import reverse
 from django.test.testcases import TestCase
+from django.urls import reverse
 from mock import patch
 
 from djstripe.models import Customer, Subscription, Plan
