@@ -90,44 +90,44 @@ class SubscriptionManagerTest(TestCase):
         )
 
     def test_started_during_no_records(self):
-        self.assertEquals(Subscription.objects.started_during(2013, 4).count(), 0)
+        self.assertEqual(Subscription.objects.started_during(2013, 4).count(), 0)
 
     def test_started_during_has_records(self):
-        self.assertEquals(Subscription.objects.started_during(2013, 1).count(), 12)
+        self.assertEqual(Subscription.objects.started_during(2013, 1).count(), 12)
 
     def test_canceled_during(self):
-        self.assertEquals(Subscription.objects.canceled_during(2013, 4).count(), 1)
+        self.assertEqual(Subscription.objects.canceled_during(2013, 4).count(), 1)
 
     def test_canceled_all(self):
-        self.assertEquals(
+        self.assertEqual(
             Subscription.objects.canceled().count(), 1)
 
     def test_active_all(self):
-        self.assertEquals(Subscription.objects.active().count(), 11)
+        self.assertEqual(Subscription.objects.active().count(), 11)
 
     def test_started_plan_summary(self):
         for plan in Subscription.objects.started_plan_summary_for(2013, 1):
             if plan["plan"] == self.plan:
-                self.assertEquals(plan["count"], 11)
+                self.assertEqual(plan["count"], 11)
             if plan["plan"] == self.plan2:
-                self.assertEquals(plan["count"], 1)
+                self.assertEqual(plan["count"], 1)
 
     def test_active_plan_summary(self):
         for plan in Subscription.objects.active_plan_summary():
             if plan["plan"] == self.plan:
-                self.assertEquals(plan["count"], 10)
+                self.assertEqual(plan["count"], 10)
             if plan["plan"] == self.plan2:
-                self.assertEquals(plan["count"], 1)
+                self.assertEqual(plan["count"], 1)
 
     def test_canceled_plan_summary(self):
         for plan in Subscription.objects.canceled_plan_summary_for(2013, 1):
             if plan["plan"] == self.plan:
-                self.assertEquals(plan["count"], 1)
+                self.assertEqual(plan["count"], 1)
             if plan["plan"] == self.plan2:
-                self.assertEquals(plan["count"], 0)
+                self.assertEqual(plan["count"], 0)
 
     def test_churn(self):
-        self.assertEquals(
+        self.assertEqual(
             Subscription.objects.churn(),
             decimal.Decimal("1") / decimal.Decimal("11")
         )
@@ -140,10 +140,10 @@ class TransferManagerTest(TestCase):
         Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER_II))
         Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER_III))
 
-        self.assertEquals(Transfer.objects.during(2015, 8).count(), 2)
+        self.assertEqual(Transfer.objects.during(2015, 8).count(), 2)
 
         totals = Transfer.objects.paid_totals_for(2015, 12)
-        self.assertEquals(
+        self.assertEqual(
             totals["total_amount"], decimal.Decimal("190.10")
         )
 

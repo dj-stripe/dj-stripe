@@ -33,7 +33,7 @@ class TestTimestampConversion(TestCase):
 
     def test_conversion(self):
         stamp = convert_tstamp(1365567407)
-        self.assertEquals(stamp, datetime(2013, 4, 10, 4, 16, 47, tzinfo=timezone.utc))
+        self.assertEqual(stamp, datetime(2013, 4, 10, 4, 16, 47, tzinfo=timezone.utc))
 
     # NOTE: These next two tests will fail if your system clock is not in UTC
     # Travis CI is, and coverage is good, so...
@@ -42,7 +42,7 @@ class TestTimestampConversion(TestCase):
     @override_settings(USE_TZ=False)
     def test_conversion_no_tz(self):
         stamp = convert_tstamp(1365567407)
-        self.assertEquals(stamp, datetime(2013, 4, 10, 4, 16, 47))
+        self.assertEqual(stamp, datetime(2013, 4, 10, 4, 16, 47))
 
 
 class TestUserHasActiveSubscription(TestCase):
