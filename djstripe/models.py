@@ -889,6 +889,7 @@ class InvoiceItem(StripeInvoiceItem):
 
 
 @class_doc_inherit
+@python_2_unicode_compatible
 class Plan(StripePlan):
     __doc__ = getattr(StripePlan, "__doc__")
 
@@ -918,6 +919,9 @@ class Plan(StripePlan):
         plan = Plan.objects.create(**kwargs)
 
         return plan
+
+    def __str__(self):
+        return self.name
 
     @property
     def human_readable_price(self):

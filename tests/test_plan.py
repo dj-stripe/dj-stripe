@@ -83,10 +83,7 @@ class PlanTest(TestCase):
         object_create_mock.assert_called_once_with(metadata=metadata, stripe_id=1, arg1=1, arg2=2, amount=1)
 
     def test_str(self):
-        self.assertEqual("<name={name}, stripe_id={stripe_id}>".format(
-            name=self.plan_data["name"],
-            stripe_id=self.plan_data["id"]), str(self.plan)
-        )
+        self.assertEqual(str(self.plan), self.plan_data["name"])
 
     @patch("stripe.Plan.retrieve", return_value=FAKE_PLAN)
     def test_stripe_plan(self, plan_retrieve_mock):
