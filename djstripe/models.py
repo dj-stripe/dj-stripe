@@ -865,6 +865,12 @@ class InvoiceItem(StripeInvoiceItem):
         help_text="The subscription that this invoice item has been created for, if any."
     )
 
+    def __str__(self):
+        if not self.plan:
+            return super(InvoiceItem, self).__str__()
+        price = self.plan.human_readable_price
+        return "Subscription to {plan} ({price})".format(plan=self.plan, price=price)
+
     def _attach_objects_hook(self, cls, data):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
 
