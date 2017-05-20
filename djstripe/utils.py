@@ -15,6 +15,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models.query import QuerySet
 from django.utils import timezone
 
 
@@ -135,3 +136,26 @@ def get_friendly_currency_amount(amount, currency):
     currency = currency.upper()
     sigil = CURRENCY_SIGILS.get(currency, "")
     return "{sigil}{amount} {currency}".format(sigil=sigil, amount=amount, currency=currency)
+
+
+class QuerySetMock(QuerySet):
+    """
+    A mocked QuerySet class that does not handle updates.
+    Used by UpcomingInvoice.invoiceitems.
+    """
+
+    @classmethod
+    def from_iterable(cls, model, iterable):
+        instance = cls(model)
+        instance._result_cache = list(iterable)
+        instance._prefetch_done = True
+        return instance
+
+    def _clone(self):
+        return self.__class__.from_iterable(self.model, self._result_cache)
+
+    def update(self):
+        return 0
+
+    def delete(self):
+        return 0
