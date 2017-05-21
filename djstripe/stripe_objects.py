@@ -30,7 +30,7 @@ from polymorphic.models import PolymorphicModel
 import stripe
 from stripe.error import InvalidRequestError
 
-from . import settings as djstripe_settings
+from . import enums, settings as djstripe_settings
 from .context_managers import stripe_temporary_api_version
 from .exceptions import StripeObjectManipulationException
 from .fields import (
@@ -1154,12 +1154,6 @@ Fields not implemented:
         (card_check_result, card_check_result.title()) for card_check_result in CARD_CHECK_RESULTS
     ]
 
-    TOKENIZATION_METHODS = ["apple_pay", "android_pay"]
-    TOKENIZATION_METHOD_CHOICES = [
-        (tokenization_method, tokenization_method.replace("_", " ").title())
-        for tokenization_method in TOKENIZATION_METHODS
-    ]
-
     class Meta:
         abstract = True
 
@@ -1205,7 +1199,7 @@ Fields not implemented:
     tokenization_method = StripeCharField(
         null=True,
         max_length=11,
-        choices=TOKENIZATION_METHOD_CHOICES,
+        choices=enums.CardTokenizationMethod.choices,
         help_text="If the card number is tokenized, this is the method that was used."
     )
 
