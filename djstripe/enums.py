@@ -17,6 +17,27 @@ class Enum(_Enum):
         return {}
 
 
+class ApiErrorCode(Enum):
+    """
+    Charge failure error codes.
+
+    https://stripe.com/docs/api#error-codes
+    """
+
+    invalid_number = _("Invalid number")
+    invalid_expiry_month = _("Invalid expiration month")
+    invalid_expiry_year = _("Invalid expiration year")
+    invalid_cvc = _("Invalid security code")
+    invalid_swipe_data = _("Invalid swipe data")
+    incorrect_number = _("Incorrect number")
+    expired_card = _("Expired card")
+    incorrect_cvc = _("Incorrect security code")
+    incorrect_zip = _("ZIP code failed validation")
+    card_declined = _("Card was declined")
+    missing = _("No card being charged")
+    processing_error = _("Processing error")
+
+
 class CardCheckResult(Enum):
     pass_ = _("Pass")
     fail = _("Fail")

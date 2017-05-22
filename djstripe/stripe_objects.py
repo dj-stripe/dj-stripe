@@ -477,12 +477,6 @@ Fields not implemented:
 .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
-    CARD_ERROR_CODES = ["invalid_number", "invalid_expiry_month", "invalid_expiry_year",
-                        "invalid_cvc", "incorrect_number", "expired_card",
-                        "incorrect_cvc", "incorrect_zip", "card_declined",
-                        "missing", "processing_error", "rate_limit"]
-    CARD_ERROR_CODE_CHOICES = [(error_code, error_code.replace("_", " ").title()) for error_code in CARD_ERROR_CODES]
-
     class Meta:
         abstract = True
 
@@ -507,7 +501,7 @@ Fields not implemented:
     failure_code = StripeCharField(
         max_length=30,
         null=True,
-        choices=CARD_ERROR_CODE_CHOICES,
+        choices=enums.ApiErrorCode.choices,
         help_text="Error code explaining reason for charge failure if available."
     )
     failure_message = StripeTextField(
