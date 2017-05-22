@@ -17,6 +17,17 @@ class Enum(_Enum):
         return {}
 
 
+class CardCheckResult(Enum):
+    pass_ = _("Pass")
+    fail = _("Fail")
+    unavailable = _("Unavailable")
+    unchecked = _("Unchecked")
+
+    @classproperty
+    def keys(cls):
+        return {"pass_": "pass"}
+
+
 class CardFundingType(Enum):
     credit = _("Credit")
     debit = _("Debit")

@@ -1146,11 +1146,6 @@ Fields not implemented:
     BRANDS = ["Visa", "American Express", "MasterCard", "Discover", "JCB", "Diners Club", "Unknown"]
     BRAND_CHOICES = [(brand, brand) for brand in BRANDS]
 
-    CARD_CHECK_RESULTS = ["pass", "fail", "unavailable", "unknown"]
-    CARD_CHECK_RESULT_CHOICES = [
-        (card_check_result, card_check_result.title()) for card_check_result in CARD_CHECK_RESULTS
-    ]
-
     class Meta:
         abstract = True
 
@@ -1162,7 +1157,7 @@ Fields not implemented:
     address_line1_check = StripeCharField(
         null=True,
         max_length=11,
-        choices=CARD_CHECK_RESULT_CHOICES,
+        choices=enums.CardCheckResult.choices,
         help_text="If ``address_line1`` was provided, results of the check."
     )
     address_line2 = StripeTextField(null=True, help_text="Billing address (Line 2).")
@@ -1171,7 +1166,7 @@ Fields not implemented:
     address_zip_check = StripeCharField(
         null=True,
         max_length=11,
-        choices=CARD_CHECK_RESULT_CHOICES,
+        choices=enums.CardCheckResult.choices,
         help_text="If ``address_zip`` was provided, results of the check."
     )
     brand = StripeCharField(max_length=16, choices=BRAND_CHOICES, help_text="Card brand.")
@@ -1179,7 +1174,7 @@ Fields not implemented:
     cvc_check = StripeCharField(
         null=True,
         max_length=11,
-        choices=CARD_CHECK_RESULT_CHOICES,
+        choices=enums.CardCheckResult.choices,
         help_text="If a CVC was provided, results of the check."
     )
     dynamic_last4 = StripeCharField(
