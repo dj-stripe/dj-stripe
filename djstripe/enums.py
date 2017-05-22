@@ -82,3 +82,9 @@ class ChargeStatus(Enum):
     succeeded = _("Succeeded")
     pending = _("Pending")
     failed = _("Failed")
+
+
+class CouponDuration(Enum):
+    once = _("Once")
+    repeating = _("Multi-month")
+    forever = _("Forever")

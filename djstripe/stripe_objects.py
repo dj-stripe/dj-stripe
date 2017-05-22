@@ -1292,9 +1292,6 @@ class StripeCoupon(StripeObject):
     DURATION_ONCE = "once"
     DURATION_REPEATING = "repeating"
 
-    DURATIONS = [DURATION_FOREVER, DURATION_ONCE, DURATION_REPEATING]
-    DURATION_CHOICES = [(duration, duration.replace("_", " ").title()) for duration in DURATIONS]
-
     class Meta:
         abstract = True
         unique_together = ("stripe_id", "livemode")
@@ -1309,7 +1306,7 @@ class StripeCoupon(StripeObject):
     )
     currency = StripeCharField(null=True, blank=True, max_length=3, help_text="Three-letter ISO currency code")
     duration = StripeCharField(
-        max_length=9, choices=DURATION_CHOICES,
+        max_length=9, choices=enums.CouponDuration.choices,
         help_text="Describes how long a customer who applies this coupon will get the discount."
     )
     duration_in_months = StripePositiveIntegerField(
