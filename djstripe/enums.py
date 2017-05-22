@@ -28,6 +28,23 @@ class CardCheckResult(Enum):
         return {"pass_": "pass"}
 
 
+class CardBrand(Enum):
+    Visa = _("Visa")
+    AmericanExpress = _("American Express")
+    MasterCard = _("MasterCard")
+    Discover = _("Discover")
+    JCB = _("JCB")
+    DinersClub = _("Diners Club")
+    Unknown = _("Unknown")
+
+    @classproperty
+    def keys(cls):
+        return {
+            "AmericanExpress": "American Express",
+            "DinersClub": "Diners Club",
+        }
+
+
 class CardFundingType(Enum):
     credit = _("Credit")
     debit = _("Debit")

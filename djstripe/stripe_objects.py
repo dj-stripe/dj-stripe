@@ -1143,9 +1143,6 @@ Fields not implemented:
 .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
-    BRANDS = ["Visa", "American Express", "MasterCard", "Discover", "JCB", "Diners Club", "Unknown"]
-    BRAND_CHOICES = [(brand, brand) for brand in BRANDS]
-
     class Meta:
         abstract = True
 
@@ -1169,7 +1166,7 @@ Fields not implemented:
         choices=enums.CardCheckResult.choices,
         help_text="If ``address_zip`` was provided, results of the check."
     )
-    brand = StripeCharField(max_length=16, choices=BRAND_CHOICES, help_text="Card brand.")
+    brand = StripeCharField(max_length=16, choices=enums.CardBrand.choices, help_text="Card brand.")
     country = StripeCharField(max_length=2, help_text="Two-letter ISO code representing the country of the card.")
     cvc_check = StripeCharField(
         null=True,
