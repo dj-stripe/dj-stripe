@@ -1,5 +1,6 @@
 from enum import Enum as _Enum
 from django.utils.decorators import classproperty
+from django.utils.translation import ugettext as _
 
 
 class Enum(_Enum):
@@ -17,12 +18,12 @@ class Enum(_Enum):
 
 
 class CardFundingType(Enum):
-    credit = "Credit"
-    debit = "Debit"
-    prepaid = "Prepaid"
-    unknown = "Unknown"
+    credit = _("Credit")
+    debit = _("Debit")
+    prepaid = _("Prepaid")
+    unknown = _("Unknown")
 
 
 class CardTokenizationMethod(Enum):
-    apple_pay = "Apple Pay"
-    android_pay = "Android Pay"
+    apple_pay = _("Apple Pay")
+    android_pay = _("Android Pay")
