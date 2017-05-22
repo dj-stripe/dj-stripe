@@ -88,3 +88,10 @@ class CouponDuration(Enum):
     once = _("Once")
     repeating = _("Multi-month")
     forever = _("Forever")
+
+
+class PlanInterval(Enum):
+    day = _("Day")
+    week = _("Week")
+    month = _("Month")
+    year = _("Year")

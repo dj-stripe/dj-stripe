@@ -1668,14 +1668,11 @@ Fields not implemented:
     stripe_class = stripe.Plan
     stripe_dashboard_item_name = "plans"
 
-    INTERVAL_TYPES = ["day", "week", "month", "year"]
-    INTERVAL_TYPE_CHOICES = [(interval_type, interval_type.title()) for interval_type in INTERVAL_TYPES]
-
     amount = StripeCurrencyField(help_text="Amount to be charged on the interval specified.")
     currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code")
     interval = StripeCharField(
         max_length=5,
-        choices=INTERVAL_TYPE_CHOICES,
+        choices=enums.PlanInterval.choices,
         help_text="The frequency with which a subscription should be billed."
     )
     interval_count = StripeIntegerField(
