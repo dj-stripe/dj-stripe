@@ -1146,9 +1146,6 @@ Fields not implemented:
     BRANDS = ["Visa", "American Express", "MasterCard", "Discover", "JCB", "Diners Club", "Unknown"]
     BRAND_CHOICES = [(brand, brand) for brand in BRANDS]
 
-    FUNDING_TYPES = ["credit", "debit", "prepaid", "unknown"]
-    FUNDING_TYPE_CHOICES = [(funding_type, funding_type.title()) for funding_type in FUNDING_TYPES]
-
     CARD_CHECK_RESULTS = ["pass", "fail", "unavailable", "unknown"]
     CARD_CHECK_RESULT_CHOICES = [
         (card_check_result, card_check_result.title()) for card_check_result in CARD_CHECK_RESULTS
@@ -1193,7 +1190,9 @@ Fields not implemented:
     exp_month = StripeIntegerField(help_text="Card expiration month.")
     exp_year = StripeIntegerField(help_text="Card expiration year.")
     fingerprint = StripeTextField(stripe_required=False, help_text="Uniquely identifies this particular card number.")
-    funding = StripeCharField(max_length=7, choices=FUNDING_TYPE_CHOICES, help_text="Card funding type.")
+    funding = StripeCharField(
+        max_length=7, choices=enums.CardFundingType.choices, help_text="Card funding type."
+    )
     last4 = StripeCharField(max_length=4, help_text="Last four digits of Card number.")
     name = StripeTextField(null=True, help_text="Cardholder name.")
     tokenization_method = StripeCharField(

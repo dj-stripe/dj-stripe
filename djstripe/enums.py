@@ -16,6 +16,13 @@ class Enum(_Enum):
         return {}
 
 
+class CardFundingType(Enum):
+    credit = "Credit"
+    debit = "Debit"
+    prepaid = "Prepaid"
+    unknown = "Unknown"
+
+
 class CardTokenizationMethod(Enum):
     apple_pay = "Apple Pay"
     android_pay = "Android Pay"
