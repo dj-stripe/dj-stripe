@@ -477,11 +477,6 @@ Fields not implemented:
 .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
-    STATUS_SUCCEEDED = "succeeded"
-    STATUS_PENDING = "pending"
-    STATUS_FAILED = "failed"
-
-    STATUS_CHOICES = [(status, status.title()) for status in [STATUS_SUCCEEDED, STATUS_FAILED]]
     CARD_ERROR_CODES = ["invalid_number", "invalid_expiry_month", "invalid_expiry_year",
                         "invalid_cvc", "incorrect_number", "expired_card",
                         "incorrect_cvc", "incorrect_zip", "card_declined",
@@ -536,7 +531,9 @@ Fields not implemented:
         "letters. Non-ASCII characters are automatically stripped. While most banks display this information "
         "consistently, some may display it incorrectly or not at all."
     )
-    status = StripeCharField(max_length=10, choices=STATUS_CHOICES, help_text="The status of the payment.")
+    status = StripeCharField(
+        max_length=10, choices=enums.ChargeStatus.choices, help_text="The status of the payment."
+    )
 
     # Balance transaction can be null if the charge failed
     fee = StripeCurrencyField(stripe_required=False, nested_name="balance_transaction")

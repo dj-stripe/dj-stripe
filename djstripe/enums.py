@@ -55,3 +55,9 @@ class CardFundingType(Enum):
 class CardTokenizationMethod(Enum):
     apple_pay = _("Apple Pay")
     android_pay = _("Android Pay")
+
+
+class ChargeStatus(Enum):
+    succeeded = _("Succeeded")
+    pending = _("Pending")
+    failed = _("Failed")
