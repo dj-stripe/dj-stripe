@@ -414,6 +414,14 @@ class StripeObject(models.Model):
         :type data: dict
         """
 
+        if data.get("deleted", False):
+            # The object looks like `{"id": "xxx_...", "deleted": True}`
+            # That means a record of it exists, but its contents have been deleted.
+            stripe_id = data["id"]
+            # We delete the object from the database (if it exists) and return None.
+            cls.stripe_objects.filter(stripe_id=stripe_id).delete()
+            return
+
         instance, created = cls._get_or_create_from_stripe_object(data)
 
         if not created:
