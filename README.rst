@@ -119,8 +119,6 @@ Run the commands::
 
     python manage.py djstripe_init_customers
 
-    python manage.py djstripe_init_plans
-
 If you haven't already, add JQuery and the Bootstrap 3.0.0+ JS and CSS to your base template:
 
 .. code-block:: html

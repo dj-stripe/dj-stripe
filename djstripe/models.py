@@ -207,10 +207,6 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
     @classmethod
     def create(cls, subscriber, idempotency_key=None):
-        trial_days = None
-        if djstripe_settings.trial_period_for_subscriber_callback:
-            trial_days = djstripe_settings.trial_period_for_subscriber_callback(subscriber)
-
         stripe_customer = cls._api_create(
             email=subscriber.email,
             idempotency_key=idempotency_key,
@@ -220,12 +216,6 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
             stripe_id=stripe_customer["id"],
             defaults={"subscriber": subscriber, "livemode": stripe_customer["livemode"]}
         )
-
-        if djstripe_settings.DEFAULT_PLAN and trial_days:
-            customer.subscribe(
-                plan=djstripe_settings.DEFAULT_PLAN,
-                trial_end=timezone.now() + timezone.timedelta(days=trial_days)
-            )
 
         return customer
 
