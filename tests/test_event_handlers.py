@@ -7,23 +7,32 @@
 
 """
 
-from copy import deepcopy
 import decimal
+from copy import deepcopy
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from mock import patch
 
-from djstripe.models import Event, Charge, Transfer, Account, Plan, Customer, InvoiceItem, Invoice, Card, Subscription
-from tests import (FAKE_CARD, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_CUSTOMER, FAKE_CUSTOMER_II,
-                   FAKE_EVENT_CHARGE_SUCCEEDED, FAKE_EVENT_CUSTOMER_CREATED,
-                   FAKE_EVENT_CUSTOMER_DELETED, FAKE_EVENT_CUSTOMER_SOURCE_CREATED,
-                   FAKE_EVENT_CUSTOMER_SOURCE_DELETED, FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE,
-                   FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED, FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED,
-                   FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_INVOICE_DELETED, FAKE_EVENT_INVOICEITEM_CREATED,
-                   FAKE_EVENT_INVOICEITEM_DELETED, FAKE_EVENT_PLAN_CREATED, FAKE_EVENT_PLAN_DELETED,
-                   FAKE_EVENT_TRANSFER_CREATED, FAKE_EVENT_TRANSFER_DELETED, FAKE_INVOICE, FAKE_INVOICE_II,
-                   FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_III, FAKE_TRANSFER)
+from djstripe.models import (
+    Account, Card, Charge, Coupon, Customer, Event, Invoice,
+    InvoiceItem, Plan, Subscription, Transfer
+)
+from tests import (
+    FAKE_CARD, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_COUPON, FAKE_CUSTOMER, FAKE_CUSTOMER_II,
+    FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED, FAKE_EVENT_CHARGE_SUCCEEDED,
+    FAKE_EVENT_CUSTOMER_CREATED, FAKE_EVENT_CUSTOMER_DELETED,
+    FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED, FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED,
+    FAKE_EVENT_CUSTOMER_SOURCE_CREATED, FAKE_EVENT_CUSTOMER_SOURCE_DELETED,
+    FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE,
+    FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED, FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED,
+    FAKE_EVENT_INVOICEITEM_CREATED, FAKE_EVENT_INVOICEITEM_DELETED,
+    FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_INVOICE_DELETED,
+    FAKE_EVENT_PLAN_CREATED, FAKE_EVENT_PLAN_DELETED,
+    FAKE_EVENT_TRANSFER_CREATED, FAKE_EVENT_TRANSFER_DELETED,
+    FAKE_INVOICE, FAKE_INVOICEITEM, FAKE_INVOICE_II, FAKE_PLAN,
+    FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_III, FAKE_TRANSFER
+)
 
 
 class EventTestCase(TestCase):
@@ -43,6 +52,16 @@ class EventTestCase(TestCase):
         event.validate()
 
         return event
+
+
+class TestAccountEvents(EventTestCase):
+    @patch("stripe.Event.retrieve")
+    def test_account_deauthorized_event(self, event_retrieve_mock):
+        fake_stripe_event = deepcopy(FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED)
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.validate()
+        event.process()
 
 
 class TestChargeEvents(EventTestCase):
@@ -121,6 +140,38 @@ class TestCustomerEvents(EventTestCase):
         customer = Customer.objects.get(stripe_id=FAKE_CUSTOMER["id"])
         self.assertIsNotNone(customer.date_purged)
 
+    @patch("stripe.Coupon.retrieve", return_value=FAKE_COUPON)
+    @patch("stripe.Event.retrieve", return_value=FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED)
+    def test_customer_discount_created(self, event_retrieve_mock, coupon_retrieve_mock):
+        Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
+
+        fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED)
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.validate()
+        event.process()
+        self.assertTrue(event.processed)
+
+        self.assertIsNotNone(event.customer)
+        self.assertEqual(event.customer.stripe_id, FAKE_CUSTOMER["id"])
+        self.assertIsNotNone(event.customer.coupon)
+
+    @patch("stripe.Coupon.retrieve", return_value=FAKE_COUPON)
+    @patch("stripe.Event.retrieve", return_value=FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED)
+    def test_customer_discount_deleted(self, event_retrieve_mock, coupon_retrieve_mock):
+        customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
+        coupon = Coupon.sync_from_stripe_data(FAKE_COUPON)
+        customer.coupon = coupon
+
+        fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED)
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.validate()
+        event.process()
+        self.assertTrue(event.processed)
+
+        self.assertIsNotNone(event.customer)
+        self.assertEqual(event.customer.stripe_id, FAKE_CUSTOMER["id"])
+        self.assertIsNone(event.customer.coupon)
+
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     @patch("stripe.Event.retrieve")
     def test_customer_card_created(self, event_retrieve_mock, customer_retrieve_mock):
@@ -130,7 +181,6 @@ class TestCustomerEvents(EventTestCase):
         customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
         event = Event.sync_from_stripe_data(fake_stripe_event)
-
         event.validate()
         event.process()
 
@@ -149,7 +199,6 @@ class TestCustomerEvents(EventTestCase):
         Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
 
         event = Event.sync_from_stripe_data(fake_stripe_event)
-
         event.validate()
         event.process()
 

@@ -35,6 +35,7 @@ import traceback as exception_traceback
 from . import settings as djstripe_settings
 from . import webhooks
 from .exceptions import MultipleSubscriptionException
+from .fields import StripeDateTimeField
 from .managers import SubscriptionManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS, webhook_processing_error
 from .stripe_objects import (
@@ -157,6 +158,16 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         on_delete=SET_NULL, related_name="djstripe_customers"
     )
     date_purged = DateTimeField(null=True, editable=False)
+
+    coupon = ForeignKey(Coupon, null=True, on_delete=SET_NULL)
+    coupon_start = StripeDateTimeField(
+        null=True, editable=False, stripe_name="discount.start", stripe_required=False,
+        help_text="If a coupon is present, the date at which it was applied."
+    )
+    coupon_end = StripeDateTimeField(
+        null=True, editable=False, stripe_name="discount.end", stripe_required=False,
+        help_text="If a coupon is present and has a limited duration, the date that the discount will end."
+    )
 
     djstripe_subscriber_key = "djstripe_subscriber"
 
@@ -408,6 +419,20 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
         return new_card
 
+    def add_coupon(self, coupon):
+        """
+        Add a coupon to a Customer.
+
+        The coupon can be a Coupon object, or a valid Stripe Coupon ID.
+        """
+        if isinstance(coupon, Coupon):
+            coupon = coupon.stripe_id
+
+        stripe_customer = self.api_retrieve()
+        stripe_customer.coupon = coupon
+        stripe_customer.save()
+        return self.__class__.sync_from_stripe_data(stripe_customer)
+
     def upcoming_invoice(self, **kwargs):
         """ Gets the upcoming preview invoice (singular) for this customer.
 
@@ -419,9 +444,18 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         kwargs['customer'] = self
         return Invoice.upcoming(**kwargs)
 
-    def _attach_objects_post_save_hook(self, cls, data):
-        default_source = data.get("default_source")
+    def _attach_objects_post_save_hook(self, cls, data):  # noqa (function complexity)
+        save = False
 
+        # Have to create sources before we handle the default_source
+        if data["sources"]:
+            for source in data["sources"]["data"]:
+                if not isinstance(source, dict) or source.get("object") == "card":
+                    Card._get_or_create_from_stripe_object(source)
+                else:
+                    logger.warn("Unsupported source type on %r: %r", self, source)
+
+        default_source = data.get("default_source")
         if default_source:
             # TODO: other sources
             if not isinstance(default_source, dict) or default_source.get("object") == "card":
@@ -432,7 +466,20 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
             if source and source != self.default_source:
                 self.default_source = source
-                self.save()
+                save = True
+
+        discount = data.get("discount")
+        if discount:
+            coupon, _created = Coupon._get_or_create_from_stripe_object(discount, "coupon")
+            if coupon and coupon != self.coupon:
+                self.coupon = coupon
+                save = True
+        elif self.coupon:
+            self.coupon = None
+            save = True
+
+        if save:
+            self.save()
 
     def _attach_objects_hook(self, cls, data):
         # When we save a customer to Stripe, we add a reference to its Django PK
@@ -496,6 +543,14 @@ class Event(StripeEvent):
         """ The event's data if the event is valid, None otherwise."""
 
         return self.webhook_message if self.valid else None
+
+    def _attach_objects_hook(self, cls, data):
+        if self.received_api_version is None:
+            # as of api version 2017-02-14, the account.application.deauthorized
+            # event sends None as api_version.
+            # If we receive that, store an empty string instead.
+            # Remove this hack if this gets fixed upstream.
+            self.received_api_version = ""
 
     def validate(self):
         """
