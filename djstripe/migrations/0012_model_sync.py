@@ -9,7 +9,22 @@ from django.db.migrations.operations.special import RunPython
 from django.db.utils import IntegrityError
 from django.utils import six
 from stripe.error import InvalidRequestError
-from tqdm import tqdm
+
+
+def import_tqdm():
+    # Performing this import lazily so that it's not a dependency if the
+    # migrations have already been run.
+    try:
+        from tqdm import tqdm
+    except ImportError as e:
+        sys.stderr.write(
+            "Could not import `tqdm`\n"
+            "Please run the following and attempt migration again: \n"
+            "    pip install tqdm\n"
+        )
+        raise
+
+    return tqdm
 
 
 def resync_subscriptions(apps, schema_editor):
@@ -25,6 +40,8 @@ def resync_subscriptions(apps, schema_editor):
 
     import stripe
     stripe.api_version = "2016-03-07"
+
+    tqdm = import_tqdm()
 
     if Subscription.objects.count():
         print("Purging subscriptions. Don't worry, all active subscriptions will be re-synced from stripe. Just in \
@@ -60,6 +77,8 @@ def resync_invoiceitems(apps, schema_editor):
     import stripe
     stripe.api_version = "2016-03-07"
 
+    tqdm = import_tqdm()
+
     if InvoiceItem.objects.count():
         print("Purging invoiceitems. Don't worry, all invoiceitems will be re-synced from stripe. Just in case you \
         didn't get the memo, we'll print out a json representation of each object for your records:")
@@ -86,6 +105,8 @@ def sync_charges(apps, schema_editor):
     import stripe
     stripe.api_version = "2016-03-07"
 
+    tqdm = import_tqdm()
+
     if Charge.objects.count():
         print("syncing charges. This may take a while.")
 
@@ -104,6 +125,8 @@ def sync_invoices(apps, schema_editor):
 
     import stripe
     stripe.api_version = "2016-03-07"
+
+    tqdm = import_tqdm()
 
     if Invoice.objects.count():
         print("syncing invoices. This may take a while.")
@@ -125,6 +148,8 @@ def sync_transfers(apps, schema_editor):
     import stripe
     stripe.api_version = "2016-03-07"
 
+    tqdm = import_tqdm()
+
     if Transfer.objects.count():
         print("syncing transfers. This may take a while.")
 
@@ -145,6 +170,8 @@ def sync_plans(apps, schema_editor):
     import stripe
     stripe.api_version = "2016-03-07"
 
+    tqdm = import_tqdm()
+
     if Plan.objects.count():
         print("syncing plans. This may take a while.")
 
@@ -163,6 +190,8 @@ def sync_customers(apps, schema_editor):
 
     import stripe
     stripe.api_version = "2016-03-07"
+
+    tqdm = import_tqdm()
 
     if Customer.objects.count():
         print("syncing customers. This may take a while.")

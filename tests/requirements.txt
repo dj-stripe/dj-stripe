@@ -15,3 +15,6 @@ djangorestframework>=3.6.2
 
 # Database drivers
 psycopg2>=2.6.2
+
+# 0012_model_sync migration
+tqdm
