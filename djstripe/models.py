@@ -667,7 +667,7 @@ class Account(StripeAccount):
 # ============================================================================ #
 
 @class_doc_inherit
-class Card(StripeCard):
+class Card(StripeCard): # noqa
     __doc__ = getattr(StripeCard, "__doc__")
 
     # account = ForeignKey("Account", null=True, related_name="cards")
@@ -683,8 +683,7 @@ class Card(StripeCard):
         return self.customer.get_stripe_dashboard_url()
 
     def remove(self):
-        """Removes a card from this customer's account."""
-
+        """Remove a card from this customer's account."""
         try:
             self._api_delete()
         except InvalidRequestError as exc:
@@ -709,7 +708,7 @@ class Card(StripeCard):
 
 
 @class_doc_inherit
-class Invoice(StripeInvoice):
+class Invoice(StripeInvoice): # noqa
     __doc__ = getattr(StripeInvoice, "__doc__")
 
     # account = ForeignKey("Account", related_name="invoices")
@@ -732,7 +731,7 @@ class Invoice(StripeInvoice):
         help_text="The subscription that this invoice was prepared for, if any."
     )
 
-    class Meta(object):
+    class Meta(object): # noqa
         ordering = ["-date"]
 
     def get_stripe_dashboard_url(self):
@@ -755,7 +754,7 @@ class Invoice(StripeInvoice):
         cls._stripe_object_to_invoice_items(target_cls=InvoiceItem, data=data, invoice=self)
 
     @classmethod
-    def upcoming(cls, **kwargs):
+    def upcoming(cls, **kwargs): # noqa
         # Convert Customer to stripe_id
         if "customer" in kwargs and isinstance(kwargs["customer"], Customer):
             kwargs.update({"customer": kwargs["customer"].stripe_id})
@@ -775,7 +774,8 @@ class Invoice(StripeInvoice):
 
     @property
     def plan(self):
-        """ Gets the associated plan for this invoice.
+        """
+        Get the associated plan for this invoice.
 
         In order to provide a consistent view of invoices, the plan object
         should be taken from the first invoice item that has one, rather than
@@ -792,7 +792,6 @@ class Invoice(StripeInvoice):
         :returns: The associated plan for the invoice.
         :rtype: ``djstripe.Plan``
         """
-
         for invoiceitem in self.invoiceitems.all():
             if invoiceitem.plan:
                 return invoiceitem.plan
@@ -802,10 +801,11 @@ class Invoice(StripeInvoice):
 
 
 @class_doc_inherit
-class UpcomingInvoice(Invoice):
+class UpcomingInvoice(Invoice): # noqa
+
     __doc__ = getattr(Invoice, "__doc__")
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):  # noqa
         super(UpcomingInvoice, self).__init__(*args, **kwargs)
         self._invoiceitems = []
 
@@ -818,7 +818,8 @@ class UpcomingInvoice(Invoice):
 
     @property
     def invoiceitems(self):
-        """ Gets the invoice items associated with this upcoming invoice.
+        """
+        Get the invoice items associated with this upcoming invoice.
 
         This differs from normal (non-upcoming) invoices, in that upcoming
         invoices are in-memory and do not persist to the database. Therefore,
@@ -828,23 +829,26 @@ class UpcomingInvoice(Invoice):
         return a mock of a queryset, but with the data fetched from Stripe - It
         will act like a normal queryset, but mutation will silently fail.
         """
-
         return QuerySetMock(InvoiceItem, *self._invoiceitems)
 
     @property
     def stripe_id(self):
+        """Do not set stripe_id."""
         return None
 
     @stripe_id.setter
     def stripe_id(self, value):
+        """Do not set stripe_id."""
         return  # noop
 
     def save(self, *args, **kwargs):
+        """Do not save the model."""
         return  # noop
 
 
 @class_doc_inherit
-class InvoiceItem(StripeInvoiceItem):
+class InvoiceItem(StripeInvoiceItem): # noqa
+
     __doc__ = getattr(StripeInvoiceItem, "__doc__")
 
     # account = ForeignKey(Account, related_name="invoiceitems")
