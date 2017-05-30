@@ -90,13 +90,19 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
     $ pip install -r tests/requirements.txt
     $ tox
 
-7. Commit your changes and push your branch to GitHub::
+7. If your changes altered the models you may need to generate Django migrations::
+
+    $ python makemigrations.py
+
+8. Commit your changes and push your branch to GitHub::
 
     $ git add .
     $ git commit -m "Your detailed description of your changes."
     $ git push origin name-of-your-bugfix-or-feature
 
-8. Submit a pull request through the GitHub website.
+9. Submit a pull request through the GitHub website.
+
+10. Congratulations, you're now a dj-stripe contributor!  Have some <3 from us.
 
 Pull Request Guidelines
 -----------------------
@@ -108,6 +114,6 @@ Before you submit a pull request, check that it meets these guidelines:
 3. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring.
 4. If the pull request makes changes to a model, include Django migrations (Django 1.7+).
-5. The pull request should work for Python 2.7 and 3.4. Check
+5. The pull request should work for Python 2.7, 3.4, 3.5 and 3.6. Check
    https://travis-ci.org/kavdev/dj-stripe/pull_requests
    and make sure that the tests pass for all supported Python versions.
