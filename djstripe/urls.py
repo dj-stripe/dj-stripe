@@ -27,8 +27,9 @@ from . import settings as app_settings
 from . import views
 
 
-urlpatterns = [
+app_name = "djstripe"
 
+urlpatterns = [
     # HTML views
     url(
         r"^subscribe/$",

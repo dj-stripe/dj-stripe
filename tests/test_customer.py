@@ -154,7 +154,7 @@ class TestCustomer(TestCase):
 
         customer_retrieve_mock.assert_called_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY,
                                                   expand=['default_source'])
-        self.assertEquals(2, customer_retrieve_mock.call_count)
+        self.assertEqual(2, customer_retrieve_mock.call_count)
 
     @patch("stripe.Customer.retrieve")
     def test_customer_delete_raises_unexpected_exception(self, customer_retrieve_mock):
@@ -203,14 +203,14 @@ class TestCustomer(TestCase):
 
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_add_coupon_by_id(self, customer_retrieve_mock):
-        self.assertEquals(self.customer.coupon, None)
+        self.assertEqual(self.customer.coupon, None)
         self.customer.add_coupon(FAKE_COUPON["id"])
         customer_retrieve_mock.assert_called_once()
 
     @patch("stripe.Coupon.retrieve", return_value=deepcopy(FAKE_COUPON))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_add_coupon_by_object(self, customer_retrieve_mock, coupon_retrieve_mock):
-        self.assertEquals(self.customer.coupon, None)
+        self.assertEqual(self.customer.coupon, None)
         coupon = Coupon.sync_from_stripe_data(FAKE_COUPON)
         self.customer.add_coupon(coupon)
         customer_retrieve_mock.assert_called_once()
@@ -233,8 +233,8 @@ class TestCustomer(TestCase):
         refunded_charge, created2 = Charge._get_or_create_from_stripe_object(fake_charge_no_invoice)
         self.assertFalse(created2)
 
-        self.assertEquals(refunded_charge.refunded, True)
-        self.assertEquals(refunded_charge.amount_refunded, decimal.Decimal("22.00"))
+        self.assertEqual(refunded_charge.refunded, True)
+        self.assertEqual(refunded_charge.amount_refunded, decimal.Decimal("22.00"))
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
@@ -250,8 +250,8 @@ class TestCustomer(TestCase):
         self.assertTrue(created)
 
         refunded_charge = charge.refund()
-        self.assertEquals(refunded_charge.refunded, True)
-        self.assertEquals(refunded_charge.amount_refunded, decimal.Decimal("22.00"))
+        self.assertEqual(refunded_charge.refunded, True)
+        self.assertEqual(refunded_charge.amount_refunded, decimal.Decimal("22.00"))
 
     def test_calculate_refund_amount_full_refund(self):
         charge = Charge(
@@ -259,7 +259,7 @@ class TestCustomer(TestCase):
             customer=self.customer,
             amount=decimal.Decimal("500.00")
         )
-        self.assertEquals(charge._calculate_refund_amount(), 50000)
+        self.assertEqual(charge._calculate_refund_amount(), 50000)
 
     def test_calculate_refund_amount_partial_refund(self):
         charge = Charge(
@@ -267,7 +267,7 @@ class TestCustomer(TestCase):
             customer=self.customer,
             amount=decimal.Decimal("500.00")
         )
-        self.assertEquals(
+        self.assertEqual(
             charge._calculate_refund_amount(amount=decimal.Decimal("300.00")),
             30000
         )
@@ -278,7 +278,7 @@ class TestCustomer(TestCase):
             customer=self.customer,
             amount=decimal.Decimal("500.00")
         )
-        self.assertEquals(
+        self.assertEqual(
             charge._calculate_refund_amount(amount=decimal.Decimal("600.00")),
             50000
         )
@@ -298,7 +298,7 @@ class TestCustomer(TestCase):
         self.customer.charge(amount=decimal.Decimal("10.00"))
 
         _, kwargs = charge_create_mock.call_args
-        self.assertEquals(kwargs["amount"], 1000)
+        self.assertEqual(kwargs["amount"], 1000)
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
@@ -340,8 +340,8 @@ class TestCustomer(TestCase):
         )
 
         _, kwargs = charge_create_mock.call_args
-        self.assertEquals(kwargs["capture"], True)
-        self.assertEquals(kwargs["destination"], FAKE_ACCOUNT["id"])
+        self.assertEqual(kwargs["capture"], True)
+        self.assertEqual(kwargs["destination"], FAKE_ACCOUNT["id"])
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
@@ -728,15 +728,15 @@ class TestCustomer(TestCase):
         plan_retrieve_mock.assert_not_called()
 
         items = invoice.invoiceitems.all()
-        self.assertEquals(1, len(items))
-        self.assertEquals(FAKE_SUBSCRIPTION["id"], items[0].stripe_id)
+        self.assertEqual(1, len(items))
+        self.assertEqual(FAKE_SUBSCRIPTION["id"], items[0].stripe_id)
 
         self.assertIsNotNone(invoice.plan)
-        self.assertEquals(FAKE_PLAN["id"], invoice.plan.stripe_id)
+        self.assertEqual(FAKE_PLAN["id"], invoice.plan.stripe_id)
 
         invoice._invoiceitems = []
         items = invoice.invoiceitems.all()
-        self.assertEquals(0, len(items))
+        self.assertEqual(0, len(items))
         self.assertIsNotNone(invoice.plan)
 
     @patch("stripe.Customer.retrieve")

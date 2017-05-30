@@ -105,7 +105,7 @@ class SubscriptionTest(TestCase):
 
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
         self.assertFalse(subscription in self.customer.active_subscriptions)
-        self.assertEquals(self.customer.active_subscriptions.count(), 0)
+        self.assertEqual(self.customer.active_subscriptions.count(), 0)
 
         delta = timezone.timedelta(days=30)
         extended_subscription = subscription.extend(delta)
@@ -204,7 +204,7 @@ class SubscriptionTest(TestCase):
         subscription_retrieve_mock.return_value = canceled_subscription_fake  # retrieve().delete()
 
         self.assertTrue(self.customer.has_active_subscription())
-        self.assertEquals(self.customer.active_subscriptions.count(), 1)
+        self.assertEqual(self.customer.active_subscriptions.count(), 1)
         self.assertTrue(self.customer.has_any_active_subscription())
 
         new_subscription = subscription.cancel(at_period_end=False)
@@ -235,11 +235,11 @@ class SubscriptionTest(TestCase):
 
         self.assertTrue(self.customer.has_active_subscription())
         self.assertTrue(self.customer.has_any_active_subscription())
-        self.assertEquals(self.customer.active_subscriptions.count(), 1)
+        self.assertEqual(self.customer.active_subscriptions.count(), 1)
         self.assertTrue(subscription in self.customer.active_subscriptions)
 
         new_subscription = subscription.cancel(at_period_end=True)
-        self.assertEquals(self.customer.active_subscriptions.count(), 1)
+        self.assertEqual(self.customer.active_subscriptions.count(), 1)
         self.assertTrue(new_subscription in self.customer.active_subscriptions)
 
         self.assertEqual(Subscription.STATUS_ACTIVE, new_subscription.status)

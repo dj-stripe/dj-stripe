@@ -87,8 +87,8 @@ class TestChargeEvents(EventTestCase):
         event.process()
 
         charge = Charge.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
-        self.assertEquals(charge.amount, fake_stripe_event["data"]["object"]["amount"] / decimal.Decimal("100"))
-        self.assertEquals(charge.status, fake_stripe_event["data"]["object"]["status"])
+        self.assertEqual(charge.amount, fake_stripe_event["data"]["object"]["amount"] / decimal.Decimal("100"))
+        self.assertEqual(charge.status, fake_stripe_event["data"]["object"]["status"])
 
 
 class TestCustomerEvents(EventTestCase):
@@ -111,8 +111,8 @@ class TestCustomerEvents(EventTestCase):
         event.process()
 
         customer = Customer.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
-        self.assertEquals(customer.account_balance, fake_stripe_event["data"]["object"]["account_balance"])
-        self.assertEquals(customer.currency, fake_stripe_event["data"]["object"]["currency"])
+        self.assertEqual(customer.account_balance, fake_stripe_event["data"]["object"]["account_balance"])
+        self.assertEqual(customer.currency, fake_stripe_event["data"]["object"]["currency"])
 
     @patch("stripe.Customer.retrieve")
     @patch("stripe.Event.retrieve")
@@ -317,9 +317,9 @@ class TestInvoiceEvents(EventTestCase):
 
         event.validate()
         event.process()
-        self.assertEquals(Customer.objects.count(), 1)
+        self.assertEqual(Customer.objects.count(), 1)
         customer = Customer.objects.get()
-        self.assertEquals(customer.subscriber, None)
+        self.assertEqual(customer.subscriber, None)
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
@@ -345,11 +345,11 @@ class TestInvoiceEvents(EventTestCase):
         event.process()
 
         invoice = Invoice.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
-        self.assertEquals(
+        self.assertEqual(
             invoice.amount_due,
             fake_stripe_event["data"]["object"]["amount_due"] / decimal.Decimal("100")
         )
-        self.assertEquals(invoice.paid, fake_stripe_event["data"]["object"]["paid"])
+        self.assertEqual(invoice.paid, fake_stripe_event["data"]["object"]["paid"])
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
@@ -403,7 +403,7 @@ class TestInvoiceItemEvents(EventTestCase):
         event.process()
 
         invoiceitem = InvoiceItem.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
-        self.assertEquals(invoiceitem.amount, fake_stripe_event["data"]["object"]["amount"] / decimal.Decimal("100"))
+        self.assertEqual(invoiceitem.amount, fake_stripe_event["data"]["object"]["amount"] / decimal.Decimal("100"))
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION_III))
@@ -447,7 +447,7 @@ class TestPlanEvents(EventTestCase):
         event.process()
 
         plan = Plan.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
-        self.assertEquals(plan.name, fake_stripe_event["data"]["object"]["name"])
+        self.assertEqual(plan.name, fake_stripe_event["data"]["object"]["name"])
 
     @patch('stripe.Plan.retrieve', return_value=FAKE_PLAN)
     def test_plan_deleted(self, plan_retrieve_mock):
@@ -478,8 +478,8 @@ class TestTransferEvents(EventTestCase):
         event.process()
 
         transfer = Transfer.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
-        self.assertEquals(transfer.amount, fake_stripe_event["data"]["object"]["amount"] / decimal.Decimal("100"))
-        self.assertEquals(transfer.status, fake_stripe_event["data"]["object"]["status"])
+        self.assertEqual(transfer.amount, fake_stripe_event["data"]["object"]["amount"] / decimal.Decimal("100"))
+        self.assertEqual(transfer.status, fake_stripe_event["data"]["object"]["status"])
 
     @patch('stripe.Transfer.retrieve', return_value=FAKE_TRANSFER)
     def test_transfer_deleted(self, transfer_retrieve_mock):

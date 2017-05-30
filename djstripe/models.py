@@ -453,7 +453,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
                 if not isinstance(source, dict) or source.get("object") == "card":
                     Card._get_or_create_from_stripe_object(source)
                 else:
-                    logger.warn("Unsupported source type on %r: %r", self, source)
+                    logger.warning("Unsupported source type on %r: %r", self, source)
 
         default_source = data.get("default_source")
         if default_source:
@@ -461,7 +461,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
             if not isinstance(default_source, dict) or default_source.get("object") == "card":
                 source, created = Card._get_or_create_from_stripe_object(data, "default_source", refetch=False)
             else:
-                logger.warn("Unsupported source type on %r: %r", self, default_source)
+                logger.warning("Unsupported source type on %r: %r", self, default_source)
                 source = None
 
             if source and source != self.default_source:
@@ -493,7 +493,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
                 # Attempting to save that would cause an IntegrityError.
                 self.subscriber = cls.objects.get(pk=subscriber_id)
             except (cls.DoesNotExist, ValueError):
-                logger.warn("Could not find subscriber %r matching customer %r" % (subscriber_id, self.stripe_id))
+                logger.warning("Could not find subscriber %r matching customer %r", subscriber_id, self.stripe_id)
                 self.subscriber = None
 
     # SYNC methods should be dropped in favor of the master sync infrastructure proposed

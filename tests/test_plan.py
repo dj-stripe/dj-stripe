@@ -107,39 +107,39 @@ class HumanReadablePlanTest(TestCase):
             stripe_id="plan-test-free-usd-daily", amount=0, currency="usd",
             interval="day", interval_count=1,
         )
-        self.assertEquals(plan.human_readable_price, "$0 USD/day")
+        self.assertEqual(plan.human_readable_price, "$0 USD/day")
 
     def test_human_readable_10_usd_weekly(self):
         plan = Plan.objects.create(
             stripe_id="plan-test-10-usd-weekly", amount=10, currency="usd",
             interval="week", interval_count=1,
         )
-        self.assertEquals(plan.human_readable_price, "$10 USD/week")
+        self.assertEqual(plan.human_readable_price, "$10 USD/week")
 
     def test_human_readable_10_usd_2weeks(self):
         plan = Plan.objects.create(
             stripe_id="plan-test-10-usd-2w", amount=10, currency="usd",
             interval="week", interval_count=2,
         )
-        self.assertEquals(plan.human_readable_price, "$10 USD every 2 weeks")
+        self.assertEqual(plan.human_readable_price, "$10 USD every 2 weeks")
 
     def test_human_readable_499_usd_monthly(self):
         plan = Plan.objects.create(
             stripe_id="plan-test-499-usd-monthly", amount=Decimal("4.99"), currency="usd",
             interval="month", interval_count=1,
         )
-        self.assertEquals(plan.human_readable_price, "$4.99 USD/month")
+        self.assertEqual(plan.human_readable_price, "$4.99 USD/month")
 
     def test_human_readable_25_usd_6months(self):
         plan = Plan.objects.create(
             stripe_id="plan-test-25-usd-6m", amount=25, currency="usd",
             interval="month", interval_count=6,
         )
-        self.assertEquals(plan.human_readable_price, "$25 USD every 6 months")
+        self.assertEqual(plan.human_readable_price, "$25 USD every 6 months")
 
     def test_human_readable_10_usd_yearly(self):
         plan = Plan.objects.create(
             stripe_id="plan-test-10-usd-yearly", amount=10, currency="usd",
             interval="year", interval_count=1,
         )
-        self.assertEquals(plan.human_readable_price, "$10 USD/year")
+        self.assertEqual(plan.human_readable_price, "$10 USD/year")
