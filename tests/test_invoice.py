@@ -248,6 +248,10 @@ class InvoiceTest(TestCase):
         self.assertEqual(1, len(items))
         self.assertEqual(FAKE_SUBSCRIPTION["id"], items[0].stripe_id)
 
+        # delete/update should do nothing
+        self.assertEqual(invoice.invoiceitems.update(), 0)
+        self.assertEqual(invoice.invoiceitems.delete(), 0)
+
         self.assertIsNotNone(invoice.plan)
         self.assertEqual(FAKE_PLAN["id"], invoice.plan.stripe_id)
 

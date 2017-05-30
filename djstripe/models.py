@@ -27,7 +27,6 @@ from django.utils import six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.functional import cached_property
 from doc_inherit import class_doc_inherit
-from mock_django.query import QuerySetMock
 from stripe.error import StripeError, InvalidRequestError
 
 import traceback as exception_traceback
@@ -43,7 +42,7 @@ from .stripe_objects import (
     StripeEvent, StripeInvoice, StripeInvoiceItem, StripePlan, StripeSource,
     StripeSubscription, StripeTransfer
 )
-from .utils import get_friendly_currency_amount
+from .utils import get_friendly_currency_amount, QuerySetMock
 
 
 logger = logging.getLogger(__name__)
@@ -829,7 +828,7 @@ class UpcomingInvoice(Invoice):
         will act like a normal queryset, but mutation will silently fail.
         """
 
-        return QuerySetMock(InvoiceItem, *self._invoiceitems)
+        return QuerySetMock.from_iterable(InvoiceItem, self._invoiceitems)
 
     @property
     def stripe_id(self):
