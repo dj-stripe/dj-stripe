@@ -12,10 +12,11 @@ from django.apps import apps as django_apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import six
-from django.utils.dateparse import date_re
 from django.utils.module_loading import import_string
+
 import stripe
 
+from .checks import validate_stripe_api_version
 
 DEFAULT_STRIPE_API_VERSION = '2017-02-14'
 
@@ -168,20 +169,8 @@ def set_stripe_api_version(version=None, validate=True):
     version = version or get_stripe_api_version()
 
     if validate:
-        check_stripe_api_version(version)
+        valid = validate_stripe_api_version(version)
+        if not valid:
+            raise ValueError("Bad stripe API version: {}".format(version))
 
     stripe.api_version = version
-
-
-def check_stripe_api_version(version):
-    """
-    Check the API version is formatted correctly for Stripe.
-
-    :param version: The version to set for the Stripe API.
-    :type version: ``str``
-    :raises ImproperlyConfigured: If the version is not formatted correctly.
-    """
-    if not date_re.match(version):
-        raise ImproperlyConfigured(
-            "The Stripe API version must be a valid date in the form of "
-            "'YYYY-MM-DD'. Value provided: '{}'.".format(version))
