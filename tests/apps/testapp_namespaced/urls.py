@@ -8,6 +8,8 @@ def testview(request):
     return HttpResponse()
 
 
+app_name = "testapp_namespaced"
+
 urlpatterns = [
     url(
         r"^$",

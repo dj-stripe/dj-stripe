@@ -2,12 +2,29 @@
 Settings
 =========
 
-DJSTRIPE_DEFAULT_PLAN (=None)
-=============================
+STRIPE_API_VERSION (='2017-02-14')
+==================================
 
-Payment plans default.
+The API version used to communicate with the Stripe API is configurable, and
+defaults to the latest version that has been tested as working. Using a value
+other than the default is allowed, as a string in the format of YYYY-MM-DD.
 
-Possibly deprecated in favor of model based plans.
+For example, you can specify `'2017-01-27'` to use that API version:
+
+.. code-block:: python
+
+    STRIPE_API_VERSION = '2017-01-27'
+
+However you do so at your own risk, as using a value other than the default
+might result in incompatibilities between Stripe and this library, especially
+if Stripe has labelled the differences between API versions as "Major". Even
+small differences such as a new enumeration value might cause issues.
+
+For this reason it is best to assume that only the default version is supported.
+
+For more information on API versioning, see the `stripe documentation`_.
+
+.. _stripe documentation: https://stripe.com/docs/upgrades
 
 
 DJSTRIPE_IDEMPOTENCY_KEY_CALLBACK (=djstripe.settings._get_idempotency_key)
@@ -31,123 +48,6 @@ pair, and usable in the Stripe ``Idempotency-Key`` HTTP header.
 For more information, see the `stripe documentation`_.
 
 .. _stripe documentation: https://stripe.com/docs/api/curl#idempotent_requests
-
-DJSTRIPE_PLANS (={})
-====================
-
-Payment plans.
-
-Possibly deprecated in favor of model based plans.
-
-Example:
-
-.. code-block:: python
-
-    DJSTRIPE_PLANS = {
-        "monthly": {
-            "stripe_plan_id": "pro-monthly",
-            "name": "Web App Pro ($24.99/month)",
-            "description": "The monthly subscription plan to WebApp",
-            "price": 2499,  # $24.99
-            "currency": "usd",
-            "interval": "month",
-            "image": "img/pro-monthly.png"
-        },
-        "yearly": {
-            "stripe_plan_id": "pro-yearly",
-            "name": "Web App Pro ($199/year)",
-            "description": "The annual subscription plan to WebApp",
-            "price": 19900,  # $199.00
-            "currency": "usd",
-            "interval": "year",
-            "image": "img/pro-yearly.png"
-        }
-    }
-
-.. note:: Stripe Plan creation
-
-    Not all properties listed in the plans above are used by Stripe - i.e 'description' and 'image',
-    which are used to display the plans description and related image within specific templates.
-
-    Although any arbitrary property you require can be added to each plan listed in DJ_STRIPE_PLANS,
-    only specific properties are used by Stripe. The full list of required and optional arguments can
-    be found here_.
-
-.. _here: https://stripe.com/docs/api/python#create_plan
-
-DJSTRIPE_PLAN_HIERARCHY (={})
-=============================
-
-Payment plans levels.
-
-Allows you to set levels of access to the plans.
-
-Example:
-
-.. code-block:: python
-
-    DJSTRIPE_PLANS = {
-        "bronze-monthly": {
-            ...
-        },
-        "bronze-yearly": {
-            ...
-        },
-        "silver-monthly": {
-            ...
-        },
-        "silver-yearly": {
-            ...
-        },
-        "gold-monthly": {
-            ...
-        },
-        "gold-yearly": {
-            ...
-        }
-    }
-
-    DJSTRIPE_PLAN_HIERARCHY = {
-        "bronze": {
-            "level": 1,
-            "plans": [
-                "bronze-monthly",
-                "bronze-yearly",
-            ]
-        },
-        "silver": {
-            "level": 2,
-            "plans": [
-                "silver-monthly",
-                "silver-yearly",
-            ]
-        },
-        "gold": {
-            "level": 3,
-            "plans": [
-                "gold-monthly",
-                "gold-yearly",
-            ]
-        },
-    }
-
-Use:
-
-.. code-block:: python
-
-    {% <plan_name>|djstripe_plan_level %}
-
-Example:
-
-.. code-block:: python
-
-    {% elif customer.subscription.plan == plan.plan %}
-        <h4>Your Current Plan</h4>
-    {% elif customer.subscription|djstripe_plan_level < plan.plan|djstripe_plan_level %}
-        <h4>Upgrade</h4>
-    {% elif customer.subscription|djstripe_plan_level > plan.plan|djstripe_plan_level %}
-        <h4>Downgrade</h4>
-    {% endif %}
 
 DJSTRIPE_PRORATION_POLICY (=False)
 ==================================
@@ -269,35 +169,6 @@ Examples:
 
 
 .. note:: This callback only becomes active when ``DJSTRIPE_SUBSCRIBER_MODEL`` is set.
-
-DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK (=None)
-=====================================================
-
-Used by ``djstripe.models.Customer`` only when creating stripe customers when you have a default plan set via ``DJSTRIPE_DEFAULT_PLAN``.
-
-This is called to dynamically add a trial period to a subscriber's plan. It must be a callable or importable string to a callable that takes a subscriber object and returns the number of days the trial period should last.
-
-Examples:
-
-.. code-block:: python
-
-    def static_trial_period(subscriber):
-        """ Adds a static trial period of 7 days to each subscriber's account."""
-        return 7
-
-
-    def dynamic_trial_period(subscriber):
-        """
-        Adds a static trial period of 7 days to each subscriber's plan,
-        unless they've accepted our month-long promotion.
-        """
-
-        if subscriber.coupons.get(slug="monthlongtrial"):
-            return 30
-        else:
-            return 7
-
-.. note:: This setting was named ``DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK`` prior to version 0.4
 
 
 DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")

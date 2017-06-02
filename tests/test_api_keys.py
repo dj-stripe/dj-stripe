@@ -23,10 +23,10 @@ class TestSubscriberModelRetrievalMethod(TestCase):
     )
     def test_global_api_keys_live_mode(self):
         reload(djstripe_settings)
-        self.assertEquals(djstripe_settings.STRIPE_LIVE_MODE, True)
-        self.assertEquals(djstripe_settings.STRIPE_SECRET_KEY, "sk_live_foo")
-        # self.assertEquals(djstripe_settings.LIVE_API_KEY, "sk_live_foo")
-        self.assertEquals(self.live_object.default_api_key, "sk_live_foo")
+        self.assertEqual(djstripe_settings.STRIPE_LIVE_MODE, True)
+        self.assertEqual(djstripe_settings.STRIPE_SECRET_KEY, "sk_live_foo")
+        # self.assertEqual(djstripe_settings.LIVE_API_KEY, "sk_live_foo")
+        self.assertEqual(self.live_object.default_api_key, "sk_live_foo")
 
     @override_settings(
         STRIPE_SECRET_KEY="sk_test_foo",
@@ -35,10 +35,10 @@ class TestSubscriberModelRetrievalMethod(TestCase):
     )
     def test_global_api_keys_test_mode(self):
         reload(djstripe_settings)
-        self.assertEquals(djstripe_settings.STRIPE_LIVE_MODE, False)
-        self.assertEquals(djstripe_settings.STRIPE_SECRET_KEY, "sk_test_foo")
-        # self.assertEquals(djstripe_settings.TEST_API_KEY, "sk_test_foo")
-        self.assertEquals(self.test_object.default_api_key, "sk_test_foo")
+        self.assertEqual(djstripe_settings.STRIPE_LIVE_MODE, False)
+        self.assertEqual(djstripe_settings.STRIPE_SECRET_KEY, "sk_test_foo")
+        # self.assertEqual(djstripe_settings.TEST_API_KEY, "sk_test_foo")
+        self.assertEqual(self.test_object.default_api_key, "sk_test_foo")
 
     @override_settings(
         STRIPE_TEST_SECRET_KEY="sk_test_foo",
@@ -51,11 +51,11 @@ class TestSubscriberModelRetrievalMethod(TestCase):
         del settings.STRIPE_SECRET_KEY
         del settings.STRIPE_PUBLIC_KEY
         reload(djstripe_settings)
-        self.assertEquals(djstripe_settings.STRIPE_LIVE_MODE, True)
-        self.assertEquals(djstripe_settings.STRIPE_SECRET_KEY, "sk_live_foo")
-        self.assertEquals(djstripe_settings.STRIPE_PUBLIC_KEY, "pk_live_foo")
-        self.assertEquals(djstripe_settings.LIVE_API_KEY, "sk_live_foo")
-        self.assertEquals(self.live_object.default_api_key, "sk_live_foo")
+        self.assertEqual(djstripe_settings.STRIPE_LIVE_MODE, True)
+        self.assertEqual(djstripe_settings.STRIPE_SECRET_KEY, "sk_live_foo")
+        self.assertEqual(djstripe_settings.STRIPE_PUBLIC_KEY, "pk_live_foo")
+        self.assertEqual(djstripe_settings.LIVE_API_KEY, "sk_live_foo")
+        self.assertEqual(self.live_object.default_api_key, "sk_live_foo")
 
     @override_settings(
         STRIPE_TEST_SECRET_KEY="sk_test_foo",
@@ -68,11 +68,11 @@ class TestSubscriberModelRetrievalMethod(TestCase):
         del settings.STRIPE_SECRET_KEY
         del settings.STRIPE_PUBLIC_KEY
         reload(djstripe_settings)
-        self.assertEquals(djstripe_settings.STRIPE_LIVE_MODE, False)
-        self.assertEquals(djstripe_settings.STRIPE_SECRET_KEY, "sk_test_foo")
-        self.assertEquals(djstripe_settings.STRIPE_PUBLIC_KEY, "pk_test_foo")
-        self.assertEquals(djstripe_settings.TEST_API_KEY, "sk_test_foo")
-        self.assertEquals(self.test_object.default_api_key, "sk_test_foo")
+        self.assertEqual(djstripe_settings.STRIPE_LIVE_MODE, False)
+        self.assertEqual(djstripe_settings.STRIPE_SECRET_KEY, "sk_test_foo")
+        self.assertEqual(djstripe_settings.STRIPE_PUBLIC_KEY, "pk_test_foo")
+        self.assertEqual(djstripe_settings.TEST_API_KEY, "sk_test_foo")
+        self.assertEqual(self.test_object.default_api_key, "sk_test_foo")
 
     def tearDown(self):
         reload(djstripe_settings)

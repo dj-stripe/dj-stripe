@@ -614,7 +614,7 @@ FAKE_CUSTOMER = CustomerDict({
     "shipping": None,
     "sources": {
         "object": "list",
-        "total_count": 1,
+        "total_count": 2,
         "has_more": False,
         "url": "/v1/customers/cus_6lsBvm5rJ0zyHc/sources",
         "data": [deepcopy(FAKE_CARD), deepcopy(FAKE_CARD_V)]
@@ -626,7 +626,6 @@ FAKE_CUSTOMER = CustomerDict({
         "url": "/v1/customers/cus_6lsBvm5rJ0zyHc/subscriptions",
         "data": [deepcopy(FAKE_SUBSCRIPTION), deepcopy(FAKE_SUBSCRIPTION_II)]
     },
-
 })
 
 
@@ -661,8 +660,14 @@ FAKE_CUSTOMER_II = CustomerDict({
 })
 
 
-FAKE_CUSTOMER_DEFAULT_SOURCE_STRING = deepcopy(FAKE_CUSTOMER)
-FAKE_CUSTOMER_DEFAULT_SOURCE_STRING["default_source"] = FAKE_CARD["id"]
+FAKE_DISCOUNT_CUSTOMER = {
+    "object": "discount",
+    "coupon": deepcopy(FAKE_COUPON),
+    "customer": FAKE_CUSTOMER["id"],
+    "start": 1493206114,
+    "end": None,
+    "subscription": None,
+}
 
 
 class InvoiceDict(dict):
@@ -1135,6 +1140,24 @@ FAKE_ACCOUNT = {
     },
 }
 
+FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED = {
+    "id": "evt_XXXXXXXXXXXXXXXXXXXXXXXX",
+    "type": "account.application.deauthorized",
+    "pending_webhooks": 0,
+    "livemode": False,
+    "request": None,
+    "api_version": None,
+    "created": 1493823371,
+    "object": "event",
+    "data": {
+        "object": {
+            "id": "ca_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "object": "application",
+            "name": "Test Connect Application",
+        }
+    },
+}
+
 FAKE_EVENT_CHARGE_SUCCEEDED = {
     "id": "evt_16YKQi2eZvKYlo2CT2oe5ff3",
     "object": "event",
@@ -1171,6 +1194,32 @@ FAKE_EVENT_CUSTOMER_DELETED.update({
     "id": "evt_38DHch3whaDvKYlo2jksfsFFxy",
     "type": "customer.deleted"
 })
+
+FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED = {
+    "id": "AGBWvF5zBm4sMCsLLPZrw9XX",
+    "type": "customer.discount.created",
+    "api_version": "2017-02-14",
+    "created": 1439229084,
+    "object": "discount",
+    "pending_webhooks": 0,
+    "request": "req_6l38DHch3whaDj",
+    "data": {
+        "object": deepcopy(FAKE_DISCOUNT_CUSTOMER),
+    }
+}
+
+FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED = {
+    "id": "AGBWvF5zBm4sMCsLLPZrw9XX",
+    "type": "customer.discount.deleted",
+    "api_version": "2017-02-14",
+    "created": 1439229084,
+    "object": "discount",
+    "pending_webhooks": 0,
+    "request": "req_6l38DHch3whaDj",
+    "data": {
+        "object": deepcopy(FAKE_DISCOUNT_CUSTOMER),
+    }
+}
 
 FAKE_EVENT_CUSTOMER_SOURCE_CREATED = {
     "id": "evt_DvKYlo38huDvKYlo2C7SXedrZk",
