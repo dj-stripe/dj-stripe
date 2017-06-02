@@ -9,8 +9,8 @@
 .. moduleauthor:: @kavdev, @pydanny, @wahuneke
 """
 from django.conf import settings
-from django.core.urlresolvers import resolve
 from django.shortcuts import redirect
+from django.urls import resolve
 
 import fnmatch
 

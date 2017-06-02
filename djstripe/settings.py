@@ -12,7 +12,12 @@ from django.apps import apps as django_apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import six
+from django.utils.dateparse import date_re
 from django.utils.module_loading import import_string
+import stripe
+
+
+DEFAULT_STRIPE_API_VERSION = '2017-02-14'
 
 
 def get_callback_function(setting_name, default=None):
@@ -61,20 +66,9 @@ def _get_idempotency_key(object_type, action, livemode):
 get_idempotency_key = get_callback_function("DJSTRIPE_IDEMPOTENCY_KEY_CALLBACK", _get_idempotency_key)
 
 
-PAYMENTS_PLANS = getattr(settings, "DJSTRIPE_PLANS", {})
-PLAN_HIERARCHY = getattr(settings, "DJSTRIPE_PLAN_HIERARCHY", {})
-
 PRORATION_POLICY = getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False)
 PRORATION_POLICY_FOR_UPGRADES = getattr(settings, 'DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES', False)
 CANCELLATION_AT_PERIOD_END = not getattr(settings, 'DJSTRIPE_PRORATION_POLICY', False)
-
-DEFAULT_PLAN = getattr(settings, "DJSTRIPE_DEFAULT_PLAN", None)
-
-# Try to find the new settings variable first. If that fails, revert to the
-# old variable.
-trial_period_for_subscriber_callback = (
-    get_callback_function("DJSTRIPE_TRIAL_PERIOD_FOR_SUBSCRIBER_CALLBACK") or
-    get_callback_function("DJSTRIPE_TRIAL_PERIOD_FOR_USER_CALLBACK"))
 
 DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
 
@@ -106,6 +100,12 @@ else:
 
 
 SUBSCRIPTION_REDIRECT = getattr(settings, "DJSTRIPE_SUBSCRIPTION_REDIRECT", "djstripe:subscribe")
+
+
+ZERO_DECIMAL_CURRENCIES = set([
+    "bif", "clp", "djf", "gnf", "jpy", "kmf", "krw", "mga", "pyg", "rwf",
+    "vnd", "vuv", "xaf", "xof", "xpf",
+])
 
 
 def get_subscriber_model_string():
@@ -150,7 +150,38 @@ def get_subscriber_model():
     return subscriber_model
 
 
-ZERO_DECIMAL_CURRENCIES = set([
-    "bif", "clp", "djf", "gnf", "jpy", "kmf", "krw", "mga", "pyg", "rwf",
-    "vnd", "vuv", "xaf", "xof", "xpf",
-])
+def get_stripe_api_version():
+    """Get the desired API version to use for Stripe requests."""
+    version = getattr(settings, 'STRIPE_API_VERSION', stripe.api_version)
+    return version or DEFAULT_STRIPE_API_VERSION
+
+
+def set_stripe_api_version(version=None, validate=True):
+    """
+    Set the desired API version to use for Stripe requests.
+
+    :param version: The version to set for the Stripe API.
+    :type version: ``str``
+    :param validate: If True validate the value for the specified version).
+    :type validate: ``bool``
+    """
+    version = version or get_stripe_api_version()
+
+    if validate:
+        check_stripe_api_version(version)
+
+    stripe.api_version = version
+
+
+def check_stripe_api_version(version):
+    """
+    Check the API version is formatted correctly for Stripe.
+
+    :param version: The version to set for the Stripe API.
+    :type version: ``str``
+    :raises ImproperlyConfigured: If the version is not formatted correctly.
+    """
+    if not date_re.match(version):
+        raise ImproperlyConfigured(
+            "The Stripe API version must be a valid date in the form of "
+            "'YYYY-MM-DD'. Value provided: '{}'.".format(version))

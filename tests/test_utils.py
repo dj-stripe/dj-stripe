@@ -31,37 +31,18 @@ TZ_IS_UTC = time.tzname == ("UTC", "UTC")
 
 class TestTimestampConversion(TestCase):
 
-    def test_conversion_without_field_name(self):
+    def test_conversion(self):
         stamp = convert_tstamp(1365567407)
-        self.assertEquals(stamp, datetime(2013, 4, 10, 4, 16, 47, tzinfo=timezone.utc))
-
-    def test_conversion_with_field_name(self):
-        stamp = convert_tstamp({"my_date": 1365567407}, "my_date")
-        self.assertEquals(stamp, datetime(2013, 4, 10, 4, 16, 47, tzinfo=timezone.utc))
-
-    def test_conversion_with_invalid_field_name(self):
-        stamp = convert_tstamp({"my_date": 1365567407}, "foo")
-        self.assertEquals(stamp, None)
+        self.assertEqual(stamp, datetime(2013, 4, 10, 4, 16, 47, tzinfo=timezone.utc))
 
     # NOTE: These next two tests will fail if your system clock is not in UTC
     # Travis CI is, and coverage is good, so...
 
     @skipIf(not TZ_IS_UTC, "Skipped because timezone is not UTC.")
     @override_settings(USE_TZ=False)
-    def test_conversion_without_field_name_no_tz(self):
+    def test_conversion_no_tz(self):
         stamp = convert_tstamp(1365567407)
-        self.assertEquals(stamp, datetime(2013, 4, 10, 4, 16, 47))
-
-    @skipIf(not TZ_IS_UTC, "Skipped because timezone is not UTC.")
-    @override_settings(USE_TZ=False)
-    def test_conversion_with_field_name_no_tz(self):
-        stamp = convert_tstamp({"my_date": 1365567407}, "my_date")
-        self.assertEquals(stamp, datetime(2013, 4, 10, 4, 16, 47))
-
-    @override_settings(USE_TZ=False)
-    def test_conversion_with_invalid_field_name_no_tz(self):
-        stamp = convert_tstamp({"my_date": 1365567407}, "foo")
-        self.assertEquals(stamp, None)
+        self.assertEqual(stamp, datetime(2013, 4, 10, 4, 16, 47))
 
 
 class TestUserHasActiveSubscription(TestCase):

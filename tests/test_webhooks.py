@@ -11,9 +11,9 @@ from collections import defaultdict
 from copy import deepcopy
 import json
 
-from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import Client
+from django.urls import reverse
 from mock import call, patch, Mock, PropertyMock, ANY
 
 from djstripe import views, webhooks
@@ -35,7 +35,7 @@ class TestWebhook(TestCase):
             json.dumps(fake_event),
             content_type="application/json"
         )
-        self.assertEquals(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
         self.assertTrue(Event.objects.filter(type="transfer.created").exists())
 
     def test_webhook_with_test_event(self):
@@ -44,7 +44,7 @@ class TestWebhook(TestCase):
             json.dumps(FAKE_EVENT_TEST_CHARGE_SUCCEEDED),
             content_type="application/json"
         )
-        self.assertEquals(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
         self.assertFalse(Event.objects.filter(stripe_id=TEST_EVENT_ID).exists())
 
     @patch.object(views.djstripe_settings, 'WEBHOOK_EVENT_CALLBACK', return_value=(lambda event: event.process()))
@@ -60,7 +60,7 @@ class TestWebhook(TestCase):
             json.dumps(fake_event),
             content_type="application/json"
         )
-        self.assertEquals(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
         event = Event.objects.get(type="transfer.created")
         webhook_event_callback_mock.called_once_with(event)
 
@@ -75,7 +75,7 @@ class TestWebhook(TestCase):
             json.dumps(fake_event),
             content_type="application/json"
         )
-        self.assertEquals(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
         self.assertTrue(Event.objects.filter(type="transfer.created").exists())
         self.assertEqual(1, Event.objects.filter(type="transfer.created").count())
 

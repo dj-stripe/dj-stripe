@@ -73,7 +73,7 @@ def run_test_suite(args):
             "tests",
             "tests.apps.testapp"
         ],
-        MIDDLEWARE_CLASSES=(
+        MIDDLEWARE=(
             "django.contrib.sessions.middleware.SessionMiddleware",
             "django.contrib.auth.middleware.AuthenticationMiddleware",
             "django.contrib.messages.middleware.MessageMiddleware"
@@ -129,29 +129,6 @@ def run_test_suite(args):
                 "currency": "usd",
                 "interval": "month"
             }
-        },
-        DJSTRIPE_PLAN_HIERARCHY={
-            "bronze": {
-                "level": 1,
-                "plans": [
-                    "test0",
-                    "test",
-                ]
-            },
-            "silver": {
-                "level": 2,
-                "plans": [
-                    "test2",
-                    "test_deletion",
-                ]
-            },
-            "gold": {
-                "level": 3,
-                "plans": [
-                    "test_trial",
-                    "unidentified_test_plan",
-                ]
-            },
         },
         DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS=(
             "(admin)",

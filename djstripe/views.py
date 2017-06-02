@@ -14,9 +14,9 @@ import logging
 from django.contrib import messages
 from django.contrib.auth import logout as auth_logout, REDIRECT_FIELD_NAME
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.encoding import smart_str
 from django.utils.http import is_safe_url
@@ -129,7 +129,7 @@ class WebHook(View):
                 traceback=""
             )
         else:
-            event = Event._create_from_stripe_object(data)
+            event = Event._create_from_stripe_object(data, save=False)
             event.validate()
 
             if djstripe_settings.WEBHOOK_EVENT_CALLBACK:

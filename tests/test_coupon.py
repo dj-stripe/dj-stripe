@@ -14,7 +14,7 @@ class TransferTest(TestCase):
     def test_retrieve_coupon(self):
         coupon_data = deepcopy(FAKE_COUPON)
         coupon = Coupon.sync_from_stripe_data(coupon_data)
-        self.assertEquals(coupon.stripe_id, FAKE_COUPON["id"])
+        self.assertEqual(coupon.stripe_id, FAKE_COUPON["id"])
 
 
 class HumanReadableCouponTest(TestCase):
@@ -23,39 +23,39 @@ class HumanReadableCouponTest(TestCase):
             stripe_id="coupon-test-amount-off-forever", amount_off=10, currency="usd",
             duration="forever",
         )
-        self.assertEquals(coupon.human_readable, "$10 USD off forever")
+        self.assertEqual(coupon.human_readable, "$10 USD off forever")
 
     def test_human_readable_eur_off_forever(self):
         coupon = Coupon.objects.create(
             stripe_id="coupon-test-amount-off-forever", amount_off=10, currency="eur",
             duration="forever",
         )
-        self.assertEquals(coupon.human_readable, "€10 EUR off forever")
+        self.assertEqual(coupon.human_readable, "€10 EUR off forever")
 
     def test_human_readable_percent_off_forever(self):
         coupon = Coupon.objects.create(
             stripe_id="coupon-test-percent-off-forever", percent_off=10, currency="usd",
             duration="forever",
         )
-        self.assertEquals(coupon.human_readable, "10% off forever")
+        self.assertEqual(coupon.human_readable, "10% off forever")
 
     def test_human_readable_percent_off_once(self):
         coupon = Coupon.objects.create(
             stripe_id="coupon-test-percent-off-once", percent_off=10, currency="usd",
             duration="once",
         )
-        self.assertEquals(coupon.human_readable, "10% off once")
+        self.assertEqual(coupon.human_readable, "10% off once")
 
     def test_human_readable_percent_off_one_month(self):
         coupon = Coupon.objects.create(
             stripe_id="coupon-test-percent-off-1month", percent_off=10, currency="usd",
             duration="repeating", duration_in_months=1,
         )
-        self.assertEquals(coupon.human_readable, "10% off for 1 month")
+        self.assertEqual(coupon.human_readable, "10% off for 1 month")
 
     def test_human_readable_percent_off_three_months(self):
         coupon = Coupon.objects.create(
             stripe_id="coupon-test-percent-off-3month", percent_off=10, currency="usd",
             duration="repeating", duration_in_months=3,
         )
-        self.assertEquals(coupon.human_readable, "10% off for 3 months")
+        self.assertEqual(coupon.human_readable, "10% off for 3 months")

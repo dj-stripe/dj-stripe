@@ -23,8 +23,9 @@ from django.conf.urls import url
 from . import views
 
 
-urlpatterns = [
+app_name = "djstripe_rest_framework"
 
+urlpatterns = [
     # REST api
     url(
         r"^subscription/$",
