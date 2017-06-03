@@ -9,13 +9,17 @@
 
 import decimal
 
-from django.core.exceptions import ImproperlyConfigured, FieldError
+from django.core.exceptions import FieldError, ImproperlyConfigured
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from jsonfield import JSONField
+from .settings import USE_NATIVE_JSONFIELD
+from .utils import convert_tstamp, dict_nested_accessor
 
-from .utils import dict_nested_accessor, convert_tstamp
+if USE_NATIVE_JSONFIELD:
+    from django.contrib.postgres.fields import JSONField
+else:
+    from jsonfield import JSONField
 
 
 class StripeFieldMixin(object):
