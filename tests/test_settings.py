@@ -150,7 +150,7 @@ class TestSetStripeApiVersion(TestCase):
         self.assertEqual('2016-03-07', stripe.api_version)
 
     def test_with_invalid_date(self):
-        with self.assertRaises(ImproperlyConfigured):
+        with self.assertRaises(ValueError):
             set_stripe_api_version(version='foobar')
 
     def test_with_invalid_date_and_no_validation(self):

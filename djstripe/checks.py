@@ -12,8 +12,7 @@
 from __future__ import unicode_literals
 
 from django.core import checks
-from django.utils import six
-from django.core.exceptions import ImproperlyConfigured
+from django.utils.dateparse import date_re
 
 
 @checks.register("djstripe")
@@ -40,6 +39,19 @@ def check_stripe_api_key(app_configs=None, **kwargs):
     return messages
 
 
+def validate_stripe_api_version(version):
+    """
+    Check the API version is formatted correctly for Stripe.
+
+    The expected format is an iso8601 date: `YYYY-MM-DD`
+
+    :param version: The version to set for the Stripe API.
+    :type version: ``str``
+    :returns bool: Whether the version is formatted correctly.
+    """
+    return date_re.match(version)
+
+
 @checks.register("djstripe")
 def check_stripe_api_version(app_configs=None, **kwargs):
     """Check the user has configured API version correctly."""
@@ -48,11 +60,10 @@ def check_stripe_api_version(app_configs=None, **kwargs):
     default_version = djstripe_settings.DEFAULT_STRIPE_API_VERSION
     version = djstripe_settings.get_stripe_api_version()
 
-    try:
-        djstripe_settings.check_stripe_api_version(version)
-    except ImproperlyConfigured as ex:
-        hint = "Use a valid date string value."
-        messages.append(checks.Critical(six.force_text(ex), hint=hint, id="djstripe.C004"))
+    if not validate_stripe_api_version(version):
+        msg = "Invalid Stripe API version: {}".format(version)
+        hint = "STRIPE_API_VERSION should be formatted as: YYYY-MM-DD"
+        messages.append(checks.Critical(msg, hint=hint, id="djstripe.C004"))
 
     if version != default_version:
         msg = (
