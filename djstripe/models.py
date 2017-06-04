@@ -504,7 +504,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
 
 
 @class_doc_inherit
-class Event(StripeEvent):
+class Event(StripeEvent):  # noqa
     __doc__ = getattr(StripeEvent, "__doc__")
 
     # account = ForeignKey(Account, related_name="events")
@@ -529,8 +529,7 @@ class Event(StripeEvent):
 
     @property
     def message(self):
-        """ The event's data if the event is valid, None otherwise."""
-
+        """The event's data if the event is valid, None otherwise."""
         return self.webhook_message if self.valid else None
 
     def _attach_objects_hook(self, cls, data):
@@ -543,21 +542,20 @@ class Event(StripeEvent):
 
     def validate(self):
         """
+        Make an API call to Stripe to re-download the Event data.
+
         The original contents of the Event message comes from a POST to the webhook endpoint. This data
         must be confirmed by re-fetching it and comparing the fetched data with the original data. That's what
         this function does.
 
-        This function makes an API call to Stripe to re-download the Event data. It then
-        marks this record's valid flag to True or False.
+        If valid, it then marks this record's valid flag to True or False.
         """
-
         self.valid = self.webhook_message == self.api_retrieve()["data"]
         self.save()
 
     def process(self, force=False, raise_exception=False):
         """
-        Invokes any webhook handlers that have been registered for this event
-        based on event type or event sub-type.
+        Invoke any webhook handlers that have been registered for this event.
 
         See event handlers registered in the ``djstripe.event_handlers`` module
         (or handlers registered in djstripe plugins or contrib packages).
@@ -572,7 +570,6 @@ class Event(StripeEvent):
         previously processed successfully.
         :rtype: bool
         """
-
         if not self.valid:
             return False
 
@@ -620,22 +617,22 @@ class Event(StripeEvent):
 
     @cached_property
     def parts(self):
-        """ Gets the event type/subtype as a list of parts. """
+        """Get the event type/subtype as a list of parts."""
         return str(self.type).split(".")
 
     @cached_property
     def event_type(self):
-        """ Gets the event type string. """
+        """Get the event type string."""
         return self.parts[0]
 
     @cached_property
     def event_subtype(self):
-        """ Gets the event subtype string. """
+        """Get the event subtype string."""
         return ".".join(self.parts[1:])
 
 
 @class_doc_inherit
-class Transfer(StripeTransfer):
+class Transfer(StripeTransfer): # noqa
     __doc__ = getattr(StripeTransfer, "__doc__")
 
     # account = ForeignKey("Account", related_name="transfers")
@@ -648,6 +645,8 @@ class Transfer(StripeTransfer):
 # ============================================================================ #
 
 class Account(StripeAccount):
+    """TODO: Documentation."""
+
     pass
 
 
