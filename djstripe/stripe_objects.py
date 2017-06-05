@@ -537,6 +537,7 @@ Fields not implemented:
     source_type = StripeCharField(
         max_length=20,
         null=True,
+        choices=enums.SourceType.choices,
         stripe_name="source.object",
         help_text="The payment source type. If the payment source is supported by dj-stripe, a corresponding model is "
         "attached to this Charge via a foreign key matching this field."
@@ -985,9 +986,6 @@ Fields not implemented:
         (destination_type, destination_type.replace("_", " ").title()) for destination_type in DESTINATION_TYPES
     ]
 
-    SOURCE_TYPES = ["card", "bank_account", "bitcoin_reciever", "alipay_account"]
-    SOURCE_TYPE_CHOICES = [(source_type, source_type.replace("_", " ").title()) for source_type in SOURCE_TYPES]
-
     FAILURE_CODES = ["insufficient_funds", "account_closed", "no_account", "invalid_account_number",
                      "debit_not_authorized", "bank_ownership_changed", "account_frozen", "could_not_process",
                      "bank_account_restricted", "invalid_currency"]
@@ -1039,7 +1037,7 @@ Fields not implemented:
     )
     source_type = StripeCharField(
         max_length=16,
-        choices=SOURCE_TYPE_CHOICES,
+        choices=enums.SourceType.choices,
         help_text="The source balance from which this transfer came."
     )
     statement_descriptor = StripeCharField(

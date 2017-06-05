@@ -95,3 +95,10 @@ class PlanInterval(Enum):
     week = _("Week")
     month = _("Month")
     year = _("Year")
+
+
+class SourceType(Enum):
+    card = _("Card")
+    bank_account = _("Bank account")
+    bitcoin_receiver = _("Bitcoin receiver")
+    alipay_account = _("Alipay account")
