@@ -20,6 +20,7 @@ NOTE: Event data is not guaranteed to be in the correct API version format. See 
 """
 
 from . import webhooks
+from .enums import SourceType
 from .models import (
     Card, Charge, Coupon, Customer, Invoice, InvoiceItem, Plan, Subscription,
     Transfer
@@ -114,7 +115,7 @@ def customer_source_webhook_handler(event, event_data, event_type, event_subtype
     source_type = event_data["object"]["object"]
 
     # TODO: handle other types of sources (https://stripe.com/docs/api#customer_object-sources)
-    if source_type == "card":
+    if source_type == SourceType.card:
         _handle_crud_type_event(
             target_cls=Card,
             event_data=event_data,

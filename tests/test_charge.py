@@ -12,6 +12,7 @@ from decimal import Decimal
 from django.test.testcases import TestCase
 from mock import patch
 
+from djstripe.enums import SourceType
 from djstripe.models import Charge, Customer, Account
 from tests import FAKE_TRANSFER, FAKE_CUSTOMER
 
@@ -62,7 +63,7 @@ class ChargeTest(TestCase):
         self.assertEqual(0, charge.amount_refunded)
 
         self.assertEqual("card_16YKQh2eZvKYlo2Cblc5Feoo", charge.source_stripe_id)
-        self.assertEqual("card", charge.source_type)
+        self.assertEqual(charge.source_type, SourceType.card)
 
     @patch("djstripe.models.Account.get_default_account")
     def test_sync_from_stripe_data_max_amount(self, default_account_mock):
