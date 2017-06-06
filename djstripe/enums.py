@@ -1,6 +1,7 @@
 from collections import OrderedDict
 
 from django.utils.translation import ugettext as _
+from django.utils.six import add_metaclass
 
 
 class EnumMetaClass(type):
@@ -33,7 +34,8 @@ class EnumMetaClass(type):
         return type.__new__(self, name, bases, classdict)
 
 
-class Enum(metaclass=EnumMetaClass):
+@add_metaclass(EnumMetaClass)
+class Enum(object):
     pass
 
 
