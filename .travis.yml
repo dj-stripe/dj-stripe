@@ -36,10 +36,6 @@ matrix:
     - python: "3.6"
       env: TOXENV=py35-djangomaster
   allow_failures:
-    - env: TOXENV=py27-django111
-    - env: TOXENV=py34-django111
-    - env: TOXENV=py35-django111
-    - env: TOXENV=py36-django111
     - env: TOXENV=py35-djangomaster
     - env: TOXENV=py36-djangomaster
 
