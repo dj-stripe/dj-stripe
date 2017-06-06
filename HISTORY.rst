@@ -7,6 +7,7 @@ History
 ---------------------
 * BACKWARDS-INCOMPATIBLE: dj-stripe now supports test-mode and live-mode Customer objects concurrently.
   As a result, the User.customer One-to-One reverse-relationship is now the User.djstripe_customers RelatedManager. (Thanks @jleclanche) #440
+* Postgres users now have access to the ``DJSTRIPE_USE_NATIVE_JSONFIELD`` setting. (Thanks @jleclanche) #517, #523
 * Charge receipts now take `DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS` into account (Thanks @r0fls)
 * Clarified/modified installation documentation (Thanks @pydanny)
 * Corrected and revised ANONYMOUS_USER_ERROR_MSG (Thanks @pydanny)
