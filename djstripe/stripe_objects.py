@@ -971,12 +971,14 @@ Fields not implemented:
     expand_fields = ["balance_transaction"]
     stripe_dashboard_item_name = "transfers"
 
-    STATUS_PAID = "paid"
-    STATUS_PENDING = "pending"
-    STATUS_IN_TRANSIT = "in_transit"
-    STATUS_CANCELED = "canceled"
+    # The following accessors are deprecated as of 1.0 and will be removed in 1.1
+    # Please use enums.SubscriptionStatus directly.
+    STATUS_PAID = enums.PayoutStatus.paid
+    STATUS_PENDING = enums.PayoutStatus.pending
+    STATUS_IN_TRANSIT = enums.PayoutStatus.in_transit
+    STATUS_CANCELED = enums.PayoutStatus.canceled
     STATUS_CANCELLED = STATUS_CANCELED
-    STATUS_FAILED = "failed"
+    STATUS_FAILED = enums.PayoutStatus.failed
 
     DESTINATION_TYPES = ["card", "bank_account", "stripe_account"]
     DESITNATION_TYPE_CHOICES = [
@@ -1725,12 +1727,14 @@ Fields not implemented:
     stripe_class = stripe.Subscription
     stripe_dashboard_item_name = "subscriptions"
 
-    STATUS_ACTIVE = "active"
-    STATUS_TRIALING = "trialing"
-    STATUS_PAST_DUE = "past_due"
-    STATUS_CANCELED = "canceled"
+    # The following accessors are deprecated as of 1.0 and will be removed in 1.1
+    # Please use enums.SubscriptionStatus directly.
+    STATUS_ACTIVE = enums.SubscriptionStatus.active
+    STATUS_TRIALING = enums.SubscriptionStatus.trialing
+    STATUS_PAST_DUE = enums.SubscriptionStatus.past_due
+    STATUS_CANCELED = enums.SubscriptionStatus.canceled
     STATUS_CANCELLED = STATUS_CANCELED
-    STATUS_UNPAID = "unpaid"
+    STATUS_UNPAID = enums.SubscriptionStatus.unpaid
 
     application_fee_percent = StripePercentField(
         null=True,
