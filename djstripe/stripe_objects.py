@@ -978,9 +978,6 @@ Fields not implemented:
     STATUS_CANCELLED = STATUS_CANCELED
     STATUS_FAILED = "failed"
 
-    STATUSES = [STATUS_PAID, STATUS_PENDING, STATUS_IN_TRANSIT, STATUS_CANCELED, STATUS_FAILED]
-    STATUS_CHOICES = [(status, status.replace("_", " ").title()) for status in STATUSES]
-
     DESTINATION_TYPES = ["card", "bank_account", "stripe_account"]
     DESITNATION_TYPE_CHOICES = [
         (destination_type, destination_type.replace("_", " ").title()) for destination_type in DESTINATION_TYPES
@@ -1045,7 +1042,7 @@ Fields not implemented:
     )
     status = StripeCharField(
         max_length=10,
-        choices=STATUS_CHOICES,
+        choices=enums.PayoutStatus.choices,
         help_text="The current status of the transfer. A transfer will be pending until it is submitted to the bank, "
         "at which point it becomes in_transit. It will then change to paid if the transaction goes through. "
         "If it does not go through successfully, its status will change to failed or canceled."

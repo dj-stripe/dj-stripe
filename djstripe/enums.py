@@ -118,6 +118,14 @@ class PayoutFailureCode(Enum):
     unsupported_card = _("Card no longer supported.")
 
 
+class PayoutStatus(Enum):
+    paid = _("Paid")
+    pending = _("Pending")
+    in_transit = _("In transit")
+    canceled = _("Canceled")
+    failed = _("Failed")
+
+
 class PlanInterval(Enum):
     day = _("Day")
     week = _("Week")
