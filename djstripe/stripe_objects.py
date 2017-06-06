@@ -986,11 +986,6 @@ Fields not implemented:
         (destination_type, destination_type.replace("_", " ").title()) for destination_type in DESTINATION_TYPES
     ]
 
-    FAILURE_CODES = ["insufficient_funds", "account_closed", "no_account", "invalid_account_number",
-                     "debit_not_authorized", "bank_ownership_changed", "account_frozen", "could_not_process",
-                     "bank_account_restricted", "invalid_currency"]
-    FAILURE_CODE_CHOICES = [(failure_code, failure_code.replace("_", " ").title()) for failure_code in FAILURE_CODES]
-
     amount = StripeCurrencyField(help_text="The amount transferred")
     amount_reversed = StripeCurrencyField(
         stripe_required=False,
@@ -1017,7 +1012,7 @@ Fields not implemented:
     failure_code = StripeCharField(
         null=True,
         max_length=23,
-        choices=FAILURE_CODE_CHOICES,
+        choices=enums.PayoutFailureCode.choices,
         help_text="Error code explaining reason for transfer failure if available. "
         "See https://stripe.com/docs/api/python#transfer_failures."
     )
