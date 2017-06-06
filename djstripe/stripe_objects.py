@@ -1740,9 +1740,6 @@ Fields not implemented:
     STATUS_CANCELLED = STATUS_CANCELED
     STATUS_UNPAID = "unpaid"
 
-    STATUSES = [STATUS_TRIALING, STATUS_ACTIVE, STATUS_PAST_DUE, STATUS_CANCELED, STATUS_UNPAID]
-    STATUS_CHOICES = [(status, status.replace("_", " ").title()) for status in STATUSES]
-
     application_fee_percent = StripePercentField(
         null=True,
         help_text="A positive decimal that represents the fee percentage of the subscription invoice amount that "
@@ -1775,7 +1772,7 @@ Fields not implemented:
     )
     quantity = StripeIntegerField(help_text="The quantity applied to this subscription.")
     start = StripeDateTimeField(help_text="Date the subscription started.")
-    status = StripeCharField(max_length=8, choices=STATUS_CHOICES, help_text="The status of this subscription.")
+    status = StripeCharField(max_length=8, choices=enums.SubscriptionStatus.choices, help_text="The status of this subscription.")
     tax_percent = StripePercentField(
         null=True,
         help_text="A positive decimal (with at most two decimal places) between 1 and 100. This represents the "

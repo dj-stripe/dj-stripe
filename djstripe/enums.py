@@ -111,3 +111,11 @@ class SourceType(Enum):
     bank_account = _("Bank account")
     bitcoin_receiver = _("Bitcoin receiver")
     alipay_account = _("Alipay account")
+
+
+class SubscriptionStatus(Enum):
+    trialing = _("Trialing")
+    active = _("Active")
+    past_due = _("Past due")
+    canceled = _("Canceled")
+    unpaid = _("Unpaid")
