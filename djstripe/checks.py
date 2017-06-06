@@ -11,6 +11,7 @@
 """
 from __future__ import unicode_literals
 
+from django.conf import settings
 from django.core import checks
 from django.utils import six
 from django.core.exceptions import ImproperlyConfigured
@@ -62,5 +63,34 @@ def check_stripe_api_version(app_configs=None, **kwargs):
         )
         hint = "Use the dj-stripe default for Stripe API version: {}".format(default_version)
         messages.append(checks.Warning(msg, hint=hint, id="djstripe.W001"))
+
+    return messages
+
+
+@checks.register("djstripe")
+def check_native_jsonfield_postgres_engine(app_configs=None, **kwargs):
+    """
+    Check that the DJSTRIPE_USE_NATIVE_JSONFIELD isn't set unless Postgres is in use.
+    """
+    from . import settings as djstripe_settings
+
+    messages = []
+    error_msg = "DJSTRIPE_USE_NATIVE_JSONFIELD is not compatible with engine {engine} for database {name}"
+
+    if djstripe_settings.USE_NATIVE_JSONFIELD:
+        for db_name, db_config in settings.DATABASES.items():
+            # Hi there.
+            # You may be reading this because you are using Postgres, but
+            # dj-stripe is not detecting that correctly. For example, maybe you
+            # are using multiple databases with different engines, or you have
+            # your own backend. As long as you are certain you can support jsonb,
+            # you can use the SILENCED_SYSTEM_CHECKS setting to ignore this check.
+            engine = db_config.get("ENGINE", "")
+            if "postgresql" not in engine and "postgis" not in engine:
+                messages.append(checks.Critical(
+                    error_msg.format(name=repr(db_name), engine=repr(engine)),
+                    hint="Switch to Postgres, or unset DJSTRIPE_USE_NATIVE_JSONFIELD",
+                    id="djstripe.C005"
+                ))
 
     return messages
