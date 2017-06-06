@@ -24,6 +24,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import FormView, TemplateView, View
 
 from . import settings as djstripe_settings
+from .enums import SubscriptionStatus
 from .forms import CancelSubscriptionForm
 from .mixins import SubscriptionMixin
 from .models import Customer, Event, EventProcessingException
@@ -80,7 +81,7 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
 
         subscription = customer.subscription.cancel()
 
-        if subscription.status == subscription.STATUS_CANCELED:
+        if subscription.status == SubscriptionStatus.canceled:
             return self.status_cancel()
         else:
             # If pro-rate, they get some time to stay.

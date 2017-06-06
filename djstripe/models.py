@@ -33,6 +33,7 @@ import traceback as exception_traceback
 
 from . import settings as djstripe_settings
 from . import webhooks
+from .enums import SubscriptionStatus
 from .exceptions import MultipleSubscriptionException
 from .fields import StripeDateTimeField
 from .managers import SubscriptionManager, ChargeManager, TransferManager
@@ -304,13 +305,13 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
     def active_subscriptions(self):
         """Returns active subscriptions (subscriptions with an active status that end in the future)."""
         return self.subscriptions.filter(
-            status=StripeSubscription.STATUS_ACTIVE, current_period_end__gt=timezone.now()
+            status=SubscriptionStatus.active, current_period_end__gt=timezone.now()
         )
 
     @property
     def valid_subscriptions(self):
         """Returns this cusotmer's valid subscriptions (subscriptions that aren't cancelled."""
-        return self.subscriptions.exclude(status=StripeSubscription.STATUS_CANCELED)
+        return self.subscriptions.exclude(status=SubscriptionStatus.canceled)
 
     @property
     def subscription(self):
