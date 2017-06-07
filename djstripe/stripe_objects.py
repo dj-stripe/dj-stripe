@@ -118,7 +118,7 @@ class StripeObject(models.Model):
             # Livemode is false, use the test secret key
             return djstripe_settings.TEST_API_KEY or djstripe_settings.STRIPE_SECRET_KEY
 
-    def api_retrieve(self, api_key=None):
+    def api_retrieve(self, api_key=None, stripe_account=None):
         """
         Call the stripe API's retrieve operation for this model.
 
@@ -127,7 +127,7 @@ class StripeObject(models.Model):
         """
         api_key = api_key or self.default_api_key
 
-        return self.stripe_class.retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
+        return self.stripe_class.retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields, stripe_account=stripe_account)
 
     @classmethod
     def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
@@ -738,7 +738,8 @@ Fields not implemented:
         return stripe_subscription
 
     def charge(self, amount, currency, application_fee=None, capture=None, description=None, destination=None,
-               metadata=None, shipping=None, source=None, statement_descriptor=None):
+               metadata=None, shipping=None, source=None, statement_descriptor=None, stripe_account=None,
+               idempotency_key=None):
         """
         Creates a charge for this customer.
 
@@ -793,6 +794,8 @@ Fields not implemented:
             customer=self.stripe_id,
             source=source,
             statement_descriptor=statement_descriptor,
+            stripe_account=stripe_account,
+            idempotency_key=idempotency_key
         )
 
         return stripe_charge
@@ -849,7 +852,7 @@ Fields not implemented:
 
         return stripe_invoiceitem
 
-    def add_card(self, source, set_default=True):
+    def add_card(self, source, set_default=True, stripe_account=None):
         """
         Adds a card to this customer's account.
 
@@ -861,7 +864,7 @@ Fields not implemented:
 
         """
 
-        stripe_customer = self.api_retrieve()
+        stripe_customer = self.api_retrieve(stripe_account=stripe_account)
         stripe_card = stripe_customer.sources.create(source=source)
 
         if set_default:
