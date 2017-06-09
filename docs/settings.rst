@@ -171,6 +171,26 @@ Examples:
 .. note:: This callback only becomes active when ``DJSTRIPE_SUBSCRIBER_MODEL`` is set.
 
 
+DJSTRIPE_USE_NATIVE_JSONFIELD (=False)
+======================================
+
+Setting this to ``True`` will make the various dj-stripe JSON fields use
+``django.contrib.postgres.fields.JSONField`` instead of the ``jsonfield``
+library (which internally uses ``text`` fields).
+
+The native Django JSONField uses the postgres `jsonb`_ column type, which
+efficiently stores JSON and can be queried far more conveniently. Django also
+supports `querying JSONField`_ with the ORM.
+
+.. note:: This is only supported on Postgres databases.
+
+.. note:: **Migrating between native and non-native must be done manually.**
+
+.. _jsonb: https://www.postgresql.org/docs/9.6/static/functions-json.html
+
+.. _querying JSONField: https://docs.djangoproject.com/en/1.11/ref/contrib/postgres/fields/#querying-jsonfield
+
+
 DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")
 =====================================
 
