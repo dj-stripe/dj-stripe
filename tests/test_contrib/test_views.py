@@ -19,6 +19,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from djstripe import settings as djstripe_settings
+from djstripe.enums import SubscriptionStatus
 from djstripe.models import Subscription, Customer, Plan
 from tests import FAKE_SUBSCRIPTION, FAKE_PLAN, FAKE_CUSTOMER
 
@@ -143,7 +144,7 @@ class RestSubscriptionTest(APITestCase):
         """
         def _cancel_sub(*args, **kwargs):
             subscription = Subscription.objects.first()
-            subscription.status = Subscription.STATUS_CANCELED
+            subscription.status = SubscriptionStatus.canceled
             subscription.canceled_at = timezone.now()
             subscription.ended_at = timezone.now()
             subscription.save()
@@ -156,14 +157,14 @@ class RestSubscriptionTest(APITestCase):
         cancel_subscription_mock.side_effect = _cancel_sub
 
         self.assertEqual(1, Subscription.objects.count())
-        self.assertEqual(Subscription.objects.first().status, Subscription.STATUS_ACTIVE)
+        self.assertEqual(Subscription.objects.first().status, SubscriptionStatus.active)
 
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         # Cancelled means flagged as cancelled, so it should still be there
         self.assertEqual(1, Subscription.objects.count())
-        self.assertEqual(Subscription.objects.first().status, Subscription.STATUS_CANCELED)
+        self.assertEqual(Subscription.objects.first().status, SubscriptionStatus.canceled)
 
         cancel_subscription_mock.assert_called_once_with(
             at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END

@@ -33,6 +33,7 @@ import traceback as exception_traceback
 
 from . import settings as djstripe_settings
 from . import webhooks
+from .enums import SourceType, SubscriptionStatus
 from .exceptions import MultipleSubscriptionException
 from .fields import StripeDateTimeField
 from .managers import SubscriptionManager, ChargeManager, TransferManager
@@ -112,7 +113,7 @@ class Charge(StripeCharge):
             self.account = Account.get_default_account()
 
         # TODO: other sources
-        if self.source_type == "card":
+        if self.source_type == SourceType.card:
             self.source = cls._stripe_object_to_source(target_cls=Card, data=data)
 
 
@@ -304,13 +305,13 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
     def active_subscriptions(self):
         """Returns active subscriptions (subscriptions with an active status that end in the future)."""
         return self.subscriptions.filter(
-            status=StripeSubscription.STATUS_ACTIVE, current_period_end__gt=timezone.now()
+            status=SubscriptionStatus.active, current_period_end__gt=timezone.now()
         )
 
     @property
     def valid_subscriptions(self):
         """Returns this cusotmer's valid subscriptions (subscriptions that aren't cancelled."""
-        return self.subscriptions.exclude(status=StripeSubscription.STATUS_CANCELED)
+        return self.subscriptions.exclude(status=SubscriptionStatus.canceled)
 
     @property
     def subscription(self):
@@ -439,7 +440,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         # Have to create sources before we handle the default_source
         if data["sources"]:
             for source in data["sources"]["data"]:
-                if not isinstance(source, dict) or source.get("object") == "card":
+                if not isinstance(source, dict) or source.get("object") == SourceType.card:
                     Card._get_or_create_from_stripe_object(source)
                 else:
                     logger.warning("Unsupported source type on %r: %r", self, source)
@@ -447,7 +448,7 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         default_source = data.get("default_source")
         if default_source:
             # TODO: other sources
-            if not isinstance(default_source, dict) or default_source.get("object") == "card":
+            if not isinstance(default_source, dict) or default_source.get("object") == SourceType.card:
                 source, created = Card._get_or_create_from_stripe_object(data, "default_source", refetch=False)
             else:
                 logger.warning("Unsupported source type on %r: %r", self, default_source)

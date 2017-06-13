@@ -17,7 +17,8 @@ from django.utils import timezone
 from mock import patch, PropertyMock
 
 from djstripe.contrib.rest_framework.serializers import SubscriptionSerializer, CreateSubscriptionSerializer
-from djstripe.models import Subscription, Plan, Customer
+from djstripe.enums import SubscriptionStatus
+from djstripe.models import Customer, Plan
 from tests import FAKE_PLAN, FAKE_CUSTOMER
 
 
@@ -37,7 +38,7 @@ class SubscriptionSerializerTest(TestCase):
                 'plan': self.plan.id,
                 'quantity': 2,
                 'start': now,
-                'status': Subscription.STATUS_ACTIVE,
+                'status': SubscriptionStatus.active,
                 'current_period_end': now + timezone.timedelta(days=5),
                 'current_period_start': now,
             }
@@ -49,7 +50,7 @@ class SubscriptionSerializerTest(TestCase):
             'plan': self.plan,
             'quantity': 2,
             'start': now,
-            'status': Subscription.STATUS_ACTIVE,
+            'status': SubscriptionStatus.active,
             'current_period_end': now + timezone.timedelta(days=5),
             'current_period_start': now,
         })
@@ -63,7 +64,7 @@ class SubscriptionSerializerTest(TestCase):
                 'customer': self.customer.id,
                 'plan': self.plan.id,
                 'start': now,
-                'status': Subscription.STATUS_ACTIVE,
+                'status': SubscriptionStatus.active,
                 'current_period_end': now + timezone.timedelta(days=5),
                 'current_period_start': now,
             }

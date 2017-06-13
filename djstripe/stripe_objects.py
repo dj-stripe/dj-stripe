@@ -30,7 +30,7 @@ from polymorphic.models import PolymorphicModel
 import stripe
 from stripe.error import InvalidRequestError
 
-from . import settings as djstripe_settings
+from . import enums, settings as djstripe_settings
 from .context_managers import stripe_temporary_api_version
 from .exceptions import StripeObjectManipulationException
 from .fields import (
@@ -477,17 +477,6 @@ Fields not implemented:
 .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
-    STATUS_SUCCEEDED = "succeeded"
-    STATUS_PENDING = "pending"
-    STATUS_FAILED = "failed"
-
-    STATUS_CHOICES = [(status, status.title()) for status in [STATUS_SUCCEEDED, STATUS_FAILED]]
-    CARD_ERROR_CODES = ["invalid_number", "invalid_expiry_month", "invalid_expiry_year",
-                        "invalid_cvc", "incorrect_number", "expired_card",
-                        "incorrect_cvc", "incorrect_zip", "card_declined",
-                        "missing", "processing_error", "rate_limit"]
-    CARD_ERROR_CODE_CHOICES = [(error_code, error_code.replace("_", " ").title()) for error_code in CARD_ERROR_CODES]
-
     class Meta:
         abstract = True
 
@@ -512,7 +501,7 @@ Fields not implemented:
     failure_code = StripeCharField(
         max_length=30,
         null=True,
-        choices=CARD_ERROR_CODE_CHOICES,
+        choices=enums.ApiErrorCode.choices,
         help_text="Error code explaining reason for charge failure if available."
     )
     failure_message = StripeTextField(
@@ -536,7 +525,9 @@ Fields not implemented:
         "letters. Non-ASCII characters are automatically stripped. While most banks display this information "
         "consistently, some may display it incorrectly or not at all."
     )
-    status = StripeCharField(max_length=10, choices=STATUS_CHOICES, help_text="The status of the payment.")
+    status = StripeCharField(
+        max_length=10, choices=enums.ChargeStatus.choices, help_text="The status of the payment."
+    )
 
     # Balance transaction can be null if the charge failed
     fee = StripeCurrencyField(stripe_required=False, nested_name="balance_transaction")
@@ -546,6 +537,7 @@ Fields not implemented:
     source_type = StripeCharField(
         max_length=20,
         null=True,
+        choices=enums.SourceType.choices,
         stripe_name="source.object",
         help_text="The payment source type. If the payment source is supported by dj-stripe, a corresponding model is "
         "attached to this Charge via a foreign key matching this field."
@@ -979,28 +971,19 @@ Fields not implemented:
     expand_fields = ["balance_transaction"]
     stripe_dashboard_item_name = "transfers"
 
-    STATUS_PAID = "paid"
-    STATUS_PENDING = "pending"
-    STATUS_IN_TRANSIT = "in_transit"
-    STATUS_CANCELED = "canceled"
+    # The following accessors are deprecated as of 1.0 and will be removed in 1.1
+    # Please use enums.SubscriptionStatus directly.
+    STATUS_PAID = enums.PayoutStatus.paid
+    STATUS_PENDING = enums.PayoutStatus.pending
+    STATUS_IN_TRANSIT = enums.PayoutStatus.in_transit
+    STATUS_CANCELED = enums.PayoutStatus.canceled
     STATUS_CANCELLED = STATUS_CANCELED
-    STATUS_FAILED = "failed"
-
-    STATUSES = [STATUS_PAID, STATUS_PENDING, STATUS_IN_TRANSIT, STATUS_CANCELED, STATUS_FAILED]
-    STATUS_CHOICES = [(status, status.replace("_", " ").title()) for status in STATUSES]
+    STATUS_FAILED = enums.PayoutStatus.failed
 
     DESTINATION_TYPES = ["card", "bank_account", "stripe_account"]
     DESITNATION_TYPE_CHOICES = [
         (destination_type, destination_type.replace("_", " ").title()) for destination_type in DESTINATION_TYPES
     ]
-
-    SOURCE_TYPES = ["card", "bank_account", "bitcoin_reciever", "alipay_account"]
-    SOURCE_TYPE_CHOICES = [(source_type, source_type.replace("_", " ").title()) for source_type in SOURCE_TYPES]
-
-    FAILURE_CODES = ["insufficient_funds", "account_closed", "no_account", "invalid_account_number",
-                     "debit_not_authorized", "bank_ownership_changed", "account_frozen", "could_not_process",
-                     "bank_account_restricted", "invalid_currency"]
-    FAILURE_CODE_CHOICES = [(failure_code, failure_code.replace("_", " ").title()) for failure_code in FAILURE_CODES]
 
     amount = StripeCurrencyField(help_text="The amount transferred")
     amount_reversed = StripeCurrencyField(
@@ -1028,7 +1011,7 @@ Fields not implemented:
     failure_code = StripeCharField(
         null=True,
         max_length=23,
-        choices=FAILURE_CODE_CHOICES,
+        choices=enums.PayoutFailureCode.choices,
         help_text="Error code explaining reason for transfer failure if available. "
         "See https://stripe.com/docs/api/python#transfer_failures."
     )
@@ -1048,7 +1031,7 @@ Fields not implemented:
     )
     source_type = StripeCharField(
         max_length=16,
-        choices=SOURCE_TYPE_CHOICES,
+        choices=enums.SourceType.choices,
         help_text="The source balance from which this transfer came."
     )
     statement_descriptor = StripeCharField(
@@ -1061,7 +1044,7 @@ Fields not implemented:
     )
     status = StripeCharField(
         max_length=10,
-        choices=STATUS_CHOICES,
+        choices=enums.PayoutStatus.choices,
         help_text="The current status of the transfer. A transfer will be pending until it is submitted to the bank, "
         "at which point it becomes in_transit. It will then change to paid if the transaction goes through. "
         "If it does not go through successfully, its status will change to failed or canceled."
@@ -1143,23 +1126,6 @@ Fields not implemented:
 .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
 
-    BRANDS = ["Visa", "American Express", "MasterCard", "Discover", "JCB", "Diners Club", "Unknown"]
-    BRAND_CHOICES = [(brand, brand) for brand in BRANDS]
-
-    FUNDING_TYPES = ["credit", "debit", "prepaid", "unknown"]
-    FUNDING_TYPE_CHOICES = [(funding_type, funding_type.title()) for funding_type in FUNDING_TYPES]
-
-    CARD_CHECK_RESULTS = ["pass", "fail", "unavailable", "unknown"]
-    CARD_CHECK_RESULT_CHOICES = [
-        (card_check_result, card_check_result.title()) for card_check_result in CARD_CHECK_RESULTS
-    ]
-
-    TOKENIZATION_METHODS = ["apple_pay", "android_pay"]
-    TOKENIZATION_METHOD_CHOICES = [
-        (tokenization_method, tokenization_method.replace("_", " ").title())
-        for tokenization_method in TOKENIZATION_METHODS
-    ]
-
     class Meta:
         abstract = True
 
@@ -1171,7 +1137,7 @@ Fields not implemented:
     address_line1_check = StripeCharField(
         null=True,
         max_length=11,
-        choices=CARD_CHECK_RESULT_CHOICES,
+        choices=enums.CardCheckResult.choices,
         help_text="If ``address_line1`` was provided, results of the check."
     )
     address_line2 = StripeTextField(null=True, help_text="Billing address (Line 2).")
@@ -1180,15 +1146,15 @@ Fields not implemented:
     address_zip_check = StripeCharField(
         null=True,
         max_length=11,
-        choices=CARD_CHECK_RESULT_CHOICES,
+        choices=enums.CardCheckResult.choices,
         help_text="If ``address_zip`` was provided, results of the check."
     )
-    brand = StripeCharField(max_length=16, choices=BRAND_CHOICES, help_text="Card brand.")
+    brand = StripeCharField(max_length=16, choices=enums.CardBrand.choices, help_text="Card brand.")
     country = StripeCharField(max_length=2, help_text="Two-letter ISO code representing the country of the card.")
     cvc_check = StripeCharField(
         null=True,
         max_length=11,
-        choices=CARD_CHECK_RESULT_CHOICES,
+        choices=enums.CardCheckResult.choices,
         help_text="If a CVC was provided, results of the check."
     )
     dynamic_last4 = StripeCharField(
@@ -1199,13 +1165,15 @@ Fields not implemented:
     exp_month = StripeIntegerField(help_text="Card expiration month.")
     exp_year = StripeIntegerField(help_text="Card expiration year.")
     fingerprint = StripeTextField(stripe_required=False, help_text="Uniquely identifies this particular card number.")
-    funding = StripeCharField(max_length=7, choices=FUNDING_TYPE_CHOICES, help_text="Card funding type.")
+    funding = StripeCharField(
+        max_length=7, choices=enums.CardFundingType.choices, help_text="Card funding type."
+    )
     last4 = StripeCharField(max_length=4, help_text="Last four digits of Card number.")
     name = StripeTextField(null=True, help_text="Cardholder name.")
     tokenization_method = StripeCharField(
         null=True,
         max_length=11,
-        choices=TOKENIZATION_METHOD_CHOICES,
+        choices=enums.CardTokenizationMethod.choices,
         help_text="If the card number is tokenized, this is the method that was used."
     )
 
@@ -1316,9 +1284,6 @@ class StripeCoupon(StripeObject):
     DURATION_ONCE = "once"
     DURATION_REPEATING = "repeating"
 
-    DURATIONS = [DURATION_FOREVER, DURATION_ONCE, DURATION_REPEATING]
-    DURATION_CHOICES = [(duration, duration.replace("_", " ").title()) for duration in DURATIONS]
-
     class Meta:
         abstract = True
         unique_together = ("stripe_id", "livemode")
@@ -1333,7 +1298,7 @@ class StripeCoupon(StripeObject):
     )
     currency = StripeCharField(null=True, blank=True, max_length=3, help_text="Three-letter ISO currency code")
     duration = StripeCharField(
-        max_length=9, choices=DURATION_CHOICES,
+        max_length=9, choices=enums.CouponDuration.choices,
         help_text="Describes how long a customer who applies this coupon will get the discount."
     )
     duration_in_months = StripePositiveIntegerField(
@@ -1695,14 +1660,11 @@ Fields not implemented:
     stripe_class = stripe.Plan
     stripe_dashboard_item_name = "plans"
 
-    INTERVAL_TYPES = ["day", "week", "month", "year"]
-    INTERVAL_TYPE_CHOICES = [(interval_type, interval_type.title()) for interval_type in INTERVAL_TYPES]
-
     amount = StripeCurrencyField(help_text="Amount to be charged on the interval specified.")
     currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code")
     interval = StripeCharField(
         max_length=5,
-        choices=INTERVAL_TYPE_CHOICES,
+        choices=enums.PlanInterval.choices,
         help_text="The frequency with which a subscription should be billed."
     )
     interval_count = StripeIntegerField(
@@ -1765,15 +1727,14 @@ Fields not implemented:
     stripe_class = stripe.Subscription
     stripe_dashboard_item_name = "subscriptions"
 
-    STATUS_ACTIVE = "active"
-    STATUS_TRIALING = "trialing"
-    STATUS_PAST_DUE = "past_due"
-    STATUS_CANCELED = "canceled"
+    # The following accessors are deprecated as of 1.0 and will be removed in 1.1
+    # Please use enums.SubscriptionStatus directly.
+    STATUS_ACTIVE = enums.SubscriptionStatus.active
+    STATUS_TRIALING = enums.SubscriptionStatus.trialing
+    STATUS_PAST_DUE = enums.SubscriptionStatus.past_due
+    STATUS_CANCELED = enums.SubscriptionStatus.canceled
     STATUS_CANCELLED = STATUS_CANCELED
-    STATUS_UNPAID = "unpaid"
-
-    STATUSES = [STATUS_TRIALING, STATUS_ACTIVE, STATUS_PAST_DUE, STATUS_CANCELED, STATUS_UNPAID]
-    STATUS_CHOICES = [(status, status.replace("_", " ").title()) for status in STATUSES]
+    STATUS_UNPAID = enums.SubscriptionStatus.unpaid
 
     application_fee_percent = StripePercentField(
         null=True,
@@ -1807,7 +1768,9 @@ Fields not implemented:
     )
     quantity = StripeIntegerField(help_text="The quantity applied to this subscription.")
     start = StripeDateTimeField(help_text="Date the subscription started.")
-    status = StripeCharField(max_length=8, choices=STATUS_CHOICES, help_text="The status of this subscription.")
+    status = StripeCharField(
+        max_length=8, choices=enums.SubscriptionStatus.choices, help_text="The status of this subscription."
+    )
     tax_percent = StripePercentField(
         null=True,
         help_text="A positive decimal (with at most two decimal places) between 1 and 100. This represents the "

@@ -15,6 +15,7 @@ from django.utils import timezone
 from mock import patch
 from stripe.error import InvalidRequestError
 
+from djstripe.enums import SubscriptionStatus
 from djstripe.models import Customer, Subscription, Plan
 from tests import (
     datetime_to_unix, FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II,
@@ -83,7 +84,7 @@ class SubscriptionTest(TestCase):
     def test_is_status_temporarily_current_false_and_cancelled(self, customer_retrieve_mock, plan_retreive_mock):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
-        subscription.status = Subscription.STATUS_CANCELED
+        subscription.status = SubscriptionStatus.canceled
         subscription.current_period_end = timezone.now() + timezone.timedelta(days=7)
         subscription.save()
 
@@ -198,7 +199,7 @@ class SubscriptionTest(TestCase):
 
         cancel_timestamp = datetime_to_unix(timezone.now())
         canceled_subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
-        canceled_subscription_fake["status"] = Subscription.STATUS_CANCELED
+        canceled_subscription_fake["status"] = SubscriptionStatus.canceled
         canceled_subscription_fake["canceled_at"] = cancel_timestamp
         canceled_subscription_fake["ended_at"] = cancel_timestamp
         subscription_retrieve_mock.return_value = canceled_subscription_fake  # retrieve().delete()
@@ -209,7 +210,7 @@ class SubscriptionTest(TestCase):
 
         new_subscription = subscription.cancel(at_period_end=False)
 
-        self.assertEqual(Subscription.STATUS_CANCELED, new_subscription.status)
+        self.assertEqual(SubscriptionStatus.canceled, new_subscription.status)
         self.assertEqual(False, new_subscription.cancel_at_period_end)
         self.assertEqual(new_subscription.canceled_at, new_subscription.ended_at)
         self.assertFalse(new_subscription.is_valid())
@@ -242,7 +243,7 @@ class SubscriptionTest(TestCase):
         self.assertEqual(self.customer.active_subscriptions.count(), 1)
         self.assertTrue(new_subscription in self.customer.active_subscriptions)
 
-        self.assertEqual(Subscription.STATUS_ACTIVE, new_subscription.status)
+        self.assertEqual(SubscriptionStatus.active, new_subscription.status)
         self.assertEqual(True, new_subscription.cancel_at_period_end)
         self.assertNotEqual(new_subscription.canceled_at, new_subscription.ended_at)
         self.assertTrue(new_subscription.is_valid())
@@ -261,7 +262,7 @@ class SubscriptionTest(TestCase):
 
         cancel_timestamp = datetime_to_unix(timezone.now())
         canceled_subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
-        canceled_subscription_fake["status"] = Subscription.STATUS_CANCELED
+        canceled_subscription_fake["status"] = SubscriptionStatus.canceled
         canceled_subscription_fake["canceled_at"] = cancel_timestamp
         canceled_subscription_fake["ended_at"] = cancel_timestamp
         subscription_retrieve_mock.return_value = canceled_subscription_fake  # retrieve().delete()
@@ -271,7 +272,7 @@ class SubscriptionTest(TestCase):
 
         new_subscription = subscription.cancel(at_period_end=False)
 
-        self.assertEqual(Subscription.STATUS_CANCELED, new_subscription.status)
+        self.assertEqual(SubscriptionStatus.canceled, new_subscription.status)
         self.assertEqual(False, new_subscription.cancel_at_period_end)
         self.assertEqual(new_subscription.canceled_at, new_subscription.ended_at)
         self.assertFalse(new_subscription.is_valid())
