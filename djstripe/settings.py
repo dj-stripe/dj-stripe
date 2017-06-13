@@ -79,18 +79,16 @@ DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
 # onto a task queue (such as celery) for asynchronous processing.
 WEBHOOK_EVENT_CALLBACK = get_callback_function("DJSTRIPE_WEBHOOK_EVENT_CALLBACK")
 
-
-TEST_API_KEY = getattr(settings, "STRIPE_TEST_SECRET_KEY", "")
-LIVE_API_KEY = getattr(settings, "STRIPE_LIVE_SECRET_KEY", "")
-
 # Determines whether we are in live mode or test mode
 STRIPE_LIVE_MODE = getattr(settings, "STRIPE_LIVE_MODE", False)
 
 # Default secret key
 if hasattr(settings, "STRIPE_SECRET_KEY"):
     STRIPE_SECRET_KEY = settings.STRIPE_SECRET_KEY
+elif STRIPE_LIVE_MODE:
+    STRIPE_SECRET_KEY = getattr(settings, "STRIPE_LIVE_SECRET_KEY", "")
 else:
-    STRIPE_SECRET_KEY = LIVE_API_KEY if STRIPE_LIVE_MODE else TEST_API_KEY
+    STRIPE_SECRET_KEY = getattr(settings, "STRIPE_TEST_SECRET_KEY", "")
 
 # Default public key
 if hasattr(settings, "STRIPE_PUBLIC_KEY"):
