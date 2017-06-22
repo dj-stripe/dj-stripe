@@ -61,7 +61,7 @@ Using this example any request on this site that isn't on the homepage, about, s
 
 .. seealso::
 
-    * :doc:`settings`
+    * :doc:`../settings`
 
 Constraining Class-Based Views
 ------------------------------
