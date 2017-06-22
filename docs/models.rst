@@ -17,8 +17,6 @@ Charge
 ------
 .. autoclass:: djstripe.models.Charge
 
-    .. autoattribute:: djstripe.models.Charge.CARD_ERROR_CODES
-
     .. automethod:: djstripe.stripe_objects.StripeObject.api_list
     .. automethod:: djstripe.models.Charge.api_retrieve
 
@@ -77,10 +75,6 @@ Transfer
     .. automethod:: djstripe.stripe_objects.StripeObject.api_list
     .. automethod:: djstripe.models.Transfer.api_retrieve
 
-    .. autoattribute:: djstripe.models.Transfer.DESTINATION_TYPES
-    .. autoattribute:: djstripe.models.Transfer.SOURCE_TYPES
-    .. autoattribute:: djstripe.models.Transfer.FAILURE_CODES
-
     .. automethod:: djstripe.models.Transfer.str_parts
     .. automethod:: djstripe.stripe_objects.StripeObject.sync_from_stripe_data
 
@@ -91,11 +85,6 @@ Card
 
     .. automethod:: djstripe.stripe_objects.StripeObject.api_list
     .. automethod:: djstripe.models.Card.api_retrieve
-
-    .. autoattribute:: djstripe.models.Card.BRANDS
-    .. autoattribute:: djstripe.models.Card.FUNDING_TYPES
-    .. autoattribute:: djstripe.models.Card.CARD_CHECK_RESULTS
-    .. autoattribute:: djstripe.models.Card.TOKENIZATION_METHODS
 
     .. automethod:: djstripe.models.Card.remove
     .. automethod:: djstripe.stripe_objects.StripeCard.create_token
