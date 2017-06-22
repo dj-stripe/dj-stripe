@@ -46,7 +46,6 @@ Contents
    :glob:
 
    models
-   api/*
    settings
 
 .. toctree::
