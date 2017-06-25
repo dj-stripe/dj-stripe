@@ -730,7 +730,8 @@ Fields not implemented:
         return stripe_subscription
 
     def charge(self, amount, currency, application_fee=None, capture=None, description=None, destination=None,
-               metadata=None, shipping=None, source=None, statement_descriptor=None):
+               metadata=None, shipping=None, source=None, statement_descriptor=None, stripe_account=None,
+               idempotency_key=None):
         """
         Creates a charge for this customer.
 
@@ -785,6 +786,8 @@ Fields not implemented:
             customer=self.stripe_id,
             source=source,
             statement_descriptor=statement_descriptor,
+            stripe_account=stripe_account,
+            idempotency_key=idempotency_key
         )
 
         return stripe_charge

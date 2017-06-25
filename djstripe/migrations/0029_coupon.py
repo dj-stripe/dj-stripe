@@ -10,7 +10,7 @@ import djstripe.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('djstripe', '0028_auto_20170313_2316'),
+        ('djstripe', '0029_customer_account'),
     ]
 
     operations = [
