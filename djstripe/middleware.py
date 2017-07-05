@@ -11,6 +11,7 @@
 from django.conf import settings
 from django.shortcuts import redirect
 from django.urls import resolve
+from django.utils.deprecation import MiddlewareMixin
 
 import fnmatch
 
@@ -30,7 +31,7 @@ EXEMPT = list(DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS)
 EXEMPT.append("[djstripe]")
 
 
-class SubscriptionPaymentMiddleware(object):
+class SubscriptionPaymentMiddleware(MiddlewareMixin):
     """
     Used to redirect users from subcription-locked request destinations.
 
