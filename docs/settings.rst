@@ -229,7 +229,7 @@ Examples:
         """ Processes events from Stripe asynchronously. """
         log.debug("Processing Stripe event: %s", str(event))
         try:
-            event.process(raise_exception=True):
+            event.process(raise_exception=True)
         except StripeError as exc:
             log.error("Failed to process Stripe event: %s", str(event))
             raise self.retry(exc=exc, countdown=60)  # retry after 60 seconds
