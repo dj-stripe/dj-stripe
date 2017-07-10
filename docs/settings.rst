@@ -222,12 +222,13 @@ Examples:
 
 .. code-block:: python
 
+    import logging as log
     from stripe.error import StripeError
 
     @shared_task(bind=True)
     def process_webhook_event(self, event):
         """ Processes events from Stripe asynchronously. """
-        log.debug("Processing Stripe event: %s", str(event))
+        log.info("Processing Stripe event: %s", str(event))
         try:
             event.process(raise_exception=True)
         except StripeError as exc:
