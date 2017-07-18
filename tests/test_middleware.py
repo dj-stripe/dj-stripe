@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 from django.test.client import RequestFactory
-from django.test.utils import override_settings
+from django.test.utils import override_settings, modify_settings
 
 from djstripe.middleware import SubscriptionPaymentMiddleware
 from djstripe.models import Customer, Subscription
@@ -74,6 +74,17 @@ class MiddlewareURLTest(TestCase):
 
         response = self.middleware.process_request(request)
         self.assertEqual(response, None)
+
+    @override_settings(DEBUG=True)
+    @modify_settings(MIDDLEWARE={
+        'append': ['djstripe.middleware.SubscriptionPaymentMiddleware']})
+    def test_middleware_loads(self):
+        """Check that the middleware can be loaded by django's
+        middleware handlers. This is to check for compatibility across
+        the change to django's middleware class structure. See
+        https://docs.djangoproject.com/en/1.10/topics/http/middleware/#upgrading-pre-django-1-10-style-middleware
+        """
+        self.client.get('/__debug__')
 
 
 class MiddlewareLogicTest(TestCase):
