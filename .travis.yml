@@ -1,11 +1,12 @@
 # https://travis-ci.org/kavdev/dj-stripe/
+dist: trusty
 sudo: false
 language: python
 
 python: "3.6"
 
 addons:
-  postgresql: "9.4"
+  postgresql: "9.6"
 
 env:
   - TOXENV=py27-django110
@@ -14,7 +15,10 @@ env:
   - TOXENV=py34-django111
   - TOXENV=py35-django110
   - TOXENV=py35-django111
+  - TOXENV=py35-djangomaster
   - TOXENV=py36-django111
+  - TOXENV=py36-djangomaster
+  - TOXENV=checkmigrations
   - TOXENV=flake8
 
 matrix:
@@ -24,33 +28,31 @@ matrix:
       env: TOXENV=py35-django110
     - python: "3.5"
       env: TOXENV=py35-django111
+    - python: "3.5"
+      env: TOXENV=py35-djangomaster
   exclude:
     - python: "3.6"
       env: TOXENV=py35-django110
     - python: "3.6"
       env: TOXENV=py35-django111
+    - python: "3.6"
+      env: TOXENV=py35-djangomaster
   allow_failures:
-    - env: TOXENV=py27-django111
-    - env: TOXENV=py34-django111
-    - env: TOXENV=py35-django111
-    - env: TOXENV=py36-django111
-
-cache:
-  directories:
-    - $HOME/.cache/pip
-    - $TRAVIS_BUILD_DIR/.tox
+    - env: TOXENV=py35-djangomaster
+    - env: TOXENV=py36-djangomaster
 
 install:
+  - pip install --upgrade pip setuptools wheel
   - pip install tox codecov
 
 before_script:
   - psql -U postgres -c 'CREATE DATABASE "djstripe";'
 
 script:
- - tox
+  - tox
 
 after_success:
-  codecov
+  - codecov
 
 notifications:
   email:

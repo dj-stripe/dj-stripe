@@ -7,7 +7,6 @@ import django.core.validators
 from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
-import model_utils.fields
 
 import djstripe.fields
 
@@ -24,11 +23,8 @@ class Migration(migrations.Migration):
             name='Account',
             fields=[
                 ('id', models.AutoField(serialize=False, verbose_name='ID', auto_created=True, primary_key=True)),
-                ('created', model_utils.fields.AutoCreatedField(verbose_name='created',
-                                                                default=django.utils.timezone.now, editable=False)),
-                ('modified', model_utils.fields.AutoLastModifiedField(verbose_name='modified',
-                                                                      default=django.utils.timezone.now,
-                                                                      editable=False)),
+                ('created', models.DateTimeField(verbose_name='created', default=django.utils.timezone.now, editable=False)),
+                ('modified', models.DateTimeField(verbose_name='modified', default=django.utils.timezone.now, editable=False)),
                 ('stripe_id', djstripe.fields.StripeIdField(max_length=50, unique=True)),
                 ('livemode', djstripe.fields.StripeNullBooleanField(
                     help_text='Null here indicates that the livemode status is unknown or was previously unrecorded. \
@@ -50,11 +46,8 @@ class Migration(migrations.Migration):
             name='StripeSource',
             fields=[
                 ('id', models.AutoField(serialize=False, verbose_name='ID', auto_created=True, primary_key=True)),
-                ('created', model_utils.fields.AutoCreatedField(verbose_name='created',
-                                                                default=django.utils.timezone.now, editable=False)),
-                ('modified', model_utils.fields.AutoLastModifiedField(verbose_name='modified',
-                                                                      default=django.utils.timezone.now,
-                                                                      editable=False)),
+                ('created', models.DateTimeField(verbose_name='created', default=django.utils.timezone.now, editable=False)),
+                ('modified', models.DateTimeField(verbose_name='modified', default=django.utils.timezone.now, editable=False)),
                 ('stripe_id', djstripe.fields.StripeIdField(max_length=50, unique=True)),
                 ('livemode', djstripe.fields.StripeNullBooleanField(
                     help_text='Null here indicates that the livemode status is unknown or was previously unrecorded. \
