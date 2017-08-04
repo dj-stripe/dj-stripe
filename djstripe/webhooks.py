@@ -40,7 +40,7 @@ registrations_global = list()
 TEST_EVENT_ID = 'evt_00000000000000'
 
 
-def handler(event_types):
+def handler(*args):
     """
     Decorator that registers a function as a webhook handler.
 
@@ -52,11 +52,15 @@ def handler(event_types):
     the handler will receive events for 'customer.subscription.created',
     'customer.subscription.updated', etc.
 
-    :param event_types: The event type(s) or sub-type(s) that should be handled.
+    :param args: The event type(s) or sub-type(s) that should be handled.
     :type event_types: A sequence (`list`) or string (`str`/`unicode`).
     """
-    if isinstance(event_types, six.string_types):
-        event_types = [event_types]
+    event_types = []
+
+    for arg in args:
+        if isinstance(arg, six.string_types):
+            arg = [arg]
+        event_types.extend(arg)
 
     def decorator(func):
         for event_type in event_types:
