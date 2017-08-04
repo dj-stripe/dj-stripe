@@ -17,6 +17,7 @@ place. Primarily this is:
 This module defines abstract models which are then extended in models.py to provide the remaining
 dj-stripe functionality.
 """
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from copy import deepcopy
 import decimal

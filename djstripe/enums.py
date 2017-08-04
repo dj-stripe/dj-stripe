@@ -1,3 +1,4 @@
+from __future__ import absolute_import, division, print_function, unicode_literals
 from collections import OrderedDict
 
 from django.utils.translation import ugettext as _
