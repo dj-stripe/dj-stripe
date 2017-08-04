@@ -16,7 +16,7 @@ from mock.mock import patch
 from stripe.error import InvalidRequestError
 
 from djstripe.exceptions import StripeObjectManipulationException
-from djstripe.models import Account, Card, Customer
+from djstripe.models import Account, Card
 from tests import FAKE_CARD, FAKE_CARD_III, FAKE_CARD_V, FAKE_CUSTOMER
 
 
@@ -25,7 +25,8 @@ class CardTest(TestCase):
     def setUp(self):
         self.account = Account.objects.create()
         self.user = get_user_model().objects.create_user(username="testuser", email="djstripe@example.com")
-        self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
+        self.customer = FAKE_CUSTOMER.create_for_user(self.user)
+        self.customer.sources.all().delete()
 
     def test_attach_objects_hook_without_customer(self):
         with self.assertRaisesMessage(ValidationError, "A customer was not attached to this card."):

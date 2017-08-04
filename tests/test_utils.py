@@ -21,7 +21,7 @@ from django.test.utils import override_settings
 from django.utils import timezone
 from mock import patch
 
-from djstripe.models import Customer, Subscription
+from djstripe.models import Subscription
 from djstripe.utils import subscriber_has_active_subscription, get_supported_currency_choices, convert_tstamp
 from tests import FAKE_SUBSCRIPTION, FAKE_CUSTOMER
 from tests.apps.testapp.models import Organization
@@ -50,7 +50,7 @@ class TestUserHasActiveSubscription(TestCase):
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
+        self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
     def test_user_has_inactive_subscription(self):
         self.assertFalse(subscriber_has_active_subscription(self.user))

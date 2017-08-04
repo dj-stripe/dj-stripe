@@ -17,7 +17,7 @@ from mock import patch
 from stripe.error import InvalidRequestError
 
 from djstripe.enums import SubscriptionStatus
-from djstripe.models import Customer, Subscription, Plan
+from djstripe.models import Subscription, Plan
 from tests import (
     datetime_to_unix, FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II,
     FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_CANCELED
@@ -28,7 +28,7 @@ class SubscriptionTest(TestCase):
 
     def setUp(self):
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        self.customer = Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
+        self.customer = FAKE_CUSTOMER.create_for_user(user)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))

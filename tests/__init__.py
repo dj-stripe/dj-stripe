@@ -587,7 +587,6 @@ class Sources(object):
 
 
 class CustomerDict(dict):
-
     def save(self):
         return self
 
@@ -597,6 +596,13 @@ class CustomerDict(dict):
     @property
     def sources(self):
         return Sources(card_fakes=self["sources"]["data"])
+
+    def create_for_user(self, user):
+        from djstripe.models import Customer
+        stripe_customer = Customer.sync_from_stripe_data(self)
+        stripe_customer.subscriber = user
+        stripe_customer.save()
+        return stripe_customer
 
 
 FAKE_CUSTOMER = CustomerDict({
