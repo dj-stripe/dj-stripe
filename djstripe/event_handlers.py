@@ -230,8 +230,18 @@ def _handle_crud_like_event(target_cls, event, data=None, verb=None,
     :returns: The object (if any) and the event CrudType.
     :rtype: ``tuple(obj, CrudType)``
     """
-    stripe_id = stripe_id or event_data["object"]["id"]
     data = data or event.data
+    stripe_id = stripe_id or data.get("object", {}).get("id", None)
+
+    if not stripe_id:
+        # We require an object when applying CRUD-like events, so if there's
+        # no ID the event is ignored/dropped. This happens in events such as
+        # invoice.upcoming, which refer to a future (non-existant) invoice.
+        logger.debug(
+            "Ignoring '%r' Stripe event without object ID: %r",
+            event.type, event)
+        return
+
     verb = verb or event.verb
     customer = customer or event.customer
     crud_type = crud_type or CrudType.determine(event=event, verb=verb, exact=crud_exact)
