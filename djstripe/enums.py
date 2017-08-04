@@ -3,7 +3,7 @@ from collections import OrderedDict
 import operator
 
 from django.utils.translation import ugettext as _
-from django.utils.six import add_metaclass
+from django.utils.six import add_metaclass, text_type
 
 
 class EnumMetaClass(type):
@@ -39,7 +39,7 @@ class EnumMetaClass(type):
         # vary on different systems based on internal hashing. Without this
         # Django will continually require new no-op migrations.
         classdict["choices"] = tuple(
-            (unicode(k), unicode(v))
+            (text_type(k), text_type(v))
             for k, v in sorted(choices.items(), key=operator.itemgetter(0))
         )
 
