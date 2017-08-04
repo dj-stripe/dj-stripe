@@ -27,7 +27,7 @@ from tests import (
     FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE,
     FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED, FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED,
     FAKE_EVENT_INVOICEITEM_CREATED, FAKE_EVENT_INVOICEITEM_DELETED,
-    FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_INVOICE_DELETED,
+    FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_INVOICE_DELETED, FAKE_EVENT_INVOICE_UPCOMING,
     FAKE_EVENT_PLAN_CREATED, FAKE_EVENT_PLAN_DELETED,
     FAKE_EVENT_TRANSFER_CREATED, FAKE_EVENT_TRANSFER_DELETED,
     FAKE_INVOICE, FAKE_INVOICEITEM, FAKE_INVOICE_II, FAKE_PLAN,
@@ -373,6 +373,12 @@ class TestInvoiceEvents(EventTestCase):
 
         with self.assertRaises(Invoice.DoesNotExist):
             Invoice.objects.get(stripe_id=FAKE_INVOICE["id"])
+
+    def test_invoice_upcoming(self):
+        # Ensure that invoice upcoming events are processed - No actual
+        # process occurs so the operation is an effective no-op.
+        event = self._create_event(FAKE_EVENT_INVOICE_UPCOMING)
+        self.assertTrue(event.process())
 
 
 class TestInvoiceItemEvents(EventTestCase):

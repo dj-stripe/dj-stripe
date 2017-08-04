@@ -1284,6 +1284,22 @@ FAKE_EVENT_INVOICE_DELETED.update({
     "id": "evt_187IHD2eZvKYlo2Cjkjsr34H",
     "type": "invoice.deleted"})
 
+FAKE_EVENT_INVOICE_UPCOMING = {
+    "id": "evt_187IHD2eZvKYlo2C6YKQi2bc",
+    "object": "event",
+    "api_version": "2017-02-14",
+    "created": 1501859641,
+    "data": {
+        "object": deepcopy(FAKE_INVOICE)
+    },
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_8O4sB7hkDobZA",
+    "type": "invoice.upcoming",
+}
+del FAKE_EVENT_INVOICE_UPCOMING["data"]["object"]["id"]
+
+
 FAKE_EVENT_INVOICEITEM_CREATED = {
     "id": "evt_187IHD2eZvKYlo2C7SXedrZk",
     "object": "event",
