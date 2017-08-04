@@ -43,9 +43,9 @@ def run_test_suite(args):
             "default": {
                 "ENGINE": "django.db.backends.postgresql_psycopg2",
                 "NAME": "djstripe",
-                "USER": "",
+                "USER": "postgres",
                 "PASSWORD": "",
-                "HOST": "",
+                "HOST": "localhost",
                 "PORT": "",
             },
         },
