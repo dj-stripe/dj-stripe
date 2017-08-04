@@ -84,7 +84,7 @@ def handler_all(func=None):
     return func
 
 
-def call_handlers(event, event_data, event_type, event_subtype):
+def call_handlers(event):
     """
     Invoke all handlers for the provided event type/sub-type.
 
@@ -98,17 +98,11 @@ def call_handlers(event, event_data, event_type, event_subtype):
 
     :param event: The event model object.
     :type event: ``djstripe.models.Event``
-    :param event_data: The raw data for the event.
-    :type event_data: ``dict``
-    :param event_type: The event type, e.g. 'customer'.
-    :type event_type: string (``str``/``unicode``)
-    :param event_subtype: The event sub-type, e.g. 'updated'.
-    :type event_subtype: string (``str``/`unicode``)
     """
     chain = [registrations_global]
 
     # Build up a list of handlers with each qualified part of the event
-    # type and subtype.  For example, "customer.subscription.created" creates:
+    # category and verb.  For example, "customer.subscription.created" creates:
     #   1. "customer"
     #   2. "customer.subscription"
     #   3. "customer.subscription.created"
@@ -117,4 +111,4 @@ def call_handlers(event, event_data, event_type, event_subtype):
         chain.append(registrations[qualified_event_type])
 
     for handler_func in itertools.chain(*chain):
-        handler_func(event, event_data, event_type, event_subtype)
+        handler_func(event=event)

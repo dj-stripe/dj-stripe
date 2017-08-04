@@ -19,6 +19,8 @@ NOTE: Event data is not guaranteed to be in the correct API version format. See 
 
 """
 
+import logging
+
 from . import webhooks
 from .enums import SourceType
 from .models import (
@@ -28,19 +30,22 @@ from .models import (
 from .utils import convert_tstamp
 
 
+logger = logging.getLogger(__name__)
+
+
 @webhooks.handler_all
-def customer_event_attach(event, event_data, event_type, event_subtype):
+def customer_event_attach(event):
     """Make the related customer available on the event for all handlers to use.
 
     Does not create Customer objects.
     """
     event.customer = None
-    crud_type = CrudType.determine(event_subtype, exact=True)
+    crud_type = CrudType.determine(event=event, exact=True)
 
-    if event_type == "customer" and crud_type.valid:
-        customer_stripe_id = event_data["object"]["id"]
+    if event.category == "customer" and crud_type.valid:
+        customer_stripe_id = event.data.get("object", {}).get("id")
     else:
-        customer_stripe_id = event_data["object"].get("customer", None)
+        customer_stripe_id = event.data.get("object", {}).get("customer")
 
     if customer_stripe_id:
         try:
@@ -50,7 +55,7 @@ def customer_event_attach(event, event_data, event_type, event_subtype):
 
 
 @webhooks.handler("customer")
-def customer_webhook_handler(event, event_data, event_type, event_subtype):
+def customer_webhook_handler(event):
     """Handle updates to customer objects.
 
     First determines the crud_type and then handles the event if a customer exists locally.
@@ -59,20 +64,14 @@ def customer_webhook_handler(event, event_data, event_type, event_subtype):
 
     Docs and an example customer webhook response: https://stripe.com/docs/api#customer_object
     """
-    crud_type = CrudType.determine(event_subtype, exact=True)
-    if crud_type.valid and event.customer:
+    if event.customer:
         # As customers are tied to local users, djstripe will not create
         # customers that do not already exist locally.
-        _handle_crud_type_event(
-            target_cls=Customer,
-            event_data=event_data,
-            event_subtype=event_subtype,
-            crud_type=crud_type
-        )
+        _handle_crud_like_event(target_cls=Customer, event=event, crud_exact=True, crud_valid=True)
 
 
 @webhooks.handler("customer.discount")
-def customer_discount_webhook_handler(event, event_data, event_type, event_subtype):
+def customer_discount_webhook_handler(event):
     """Handle updates to customer discount objects.
 
     Docs: https://stripe.com/docs/api#discounts
@@ -82,19 +81,19 @@ def customer_discount_webhook_handler(event, event_data, event_type, event_subty
     handlers.
     """
 
-    crud_type = CrudType.determine(event_subtype)
-    discount_data = event_data["object"]
-    coupon_data = discount_data["coupon"]
+    crud_type = CrudType.determine(event=event)
+    discount_data = event.data.get("object", {})
+    coupon_data = discount_data.get("coupon", {})
 
     if crud_type.created or crud_type.updated:
-        coupon, _ = _handle_crud_type_event(
+        coupon, _ = _handle_crud_like_event(
             target_cls=Coupon,
-            event_data=coupon_data,
-            event_subtype="created",
-            stripe_id=coupon_data["id"]
+            event=event,
+            data=coupon_data,
+            stripe_id=coupon_data.get("id")
         )
-        coupon_start = discount_data["start"]
-        coupon_end = discount_data["end"]
+        coupon_start = discount_data.get("start")
+        coupon_end = discount_data.get("end")
     else:
         coupon = None
         coupon_start = None
@@ -107,39 +106,30 @@ def customer_discount_webhook_handler(event, event_data, event_type, event_subty
 
 
 @webhooks.handler("customer.source")
-def customer_source_webhook_handler(event, event_data, event_type, event_subtype):
+def customer_source_webhook_handler(event):
     """Handle updates to customer payment-source objects.
 
     Docs: https://stripe.com/docs/api#customer_object-sources.
     """
-    source_type = event_data["object"]["object"]
+    customer_data = event.data.get("object", {})
+    source_type = customer_data.get("object", {})
 
     # TODO: handle other types of sources (https://stripe.com/docs/api#customer_object-sources)
     if source_type == SourceType.card:
-        _handle_crud_type_event(
-            target_cls=Card,
-            event_data=event_data,
-            event_subtype=event_subtype,
-            customer=event.customer
-        )
+        _handle_crud_like_event(target_cls=Card, event=event)
 
 
 @webhooks.handler("customer.subscription")
-def customer_subscription_webhook_handler(event, event_data, event_type, event_subtype):
+def customer_subscription_webhook_handler(event):
     """Handle updates to customer subscription objects.
 
     Docs an example subscription webhook response: https://stripe.com/docs/api#subscription_object
     """
-    _handle_crud_type_event(
-        target_cls=Subscription,
-        event_data=event_data,
-        event_subtype=event_subtype,
-        customer=event.customer
-    )
+    _handle_crud_like_event(target_cls=Subscription, event=event)
 
 
-@webhooks.handler(["transfer", "charge", "coupon", "invoice", "invoiceitem", "plan"])
-def other_object_webhook_handler(event, event_data, event_type, event_subtype):
+@webhooks.handler("transfer", "charge", "coupon", "invoice", "invoiceitem", "plan")
+def other_object_webhook_handler(event):
     """Handle updates to transfer, charge, invoice, invoiceitem and plan objects.
 
     Docs for:
@@ -156,14 +146,9 @@ def other_object_webhook_handler(event, event_data, event_type, event_subtype):
         "invoiceitem": InvoiceItem,
         "plan": Plan,
         "transfer": Transfer
-    }.get(event_type)
+    }.get(event.category)
 
-    _handle_crud_type_event(
-        target_cls=target_cls,
-        event_data=event_data,
-        event_subtype=event_subtype,
-        customer=event.customer
-    )
+    _handle_crud_like_event(target_cls=target_cls, event=event)
 
 
 #
@@ -188,22 +173,24 @@ class CrudType(object):
         return self.created or self.updated or self.deleted
 
     @classmethod
-    def determine(cls, event_subtype, exact=False):
+    def determine(cls, event, verb=None, exact=False):
         """
-        Determine if the event subtype is a crud_type (without the 'R') event.
+        Determine if the event verb is a crud_type (without the 'R') event.
 
-        :param event_subtype: The event subtype to examine.
-        :type event_subtype: string (``str``/`unicode``)
-        :param exact: If True, match crud_type to event subtype string exactly.
+        :param verb: The event verb to examine.
+        :type verb: string (``str``/`unicode``)
+        :param exact: If True, match crud_type to event verb string exactly.
         :param type: ``bool``
         :returns: The CrudType state object.
         :rtype: ``CrudType``
         """
+        verb = verb or event.verb
+
         def check(crud_type_event):
             if exact:
-                return event_subtype == crud_type_event
+                return verb == crud_type_event
             else:
-                return event_subtype.endswith(crud_type_event)
+                return verb.endswith(crud_type_event)
 
         created = updated = deleted = False
 
@@ -217,7 +204,9 @@ class CrudType(object):
         return cls(created=created, updated=updated, deleted=deleted)
 
 
-def _handle_crud_type_event(target_cls, event_data, event_subtype, stripe_id=None, customer=None, crud_type=None):
+def _handle_crud_like_event(target_cls, event, data=None, verb=None,
+                            stripe_id=None, customer=None, crud_type=None,
+                            crud_exact=False, crud_valid=False):
     """
     Helper to process crud_type-like events for objects.
 
@@ -231,19 +220,28 @@ def _handle_crud_type_event(target_cls, event_data, event_subtype, stripe_id=Non
 
     :param target_cls: The djstripe model being handled.
     :type: ``djstripe.stripe_objects.StripeObject``
-    :param event_data: The event object data received from the Stripe API.
-    :param event_subtype: The event subtype string.
-    :param stripe_id: The object Stripe ID - If not provided then this is
-    retrieved from the event object data by "object.id" key.
-    :param customer: The customer object which is passed on object creation.
-    :param crud_type: The CrudType object - If not provided it is determined
-    based on the event subtype string.
+    :param data: The event object data (defaults to ``event.data``).
+    :param verb: The event verb (defaults to ``event.verb``).
+    :param stripe_id: The object Stripe ID (defaults to ``object.id``).
+    :param customer: The customer object (defaults to ``event.customer``).
+    :param crud_type: The CrudType object (determined by default).
+    :param crud_exact: If True, match verb against CRUD type exactly.
+    :param crud_valid: If True, CRUD type must match valid type.
     :returns: The object (if any) and the event CrudType.
     :rtype: ``tuple(obj, CrudType)``
     """
-    crud_type = crud_type or CrudType.determine(event_subtype)
     stripe_id = stripe_id or event_data["object"]["id"]
+    data = data or event.data
+    verb = verb or event.verb
+    customer = customer or event.customer
+    crud_type = crud_type or CrudType.determine(event=event, verb=verb, exact=crud_exact)
     obj = None
+
+    if crud_valid and not crud_type.valid:
+        logger.debug(
+            "Ignoring '%r' Stripe event without valid CRUD type: %r",
+            event.type, event)
+        return
 
     if crud_type.deleted:
         try:
@@ -252,9 +250,11 @@ def _handle_crud_type_event(target_cls, event_data, event_subtype, stripe_id=Non
         except target_cls.DoesNotExist:
             pass
     else:
-        # Any other event type (creates, updates, etc.)
+        # Any other event type (creates, updates, etc.) - This can apply to
+        # verbs that aren't strictly CRUD but Stripe do intend an update.  Such
+        # as invoice.payment_failed.
         kwargs = {"stripe_id": stripe_id}
-        if customer:
+        if hasattr(target_cls, 'customer'):
             kwargs["customer"] = customer
         data = target_cls(**kwargs).api_retrieve()
         obj = target_cls.sync_from_stripe_data(data)
