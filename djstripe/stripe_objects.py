@@ -509,6 +509,7 @@ Fields not implemented:
         help_text="Message to user further explaining reason for charge failure if available."
     )
     fraud_details = StripeJSONField(help_text="Hash with information on fraud assessments for the charge.")
+    outcome = StripeJSONField(help_text="Details about whether or not the payment was accepted, and why.")
     paid = StripeBooleanField(
         default=False,
         help_text="True if the charge succeeded, or was successfully authorized for later capture, False otherwise."
