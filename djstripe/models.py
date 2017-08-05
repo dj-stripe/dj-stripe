@@ -216,7 +216,11 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         )
         customer, created = Customer.objects.get_or_create(
             stripe_id=stripe_customer["id"],
-            defaults={"subscriber": subscriber, "livemode": stripe_customer["livemode"]}
+            defaults={
+                "subscriber": subscriber,
+                "livemode": stripe_customer["livemode"],
+                "account_balance": stripe_customer["account_balance"],
+            }
         )
 
         return customer
