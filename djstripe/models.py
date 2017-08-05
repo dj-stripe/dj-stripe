@@ -67,6 +67,13 @@ class Charge(StripeCharge):
         related_name="charges",
         help_text="The customer associated with this charge."
     )
+
+    invoice = ForeignKey(
+        "Invoice", on_delete=models.CASCADE, null=True,
+        related_name="charges",
+        help_text="The invoice this charge is for if one exists."
+    )
+
     transfer = ForeignKey(
         "Transfer",
         null=True, on_delete=models.CASCADE,
@@ -710,7 +717,7 @@ class Invoice(StripeInvoice):
     charge = OneToOneField(
         Charge,
         null=True, on_delete=models.CASCADE,
-        related_name="invoice",
+        related_name="latest_invoice",
         help_text="The latest charge generated for this invoice, if any."
     )
     subscription = ForeignKey(
