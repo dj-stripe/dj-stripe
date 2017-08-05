@@ -468,7 +468,6 @@ Fields not implemented:
 * **application_fee** - #. Coming soon with stripe connect functionality
 * **balance_transaction** - #
 * **dispute** - #; Mapped to a ``disputed`` boolean.
-* **fraud_details** - Mapped to a ``fraudulent`` boolean.
 * **order** - #
 * **receipt_email** - Unnecessary. Use Customer.email. Create a feature request if this is functionality you need.
 * **receipt_number** - Unnecessary. Use the dashboard. Create a feature request if this is functionality you need.
@@ -509,6 +508,7 @@ Fields not implemented:
         null=True,
         help_text="Message to user further explaining reason for charge failure if available."
     )
+    fraud_details = StripeJSONField(help_text="Hash with information on fraud assessments for the charge.")
     paid = StripeBooleanField(
         default=False,
         help_text="True if the charge succeeded, or was successfully authorized for later capture, False otherwise."
