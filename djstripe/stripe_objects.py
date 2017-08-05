@@ -640,7 +640,6 @@ Fields not implemented:
 
 * **object** - Unnecessary. Just check the model name.
 * **discount** - #
-* **email** - Unnecessary. Use ``Customer.subscriber.email``.
 
 .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
@@ -678,6 +677,7 @@ Fields not implemented:
     delinquent = StripeBooleanField(
         help_text="Whether or not the latest charge for the customer's latest invoice has failed."
     )
+    email = StripeTextField(null=True)
     shipping = StripeJSONField(null=True, help_text="Shipping information associated with the customer.")
 
     def subscribe(self, plan, application_fee_percent=None, coupon=None, quantity=None, metadata=None,
