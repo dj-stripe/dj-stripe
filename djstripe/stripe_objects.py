@@ -676,7 +676,6 @@ Fields not implemented:
         "invoices, invoice items)."
     )
     delinquent = StripeBooleanField(
-        default=False,
         help_text="Whether or not the latest charge for the customer's latest invoice has failed."
     )
     shipping = StripeJSONField(null=True, help_text="Shipping information associated with the customer.")
