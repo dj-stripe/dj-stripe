@@ -469,7 +469,6 @@ Fields not implemented:
 * **balance_transaction** - #
 * **dispute** - #; Mapped to a ``disputed`` boolean.
 * **order** - #
-* **receipt_email** - Unnecessary. Use Customer.email. Create a feature request if this is functionality you need.
 * **receipt_number** - Unnecessary. Use the dashboard. Create a feature request if this is functionality you need.
 * **refunds** - #
 * **source_transfer** - #
@@ -513,6 +512,10 @@ Fields not implemented:
     paid = StripeBooleanField(
         default=False,
         help_text="True if the charge succeeded, or was successfully authorized for later capture, False otherwise."
+    )
+    receipt_email = StripeCharField(
+        null=True, max_length=800,  # yup, 800.
+        help_text="The email address that the receipt for this charge was sent to."
     )
     refunded = StripeBooleanField(
         default=False,
