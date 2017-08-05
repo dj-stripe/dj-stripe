@@ -29,8 +29,6 @@ from django.utils.functional import cached_property
 from doc_inherit import class_doc_inherit
 from stripe.error import StripeError, InvalidRequestError
 
-import traceback as exception_traceback
-
 from . import settings as djstripe_settings
 from . import webhooks
 from .enums import SourceType, SubscriptionStatus
@@ -1074,11 +1072,12 @@ class EventProcessingException(models.Model):
 
     @classmethod
     def log(cls, data, exception, event):
+        from traceback import format_exc
         cls.objects.create(
             event=event,
             data=data or "",
             message=str(exception),
-            traceback=exception_traceback.format_exc()
+            traceback=format_exc()
         )
 
     def __str__(self):
