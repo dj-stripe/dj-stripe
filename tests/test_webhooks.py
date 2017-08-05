@@ -112,7 +112,7 @@ class TestWebhookHandlers(TestCase):
         global_func_mock = Mock()
         handler_all()(global_func_mock)
         func_mock = Mock()
-        handler(["foo"])(func_mock)
+        handler("foo")(func_mock)
         event = self._call_handlers("foo.bar", {"data": "foo"})  # handled
         self._call_handlers("bar.foo", {"data": "foo"})  # not handled
         self.assertEqual(2, global_func_mock.call_count)  # called each time
@@ -123,7 +123,7 @@ class TestWebhookHandlers(TestCase):
         global_func_mock = Mock()
         handler_all()(global_func_mock)
         func_mock = Mock()
-        handler(["foo.bar"])(func_mock)
+        handler("foo.bar")(func_mock)
         event1 = self._call_handlers("foo.bar", {"data": "foo"})  # handled
         event2 = self._call_handlers("foo.bar.wib", {"data": "foo"})  # handled
         self._call_handlers("foo.baz", {"data": "foo"})  # not handled
@@ -147,6 +147,17 @@ class TestWebhookHandlers(TestCase):
         event = self._call_handlers("foo.bar", {"data": "foo"})  # handled
         self.assertEqual(1, func_mock.call_count)
         func_mock.assert_called_with(event=event)
+
+    def test_event_handle_registation_with_list_of_strings(self):
+        func_mock = Mock()
+        handler("foo", "bar")(func_mock)
+        event1 = self._call_handlers("foo.bar", {"data": "foo"})  # handled
+        event2 = self._call_handlers("bar.foo", {"data": "bar"})  # handled
+        self.assertEqual(2, func_mock.call_count)
+        func_mock.assert_has_calls([
+            call(event=event1),
+            call(event=event2)
+        ])
 
     #
     # Helpers
