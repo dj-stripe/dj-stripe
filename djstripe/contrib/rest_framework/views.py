@@ -31,13 +31,12 @@ class SubscriptionRestView(APIView):
 
         Returns with status code 200.
         """
-        try:
-            customer, _created = Customer.get_or_create(subscriber=subscriber_request_callback(self.request))
+        customer, _created = Customer.get_or_create(
+            subscriber=subscriber_request_callback(self.request),
+        )
 
-            serializer = SubscriptionSerializer(customer.subscription)
-            return Response(serializer.data)
-        except:
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        serializer = SubscriptionSerializer(customer.subscription)
+        return Response(serializer.data)
 
     def post(self, request, **kwargs):
         """
