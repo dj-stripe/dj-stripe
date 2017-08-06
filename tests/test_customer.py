@@ -44,9 +44,9 @@ class TestCustomer(TestCase):
         self.account = Account.objects.create()
 
     def test_str(self):
-        self.assertEqual("<{subscriber}, email={email}, stripe_id={stripe_id}>".format(
-            subscriber=str(self.user), email=self.user.email, stripe_id=FAKE_CUSTOMER["id"]
-        ), str(self.customer))
+        self.assertEqual(str(self.customer), self.user.email)
+        self.customer.subscriber = None
+        self.assertEqual(str(self.customer), "{stripe_id} (deleted)".format(stripe_id=self.customer.stripe_id))
 
     def test_customer_dashboard_url(self):
         expected_url = "https://dashboard.stripe.com/test/customers/{}".format(self.customer.stripe_id)
@@ -716,7 +716,6 @@ class TestCustomer(TestCase):
         self.user.delete()
         customer = Customer.objects.get(stripe_id=FAKE_CUSTOMER["id"])
         self.assertIsNotNone(customer.date_purged)
-        self.assertEqual(["(deleted)", "stripe_id=cus_6lsBvm5rJ0zyHc"], customer.str_parts())
 
     @patch("stripe.Customer.retrieve")
     def test_delete_subscriber_without_customer_is_noop(self, customer_retrieve_mock):

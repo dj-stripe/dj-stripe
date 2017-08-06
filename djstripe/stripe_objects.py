@@ -1691,11 +1691,6 @@ Fields not implemented:
     def amount_in_cents(self):
         return int(self.amount * 100)
 
-    def str_parts(self):
-        return [
-            "name={name}".format(name=self.name),
-        ] + super(StripePlan, self).str_parts()
-
 
 class StripeSubscription(StripeObject):
     """
