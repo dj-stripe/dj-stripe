@@ -6,7 +6,7 @@
 
 .. moduleauthor:: @kavdev, @pydanny, @lskillen, and @chrissmejia
 """
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.apps import apps as django_apps
 from django.conf import settings
