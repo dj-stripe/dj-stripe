@@ -29,8 +29,6 @@ from collections import defaultdict
 import functools
 import itertools
 
-from django.utils import six
-
 __all__ = ['handler', 'handler_all', 'call_handlers']
 
 
