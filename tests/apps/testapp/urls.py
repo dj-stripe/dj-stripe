@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
 from django.conf.urls import url, include
 
 from django.http import HttpResponse

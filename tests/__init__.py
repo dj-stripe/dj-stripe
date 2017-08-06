@@ -10,6 +10,7 @@ A Fake or multiple fakes for each stripe object.
 Originally collected using API VERSION 2015-07-28.
 Updated to API VERSION 2016-03-07 with bogus fields.
 """
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from copy import deepcopy
 from datetime import datetime

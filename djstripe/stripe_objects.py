@@ -17,6 +17,7 @@ place. Primarily this is:
 This module defines abstract models which are then extended in models.py to provide the remaining
 dj-stripe functionality.
 """
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from copy import deepcopy
 import decimal
@@ -1689,11 +1690,6 @@ Fields not implemented:
     @property
     def amount_in_cents(self):
         return int(self.amount * 100)
-
-    def str_parts(self):
-        return [
-            "name={name}".format(name=self.name),
-        ] + super(StripePlan, self).str_parts()
 
 
 class StripeSubscription(StripeObject):

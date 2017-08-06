@@ -8,6 +8,8 @@
 
 .. moduleauthor:: @kavdev, @pydanny, @wahuneke
 """
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 from django.conf import settings
 from django.shortcuts import redirect
 from django.urls import resolve

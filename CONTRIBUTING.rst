@@ -55,6 +55,16 @@ If you are proposing a feature:
 * Keep the scope as narrow as possible, to make it easier to implement.
 * Remember that this is a volunteer-driven project, and that contributions are welcome :)
 
+New Modules
+-----------
+
+As with Django we're aiming for future compatibility with Python 3.x.  Please ensure that any
+new modules use the following future import statement:
+
+```
+from __future__ import absolute_import, division, print_function, unicode_literals
+```
+
 Get Started!
 ------------
 

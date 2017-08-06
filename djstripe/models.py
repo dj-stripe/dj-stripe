@@ -9,7 +9,7 @@
 
 """
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import logging
 import uuid
@@ -141,6 +141,7 @@ class Coupon(StripeCoupon):
 
 
 @class_doc_inherit
+@python_2_unicode_compatible
 class Customer(StripeCustomer):
     doc = """
 
@@ -174,18 +175,13 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
     class Meta:
         unique_together = ("subscriber", "livemode")
 
-    def str_parts(self):
-        parts = []
-
-        if self.subscriber:
-            parts.append(smart_text(self.subscriber))
-            parts.append("email={email}".format(email=self.subscriber.email))
+    def __str__(self):
+        if not self.subscriber:
+            return "{stripe_id} (deleted)".format(stripe_id=self.stripe_id)
+        elif self.subscriber.email:
+            return self.subscriber.email
         else:
-            parts.append("(deleted)")
-
-        parts.extend(super(Customer, self).str_parts())
-
-        return parts
+            return self.stripe_id
 
     @classmethod
     def get_or_create(cls, subscriber, livemode=djstripe_settings.STRIPE_LIVE_MODE):
@@ -870,6 +866,12 @@ class InvoiceItem(StripeInvoiceItem):
         help_text="The subscription that this invoice item has been created for, if any."
     )
 
+    def __str__(self):
+        if not self.plan:
+            return super(InvoiceItem, self).__str__()
+        price = self.plan.human_readable_price
+        return "Subscription to {plan} ({price})".format(plan=self.plan, price=price)
+
     def _attach_objects_hook(self, cls, data):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
 
@@ -894,6 +896,7 @@ class InvoiceItem(StripeInvoiceItem):
 
 
 @class_doc_inherit
+@python_2_unicode_compatible
 class Plan(StripePlan):
     __doc__ = getattr(StripePlan, "__doc__")
 
@@ -923,6 +926,9 @@ class Plan(StripePlan):
         plan = Plan.objects.create(**kwargs)
 
         return plan
+
+    def __str__(self):
+        return self.name
 
     @property
     def human_readable_price(self):
