@@ -9,11 +9,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from copy import deepcopy
 
-from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
 from mock import patch
 
-from djstripe.models import Customer, InvoiceItem, Account
+from djstripe.models import InvoiceItem, Account
 from tests import (FAKE_INVOICEITEM, FAKE_INVOICE_II, FAKE_CHARGE_II, FAKE_CUSTOMER_II, FAKE_SUBSCRIPTION_III,
                    FAKE_PLAN_II)
 
@@ -22,9 +21,6 @@ class InvoiceItemTest(TestCase):
 
     def setUp(self):
         self.account = Account.objects.create()
-
-        user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        Customer.objects.create(subscriber=user, stripe_id=FAKE_CUSTOMER_II["id"], livemode=False)
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN_II))

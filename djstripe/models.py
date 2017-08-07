@@ -29,8 +29,6 @@ from django.utils.functional import cached_property
 from doc_inherit import class_doc_inherit
 from stripe.error import StripeError, InvalidRequestError
 
-import traceback as exception_traceback
-
 from . import settings as djstripe_settings
 from . import webhooks
 from .enums import SourceType, SubscriptionStatus
@@ -69,6 +67,13 @@ class Charge(StripeCharge):
         related_name="charges",
         help_text="The customer associated with this charge."
     )
+
+    invoice = ForeignKey(
+        "Invoice", on_delete=models.CASCADE, null=True,
+        related_name="charges",
+        help_text="The invoice this charge is for if one exists."
+    )
+
     transfer = ForeignKey(
         "Transfer",
         null=True, on_delete=models.CASCADE,
@@ -211,7 +216,12 @@ Use ``Customer.sources`` and ``Customer.subscriptions`` to access them.
         )
         customer, created = Customer.objects.get_or_create(
             stripe_id=stripe_customer["id"],
-            defaults={"subscriber": subscriber, "livemode": stripe_customer["livemode"]}
+            defaults={
+                "subscriber": subscriber,
+                "livemode": stripe_customer["livemode"],
+                "account_balance": stripe_customer["account_balance"],
+                "delinquent": stripe_customer["delinquent"],
+            }
         )
 
         return customer
@@ -712,7 +722,7 @@ class Invoice(StripeInvoice):
     charge = OneToOneField(
         Charge,
         null=True, on_delete=models.CASCADE,
-        related_name="invoice",
+        related_name="latest_invoice",
         help_text="The latest charge generated for this invoice, if any."
     )
     subscription = ForeignKey(
@@ -1074,11 +1084,12 @@ class EventProcessingException(models.Model):
 
     @classmethod
     def log(cls, data, exception, event):
+        from traceback import format_exc
         cls.objects.create(
             event=event,
             data=data or "",
             message=str(exception),
-            traceback=exception_traceback.format_exc()
+            traceback=format_exc()
         )
 
     def __str__(self):

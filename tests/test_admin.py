@@ -16,7 +16,7 @@ from django.test import TestCase
 from mock import Mock, patch
 
 from djstripe.admin import reprocess_events, subscription_status
-from djstripe.models import Customer, Event, Subscription
+from djstripe.models import Event, Subscription
 from tests import FAKE_CUSTOMER, FAKE_PLAN, FAKE_SUBSCRIPTION
 
 
@@ -42,15 +42,14 @@ class TestAdminSite(TestCase):
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_subscription_status(self, customer_mock, plan_mock):
-        customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
+        customer = FAKE_CUSTOMER.create_for_user(self.user)
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
 
         self.assertEqual(subscription.status, subscription_status(customer))
 
     def test_subscription_status_no_sub(self):
-        customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
-
+        customer = FAKE_CUSTOMER.create_for_user(self.user)
         self.assertEqual("", subscription_status(customer))
 
 

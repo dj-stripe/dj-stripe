@@ -31,13 +31,16 @@ class SubscriptionManagerTest(TestCase):
         self.plan2 = Plan.sync_from_stripe_data(FAKE_PLAN_II)
 
         for i in range(10):
+            user = get_user_model().objects.create_user(
+                username="patrick{0}".format(i),
+                email="patrick{0}@example.com".format(i)
+            )
             customer = Customer.objects.create(
-                subscriber=get_user_model().objects.create_user(
-                    username="patrick{0}".format(i),
-                    email="patrick{0}@gmail.com".format(i)
-                ),
+                subscriber=user,
                 stripe_id="cus_xxxxxxxxxxxxxx{0}".format(i),
                 livemode=False,
+                account_balance=0,
+                delinquent=False,
             )
 
             Subscription.objects.create(
@@ -51,13 +54,16 @@ class SubscriptionManagerTest(TestCase):
                 quantity=1
             )
 
+        user = get_user_model().objects.create_user(
+            username="patrick{0}".format(11),
+            email="patrick{0}@example.com".format(11)
+        )
         customer = Customer.objects.create(
-            subscriber=get_user_model().objects.create_user(
-                username="patrick{0}".format(11),
-                email="patrick{0}@gmail.com".format(11)
-            ),
+            subscriber=user,
             stripe_id="cus_xxxxxxxxxxxxxx{0}".format(11),
             livemode=False,
+            account_balance=0,
+            delinquent=False,
         )
         Subscription.objects.create(
             stripe_id="sub_xxxxxxxxxxxxxx{0}".format(11),
@@ -71,13 +77,16 @@ class SubscriptionManagerTest(TestCase):
             quantity=1
         )
 
+        user = get_user_model().objects.create_user(
+            username="patrick{0}".format(12),
+            email="patrick{0}@example.com".format(12)
+        )
         customer = Customer.objects.create(
-            subscriber=get_user_model().objects.create_user(
-                username="patrick{0}".format(12),
-                email="patrick{0}@gmail.com".format(12)
-            ),
+            subscriber=user,
             stripe_id="cus_xxxxxxxxxxxxxx{0}".format(12),
             livemode=False,
+            account_balance=0,
+            delinquent=False,
         )
         Subscription.objects.create(
             stripe_id="sub_xxxxxxxxxxxxxx{0}".format(12),
@@ -152,7 +161,10 @@ class TransferManagerTest(TestCase):
 class ChargeManagerTest(TestCase):
 
     def setUp(self):
-        customer = Customer.objects.create(stripe_id="cus_XXXXXXX", livemode=False)
+        customer = Customer.objects.create(
+            stripe_id="cus_XXXXXXX", livemode=False,
+            account_balance=0, delinquent=False
+        )
 
         self.march_charge = Charge.objects.create(
             stripe_id="ch_XXXXMAR1",

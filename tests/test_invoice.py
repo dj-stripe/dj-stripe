@@ -15,8 +15,7 @@ from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
 from mock import patch, ANY
 
-from djstripe.models import Customer, Invoice, Account, UpcomingInvoice, \
-    Subscription, Plan
+from djstripe.models import Account, Invoice, Plan, Subscription, UpcomingInvoice
 from djstripe.models import InvalidRequestError
 
 from tests import (FAKE_INVOICE, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_SUBSCRIPTION, FAKE_PLAN, FAKE_INVOICEITEM_II,
@@ -28,7 +27,7 @@ class InvoiceTest(TestCase):
     def setUp(self):
         self.account = Account.objects.create()
         self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
+        self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))

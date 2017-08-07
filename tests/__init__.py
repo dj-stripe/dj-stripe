@@ -364,6 +364,13 @@ FAKE_CHARGE = ChargeDict({
     "livemode": False,
     "metadata": {},
     "order": None,
+    "outcome": {
+        "network_status": "approved_by_network",
+        "reason": None,
+        "risk_level": "normal",
+        "seller_message": "Payment complete.",
+        "type": "authorized",
+    },
     "paid": True,
     "receipt_email": None,
     "receipt_number": None,
@@ -403,6 +410,13 @@ FAKE_CHARGE_II = ChargeDict({
     "livemode": False,
     "metadata": {},
     "order": None,
+    "outcome": {
+        "network_status": "declined_by_network",
+        "reason": "expired_card",
+        "risk_level": "normal",
+        "seller_message": "The bank returned the decline code `expired_card`.",
+        "type": "issuer_declined",
+    },
     "paid": False,
     "receipt_email": None,
     "receipt_number": None,
@@ -587,7 +601,6 @@ class Sources(object):
 
 
 class CustomerDict(dict):
-
     def save(self):
         return self
 
@@ -597,6 +610,13 @@ class CustomerDict(dict):
     @property
     def sources(self):
         return Sources(card_fakes=self["sources"]["data"])
+
+    def create_for_user(self, user):
+        from djstripe.models import Customer
+        stripe_customer = Customer.sync_from_stripe_data(self)
+        stripe_customer.subscriber = user
+        stripe_customer.save()
+        return stripe_customer
 
 
 FAKE_CUSTOMER = CustomerDict({

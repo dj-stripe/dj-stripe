@@ -468,10 +468,7 @@ Fields not implemented:
 * **application_fee** - #. Coming soon with stripe connect functionality
 * **balance_transaction** - #
 * **dispute** - #; Mapped to a ``disputed`` boolean.
-* **fraud_details** - Mapped to a ``fraudulent`` boolean.
 * **order** - #
-* **receipt_email** - Unnecessary. Use Customer.email. Create a feature request if this is functionality you need.
-* **receipt_number** - Unnecessary. Use the dashboard. Create a feature request if this is functionality you need.
 * **refunds** - #
 * **source_transfer** - #
 
@@ -509,9 +506,19 @@ Fields not implemented:
         null=True,
         help_text="Message to user further explaining reason for charge failure if available."
     )
+    fraud_details = StripeJSONField(help_text="Hash with information on fraud assessments for the charge.")
+    outcome = StripeJSONField(help_text="Details about whether or not the payment was accepted, and why.")
     paid = StripeBooleanField(
         default=False,
         help_text="True if the charge succeeded, or was successfully authorized for later capture, False otherwise."
+    )
+    receipt_email = StripeCharField(
+        null=True, max_length=800,  # yup, 800.
+        help_text="The email address that the receipt for this charge was sent to."
+    )
+    receipt_number = StripeCharField(
+        null=True, max_length=9,
+        help_text="The transaction number that appears on email receipts sent for this charge."
     )
     refunded = StripeBooleanField(
         default=False,
@@ -633,7 +640,6 @@ Fields not implemented:
 
 * **object** - Unnecessary. Just check the model name.
 * **discount** - #
-* **email** - Unnecessary. Use ``Customer.subscriber.email``.
 
 .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
     """
@@ -646,12 +652,15 @@ Fields not implemented:
     stripe_dashboard_item_name = "customers"
 
     account_balance = StripeIntegerField(
-        null=True,
-        help_text="Current balance, if any, being stored on the customer's account. If negative, the customer has "
-        "credit to apply to the next invoice. If positive, the customer has an amount owed that will be added to the "
-        "next invoice. The balance does not refer to any unpaid invoices; it solely takes into account amounts that "
-        "have yet to be successfully applied to any invoice. This balance is only taken into account for recurring "
-        "charges."
+        help_text=(
+            "Current balance, if any, being stored on the customer’s account. "
+            "If negative, the customer has credit to apply to the next invoice. "
+            "If positive, the customer has an amount owed that will be added to the"
+            "next invoice. The balance does not refer to any unpaid invoices; it "
+            "solely takes into account amounts that have yet to be successfully"
+            "applied to any invoice. This balance is only taken into account for "
+            "recurring billing purposes (i.e., subscriptions, invoices, invoice items)."
+        )
     )
     business_vat_id = StripeCharField(
         max_length=20,
@@ -666,9 +675,9 @@ Fields not implemented:
         "invoices, invoice items)."
     )
     delinquent = StripeBooleanField(
-        default=False,
         help_text="Whether or not the latest charge for the customer's latest invoice has failed."
     )
+    email = StripeTextField(null=True)
     shipping = StripeJSONField(null=True, help_text="Shipping information associated with the customer.")
 
     def subscribe(self, plan, application_fee_percent=None, coupon=None, quantity=None, metadata=None,

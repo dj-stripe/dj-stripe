@@ -18,7 +18,7 @@ from mock import patch, PropertyMock
 
 from djstripe.contrib.rest_framework.serializers import SubscriptionSerializer, CreateSubscriptionSerializer
 from djstripe.enums import SubscriptionStatus
-from djstripe.models import Customer, Plan
+from djstripe.models import Plan
 from tests import FAKE_PLAN, FAKE_CUSTOMER
 
 
@@ -26,7 +26,7 @@ class SubscriptionSerializerTest(TestCase):
 
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        self.customer = Customer.objects.create(subscriber=self.user, stripe_id=FAKE_CUSTOMER["id"], livemode=False)
+        self.customer = FAKE_CUSTOMER.create_for_user(self.user)
         self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
     def test_valid_serializer(self):
