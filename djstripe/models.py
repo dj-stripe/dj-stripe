@@ -581,7 +581,7 @@ class Event(StripeEvent):
                 # except that some webhook handlers can have side effects outside of our local database, meaning that
                 # even if we rollback on our database, some updates may have been sent to Stripe, etc in resposne to
                 # webhooks...
-                webhooks.call_handlers(self, self.message, self.event_type, self.event_subtype)
+                webhooks.call_handlers(event=self)
                 self._send_signal()
                 self.processed = True
             except StripeError as exc:
@@ -616,18 +616,23 @@ class Event(StripeEvent):
             return signal.send(sender=Event, event=self)
 
     @cached_property
+    def data(self):
+        """Get the event data/contents."""
+        return self.message
+
+    @cached_property
     def parts(self):
-        """ Gets the event type/subtype as a list of parts. """
+        """ Gets the event category/verb as a list of parts. """
         return str(self.type).split(".")
 
     @cached_property
-    def event_type(self):
-        """ Gets the event type string. """
+    def category(self):
+        """ Gets the event category string (e.g. 'customer'). """
         return self.parts[0]
 
     @cached_property
-    def event_subtype(self):
-        """ Gets the event subtype string. """
+    def verb(self):
+        """ Gets the event past-tense verb string (e.g. 'updated'). """
         return ".".join(self.parts[1:])
 
 
