@@ -1789,14 +1789,6 @@ Fields not implemented:
         help_text="If the subscription has a trial, the beginning of that trial."
     )
 
-    def str_parts(self):
-        return [
-            "current_period_start={current_period_start}".format(current_period_start=self.current_period_start),
-            "current_period_end={current_period_end}".format(current_period_end=self.current_period_end),
-            "status={status}".format(status=self.status),
-            "quantity={quantity}".format(quantity=self.quantity),
-        ] + super(StripeSubscription, self).str_parts()
-
     @classmethod
     def _stripe_object_to_plan(cls, target_cls, data):
         """

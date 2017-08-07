@@ -1000,6 +1000,9 @@ class Subscription(StripeSubscription):
 
     objects = SubscriptionManager()
 
+    def __str__(self):
+        return "{customer} on {plan}".format(customer=str(self.customer), plan=str(self.plan))
+
     def is_period_current(self):
         """ Returns True if this subscription's period is current, false otherwise."""
 
