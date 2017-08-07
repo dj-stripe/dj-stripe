@@ -18,9 +18,7 @@ from .models import (
 )
 
 
-class CustomerHasSourceListFilter(admin.SimpleListFilter):
-    """A SimpleListFilter used with Customer admin."""
-
+class BaseHasSourceListFilter(admin.SimpleListFilter):
     title = "source presence"
     parameter_name = "has_source"
 
@@ -34,10 +32,10 @@ class CustomerHasSourceListFilter(admin.SimpleListFilter):
         in the right sidebar.
         source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
         """
-        return [
-            ["yes", "Has Source"],
-            ["no", "Does Not Have Source"]
-        ]
+        return (
+            ("yes", "Has a source"),
+            ("no", "Has no source"),
+        )
 
     def queryset(self, request, queryset):
         """
@@ -45,43 +43,20 @@ class CustomerHasSourceListFilter(admin.SimpleListFilter):
 
         source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
         """
+        filter_args = {self._filter_arg_key: None}
+
         if self.value() == "yes":
-            return queryset.exclude(default_source=None)
+            return queryset.exclude(**filter_args)
         if self.value() == "no":
-            return queryset.filter(default_source=None)
+            return queryset.filter(**filter_args)
 
 
-class InvoiceCustomerHasSourceListFilter(admin.SimpleListFilter):
-    """A SimpleListFilter used with Invoice admin."""
+class CustomerHasSourceListFilter(BaseHasSourceListFilter):
+    _filter_arg_key = "default_source"
 
-    title = "source presence"
-    parameter_name = "has_source"
 
-    def lookups(self, request, model_admin):
-        """
-        Return a list of tuples.
-
-        The first element in each tuple is the coded value for the option that will
-        appear in the URL query. The second element is the
-        human-readable name for the option that will appear
-        in the right sidebar.
-        source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
-        """
-        return [
-            ["yes", "Has Source"],
-            ["no", "Does Not Have Source"]
-        ]
-
-    def queryset(self, request, queryset):
-        """
-        Return the filtered queryset based on the value provided in the query string.
-
-        source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
-        """
-        if self.value() == "yes":
-            return queryset.exclude(customer__default_source=None)
-        if self.value() == "no":
-            return queryset.filter(customer__default_source=None)
+class InvoiceCustomerHasSourceListFilter(BaseHasSourceListFilter):
+    _filter_arg_key = "customer__default_source"
 
 
 class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
@@ -261,9 +236,9 @@ class ChargeAdmin(StripeObjectAdmin):
     )
     search_fields = ("stripe_id", "customer__stripe_id", "invoice__stripe_id")
     list_filter = (
-        "status", "paid", "disputed", "refunded", "fraudulent", "captured",
+        "status", "source_type", "paid", "disputed", "refunded", "fraudulent", "captured",
     )
-    raw_id_fields = ("customer", "source", "transfer")
+    raw_id_fields = ("customer", "invoice", "source", "transfer")
 
 
 @admin.register(Coupon)
