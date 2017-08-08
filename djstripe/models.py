@@ -548,6 +548,15 @@ class Event(StripeEvent):
             # Remove this hack if this gets fixed upstream.
             self.received_api_version = ""
 
+        request_obj = data.get("request", None)
+        if isinstance(request_obj, dict):
+            # Format as of 2017-05-25
+            self.request_id = request_obj.get("request")
+            self.idempotency_key = request_obj.get("idempotency_key")
+        else:
+            # Format before 2017-05-25
+            self.request_id = request_obj
+
     def validate(self):
         """
         The original contents of the Event message comes from a POST to the webhook endpoint. This data

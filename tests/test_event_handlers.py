@@ -29,7 +29,7 @@ from tests import (
     FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED, FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED,
     FAKE_EVENT_INVOICEITEM_CREATED, FAKE_EVENT_INVOICEITEM_DELETED,
     FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_INVOICE_DELETED, FAKE_EVENT_INVOICE_UPCOMING,
-    FAKE_EVENT_PLAN_CREATED, FAKE_EVENT_PLAN_DELETED,
+    FAKE_EVENT_PLAN_CREATED, FAKE_EVENT_PLAN_DELETED, FAKE_EVENT_PLAN_REQUEST_IS_OBJECT,
     FAKE_EVENT_TRANSFER_CREATED, FAKE_EVENT_TRANSFER_DELETED,
     FAKE_INVOICE, FAKE_INVOICEITEM, FAKE_INVOICE_II, FAKE_PLAN,
     FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_III, FAKE_TRANSFER
@@ -421,8 +421,21 @@ class TestPlanEvents(EventTestCase):
         plan = Plan.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(plan.name, fake_stripe_event["data"]["object"]["name"])
 
+    @patch("stripe.Plan.retrieve", return_value=FAKE_PLAN)
+    @patch("stripe.Event.retrieve", return_value=FAKE_EVENT_PLAN_REQUEST_IS_OBJECT)
+    def test_plan_updated_request_object(self, event_retrieve_mock, plan_retrieve_mock):
+        plan_retrieve_mock.return_value = FAKE_EVENT_PLAN_REQUEST_IS_OBJECT["data"]["object"]
+
+        event = Event.sync_from_stripe_data(FAKE_EVENT_PLAN_REQUEST_IS_OBJECT)
+        event.validate()
+        event.process()
+
+        plan = Plan.objects.get(stripe_id=FAKE_EVENT_PLAN_REQUEST_IS_OBJECT["data"]["object"]["id"])
+        self.assertEqual(plan.name, FAKE_EVENT_PLAN_REQUEST_IS_OBJECT["data"]["object"]["name"])
+
     @patch('stripe.Plan.retrieve', return_value=FAKE_PLAN)
     def test_plan_deleted(self, plan_retrieve_mock):
+
         event = self._create_event(FAKE_EVENT_PLAN_CREATED)
         self.assertTrue(event.process())
 

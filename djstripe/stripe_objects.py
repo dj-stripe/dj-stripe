@@ -918,10 +918,10 @@ Fields not implemented:
         max_length=50,
         null=True,
         blank=True,
-        stripe_name="request",
         help_text="Information about the request that triggered this event, for traceability purposes. If empty "
         "string then this is an old entry without that data. If Null then this is not an old entry, but a Stripe "
-        "'automated' event with no associated request."
+        "'automated' event with no associated request.",
+        stripe_required=False
     )
     received_api_version = StripeCharField(
         max_length=15, blank=True, stripe_name="api_version", help_text="the API version at which the event data was "
