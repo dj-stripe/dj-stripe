@@ -1017,17 +1017,18 @@ Fields not implemented:
         stripe_name="type",
         max_length=14,
         choices=DESITNATION_TYPE_CHOICES,
+        blank=True, null=True, stripe_required=False,
         help_text="The type of the transfer destination."
     )
     failure_code = StripeCharField(
-        null=True,
         max_length=23,
+        blank=True, null=True, stripe_required=False,
         choices=enums.PayoutFailureCode.choices,
         help_text="Error code explaining reason for transfer failure if available. "
         "See https://stripe.com/docs/api/python#transfer_failures."
     )
     failure_message = StripeTextField(
-        null=True,
+        blank=True, null=True, stripe_required=False,
         help_text="Message to user further explaining reason for transfer failure if available."
     )
     reversed = StripeBooleanField(
@@ -1056,6 +1057,7 @@ Fields not implemented:
     status = StripeCharField(
         max_length=10,
         choices=enums.PayoutStatus.choices,
+        blank=True, null=True, stripe_required=False,
         help_text="The current status of the transfer. A transfer will be pending until it is submitted to the bank, "
         "at which point it becomes in_transit. It will then change to paid if the transaction goes through. "
         "If it does not go through successfully, its status will change to failed or canceled."
