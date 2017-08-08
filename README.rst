@@ -6,12 +6,12 @@ Django + Stripe Made Easy
 Badges
 ------
 
-.. image:: https://img.shields.io/travis/kavdev/dj-stripe/1.0.0.svg?style=flat-square
-        :target: https://travis-ci.org/kavdev/dj-stripe
-.. image:: https://img.shields.io/codecov/c/github/kavdev/dj-stripe/1.0.0.svg?style=flat-square
-        :target: http://codecov.io/github/kavdev/dj-stripe?branch=1.0.0
-.. image:: https://img.shields.io/requires/github/kavdev/dj-stripe.svg?style=flat-square
-        :target: https://requires.io/github/kavdev/dj-stripe/requirements/?branch=1.0.0
+.. image:: https://img.shields.io/travis/dj-stripe/dj-stripe/1.0.0.svg?style=flat-square
+        :target: https://travis-ci.org/dj-stripe/dj-stripe
+.. image:: https://img.shields.io/codecov/c/github/dj-stripe/dj-stripe/1.0.0.svg?style=flat-square
+        :target: http://codecov.io/github/dj-stripe/dj-stripe?branch=1.0.0
+.. image:: https://img.shields.io/requires/github/dj-stripe/dj-stripe.svg?style=flat-square
+        :target: https://requires.io/github/dj-stripe/dj-stripe/requirements/?branch=1.0.0
 .. image:: https://img.shields.io/codacy/3c99e13eda1c4dea9f993b362e4ea816.svg?style=flat-square
         :target: https://www.codacy.com/app/kavanaugh-development/dj-stripe/dashboard
 
@@ -20,10 +20,10 @@ Badges
 .. image:: https://img.shields.io/pypi/dw/dj-stripe.svg?style=flat-square
         :target: https://pypi.python.org/pypi/dj-stripe
 
-.. image:: https://img.shields.io/github/issues/kavdev/dj-stripe.svg?style=flat-square
-        :target: https://github.com/kavdev/dj-stripe/issues
-.. image:: https://img.shields.io/github/license/kavdev/dj-stripe.svg?style=flat-square
-        :target: https://github.com/kavdev/dj-stripe/blob/master/LICENSE
+.. image:: https://img.shields.io/github/issues/dj-stripe/dj-stripe.svg?style=flat-square
+        :target: https://github.com/dj-stripe/dj-stripe/issues
+.. image:: https://img.shields.io/github/license/dj-stripe/dj-stripe.svg?style=flat-square
+        :target: https://github.com/dj-stripe/dj-stripe/blob/master/LICENSE
 
 
 Documentation

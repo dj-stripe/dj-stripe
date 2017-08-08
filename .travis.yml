@@ -1,4 +1,4 @@
-# https://travis-ci.org/kavdev/dj-stripe/
+# https://travis-ci.org/dj-stripe/dj-stripe/
 dist: trusty
 sudo: false
 language: python
