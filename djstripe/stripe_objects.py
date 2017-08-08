@@ -923,6 +923,7 @@ Fields not implemented:
         "'automated' event with no associated request.",
         stripe_required=False
     )
+    idempotency_key = StripeTextField(null=True, blank=True, stripe_required=False)
     received_api_version = StripeCharField(
         max_length=15, blank=True, stripe_name="api_version", help_text="the API version at which the event data was "
         "rendered. Blank for old entries only, all new entries will have this value"
