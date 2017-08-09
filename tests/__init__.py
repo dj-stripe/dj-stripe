@@ -1179,6 +1179,28 @@ FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED = {
     },
 }
 
+# 2017-05-25 api changed request from id to object with id and idempotency_key
+# issue #541
+FAKE_EVENT_PLAN_REQUEST_IS_OBJECT = {
+    "id": "evt_1AcdbXXXXXXXXXXXXXXXXXXX",
+    "object": "event",
+    "api_version": "2017-06-05",
+    "created": 1499361420,
+    "data": {
+        "object": FAKE_PLAN,
+        "previous_attributes": {
+            "name": "Plan anual test4"
+        }
+    },
+    "livemode": False,
+    "pending_webhooks": 1,
+    "request": {
+        "id": "req_AyamqQWoi5AMR2",
+        "idempotency_key": None,
+    },
+    "type": "plan.updated",
+}
+
 FAKE_EVENT_CHARGE_SUCCEEDED = {
     "id": "evt_16YKQi2eZvKYlo2CT2oe5ff3",
     "object": "event",

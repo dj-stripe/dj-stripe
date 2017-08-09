@@ -13,7 +13,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/kavdev/dj-stripe/issues.
+Report bugs at https://github.com/dj-stripe/dj-stripe/issues.
 
 If you are reporting a bug, please include:
 
@@ -47,7 +47,7 @@ in a web browser.
 Submit Feedback
 ~~~~~~~~~~~~~~~
 
-The best way to send feedback is to file an issue at https://github.com/kavdev/dj-stripe/issues.
+The best way to send feedback is to file an issue at https://github.com/dj-stripe/dj-stripe/issues.
 
 If you are proposing a feature:
 
@@ -125,5 +125,5 @@ Before you submit a pull request, check that it meets these guidelines:
    your new functionality into a function with a docstring.
 4. If the pull request makes changes to a model, include Django migrations (Django 1.7+).
 5. The pull request should work for Python 2.7, 3.4, 3.5 and 3.6. Check
-   https://travis-ci.org/kavdev/dj-stripe/pull_requests
+   https://travis-ci.org/dj-stripe/dj-stripe/pull_requests
    and make sure that the tests pass for all supported Python versions.

@@ -66,7 +66,7 @@ Using this example any request on this site that isn't on the homepage, about, s
 
 .. note::
 
-    The extensive list of rules for this feature can be found at https://github.com/kavdev/dj-stripe/blob/master/djstripe/middleware.py.
+    The extensive list of rules for this feature can be found at https://github.com/dj-stripe/dj-stripe/blob/master/djstripe/middleware.py.
 
 .. seealso::
 

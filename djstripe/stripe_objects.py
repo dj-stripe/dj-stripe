@@ -918,11 +918,12 @@ Fields not implemented:
         max_length=50,
         null=True,
         blank=True,
-        stripe_name="request",
         help_text="Information about the request that triggered this event, for traceability purposes. If empty "
         "string then this is an old entry without that data. If Null then this is not an old entry, but a Stripe "
-        "'automated' event with no associated request."
+        "'automated' event with no associated request.",
+        stripe_required=False
     )
+    idempotency_key = StripeTextField(null=True, blank=True, stripe_required=False)
     received_api_version = StripeCharField(
         max_length=15, blank=True, stripe_name="api_version", help_text="the API version at which the event data was "
         "rendered. Blank for old entries only, all new entries will have this value"
@@ -1787,14 +1788,6 @@ Fields not implemented:
         null=True,
         help_text="If the subscription has a trial, the beginning of that trial."
     )
-
-    def str_parts(self):
-        return [
-            "current_period_start={current_period_start}".format(current_period_start=self.current_period_start),
-            "current_period_end={current_period_end}".format(current_period_end=self.current_period_end),
-            "status={status}".format(status=self.status),
-            "quantity={quantity}".format(quantity=self.quantity),
-        ] + super(StripeSubscription, self).str_parts()
 
     @classmethod
     def _stripe_object_to_plan(cls, target_cls, data):

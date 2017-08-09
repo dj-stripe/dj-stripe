@@ -27,8 +27,8 @@ from tests import (
 class SubscriptionTest(TestCase):
 
     def setUp(self):
-        user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
-        self.customer = FAKE_CUSTOMER.create_for_user(user)
+        self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
+        self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
@@ -37,15 +37,7 @@ class SubscriptionTest(TestCase):
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
 
         self.assertEqual(
-            "<current_period_start={current_period_start}, current_period_end={current_period_end}, status={status}, "
-            "quantity={quantity}, stripe_id={stripe_id}>".format(
-                current_period_start=subscription.current_period_start,
-                current_period_end=subscription.current_period_end,
-                status=subscription.status,
-                quantity=subscription.quantity,
-                stripe_id=subscription.stripe_id
-            ),
-            str(subscription)
+            str(subscription), "{email} on {plan}".format(email=self.user.email, plan=str(subscription.plan))
         )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
