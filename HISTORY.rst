@@ -24,7 +24,7 @@ signatures to be different than those in previous versions of dj-stripe.
 
 Finally, please note that there is still a bit of work ahead of us. Not everything
 in the Stripe API is currently supported by dj-stripe -- we're working on it.
-That said, v1.0.0 has been thorougly tested and is verified stable in
+That said, v1.0.0 has been thoroughly tested and is verified stable in
 production applications.
 
 A few things to get excited for
