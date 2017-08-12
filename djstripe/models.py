@@ -38,8 +38,8 @@ from .managers import SubscriptionManager, ChargeManager, TransferManager
 from .signals import WEBHOOK_SIGNALS, webhook_processing_error
 from .stripe_objects import (
     StripeAccount, StripeCard, StripeCharge, StripeCoupon, StripeCustomer,
-    StripeEvent, StripeInvoice, StripeInvoiceItem, StripePlan, StripeSource,
-    StripeSubscription, StripeTransfer
+    StripeEvent, StripeInvoice, StripeInvoiceItem, StripePayout, StripePlan,
+    StripeSource, StripeSubscription, StripeTransfer
 )
 from .utils import get_friendly_currency_amount, QuerySetMock
 
@@ -653,6 +653,13 @@ class Event(StripeEvent):
     def verb(self):
         """ Gets the event past-tense verb string (e.g. 'updated'). """
         return ".".join(self.parts[1:])
+
+
+class Payout(StripePayout):
+    pass
+    # balance_transaction = ForeignKey("Transaction")  txn_...
+    # destination = ForeignKey("BankAccount", null=True)  ba_...
+    # failure_balance_transaction = ForeignKey("Transaction", null=True)
 
 
 @class_doc_inherit

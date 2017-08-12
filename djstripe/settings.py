@@ -18,7 +18,8 @@ import stripe
 
 from .checks import validate_stripe_api_version
 
-DEFAULT_STRIPE_API_VERSION = '2017-02-14'
+
+DEFAULT_STRIPE_API_VERSION = "2017-06-05"
 
 
 def get_callback_function(setting_name, default=None):

@@ -954,6 +954,59 @@ Fields not implemented:
         return stripe_event
 
 
+class StripePayout(StripeObject):
+    class Meta:
+        abstract = True
+
+    stripe_class = stripe.Payout
+    stripe_dashboard_item_name = "payouts"
+
+    amount = StripeCurrencyField(
+        help_text="Amount to be transferred to your bank account or debit card."
+    )
+    arrival_date = StripeDateTimeField(
+        help_text=(
+            "Date the payout is expected to arrive in the bank. "
+            "This factors in delays like weekends or bank holidays."
+        )
+    )
+    currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code.")
+    failure_code = StripeCharField(
+        max_length=23,
+        blank=True, null=True,
+        choices=enums.PayoutFailureCode.choices,
+        help_text="Error code explaining reason for transfer failure if available. "
+        "See https://stripe.com/docs/api/python#transfer_failures."
+    )
+    failure_message = StripeTextField(
+        null=True, blank=True,
+        help_text="Message to user further explaining reason for payout failure if available."
+    )
+    method = StripeCharField(
+        max_length=8,
+        choices=enums.PayoutMethod.choices,
+        help_text=(
+            "The method used to send this payout. "
+            "`instant` is only supported for payouts to debit cards."
+        )
+    )
+    statement_descriptor = StripeCharField(
+        max_length=255, null=True, blank=True,
+        help_text="Extra information about a payout to be displayed on the user’s bank statement."
+    )
+    status = StripeCharField(
+        max_length=10,
+        choices=enums.PayoutStatus.choices,
+        help_text=(
+            "Current status of the payout. "
+            "A payout will be `pending` until it is submitted to the bank, at which point it "
+            "becomes `in_transit`. I t will then change to paid if the transaction goes through. "
+            "If it does not go through successfully, its status will change to `failed` or `canceled`."
+        )
+    )
+    type = StripeCharField(max_length=12, choices=enums.PayoutType.choices)
+
+
 class StripeTransfer(StripeObject):
     """
 When Stripe sends you money or you initiate a transfer to a bank account, debit card, or
@@ -1017,17 +1070,18 @@ Fields not implemented:
         stripe_name="type",
         max_length=14,
         choices=DESITNATION_TYPE_CHOICES,
+        blank=True, null=True, stripe_required=False,
         help_text="The type of the transfer destination."
     )
     failure_code = StripeCharField(
-        null=True,
         max_length=23,
+        blank=True, null=True, stripe_required=False,
         choices=enums.PayoutFailureCode.choices,
         help_text="Error code explaining reason for transfer failure if available. "
         "See https://stripe.com/docs/api/python#transfer_failures."
     )
     failure_message = StripeTextField(
-        null=True,
+        blank=True, null=True, stripe_required=False,
         help_text="Message to user further explaining reason for transfer failure if available."
     )
     reversed = StripeBooleanField(
@@ -1056,6 +1110,7 @@ Fields not implemented:
     status = StripeCharField(
         max_length=10,
         choices=enums.PayoutStatus.choices,
+        blank=True, null=True, stripe_required=False,
         help_text="The current status of the transfer. A transfer will be pending until it is submitted to the bank, "
         "at which point it becomes in_transit. It will then change to paid if the transaction goes through. "
         "If it does not go through successfully, its status will change to failed or canceled."
