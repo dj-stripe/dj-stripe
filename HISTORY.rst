@@ -3,16 +3,298 @@
 History
 =======
 
-1.0.0 (2016-??-??)
----------------------
-* BACKWARDS-INCOMPATIBLE: dj-stripe now supports test-mode and live-mode Customer objects concurrently.
-  As a result, the User.customer One-to-One reverse-relationship is now the User.djstripe_customers RelatedManager. (Thanks @jleclanche) #440
+1.0.0 (2017-08-12)
+------------------
+
+It's finally here! We've made significant changes to the codebase and are
+now compliant with stripe API version **2017-06-05**.
+
+I want to give a huge thanks to all of our contributors for their help
+in making this happen, especially Bill Huneke (@wahuneke) for his
+impressive design work and @jleclanche for really pushing this release along.
+
+I also want to welcome onboard two more maintainers, @jleclanche and @lskillen.
+They've stepped up and have graciously dedicated their resources to making dj-stripe
+such an amazing package.
+
+Almost all methods now mimic the parameters of those same methods in the
+stripe API. Note that some methods do not have some parameters
+implemented. This is intentional. That being said, expect all method
+signatures to be different than those in previous versions of dj-stripe.
+
+Finally, please note that there is still a bit of work ahead of us. Not everything
+in the Stripe API is currently supported by dj-stripe -- we're working on it.
+That said, v1.0.0 has been thorougly tested and is verified stable in
+production applications.
+
+A few things to get excited for
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+-  Multiple subscription support (finally)
+-  Multiple sources support (currently limited to Cards)
+-  Idempotency support (See #455, #460 for discussion -- big thanks to
+   @jleclanche)
+-  Full model documentation
+-  Objects that come through webhooks are now tied to the API version
+   set in dj-stripe. No more errors if dj-stripe falls behind the newest
+   stripe API version.
+-  Any create/update action on an object automatically syncs the object.
+-  Concurrent LIVE and TEST mode support (Thanks to @jleclanche). Note
+   that you'll run into issues if ``livemode`` isn't set on your
+   existing customer objects.
+-  All choices are now enum-based (Thanks @jleclanche, See #520). Access
+   them from the new ``djstripe.enums`` module. The ability to check
+   against model property based choices will be deprecated in 1.1
+-  Support for the Coupon model, and coupons on Customer objects.
+-  Support for the `Payout/Transfer
+   split <https://stripe.com/docs/transfer-payout-split>`__ from api
+   version ``2017-04-06``.
+
+What still needs to be done (in v1.1.0)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+-  **Documentation**. Our original documentation was not very helpful,
+   but it covered the important bits. It will be very out of date after
+   this update and will need to be rewritten. If you feel like helping,
+   we could use all the help we can get to get this pushed out asap.
+-  **Master sync re-write**. This sounds scary, but really isn't. The
+   current management methods run sync methods on Customer that aren't
+   very helpful and are due for removal. My plan is to write something
+   that first updates local data (via ``api_retrieve`` and
+   ``sync_from_stripe_data``) and then pulls all objects from Stripe and
+   populates the local database with any records that don't already
+   exist there.
+
+   You might be wondering, "Why are they releasing this if there are only
+   a few things left?" Well, that thinking turned this into a two year
+   release... Trust me, this is a good thing.
+
+Significant changes (mostly backwards-incompatible)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+-  **Idempotency**. #460 introduces idempotency keys and implements
+   idempotency for ``Customer.get_or_create()``. Idempotency will be
+   enabled for all calls that need it.
+-  **Improved Admin Interface**. This is almost complete. See #451 and
+   #452.
+-  **Drop non-trivial endpoint views**. We're dropping everything except
+   the webhook endpoint and the subscription cancel endpoint. See #428.
+-  **Drop support for sending receipts**. Stripe now handles this for
+   you. See #478.
+-  **Drop support for plans as settings**, including custom plan
+   hierarchy (if you want this, write something custom) and the dynamic
+   trial callback. We've decided to gut having plans as settings.
+   Stripe should be your source of truth; create your plans
+   there and sync them down manually. If you need to create plans
+   locally for testing, etc., simply use the ORM to create Plan models.
+   The sync rewrite will make this drop less annoying.
+-  **Orphan Customer Sync**. We will now sync Customer objects from
+   Stripe even if they aren't linked to local subscriber objects. You
+   can link up subscribers to those Customers manually.
+-  **Concurrent Live and Test Mode**. dj-stripe now supports test-mode
+   and live-mode Customer objects concurrently. As a result, the
+   User.customer One-to-One reverse-relationship is now the
+   User.djstripe_customers RelatedManager. (Thanks @jleclanche) #440. You'll
+   run into some dj-stripe check issues if you don't update your KEY settings
+   accordingly. Check our GitHub issue tracker for help on this.
+
+SETTINGS
+^^^^^^^^
+
+-  The ``PLAN_CHOICES``, ``PLAN_LIST``, and ``PAYMENT_PLANS`` objects
+   are removed. Use Plan.objects.all() instead.
+-  The ``plan_from_stripe_id`` function is removed. Use
+   Plan.objects.get(stripe\_id=)
+
+SYNCING
+^^^^^^^
+
+-  sync\_plans no longer takes an api\_key
+-  sync methods no longer take a ``cu`` parameter
+-  All sync methods are now private. We're in the process of building a
+   better syncing mechanism.
+
+UTILITIES
+^^^^^^^^^
+
+-  dj-stripe decorators now take a plan argument. If you're passing in a
+   custom test function to ``subscriber_passes_pay_test``, be sure to
+   account for this new argument.
+
+MIXINS
+^^^^^^
+
+-  The context provided by dj-stripe's mixins has changed.
+   ``PaymentsContextMixin`` now provides ``STRIPE_PUBLIC_KEY`` and
+   ``plans`` (changed to ``Plan.objects.all()``). ``SubscriptionMixin``
+   now provides ``customer`` and ``is_plans_plural``.
+-  We've removed the SubscriptionPaymentRequiredMixin. Use
+   ``@method_decorator("dispatch",``\ `subscription\_payment\_required <https://github.com/kavdev/dj-stripe/blob/1.0.0/djstripe/decorators.py#L39>`__\ ``)``
+   instead.
+
+MIDDLEWARE
+^^^^^^^^^^
+
+-  dj-stripe middleware doesn't support multiple subscriptions.
+
+SIGNALS
+^^^^^^^
+
+-  Local custom signals are deprecated in favor of Stripe webhooks:
+-  ``cancelled`` -> WEBHOOK\_SIGNALS["customer.subscription.deleted"]
+-  ``card_changed`` -> WEBHOOK\_SIGNALS["customer.source.updated"]
+-  ``subscription_made`` ->
+   WEBHOOK\_SIGNALS["customer.subscription.created"]
+
+WEBHOOK EVENTS
+^^^^^^^^^^^^^^
+
+-  The Event Handlers designed by @wahuneke are the new way to handle
+   events that come through webhooks. Definitely take a look at
+   ``event_handlers.py`` and ``webhooks.py``.
+
+EXCEPTIONS
+^^^^^^^^^^
+
+-  ``SubscriptionUpdateFailure`` and ``SubscriptionCancellationFailure``
+   exceptions are removed. There should no longer be a case where they
+   would have been useful. Catch native stripe errors in their place
+   instead.
+
+MODELS
+^^^^^^
+
+   .. rubric:: CHARGE
+      :name: charge
+
+-  ``Charge.charge_created`` -> ``Charge.stripe_timestamp``
+-  ``Charge.card_last_4`` and ``Charge.card_kind`` are removed. Use
+   ``Charge.source.last4`` and ``Charge.source.brand`` (if the source is
+   a Card)
+-  ``Charge.invoice`` is no longer a foreign key to the Invoice model.
+   ``Invoice`` now has a OneToOne relationship with ``Charge``.
+   (``Charge.invoice`` will still work, but will no longer be
+   represented in the database).
+
+   .. rubric:: CUSTOMER
+      :name: customer
+
+-  dj-stripe now supports test mode and live mode Customer objects
+   concurrently (See #440). As a result, the
+   ``<subscriber_model>.customer`` OneToOne reverse relationship is no
+   longer a thing. You should now instead add a ``customer`` property to
+   your subscriber model that checks whether you're in live or test mode
+   (see djstripe.settings.STRIPE\_LIVE\_MODE as an example) and grabs
+   the customer from ``<subscriber_model>.djstripe_customers`` with a
+   simple ``livemode=`` filter.
+-  Customer no longer has a ``current_subscription`` property. We've
+   added a ``subscription`` property that should suit your needs.
+-  With the advent of multiple subscriptions, the behavior of
+   ``Customer.subscribe()`` has changed. Before, ``calling subscribe()``
+   when a customer was already subscribed to a plan would switch the
+   customer to the new plan with an option to prorate. Now calling
+   ``subscribe()`` simply subscribes that customer to a new plan in
+   addition to it's current subsription. Use ``Subscription.update()``
+   to change a subscription's plan instead.
+-  ``Customer.cancel_subscription()`` is removed. Use
+   ``Subscription.cancel()`` instead.
+-  The ``Customer.update_plan_quantity()`` method is removed. Use
+   ``Subscription.update()`` instead.
+-  ``CustomerManager`` is now ``SubscriptionManager`` and works on the
+   ``Subscription`` model instead of the ``Customer`` model.
+-  ``Customer.has_valid_card()`` is now ``Customer.has_valid_source()``.
+-  ``Customer.update_card()`` now takes an id. If the id is not
+   supplied, the default source is updated.
+-  ``Customer.stripe_customer`` property is removed. Use
+   ``Customer.api_retrieve()`` instead.
+-  The ``at_period_end`` parameter of ``Customer.cancel_subscription()``
+   now actually follows the
+   `DJSTRIPE\_PRORATION\_POLICY <http://dj-stripe.readthedocs.org/en/latest/settings.html#djstripe-proration-policy-false>`__
+   setting.
+-  ``Customer.card_fingerprint``, ``Customer.card_last_4``,
+   ``Customer.card_kind``, ``Customer.card_exp_month``,
+   ``Customer.card_exp_year`` are all removed. Check
+   ``Customer.default_source`` (if it's a Card) or one of the sources in
+   ``Customer.sources`` (again, if it's a Card) instead.
+-  The ``invoice_id`` parameter of ``Customer.add_invoice_item`` is now
+   named ``invoice`` and can be either an Invoice object or the
+   stripe\_id of an Invoice.
+
+   .. rubric:: EVENT
+      :name: event
+
+-  ``Event.kind`` -> ``Event.type``
+-  Removed ``Event.validated_message``. Just check if the event is valid
+   - no need to double check (we do that for you)
+
+   .. rubric:: TRANSFER
+      :name: transfer
+
+-  Removed ``Transfer.update_status()``
+-  Removed ``Transfer.event``
+-  ``TransferChargeFee`` is removed. It hasn't been used in a while due
+   to a broken API version. Use ``Transfer.fee_details`` instead.
+-  Any fields that were in ``Transfer.summary`` no longer exist and are
+   therefore deprecated (unused but not removed from the database).
+   Because of this, ``TransferManager`` now only aggregates
+   ``total_sum``
+
+   .. rubric:: INVOICE
+      :name: invoice
+
+-  ``Invoice.attempts`` -> ``Invoice.attempt_count``
+-  InvoiceItems are no longer created when Invoices are synced. You must
+   now sync InvoiceItems directly.
+
+   .. rubric:: INVOICEITEM
+      :name: invoiceitem
+
+-  Removed ``InvoiceItem.line_type``
+
+   .. rubric:: PLAN
+      :name: plan
+
+-  Plan no longer has a ``stripe_plan`` property.
+   Use ``api_retrieve()`` instead.
+-  ``Plan.currency`` no longer uses choices. Use the
+   ``get_supported_currency_choices()`` utility and create your own
+   custom choices list instead.
+-  Plan interval choices are now in ``Plan.INTERVAL_TYPE_CHOICES``
+
+   .. rubric:: SUBSCRIPTION
+      :name: subscription
+
+-  ``Subscription.is_period_current()`` now checks for a current trial
+   end if the current period has ended. This change means subscriptions
+   extended with ``Subscription.extend()`` will now be seen as valid.
+
+MIGRATIONS
+^^^^^^^^^^
+
+We'll sync your current records with Stripe in a migration. It will take
+a while, but it's the only way we can ensure data integrity. There were
+some fields for which we needed to temporarily add placeholder defaults,
+so just make sure you have a customer with ID 1 and a plan with ID 1 and
+you shouldn't run into any issues (create dummy values for these if need
+be and delete them after the migration).
+
+BIG HUGE NOTE - DON'T OVERLOOK THIS
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Subscription and InvoiceItem migration is not possible because old records don't have Stripe IDs (so we can't sync them). Our approach is to delete all local subscription and invoiceitem objects and re-sync them from Stripe.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+We 100% recommend you create a backup of your database before performing this upgrade.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Other changes
+^^^^^^^^^^^^^
+
 * Postgres users now have access to the ``DJSTRIPE_USE_NATIVE_JSONFIELD`` setting. (Thanks @jleclanche) #517, #523
-* Charge receipts now take `DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS` into account (Thanks @r0fls)
+* Charge receipts now take ``DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS`` into account (Thanks @r0fls)
 * Clarified/modified installation documentation (Thanks @pydanny)
 * Corrected and revised ANONYMOUS_USER_ERROR_MSG (Thanks @pydanny)
-* Added fnmatching to `SubscriptionPaymentMiddleware` (Thanks @pydanny)
-* `SubscriptionPaymentMiddleware.process_request()` functionality broken up into multiple methods, making local customizations easier (Thanks @pydanny)
+* Added fnmatching to ``SubscriptionPaymentMiddleware`` (Thanks @pydanny)
+* ``SubscriptionPaymentMiddleware.process_request()`` functionality broken up into multiple methods, making local customizations easier (Thanks @pydanny)
 * Fully qualified events are now supported by event handlers as strings e.g. 'customer.subscription.deleted' (Thanks @lskillen) #316
 * runtests now accepts positional arguments for declaring which tests to run (Thanks @lskillen) #317
 * It is now possible to reprocess events in both code and the admin interface (Thanks @lskillen) #318
@@ -104,7 +386,7 @@ History
 * Formal Python 3.3+/Django 1.7 Support (including migrations)
 * Removed Python 2.6 from Travis CI build. (Thanks @audreyr)
 * Dropped Django 1.4 support. (Thanks @audreyr)
-* Deprecated the ``djstripe.forms.StripeSubscriptionSignupForm``. Making this form work easily with both `dj-stripe` and `django-allauth` required too much abstraction. It will be removed in the 0.5.0 release.
+* Deprecated the ``djstripe.forms.StripeSubscriptionSignupForm``. Making this form work easily with both ``dj-stripe`` and ``django-allauth`` required too much abstraction. It will be removed in the 0.5.0 release.
 * Add the ability to add invoice items for a customer (Thanks @kavdev)
 * Add the ability to use a custom customer model (Thanks @kavdev)
 * Added setting to disable Invoice receipt emails (Thanks Chris Halpert)
@@ -154,7 +436,7 @@ History
 * Make plan cancellation and plan change consistently not prorating (Thanks Yasmine Charif)
 * Fix circular import when ACCOUNT_SIGNUP_FORM_CLASS is defined (Thanks Dustin Farris)
 * Add send e-mail receipt action in charges admin panel (Thanks Buddy Lindsay)
-* Add `created` field to all ModelAdmins to help with internal auditing (Thanks Kulbir Singh)
+* Add ``created`` field to all ModelAdmins to help with internal auditing (Thanks Kulbir Singh)
 
 0.3.1 (2013-11-14)
 ----------------------
@@ -166,8 +448,8 @@ History
 ----------------------
 
 * Fully tested against Django 1.6, 1.5, and 1.4
-* Fix boolean default issue in models (from now on they are all default to `False`).
-* Replace duplicated code with `djstripe.utils.user_has_active_subscription`.
+* Fix boolean default issue in models (from now on they are all default to ``False``).
+* Replace duplicated code with ``djstripe.utils.user_has_active_subscription``.
 
 0.2.9 (2013-09-06)
 ----------------------
