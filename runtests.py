@@ -1,11 +1,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
-from argparse import ArgumentParser
+
 import os
 import sys
+from argparse import ArgumentParser
 
-from coverage import Coverage
 import django
 from django.conf import settings
+
+from coverage import Coverage
 from termcolor import colored
 
 

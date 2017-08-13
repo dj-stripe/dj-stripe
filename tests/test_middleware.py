@@ -11,11 +11,12 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 from django.test.client import RequestFactory
-from django.test.utils import override_settings, modify_settings
+from django.test.utils import modify_settings, override_settings
 
 from djstripe.middleware import SubscriptionPaymentMiddleware
 from djstripe.models import Customer, Subscription
-from tests import FAKE_SUBSCRIPTION, FUTURE_DATE, FAKE_CUSTOMER
+
+from . import FAKE_CUSTOMER, FAKE_SUBSCRIPTION, FUTURE_DATE
 
 
 class MiddlewareURLTest(TestCase):

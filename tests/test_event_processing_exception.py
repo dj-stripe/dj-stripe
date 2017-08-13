@@ -11,7 +11,7 @@ from copy import deepcopy
 
 from django.test import TestCase
 
-from djstripe.models import EventProcessingException, Event
+from djstripe.models import Event, EventProcessingException
 
 
 class TestEventProcessingException(TestCase):

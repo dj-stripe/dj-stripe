@@ -10,23 +10,23 @@
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from copy import deepcopy
 import decimal
+from copy import deepcopy
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
-from mock import patch, ANY
 from stripe.error import InvalidRequestError
 
 from djstripe.exceptions import MultipleSubscriptionException
-from djstripe.models import Account, Coupon, Customer, Charge, Card, Subscription, Invoice, Plan
-from tests import (
-    FAKE_ACCOUNT, FAKE_CARD, FAKE_CARD_V, FAKE_CHARGE, FAKE_COUPON, FAKE_CUSTOMER,
-    FAKE_CUSTOMER_II, FAKE_DISCOUNT_CUSTOMER, FAKE_INVOICE, FAKE_INVOICEITEM,
-    FAKE_INVOICE_III, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II,
-    FAKE_UPCOMING_INVOICE, StripeList, datetime_to_unix
+from djstripe.models import Account, Card, Charge, Coupon, Customer, Invoice, Plan, Subscription
+from mock import ANY, patch
+
+from . import (
+    FAKE_ACCOUNT, FAKE_CARD, FAKE_CARD_V, FAKE_CHARGE, FAKE_COUPON, FAKE_CUSTOMER, FAKE_CUSTOMER_II,
+    FAKE_DISCOUNT_CUSTOMER, FAKE_INVOICE, FAKE_INVOICE_III, FAKE_INVOICEITEM, FAKE_PLAN,
+    FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II, FAKE_UPCOMING_INVOICE, StripeList, datetime_to_unix
 )
 
 

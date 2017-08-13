@@ -12,36 +12,33 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import logging
-import uuid
 import sys
+import uuid
 from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models.fields import (
-    BooleanField, CharField, DateTimeField, NullBooleanField, TextField, UUIDField
-)
-from django.db.models.fields.related import ForeignKey, OneToOneField
 from django.db.models.deletion import SET_NULL
+from django.db.models.fields import BooleanField, CharField, DateTimeField, NullBooleanField, TextField, UUIDField
+from django.db.models.fields.related import ForeignKey, OneToOneField
 from django.utils import six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.functional import cached_property
 from doc_inherit import class_doc_inherit
-from stripe.error import StripeError, InvalidRequestError
+from stripe.error import InvalidRequestError, StripeError
 
 from . import settings as djstripe_settings
 from . import webhooks
 from .enums import SourceType, SubscriptionStatus
 from .exceptions import MultipleSubscriptionException
 from .fields import StripeDateTimeField
-from .managers import SubscriptionManager, ChargeManager, TransferManager
+from .managers import ChargeManager, SubscriptionManager, TransferManager
 from .signals import WEBHOOK_SIGNALS, webhook_processing_error
 from .stripe_objects import (
-    StripeAccount, StripeCard, StripeCharge, StripeCoupon, StripeCustomer,
-    StripeEvent, StripeInvoice, StripeInvoiceItem, StripePayout, StripePlan,
-    StripeSource, StripeSubscription, StripeTransfer
+    StripeAccount, StripeCard, StripeCharge, StripeCoupon, StripeCustomer, StripeEvent, StripeInvoice,
+    StripeInvoiceItem, StripePayout, StripePlan, StripeSource, StripeSubscription, StripeTransfer
 )
-from .utils import get_friendly_currency_amount, QuerySetMock
+from .utils import QuerySetMock, get_friendly_currency_amount
 
 
 logger = logging.getLogger(__name__)

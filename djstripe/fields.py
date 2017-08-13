@@ -17,6 +17,7 @@ from django.db import models
 from .settings import USE_NATIVE_JSONFIELD
 from .utils import convert_tstamp, dict_nested_accessor
 
+
 if USE_NATIVE_JSONFIELD:
     from django.contrib.postgres.fields import JSONField
 else:

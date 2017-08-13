@@ -16,8 +16,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ...models import Customer
-from ...settings import subscriber_request_callback, CANCELLATION_AT_PERIOD_END
-from .serializers import SubscriptionSerializer, CreateSubscriptionSerializer
+from ...settings import CANCELLATION_AT_PERIOD_END, subscriber_request_callback
+from .serializers import CreateSubscriptionSerializer, SubscriptionSerializer
 
 
 class SubscriptionRestView(APIView):

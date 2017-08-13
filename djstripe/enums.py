@@ -1,9 +1,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
-from collections import OrderedDict
-import operator
 
-from django.utils.translation import ugettext as _
+import operator
+from collections import OrderedDict
+
 from django.utils.six import add_metaclass, text_type
+from django.utils.translation import ugettext as _
 
 
 class EnumMetaClass(type):

@@ -7,14 +7,15 @@
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from copy import deepcopy
 import decimal
+from copy import deepcopy
 
 from django.test.testcases import TestCase
-from mock import patch
 
 from djstripe.models import Event, Transfer
-from tests import FAKE_EVENT_TRANSFER_CREATED
+from mock import patch
+
+from . import FAKE_EVENT_TRANSFER_CREATED
 
 
 class TransferTest(TestCase):

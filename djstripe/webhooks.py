@@ -27,9 +27,10 @@ NOTE: global processors are called before other processors.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from collections import defaultdict
 import functools
 import itertools
+from collections import defaultdict
+
 
 __all__ = ['handler', 'handler_all', 'call_handlers']
 

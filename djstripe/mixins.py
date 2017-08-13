@@ -11,7 +11,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from . import settings as djstripe_settings
-from .models import Plan, Customer
+from .models import Customer, Plan
 
 
 class PaymentsContextMixin(object):

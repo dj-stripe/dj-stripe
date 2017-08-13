@@ -12,7 +12,8 @@ import json
 import logging
 
 from django.contrib import messages
-from django.contrib.auth import logout as auth_logout, REDIRECT_FIELD_NAME
+from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -29,6 +30,7 @@ from .forms import CancelSubscriptionForm
 from .mixins import SubscriptionMixin
 from .models import Customer, Event, EventProcessingException
 from .webhooks import TEST_EVENT_ID
+
 
 logger = logging.getLogger(__name__)
 
