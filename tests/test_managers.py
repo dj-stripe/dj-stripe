@@ -7,16 +7,17 @@
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from copy import deepcopy
 import datetime
 import decimal
+from copy import deepcopy
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 
-from djstripe.models import Transfer, Customer, Subscription, Charge, Plan
-from tests import FAKE_PLAN, FAKE_PLAN_II, FAKE_TRANSFER, FAKE_TRANSFER_II, FAKE_TRANSFER_III
+from djstripe.models import Charge, Customer, Plan, Subscription, Transfer
+
+from . import FAKE_PLAN, FAKE_PLAN_II, FAKE_TRANSFER, FAKE_TRANSFER_II, FAKE_TRANSFER_III
 
 
 class SubscriptionManagerTest(TestCase):

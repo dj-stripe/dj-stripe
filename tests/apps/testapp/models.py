@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
+
 from django.db.models.base import Model
-from django.db.models.fields import EmailField, CharField
+from django.db.models.fields import CharField, EmailField
 
 
 class Organization(Model):

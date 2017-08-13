@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import, division, print_function, unicode_literals
+)
 
 import datetime
 
 import django.core.validators
-from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
+from django.db import migrations, models
 
 import djstripe.fields
 

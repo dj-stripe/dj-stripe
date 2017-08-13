@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import, division, print_function, unicode_literals
+)
 
 import datetime
 
-from django.db import migrations, models
 import django.db.models.deletion
+from django.db import migrations, models
 from django.utils import timezone
 
 import djstripe.fields

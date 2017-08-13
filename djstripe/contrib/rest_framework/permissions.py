@@ -8,10 +8,11 @@
 
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
+
 from rest_framework.permissions import BasePermission
 
-from ...utils import subscriber_has_active_subscription
 from ...settings import subscriber_request_callback
+from ...utils import subscriber_has_active_subscription
 
 
 class DJStripeSubscriptionPermission(BasePermission):

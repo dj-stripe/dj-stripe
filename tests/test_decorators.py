@@ -18,7 +18,8 @@ from django.test.client import RequestFactory
 
 from djstripe.decorators import subscription_payment_required
 from djstripe.models import Subscription
-from tests import FAKE_SUBSCRIPTION, FUTURE_DATE, FAKE_CUSTOMER
+
+from . import FAKE_CUSTOMER, FAKE_SUBSCRIPTION, FUTURE_DATE
 
 
 class TestSubscriptionPaymentRequired(TestCase):

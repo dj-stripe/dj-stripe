@@ -21,6 +21,9 @@ from django.conf import settings
 from django.utils.encoding import force_text
 from django.utils.html import strip_tags
 
+import djstripe  # noqa
+
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -29,7 +32,6 @@ cwd = os.getcwd()
 parent = os.path.dirname(cwd)
 sys.path.append(parent)
 
-import djstripe  # noqa
 
 settings.configure(
     INSTALLED_APPS=[

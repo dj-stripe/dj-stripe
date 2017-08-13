@@ -24,10 +24,7 @@ import logging
 
 from . import webhooks
 from .enums import SourceType
-from .models import (
-    Card, Charge, Coupon, Customer, Invoice, InvoiceItem, Plan, Subscription,
-    Transfer
-)
+from .models import Card, Charge, Coupon, Customer, Invoice, InvoiceItem, Plan, Subscription, Transfer
 from .utils import convert_tstamp
 
 

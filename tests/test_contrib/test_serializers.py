@@ -14,12 +14,13 @@ from copy import deepcopy
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
-from mock import patch, PropertyMock
 
-from djstripe.contrib.rest_framework.serializers import SubscriptionSerializer, CreateSubscriptionSerializer
+from djstripe.contrib.rest_framework.serializers import CreateSubscriptionSerializer, SubscriptionSerializer
 from djstripe.enums import SubscriptionStatus
 from djstripe.models import Plan
-from tests import FAKE_PLAN, FAKE_CUSTOMER
+from mock import PropertyMock, patch
+
+from .. import FAKE_CUSTOMER, FAKE_PLAN
 
 
 class SubscriptionSerializerTest(TestCase):

@@ -13,8 +13,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from django.contrib import admin
 
 from .models import (
-    Charge, Coupon, Customer, Event, EventProcessingException, IdempotencyKey,
-    Invoice, InvoiceItem, Plan, Subscription, Transfer
+    Charge, Coupon, Customer, Event, EventProcessingException,
+    IdempotencyKey, Invoice, InvoiceItem, Plan, Subscription, Transfer
 )
 
 

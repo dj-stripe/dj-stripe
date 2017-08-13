@@ -8,19 +8,20 @@
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import json
 from collections import defaultdict
 from copy import deepcopy
-import json
 
 from django.test import TestCase
 from django.test.client import Client
 from django.urls import reverse
-from mock import call, patch, Mock, PropertyMock
 
 from djstripe import views, webhooks
 from djstripe.models import Event, EventProcessingException
-from djstripe.webhooks import handler, handler_all, call_handlers, TEST_EVENT_ID
-from tests import FAKE_EVENT_TRANSFER_CREATED, FAKE_TRANSFER, FAKE_EVENT_TEST_CHARGE_SUCCEEDED
+from djstripe.webhooks import TEST_EVENT_ID, call_handlers, handler, handler_all
+from mock import Mock, PropertyMock, call, patch
+
+from . import FAKE_EVENT_TEST_CHARGE_SUCCEEDED, FAKE_EVENT_TRANSFER_CREATED, FAKE_TRANSFER
 
 
 class TestWebhook(TestCase):

@@ -7,7 +7,7 @@ from django.test.testcases import TestCase
 
 from djstripe.models import Coupon
 
-from tests import FAKE_COUPON
+from . import FAKE_COUPON
 
 
 class TransferTest(TestCase):

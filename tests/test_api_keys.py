@@ -1,9 +1,12 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
+
 from django.conf import settings
 from django.test import TestCase
 from django.test.utils import override_settings
+
 from djstripe import settings as djstripe_settings
 from djstripe.stripe_objects import StripeObject
+
 
 try:
     reload

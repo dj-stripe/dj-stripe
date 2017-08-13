@@ -10,11 +10,11 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from copy import deepcopy
 
 from django.test.testcases import TestCase
+
+from djstripe.models import Account, InvoiceItem
 from mock import patch
 
-from djstripe.models import InvoiceItem, Account
-from tests import (FAKE_INVOICEITEM, FAKE_INVOICE_II, FAKE_CHARGE_II, FAKE_CUSTOMER_II, FAKE_SUBSCRIPTION_III,
-                   FAKE_PLAN_II)
+from . import FAKE_CHARGE_II, FAKE_CUSTOMER_II, FAKE_INVOICE_II, FAKE_INVOICEITEM, FAKE_PLAN_II, FAKE_SUBSCRIPTION_III
 
 
 class InvoiceItemTest(TestCase):

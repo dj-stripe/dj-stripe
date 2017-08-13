@@ -12,8 +12,9 @@ Stripe docs for Webhooks: https://stripe.com/docs/webhooks
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from django.dispatch import Signal, receiver
 from django.db.models.signals import pre_delete
+from django.dispatch import Signal, receiver
+
 from . import settings as djstripe_settings
 
 

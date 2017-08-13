@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import, division, print_function, unicode_literals
+)
 
-from django.conf import settings
-from django.db import models, migrations
 import django.db.models.deletion
 import django.utils.timezone
 import jsonfield.fields
+from django.conf import settings
+from django.db import migrations, models
 
 
 # Can't use the callable because the app registry is not ready yet.

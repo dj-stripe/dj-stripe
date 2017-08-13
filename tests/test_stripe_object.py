@@ -7,11 +7,10 @@
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from django.core.exceptions import ImproperlyConfigured, FieldError
-
+from django.core.exceptions import FieldError, ImproperlyConfigured
 from django.test import TestCase
 
-from djstripe.stripe_objects import StripeObject, StripeCharField, StripeBooleanField
+from djstripe.stripe_objects import StripeBooleanField, StripeCharField, StripeObject
 
 
 SIMPLE_OBJ = {

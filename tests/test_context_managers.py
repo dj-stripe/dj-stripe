@@ -8,11 +8,10 @@
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import stripe
 from django.test import TestCase
 
 from djstripe.context_managers import stripe_temporary_api_version
-
-import stripe
 
 
 class TestTemporaryVersion(TestCase):
