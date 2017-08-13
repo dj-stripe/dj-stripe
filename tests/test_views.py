@@ -37,7 +37,7 @@ class CancelSubscriptionViewTest(TestCase):
         stripe_customer.save()
 
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
-    @patch("djstripe.stripe_objects.StripeSubscription.cancel", return_value=FAKE_SUBSCRIPTION_CANCELED)
+    @patch("djstripe.models.StripeSubscription.cancel", return_value=FAKE_SUBSCRIPTION_CANCELED)
     def test_cancel(self, cancel_subscription_mock, customer_retrieve_mock):
         Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
 
@@ -48,7 +48,7 @@ class CancelSubscriptionViewTest(TestCase):
         self.assertTrue(self.user.is_authenticated)
 
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
-    @patch("djstripe.stripe_objects.StripeSubscription.cancel", return_value=FAKE_SUBSCRIPTION_CANCELED_AT_PERIOD_END)
+    @patch("djstripe.models.StripeSubscription.cancel", return_value=FAKE_SUBSCRIPTION_CANCELED_AT_PERIOD_END)
     def test_cancel_at_period_end(self, cancel_subscription_mock, customer_retrieve_mock):
         Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
 
@@ -59,7 +59,7 @@ class CancelSubscriptionViewTest(TestCase):
         self.assertTrue(self.user.is_authenticated)
 
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
-    @patch("djstripe.stripe_objects.StripeSubscription.cancel", return_value=FAKE_SUBSCRIPTION_CANCELED)
+    @patch("djstripe.models.StripeSubscription.cancel", return_value=FAKE_SUBSCRIPTION_CANCELED)
     def test_cancel_next_url(self, cancel_subscription_mock, customer_retrieve_mock):
         Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
 
@@ -71,7 +71,7 @@ class CancelSubscriptionViewTest(TestCase):
         self.assertTrue(get_user(self.client).is_anonymous)
 
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
-    @patch("djstripe.stripe_objects.StripeSubscription.cancel")
+    @patch("djstripe.models.StripeSubscription.cancel")
     def test_cancel_no_subscription(self, cancel_subscription_mock, customer_retrieve_mock):
         response = self.client.post(self.url)
 

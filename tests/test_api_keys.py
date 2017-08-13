@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 from djstripe import settings as djstripe_settings
-from djstripe.stripe_objects import StripeObject
+from djstripe.models import StripeObject
 
 
 try:

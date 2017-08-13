@@ -11,7 +11,7 @@ from django.core.exceptions import FieldError, ImproperlyConfigured
 from django.test import TestCase
 
 from djstripe.fields import StripeBooleanField, StripeCharField
-from djstripe.stripe_objects import StripeObject
+from djstripe.models import StripeObject
 
 
 SIMPLE_OBJ = {
