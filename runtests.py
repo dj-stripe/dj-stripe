@@ -44,12 +44,8 @@ def run_test_suite(args):
         SITE_ID=1,
         DATABASES={
             "default": {
-                "ENGINE": "django.db.backends.postgresql_psycopg2",
-                "NAME": "djstripe",
-                "USER": "postgres",
-                "PASSWORD": "",
-                "HOST": "localhost",
-                "PORT": "",
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": ":memory:",
             },
         },
         TEMPLATES=[
