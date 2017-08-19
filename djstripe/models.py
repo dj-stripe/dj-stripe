@@ -590,7 +590,7 @@ class Event(StripeEvent):
             return False
 
         if not self.processed or force:
-            exc_value = None
+            exc_info = None
 
             try:
                 # TODO: would it make sense to wrap the next 4 lines in a transaction.atomic context? Yes it would,
@@ -603,7 +603,8 @@ class Event(StripeEvent):
             except StripeError as exc:
                 # TODO: What if we caught all exceptions or a broader range of exceptions here? How about DoesNotExist
                 # exceptions, for instance? or how about TypeErrors, KeyErrors, ValueErrors, etc?
-                exc_value = exc
+                exc_info = sys.exc_info()
+
                 self.processed = False
                 EventProcessingException.log(
                     data=exc.http_body,
@@ -621,8 +622,8 @@ class Event(StripeEvent):
             # an event handle was broken.
             self.save()
 
-            if exc_value and raise_exception:
-                six.reraise(StripeError, exc_value)
+            if exc_info and raise_exception:
+                six.reraise(*exc_info)
 
         return self.processed
 
