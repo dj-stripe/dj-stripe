@@ -297,7 +297,7 @@ class SubscriptionTest(TestCase):
         reactivated_subscription = Subscription.sync_from_stripe_data(subscription_reactivate_fake)
         self.assertEqual(reactivated_subscription.cancel_at_period_end, False)
 
-    @patch("djstripe.stripe_objects.StripeSubscription._api_delete")
+    @patch("djstripe.models.Subscription._api_delete")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION_CANCELED))
     def test_cancel_already_canceled(self, subscription_retrieve_mock, subscription_delete_mock):
         subscription_delete_mock.side_effect = InvalidRequestError("No such subscription: sub_xxxx", "blah")
@@ -309,7 +309,7 @@ class SubscriptionTest(TestCase):
         subscription.cancel()
         self.assertEqual(Subscription.objects.filter(status="canceled").count(), 1)
 
-    @patch("djstripe.stripe_objects.StripeSubscription._api_delete")
+    @patch("djstripe.models.Subscription._api_delete")
     def test_cancel_error_in_cancel(self, subscription_delete_mock):
         subscription_delete_mock.side_effect = InvalidRequestError("Unexpected error", "blah")
 
