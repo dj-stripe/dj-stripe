@@ -12,10 +12,10 @@ from copy import deepcopy
 from django.contrib.auth import get_user_model
 from django.test.client import RequestFactory
 from django.test.testcases import TestCase
+from mock import patch
 
 from djstripe.mixins import PaymentsContextMixin, SubscriptionMixin
 from djstripe.models import Plan
-from mock import patch
 
 from . import FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II
 

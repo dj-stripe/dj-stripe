@@ -5,9 +5,8 @@ import sys
 from argparse import ArgumentParser
 
 import django
-from django.conf import settings
-
 from coverage import Coverage
+from django.conf import settings
 from termcolor import colored
 
 

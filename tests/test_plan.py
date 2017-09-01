@@ -13,10 +13,10 @@ from decimal import Decimal
 from django.conf import settings
 from django.contrib.admin.sites import AdminSite
 from django.test import TestCase
+from mock import patch
 
 from djstripe.admin import PlanAdmin
 from djstripe.models import Plan
-from mock import patch
 
 from . import FAKE_PLAN, FAKE_PLAN_II
 

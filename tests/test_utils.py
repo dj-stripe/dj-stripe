@@ -19,10 +19,10 @@ from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import timezone
+from mock import patch
 
 from djstripe.models import Subscription
 from djstripe.utils import convert_tstamp, get_supported_currency_choices, subscriber_has_active_subscription
-from mock import patch
 
 from . import FAKE_CUSTOMER, FAKE_SUBSCRIPTION
 from .apps.testapp.models import Organization

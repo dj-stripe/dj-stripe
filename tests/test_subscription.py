@@ -13,11 +13,11 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
+from mock import patch
 from stripe.error import InvalidRequestError
 
 from djstripe.enums import SubscriptionStatus
 from djstripe.models import Plan, Subscription
-from mock import patch
 
 from . import FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_CANCELED, datetime_to_unix
 

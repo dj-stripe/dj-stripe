@@ -14,13 +14,13 @@ from copy import deepcopy
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
+from mock import patch
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from djstripe import settings as djstripe_settings
 from djstripe.enums import SubscriptionStatus
 from djstripe.models import Customer, Plan, Subscription
-from mock import patch
 
 from .. import FAKE_CUSTOMER, FAKE_PLAN, FAKE_SUBSCRIPTION
 

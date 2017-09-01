@@ -12,11 +12,11 @@ from copy import deepcopy
 
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
+from mock import patch
 from stripe.error import InvalidRequestError
 
 from djstripe.models import Customer
 from djstripe.sync import sync_subscriber
-from mock import patch
 
 from . import FAKE_CUSTOMER
 
