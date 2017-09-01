@@ -13,10 +13,10 @@ from copy import deepcopy
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from mock import Mock, patch
 
 from djstripe import webhooks
 from djstripe.models import Event, StripeError
-from mock import Mock, patch
 
 from . import FAKE_CUSTOMER, FAKE_EVENT_TRANSFER_CREATED
 

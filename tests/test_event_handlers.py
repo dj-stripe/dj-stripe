@@ -13,11 +13,11 @@ from copy import deepcopy
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from mock import patch
 
 from djstripe.models import (
     Account, Card, Charge, Coupon, Customer, Event, Invoice, InvoiceItem, Plan, Subscription, Transfer
 )
-from mock import patch
 
 from . import (
     FAKE_CARD, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_COUPON, FAKE_CUSTOMER, FAKE_CUSTOMER_II,

@@ -15,11 +15,11 @@ from copy import deepcopy
 from django.test import TestCase
 from django.test.client import Client
 from django.urls import reverse
+from mock import Mock, PropertyMock, call, patch
 
 from djstripe import views, webhooks
 from djstripe.models import Event, EventProcessingException
 from djstripe.webhooks import TEST_EVENT_ID, call_handlers, handler, handler_all
-from mock import Mock, PropertyMock, call, patch
 
 from . import FAKE_EVENT_TEST_CHARGE_SUCCEEDED, FAKE_EVENT_TRANSFER_CREATED, FAKE_TRANSFER
 

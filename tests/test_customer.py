@@ -17,11 +17,11 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
+from mock import ANY, patch
 from stripe.error import InvalidRequestError
 
 from djstripe.exceptions import MultipleSubscriptionException
 from djstripe.models import Account, Card, Charge, Coupon, Customer, Invoice, Plan, Subscription
-from mock import ANY, patch
 
 from . import (
     FAKE_ACCOUNT, FAKE_CARD, FAKE_CARD_V, FAKE_CHARGE, FAKE_COUPON, FAKE_CUSTOMER, FAKE_CUSTOMER_II,

@@ -9,9 +9,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.conf import settings
 from django.test.testcases import TestCase
+from mock import patch
 
 from djstripe.models import Account
-from mock import patch
 
 from . import FAKE_ACCOUNT
 

@@ -13,9 +13,9 @@ from copy import deepcopy
 from django.contrib.auth import get_user, get_user_model
 from django.test.testcases import TestCase
 from django.urls import reverse
+from mock import patch
 
 from djstripe.models import Customer, Plan, Subscription
-from mock import patch
 
 from . import (
     FAKE_CUSTOMER, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_CANCELED, FAKE_SUBSCRIPTION_CANCELED_AT_PERIOD_END

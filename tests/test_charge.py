@@ -12,10 +12,10 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
+from mock import patch
 
 from djstripe.enums import SourceType
 from djstripe.models import Account, Charge
-from mock import patch
 
 from . import FAKE_ACCOUNT, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_TRANSFER
 

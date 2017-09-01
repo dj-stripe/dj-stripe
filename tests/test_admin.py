@@ -13,10 +13,10 @@ from copy import deepcopy
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from mock import Mock, patch
 
 from djstripe.admin import reprocess_events, subscription_status
 from djstripe.models import Event, Subscription
-from mock import Mock, patch
 
 from . import FAKE_CUSTOMER, FAKE_PLAN, FAKE_SUBSCRIPTION
 

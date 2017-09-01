@@ -11,9 +11,9 @@ import decimal
 from copy import deepcopy
 
 from django.test.testcases import TestCase
+from mock import patch
 
 from djstripe.models import Event, Transfer
-from mock import patch
 
 from . import FAKE_EVENT_TRANSFER_CREATED
 
