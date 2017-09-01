@@ -1556,7 +1556,7 @@ class Payout(StripeObject):
 # ============================================================================ #
 
 class StripeSource(PolymorphicModel, StripeObject):
-    customer = models.ForeignKey("Customer", on_delete=models.CASCADE, related_name="sources")
+    pass
 
 
 class Card(StripeSource):
@@ -1624,6 +1624,10 @@ class Card(StripeSource):
         max_length=11,
         choices=enums.CardTokenizationMethod.choices,
         help_text="If the card number is tokenized, this is the method that was used."
+    )
+
+    customer = models.ForeignKey(
+        "Customer", on_delete=models.CASCADE, related_name="sources"
     )
 
     @staticmethod
