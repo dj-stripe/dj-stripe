@@ -37,8 +37,8 @@ from .context_managers import stripe_temporary_api_version
 from .enums import SourceType, SubscriptionStatus
 from .exceptions import MultipleSubscriptionException, StripeObjectManipulationException
 from .fields import (
-    StripeBooleanField, StripeCharField, StripeCurrencyField, StripeDateTimeField,
-    StripeFieldMixin, StripeIdField, StripeIntegerField, StripeJSONField,
+    PaymentMethodForeignKey, StripeBooleanField, StripeCharField, StripeCurrencyField,
+    StripeDateTimeField, StripeFieldMixin, StripeIdField, StripeIntegerField, StripeJSONField,
     StripeNullBooleanField, StripePercentField, StripePositiveIntegerField, StripeTextField
 )
 from .managers import ChargeManager, StripeObjectManager, SubscriptionManager, TransferManager
@@ -50,6 +50,19 @@ logger = logging.getLogger(__name__)
 
 # Override the default API version used by the Stripe library.
 djstripe_settings.set_stripe_api_version()
+
+
+class PaymentMethod(models.Model):
+    """
+    An internal model that abstracts the legacy Card and BankAccount
+    objects with Source objects.
+
+    Contains two fields: `id` and `type`:
+    - `id` is the id of the Stripe object.
+    - `type` can be `card`, `bank_account` or `source`.
+    """
+    id = CharField(max_length=255, primary_key=True)
+    type = CharField(max_length=12, db_index=True)
 
 
 @python_2_unicode_compatible
@@ -541,9 +554,8 @@ class Charge(StripeObject):
     )
     # TODO: refunds, review
     shipping = StripeJSONField(null=True, help_text="Shipping information for the charge")
-    source = ForeignKey(
-        "StripeSource", on_delete=SET_NULL,
-        null=True, related_name="charges",
+    source = PaymentMethodForeignKey(
+        on_delete=SET_NULL, null=True, related_name="charges",
         help_text="The source used for this charge."
     )
     # TODO: source, source_transfer
@@ -729,7 +741,7 @@ class Customer(StripeObject):
         help_text="The currency the customer can be charged in for recurring billing purposes (subscriptions, "
         "invoices, invoice items)."
     )
-    default_source = ForeignKey("StripeSource", null=True, related_name="customers", on_delete=SET_NULL)
+    default_source = PaymentMethodForeignKey(on_delete=SET_NULL, null=True, related_name="customers")
     delinquent = StripeBooleanField(
         help_text="Whether or not the latest charge for the customer's latest invoice has failed."
     )

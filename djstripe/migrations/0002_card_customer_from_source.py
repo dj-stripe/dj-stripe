@@ -44,4 +44,71 @@ class Migration(migrations.Migration):
             name="customer",
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="sources", to="djstripe.Customer"),
         ),
+
+        # Step 6: Add a PaymentMethod model
+        migrations.CreateModel(
+            name="PaymentMethod",
+            fields=[
+                ("id", models.CharField(max_length=255, primary_key=True, serialize=False)),
+                ("type", models.CharField(db_index=True, max_length=12)),
+            ],
+        ),
+        # Step 7: Backfill the PaymentMethod model, using data from the Card table
+        # The neat thing: We don"t have to worry about handling non-card data because
+        # until now, it was not supported in djstripe.
+        migrations.RunSQL("""
+            INSERT INTO djstripe_paymentmethod (id, type)
+                SELECT stripe_id, 'card'
+                FROM djstripe_stripesource
+        """),
+
+        # Step 8: Rename `charge.source` and `customer.default_source` to `_old` prefix
+        migrations.RenameField(
+            model_name="charge",
+            old_name="source",
+            new_name="source_old",
+        ),
+        migrations.RenameField(
+            model_name="customer",
+            old_name="default_source",
+            new_name="default_source_old",
+        ),
+
+        # Step 9: Add `charge.source` and `customer.default_source` fields
+        # They will be ForeignKeys to the PaymentMethod model
+        migrations.AddField(
+            model_name="charge",
+            name="source",
+            field=djstripe.fields.PaymentMethodForeignKey(help_text="The source used for this charge.", null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="charges", to="djstripe.PaymentMethod"),
+        ),
+        migrations.AddField(
+            model_name="customer",
+            name="default_source",
+            field=djstripe.fields.PaymentMethodForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="customers", to="djstripe.PaymentMethod"),
+        ),
+
+        # Step 10: Backfill `charge.source` and `customer.default_source`
+        # The values are the stripe IDs of the sources.
+        migrations.RunSQL("""
+            UPDATE djstripe_charge AS dch
+            SET source_id = dss.stripe_id
+            FROM djstripe_stripesource AS dss
+            WHERE dch.source_old_id = dss.id
+        """),
+        migrations.RunSQL("""
+            UPDATE djstripe_customer AS dcu
+            SET default_source_id = dss.stripe_id
+            FROM djstripe_stripesource AS dss
+            WHERE dcu.default_source_old_id = dss.id
+        """),
+
+        # Step 11: Drop the `_old` fields.
+        migrations.RemoveField(
+            model_name="charge",
+            name="source_old",
+        ),
+        migrations.RemoveField(
+            model_name="customer",
+            name="default_source_old",
+        ),
     ]
