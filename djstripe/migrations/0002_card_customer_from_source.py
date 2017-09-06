@@ -14,38 +14,38 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # Step 1: Create a `customer_from_source` field on Card.
+        # Step 1: Remove the `customer` field on StripeSource (SQL noop)
+        # We have to do this first because we can't add a customer field on
+        # the child model without Django freaking out.
+        # We could create it with a different name then rename it... but:
+        # https://code.djangoproject.com/ticket/28573
+        migrations.RunSQL("", state_operations=[
+            migrations.RemoveField(model_name="stripesource", name="customer")
+        ]),
+
+        # Step 2: Create a `customer` field on Card.
         migrations.AddField(
             model_name="card",
-            name="customer_from_source",
+            name="customer",
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name="sources", to="djstripe.Customer"),
         ),
-        # Step 2: Backfill `customer_from_source` using data from the parent source model.
+
+        # Step 3: Backfill `card.customer` using data from the parent source model.
         migrations.RunSQL("""
             UPDATE djstripe_card AS dc
-            SET customer_from_source_id = ds.customer_id
-            FROM djstripe_stripesource AS ds
-            WHERE dc.stripesource_ptr_id = ds.id
+            SET customer_id = dss.customer_id
+            FROM djstripe_stripesource AS dss
+            WHERE dc.stripesource_ptr_id = dss.id
         """),
-        # Step 3: Drop `customer` on parent source model.
-        migrations.RemoveField(
-            model_name="stripesource",
-            name="customer",
-        ),
-        # Step 4: Rename `customer_from_source` to `customer`.
-        migrations.RenameField(
-            model_name="card",
-            old_name="customer_from_source",
-            new_name="customer",
-        ),
-        # Step 5: Drop NULL on `card.customer`
+
+        # Step 4: Drop NULL on `card.customer`
         migrations.AlterField(
             model_name="card",
             name="customer",
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="sources", to="djstripe.Customer"),
         ),
 
-        # Step 6: Add a PaymentMethod model
+        # Step 5: Add a PaymentMethod model
         migrations.CreateModel(
             name="PaymentMethod",
             fields=[
@@ -53,7 +53,8 @@ class Migration(migrations.Migration):
                 ("type", models.CharField(db_index=True, max_length=12)),
             ],
         ),
-        # Step 7: Backfill the PaymentMethod model, using data from the Card table
+
+        # Step 6: Backfill the PaymentMethod model, using data from the Card table
         # The neat thing: We don"t have to worry about handling non-card data because
         # until now, it was not supported in djstripe.
         migrations.RunSQL("""
@@ -62,7 +63,7 @@ class Migration(migrations.Migration):
                 FROM djstripe_stripesource
         """),
 
-        # Step 8: Rename `charge.source` and `customer.default_source` to `_old` prefix
+        # Step 7: Rename `charge.source` and `customer.default_source` to `_old` prefix
         migrations.RenameField(
             model_name="charge",
             old_name="source",
@@ -74,7 +75,7 @@ class Migration(migrations.Migration):
             new_name="default_source_old",
         ),
 
-        # Step 9: Add `charge.source` and `customer.default_source` fields
+        # Step 8: Add `charge.source` and `customer.default_source` fields
         # They will be ForeignKeys to the PaymentMethod model
         migrations.AddField(
             model_name="charge",
@@ -87,7 +88,7 @@ class Migration(migrations.Migration):
             field=djstripe.fields.PaymentMethodForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="customers", to="djstripe.PaymentMethod"),
         ),
 
-        # Step 10: Backfill `charge.source` and `customer.default_source`
+        # Step 9: Backfill `charge.source` and `customer.default_source`
         # The values are the stripe IDs of the sources.
         migrations.RunSQL("""
             UPDATE djstripe_charge AS dch
@@ -102,7 +103,7 @@ class Migration(migrations.Migration):
             WHERE dcu.default_source_old_id = dss.id
         """),
 
-        # Step 11: Drop the `_old` fields.
+        # Step 10: Drop the `_old` fields.
         migrations.RemoveField(
             model_name="charge",
             name="source_old",
@@ -115,10 +116,10 @@ class Migration(migrations.Migration):
         # Now we are ready to unpolymorphize the Card model
         # Okay, so altering model bases does not quite work in django migrations.
         # https://groups.google.com/forum/#!topic/django-developers/Z43FvzPP3HA
-        # Step 12: Delete the Card model from the state, without deleting it from the db.
+        # Step 11: Delete the Card model from the state, without deleting it from the db.
         migrations.RunSQL("", state_operations=[migrations.DeleteModel(name="Card")]),
 
-        # Step 13: Recover the Card model without its bases (again, SQL noop)
+        # Step 12: Recover the Card model without its bases (again, SQL noop)
         migrations.RunSQL("", state_operations=[
             migrations.CreateModel(
                 name="Card",
