@@ -24,7 +24,7 @@ import logging
 
 from . import webhooks
 from .enums import SourceType
-from .models import Card, Charge, Coupon, Customer, Invoice, InvoiceItem, Plan, Subscription, Transfer
+from .models import Card, Charge, Coupon, Customer, Invoice, InvoiceItem, PaymentMethod, Plan, Subscription, Transfer
 from .utils import convert_tstamp
 
 
@@ -114,7 +114,15 @@ def customer_source_webhook_handler(event):
 
     # TODO: handle other types of sources (https://stripe.com/docs/api#customer_object-sources)
     if source_type == SourceType.card:
-        _handle_crud_like_event(target_cls=Card, event=event)
+        if event.verb.endswith("deleted") and customer_data:
+            # On customer.source.deleted, we do not delete the object, we merely unlink it.
+            # customer = Customer.objects.get(stripe_id=customer_data["id"])
+            # NOTE: for now, customer.sources still points to Card
+            # Also, https://github.com/dj-stripe/dj-stripe/issues/576
+            Card.objects.filter(stripe_id=customer_data.get("id", "")).delete()
+            PaymentMethod.objects.filter(id=customer_data.get("id", "")).delete()
+        else:
+            _handle_crud_like_event(target_cls=Card, event=event)
 
 
 @webhooks.handler("customer.subscription")
