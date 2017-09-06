@@ -21,7 +21,7 @@ from datetime import timedelta
 import stripe
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
+from django.db import models, transaction
 from django.db.models.deletion import SET_NULL
 from django.db.models.fields import BooleanField, CharField, DateTimeField, NullBooleanField, TextField, UUIDField
 from django.db.models.fields.related import ForeignKey, OneToOneField
@@ -63,6 +63,27 @@ class PaymentMethod(models.Model):
     """
     id = CharField(max_length=255, primary_key=True)
     type = CharField(max_length=12, db_index=True)
+
+    @classmethod
+    def _get_or_create_source(cls, data, source_type):
+        # TODO other source types
+        if source_type == SourceType.card:
+            Card._get_or_create_from_stripe_object(data)
+
+        return cls.objects.get_or_create(id=data["id"], defaults={"type": source_type})
+
+    @property
+    def stripe_id(self):
+        # Deprecated (transitional)
+        return self.id
+
+    @property
+    def object_model(self):
+        # TODO other source types
+        return Card
+
+    def get_object(self):
+        return self.object_model.objects.get(stripe_id=self.id)
 
 
 @python_2_unicode_compatible
@@ -339,20 +360,6 @@ class StripeObject(models.Model):
             return target_cls._get_or_create_from_stripe_object(data, "transfer")[0]
 
     @classmethod
-    def _stripe_object_to_source(cls, target_cls, data):
-        """
-        Search the given manager for the source matching this object's ``source`` field.
-        Note that the source field is already expanded in each request, and that it is required.
-
-        :param target_cls: The target class
-        :type target_cls: Source
-        :param data: stripe object
-        :type data: dict
-        """
-
-        return target_cls._get_or_create_from_stripe_object(data["source"])[0]
-
-    @classmethod
     def _stripe_object_to_invoice(cls, target_cls, data):
         """
         Search the given manager for the Invoice matching this Charge object's ``invoice`` field.
@@ -616,9 +623,7 @@ class Charge(StripeObject):
         else:
             self.account = Account.get_default_account()
 
-        # TODO: other sources
-        if self.source_type == SourceType.card:
-            self.source = cls._stripe_object_to_source(target_cls=Card, data=data)
+        self.source, _ = PaymentMethod._get_or_create_source(data["source"], self.source_type)
 
     def str_parts(self):
         return [
@@ -1029,14 +1034,18 @@ class Customer(StripeObject):
             stripe_customer.default_source = new_stripe_card["id"]
             stripe_customer.save()
 
-        new_stripe_card = Card.sync_from_stripe_data(new_stripe_card)
+        with transaction.atomic():
+            new_card = Card.sync_from_stripe_data(new_stripe_card)
+            new_payment_method, _ = PaymentMethod.objects.get_or_create(
+                id=new_stripe_card["id"], defaults={"type": "card"}
+            )
 
         # Change the default source
         if set_default:
-            self.default_source = new_stripe_card
-            new_stripe_card = self.save()
+            self.default_source = new_payment_method
+            new_card = self.save()
 
-        return new_stripe_card
+        return new_card
 
     def purge(self):
         try:
@@ -1211,26 +1220,26 @@ class Customer(StripeObject):
     def _attach_objects_post_save_hook(self, cls, data):  # noqa (function complexity)
         save = False
 
-        # Have to create sources before we handle the default_source
-        if data["sources"]:
-            for source in data["sources"]["data"]:
-                if not isinstance(source, dict) or source.get("object") == SourceType.card:
-                    Card._get_or_create_from_stripe_object(source)
-                else:
-                    logger.warning("Unsupported source type on %r: %r", self, source)
+        customer_sources = data.get("sources")
+        if customer_sources:
+            # Have to create sources before we handle the default_source
+            # We save all of them in the `sources` dict, so that we can find them
+            # by id when we look at the default_source (we need the source type).
+            sources = {}
+            for source in customer_sources["data"]:
+                obj, _ = PaymentMethod._get_or_create_source(source, source["object"])
+                sources[source["id"]] = obj
 
         default_source = data.get("default_source")
         if default_source:
-            # TODO: other sources
-            if not isinstance(default_source, dict) or default_source.get("object") == SourceType.card:
-                source, created = Card._get_or_create_from_stripe_object(data, "default_source", refetch=False)
+            if isinstance(default_source, six.string_types):
+                default_source_id = default_source
             else:
-                logger.warning("Unsupported source type on %r: %r", self, default_source)
-                source = None
+                default_source_id = default_source["id"]
+            source = sources[default_source_id]
 
-            if source and source != self.default_source:
-                self.default_source = source
-                save = True
+            save = self.default_source != source
+            self.default_source = source
 
         discount = data.get("discount")
         if discount:

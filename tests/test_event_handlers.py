@@ -16,7 +16,7 @@ from django.test import TestCase
 from mock import patch
 
 from djstripe.models import (
-    Account, Card, Charge, Coupon, Customer, Event, Invoice, InvoiceItem, Plan, Subscription, Transfer
+    Account, Card, Charge, Coupon, Customer, Event, Invoice, InvoiceItem, PaymentMethod, Plan, Subscription, Transfer
 )
 
 from . import (
@@ -191,8 +191,7 @@ class TestCustomerEvents(EventTestCase):
         self.assertFalse(Card.objects.filter(stripe_id=fake_stripe_event["data"]["object"]["id"]).exists())
 
     def test_customer_default_source_deleted(self):
-        card = Card.objects.get(stripe_id=FAKE_CARD["id"])
-        self.customer.default_source = card
+        self.customer.default_source = PaymentMethod.objects.get(id=FAKE_CARD["id"])
         self.customer.save()
         self.assertIsNotNone(self.customer.default_source)
         self.assertTrue(self.customer.has_valid_source())

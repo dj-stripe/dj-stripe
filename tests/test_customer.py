@@ -21,7 +21,7 @@ from mock import ANY, patch
 from stripe.error import InvalidRequestError
 
 from djstripe.exceptions import MultipleSubscriptionException
-from djstripe.models import Account, Card, Charge, Coupon, Customer, Invoice, Plan, Subscription
+from djstripe.models import Account, Card, Charge, Coupon, Customer, Invoice, PaymentMethod, Plan, Subscription
 
 from . import (
     FAKE_ACCOUNT, FAKE_CARD, FAKE_CARD_V, FAKE_CHARGE, FAKE_COUPON, FAKE_CUSTOMER, FAKE_CUSTOMER_II,
@@ -36,9 +36,10 @@ class TestCustomer(TestCase):
         self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
-        self.card, _created = Card._get_or_create_from_stripe_object(data=FAKE_CARD)
+        self.payment_method, _ = PaymentMethod._get_or_create_source(FAKE_CARD, "card")
+        self.card = self.payment_method.get_object()
 
-        self.customer.default_source = self.card
+        self.customer.default_source = self.payment_method
         self.customer.save()
 
         self.account = Account.objects.create()
