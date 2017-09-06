@@ -473,3 +473,6 @@ class TestTransferEvents(EventTestCase):
 
         with self.assertRaises(Transfer.DoesNotExist):
             Transfer.objects.get(stripe_id=FAKE_TRANSFER["id"])
+
+        event = self._create_event(FAKE_EVENT_TRANSFER_DELETED)
+        self.assertTrue(event.process())

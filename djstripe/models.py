@@ -1704,11 +1704,7 @@ class Card(StripeObject):
                 # The exception was raised for another reason, re-raise it
                 six.reraise(*sys.exc_info())
 
-        try:
-            self.delete()
-        except Card.DoesNotExist:
-            # The card has already been deleted (potentially during the API call)
-            pass
+        self.delete()
 
     def api_retrieve(self, api_key=None):
         # OVERRIDING the parent version of this function
