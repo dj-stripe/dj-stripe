@@ -111,4 +111,120 @@ class Migration(migrations.Migration):
             model_name="customer",
             name="default_source_old",
         ),
+
+        # Now we are ready to unpolymorphize the Card model
+        # Okay, so altering model bases does not quite work in django migrations.
+        # https://groups.google.com/forum/#!topic/django-developers/Z43FvzPP3HA
+        # Step 12: Delete the Card model from the state, without deleting it from the db.
+        migrations.RunSQL("", state_operations=[migrations.DeleteModel(name="Card")]),
+
+        # Step 13: Recover the Card model without its bases (again, SQL noop)
+        migrations.RunSQL("", state_operations=[
+            migrations.CreateModel(
+                name="Card",
+                fields=[
+                    ("stripesource_ptr", models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to="djstripe.StripeSource")),
+                    ("address_city", djstripe.fields.StripeTextField(help_text="Billing address city.", null=True)),
+                    ("address_country", djstripe.fields.StripeTextField(help_text="Billing address country.", null=True)),
+                    ("address_line1", djstripe.fields.StripeTextField(help_text="Billing address (Line 1).", null=True)),
+                    ("address_line1_check", djstripe.fields.StripeCharField(choices=[("fail", "Fail"), ("pass", "Pass"), ("unavailable", "Unavailable"), ("unchecked", "Unchecked")], help_text="If ``address_line1`` was provided, results of the check.", max_length=11, null=True)),
+                    ("address_line2", djstripe.fields.StripeTextField(help_text="Billing address (Line 2).", null=True)),
+                    ("address_state", djstripe.fields.StripeTextField(help_text="Billing address state.", null=True)),
+                    ("address_zip", djstripe.fields.StripeTextField(help_text="Billing address zip code.", null=True)),
+                    ("address_zip_check", djstripe.fields.StripeCharField(choices=[("fail", "Fail"), ("pass", "Pass"), ("unavailable", "Unavailable"), ("unchecked", "Unchecked")], help_text="If ``address_zip`` was provided, results of the check.", max_length=11, null=True)),
+                    ("brand", djstripe.fields.StripeCharField(choices=[("American Express", "American Express"), ("Diners Club", "Diners Club"), ("Discover", "Discover"), ("JCB", "JCB"), ("MasterCard", "MasterCard"), ("Unknown", "Unknown"), ("Visa", "Visa")], help_text="Card brand.", max_length=16)),
+                    ("country", djstripe.fields.StripeCharField(help_text="Two-letter ISO code representing the country of the card.", max_length=2)),
+                    ("cvc_check", djstripe.fields.StripeCharField(choices=[("fail", "Fail"), ("pass", "Pass"), ("unavailable", "Unavailable"), ("unchecked", "Unchecked")], help_text="If a CVC was provided, results of the check.", max_length=11, null=True)),
+                    ("dynamic_last4", djstripe.fields.StripeCharField(help_text="(For tokenized numbers only.) The last four digits of the device account number.", max_length=4, null=True)),
+                    ("exp_month", djstripe.fields.StripeIntegerField(help_text="Card expiration month.")),
+                    ("exp_year", djstripe.fields.StripeIntegerField(help_text="Card expiration year.")),
+                    ("fingerprint", djstripe.fields.StripeTextField(help_text="Uniquely identifies this particular card number.", null=True)),
+                    ("funding", djstripe.fields.StripeCharField(choices=[("credit", "Credit"), ("debit", "Debit"), ("prepaid", "Prepaid"), ("unknown", "Unknown")], help_text="Card funding type.", max_length=7)),
+                    ("last4", djstripe.fields.StripeCharField(help_text="Last four digits of Card number.", max_length=4)),
+                    ("name", djstripe.fields.StripeTextField(help_text="Cardholder name.", null=True)),
+                    ("tokenization_method", djstripe.fields.StripeCharField(choices=[("android_pay", "Android Pay"), ("apple_pay", "Apple Pay")], help_text="If the card number is tokenized, this is the method that was used.", max_length=11, null=True)),
+                    ("customer", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="sources", to="djstripe.Customer")),
+                ],
+                options={
+                    "abstract": False,
+                },
+            ),
+        ]),
+
+        # Step 13: Recover common StripeObject fields previously on StripeSource
+        migrations.AddField(
+            model_name="card",
+            name="created",
+            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name="card",
+            name="description",
+            field=djstripe.fields.StripeTextField(blank=True, help_text="A description of this object.", null=True),
+        ),
+        migrations.AddField(
+            model_name="card",
+            name="livemode",
+            field=djstripe.fields.StripeNullBooleanField(default=None, help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation."),
+        ),
+        migrations.AddField(
+            model_name="card",
+            name="metadata",
+            field=djstripe.fields.StripeJSONField(blank=True, help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.", null=True),
+        ),
+        migrations.AddField(
+            model_name="card",
+            name="modified",
+            field=models.DateTimeField(auto_now=True),
+        ),
+        migrations.AddField(
+            model_name="card",
+            name="stripe_id",
+            field=djstripe.fields.StripeIdField(default="", max_length=255, unique=True),
+            preserve_default=False,
+        ),
+        migrations.AddField(
+            model_name="card",
+            name="stripe_timestamp",
+            field=djstripe.fields.StripeDateTimeField(help_text="The datetime this object was created in stripe.", null=True),
+        ),
+
+        # Step 14: Backfill common fields from djstripe_stripesource table
+        migrations.RunSQL("""
+            UPDATE djstripe_card AS dc
+            SET
+               created = dss.created,
+               description = dss.description,
+               livemode = dss.livemode,
+               metadata = dss.metadata,
+               modified = dss.modified,
+               stripe_id = dss.stripe_id,
+               stripe_timestamp = dss.stripe_timestamp
+            FROM djstripe_stripesource AS dss
+            WHERE dc.stripesource_ptr_id = dss.id
+        """),
+
+        # Step 15: Rename stripesource_ptr_id to id and turn it into an Auto field
+        migrations.RenameField(
+            model_name="card",
+            old_name="stripesource_ptr",
+            new_name="id",
+        ),
+        migrations.AlterField(
+            model_name="card",
+            name="id",
+            field=models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID"),
+        ),
+
+        # Step 16: Delete old ctype field
+        migrations.RemoveField(
+            model_name="stripesource",
+            name="polymorphic_ctype",
+        ),
+
+        # Step 17: Actually delete the parent djstripe_stripesource table
+        migrations.DeleteModel(
+            name="StripeSource",
+        ),
     ]

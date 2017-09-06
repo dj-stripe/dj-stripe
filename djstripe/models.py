@@ -28,7 +28,6 @@ from django.db.models.fields.related import ForeignKey, OneToOneField
 from django.utils import dateformat, six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.functional import cached_property
-from polymorphic.models import PolymorphicModel
 from stripe.error import InvalidRequestError, StripeError
 
 from . import settings as djstripe_settings
@@ -934,7 +933,7 @@ class Customer(StripeObject):
         currency = currency or "usd"
 
         # Convert Source to stripe_id
-        if source and isinstance(source, StripeSource):
+        if source and isinstance(source, Card):
             source = source.stripe_id
 
         stripe_charge = Charge._api_create(
@@ -1576,11 +1575,8 @@ class Payout(StripeObject):
 #                               Payment Methods                                #
 # ============================================================================ #
 
-class StripeSource(PolymorphicModel, StripeObject):
-    pass
 
-
-class Card(StripeSource):
+class Card(StripeObject):
     """
     You can store multiple cards on a customer in order to charge the customer later.
     (Source: https://stripe.com/docs/api/python#cards)
@@ -1710,7 +1706,7 @@ class Card(StripeSource):
 
         try:
             self.delete()
-        except StripeSource.DoesNotExist:
+        except Card.DoesNotExist:
             # The card has already been deleted (potentially during the API call)
             pass
 
@@ -1765,6 +1761,10 @@ class Card(StripeSource):
         card.update(kwargs)
 
         return stripe.Token.create(card=card)
+
+
+# Backwards compatibility
+StripeSource = Card
 
 
 # ============================================================================ #
