@@ -182,7 +182,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="card",
             name="stripe_id",
-            field=djstripe.fields.StripeIdField(default="", max_length=255, unique=True),
+            field=djstripe.fields.StripeIdField(default="", max_length=255),
             preserve_default=False,
         ),
         migrations.AddField(
@@ -227,5 +227,13 @@ class Migration(migrations.Migration):
         # Step 17: Actually delete the parent djstripe_stripesource table
         migrations.DeleteModel(
             name="StripeSource",
+        ),
+
+        # Step 18: Add UNIQUE constraint on stripe_id now that it's backfilled
+        # this must be done last because of triggers
+        migrations.AlterField(
+            model_name="card",
+            name="stripe_id",
+            field=djstripe.fields.StripeIdField(default="", max_length=255, unique=True),
         ),
     ]
