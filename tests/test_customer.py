@@ -69,7 +69,10 @@ class TestCustomer(TestCase):
         user = get_user_model().objects.create_user(username="test_user_sync_unsupported_source")
         synced_customer = fake_customer.create_for_user(user)
         self.assertEqual(0, synced_customer.sources.count())
-        self.assertEqual(None, synced_customer.default_source)
+        self.assertEqual(
+            synced_customer.default_source,
+            PaymentMethod.objects.get(id=fake_customer["default_source"]["id"])
+        )
 
     def test_customer_sync_has_subscriber_metadata(self):
         user = get_user_model().objects.create(username="test_metadata", id=12345)
