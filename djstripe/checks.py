@@ -27,12 +27,12 @@ def check_stripe_api_key(app_configs=None, **kwargs):
         hint = "Add STRIPE_TEST_SECRET_KEY and STRIPE_LIVE_SECRET_KEY to your settings."
         messages.append(checks.Critical(msg, hint=hint, id="djstripe.C001"))
     elif djstripe_settings.STRIPE_LIVE_MODE:
-        if not djstripe_settings.LIVE_API_KEY.startswith("sk_live_"):
+        if not djstripe_settings.LIVE_API_KEY.startswith(("sk_live_", "rk_live_")):
             msg = "Bad Stripe live API key."
             hint = 'STRIPE_LIVE_SECRET_KEY should start with "sk_live_"'
             messages.append(checks.Critical(msg, hint=hint, id="djstripe.C002"))
     else:
-        if not djstripe_settings.TEST_API_KEY.startswith("sk_test_"):
+        if not djstripe_settings.TEST_API_KEY.startswith(("sk_test_", "rk_test_")):
             msg = "Bad Stripe test API key."
             hint = 'STRIPE_TEST_SECRET_KEY should start with "sk_test_"'
             messages.append(checks.Critical(msg, hint=hint, id="djstripe.C003"))
