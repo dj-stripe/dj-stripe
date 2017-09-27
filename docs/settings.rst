@@ -60,14 +60,6 @@ By default, plans are not prorated in dj-stripe. Concretely, this is how this tr
 
 Assigning ``True`` to ``DJSTRIPE_PRORATION_POLICY`` reverses the functioning of item 2 (plan cancellation) by making a cancellation effective right away and refunding the unused balance to the customer, and affects the functioning of item 3 (plan change) by prorating the previous customer's plan towards their new plan's amount.
 
-DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES (=False)
-===============================================
-
-By default, the plan change policy described in item 3 above holds also for plan upgrades.
-
-Assigning ``True`` to ``DJSTRIPE_PRORATION_POLICY_FOR_UPGRADES`` allows dj-stripe to prorate plans in the specific case of an upgrade. Therefore, if a customer upgrades their plan, their new plan is effective right away, and they get billed for the new plan's amount minus the unused balance from their previous plan.
-
-
 DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS (=())
 ===================================================
 

@@ -2541,7 +2541,7 @@ class Subscription(StripeObject):
                                wish to use for proration calculations.
         :type proration_date: datetime
 
-        .. note:: The default value for ``prorate`` is overridden by the DJSTRIPE_PRORATION_POLICY setting.
+        .. note:: The default value for ``prorate`` is the DJSTRIPE_PRORATION_POLICY setting.
 
         .. important:: Updating a subscription by changing the plan or quantity creates a new ``Subscription`` in \
         Stripe (and dj-stripe).
