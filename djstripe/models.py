@@ -169,8 +169,13 @@ class TransferChargeFee(TimeStampedModel):
 
 
 class Customer(StripeCustomer):
-    subscriber = models.OneToOneField(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
+    subscriber = models.ForeignKey(getattr(settings, 'DJSTRIPE_SUBSCRIBER_MODEL', settings.AUTH_USER_MODEL), null=True)
     date_purged = models.DateTimeField(null=True, editable=False)
+
+    # Is this the subscriber's currently active customer?
+    primary = models.BooleanField(default=True)
+    # What currency does this customer use? (3 letter ISO code)
+    currency = models.CharField(max_length=3, default='', blank=True)
 
     objects = CustomerManager()
 
