@@ -90,8 +90,17 @@ REST API
 --------
 
 The subscriptions can be accessed through a REST API. Make sure you have
-Django Rest Framework installed
-(https://github.com/tomchristie/django-rest-framework).
+Django Rest Framework installed (https://github.com/tomchristie/django-rest-framework) 
+and then add the following to your url patterns:
+
+.. code-block:: python
+
+    url(
+        r'^api/v1/stripe/',
+        include('djstripe.contrib.rest_framework.urls', namespace="rest_djstripe")
+    ),
+    # url can be changed
+    # Call to 'djstripe.contrib.rest_framework.urls' and 'namespace' must stay as is
 
 The REST API endpoints require an authenticated user. GET will provide the
 current subscription of the user. POST will create a new current subscription.
