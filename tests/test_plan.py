@@ -68,6 +68,56 @@ class TestPlanAdmin(TestCase):
         # Would throw DoesNotExist if it didn't work
         Plan.objects.get(name=self.plan.name)
 
+    @patch("stripe.Plan.create")
+    @patch("stripe.Plan.retrieve")
+    def test_admin_can_create_plan_with_id_but_cant_edit_that_id_later(self, plan_retrieve_mock, plan_create_mock):
+        # create form, `stripe_id` field is here
+        self.assertIn(
+            "stripe_id",
+            list(self.plan_admin.get_form(self.FakeRequest()).base_fields))
+
+        fake_form = self.FakeForm()
+        plan_data = Plan._stripe_object_to_record(deepcopy(FAKE_PLAN))
+        # new unique id for plan
+        plan_id = plan_data["stripe_id"] + "-new"
+        plan_data["stripe_id"] = plan_id
+        # no plan with that id yet
+        with self.assertRaises(Plan.DoesNotExist):
+            Plan.objects.get(stripe_id=plan_id)
+
+        # create plan
+        fake_form.cleaned_data = plan_data
+        self.plan_admin.save_model(request=self.FakeRequest(),
+                                   obj=Plan(**plan_data),
+                                   form=fake_form, change=True)
+        # plan is here
+        plan = Plan.objects.get(stripe_id=plan_id)
+
+        # edit form for instance, `stripe_id` field is not here
+        self.assertNotIn(
+            "stripe_id",
+            list(self.plan_admin.get_form(self.FakeRequest(),
+                 plan).base_fields))
+        # trying to modify plan id for instance
+
+        # new value for plan id
+        new_plan_id = plan_data["stripe_id"].replace("-new", "-old")
+        plan_data["stripe_id"] = new_plan_id
+        # there is no plan with new id
+        with self.assertRaises(Plan.DoesNotExist):
+            Plan.objects.get(stripe_id=new_plan_id)
+
+        # update plan
+        fake_form.cleaned_data = plan_data
+        self.plan_admin.save_model(request=self.FakeRequest(),
+                                   obj=plan,
+                                   form=fake_form, change=True)
+
+        # plan id is same
+        plan = Plan.objects.get(stripe_id=plan_id)
+        with self.assertRaises(Plan.DoesNotExist):
+            Plan.objects.get(stripe_id=new_plan_id)
+
 
 class PlanTest(TestCase):
 

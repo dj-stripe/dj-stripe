@@ -305,6 +305,11 @@ class PlanAdmin(StripeObjectAdmin):
             readonly_fields += (
                 "amount", "currency", "interval", "interval_count", "trial_period_days"
             )
+        else:
+            # stripe id is required for plan creation,
+            # but can't be changed later
+            readonly_fields = tuple(
+                f for f in readonly_fields if f != "stripe_id")
 
         return readonly_fields
 
