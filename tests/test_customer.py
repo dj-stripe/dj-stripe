@@ -420,7 +420,7 @@ class TestCustomer(TestCase):
 
         try:
             self.customer.retry_unpaid_invoices()
-        except:
+        except Exception:
             self.fail("Exception was unexpectedly raised.")
 
     @patch("djstripe.models.Account.get_default_account")
