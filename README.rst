@@ -92,6 +92,8 @@ Add to the urls.py:
 
     url(r'^payments/', include('djstripe.urls', namespace="djstripe")),
 
+Then tell stripe about the webhook (Stripe webhook docs can be found `here <https://stripe.com/docs/webhooks>`_) using the full url for wherever you put the the djstrip urls, e.g. ``yourwebsite.com/payments/webhook``.
+
 Run the commands::
 
     python manage.py migrate
