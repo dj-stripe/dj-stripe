@@ -597,6 +597,10 @@ class Charge(StripeObject):
         if transfer:
             self.transfer = transfer
 
+        invoice = cls._stripe_object_to_invoice(target_cls=Invoice, data=data)
+        if invoice:
+            self.invoice = invoice
+
         # Set the account on this object.
         destination_account = cls._stripe_object_destination_to_account(target_cls=Account, data=data)
         if destination_account:
