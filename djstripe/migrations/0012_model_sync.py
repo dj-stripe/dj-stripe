@@ -11,7 +11,6 @@ from django.db.migrations.operations.special import RunPython
 from django.db.utils import IntegrityError
 from django.utils import six
 from stripe.error import InvalidRequestError
-from tqdm import tqdm
 
 
 def resync_subscriptions(apps, schema_editor):
@@ -36,13 +35,13 @@ def resync_subscriptions(apps, schema_editor):
 
             print("Re-syncing subscriptions. This may take a while.")
 
-            for stripe_subscription in tqdm(iterable=Subscription.api_list(), desc="Sync", unit=" subscriptions"):
+            for stripe_subscription in Subscription.api_list():
                 subscription = Subscription.sync_from_stripe_data(stripe_subscription)
 
                 if not subscription.customer:
-                    tqdm.write("The customer for this subscription ({subscription_id}) does not exist locally (so we \
+                    print("The customer for this subscription ({subscription_id}) does not exist locally (so we \
                     won't sync the subscription). You'll want to figure out how that \
-                    happened.".format(subscription_id=stripe_subscription['id']))
+                    happened.").format(subscription_id=stripe_subscription['id'])
 
             print("Subscription re-sync complete.")
 
@@ -70,11 +69,11 @@ def resync_invoiceitems(apps, schema_editor):
 
             print("Re-syncing invoiceitems. This may take a while.")
 
-            for stripe_invoiceitem in tqdm(iterable=InvoiceItem.api_list(), desc="Sync", unit=" invoiceitems"):
+            for stripe_invoiceitem in InvoiceItem.api_list():
                 invoice = InvoiceItem.sync_from_stripe_data(stripe_invoiceitem)
 
                 if not invoice.customer:
-                    tqdm.write("The customer for this invoiceitem ({invoiceitem_id}) does not exist \
+                    print("The customer for this invoiceitem ({invoiceitem_id}) does not exist \
                     locally (so we won't sync the invoiceitem). You'll want to figure out how that \
                     happened.".format(invoiceitem_id=stripe_invoiceitem['id']))
 
@@ -91,11 +90,11 @@ def sync_charges(apps, schema_editor):
         if Charge.objects.count():
             print("syncing charges. This may take a while.")
 
-            for charge in tqdm(Charge.objects.all(), desc="Sync", unit=" charges"):
+            for charge in Charge.objects.all():
                 try:
                     Charge.sync_from_stripe_data(charge.api_retrieve())
                 except InvalidRequestError:
-                    tqdm.write("There was an error while syncing charge ({charge_id}).".format(charge_id=charge.stripe_id))
+                    print("There was an error while syncing charge ({charge_id}).".format(charge_id=charge.stripe_id))
 
             print("Charge sync complete.")
 
@@ -110,11 +109,11 @@ def sync_invoices(apps, schema_editor):
         if Invoice.objects.count():
             print("syncing invoices. This may take a while.")
 
-            for invoice in tqdm(iterable=Invoice.objects.all(), desc="Sync", unit=" invoices"):
+            for invoice in Invoice.objects.all():
                 try:
                     Invoice.sync_from_stripe_data(invoice.api_retrieve())
                 except InvalidRequestError:
-                    tqdm.write("There was an error while syncing invoice \
+                    print("There was an error while syncing invoice \
                     ({invoice_id}).".format(invoice_id=invoice.stripe_id))
 
             print("Invoice sync complete.")
@@ -130,11 +129,11 @@ def sync_transfers(apps, schema_editor):
         if Transfer.objects.count():
             print("syncing transfers. This may take a while.")
 
-            for transfer in tqdm(iterable=Transfer.objects.all(), desc="Sync", unit=" transfers"):
+            for transfer in Transfer.objects.all():
                 try:
                     Transfer.sync_from_stripe_data(transfer)
                 except InvalidRequestError:
-                    tqdm.write("There was an error while syncing transfer \
+                    print("There was an error while syncing transfer \
                     ({transfer_id}).".format(transfer_id=transfer.stripe_id))
 
             print("Transfer sync complete.")
@@ -150,11 +149,11 @@ def sync_plans(apps, schema_editor):
         if Plan.objects.count():
             print("syncing plans. This may take a while.")
 
-            for plan in tqdm(iterable=Plan.objects.all(), desc="Sync", unit=" plans"):
+            for plan in Plan.objects.all():
                 try:
                     Plan.sync_from_stripe_data(plan)
                 except InvalidRequestError:
-                    tqdm.write("There was an error while syncing plan ({plan_id}).".format(transfer_id=plan.stripe_id))
+                    print("There was an error while syncing plan ({plan_id}).".format(transfer_id=plan.stripe_id))
 
             print("Transfer sync complete.")
 
@@ -169,11 +168,11 @@ def sync_customers(apps, schema_editor):
         if Customer.objects.count():
             print("syncing customers. This may take a while.")
 
-            for customer in tqdm(Customer.objects.all(), desc="Sync", unit=" customers"):
+            for customer in Customer.objects.all():
                 try:
                     Customer.sync_from_stripe_data(customer.api_retrieve())
                 except InvalidRequestError:
-                    tqdm.write("There was an error while syncing customer \
+                    print("There was an error while syncing customer \
                     ({customer_id}).".format(customer_id=customer.stripe_id))
                 except IntegrityError:
                     print(customer.api_retrieve())
