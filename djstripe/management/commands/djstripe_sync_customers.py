@@ -22,7 +22,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """Call sync_subscriber on Subscribers without customers associated to them."""
-        qs = get_subscriber_model().objects.filter(customer__isnull=True)
+        qs = get_subscriber_model().objects.filter(djstripe_customers__isnull=True)
         count = 0
         total = qs.count()
         for subscriber in qs:
