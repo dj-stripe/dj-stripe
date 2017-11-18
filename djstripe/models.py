@@ -36,7 +36,7 @@ from .context_managers import stripe_temporary_api_version
 from .enums import SourceType, SubscriptionStatus
 from .exceptions import MultipleSubscriptionException, StripeObjectManipulationException
 from .fields import (
-    PaymentMethodForeignKey, StripeBooleanField, StripeCharField, StripeCurrencyField,
+    JSONField, PaymentMethodForeignKey, StripeBooleanField, StripeCharField, StripeCurrencyField,
     StripeDateTimeField, StripeFieldMixin, StripeIdField, StripeIntegerField, StripeJSONField,
     StripeNullBooleanField, StripePercentField, StripePositiveIntegerField, StripeTextField
 )
@@ -2842,6 +2842,13 @@ class Transfer(StripeObject):
 #                             DJ-STRIPE RESOURCES                              #
 # ============================================================================ #
 
+
+def _get_version():
+    from . import __version__
+
+    return __version__
+
+
 @python_2_unicode_compatible
 class IdempotencyKey(models.Model):
     uuid = UUIDField(max_length=36, primary_key=True, editable=False, default=uuid.uuid4)
@@ -2858,6 +2865,41 @@ class IdempotencyKey(models.Model):
     @property
     def is_expired(self):
         return timezone.now() > self.created + timedelta(hours=24)
+
+
+class WebhookEventTrigger(models.Model):
+    """
+    An instance of a request that reached the server endpoint for Stripe webhooks.
+    """
+    id = models.BigAutoField(primary_key=True)
+    remote_ip = models.GenericIPAddressField(
+        help_text="IP address of the request client."
+    )
+    headers = JSONField()
+    body = models.TextField(blank=True)
+    valid = models.BooleanField(
+        default=False,
+        help_text="Whether or not the webhook event has passed validation"
+    )
+    processed = models.BooleanField(
+        default=False,
+        help_text="Whether or not the webhook event has been successfully processed"
+    )
+    exception = models.CharField(max_length=128, blank=True)
+    traceback = models.TextField(
+        blank=True, help_text="Traceback if an exception was thrown during processing"
+    )
+    event = models.ForeignKey(
+        "Event", on_delete=models.SET_NULL, null=True, blank=True,
+        help_text="Event object contained in the (valid) Webhook"
+    )
+    djstripe_version = models.CharField(
+        max_length=32,
+        default=_get_version,  # Needs to be a callable, otherwise it's a db default.
+        help_text="The version of dj-stripe when the webhook was received"
+    )
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
 
 @python_2_unicode_compatible
