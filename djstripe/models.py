@@ -142,15 +142,7 @@ class StripeObject(models.Model):
 
     @property
     def default_api_key(self):
-        if self.livemode is None:
-            # Livemode is unknown. Use the default secret key.
-            return djstripe_settings.STRIPE_SECRET_KEY
-        elif self.livemode:
-            # Livemode is true, use the live secret key
-            return djstripe_settings.LIVE_API_KEY or djstripe_settings.STRIPE_SECRET_KEY
-        else:
-            # Livemode is false, use the test secret key
-            return djstripe_settings.TEST_API_KEY or djstripe_settings.STRIPE_SECRET_KEY
+        return djstripe_settings.get_default_api_key(self.livemode)
 
     def api_retrieve(self, api_key=None):
         """
