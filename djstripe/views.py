@@ -8,18 +8,16 @@
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import json
 import logging
 
 from django.contrib import messages
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.utils.encoding import smart_str
 from django.utils.http import is_safe_url
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import FormView, TemplateView, View
@@ -28,8 +26,7 @@ from . import settings as djstripe_settings
 from .enums import SubscriptionStatus
 from .forms import CancelSubscriptionForm
 from .mixins import SubscriptionMixin
-from .models import Customer, Event, EventProcessingException
-from .webhooks import TEST_EVENT_ID
+from .models import Customer, WebhookEventTrigger
 
 
 logger = logging.getLogger(__name__)
@@ -110,34 +107,31 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class ProcessWebhookView(View):
-    """A view used to handle webhooks."""
+    """
+    A Stripe Webhook handler view.
 
-    def post(self, request, *args, **kwargs):
-        """
-        Create an Event object based on request data.
+    This will create a WebhookEventTrigger instance, verify it,
+    then attempt to process it.
 
-        Creates an EventProcessingException if the webhook Event is a duplicate.
-        """
-        body = smart_str(request.body)
-        data = json.loads(body)
+    If the webhook cannot be verified, returns HTTP 400.
 
-        if data['id'] == TEST_EVENT_ID:
-            logger.info("Test webhook received: {}".format(data['type']))
-            return HttpResponse()
+    If an exception happens during processing, returns HTTP 500.
+    """
 
-        if Event.stripe_objects.exists_by_json(data):
-            EventProcessingException.objects.create(
-                data=data,
-                message="Duplicate event record",
-                traceback=""
-            )
-        else:
-            event = Event._create_from_stripe_object(data, save=False)
-            event.validate()
+    def post(self, request):
+        if "HTTP_STRIPE_SIGNATURE" not in request.META:
+            # Do not even attempt to process/store the event if there is
+            # no signature in the headers so we avoid overfilling the db.
+            return HttpResponseBadRequest()
 
-            if djstripe_settings.WEBHOOK_EVENT_CALLBACK:
-                djstripe_settings.WEBHOOK_EVENT_CALLBACK(event)
-            else:
-                event.process()
+        trigger = WebhookEventTrigger.from_request(request)
 
-        return HttpResponse()
+        if trigger.exception:
+            # An exception happened, return 500
+            return HttpResponseServerError()
+
+        if not trigger.valid:
+            # Webhook Event did not validate, return 400
+            return HttpResponseBadRequest()
+
+        return HttpResponse(str(trigger.id))
