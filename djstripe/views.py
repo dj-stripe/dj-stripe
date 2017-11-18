@@ -109,7 +109,7 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
 
 
 @method_decorator(csrf_exempt, name="dispatch")
-class WebHook(View):
+class ProcessWebhookView(View):
     """A view used to handle webhooks."""
 
     def post(self, request, *args, **kwargs):
