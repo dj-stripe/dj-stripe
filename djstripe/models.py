@@ -23,7 +23,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
 from django.db.models.deletion import SET_NULL
-from django.db.models.fields import BooleanField, CharField, DateTimeField, NullBooleanField, TextField, UUIDField
+from django.db.models.fields import BooleanField, CharField, DateTimeField, NullBooleanField, UUIDField
 from django.db.models.fields.related import ForeignKey, OneToOneField
 from django.utils import dateformat, six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
@@ -2929,34 +2929,6 @@ class WebhookEventTrigger(models.Model):
             self.save()
 
         return self.event
-
-
-@python_2_unicode_compatible
-class EventProcessingException(models.Model):
-    event = ForeignKey("Event", on_delete=models.CASCADE, null=True)
-    data = TextField()
-    message = CharField(max_length=500)
-    traceback = TextField()
-
-    created = DateTimeField(auto_now_add=True, editable=False)
-    modified = DateTimeField(auto_now=True, editable=False)
-
-    @classmethod
-    def log(cls, data, exception, event):
-        from traceback import format_exc
-        cls.objects.create(
-            event=event,
-            data=data or "",
-            message=str(exception),
-            traceback=format_exc()
-        )
-
-    def __str__(self):
-        return smart_text("<{message}, pk={pk}, Event={event}>".format(
-            message=self.message,
-            pk=self.pk,
-            event=self.event
-        ))
 
 
 # Much like registering signal handlers. We import this module so that its registrations get picked up

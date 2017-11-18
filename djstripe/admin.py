@@ -12,10 +12,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.contrib import admin
 
-from .models import (
-    Charge, Coupon, Customer, Event, EventProcessingException,
-    IdempotencyKey, Invoice, InvoiceItem, Plan, Subscription, Transfer
-)
+from .models import Charge, Coupon, Customer, Event, IdempotencyKey, Invoice, InvoiceItem, Plan, Subscription, Transfer
 
 
 class BaseHasSourceListFilter(admin.SimpleListFilter):
@@ -102,16 +99,6 @@ class IdempotencyKeyAdmin(admin.ModelAdmin):
     list_display = ("uuid", "action", "created", "is_expired", "livemode")
     list_filter = ("livemode", )
     search_fields = ("uuid", "action")
-
-
-@admin.register(EventProcessingException)
-class EventProcessingExceptionAdmin(admin.ModelAdmin):
-    list_display = ("message", "event", "created")
-    raw_id_fields = ("event", )
-    search_fields = ("message", "traceback", "data")
-
-    def has_add_permission(self, request):
-        return False
 
 
 class StripeObjectAdmin(admin.ModelAdmin):

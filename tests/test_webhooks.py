@@ -18,7 +18,7 @@ from django.urls import reverse
 from mock import Mock, PropertyMock, call, patch
 
 from djstripe import views, webhooks
-from djstripe.models import Event, EventProcessingException
+from djstripe.models import Event
 from djstripe.webhooks import TEST_EVENT_ID, call_handlers, handler, handler_all
 
 from . import FAKE_EVENT_TEST_CHARGE_SUCCEEDED, FAKE_EVENT_TRANSFER_CREATED, FAKE_TRANSFER
@@ -77,7 +77,6 @@ class TestWebhook(TestCase):
         resp = self._send_event(fake_event)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(1, Event.objects.filter(type="transfer.created").count())
-        self.assertEqual(1, EventProcessingException.objects.count())
 
 
 class TestWebhookHandlers(TestCase):
