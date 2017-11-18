@@ -1326,9 +1326,7 @@ class Event(StripeObject):
         max_length=15, blank=True, help_text="the API version at which the event data was "
         "rendered. Blank for old entries only, all new entries will have this value"
     )
-    # XXX: data
-    webhook_message = StripeJSONField(
-        stripe_name="data",
+    data = StripeJSONField(
         help_text="data received at webhook. data should be considered to be garbage until validity check is run "
         "and valid flag is set"
     )
@@ -1361,12 +1359,6 @@ class Event(StripeObject):
         help_text="If validity is performed, webhook event processor(s) may run to take further action on the event. "
         "Once these have run, this is set to True."
     )
-
-    @property
-    def message(self):
-        """ The event's data if the event is valid, None otherwise."""
-
-        return self.webhook_message if self.valid else None
 
     def str_parts(self):
         return [
@@ -1413,7 +1405,7 @@ class Event(StripeObject):
         marks this record's valid flag to True or False.
         """
 
-        self.valid = self.webhook_message == self.api_retrieve()["data"]
+        self.valid = self.data == self.api_retrieve()["data"]
         self.save()
 
     def process(self, force=False, raise_exception=False):
@@ -1479,11 +1471,6 @@ class Event(StripeObject):
         signal = WEBHOOK_SIGNALS.get(self.type)
         if signal:
             return signal.send(sender=Event, event=self)
-
-    @cached_property
-    def data(self):
-        """Get the event data/contents."""
-        return self.message
 
     @cached_property
     def parts(self):
