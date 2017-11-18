@@ -1322,9 +1322,8 @@ class Event(StripeObject):
     stripe_class = stripe.Event
     stripe_dashboard_item_name = "events"
 
-    # XXX: api_version
-    received_api_version = StripeCharField(
-        max_length=15, blank=True, stripe_name="api_version", help_text="the API version at which the event data was "
+    api_version = StripeCharField(
+        max_length=15, blank=True, help_text="the API version at which the event data was "
         "rendered. Blank for old entries only, all new entries will have this value"
     )
     # XXX: data
@@ -1379,22 +1378,21 @@ class Event(StripeObject):
         # Event retrieve is special. For Event we don't retrieve using djstripe's API version. We always retrieve
         # using the API version that was used to send the Event (which depends on the Stripe account holders settings
         api_key = api_key or self.default_api_key
-        api_version = self.received_api_version
 
         # Stripe API version validation is bypassed because we assume what
         # Stripe passes us is a sane and usable value.
-        with stripe_temporary_api_version(api_version, validate=False):
+        with stripe_temporary_api_version(self.api_version, validate=False):
             stripe_event = super(Event, self).api_retrieve(api_key)
 
         return stripe_event
 
     def _attach_objects_hook(self, cls, data):
-        if self.received_api_version is None:
+        if self.api_version is None:
             # as of api version 2017-02-14, the account.application.deauthorized
             # event sends None as api_version.
             # If we receive that, store an empty string instead.
             # Remove this hack if this gets fixed upstream.
-            self.received_api_version = ""
+            self.api_version = ""
 
         request_obj = data.get("request", None)
         if isinstance(request_obj, dict):
