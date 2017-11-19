@@ -30,7 +30,8 @@ class TestWebhook(TestCase):
         return Client().post(
             reverse("djstripe:webhook"),
             json.dumps(event_data),
-            content_type="application/json"
+            content_type="application/json",
+            HTTP_STRIPE_SIGNATURE="PLACEHOLDER"
         )
 
     @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
