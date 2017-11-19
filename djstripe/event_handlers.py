@@ -260,7 +260,11 @@ def _handle_crud_like_event(target_cls, event, data=None, verb=None,
         return
 
     if crud_type.deleted:
-        obj = target_cls.objects.filter(stripe_id=stripe_id).delete()
+        qs = target_cls.objects.filter(stripe_id=stripe_id)
+        if target_cls is Customer and qs.exists():
+            qs.get().purge()
+        else:
+            obj = target_cls.objects.filter(stripe_id=stripe_id).delete()
     else:
         # Any other event type (creates, updates, etc.) - This can apply to
         # verbs that aren't strictly CRUD but Stripe do intend an update.  Such
