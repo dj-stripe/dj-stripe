@@ -2892,6 +2892,10 @@ class WebhookEventTrigger(models.Model):
         except ValueError:
             return {}
 
+    @property
+    def is_test_event(self):
+        return self.json_body.get("id") == webhooks.TEST_EVENT_ID
+
     def validate(self, api_key=None):
         """
         The original contents of the Event message must be confirmed by
@@ -2905,7 +2909,7 @@ class WebhookEventTrigger(models.Model):
         if "id" not in local_data or "livemode" not in local_data:
             return False
 
-        if local_data["id"] == webhooks.TEST_EVENT_ID:
+        if self.is_test_event:
             logger.info("Test webhook received: {}".format(local_data))
             return False
 

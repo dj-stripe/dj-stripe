@@ -130,6 +130,10 @@ class ProcessWebhookView(View):
             # An exception happened, return 500
             return HttpResponseServerError()
 
+        if trigger.is_test_event:
+            # Since we don't do signature verification, we have to skip trigger.valid
+            return HttpResponse("Test webhook successfully received!")
+
         if not trigger.valid:
             # Webhook Event did not validate, return 400
             return HttpResponseBadRequest()
