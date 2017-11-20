@@ -235,8 +235,9 @@ class CustomerAdmin(StripeObjectAdmin):
 
 @admin.register(Event)
 class EventAdmin(StripeObjectAdmin):
-    list_display = ("type", "created")
+    list_display = ("type", "created", "request_id")
     list_filter = ("type", "created")
+    search_fields = ("request_id", )
 
     def has_add_permission(self, request):
         return False
