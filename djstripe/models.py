@@ -23,7 +23,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
 from django.db.models.deletion import SET_NULL
-from django.db.models.fields import BooleanField, CharField, DateTimeField, NullBooleanField, UUIDField
+from django.db.models.fields import BooleanField, CharField, DateTimeField, UUIDField
 from django.db.models.fields.related import ForeignKey, OneToOneField
 from django.utils import dateformat, six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
@@ -1347,17 +1347,6 @@ class Event(StripeObject):
         "Customer",
         null=True, on_delete=models.CASCADE,
         help_text="In the event that there is a related customer, this will point to that Customer record"
-    )
-    valid = NullBooleanField(
-        null=True,
-        help_text="Tri-state bool. Null == validity not yet confirmed. Otherwise, this field indicates that this "
-        "event was checked via stripe api and found to be either authentic (valid=True) or in-authentic (possibly "
-        "malicious)"
-    )
-    processed = BooleanField(
-        default=False,
-        help_text="If validity is performed, webhook event processor(s) may run to take further action on the event. "
-        "Once these have run, this is set to True."
     )
 
     def str_parts(self):
