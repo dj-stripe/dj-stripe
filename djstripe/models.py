@@ -2913,7 +2913,7 @@ class WebhookEventTrigger(models.Model):
         with stripe_temporary_api_version(local_data["api_version"], validate=False):
             remote_data = Event.stripe_class.retrieve(id=local_data["id"], api_key=api_key)
 
-        return local_data == remote_data
+        return local_data["data"] == remote_data["data"]
 
     def process(self, save=True):
         self.event = Event.process(self.json_body)
