@@ -12,7 +12,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.contrib import admin
 
-from .models import Charge, Coupon, Customer, Event, IdempotencyKey, Invoice, InvoiceItem, Plan, Subscription, Transfer
+from .models import (
+    Charge, Coupon, Customer, Event, IdempotencyKey, Invoice,
+    InvoiceItem, Plan, Subscription, Transfer, WebhookEventTrigger
+)
 
 
 class BaseHasSourceListFilter(admin.SimpleListFilter):
@@ -99,6 +102,15 @@ class IdempotencyKeyAdmin(admin.ModelAdmin):
     list_display = ("uuid", "action", "created", "is_expired", "livemode")
     list_filter = ("livemode", )
     search_fields = ("uuid", "action")
+
+
+@admin.register(WebhookEventTrigger)
+class WebhookEventTriggerAdmin(admin.ModelAdmin):
+    list_display = (
+        "created", "event", "remote_ip", "processed", "valid", "exception", "djstripe_version"
+    )
+    list_filter = ("created", "valid", "processed")
+    raw_id_fields = ("event", )
 
 
 class StripeObjectAdmin(admin.ModelAdmin):
