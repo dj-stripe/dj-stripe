@@ -223,7 +223,6 @@ class CustomerAdmin(StripeObjectAdmin):
 
 @admin.register(Event)
 class EventAdmin(StripeObjectAdmin):
-    raw_id_fields = ("customer", )
     list_display = ("type", "created")
     list_filter = ("type", "created")
 

@@ -102,19 +102,6 @@ class TestCustomerEvents(EventTestCase):
         self.assertEqual(customer.currency, fake_stripe_event["data"]["object"]["currency"])
 
     @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER)
-    @patch("stripe.Event.retrieve")
-    def test_customer_created_no_customer_exists(self, event_retrieve_mock, customer_retrieve_mock):
-        fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_CREATED)
-        fake_stripe_event["data"]["object"]["id"] = "cus_XXX_test_no_customer_exists"
-        event_retrieve_mock.return_value = fake_stripe_event
-        customer_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
-
-        event = Event.sync_from_stripe_data(fake_stripe_event)
-        event.invoke_webhook_handlers()
-
-        self.assertFalse(Customer.objects.filter(stripe_id=fake_stripe_event["data"]["object"]["id"]).exists())
-
-    @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER)
     def test_customer_deleted(self, customer_retrieve_mock):
         FAKE_CUSTOMER.create_for_user(self.user)
         event = self._create_event(FAKE_EVENT_CUSTOMER_CREATED)

@@ -1342,13 +1342,6 @@ class Event(StripeObject):
     idempotency_key = StripeTextField(null=True, blank=True, stripe_required=False)
     type = StripeCharField(max_length=250, help_text="Stripe's event description code")
 
-    # dj-stripe fields
-    customer = ForeignKey(
-        "Customer",
-        null=True, on_delete=models.CASCADE,
-        help_text="In the event that there is a related customer, this will point to that Customer record"
-    )
-
     def str_parts(self):
         return [
             "type={type}".format(type=self.type),
@@ -1410,6 +1403,17 @@ class Event(StripeObject):
     def verb(self):
         """ Gets the event past-tense verb string (e.g. 'updated'). """
         return ".".join(self.parts[1:])
+
+    @property
+    def customer(self):
+        data = self.data["object"]
+        if data["object"] == "customer":
+            field = "id"
+        else:
+            field = "customer"
+
+        if data.get(field):
+            return Customer._get_or_create_from_stripe_object(data, field)[0]
 
 
 # TODO: class FileUpload(...)
