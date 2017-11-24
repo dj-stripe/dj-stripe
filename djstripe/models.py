@@ -2507,7 +2507,7 @@ class Subscription(StripeObject):
     STATUS_UNPAID = enums.SubscriptionStatus.unpaid
 
     application_fee_percent = StripePercentField(
-        null=True,
+        null=True, blank=True,
         help_text="A positive decimal that represents the fee percentage of the subscription invoice amount that "
         "will be transferred to the application owner's Stripe account each billing period."
     )
@@ -2518,7 +2518,7 @@ class Subscription(StripeObject):
         "a subscription that has a status of active is scheduled to be canceled at the end of the current period."
     )
     canceled_at = StripeDateTimeField(
-        null=True,
+        null=True, blank=True,
         help_text="If the subscription has been canceled, the date of that cancellation. If the subscription was "
         "canceled with ``cancel_at_period_end``, canceled_at will still reflect the date of the initial cancellation "
         "request, not the end of the subscription period when the subscription is automatically moved to a canceled "
@@ -2538,7 +2538,7 @@ class Subscription(StripeObject):
     )
     # TODO: discount
     ended_at = StripeDateTimeField(
-        null=True,
+        null=True, blank=True,
         help_text="If the subscription has ended (either because it was canceled or because the customer was switched "
         "to a subscription to a new plan), the date the subscription ended."
     )
@@ -2553,14 +2553,17 @@ class Subscription(StripeObject):
         max_length=8, choices=enums.SubscriptionStatus.choices, help_text="The status of this subscription."
     )
     tax_percent = StripePercentField(
-        null=True,
+        null=True, blank=True,
         help_text="A positive decimal (with at most two decimal places) between 1 and 100. This represents the "
         "percentage of the subscription invoice subtotal that will be calculated and added as tax to the final "
         "amount each billing period."
     )
-    trial_end = StripeDateTimeField(null=True, help_text="If the subscription has a trial, the end of that trial.")
+    trial_end = StripeDateTimeField(
+        null=True, blank=True,
+        help_text="If the subscription has a trial, the end of that trial."
+    )
     trial_start = StripeDateTimeField(
-        null=True,
+        null=True, blank=True,
         help_text="If the subscription has a trial, the beginning of that trial."
     )
 
