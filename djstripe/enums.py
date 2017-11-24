@@ -158,7 +158,7 @@ class PlanInterval(Enum):
     year = _("Year")
 
 
-class SourceType(Enum):
+class LegacySourceType(Enum):
     card = _("Card")
     bank_account = _("Bank account")
     bitcoin_receiver = _("Bitcoin receiver")

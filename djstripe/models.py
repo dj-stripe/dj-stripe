@@ -33,7 +33,7 @@ from stripe.error import InvalidRequestError
 from . import settings as djstripe_settings
 from . import enums, webhooks
 from .context_managers import stripe_temporary_api_version
-from .enums import SourceType, SubscriptionStatus
+from .enums import LegacySourceType, SubscriptionStatus
 from .exceptions import MultipleSubscriptionException, StripeObjectManipulationException
 from .fields import (
     JSONField, PaymentMethodForeignKey, StripeBooleanField, StripeCharField, StripeCurrencyField,
@@ -66,7 +66,7 @@ class PaymentMethod(models.Model):
     @classmethod
     def _get_or_create_source(cls, data, source_type):
         # TODO other source types
-        if source_type == SourceType.card:
+        if source_type == LegacySourceType.card:
             Card._get_or_create_from_stripe_object(data)
 
         return cls.objects.get_or_create(id=data["id"], defaults={"type": source_type})
@@ -584,7 +584,7 @@ class Charge(StripeObject):
     source_type = StripeCharField(
         max_length=20,
         null=True,
-        choices=enums.SourceType.choices,
+        choices=enums.LegacySourceType.choices,
         stripe_name="source.object",
         help_text="The payment source type. If the payment source is supported by dj-stripe, a corresponding model is "
         "attached to this Charge via a foreign key matching this field."
@@ -2719,7 +2719,7 @@ class Transfer(StripeObject):
     )
     source_type = StripeCharField(
         max_length=16,
-        choices=enums.SourceType.choices,
+        choices=enums.LegacySourceType.choices,
         help_text="The source balance from which this transfer came."
     )
     statement_descriptor = StripeCharField(
