@@ -811,6 +811,14 @@ class Customer(StripeObject):
 
         return customer
 
+    @property
+    def legacy_cards(self):
+        """
+        Transitional property for Customer.sources.
+        Use this instead of Customer.sources if you want to access the legacy Card queryset.
+        """
+        return self.sources
+
     def subscribe(
         self, plan, charge_immediately=True, application_fee_percent=None, coupon=None,
         quantity=None, metadata=None, tax_percent=None, trial_end=None
