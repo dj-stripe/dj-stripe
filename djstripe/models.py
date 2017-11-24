@@ -1741,12 +1741,22 @@ class Source(StripeObject):
         )
     )
 
+    source_data = StripeJSONField(help_text=(
+        "The data corresponding to the source type."
+    ))
+
     customer = models.ForeignKey(
         "Customer", on_delete=models.CASCADE, related_name="sources_v3"
     )
 
     stripe_class = stripe.Source
     stripe_dashboard_item_name = "sources"
+
+    @classmethod
+    def _manipulate_stripe_object_hook(cls, data):
+        # The source_data dict is an alias of all the source types
+        data["source_data"] = data[data["type"]]
+        return data
 
     def _attach_objects_hook(self, cls, data):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
