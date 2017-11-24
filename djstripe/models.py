@@ -1769,7 +1769,7 @@ class Source(StripeObject):
     ))
 
     customer = models.ForeignKey(
-        "Customer", on_delete=models.CASCADE, related_name="sources_v3"
+        "Customer", on_delete=models.SET_NULL, null=True, blank=True, related_name="sources_v3"
     )
 
     stripe_class = stripe.Source
@@ -1786,7 +1786,7 @@ class Source(StripeObject):
         if customer:
             self.customer = customer
         else:
-            raise ValidationError("A customer was not attached to this source.")
+            self.customer = None
 
 
 # ============================================================================ #
