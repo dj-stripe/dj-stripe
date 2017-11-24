@@ -1788,6 +1788,20 @@ class Source(StripeObject):
         else:
             self.customer = None
 
+    def detach(self):
+        """
+        Detach the source from its customer.
+        """
+        try:
+            self.sync_from_stripe_data(self.api_retrieve().detach())
+            return True
+        except NotImplementedError:
+            # The source was already detached. Resyncing.
+            # NotImplementedError is weird.
+            # https://github.com/stripe/stripe-python/issues/376
+            self.sync_from_stripe_data(self.api_retrieve())
+            return False
+
 
 # ============================================================================ #
 #                                Subscriptions                                 #
