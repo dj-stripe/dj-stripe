@@ -1740,6 +1740,13 @@ class Source(StripeObject):
     stripe_class = stripe.Source
     stripe_dashboard_item_name = "sources"
 
+    def _attach_objects_hook(self, cls, data):
+        customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
+        if customer:
+            self.customer = customer
+        else:
+            raise ValidationError("A customer was not attached to this source.")
+
 
 # ============================================================================ #
 #                                Subscriptions                                 #
