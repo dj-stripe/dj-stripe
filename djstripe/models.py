@@ -1671,6 +1671,76 @@ class Card(StripeObject):
 StripeSource = Card
 
 
+class Source(StripeObject):
+    amount = StripeCurrencyField(null=True, blank=True, help_text=(
+        "Amount associated with the source. "
+        "This is the amount for which the source will be chargeable once ready. "
+        "Required for `single_use` sources."
+    ))
+    client_secret = StripeCharField(max_length=255, help_text=(
+        "The client secret of the source. "
+        "Used for client-side retrieval using a publishable key."
+    ))
+    currency = StripeCharField(null=True, blank=True, max_length=3, help_text="Three-letter ISO currency code")
+    flow = StripeCharField(
+        max_length=17, choices=enums.SourceFlow.choices, help_text=(
+            "The authentication flow of the source."
+        )
+    )
+    owner = StripeJSONField(help_text=(
+        "Information about the owner of the payment instrument that may be "
+        "used or required by particular source types."
+    ))
+    statement_descriptor = StripeCharField(
+        null=True, blank=True, max_length=255, help_text=(
+            "Extra information about a source. "
+            "This will appear on your customer’s statement every time you charge the source."
+        )
+    )
+    status = StripeCharField(
+        max_length=10, choices=enums.SourceStatus.choices, help_text=(
+            "The status of the source. Only `chargeable` sources can be used to create a charge."
+        )
+    )
+    type = StripeCharField(
+        max_length=19, choices=enums.SourceType.choices, help_text="The type of the source."
+    )
+    usage = StripeCharField(
+        max_length=10, choices=enums.SourceUsage.choices, help_text=(
+            "Whether this source should be reusable or not. "
+            "Some source types may or may not be reusable by construction, "
+            "while other may leave the option at creation."
+        )
+    )
+
+    # Flows
+    code_verification = StripeJSONField(
+        null=True, blank=True, stripe_required=False, help_text=(
+            "Information related to the code verification flow. "
+            "Present if the source is authenticated by a verification code (`flow` is `code_verification`)."
+        )
+    )
+    receiver = StripeJSONField(
+        null=True, blank=True, stripe_required=False, help_text=(
+            "Information related to the receiver flow. "
+            "Present if the source is a receiver (`flow` is `receiver`)."
+        )
+    )
+    redirect = StripeJSONField(
+        null=True, blank=True, stripe_required=False, help_text=(
+            "Information related to the redirect flow. "
+            "Present if the source is authenticated by a redirect (`flow` is `redirect`)."
+        )
+    )
+
+    customer = models.ForeignKey(
+        "Customer", on_delete=models.CASCADE, related_name="sources_v3"
+    )
+
+    stripe_class = stripe.Source
+    stripe_dashboard_item_name = "sources"
+
+
 # ============================================================================ #
 #                                Subscriptions                                 #
 # ============================================================================ #
