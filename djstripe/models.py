@@ -33,7 +33,7 @@ from stripe.error import InvalidRequestError
 from . import settings as djstripe_settings
 from . import enums, webhooks
 from .context_managers import stripe_temporary_api_version
-from .enums import LegacySourceType, SubscriptionStatus
+from .enums import SubscriptionStatus
 from .exceptions import MultipleSubscriptionException, StripeObjectManipulationException
 from .fields import (
     JSONField, PaymentMethodForeignKey, StripeBooleanField, StripeCharField, StripeCurrencyField,
@@ -64,12 +64,40 @@ class PaymentMethod(models.Model):
     type = CharField(max_length=12, db_index=True)
 
     @classmethod
+    def from_stripe_object(cls, data):
+        source_type = data["object"]
+        model = cls._model_for_type(source_type)
+
+        with transaction.atomic():
+            model.sync_from_stripe_data(data)
+            instance, _ = cls.objects.get_or_create(
+                id=data["id"], defaults={"type": source_type}
+            )
+
+        return instance
+
+    @classmethod
     def _get_or_create_source(cls, data, source_type):
-        # TODO other source types
-        if source_type == LegacySourceType.card:
-            Card._get_or_create_from_stripe_object(data)
+        try:
+            model = cls._model_for_type(source_type)
+            model._get_or_create_from_stripe_object(data)
+        except ValueError as e:
+            # This may happen if we have source types we don't know about.
+            # Let's not make dj-stripe entirely unusable if that happens.
+            logger.warning("Could not sync source of type %r: %s", source_type, e)
 
         return cls.objects.get_or_create(id=data["id"], defaults={"type": source_type})
+
+    @classmethod
+    def _model_for_type(cls, type):
+        if type == "card":
+            return Card
+        elif type == "source":
+            return Source
+        elif type == "bank_account":
+            raise NotImplementedError("BankAccount class not implemented yet")
+
+        raise ValueError("Unknown source type: {}".format(type))
 
     @property
     def stripe_id(self):
@@ -78,8 +106,7 @@ class PaymentMethod(models.Model):
 
     @property
     def object_model(self):
-        # TODO other source types
-        return Card
+        return self._model_for_type(self.type)
 
     def get_object(self):
         return self.object_model.objects.get(stripe_id=self.id)
@@ -1027,24 +1054,20 @@ class Customer(StripeObject):
         """
 
         stripe_customer = self.api_retrieve()
-        new_stripe_card = stripe_customer.sources.create(source=source)
+        new_stripe_payment_method = stripe_customer.sources.create(source=source)
 
         if set_default:
-            stripe_customer.default_source = new_stripe_card["id"]
+            stripe_customer.default_source = new_stripe_payment_method["id"]
             stripe_customer.save()
 
-        with transaction.atomic():
-            new_card = Card.sync_from_stripe_data(new_stripe_card)
-            new_payment_method, _ = PaymentMethod.objects.get_or_create(
-                id=new_stripe_card["id"], defaults={"type": "card"}
-            )
+        new_payment_method = PaymentMethod.from_stripe_object(new_stripe_payment_method)
 
         # Change the default source
         if set_default:
             self.default_source = new_payment_method
-            new_card = self.save()
+            self.save()
 
-        return new_card
+        return new_payment_method.get_object()
 
     def purge(self):
         try:
