@@ -1629,6 +1629,9 @@ class Card(StripeObject):
     def remove(self):
         """Removes a card from this customer's account."""
 
+        # First, wipe default source on all customers that use this card.
+        Customer.objects.filter(default_source=self.stripe_id).update(default_source=None)
+
         try:
             self._api_delete()
         except InvalidRequestError as exc:
@@ -1792,6 +1795,10 @@ class Source(StripeObject):
         """
         Detach the source from its customer.
         """
+
+        # First, wipe default source on all customers that use this.
+        Customer.objects.filter(default_source=self.stripe_id).update(default_source=None)
+
         try:
             self.sync_from_stripe_data(self.api_retrieve().detach())
             return True
