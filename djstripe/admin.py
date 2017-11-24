@@ -13,8 +13,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from django.contrib import admin
 
 from .models import (
-    Charge, Coupon, Customer, Event, IdempotencyKey, Invoice,
-    InvoiceItem, Plan, Subscription, Transfer, WebhookEventTrigger
+    Charge, Coupon, Customer, Event, IdempotencyKey, Invoice, InvoiceItem,
+    Plan, Source, Subscription, Transfer, WebhookEventTrigger
 )
 
 
@@ -287,6 +287,13 @@ class PlanAdmin(StripeObjectAdmin):
             )
 
         return readonly_fields
+
+
+@admin.register(Source)
+class SourceAdmin(StripeObjectAdmin):
+    raw_id_fields = ("customer", )
+    list_display = ("customer", "type", "status", "amount", "currency", "usage", "flow")
+    list_filter = ("type", "status", "usage", "flow")
 
 
 @admin.register(Subscription)
