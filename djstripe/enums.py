@@ -171,3 +171,12 @@ class SubscriptionStatus(Enum):
     past_due = _("Past due")
     canceled = _("Canceled")
     unpaid = _("Unpaid")
+
+
+class PaymentMethodType(Enum):
+    """
+    A djstripe-specific enum for the PaymentMethod model.
+    """
+    card = _("Card")
+    bank_account = _("Bank account")
+    source = _("Source")

@@ -60,6 +60,7 @@ class RestSubscriptionTest(APITestCase):
         add_card_mock.assert_called_once_with(customer, "cake")
         subscribe_mock.assert_called_once_with(customer, "test0", True)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        data["charge_immediately"] = None
         self.assertEqual(response.data, data)
 
     @patch("djstripe.models.Customer.subscribe", autospec=True)
