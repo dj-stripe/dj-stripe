@@ -1723,7 +1723,10 @@ class Card(StripeObject):
         ] + super(Card, self).str_parts()
 
     @classmethod
-    def create_token(cls, number, exp_month, exp_year, cvc, **kwargs):
+    def create_token(
+        cls, number, exp_month, exp_year, cvc,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs
+    ):
         """
         Creates a single use token that wraps the details of a credit card. This token can be used in
         place of a credit card dictionary with any API method. These tokens can only be used once: by
@@ -1748,7 +1751,7 @@ class Card(StripeObject):
         }
         card.update(kwargs)
 
-        return stripe.Token.create(card=card)
+        return stripe.Token.create(api_key=api_key, card=card)
 
 
 # Backwards compatibility
