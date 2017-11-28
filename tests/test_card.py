@@ -12,7 +12,7 @@ from copy import deepcopy
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-from mock.mock import patch
+from mock.mock import ANY, patch
 from stripe.error import InvalidRequestError
 
 from djstripe.exceptions import StripeObjectManipulationException
@@ -59,7 +59,7 @@ class CardTest(TestCase):
         card = {"number": "4242", "exp_month": 5, "exp_year": 2012, "cvc": 445}
         Card.create_token(**card)
 
-        token_create_mock.assert_called_with(card=card)
+        token_create_mock.assert_called_with(api_key=ANY, card=card)
 
     def test_api_call_no_customer(self):
         exception_message = "Cards must be manipulated through a Customer. Pass a Customer object into this call."
