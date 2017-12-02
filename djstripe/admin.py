@@ -112,6 +112,14 @@ class WebhookEventTriggerAdmin(admin.ModelAdmin):
     list_filter = ("created", "valid", "processed")
     raw_id_fields = ("event", )
 
+    def reprocess(self, request, queryset):
+        for trigger in queryset:
+            if not trigger.valid:
+                self.message_user(request, "Skipped invalid trigger {}".format(trigger))
+                continue
+
+            trigger.process()
+
 
 class StripeObjectAdmin(admin.ModelAdmin):
     """Base class for all StripeObject-based model admins"""
