@@ -105,7 +105,7 @@ Running the Tests
 Assuming the tests are run against PostgreSQL::
 
     createdb djstripe
-    pip install -r tests/requirements.txt
+    pip install tox
     tox
 
 Follows Best Practices
