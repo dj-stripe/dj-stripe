@@ -386,7 +386,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='charge',
             name='source',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='charges', to='djstripe.StripeSource'),
+            field=models.ForeignKey(help_text='The source used for this charge.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='charges', to='djstripe.StripeSource'),
         ),
         migrations.AddField(
             model_name='charge',
@@ -591,7 +591,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='invoice',
             name='subscription',
-            field=models.ForeignKey(help_text='The subscription that this invoice was prepared for, if any.', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='invoices', to='djstripe.Subscription'),
+            field=models.ForeignKey(help_text='The subscription that this invoice was prepared for, if any.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoices', to='djstripe.Subscription'),
         ),
         migrations.AddField(
             model_name='invoice',
@@ -643,7 +643,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='invoiceitem',
             name='subscription',
-            field=models.ForeignKey(help_text='The subscription that this invoice item has been created for, if any.', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='invoiceitems', to='djstripe.Subscription'),
+            field=models.ForeignKey(help_text='The subscription that this invoice item has been created for, if any.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoiceitems', to='djstripe.Subscription'),
         ),
         migrations.AddField(
             model_name='plan',
@@ -807,7 +807,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='customer',
             name='default_source',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='customers', to='djstripe.StripeSource'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='customers', to='djstripe.StripeSource'),
         ),
         migrations.DeleteModel(
             name='TransferChargeFee',
@@ -966,7 +966,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='invoiceitem',
             name='plan',
-            field=models.ForeignKey(help_text='If the invoice item is a proration, the plan of the subscription for which the proration was computed.', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='invoiceitems', to='djstripe.Plan'),
+            field=models.ForeignKey(help_text='If the invoice item is a proration, the plan of the subscription for which the proration was computed.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoiceitems', to='djstripe.Plan'),
         ),
         migrations.AlterField(
             model_name='invoiceitem',
@@ -1304,11 +1304,6 @@ class Migration(migrations.Migration):
             field=models.BooleanField(default=False, help_text='Whether or not a receipt was sent for this charge.'),
         ),
         migrations.AlterField(
-            model_name='charge',
-            name='source',
-            field=models.ForeignKey(help_text='The source used for this charge.', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='charges', to='djstripe.StripeSource'),
-        ),
-        migrations.AlterField(
             model_name='subscription',
             name='application_fee_percent',
             field=djstripe.fields.StripePercentField(decimal_places=2, help_text='A positive decimal that represents the fee percentage of the subscription invoice amount that will be transferred to the application owner\'s Stripe account each billing period.', max_digits=5, null=True, validators=[django.core.validators.MinValueValidator(1.0), django.core.validators.MaxValueValidator(100.0)]),
@@ -1399,31 +1394,6 @@ class Migration(migrations.Migration):
             field=djstripe.fields.StripeIdField(max_length=255, unique=True),
         ),
         migrations.AlterField(
-            model_name='customer',
-            name='default_source',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='customers', to='djstripe.StripeSource'),
-        ),
-        migrations.AlterField(
-            model_name='charge',
-            name='source',
-            field=models.ForeignKey(help_text='The source used for this charge.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='charges', to='djstripe.StripeSource'),
-        ),
-        migrations.AlterField(
-            model_name='invoice',
-            name='subscription',
-            field=models.ForeignKey(help_text='The subscription that this invoice was prepared for, if any.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoices', to='djstripe.Subscription'),
-        ),
-        migrations.AlterField(
-            model_name='invoiceitem',
-            name='plan',
-            field=models.ForeignKey(help_text='If the invoice item is a proration, the plan of the subscription for which the proration was computed.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoiceitems', to='djstripe.Plan'),
-        ),
-        migrations.AlterField(
-            model_name='invoiceitem',
-            name='subscription',
-            field=models.ForeignKey(help_text='The subscription that this invoice item has been created for,Z if any.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoiceitems', to='djstripe.Subscription'),
-        ),
-        migrations.AlterField(
             model_name='account',
             name='livemode',
             field=djstripe.fields.StripeNullBooleanField(default=False, help_text='Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.'),
@@ -1432,11 +1402,6 @@ class Migration(migrations.Migration):
             model_name='account',
             name='metadata',
             field=djstripe.fields.StripeJSONField(blank=True, help_text='A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.', null=True),
-        ),
-        migrations.AlterField(
-            model_name='charge',
-            name='account',
-            field=models.ForeignKey(help_text='The account the charge was made on behalf of. Null here indicates that this value was never set.', null=True, on_delete=django.db.models.deletion.CASCADE, related_name='charges', to='djstripe.Account'),
         ),
         migrations.AlterField(
             model_name='charge',
@@ -1482,11 +1447,6 @@ class Migration(migrations.Migration):
             model_name='charge',
             name='statement_descriptor',
             field=djstripe.fields.StripeCharField(help_text='An arbitrary string to be displayed on your customer\'s credit card statement. The statement description may not include <>"\' characters, and will appear on your customer\'s statement in capital letters. Non-ASCII characters are automatically stripped. While most banks display this information consistently, some may display it incorrectly or not at all.', max_length=22, null=True),
-        ),
-        migrations.AlterField(
-            model_name='charge',
-            name='transfer',
-            field=models.ForeignKey(help_text='The transfer to the destination account (only applicable if the charge was created using the destination parameter).', null=True, on_delete=django.db.models.deletion.CASCADE, to='djstripe.Transfer'),
         ),
         migrations.AlterField(
             model_name='customer',
@@ -1635,11 +1595,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='invoiceitem',
-            name='plan',
-            field=models.ForeignKey(help_text='If the invoice item is a proration, the plan of the subscription for which the proration was computed.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoiceitems', to='djstripe.Plan'),
-        ),
-        migrations.AlterField(
-            model_name='invoiceitem',
             name='proration',
             field=djstripe.fields.StripeBooleanField(default=False, help_text='Whether or not the invoice item was created automatically as a proration adjustment when the customer switched plans.'),
         ),
@@ -1647,11 +1602,6 @@ class Migration(migrations.Migration):
             model_name='invoiceitem',
             name='quantity',
             field=djstripe.fields.StripeIntegerField(help_text='If the invoice item is a proration, the quantity of the subscription for which the proration was computed.', null=True),
-        ),
-        migrations.AlterField(
-            model_name='invoiceitem',
-            name='subscription',
-            field=models.ForeignKey(help_text='The subscription that this invoice item has been created for, if any.', null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='invoiceitems', to='djstripe.Subscription'),
         ),
         migrations.AlterField(
             model_name='plan',

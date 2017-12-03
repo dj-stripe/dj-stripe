@@ -37,7 +37,7 @@ Features
 * Subscription management
 * Designed for easy implementation of post-registration subscription forms
 * Single-unit purchases
-* Works with Django >= 1.10
+* Works with Django >= 1.11
 * Works with Python 3.6, 3.5, 3.4, 2.7
 * Built-in migrations
 * Dead-Easy installation
@@ -105,7 +105,7 @@ Running the Tests
 Assuming the tests are run against PostgreSQL::
 
     createdb djstripe
-    pip install -r tests/requirements.txt
+    pip install tox
     tox
 
 Follows Best Practices
