@@ -23,16 +23,38 @@ Contents
 ---------
 
 .. toctree::
-   :maxdepth: 2
+   :caption: Getting Started
 
    installation
-   usage
+
+.. toctree::
+   :caption: Usage
+
+   usage/checking_customer_subscription
+   usage/subscribing_customers.rst
+   usage/one_off_charges.rst
+   usage/restricting_access.rst
+   usage/managing_subscriptions.rst
+   usage/creating_invoices.rst
+   usage/running_reports.rst
+   usage/webhooks.rst
+   usage/manually_syncing_with_stripe.rst
+.. cookbook
+
+.. toctree::
+   :caption: Reference
+   :glob:
+
    models
    settings
-   cookbook
+
+.. toctree::
+   :caption: Project
+
    contributing
    authors
    history
+   support
 
 Constraints
 ------------

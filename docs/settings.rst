@@ -1,6 +1,6 @@
-=========
+========
 Settings
-=========
+========
 
 STRIPE_API_VERSION (='2017-02-14')
 ==================================
@@ -24,9 +24,6 @@ For this reason it is best to assume that only the default version is supported.
 
 For more information on API versioning, see the `stripe documentation`_.
 
-.. _stripe documentation: https://stripe.com/docs/upgrades
-
-
 DJSTRIPE_IDEMPOTENCY_KEY_CALLBACK (=djstripe.settings._get_idempotency_key)
 ===========================================================================
 
@@ -46,8 +43,6 @@ The function takes the following signature:
 The function MUST return a string suitably random for the object_type/action
 pair, and usable in the Stripe ``Idempotency-Key`` HTTP header.
 For more information, see the `stripe documentation`_.
-
-.. _stripe documentation: https://stripe.com/docs/api/curl#idempotent_requests
 
 DJSTRIPE_PRORATION_POLICY (=False)
 ==================================
@@ -231,3 +226,5 @@ Examples:
 .. code-block:: python
 
     DJSTRIPE_WEBHOOK_EVENT_CALLBACK = 'callbacks.webhook_event_callback'
+
+.. _stripe documentation: https://stripe.com/docs/upgrades

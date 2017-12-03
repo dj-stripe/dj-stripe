@@ -1,16 +1,7 @@
-========
-Usage
-========
+Restricting access to only active subscribers
+=============================================
 
-Nearly every project breaks payment types into two broad categories, and will support either or both:
-
-1. Ongoing Subscriptions (Well supported)
-2. Individual Checkouts (Early, undocumented support)
-
-Ongoing Subscriptions
-=====================
-
-dj-stripe provides three methods to support ongoing subscriptions:
+dj-stripe provides three methods to support constraining views to be only accessible to users with active subscriptions:
 
 * Middleware approach to constrain entire projects easily.
 * Class-Based View mixin to constrain individual views.
@@ -70,7 +61,7 @@ Using this example any request on this site that isn't on the homepage, about, s
 
 .. seealso::
 
-    * :doc:`settings`
+    * :doc:`../settings`
 
 Constraining Class-Based Views
 ------------------------------
@@ -151,7 +142,7 @@ If you want to quickly constrain a single Function-Based View, the ``djstripe.de
 
 
 Don't do this!
----------------
+--------------
 
 Described is an anti-pattern. View logic belongs in views.py, not urls.py.
 
@@ -193,13 +184,4 @@ Described is an anti-pattern. View logic belongs in views.py, not urls.py.
         ),
     )
 
-Extending Subscriptions
-=======================
 
-``Subscription.extend(*delta*)``
-
-Subscriptions can be extended by using the ``Subscription.extend`` method, which takes a positive ``timedelta`` as its only property. This method is useful if you want to offer time-cards, gift-cards, or some other external way of subscribing users or extending subscriptions, while keeping the billing handling within Stripe.
-
-.. warning::
-
-    Subscription extensions are achieved by manipulating the ``trial_end`` of the subscription instance, which means that Stripe will change the status to ``trialing``.
