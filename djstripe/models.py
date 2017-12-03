@@ -108,7 +108,7 @@ class PaymentMethod(models.Model):
     def object_model(self):
         return self._model_for_type(self.type)
 
-    def get_object(self):
+    def resolve(self):
         return self.object_model.objects.get(stripe_id=self.id)
 
 
@@ -1067,7 +1067,7 @@ class Customer(StripeObject):
             self.default_source = new_payment_method
             self.save()
 
-        return new_payment_method.get_object()
+        return new_payment_method.resolve()
 
     def purge(self):
         try:

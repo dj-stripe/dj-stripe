@@ -37,7 +37,7 @@ class TestCustomer(TestCase):
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
         self.payment_method, _ = PaymentMethod._get_or_create_source(FAKE_CARD, "card")
-        self.card = self.payment_method.get_object()
+        self.card = self.payment_method.resolve()
 
         self.customer.default_source = self.payment_method
         self.customer.save()
