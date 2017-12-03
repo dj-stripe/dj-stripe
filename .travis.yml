@@ -10,7 +10,6 @@ addons:
 
 env:
   - TOXENV=py27-django111
-  - TOXENV=py27-checkmigrations
   - TOXENV=py34-django111
   - TOXENV=py34-django20
   - TOXENV=py35-django111
@@ -19,7 +18,7 @@ env:
   - TOXENV=py36-django111
   - TOXENV=py36-django20
   - TOXENV=py36-djangomaster
-  - TOXENV=py36-checkmigrations
+  - TOXENV=checkmigrations
   - TOXENV=flake8
 
 matrix:
