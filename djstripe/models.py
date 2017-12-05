@@ -302,7 +302,7 @@ class StripeObject(models.Model):
         instance._attach_objects_hook(cls, data)
 
         if save:
-            instance.save()
+            instance.save(force_insert=True)
 
         instance._attach_objects_post_save_hook(cls, data)
 
