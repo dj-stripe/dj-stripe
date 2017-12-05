@@ -3065,6 +3065,10 @@ class WebhookEventTrigger(models.Model):
         return local_data["data"] == remote_data["data"]
 
     def process(self, save=True):
+        # Reset traceback and exception in case of reprocessing
+        self.exception = ""
+        self.traceback = ""
+
         self.event = Event.process(self.json_body)
         self.processed = True
         if save:
