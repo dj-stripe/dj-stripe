@@ -1217,7 +1217,7 @@ class Customer(StripeObject):
         """ Check whether the customer has a valid payment source."""
         return self.default_source is not None
 
-    def add_coupon(self, coupon):
+    def add_coupon(self, coupon, idempotency_key=None):
         """
         Add a coupon to a Customer.
 
@@ -1228,7 +1228,7 @@ class Customer(StripeObject):
 
         stripe_customer = self.api_retrieve()
         stripe_customer.coupon = coupon
-        stripe_customer.save()
+        stripe_customer.save(idempotency_key=idempotency_key)
         return self.__class__.sync_from_stripe_data(stripe_customer)
 
     def upcoming_invoice(self, **kwargs):

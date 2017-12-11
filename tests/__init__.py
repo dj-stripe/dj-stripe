@@ -505,7 +505,7 @@ class SubscriptionDict(dict):
 
         return self
 
-    def save(self):
+    def save(self, idempotency_key=None):
         return self
 
 
@@ -601,7 +601,7 @@ class Sources(object):
 
 
 class CustomerDict(dict):
-    def save(self):
+    def save(self, idempotency_key=None):
         return self
 
     def delete(self):
