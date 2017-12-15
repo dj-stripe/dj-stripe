@@ -149,6 +149,11 @@ def other_object_webhook_handler(event):
         "transfer": Transfer
     }.get(event.category)
 
+    if event.parts[:2] == ["charge", "dispute"]:
+        # Do not attempt to handle charge.dispute.* events.
+        # We do not have a Dispute model yet.
+        return
+
     _handle_crud_like_event(target_cls=target_cls, event=event)
 
 
