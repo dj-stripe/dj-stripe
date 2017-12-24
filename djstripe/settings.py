@@ -7,8 +7,11 @@
 .. moduleauthor:: @kavdev, @pydanny, @lskillen, and @chrissmejia
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
+import inspect
 
+import six
 import stripe
+
 from django.apps import apps as django_apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -57,6 +60,23 @@ subscriber_request_callback = get_callback_function("DJSTRIPE_SUBSCRIBER_MODEL_R
                                                     default=(lambda request: request.user))
 
 
+def get_keymanager(keymanager_class):
+    if isinstance(keymanager_class, six.string_types):
+        try:
+            keymanager_class = import_string(keymanager_class)
+        except ImportError:
+            message = "DJSTRIPE_KEYMANAGER_CLASS is not set properly. {path} isn't found".format(path=keymanager_class)
+            raise ImproperlyConfigured(message)
+
+    if not inspect.isclass(keymanager_class):
+        raise ImproperlyConfigured("{name} must be string or class.".format(name=settings_name))
+    return keymanager_class()
+
+
+settings_name = 'DJSTRIPE_KEYMANAGER_CLASS'
+KEYS = get_keymanager(getattr(settings, settings_name, 'djstripe.key_managers.DefaultKeyManager'))
+
+
 def _get_idempotency_key(object_type, action, livemode):
     from .models import IdempotencyKey
     action = "{}:{}".format(object_type, action)
@@ -78,45 +98,10 @@ DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
 # onto a task queue (such as celery) for asynchronous processing.
 WEBHOOK_EVENT_CALLBACK = get_callback_function("DJSTRIPE_WEBHOOK_EVENT_CALLBACK")
 
-
-TEST_API_KEY = getattr(settings, "STRIPE_TEST_SECRET_KEY", "")
-LIVE_API_KEY = getattr(settings, "STRIPE_LIVE_SECRET_KEY", "")
-
 # Determines whether we are in live mode or test mode
 STRIPE_LIVE_MODE = getattr(settings, "STRIPE_LIVE_MODE", False)
 
-# Default secret key
-if hasattr(settings, "STRIPE_SECRET_KEY"):
-    STRIPE_SECRET_KEY = settings.STRIPE_SECRET_KEY
-else:
-    STRIPE_SECRET_KEY = LIVE_API_KEY if STRIPE_LIVE_MODE else TEST_API_KEY
-
-# Default public key
-if hasattr(settings, "STRIPE_PUBLIC_KEY"):
-    STRIPE_PUBLIC_KEY = settings.STRIPE_PUBLIC_KEY
-elif STRIPE_LIVE_MODE:
-    STRIPE_PUBLIC_KEY = getattr(settings, "STRIPE_LIVE_PUBLIC_KEY", "")
-else:
-    STRIPE_PUBLIC_KEY = getattr(settings, "STRIPE_TEST_PUBLIC_KEY", "")
-
-
-def get_default_api_key(livemode):
-    """
-    Returns the default API key for a value of `livemode`.
-    """
-    if livemode is None:
-        # Livemode is unknown. Use the default secret key.
-        return STRIPE_SECRET_KEY
-    elif livemode:
-        # Livemode is true, use the live secret key
-        return LIVE_API_KEY or STRIPE_SECRET_KEY
-    else:
-        # Livemode is false, use the test secret key
-        return TEST_API_KEY or STRIPE_SECRET_KEY
-
-
 SUBSCRIPTION_REDIRECT = getattr(settings, "DJSTRIPE_SUBSCRIPTION_REDIRECT", "djstripe:subscribe")
-
 
 ZERO_DECIMAL_CURRENCIES = set([
     "bif", "clp", "djf", "gnf", "jpy", "kmf", "krw", "mga", "pyg", "rwf",
