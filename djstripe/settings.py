@@ -77,6 +77,7 @@ DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
 # when an event from Stripe is received.  One suggestion is to put the event
 # onto a task queue (such as celery) for asynchronous processing.
 WEBHOOK_EVENT_CALLBACK = get_callback_function("DJSTRIPE_WEBHOOK_EVENT_CALLBACK")
+ABSTRACT_MODELS = getattr(settings, "DJSTRIPE_ABSTRACT_MODELS", False)
 
 
 TEST_API_KEY = getattr(settings, "STRIPE_TEST_SECRET_KEY", "")
