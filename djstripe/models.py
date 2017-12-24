@@ -40,6 +40,7 @@ from .fields import (
     StripeDateTimeField, StripeFieldMixin, StripeIdField, StripeIntegerField, StripeJSONField,
     StripeNullBooleanField, StripePercentField, StripePositiveIntegerField, StripeTextField
 )
+from .settings import KEYS
 from .managers import ChargeManager, StripeObjectManager, SubscriptionManager, TransferManager
 from .signals import WEBHOOK_SIGNALS, webhook_processing_error
 from .utils import QuerySetMock, get_friendly_currency_amount
@@ -142,13 +143,13 @@ class StripeObject(models.Model):
 
     @property
     def default_api_key(self):
-        return djstripe_settings.get_default_api_key(self.livemode)
+        return KEYS.get_default_api_key(self.livemode)
 
     def api_retrieve(self, api_key=None):
         """
         Call the stripe API's retrieve operation for this model.
 
-        :param api_key: The api key to use for this request. Defaults to settings.STRIPE_SECRET_KEY.
+        :param api_key: The api key to use for this request.
         :type api_key: string
         """
         api_key = api_key or self.default_api_key
@@ -156,36 +157,41 @@ class StripeObject(models.Model):
         return self.stripe_class.retrieve(id=self.stripe_id, api_key=api_key, expand=self.expand_fields)
 
     @classmethod
-    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def get_default_secret_key(cls):
+        return KEYS.STRIPE_SECRET_KEY
+
+    @classmethod
+    def api_list(cls, api_key=None, **kwargs):
         """
         Call the stripe API's list operation for this model.
 
-        :param api_key: The api key to use for this request. Defualts to djstripe_settings.STRIPE_SECRET_KEY.
+        :param api_key: The api key to use for this request.
         :type api_key: string
 
         See Stripe documentation for accepted kwargs for each object.
 
         :returns: an iterator over all items in the query
         """
+        api_key = api_key or cls.get_default_secret_key()
 
         return cls.stripe_class.list(api_key=api_key, **kwargs).auto_paging_iter()
 
     @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(cls, api_key=None, **kwargs):
         """
         Call the stripe API's create operation for this model.
 
-        :param api_key: The api key to use for this request. Defualts to djstripe_settings.STRIPE_SECRET_KEY.
+        :param api_key: The api key to use for this request.
         :type api_key: string
         """
-
+        api_key = api_key or cls.get_default_secret_key()
         return cls.stripe_class.create(api_key=api_key, **kwargs)
 
     def _api_delete(self, api_key=None, **kwargs):
         """
         Call the stripe API's delete operation for this model
 
-        :param api_key: The api key to use for this request. Defualts to djstripe_settings.STRIPE_SECRET_KEY.
+        :param api_key: The api key to use for this request.
         :type api_key: string
         """
         api_key = api_key or self.default_api_key
@@ -1651,26 +1657,24 @@ class Card(StripeObject):
         return customer, kwargs
 
     @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(cls, api_key=None, **kwargs):
         # OVERRIDING the parent version of this function
         # Cards must be manipulated through a customer or account.
         # TODO: When managed accounts are supported, this method needs to check if either a customer or
         #       account is supplied to determine the correct object to use.
 
         customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
-
         return customer.api_retrieve().sources.create(api_key=api_key, **clean_kwargs)
 
     @classmethod
-    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def api_list(cls, api_key=None, **kwargs):
         # OVERRIDING the parent version of this function
         # Cards must be manipulated through a customer or account.
         # TODO: When managed accounts are supported, this method needs to check if either a customer or
         #       account is supplied to determine the correct object to use.
 
         customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
-
-        return customer.api_retrieve(api_key=api_key).sources.list(object="card", **clean_kwargs).auto_paging_iter()
+        return customer.api_retrieve().sources.list(object="card", **clean_kwargs).auto_paging_iter()
 
     def _attach_objects_hook(self, cls, data):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
@@ -1723,10 +1727,7 @@ class Card(StripeObject):
         ] + super(Card, self).str_parts()
 
     @classmethod
-    def create_token(
-        cls, number, exp_month, exp_year, cvc,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs
-    ):
+    def create_token(cls, number, exp_month, exp_year, cvc, api_key=None, **kwargs):
         """
         Creates a single use token that wraps the details of a credit card. This token can be used in
         place of a credit card dictionary with any API method. These tokens can only be used once: by
@@ -1742,6 +1743,7 @@ class Card(StripeObject):
         :param cvc: Card security code.
         :type cvc: string
         """
+        api_key = api_key or cls.get_default_secret_key()
 
         card = {
             "number": number,
@@ -2001,7 +2003,7 @@ class Invoice(StripeObject):
 
     @classmethod
     def upcoming(
-        cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, customer=None, coupon=None, subscription=None,
+        cls, api_key=None, customer=None, coupon=None, subscription=None,
         subscription_plan=None, subscription_prorate=None, subscription_proration_date=None,
         subscription_quantity=None, subscription_trial_end=None, **kwargs
     ):
@@ -2046,6 +2048,7 @@ class Invoice(StripeObject):
         :returns: The upcoming preview invoice.
         :rtype: UpcomingInvoice
         """
+        api_key = api_key or cls.get_default_secret_key()
 
         # Convert Customer to stripe_id
         if customer is not None and isinstance(customer, Customer):
@@ -2713,7 +2716,7 @@ class Account(StripeObject):
 
     @classmethod
     def get_default_account(cls):
-        account_data = cls.stripe_class.retrieve(api_key=djstripe_settings.STRIPE_SECRET_KEY)
+        account_data = cls.stripe_class.retrieve(api_key=cls.get_default_secret_key())
 
         return cls._get_or_create_from_stripe_object(account_data)[0]
 
