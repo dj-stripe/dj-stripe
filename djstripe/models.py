@@ -598,6 +598,9 @@ class Charge(StripeObject):
 
     objects = ChargeManager()
 
+    class Meta:
+        abstract = djstripe_settings.ABSTRACT_MODELS
+
     def _attach_objects_hook(self, cls, data):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
         if customer:
@@ -764,6 +767,7 @@ class Customer(StripeObject):
 
     class Meta:
         unique_together = ("subscriber", "livemode")
+        abstract = djstripe_settings.ABSTRACT_MODELS
 
     def __str__(self):
         if not self.subscriber:
@@ -1363,6 +1367,9 @@ class Event(StripeObject):
         "Once these have run, this is set to True."
     )
 
+    class Meta:
+        abstract = djstripe_settings.ABSTRACT_MODELS
+
     @property
     def message(self):
         """ The event's data if the event is valid, None otherwise."""
@@ -1559,6 +1566,9 @@ class Payout(StripeObject):
     )
     type = StripeCharField(max_length=12, choices=enums.PayoutType.choices)
 
+    class Meta:
+        abstract = djstripe_settings.ABSTRACT_MODELS
+
 
 # TODO: class Refund(...)
 
@@ -1638,6 +1648,9 @@ class Card(StripeObject):
     customer = models.ForeignKey(
         "Customer", on_delete=models.CASCADE, related_name="sources"
     )
+
+    class Meta:
+        abstract = djstripe_settings.ABSTRACT_MODELS
 
     @staticmethod
     def _get_customer_from_kwargs(**kwargs):
@@ -1803,6 +1816,7 @@ class Coupon(StripeObject):
 
     class Meta:
         unique_together = ("stripe_id", "livemode")
+        abstract = djstripe_settings.ABSTRACT_MODELS
 
     stripe_class = stripe.Coupon
     stripe_dashboard_item_name = "coupons"
@@ -1977,6 +1991,7 @@ class Invoice(StripeObject):
 
     class Meta(object):
         ordering = ["-date"]
+        abstract = djstripe_settings.ABSTRACT_MODELS
 
     def str_parts(self):
         return [
@@ -2155,6 +2170,10 @@ class Invoice(StripeObject):
 
 
 class UpcomingInvoice(Invoice):
+
+    class Meta:
+        abstract = djstripe_settings.ABSTRACT_MODELS
+
     def __init__(self, *args, **kwargs):
         super(UpcomingInvoice, self).__init__(*args, **kwargs)
         self._invoiceitems = []
@@ -2265,6 +2284,9 @@ class InvoiceItem(StripeObject):
     )
     # XXX: subscription_item
 
+    class Meta:
+        abstract = djstripe_settings.ABSTRACT_MODELS
+
     @classmethod
     def _stripe_object_to_plan(cls, target_cls, data):
         """
@@ -2361,6 +2383,7 @@ class Plan(StripeObject):
 
     class Meta(object):
         ordering = ["amount"]
+        abstract = djstripe_settings.ABSTRACT_MODELS
 
     @classmethod
     def get_or_create(cls, **kwargs):
@@ -2520,6 +2543,9 @@ class Subscription(StripeObject):
     )
 
     objects = SubscriptionManager()
+
+    class Meta:
+        abstract = djstripe_settings.ABSTRACT_MODELS
 
     @classmethod
     def _stripe_object_to_plan(cls, target_cls, data):
@@ -2705,6 +2731,9 @@ class Subscription(StripeObject):
 class Account(StripeObject):
     stripe_class = stripe.Account
 
+    class Meta:
+        abstract = djstripe_settings.ABSTRACT_MODELS
+
     @classmethod
     def get_connected_account_from_token(cls, access_token):
         account_data = cls.stripe_class.retrieve(api_key=access_token)
@@ -2846,6 +2875,9 @@ class Transfer(StripeObject):
     validation_count = StripeIntegerField(deprecated=True)
     validation_fees = StripeCurrencyField(deprecated=True)
 
+    class Meta:
+        abstract = djstripe_settings.ABSTRACT_MODELS
+
     def str_parts(self):
         return [
             "amount={amount}".format(amount=self.amount),
@@ -2866,6 +2898,7 @@ class IdempotencyKey(models.Model):
 
     class Meta:
         unique_together = ("action", "livemode")
+        abstract = djstripe_settings.ABSTRACT_MODELS
 
     def __str__(self):
         return str(self.uuid)
@@ -2884,6 +2917,9 @@ class EventProcessingException(models.Model):
 
     created = DateTimeField(auto_now_add=True, editable=False)
     modified = DateTimeField(auto_now=True, editable=False)
+
+    class Meta:
+        abstract = djstripe_settings.ABSTRACT_MODELS
 
     @classmethod
     def log(cls, data, exception, event):
