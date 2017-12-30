@@ -100,6 +100,21 @@ else:
     STRIPE_PUBLIC_KEY = getattr(settings, "STRIPE_TEST_PUBLIC_KEY", "")
 
 
+def get_default_api_key(livemode):
+    """
+    Returns the default API key for a value of `livemode`.
+    """
+    if livemode is None:
+        # Livemode is unknown. Use the default secret key.
+        return STRIPE_SECRET_KEY
+    elif livemode:
+        # Livemode is true, use the live secret key
+        return LIVE_API_KEY or STRIPE_SECRET_KEY
+    else:
+        # Livemode is false, use the test secret key
+        return TEST_API_KEY or STRIPE_SECRET_KEY
+
+
 SUBSCRIPTION_REDIRECT = getattr(settings, "DJSTRIPE_SUBSCRIPTION_REDIRECT", "djstripe:subscribe")
 
 

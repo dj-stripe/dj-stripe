@@ -21,14 +21,13 @@ from datetime import timedelta
 import stripe
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
+from django.db import models, transaction
 from django.db.models.deletion import SET_NULL
 from django.db.models.fields import BooleanField, CharField, DateTimeField, NullBooleanField, TextField, UUIDField
 from django.db.models.fields.related import ForeignKey, OneToOneField
 from django.utils import dateformat, six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.functional import cached_property
-from polymorphic.models import PolymorphicModel
 from stripe.error import InvalidRequestError, StripeError
 
 from . import settings as djstripe_settings
@@ -37,8 +36,8 @@ from .context_managers import stripe_temporary_api_version
 from .enums import SourceType, SubscriptionStatus
 from .exceptions import MultipleSubscriptionException, StripeObjectManipulationException
 from .fields import (
-    StripeBooleanField, StripeCharField, StripeCurrencyField, StripeDateTimeField,
-    StripeFieldMixin, StripeIdField, StripeIntegerField, StripeJSONField,
+    PaymentMethodForeignKey, StripeBooleanField, StripeCharField, StripeCurrencyField,
+    StripeDateTimeField, StripeFieldMixin, StripeIdField, StripeIntegerField, StripeJSONField,
     StripeNullBooleanField, StripePercentField, StripePositiveIntegerField, StripeTextField
 )
 from .managers import ChargeManager, StripeObjectManager, SubscriptionManager, TransferManager
@@ -50,6 +49,40 @@ logger = logging.getLogger(__name__)
 
 # Override the default API version used by the Stripe library.
 djstripe_settings.set_stripe_api_version()
+
+
+class PaymentMethod(models.Model):
+    """
+    An internal model that abstracts the legacy Card and BankAccount
+    objects with Source objects.
+
+    Contains two fields: `id` and `type`:
+    - `id` is the id of the Stripe object.
+    - `type` can be `card`, `bank_account` or `source`.
+    """
+    id = CharField(max_length=255, primary_key=True)
+    type = CharField(max_length=12, db_index=True)
+
+    @classmethod
+    def _get_or_create_source(cls, data, source_type):
+        # TODO other source types
+        if source_type == SourceType.card:
+            Card._get_or_create_from_stripe_object(data)
+
+        return cls.objects.get_or_create(id=data["id"], defaults={"type": source_type})
+
+    @property
+    def stripe_id(self):
+        # Deprecated (transitional)
+        return self.id
+
+    @property
+    def object_model(self):
+        # TODO other source types
+        return Card
+
+    def get_object(self):
+        return self.object_model.objects.get(stripe_id=self.id)
 
 
 @python_2_unicode_compatible
@@ -109,15 +142,7 @@ class StripeObject(models.Model):
 
     @property
     def default_api_key(self):
-        if self.livemode is None:
-            # Livemode is unknown. Use the default secret key.
-            return djstripe_settings.STRIPE_SECRET_KEY
-        elif self.livemode:
-            # Livemode is true, use the live secret key
-            return djstripe_settings.LIVE_API_KEY or djstripe_settings.STRIPE_SECRET_KEY
-        else:
-            # Livemode is false, use the test secret key
-            return djstripe_settings.TEST_API_KEY or djstripe_settings.STRIPE_SECRET_KEY
+        return djstripe_settings.get_default_api_key(self.livemode)
 
     def api_retrieve(self, api_key=None):
         """
@@ -326,20 +351,6 @@ class StripeObject(models.Model):
             return target_cls._get_or_create_from_stripe_object(data, "transfer")[0]
 
     @classmethod
-    def _stripe_object_to_source(cls, target_cls, data):
-        """
-        Search the given manager for the source matching this object's ``source`` field.
-        Note that the source field is already expanded in each request, and that it is required.
-
-        :param target_cls: The target class
-        :type target_cls: Source
-        :param data: stripe object
-        :type data: dict
-        """
-
-        return target_cls._get_or_create_from_stripe_object(data["source"])[0]
-
-    @classmethod
     def _stripe_object_to_invoice(cls, target_cls, data):
         """
         Search the given manager for the Invoice matching this Charge object's ``invoice`` field.
@@ -541,9 +552,8 @@ class Charge(StripeObject):
     )
     # TODO: refunds, review
     shipping = StripeJSONField(null=True, help_text="Shipping information for the charge")
-    source = ForeignKey(
-        "StripeSource", on_delete=SET_NULL,
-        null=True, related_name="charges",
+    source = PaymentMethodForeignKey(
+        on_delete=SET_NULL, null=True, related_name="charges",
         help_text="The source used for this charge."
     )
     # TODO: source, source_transfer
@@ -604,9 +614,7 @@ class Charge(StripeObject):
         else:
             self.account = Account.get_default_account()
 
-        # TODO: other sources
-        if self.source_type == SourceType.card:
-            self.source = cls._stripe_object_to_source(target_cls=Card, data=data)
+        self.source, _ = PaymentMethod._get_or_create_source(data["source"], self.source_type)
 
     def str_parts(self):
         return [
@@ -729,7 +737,7 @@ class Customer(StripeObject):
         help_text="The currency the customer can be charged in for recurring billing purposes (subscriptions, "
         "invoices, invoice items)."
     )
-    default_source = ForeignKey("StripeSource", null=True, related_name="customers", on_delete=SET_NULL)
+    default_source = PaymentMethodForeignKey(on_delete=SET_NULL, null=True, related_name="customers")
     delinquent = StripeBooleanField(
         help_text="Whether or not the latest charge for the customer's latest invoice has failed."
     )
@@ -917,7 +925,7 @@ class Customer(StripeObject):
         currency = currency or "usd"
 
         # Convert Source to stripe_id
-        if source and isinstance(source, StripeSource):
+        if source and isinstance(source, Card):
             source = source.stripe_id
 
         stripe_charge = Charge._api_create(
@@ -1017,14 +1025,18 @@ class Customer(StripeObject):
             stripe_customer.default_source = new_stripe_card["id"]
             stripe_customer.save()
 
-        new_stripe_card = Card.sync_from_stripe_data(new_stripe_card)
+        with transaction.atomic():
+            new_card = Card.sync_from_stripe_data(new_stripe_card)
+            new_payment_method, _ = PaymentMethod.objects.get_or_create(
+                id=new_stripe_card["id"], defaults={"type": "card"}
+            )
 
         # Change the default source
         if set_default:
-            self.default_source = new_stripe_card
-            new_stripe_card = self.save()
+            self.default_source = new_payment_method
+            new_card = self.save()
 
-        return new_stripe_card
+        return new_card
 
     def purge(self):
         try:
@@ -1199,26 +1211,26 @@ class Customer(StripeObject):
     def _attach_objects_post_save_hook(self, cls, data):  # noqa (function complexity)
         save = False
 
-        # Have to create sources before we handle the default_source
-        if data["sources"]:
-            for source in data["sources"]["data"]:
-                if not isinstance(source, dict) or source.get("object") == SourceType.card:
-                    Card._get_or_create_from_stripe_object(source)
-                else:
-                    logger.warning("Unsupported source type on %r: %r", self, source)
+        customer_sources = data.get("sources")
+        if customer_sources:
+            # Have to create sources before we handle the default_source
+            # We save all of them in the `sources` dict, so that we can find them
+            # by id when we look at the default_source (we need the source type).
+            sources = {}
+            for source in customer_sources["data"]:
+                obj, _ = PaymentMethod._get_or_create_source(source, source["object"])
+                sources[source["id"]] = obj
 
         default_source = data.get("default_source")
         if default_source:
-            # TODO: other sources
-            if not isinstance(default_source, dict) or default_source.get("object") == SourceType.card:
-                source, created = Card._get_or_create_from_stripe_object(data, "default_source", refetch=False)
+            if isinstance(default_source, six.string_types):
+                default_source_id = default_source
             else:
-                logger.warning("Unsupported source type on %r: %r", self, default_source)
-                source = None
+                default_source_id = default_source["id"]
+            source = sources[default_source_id]
 
-            if source and source != self.default_source:
-                self.default_source = source
-                save = True
+            save = self.default_source != source
+            self.default_source = source
 
         discount = data.get("discount")
         if discount:
@@ -1555,11 +1567,8 @@ class Payout(StripeObject):
 #                               Payment Methods                                #
 # ============================================================================ #
 
-class StripeSource(PolymorphicModel, StripeObject):
-    customer = models.ForeignKey("Customer", on_delete=models.CASCADE, related_name="sources")
 
-
-class Card(StripeSource):
+class Card(StripeObject):
     """
     You can store multiple cards on a customer in order to charge the customer later.
     (Source: https://stripe.com/docs/api/python#cards)
@@ -1626,6 +1635,10 @@ class Card(StripeSource):
         help_text="If the card number is tokenized, this is the method that was used."
     )
 
+    customer = models.ForeignKey(
+        "Customer", on_delete=models.CASCADE, related_name="sources"
+    )
+
     @staticmethod
     def _get_customer_from_kwargs(**kwargs):
         if "customer" not in kwargs or not isinstance(kwargs["customer"], Customer):
@@ -1683,11 +1696,7 @@ class Card(StripeSource):
                 # The exception was raised for another reason, re-raise it
                 six.reraise(*sys.exc_info())
 
-        try:
-            self.delete()
-        except StripeSource.DoesNotExist:
-            # The card has already been deleted (potentially during the API call)
-            pass
+        self.delete()
 
     def api_retrieve(self, api_key=None):
         # OVERRIDING the parent version of this function
@@ -1714,7 +1723,10 @@ class Card(StripeSource):
         ] + super(Card, self).str_parts()
 
     @classmethod
-    def create_token(cls, number, exp_month, exp_year, cvc, **kwargs):
+    def create_token(
+        cls, number, exp_month, exp_year, cvc,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs
+    ):
         """
         Creates a single use token that wraps the details of a credit card. This token can be used in
         place of a credit card dictionary with any API method. These tokens can only be used once: by
@@ -1739,7 +1751,11 @@ class Card(StripeSource):
         }
         card.update(kwargs)
 
-        return stripe.Token.create(card=card)
+        return stripe.Token.create(api_key=api_key, card=card)
+
+
+# Backwards compatibility
+StripeSource = Card
 
 
 # ============================================================================ #
