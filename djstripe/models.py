@@ -849,6 +849,20 @@ class Customer(StripeObject):
         """
         return self.sources
 
+    @property
+    def credits(self):
+        """
+        The customer is considered to have credits if their account_balance is below 0.
+        """
+        return abs(min(self.account_balance, 0))
+
+    @property
+    def pending_charges(self):
+        """
+        The customer is considered to have pending charges if their account_balance is above 0.
+        """
+        return max(self.account_balance, 0)
+
     def subscribe(
         self, plan, charge_immediately=True, application_fee_percent=None, coupon=None,
         quantity=None, metadata=None, tax_percent=None, trial_end=None
