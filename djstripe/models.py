@@ -1555,7 +1555,11 @@ class Card(StripeObject):
         help_text="If ``address_zip`` was provided, results of the check."
     )
     brand = StripeCharField(max_length=16, choices=enums.CardBrand.choices, help_text="Card brand.")
-    country = StripeCharField(max_length=2, help_text="Two-letter ISO code representing the country of the card.")
+    country = StripeCharField(
+        null=True,
+        max_length=2,
+        help_text="Two-letter ISO code representing the country of the card."
+    )
     cvc_check = StripeCharField(
         null=True,
         max_length=11,
