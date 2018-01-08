@@ -13,8 +13,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from django.contrib import admin
 
 from .models import (
-    Charge, Coupon, Customer, Event, EventProcessingException,
-    IdempotencyKey, Invoice, InvoiceItem, Plan, Subscription, Transfer
+    Charge, Coupon, Customer, Event, IdempotencyKey, Invoice,
+    InvoiceItem, Plan, Subscription, Transfer, WebhookEventTrigger
 )
 
 
@@ -104,14 +104,21 @@ class IdempotencyKeyAdmin(admin.ModelAdmin):
     search_fields = ("uuid", "action")
 
 
-@admin.register(EventProcessingException)
-class EventProcessingExceptionAdmin(admin.ModelAdmin):
-    list_display = ("message", "event", "created")
+@admin.register(WebhookEventTrigger)
+class WebhookEventTriggerAdmin(admin.ModelAdmin):
+    list_display = (
+        "created", "event", "remote_ip", "processed", "valid", "exception", "djstripe_version"
+    )
+    list_filter = ("created", "valid", "processed")
     raw_id_fields = ("event", )
-    search_fields = ("message", "traceback", "data")
 
-    def has_add_permission(self, request):
-        return False
+    def reprocess(self, request, queryset):
+        for trigger in queryset:
+            if not trigger.valid:
+                self.message_user(request, "Skipped invalid trigger {}".format(trigger))
+                continue
+
+            trigger.process()
 
 
 class StripeObjectAdmin(admin.ModelAdmin):
@@ -139,31 +146,6 @@ class StripeObjectAdmin(admin.ModelAdmin):
             (None, {"fields": common_fields}),
             (self.model.__name__, {"fields": fields}),
         )
-
-
-def reprocess_events(modeladmin, request, queryset):
-    """Re-process the selected webhook events.
-
-    Note that this isn't idempotent, so any side-effects that are produced from
-    the event being handled will be multiplied (for example, an event handler
-    that sends emails will send duplicates; an event handler that adds 1 to a
-    total count will be a count higher than it was, etc.)
-
-    There aren't any event handlers with adverse side-effects built within
-    dj-stripe, but there might be within your own event handlers, third-party
-    plugins, contrib code, etc.
-    """
-    processed = 0
-    for event in queryset:
-        if event.process(force=True):
-            processed += 1
-
-    message = "{processed}/{total} event(s) successfully re-processed."
-    total = queryset.count()
-    modeladmin.message_user(request, message.format(processed=processed, total=total))
-
-
-reprocess_events.short_description = "Re-process selected webhook events"
 
 
 class SubscriptionInline(admin.StackedInline):
@@ -261,11 +243,9 @@ class CustomerAdmin(StripeObjectAdmin):
 
 @admin.register(Event)
 class EventAdmin(StripeObjectAdmin):
-    raw_id_fields = ("customer", )
-    list_display = ("type", "created", "valid", "processed")
-    list_filter = ("type", "created", "valid", "processed")
-    actions = (reprocess_events, )
-    # radio_fields = {"valid": admin.HORIZONTAL}
+    list_display = ("type", "created", "request_id")
+    list_filter = ("type", "created")
+    search_fields = ("request_id", )
 
     def has_add_permission(self, request):
         return False

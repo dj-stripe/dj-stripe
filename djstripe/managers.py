@@ -15,17 +15,7 @@ from django.db import models
 
 class StripeObjectManager(models.Manager):
     """Manager used in StripeObject."""
-
-    def exists_by_json(self, data):
-        """
-        Search for a matching stripe object based on a Stripe object received from Stripe in JSON format.
-
-        :param data: Stripe event object parsed from a JSON string into an object
-        :type data: dict
-        :rtype: bool
-        :returns: True if the requested object exists, False otherwise
-        """
-        return self.filter(stripe_id=data["id"]).exists()
+    pass
 
 
 class SubscriptionManager(models.Manager):

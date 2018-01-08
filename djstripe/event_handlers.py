@@ -31,27 +31,6 @@ from .utils import convert_tstamp
 logger = logging.getLogger(__name__)
 
 
-@webhooks.handler_all
-def customer_event_attach(event):
-    """Make the related customer available on the event for all handlers to use.
-
-    Does not create Customer objects.
-    """
-    event.customer = None
-    crud_type = CrudType.determine(event=event, exact=True)
-
-    if event.category == "customer" and crud_type.valid:
-        customer_stripe_id = event.data.get("object", {}).get("id")
-    else:
-        customer_stripe_id = event.data.get("object", {}).get("customer")
-
-    if customer_stripe_id:
-        try:
-            event.customer = Customer.objects.get(stripe_id=customer_stripe_id)
-        except Customer.DoesNotExist:
-            pass
-
-
 @webhooks.handler("customer")
 def customer_webhook_handler(event):
     """Handle updates to customer objects.
@@ -82,6 +61,7 @@ def customer_discount_webhook_handler(event):
     crud_type = CrudType.determine(event=event)
     discount_data = event.data.get("object", {})
     coupon_data = discount_data.get("coupon", {})
+    customer = event.customer
 
     if crud_type.created or crud_type.updated:
         coupon, _ = _handle_crud_like_event(
@@ -97,10 +77,10 @@ def customer_discount_webhook_handler(event):
         coupon_start = None
         coupon_end = None
 
-    event.customer.coupon = coupon
-    event.customer.coupon_start = convert_tstamp(coupon_start)
-    event.customer.coupon_end = convert_tstamp(coupon_end)
-    event.customer.save()
+    customer.coupon = coupon
+    customer.coupon_start = convert_tstamp(coupon_start)
+    customer.coupon_end = convert_tstamp(coupon_end)
+    customer.save()
 
 
 @webhooks.handler("customer.source")

@@ -13,10 +13,11 @@ from copy import deepcopy
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from mock import Mock, patch
+from mock import patch
+from stripe.error import StripeError
 
 from djstripe import webhooks
-from djstripe.models import Event, StripeError
+from djstripe.models import Event
 
 from . import FAKE_CUSTOMER, FAKE_EVENT_TRANSFER_CREATED
 
@@ -39,50 +40,22 @@ class EventTest(TestCase):
             stripe_id=FAKE_EVENT_TRANSFER_CREATED["id"]
         ), str(event))
 
-    @patch('djstripe.models.EventProcessingException.log')
-    def test_process_event_with_log_stripe_error(self, event_exception_log_mock):
-        event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
-        self.call_handlers.side_effect = StripeError("Boom!")
-        self.assertFalse(event.process())
-        self.assertTrue(event_exception_log_mock.called)
-        self.assertFalse(event.processed)
-
-    @patch('djstripe.models.EventProcessingException.log')
-    def test_process_event_with_raise_stripe_error(self, event_exception_log_mock):
+    def test_invoke_webhook_handlers_event_with_log_stripe_error(self):
         event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
         self.call_handlers.side_effect = StripeError("Boom!")
         with self.assertRaises(StripeError):
-            event.process(raise_exception=True)
-        self.assertTrue(event_exception_log_mock.called)
-        self.assertFalse(event.processed)
+            event.invoke_webhook_handlers()
 
-    def test_process_event_when_invalid(self):
+    def test_invoke_webhook_handlers_event_with_raise_stripe_error(self):
+        event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
+        self.call_handlers.side_effect = StripeError("Boom!")
+        with self.assertRaises(StripeError):
+            event.invoke_webhook_handlers()
+
+    def test_invoke_webhook_handlers_event_when_invalid(self):
         event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
         event.valid = False
-        self.assertFalse(event.process())
-        self.assertFalse(event.process(force=True))  # no effect
-
-    def test_reprocess_event_not_forced(self):
-        event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
-        event.save = Mock()
-
-        self.assertTrue(event.process())
-        event.save.assert_called_with()
-        event.save.reset_mock()
-
-        self.assertTrue(event.process())
-        event.save.assert_not_called()
-
-    def test_reprocess_event_forced(self):
-        event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
-        event.save = Mock()
-
-        self.assertTrue(event.process())
-        event.save.assert_called_with()
-        event.save.reset_mock()
-
-        self.assertTrue(event.process(force=True))
-        event.save.assert_called_with()
+        event.invoke_webhook_handlers()
 
     #
     # Helpers
@@ -93,5 +66,4 @@ class EventTest(TestCase):
         event_data = deepcopy(event_data)
         event_retrieve_mock.return_value = event_data
         event = Event.sync_from_stripe_data(event_data)
-        event.validate()
         return event

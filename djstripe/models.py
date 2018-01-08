@@ -23,12 +23,12 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
 from django.db.models.deletion import SET_NULL
-from django.db.models.fields import BooleanField, CharField, DateTimeField, NullBooleanField, TextField, UUIDField
+from django.db.models.fields import BooleanField, CharField, DateTimeField, UUIDField
 from django.db.models.fields.related import ForeignKey, OneToOneField
 from django.utils import dateformat, six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.functional import cached_property
-from stripe.error import InvalidRequestError, StripeError
+from stripe.error import InvalidRequestError
 
 from . import settings as djstripe_settings
 from . import enums, webhooks
@@ -36,7 +36,7 @@ from .context_managers import stripe_temporary_api_version
 from .enums import SourceType, SubscriptionStatus
 from .exceptions import MultipleSubscriptionException, StripeObjectManipulationException
 from .fields import (
-    PaymentMethodForeignKey, StripeBooleanField, StripeCharField, StripeCurrencyField,
+    JSONField, PaymentMethodForeignKey, StripeBooleanField, StripeCharField, StripeCurrencyField,
     StripeDateTimeField, StripeFieldMixin, StripeIdField, StripeIntegerField, StripeJSONField,
     StripeNullBooleanField, StripePercentField, StripePositiveIntegerField, StripeTextField
 )
@@ -1322,14 +1322,11 @@ class Event(StripeObject):
     stripe_class = stripe.Event
     stripe_dashboard_item_name = "events"
 
-    # XXX: api_version
-    received_api_version = StripeCharField(
-        max_length=15, blank=True, stripe_name="api_version", help_text="the API version at which the event data was "
+    api_version = StripeCharField(
+        max_length=15, blank=True, help_text="the API version at which the event data was "
         "rendered. Blank for old entries only, all new entries will have this value"
     )
-    # XXX: data
-    webhook_message = StripeJSONField(
-        stripe_name="data",
+    data = StripeJSONField(
         help_text="data received at webhook. data should be considered to be garbage until validity check is run "
         "and valid flag is set"
     )
@@ -1345,56 +1342,18 @@ class Event(StripeObject):
     idempotency_key = StripeTextField(null=True, blank=True, stripe_required=False)
     type = StripeCharField(max_length=250, help_text="Stripe's event description code")
 
-    # dj-stripe fields
-    customer = ForeignKey(
-        "Customer",
-        null=True, on_delete=models.CASCADE,
-        help_text="In the event that there is a related customer, this will point to that Customer record"
-    )
-    valid = NullBooleanField(
-        null=True,
-        help_text="Tri-state bool. Null == validity not yet confirmed. Otherwise, this field indicates that this "
-        "event was checked via stripe api and found to be either authentic (valid=True) or in-authentic (possibly "
-        "malicious)"
-    )
-    processed = BooleanField(
-        default=False,
-        help_text="If validity is performed, webhook event processor(s) may run to take further action on the event. "
-        "Once these have run, this is set to True."
-    )
-
-    @property
-    def message(self):
-        """ The event's data if the event is valid, None otherwise."""
-
-        return self.webhook_message if self.valid else None
-
     def str_parts(self):
         return [
             "type={type}".format(type=self.type),
         ] + super(Event, self).str_parts()
 
-    def api_retrieve(self, api_key=None):
-        # OVERRIDING the parent version of this function
-        # Event retrieve is special. For Event we don't retrieve using djstripe's API version. We always retrieve
-        # using the API version that was used to send the Event (which depends on the Stripe account holders settings
-        api_key = api_key or self.default_api_key
-        api_version = self.received_api_version
-
-        # Stripe API version validation is bypassed because we assume what
-        # Stripe passes us is a sane and usable value.
-        with stripe_temporary_api_version(api_version, validate=False):
-            stripe_event = super(Event, self).api_retrieve(api_key)
-
-        return stripe_event
-
     def _attach_objects_hook(self, cls, data):
-        if self.received_api_version is None:
+        if self.api_version is None:
             # as of api version 2017-02-14, the account.application.deauthorized
             # event sends None as api_version.
             # If we receive that, store an empty string instead.
             # Remove this hack if this gets fixed upstream.
-            self.received_api_version = ""
+            self.api_version = ""
 
         request_obj = data.get("request", None)
         if isinstance(request_obj, dict):
@@ -1405,87 +1364,30 @@ class Event(StripeObject):
             # Format before 2017-05-25
             self.request_id = request_obj
 
-    def validate(self):
-        """
-        The original contents of the Event message comes from a POST to the webhook endpoint. This data
-        must be confirmed by re-fetching it and comparing the fetched data with the original data. That's what
-        this function does.
+    @classmethod
+    def process(cls, data):
+        qs = cls.objects.filter(stripe_id=data["id"])
+        if qs.exists():
+            return qs.first()
+        else:
+            ret = cls._create_from_stripe_object(data)
+            ret.invoke_webhook_handlers()
+            return ret
 
-        This function makes an API call to Stripe to re-download the Event data. It then
-        marks this record's valid flag to True or False.
-        """
-
-        self.valid = self.webhook_message == self.api_retrieve()["data"]
-        self.save()
-
-    def process(self, force=False, raise_exception=False):
+    def invoke_webhook_handlers(self):
         """
         Invokes any webhook handlers that have been registered for this event
         based on event type or event sub-type.
 
         See event handlers registered in the ``djstripe.event_handlers`` module
         (or handlers registered in djstripe plugins or contrib packages).
-
-        :param force: If True, force the event to be processed by webhook
-        handlers, even if the event has already been processed previously.
-        :type force: bool
-        :param raise_exception: If True, any Stripe errors raised during
-        processing will be raised to the caller after logging the exception.
-        :type raise_exception: bool
-        :returns: True if the webhook was processed successfully or was
-        previously processed successfully.
-        :rtype: bool
         """
 
-        if not self.valid:
-            return False
+        webhooks.call_handlers(event=self)
 
-        if not self.processed or force:
-            exc_value = None
-
-            try:
-                # TODO: would it make sense to wrap the next 4 lines in a transaction.atomic context? Yes it would,
-                # except that some webhook handlers can have side effects outside of our local database, meaning that
-                # even if we rollback on our database, some updates may have been sent to Stripe, etc in resposne to
-                # webhooks...
-                webhooks.call_handlers(event=self)
-                self._send_signal()
-                self.processed = True
-            except StripeError as exc:
-                # TODO: What if we caught all exceptions or a broader range of exceptions here? How about DoesNotExist
-                # exceptions, for instance? or how about TypeErrors, KeyErrors, ValueErrors, etc?
-                exc_value = exc
-                self.processed = False
-                EventProcessingException.log(
-                    data=exc.http_body,
-                    exception=exc,
-                    event=self
-                )
-                webhook_processing_error.send(
-                    sender=Event,
-                    data=exc.http_body,
-                    exception=exc
-                )
-
-            # Saving here now because a previously processed webhook may no
-            # longer be processsed successfully if a re-process was forced but
-            # an event handle was broken.
-            self.save()
-
-            if exc_value and raise_exception:
-                six.reraise(StripeError, exc_value)
-
-        return self.processed
-
-    def _send_signal(self):
         signal = WEBHOOK_SIGNALS.get(self.type)
         if signal:
             return signal.send(sender=Event, event=self)
-
-    @cached_property
-    def data(self):
-        """Get the event data/contents."""
-        return self.message
 
     @cached_property
     def parts(self):
@@ -1501,6 +1403,17 @@ class Event(StripeObject):
     def verb(self):
         """ Gets the event past-tense verb string (e.g. 'updated'). """
         return ".".join(self.parts[1:])
+
+    @property
+    def customer(self):
+        data = self.data["object"]
+        if data["object"] == "customer":
+            field = "id"
+        else:
+            field = "customer"
+
+        if data.get(field):
+            return Customer._get_or_create_from_stripe_object(data, field)[0]
 
 
 # TODO: class FileUpload(...)
@@ -2857,6 +2770,13 @@ class Transfer(StripeObject):
 #                             DJ-STRIPE RESOURCES                              #
 # ============================================================================ #
 
+
+def _get_version():
+    from . import __version__
+
+    return __version__
+
+
 @python_2_unicode_compatible
 class IdempotencyKey(models.Model):
     uuid = UUIDField(max_length=36, primary_key=True, editable=False, default=uuid.uuid4)
@@ -2875,32 +2795,133 @@ class IdempotencyKey(models.Model):
         return timezone.now() > self.created + timedelta(hours=24)
 
 
-@python_2_unicode_compatible
-class EventProcessingException(models.Model):
-    event = ForeignKey("Event", on_delete=models.CASCADE, null=True)
-    data = TextField()
-    message = CharField(max_length=500)
-    traceback = TextField()
-
-    created = DateTimeField(auto_now_add=True, editable=False)
-    modified = DateTimeField(auto_now=True, editable=False)
+class WebhookEventTrigger(models.Model):
+    """
+    An instance of a request that reached the server endpoint for Stripe webhooks.
+    """
+    id = models.BigAutoField(primary_key=True)
+    remote_ip = models.GenericIPAddressField(
+        help_text="IP address of the request client."
+    )
+    headers = JSONField()
+    body = models.TextField(blank=True)
+    valid = models.BooleanField(
+        default=False,
+        help_text="Whether or not the webhook event has passed validation"
+    )
+    processed = models.BooleanField(
+        default=False,
+        help_text="Whether or not the webhook event has been successfully processed"
+    )
+    exception = models.CharField(max_length=128, blank=True)
+    traceback = models.TextField(
+        blank=True, help_text="Traceback if an exception was thrown during processing"
+    )
+    event = models.ForeignKey(
+        "Event", on_delete=models.SET_NULL, null=True, blank=True,
+        help_text="Event object contained in the (valid) Webhook"
+    )
+    djstripe_version = models.CharField(
+        max_length=32,
+        default=_get_version,  # Needs to be a callable, otherwise it's a db default.
+        help_text="The version of dj-stripe when the webhook was received"
+    )
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     @classmethod
-    def log(cls, data, exception, event):
-        from traceback import format_exc
-        cls.objects.create(
-            event=event,
-            data=data or "",
-            message=str(exception),
-            traceback=format_exc()
-        )
+    def from_request(cls, request):
+        """
+        Create, validate and process a WebhookEventTrigger given a Django
+        request object.
 
-    def __str__(self):
-        return smart_text("<{message}, pk={pk}, Event={event}>".format(
-            message=self.message,
-            pk=self.pk,
-            event=self.event
-        ))
+        The process is three-fold:
+        1. Create a WebhookEventTrigger object from a Django request.
+        2. Validate the WebhookEventTrigger as a Stripe event using the API.
+        3. If valid, process it into an Event object (and child resource).
+        """
+        from traceback import format_exc
+        from .utils import fix_django_headers
+
+        headers = fix_django_headers(request.META)
+        assert headers
+        try:
+            body = request.body.decode(request.encoding or "utf-8")
+        except Exception:
+            body = "(error decoding body)"
+
+        ip = request.META["REMOTE_ADDR"]
+        obj = cls.objects.create(headers=headers, body=body, remote_ip=ip)
+
+        try:
+            obj.valid = obj.validate()
+            if obj.valid:
+                if djstripe_settings.WEBHOOK_EVENT_CALLBACK:
+                    # If WEBHOOK_EVENT_CALLBACK, pass it for processing
+                    djstripe_settings.WEBHOOK_EVENT_CALLBACK(obj)
+                else:
+                    # Process the item (do not save it, it'll get saved below)
+                    obj.process(save=False)
+        except Exception as e:
+            max_length = WebhookEventTrigger._meta.get_field("exception").max_length
+            obj.exception = str(e)[:max_length]
+            obj.traceback = format_exc()
+
+            # Send the exception as the webhook_processing_error signal
+            webhook_processing_error.send(
+                sender=WebhookEventTrigger, exception=e, data=getattr(e, "http_body", "")
+            )
+        finally:
+            obj.save()
+
+        return obj
+
+    @cached_property
+    def json_body(self):
+        import json
+
+        try:
+            return json.loads(self.body)
+        except ValueError:
+            return {}
+
+    @property
+    def is_test_event(self):
+        return self.json_body.get("id") == webhooks.TEST_EVENT_ID
+
+    def validate(self, api_key=None):
+        """
+        The original contents of the Event message must be confirmed by
+        refetching it and comparing the fetched data with the original data.
+
+        This function makes an API call to Stripe to redownload the Event data
+        and returns whether or not it matches the WebhookEventTrigger data.
+        """
+
+        local_data = self.json_body
+        if "id" not in local_data or "livemode" not in local_data:
+            return False
+
+        if self.is_test_event:
+            logger.info("Test webhook received: {}".format(local_data))
+            return False
+
+        livemode = local_data["livemode"]
+        api_key = api_key or djstripe_settings.get_default_api_key(livemode)
+
+        # Retrieve the event using the api_version specified in itself
+        with stripe_temporary_api_version(local_data["api_version"], validate=False):
+            remote_data = Event.stripe_class.retrieve(id=local_data["id"], api_key=api_key)
+
+        return local_data["data"] == remote_data["data"]
+
+    def process(self, save=True):
+        self.event = Event.process(self.json_body)
+        self.processed = True
+        if save:
+            self.save()
+
+        return self.event
 
 
 # Much like registering signal handlers. We import this module so that its registrations get picked up
