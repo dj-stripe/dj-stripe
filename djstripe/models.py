@@ -506,7 +506,6 @@ class Charge(StripeObject):
     * **object** - Unnecessary. Just check the model name.
     * **application_fee** - #. Coming soon with stripe connect functionality
     * **balance_transaction** - #
-    * **dispute** - #; Mapped to a ``disputed`` boolean.
     * **order** - #
     * **refunds** - #
     * **source_transfer** - #
@@ -543,6 +542,11 @@ class Charge(StripeObject):
         "Account", on_delete=models.CASCADE, null=True,
         related_name="charges",
         help_text="The account the charge was made on behalf of. Null here indicates that this value was never set."
+    )
+    dispute = ForeignKey(
+        "Dispute", on_delete=models.SET_NULL, null=True,
+        related_name="charges",
+        help_text="Details about the dispute if the charge has been disputed."
     )
     # TODO: dispute
     failure_code = StripeCharField(
@@ -620,13 +624,16 @@ class Charge(StripeObject):
         "attached to this Charge via a foreign key matching this field."
     )
     source_stripe_id = StripeIdField(null=True, stripe_name="source.id", help_text="The payment source id.")
-    disputed = StripeBooleanField(default=False, help_text="Whether or not this charge is disputed.")
     fraudulent = StripeBooleanField(default=False, help_text="Whether or not this charge was marked as fraudulent.")
 
     # XXX: Remove me
     receipt_sent = BooleanField(default=False, help_text="Whether or not a receipt was sent for this charge.")
 
     objects = ChargeManager()
+
+    @property
+    def disputed(self):
+        return self.dispute is not None
 
     def _attach_objects_hook(self, cls, data):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
@@ -713,8 +720,6 @@ class Charge(StripeObject):
 
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
-        data["disputed"] = data["dispute"] is not None
-
         # Assessments reported by you have the key user_report and, if set,
         # possible values of safe and fraudulent. Assessments from Stripe have
         # the key stripe_report and, if set, the value fraudulent.

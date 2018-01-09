@@ -218,9 +218,9 @@ class ChargeAdmin(StripeObjectAdmin):
     )
     search_fields = ("stripe_id", "customer__stripe_id", "invoice__stripe_id")
     list_filter = (
-        "status", "source_type", "paid", "disputed", "refunded", "fraudulent", "captured",
+        "status", "source_type", "paid", "refunded", "fraudulent", "captured",
     )
-    raw_id_fields = ("customer", "invoice", "source", "transfer")
+    raw_id_fields = ("customer", "dispute", "invoice", "source", "transfer")
 
 
 @admin.register(Coupon)
