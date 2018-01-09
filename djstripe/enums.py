@@ -114,6 +114,33 @@ class CouponDuration(Enum):
     forever = _("Forever")
 
 
+class DisputeReason(Enum):
+    duplicate = _("Duplicate")
+    fraudulent = _("Fraudulent")
+    subscription_canceled = _("Subscription canceled")
+    product_unacceptable = _("Product unacceptable")
+    product_not_received = _("Product not received")
+    unrecognized = _("Unrecognized")
+    credit_not_processed = _("Credit not processed")
+    general = _("General")
+    incorrect_account_details = _("Incorrect account details")
+    insufficient_funds = _("Insufficient funds")
+    bank_cannot_process = _("Bank cannot process")
+    debit_not_authorized = _("Debit not authorized")
+    customer_initiated = _("Customer-initiated")
+
+
+class DisputeStatus(Enum):
+    warning_needs_response = _("Warning needs response")
+    warning_under_review = _("Warning under review")
+    warning_closed = _("Warning closed")
+    needs_response = _("Needs response")
+    under_review = _("Under review")
+    charge_refunded = _("Charge refunded")
+    won = _("Won")
+    lost = _("Lost")
+
+
 class PayoutFailureCode(Enum):
     """
     Payout failure error codes.

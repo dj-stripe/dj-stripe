@@ -1326,7 +1326,26 @@ class Customer(StripeObject):
             Subscription.sync_from_stripe_data(stripe_subscription)
 
 
-# TODO: class Dispute(...)
+class Dispute(StripeObject):
+    stripe_class = stripe.Dispute
+    stripe_dashboard_item_name = "disputes"
+
+    amount = StripeIntegerField(
+        help_text=(
+            "Disputed amount. Usually the amount of the charge, but can differ "
+            "(usually because of currency fluctuation or because only part of the order is disputed)."
+        )
+    )
+    currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code.")
+    evidence = StripeJSONField(help_text="Evidence provided to respond to a dispute.")
+    evidence_details = StripeJSONField(help_text="Information about the evidence submission.")
+    is_charge_refundable = StripeBooleanField(help_text=(
+        "If true, it is still possible to refund the disputed payment. "
+        "Once the payment has been fully refunded, no further funds will "
+        "be withdrawn from your Stripe account as a result of this dispute."
+    ))
+    reason = StripeCharField(max_length=50, choices=enums.DisputeReason.choices)
+    status = StripeCharField(max_length=50, choices=enums.DisputeStatus.choices)
 
 
 class Event(StripeObject):
