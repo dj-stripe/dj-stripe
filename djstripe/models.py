@@ -21,7 +21,7 @@ from datetime import timedelta
 import stripe
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models, transaction
+from django.db import IntegrityError, models, transaction
 from django.db.models.deletion import SET_NULL
 from django.db.models.fields import BooleanField, CharField, DateTimeField, UUIDField
 from django.db.models.fields.related import ForeignKey, OneToOneField
@@ -33,7 +33,7 @@ from stripe.error import InvalidRequestError
 from . import settings as djstripe_settings
 from . import enums, webhooks
 from .context_managers import stripe_temporary_api_version
-from .enums import SourceType, SubscriptionStatus
+from .enums import SubscriptionStatus
 from .exceptions import MultipleSubscriptionException, StripeObjectManipulationException
 from .fields import (
     JSONField, PaymentMethodForeignKey, StripeBooleanField, StripeCharField, StripeCurrencyField,
@@ -64,12 +64,40 @@ class PaymentMethod(models.Model):
     type = CharField(max_length=12, db_index=True)
 
     @classmethod
+    def from_stripe_object(cls, data):
+        source_type = data["object"]
+        model = cls._model_for_type(source_type)
+
+        with transaction.atomic():
+            model.sync_from_stripe_data(data)
+            instance, _ = cls.objects.get_or_create(
+                id=data["id"], defaults={"type": source_type}
+            )
+
+        return instance
+
+    @classmethod
     def _get_or_create_source(cls, data, source_type):
-        # TODO other source types
-        if source_type == SourceType.card:
-            Card._get_or_create_from_stripe_object(data)
+        try:
+            model = cls._model_for_type(source_type)
+            model._get_or_create_from_stripe_object(data)
+        except ValueError as e:
+            # This may happen if we have source types we don't know about.
+            # Let's not make dj-stripe entirely unusable if that happens.
+            logger.warning("Could not sync source of type %r: %s", source_type, e)
 
         return cls.objects.get_or_create(id=data["id"], defaults={"type": source_type})
+
+    @classmethod
+    def _model_for_type(cls, type):
+        if type == "card":
+            return Card
+        elif type == "source":
+            return Source
+        elif type == "bank_account":
+            raise NotImplementedError("BankAccount class not implemented yet")
+
+        raise ValueError("Unknown source type: {}".format(type))
 
     @property
     def stripe_id(self):
@@ -78,10 +106,9 @@ class PaymentMethod(models.Model):
 
     @property
     def object_model(self):
-        # TODO other source types
-        return Card
+        return self._model_for_type(self.type)
 
-    def get_object(self):
+    def resolve(self):
         return self.object_model.objects.get(stripe_id=self.id)
 
 
@@ -320,7 +347,10 @@ class StripeObject(models.Model):
         # If this happens when syncing Stripe data, it's a djstripe bug. Report it!
         assert not should_expand, "No data to create {} from {}".format(cls.__name__, field_name)
 
-        return cls._create_from_stripe_object(data, save=save), True
+        try:
+            return cls._create_from_stripe_object(data, save=save), True
+        except IntegrityError:
+            return cls.stripe_objects.get(stripe_id=stripe_id), False
 
     @classmethod
     def _stripe_object_to_customer(cls, target_cls, data):
@@ -584,7 +614,7 @@ class Charge(StripeObject):
     source_type = StripeCharField(
         max_length=20,
         null=True,
-        choices=enums.SourceType.choices,
+        choices=enums.LegacySourceType.choices,
         stripe_name="source.object",
         help_text="The payment source type. If the payment source is supported by dj-stripe, a corresponding model is "
         "attached to this Charge via a foreign key matching this field."
@@ -811,6 +841,14 @@ class Customer(StripeObject):
 
         return customer
 
+    @property
+    def legacy_cards(self):
+        """
+        Transitional property for Customer.sources.
+        Use this instead of Customer.sources if you want to access the legacy Card queryset.
+        """
+        return self.sources
+
     def subscribe(
         self, plan, charge_immediately=True, application_fee_percent=None, coupon=None,
         quantity=None, metadata=None, tax_percent=None, trial_end=None
@@ -1019,24 +1057,20 @@ class Customer(StripeObject):
         """
 
         stripe_customer = self.api_retrieve()
-        new_stripe_card = stripe_customer.sources.create(source=source)
+        new_stripe_payment_method = stripe_customer.sources.create(source=source)
 
         if set_default:
-            stripe_customer.default_source = new_stripe_card["id"]
+            stripe_customer.default_source = new_stripe_payment_method["id"]
             stripe_customer.save()
 
-        with transaction.atomic():
-            new_card = Card.sync_from_stripe_data(new_stripe_card)
-            new_payment_method, _ = PaymentMethod.objects.get_or_create(
-                id=new_stripe_card["id"], defaults={"type": "card"}
-            )
+        new_payment_method = PaymentMethod.from_stripe_object(new_stripe_payment_method)
 
         # Change the default source
         if set_default:
             self.default_source = new_payment_method
-            new_card = self.save()
+            self.save()
 
-        return new_card
+        return new_payment_method.resolve()
 
     def purge(self):
         try:
@@ -1521,7 +1555,11 @@ class Card(StripeObject):
         help_text="If ``address_zip`` was provided, results of the check."
     )
     brand = StripeCharField(max_length=16, choices=enums.CardBrand.choices, help_text="Card brand.")
-    country = StripeCharField(max_length=2, help_text="Two-letter ISO code representing the country of the card.")
+    country = StripeCharField(
+        null=True,
+        max_length=2,
+        help_text="Two-letter ISO code representing the country of the card."
+    )
     cvc_check = StripeCharField(
         null=True,
         max_length=11,
@@ -1598,6 +1636,9 @@ class Card(StripeObject):
     def remove(self):
         """Removes a card from this customer's account."""
 
+        # First, wipe default source on all customers that use this card.
+        Customer.objects.filter(default_source=self.stripe_id).update(default_source=None)
+
         try:
             self._api_delete()
         except InvalidRequestError as exc:
@@ -1669,6 +1710,111 @@ class Card(StripeObject):
 
 # Backwards compatibility
 StripeSource = Card
+
+
+class Source(StripeObject):
+    amount = StripeCurrencyField(null=True, blank=True, help_text=(
+        "Amount associated with the source. "
+        "This is the amount for which the source will be chargeable once ready. "
+        "Required for `single_use` sources."
+    ))
+    client_secret = StripeCharField(max_length=255, help_text=(
+        "The client secret of the source. "
+        "Used for client-side retrieval using a publishable key."
+    ))
+    currency = StripeCharField(null=True, blank=True, max_length=3, help_text="Three-letter ISO currency code")
+    flow = StripeCharField(
+        max_length=17, choices=enums.SourceFlow.choices, help_text=(
+            "The authentication flow of the source."
+        )
+    )
+    owner = StripeJSONField(help_text=(
+        "Information about the owner of the payment instrument that may be "
+        "used or required by particular source types."
+    ))
+    statement_descriptor = StripeCharField(
+        null=True, blank=True, max_length=255, help_text=(
+            "Extra information about a source. "
+            "This will appear on your customer’s statement every time you charge the source."
+        )
+    )
+    status = StripeCharField(
+        max_length=10, choices=enums.SourceStatus.choices, help_text=(
+            "The status of the source. Only `chargeable` sources can be used to create a charge."
+        )
+    )
+    type = StripeCharField(
+        max_length=19, choices=enums.SourceType.choices, help_text="The type of the source."
+    )
+    usage = StripeCharField(
+        max_length=10, choices=enums.SourceUsage.choices, help_text=(
+            "Whether this source should be reusable or not. "
+            "Some source types may or may not be reusable by construction, "
+            "while other may leave the option at creation."
+        )
+    )
+
+    # Flows
+    code_verification = StripeJSONField(
+        null=True, blank=True, stripe_required=False, help_text=(
+            "Information related to the code verification flow. "
+            "Present if the source is authenticated by a verification code (`flow` is `code_verification`)."
+        )
+    )
+    receiver = StripeJSONField(
+        null=True, blank=True, stripe_required=False, help_text=(
+            "Information related to the receiver flow. "
+            "Present if the source is a receiver (`flow` is `receiver`)."
+        )
+    )
+    redirect = StripeJSONField(
+        null=True, blank=True, stripe_required=False, help_text=(
+            "Information related to the redirect flow. "
+            "Present if the source is authenticated by a redirect (`flow` is `redirect`)."
+        )
+    )
+
+    source_data = StripeJSONField(help_text=(
+        "The data corresponding to the source type."
+    ))
+
+    customer = models.ForeignKey(
+        "Customer", on_delete=models.SET_NULL, null=True, blank=True, related_name="sources_v3"
+    )
+
+    stripe_class = stripe.Source
+    stripe_dashboard_item_name = "sources"
+
+    @classmethod
+    def _manipulate_stripe_object_hook(cls, data):
+        # The source_data dict is an alias of all the source types
+        data["source_data"] = data[data["type"]]
+        return data
+
+    def _attach_objects_hook(self, cls, data):
+        customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
+        if customer:
+            self.customer = customer
+        else:
+            self.customer = None
+
+    def detach(self):
+        """
+        Detach the source from its customer.
+        """
+
+        # First, wipe default source on all customers that use this.
+        Customer.objects.filter(default_source=self.stripe_id).update(default_source=None)
+
+        try:
+            self.sync_from_stripe_data(self.api_retrieve().detach())
+            return True
+        except NotImplementedError:
+            # The source was already detached. Resyncing.
+            # NotImplementedError is weird.
+            # https://github.com/stripe/stripe-python/issues/376
+            self.sync_from_stripe_data(self.api_retrieve())
+            return False
 
 
 # ============================================================================ #
@@ -2375,7 +2521,7 @@ class Subscription(StripeObject):
     STATUS_UNPAID = enums.SubscriptionStatus.unpaid
 
     application_fee_percent = StripePercentField(
-        null=True,
+        null=True, blank=True,
         help_text="A positive decimal that represents the fee percentage of the subscription invoice amount that "
         "will be transferred to the application owner's Stripe account each billing period."
     )
@@ -2386,7 +2532,7 @@ class Subscription(StripeObject):
         "a subscription that has a status of active is scheduled to be canceled at the end of the current period."
     )
     canceled_at = StripeDateTimeField(
-        null=True,
+        null=True, blank=True,
         help_text="If the subscription has been canceled, the date of that cancellation. If the subscription was "
         "canceled with ``cancel_at_period_end``, canceled_at will still reflect the date of the initial cancellation "
         "request, not the end of the subscription period when the subscription is automatically moved to a canceled "
@@ -2406,7 +2552,7 @@ class Subscription(StripeObject):
     )
     # TODO: discount
     ended_at = StripeDateTimeField(
-        null=True,
+        null=True, blank=True,
         help_text="If the subscription has ended (either because it was canceled or because the customer was switched "
         "to a subscription to a new plan), the date the subscription ended."
     )
@@ -2421,14 +2567,17 @@ class Subscription(StripeObject):
         max_length=8, choices=enums.SubscriptionStatus.choices, help_text="The status of this subscription."
     )
     tax_percent = StripePercentField(
-        null=True,
+        null=True, blank=True,
         help_text="A positive decimal (with at most two decimal places) between 1 and 100. This represents the "
         "percentage of the subscription invoice subtotal that will be calculated and added as tax to the final "
         "amount each billing period."
     )
-    trial_end = StripeDateTimeField(null=True, help_text="If the subscription has a trial, the end of that trial.")
+    trial_end = StripeDateTimeField(
+        null=True, blank=True,
+        help_text="If the subscription has a trial, the end of that trial."
+    )
     trial_start = StripeDateTimeField(
-        null=True,
+        null=True, blank=True,
         help_text="If the subscription has a trial, the beginning of that trial."
     )
 
@@ -2719,7 +2868,7 @@ class Transfer(StripeObject):
     )
     source_type = StripeCharField(
         max_length=16,
-        choices=enums.SourceType.choices,
+        choices=enums.LegacySourceType.choices,
         help_text="The source balance from which this transfer came."
     )
     statement_descriptor = StripeCharField(

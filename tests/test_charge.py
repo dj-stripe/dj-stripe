@@ -14,7 +14,7 @@ from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
 from mock import patch
 
-from djstripe.enums import SourceType
+from djstripe.enums import LegacySourceType
 from djstripe.models import Account, Charge, PaymentMethod
 
 from . import FAKE_ACCOUNT, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_TRANSFER
@@ -65,7 +65,7 @@ class ChargeTest(TestCase):
         self.assertEqual(0, charge.amount_refunded)
 
         self.assertEqual("card_16YKQh2eZvKYlo2Cblc5Feoo", charge.source_stripe_id)
-        self.assertEqual(charge.source_type, SourceType.card)
+        self.assertEqual(charge.source_type, LegacySourceType.card)
 
     @patch("djstripe.models.Account.get_default_account")
     def test_sync_from_stripe_data_max_amount(self, default_account_mock):
