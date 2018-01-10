@@ -124,6 +124,7 @@ class StripeObject(models.Model):
     objects = models.Manager()
     stripe_objects = StripeObjectManager()
 
+    id = models.BigAutoField(verbose_name="ID", serialize=False, primary_key=True)
     stripe_id = StripeIdField(unique=True, stripe_name='id')
     livemode = StripeNullBooleanField(
         default=None,
