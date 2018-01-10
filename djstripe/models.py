@@ -15,6 +15,7 @@ import decimal
 import logging
 import sys
 import uuid
+import warnings
 from copy import deepcopy
 from datetime import timedelta
 
@@ -131,10 +132,9 @@ class StripeObject(models.Model):
         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, "
         "this field indicates whether this record comes from Stripe test mode or live mode operation."
     )
-    stripe_timestamp = StripeDateTimeField(
+    created = StripeDateTimeField(
         null=True,
         stripe_required=False,
-        stripe_name="created",
         help_text="The datetime this object was created in stripe."
     )
     metadata = StripeJSONField(
@@ -170,6 +170,14 @@ class StripeObject(models.Model):
     @property
     def default_api_key(self):
         return djstripe_settings.get_default_api_key(self.livemode)
+
+    @property
+    def stripe_timestamp(self):
+        """
+        DEPRECATED(2018-01-10): Use `.created` instead.
+        """
+        warnings.warn("The stripe_timestamp field has been renamed to `created`.", DeprecationWarning)
+        return self.created
 
     def api_retrieve(self, api_key=None):
         """

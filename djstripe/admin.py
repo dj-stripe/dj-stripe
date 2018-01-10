@@ -127,19 +127,19 @@ class StripeObjectAdmin(admin.ModelAdmin):
     change_form_template = "djstripe/admin/change_form.html"
 
     def get_list_display(self, request):
-        return ("stripe_id", ) + self.list_display + ("stripe_timestamp", "livemode")
+        return ("stripe_id", ) + self.list_display + ("created", "livemode")
 
     def get_list_filter(self, request):
-        return self.list_filter + ("stripe_timestamp", "livemode")
+        return self.list_filter + ("created", "livemode")
 
     def get_readonly_fields(self, request, obj=None):
-        return self.readonly_fields + ("stripe_id", "stripe_timestamp")
+        return self.readonly_fields + ("stripe_id", "created")
 
     def get_search_fields(self, request):
         return self.search_fields + ("stripe_id", )
 
     def get_fieldsets(self, request, obj=None):
-        common_fields = ("livemode", "stripe_id", "stripe_timestamp")
+        common_fields = ("livemode", "stripe_id", "created")
         # Have to remove the fields from the common set, otherwise they'll show up twice.
         fields = [f for f in self.get_fields(request, obj) if f not in common_fields]
         return (
@@ -153,7 +153,7 @@ class SubscriptionInline(admin.StackedInline):
 
     model = Subscription
     extra = 0
-    readonly_fields = ("stripe_id", "stripe_timestamp")
+    readonly_fields = ("stripe_id", "created")
     show_change_link = True
 
 
@@ -186,7 +186,7 @@ class InvoiceItemInline(admin.StackedInline):
 
     model = InvoiceItem
     extra = 0
-    readonly_fileds = ("stripe_id", "stripe_timestamp")
+    readonly_fields = ("stripe_id", "created")
     raw_id_fields = ("customer", "subscription")
     show_change_link = True
 

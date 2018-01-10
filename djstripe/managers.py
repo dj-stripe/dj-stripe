@@ -72,8 +72,8 @@ class ChargeManager(models.Manager):
     """Manager used by models.Charge."""
 
     def during(self, year, month):
-        """Return Charges between a certain time range based on stripe_timestamp."""
-        return self.filter(stripe_timestamp__year=year, stripe_timestamp__month=month)
+        """Return Charges between a certain time range based on `created`."""
+        return self.filter(created__year=year, created__month=month)
 
     def paid_totals_for(self, year, month):
         """Return paid Charges during a certain year, month with total amount, fee and refunded annotated."""
