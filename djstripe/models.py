@@ -2344,6 +2344,7 @@ class InvoiceItem(StripeObject):
         related_name="invoiceitems",
         help_text="The invoice to which this invoiceitem is attached."
     )
+    period = StripeJSONField()
     period_end = StripeDateTimeField(
         stripe_name="period.end",
         help_text="Might be the date when this invoiceitem's invoice was sent."
