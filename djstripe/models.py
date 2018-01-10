@@ -624,7 +624,10 @@ class Charge(StripeObject):
         help_text="The transfer to the destination account (only applicable if the charge was created using the "
         "destination parameter)."
     )
-    # TODO: transfer_group
+    transfer_group = StripeCharField(
+        max_length=255, null=True, blank=True, stripe_required=False,
+        help_text="A string that identifies this transaction as part of a group."
+    )
 
     # Everything below remains to be cleaned up
     # Balance transaction can be null if the charge failed
@@ -2884,15 +2887,37 @@ class Transfer(StripeObject):
         "reversal was issued)."
     )
     currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code.")
-    date = StripeDateTimeField(
-        help_text="Date the transfer is scheduled to arrive in the bank. This doesn't factor in delays like "
-        "weekends or bank holidays."
-    )
     destination = StripeIdField(help_text="ID of the bank account, card, or Stripe account the transfer was sent to.")
     destination_payment = StripeIdField(
         stripe_required=False,
         help_text="If the destination is a Stripe account, this will be the ID of the payment that the destination "
         "account received for the transfer."
+    )
+    # reversals = ...
+    reversed = StripeBooleanField(
+        default=False,
+        help_text="Whether or not the transfer has been fully reversed. If the transfer is only partially "
+        "reversed, this attribute will still be false."
+    )
+    source_transaction = StripeIdField(
+        null=True,
+        help_text="ID of the charge (or other transaction) that was used to fund the transfer. "
+        "If null, the transfer was funded from the available balance."
+    )
+    source_type = StripeCharField(
+        max_length=16,
+        choices=enums.LegacySourceType.choices,
+        help_text="The source balance from which this transfer came."
+    )
+    transfer_group = StripeCharField(
+        max_length=255, null=True, blank=True, stripe_required=False,
+        help_text="A string that identifies this transaction as part of a group."
+    )
+
+    # DEPRECATED Fields
+    date = StripeDateTimeField(
+        help_text="Date the transfer is scheduled to arrive in the bank. This doesn't factor in delays like "
+        "weekends or bank holidays."
     )
     destination_type = StripeCharField(
         stripe_name="type",
@@ -2911,21 +2936,6 @@ class Transfer(StripeObject):
     failure_message = StripeTextField(
         blank=True, null=True, stripe_required=False,
         help_text="Message to user further explaining reason for transfer failure if available."
-    )
-    reversed = StripeBooleanField(
-        default=False,
-        help_text="Whether or not the transfer has been fully reversed. If the transfer is only partially "
-        "reversed, this attribute will still be false."
-    )
-    source_transaction = StripeIdField(
-        null=True,
-        help_text="ID of the charge (or other transaction) that was used to fund the transfer. "
-        "If null, the transfer was funded from the available balance."
-    )
-    source_type = StripeCharField(
-        max_length=16,
-        choices=enums.LegacySourceType.choices,
-        help_text="The source balance from which this transfer came."
     )
     statement_descriptor = StripeCharField(
         max_length=22,
@@ -2948,7 +2958,6 @@ class Transfer(StripeObject):
     fee = StripeCurrencyField(stripe_required=False, nested_name="balance_transaction")
     fee_details = StripeJSONField(stripe_required=False, nested_name="balance_transaction")
 
-    # DEPRECATED Fields
     adjustment_count = StripeIntegerField(deprecated=True)
     adjustment_fees = StripeCurrencyField(deprecated=True)
     adjustment_gross = StripeCurrencyField(deprecated=True)
