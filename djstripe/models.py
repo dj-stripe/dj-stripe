@@ -2958,21 +2958,6 @@ class Transfer(StripeObject):
     fee = StripeCurrencyField(stripe_required=False, nested_name="balance_transaction")
     fee_details = StripeJSONField(stripe_required=False, nested_name="balance_transaction")
 
-    adjustment_count = StripeIntegerField(deprecated=True)
-    adjustment_fees = StripeCurrencyField(deprecated=True)
-    adjustment_gross = StripeCurrencyField(deprecated=True)
-    charge_count = StripeIntegerField(deprecated=True)
-    charge_fees = StripeCurrencyField(deprecated=True)
-    charge_gross = StripeCurrencyField(deprecated=True)
-    collected_fee_count = StripeIntegerField(deprecated=True)
-    collected_fee_gross = StripeCurrencyField(deprecated=True)
-    net = StripeCurrencyField(deprecated=True)
-    refund_count = StripeIntegerField(deprecated=True)
-    refund_fees = StripeCurrencyField(deprecated=True)
-    refund_gross = StripeCurrencyField(deprecated=True)
-    validation_count = StripeIntegerField(deprecated=True)
-    validation_fees = StripeCurrencyField(deprecated=True)
-
     def str_parts(self):
         return [
             "amount={amount}".format(amount=self.amount),
