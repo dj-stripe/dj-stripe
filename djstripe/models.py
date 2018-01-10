@@ -96,7 +96,7 @@ class PaymentMethod(models.Model):
         elif type == "source":
             return Source
         elif type == "bank_account":
-            raise NotImplementedError("BankAccount class not implemented yet")
+            return BankAccount
 
         raise ValueError("Unknown source type: {}".format(type))
 
@@ -565,7 +565,6 @@ class Charge(StripeObject):
         related_name="charges",
         help_text="Details about the dispute if the charge has been disputed."
     )
-    # TODO: dispute
     failure_code = StripeCharField(
         max_length=30,
         null=True,
@@ -607,7 +606,7 @@ class Charge(StripeObject):
         on_delete=SET_NULL, null=True, related_name="charges",
         help_text="The source used for this charge."
     )
-    # TODO: source, source_transfer
+    # TODO: source_transfer
     statement_descriptor = StripeCharField(
         max_length=22, null=True,
         help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement "
@@ -1526,7 +1525,10 @@ class Payout(StripeObject):
     )
     # TODO: balance_transaction = ForeignKey("Transaction")  txn_...
     currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code.")
-    # TODO: destination = ForeignKey("BankAccount", null=True)  ba_...
+    destination = models.ForeignKey(
+        "BankAccount", on_delete=models.PROTECT, null=True,
+        help_text="ID of the bank account or card the payout was sent to."
+    )
     # TODO: failure_balance_transaction = ForeignKey("Transaction", null=True)
     failure_code = StripeCharField(
         max_length=23,
@@ -1571,6 +1573,47 @@ class Payout(StripeObject):
 # ============================================================================ #
 #                               Payment Methods                                #
 # ============================================================================ #
+
+
+class BankAccount(StripeObject):
+    account = ForeignKey(
+        "Account", on_delete=models.PROTECT,
+        related_name="bank_account",
+        help_text="The account the charge was made on behalf of. Null here indicates that this value was never set."
+    )
+    account_holder_name = StripeCharField(
+        max_length=5000, null=True,
+        help_text="The name of the person or business that owns the bank account."
+    )
+    account_holder_type = StripeCharField(
+        max_length=10, choices=enums.BankAccountHolderType.choices,
+        help_text="The type of entity that holds the account."
+    )
+    bank_name = StripeCharField(
+        max_length=255,
+        help_text="Name of the bank associated with the routing number (e.g., `WELLS FARGO`)."
+    )
+    country = StripeCharField(
+        max_length=2,
+        help_text="Two-letter ISO code representing the country the bank account is located in."
+    )
+    currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code")
+    customer = models.ForeignKey(
+        "Customer", on_delete=models.SET_NULL, null=True, related_name="bank_account"
+    )
+    default_for_currency = StripeNullBooleanField(
+        help_text="Whether this external account is the default account for its currency."
+    )
+    fingerprint = StripeCharField(
+        max_length=16,
+        help_text=(
+            "Uniquely identifies this particular bank account. "
+            "You can use this attribute to check whether two bank accounts are the same."
+        )
+    )
+    last4 = StripeCharField(max_length=4)
+    routing_number = StripeCharField(max_length=255, help_text="The routing transit number for the bank account.")
+    status = StripeCharField(max_length=19, choices=enums.BankAccountStatus.choices)
 
 
 class Card(StripeObject):

@@ -73,6 +73,19 @@ class ApiErrorCode(Enum):
     processing_error = _("Processing error")
 
 
+class BankAccountHolderType(Enum):
+    individual = _("Individual")
+    company = _("Company")
+
+
+class BankAccountStatus(Enum):
+    new = _("New")
+    validated = _("Validated")
+    verified = _("Verified")
+    verification_failed = _("Verification failed")
+    errored = _("Errored")
+
+
 class CardCheckResult(Enum):
     pass_ = (_("Pass"), "pass")
     fail = _("Fail")
