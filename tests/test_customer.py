@@ -51,6 +51,20 @@ class TestCustomer(TestCase):
         self.customer.subscriber = None
         self.assertEqual(str(self.customer), "{stripe_id} (deleted)".format(stripe_id=self.customer.stripe_id))
 
+    def test_account_balance(self):
+        self.assertEqual(self.customer.account_balance, 0)
+        self.assertEqual(self.customer.credits, 0)
+
+        self.customer.account_balance = 1000
+        self.assertEqual(self.customer.account_balance, 1000)
+        self.assertEqual(self.customer.credits, 0)
+        self.assertEqual(self.customer.pending_charges, 1000)
+
+        self.customer.account_balance = -1000
+        self.assertEqual(self.customer.account_balance, -1000)
+        self.assertEqual(self.customer.credits, 1000)
+        self.assertEqual(self.customer.pending_charges, 0)
+
     def test_customer_dashboard_url(self):
         expected_url = "https://dashboard.stripe.com/test/customers/{}".format(self.customer.stripe_id)
         self.assertEqual(self.customer.get_stripe_dashboard_url(), expected_url)

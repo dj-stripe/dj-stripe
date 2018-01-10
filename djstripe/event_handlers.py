@@ -24,7 +24,9 @@ import logging
 
 from . import webhooks
 from .enums import SourceType
-from .models import Card, Charge, Coupon, Customer, Invoice, InvoiceItem, PaymentMethod, Plan, Subscription, Transfer
+from .models import (
+    Card, Charge, Coupon, Customer, Dispute, Invoice, InvoiceItem, PaymentMethod, Plan, Subscription, Transfer
+)
 from .utils import convert_tstamp
 
 
@@ -125,14 +127,20 @@ def other_object_webhook_handler(event):
     - invoiceitem: https://stripe.com/docs/api#invoiceitems
     - plan: https://stripe.com/docs/api#plans
     """
-    target_cls = {
-        "charge": Charge,
-        "coupon": Coupon,
-        "invoice": Invoice,
-        "invoiceitem": InvoiceItem,
-        "plan": Plan,
-        "transfer": Transfer
-    }.get(event.category)
+
+    if event.parts[:2] == ["charge", "dispute"]:
+        # Do not attempt to handle charge.dispute.* events.
+        # We do not have a Dispute model yet.
+        target_cls = Dispute
+    else:
+        target_cls = {
+            "charge": Charge,
+            "coupon": Coupon,
+            "invoice": Invoice,
+            "invoiceitem": InvoiceItem,
+            "plan": Plan,
+            "transfer": Transfer
+        }.get(event.category)
 
     _handle_crud_like_event(target_cls=target_cls, event=event)
 

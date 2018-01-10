@@ -13,8 +13,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from django.contrib import admin
 
 from .models import (
-    Charge, Coupon, Customer, Event, IdempotencyKey, Invoice, InvoiceItem,
-    Plan, Source, Subscription, Transfer, WebhookEventTrigger
+    Charge, Coupon, Customer, Dispute, Event, IdempotencyKey, Invoice,
+    InvoiceItem, Plan, Source, Subscription, Transfer, WebhookEventTrigger
 )
 
 
@@ -218,9 +218,9 @@ class ChargeAdmin(StripeObjectAdmin):
     )
     search_fields = ("stripe_id", "customer__stripe_id", "invoice__stripe_id")
     list_filter = (
-        "status", "source_type", "paid", "disputed", "refunded", "fraudulent", "captured",
+        "status", "source_type", "paid", "refunded", "fraudulent", "captured",
     )
-    raw_id_fields = ("customer", "invoice", "source", "transfer")
+    raw_id_fields = ("customer", "dispute", "invoice", "source", "transfer")
 
 
 @admin.register(Coupon)
@@ -239,6 +239,12 @@ class CustomerAdmin(StripeObjectAdmin):
     list_display = ("subscriber", subscription_status)
     list_filter = (CustomerHasSourceListFilter, CustomerSubscriptionStatusListFilter)
     inlines = (SubscriptionInline, )
+
+
+@admin.register(Dispute)
+class DisputeAdmin(StripeObjectAdmin):
+    list_display = ("reason", "status", "amount", "currency", "is_charge_refundable")
+    list_filter = ("is_charge_refundable", "reason", "status")
 
 
 @admin.register(Event)

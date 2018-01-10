@@ -154,7 +154,7 @@ CURRENCY_SIGILS = {
 def get_friendly_currency_amount(amount, currency):
     currency = currency.upper()
     sigil = CURRENCY_SIGILS.get(currency, "")
-    return "{sigil}{amount} {currency}".format(sigil=sigil, amount=amount, currency=currency)
+    return "{sigil}{amount:.2f} {currency}".format(sigil=sigil, amount=amount, currency=currency)
 
 
 class QuerySetMock(QuerySet):

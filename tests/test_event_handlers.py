@@ -16,17 +16,18 @@ from django.test import TestCase
 from mock import patch
 
 from djstripe.models import (
-    Account, Card, Charge, Coupon, Customer, Event, Invoice, InvoiceItem, PaymentMethod, Plan, Subscription, Transfer
+    Account, Card, Charge, Coupon, Customer, Dispute, Event, Invoice,
+    InvoiceItem, PaymentMethod, Plan, Subscription, Transfer
 )
 
 from . import (
-    FAKE_CARD, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_COUPON, FAKE_CUSTOMER, FAKE_CUSTOMER_II,
+    FAKE_CARD, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_COUPON, FAKE_CUSTOMER, FAKE_CUSTOMER_II, FAKE_DISPUTE,
     FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED, FAKE_EVENT_CHARGE_SUCCEEDED, FAKE_EVENT_CUSTOMER_CREATED,
     FAKE_EVENT_CUSTOMER_DELETED, FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED, FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED,
     FAKE_EVENT_CUSTOMER_SOURCE_CREATED, FAKE_EVENT_CUSTOMER_SOURCE_DELETED, FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE,
-    FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED, FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED, FAKE_EVENT_INVOICE_CREATED,
-    FAKE_EVENT_INVOICE_DELETED, FAKE_EVENT_INVOICE_UPCOMING, FAKE_EVENT_INVOICEITEM_CREATED,
-    FAKE_EVENT_INVOICEITEM_DELETED, FAKE_EVENT_PLAN_CREATED, FAKE_EVENT_PLAN_DELETED,
+    FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED, FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED, FAKE_EVENT_DISPUTE_CREATED,
+    FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_INVOICE_DELETED, FAKE_EVENT_INVOICE_UPCOMING,
+    FAKE_EVENT_INVOICEITEM_CREATED, FAKE_EVENT_INVOICEITEM_DELETED, FAKE_EVENT_PLAN_CREATED, FAKE_EVENT_PLAN_DELETED,
     FAKE_EVENT_PLAN_REQUEST_IS_OBJECT, FAKE_EVENT_TRANSFER_CREATED, FAKE_EVENT_TRANSFER_DELETED, FAKE_INVOICE,
     FAKE_INVOICE_II, FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_III, FAKE_TRANSFER
 )
@@ -228,6 +229,17 @@ class TestCustomerEvents(EventTestCase):
 
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
+
+
+class TestDisputeEvents(EventTestCase):
+    @patch("stripe.Dispute.retrieve", return_value=deepcopy(FAKE_DISPUTE))
+    @patch("stripe.Event.retrieve", return_value=deepcopy(FAKE_EVENT_DISPUTE_CREATED))
+    def test_dispute_created(self, event_retrieve_mock, dispute_retrieve_mock):
+        fake_stripe_event = deepcopy(FAKE_EVENT_DISPUTE_CREATED)
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+        dispute = Dispute.objects.get()
+        self.assertEqual(dispute.stripe_id, FAKE_DISPUTE["id"])
 
 
 class TestInvoiceEvents(EventTestCase):

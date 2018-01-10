@@ -454,6 +454,58 @@ FAKE_COUPON = {
 }
 
 
+FAKE_DISPUTE = {
+    "id": "dp_XXXXXXXXXXXXXXXXXXXXXXXX",
+    "object": "dispute",
+    "amount": 499,
+    "balance_transaction": FAKE_BALANCE_TRANSACTION_III["id"],
+    "balance_transactions": [deepcopy(FAKE_BALANCE_TRANSACTION_III)],
+    "charge": FAKE_CHARGE["id"],
+    "created": 1515012086,
+    "currency": "usd",
+    "evidence": {
+      "access_activity_log": None,
+      "billing_address": None,
+      "cancellation_policy": None,
+      "cancellation_policy_disclosure": None,
+      "cancellation_rebuttal": None,
+      "customer_communication": None,
+      "customer_email_address": "customer@example.com",
+      "customer_name": "customer@example.com",
+      "customer_purchase_ip": "127.0.0.1",
+      "customer_signature": None,
+      "duplicate_charge_documentation": None,
+      "duplicate_charge_explanation": None,
+      "duplicate_charge_id": None,
+      "product_description": None,
+      "receipt": "file_XXXXXXXXXXXXXXXXXXXXXXXX",
+      "refund_policy": None,
+      "refund_policy_disclosure": None,
+      "refund_refusal_explanation": None,
+      "service_date": None,
+      "service_documentation": None,
+      "shipping_address": None,
+      "shipping_carrier": None,
+      "shipping_date": None,
+      "shipping_documentation": None,
+      "shipping_tracking_number": None,
+      "uncategorized_file": None,
+      "uncategorized_text": None,
+    },
+    "evidence_details": {
+      "due_by": 1516406399,
+      "has_evidence": False,
+      "past_due": False,
+      "submission_count": 0,
+    },
+    "is_charge_refundable": False,
+    "livemode": True,
+    "metadata": {},
+    "reason": "subscription_canceled",
+    "status": "needs_response",
+}
+
+
 FAKE_PLAN = {
     "id": "gold21323",
     "object": "plan",
@@ -505,7 +557,7 @@ class SubscriptionDict(dict):
 
         return self
 
-    def save(self):
+    def save(self, idempotency_key=None):
         return self
 
 
@@ -601,7 +653,7 @@ class Sources(object):
 
 
 class CustomerDict(dict):
-    def save(self):
+    def save(self, idempotency_key=None):
         return self
 
     def delete(self):
@@ -1307,6 +1359,20 @@ FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED = deepcopy(FAKE_EVENT_CUSTOMER_SUBSCRIP
 FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED.update({
     "id": "evt_38DHch3wHD2eZvKYlCT2oeryaf",
     "type": "customer.subscription.deleted"})
+
+FAKE_EVENT_DISPUTE_CREATED = {
+    "id": "evt_16YKQi2eZvKYlo2CT2oe5ff3",
+    "object": "dispute",
+    "api_version": "2017-08-15",
+    "created": 1439229084,
+    "data": {
+        "object": deepcopy(FAKE_DISPUTE)
+    },
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_6lsB7hkicwhaDj",
+    "type": "charge.dispute.created",
+}
 
 FAKE_EVENT_INVOICE_CREATED = {
     "id": "evt_187IHD2eZvKYlo2C6YKQi2eZ",

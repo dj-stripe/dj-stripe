@@ -302,7 +302,7 @@ class StripeObject(models.Model):
         instance._attach_objects_hook(cls, data)
 
         if save:
-            instance.save()
+            instance.save(force_insert=True)
 
         instance._attach_objects_post_save_hook(cls, data)
 
@@ -506,7 +506,6 @@ class Charge(StripeObject):
     * **object** - Unnecessary. Just check the model name.
     * **application_fee** - #. Coming soon with stripe connect functionality
     * **balance_transaction** - #
-    * **dispute** - #; Mapped to a ``disputed`` boolean.
     * **order** - #
     * **refunds** - #
     * **source_transfer** - #
@@ -543,6 +542,11 @@ class Charge(StripeObject):
         "Account", on_delete=models.CASCADE, null=True,
         related_name="charges",
         help_text="The account the charge was made on behalf of. Null here indicates that this value was never set."
+    )
+    dispute = ForeignKey(
+        "Dispute", on_delete=models.SET_NULL, null=True,
+        related_name="charges",
+        help_text="Details about the dispute if the charge has been disputed."
     )
     # TODO: dispute
     failure_code = StripeCharField(
@@ -620,13 +624,16 @@ class Charge(StripeObject):
         "attached to this Charge via a foreign key matching this field."
     )
     source_stripe_id = StripeIdField(null=True, stripe_name="source.id", help_text="The payment source id.")
-    disputed = StripeBooleanField(default=False, help_text="Whether or not this charge is disputed.")
     fraudulent = StripeBooleanField(default=False, help_text="Whether or not this charge was marked as fraudulent.")
 
     # XXX: Remove me
     receipt_sent = BooleanField(default=False, help_text="Whether or not a receipt was sent for this charge.")
 
     objects = ChargeManager()
+
+    @property
+    def disputed(self):
+        return self.dispute is not None
 
     def _attach_objects_hook(self, cls, data):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
@@ -713,8 +720,6 @@ class Charge(StripeObject):
 
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
-        data["disputed"] = data["dispute"] is not None
-
         # Assessments reported by you have the key user_report and, if set,
         # possible values of safe and fraudulent. Assessments from Stripe have
         # the key stripe_report and, if set, the value fraudulent.
@@ -848,6 +853,20 @@ class Customer(StripeObject):
         Use this instead of Customer.sources if you want to access the legacy Card queryset.
         """
         return self.sources
+
+    @property
+    def credits(self):
+        """
+        The customer is considered to have credits if their account_balance is below 0.
+        """
+        return abs(min(self.account_balance, 0))
+
+    @property
+    def pending_charges(self):
+        """
+        The customer is considered to have pending charges if their account_balance is above 0.
+        """
+        return max(self.account_balance, 0)
 
     def subscribe(
         self, plan, charge_immediately=True, application_fee_percent=None, coupon=None,
@@ -1217,7 +1236,7 @@ class Customer(StripeObject):
         """ Check whether the customer has a valid payment source."""
         return self.default_source is not None
 
-    def add_coupon(self, coupon):
+    def add_coupon(self, coupon, idempotency_key=None):
         """
         Add a coupon to a Customer.
 
@@ -1228,7 +1247,7 @@ class Customer(StripeObject):
 
         stripe_customer = self.api_retrieve()
         stripe_customer.coupon = coupon
-        stripe_customer.save()
+        stripe_customer.save(idempotency_key=idempotency_key)
         return self.__class__.sync_from_stripe_data(stripe_customer)
 
     def upcoming_invoice(self, **kwargs):
@@ -1312,7 +1331,26 @@ class Customer(StripeObject):
             Subscription.sync_from_stripe_data(stripe_subscription)
 
 
-# TODO: class Dispute(...)
+class Dispute(StripeObject):
+    stripe_class = stripe.Dispute
+    stripe_dashboard_item_name = "disputes"
+
+    amount = StripeIntegerField(
+        help_text=(
+            "Disputed amount. Usually the amount of the charge, but can differ "
+            "(usually because of currency fluctuation or because only part of the order is disputed)."
+        )
+    )
+    currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code.")
+    evidence = StripeJSONField(help_text="Evidence provided to respond to a dispute.")
+    evidence_details = StripeJSONField(help_text="Information about the evidence submission.")
+    is_charge_refundable = StripeBooleanField(help_text=(
+        "If true, it is still possible to refund the disputed payment. "
+        "Once the payment has been fully refunded, no further funds will "
+        "be withdrawn from your Stripe account as a result of this dispute."
+    ))
+    reason = StripeCharField(max_length=50, choices=enums.DisputeReason.choices)
+    status = StripeCharField(max_length=50, choices=enums.DisputeStatus.choices)
 
 
 class Event(StripeObject):
@@ -3065,6 +3103,10 @@ class WebhookEventTrigger(models.Model):
         return local_data["data"] == remote_data["data"]
 
     def process(self, save=True):
+        # Reset traceback and exception in case of reprocessing
+        self.exception = ""
+        self.traceback = ""
+
         self.event = Event.process(self.json_body)
         self.processed = True
         if save:
