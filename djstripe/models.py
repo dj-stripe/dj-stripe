@@ -145,8 +145,8 @@ class StripeObject(models.Model):
     )
     description = StripeTextField(blank=True, stripe_required=False, help_text="A description of this object.")
 
-    created = models.DateTimeField(auto_now_add=True, editable=False)
-    modified = models.DateTimeField(auto_now=True, editable=False)
+    djstripe_created = models.DateTimeField(auto_now_add=True, editable=False)
+    djstripe_updated = models.DateTimeField(auto_now=True, editable=False)
 
     class Meta:
         abstract = True
