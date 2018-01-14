@@ -42,6 +42,8 @@ Add the following to the `urlpatterns` in your `urls.py` to expose the webhook e
 
     url(r'^payments/', include('djstripe.urls', namespace="djstripe")),
 
+Then tell Stripe about the webhook (Stripe webhook docs can be found `here <https://stripe.com/docs/webhooks>`_) using the full URL of your endpoint from the urls.py step above (e.g. ``https://yourwebsite.com/payments/webhook``).
+
 Run the commands::
 
     python manage.py migrate

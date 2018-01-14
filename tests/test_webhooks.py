@@ -18,13 +18,25 @@ from django.urls import reverse
 from mock import Mock, PropertyMock, call, patch
 
 from djstripe import views, webhooks
-from djstripe.models import Event, EventProcessingException
+from djstripe.models import Event, WebhookEventTrigger
 from djstripe.webhooks import TEST_EVENT_ID, call_handlers, handler, handler_all
 
 from . import FAKE_EVENT_TEST_CHARGE_SUCCEEDED, FAKE_EVENT_TRANSFER_CREATED, FAKE_TRANSFER
 
 
+def mock_webhook_handler(webhook_event_trigger):
+    webhook_event_trigger.process()
+
+
 class TestWebhook(TestCase):
+
+    def _send_event(self, event_data):
+        return Client().post(
+            reverse("djstripe:webhook"),
+            json.dumps(event_data),
+            content_type="application/json",
+            HTTP_STRIPE_SIGNATURE="PLACEHOLDER"
+        )
 
     @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
     @patch("stripe.Event.retrieve")
@@ -32,39 +44,29 @@ class TestWebhook(TestCase):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
 
-        resp = Client().post(
-            reverse("djstripe:webhook"),
-            json.dumps(fake_event),
-            content_type="application/json"
-        )
+        resp = self._send_event(fake_event)
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(Event.objects.filter(type="transfer.created").exists())
 
     def test_webhook_with_test_event(self):
-        resp = Client().post(
-            reverse("djstripe:webhook"),
-            json.dumps(FAKE_EVENT_TEST_CHARGE_SUCCEEDED),
-            content_type="application/json"
-        )
+        resp = self._send_event(FAKE_EVENT_TEST_CHARGE_SUCCEEDED)
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(Event.objects.filter(stripe_id=TEST_EVENT_ID).exists())
 
-    @patch.object(views.djstripe_settings, 'WEBHOOK_EVENT_CALLBACK', return_value=(lambda event: event.process()))
+    @patch.object(views.djstripe_settings, "WEBHOOK_EVENT_CALLBACK", return_value=mock_webhook_handler)
     @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
     @patch("stripe.Event.retrieve")
-    def test_webhook_with_custom_callback(self, event_retrieve_mock, transfer_retrieve_mock,
-                                          webhook_event_callback_mock):
+    def test_webhook_with_custom_callback(
+        self, event_retrieve_mock, transfer_retrieve_mock,
+        webhook_event_callback_mock
+    ):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
 
-        resp = Client().post(
-            reverse("djstripe:webhook"),
-            json.dumps(fake_event),
-            content_type="application/json"
-        )
+        resp = self._send_event(fake_event)
         self.assertEqual(resp.status_code, 200)
-        event = Event.objects.get(type="transfer.created")
-        webhook_event_callback_mock.called_once_with(event)
+        webhook_event_trigger = WebhookEventTrigger.objects.get()
+        webhook_event_callback_mock.called_once_with(webhook_event_trigger)
 
     @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
     @patch("stripe.Event.retrieve")
@@ -72,24 +74,15 @@ class TestWebhook(TestCase):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
 
-        resp = Client().post(
-            reverse("djstripe:webhook"),
-            json.dumps(fake_event),
-            content_type="application/json"
-        )
+        resp = self._send_event(fake_event)
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(Event.objects.filter(type="transfer.created").exists())
         self.assertEqual(1, Event.objects.filter(type="transfer.created").count())
 
         # Duplication
-        resp = Client().post(
-            reverse("djstripe:webhook"),
-            json.dumps(fake_event),
-            content_type="application/json"
-        )
+        resp = self._send_event(fake_event)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(1, Event.objects.filter(type="transfer.created").count())
-        self.assertEqual(1, EventProcessingException.objects.count())
 
 
 class TestWebhookHandlers(TestCase):

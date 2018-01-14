@@ -11,6 +11,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import time
 from copy import deepcopy
 from datetime import datetime
+from decimal import Decimal
 from unittest import skipIf
 
 from django.contrib.auth import get_user_model
@@ -22,7 +23,9 @@ from django.utils import timezone
 from mock import patch
 
 from djstripe.models import Subscription
-from djstripe.utils import convert_tstamp, get_supported_currency_choices, subscriber_has_active_subscription
+from djstripe.utils import (
+    convert_tstamp, get_friendly_currency_amount, get_supported_currency_choices, subscriber_has_active_subscription
+)
 
 from . import FAKE_CUSTOMER, FAKE_SUBSCRIPTION
 from .apps.testapp.models import Organization
@@ -111,3 +114,12 @@ class TestGetSupportedCurrencyChoices(TestCase):
         self.assertGreaterEqual(len(currency_choices), 1, "Currency choices pull returned an empty list.")
         self.assertEqual(tuple, type(currency_choices[0]), "Currency choices are not tuples.")
         self.assertIn(("usd", "USD"), currency_choices, "USD not in currency choices.")
+
+
+class TestUtils(TestCase):
+    def test_get_friendly_currency_amount(self):
+        self.assertEqual(get_friendly_currency_amount(Decimal("1.001"), "usd"), "$1.00 USD")
+        self.assertEqual(get_friendly_currency_amount(Decimal("10"), "usd"), "$10.00 USD")
+        self.assertEqual(get_friendly_currency_amount(Decimal("10.50"), "usd"), "$10.50 USD")
+        self.assertEqual(get_friendly_currency_amount(Decimal("10.51"), "cad"), "$10.51 CAD")
+        self.assertEqual(get_friendly_currency_amount(Decimal("9.99"), "eur"), "€9.99 EUR")

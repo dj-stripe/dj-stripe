@@ -73,6 +73,19 @@ class ApiErrorCode(Enum):
     processing_error = _("Processing error")
 
 
+class BankAccountHolderType(Enum):
+    individual = _("Individual")
+    company = _("Company")
+
+
+class BankAccountStatus(Enum):
+    new = _("New")
+    validated = _("Validated")
+    verified = _("Verified")
+    verification_failed = _("Verification failed")
+    errored = _("Errored")
+
+
 class CardCheckResult(Enum):
     pass_ = (_("Pass"), "pass")
     fail = _("Fail")
@@ -112,6 +125,33 @@ class CouponDuration(Enum):
     once = _("Once")
     repeating = _("Multi-month")
     forever = _("Forever")
+
+
+class DisputeReason(Enum):
+    duplicate = _("Duplicate")
+    fraudulent = _("Fraudulent")
+    subscription_canceled = _("Subscription canceled")
+    product_unacceptable = _("Product unacceptable")
+    product_not_received = _("Product not received")
+    unrecognized = _("Unrecognized")
+    credit_not_processed = _("Credit not processed")
+    general = _("General")
+    incorrect_account_details = _("Incorrect account details")
+    insufficient_funds = _("Insufficient funds")
+    bank_cannot_process = _("Bank cannot process")
+    debit_not_authorized = _("Debit not authorized")
+    customer_initiated = _("Customer-initiated")
+
+
+class DisputeStatus(Enum):
+    warning_needs_response = _("Warning needs response")
+    warning_under_review = _("Warning under review")
+    warning_closed = _("Warning closed")
+    needs_response = _("Needs response")
+    under_review = _("Under review")
+    charge_refunded = _("Charge refunded")
+    won = _("Won")
+    lost = _("Lost")
 
 
 class PayoutFailureCode(Enum):
@@ -158,11 +198,64 @@ class PlanInterval(Enum):
     year = _("Year")
 
 
+class SourceFlow(Enum):
+    redirect = _("Redirect")
+    receiver = _("Receiver")
+    code_verification = _("Code verification")
+    none = _("None")
+
+
+class SourceStatus(Enum):
+    canceled = _("Canceled")
+    chargeable = _("Chargeable")
+    consumed = _("Consumed")
+    failed = _("Failed")
+    pending = _("Pending")
+
+
 class SourceType(Enum):
+    card = _("Card")
+    three_d_secure = _("3D Secure")
+    alipay = _("Alipay")
+    ach_credit_transfer = _("ACH Credit Transfer")
+    bancontact = _("Bancontact")
+    bitcoin = _("Bitcoin")
+    giropay = _("Giropay")
+    ideal = _("iDEAL")
+    p24 = _("P24")
+    sepa_debit = _("SEPA Direct Debit")
+    sofort = _("SOFORT")
+
+
+class LegacySourceType(Enum):
     card = _("Card")
     bank_account = _("Bank account")
     bitcoin_receiver = _("Bitcoin receiver")
     alipay_account = _("Alipay account")
+
+
+class SourceUsage(Enum):
+    reusable = _("Reusable")
+    single_use = _("Single-use")
+
+
+class SourceCodeVerificationStatus(Enum):
+    pending = _("Pending")
+    succeeded = _("Succeeded")
+    failed = _("Failed")
+
+
+class SourceRedirectFailureReason(Enum):
+    user_abort = _("User-aborted")
+    declined = _("Declined")
+    processing_error = _("Processing error")
+
+
+class SourceRedirectStatus(Enum):
+    pending = _("Pending")
+    succeeded = _("Succeeded")
+    not_required = _("Not required")
+    failed = _("Failed")
 
 
 class SubscriptionStatus(Enum):
@@ -171,3 +264,12 @@ class SubscriptionStatus(Enum):
     past_due = _("Past due")
     canceled = _("Canceled")
     unpaid = _("Unpaid")
+
+
+class PaymentMethodType(Enum):
+    """
+    A djstripe-specific enum for the PaymentMethod model.
+    """
+    card = _("Card")
+    bank_account = _("Bank account")
+    source = _("Source")

@@ -147,7 +147,7 @@ If you want to quickly constrain a single Function-Based View, the ``djstripe.de
     @login_required
     @subscription_payment_required
     def my_constrained_view(request):
-        return HttpReponse("I like cheese")
+        return HttpResponse("I like cheese")
 
 
 Don't do this!

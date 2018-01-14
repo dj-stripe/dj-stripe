@@ -24,6 +24,12 @@ else:
     from jsonfield import JSONField
 
 
+class PaymentMethodForeignKey(models.ForeignKey):
+    def __init__(self, **kwargs):
+        kwargs.setdefault("to", "PaymentMethod")
+        super(PaymentMethodForeignKey, self).__init__(**kwargs)
+
+
 class StripeFieldMixin(object):
     """
     Custom fields for all Stripe data.

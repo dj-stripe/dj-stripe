@@ -15,30 +15,30 @@ import decimal
 import logging
 import sys
 import uuid
+import warnings
 from copy import deepcopy
 from datetime import timedelta
 
 import stripe
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
+from django.db import IntegrityError, models, transaction
 from django.db.models.deletion import SET_NULL
-from django.db.models.fields import BooleanField, CharField, DateTimeField, NullBooleanField, TextField, UUIDField
+from django.db.models.fields import BooleanField, CharField, DateTimeField, UUIDField
 from django.db.models.fields.related import ForeignKey, OneToOneField
 from django.utils import dateformat, six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.functional import cached_property
-from polymorphic.models import PolymorphicModel
-from stripe.error import InvalidRequestError, StripeError
+from stripe.error import InvalidRequestError
 
 from . import settings as djstripe_settings
 from . import enums, webhooks
 from .context_managers import stripe_temporary_api_version
-from .enums import SourceType, SubscriptionStatus
+from .enums import SubscriptionStatus
 from .exceptions import MultipleSubscriptionException, StripeObjectManipulationException
 from .fields import (
-    StripeBooleanField, StripeCharField, StripeCurrencyField, StripeDateTimeField,
-    StripeFieldMixin, StripeIdField, StripeIntegerField, StripeJSONField,
+    JSONField, PaymentMethodForeignKey, StripeBooleanField, StripeCharField, StripeCurrencyField,
+    StripeDateTimeField, StripeFieldMixin, StripeIdField, StripeIntegerField, StripeJSONField,
     StripeNullBooleanField, StripePercentField, StripePositiveIntegerField, StripeTextField
 )
 from .managers import ChargeManager, StripeObjectManager, SubscriptionManager, TransferManager
@@ -52,6 +52,67 @@ logger = logging.getLogger(__name__)
 djstripe_settings.set_stripe_api_version()
 
 
+class PaymentMethod(models.Model):
+    """
+    An internal model that abstracts the legacy Card and BankAccount
+    objects with Source objects.
+
+    Contains two fields: `id` and `type`:
+    - `id` is the id of the Stripe object.
+    - `type` can be `card`, `bank_account` or `source`.
+    """
+    id = CharField(max_length=255, primary_key=True)
+    type = CharField(max_length=12, db_index=True)
+
+    @classmethod
+    def from_stripe_object(cls, data):
+        source_type = data["object"]
+        model = cls._model_for_type(source_type)
+
+        with transaction.atomic():
+            model.sync_from_stripe_data(data)
+            instance, _ = cls.objects.get_or_create(
+                id=data["id"], defaults={"type": source_type}
+            )
+
+        return instance
+
+    @classmethod
+    def _get_or_create_source(cls, data, source_type):
+        try:
+            model = cls._model_for_type(source_type)
+            model._get_or_create_from_stripe_object(data)
+        except ValueError as e:
+            # This may happen if we have source types we don't know about.
+            # Let's not make dj-stripe entirely unusable if that happens.
+            logger.warning("Could not sync source of type %r: %s", source_type, e)
+
+        return cls.objects.get_or_create(id=data["id"], defaults={"type": source_type})
+
+    @classmethod
+    def _model_for_type(cls, type):
+        if type == "card":
+            return Card
+        elif type == "source":
+            return Source
+        elif type == "bank_account":
+            return BankAccount
+
+        raise ValueError("Unknown source type: {}".format(type))
+
+    @property
+    def stripe_id(self):
+        # Deprecated (transitional)
+        return self.id
+
+    @property
+    def object_model(self):
+        return self._model_for_type(self.type)
+
+    def resolve(self):
+        return self.object_model.objects.get(stripe_id=self.id)
+
+
 @python_2_unicode_compatible
 class StripeObject(models.Model):
     # This must be defined in descendants of this model/mixin
@@ -63,6 +124,7 @@ class StripeObject(models.Model):
     objects = models.Manager()
     stripe_objects = StripeObjectManager()
 
+    djstripe_id = models.BigAutoField(verbose_name="ID", serialize=False, primary_key=True)
     stripe_id = StripeIdField(unique=True, stripe_name='id')
     livemode = StripeNullBooleanField(
         default=None,
@@ -71,10 +133,9 @@ class StripeObject(models.Model):
         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, "
         "this field indicates whether this record comes from Stripe test mode or live mode operation."
     )
-    stripe_timestamp = StripeDateTimeField(
+    created = StripeDateTimeField(
         null=True,
         stripe_required=False,
-        stripe_name="created",
         help_text="The datetime this object was created in stripe."
     )
     metadata = StripeJSONField(
@@ -85,8 +146,8 @@ class StripeObject(models.Model):
     )
     description = StripeTextField(blank=True, stripe_required=False, help_text="A description of this object.")
 
-    created = models.DateTimeField(auto_now_add=True, editable=False)
-    modified = models.DateTimeField(auto_now=True, editable=False)
+    djstripe_created = models.DateTimeField(auto_now_add=True, editable=False)
+    djstripe_updated = models.DateTimeField(auto_now=True, editable=False)
 
     class Meta:
         abstract = True
@@ -109,15 +170,23 @@ class StripeObject(models.Model):
 
     @property
     def default_api_key(self):
-        if self.livemode is None:
-            # Livemode is unknown. Use the default secret key.
-            return djstripe_settings.STRIPE_SECRET_KEY
-        elif self.livemode:
-            # Livemode is true, use the live secret key
-            return djstripe_settings.LIVE_API_KEY or djstripe_settings.STRIPE_SECRET_KEY
-        else:
-            # Livemode is false, use the test secret key
-            return djstripe_settings.TEST_API_KEY or djstripe_settings.STRIPE_SECRET_KEY
+        return djstripe_settings.get_default_api_key(self.livemode)
+
+    @property
+    def id(self):
+        """
+        DEPRECATED(2018-01-10): Use `.djstripe_id` instead.
+        """
+        warnings.warn("The id field has been renamed to `djstripe_id`.", DeprecationWarning)
+        return self.djstripe_id
+
+    @property
+    def stripe_timestamp(self):
+        """
+        DEPRECATED(2018-01-10): Use `.created` instead.
+        """
+        warnings.warn("The stripe_timestamp field has been renamed to `created`.", DeprecationWarning)
+        return self.created
 
     def api_retrieve(self, api_key=None):
         """
@@ -250,7 +319,7 @@ class StripeObject(models.Model):
         instance._attach_objects_hook(cls, data)
 
         if save:
-            instance.save()
+            instance.save(force_insert=True)
 
         instance._attach_objects_post_save_hook(cls, data)
 
@@ -295,7 +364,10 @@ class StripeObject(models.Model):
         # If this happens when syncing Stripe data, it's a djstripe bug. Report it!
         assert not should_expand, "No data to create {} from {}".format(cls.__name__, field_name)
 
-        return cls._create_from_stripe_object(data, save=save), True
+        try:
+            return cls._create_from_stripe_object(data, save=save), True
+        except IntegrityError:
+            return cls.stripe_objects.get(stripe_id=stripe_id), False
 
     @classmethod
     def _stripe_object_to_customer(cls, target_cls, data):
@@ -324,20 +396,6 @@ class StripeObject(models.Model):
 
         if "transfer" in data and data["transfer"]:
             return target_cls._get_or_create_from_stripe_object(data, "transfer")[0]
-
-    @classmethod
-    def _stripe_object_to_source(cls, target_cls, data):
-        """
-        Search the given manager for the source matching this object's ``source`` field.
-        Note that the source field is already expanded in each request, and that it is required.
-
-        :param target_cls: The target class
-        :type target_cls: Source
-        :param data: stripe object
-        :type data: dict
-        """
-
-        return target_cls._get_or_create_from_stripe_object(data["source"])[0]
 
     @classmethod
     def _stripe_object_to_invoice(cls, target_cls, data):
@@ -465,7 +523,6 @@ class Charge(StripeObject):
     * **object** - Unnecessary. Just check the model name.
     * **application_fee** - #. Coming soon with stripe connect functionality
     * **balance_transaction** - #
-    * **dispute** - #; Mapped to a ``disputed`` boolean.
     * **order** - #
     * **refunds** - #
     * **source_transfer** - #
@@ -503,7 +560,11 @@ class Charge(StripeObject):
         related_name="charges",
         help_text="The account the charge was made on behalf of. Null here indicates that this value was never set."
     )
-    # TODO: dispute
+    dispute = ForeignKey(
+        "Dispute", on_delete=models.SET_NULL, null=True,
+        related_name="charges",
+        help_text="Details about the dispute if the charge has been disputed."
+    )
     failure_code = StripeCharField(
         max_length=30,
         null=True,
@@ -541,12 +602,11 @@ class Charge(StripeObject):
     )
     # TODO: refunds, review
     shipping = StripeJSONField(null=True, help_text="Shipping information for the charge")
-    source = ForeignKey(
-        "StripeSource", on_delete=SET_NULL,
-        null=True, related_name="charges",
+    source = PaymentMethodForeignKey(
+        on_delete=SET_NULL, null=True, related_name="charges",
         help_text="The source used for this charge."
     )
-    # TODO: source, source_transfer
+    # TODO: source_transfer
     statement_descriptor = StripeCharField(
         max_length=22, null=True,
         help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement "
@@ -563,7 +623,10 @@ class Charge(StripeObject):
         help_text="The transfer to the destination account (only applicable if the charge was created using the "
         "destination parameter)."
     )
-    # TODO: transfer_group
+    transfer_group = StripeCharField(
+        max_length=255, null=True, blank=True, stripe_required=False,
+        help_text="A string that identifies this transaction as part of a group."
+    )
 
     # Everything below remains to be cleaned up
     # Balance transaction can be null if the charge failed
@@ -574,19 +637,22 @@ class Charge(StripeObject):
     source_type = StripeCharField(
         max_length=20,
         null=True,
-        choices=enums.SourceType.choices,
+        choices=enums.LegacySourceType.choices,
         stripe_name="source.object",
         help_text="The payment source type. If the payment source is supported by dj-stripe, a corresponding model is "
         "attached to this Charge via a foreign key matching this field."
     )
     source_stripe_id = StripeIdField(null=True, stripe_name="source.id", help_text="The payment source id.")
-    disputed = StripeBooleanField(default=False, help_text="Whether or not this charge is disputed.")
     fraudulent = StripeBooleanField(default=False, help_text="Whether or not this charge was marked as fraudulent.")
 
     # XXX: Remove me
     receipt_sent = BooleanField(default=False, help_text="Whether or not a receipt was sent for this charge.")
 
     objects = ChargeManager()
+
+    @property
+    def disputed(self):
+        return self.dispute is not None
 
     def _attach_objects_hook(self, cls, data):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
@@ -604,9 +670,7 @@ class Charge(StripeObject):
         else:
             self.account = Account.get_default_account()
 
-        # TODO: other sources
-        if self.source_type == SourceType.card:
-            self.source = cls._stripe_object_to_source(target_cls=Card, data=data)
+        self.source, _ = PaymentMethod._get_or_create_source(data["source"], self.source_type)
 
     def str_parts(self):
         return [
@@ -675,8 +739,6 @@ class Charge(StripeObject):
 
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
-        data["disputed"] = data["dispute"] is not None
-
         # Assessments reported by you have the key user_report and, if set,
         # possible values of safe and fraudulent. Assessments from Stripe have
         # the key stripe_report and, if set, the value fraudulent.
@@ -729,7 +791,7 @@ class Customer(StripeObject):
         help_text="The currency the customer can be charged in for recurring billing purposes (subscriptions, "
         "invoices, invoice items)."
     )
-    default_source = ForeignKey("StripeSource", null=True, related_name="customers", on_delete=SET_NULL)
+    default_source = PaymentMethodForeignKey(on_delete=SET_NULL, null=True, related_name="customers")
     delinquent = StripeBooleanField(
         help_text="Whether or not the latest charge for the customer's latest invoice has failed."
     )
@@ -802,6 +864,28 @@ class Customer(StripeObject):
         )
 
         return customer
+
+    @property
+    def legacy_cards(self):
+        """
+        Transitional property for Customer.sources.
+        Use this instead of Customer.sources if you want to access the legacy Card queryset.
+        """
+        return self.sources
+
+    @property
+    def credits(self):
+        """
+        The customer is considered to have credits if their account_balance is below 0.
+        """
+        return abs(min(self.account_balance, 0))
+
+    @property
+    def pending_charges(self):
+        """
+        The customer is considered to have pending charges if their account_balance is above 0.
+        """
+        return max(self.account_balance, 0)
 
     def subscribe(
         self, plan, charge_immediately=True, application_fee_percent=None, coupon=None,
@@ -917,7 +1001,7 @@ class Customer(StripeObject):
         currency = currency or "usd"
 
         # Convert Source to stripe_id
-        if source and isinstance(source, StripeSource):
+        if source and isinstance(source, Card):
             source = source.stripe_id
 
         stripe_charge = Charge._api_create(
@@ -1011,20 +1095,20 @@ class Customer(StripeObject):
         """
 
         stripe_customer = self.api_retrieve()
-        new_stripe_card = stripe_customer.sources.create(source=source)
+        new_stripe_payment_method = stripe_customer.sources.create(source=source)
 
         if set_default:
-            stripe_customer.default_source = new_stripe_card["id"]
+            stripe_customer.default_source = new_stripe_payment_method["id"]
             stripe_customer.save()
 
-        new_stripe_card = Card.sync_from_stripe_data(new_stripe_card)
+        new_payment_method = PaymentMethod.from_stripe_object(new_stripe_payment_method)
 
         # Change the default source
         if set_default:
-            self.default_source = new_stripe_card
-            new_stripe_card = self.save()
+            self.default_source = new_payment_method
+            self.save()
 
-        return new_stripe_card
+        return new_payment_method.resolve()
 
     def purge(self):
         try:
@@ -1171,7 +1255,7 @@ class Customer(StripeObject):
         """ Check whether the customer has a valid payment source."""
         return self.default_source is not None
 
-    def add_coupon(self, coupon):
+    def add_coupon(self, coupon, idempotency_key=None):
         """
         Add a coupon to a Customer.
 
@@ -1182,7 +1266,7 @@ class Customer(StripeObject):
 
         stripe_customer = self.api_retrieve()
         stripe_customer.coupon = coupon
-        stripe_customer.save()
+        stripe_customer.save(idempotency_key=idempotency_key)
         return self.__class__.sync_from_stripe_data(stripe_customer)
 
     def upcoming_invoice(self, **kwargs):
@@ -1199,26 +1283,26 @@ class Customer(StripeObject):
     def _attach_objects_post_save_hook(self, cls, data):  # noqa (function complexity)
         save = False
 
-        # Have to create sources before we handle the default_source
-        if data["sources"]:
-            for source in data["sources"]["data"]:
-                if not isinstance(source, dict) or source.get("object") == SourceType.card:
-                    Card._get_or_create_from_stripe_object(source)
-                else:
-                    logger.warning("Unsupported source type on %r: %r", self, source)
+        customer_sources = data.get("sources")
+        if customer_sources:
+            # Have to create sources before we handle the default_source
+            # We save all of them in the `sources` dict, so that we can find them
+            # by id when we look at the default_source (we need the source type).
+            sources = {}
+            for source in customer_sources["data"]:
+                obj, _ = PaymentMethod._get_or_create_source(source, source["object"])
+                sources[source["id"]] = obj
 
         default_source = data.get("default_source")
         if default_source:
-            # TODO: other sources
-            if not isinstance(default_source, dict) or default_source.get("object") == SourceType.card:
-                source, created = Card._get_or_create_from_stripe_object(data, "default_source", refetch=False)
+            if isinstance(default_source, six.string_types):
+                default_source_id = default_source
             else:
-                logger.warning("Unsupported source type on %r: %r", self, default_source)
-                source = None
+                default_source_id = default_source["id"]
+            source = sources[default_source_id]
 
-            if source and source != self.default_source:
-                self.default_source = source
-                save = True
+            save = self.default_source != source
+            self.default_source = source
 
         discount = data.get("discount")
         if discount:
@@ -1266,7 +1350,26 @@ class Customer(StripeObject):
             Subscription.sync_from_stripe_data(stripe_subscription)
 
 
-# TODO: class Dispute(...)
+class Dispute(StripeObject):
+    stripe_class = stripe.Dispute
+    stripe_dashboard_item_name = "disputes"
+
+    amount = StripeIntegerField(
+        help_text=(
+            "Disputed amount. Usually the amount of the charge, but can differ "
+            "(usually because of currency fluctuation or because only part of the order is disputed)."
+        )
+    )
+    currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code.")
+    evidence = StripeJSONField(help_text="Evidence provided to respond to a dispute.")
+    evidence_details = StripeJSONField(help_text="Information about the evidence submission.")
+    is_charge_refundable = StripeBooleanField(help_text=(
+        "If true, it is still possible to refund the disputed payment. "
+        "Once the payment has been fully refunded, no further funds will "
+        "be withdrawn from your Stripe account as a result of this dispute."
+    ))
+    reason = StripeCharField(max_length=50, choices=enums.DisputeReason.choices)
+    status = StripeCharField(max_length=50, choices=enums.DisputeStatus.choices)
 
 
 class Event(StripeObject):
@@ -1310,14 +1413,11 @@ class Event(StripeObject):
     stripe_class = stripe.Event
     stripe_dashboard_item_name = "events"
 
-    # XXX: api_version
-    received_api_version = StripeCharField(
-        max_length=15, blank=True, stripe_name="api_version", help_text="the API version at which the event data was "
+    api_version = StripeCharField(
+        max_length=15, blank=True, help_text="the API version at which the event data was "
         "rendered. Blank for old entries only, all new entries will have this value"
     )
-    # XXX: data
-    webhook_message = StripeJSONField(
-        stripe_name="data",
+    data = StripeJSONField(
         help_text="data received at webhook. data should be considered to be garbage until validity check is run "
         "and valid flag is set"
     )
@@ -1333,56 +1433,18 @@ class Event(StripeObject):
     idempotency_key = StripeTextField(null=True, blank=True, stripe_required=False)
     type = StripeCharField(max_length=250, help_text="Stripe's event description code")
 
-    # dj-stripe fields
-    customer = ForeignKey(
-        "Customer",
-        null=True, on_delete=models.CASCADE,
-        help_text="In the event that there is a related customer, this will point to that Customer record"
-    )
-    valid = NullBooleanField(
-        null=True,
-        help_text="Tri-state bool. Null == validity not yet confirmed. Otherwise, this field indicates that this "
-        "event was checked via stripe api and found to be either authentic (valid=True) or in-authentic (possibly "
-        "malicious)"
-    )
-    processed = BooleanField(
-        default=False,
-        help_text="If validity is performed, webhook event processor(s) may run to take further action on the event. "
-        "Once these have run, this is set to True."
-    )
-
-    @property
-    def message(self):
-        """ The event's data if the event is valid, None otherwise."""
-
-        return self.webhook_message if self.valid else None
-
     def str_parts(self):
         return [
             "type={type}".format(type=self.type),
         ] + super(Event, self).str_parts()
 
-    def api_retrieve(self, api_key=None):
-        # OVERRIDING the parent version of this function
-        # Event retrieve is special. For Event we don't retrieve using djstripe's API version. We always retrieve
-        # using the API version that was used to send the Event (which depends on the Stripe account holders settings
-        api_key = api_key or self.default_api_key
-        api_version = self.received_api_version
-
-        # Stripe API version validation is bypassed because we assume what
-        # Stripe passes us is a sane and usable value.
-        with stripe_temporary_api_version(api_version, validate=False):
-            stripe_event = super(Event, self).api_retrieve(api_key)
-
-        return stripe_event
-
     def _attach_objects_hook(self, cls, data):
-        if self.received_api_version is None:
+        if self.api_version is None:
             # as of api version 2017-02-14, the account.application.deauthorized
             # event sends None as api_version.
             # If we receive that, store an empty string instead.
             # Remove this hack if this gets fixed upstream.
-            self.received_api_version = ""
+            self.api_version = ""
 
         request_obj = data.get("request", None)
         if isinstance(request_obj, dict):
@@ -1393,87 +1455,30 @@ class Event(StripeObject):
             # Format before 2017-05-25
             self.request_id = request_obj
 
-    def validate(self):
-        """
-        The original contents of the Event message comes from a POST to the webhook endpoint. This data
-        must be confirmed by re-fetching it and comparing the fetched data with the original data. That's what
-        this function does.
+    @classmethod
+    def process(cls, data):
+        qs = cls.objects.filter(stripe_id=data["id"])
+        if qs.exists():
+            return qs.first()
+        else:
+            ret = cls._create_from_stripe_object(data)
+            ret.invoke_webhook_handlers()
+            return ret
 
-        This function makes an API call to Stripe to re-download the Event data. It then
-        marks this record's valid flag to True or False.
-        """
-
-        self.valid = self.webhook_message == self.api_retrieve()["data"]
-        self.save()
-
-    def process(self, force=False, raise_exception=False):
+    def invoke_webhook_handlers(self):
         """
         Invokes any webhook handlers that have been registered for this event
         based on event type or event sub-type.
 
         See event handlers registered in the ``djstripe.event_handlers`` module
         (or handlers registered in djstripe plugins or contrib packages).
-
-        :param force: If True, force the event to be processed by webhook
-        handlers, even if the event has already been processed previously.
-        :type force: bool
-        :param raise_exception: If True, any Stripe errors raised during
-        processing will be raised to the caller after logging the exception.
-        :type raise_exception: bool
-        :returns: True if the webhook was processed successfully or was
-        previously processed successfully.
-        :rtype: bool
         """
 
-        if not self.valid:
-            return False
+        webhooks.call_handlers(event=self)
 
-        if not self.processed or force:
-            exc_value = None
-
-            try:
-                # TODO: would it make sense to wrap the next 4 lines in a transaction.atomic context? Yes it would,
-                # except that some webhook handlers can have side effects outside of our local database, meaning that
-                # even if we rollback on our database, some updates may have been sent to Stripe, etc in resposne to
-                # webhooks...
-                webhooks.call_handlers(event=self)
-                self._send_signal()
-                self.processed = True
-            except StripeError as exc:
-                # TODO: What if we caught all exceptions or a broader range of exceptions here? How about DoesNotExist
-                # exceptions, for instance? or how about TypeErrors, KeyErrors, ValueErrors, etc?
-                exc_value = exc
-                self.processed = False
-                EventProcessingException.log(
-                    data=exc.http_body,
-                    exception=exc,
-                    event=self
-                )
-                webhook_processing_error.send(
-                    sender=Event,
-                    data=exc.http_body,
-                    exception=exc
-                )
-
-            # Saving here now because a previously processed webhook may no
-            # longer be processsed successfully if a re-process was forced but
-            # an event handle was broken.
-            self.save()
-
-            if exc_value and raise_exception:
-                six.reraise(StripeError, exc_value)
-
-        return self.processed
-
-    def _send_signal(self):
         signal = WEBHOOK_SIGNALS.get(self.type)
         if signal:
             return signal.send(sender=Event, event=self)
-
-    @cached_property
-    def data(self):
-        """Get the event data/contents."""
-        return self.message
 
     @cached_property
     def parts(self):
@@ -1489,6 +1494,17 @@ class Event(StripeObject):
     def verb(self):
         """ Gets the event past-tense verb string (e.g. 'updated'). """
         return ".".join(self.parts[1:])
+
+    @property
+    def customer(self):
+        data = self.data["object"]
+        if data["object"] == "customer":
+            field = "id"
+        else:
+            field = "customer"
+
+        if data.get(field):
+            return Customer._get_or_create_from_stripe_object(data, field)[0]
 
 
 # TODO: class FileUpload(...)
@@ -1509,7 +1525,10 @@ class Payout(StripeObject):
     )
     # TODO: balance_transaction = ForeignKey("Transaction")  txn_...
     currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code.")
-    # TODO: destination = ForeignKey("BankAccount", null=True)  ba_...
+    destination = models.ForeignKey(
+        "BankAccount", on_delete=models.PROTECT, null=True,
+        help_text="ID of the bank account or card the payout was sent to."
+    )
     # TODO: failure_balance_transaction = ForeignKey("Transaction", null=True)
     failure_code = StripeCharField(
         max_length=23,
@@ -1555,11 +1574,49 @@ class Payout(StripeObject):
 #                               Payment Methods                                #
 # ============================================================================ #
 
-class StripeSource(PolymorphicModel, StripeObject):
-    customer = models.ForeignKey("Customer", on_delete=models.CASCADE, related_name="sources")
+
+class BankAccount(StripeObject):
+    account = ForeignKey(
+        "Account", on_delete=models.PROTECT,
+        related_name="bank_account",
+        help_text="The account the charge was made on behalf of. Null here indicates that this value was never set."
+    )
+    account_holder_name = StripeCharField(
+        max_length=5000, null=True,
+        help_text="The name of the person or business that owns the bank account."
+    )
+    account_holder_type = StripeCharField(
+        max_length=10, choices=enums.BankAccountHolderType.choices,
+        help_text="The type of entity that holds the account."
+    )
+    bank_name = StripeCharField(
+        max_length=255,
+        help_text="Name of the bank associated with the routing number (e.g., `WELLS FARGO`)."
+    )
+    country = StripeCharField(
+        max_length=2,
+        help_text="Two-letter ISO code representing the country the bank account is located in."
+    )
+    currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code")
+    customer = models.ForeignKey(
+        "Customer", on_delete=models.SET_NULL, null=True, related_name="bank_account"
+    )
+    default_for_currency = StripeNullBooleanField(
+        help_text="Whether this external account is the default account for its currency."
+    )
+    fingerprint = StripeCharField(
+        max_length=16,
+        help_text=(
+            "Uniquely identifies this particular bank account. "
+            "You can use this attribute to check whether two bank accounts are the same."
+        )
+    )
+    last4 = StripeCharField(max_length=4)
+    routing_number = StripeCharField(max_length=255, help_text="The routing transit number for the bank account.")
+    status = StripeCharField(max_length=19, choices=enums.BankAccountStatus.choices)
 
 
-class Card(StripeSource):
+class Card(StripeObject):
     """
     You can store multiple cards on a customer in order to charge the customer later.
     (Source: https://stripe.com/docs/api/python#cards)
@@ -1599,7 +1656,11 @@ class Card(StripeSource):
         help_text="If ``address_zip`` was provided, results of the check."
     )
     brand = StripeCharField(max_length=16, choices=enums.CardBrand.choices, help_text="Card brand.")
-    country = StripeCharField(max_length=2, help_text="Two-letter ISO code representing the country of the card.")
+    country = StripeCharField(
+        null=True,
+        max_length=2,
+        help_text="Two-letter ISO code representing the country of the card."
+    )
     cvc_check = StripeCharField(
         null=True,
         max_length=11,
@@ -1624,6 +1685,10 @@ class Card(StripeSource):
         max_length=11,
         choices=enums.CardTokenizationMethod.choices,
         help_text="If the card number is tokenized, this is the method that was used."
+    )
+
+    customer = models.ForeignKey(
+        "Customer", on_delete=models.CASCADE, related_name="sources"
     )
 
     @staticmethod
@@ -1672,6 +1737,9 @@ class Card(StripeSource):
     def remove(self):
         """Removes a card from this customer's account."""
 
+        # First, wipe default source on all customers that use this card.
+        Customer.objects.filter(default_source=self.stripe_id).update(default_source=None)
+
         try:
             self._api_delete()
         except InvalidRequestError as exc:
@@ -1683,11 +1751,7 @@ class Card(StripeSource):
                 # The exception was raised for another reason, re-raise it
                 six.reraise(*sys.exc_info())
 
-        try:
-            self.delete()
-        except StripeSource.DoesNotExist:
-            # The card has already been deleted (potentially during the API call)
-            pass
+        self.delete()
 
     def api_retrieve(self, api_key=None):
         # OVERRIDING the parent version of this function
@@ -1714,7 +1778,10 @@ class Card(StripeSource):
         ] + super(Card, self).str_parts()
 
     @classmethod
-    def create_token(cls, number, exp_month, exp_year, cvc, **kwargs):
+    def create_token(
+        cls, number, exp_month, exp_year, cvc,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs
+    ):
         """
         Creates a single use token that wraps the details of a credit card. This token can be used in
         place of a credit card dictionary with any API method. These tokens can only be used once: by
@@ -1739,7 +1806,116 @@ class Card(StripeSource):
         }
         card.update(kwargs)
 
-        return stripe.Token.create(card=card)
+        return stripe.Token.create(api_key=api_key, card=card)
+
+
+# Backwards compatibility
+StripeSource = Card
+
+
+class Source(StripeObject):
+    amount = StripeCurrencyField(null=True, blank=True, help_text=(
+        "Amount associated with the source. "
+        "This is the amount for which the source will be chargeable once ready. "
+        "Required for `single_use` sources."
+    ))
+    client_secret = StripeCharField(max_length=255, help_text=(
+        "The client secret of the source. "
+        "Used for client-side retrieval using a publishable key."
+    ))
+    currency = StripeCharField(null=True, blank=True, max_length=3, help_text="Three-letter ISO currency code")
+    flow = StripeCharField(
+        max_length=17, choices=enums.SourceFlow.choices, help_text=(
+            "The authentication flow of the source."
+        )
+    )
+    owner = StripeJSONField(help_text=(
+        "Information about the owner of the payment instrument that may be "
+        "used or required by particular source types."
+    ))
+    statement_descriptor = StripeCharField(
+        null=True, blank=True, max_length=255, help_text=(
+            "Extra information about a source. "
+            "This will appear on your customer’s statement every time you charge the source."
+        )
+    )
+    status = StripeCharField(
+        max_length=10, choices=enums.SourceStatus.choices, help_text=(
+            "The status of the source. Only `chargeable` sources can be used to create a charge."
+        )
+    )
+    type = StripeCharField(
+        max_length=19, choices=enums.SourceType.choices, help_text="The type of the source."
+    )
+    usage = StripeCharField(
+        max_length=10, choices=enums.SourceUsage.choices, help_text=(
+            "Whether this source should be reusable or not. "
+            "Some source types may or may not be reusable by construction, "
+            "while other may leave the option at creation."
+        )
+    )
+
+    # Flows
+    code_verification = StripeJSONField(
+        null=True, blank=True, stripe_required=False, help_text=(
+            "Information related to the code verification flow. "
+            "Present if the source is authenticated by a verification code (`flow` is `code_verification`)."
+        )
+    )
+    receiver = StripeJSONField(
+        null=True, blank=True, stripe_required=False, help_text=(
+            "Information related to the receiver flow. "
+            "Present if the source is a receiver (`flow` is `receiver`)."
+        )
+    )
+    redirect = StripeJSONField(
+        null=True, blank=True, stripe_required=False, help_text=(
+            "Information related to the redirect flow. "
+            "Present if the source is authenticated by a redirect (`flow` is `redirect`)."
+        )
+    )
+
+    source_data = StripeJSONField(help_text=(
+        "The data corresponding to the source type."
+    ))
+
+    customer = models.ForeignKey(
+        "Customer", on_delete=models.SET_NULL, null=True, blank=True, related_name="sources_v3"
+    )
+
+    stripe_class = stripe.Source
+    stripe_dashboard_item_name = "sources"
+
+    @classmethod
+    def _manipulate_stripe_object_hook(cls, data):
+        # The source_data dict is an alias of all the source types
+        data["source_data"] = data[data["type"]]
+        return data
+
+    def _attach_objects_hook(self, cls, data):
+        customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
+        if customer:
+            self.customer = customer
+        else:
+            self.customer = None
+
+    def detach(self):
+        """
+        Detach the source from its customer.
+        """
+
+        # First, wipe default source on all customers that use this.
+        Customer.objects.filter(default_source=self.stripe_id).update(default_source=None)
+
+        try:
+            self.sync_from_stripe_data(self.api_retrieve().detach())
+            return True
+        except NotImplementedError:
+            # The source was already detached. Resyncing.
+            # NotImplementedError is weird.
+            # https://github.com/stripe/stripe-python/issues/376
+            self.sync_from_stripe_data(self.api_retrieve())
+            return False
 
 
 # ============================================================================ #
@@ -2214,6 +2390,7 @@ class InvoiceItem(StripeObject):
         related_name="invoiceitems",
         help_text="The invoice to which this invoiceitem is attached."
     )
+    period = StripeJSONField()
     period_end = StripeDateTimeField(
         stripe_name="period.end",
         help_text="Might be the date when this invoiceitem's invoice was sent."
@@ -2446,7 +2623,7 @@ class Subscription(StripeObject):
     STATUS_UNPAID = enums.SubscriptionStatus.unpaid
 
     application_fee_percent = StripePercentField(
-        null=True,
+        null=True, blank=True,
         help_text="A positive decimal that represents the fee percentage of the subscription invoice amount that "
         "will be transferred to the application owner's Stripe account each billing period."
     )
@@ -2457,7 +2634,7 @@ class Subscription(StripeObject):
         "a subscription that has a status of active is scheduled to be canceled at the end of the current period."
     )
     canceled_at = StripeDateTimeField(
-        null=True,
+        null=True, blank=True,
         help_text="If the subscription has been canceled, the date of that cancellation. If the subscription was "
         "canceled with ``cancel_at_period_end``, canceled_at will still reflect the date of the initial cancellation "
         "request, not the end of the subscription period when the subscription is automatically moved to a canceled "
@@ -2477,7 +2654,7 @@ class Subscription(StripeObject):
     )
     # TODO: discount
     ended_at = StripeDateTimeField(
-        null=True,
+        null=True, blank=True,
         help_text="If the subscription has ended (either because it was canceled or because the customer was switched "
         "to a subscription to a new plan), the date the subscription ended."
     )
@@ -2492,14 +2669,17 @@ class Subscription(StripeObject):
         max_length=8, choices=enums.SubscriptionStatus.choices, help_text="The status of this subscription."
     )
     tax_percent = StripePercentField(
-        null=True,
+        null=True, blank=True,
         help_text="A positive decimal (with at most two decimal places) between 1 and 100. This represents the "
         "percentage of the subscription invoice subtotal that will be calculated and added as tax to the final "
         "amount each billing period."
     )
-    trial_end = StripeDateTimeField(null=True, help_text="If the subscription has a trial, the end of that trial.")
+    trial_end = StripeDateTimeField(
+        null=True, blank=True,
+        help_text="If the subscription has a trial, the end of that trial."
+    )
     trial_start = StripeDateTimeField(
-        null=True,
+        null=True, blank=True,
         help_text="If the subscription has a trial, the beginning of that trial."
     )
 
@@ -2750,15 +2930,37 @@ class Transfer(StripeObject):
         "reversal was issued)."
     )
     currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code.")
-    date = StripeDateTimeField(
-        help_text="Date the transfer is scheduled to arrive in the bank. This doesn't factor in delays like "
-        "weekends or bank holidays."
-    )
     destination = StripeIdField(help_text="ID of the bank account, card, or Stripe account the transfer was sent to.")
     destination_payment = StripeIdField(
         stripe_required=False,
         help_text="If the destination is a Stripe account, this will be the ID of the payment that the destination "
         "account received for the transfer."
+    )
+    # reversals = ...
+    reversed = StripeBooleanField(
+        default=False,
+        help_text="Whether or not the transfer has been fully reversed. If the transfer is only partially "
+        "reversed, this attribute will still be false."
+    )
+    source_transaction = StripeIdField(
+        null=True,
+        help_text="ID of the charge (or other transaction) that was used to fund the transfer. "
+        "If null, the transfer was funded from the available balance."
+    )
+    source_type = StripeCharField(
+        max_length=16,
+        choices=enums.LegacySourceType.choices,
+        help_text="The source balance from which this transfer came."
+    )
+    transfer_group = StripeCharField(
+        max_length=255, null=True, blank=True, stripe_required=False,
+        help_text="A string that identifies this transaction as part of a group."
+    )
+
+    # DEPRECATED Fields
+    date = StripeDateTimeField(
+        help_text="Date the transfer is scheduled to arrive in the bank. This doesn't factor in delays like "
+        "weekends or bank holidays."
     )
     destination_type = StripeCharField(
         stripe_name="type",
@@ -2777,21 +2979,6 @@ class Transfer(StripeObject):
     failure_message = StripeTextField(
         blank=True, null=True, stripe_required=False,
         help_text="Message to user further explaining reason for transfer failure if available."
-    )
-    reversed = StripeBooleanField(
-        default=False,
-        help_text="Whether or not the transfer has been fully reversed. If the transfer is only partially "
-        "reversed, this attribute will still be false."
-    )
-    source_transaction = StripeIdField(
-        null=True,
-        help_text="ID of the charge (or other transaction) that was used to fund the transfer. "
-        "If null, the transfer was funded from the available balance."
-    )
-    source_type = StripeCharField(
-        max_length=16,
-        choices=enums.SourceType.choices,
-        help_text="The source balance from which this transfer came."
     )
     statement_descriptor = StripeCharField(
         max_length=22,
@@ -2814,22 +3001,6 @@ class Transfer(StripeObject):
     fee = StripeCurrencyField(stripe_required=False, nested_name="balance_transaction")
     fee_details = StripeJSONField(stripe_required=False, nested_name="balance_transaction")
 
-    # DEPRECATED Fields
-    adjustment_count = StripeIntegerField(deprecated=True)
-    adjustment_fees = StripeCurrencyField(deprecated=True)
-    adjustment_gross = StripeCurrencyField(deprecated=True)
-    charge_count = StripeIntegerField(deprecated=True)
-    charge_fees = StripeCurrencyField(deprecated=True)
-    charge_gross = StripeCurrencyField(deprecated=True)
-    collected_fee_count = StripeIntegerField(deprecated=True)
-    collected_fee_gross = StripeCurrencyField(deprecated=True)
-    net = StripeCurrencyField(deprecated=True)
-    refund_count = StripeIntegerField(deprecated=True)
-    refund_fees = StripeCurrencyField(deprecated=True)
-    refund_gross = StripeCurrencyField(deprecated=True)
-    validation_count = StripeIntegerField(deprecated=True)
-    validation_fees = StripeCurrencyField(deprecated=True)
-
     def str_parts(self):
         return [
             "amount={amount}".format(amount=self.amount),
@@ -2840,6 +3011,13 @@ class Transfer(StripeObject):
 # ============================================================================ #
 #                             DJ-STRIPE RESOURCES                              #
 # ============================================================================ #
+
+
+def _get_version():
+    from . import __version__
+
+    return __version__
+
 
 @python_2_unicode_compatible
 class IdempotencyKey(models.Model):
@@ -2859,32 +3037,137 @@ class IdempotencyKey(models.Model):
         return timezone.now() > self.created + timedelta(hours=24)
 
 
-@python_2_unicode_compatible
-class EventProcessingException(models.Model):
-    event = ForeignKey("Event", on_delete=models.CASCADE, null=True)
-    data = TextField()
-    message = CharField(max_length=500)
-    traceback = TextField()
-
-    created = DateTimeField(auto_now_add=True, editable=False)
-    modified = DateTimeField(auto_now=True, editable=False)
+class WebhookEventTrigger(models.Model):
+    """
+    An instance of a request that reached the server endpoint for Stripe webhooks.
+    """
+    id = models.BigAutoField(primary_key=True)
+    remote_ip = models.GenericIPAddressField(
+        help_text="IP address of the request client."
+    )
+    headers = JSONField()
+    body = models.TextField(blank=True)
+    valid = models.BooleanField(
+        default=False,
+        help_text="Whether or not the webhook event has passed validation"
+    )
+    processed = models.BooleanField(
+        default=False,
+        help_text="Whether or not the webhook event has been successfully processed"
+    )
+    exception = models.CharField(max_length=128, blank=True)
+    traceback = models.TextField(
+        blank=True, help_text="Traceback if an exception was thrown during processing"
+    )
+    event = models.ForeignKey(
+        "Event", on_delete=models.SET_NULL, null=True, blank=True,
+        help_text="Event object contained in the (valid) Webhook"
+    )
+    djstripe_version = models.CharField(
+        max_length=32,
+        default=_get_version,  # Needs to be a callable, otherwise it's a db default.
+        help_text="The version of dj-stripe when the webhook was received"
+    )
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     @classmethod
-    def log(cls, data, exception, event):
-        from traceback import format_exc
-        cls.objects.create(
-            event=event,
-            data=data or "",
-            message=str(exception),
-            traceback=format_exc()
-        )
+    def from_request(cls, request):
+        """
+        Create, validate and process a WebhookEventTrigger given a Django
+        request object.
 
-    def __str__(self):
-        return smart_text("<{message}, pk={pk}, Event={event}>".format(
-            message=self.message,
-            pk=self.pk,
-            event=self.event
-        ))
+        The process is three-fold:
+        1. Create a WebhookEventTrigger object from a Django request.
+        2. Validate the WebhookEventTrigger as a Stripe event using the API.
+        3. If valid, process it into an Event object (and child resource).
+        """
+        from traceback import format_exc
+        from .utils import fix_django_headers
+
+        headers = fix_django_headers(request.META)
+        assert headers
+        try:
+            body = request.body.decode(request.encoding or "utf-8")
+        except Exception:
+            body = "(error decoding body)"
+
+        ip = request.META["REMOTE_ADDR"]
+        obj = cls.objects.create(headers=headers, body=body, remote_ip=ip)
+
+        try:
+            obj.valid = obj.validate()
+            if obj.valid:
+                if djstripe_settings.WEBHOOK_EVENT_CALLBACK:
+                    # If WEBHOOK_EVENT_CALLBACK, pass it for processing
+                    djstripe_settings.WEBHOOK_EVENT_CALLBACK(obj)
+                else:
+                    # Process the item (do not save it, it'll get saved below)
+                    obj.process(save=False)
+        except Exception as e:
+            max_length = WebhookEventTrigger._meta.get_field("exception").max_length
+            obj.exception = str(e)[:max_length]
+            obj.traceback = format_exc()
+
+            # Send the exception as the webhook_processing_error signal
+            webhook_processing_error.send(
+                sender=WebhookEventTrigger, exception=e, data=getattr(e, "http_body", "")
+            )
+        finally:
+            obj.save()
+
+        return obj
+
+    @cached_property
+    def json_body(self):
+        import json
+
+        try:
+            return json.loads(self.body)
+        except ValueError:
+            return {}
+
+    @property
+    def is_test_event(self):
+        return self.json_body.get("id") == webhooks.TEST_EVENT_ID
+
+    def validate(self, api_key=None):
+        """
+        The original contents of the Event message must be confirmed by
+        refetching it and comparing the fetched data with the original data.
+
+        This function makes an API call to Stripe to redownload the Event data
+        and returns whether or not it matches the WebhookEventTrigger data.
+        """
+
+        local_data = self.json_body
+        if "id" not in local_data or "livemode" not in local_data:
+            return False
+
+        if self.is_test_event:
+            logger.info("Test webhook received: {}".format(local_data))
+            return False
+
+        livemode = local_data["livemode"]
+        api_key = api_key or djstripe_settings.get_default_api_key(livemode)
+
+        # Retrieve the event using the api_version specified in itself
+        with stripe_temporary_api_version(local_data["api_version"], validate=False):
+            remote_data = Event.stripe_class.retrieve(id=local_data["id"], api_key=api_key)
+
+        return local_data["data"] == remote_data["data"]
+
+    def process(self, save=True):
+        # Reset traceback and exception in case of reprocessing
+        self.exception = ""
+        self.traceback = ""
+
+        self.event = Event.process(self.json_body)
+        self.processed = True
+        if save:
+            self.save()
+
+        return self.event
 
 
 # Much like registering signal handlers. We import this module so that its registrations get picked up

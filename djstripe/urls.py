@@ -46,7 +46,7 @@ urlpatterns = [
     # Webhook
     url(
         app_settings.DJSTRIPE_WEBHOOK_URL,
-        views.WebHook.as_view(),
+        views.ProcessWebhookView.as_view(),
         name="webhook"
     ),
 ]

@@ -23,14 +23,14 @@ class HumanReadableCouponTest(TestCase):
             stripe_id="coupon-test-amount-off-forever", amount_off=10, currency="usd",
             duration="forever",
         )
-        self.assertEqual(coupon.human_readable, "$10 USD off forever")
+        self.assertEqual(coupon.human_readable, "$10.00 USD off forever")
 
     def test_human_readable_eur_off_forever(self):
         coupon = Coupon.objects.create(
             stripe_id="coupon-test-amount-off-forever", amount_off=10, currency="eur",
             duration="forever",
         )
-        self.assertEqual(coupon.human_readable, "€10 EUR off forever")
+        self.assertEqual(coupon.human_readable, "€10.00 EUR off forever")
 
     def test_human_readable_percent_off_forever(self):
         coupon = Coupon.objects.create(

@@ -15,17 +15,7 @@ from django.db import models
 
 class StripeObjectManager(models.Manager):
     """Manager used in StripeObject."""
-
-    def exists_by_json(self, data):
-        """
-        Search for a matching stripe object based on a Stripe object received from Stripe in JSON format.
-
-        :param data: Stripe event object parsed from a JSON string into an object
-        :type data: dict
-        :rtype: bool
-        :returns: True if the requested object exists, False otherwise
-        """
-        return self.filter(stripe_id=data["id"]).exists()
+    pass
 
 
 class SubscriptionManager(models.Manager):
@@ -82,8 +72,8 @@ class ChargeManager(models.Manager):
     """Manager used by models.Charge."""
 
     def during(self, year, month):
-        """Return Charges between a certain time range based on stripe_timestamp."""
-        return self.filter(stripe_timestamp__year=year, stripe_timestamp__month=month)
+        """Return Charges between a certain time range based on `created`."""
+        return self.filter(created__year=year, created__month=month)
 
     def paid_totals_for(self, year, month):
         """Return paid Charges during a certain year, month with total amount, fee and refunded annotated."""

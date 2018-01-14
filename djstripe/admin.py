@@ -13,8 +13,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from django.contrib import admin
 
 from .models import (
-    Charge, Coupon, Customer, Event, EventProcessingException,
-    IdempotencyKey, Invoice, InvoiceItem, Plan, Subscription, Transfer
+    Charge, Coupon, Customer, Dispute, Event, IdempotencyKey, Invoice,
+    InvoiceItem, Plan, Source, Subscription, Transfer, WebhookEventTrigger
 )
 
 
@@ -104,14 +104,21 @@ class IdempotencyKeyAdmin(admin.ModelAdmin):
     search_fields = ("uuid", "action")
 
 
-@admin.register(EventProcessingException)
-class EventProcessingExceptionAdmin(admin.ModelAdmin):
-    list_display = ("message", "event", "created")
+@admin.register(WebhookEventTrigger)
+class WebhookEventTriggerAdmin(admin.ModelAdmin):
+    list_display = (
+        "created", "event", "remote_ip", "processed", "valid", "exception", "djstripe_version"
+    )
+    list_filter = ("created", "valid", "processed")
     raw_id_fields = ("event", )
-    search_fields = ("message", "traceback", "data")
 
-    def has_add_permission(self, request):
-        return False
+    def reprocess(self, request, queryset):
+        for trigger in queryset:
+            if not trigger.valid:
+                self.message_user(request, "Skipped invalid trigger {}".format(trigger))
+                continue
+
+            trigger.process()
 
 
 class StripeObjectAdmin(admin.ModelAdmin):
@@ -120,19 +127,19 @@ class StripeObjectAdmin(admin.ModelAdmin):
     change_form_template = "djstripe/admin/change_form.html"
 
     def get_list_display(self, request):
-        return ("stripe_id", ) + self.list_display + ("stripe_timestamp", "livemode")
+        return ("stripe_id", ) + self.list_display + ("created", "livemode")
 
     def get_list_filter(self, request):
-        return self.list_filter + ("stripe_timestamp", "livemode")
+        return self.list_filter + ("created", "livemode")
 
     def get_readonly_fields(self, request, obj=None):
-        return self.readonly_fields + ("stripe_id", "stripe_timestamp")
+        return self.readonly_fields + ("stripe_id", "created")
 
     def get_search_fields(self, request):
         return self.search_fields + ("stripe_id", )
 
     def get_fieldsets(self, request, obj=None):
-        common_fields = ("livemode", "stripe_id", "stripe_timestamp")
+        common_fields = ("livemode", "stripe_id", "created")
         # Have to remove the fields from the common set, otherwise they'll show up twice.
         fields = [f for f in self.get_fields(request, obj) if f not in common_fields]
         return (
@@ -141,37 +148,12 @@ class StripeObjectAdmin(admin.ModelAdmin):
         )
 
 
-def reprocess_events(modeladmin, request, queryset):
-    """Re-process the selected webhook events.
-
-    Note that this isn't idempotent, so any side-effects that are produced from
-    the event being handled will be multiplied (for example, an event handler
-    that sends emails will send duplicates; an event handler that adds 1 to a
-    total count will be a count higher than it was, etc.)
-
-    There aren't any event handlers with adverse side-effects built within
-    dj-stripe, but there might be within your own event handlers, third-party
-    plugins, contrib code, etc.
-    """
-    processed = 0
-    for event in queryset:
-        if event.process(force=True):
-            processed += 1
-
-    message = "{processed}/{total} event(s) successfully re-processed."
-    total = queryset.count()
-    modeladmin.message_user(request, message.format(processed=processed, total=total))
-
-
-reprocess_events.short_description = "Re-process selected webhook events"
-
-
 class SubscriptionInline(admin.StackedInline):
     """A TabularInline for use models.Subscription."""
 
     model = Subscription
     extra = 0
-    readonly_fields = ("stripe_id", "stripe_timestamp")
+    readonly_fields = ("stripe_id", "created")
     show_change_link = True
 
 
@@ -202,7 +184,7 @@ class InvoiceItemInline(admin.StackedInline):
 
     model = InvoiceItem
     extra = 0
-    readonly_fileds = ("stripe_id", "stripe_timestamp")
+    readonly_fields = ("stripe_id", "created")
     raw_id_fields = ("customer", "subscription")
     show_change_link = True
 
@@ -234,9 +216,9 @@ class ChargeAdmin(StripeObjectAdmin):
     )
     search_fields = ("stripe_id", "customer__stripe_id", "invoice__stripe_id")
     list_filter = (
-        "status", "source_type", "paid", "disputed", "refunded", "fraudulent", "captured",
+        "status", "source_type", "paid", "refunded", "fraudulent", "captured",
     )
-    raw_id_fields = ("customer", "invoice", "source", "transfer")
+    raw_id_fields = ("customer", "dispute", "invoice", "source", "transfer")
 
 
 @admin.register(Coupon)
@@ -257,13 +239,17 @@ class CustomerAdmin(StripeObjectAdmin):
     inlines = (SubscriptionInline, )
 
 
+@admin.register(Dispute)
+class DisputeAdmin(StripeObjectAdmin):
+    list_display = ("reason", "status", "amount", "currency", "is_charge_refundable")
+    list_filter = ("is_charge_refundable", "reason", "status")
+
+
 @admin.register(Event)
 class EventAdmin(StripeObjectAdmin):
-    raw_id_fields = ("customer", )
-    list_display = ("type", "created", "valid", "processed")
-    list_filter = ("type", "created", "valid", "processed")
-    actions = (reprocess_events, )
-    # radio_fields = {"valid": admin.HORIZONTAL}
+    list_display = ("type", "created", "request_id")
+    list_filter = ("type", "created")
+    search_fields = ("request_id", )
 
     def has_add_permission(self, request):
         return False
@@ -305,6 +291,13 @@ class PlanAdmin(StripeObjectAdmin):
             )
 
         return readonly_fields
+
+
+@admin.register(Source)
+class SourceAdmin(StripeObjectAdmin):
+    raw_id_fields = ("customer", )
+    list_display = ("customer", "type", "status", "amount", "currency", "usage", "flow")
+    list_filter = ("type", "status", "usage", "flow")
 
 
 @admin.register(Subscription)
