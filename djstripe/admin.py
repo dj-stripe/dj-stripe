@@ -13,7 +13,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from django.contrib import admin
 
 from .models import (
-    Charge, Coupon, Customer, Dispute, Event, IdempotencyKey, Invoice,
+    Charge, Coupon, Customer, Dispute, Event, FileUpload, IdempotencyKey, Invoice,
     InvoiceItem, Plan, Source, Subscription, Transfer, WebhookEventTrigger
 )
 
@@ -246,6 +246,13 @@ class EventAdmin(StripeObjectAdmin):
 
     def has_add_permission(self, request):
         return False
+
+
+@admin.register(FileUpload)
+class FileUploadAdmin(StripeObjectAdmin):
+    list_display = ("purpose", "size", "type")
+    list_filter = ("purpose", "type")
+    search_fields = ("filename", )
 
 
 @admin.register(Invoice)
