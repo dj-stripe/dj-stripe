@@ -154,6 +154,22 @@ class DisputeStatus(Enum):
     lost = _("Lost")
 
 
+class FileUploadPurpose(Enum):
+    dispute_evidence = _("Dispute evidence")
+    identity_document = _("Identity document")
+    tax_document_user_upload = _("Tax document user upload")
+
+
+class FileUploadType(Enum):
+    pdf = _("PDF")
+    jpg = _("JPG")
+    png = _("PNG")
+    csv = _("CSV")
+    xls = _("XLS")
+    xlsx = _("XLSX")
+    docx = _("DOCX")
+
+
 class PayoutFailureCode(Enum):
     """
     Payout failure error codes.

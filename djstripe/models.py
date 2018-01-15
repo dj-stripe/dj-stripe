@@ -1526,7 +1526,23 @@ class Event(StripeObject):
             return Customer._get_or_create_from_stripe_object(data, field)[0]
 
 
-# TODO: class FileUpload(...)
+class FileUpload(StripeObject):
+    filename = StripeCharField(
+        max_length=255, help_text="A filename for the file, suitable for saving to a filesystem."
+    )
+    purpose = StripeCharField(
+        max_length=24, choices=enums.FileUploadPurpose.choices,
+        help_text="The purpose of the uploaded file."
+    )
+    size = StripeIntegerField(help_text="The size in bytes of the file upload object.")
+    type = StripeCharField(
+        max_length=4, choices=enums.FileUploadType.choices,
+        help_text="The type of the file returned."
+    )
+    url = StripeCharField(
+        max_length=200,
+        help_text="A read-only URL where the uploaded file can be accessed."
+    )
 
 
 class Payout(StripeObject):
