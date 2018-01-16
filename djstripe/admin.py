@@ -12,10 +12,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from django.contrib import admin
 
-from .models import (
-    Charge, Coupon, Customer, Dispute, Event, FileUpload, IdempotencyKey, Invoice,
-    InvoiceItem, Plan, Source, Subscription, Transfer, WebhookEventTrigger
-)
+from . import models
 
 
 class BaseHasSourceListFilter(admin.SimpleListFilter):
@@ -77,7 +74,7 @@ class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
         """
         statuses = [
             [x, x.replace("_", " ").title()]
-            for x in Subscription.objects.values_list(
+            for x in models.Subscription.objects.values_list(
                 "status",
                 flat=True
             ).distinct()
@@ -97,14 +94,14 @@ class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
             return queryset.filter(subscriptions__status=self.value()).distinct()
 
 
-@admin.register(IdempotencyKey)
+@admin.register(models.IdempotencyKey)
 class IdempotencyKeyAdmin(admin.ModelAdmin):
     list_display = ("uuid", "action", "created", "is_expired", "livemode")
     list_filter = ("livemode", )
     search_fields = ("uuid", "action")
 
 
-@admin.register(WebhookEventTrigger)
+@admin.register(models.WebhookEventTrigger)
 class WebhookEventTriggerAdmin(admin.ModelAdmin):
     list_display = (
         "created", "event", "remote_ip", "processed", "valid", "exception", "djstripe_version"
@@ -151,7 +148,7 @@ class StripeObjectAdmin(admin.ModelAdmin):
 class SubscriptionInline(admin.StackedInline):
     """A TabularInline for use models.Subscription."""
 
-    model = Subscription
+    model = models.Subscription
     extra = 0
     readonly_fields = ("stripe_id", "created")
     show_change_link = True
@@ -175,7 +172,7 @@ subscription_status.short_description = "Subscription Status"
 class InvoiceItemInline(admin.StackedInline):
     """A TabularInline for use InvoiceItem."""
 
-    model = InvoiceItem
+    model = models.InvoiceItem
     extra = 0
     readonly_fields = ("stripe_id", "created")
     raw_id_fields = ("customer", "subscription")
@@ -201,7 +198,7 @@ def customer_email(obj):
 customer_email.short_description = "Customer"
 
 
-@admin.register(Charge)
+@admin.register(models.Charge)
 class ChargeAdmin(StripeObjectAdmin):
     list_display = (
         "customer", "amount", "description", "paid", "disputed", "refunded",
@@ -214,7 +211,7 @@ class ChargeAdmin(StripeObjectAdmin):
     raw_id_fields = ("customer", "dispute", "invoice", "source", "transfer")
 
 
-@admin.register(Coupon)
+@admin.register(models.Coupon)
 class CouponAdmin(StripeObjectAdmin):
     list_display = (
         "amount_off", "percent_off", "duration", "duration_in_months",
@@ -224,7 +221,7 @@ class CouponAdmin(StripeObjectAdmin):
     radio_fields = {"duration": admin.HORIZONTAL}
 
 
-@admin.register(Customer)
+@admin.register(models.Customer)
 class CustomerAdmin(StripeObjectAdmin):
     raw_id_fields = ("subscriber", "default_source", "coupon")
     list_display = ("subscriber", subscription_status)
@@ -232,13 +229,13 @@ class CustomerAdmin(StripeObjectAdmin):
     inlines = (SubscriptionInline, )
 
 
-@admin.register(Dispute)
+@admin.register(models.Dispute)
 class DisputeAdmin(StripeObjectAdmin):
     list_display = ("reason", "status", "amount", "currency", "is_charge_refundable")
     list_filter = ("is_charge_refundable", "reason", "status")
 
 
-@admin.register(Event)
+@admin.register(models.Event)
 class EventAdmin(StripeObjectAdmin):
     list_display = ("type", "created", "request_id")
     list_filter = ("type", "created")
@@ -248,14 +245,14 @@ class EventAdmin(StripeObjectAdmin):
         return False
 
 
-@admin.register(FileUpload)
+@admin.register(models.FileUpload)
 class FileUploadAdmin(StripeObjectAdmin):
     list_display = ("purpose", "size", "type")
     list_filter = ("purpose", "type")
     search_fields = ("filename", )
 
 
-@admin.register(Invoice)
+@admin.register(models.Invoice)
 class InvoiceAdmin(StripeObjectAdmin):
     list_display = (
         "paid", "forgiven", "closed", customer_email, customer_has_source,
@@ -270,7 +267,7 @@ class InvoiceAdmin(StripeObjectAdmin):
     inlines = (InvoiceItemInline, )
 
 
-@admin.register(Plan)
+@admin.register(models.Plan)
 class PlanAdmin(StripeObjectAdmin):
     radio_fields = {"interval": admin.HORIZONTAL}
 
@@ -279,7 +276,7 @@ class PlanAdmin(StripeObjectAdmin):
         if change:
             obj.update_name()
         else:
-            Plan.get_or_create(**form.cleaned_data)
+            models.Plan.get_or_create(**form.cleaned_data)
 
     def get_readonly_fields(self, request, obj=None):
         """Return extra readonly_fields."""
@@ -293,14 +290,14 @@ class PlanAdmin(StripeObjectAdmin):
         return readonly_fields
 
 
-@admin.register(Source)
+@admin.register(models.Source)
 class SourceAdmin(StripeObjectAdmin):
     raw_id_fields = ("customer", )
     list_display = ("customer", "type", "status", "amount", "currency", "usage", "flow")
     list_filter = ("type", "status", "usage", "flow")
 
 
-@admin.register(Subscription)
+@admin.register(models.Subscription)
 class SubscriptionAdmin(StripeObjectAdmin):
     raw_id_fields = ("customer", )
     list_display = ("customer", "status")
@@ -315,6 +312,6 @@ class SubscriptionAdmin(StripeObjectAdmin):
     actions = (cancel_subscription, )
 
 
-@admin.register(Transfer)
+@admin.register(models.Transfer)
 class TransferAdmin(StripeObjectAdmin):
     list_display = ("amount", "status", "date", "description")
