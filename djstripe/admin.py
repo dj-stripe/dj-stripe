@@ -172,15 +172,6 @@ def subscription_status(customer):
 subscription_status.short_description = "Subscription Status"
 
 
-def cancel_subscription(modeladmin, request, queryset):
-    """Cancel a subscription."""
-    for subscription in queryset:
-        subscription.cancel()
-
-
-cancel_subscription.short_description = "Cancel selected subscriptions"
-
-
 class InvoiceItemInline(admin.StackedInline):
     """A TabularInline for use InvoiceItem."""
 
@@ -307,6 +298,13 @@ class SubscriptionAdmin(StripeObjectAdmin):
     raw_id_fields = ("customer", )
     list_display = ("customer", "status")
     list_filter = ("status", "cancel_at_period_end")
+
+    def cancel_subscription(self, request, queryset):
+        """Cancel a subscription."""
+        for subscription in queryset:
+            subscription.cancel()
+    cancel_subscription.short_description = "Cancel selected subscriptions"
+
     actions = (cancel_subscription, )
 
 
