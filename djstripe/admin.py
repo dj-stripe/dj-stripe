@@ -207,7 +207,7 @@ class ChargeAdmin(StripeObjectAdmin):
         "customer", "amount", "description", "paid", "disputed", "refunded",
         "fee", "receipt_sent"
     )
-    search_fields = ("stripe_id", "customer__stripe_id", "invoice__stripe_id")
+    search_fields = ("customer__stripe_id", "invoice__stripe_id")
     list_filter = (
         "status", "source_type", "paid", "refunded", "fraudulent", "captured",
     )
