@@ -17,7 +17,7 @@ from mock import patch
 from djstripe.enums import LegacySourceType
 from djstripe.models import Account, Charge, PaymentMethod
 
-from . import FAKE_ACCOUNT, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_TRANSFER
+from . import FAKE_ACCOUNT, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_TRANSFER, default_account
 
 
 class ChargeTest(TestCase):
@@ -25,7 +25,7 @@ class ChargeTest(TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="user", email="user@example.com")
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
-        self.account = Account.objects.create()
+        self.account = default_account()
 
     def test_str(self):
         charge = Charge(amount=50, paid=True, stripe_id='charge_xxxxxxxxxxxxxx')

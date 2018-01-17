@@ -45,6 +45,13 @@ class StripeList(dict):
         return len(self.data)
 
 
+def default_account():
+    from djstripe.models import Account
+    return Account.objects.create(
+        charges_enabled=True, details_submitted=True, payouts_enabled=True
+    )
+
+
 FAKE_BALANCE_TRANSACTION = {
     "id": "txn_16YKQi2eZvKYlo2CNx26h2Wz",
     "object": "balance_transaction",
@@ -1143,6 +1150,7 @@ FAKE_ACCOUNT = {
     "object": "account",
     "business_logo": None,
     "business_name": "Stripe.com",
+    "business_primary_color": "",
     "business_url": None,
     "charges_enabled": False,
     "country": "US",
@@ -1191,10 +1199,14 @@ FAKE_ACCOUNT = {
         },
     },
     "managed": False,
+    "payout_schedule": None,
+    "payout_statement_descriptor": "",
+    "payouts_enabled": True,
     "product_description": None,
-    "statement_descriptor": None,
-    "support_emaile": None,
-    "support_phone": None,
+    "statement_descriptor": "",
+    "support_email": "",
+    "support_phone": "",
+    "support_url": "https://example.com/support/",
     "timezone": "US/Pacific",
     "tos_acceptance": {
         "date": None,
@@ -1206,6 +1218,7 @@ FAKE_ACCOUNT = {
         "interval": "daily"
     },
     "transfers_enabled": False,
+    "type": "standard",
     "verification": {
         "disabled_reason": "other",
         "fields_needed": [],

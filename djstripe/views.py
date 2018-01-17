@@ -11,8 +11,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import logging
 
 from django.contrib import messages
-from django.contrib.auth import logout as auth_logout
 from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 from django.shortcuts import redirect

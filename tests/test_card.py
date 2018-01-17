@@ -16,15 +16,15 @@ from mock.mock import ANY, patch
 from stripe.error import InvalidRequestError
 
 from djstripe.exceptions import StripeObjectManipulationException
-from djstripe.models import Account, Card
+from djstripe.models import Card
 
-from . import FAKE_CARD, FAKE_CARD_III, FAKE_CARD_V, FAKE_CUSTOMER
+from . import FAKE_CARD, FAKE_CARD_III, FAKE_CARD_V, FAKE_CUSTOMER, default_account
 
 
 class CardTest(TestCase):
 
     def setUp(self):
-        self.account = Account.objects.create()
+        self.account = default_account()
         self.user = get_user_model().objects.create_user(username="testuser", email="djstripe@example.com")
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
         self.customer.sources.all().delete()

@@ -198,6 +198,14 @@ def customer_email(obj):
 customer_email.short_description = "Customer"
 
 
+@admin.register(models.Account)
+class AccountAdmin(StripeObjectAdmin):
+    list_display = ("business_url", "country", "default_currency")
+    list_filter = ("details_submitted", )
+    search_fields = ("business_name", "display_name", "business_url")
+    raw_id_fields = ("business_logo", )
+
+
 @admin.register(models.Charge)
 class ChargeAdmin(StripeObjectAdmin):
     list_display = (

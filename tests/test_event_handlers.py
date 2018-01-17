@@ -16,8 +16,7 @@ from django.test import TestCase
 from mock import patch
 
 from djstripe.models import (
-    Account, Card, Charge, Coupon, Customer, Dispute, Event, Invoice,
-    InvoiceItem, PaymentMethod, Plan, Subscription, Transfer
+    Card, Charge, Coupon, Customer, Dispute, Event, Invoice, InvoiceItem, PaymentMethod, Plan, Subscription, Transfer
 )
 
 from . import (
@@ -27,9 +26,10 @@ from . import (
     FAKE_EVENT_CUSTOMER_SOURCE_CREATED, FAKE_EVENT_CUSTOMER_SOURCE_DELETED, FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE,
     FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED, FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED, FAKE_EVENT_DISPUTE_CREATED,
     FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_INVOICE_DELETED, FAKE_EVENT_INVOICE_UPCOMING,
-    FAKE_EVENT_INVOICEITEM_CREATED, FAKE_EVENT_INVOICEITEM_DELETED, FAKE_EVENT_PLAN_CREATED, FAKE_EVENT_PLAN_DELETED,
-    FAKE_EVENT_PLAN_REQUEST_IS_OBJECT, FAKE_EVENT_TRANSFER_CREATED, FAKE_EVENT_TRANSFER_DELETED, FAKE_INVOICE,
-    FAKE_INVOICE_II, FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_III, FAKE_TRANSFER
+    FAKE_EVENT_INVOICEITEM_CREATED, FAKE_EVENT_INVOICEITEM_DELETED, FAKE_EVENT_PLAN_CREATED,
+    FAKE_EVENT_PLAN_DELETED, FAKE_EVENT_PLAN_REQUEST_IS_OBJECT, FAKE_EVENT_TRANSFER_CREATED,
+    FAKE_EVENT_TRANSFER_DELETED, FAKE_INVOICE, FAKE_INVOICE_II, FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION,
+    FAKE_SUBSCRIPTION_III, FAKE_TRANSFER, default_account
 )
 
 
@@ -73,7 +73,7 @@ class TestChargeEvents(EventTestCase):
         fake_stripe_event = deepcopy(FAKE_EVENT_CHARGE_SUCCEEDED)
         event_retrieve_mock.return_value = fake_stripe_event
         charge_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
-        account_mock.return_value = Account.objects.create()
+        account_mock.return_value = default_account()
 
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
@@ -253,7 +253,7 @@ class TestInvoiceEvents(EventTestCase):
     def test_invoice_created_no_existing_customer(self, event_retrieve_mock, invoice_retrieve_mock,
                                                   charge_retrieve_mock, customer_retrieve_mock,
                                                   subscription_retrieve_mock, default_account_mock):
-        default_account_mock.return_value = Account.objects.create()
+        default_account_mock.return_value = default_account()
 
         fake_stripe_event = deepcopy(FAKE_EVENT_INVOICE_CREATED)
         event_retrieve_mock.return_value = fake_stripe_event
@@ -275,7 +275,7 @@ class TestInvoiceEvents(EventTestCase):
     @patch("stripe.Event.retrieve")
     def test_invoice_created(self, event_retrieve_mock, invoice_retrieve_mock, charge_retrieve_mock,
                              customer_retrieve_mock, subscription_retrieve_mock, default_account_mock):
-        default_account_mock.return_value = Account.objects.create()
+        default_account_mock.return_value = default_account()
 
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
         FAKE_CUSTOMER.create_for_user(user)
@@ -301,7 +301,7 @@ class TestInvoiceEvents(EventTestCase):
     @patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
     def test_invoice_deleted(self, invoice_retrieve_mock, charge_retrieve_mock,
                              subscription_retrieve_mock, default_account_mock):
-        default_account_mock.return_value = Account.objects.create()
+        default_account_mock.return_value = default_account()
 
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
         FAKE_CUSTOMER.create_for_user(user)
@@ -335,7 +335,7 @@ class TestInvoiceItemEvents(EventTestCase):
     def test_invoiceitem_created(self, event_retrieve_mock, invoiceitem_retrieve_mock, invoice_retrieve_mock,
                                  charge_retrieve_mock, subscription_retrieve_mock,
                                  default_account_mock):
-        default_account_mock.return_value = Account.objects.create()
+        default_account_mock.return_value = default_account()
 
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
         FAKE_CUSTOMER_II.create_for_user(user)
@@ -360,7 +360,7 @@ class TestInvoiceItemEvents(EventTestCase):
             self, invoiceitem_retrieve_mock, invoice_retrieve_mock,
             charge_retrieve_mock,
             subscription_retrieve_mock, default_account_mock):
-        default_account_mock.return_value = Account.objects.create()
+        default_account_mock.return_value = default_account()
 
         user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
         FAKE_CUSTOMER_II.create_for_user(user)

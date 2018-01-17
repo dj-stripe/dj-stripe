@@ -21,12 +21,12 @@ from mock import ANY, patch
 from stripe.error import InvalidRequestError
 
 from djstripe.exceptions import MultipleSubscriptionException
-from djstripe.models import Account, Card, Charge, Coupon, Customer, Invoice, PaymentMethod, Plan, Subscription
+from djstripe.models import Card, Charge, Coupon, Customer, Invoice, PaymentMethod, Plan, Subscription
 
 from . import (
     FAKE_ACCOUNT, FAKE_CARD, FAKE_CARD_V, FAKE_CHARGE, FAKE_COUPON, FAKE_CUSTOMER, FAKE_CUSTOMER_II,
-    FAKE_DISCOUNT_CUSTOMER, FAKE_INVOICE, FAKE_INVOICE_III, FAKE_INVOICEITEM, FAKE_PLAN,
-    FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II, FAKE_UPCOMING_INVOICE, StripeList, datetime_to_unix
+    FAKE_DISCOUNT_CUSTOMER, FAKE_INVOICE, FAKE_INVOICE_III, FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION,
+    FAKE_SUBSCRIPTION_II, FAKE_UPCOMING_INVOICE, StripeList, datetime_to_unix, default_account
 )
 
 
@@ -42,7 +42,7 @@ class TestCustomer(TestCase):
         self.customer.default_source = self.payment_method
         self.customer.save()
 
-        self.account = Account.objects.create()
+        self.account = default_account()
 
     def test_str(self):
         self.assertEqual(str(self.customer), self.user.email)

@@ -30,8 +30,9 @@ from django.utils import dateformat, six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.functional import cached_property
 
+from . import enums
 from . import settings as djstripe_settings
-from . import enums, webhooks
+from . import webhooks
 from .context_managers import stripe_temporary_api_version
 from .enums import SubscriptionStatus
 from .exceptions import MultipleSubscriptionException, StripeObjectManipulationException
@@ -2884,6 +2885,77 @@ class Subscription(StripeObject):
 class Account(StripeObject):
     stripe_class = stripe.Account
 
+    business_logo = ForeignKey("FileUpload", on_delete=models.SET_NULL, null=True)
+    business_name = StripeCharField(max_length=255, help_text=(
+        "The publicly visible name of the business"
+    ))
+    business_primary_color = StripeCharField(max_length=7, null=True, help_text=(
+        "A CSS hex color value representing the primary branding color for this account"
+    ))
+    business_url = StripeCharField(max_length=200, null=True, help_text=(
+        "The publicly visible website of the business"
+    ))
+    charges_enabled = StripeBooleanField(help_text="Whether the account can create live charges")
+    country = StripeCharField(max_length=2, help_text="The country of the account")
+    debit_negative_balances = StripeBooleanField(null=True, help_text=(
+        "A Boolean indicating if Stripe should try to reclaim negative "
+        "balances from an attached bank account."
+    ))
+    decline_charge_on = StripeJSONField(null=True, help_text=(
+        "Account-level settings to automatically decline certain types "
+        "of charges regardless of the decision of the card issuer"
+    ))
+    default_currency = StripeCharField(max_length=3, help_text=(
+        "The currency this account has chosen to use as the default"
+    ))
+    details_submitted = StripeBooleanField(help_text=(
+        "Whether account details have been submitted. "
+        "Standard accounts cannot receive payouts before this is true."
+    ))
+    display_name = StripeCharField(max_length=255, help_text=(
+        "The display name for this account. "
+        "This is used on the Stripe Dashboard to differentiate between accounts."
+    ))
+    email = StripeCharField(max_length=255, help_text="The primary user’s email address.")
+    # TODO external_accounts = ...
+    legal_entity = StripeJSONField(
+        help_text="Information about the legal entity itself, including about the associated account representative"
+    )
+    payout_schedule = StripeJSONField(null=True, help_text=(
+        "Details on when funds from charges are available, and when they are paid out to an external account."
+    ))
+    payout_statement_descriptor = StripeCharField(
+        max_length=255, default="", help_text="The text that appears on the bank account statement for payouts."
+    )
+    payouts_enabled = StripeBooleanField(help_text="Whether Stripe can send payouts to this account")
+    product_description = StripeCharField(max_length=255, null=True, help_text=(
+        "Internal-only description of the product sold or service provided by the business. "
+        "It’s used by Stripe for risk and underwriting purposes."
+    ))
+    statement_descriptor = StripeCharField(max_length=255, default="", help_text=(
+        "The default text that appears on credit card statements when a charge is made directly on the account"
+    ))
+    support_email = StripeCharField(max_length=255, help_text=(
+        "A publicly shareable support email address for the business"
+    ))
+    support_phone = StripeCharField(max_length=255, help_text=(
+        "A publicly shareable support phone number for the business"
+    ))
+    support_url = StripeCharField(max_length=200, help_text=(
+        "A publicly shareable URL that provides support for this account"
+    ))
+    timezone = StripeCharField(max_length=50, help_text=(
+        "The timezone used in the Stripe Dashboard for this account."
+    ))
+    type = StripeCharField(max_length=8, choices=enums.AccountType.choices, help_text="The Stripe account type.")
+    tos_acceptance = StripeJSONField(null=True, help_text=(
+        "Details on the acceptance of the Stripe Services Agreement"
+    ))
+    verification = StripeJSONField(null=True, help_text=(
+        "Information on the verification state of the account, "
+        "including what information is needed and by when"
+    ))
+
     @classmethod
     def get_connected_account_from_token(cls, access_token):
         account_data = cls.stripe_class.retrieve(api_key=access_token)
@@ -2895,6 +2967,9 @@ class Account(StripeObject):
         account_data = cls.stripe_class.retrieve(api_key=djstripe_settings.STRIPE_SECRET_KEY)
 
         return cls._get_or_create_from_stripe_object(account_data)[0]
+
+    def __str__(self):
+        return self.display_name or self.business_name
 
 
 class Transfer(StripeObject):
