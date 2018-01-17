@@ -45,6 +45,13 @@ class StripeList(dict):
         return len(self.data)
 
 
+def default_account():
+    from djstripe.models import Account
+    return Account.objects.create(
+        charges_enabled=True, details_submitted=True, payouts_enabled=True
+    )
+
+
 FAKE_BALANCE_TRANSACTION = {
     "id": "txn_16YKQi2eZvKYlo2CNx26h2Wz",
     "object": "balance_transaction",
@@ -1142,75 +1149,22 @@ FAKE_ACCOUNT = {
     "id": "acct_1032D82eZvKYlo2C",
     "object": "account",
     "business_logo": None,
-    "business_name": "Stripe.com",
-    "business_url": None,
-    "charges_enabled": False,
+    "business_name": "dj-stripe",
+    "business_primary_color": "#092e20",
+    "business_url": "https://example.com",
+    "charges_enabled": True,
     "country": "US",
-    "debit_negative_balances": True,
-    "decline_charge_on": {
-        "cvc_failure": False,
-        "avs_failure": False,
-    },
     "default_currency": "usd",
-    "details_submitted": False,
-    "display_name": "Stripe.com",
-    "email": "site@stripe.com",
-    "external_accounts": {
-        "object": "list",
-        "data": [],
-        "has_more": False,
-        "total_count": 0,
-        "url": "/v1/accounts/acct_1032D82eZvKYlo2C/external_accounts",
-    },
-    "legal_entity": {
-        "address": {
-            "city": None,
-            "country": "US",
-            "line1": None,
-            "line2": None,
-            "postal_code": None,
-            "state": None,
-        },
-        "business_name": None,
-        "business_tax_id_provided": False,
-        "dob": {
-            "day": None,
-            "month": None,
-            "year": None
-        },
-        "first_name": None,
-        "last_name": None,
-        "personal_id_number_provided": False,
-        "ssn_last_4_provided": False,
-        "type": None,
-        "verification": {
-            "details": None,
-            "details_code": "failed_other",
-            "document": None,
-            "status": "unverified",
-        },
-    },
-    "managed": False,
-    "product_description": None,
-    "statement_descriptor": None,
-    "support_emaile": None,
-    "support_phone": None,
-    "timezone": "US/Pacific",
-    "tos_acceptance": {
-        "date": None,
-        "ip": None,
-        "user_agent": None
-    },
-    "transfer_schedule": {
-        "delay_days": 7,
-        "interval": "daily"
-    },
-    "transfers_enabled": False,
-    "verification": {
-        "disabled_reason": "other",
-        "fields_needed": [],
-        "due_by": None,
-    },
+    "details_submitted": True,
+    "display_name": "dj-stripe",
+    "email": "djstripe@example.com",
+    "payouts_enabled": True,
+    "statement_descriptor": "DJSTRIPE",
+    "support_email": "djstripe@exmaple.com",
+    "support_phone": "",
+    "support_url": "https://example.com/support/",
+    "timezone": "Etc/UTC",
+    "type": "standard",
 }
 
 FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED = {

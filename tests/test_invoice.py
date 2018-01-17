@@ -16,17 +16,18 @@ from django.test.testcases import TestCase
 from mock import ANY, patch
 from stripe.error import InvalidRequestError
 
-from djstripe.models import Account, Invoice, Plan, Subscription, UpcomingInvoice
+from djstripe.models import Invoice, Plan, Subscription, UpcomingInvoice
 
 from . import (
-    FAKE_CHARGE, FAKE_CUSTOMER, FAKE_INVOICE, FAKE_INVOICEITEM_II, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_UPCOMING_INVOICE
+    FAKE_CHARGE, FAKE_CUSTOMER, FAKE_INVOICE, FAKE_INVOICEITEM_II,
+    FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_UPCOMING_INVOICE, default_account
 )
 
 
 class InvoiceTest(TestCase):
 
     def setUp(self):
-        self.account = Account.objects.create()
+        self.account = default_account()
         self.user = get_user_model().objects.create_user(username="pydanny", email="pydanny@gmail.com")
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 

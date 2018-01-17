@@ -12,15 +12,18 @@ from copy import deepcopy
 from django.test.testcases import TestCase
 from mock import patch
 
-from djstripe.models import Account, InvoiceItem
+from djstripe.models import InvoiceItem
 
-from . import FAKE_CHARGE_II, FAKE_CUSTOMER_II, FAKE_INVOICE_II, FAKE_INVOICEITEM, FAKE_PLAN_II, FAKE_SUBSCRIPTION_III
+from . import (
+    FAKE_CHARGE_II, FAKE_CUSTOMER_II, FAKE_INVOICE_II, FAKE_INVOICEITEM,
+    FAKE_PLAN_II, FAKE_SUBSCRIPTION_III, default_account
+)
 
 
 class InvoiceItemTest(TestCase):
 
     def setUp(self):
-        self.account = Account.objects.create()
+        self.account = default_account()
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN_II))

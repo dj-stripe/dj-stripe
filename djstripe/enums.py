@@ -73,6 +73,12 @@ class ApiErrorCode(Enum):
     processing_error = _("Processing error")
 
 
+class AccountType(Enum):
+    standard = _("Standard")
+    express = _("Express")
+    custom = _("Custom")
+
+
 class BankAccountHolderType(Enum):
     individual = _("Individual")
     company = _("Company")
