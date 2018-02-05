@@ -28,8 +28,14 @@ class ChargeTest(TestCase):
         self.account = default_account()
 
     def test_str(self):
-        charge = Charge(amount=50, paid=True, stripe_id='charge_xxxxxxxxxxxxxx')
-        self.assertEqual("<amount=50, paid=True, stripe_id=charge_xxxxxxxxxxxxxx>", str(charge))
+        self.assertEqual(
+            str(Charge(amount=50, currency="usd", captured=True, paid=True, stripe_id='charge_xxxxxxxxxxxxxx')),
+            "$50.00 USD"
+        )
+        self.assertEqual(
+            str(Charge(amount=50, currency="usd", captured=False, paid=True, stripe_id='charge_xxxxxxxxxxxxxx')),
+            "$50.00 USD (Uncaptured)"
+        )
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")

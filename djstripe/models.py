@@ -650,9 +650,35 @@ class Charge(StripeObject):
 
     objects = ChargeManager()
 
+    def __str__(self):
+        amount = self.human_readable_amount
+        status = self.human_readable_status
+        if not status:
+            return amount
+        return "{amount} ({status})".format(amount=amount, status=status)
+
     @property
     def disputed(self):
         return self.dispute is not None
+
+    @property
+    def human_readable_amount(self):
+        return get_friendly_currency_amount(self.amount, self.currency)
+
+    @property
+    def human_readable_status(self):
+        if not self.captured:
+            return "Uncaptured"
+        elif self.disputed:
+            return "Disputed"
+        elif self.refunded:
+            return "Refunded"
+        elif self.amount_refunded:
+            return "Partially refunded"
+        elif self.status == enums.ChargeStatus.failed:
+            return "Failed"
+
+        return ""
 
     def _attach_objects_hook(self, cls, data):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
@@ -671,12 +697,6 @@ class Charge(StripeObject):
             self.account = Account.get_default_account()
 
         self.source, _ = PaymentMethod._get_or_create_source(data["source"], self.source_type)
-
-    def str_parts(self):
-        return [
-            "amount={amount}".format(amount=self.amount),
-            "paid={paid}".format(paid=smart_text(self.paid)),
-        ] + super(Charge, self).str_parts()
 
     def _calculate_refund_amount(self, amount=None):
         """
