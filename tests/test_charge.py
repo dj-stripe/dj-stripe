@@ -14,8 +14,8 @@ from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
 from mock import patch
 
-from djstripe.enums import LegacySourceType
-from djstripe.models import Account, Charge, PaymentMethod
+from djstripe.enums import ChargeStatus, LegacySourceType
+from djstripe.models import Account, Charge, Dispute, PaymentMethod
 
 from . import FAKE_ACCOUNT, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_TRANSFER
 
@@ -28,8 +28,31 @@ class ChargeTest(TestCase):
         self.account = Account.objects.create()
 
     def test_str(self):
-        charge = Charge(amount=50, paid=True, stripe_id='charge_xxxxxxxxxxxxxx')
-        self.assertEqual("<amount=50, paid=True, stripe_id=charge_xxxxxxxxxxxxxx>", str(charge))
+        charge = Charge(
+            amount=50, currency="usd", stripe_id="ch_test",
+            status=ChargeStatus.failed,
+            captured=False,
+            paid=False,
+        )
+        self.assertEqual(str(charge), "$50.00 USD (Uncaptured)")
+
+        charge.captured = True
+        self.assertEqual(str(charge), "$50.00 USD (Failed)")
+        charge.status = ChargeStatus.succeeded
+
+        charge.dispute = Dispute()
+        self.assertEqual(str(charge), "$50.00 USD (Disputed)")
+
+        charge.dispute = None
+        charge.refunded = True
+        charge.amount_refunded = 50
+        self.assertEqual(str(charge), "$50.00 USD (Refunded)")
+
+        charge.refunded = False
+        self.assertEqual(str(charge), "$50.00 USD (Partially refunded)")
+
+        charge.amount_refunded = 0
+        self.assertEqual(str(charge), "$50.00 USD")
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
