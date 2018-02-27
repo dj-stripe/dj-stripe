@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='customer',
             name='account_balance',
-            field=djstripe.fields.StripeIntegerField(default=0, help_text='Current balance, if any, being stored on the customer’s account. If negative, the customer has credit to apply to the next invoice. If positive, the customer has an amount owed that will be added to thenext invoice. The balance does not refer to any unpaid invoices; it solely takes into account amounts that have yet to be successfullyapplied to any invoice. This balance is only taken into account for recurring billing purposes (i.e., subscriptions, invoices, invoice items).'),
+            field=djstripe.fields.StripeIntegerField(default=0, help_text='Current balance, if any, being stored on the customer\'s account. If negative, the customer has credit to apply to the next invoice. If positive, the customer has an amount owed that will be added to thenext invoice. The balance does not refer to any unpaid invoices; it solely takes into account amounts that have yet to be successfullyapplied to any invoice. This balance is only taken into account for recurring billing purposes (i.e., subscriptions, invoices, invoice items).'),
             preserve_default=False,
         ),
         migrations.AlterField(
