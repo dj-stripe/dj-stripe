@@ -770,7 +770,7 @@ class Customer(StripeObject):
 
     account_balance = StripeIntegerField(
         help_text=(
-            "Current balance, if any, being stored on the customer’s account. "
+            "Current balance, if any, being stored on the customer's account. "
             "If negative, the customer has credit to apply to the next invoice. "
             "If positive, the customer has an amount owed that will be added to the"
             "next invoice. The balance does not refer to any unpaid invoices; it "
@@ -1552,7 +1552,7 @@ class Payout(StripeObject):
     # TODO: source_type
     statement_descriptor = StripeCharField(
         max_length=255, null=True, blank=True,
-        help_text="Extra information about a payout to be displayed on the user’s bank statement."
+        help_text="Extra information about a payout to be displayed on the user's bank statement."
     )
     status = StripeCharField(
         max_length=10,
@@ -1836,7 +1836,7 @@ class Source(StripeObject):
     statement_descriptor = StripeCharField(
         null=True, blank=True, max_length=255, help_text=(
             "Extra information about a source. "
-            "This will appear on your customer’s statement every time you charge the source."
+            "This will appear on your customer's statement every time you charge the source."
         )
     )
     status = StripeCharField(
@@ -2815,7 +2815,7 @@ class Subscription(StripeObject):
         """
         Reactivates this subscription.
 
-        If a customer’s subscription is canceled with ``at_period_end`` set to True and it has not yet reached the end
+        If a customer's subscription is canceled with ``at_period_end`` set to True and it has not yet reached the end
         of the billing period, it can be reactivated. Subscriptions canceled immediately cannot be reactivated.
         (Source: https://stripe.com/docs/subscriptions/canceling-pausing)
 

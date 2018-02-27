@@ -608,7 +608,7 @@ class Migration(migrations.Migration):
                 validators=[django.core.validators.MinValueValidator(1.0),
                             django.core.validators.MaxValueValidator(100.0)],
                 help_text='A positive decimal that represents the fee percentage of the subscription invoice amount \
-                that will be transferred to the application owner’s Stripe account each billing period.',
+                that will be transferred to the application owner\'s Stripe account each billing period.',
                 max_digits=5, decimal_places=2, null=True),
         ),
         migrations.AddField(
