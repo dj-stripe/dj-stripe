@@ -36,6 +36,10 @@ def run_test_suite(args):
         cov.erase()
         cov.start()
 
+    test_db_name = os.environ.get('DJSTRIPE_TEST_DB_NAME', 'djstripe')
+    test_db_user = os.environ.get('DJSTRIPE_TEST_DB_USER', 'postgres')
+    test_db_pass = os.environ.get('DJSTRIPE_TEST_DB_PASS', '')
+
     settings.configure(
         DEBUG=True,
         USE_TZ=True,
@@ -44,9 +48,9 @@ def run_test_suite(args):
         DATABASES={
             "default": {
                 "ENGINE": "django.db.backends.postgresql_psycopg2",
-                "NAME": "djstripe",
-                "USER": "postgres",
-                "PASSWORD": "",
+                "NAME": test_db_name,
+                "USER": test_db_user,
+                "PASSWORD": test_db_pass,
                 "HOST": "localhost",
                 "PORT": "",
             },
