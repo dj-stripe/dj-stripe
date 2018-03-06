@@ -3092,7 +3092,7 @@ class WebhookEventTrigger(models.Model):
         except Exception:
             body = "(error decoding body)"
 
-        ip = request.META["REMOTE_ADDR"]
+        ip = request.META['HTTP_X_REAL_IP'] or request.META["REMOTE_ADDR", '']
         obj = cls.objects.create(headers=headers, body=body, remote_ip=ip)
 
         try:
