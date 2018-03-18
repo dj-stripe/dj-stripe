@@ -105,3 +105,22 @@ def check_native_jsonfield_postgres_engine(app_configs=None, **kwargs):
                 ))
 
     return messages
+
+
+@checks.register("djstripe")
+def check_stripe_api_host(app_configs=None, **kwargs):
+    """
+    Check that STRIPE_API_HOST is not being used in production.
+    """
+    from django.conf import settings
+
+    messages = []
+
+    if not settings.DEBUG and hasattr(settings, "STRIPE_API_HOST"):
+        messages.append(checks.Warning(
+            "STRIPE_API_HOST should not be set in production! This is most likely unintended.",
+            hint="Remove STRIPE_API_HOST from your Django settings.",
+            id="djstripe.W002"
+        ))
+
+    return messages

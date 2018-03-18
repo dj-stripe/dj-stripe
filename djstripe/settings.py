@@ -100,6 +100,12 @@ else:
     STRIPE_PUBLIC_KEY = getattr(settings, "STRIPE_TEST_PUBLIC_KEY", "")
 
 
+# Set STRIPE_API_HOST if you want to use a different Stripe API server
+# Example: https://github.com/stripe/stripe-mock
+if hasattr(settings, "STRIPE_API_HOST"):
+    stripe.api_base = settings.STRIPE_API_HOST
+
+
 def get_default_api_key(livemode):
     """
     Returns the default API key for a value of `livemode`.

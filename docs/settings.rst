@@ -231,3 +231,15 @@ Examples:
 .. code-block:: python
 
     DJSTRIPE_WEBHOOK_EVENT_CALLBACK = 'callbacks.webhook_event_callback'
+
+
+STRIPE_API_HOST (= unset)
+=========================
+
+If set, this sets the base API host for Stripe.
+You may want to set this to, for example, ``"http://localhost:12111"`` if you are
+running `stripe-mock`_.
+
+If this is set in production (DEBUG=False), a warning will be raised on ``manage.py check``.
+
+.. _stripe-mock: https://github.com/stripe/stripe-mock
