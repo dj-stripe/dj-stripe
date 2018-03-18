@@ -14,8 +14,9 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
 from mock import ANY, patch
+from stripe.error import InvalidRequestError
 
-from djstripe.models import Account, InvalidRequestError, Invoice, Plan, Subscription, UpcomingInvoice
+from djstripe.models import Account, Invoice, Plan, Subscription, UpcomingInvoice
 
 from . import (
     FAKE_CHARGE, FAKE_CUSTOMER, FAKE_INVOICE, FAKE_INVOICEITEM_II, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_UPCOMING_INVOICE
