@@ -857,8 +857,8 @@ class Customer(StripeObject):
             defaults={
                 "subscriber": subscriber,
                 "livemode": stripe_customer["livemode"],
-                "account_balance": stripe_customer["account_balance"],
-                "delinquent": stripe_customer["delinquent"],
+                "account_balance": stripe_customer.get("account_balance", 0),
+                "delinquent": stripe_customer.get("delinquent", False),
             }
         )
 
