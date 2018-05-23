@@ -2069,6 +2069,14 @@ class Invoice(StripeObject):
         "will also take that into account. The charge that gets generated for the invoice will be for the amount "
         "specified in amount_due."
     )
+    amount_paid = StripeCurrencyField(
+        null=True,  # XXX: This is not nullable, but it's a new field
+        help_text="The amount, in cents, that was paid."
+    )
+    amount_remaining = StripeCurrencyField(
+        null=True,  # XXX: This is not nullable, but it's a new field
+        help_text="The amount, in cents, that was paid."
+    )
     application_fee = StripeCurrencyField(
         null=True,
         help_text="The fee in cents that will be applied to the invoice and transferred to the application owner's "
@@ -2086,6 +2094,12 @@ class Invoice(StripeObject):
         "hour after the ``invoice.created`` webhook, for example, so you might not want to display that invoice as "
         "unpaid to your users."
     )
+    billing = StripeCharField(max_length=20, null=True, choices=enums.InvoiceBilling.choices, help_text=(
+        "When charging automatically, Stripe will attempt to pay this invoice"
+        "using the default source attached to the customer. "
+        "When sending an invoice, Stripe will email this invoice to the customer "
+        "with payment instructions."
+    ))
     charge = OneToOneField(
         Charge,
         null=True, on_delete=models.CASCADE,
@@ -2105,6 +2119,10 @@ class Invoice(StripeObject):
     )
     date = StripeDateTimeField(help_text="The date on the invoice.")
     # TODO: discount
+    due_date = StripeDateTimeField(null=True, help_text=(
+        "The date on which payment for this invoice is due. "
+        "This value will be null for invoices where billing=charge_automatically."
+    ))
     ending_balance = StripeIntegerField(
         null=True,
         help_text="Ending customer balance after attempting to pay invoice. If the invoice has not been attempted "
@@ -2120,6 +2138,10 @@ class Invoice(StripeObject):
         null=True,
         help_text="The time at which payment will next be attempted."
     )
+    number = StripeCharField(max_length=64, null=True, help_text=(
+        "A unique, identifying string that appears on emails sent to the customer for this invoice. "
+        "This starts with the customer’s unique invoice_prefix if it is specified."
+    ))
     paid = StripeBooleanField(
         default=False,
         help_text="The time at which payment will next be attempted."
@@ -2130,7 +2152,9 @@ class Invoice(StripeObject):
     period_start = StripeDateTimeField(
         help_text="Start of the usage period during which invoice items were added to this invoice."
     )
-    # TODO: receipt_number
+    receipt_number = StripeCharField(max_length=64, null=True, help_text=(
+        "This is the transaction number that appears on email receipts sent for this invoice."
+    ))
     starting_balance = StripeIntegerField(
         help_text="Starting customer balance before attempting to pay invoice. If the invoice has not been attempted "
         "yet, this will be the current customer balance."
@@ -2169,7 +2193,12 @@ class Invoice(StripeObject):
         "but can be changed before the invoice is paid. This field defaults to null."
     )
     total = StripeCurrencyField("Total after discount.")
-    # TODO: webhooks_delivered_at
+    webhooks_delivered_at = StripeDateTimeField(null=True, help_text=(
+        "The time at which webhooks for this invoice were successfully delivered "
+        "(if the invoice had no webhooks to deliver, this will match `date`). "
+        "Invoice payment is delayed until webhooks are delivered, or until all "
+        "webhook delivery attempts have been exhausted."
+    ))
 
     class Meta(object):
         ordering = ["-date"]

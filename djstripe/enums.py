@@ -176,6 +176,11 @@ class FileUploadType(Enum):
     docx = _("DOCX")
 
 
+class InvoiceBilling(Enum):
+    charge_automatically = _("Charge automatically")
+    send_invoice = _("Send invoice")
+
+
 class PayoutFailureCode(Enum):
     """
     Payout failure error codes.
