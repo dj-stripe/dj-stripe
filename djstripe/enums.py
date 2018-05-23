@@ -4,7 +4,7 @@ import operator
 from collections import OrderedDict
 
 from django.utils.six import add_metaclass, text_type
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 
 
 class EnumMetaClass(type):
