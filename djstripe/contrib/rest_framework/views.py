@@ -52,9 +52,13 @@ class SubscriptionRestView(APIView):
                     subscriber=subscriber_request_callback(self.request)
                 )
                 customer.add_card(serializer.data["stripe_token"])
+                charge_immediately = serializer.data.get("charge_immediately")
+                if charge_immediately is None:
+                    charge_immediately = True
+
                 customer.subscribe(
                     serializer.data["plan"],
-                    serializer.data.get("charge_immediately", True)
+                    charge_immediately
                 )
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             except Exception:
