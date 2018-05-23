@@ -2,8 +2,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from collections import OrderedDict
 import operator
 
-from django.utils.translation import ugettext as _
 from django.utils.six import add_metaclass, text_type
+from django.utils.translation import ugettext_lazy as _
 
 
 class EnumMetaClass(type):
