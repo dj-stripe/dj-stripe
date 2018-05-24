@@ -58,4 +58,8 @@ class Migration(migrations.Migration):
             name='status',
             field=djstripe.fields.StripeCharField(blank=True, choices=[('canceled', 'Canceled'), ('failed', 'Failed'), ('in_transit', 'In transit'), ('paid', 'Paid'), ('pending', 'Pending')], help_text='The current status of the transfer. A transfer will be pending until it is submitted to the bank, at which point it becomes in_transit. It will then change to paid if the transaction goes through. If it does not go through successfully, its status will change to failed or canceled.', max_length=10, null=True),
         ),
+        migrations.AlterModelOptions(
+            name='stripesource',
+            options={'base_manager_name': 'objects'},
+        ),
     ]
