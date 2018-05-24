@@ -3,6 +3,18 @@
 History
 =======
 
+1.0.1 (2018-05-24)
+------------------
+
+- COMPATIBILITY: Drop support for Django 1.10
+- COMPATIBILITY: Add support for Django 2.0
+- Various migration fixes
+- Fix python 2.7 encoding issues
+- Allow restricted key (``rk_*``) in checks
+- Use ugettext_lazy instead of ugettext in enums (#581)
+- Set Stripe app_info metadata on API calls
+- Do not attempt to handle charge.dispute events
+
 1.0.0 (2017-08-12)
 ------------------
 
