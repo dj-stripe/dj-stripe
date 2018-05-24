@@ -63,7 +63,7 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
         next = self.request.GET.get(REDIRECT_FIELD_NAME)
 
         # is_safe_url() will ensure we don't redirect to another domain
-        if next and is_safe_url(next):
+        if next and is_safe_url(next, allowed_hosts=None):
             return next
         else:
             return self.redirect_url
