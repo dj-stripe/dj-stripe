@@ -37,9 +37,10 @@ def run_test_suite(args):
 
     settings.configure(
         DEBUG=True,
-        USE_TZ=True,
-        TIME_ZONE="UTC",
+        SECRET_KEY="djstripe",
         SITE_ID=1,
+        TIME_ZONE="UTC",
+        USE_TZ=True,
         DATABASES={
             "default": {
                 "ENGINE": "django.db.backends.postgresql_psycopg2",
