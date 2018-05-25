@@ -1097,7 +1097,6 @@ class EventProcessingException(models.Model):
     data = TextField()
     message = CharField(max_length=500)
     traceback = TextField()
-
     created = DateTimeField(auto_now_add=True, editable=False)
     modified = DateTimeField(auto_now=True, editable=False)
 
