@@ -43,6 +43,7 @@ nosetests.xml
 
 # Sphinx
 docs/_build
+docs/_static
 htmlcov
 
 # OSX

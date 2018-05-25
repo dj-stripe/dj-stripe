@@ -15,11 +15,7 @@ registrations are keyed by top-level event type (e.g. "invoice", "customer", etc
 Each registration entry is a list of processors
 Each processor in these lists is a function to be called
 The function signature is:
-     <Event object> <event data dict> <event type> <event sub type>
-
-The <event data dict> parameter should be a dict() structure, as received from Stripe
-on webhook. This dict contains an 'object' member and also, sometimes, a 'previous_attributes'
-member.
+     <Event object>
 
 There is also a "global registry" which is just a list of processors (as defined above)
 

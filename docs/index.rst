@@ -1,8 +1,3 @@
-.. complexity documentation master file, created by
-   sphinx-quickstart on Tue Jul  9 22:26:36 2013.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Django + Stripe Made Easy
 --------------------------------
 
@@ -23,16 +18,44 @@ Contents
 ---------
 
 .. toctree::
-   :maxdepth: 2
+   :caption: Getting Started
 
    installation
-   usage
-   models
-   settings
-   cookbook
-   contributing
-   authors
-   history
+
+.. toctree::
+   :caption: Usage
+
+   usage/checking_customer_subscription
+   usage/subscribing_customers.rst
+   usage/one_off_charges.rst
+   usage/restricting_access.rst
+   usage/managing_subscriptions.rst
+   usage/creating_invoices.rst
+   usage/running_reports.rst
+   usage/webhooks.rst
+   usage/manually_syncing_with_stripe.rst
+   usage/cookbook
+
+.. toctree::
+   :caption: Reference
+   :glob:
+
+   reference/context_managers.rst
+   reference/decorators.rst
+   reference/enums.rst
+   reference/managers.rst
+   reference/middleware.rst
+   reference/models.rst
+   reference/settings.rst
+   reference/utils.rst
+
+.. toctree::
+   :caption: Project
+
+   project/contributing.rst
+   project/authors.rst
+   project/history.rst
+   project/support.rst
 
 Constraints
 ------------

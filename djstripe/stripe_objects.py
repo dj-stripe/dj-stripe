@@ -2,7 +2,8 @@
 
 import warnings
 
-from . import models
+from .models import StripeObject as MovedStripeObject
+from .models import Account, Card, Charge, Coupon, Customer, Event, Invoice, Payout, Plan, Subscription, Transfer
 
 
 warnings.warn(
@@ -10,15 +11,15 @@ warnings.warn(
     DeprecationWarning
 )
 
-StripeObject = models.StripeObject
-StripeCharge = models.Charge
-StripeCustomer = models.Customer
-StripeEvent = models.Event
-StripePayout = models.Payout
-StripeCard = models.Card
-StripeCoupon = models.Coupon
-StripeInvoice = models.Invoice
-StripePlan = models.Plan
-StripeSubscription = models.Subscription
-StripeAccount = models.Account
-StripeTransfer = models.Transfer
+StripeObject = MovedStripeObject
+StripeCharge = Charge
+StripeCustomer = Customer
+StripeEvent = Event
+StripePayout = Payout
+StripeCard = Card
+StripeCoupon = Coupon
+StripeInvoice = Invoice
+StripePlan = Plan
+StripeSubscription = Subscription
+StripeAccount = Account
+StripeTransfer = Transfer

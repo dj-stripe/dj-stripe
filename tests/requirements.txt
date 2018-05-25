@@ -5,10 +5,6 @@ mock>=2.0.0
 nose>=1.3.7
 termcolor>=1.1.0
 
-# Docs
-sphinx_rtd_theme>=0.1.9
-sphinx-autobuild>=0.6.0
-
 # Contrib packages
 djangorestframework>=3.6.2
 
