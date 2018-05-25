@@ -138,10 +138,3 @@ DELETE will cancel the current subscription, based on the settings.
 
     - Output (204)
         - None
-
-Not in the Cookbook?
-=====================
-
-Cartwheel Web provides `commercial support`_ for dj-stripe and other open source packages.
-
-.. _commercial support: https://www.cartwheelweb.com/open-source-commercial-support/

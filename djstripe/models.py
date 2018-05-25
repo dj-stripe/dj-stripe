@@ -1397,10 +1397,6 @@ class Event(StripeObject):
     event that just happened. Events are processed in detail by their respective
     models (charge events by the Charge model, etc).
 
-    Events are initially **UNTRUSTED**, as it is possible for any web entity to
-    post any data to our webhook url. Data posted may be valid Stripe information,
-    garbage, or even malicious. The 'valid' flag in this model monitors this.
-
     **API VERSIONING**
 
     This is a tricky matter when it comes to webhooks. See the discussion here_.
@@ -1416,7 +1412,7 @@ class Event(StripeObject):
     2) retrieve the referenced object (e.g. the Charge, the Customer, etc) using
        the plugin's supported API version.
     3) process that event using the retrieved object which will, only now, be in
-    a format that you are certain to understand
+       a format that you are certain to understand
 
     # = Mapping the values of this field isn't currently on our roadmap.
         Please use the stripe dashboard to check the value of this field instead.
@@ -3326,6 +3322,10 @@ class IdempotencyKey(models.Model):
 class WebhookEventTrigger(models.Model):
     """
     An instance of a request that reached the server endpoint for Stripe webhooks.
+
+    Webhook Events are initially **UNTRUSTED**, as it is possible for any web entity to
+    post any data to our webhook url. Data posted may be valid Stripe information,  garbage, or even malicious.
+    The 'valid' flag in this model monitors this.
     """
     id = models.BigAutoField(primary_key=True)
     remote_ip = models.GenericIPAddressField(
