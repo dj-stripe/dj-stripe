@@ -56,5 +56,4 @@ Running Tests
 Assuming the tests are run against PostgreSQL::
 
     createdb djstripe
-    pip install -r tests/requirements.txt
     tox
