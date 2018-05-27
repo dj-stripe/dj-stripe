@@ -691,7 +691,6 @@ class Migration(migrations.Migration):
             name='destination_type',
             field=djstripe.fields.StripeCharField(
                 help_text='The type of the transfer destination.',
-                choices=[('card', 'Card'), ('bank_account', 'Bank Account'), ('stripe_account', 'Stripe Account')],
                 max_length=14, default='unknown'),
             preserve_default=False,
         ),

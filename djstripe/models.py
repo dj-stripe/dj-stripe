@@ -3157,11 +3157,6 @@ class Transfer(StripeObject):
 
     objects = TransferManager()
 
-    DESTINATION_TYPES = ["card", "bank_account", "stripe_account"]
-    DESITNATION_TYPE_CHOICES = [
-        (destination_type, destination_type.replace("_", " ").title()) for destination_type in DESTINATION_TYPES
-    ]
-
     amount = StripeCurrencyField(help_text="The amount transferred")
     amount_reversed = StripeCurrencyField(
         stripe_required=False,
@@ -3204,7 +3199,6 @@ class Transfer(StripeObject):
     destination_type = StripeCharField(
         stripe_name="type",
         max_length=14,
-        choices=DESITNATION_TYPE_CHOICES,
         blank=True, null=True, stripe_required=False,
         help_text="The type of the transfer destination."
     )

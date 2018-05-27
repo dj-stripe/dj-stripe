@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='transfer',
             name='destination_type',
-            field=djstripe.fields.StripeCharField(blank=True, choices=[('card', 'Card'), ('bank_account', 'Bank Account'), ('stripe_account', 'Stripe Account')], help_text='The type of the transfer destination.', max_length=14, null=True),
+            field=djstripe.fields.StripeCharField(blank=True, help_text='The type of the transfer destination.', max_length=14, null=True),
         ),
         migrations.AlterField(
             model_name='transfer',

@@ -1094,7 +1094,6 @@ FAKE_TRANSFER = {
     "source_type": "bank_account",
     "statement_descriptor": None,
     "status": "paid",
-    "type": "stripe_account",
 }
 
 FAKE_TRANSFER_II = {

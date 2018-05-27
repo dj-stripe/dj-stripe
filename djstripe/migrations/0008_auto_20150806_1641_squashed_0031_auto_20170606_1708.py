@@ -735,7 +735,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='transfer',
             name='destination_type',
-            field=djstripe.fields.StripeCharField(choices=[('card', 'Card'), ('bank_account', 'Bank Account'), ('stripe_account', 'Stripe Account')], default='unknown', help_text='The type of the transfer destination.', max_length=14),
+            field=djstripe.fields.StripeCharField(default='unknown', help_text='The type of the transfer destination.', max_length=14),
             preserve_default=False,
         ),
         migrations.AddField(
