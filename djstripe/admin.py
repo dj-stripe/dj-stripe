@@ -154,21 +154,6 @@ class SubscriptionInline(admin.StackedInline):
     show_change_link = True
 
 
-def subscription_status(customer):
-    """
-    Return a string representation of the customer's subscription status.
-
-    If the customer does not have a subscription, an empty string is returned.
-    """
-    if customer.subscription:
-        return customer.subscription.status
-    else:
-        return ""
-
-
-subscription_status.short_description = "Subscription Status"
-
-
 class InvoiceItemInline(admin.StackedInline):
     """A TabularInline for use InvoiceItem."""
 
@@ -232,8 +217,12 @@ class CouponAdmin(StripeObjectAdmin):
 @admin.register(models.Customer)
 class CustomerAdmin(StripeObjectAdmin):
     raw_id_fields = ("subscriber", "default_source", "coupon")
-    list_display = ("subscriber", subscription_status)
+    list_display = (
+        "subscriber", "email", "currency", "default_source", "coupon",
+        "account_balance", "business_vat_id",
+    )
     list_filter = (CustomerHasSourceListFilter, CustomerSubscriptionStatusListFilter)
+    search_fields = ("email", "description")
     inlines = (SubscriptionInline, )
 
 
