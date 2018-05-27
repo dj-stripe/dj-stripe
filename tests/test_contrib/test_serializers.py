@@ -36,6 +36,7 @@ class SubscriptionSerializerTest(TestCase):
             data={
                 'stripe_id': "sub_6lsC8pt7IcFpjA",
                 'customer': self.customer.id,
+                "billing": "charge_automatically",
                 'plan': self.plan.id,
                 'quantity': 2,
                 'start': now,
@@ -48,6 +49,7 @@ class SubscriptionSerializerTest(TestCase):
         self.assertEqual(serializer.validated_data, {
             'stripe_id': "sub_6lsC8pt7IcFpjA",
             'customer': self.customer,
+            "billing": "charge_automatically",
             'plan': self.plan,
             'quantity': 2,
             'start': now,
@@ -63,6 +65,7 @@ class SubscriptionSerializerTest(TestCase):
             data={
                 'stripe_id': "sub_6lsC8pt7IcFpjA",
                 'customer': self.customer.id,
+                "billing": "charge_automatically",
                 'plan': self.plan.id,
                 'start': now,
                 'status': SubscriptionStatus.active,
