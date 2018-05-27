@@ -11,7 +11,7 @@ from termcolor import colored
 
 
 TESTS_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-TESTS_THRESHOLD = 98.1
+TESTS_THRESHOLD = 95
 
 
 def main():

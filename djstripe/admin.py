@@ -298,6 +298,13 @@ class PlanAdmin(StripeObjectAdmin):
         return readonly_fields
 
 
+@admin.register(models.Product)
+class ProductAdmin(StripeObjectAdmin):
+    list_display = ("name", "type", "active", "url", "statement_descriptor")
+    list_filter = ("type", "active", "shippable")
+    search_fields = ("name", "statement_descriptor")
+
+
 @admin.register(models.Source)
 class SourceAdmin(StripeObjectAdmin):
     raw_id_fields = ("customer", )

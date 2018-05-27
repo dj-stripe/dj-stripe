@@ -247,6 +247,11 @@ class PlanTiersMode(Enum):
     volume = _("Volume-based")
 
 
+class ProductType(Enum):
+    good = _("Good")
+    service = _("Service")
+
+
 class SourceFlow(Enum):
     redirect = _("Redirect")
     receiver = _("Receiver")

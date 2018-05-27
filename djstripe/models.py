@@ -2593,7 +2593,9 @@ class Plan(StripeObject):
     nickname = StripeCharField(
         max_length=5000, stripe_required=False, help_text="A brief description of the plan, hidden from customers."
     )
-    # TODO: product = ForeignKey("Product", stripe_required=False)
+    product = ForeignKey("Product", on_delete=models.SET_NULL, null=True, help_text=(
+        "The product whose pricing this plan determines."
+    ))
     tiers = StripeJSONField(stripe_required=False, help_text=(
         "Each element represents a pricing tier. "
         "This parameter requires `billing_scheme` to be set to `tiered`."
@@ -2696,6 +2698,73 @@ class Plan(StripeObject):
         p.save()
 
         self.save()
+
+
+class Product(StripeObject):
+    """
+    https://stripe.com/docs/api#product_object
+    """
+
+    stripe_class = stripe.Product
+    stripe_dashboard_item_name = "products"
+
+    # Fields applicable to both `good` and `service`
+    name = StripeCharField(max_length=5000, help_text=(
+        "The product's name, meant to be displayable to the customer. "
+        "Applicable to both `service` and `good` types."
+    ))
+    type = StripeCharField(max_length=7, choices=enums.ProductType.choices, help_text=(
+        "The type of the product. The product is either of type `good`, which is "
+        "eligible for use with Orders and SKUs, or `service`, which is eligible "
+        "for use with Subscriptions and Plans."
+    ))
+
+    # Fields applicable to `good` only
+    active = StripeNullBooleanField(help_text=(
+        "Whether the product is currently available for purchase. "
+        "Only applicable to products of `type=good`."
+    ))
+    attributes = StripeJSONField(null=True, help_text=(
+        "A list of up to 5 attributes that each SKU can provide values for "
+        '(e.g., `["color", "size"]`). Only applicable to products of `type=good`.'
+    ))
+    caption = StripeCharField(null=True, max_length=5000, help_text=(
+        "A short one-line description of the product, meant to be displayable"
+        "to the customer. Only applicable to products of `type=good`."
+    ))
+    deactivate_on = StripeJSONField(blank=True, help_text=(
+        "An array of connect application identifiers that cannot purchase "
+        "this product. Only applicable to products of `type=good`."
+    ))
+    images = StripeJSONField(blank=True, help_text=(
+        "A list of up to 8 URLs of images for this product, meant to be "
+        "displayable to the customer. Only applicable to products of `type=good`."
+    ))
+    package_dimensions = StripeJSONField(stripe_required=False, help_text=(
+        "The dimensions of this product for shipping purposes. "
+        "A SKU associated with this product can override this value by having its "
+        "own `package_dimensions`. Only applicable to products of `type=good`."
+    ))
+    shippable = StripeNullBooleanField(stripe_required=False, help_text=(
+        "Whether this product is a shipped good. "
+        "Only applicable to products of `type=good`."
+    ))
+    url = StripeCharField(max_length=799, null=True, help_text=(
+        "A URL of a publicly-accessible webpage for this product. "
+        "Only applicable to products of `type=good`."
+    ))
+
+    # Fields available to `service` only
+    statement_descriptor = StripeCharField(max_length=22, null=True, help_text=(
+        "Extra information about a product which will appear on your customer's "
+        "credit card statement. In the case that multiple products are billed at "
+        "once, the first statement descriptor will be used. "
+        "Only available on products of type=`service`."
+    ))
+    unit_label = StripeCharField(max_length=12, null=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Subscription(StripeObject):
