@@ -2559,31 +2559,79 @@ class Plan(StripeObject):
     stripe_class = stripe.Plan
     stripe_dashboard_item_name = "plans"
 
+    aggregate_usage = StripeCharField(
+        stripe_required=False, max_length=18, choices=enums.PlanAggregateUsage.choices,
+        help_text=(
+            "Specifies a usage aggregation strategy for plans of usage_type=metered. "
+            "Allowed values are `sum` for summing up all usage during a period, "
+            "`last_during_period` for picking the last usage record reported within a "
+            "period, `last_ever` for picking the last usage record ever (across period "
+            "bounds) or max which picks the usage record with the maximum reported "
+            "usage during a period. Defaults to `sum`."
+        )
+    )
     amount = StripeCurrencyField(help_text="Amount to be charged on the interval specified.")
+    billing_scheme = StripeCharField(
+        stripe_required=False, max_length=8, choices=enums.PlanBillingScheme.choices,
+        help_text=(
+            "Describes how to compute the price per period. Either `per_unit` or `tiered`. "
+            "`per_unit` indicates that the fixed amount (specified in amount) will be charged "
+            "per unit in quantity (for plans with `usage_type=licensed`), or per unit of total "
+            "usage (for plans with `usage_type=metered`). "
+            "`tiered` indicates that the unit pricing will be computed using a tiering strategy "
+            "as defined using the tiers and tiers_mode attributes."
+        )
+    )
     currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code")
     interval = StripeCharField(
-        max_length=5,
-        choices=enums.PlanInterval.choices,
+        max_length=5, choices=enums.PlanInterval.choices,
         help_text="The frequency with which a subscription should be billed."
     )
-    interval_count = StripeIntegerField(
-        null=True,
-        help_text="The number of intervals (specified in the interval property) between each subscription billing."
+    interval_count = StripeIntegerField(null=True, help_text=(
+        "The number of intervals (specified in the interval property) between each subscription billing."
+    ))
+    nickname = StripeCharField(
+        max_length=5000, stripe_required=False, help_text="A brief description of the plan, hidden from customers."
     )
+    # TODO: product = ForeignKey("Product", stripe_required=False)
+    tiers = StripeJSONField(stripe_required=False, help_text=(
+        "Each element represents a pricing tier. "
+        "This parameter requires `billing_scheme` to be set to `tiered`."
+    ))
+    tiers_mode = StripeCharField(
+        max_length=9, choices=enums.PlanTiersMode.choices, stripe_required=False, help_text=(
+            "Defines if the tiering price should be `graduated` or `volume` based. "
+            "In `volume`-based tiering, the maximum quantity within a period "
+            "determines the per unit price, in `graduated` tiering pricing can "
+            "successively change as the quantity grows."
+        )
+    )
+    transform_usage = StripeJSONField(stripe_required=False, help_text=(
+        "Apply a transformation to the reported usage or set quantity "
+        "before computing the billed price. Cannot be combined with `tiers`."
+    ))
+    trial_period_days = StripeIntegerField(null=True, help_text=(
+        "Number of trial period days granted when subscribing a customer to this plan. "
+        "Null if the plan has no trial period."
+    ))
+    usage_type = StripeCharField(
+        max_length=8, default=enums.PlanUsageType.licensed, choices=enums.PlanUsageType.choices,
+        help_text=(
+            "Configures how the quantity per period should be determined, can be either"
+            "`metered` or `licensed`. `licensed` will automatically bill the `quantity` "
+            "set for a plan when adding it to a subscription, `metered` will aggregate "
+            "the total usage based on usage records. Defaults to `licensed`."
+        )
+    )
+
+    # Legacy fields (pre 2017-08-15)
     name = StripeTextField(help_text="Name of the plan, to be displayed on invoices and in the web interface.")
-    statement_descriptor = StripeCharField(
-        max_length=22,
-        null=True,
-        help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement "
+    statement_descriptor = StripeCharField(max_length=22, null=True, help_text=(
+        "An arbitrary string to be displayed on your customer's credit card statement. The statement "
         "description may not include <>\"' characters, and will appear on your customer's statement in capital "
         "letters. Non-ASCII characters are automatically stripped. While most banks display this information "
         "consistently, some may display it incorrectly or not at all."
-    )
-    trial_period_days = StripeIntegerField(
-        null=True,
-        help_text="Number of trial period days granted when subscribing a customer to this plan. "
-        "Null if the plan has no trial period."
-    )
+    ))
 
     class Meta(object):
         ordering = ["amount"]
@@ -2611,7 +2659,7 @@ class Plan(StripeObject):
         return plan
 
     def __str__(self):
-        return self.name
+        return self.name or self.nickname
 
     @property
     def amount_in_cents(self):

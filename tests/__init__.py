@@ -526,6 +526,7 @@ FAKE_PLAN = {
     "name": "New plan name",
     "statement_descriptor": None,
     "trial_period_days": None,
+    "usage_type": "licensed",
 }
 
 FAKE_PLAN_II = {
@@ -541,6 +542,7 @@ FAKE_PLAN_II = {
     "name": "New plan name",
     "statement_descriptor": None,
     "trial_period_days": 12,
+    "usage_type": "licensed",
 }
 
 

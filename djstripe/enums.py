@@ -218,11 +218,33 @@ class PayoutType(Enum):
     card = _("Card")
 
 
+class PlanAggregateUsage(Enum):
+    last_during_period = _("Last during period")
+    last_ever = _("Last ever")
+    max = _("Max")
+    sum = _("Sum")
+
+
+class PlanBillingScheme(Enum):
+    per_unit = _("Per unit")
+    tiered = _("Tiered")
+
+
 class PlanInterval(Enum):
     day = _("Day")
     week = _("Week")
     month = _("Month")
     year = _("Year")
+
+
+class PlanUsageType(Enum):
+    metered = _("Metered")
+    licensed = _("Licensed")
+
+
+class PlanTiersMode(Enum):
+    graduated = _("Graduated")
+    volume = _("Volume-based")
 
 
 class SourceFlow(Enum):
