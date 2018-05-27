@@ -39,10 +39,9 @@ dj-stripe could always use more documentation, whether as part of the
 official dj-stripe docs, in docstrings, or even on the web in blog posts,
 articles, and such.
 
-If you are adding to dj-stripe's documentation, you can see your changes by changing
-into the ``docs`` directory, running ``make html`` (or ``make.bat html`` if you're
-developing on Windows) from the command line, and then opening ``docs/_build/html/index.html``
-in a web browser.
+If you are adding to dj-stripe's documentation, you can see your changes by
+running ``tox -e docs``. The documentation will be generated in the ``docs/``
+directory, and you can open ``docs/_build/html/index.html`` in a web browser.
 
 Submit Feedback
 ~~~~~~~~~~~~~~~
