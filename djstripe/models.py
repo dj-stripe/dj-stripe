@@ -2795,15 +2795,6 @@ class Subscription(StripeObject):
     stripe_class = stripe.Subscription
     stripe_dashboard_item_name = "subscriptions"
 
-    # The following accessors are deprecated as of 1.0 and will be removed in 1.1
-    # Please use enums.SubscriptionStatus directly.
-    STATUS_ACTIVE = enums.SubscriptionStatus.active
-    STATUS_TRIALING = enums.SubscriptionStatus.trialing
-    STATUS_PAST_DUE = enums.SubscriptionStatus.past_due
-    STATUS_CANCELED = enums.SubscriptionStatus.canceled
-    STATUS_CANCELLED = STATUS_CANCELED
-    STATUS_UNPAID = enums.SubscriptionStatus.unpaid
-
     application_fee_percent = StripePercentField(
         null=True, blank=True,
         help_text="A positive decimal that represents the fee percentage of the subscription invoice amount that "
@@ -3165,15 +3156,6 @@ class Transfer(StripeObject):
     stripe_dashboard_item_name = "transfers"
 
     objects = TransferManager()
-
-    # The following accessors are deprecated as of 1.0 and will be removed in 1.1
-    # Please use enums.SubscriptionStatus directly.
-    STATUS_PAID = enums.PayoutStatus.paid
-    STATUS_PENDING = enums.PayoutStatus.pending
-    STATUS_IN_TRANSIT = enums.PayoutStatus.in_transit
-    STATUS_CANCELED = enums.PayoutStatus.canceled
-    STATUS_CANCELLED = STATUS_CANCELED
-    STATUS_FAILED = enums.PayoutStatus.failed
 
     DESTINATION_TYPES = ["card", "bank_account", "stripe_account"]
     DESITNATION_TYPE_CHOICES = [
