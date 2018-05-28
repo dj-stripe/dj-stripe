@@ -600,7 +600,7 @@ class Charge(StripeObject):
         help_text="Whether or not the charge has been fully refunded. If the charge is only partially refunded, "
         "this attribute will still be false."
     )
-    # TODO: refunds, review
+    # TODO: review
     shipping = StripeJSONField(null=True, help_text="Shipping information for the charge")
     source = PaymentMethodForeignKey(
         on_delete=SET_NULL, null=True, related_name="charges",
@@ -1603,7 +1603,43 @@ class Payout(StripeObject):
     type = StripeCharField(max_length=12, choices=enums.PayoutType.choices)
 
 
-# TODO: class Refund(...)
+class Refund(StripeObject):
+    """
+    https://stripe.com/docs/api#refund_object
+    https://stripe.com/docs/refunds
+    """
+    stripe_class = stripe.Refund
+
+    amount = StripeIntegerField(help_text="Amount, in cents.")
+    # balance_transaction = ForeignKey("BalanceTransaction")
+    charge = ForeignKey(
+        "Charge", on_delete=models.CASCADE, related_name="refunds",
+        help_text="The charge that was refunded"
+    )
+    currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code")
+    # failure_balance_transaction = ForeignKey("BalanceTransaction", null=True)
+    failure_reason = StripeCharField(
+        max_length=24, choices=enums.RefundFailureReason.choices, stripe_required=False,
+        help_text="If the refund failed, the reason for refund failure if known."
+    )
+    reason = StripeCharField(
+        max_length=21, choices=enums.RefundReason.choices, null=True,
+        help_text="Reason for the refund."
+    )
+    receipt_number = StripeCharField(max_length=9, null=True, help_text=(
+        "The transaction number that appears on email receipts sent for this charge."
+    ))
+    status = StripeCharField(
+        max_length=9, choices=enums.RefundFailureReason.choices,
+        help_text="Status of the refund."
+    )
+
+    def get_stripe_dashboard_url(self):
+        return self.charge.get_stripe_dashboard_url()
+
+    def _attach_objects_hook(self, cls, data):
+        self.charge = Charge._get_or_create_from_stripe_object(data, "charge")[0]
+
 
 
 # ============================================================================ #

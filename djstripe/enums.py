@@ -288,6 +288,25 @@ class LegacySourceType(Enum):
     alipay_account = _("Alipay account")
 
 
+class RefundFailureReason(Enum):
+    lost_or_stolen_card = _("Lost or stolen card")
+    expired_or_canceled_card = _("Expired or canceled card")
+    unknown = _("Unknown")
+
+
+class RefundReason(Enum):
+    duplicate = _("Duplicate charge")
+    fraudulent = _("Fraudulent")
+    requested_by_customer = _("Requested by customer")
+
+
+class RefundStatus(Enum):
+    pending = _("Pending")
+    succeeded = _("Succeeded")
+    failed = _("Failed")
+    canceled = _("Canceled")
+
+
 class SourceUsage(Enum):
     reusable = _("Reusable")
     single_use = _("Single-use")

@@ -294,6 +294,13 @@ class ProductAdmin(StripeObjectAdmin):
     search_fields = ("name", "statement_descriptor")
 
 
+@admin.register(models.Refund)
+class RefundAdmin(StripeObjectAdmin):
+    list_display = ("amount", "currency", "charge", "reason", "status", "failure_reason")
+    list_filter = ("reason", "status")
+    search_fields = ("receipt_number", )
+
+
 @admin.register(models.Source)
 class SourceAdmin(StripeObjectAdmin):
     raw_id_fields = ("customer", )
