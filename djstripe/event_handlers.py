@@ -22,11 +22,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import logging
 
-from . import webhooks
+from . import models, webhooks
 from .enums import SourceType
-from .models import (
-    Card, Charge, Coupon, Customer, Dispute, Invoice, InvoiceItem, PaymentMethod, Plan, Subscription, Transfer
-)
 from .utils import convert_tstamp
 
 
@@ -46,7 +43,9 @@ def customer_webhook_handler(event):
     if event.customer:
         # As customers are tied to local users, djstripe will not create
         # customers that do not already exist locally.
-        _handle_crud_like_event(target_cls=Customer, event=event, crud_exact=True, crud_valid=True)
+        _handle_crud_like_event(
+            target_cls=models.Customer, event=event, crud_exact=True, crud_valid=True
+        )
 
 
 @webhooks.handler("customer.discount")
@@ -67,7 +66,7 @@ def customer_discount_webhook_handler(event):
 
     if crud_type.created or crud_type.updated:
         coupon, _ = _handle_crud_like_event(
-            target_cls=Coupon,
+            target_cls=models.Coupon,
             event=event,
             data=coupon_data,
             stripe_id=coupon_data.get("id")
@@ -101,10 +100,10 @@ def customer_source_webhook_handler(event):
             # customer = Customer.objects.get(stripe_id=customer_data["id"])
             # NOTE: for now, customer.sources still points to Card
             # Also, https://github.com/dj-stripe/dj-stripe/issues/576
-            Card.objects.filter(stripe_id=customer_data.get("id", "")).delete()
-            PaymentMethod.objects.filter(id=customer_data.get("id", "")).delete()
+            models.Card.objects.filter(stripe_id=customer_data.get("id", "")).delete()
+            models.PaymentMethod.objects.filter(id=customer_data.get("id", "")).delete()
         else:
-            _handle_crud_like_event(target_cls=Card, event=event)
+            _handle_crud_like_event(target_cls=models.Card, event=event)
 
 
 @webhooks.handler("customer.subscription")
@@ -113,7 +112,7 @@ def customer_subscription_webhook_handler(event):
 
     Docs an example subscription webhook response: https://stripe.com/docs/api#subscription_object
     """
-    _handle_crud_like_event(target_cls=Subscription, event=event)
+    _handle_crud_like_event(target_cls=models.Subscription, event=event)
 
 
 @webhooks.handler("transfer", "charge", "coupon", "invoice", "invoiceitem", "plan")
@@ -131,15 +130,15 @@ def other_object_webhook_handler(event):
     if event.parts[:2] == ["charge", "dispute"]:
         # Do not attempt to handle charge.dispute.* events.
         # We do not have a Dispute model yet.
-        target_cls = Dispute
+        target_cls = models.Dispute
     else:
         target_cls = {
-            "charge": Charge,
-            "coupon": Coupon,
-            "invoice": Invoice,
-            "invoiceitem": InvoiceItem,
-            "plan": Plan,
-            "transfer": Transfer
+            "charge": models.Charge,
+            "coupon": models.Coupon,
+            "invoice": models.Invoice,
+            "invoiceitem": models.InvoiceItem,
+            "plan": models.Plan,
+            "transfer": models.Transfer
         }.get(event.category)
 
     _handle_crud_like_event(target_cls=target_cls, event=event)
@@ -249,7 +248,7 @@ def _handle_crud_like_event(target_cls, event, data=None, verb=None,
 
     if crud_type.deleted:
         qs = target_cls.objects.filter(stripe_id=stripe_id)
-        if target_cls is Customer and qs.exists():
+        if target_cls is models.Customer and qs.exists():
             qs.get().purge()
         else:
             obj = target_cls.objects.filter(stripe_id=stripe_id).delete()
