@@ -162,6 +162,24 @@ class StripeCharField(StripeFieldMixin, models.CharField):
     pass
 
 
+class StripeEnumField(StripeCharField):
+    def __init__(self, enum, *args, **kwargs):
+        self.enum = enum
+        choices = enum.choices
+        defaults = {
+            "choices": choices,
+            "max_length": max(len(k) for k, v in choices)
+        }
+        defaults.update(kwargs)
+        super(StripeEnumField, self).__init__(*args, **defaults)
+
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        kwargs["enum"] = self.enum
+        del kwargs["choices"]
+        return name, path, args, kwargs
+
+
 class StripeIdField(StripeCharField):
     """A field with enough space to hold any stripe ID."""
 
