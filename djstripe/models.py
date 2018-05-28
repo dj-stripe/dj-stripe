@@ -37,8 +37,8 @@ from .enums import SubscriptionStatus
 from .exceptions import MultipleSubscriptionException, StripeObjectManipulationException
 from .fields import (
     JSONField, PaymentMethodForeignKey, StripeBooleanField, StripeCharField, StripeCurrencyField,
-    StripeDateTimeField, StripeFieldMixin, StripeIdField, StripeIntegerField, StripeJSONField,
-    StripeNullBooleanField, StripePercentField, StripePositiveIntegerField, StripeTextField
+    StripeDateTimeField, StripeEnumField, StripeFieldMixin, StripeIdField, StripeIntegerField,
+    StripeJSONField, StripeNullBooleanField, StripePercentField, StripePositiveIntegerField, StripeTextField
 )
 from .managers import ChargeManager, StripeObjectManager, SubscriptionManager, TransferManager
 from .signals import WEBHOOK_SIGNALS, webhook_processing_error
@@ -564,10 +564,8 @@ class Charge(StripeObject):
         related_name="charges",
         help_text="Details about the dispute if the charge has been disputed."
     )
-    failure_code = StripeCharField(
-        max_length=30,
-        null=True,
-        choices=enums.ApiErrorCode.choices,
+    failure_code = StripeEnumField(
+        enum=enums.ApiErrorCode, null=True,
         help_text="Error code explaining reason for charge failure if available."
     )
     failure_message = StripeTextField(
@@ -613,9 +611,7 @@ class Charge(StripeObject):
         "letters. Non-ASCII characters are automatically stripped. While most banks display this information "
         "consistently, some may display it incorrectly or not at all."
     )
-    status = StripeCharField(
-        max_length=10, choices=enums.ChargeStatus.choices, help_text="The status of the payment."
-    )
+    status = StripeEnumField(enum=enums.ChargeStatus, help_text="The status of the payment.")
     transfer = ForeignKey(
         "Transfer",
         null=True, on_delete=models.CASCADE,
@@ -633,10 +629,9 @@ class Charge(StripeObject):
     fee_details = StripeJSONField(stripe_required=False, nested_name="balance_transaction")
 
     # dj-stripe custom stripe fields. Don't try to send these.
-    source_type = StripeCharField(
-        max_length=20,
+    source_type = StripeEnumField(
         null=True,
-        choices=enums.LegacySourceType.choices,
+        enum=enums.LegacySourceType,
         stripe_name="source.object",
         help_text="The payment source type. If the payment source is supported by dj-stripe, a corresponding model is "
         "attached to this Charge via a foreign key matching this field."
@@ -1387,8 +1382,8 @@ class Dispute(StripeObject):
         "Once the payment has been fully refunded, no further funds will "
         "be withdrawn from your Stripe account as a result of this dispute."
     ))
-    reason = StripeCharField(max_length=50, choices=enums.DisputeReason.choices)
-    status = StripeCharField(max_length=50, choices=enums.DisputeStatus.choices)
+    reason = StripeEnumField(enum=enums.DisputeReason)
+    status = StripeEnumField(enum=enums.DisputeStatus)
 
 
 class Event(StripeObject):
@@ -1526,15 +1521,11 @@ class FileUpload(StripeObject):
     filename = StripeCharField(
         max_length=255, help_text="A filename for the file, suitable for saving to a filesystem."
     )
-    purpose = StripeCharField(
-        max_length=24, choices=enums.FileUploadPurpose.choices,
-        help_text="The purpose of the uploaded file."
+    purpose = StripeEnumField(
+        enum=enums.FileUploadPurpose, help_text="The purpose of the uploaded file."
     )
     size = StripeIntegerField(help_text="The size in bytes of the file upload object.")
-    type = StripeCharField(
-        max_length=4, choices=enums.FileUploadType.choices,
-        help_text="The type of the file returned."
-    )
+    type = StripeEnumField(enum=enums.FileUploadType, help_text="The type of the file returned.")
     url = StripeCharField(
         max_length=200,
         help_text="A read-only URL where the uploaded file can be accessed."
@@ -1561,10 +1552,9 @@ class Payout(StripeObject):
         help_text="ID of the bank account or card the payout was sent to."
     )
     # TODO: failure_balance_transaction = ForeignKey("Transaction", null=True)
-    failure_code = StripeCharField(
-        max_length=23,
+    failure_code = StripeEnumField(
+        enum=enums.PayoutFailureCode,
         blank=True, null=True,
-        choices=enums.PayoutFailureCode.choices,
         help_text="Error code explaining reason for transfer failure if available. "
         "See https://stripe.com/docs/api/python#transfer_failures."
     )
@@ -1572,30 +1562,22 @@ class Payout(StripeObject):
         null=True, blank=True,
         help_text="Message to user further explaining reason for payout failure if available."
     )
-    method = StripeCharField(
-        max_length=8,
-        choices=enums.PayoutMethod.choices,
-        help_text=(
-            "The method used to send this payout. "
-            "`instant` is only supported for payouts to debit cards."
-        )
-    )
+    method = StripeEnumField(max_length=8, enum=enums.PayoutMethod, help_text=(
+        "The method used to send this payout. "
+        "`instant` is only supported for payouts to debit cards."
+    ))
     # TODO: source_type
     statement_descriptor = StripeCharField(
         max_length=255, null=True, blank=True,
         help_text="Extra information about a payout to be displayed on the user's bank statement."
     )
-    status = StripeCharField(
-        max_length=10,
-        choices=enums.PayoutStatus.choices,
-        help_text=(
-            "Current status of the payout. "
-            "A payout will be `pending` until it is submitted to the bank, at which point it "
-            "becomes `in_transit`. I t will then change to paid if the transaction goes through. "
-            "If it does not go through successfully, its status will change to `failed` or `canceled`."
-        )
-    )
-    type = StripeCharField(max_length=12, choices=enums.PayoutType.choices)
+    status = StripeEnumField(enum=enums.PayoutStatus, help_text=(
+        "Current status of the payout. "
+        "A payout will be `pending` until it is submitted to the bank, at which point it "
+        "becomes `in_transit`. I t will then change to paid if the transaction goes through. "
+        "If it does not go through successfully, its status will change to `failed` or `canceled`."
+    ))
+    type = StripeEnumField(enum=enums.PayoutType)
 
 
 class Refund(StripeObject):
@@ -1613,21 +1595,17 @@ class Refund(StripeObject):
     )
     currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code")
     # failure_balance_transaction = ForeignKey("BalanceTransaction", null=True)
-    failure_reason = StripeCharField(
-        max_length=24, choices=enums.RefundFailureReason.choices, stripe_required=False,
+    failure_reason = StripeEnumField(
+        enum=enums.RefundFailureReason, stripe_required=False,
         help_text="If the refund failed, the reason for refund failure if known."
     )
-    reason = StripeCharField(
-        max_length=21, choices=enums.RefundReason.choices, null=True,
-        help_text="Reason for the refund."
+    reason = StripeEnumField(
+        enum=enums.RefundReason, null=True, help_text="Reason for the refund."
     )
     receipt_number = StripeCharField(max_length=9, null=True, help_text=(
         "The transaction number that appears on email receipts sent for this charge."
     ))
-    status = StripeCharField(
-        max_length=9, choices=enums.RefundFailureReason.choices,
-        help_text="Status of the refund."
-    )
+    status = StripeEnumField(enum=enums.RefundFailureReason, help_text="Status of the refund.")
 
     def get_stripe_dashboard_url(self):
         return self.charge.get_stripe_dashboard_url()
@@ -1651,9 +1629,8 @@ class BankAccount(StripeObject):
         max_length=5000, null=True,
         help_text="The name of the person or business that owns the bank account."
     )
-    account_holder_type = StripeCharField(
-        max_length=10, choices=enums.BankAccountHolderType.choices,
-        help_text="The type of entity that holds the account."
+    account_holder_type = StripeEnumField(
+        enum=enums.BankAccountHolderType, help_text="The type of entity that holds the account."
     )
     bank_name = StripeCharField(
         max_length=255,
@@ -1679,7 +1656,7 @@ class BankAccount(StripeObject):
     )
     last4 = StripeCharField(max_length=4)
     routing_number = StripeCharField(max_length=255, help_text="The routing transit number for the bank account.")
-    status = StripeCharField(max_length=19, choices=enums.BankAccountStatus.choices)
+    status = StripeEnumField(enum=enums.BankAccountStatus)
 
 
 class Card(StripeObject):
@@ -1706,33 +1683,24 @@ class Card(StripeObject):
     address_city = StripeTextField(null=True, help_text="Billing address city.")
     address_country = StripeTextField(null=True, help_text="Billing address country.")
     address_line1 = StripeTextField(null=True, help_text="Billing address (Line 1).")
-    address_line1_check = StripeCharField(
-        null=True,
-        max_length=11,
-        choices=enums.CardCheckResult.choices,
-        help_text="If ``address_line1`` was provided, results of the check."
-    )
+    address_line1_check = StripeEnumField(enum=enums.CardCheckResult, null=True, help_text=(
+        "If `address_line1` was provided, results of the check."
+    ))
     address_line2 = StripeTextField(null=True, help_text="Billing address (Line 2).")
     address_state = StripeTextField(null=True, help_text="Billing address state.")
     address_zip = StripeTextField(null=True, help_text="Billing address zip code.")
-    address_zip_check = StripeCharField(
-        null=True,
-        max_length=11,
-        choices=enums.CardCheckResult.choices,
-        help_text="If ``address_zip`` was provided, results of the check."
-    )
-    brand = StripeCharField(max_length=16, choices=enums.CardBrand.choices, help_text="Card brand.")
+    address_zip_check = StripeEnumField(enum=enums.CardCheckResult, null=True, help_text=(
+        "If `address_zip` was provided, results of the check."
+    ))
+    brand = StripeEnumField(enum=enums.CardBrand, help_text="Card brand.")
     country = StripeCharField(
         null=True,
         max_length=2,
         help_text="Two-letter ISO code representing the country of the card."
     )
-    cvc_check = StripeCharField(
-        null=True,
-        max_length=11,
-        choices=enums.CardCheckResult.choices,
-        help_text="If a CVC was provided, results of the check."
-    )
+    cvc_check = StripeEnumField(enum=enums.CardCheckResult, null=True, help_text=(
+        "If a CVC was provided, results of the check."
+    ))
     dynamic_last4 = StripeCharField(
         null=True,
         max_length=4,
@@ -1740,16 +1708,14 @@ class Card(StripeObject):
     )
     exp_month = StripeIntegerField(help_text="Card expiration month.")
     exp_year = StripeIntegerField(help_text="Card expiration year.")
-    fingerprint = StripeTextField(stripe_required=False, help_text="Uniquely identifies this particular card number.")
-    funding = StripeCharField(
-        max_length=7, choices=enums.CardFundingType.choices, help_text="Card funding type."
+    fingerprint = StripeTextField(
+        stripe_required=False, help_text="Uniquely identifies this particular card number."
     )
+    funding = StripeEnumField(enum=enums.CardFundingType, help_text="Card funding type.")
     last4 = StripeCharField(max_length=4, help_text="Last four digits of Card number.")
     name = StripeTextField(null=True, help_text="Cardholder name.")
-    tokenization_method = StripeCharField(
-        null=True,
-        max_length=11,
-        choices=enums.CardTokenizationMethod.choices,
+    tokenization_method = StripeEnumField(
+        enum=enums.CardTokenizationMethod, null=True,
         help_text="If the card number is tokenized, this is the method that was used."
     )
 
@@ -1890,11 +1856,9 @@ class Source(StripeObject):
         "Used for client-side retrieval using a publishable key."
     ))
     currency = StripeCharField(null=True, blank=True, max_length=3, help_text="Three-letter ISO currency code")
-    flow = StripeCharField(
-        max_length=17, choices=enums.SourceFlow.choices, help_text=(
-            "The authentication flow of the source."
-        )
-    )
+    flow = StripeEnumField(enum=enums.SourceFlow, help_text=(
+        "The authentication flow of the source."
+    ))
     owner = StripeJSONField(help_text=(
         "Information about the owner of the payment instrument that may be "
         "used or required by particular source types."
@@ -1905,21 +1869,15 @@ class Source(StripeObject):
             "This will appear on your customer's statement every time you charge the source."
         )
     )
-    status = StripeCharField(
-        max_length=10, choices=enums.SourceStatus.choices, help_text=(
-            "The status of the source. Only `chargeable` sources can be used to create a charge."
-        )
-    )
-    type = StripeCharField(
-        max_length=19, choices=enums.SourceType.choices, help_text="The type of the source."
-    )
-    usage = StripeCharField(
-        max_length=10, choices=enums.SourceUsage.choices, help_text=(
-            "Whether this source should be reusable or not. "
-            "Some source types may or may not be reusable by construction, "
-            "while other may leave the option at creation."
-        )
-    )
+    status = StripeEnumField(enum=enums.SourceStatus, help_text=(
+        "The status of the source. Only `chargeable` sources can be used to create a charge."
+    ))
+    type = StripeEnumField(enum=enums.SourceType, help_text="The type of the source.")
+    usage = StripeEnumField(enum=enums.SourceUsage, help_text=(
+        "Whether this source should be reusable or not. "
+        "Some source types may or may not be reusable by construction, "
+        "while other may leave the option at creation."
+    ))
 
     # Flows
     code_verification = StripeJSONField(
@@ -1996,10 +1954,9 @@ class Coupon(StripeObject):
         help_text="Amount that will be taken off the subtotal of any invoices for this customer."
     )
     currency = StripeCharField(null=True, blank=True, max_length=3, help_text="Three-letter ISO currency code")
-    duration = StripeCharField(
-        max_length=9, choices=enums.CouponDuration.choices,
-        help_text="Describes how long a customer who applies this coupon will get the discount."
-    )
+    duration = StripeEnumField(enum=enums.CouponDuration, help_text=(
+        "Describes how long a customer who applies this coupon will get the discount."
+    ))
     duration_in_months = StripePositiveIntegerField(
         null=True, blank=True,
         help_text="If `duration` is `repeating`, the number of months the coupon applies."
@@ -2124,7 +2081,7 @@ class Invoice(StripeObject):
         "hour after the ``invoice.created`` webhook, for example, so you might not want to display that invoice as "
         "unpaid to your users."
     )
-    billing = StripeCharField(max_length=20, null=True, choices=enums.InvoiceBilling.choices, help_text=(
+    billing = StripeEnumField(enum=enums.InvoiceBilling, null=True, help_text=(
         "When charging automatically, Stripe will attempt to pay this invoice"
         "using the default source attached to the customer. "
         "When sending an invoice, Stripe will email this invoice to the customer "
@@ -2589,8 +2546,8 @@ class Plan(StripeObject):
     stripe_class = stripe.Plan
     stripe_dashboard_item_name = "plans"
 
-    aggregate_usage = StripeCharField(
-        stripe_required=False, max_length=18, choices=enums.PlanAggregateUsage.choices,
+    aggregate_usage = StripeEnumField(
+        enum=enums.PlanAggregateUsage, stripe_required=False,
         help_text=(
             "Specifies a usage aggregation strategy for plans of usage_type=metered. "
             "Allowed values are `sum` for summing up all usage during a period, "
@@ -2601,8 +2558,8 @@ class Plan(StripeObject):
         )
     )
     amount = StripeCurrencyField(help_text="Amount to be charged on the interval specified.")
-    billing_scheme = StripeCharField(
-        stripe_required=False, max_length=8, choices=enums.PlanBillingScheme.choices,
+    billing_scheme = StripeEnumField(
+        enum=enums.PlanBillingScheme, stripe_required=False,
         help_text=(
             "Describes how to compute the price per period. Either `per_unit` or `tiered`. "
             "`per_unit` indicates that the fixed amount (specified in amount) will be charged "
@@ -2613,10 +2570,9 @@ class Plan(StripeObject):
         )
     )
     currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code")
-    interval = StripeCharField(
-        max_length=5, choices=enums.PlanInterval.choices,
-        help_text="The frequency with which a subscription should be billed."
-    )
+    interval = StripeEnumField(enum=enums.PlanInterval, help_text=(
+        "The frequency with which a subscription should be billed."
+    ))
     interval_count = StripeIntegerField(null=True, help_text=(
         "The number of intervals (specified in the interval property) between each subscription billing."
     ))
@@ -2630,14 +2586,12 @@ class Plan(StripeObject):
         "Each element represents a pricing tier. "
         "This parameter requires `billing_scheme` to be set to `tiered`."
     ))
-    tiers_mode = StripeCharField(
-        max_length=9, choices=enums.PlanTiersMode.choices, stripe_required=False, help_text=(
-            "Defines if the tiering price should be `graduated` or `volume` based. "
-            "In `volume`-based tiering, the maximum quantity within a period "
-            "determines the per unit price, in `graduated` tiering pricing can "
-            "successively change as the quantity grows."
-        )
-    )
+    tiers_mode = StripeEnumField(enum=enums.PlanTiersMode, stripe_required=False, help_text=(
+        "Defines if the tiering price should be `graduated` or `volume` based. "
+        "In `volume`-based tiering, the maximum quantity within a period "
+        "determines the per unit price, in `graduated` tiering pricing can "
+        "successively change as the quantity grows."
+    ))
     transform_usage = StripeJSONField(stripe_required=False, help_text=(
         "Apply a transformation to the reported usage or set quantity "
         "before computing the billed price. Cannot be combined with `tiers`."
@@ -2646,8 +2600,8 @@ class Plan(StripeObject):
         "Number of trial period days granted when subscribing a customer to this plan. "
         "Null if the plan has no trial period."
     ))
-    usage_type = StripeCharField(
-        max_length=8, default=enums.PlanUsageType.licensed, choices=enums.PlanUsageType.choices,
+    usage_type = StripeEnumField(
+        enum=enums.PlanUsageType, default=enums.PlanUsageType.licensed,
         help_text=(
             "Configures how the quantity per period should be determined, can be either"
             "`metered` or `licensed`. `licensed` will automatically bill the `quantity` "
@@ -2743,7 +2697,7 @@ class Product(StripeObject):
         "The product's name, meant to be displayable to the customer. "
         "Applicable to both `service` and `good` types."
     ))
-    type = StripeCharField(max_length=7, choices=enums.ProductType.choices, help_text=(
+    type = StripeEnumField(enum=enums.ProductType, help_text=(
         "The type of the product. The product is either of type `good`, which is "
         "eligible for use with Orders and SKUs, or `service`, which is eligible "
         "for use with Subscriptions and Plans."
@@ -2830,16 +2784,12 @@ class Subscription(StripeObject):
         help_text="A positive decimal that represents the fee percentage of the subscription invoice amount that "
         "will be transferred to the application owner's Stripe account each billing period."
     )
-    billing = StripeCharField(
-        max_length=20,
-        choices=enums.InvoiceBilling.choices,
-        help_text=(
-            "Either `charge_automatically`, or `send_invoice`. When charging automatically, "
-            "Stripe will attempt to pay this subscription at the end of the cycle using the "
-            "default source attached to the customer. When sending an invoice, Stripe will "
-            "email your customer an invoice with payment instructions."
-        )
-    )
+    billing = StripeEnumField(enum=enums.InvoiceBilling, help_text=(
+        "Either `charge_automatically`, or `send_invoice`. When charging automatically, "
+        "Stripe will attempt to pay this subscription at the end of the cycle using the "
+        "default source attached to the customer. When sending an invoice, Stripe will "
+        "email your customer an invoice with payment instructions."
+    ))
     billing_cycle_anchor = StripeDateTimeField(stripe_required=False, help_text=(
         "Determines the date of the first full invoice, and, for plans with `month` or "
         "`year` intervals, the day of the month for subsequent invoices."
@@ -2887,8 +2837,8 @@ class Subscription(StripeObject):
     )
     quantity = StripeIntegerField(help_text="The quantity applied to this subscription.")
     start = StripeDateTimeField(help_text="Date the subscription started.")
-    status = StripeCharField(
-        max_length=8, choices=enums.SubscriptionStatus.choices, help_text="The status of this subscription."
+    status = StripeEnumField(
+        enum=enums.SubscriptionStatus, help_text="The status of this subscription."
     )
     tax_percent = StripePercentField(
         null=True, blank=True,
@@ -3154,7 +3104,7 @@ class Account(StripeObject):
     timezone = StripeCharField(max_length=50, help_text=(
         "The timezone used in the Stripe Dashboard for this account."
     ))
-    type = StripeCharField(max_length=8, choices=enums.AccountType.choices, help_text="The Stripe account type.")
+    type = StripeEnumField(enum=enums.AccountType, help_text="The Stripe account type.")
     tos_acceptance = StripeJSONField(stripe_required=False, help_text=(
         "Details on the acceptance of the Stripe Services Agreement"
     ))
@@ -3230,11 +3180,9 @@ class Transfer(StripeObject):
         help_text="ID of the charge (or other transaction) that was used to fund the transfer. "
         "If null, the transfer was funded from the available balance."
     )
-    source_type = StripeCharField(
-        max_length=16,
-        choices=enums.LegacySourceType.choices,
-        help_text="The source balance from which this transfer came."
-    )
+    source_type = StripeEnumField(enum=enums.LegacySourceType, help_text=(
+        "The source balance from which this transfer came."
+    ))
     transfer_group = StripeCharField(
         max_length=255, null=True, blank=True, stripe_required=False,
         help_text="A string that identifies this transaction as part of a group."
@@ -3251,10 +3199,9 @@ class Transfer(StripeObject):
         blank=True, null=True, stripe_required=False,
         help_text="The type of the transfer destination."
     )
-    failure_code = StripeCharField(
-        max_length=23,
+    failure_code = StripeEnumField(
+        enum=enums.PayoutFailureCode,
         blank=True, null=True, stripe_required=False,
-        choices=enums.PayoutFailureCode.choices,
         help_text="Error code explaining reason for transfer failure if available. "
         "See https://stripe.com/docs/api/python#transfer_failures."
     )
@@ -3270,9 +3217,8 @@ class Transfer(StripeObject):
         "letters. Non-ASCII characters are automatically stripped. While most banks display this information "
         "consistently, some may display it incorrectly or not at all."
     )
-    status = StripeCharField(
-        max_length=10,
-        choices=enums.PayoutStatus.choices,
+    status = StripeEnumField(
+        enum=enums.PayoutStatus,
         blank=True, null=True, stripe_required=False,
         help_text="The current status of the transfer. A transfer will be pending until it is submitted to the bank, "
         "at which point it becomes in_transit. It will then change to paid if the transaction goes through. "
