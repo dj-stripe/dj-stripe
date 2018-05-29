@@ -164,6 +164,10 @@ def run_test_suite(args):
     args = sys.argv[1:]
     sys.argv = sys.argv[0:1]
 
+    # Add the ability to run tests on executable files. This is important when running tests on WSL, where permissions
+    # are dictated by Windows instead of Unix.
+    sys.argv += ["--exe"]
+
     from django_nose import NoseTestSuiteRunner
 
     test_runner = NoseTestSuiteRunner(verbosity=1, keepdb=True, failfast=True)
