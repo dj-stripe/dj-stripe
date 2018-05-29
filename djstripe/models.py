@@ -30,9 +30,8 @@ from django.utils import dateformat, six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.functional import cached_property
 
-from . import enums
+from . import enums, webhooks
 from . import settings as djstripe_settings
-from . import webhooks
 from .context_managers import stripe_temporary_api_version
 from .enums import SubscriptionStatus
 from .exceptions import MultipleSubscriptionException, StripeObjectManipulationException
@@ -1639,7 +1638,6 @@ class Refund(StripeObject):
 
     def _attach_objects_hook(self, cls, data):
         self.charge = Charge._get_or_create_from_stripe_object(data, "charge")[0]
-
 
 
 # ============================================================================ #
@@ -3456,8 +3454,3 @@ class WebhookEventTrigger(models.Model):
             self.save()
 
         return self.event
-
-
-# Much like registering signal handlers. We import this module so that its registrations get picked up
-# the NO QA directive tells flake8 to not complain about the unused import
-from . import event_handlers  # NOQA, isort:skip
