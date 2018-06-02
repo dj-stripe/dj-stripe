@@ -24,6 +24,7 @@ class HumanReadableCouponTest(TestCase):
             duration="forever",
         )
         self.assertEqual(coupon.human_readable, "$10.00 USD off forever")
+        self.assertEqual(str(coupon), coupon.human_readable)
 
     def test_human_readable_eur_off_forever(self):
         coupon = Coupon.objects.create(
@@ -31,6 +32,7 @@ class HumanReadableCouponTest(TestCase):
             duration="forever",
         )
         self.assertEqual(coupon.human_readable, "€10.00 EUR off forever")
+        self.assertEqual(str(coupon), coupon.human_readable)
 
     def test_human_readable_percent_off_forever(self):
         coupon = Coupon.objects.create(
@@ -38,6 +40,7 @@ class HumanReadableCouponTest(TestCase):
             duration="forever",
         )
         self.assertEqual(coupon.human_readable, "10% off forever")
+        self.assertEqual(str(coupon), coupon.human_readable)
 
     def test_human_readable_percent_off_once(self):
         coupon = Coupon.objects.create(
@@ -45,6 +48,7 @@ class HumanReadableCouponTest(TestCase):
             duration="once",
         )
         self.assertEqual(coupon.human_readable, "10% off once")
+        self.assertEqual(str(coupon), coupon.human_readable)
 
     def test_human_readable_percent_off_one_month(self):
         coupon = Coupon.objects.create(
@@ -52,6 +56,7 @@ class HumanReadableCouponTest(TestCase):
             duration="repeating", duration_in_months=1,
         )
         self.assertEqual(coupon.human_readable, "10% off for 1 month")
+        self.assertEqual(str(coupon), coupon.human_readable)
 
     def test_human_readable_percent_off_three_months(self):
         coupon = Coupon.objects.create(
@@ -59,3 +64,4 @@ class HumanReadableCouponTest(TestCase):
             duration="repeating", duration_in_months=3,
         )
         self.assertEqual(coupon.human_readable, "10% off for 3 months")
+        self.assertEqual(str(coupon), coupon.human_readable)

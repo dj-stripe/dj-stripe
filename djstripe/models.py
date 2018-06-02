@@ -1990,6 +1990,9 @@ class Coupon(StripeObject):
     stripe_class = stripe.Coupon
     stripe_dashboard_item_name = "coupons"
 
+    def __str__(self):
+        return self.human_readable
+
     @property
     def human_readable_amount(self):
         if self.percent_off:
