@@ -2614,8 +2614,11 @@ class Plan(StripeObject):
     )
 
     # Legacy fields (pre 2017-08-15)
-    name = StripeTextField(help_text="Name of the plan, to be displayed on invoices and in the web interface.")
-    statement_descriptor = StripeCharField(max_length=22, null=True, help_text=(
+    name = StripeTextField(
+        stripe_required=False,
+        help_text="Name of the plan, to be displayed on invoices and in the web interface."
+    )
+    statement_descriptor = StripeCharField(max_length=22, stripe_required=False, help_text=(
         "An arbitrary string to be displayed on your customer's credit card statement. The statement "
         "description may not include <>\"' characters, and will appear on your customer's statement in capital "
         "letters. Non-ASCII characters are automatically stripped. While most banks display this information "
@@ -2648,7 +2651,7 @@ class Plan(StripeObject):
         return plan
 
     def __str__(self):
-        return self.name or self.nickname
+        return self.name or self.nickname or self.stripe_id
 
     @property
     def amount_in_cents(self):
