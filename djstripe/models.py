@@ -30,8 +30,9 @@ from django.utils import dateformat, six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.functional import cached_property
 
-from . import enums, webhooks
+from . import enums
 from . import settings as djstripe_settings
+from . import webhooks
 from .context_managers import stripe_temporary_api_version
 from .enums import SubscriptionStatus
 from .exceptions import MultipleSubscriptionException, StripeObjectManipulationException
@@ -2124,6 +2125,14 @@ class Invoice(StripeObject):
         "subscription status as if the invoice were successfully paid. Once an invoice has been forgiven, it cannot "
         "be unforgiven or reopened."
     )
+    hosted_invoice_url = StripeCharField(max_length=799, stripe_required=False, help_text=(
+        "The URL for the hosted invoice page, which allows customers to view and pay an invoice. "
+        "If the invoice has not been frozen yet, this will be null."
+    ))
+    invoice_pdf = StripeCharField(max_length=799, stripe_required=False, help_text=(
+        "The link to download the PDF for the invoice. "
+        "If the invoice has not been frozen yet, this will be null."
+    ))
     next_payment_attempt = StripeDateTimeField(
         null=True,
         help_text="The time at which payment will next be attempted."
