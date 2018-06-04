@@ -42,14 +42,13 @@ class InvoiceItemTest(TestCase):
 
         self.assertEqual(
             str(invoiceitem),
-            "Subscription to New plan name ({price})".format(price=invoiceitem.plan.human_readable_price)
+            "<amount=20, date=2015-08-08 11:26:56+00:00, stripe_id=ii_16XVTY2eZvKYlo2Cxz5n3RaS>"
         )
         invoiceitem.plan = None
-        self.assertEqual(str(invoiceitem), "<amount={amount}, date={date}, stripe_id={stripe_id}>".format(
-            amount=invoiceitem.amount,
-            date=invoiceitem.date,
-            stripe_id=invoiceitem_data["id"]
-        ))
+        self.assertEqual(
+            str(invoiceitem),
+            "<amount=20, date=2015-08-08 11:26:56+00:00, stripe_id=ii_16XVTY2eZvKYlo2Cxz5n3RaS>"
+        )
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION_III))

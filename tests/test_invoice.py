@@ -38,16 +38,7 @@ class InvoiceTest(TestCase):
         default_account_mock.return_value = self.account
         invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
         self.assertEqual(invoice.get_stripe_dashboard_url(), self.customer.get_stripe_dashboard_url())
-
-        self.assertEqual(
-            "<amount_due={amount_due}, date={date}, status={status}, stripe_id={stripe_id}>".format(
-                amount_due=invoice.amount_due,
-                date=invoice.date,
-                status=invoice.status,
-                stripe_id=invoice.stripe_id
-            ),
-            str(invoice)
-        )
+        self.assertEqual(str(invoice), "Invoice #XXXXXXX-0001")
 
     @patch("stripe.Invoice.retrieve")
     @patch("djstripe.models.Account.get_default_account")

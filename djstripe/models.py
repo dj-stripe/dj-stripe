@@ -2193,12 +2193,8 @@ class Invoice(StripeObject):
     class Meta(object):
         ordering = ["-date"]
 
-    def str_parts(self):
-        return [
-            "amount_due={amount_due}".format(amount_due=self.amount_due),
-            "date={date}".format(date=self.date),
-            "status={status}".format(status=self.status),
-        ] + super(Invoice, self).str_parts()
+    def __str__(self):
+        return "Invoice #{number}".format(number=self.number or self.receipt_number or self.stripe_id)
 
     @classmethod
     def _stripe_object_to_charge(cls, target_cls, data):
@@ -2496,10 +2492,9 @@ class InvoiceItem(StripeObject):
             return target_cls._get_or_create_from_stripe_object(data, "plan")[0]
 
     def __str__(self):
-        if not self.plan:
-            return super(InvoiceItem, self).__str__()
-        price = self.plan.human_readable_price
-        return "Subscription to {plan} ({price})".format(plan=self.plan, price=price)
+        if self.plan and self.plan.product:
+            return self.plan.product.name or str(self.plan)
+        return super(InvoiceItem, self).__str__()
 
     def _attach_objects_hook(self, cls, data):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
