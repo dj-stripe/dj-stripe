@@ -3,6 +3,89 @@
 History
 =======
 
+
+1.1.0 (2018-06-11)
+------------------
+
+In dj-stripe 1.1.0, we made a *lot* of changes to models in order to
+bring the dj-stripe model state much closer to the upstream API objects.
+If you are a current user of dj-stripe, you will most likely have to
+make changes in order to upgrade. Please read the full changelog below.
+If you are having trouble upgrading, you may ask for help `by filing an
+issue on GitHub`_.
+
+Upgrade notes
+-------------
+
+Migration reset
+~~~~~~~~~~~~~~~
+
+The next version of dj-stripe, **1.2.0**, will reset all the migrations
+to ``0001_initial``. Migrations are currently in an unmaintainable
+state.
+
+**What this means is you will not be able to upgrade directly to
+dj-stripe 1.2.0. You must go through 1.1.0 first, run
+``manage.py migrate djstripe``, then upgrade to 1.2.0.**
+
+Python 2.7 end-of-life
+~~~~~~~~~~~~~~~~~~~~~~
+
+dj-stripe 1.1.0 drops support for Django 1.10 and adds support for
+Django 2.0. Django 1.11+ and Python 2.7+ or 3.4+ are required.
+
+Support for Python versions older than 3.5, and Django versions older
+than 2.0, will be dropped in dj-stripe 1.3.0.
+
+Backwards-incompatible changes and deprecations
+-----------------------------------------------
+
+Removal of polymorphic models
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The model architecture of dj-stripe has been simplified. Polymorphic
+models have been dropped and the old base StripeCustomer, StripeCharge,
+StripeInvoice, etc models have all been merged into the top-level
+Customer, Charge, Invoice, etc models.
+
+Importing those legacy models from ``djstripe.stripe_objects`` will
+yield the new ones. This is deprecated and support for this will be
+dropped in dj-stripe 1.3.0.
+
+Full support for Stripe Sources (Support for v3 stripe.js)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Stripe sources (``src_XXXX``) are objects that can arbitrarily reference
+any of the payment method types that Stripe supports. However, the
+legacy ``Card`` object (with object IDs like ``card_XXXX`` or
+``cc_XXXX``) is not a Source object, and cannot be turned into a Source
+object at this time. In order to support both Card and Source objects in
+ForeignKeys, a new model ``PaymentMethod`` has been devised. That model
+can resolve into a Card, a Source, or a BankAccount object.
+
+-  **The ``default_source`` attribute on ``Customer`` now refers to a
+   ``PaymentMethod`` object**. You will need to call ``.resolve()`` on
+   it to get the Card or Source in question.
+-  References to ``Customer.sources`` expecting a queryset of Card
+   objects should be updated to ``Customer.legacy_cards``.
+-  The legacy ``StripeSource`` name refers to the ``Card`` model. This
+   will be removed in dj-stripe 1.3.0. Update your references to either
+   ``Card`` or ``Source``.
+-  ``enums.SourceType`` has been renamed to ``enums.LegacySourceType``.
+   ``enums.SourceType`` now refers to the actual Stripe Source types
+   enum.
+
+Core fields renamed
+~~~~~~~~~~~~~~~~~~~
+
+-  The numeric ``id`` field has been renamed to ``djstripe_id``. This
+   avoids a clash with the upstream stripe id. Accessing ``.id`` is
+   deprecated and \**will reference the upstream ``stripe_id`` in
+   dj-stripe 1.3.0
+
+.. _by filing an issue on GitHub: https://github.com/dj-stripe/dj-stripe/issues
+
+
 1.0.0 (2017-08-12)
 ------------------
 
