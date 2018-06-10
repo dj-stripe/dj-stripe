@@ -176,14 +176,6 @@ class StripeObject(models.Model):
         warnings.warn("The id field has been renamed to `djstripe_id`.", DeprecationWarning)
         return self.djstripe_id
 
-    @property
-    def stripe_timestamp(self):
-        """
-        DEPRECATED(2018-01-10): Use `.created` instead.
-        """
-        warnings.warn("The stripe_timestamp field has been renamed to `created`.", DeprecationWarning)
-        return self.created
-
     def api_retrieve(self, api_key=None):
         """
         Call the stripe API's retrieve operation for this model.
