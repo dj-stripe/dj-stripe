@@ -569,7 +569,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(primary_key=True, serialize=False)),
                 ('remote_ip', models.GenericIPAddressField(help_text='IP address of the request client.')),
-                ('headers', djstripe.fields.StripeJSONField()),
+                ('headers', djstripe.fields.JSONField()),
                 ('body', models.TextField(blank=True)),
                 ('valid', models.BooleanField(default=False, help_text='Whether or not the webhook event has passed validation')),
                 ('processed', models.BooleanField(default=False, help_text='Whether or not the webhook event has been successfully processed')),
