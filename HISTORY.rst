@@ -4,6 +4,17 @@ History
 =======
 
 
+1.2.0 (2018-06-11)
+------------------
+
+The dj-stripe 1.2.0 release resets all migrations.
+
+**Do not upgrade to 1.2.0 directly from 1.0.1 or below.
+You must upgrade to 1.1.0 first.**
+
+Please read the 1.1.0 release notes below for more information.
+
+
 1.1.0 (2018-06-11)
 ------------------
 
