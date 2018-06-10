@@ -10,9 +10,7 @@
 
 import decimal
 import logging
-import sys
 import uuid
-import warnings
 from copy import deepcopy
 from datetime import timedelta
 
@@ -167,14 +165,6 @@ class StripeObject(models.Model):
     @property
     def default_api_key(self):
         return djstripe_settings.get_default_api_key(self.livemode)
-
-    @property
-    def id(self):
-        """
-        DEPRECATED(2018-01-10): Use `.djstripe_id` instead.
-        """
-        warnings.warn("The id field has been renamed to `djstripe_id`.", DeprecationWarning)
-        return self.djstripe_id
 
     def api_retrieve(self, api_key=None):
         """
