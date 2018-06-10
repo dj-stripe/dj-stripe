@@ -7,8 +7,6 @@
 .. moduleauthor:: Michael Thronhill (@mthornhill)
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from django.test.testcases import TestCase
 
 from djstripe.fields import StripeCurrencyField, StripeDateTimeField, StripeTextField

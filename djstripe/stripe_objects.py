@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
-
 import warnings
 
+from .models import Account, Card, Charge, Coupon, Customer, Event, Invoice, Payout, Plan
 from .models import StripeObject as MovedStripeObject
-from .models import Account, Card, Charge, Coupon, Customer, Event, Invoice, Payout, Plan, Subscription, Transfer
+from .models import Subscription, Transfer
 
 
 warnings.warn(

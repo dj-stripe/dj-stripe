@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. module:: djstripe.settings.
 
@@ -6,13 +5,10 @@
 
 .. moduleauthor:: @kavdev, @pydanny, @lskillen, and @chrissmejia
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import stripe
 from django.apps import apps as django_apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.utils import six
 from django.utils.module_loading import import_string
 
 from .checks import validate_stripe_api_version
@@ -44,7 +40,7 @@ def get_callback_function(setting_name, default=None):
     if callable(func):
         return func
 
-    if isinstance(func, six.string_types):
+    if isinstance(func, str):
         func = import_string(func)
 
     if not callable(func):

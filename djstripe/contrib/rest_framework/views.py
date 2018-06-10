@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. module:: dj-stripe.contrib.rest_framework.views.
 
@@ -7,8 +6,6 @@
 .. moduleauthor:: Philippe Luickx (@philippeluickx)
 
 """
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated

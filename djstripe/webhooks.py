@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. module:: djstripe.webhooks.
 
@@ -21,8 +20,6 @@ There is also a "global registry" which is just a list of processors (as defined
 
 NOTE: global processors are called before other processors.
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import functools
 import itertools
 from collections import defaultdict

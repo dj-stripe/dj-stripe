@@ -6,8 +6,6 @@
 .. moduleauthor:: Lee Skillen (@lskillen)
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import stripe
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models.base import ModelBase

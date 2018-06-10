@@ -1,9 +1,6 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import operator
 from collections import OrderedDict
 
-from django.utils.six import add_metaclass, text_type
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -40,15 +37,14 @@ class EnumMetaClass(type):
         # vary on different systems based on internal hashing. Without this
         # Django will continually require new no-op migrations.
         classdict["choices"] = tuple(
-            (text_type(k), text_type(v))
+            (str(k), str(v))
             for k, v in sorted(choices.items(), key=operator.itemgetter(0))
         )
 
         return type.__new__(self, name, bases, classdict)
 
 
-@add_metaclass(EnumMetaClass)
-class Enum(object):
+class Enum(metaclass=EnumMetaClass):
     pass
 
 

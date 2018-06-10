@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. module:: djstripe.checks.
 
@@ -9,8 +8,6 @@
 .. moduleauthor:: Lee Skillen (@lskillen)
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from django.conf import settings
 from django.core import checks
 from django.utils.dateparse import date_re

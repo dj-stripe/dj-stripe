@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. module:: djstripe.middleware.
 
@@ -8,8 +7,6 @@
 
 .. moduleauthor:: @kavdev, @pydanny, @wahuneke
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import fnmatch
 
 from django.conf import settings

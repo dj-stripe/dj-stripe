@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. module:: djstripe.event_handlers.
 
@@ -18,8 +17,6 @@ NOTE: Event data is not guaranteed to be in the correct API version format. See 
       process.
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import logging
 
 from . import models, webhooks

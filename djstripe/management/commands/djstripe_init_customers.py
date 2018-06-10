@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. module:: djstripe.management.commands.djstripe_init_customers.
 
@@ -7,8 +6,6 @@
 .. moduleauthor:: @kavdev, @pydanny
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from django.core.management.base import BaseCommand
 
 from ...models import Customer

@@ -9,13 +9,9 @@ addons:
   postgresql: "9.6"
 
 env:
-  - TOXENV=py27-django111
-  - TOXENV=py34-django111
   - TOXENV=py34-django20
-  - TOXENV=py35-django111
   - TOXENV=py35-django20
   - TOXENV=py35-djangomaster
-  - TOXENV=py36-django111
   - TOXENV=py36-django20
   - TOXENV=py36-djangomaster
   - TOXENV=checkmigrations
@@ -26,14 +22,10 @@ matrix:
   fast_finish: true
   include:
     - python: "3.5"
-      env: TOXENV=py35-django111
-    - python: "3.5"
       env: TOXENV=py35-django20
     - python: "3.5"
       env: TOXENV=py35-djangomaster
   exclude:
-    - python: "3.6"
-      env: TOXENV=py35-django111
     - python: "3.6"
       env: TOXENV=py35-django20
     - python: "3.6"
