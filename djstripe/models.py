@@ -2465,9 +2465,9 @@ class InvoiceItem(StripeObject):
     # XXX: subscription_item
     #FIXME - check this
     subscription_item = ForeignKey(
-        "SubscriptionItems",
+        "SubscriptionItem",
         null=True,
-        related_name="subscriptionitems",
+        related_name="invoiceitems",
         on_delete=SET_NULL,
         help_text="The subscription item that this invoice item has been created for, if any."
     )
