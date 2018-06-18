@@ -2463,6 +2463,14 @@ class InvoiceItem(StripeObject):
         help_text="The subscription that this invoice item has been created for, if any."
     )
     # XXX: subscription_item
+    #FIXME - check this
+    subscription_item = ForeignKey(
+        "SubscriptionItems",
+        null=True,
+        related_name="subscriptionitems",
+        on_delete=SET_NULL,
+        help_text="The subscription item that this invoice item has been created for, if any."
+    )
 
     @classmethod
     def _stripe_object_to_plan(cls, target_cls, data):
@@ -2758,6 +2766,7 @@ class Subscription(StripeObject):
     Fields not implemented:
 
     * **object** - Unnecessary. Just check the model name.
+    * **items** - Unnecessary. Check SubscriptionItems directly.
     * **discount** - #
 
     .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
@@ -2816,7 +2825,6 @@ class Subscription(StripeObject):
         help_text="If the subscription has ended (either because it was canceled or because the customer was switched "
         "to a subscription to a new plan), the date the subscription ended."
     )
-    # TODO: items (SubscriptionItem)
     plan = ForeignKey(
         "Plan", on_delete=models.CASCADE,
         related_name="subscriptions",
@@ -2858,6 +2866,24 @@ class Subscription(StripeObject):
         """
 
         return target_cls._get_or_create_from_stripe_object(data["plan"])[0]
+
+    @property
+    def plan(self):
+        """ Gets the associated plan for this subscription.
+
+        The plan object should be taken from the first SubscriptionItem
+        that has one, and take the plan field if not. FIXME
+
+        :returns: The associated plan for the invoice.
+        :rtype: ``djstripe.Plan``
+        """
+
+        for subscriptionitem in self.subscriptionitems.all():
+            if subscriptionitem.plan:
+                return subscriptionitem.plan
+
+        if self.subscription:
+            return self.subscription.plan
 
     def __str__(self):
         return "{customer} on {plan}".format(customer=str(self.customer), plan=str(self.plan))
@@ -3019,6 +3045,64 @@ class Subscription(StripeObject):
     def _attach_objects_hook(self, cls, data):
         self.customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
         self.plan = cls._stripe_object_to_plan(target_cls=Plan, data=data)
+
+
+class SubscriptionItem(StripeObject):
+    """
+    Subscription items allow you to create customer subscriptions
+    with more than one plan, making it easy to represent complex billing relationships.
+    """
+
+    stripe_class = stripe.SubscriptionItem
+
+    created = StripeIntegerField(help_text="Time at which the object was created. Measured in "
+        "seconds since the Unix epoch.")
+    metadata = StripeJSONField(
+        blank=True,
+        stripe_required=False,
+        help_text="A set of key/value pairs that you can attach to an object. It can be useful "
+        "for storing additional "
+        "information about an object in a structured format."
+    )
+    plan = ForeignKey(
+        "Plan",
+        null=True,
+        related_name="subscriptionitems",
+        on_delete=SET_NULL,
+        help_text="Hash describing the plan the customer is subscribed to."
+    )
+    quantity = StripeIntegerField(
+        stripe_required=False,
+        help_text="The quantity of the plan to which the customer should be subscribed."
+    )
+    subscription = ForeignKey(
+        "Subscription",
+        null=True,
+        related_name="subscriptionitems",
+        on_delete=SET_NULL,
+        help_text="The subscription this subscription_item belongs to."
+    )
+
+    # stolen from InvoiceItem
+    @classmethod
+    def _stripe_object_to_plan(cls, target_cls, data):
+        """
+        Search the given manager for the Plan matching this Charge object's ``plan`` field.
+
+        :param target_cls: The target class
+        :type target_cls: Plan
+        :param data: stripe object
+        :type data: dict
+        """
+
+        if "plan" in data and data["plan"]:
+            return target_cls._get_or_create_from_stripe_object(data, "plan")[0]
+
+    # stolen from InvoiceItem
+    def __str__(self):
+        if self.plan and self.plan.product:
+            return self.plan.product.name or str(self.plan)
+        return super().__str__()
 
 
 # ============================================================================ #
