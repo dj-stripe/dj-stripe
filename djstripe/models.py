@@ -2825,6 +2825,11 @@ class Subscription(StripeObject):
         help_text="If the subscription has ended (either because it was canceled or because the customer was switched "
         "to a subscription to a new plan), the date the subscription ended."
     )
+    plan = ForeignKey(
+        "Plan", on_delete=models.CASCADE,
+        related_name="subscriptions",
+        help_text="The plan associated with this subscription."
+    )
     quantity = StripeIntegerField(help_text="The quantity applied to this subscription.")
     start = StripeDateTimeField(help_text="Date the subscription started.")
     status = StripeEnumField(
@@ -3058,15 +3063,6 @@ class SubscriptionItem(StripeObject):
 
     stripe_class = stripe.SubscriptionItem
 
-    created = StripeIntegerField(help_text="Time at which the object was created. Measured in "
-        "seconds since the Unix epoch.")
-    metadata = StripeJSONField(
-        blank=True,
-        stripe_required=False,
-        help_text="A set of key/value pairs that you can attach to an object. It can be useful "
-        "for storing additional "
-        "information about an object in a structured format."
-    )
     plan = ForeignKey(
         "Plan",
         null=True,
