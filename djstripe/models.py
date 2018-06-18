@@ -2825,11 +2825,6 @@ class Subscription(StripeObject):
         help_text="If the subscription has ended (either because it was canceled or because the customer was switched "
         "to a subscription to a new plan), the date the subscription ended."
     )
-    plan = ForeignKey(
-        "Plan", on_delete=models.CASCADE,
-        related_name="subscriptions",
-        help_text="The plan associated with this subscription."
-    )
     quantity = StripeIntegerField(help_text="The quantity applied to this subscription.")
     start = StripeDateTimeField(help_text="Date the subscription started.")
     status = StripeEnumField(
