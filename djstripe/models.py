@@ -3046,6 +3046,14 @@ class SubscriptionItem(StripeObject):
     """
     Subscription items allow you to create customer subscriptions
     with more than one plan, making it easy to represent complex billing relationships.
+    (Source: https://stripe.com/docs/api#subscription_items)
+
+    # = Mapping the values of this field isn't currently on our roadmap.
+        Please use the stripe dashboard to check the value of this field instead.
+
+    Fields not implemented:
+
+    * **object** - Unnecessary. Just check the model name.
     """
 
     stripe_class = stripe.SubscriptionItem
