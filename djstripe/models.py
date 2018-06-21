@@ -618,9 +618,6 @@ class Charge(StripeObject):
     source_stripe_id = StripeIdField(null=True, stripe_name="source.id", help_text="The payment source id.")
     fraudulent = StripeBooleanField(default=False, help_text="Whether or not this charge was marked as fraudulent.")
 
-    # XXX: Remove me
-    receipt_sent = BooleanField(default=False, help_text="Whether or not a receipt was sent for this charge.")
-
     objects = ChargeManager()
 
     def __str__(self):

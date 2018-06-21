@@ -4,6 +4,12 @@ History
 =======
 
 
+1.3.0 (unreleased)
+------------------
+
+- Dropped previously-deprecated ``Charge.receipt_number`` field.
+
+
 1.2.0 (2018-06-11)
 ------------------
 

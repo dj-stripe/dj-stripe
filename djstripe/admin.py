@@ -192,8 +192,7 @@ class AccountAdmin(StripeObjectAdmin):
 @admin.register(models.Charge)
 class ChargeAdmin(StripeObjectAdmin):
     list_display = (
-        "customer", "amount", "description", "paid", "disputed", "refunded",
-        "fee", "receipt_sent"
+        "customer", "amount", "description", "paid", "disputed", "refunded", "fee"
     )
     search_fields = ("customer__stripe_id", "invoice__stripe_id")
     list_filter = (
