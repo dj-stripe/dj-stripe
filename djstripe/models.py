@@ -3063,10 +3063,10 @@ class Account(StripeObject):
     stripe_class = stripe.Account
 
     business_logo = ForeignKey("FileUpload", on_delete=models.SET_NULL, null=True)
-    business_name = StripeCharField(max_length=255, help_text=(
+    business_name = StripeCharField(max_length=255, stripe_required=False, help_text=(
         "The publicly visible name of the business"
     ))
-    business_primary_color = StripeCharField(max_length=7, null=True, help_text=(
+    business_primary_color = StripeCharField(max_length=7, stripe_required=False, help_text=(
         "A CSS hex color value representing the primary branding color for this account"
     ))
     business_url = StripeCharField(max_length=200, null=True, help_text=(
@@ -3119,7 +3119,7 @@ class Account(StripeObject):
     support_phone = StripeCharField(max_length=255, help_text=(
         "A publicly shareable support phone number for the business"
     ))
-    support_url = StripeCharField(max_length=200, help_text=(
+    support_url = StripeCharField(max_length=200, stripe_required=False, help_text=(
         "A publicly shareable URL that provides support for this account"
     ))
     timezone = StripeCharField(max_length=50, help_text=(
