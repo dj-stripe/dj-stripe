@@ -592,7 +592,7 @@ class Charge(StripeObject):
         help_text="The email address that the receipt for this charge was sent to."
     )
     receipt_number = StripeCharField(
-        null=True, max_length=9,
+        null=True, max_length=14,
         help_text="The transaction number that appears on email receipts sent for this charge."
     )
     refunded = StripeBooleanField(
