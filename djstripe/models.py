@@ -2633,6 +2633,20 @@ class Plan(StripeObject):
         ordering = ["amount"]
 
     @classmethod
+    def _stripe_object_to_product(cls, target_cls, data):
+        """
+        Search the given manager for the Product matching this Plan object's ``product`` field.
+
+        :param target_cls: The target class
+        :type target_cls: Product
+        :param data: stripe object
+        :type data: dict
+        """
+
+        if "product" in data and data["product"]:
+            return target_cls._get_or_create_from_stripe_object(data, "product")[0]
+
+    @classmethod
     def get_or_create(cls, **kwargs):
         """ Get or create a Plan."""
 
@@ -2656,6 +2670,11 @@ class Plan(StripeObject):
 
     def __str__(self):
         return self.name or self.nickname or self.stripe_id
+
+    def _attach_objects_hook(self, cls, data):
+        product = cls._stripe_object_to_product(target_cls=Product, data=data)
+        if product:
+            self.product = product
 
     @property
     def amount_in_cents(self):
