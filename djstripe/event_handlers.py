@@ -139,7 +139,8 @@ def other_object_webhook_handler(event):
             "invoice": models.Invoice,
             "invoiceitem": models.InvoiceItem,
             "plan": models.Plan,
-            "transfer": models.Transfer
+            "transfer": models.Transfer,
+            "product": models.Product
         }.get(event.category)
 
     _handle_crud_like_event(target_cls=target_cls, event=event)
