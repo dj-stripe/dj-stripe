@@ -138,9 +138,9 @@ def other_object_webhook_handler(event):
             "coupon": models.Coupon,
             "invoice": models.Invoice,
             "invoiceitem": models.InvoiceItem,
+            "product": models.Product,
             "plan": models.Plan,
-            "transfer": models.Transfer,
-            "product": models.Product
+            "transfer": models.Transfer
         }.get(event.category)
 
     _handle_crud_like_event(target_cls=target_cls, event=event)
