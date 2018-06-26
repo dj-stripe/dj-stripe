@@ -3,8 +3,6 @@ Tests for JSONField
 
 Due to their nature messing with subclassing, these tests must be run last.
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from django.test import TestCase
 from django.test.utils import override_settings
 

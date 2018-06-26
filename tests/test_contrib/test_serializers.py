@@ -7,8 +7,6 @@
 
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from copy import deepcopy
 
 from django.contrib.auth import get_user_model
@@ -35,9 +33,9 @@ class SubscriptionSerializerTest(TestCase):
         serializer = SubscriptionSerializer(
             data={
                 'stripe_id': "sub_6lsC8pt7IcFpjA",
-                'customer': self.customer.id,
+                'customer': self.customer.djstripe_id,
                 "billing": "charge_automatically",
-                'plan': self.plan.id,
+                'plan': self.plan.djstripe_id,
                 'quantity': 2,
                 'start': now,
                 'status': SubscriptionStatus.active,
@@ -64,9 +62,9 @@ class SubscriptionSerializerTest(TestCase):
         serializer = SubscriptionSerializer(
             data={
                 'stripe_id': "sub_6lsC8pt7IcFpjA",
-                'customer': self.customer.id,
+                'customer': self.customer.djstripe_id,
                 "billing": "charge_automatically",
-                'plan': self.plan.id,
+                'plan': self.plan.djstripe_id,
                 'start': now,
                 'status': SubscriptionStatus.active,
                 'current_period_end': now + timezone.timedelta(days=5),
@@ -114,7 +112,7 @@ class CreateSubscriptionSerializerTest(TestCase):
     def test_invalid_serializer(self):
         serializer = CreateSubscriptionSerializer(
             data={
-                'plan': self.plan.id,
+                'plan': self.plan.djstripe_id,
             }
         )
         self.assertFalse(serializer.is_valid())

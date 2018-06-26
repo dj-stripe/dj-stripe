@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. module:: djstripe.urls.
 
@@ -20,8 +19,6 @@
 
 .. moduleauthor:: @pydanny
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from django.conf.urls import url
 
 from . import settings as app_settings

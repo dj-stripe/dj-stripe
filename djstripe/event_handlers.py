@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. module:: djstripe.event_handlers.
 
@@ -18,8 +17,6 @@ NOTE: Event data is not guaranteed to be in the correct API version format. See 
       process.
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import logging
 
 from . import models, webhooks
@@ -214,7 +211,7 @@ def _handle_crud_like_event(target_cls, event, data=None, verb=None,
     ignored (but the event processing still succeeds).
 
     :param target_cls: The djstripe model being handled.
-    :type: ``djstripe.stripe_objects.StripeObject``
+    :type: ``djstripe.models.StripeObject``
     :param data: The event object data (defaults to ``event.data``).
     :param verb: The event verb (defaults to ``event.verb``).
     :param stripe_id: The object Stripe ID (defaults to ``object.id``).

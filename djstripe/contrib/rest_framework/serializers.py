@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. module:: dj-stripe.contrib.rest_framework.serializers.
 
@@ -7,8 +6,6 @@
 .. moduleauthor:: Philippe Luickx (@philippeluickx)
 
 """
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
@@ -19,7 +16,7 @@ from djstripe.models import Subscription
 class SubscriptionSerializer(ModelSerializer):
     """A serializer used for the Subscription model."""
 
-    class Meta(object):
+    class Meta:
         """Model class options."""
 
         model = Subscription

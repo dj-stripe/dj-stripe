@@ -8,8 +8,6 @@
 .. moduleauthor:: Lee Skillen (@lskillen)
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from django.contrib import admin
 
 from . import models
@@ -277,7 +275,7 @@ class PlanAdmin(StripeObjectAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         """Return extra readonly_fields."""
-        readonly_fields = super(PlanAdmin, self).get_readonly_fields(request, obj)
+        readonly_fields = super().get_readonly_fields(request, obj)
 
         if obj:
             readonly_fields += (

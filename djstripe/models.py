@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. module:: djstripe.models
    :synopsis: dj-stripe - Django ORM model definitions
@@ -9,13 +8,9 @@
 
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import decimal
 import logging
-import sys
 import uuid
-import warnings
 from copy import deepcopy
 from datetime import timedelta
 
@@ -26,8 +21,8 @@ from django.db import IntegrityError, models, transaction
 from django.db.models.deletion import SET_NULL
 from django.db.models.fields import BooleanField, CharField, DateTimeField, UUIDField
 from django.db.models.fields.related import ForeignKey, OneToOneField
-from django.utils import dateformat, six, timezone
-from django.utils.encoding import python_2_unicode_compatible, smart_text
+from django.utils import dateformat, timezone
+from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
 
 from . import enums
@@ -113,7 +108,6 @@ class PaymentMethod(models.Model):
         return self.object_model.objects.get(stripe_id=self.id)
 
 
-@python_2_unicode_compatible
 class StripeObject(models.Model):
     # This must be defined in descendants of this model/mixin
     # e.g. Event, Charge, Customer, etc.
@@ -171,22 +165,6 @@ class StripeObject(models.Model):
     @property
     def default_api_key(self):
         return djstripe_settings.get_default_api_key(self.livemode)
-
-    @property
-    def id(self):
-        """
-        DEPRECATED(2018-01-10): Use `.djstripe_id` instead.
-        """
-        warnings.warn("The id field has been renamed to `djstripe_id`.", DeprecationWarning)
-        return self.djstripe_id
-
-    @property
-    def stripe_timestamp(self):
-        """
-        DEPRECATED(2018-01-10): Use `.created` instead.
-        """
-        warnings.warn("The stripe_timestamp field has been renamed to `created`.", DeprecationWarning)
-        return self.created
 
     def api_retrieve(self, api_key=None):
         """
@@ -331,7 +309,7 @@ class StripeObject(models.Model):
         is_nested_data = field_name != "id"
         should_expand = False
 
-        if isinstance(field, six.string_types):
+        if isinstance(field, str):
             # A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}
             stripe_id = field
             # We'll have to expand if the field is not "id" (= is nested)
@@ -1135,7 +1113,7 @@ class Customer(StripeObject):
                 pass
             else:
                 # The exception was raised for another reason, re-raise it
-                six.reraise(*sys.exc_info())
+                raise
 
         self.subscriber = None
 
@@ -1264,7 +1242,7 @@ class Customer(StripeObject):
                 invoice.retry()  # Always retry unpaid invoices
             except stripe.InvalidRequestError as exc:
                 if str(exc) != "Invoice is already paid":
-                    six.reraise(*sys.exc_info())
+                    raise
 
     def has_valid_source(self):
         """ Check whether the customer has a valid payment source."""
@@ -1310,7 +1288,7 @@ class Customer(StripeObject):
 
         default_source = data.get("default_source")
         if default_source:
-            if isinstance(default_source, six.string_types):
+            if isinstance(default_source, str):
                 default_source_id = default_source
             else:
                 default_source_id = default_source["id"]
@@ -1447,7 +1425,7 @@ class Event(StripeObject):
     def str_parts(self):
         return [
             "type={type}".format(type=self.type),
-        ] + super(Event, self).str_parts()
+        ] + super().str_parts()
 
     def _attach_objects_hook(self, cls, data):
         if self.api_version is None:
@@ -1782,7 +1760,7 @@ class Card(StripeObject):
                 pass
             else:
                 # The exception was raised for another reason, re-raise it
-                six.reraise(*sys.exc_info())
+                raise
 
         self.delete()
 
@@ -1808,7 +1786,7 @@ class Card(StripeObject):
             "last4={last4}".format(last4=self.last4),
             "exp_month={exp_month}".format(exp_month=self.exp_month),
             "exp_year={exp_year}".format(exp_year=self.exp_year),
-        ] + super(Card, self).str_parts()
+        ] + super().str_parts()
 
     @classmethod
     def create_token(
@@ -2290,7 +2268,7 @@ class Invoice(StripeObject):
                 subscription_trial_end=subscription_trial_end, **kwargs)
         except stripe.InvalidRequestError as exc:
             if str(exc) != "Nothing to invoice for customer":
-                six.reraise(*sys.exc_info())
+                raise
             return
 
         # Workaround for "id" being missing (upcoming invoices don't persist).
@@ -2376,14 +2354,14 @@ class Invoice(StripeObject):
 
 class UpcomingInvoice(Invoice):
     def __init__(self, *args, **kwargs):
-        super(UpcomingInvoice, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._invoiceitems = []
 
     def get_stripe_dashboard_url(self):
         return ""
 
     def _attach_objects_hook(self, cls, data):
-        super(UpcomingInvoice, self)._attach_objects_hook(cls, data)
+        super()._attach_objects_hook(cls, data)
         self._invoiceitems = cls._stripe_object_to_invoice_items(target_cls=InvoiceItem, data=data, invoice=self)
 
     @property
@@ -2503,7 +2481,7 @@ class InvoiceItem(StripeObject):
     def __str__(self):
         if self.plan and self.plan.product:
             return self.plan.product.name or str(self.plan)
-        return super(InvoiceItem, self).__str__()
+        return super().__str__()
 
     def _attach_objects_hook(self, cls, data):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
@@ -2531,10 +2509,9 @@ class InvoiceItem(StripeObject):
         return [
             "amount={amount}".format(amount=self.amount),
             "date={date}".format(date=self.date),
-        ] + super(InvoiceItem, self).str_parts()
+        ] + super().str_parts()
 
 
-@python_2_unicode_compatible
 class Plan(StripeObject):
     """
     A subscription plan contains the pricing information for different products and feature levels on your site.
@@ -3008,7 +2985,7 @@ class Subscription(StripeObject):
                 # does not exist, in which case the following line will re-raise.
                 stripe_subscription = self.api_retrieve()
             else:
-                six.reraise(*sys.exc_info())
+                raise
 
         return Subscription.sync_from_stripe_data(stripe_subscription)
 
@@ -3262,7 +3239,7 @@ class Transfer(StripeObject):
         return [
             "amount={amount}".format(amount=self.amount),
             "status={status}".format(status=self.status),
-        ] + super(Transfer, self).str_parts()
+        ] + super().str_parts()
 
 
 # ============================================================================ #
@@ -3276,7 +3253,6 @@ def _get_version():
     return __version__
 
 
-@python_2_unicode_compatible
 class IdempotencyKey(models.Model):
     uuid = UUIDField(max_length=36, primary_key=True, editable=False, default=uuid.uuid4)
     action = CharField(max_length=100)
