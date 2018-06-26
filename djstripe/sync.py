@@ -8,6 +8,7 @@
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from six import text_type
 from stripe.error import InvalidRequestError
 
 from .models import Customer
@@ -23,5 +24,5 @@ def sync_subscriber(subscriber):
         customer._sync_cards()
         customer._sync_charges()
     except InvalidRequestError as e:
-        print("ERROR: " + str(e))
+        print("ERROR: " + text_type(e))
     return customer

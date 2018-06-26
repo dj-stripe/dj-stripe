@@ -11,6 +11,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.contrib import admin
+from six import text_type
 
 from . import models
 
@@ -175,7 +176,7 @@ customer_has_source.short_description = "Customer Has Source"
 def customer_email(obj):
     """Return a string representation of the customer's email."""
     if obj.customer.subscriber:
-        return str(obj.customer.subscriber.email)
+        return text_type(obj.customer.subscriber.email)
     else:
         return ""
 

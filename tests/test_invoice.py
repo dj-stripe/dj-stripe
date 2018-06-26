@@ -14,6 +14,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
 from mock import ANY, patch
+from six import text_type
 from stripe.error import InvalidRequestError
 
 from djstripe.models import Invoice, Plan, Subscription, UpcomingInvoice
@@ -38,7 +39,7 @@ class InvoiceTest(TestCase):
         default_account_mock.return_value = self.account
         invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
         self.assertEqual(invoice.get_stripe_dashboard_url(), self.customer.get_stripe_dashboard_url())
-        self.assertEqual(str(invoice), "Invoice #XXXXXXX-0001")
+        self.assertEqual(text_type(invoice), "Invoice #XXXXXXX-0001")
 
     @patch("stripe.Invoice.retrieve")
     @patch("djstripe.models.Account.get_default_account")

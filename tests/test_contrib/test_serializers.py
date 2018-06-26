@@ -15,6 +15,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 from mock import PropertyMock, patch
+from six import text_type
 
 from djstripe.contrib.rest_framework.serializers import CreateSubscriptionSerializer, SubscriptionSerializer
 from djstripe.enums import SubscriptionStatus
@@ -93,7 +94,7 @@ class CreateSubscriptionSerializerTest(TestCase):
             }
         )
         self.assertTrue(serializer.is_valid())
-        self.assertEqual(serializer.validated_data['plan'], str(self.plan.stripe_id))
+        self.assertEqual(serializer.validated_data['plan'], text_type(self.plan.stripe_id))
         self.assertIn('stripe_token', serializer.validated_data)
         self.assertEqual(serializer.errors, {})
 

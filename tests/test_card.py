@@ -13,6 +13,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from mock.mock import ANY, patch
+from six import text_type
 from stripe.error import InvalidRequestError
 
 from djstripe.exceptions import StripeObjectManipulationException
@@ -51,7 +52,7 @@ class CardTest(TestCase):
                 exp_year=fake_card["exp_year"],
                 stripe_id=fake_card["id"]
             ),
-            str(card)
+            text_type(card)
         )
 
     @patch("stripe.Token.create")

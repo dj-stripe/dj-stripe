@@ -4,6 +4,7 @@ from datetime import timedelta
 
 from django.test import TestCase
 from django.utils.timezone import now
+from six import text_type
 
 from djstripe.models import IdempotencyKey
 from djstripe.settings import get_idempotency_key
@@ -25,7 +26,7 @@ class IdempotencyKeyTest(TestCase):
         self.assertEqual(IdempotencyKey.objects.count(), 3)
         key1_obj = IdempotencyKey.objects.get(action="customer:create:1", livemode=False)
         self.assertFalse(key1_obj.is_expired)
-        self.assertEqual(str(key1_obj), str(key1_obj.uuid))
+        self.assertEqual(text_type(key1_obj), text_type(key1_obj.uuid))
 
     def test_clear_expired_idempotency_keys(self):
         expired_key = get_idempotency_key("customer", "create:1", False)
@@ -40,4 +41,4 @@ class IdempotencyKeyTest(TestCase):
         clear_expired_idempotency_keys()
 
         self.assertEqual(IdempotencyKey.objects.count(), 1)
-        self.assertEqual(str(IdempotencyKey.objects.get().uuid), valid_key)
+        self.assertEqual(text_type(IdempotencyKey.objects.get().uuid), valid_key)

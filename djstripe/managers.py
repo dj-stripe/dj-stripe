@@ -11,6 +11,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import decimal
 
 from django.db import models
+from six import text_type
 
 
 class StripeObjectManager(models.Manager):
@@ -53,7 +54,7 @@ class SubscriptionManager(models.Manager):
         """Return number of canceled Subscriptions divided by active Subscriptions."""
         canceled = self.canceled().count()
         active = self.active().count()
-        return decimal.Decimal(str(canceled)) / decimal.Decimal(str(active))
+        return decimal.Decimal(text_type(canceled)) / decimal.Decimal(text_type(active))
 
 
 class TransferManager(models.Manager):

@@ -18,6 +18,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 from mock import ANY, patch
+from six import text_type
 from stripe.error import InvalidRequestError
 
 from djstripe.exceptions import MultipleSubscriptionException
@@ -45,11 +46,11 @@ class TestCustomer(TestCase):
         self.account = default_account()
 
     def test_str(self):
-        self.assertEqual(str(self.customer), self.user.email)
+        self.assertEqual(text_type(self.customer), self.user.email)
         self.customer.subscriber.email = ""
-        self.assertEqual(str(self.customer), self.customer.stripe_id)
+        self.assertEqual(text_type(self.customer), self.customer.stripe_id)
         self.customer.subscriber = None
-        self.assertEqual(str(self.customer), "{stripe_id} (deleted)".format(stripe_id=self.customer.stripe_id))
+        self.assertEqual(text_type(self.customer), "{stripe_id} (deleted)".format(stripe_id=self.customer.stripe_id))
 
     def test_account_balance(self):
         self.assertEqual(self.customer.account_balance, 0)

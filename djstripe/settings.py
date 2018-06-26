@@ -14,6 +14,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils import six
 from django.utils.module_loading import import_string
+from six import text_type
 
 from .checks import validate_stripe_api_version
 
@@ -61,7 +62,7 @@ def _get_idempotency_key(object_type, action, livemode):
     from .models import IdempotencyKey
     action = "{}:{}".format(object_type, action)
     idempotency_key, _created = IdempotencyKey.objects.get_or_create(action=action, livemode=livemode)
-    return str(idempotency_key.uuid)
+    return text_type(idempotency_key.uuid)
 
 
 get_idempotency_key = get_callback_function("DJSTRIPE_IDEMPOTENCY_KEY_CALLBACK", _get_idempotency_key)

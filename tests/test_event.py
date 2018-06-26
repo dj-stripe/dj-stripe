@@ -14,6 +14,7 @@ from copy import deepcopy
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from mock import patch
+from six import text_type
 from stripe.error import StripeError
 
 from djstripe import webhooks
@@ -38,7 +39,7 @@ class EventTest(TestCase):
         self.assertEqual("<type={type}, stripe_id={stripe_id}>".format(
             type=FAKE_EVENT_TRANSFER_CREATED["type"],
             stripe_id=FAKE_EVENT_TRANSFER_CREATED["id"]
-        ), str(event))
+        ), text_type(event))
 
     def test_invoke_webhook_handlers_event_with_log_stripe_error(self):
         event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
