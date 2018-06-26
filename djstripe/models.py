@@ -2722,11 +2722,11 @@ class Product(StripeObject):
         "A short one-line description of the product, meant to be displayable"
         "to the customer. Only applicable to products of `type=good`."
     ))
-    deactivate_on = StripeJSONField(blank=True, help_text=(
+    deactivate_on = StripeJSONField(stripe_required=False, help_text=(
         "An array of connect application identifiers that cannot purchase "
         "this product. Only applicable to products of `type=good`."
     ))
-    images = StripeJSONField(blank=True, help_text=(
+    images = StripeJSONField(stripe_required=False, help_text=(
         "A list of up to 8 URLs of images for this product, meant to be "
         "displayable to the customer. Only applicable to products of `type=good`."
     ))
