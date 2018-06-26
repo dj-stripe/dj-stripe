@@ -14,6 +14,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 from mock import patch
+from six import text_type
 from stripe.error import InvalidRequestError
 
 from djstripe.enums import SubscriptionStatus
@@ -35,7 +36,9 @@ class SubscriptionTest(TestCase):
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
 
         self.assertEqual(
-            str(subscription), "{email} on {plan}".format(email=self.user.email, plan=str(subscription.plan))
+            text_type(subscription), "{email} on {plan}".format(
+                email=self.user.email, plan=text_type(subscription.plan)
+            )
         )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))

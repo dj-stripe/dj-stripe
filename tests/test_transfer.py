@@ -12,6 +12,7 @@ from copy import deepcopy
 
 from django.test.testcases import TestCase
 from mock import patch
+from six import text_type
 
 from djstripe.models import Event, Transfer
 
@@ -53,4 +54,4 @@ class TransferTest(TestCase):
             amount=fake_event_updated["data"]["object"]["amount"] / decimal.Decimal("100"),
             status=fake_event_updated["data"]["object"]["status"],
             stripe_id=fake_event_updated["data"]["object"]["id"]
-        ), str(transfer_instance))
+        ), text_type(transfer_instance))

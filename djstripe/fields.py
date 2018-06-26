@@ -174,7 +174,7 @@ class StripeEnumField(StripeCharField):
         super(StripeEnumField, self).__init__(*args, **defaults)
 
     def deconstruct(self):
-        name, path, args, kwargs = super().deconstruct()
+        name, path, args, kwargs = super(StripeEnumField, self).deconstruct()
         kwargs["enum"] = self.enum
         del kwargs["choices"]
         return name, path, args, kwargs

@@ -14,6 +14,7 @@ from django.conf import settings
 from django.contrib.admin.sites import AdminSite
 from django.test import TestCase
 from mock import patch
+from six import text_type
 
 from djstripe.admin import PlanAdmin
 from djstripe.models import Plan
@@ -85,7 +86,7 @@ class PlanTest(TestCase):
         object_create_mock.assert_called_once_with(metadata=metadata, stripe_id=1, arg1=1, arg2=2, amount=1)
 
     def test_str(self):
-        self.assertEqual(str(self.plan), self.plan_data["name"])
+        self.assertEqual(text_type(self.plan), self.plan_data["name"])
 
     @patch("stripe.Plan.retrieve", return_value=FAKE_PLAN)
     def test_stripe_plan(self, plan_retrieve_mock):

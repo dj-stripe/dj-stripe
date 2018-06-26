@@ -13,6 +13,7 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
 from mock import patch
+from six import text_type
 
 from djstripe.enums import ChargeStatus, LegacySourceType
 from djstripe.models import Account, Charge, Dispute, PaymentMethod
@@ -34,25 +35,25 @@ class ChargeTest(TestCase):
             captured=False,
             paid=False,
         )
-        self.assertEqual(str(charge), "$50.00 USD (Uncaptured)")
+        self.assertEqual(text_type(charge), "$50.00 USD (Uncaptured)")
 
         charge.captured = True
-        self.assertEqual(str(charge), "$50.00 USD (Failed)")
+        self.assertEqual(text_type(charge), "$50.00 USD (Failed)")
         charge.status = ChargeStatus.succeeded
 
         charge.dispute = Dispute()
-        self.assertEqual(str(charge), "$50.00 USD (Disputed)")
+        self.assertEqual(text_type(charge), "$50.00 USD (Disputed)")
 
         charge.dispute = None
         charge.refunded = True
         charge.amount_refunded = 50
-        self.assertEqual(str(charge), "$50.00 USD (Refunded)")
+        self.assertEqual(text_type(charge), "$50.00 USD (Refunded)")
 
         charge.refunded = False
-        self.assertEqual(str(charge), "$50.00 USD (Partially refunded)")
+        self.assertEqual(text_type(charge), "$50.00 USD (Partially refunded)")
 
         charge.amount_refunded = 0
-        self.assertEqual(str(charge), "$50.00 USD")
+        self.assertEqual(text_type(charge), "$50.00 USD")
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")

@@ -29,6 +29,7 @@ from django.db.models.fields.related import ForeignKey, OneToOneField
 from django.utils import dateformat, six, timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.functional import cached_property
+from six import text_type, PY3
 
 from . import enums
 from . import settings as djstripe_settings
@@ -509,6 +510,7 @@ class StripeObject(models.Model):
 
 # TODO: class Balance(...)
 
+@python_2_unicode_compatible
 class Charge(StripeObject):
     """
     To charge a credit or a debit card, you create a charge object. You can
@@ -762,6 +764,7 @@ class Charge(StripeObject):
         return data
 
 
+@python_2_unicode_compatible
 class Customer(StripeObject):
     """
     Customer objects allow you to perform recurring charges and track multiple charges that are
@@ -1129,7 +1132,7 @@ class Customer(StripeObject):
         try:
             self._api_delete()
         except stripe.InvalidRequestError as exc:
-            if "No such customer:" in str(exc):
+            if "No such customer:" in text_type(exc):
                 # The exception was thrown because the stripe customer was already
                 # deleted on the stripe side, ignore the exception
                 pass
@@ -1263,7 +1266,7 @@ class Customer(StripeObject):
             try:
                 invoice.retry()  # Always retry unpaid invoices
             except stripe.InvalidRequestError as exc:
-                if str(exc) != "Invoice is already paid":
+                if text_type(exc) != "Invoice is already paid":
                     six.reraise(*sys.exc_info())
 
     def has_valid_source(self):
@@ -1494,7 +1497,7 @@ class Event(StripeObject):
     @cached_property
     def parts(self):
         """ Gets the event category/verb as a list of parts. """
-        return str(self.type).split(".")
+        return text_type(self.type).split(".")
 
     @cached_property
     def category(self):
@@ -1776,7 +1779,7 @@ class Card(StripeObject):
         try:
             self._api_delete()
         except stripe.InvalidRequestError as exc:
-            if "No such source:" in str(exc) or "No such customer:" in str(exc):
+            if "No such source:" in text_type(exc) or "No such customer:" in text_type(exc):
                 # The exception was thrown because the stripe customer or card was already
                 # deleted on the stripe side, ignore the exception
                 pass
@@ -1948,6 +1951,7 @@ class Source(StripeObject):
 # ============================================================================ #
 
 
+@python_2_unicode_compatible
 class Coupon(StripeObject):
     stripe_id = StripeIdField(stripe_name="id", max_length=500)
     amount_off = StripeCurrencyField(
@@ -2015,6 +2019,7 @@ class Coupon(StripeObject):
         return "{amount} {duration}".format(amount=self.human_readable_amount, duration=duration)
 
 
+@python_2_unicode_compatible
 class Invoice(StripeObject):
     """
     Invoices are statements of what a customer owes for a particular billing
@@ -2289,7 +2294,7 @@ class Invoice(StripeObject):
                 subscription_quantity=subscription_quantity,
                 subscription_trial_end=subscription_trial_end, **kwargs)
         except stripe.InvalidRequestError as exc:
-            if str(exc) != "Nothing to invoice for customer":
+            if text_type(exc) != "Nothing to invoice for customer":
                 six.reraise(*sys.exc_info())
             return
 
@@ -2413,6 +2418,7 @@ class UpcomingInvoice(Invoice):
         return  # noop
 
 
+@python_2_unicode_compatible
 class InvoiceItem(StripeObject):
     """
     Sometimes you want to add a charge or credit to a customer but only actually charge the customer's
@@ -2502,8 +2508,10 @@ class InvoiceItem(StripeObject):
 
     def __str__(self):
         if self.plan and self.plan.product:
-            return self.plan.product.name or str(self.plan)
-        return super(InvoiceItem, self).__str__()
+            return self.plan.product.name or text_type(self.plan)
+        # See: https://code.djangoproject.com/ticket/25218
+        text_method = '__str__' if PY3 else '__unicode__'
+        return getattr(super(InvoiceItem, self), text_method)()
 
     def _attach_objects_hook(self, cls, data):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
@@ -2694,6 +2702,7 @@ class Plan(StripeObject):
         self.save()
 
 
+@python_2_unicode_compatible
 class Product(StripeObject):
     """
     https://stripe.com/docs/api#product_object
@@ -2761,6 +2770,7 @@ class Product(StripeObject):
         return self.name
 
 
+@python_2_unicode_compatible
 class Subscription(StripeObject):
     """
     Subscriptions allow you to charge a customer's card on a recurring basis. A subscription ties a
@@ -2883,7 +2893,7 @@ class Subscription(StripeObject):
         return target_cls._get_or_create_from_stripe_object(data["plan"])[0]
 
     def __str__(self):
-        return "{customer} on {plan}".format(customer=str(self.customer), plan=str(self.plan))
+        return "{customer} on {plan}".format(customer=text_type(self.customer), plan=text_type(self.plan))
 
     def update(
         self, plan=None, application_fee_percent=None, coupon=None, prorate=djstripe_settings.PRORATION_POLICY,
@@ -2980,7 +2990,7 @@ class Subscription(StripeObject):
         try:
             stripe_subscription = self._api_delete(at_period_end=at_period_end)
         except stripe.InvalidRequestError as exc:
-            if "No such subscription:" in str(exc):
+            if "No such subscription:" in text_type(exc):
                 # cancel() works by deleting the subscription. The object still
                 # exists in Stripe however, and can still be retrieved.
                 # If the subscription was already canceled (status=canceled),
@@ -3048,6 +3058,7 @@ class Subscription(StripeObject):
 #                                   Connect                                    #
 # ============================================================================ #
 
+@python_2_unicode_compatible
 class Account(StripeObject):
     stripe_class = stripe.Account
 
@@ -3268,7 +3279,7 @@ class IdempotencyKey(models.Model):
         unique_together = ("action", "livemode")
 
     def __str__(self):
-        return str(self.uuid)
+        return text_type(self.uuid)
 
     @property
     def is_expired(self):
@@ -3348,7 +3359,7 @@ class WebhookEventTrigger(models.Model):
                     obj.process(save=False)
         except Exception as e:
             max_length = WebhookEventTrigger._meta.get_field("exception").max_length
-            obj.exception = str(e)[:max_length]
+            obj.exception = text_type(e)[:max_length]
             obj.traceback = format_exc()
 
             # Send the exception as the webhook_processing_error signal

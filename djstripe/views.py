@@ -21,6 +21,7 @@ from django.utils.decorators import method_decorator
 from django.utils.http import is_safe_url
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import FormView, TemplateView, View
+from six import text_type
 
 from . import settings as djstripe_settings
 from .enums import SubscriptionStatus
@@ -138,4 +139,4 @@ class ProcessWebhookView(View):
             # Webhook Event did not validate, return 400
             return HttpResponseBadRequest()
 
-        return HttpResponse(str(trigger.id))
+        return HttpResponse(text_type(trigger.id))

@@ -11,6 +11,7 @@ from copy import deepcopy
 
 from django.test.testcases import TestCase
 from mock import patch
+from six import text_type
 
 from djstripe.models import InvoiceItem
 
@@ -41,12 +42,12 @@ class InvoiceItemTest(TestCase):
         self.assertEqual(invoiceitem.get_stripe_dashboard_url(), invoiceitem.invoice.get_stripe_dashboard_url())
 
         self.assertEqual(
-            str(invoiceitem),
+            text_type(invoiceitem),
             "<amount=20, date=2015-08-08 11:26:56+00:00, stripe_id=ii_16XVTY2eZvKYlo2Cxz5n3RaS>"
         )
         invoiceitem.plan = None
         self.assertEqual(
-            str(invoiceitem),
+            text_type(invoiceitem),
             "<amount=20, date=2015-08-08 11:26:56+00:00, stripe_id=ii_16XVTY2eZvKYlo2Cxz5n3RaS>"
         )
 
