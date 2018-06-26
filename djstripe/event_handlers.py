@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. module:: djstripe.event_handlers.
 
@@ -18,8 +17,6 @@ NOTE: Event data is not guaranteed to be in the correct API version format. See 
       process.
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import logging
 
 from . import models, webhooks
@@ -115,9 +112,9 @@ def customer_subscription_webhook_handler(event):
     _handle_crud_like_event(target_cls=models.Subscription, event=event)
 
 
-@webhooks.handler("transfer", "charge", "coupon", "invoice", "invoiceitem", "plan")
+@webhooks.handler("transfer", "charge", "coupon", "invoice", "invoiceitem", "plan", "product")
 def other_object_webhook_handler(event):
-    """Handle updates to transfer, charge, invoice, invoiceitem and plan objects.
+    """Handle updates to transfer, charge, invoice, invoiceitem, plan and product objects.
 
     Docs for:
     - charge: https://stripe.com/docs/api#charges
@@ -125,6 +122,7 @@ def other_object_webhook_handler(event):
     - invoice: https://stripe.com/docs/api#invoices
     - invoiceitem: https://stripe.com/docs/api#invoiceitems
     - plan: https://stripe.com/docs/api#plans
+    - product: https://stripe.com/docs/api#products
     """
 
     if event.parts[:2] == ["charge", "dispute"]:
@@ -137,6 +135,7 @@ def other_object_webhook_handler(event):
             "coupon": models.Coupon,
             "invoice": models.Invoice,
             "invoiceitem": models.InvoiceItem,
+            "product": models.Product,
             "plan": models.Plan,
             "transfer": models.Transfer
         }.get(event.category)
@@ -212,7 +211,7 @@ def _handle_crud_like_event(target_cls, event, data=None, verb=None,
     ignored (but the event processing still succeeds).
 
     :param target_cls: The djstripe model being handled.
-    :type: ``djstripe.stripe_objects.StripeObject``
+    :type: ``djstripe.models.StripeObject``
     :param data: The event object data (defaults to ``event.data``).
     :param verb: The event verb (defaults to ``event.verb``).
     :param stripe_id: The object Stripe ID (defaults to ``object.id``).

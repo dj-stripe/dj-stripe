@@ -7,8 +7,6 @@
 .. moduleauthor:: Alex Kavanaugh (@kavdev)
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import time
 from copy import deepcopy
 from datetime import datetime

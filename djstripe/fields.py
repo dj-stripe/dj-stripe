@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. module:: djstripe.fields.
 
@@ -6,8 +5,6 @@
 
 .. moduleauthor:: Bill Huneke (@wahuneke)
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import decimal
 
 from django.core.exceptions import FieldError, ImproperlyConfigured
@@ -27,10 +24,10 @@ else:
 class PaymentMethodForeignKey(models.ForeignKey):
     def __init__(self, **kwargs):
         kwargs.setdefault("to", "PaymentMethod")
-        super(PaymentMethodForeignKey, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
 
-class StripeFieldMixin(object):
+class StripeFieldMixin:
     """
     Custom fields for all Stripe data.
 
@@ -76,7 +73,7 @@ class StripeFieldMixin(object):
         if self.deprecated:
             kwargs["null"] = True
             kwargs["default"] = None
-        super(StripeFieldMixin, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def stripe_to_db(self, data):
         """Try converting stripe fields to defined database fields."""
@@ -111,7 +108,7 @@ class StripePercentField(StripeFieldMixin, models.DecimalField):
             'validators': [MinValueValidator(1.00), MaxValueValidator(100.00)]
         }
         defaults.update(kwargs)
-        super(StripePercentField, self).__init__(*args, **defaults)
+        super().__init__(*args, **defaults)
 
 
 class StripeCurrencyField(StripeFieldMixin, models.DecimalField):
@@ -128,11 +125,11 @@ class StripeCurrencyField(StripeFieldMixin, models.DecimalField):
             'max_digits': 8,
         }
         defaults.update(kwargs)
-        super(StripeCurrencyField, self).__init__(*args, **defaults)
+        super().__init__(*args, **defaults)
 
     def stripe_to_db(self, data):
         """Convert the raw value to decimal representation."""
-        val = super(StripeCurrencyField, self).stripe_to_db(data)
+        val = super().stripe_to_db(data)
 
         # Note: 0 is a possible return value, which is 'falseish'
         if val is not None:
@@ -147,7 +144,7 @@ class StripeBooleanField(StripeFieldMixin, models.BooleanField):
         if kwargs.get("deprecated", False):
             raise ImproperlyConfigured("Boolean field cannot be deprecated. Change field type to "
                                        "StripeNullBooleanField")
-        super(StripeBooleanField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class StripeNullBooleanField(StripeFieldMixin, models.NullBooleanField):
@@ -171,7 +168,7 @@ class StripeEnumField(StripeCharField):
             "max_length": max(len(k) for k, v in choices)
         }
         defaults.update(kwargs)
-        super(StripeEnumField, self).__init__(*args, **defaults)
+        super().__init__(*args, **defaults)
 
     def deconstruct(self):
         name, path, args, kwargs = super().deconstruct()
@@ -198,7 +195,7 @@ class StripeIdField(StripeCharField):
             'null': False,
         }
         defaults.update(kwargs)
-        super(StripeIdField, self).__init__(*args, **defaults)
+        super().__init__(*args, **defaults)
 
 
 class StripeTextField(StripeFieldMixin, models.TextField):
@@ -212,7 +209,7 @@ class StripeDateTimeField(StripeFieldMixin, models.DateTimeField):
 
     def stripe_to_db(self, data):
         """Convert the raw timestamp value to a DateTime representation."""
-        val = super(StripeDateTimeField, self).stripe_to_db(data)
+        val = super().stripe_to_db(data)
 
         # Note: 0 is a possible return value, which is 'falseish'
         if val is not None:

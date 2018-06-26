@@ -5,8 +5,6 @@
 .. moduleauthor:: Alex Kavanaugh (@kavdev)
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from django.conf import settings
 from django.test.testcases import TestCase
 from mock import patch

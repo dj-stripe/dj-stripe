@@ -37,8 +37,8 @@ Features
 * Subscription management
 * Designed for easy implementation of post-registration subscription forms
 * Single-unit purchases
-* Works with Django >= 1.11
-* Works with Python 3.6, 3.5, 3.4, 2.7
+* Works with Django >= 2.0
+* Works with Python >= 3.4
 * Compatible with Stripe API version 2018-05-21
 * Built-in migrations
 * Dead-Easy installation

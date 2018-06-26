@@ -4,15 +4,14 @@ Django + Stripe Made Easy
 * Subscription management
 * Designed for easy implementation of post-registration subscription forms
 * Single-unit purchases
-* Works with Django >= 1.10
-* Works with Python 3.6, 3.5, 3.4, 2.7
+* Works with Django >= 2.0
+* Works with Python >= 3.4
 * Built-in migrations
 * Dead-Easy installation
 * Leverages the best of the 3rd party Django package ecosystem
 * `djstripe` namespace so you can have more than one payments related app
 * Documented
 * 100% Tested
-* Current API version (2017-06-05), in progress of being updated
 
 Contents
 ---------

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. module:: dj-stripe.contrib.rest_framework.urls.
 
@@ -16,8 +15,6 @@ Wire this into the root URLConf this way::
     # Call to 'djstripe.contrib.rest_framework.urls' and 'namespace' must stay as is
 
 """
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.conf.urls import url
 

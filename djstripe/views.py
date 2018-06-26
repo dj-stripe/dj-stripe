@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. module:: djstripe.webhooks.
 
@@ -6,8 +5,6 @@
 
 .. moduleauthor:: @kavdev, @pydanny, @lskillen, @wahuneke, @dollydagr, @chrissmejia
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import logging
 
 from django.contrib import messages
@@ -88,7 +85,7 @@ class CancelSubscriptionView(LoginRequiredMixin, SubscriptionMixin, FormView):
                 status=subscription.status, period_end=subscription.current_period_end)
             )
 
-        return super(CancelSubscriptionView, self).form_valid(form)
+        return super().form_valid(form)
 
     def status_cancel(self):
         """Triggered when the subscription is immediately canceled (not pro-rated)"""

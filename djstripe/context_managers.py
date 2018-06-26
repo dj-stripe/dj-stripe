@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. module:: djstripe.context_managers.
 
@@ -9,8 +8,6 @@
 .. moduleauthor:: Lee Skillen (@lskillen)
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from contextlib import contextmanager
 
 from . import settings as djstripe_settings

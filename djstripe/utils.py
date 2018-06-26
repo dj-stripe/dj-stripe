@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 .. module:: djstripe.utils.
 
@@ -6,8 +5,6 @@
 
 .. moduleauthor:: @kavdev, @pydanny, @wahuneke
 """
-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 import datetime
 
