@@ -72,7 +72,7 @@ Add to urls.py:
 
     path("stripe/", include("djstripe.urls", namespace="djstripe")),
 
-Then tell Stripe about the webhook (Stripe webhook docs can be found `here <https://stripe.com/docs/webhooks>`_) using the full URL of your endpoint from the urls.py step above (e.g. ``https://example.com/payments/webhook``).
+Then tell Stripe about the webhook (Stripe webhook docs can be found `here <https://stripe.com/docs/webhooks>`_) using the full URL of your endpoint from the urls.py step above (e.g. ``https://example.com/stripe/webhook``).
 
 Run the commands::
 
