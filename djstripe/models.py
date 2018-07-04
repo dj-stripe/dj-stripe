@@ -825,7 +825,7 @@ class Customer(StripeObject):
     )
     # </discount>
     email = StripeTextField(null=True)
-    shipping = StripeJSONField(null=True, help_text="Shipping information associated with the customer.")
+    shipping = StripeJSONField(stripe_required=False, help_text="Shipping information associated with the customer.")
 
     # dj-stripe fields
     subscriber = ForeignKey(
