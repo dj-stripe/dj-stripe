@@ -1939,9 +1939,9 @@ class Source(StripeObject):
         try:
             self.sync_from_stripe_data(self.api_retrieve().detach())
             return True
-        except NotImplementedError:
+        except (InvalidRequestError, NotImplementedError):
             # The source was already detached. Resyncing.
-            # NotImplementedError is weird.
+            # NotImplementedError is an artifact of stripe-python<2.0
             # https://github.com/stripe/stripe-python/issues/376
             self.sync_from_stripe_data(self.api_retrieve())
             return False
