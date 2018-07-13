@@ -1948,7 +1948,7 @@ class Source(StripeObject):
 #                                Subscriptions                                 #
 # ============================================================================ #
 
-
+@python_2_unicode_compatible
 class Coupon(StripeObject):
     stripe_id = StripeIdField(stripe_name="id", max_length=500)
     amount_off = StripeCurrencyField(
