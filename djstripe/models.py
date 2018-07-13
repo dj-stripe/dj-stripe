@@ -24,6 +24,7 @@ from django.db.models.fields.related import ForeignKey, OneToOneField
 from django.utils import dateformat, timezone
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
+from stripe.error import InvalidRequestError
 
 from . import enums
 from . import settings as djstripe_settings
@@ -1103,7 +1104,7 @@ class Customer(StripeObject):
     def purge(self):
         try:
             self._api_delete()
-        except stripe.InvalidRequestError as exc:
+        except InvalidRequestError as exc:
             if "No such customer:" in str(exc):
                 # The exception was thrown because the stripe customer was already
                 # deleted on the stripe side, ignore the exception
@@ -1227,7 +1228,7 @@ class Customer(StripeObject):
             invoice = Invoice._api_create(customer=self.stripe_id)
             invoice.pay()
             return True
-        except stripe.InvalidRequestError:  # TODO: Check this for a more specific error message.
+        except InvalidRequestError:  # TODO: Check this for a more specific error message.
             return False  # There was nothing to invoice
 
     def retry_unpaid_invoices(self):
@@ -1237,7 +1238,7 @@ class Customer(StripeObject):
         for invoice in self.invoices.filter(paid=False, closed=False):
             try:
                 invoice.retry()  # Always retry unpaid invoices
-            except stripe.InvalidRequestError as exc:
+            except InvalidRequestError as exc:
                 if str(exc) != "Invoice is already paid":
                     raise
 
@@ -1750,7 +1751,7 @@ class Card(StripeObject):
 
         try:
             self._api_delete()
-        except stripe.InvalidRequestError as exc:
+        except InvalidRequestError as exc:
             if "No such source:" in str(exc) or "No such customer:" in str(exc):
                 # The exception was thrown because the stripe customer or card was already
                 # deleted on the stripe side, ignore the exception
@@ -1773,7 +1774,7 @@ class Card(StripeObject):
         # eg. {"id": "cus_XXXXXXXX", "deleted": True}
         if "sources" not in customer:
             # We fake a native stripe InvalidRequestError so that it's caught like an invalid ID error.
-            raise stripe.InvalidRequestError("No such source: %s" % (self.stripe_id), "id")
+            raise InvalidRequestError("No such source: %s" % (self.stripe_id), "id")
 
         return customer.sources.retrieve(self.stripe_id, expand=self.expand_fields)
 
@@ -2263,7 +2264,7 @@ class Invoice(StripeObject):
                 subscription_proration_date=subscription_proration_date,
                 subscription_quantity=subscription_quantity,
                 subscription_trial_end=subscription_trial_end, **kwargs)
-        except stripe.InvalidRequestError as exc:
+        except InvalidRequestError as exc:
             if str(exc) != "Nothing to invoice for customer":
                 raise
             return
@@ -2972,7 +2973,7 @@ class Subscription(StripeObject):
 
         try:
             stripe_subscription = self._api_delete(at_period_end=at_period_end)
-        except stripe.InvalidRequestError as exc:
+        except InvalidRequestError as exc:
             if "No such subscription:" in str(exc):
                 # cancel() works by deleting the subscription. The object still
                 # exists in Stripe however, and can still be retrieved.
