@@ -239,6 +239,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunSQL("""
+            UPDATE "djstripe_invoice" SET "attempts" = 0 WHERE "attempts" IS NULL;
+            UPDATE "djstripe_charge" SET "amount_refunded" = '0.00' WHERE "amount_refunded" IS NULL;
+        """),
         migrations.RenameField(
             model_name='charge',
             old_name='charge_created',
