@@ -880,7 +880,8 @@ class Customer(StripeObject):
 
     def subscribe(
         self, plan, charge_immediately=True, application_fee_percent=None, coupon=None,
-        quantity=None, metadata=None, tax_percent=None, trial_end=None
+        quantity=None, metadata=None, tax_percent=None, trial_end=None, trial_from_plan=None,
+        trial_period_days=None
     ):
         """
         Subscribes this customer to a plan.
@@ -939,6 +940,8 @@ class Customer(StripeObject):
             metadata=metadata,
             tax_percent=tax_percent,
             trial_end=trial_end,
+            trial_from_plan=trial_from_plan,
+            trial_period_days=trial_period_days,
         )
 
         if charge_immediately:
