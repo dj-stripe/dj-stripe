@@ -923,6 +923,14 @@ class Customer(StripeObject):
         :param charge_immediately: Whether or not to charge for the subscription upon creation. If False, an
                                    invoice will be created at the end of this period.
         :type charge_immediately: boolean
+        :param trial_from_plan: Indicates if a plan’s trial_period_days should be applied to the subscription.
+                                Setting trial_end per subscription is preferred, and this defaults to false.
+                                Setting this flag to true together with trial_end is not allowed.
+        :type trial_from_plan: boolean
+        :param trial_period_days: Integer representing the number of trial period days before the customer is
+                                  charged for the first time. This will always overwrite any trials that might
+                                  apply via a subscribed plan.
+        :type trial_period_days: integer
 
         .. Notes:
         .. ``charge_immediately`` is only available on ``Customer.subscribe()``
