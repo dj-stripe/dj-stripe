@@ -198,7 +198,7 @@ class Migration(migrations.Migration):
                 ('djstripe_created', models.DateTimeField(auto_now_add=True)),
                 ('djstripe_updated', models.DateTimeField(auto_now=True)),
                 ('account_balance', djstripe.fields.StripeIntegerField(help_text="Current balance, if any, being stored on the customer's account. If negative, the customer has credit to apply to the next invoice. If positive, the customer has an amount owed that will be added to thenext invoice. The balance does not refer to any unpaid invoices; it solely takes into account amounts that have yet to be successfullyapplied to any invoice. This balance is only taken into account for recurring billing purposes (i.e., subscriptions, invoices, invoice items).")),
-                ('business_vat_id', djstripe.fields.StripeCharField(help_text="The customer's VAT identification number.", max_length=20, null=True)),
+                ('business_vat_id', djstripe.fields.StripeCharField(help_text="The customer's VAT identification number.", max_length=20, null=True, blank=True)),
                 ('currency', djstripe.fields.StripeCharField(help_text='The currency the customer can be charged in for recurring billing purposes (subscriptions, invoices, invoice items).', max_length=3, null=True)),
                 ('delinquent', djstripe.fields.StripeBooleanField(help_text="Whether or not the latest charge for the customer's latest invoice has failed.")),
                 ('coupon_start', djstripe.fields.StripeDateTimeField(editable=False, help_text='If a coupon is present, the date at which it was applied.', null=True)),
