@@ -3,6 +3,17 @@
 History
 =======
 
+1.1.1 (2018-07-18)
+------------------
+
+This is a bugfix-only release for Python 2 and migration issues found
+in dj-stripe 1.1.0.
+
+If you are on an older version of dj-stripe, you should upgrade to 1.1.x
+first with `pip install "djstripe<1.2"` before upgrading to 1.2.x.
+
+Please make sure to read the 1.1.0 release notes below.
+
 
 1.1.0 (2018-06-11)
 ------------------
