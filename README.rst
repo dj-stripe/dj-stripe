@@ -1,58 +1,38 @@
-=============================
+=========
 dj-stripe
-=============================
-Django + Stripe Made Easy
+=========
 
-Badges
-------
+.. image:: https://travis-ci.org/dj-stripe/dj-stripe.png
+   :alt: Build Status
+   :target: https://travis-ci.org/dj-stripe/dj-stripe
 
-.. image:: https://img.shields.io/travis/dj-stripe/dj-stripe.svg?style=flat-square
-        :target: https://travis-ci.org/dj-stripe/dj-stripe
-.. image:: https://img.shields.io/codecov/c/github/dj-stripe/dj-stripe.svg?style=flat-square
-        :target: http://codecov.io/github/dj-stripe/dj-stripe
-.. image:: https://pyup.io/repos/github/dj-stripe/dj-stripe/shield.svg
-        :target: https://pyup.io/repos/github/dj-stripe/dj-stripe/
-.. image:: https://img.shields.io/codacy/grade/3c99e13eda1c4dea9f993b362e4ea816.svg?style=flat-square
-        :target: https://www.codacy.com/app/kavdev/dj-stripe
-
-.. image:: https://img.shields.io/pypi/v/dj-stripe.svg?style=flat-square
-        :target: https://pypi.python.org/pypi/dj-stripe
-.. image:: https://img.shields.io/pypi/dw/dj-stripe.svg?style=flat-square
-        :target: https://pypi.python.org/pypi/dj-stripe
-
-.. image:: https://img.shields.io/github/issues/dj-stripe/dj-stripe.svg?style=flat-square
-        :target: https://github.com/dj-stripe/dj-stripe/issues
-.. image:: https://img.shields.io/github/license/dj-stripe/dj-stripe.svg?style=flat-square
-        :target: https://github.com/dj-stripe/dj-stripe/blob/master/LICENSE
+Stripe Models for Django.
 
 
-Documentation
--------------
+Introduction
+------------
 
-The full documentation is at http://dj-stripe.rtfd.org.
+dj-stripe implements all of the Stripe models, for Django.
+Set up your webhook and start receiving model updates.
+You will then have a copy of all the Stripe models available in Django models, no API traffic required!
+
+The full documentation is available here: https://dj-stripe.readthedocs.io/
 
 Features
 --------
 
-* Subscription management
-* Designed for easy implementation of post-registration subscription forms
-* Single-unit purchases
-* Works with Django >= 2.0
-* Works with Python >= 3.4
-* Compatible with Stripe API version 2018-05-21
-* Built-in migrations
-* Dead-Easy installation
-* Leverages the best of the 3rd party Django package ecosystem
-* `djstripe` namespace so you can have more than one payments related app
-* Documented
-* 100% Tested
+* Subscriptions
+* Individual charges
+* Stripe Sources
+* Stripe v2 and v3 support
+* Supports Stripe API `2018-05-21`
 
-Constraints
+Requirements
 ------------
 
-1. For stripe.com only
-2. Only use or support well-maintained third-party libraries
-3. For modern Python and Django
+* Django >= 2.0
+* Python >= 3.4
+* Supports Stripe exclusively. For PayPal, see `dj-paypal <https://github.com/HearthSim/dj-paypal>`_ instead.
 
 
 Quickstart
@@ -82,17 +62,17 @@ Add your Stripe keys and set the operating mode:
     STRIPE_LIVE_SECRET_KEY = os.environ.get("STRIPE_LIVE_SECRET_KEY", "<your secret key>")
     STRIPE_TEST_PUBLIC_KEY = os.environ.get("STRIPE_TEST_PUBLIC_KEY", "<your publishable key>")
     STRIPE_TEST_SECRET_KEY = os.environ.get("STRIPE_TEST_SECRET_KEY", "<your secret key>")
-    STRIPE_LIVE_MODE = <True or False>
+    STRIPE_LIVE_MODE = False  # Change to True in production
 
-Add some payment plans via the Stripe.com dashboard or the django ORM.
+Add some payment plans via the Stripe.com dashboard.
 
-Add to the urls.py:
+Add to urls.py:
 
 .. code-block:: python
 
-    url(r'^payments/', include('djstripe.urls', namespace="djstripe")),
+    path("stripe/", include("djstripe.urls", namespace="djstripe")),
 
-Then tell Stripe about the webhook (Stripe webhook docs can be found `here <https://stripe.com/docs/webhooks>`_) using the full URL of your endpoint from the urls.py step above (e.g. ``https://yourwebsite.com/payments/webhook``).
+Then tell Stripe about the webhook (Stripe webhook docs can be found `here <https://stripe.com/docs/webhooks>`_) using the full URL of your endpoint from the urls.py step above (e.g. ``https://example.com/stripe/webhook``).
 
 Run the commands::
 
@@ -113,12 +93,12 @@ Assuming the tests are run against PostgreSQL::
 Follows Best Practices
 ======================
 
-.. image:: http://twoscoops.smugmug.com/Two-Scoops-Press-Media-Kit/i-C8s5jkn/0/O/favicon-152.png
+.. image:: https://twoscoops.smugmug.com/Two-Scoops-Press-Media-Kit/i-C8s5jkn/0/O/favicon-152.png
    :name: Two Scoops Logo
    :align: center
    :alt: Two Scoops of Django
-   :target: http://twoscoopspress.org/products/two-scoops-of-django-1-11
+   :target: https://www.twoscoopspress.org/products/two-scoops-of-django-1-11
 
 This project follows best practices as espoused in `Two Scoops of Django: Best Practices for Django 1.11`_.
 
-.. _`Two Scoops of Django: Best Practices for Django 1.11`: http://twoscoopspress.org/products/two-scoops-of-django-1-11
+.. _`Two Scoops of Django: Best Practices for Django 1.11`: https://twoscoopspress.org/products/two-scoops-of-django-1-11

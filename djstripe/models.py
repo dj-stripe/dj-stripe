@@ -24,6 +24,7 @@ from django.db.models.fields.related import ForeignKey, OneToOneField
 from django.utils import dateformat, timezone
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
+from stripe.error import InvalidRequestError
 
 from . import enums
 from . import settings as djstripe_settings
@@ -568,7 +569,7 @@ class Charge(StripeObject):
         help_text="The email address that the receipt for this charge was sent to."
     )
     receipt_number = StripeCharField(
-        null=True, max_length=9,
+        null=True, max_length=14,
         help_text="The transaction number that appears on email receipts sent for this charge."
     )
     refunded = StripeBooleanField(
@@ -617,9 +618,6 @@ class Charge(StripeObject):
     )
     source_stripe_id = StripeIdField(null=True, stripe_name="source.id", help_text="The payment source id.")
     fraudulent = StripeBooleanField(default=False, help_text="Whether or not this charge was marked as fraudulent.")
-
-    # XXX: Remove me
-    receipt_sent = BooleanField(default=False, help_text="Whether or not a receipt was sent for this charge.")
 
     objects = ChargeManager()
 
@@ -773,6 +771,7 @@ class Customer(StripeObject):
         )
     )
     business_vat_id = StripeCharField(
+        blank=True,
         max_length=20,
         null=True,
         stripe_required=False,
@@ -789,7 +788,7 @@ class Customer(StripeObject):
         help_text="Whether or not the latest charge for the customer's latest invoice has failed."
     )
     # <discount>
-    coupon = ForeignKey("Coupon", null=True, on_delete=SET_NULL)
+    coupon = ForeignKey("Coupon", null=True, blank=True, on_delete=SET_NULL)
     coupon_start = StripeDateTimeField(
         null=True, editable=False, stripe_name="discount.start", stripe_required=False,
         help_text="If a coupon is present, the date at which it was applied."
@@ -800,7 +799,9 @@ class Customer(StripeObject):
     )
     # </discount>
     email = StripeTextField(null=True)
-    shipping = StripeJSONField(null=True, help_text="Shipping information associated with the customer.")
+    shipping = StripeJSONField(
+        blank=True, stripe_required=False, help_text="Shipping information associated with the customer."
+    )
 
     # dj-stripe fields
     subscriber = ForeignKey(
@@ -1106,7 +1107,7 @@ class Customer(StripeObject):
     def purge(self):
         try:
             self._api_delete()
-        except stripe.InvalidRequestError as exc:
+        except InvalidRequestError as exc:
             if "No such customer:" in str(exc):
                 # The exception was thrown because the stripe customer was already
                 # deleted on the stripe side, ignore the exception
@@ -1230,7 +1231,7 @@ class Customer(StripeObject):
             invoice = Invoice._api_create(customer=self.stripe_id)
             invoice.pay()
             return True
-        except stripe.InvalidRequestError:  # TODO: Check this for a more specific error message.
+        except InvalidRequestError:  # TODO: Check this for a more specific error message.
             return False  # There was nothing to invoice
 
     def retry_unpaid_invoices(self):
@@ -1240,7 +1241,7 @@ class Customer(StripeObject):
         for invoice in self.invoices.filter(paid=False, closed=False):
             try:
                 invoice.retry()  # Always retry unpaid invoices
-            except stripe.InvalidRequestError as exc:
+            except InvalidRequestError as exc:
                 if str(exc) != "Invoice is already paid":
                     raise
 
@@ -1753,7 +1754,7 @@ class Card(StripeObject):
 
         try:
             self._api_delete()
-        except stripe.InvalidRequestError as exc:
+        except InvalidRequestError as exc:
             if "No such source:" in str(exc) or "No such customer:" in str(exc):
                 # The exception was thrown because the stripe customer or card was already
                 # deleted on the stripe side, ignore the exception
@@ -1776,7 +1777,7 @@ class Card(StripeObject):
         # eg. {"id": "cus_XXXXXXXX", "deleted": True}
         if "sources" not in customer:
             # We fake a native stripe InvalidRequestError so that it's caught like an invalid ID error.
-            raise stripe.InvalidRequestError("No such source: %s" % (self.stripe_id), "id")
+            raise InvalidRequestError("No such source: %s" % (self.stripe_id), "id")
 
         return customer.sources.retrieve(self.stripe_id, expand=self.expand_fields)
 
@@ -1913,9 +1914,9 @@ class Source(StripeObject):
         try:
             self.sync_from_stripe_data(self.api_retrieve().detach())
             return True
-        except NotImplementedError:
+        except (InvalidRequestError, NotImplementedError):
             # The source was already detached. Resyncing.
-            # NotImplementedError is weird.
+            # NotImplementedError is an artifact of stripe-python<2.0
             # https://github.com/stripe/stripe-python/issues/376
             self.sync_from_stripe_data(self.api_retrieve())
             return False
@@ -2266,7 +2267,7 @@ class Invoice(StripeObject):
                 subscription_proration_date=subscription_proration_date,
                 subscription_quantity=subscription_quantity,
                 subscription_trial_end=subscription_trial_end, **kwargs)
-        except stripe.InvalidRequestError as exc:
+        except InvalidRequestError as exc:
             if str(exc) != "Nothing to invoice for customer":
                 raise
             return
@@ -2618,6 +2619,20 @@ class Plan(StripeObject):
         ordering = ["amount"]
 
     @classmethod
+    def _stripe_object_to_product(cls, target_cls, data):
+        """
+        Search the given manager for the Product matching this Plan object's ``product`` field.
+
+        :param target_cls: The target class
+        :type target_cls: Product
+        :param data: stripe object
+        :type data: dict
+        """
+
+        if "product" in data and data["product"]:
+            return target_cls._get_or_create_from_stripe_object(data, "product")[0]
+
+    @classmethod
     def get_or_create(cls, **kwargs):
         """ Get or create a Plan."""
 
@@ -2641,6 +2656,11 @@ class Plan(StripeObject):
 
     def __str__(self):
         return self.name or self.nickname or self.stripe_id
+
+    def _attach_objects_hook(self, cls, data):
+        product = cls._stripe_object_to_product(target_cls=Product, data=data)
+        if product:
+            self.product = product
 
     @property
     def amount_in_cents(self):
@@ -2711,11 +2731,11 @@ class Product(StripeObject):
         "A short one-line description of the product, meant to be displayable"
         "to the customer. Only applicable to products of `type=good`."
     ))
-    deactivate_on = StripeJSONField(blank=True, help_text=(
+    deactivate_on = StripeJSONField(stripe_required=False, help_text=(
         "An array of connect application identifiers that cannot purchase "
         "this product. Only applicable to products of `type=good`."
     ))
-    images = StripeJSONField(blank=True, help_text=(
+    images = StripeJSONField(stripe_required=False, help_text=(
         "A list of up to 8 URLs of images for this product, meant to be "
         "displayable to the customer. Only applicable to products of `type=good`."
     ))
@@ -2815,7 +2835,7 @@ class Subscription(StripeObject):
         related_name="subscriptions",
         help_text="The customer associated with this subscription."
     )
-    days_until_due = StripeIntegerField(stripe_required=False, help_text=(
+    days_until_due = StripeIntegerField(blank=True, stripe_required=False, help_text=(
         "Number of days a customer has to pay invoices generated by this subscription. "
         "This value will be `null` for subscriptions where `billing=charge_automatically`."
     ))
@@ -2982,7 +3002,7 @@ class Subscription(StripeObject):
 
         try:
             stripe_subscription = self._api_delete(at_period_end=at_period_end)
-        except stripe.InvalidRequestError as exc:
+        except InvalidRequestError as exc:
             if "No such subscription:" in str(exc):
                 # cancel() works by deleting the subscription. The object still
                 # exists in Stripe however, and can still be retrieved.
@@ -3112,10 +3132,10 @@ class Account(StripeObject):
     stripe_class = stripe.Account
 
     business_logo = ForeignKey("FileUpload", on_delete=models.SET_NULL, null=True)
-    business_name = StripeCharField(max_length=255, help_text=(
+    business_name = StripeCharField(max_length=255, stripe_required=False, help_text=(
         "The publicly visible name of the business"
     ))
-    business_primary_color = StripeCharField(max_length=7, null=True, help_text=(
+    business_primary_color = StripeCharField(max_length=7, stripe_required=False, help_text=(
         "A CSS hex color value representing the primary branding color for this account"
     ))
     business_url = StripeCharField(max_length=200, null=True, help_text=(
@@ -3168,7 +3188,7 @@ class Account(StripeObject):
     support_phone = StripeCharField(max_length=255, help_text=(
         "A publicly shareable support phone number for the business"
     ))
-    support_url = StripeCharField(max_length=200, help_text=(
+    support_url = StripeCharField(max_length=200, stripe_required=False, help_text=(
         "A publicly shareable URL that provides support for this account"
     ))
     timezone = StripeCharField(max_length=50, help_text=(
