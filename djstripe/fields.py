@@ -69,10 +69,13 @@ class StripeFieldMixin:
         self.deprecated = kwargs.pop('deprecated', self.deprecated)
         if not self.stripe_required:
             kwargs["null"] = True
+            kwargs["blank"] = True
 
         if self.deprecated:
             kwargs["null"] = True
+            kwargs["blank"] = True
             kwargs["default"] = None
+
         super().__init__(*args, **kwargs)
 
     def stripe_to_db(self, data):

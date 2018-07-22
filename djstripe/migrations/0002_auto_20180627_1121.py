@@ -15,12 +15,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="account",
             name="business_name",
-            field=djstripe.fields.StripeCharField(help_text="The publicly visible name of the business", max_length=255, null=True),
+            field=djstripe.fields.StripeCharField(help_text="The publicly visible name of the business", max_length=255, null=True, blank=True),
         ),
         migrations.AlterField(
             model_name="account",
             name="support_url",
-            field=djstripe.fields.StripeCharField(help_text="A publicly shareable URL that provides support for this account", max_length=200, null=True),
+            field=djstripe.fields.StripeCharField(help_text="A publicly shareable URL that provides support for this account", max_length=200, null=True, blank=True),
         ),
         migrations.AlterField(
             model_name="charge",
@@ -30,12 +30,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="product",
             name="deactivate_on",
-            field=djstripe.fields.StripeJSONField(help_text="An array of connect application identifiers that cannot purchase this product. Only applicable to products of `type=good`.", null=True),
+            field=djstripe.fields.StripeJSONField(help_text="An array of connect application identifiers that cannot purchase this product. Only applicable to products of `type=good`.", null=True, blank=True),
         ),
         migrations.AlterField(
             model_name="product",
             name="images",
-            field=djstripe.fields.StripeJSONField(help_text="A list of up to 8 URLs of images for this product, meant to be displayable to the customer. Only applicable to products of `type=good`.", null=True),
+            field=djstripe.fields.StripeJSONField(help_text="A list of up to 8 URLs of images for this product, meant to be displayable to the customer. Only applicable to products of `type=good`.", null=True, blank=True),
         ),
         migrations.RemoveField(
             model_name="charge",
