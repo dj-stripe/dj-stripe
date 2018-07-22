@@ -10,6 +10,7 @@ from django.db import migrations, models
 import djstripe.enums
 import djstripe.fields
 import djstripe.models
+from djstripe.models.webhooks import _get_version
 
 
 DJSTRIPE_SUBSCRIBER_MODEL = getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", settings.AUTH_USER_MODEL)
@@ -575,7 +576,7 @@ class Migration(migrations.Migration):
                 ('processed', models.BooleanField(default=False, help_text='Whether or not the webhook event has been successfully processed')),
                 ('exception', models.CharField(blank=True, max_length=128)),
                 ('traceback', models.TextField(blank=True, help_text='Traceback if an exception was thrown during processing')),
-                ('djstripe_version', models.CharField(default=djstripe.models._get_version, help_text='The version of dj-stripe when the webhook was received', max_length=32)),
+                ('djstripe_version', models.CharField(default=_get_version, help_text='The version of dj-stripe when the webhook was received', max_length=32)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('event', models.ForeignKey(blank=True, help_text='Event object contained in the (valid) Webhook', null=True, on_delete=django.db.models.deletion.SET_NULL, to='djstripe.Event')),
