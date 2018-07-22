@@ -53,8 +53,9 @@ class InvoiceTest(TestCase):
         invoice = Invoice.sync_from_stripe_data(fake_invoice)
         return_value = invoice.retry()
 
-        invoice_retrieve_mock.assert_called_once_with(id=invoice.stripe_id, api_key=settings.STRIPE_SECRET_KEY,
-                                                      expand=None)
+        invoice_retrieve_mock.assert_called_once_with(
+            id=invoice.stripe_id, api_key=settings.STRIPE_SECRET_KEY, expand=[]
+        )
         self.assertTrue(return_value)
 
     @patch("stripe.Invoice.retrieve")

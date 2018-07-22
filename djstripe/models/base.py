@@ -21,7 +21,7 @@ class StripeObject(models.Model):
     # This must be defined in descendants of this model/mixin
     # e.g. Event, Charge, Customer, etc.
     stripe_class = None
-    expand_fields = None
+    expand_fields = []
     stripe_dashboard_item_name = ""
 
     objects = models.Manager()

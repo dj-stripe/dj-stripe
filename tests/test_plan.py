@@ -91,7 +91,7 @@ class PlanTest(TestCase):
         plan_retrieve_mock.assert_called_once_with(
             id=self.plan_data["id"],
             api_key=settings.STRIPE_SECRET_KEY,
-            expand=None
+            expand=[]
         )
         plan = Plan.sync_from_stripe_data(stripe_plan)
         assert plan.amount_in_cents == plan.amount * 100
