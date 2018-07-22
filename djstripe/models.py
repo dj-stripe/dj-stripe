@@ -24,6 +24,8 @@ from django.db.models.fields.related import ForeignKey, OneToOneField
 from django.utils import dateformat, timezone
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
+from django.utils.text import format_lazy
+from django.utils.translation import gettext_lazy as _
 from stripe.error import InvalidRequestError
 
 from . import enums
@@ -2671,13 +2673,23 @@ class Plan(StripeObject):
         interval_count = self.interval_count
 
         if interval_count == 1:
-            interval = self.interval
-            template = "{amount}/{interval}"
+            interval = {
+                "day": _("day"),
+                "week": _("week"),
+                "month": _("month"),
+                "year": _("year"),
+            }[self.interval]
+            template = _("{amount}/{interval}")
         else:
-            interval = {"day": "days", "week": "weeks", "month": "months", "year": "years"}[self.interval]
-            template = "{amount} every {interval_count} {interval}"
+            interval = {
+                "day": _("days"),
+                "week": _("weeks"),
+                "month": _("months"),
+                "year": _("years"),
+            }[self.interval]
+            template = _("{amount} every {interval_count} {interval}")
 
-        return template.format(amount=amount, interval=interval, interval_count=interval_count)
+        return format_lazy(template, amount=amount, interval=interval, interval_count=interval_count)
 
     # TODO: Move this type of update to the model's save() method so it happens automatically
     # Also, block other fields from being saved.
