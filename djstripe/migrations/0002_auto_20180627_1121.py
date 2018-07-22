@@ -27,6 +27,11 @@ class Migration(migrations.Migration):
             name="receipt_number",
             field=djstripe.fields.StripeCharField(help_text="The transaction number that appears on email receipts sent for this charge.", max_length=14, null=True),
         ),
+        migrations.AddField(
+            model_name="coupon",
+            name="name",
+            field=djstripe.fields.StripeCharField(blank=True, help_text="Name of the coupon displayed to customers on for instance invoices or receipts.", max_length=5000, null=True),
+        ),
         migrations.AlterField(
             model_name="product",
             name="deactivate_on",

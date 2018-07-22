@@ -1953,6 +1953,9 @@ class Coupon(StripeObject):
         null=True, blank=True,
         help_text="Maximum number of times this coupon can be redeemed, in total, before it is no longer valid."
     )
+    name = StripeCharField(max_length=5000, stripe_required=False, help_text=(
+        "Name of the coupon displayed to customers on for instance invoices or receipts."
+    ))
     # This is not a StripePercentField. Only integer values between 1 and 100 are possible.
     percent_off = StripePositiveIntegerField(
         null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(100)]
@@ -1979,6 +1982,8 @@ class Coupon(StripeObject):
     stripe_dashboard_item_name = "coupons"
 
     def __str__(self):
+        if self.name:
+            return self.name
         return self.human_readable
 
     @property

@@ -16,6 +16,13 @@ class TransferTest(TestCase):
 
 
 class HumanReadableCouponTest(TestCase):
+    def test_str_name(self):
+        coupon = Coupon.objects.create(
+            stripe_id="coupon-test-amount-off-forever", amount_off=10, currency="usd",
+            duration="forever", name="Test coupon"
+        )
+        self.assertEqual(str(coupon), "Test coupon")
+
     def test_human_readable_usd_off_forever(self):
         coupon = Coupon.objects.create(
             stripe_id="coupon-test-amount-off-forever", amount_off=10, currency="usd",
