@@ -145,6 +145,7 @@ class StripeObject(models.Model):
 
     class Meta:
         abstract = True
+        get_latest_by = "created"
 
     def get_stripe_dashboard_url(self):
         """Get the stripe dashboard url for this object."""

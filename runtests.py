@@ -168,7 +168,7 @@ def run_test_suite(args):
 
     from django_nose import NoseTestSuiteRunner
 
-    test_runner = NoseTestSuiteRunner(verbosity=1, keepdb=True, failfast=True)
+    test_runner = NoseTestSuiteRunner(verbosity=1, keepdb=False, failfast=True)
     failures = test_runner.run_tests(tests)
 
     if failures:

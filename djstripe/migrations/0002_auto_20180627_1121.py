@@ -47,4 +47,64 @@ class Migration(migrations.Migration):
             model_name="charge",
             name="receipt_sent",
         ),
+        migrations.AlterModelOptions(
+            name="account",
+            options={"get_latest_by": "created"},
+        ),
+        migrations.AlterModelOptions(
+            name="bankaccount",
+            options={"get_latest_by": "created"},
+        ),
+        migrations.AlterModelOptions(
+            name="card",
+            options={"get_latest_by": "created"},
+        ),
+        migrations.AlterModelOptions(
+            name="charge",
+            options={"get_latest_by": "created"},
+        ),
+        migrations.AlterModelOptions(
+            name="dispute",
+            options={"get_latest_by": "created"},
+        ),
+        migrations.AlterModelOptions(
+            name="event",
+            options={"get_latest_by": "created"},
+        ),
+        migrations.AlterModelOptions(
+            name="fileupload",
+            options={"get_latest_by": "created"},
+        ),
+        migrations.AlterModelOptions(
+            name="invoiceitem",
+            options={"get_latest_by": "created"},
+        ),
+        migrations.AlterModelOptions(
+            name="payout",
+            options={"get_latest_by": "created"},
+        ),
+        migrations.AlterModelOptions(
+            name="product",
+            options={"get_latest_by": "created"},
+        ),
+        migrations.AlterModelOptions(
+            name="refund",
+            options={"get_latest_by": "created"},
+        ),
+        migrations.AlterModelOptions(
+            name="source",
+            options={"get_latest_by": "created"},
+        ),
+        migrations.AlterModelOptions(
+            name="subscription",
+            options={"get_latest_by": "created"},
+        ),
+        migrations.AlterModelOptions(
+            name="transfer",
+            options={"get_latest_by": "created"},
+        ),
+        migrations.AlterModelOptions(
+            name="upcominginvoice",
+            options={"get_latest_by": "created"},
+        ),
     ]
