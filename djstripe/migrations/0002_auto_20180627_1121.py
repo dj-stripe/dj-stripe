@@ -37,6 +37,12 @@ class Migration(migrations.Migration):
             name="images",
             field=djstripe.fields.StripeJSONField(help_text="A list of up to 8 URLs of images for this product, meant to be displayable to the customer. Only applicable to products of `type=good`.", null=True, blank=True),
         ),
+        migrations.AddField(
+            model_name="plan",
+            name="active",
+            field=djstripe.fields.StripeBooleanField(default=True, help_text="Whether the plan is currently available for new subscriptions."),
+            preserve_default=False,
+        ),
         migrations.RemoveField(
             model_name="charge",
             name="receipt_sent",

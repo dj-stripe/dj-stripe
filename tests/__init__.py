@@ -15,9 +15,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from copy import deepcopy
 from datetime import datetime
 
-from django.utils import timezone, dateformat
+from django.utils import dateformat, timezone
 
 from djstripe.webhooks import TEST_EVENT_ID
+
 
 FUTURE_DATE = datetime(2100, 4, 30, tzinfo=timezone.utc)
 
@@ -516,6 +517,7 @@ FAKE_DISPUTE = {
 FAKE_PLAN = {
     "id": "gold21323",
     "object": "plan",
+    "active": True,
     "amount": 2000,
     "created": 1386247539,
     "currency": "usd",
@@ -532,6 +534,7 @@ FAKE_PLAN = {
 FAKE_PLAN_II = {
     "id": "silver41294",
     "object": "plan",
+    "active": True,
     "amount": 4000,
     "created": 1386247539,
     "currency": "usd",

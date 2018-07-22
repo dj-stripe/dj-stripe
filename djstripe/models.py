@@ -2536,6 +2536,7 @@ class Plan(StripeObject):
     stripe_class = stripe.Plan
     stripe_dashboard_item_name = "plans"
 
+    active = StripeBooleanField(help_text="Whether the plan is currently available for new subscriptions.")
     aggregate_usage = StripeEnumField(
         enum=enums.PlanAggregateUsage, stripe_required=False,
         help_text=(
