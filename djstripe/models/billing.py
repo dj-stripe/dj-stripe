@@ -400,15 +400,15 @@ class Invoice(StripeObject):
         """
 
         # Convert Customer to stripe_id
-        if customer is not None and isinstance(customer, Customer):
+        if customer is not None and isinstance(customer, StripeObject):
             customer = customer.stripe_id
 
         # Convert Subscription to stripe_id
-        if subscription is not None and isinstance(subscription, Subscription):
+        if subscription is not None and isinstance(subscription, StripeObject):
             subscription = subscription.stripe_id
 
         # Convert Plan to stripe_id
-        if subscription_plan is not None and isinstance(subscription_plan, Plan):
+        if subscription_plan is not None and isinstance(subscription_plan, StripeObject):
             subscription_plan = subscription_plan.stripe_id
 
         try:
@@ -1091,7 +1091,7 @@ class Subscription(StripeObject):
         """
 
         # Convert Plan to stripe_id
-        if plan is not None and isinstance(plan, Plan):
+        if plan is not None and isinstance(plan, StripeObject):
             plan = plan.stripe_id
 
         kwargs = deepcopy(locals())

@@ -536,10 +536,10 @@ class Customer(StripeObject):
         .. if you're using ``Customer.subscribe()`` instead of ``Customer.subscribe()``, ``plan`` \
         can only be a string
         """
-        from .billing import Plan, Subscription
+        from .billing import Subscription
 
         # Convert Plan to stripe_id
-        if isinstance(plan, Plan):
+        if isinstance(plan, StripeObject):
             plan = plan.stripe_id
 
         stripe_subscription = Subscription._api_create(
