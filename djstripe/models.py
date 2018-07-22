@@ -2915,10 +2915,6 @@ class Subscription(StripeObject):
 
         .. important:: Updating a subscription by changing the plan or quantity creates a new ``Subscription`` in \
         Stripe (and dj-stripe).
-
-        .. Notes:
-        .. if you're using ``Subscription.update()`` instead of ``Subscription.update()``, ``plan`` can only \
-        be a string
         """
 
         # Convert Plan to stripe_id
