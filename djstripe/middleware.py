@@ -10,6 +10,7 @@
 import fnmatch
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import redirect
 from django.urls import resolve
 from django.utils.deprecation import MiddlewareMixin
@@ -98,4 +99,6 @@ class SubscriptionPaymentMiddleware(MiddlewareMixin):
         subscriber = subscriber_request_callback(request)
 
         if not subscriber_has_active_subscription(subscriber):
+            if not SUBSCRIPTION_REDIRECT:
+                raise ImproperlyConfigured("DJSTRIPE_SUBSCRIPTION_REDIRECT is not set.")
             return redirect(SUBSCRIPTION_REDIRECT)

@@ -19,8 +19,9 @@ This is a bugfix-only version:
 ------------------
 
 - Dropped previously-deprecated ``Charge.receipt_number`` field.
-- Dropped previously-deprecated ``SubscriptionView``, ``CancelSubscriptionView``
-  and ``CancelSubscriptionForm``.
+- Dropped previously-deprecated ``SubscriptionView``,
+  ``CancelSubscriptionView`` and ``CancelSubscriptionForm``.
+- Removed the default value from ``DJSTRIPE_SUBSCRIPTION_REDIRECT``.
 
 
 1.2.0 (2018-06-11)

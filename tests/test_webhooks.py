@@ -15,11 +15,14 @@ from django.test.client import Client
 from django.urls import reverse
 from mock import Mock, PropertyMock, call, patch
 
-from djstripe import views, webhooks
+from djstripe import settings as djstripe_settings
+from djstripe import webhooks
 from djstripe.models import Event, WebhookEventTrigger
 from djstripe.webhooks import TEST_EVENT_ID, call_handlers, handler, handler_all
 
-from . import FAKE_EVENT_TEST_CHARGE_SUCCEEDED, FAKE_EVENT_TRANSFER_CREATED, FAKE_TRANSFER
+from . import (
+    FAKE_EVENT_TEST_CHARGE_SUCCEEDED, FAKE_EVENT_TRANSFER_CREATED, FAKE_TRANSFER
+)
 
 
 def mock_webhook_handler(webhook_event_trigger):
@@ -51,7 +54,7 @@ class TestWebhook(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(Event.objects.filter(stripe_id=TEST_EVENT_ID).exists())
 
-    @patch.object(views.djstripe_settings, "WEBHOOK_EVENT_CALLBACK", return_value=mock_webhook_handler)
+    @patch.object(djstripe_settings, "WEBHOOK_EVENT_CALLBACK", return_value=mock_webhook_handler)
     @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
     @patch("stripe.Event.retrieve")
     def test_webhook_with_custom_callback(

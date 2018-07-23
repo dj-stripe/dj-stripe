@@ -117,7 +117,7 @@ def get_default_api_key(livemode):
         return TEST_API_KEY or STRIPE_SECRET_KEY
 
 
-SUBSCRIPTION_REDIRECT = getattr(settings, "DJSTRIPE_SUBSCRIPTION_REDIRECT", "djstripe:subscribe")
+SUBSCRIPTION_REDIRECT = getattr(settings, "DJSTRIPE_SUBSCRIPTION_REDIRECT", "")
 
 
 ZERO_DECIMAL_CURRENCIES = set([

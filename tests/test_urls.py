@@ -26,4 +26,6 @@ urlpatterns = [
     url(r'^testapp_content/', include('tests.apps.testapp_content.urls')),
     # For testing fnmatches
     url(r"test_fnmatch/extra_text/$", empty_view, name="test_fnmatch"),
+    # Default for DJSTRIPE_SUBSCRIPTION_REDIRECT
+    url(r"subscribe/$", empty_view, name="test_url_subscribe")
 ]
