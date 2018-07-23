@@ -19,6 +19,8 @@ This is a bugfix-only version:
 ------------------
 
 - Dropped previously-deprecated ``Charge.receipt_number`` field.
+- Dropped previously-deprecated ``SubscriptionView``, ``CancelSubscriptionView``
+  and ``CancelSubscriptionForm``.
 
 
 1.2.0 (2018-06-11)
