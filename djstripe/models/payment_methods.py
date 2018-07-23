@@ -326,10 +326,6 @@ class Card(StripeObject):
         return stripe.Token.create(api_key=api_key, card=card)
 
 
-# Backwards compatibility
-StripeSource = Card
-
-
 class Source(StripeObject):
     amount = StripeCurrencyField(
         null=True,
