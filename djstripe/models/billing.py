@@ -1196,3 +1196,30 @@ class Subscription(StripeObject):
     def _attach_objects_hook(self, cls, data):
         self.customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
         self.plan = cls._stripe_object_to_plan(target_cls=Plan, data=data)
+
+
+class SubscriptionItem(StripeObject):
+    """
+    Subscription items allow you to create customer subscriptions
+    with more than one plan, making it easy to represent complex billing relationships.
+
+    Stripe documentation: https://stripe.com/docs/api#subscription_items
+    """
+
+    stripe_class = stripe.SubscriptionItem
+
+    plan = models.ForeignKey(
+        "Plan",
+        on_delete=models.CASCADE,
+        related_name="subscription_items",
+        help_text="The plan the customer is subscribed to."
+    )
+    quantity = StripePositiveIntegerField(help_text=(
+        "The quantity of the plan to which the customer should be subscribed."
+    ))
+    subscription = models.ForeignKey(
+        "Subscription",
+        on_delete=models.CASCADE,
+        related_name="items",
+        help_text="The subscription this subscription item belongs to."
+    )
