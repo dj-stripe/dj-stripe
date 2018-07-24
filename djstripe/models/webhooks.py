@@ -1,4 +1,5 @@
 import json
+import warnings
 from traceback import format_exc
 
 from django.db import models
@@ -81,7 +82,13 @@ class WebhookEventTrigger(models.Model):
         except Exception:
             body = "(error decoding body)"
 
-        ip = request.META["REMOTE_ADDR"]
+        ip = request.META.get("REMOTE_ADDR")
+        if ip is None:
+            warnings.warn(
+                "Could not determine remote IP (missing REMOTE_ADDR). "
+                "This is likely an issue with your wsgi/server setup."
+            )
+            ip = "0.0.0.0"
         obj = cls.objects.create(headers=headers, body=body, remote_ip=ip)
 
         try:

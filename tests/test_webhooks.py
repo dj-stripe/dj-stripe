@@ -7,6 +7,7 @@
 
 """
 import json
+import warnings
 from collections import defaultdict
 from copy import deepcopy
 
@@ -53,6 +54,22 @@ class TestWebhook(TestCase):
         resp = self._send_event(FAKE_EVENT_TEST_CHARGE_SUCCEEDED)
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(Event.objects.filter(id=TEST_EVENT_ID).exists())
+
+    def test_webhook_no_remote_addr(self):
+        self.assertEqual(WebhookEventTrigger.objects.count(), 0)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            Client().post(
+                reverse("djstripe:webhook"),
+                "{}",
+                content_type="application/json",
+                HTTP_STRIPE_SIGNATURE="PLACEHOLDER",
+                REMOTE_ADDR=None
+            )
+
+        self.assertEqual(WebhookEventTrigger.objects.count(), 1)
+        event_trigger = WebhookEventTrigger.objects.first()
+        self.assertEqual(event_trigger.remote_ip, "0.0.0.0")
 
     @patch.object(djstripe_settings, "WEBHOOK_EVENT_CALLBACK", return_value=mock_webhook_handler)
     @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))

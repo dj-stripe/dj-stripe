@@ -16,6 +16,7 @@ History
 - All deprecated Transfer fields (Stripe API < 2017-04-06), have been dropped.
   This includes ``date``, ``destination_type`` (``type``), ``failure_code``,
   ``failure_message``, ``statement_descriptor`` and ``status``.
+- Fixed IntegrityError when ``REMOTE_ADDR`` is missing (#640).
 
 
 1.2.1 (2018-07-18)
