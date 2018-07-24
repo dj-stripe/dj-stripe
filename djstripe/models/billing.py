@@ -1223,3 +1223,22 @@ class SubscriptionItem(StripeObject):
         related_name="items",
         help_text="The subscription this subscription item belongs to."
     )
+
+
+class UsageRecord(StripeObject):
+    """
+    Usage records allow you to continually report usage and metrics to
+    Stripe for metered billing of plans.
+
+    Stripe documentation: https://stripe.com/docs/api#usage_records
+    """
+
+    quantity = StripePositiveIntegerField(help_text=(
+        "The quantity of the plan to which the customer should be subscribed."
+    ))
+    subscription_item = models.ForeignKey(
+        "SubscriptionItem",
+        on_delete=models.CASCADE,
+        related_name="usage_records",
+        help_text="The subscription item this usage record contains data for."
+    )

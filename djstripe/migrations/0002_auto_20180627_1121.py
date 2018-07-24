@@ -133,4 +133,23 @@ class Migration(migrations.Migration):
                 "abstract": False,
             },
         ),
+        migrations.CreateModel(
+            name="UsageRecord",
+            fields=[
+                ("djstripe_id", models.BigAutoField(primary_key=True, serialize=False, verbose_name="ID")),
+                ("stripe_id", djstripe.fields.StripeIdField(max_length=255, unique=True)),
+                ("livemode", djstripe.fields.StripeNullBooleanField(default=None, help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.")),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, help_text="The datetime this object was created in stripe.", null=True)),
+                ("metadata", djstripe.fields.StripeJSONField(blank=True, help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.", null=True)),
+                ("description", djstripe.fields.StripeTextField(blank=True, help_text="A description of this object.", null=True)),
+                ("djstripe_created", models.DateTimeField(auto_now_add=True)),
+                ("djstripe_updated", models.DateTimeField(auto_now=True)),
+                ("quantity", djstripe.fields.StripePositiveIntegerField(help_text="The quantity of the plan to which the customer should be subscribed.")),
+                ("subscription_item", models.ForeignKey(help_text="The subscription item this usage record contains data for.", on_delete=django.db.models.deletion.CASCADE, related_name="usage_records", to="djstripe.SubscriptionItem")),
+            ],
+            options={
+                "get_latest_by": "created",
+                "abstract": False,
+            },
+        ),
     ]
