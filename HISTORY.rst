@@ -22,6 +22,7 @@ This is a bugfix-only version:
 - Dropped previously-deprecated ``SubscriptionView``,
   ``CancelSubscriptionView`` and ``CancelSubscriptionForm``.
 - Removed the default value from ``DJSTRIPE_SUBSCRIPTION_REDIRECT``.
+- All ``stripe_id`` fields have been renamed ``id``.
 
 
 1.2.0 (2018-06-11)

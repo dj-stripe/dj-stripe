@@ -384,11 +384,11 @@ class Customer(StripeObject):
 
     def __str__(self):
         if not self.subscriber:
-            return "{stripe_id} (deleted)".format(stripe_id=self.stripe_id)
+            return "{id} (deleted)".format(id=self.id)
         elif self.subscriber.email:
             return self.subscriber.email
         else:
-            return self.stripe_id
+            return self.id
 
     @classmethod
     def get_or_create(cls, subscriber, livemode=djstripe_settings.STRIPE_LIVE_MODE):
@@ -419,7 +419,7 @@ class Customer(StripeObject):
             metadata={cls.djstripe_subscriber_key: subscriber.pk},
         )
         customer, created = Customer.objects.get_or_create(
-            stripe_id=stripe_customer["id"],
+            id=stripe_customer["id"],
             defaults={
                 "subscriber": subscriber,
                 "livemode": stripe_customer["livemode"],
@@ -518,13 +518,13 @@ class Customer(StripeObject):
         """
         from .billing import Subscription
 
-        # Convert Plan to stripe_id
+        # Convert Plan to id
         if isinstance(plan, StripeObject):
-            plan = plan.stripe_id
+            plan = plan.id
 
         stripe_subscription = Subscription._api_create(
             plan=plan,
-            customer=self.stripe_id,
+            customer=self.id,
             application_fee_percent=application_fee_percent,
             coupon=coupon,
             quantity=quantity,
@@ -594,9 +594,9 @@ class Customer(StripeObject):
         # TODO: better default detection (should charge in customer default)
         currency = currency or "usd"
 
-        # Convert Source to stripe_id
+        # Convert Source to id
         if source and isinstance(source, StripeObject):
-            source = source.stripe_id
+            source = source.id
 
         stripe_charge = Charge._api_create(
             amount=int(amount * 100),  # Convert dollars into cents
@@ -609,7 +609,7 @@ class Customer(StripeObject):
             destination=destination,
             metadata=metadata,
             shipping=shipping,
-            customer=self.stripe_id,
+            customer=self.id,
             source=source,
             statement_descriptor=statement_descriptor,
         )
@@ -664,18 +664,18 @@ class Customer(StripeObject):
         if not isinstance(amount, decimal.Decimal):
             raise ValueError("You must supply a decimal value representing dollars.")
 
-        # Convert Invoice to stripe_id
+        # Convert Invoice to id
         if invoice is not None and isinstance(invoice, StripeObject):
-            invoice = invoice.stripe_id
+            invoice = invoice.id
 
-        # Convert Subscription to stripe_id
+        # Convert Subscription to id
         if subscription is not None and isinstance(subscription, StripeObject):
-            subscription = subscription.stripe_id
+            subscription = subscription.id
 
         stripe_invoiceitem = InvoiceItem._api_create(
             amount=int(amount * 100),  # Convert dollars into cents
             currency=currency,
-            customer=self.stripe_id,
+            customer=self.id,
             description=description,
             discountable=discountable,
             invoice=invoice,
@@ -784,14 +784,14 @@ class Customer(StripeObject):
                 )
 
         else:
-            # Convert Plan to stripe_id
+            # Convert Plan to id
             if isinstance(plan, StripeObject):
-                plan = plan.stripe_id
+                plan = plan.id
 
             return any(
                 [
                     subscription.is_valid()
-                    for subscription in self.subscriptions.filter(plan__stripe_id=plan)
+                    for subscription in self.subscriptions.filter(plan__id=plan)
                 ]
             )
 
@@ -854,7 +854,7 @@ class Customer(StripeObject):
         from .billing import Invoice
 
         try:
-            invoice = Invoice._api_create(customer=self.stripe_id)
+            invoice = Invoice._api_create(customer=self.id)
             invoice.pay()
             return True
         except InvalidRequestError:  # TODO: Check this for a more specific error message.
@@ -882,7 +882,7 @@ class Customer(StripeObject):
         The coupon can be a Coupon object, or a valid Stripe Coupon ID.
         """
         if isinstance(coupon, StripeObject):
-            coupon = coupon.stripe_id
+            coupon = coupon.id
 
         stripe_customer = self.api_retrieve()
         stripe_customer.coupon = coupon
@@ -958,7 +958,7 @@ class Customer(StripeObject):
                 logger.warning(
                     "Could not find subscriber %r matching customer %r",
                     subscriber_id,
-                    self.stripe_id,
+                    self.id,
                 )
                 self.subscriber = None
 
@@ -966,11 +966,11 @@ class Customer(StripeObject):
     def _sync_invoices(self, **kwargs):
         from .billing import Invoice
 
-        for stripe_invoice in Invoice.api_list(customer=self.stripe_id, **kwargs):
+        for stripe_invoice in Invoice.api_list(customer=self.id, **kwargs):
             Invoice.sync_from_stripe_data(stripe_invoice)
 
     def _sync_charges(self, **kwargs):
-        for stripe_charge in Charge.api_list(customer=self.stripe_id, **kwargs):
+        for stripe_charge in Charge.api_list(customer=self.id, **kwargs):
             Charge.sync_from_stripe_data(stripe_charge)
 
     def _sync_cards(self, **kwargs):
@@ -983,7 +983,7 @@ class Customer(StripeObject):
         from .billing import Subscription
 
         for stripe_subscription in Subscription.api_list(
-            customer=self.stripe_id, status="all", **kwargs
+            customer=self.id, status="all", **kwargs
         ):
             Subscription.sync_from_stripe_data(stripe_subscription)
 
@@ -1074,7 +1074,7 @@ class Event(StripeObject):
 
     @classmethod
     def process(cls, data):
-        qs = cls.objects.filter(stripe_id=data["id"])
+        qs = cls.objects.filter(id=data["id"])
         if qs.exists():
             return qs.first()
         else:

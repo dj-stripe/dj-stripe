@@ -20,4 +20,4 @@ class Command(BaseCommand):
         """Call sync_from_stripe_data for each plan returned by api_list."""
         for plan_data in Plan.api_list():
             plan = Plan.sync_from_stripe_data(plan_data)
-            print("Synchronized plan {0}".format(plan.stripe_id))
+            print("Synchronized plan {0}".format(plan.id))

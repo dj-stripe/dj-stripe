@@ -122,19 +122,19 @@ class StripeObjectAdmin(admin.ModelAdmin):
     change_form_template = "djstripe/admin/change_form.html"
 
     def get_list_display(self, request):
-        return ("stripe_id", ) + self.list_display + ("created", "livemode")
+        return ("id", ) + self.list_display + ("created", "livemode")
 
     def get_list_filter(self, request):
         return self.list_filter + ("created", "livemode")
 
     def get_readonly_fields(self, request, obj=None):
-        return self.readonly_fields + ("stripe_id", "created")
+        return self.readonly_fields + ("id", "created")
 
     def get_search_fields(self, request):
-        return self.search_fields + ("stripe_id", )
+        return self.search_fields + ("id", )
 
     def get_fieldsets(self, request, obj=None):
-        common_fields = ("livemode", "stripe_id", "created")
+        common_fields = ("livemode", "id", "created")
         # Have to remove the fields from the common set, otherwise they'll show up twice.
         fields = [f for f in self.get_fields(request, obj) if f not in common_fields]
         return (
@@ -148,7 +148,7 @@ class SubscriptionInline(admin.StackedInline):
 
     model = models.Subscription
     extra = 0
-    readonly_fields = ("stripe_id", "created")
+    readonly_fields = ("id", "created")
     show_change_link = True
 
 
@@ -157,7 +157,7 @@ class InvoiceItemInline(admin.StackedInline):
 
     model = models.InvoiceItem
     extra = 0
-    readonly_fields = ("stripe_id", "created")
+    readonly_fields = ("id", "created")
     raw_id_fields = ("customer", "subscription")
     show_change_link = True
 
@@ -194,7 +194,7 @@ class ChargeAdmin(StripeObjectAdmin):
     list_display = (
         "customer", "amount", "description", "paid", "disputed", "refunded", "fee"
     )
-    search_fields = ("customer__stripe_id", "invoice__stripe_id")
+    search_fields = ("customer__id", "invoice__id")
     list_filter = (
         "status", "source_type", "paid", "refunded", "fraudulent", "captured",
     )
@@ -257,7 +257,7 @@ class InvoiceAdmin(StripeObjectAdmin):
         "date", "period_end",
     )
     raw_id_fields = ("customer", "charge", "subscription")
-    search_fields = ("customer__stripe_id", )
+    search_fields = ("customer__id", )
     inlines = (InvoiceItemInline, )
 
 

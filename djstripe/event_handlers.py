@@ -66,7 +66,7 @@ def customer_discount_webhook_handler(event):
             target_cls=models.Coupon,
             event=event,
             data=coupon_data,
-            stripe_id=coupon_data.get("id")
+            id=coupon_data.get("id")
         )
         coupon_start = discount_data.get("start")
         coupon_end = discount_data.get("end")
@@ -94,10 +94,10 @@ def customer_source_webhook_handler(event):
     if source_type == SourceType.card:
         if event.verb.endswith("deleted") and customer_data:
             # On customer.source.deleted, we do not delete the object, we merely unlink it.
-            # customer = Customer.objects.get(stripe_id=customer_data["id"])
+            # customer = Customer.objects.get(id=customer_data["id"])
             # NOTE: for now, customer.sources still points to Card
             # Also, https://github.com/dj-stripe/dj-stripe/issues/576
-            models.Card.objects.filter(stripe_id=customer_data.get("id", "")).delete()
+            models.Card.objects.filter(id=customer_data.get("id", "")).delete()
             models.PaymentMethod.objects.filter(id=customer_data.get("id", "")).delete()
         else:
             _handle_crud_like_event(target_cls=models.Card, event=event)
@@ -197,7 +197,7 @@ class CrudType(object):
 
 
 def _handle_crud_like_event(target_cls, event, data=None, verb=None,
-                            stripe_id=None, customer=None, crud_type=None,
+                            id=None, customer=None, crud_type=None,
                             crud_exact=False, crud_valid=False):
     """
     Helper to process crud_type-like events for objects.
@@ -214,7 +214,7 @@ def _handle_crud_like_event(target_cls, event, data=None, verb=None,
     :type: ``djstripe.models.StripeObject``
     :param data: The event object data (defaults to ``event.data``).
     :param verb: The event verb (defaults to ``event.verb``).
-    :param stripe_id: The object Stripe ID (defaults to ``object.id``).
+    :param id: The object Stripe ID (defaults to ``object.id``).
     :param customer: The customer object (defaults to ``event.customer``).
     :param crud_type: The CrudType object (determined by default).
     :param crud_exact: If True, match verb against CRUD type exactly.
@@ -223,9 +223,9 @@ def _handle_crud_like_event(target_cls, event, data=None, verb=None,
     :rtype: ``tuple(obj, CrudType)``
     """
     data = data or event.data
-    stripe_id = stripe_id or data.get("object", {}).get("id", None)
+    id = id or data.get("object", {}).get("id", None)
 
-    if not stripe_id:
+    if not id:
         # We require an object when applying CRUD-like events, so if there's
         # no ID the event is ignored/dropped. This happens in events such as
         # invoice.upcoming, which refer to a future (non-existant) invoice.
@@ -246,16 +246,16 @@ def _handle_crud_like_event(target_cls, event, data=None, verb=None,
         return
 
     if crud_type.deleted:
-        qs = target_cls.objects.filter(stripe_id=stripe_id)
+        qs = target_cls.objects.filter(id=id)
         if target_cls is models.Customer and qs.exists():
             qs.get().purge()
         else:
-            obj = target_cls.objects.filter(stripe_id=stripe_id).delete()
+            obj = target_cls.objects.filter(id=id).delete()
     else:
         # Any other event type (creates, updates, etc.) - This can apply to
         # verbs that aren't strictly CRUD but Stripe do intend an update.  Such
         # as invoice.payment_failed.
-        kwargs = {"stripe_id": stripe_id}
+        kwargs = {"id": id}
         if hasattr(target_cls, 'customer'):
             kwargs["customer"] = customer
         data = target_cls(**kwargs).api_retrieve()

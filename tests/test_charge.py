@@ -27,7 +27,7 @@ class ChargeTest(TestCase):
 
     def test_str(self):
         charge = Charge(
-            amount=50, currency="usd", stripe_id="ch_test",
+            amount=50, currency="usd", id="ch_test",
             status=ChargeStatus.failed,
             captured=False,
             paid=False,
@@ -85,7 +85,7 @@ class ChargeTest(TestCase):
         self.assertEqual("VideoDoc consultation for ivanp0001 berkp0001", charge.description)
         self.assertEqual(0, charge.amount_refunded)
 
-        self.assertEqual("card_16YKQh2eZvKYlo2Cblc5Feoo", charge.source_stripe_id)
+        self.assertEqual("card_16YKQh2eZvKYlo2Cblc5Feoo", charge.source_id)
         self.assertEqual(charge.source_type, LegacySourceType.card)
 
     @patch("djstripe.models.Account.get_default_account")
@@ -113,7 +113,7 @@ class ChargeTest(TestCase):
         fake_charge_copy.update({"source": {"id": "test_id", "object": "unsupported"}})
 
         charge = Charge.sync_from_stripe_data(fake_charge_copy)
-        self.assertEqual("test_id", charge.source_stripe_id)
+        self.assertEqual("test_id", charge.source_id)
         self.assertEqual("unsupported", charge.source_type)
         self.assertEqual(charge.source, PaymentMethod.objects.get(id="test_id"))
 
@@ -148,7 +148,7 @@ class ChargeTest(TestCase):
         self.assertTrue(created)
 
         self.assertNotEqual(None, charge.transfer)
-        self.assertEqual(fake_transfer["id"], charge.transfer.stripe_id)
+        self.assertEqual(fake_transfer["id"], charge.transfer.id)
 
     @patch("stripe.Charge.retrieve")
     @patch("stripe.Account.retrieve")
@@ -164,6 +164,6 @@ class ChargeTest(TestCase):
         self.assertTrue(created)
 
         self.assertEqual(2, Account.objects.count())
-        account = Account.objects.get(stripe_id=FAKE_ACCOUNT["id"])
+        account = Account.objects.get(id=FAKE_ACCOUNT["id"])
 
         self.assertEqual(account, charge.account)

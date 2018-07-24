@@ -30,7 +30,8 @@ class StripeObject(models.Model):
     djstripe_id = models.BigAutoField(
         verbose_name="ID", serialize=False, primary_key=True
     )
-    stripe_id = StripeIdField(unique=True, stripe_name="id")
+
+    id = StripeIdField(unique=True)
     livemode = StripeNullBooleanField(
         default=None,
         null=True,
@@ -66,13 +67,13 @@ class StripeObject(models.Model):
         if not self.livemode:
             base_url += "test/"
 
-        if not self.stripe_dashboard_item_name or not self.stripe_id:
+        if not self.stripe_dashboard_item_name or not self.id:
             return ""
         else:
-            return "{base_url}{item}/{stripe_id}".format(
+            return "{base_url}{item}/{id}".format(
                 base_url=base_url,
                 item=self.stripe_dashboard_item_name,
-                stripe_id=self.stripe_id,
+                id=self.id,
             )
 
     @property
@@ -89,7 +90,7 @@ class StripeObject(models.Model):
         api_key = api_key or self.default_api_key
 
         return self.stripe_class.retrieve(
-            id=self.stripe_id, api_key=api_key, expand=self.expand_fields
+            id=self.id, api_key=api_key, expand=self.expand_fields
         )
 
     @classmethod
@@ -135,7 +136,7 @@ class StripeObject(models.Model):
 
         :rtype: list of str
         """
-        return ["stripe_id={id}".format(id=self.stripe_id)]
+        return ["id={id}".format(id=self.id)]
 
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
@@ -230,27 +231,27 @@ class StripeObject(models.Model):
 
         if isinstance(field, str):
             # A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}
-            stripe_id = field
+            id = field
             # We'll have to expand if the field is not "id" (= is nested)
             should_expand = is_nested_data
         elif field:
             # A field like {"subscription": {"id": sub_6lsC8pt7IcFpjA", ...}}
             data = field
-            stripe_id = field.get("id")
+            id = field.get("id")
         else:
             # An empty field - We need to return nothing here because there is
             # no way of knowing what needs to be fetched!
             return None, False
 
         try:
-            return cls.stripe_objects.get(stripe_id=stripe_id), False
+            return cls.stripe_objects.get(id=id), False
         except cls.DoesNotExist:
             if is_nested_data and refetch:
                 # This is what `data` usually looks like:
                 # {"id": "cus_XXXX", "default_source": "card_XXXX"}
                 # Leaving the default field_name ("id") will get_or_create the customer.
                 # If field_name="default_source", we get_or_create the card instead.
-                cls_instance = cls(stripe_id=stripe_id)
+                cls_instance = cls(id=id)
                 data = cls_instance.api_retrieve()
                 should_expand = False
 
@@ -266,7 +267,7 @@ class StripeObject(models.Model):
         try:
             return cls._create_from_stripe_object(data, save=save), True
         except IntegrityError:
-            return cls.stripe_objects.get(stripe_id=stripe_id), False
+            return cls.stripe_objects.get(id=id), False
 
     @classmethod
     def _stripe_object_to_customer(cls, target_cls, data):
@@ -334,9 +335,9 @@ class StripeObject(models.Model):
 
         invoiceitems = []
         for line in lines.get("data", []):
-            if invoice.stripe_id:
+            if invoice.id:
                 save = True
-                line.setdefault("invoice", invoice.stripe_id)
+                line.setdefault("invoice", invoice.id)
 
                 if line.get("type") == "subscription":
                     # Lines for subscriptions need to be keyed based on invoice and
@@ -344,15 +345,15 @@ class StripeObject(models.Model):
                     # when received from Stripe. This means that future updates to
                     # a subscription will change previously saved invoices - Doing
                     # the composite key avoids this.
-                    if not line["id"].startswith(invoice.stripe_id):
+                    if not line["id"].startswith(invoice.id):
                         line["id"] = "{invoice_id}-{subscription_id}".format(
-                            invoice_id=invoice.stripe_id, subscription_id=line["id"]
+                            invoice_id=invoice.id, subscription_id=line["id"]
                         )
             else:
                 # Don't save invoice items for ephemeral invoices
                 save = False
 
-            line.setdefault("customer", invoice.customer.stripe_id)
+            line.setdefault("customer", invoice.customer.id)
             line.setdefault("date", int(dateformat.format(invoice.date, "U")))
 
             item, _ = target_cls._get_or_create_from_stripe_object(

@@ -47,8 +47,8 @@ class TransferTest(TestCase):
         self.assertEqual(2, transfer_retrieve_mock.call_count)
 
         # Test to string to ensure data was updated
-        self.assertEqual("<amount={amount}, status={status}, stripe_id={stripe_id}>".format(
+        self.assertEqual("<amount={amount}, status={status}, id={id}>".format(
             amount=fake_event_updated["data"]["object"]["amount"] / decimal.Decimal("100"),
             status=fake_event_updated["data"]["object"]["status"],
-            stripe_id=fake_event_updated["data"]["object"]["id"]
+            id=fake_event_updated["data"]["object"]["id"]
         ), str(transfer_instance))

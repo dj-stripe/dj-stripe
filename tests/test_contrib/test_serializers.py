@@ -14,7 +14,9 @@ from django.test import TestCase
 from django.utils import timezone
 from mock import PropertyMock, patch
 
-from djstripe.contrib.rest_framework.serializers import CreateSubscriptionSerializer, SubscriptionSerializer
+from djstripe.contrib.rest_framework.serializers import (
+    CreateSubscriptionSerializer, SubscriptionSerializer
+)
 from djstripe.enums import SubscriptionStatus
 from djstripe.models import Plan
 
@@ -32,7 +34,7 @@ class SubscriptionSerializerTest(TestCase):
         now = timezone.now()
         serializer = SubscriptionSerializer(
             data={
-                'stripe_id': "sub_6lsC8pt7IcFpjA",
+                'id': "sub_6lsC8pt7IcFpjA",
                 'customer': self.customer.djstripe_id,
                 "billing": "charge_automatically",
                 'plan': self.plan.djstripe_id,
@@ -45,7 +47,7 @@ class SubscriptionSerializerTest(TestCase):
         )
         self.assertTrue(serializer.is_valid())
         self.assertEqual(serializer.validated_data, {
-            'stripe_id': "sub_6lsC8pt7IcFpjA",
+            'id': "sub_6lsC8pt7IcFpjA",
             'customer': self.customer,
             "billing": "charge_automatically",
             'plan': self.plan,
@@ -61,7 +63,7 @@ class SubscriptionSerializerTest(TestCase):
         now = timezone.now()
         serializer = SubscriptionSerializer(
             data={
-                'stripe_id': "sub_6lsC8pt7IcFpjA",
+                'id': "sub_6lsC8pt7IcFpjA",
                 'customer': self.customer.djstripe_id,
                 "billing": "charge_automatically",
                 'plan': self.plan.djstripe_id,
@@ -86,12 +88,12 @@ class CreateSubscriptionSerializerTest(TestCase):
         token = stripe_token_mock(card={})
         serializer = CreateSubscriptionSerializer(
             data={
-                'plan': self.plan.stripe_id,
+                'plan': self.plan.id,
                 'stripe_token': token.id,
             }
         )
         self.assertTrue(serializer.is_valid())
-        self.assertEqual(serializer.validated_data['plan'], str(self.plan.stripe_id))
+        self.assertEqual(serializer.validated_data['plan'], str(self.plan.id))
         self.assertIn('stripe_token', serializer.validated_data)
         self.assertEqual(serializer.errors, {})
 
@@ -101,7 +103,7 @@ class CreateSubscriptionSerializerTest(TestCase):
         token = stripe_token_mock(card={})
         serializer = CreateSubscriptionSerializer(
             data={
-                'plan': self.plan.stripe_id,
+                'plan': self.plan.id,
                 'stripe_token': token.id,
                 'charge_immediately': True,
                 'tax_percent': 13.00,
@@ -112,7 +114,7 @@ class CreateSubscriptionSerializerTest(TestCase):
     def test_invalid_serializer(self):
         serializer = CreateSubscriptionSerializer(
             data={
-                'plan': self.plan.djstripe_id,
+                'plan': self.plan.id,
             }
         )
         self.assertFalse(serializer.is_valid())

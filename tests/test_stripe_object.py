@@ -17,7 +17,7 @@ SIMPLE_OBJ = {
     'livemode': True
 }
 SIMPLE_OBJ_RESULT = {
-    'stripe_id': 'yo',
+    'id': 'yo',
     'description': None,
     'livemode': True,
     'metadata': None,

@@ -17,7 +17,10 @@ from stripe.error import InvalidRequestError
 from djstripe.enums import SubscriptionStatus
 from djstripe.models import Plan, Subscription
 
-from . import FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_CANCELED, datetime_to_unix
+from . import (
+    FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II, FAKE_SUBSCRIPTION,
+    FAKE_SUBSCRIPTION_CANCELED, datetime_to_unix
+)
 
 
 class SubscriptionTest(TestCase):
@@ -171,11 +174,11 @@ class SubscriptionTest(TestCase):
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
         new_plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN_II))
 
-        self.assertEqual(FAKE_PLAN["id"], subscription.plan.stripe_id)
+        self.assertEqual(FAKE_PLAN["id"], subscription.plan.id)
 
         new_subscription = subscription.update(plan=new_plan)
 
-        self.assertEqual(FAKE_PLAN_II["id"], new_subscription.plan.stripe_id)
+        self.assertEqual(FAKE_PLAN_II["id"], new_subscription.plan.id)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
     @patch("stripe.Subscription.retrieve")

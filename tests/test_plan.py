@@ -53,7 +53,7 @@ class TestPlanAdmin(TestCase):
         self.plan_admin.save_model(request=self.FakeRequest(), obj=None, form=fake_form, change=False)
 
         # Would throw DoesNotExist if it didn't work
-        Plan.objects.get(stripe_id=plan_data["stripe_id"])
+        Plan.objects.get(id=plan_data["id"])
 
     @patch("stripe.Plan.create")
     @patch("stripe.Plan.retrieve")
@@ -77,10 +77,10 @@ class PlanTest(TestCase):
     @patch("djstripe.models.Plan._api_create")
     def test_create_with_metadata(self, api_create_mock, object_create_mock):
         metadata = {'other_data': 'more_data'}
-        Plan.create(metadata=metadata, arg1=1, arg2=2, amount=1, stripe_id=1)
+        Plan.create(metadata=metadata, arg1=1, arg2=2, amount=1, id=1)
 
         api_create_mock.assert_called_once_with(metadata=metadata, id=1, arg1=1, arg2=2, amount=100)
-        object_create_mock.assert_called_once_with(metadata=metadata, stripe_id=1, arg1=1, arg2=2, amount=1)
+        object_create_mock.assert_called_once_with(metadata=metadata, id=1, arg1=1, arg2=2, amount=1)
 
     def test_str(self):
         self.assertEqual(str(self.plan), self.plan_data["name"])
@@ -101,42 +101,42 @@ class PlanTest(TestCase):
 class HumanReadablePlanTest(TestCase):
     def test_human_readable_free_usd_daily(self):
         plan = Plan.objects.create(
-            stripe_id="plan-test-free-usd-daily", active=True, amount=0, currency="usd",
+            id="plan-test-free-usd-daily", active=True, amount=0, currency="usd",
             interval="day", interval_count=1,
         )
         self.assertEqual(plan.human_readable_price, "$0.00 USD/day")
 
     def test_human_readable_10_usd_weekly(self):
         plan = Plan.objects.create(
-            stripe_id="plan-test-10-usd-weekly", active=True, amount=10, currency="usd",
+            id="plan-test-10-usd-weekly", active=True, amount=10, currency="usd",
             interval="week", interval_count=1,
         )
         self.assertEqual(plan.human_readable_price, "$10.00 USD/week")
 
     def test_human_readable_10_usd_2weeks(self):
         plan = Plan.objects.create(
-            stripe_id="plan-test-10-usd-2w", active=True, amount=10, currency="usd",
+            id="plan-test-10-usd-2w", active=True, amount=10, currency="usd",
             interval="week", interval_count=2,
         )
         self.assertEqual(plan.human_readable_price, "$10.00 USD every 2 weeks")
 
     def test_human_readable_499_usd_monthly(self):
         plan = Plan.objects.create(
-            stripe_id="plan-test-499-usd-monthly", active=True, amount=Decimal("4.99"), currency="usd",
+            id="plan-test-499-usd-monthly", active=True, amount=Decimal("4.99"), currency="usd",
             interval="month", interval_count=1,
         )
         self.assertEqual(plan.human_readable_price, "$4.99 USD/month")
 
     def test_human_readable_25_usd_6months(self):
         plan = Plan.objects.create(
-            stripe_id="plan-test-25-usd-6m", active=True, amount=25, currency="usd",
+            id="plan-test-25-usd-6m", active=True, amount=25, currency="usd",
             interval="month", interval_count=6,
         )
         self.assertEqual(plan.human_readable_price, "$25.00 USD every 6 months")
 
     def test_human_readable_10_usd_yearly(self):
         plan = Plan.objects.create(
-            stripe_id="plan-test-10-usd-yearly", active=True, amount=10, currency="usd",
+            id="plan-test-10-usd-yearly", active=True, amount=10, currency="usd",
             interval="year", interval_count=1,
         )
         self.assertEqual(plan.human_readable_price, "$10.00 USD/year")

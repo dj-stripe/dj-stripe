@@ -73,7 +73,7 @@ class PaymentMethod(models.Model):
         return self._model_for_type(self.type)
 
     def resolve(self):
-        return self.object_model.objects.get(stripe_id=self.id)
+        return self.object_model.objects.get(id=self.id)
 
 
 class BankAccount(StripeObject):
@@ -246,7 +246,7 @@ class Card(StripeObject):
         """
 
         # First, wipe default source on all customers that use this card.
-        Customer.objects.filter(default_source=self.stripe_id).update(
+        Customer.objects.filter(default_source=self.id).update(
             default_source=None
         )
 
@@ -275,9 +275,9 @@ class Card(StripeObject):
         # eg. {"id": "cus_XXXXXXXX", "deleted": True}
         if "sources" not in customer:
             # We fake a native stripe InvalidRequestError so that it's caught like an invalid ID error.
-            raise InvalidRequestError("No such source: %s" % (self.stripe_id), "id")
+            raise InvalidRequestError("No such source: %s" % (self.id), "id")
 
-        return customer.sources.retrieve(self.stripe_id, expand=self.expand_fields)
+        return customer.sources.retrieve(self.id, expand=self.expand_fields)
 
     def str_parts(self):
         return [
@@ -438,7 +438,7 @@ class Source(StripeObject):
         """
 
         # First, wipe default source on all customers that use this.
-        Customer.objects.filter(default_source=self.stripe_id).update(
+        Customer.objects.filter(default_source=self.id).update(
             default_source=None
         )
 

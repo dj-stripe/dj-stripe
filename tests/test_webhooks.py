@@ -52,7 +52,7 @@ class TestWebhook(TestCase):
     def test_webhook_with_test_event(self):
         resp = self._send_event(FAKE_EVENT_TEST_CHARGE_SUCCEEDED)
         self.assertEqual(resp.status_code, 200)
-        self.assertFalse(Event.objects.filter(stripe_id=TEST_EVENT_ID).exists())
+        self.assertFalse(Event.objects.filter(id=TEST_EVENT_ID).exists())
 
     @patch.object(djstripe_settings, "WEBHOOK_EVENT_CALLBACK", return_value=mock_webhook_handler)
     @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))

@@ -42,12 +42,12 @@ class CardTest(TestCase):
         card = Card.sync_from_stripe_data(fake_card)
 
         self.assertEqual(
-            "<brand={brand}, last4={last4}, exp_month={exp_month}, exp_year={exp_year}, stripe_id={stripe_id}>".format(
+            "<brand={brand}, last4={last4}, exp_month={exp_month}, exp_year={exp_year}, id={id}>".format(
                 brand=fake_card["brand"],
                 last4=fake_card["last4"],
                 exp_month=fake_card["exp_month"],
                 exp_year=fake_card["exp_year"],
-                stripe_id=fake_card["id"]
+                id=fake_card["id"]
             ),
             str(card)
         )
@@ -105,7 +105,7 @@ class CardTest(TestCase):
 
         self.assertEqual(self.customer.sources.count(), 1)
         card_object = self.customer.sources.first()
-        Card.objects.filter(stripe_id=stripe_card["id"]).delete()
+        Card.objects.filter(id=stripe_card["id"]).delete()
         self.assertEqual(self.customer.sources.count(), 0)
         card_object.remove()
         self.assertEqual(self.customer.sources.count(), 0)

@@ -15,7 +15,9 @@ from django.utils import timezone
 
 from djstripe.models import Charge, Customer, Plan, Subscription, Transfer
 
-from . import FAKE_PLAN, FAKE_PLAN_II, FAKE_TRANSFER, FAKE_TRANSFER_II, FAKE_TRANSFER_III
+from . import (
+    FAKE_PLAN, FAKE_PLAN_II, FAKE_TRANSFER, FAKE_TRANSFER_II, FAKE_TRANSFER_III
+)
 
 
 class SubscriptionManagerTest(TestCase):
@@ -36,14 +38,14 @@ class SubscriptionManagerTest(TestCase):
             )
             customer = Customer.objects.create(
                 subscriber=user,
-                stripe_id="cus_xxxxxxxxxxxxxx{0}".format(i),
+                id="cus_xxxxxxxxxxxxxx{0}".format(i),
                 livemode=False,
                 account_balance=0,
                 delinquent=False,
             )
 
             Subscription.objects.create(
-                stripe_id="sub_xxxxxxxxxxxxxx{0}".format(i),
+                id="sub_xxxxxxxxxxxxxx{0}".format(i),
                 customer=customer,
                 plan=self.plan,
                 current_period_start=period_start,
@@ -59,13 +61,13 @@ class SubscriptionManagerTest(TestCase):
         )
         customer = Customer.objects.create(
             subscriber=user,
-            stripe_id="cus_xxxxxxxxxxxxxx{0}".format(11),
+            id="cus_xxxxxxxxxxxxxx{0}".format(11),
             livemode=False,
             account_balance=0,
             delinquent=False,
         )
         Subscription.objects.create(
-            stripe_id="sub_xxxxxxxxxxxxxx{0}".format(11),
+            id="sub_xxxxxxxxxxxxxx{0}".format(11),
             customer=customer,
             plan=self.plan,
             current_period_start=period_start,
@@ -82,13 +84,13 @@ class SubscriptionManagerTest(TestCase):
         )
         customer = Customer.objects.create(
             subscriber=user,
-            stripe_id="cus_xxxxxxxxxxxxxx{0}".format(12),
+            id="cus_xxxxxxxxxxxxxx{0}".format(12),
             livemode=False,
             account_balance=0,
             delinquent=False,
         )
         Subscription.objects.create(
-            stripe_id="sub_xxxxxxxxxxxxxx{0}".format(12),
+            id="sub_xxxxxxxxxxxxxx{0}".format(12),
             customer=customer,
             plan=self.plan2,
             current_period_start=period_start,
@@ -161,12 +163,12 @@ class ChargeManagerTest(TestCase):
 
     def setUp(self):
         customer = Customer.objects.create(
-            stripe_id="cus_XXXXXXX", livemode=False,
+            id="cus_XXXXXXX", livemode=False,
             account_balance=0, delinquent=False
         )
 
         self.march_charge = Charge.objects.create(
-            stripe_id="ch_XXXXMAR1",
+            id="ch_XXXXMAR1",
             customer=customer,
             created=datetime.datetime(2015, 3, 31, tzinfo=timezone.utc),
             amount=0,
@@ -178,7 +180,7 @@ class ChargeManagerTest(TestCase):
         )
 
         self.april_charge_1 = Charge.objects.create(
-            stripe_id="ch_XXXXAPR1",
+            id="ch_XXXXAPR1",
             customer=customer,
             created=datetime.datetime(2015, 4, 1, tzinfo=timezone.utc),
             amount=decimal.Decimal("20.15"),
@@ -191,7 +193,7 @@ class ChargeManagerTest(TestCase):
         )
 
         self.april_charge_2 = Charge.objects.create(
-            stripe_id="ch_XXXXAPR2",
+            id="ch_XXXXAPR2",
             customer=customer,
             created=datetime.datetime(2015, 4, 18, tzinfo=timezone.utc),
             amount=decimal.Decimal("10.35"),
@@ -204,7 +206,7 @@ class ChargeManagerTest(TestCase):
         )
 
         self.april_charge_3 = Charge.objects.create(
-            stripe_id="ch_XXXXAPR3",
+            id="ch_XXXXAPR3",
             customer=customer,
             created=datetime.datetime(2015, 4, 30, tzinfo=timezone.utc),
             amount=decimal.Decimal("100.00"),
@@ -217,7 +219,7 @@ class ChargeManagerTest(TestCase):
         )
 
         self.may_charge = Charge.objects.create(
-            stripe_id="ch_XXXXMAY1",
+            id="ch_XXXXMAY1",
             customer=customer,
             created=datetime.datetime(2015, 5, 1, tzinfo=timezone.utc),
             amount=0,
@@ -229,7 +231,7 @@ class ChargeManagerTest(TestCase):
         )
 
         self.november_charge = Charge.objects.create(
-            stripe_id="ch_XXXXNOV1",
+            id="ch_XXXXNOV1",
             customer=customer,
             created=datetime.datetime(2015, 11, 16, tzinfo=timezone.utc),
             amount=0,
@@ -241,7 +243,7 @@ class ChargeManagerTest(TestCase):
         )
 
         self.charge_2014 = Charge.objects.create(
-            stripe_id="ch_XXXX20141",
+            id="ch_XXXX20141",
             customer=customer,
             created=datetime.datetime(2014, 12, 31, tzinfo=timezone.utc),
             amount=0,
@@ -253,7 +255,7 @@ class ChargeManagerTest(TestCase):
         )
 
         self.charge_2016 = Charge.objects.create(
-            stripe_id="ch_XXXX20161",
+            id="ch_XXXX20161",
             customer=customer,
             created=datetime.datetime(2016, 1, 1, tzinfo=timezone.utc),
             amount=0,
@@ -266,17 +268,17 @@ class ChargeManagerTest(TestCase):
 
     def test_is_during_april_2015(self):
         raw_charges = Charge.objects.during(year=2015, month=4)
-        charges = [charge.stripe_id for charge in raw_charges]
+        charges = [charge.id for charge in raw_charges]
 
-        self.assertIn(self.april_charge_1.stripe_id, charges, "April charge 1 not in charges.")
-        self.assertIn(self.april_charge_2.stripe_id, charges, "April charge 2 not in charges.")
-        self.assertIn(self.april_charge_3.stripe_id, charges, "April charge 3 not in charges.")
+        self.assertIn(self.april_charge_1.id, charges, "April charge 1 not in charges.")
+        self.assertIn(self.april_charge_2.id, charges, "April charge 2 not in charges.")
+        self.assertIn(self.april_charge_3.id, charges, "April charge 3 not in charges.")
 
-        self.assertNotIn(self.march_charge.stripe_id, charges, "March charge unexpectedly in charges.")
-        self.assertNotIn(self.may_charge.stripe_id, charges, "May charge unexpectedly in charges.")
-        self.assertNotIn(self.november_charge.stripe_id, charges, "November charge unexpectedly in charges.")
-        self.assertNotIn(self.charge_2014.stripe_id, charges, "2014 charge unexpectedly in charges.")
-        self.assertNotIn(self.charge_2016.stripe_id, charges, "2016 charge unexpectedly in charges.")
+        self.assertNotIn(self.march_charge.id, charges, "March charge unexpectedly in charges.")
+        self.assertNotIn(self.may_charge.id, charges, "May charge unexpectedly in charges.")
+        self.assertNotIn(self.november_charge.id, charges, "November charge unexpectedly in charges.")
+        self.assertNotIn(self.charge_2014.id, charges, "2014 charge unexpectedly in charges.")
+        self.assertNotIn(self.charge_2016.id, charges, "2016 charge unexpectedly in charges.")
 
     def test_get_paid_totals_for_april_2015(self):
         paid_totals = Charge.objects.paid_totals_for(year=2015, month=4)

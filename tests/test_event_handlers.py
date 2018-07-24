@@ -14,20 +14,24 @@ from django.test import TestCase
 from mock import patch
 
 from djstripe.models import (
-    Card, Charge, Coupon, Customer, Dispute, Event, Invoice, InvoiceItem, PaymentMethod, Plan, Subscription, Transfer
+    Card, Charge, Coupon, Customer, Dispute, Event, Invoice,
+    InvoiceItem, PaymentMethod, Plan, Subscription, Transfer
 )
 
 from . import (
-    FAKE_CARD, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_COUPON, FAKE_CUSTOMER, FAKE_CUSTOMER_II, FAKE_DISPUTE,
-    FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED, FAKE_EVENT_CHARGE_SUCCEEDED, FAKE_EVENT_CUSTOMER_CREATED,
-    FAKE_EVENT_CUSTOMER_DELETED, FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED, FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED,
-    FAKE_EVENT_CUSTOMER_SOURCE_CREATED, FAKE_EVENT_CUSTOMER_SOURCE_DELETED, FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE,
-    FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED, FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED, FAKE_EVENT_DISPUTE_CREATED,
-    FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_INVOICE_DELETED, FAKE_EVENT_INVOICE_UPCOMING,
-    FAKE_EVENT_INVOICEITEM_CREATED, FAKE_EVENT_INVOICEITEM_DELETED, FAKE_EVENT_PLAN_CREATED,
-    FAKE_EVENT_PLAN_DELETED, FAKE_EVENT_PLAN_REQUEST_IS_OBJECT, FAKE_EVENT_TRANSFER_CREATED,
-    FAKE_EVENT_TRANSFER_DELETED, FAKE_INVOICE, FAKE_INVOICE_II, FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION,
-    FAKE_SUBSCRIPTION_III, FAKE_TRANSFER, default_account
+    FAKE_CARD, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_COUPON, FAKE_CUSTOMER,
+    FAKE_CUSTOMER_II, FAKE_DISPUTE, FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED,
+    FAKE_EVENT_CHARGE_SUCCEEDED, FAKE_EVENT_CUSTOMER_CREATED,
+    FAKE_EVENT_CUSTOMER_DELETED, FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED,
+    FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED, FAKE_EVENT_CUSTOMER_SOURCE_CREATED,
+    FAKE_EVENT_CUSTOMER_SOURCE_DELETED, FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE,
+    FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED, FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED,
+    FAKE_EVENT_DISPUTE_CREATED, FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_INVOICE_DELETED,
+    FAKE_EVENT_INVOICE_UPCOMING, FAKE_EVENT_INVOICEITEM_CREATED,
+    FAKE_EVENT_INVOICEITEM_DELETED, FAKE_EVENT_PLAN_CREATED, FAKE_EVENT_PLAN_DELETED,
+    FAKE_EVENT_PLAN_REQUEST_IS_OBJECT, FAKE_EVENT_TRANSFER_CREATED,
+    FAKE_EVENT_TRANSFER_DELETED, FAKE_INVOICE, FAKE_INVOICE_II, FAKE_INVOICEITEM,
+    FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_III, FAKE_TRANSFER, default_account
 )
 
 
@@ -76,7 +80,7 @@ class TestChargeEvents(EventTestCase):
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
 
-        charge = Charge.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
+        charge = Charge.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(charge.amount, fake_stripe_event["data"]["object"]["amount"] / decimal.Decimal("100"))
         self.assertEqual(charge.status, fake_stripe_event["data"]["object"]["status"])
 
@@ -96,7 +100,7 @@ class TestCustomerEvents(EventTestCase):
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
 
-        customer = Customer.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
+        customer = Customer.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(customer.account_balance, fake_stripe_event["data"]["object"]["account_balance"])
         self.assertEqual(customer.currency, fake_stripe_event["data"]["object"]["currency"])
 
@@ -108,7 +112,7 @@ class TestCustomerEvents(EventTestCase):
 
         event = self._create_event(FAKE_EVENT_CUSTOMER_DELETED)
         event.invoke_webhook_handlers()
-        customer = Customer.objects.get(stripe_id=FAKE_CUSTOMER["id"])
+        customer = Customer.objects.get(id=FAKE_CUSTOMER["id"])
         self.assertIsNotNone(customer.date_purged)
 
     @patch("stripe.Coupon.retrieve", return_value=FAKE_COUPON)
@@ -119,7 +123,7 @@ class TestCustomerEvents(EventTestCase):
         event.invoke_webhook_handlers()
 
         self.assertIsNotNone(event.customer)
-        self.assertEqual(event.customer.stripe_id, FAKE_CUSTOMER["id"])
+        self.assertEqual(event.customer.id, FAKE_CUSTOMER["id"])
         self.assertIsNotNone(event.customer.coupon)
 
     @patch("stripe.Coupon.retrieve", return_value=FAKE_COUPON)
@@ -133,7 +137,7 @@ class TestCustomerEvents(EventTestCase):
         event.invoke_webhook_handlers()
 
         self.assertIsNotNone(event.customer)
-        self.assertEqual(event.customer.stripe_id, FAKE_CUSTOMER["id"])
+        self.assertEqual(event.customer.id, FAKE_CUSTOMER["id"])
         self.assertIsNone(event.customer.coupon)
 
     @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER)
@@ -145,7 +149,7 @@ class TestCustomerEvents(EventTestCase):
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
 
-        card = Card.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
+        card = Card.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertIn(card, self.customer.sources.all())
         self.assertEqual(card.brand, fake_stripe_event["data"]["object"]["brand"])
         self.assertEqual(card.last4, fake_stripe_event["data"]["object"]["last4"])
@@ -162,7 +166,7 @@ class TestCustomerEvents(EventTestCase):
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
 
-        self.assertFalse(Card.objects.filter(stripe_id=fake_stripe_event["data"]["object"]["id"]).exists())
+        self.assertFalse(Card.objects.filter(id=fake_stripe_event["data"]["object"]["id"]).exists())
 
     def test_customer_default_source_deleted(self):
         self.customer.default_source = PaymentMethod.objects.get(id=FAKE_CARD["id"])
@@ -173,7 +177,7 @@ class TestCustomerEvents(EventTestCase):
         event = self._create_event(FAKE_EVENT_CUSTOMER_SOURCE_DELETED)
         event.invoke_webhook_handlers()
 
-        customer = Customer.objects.get(stripe_id=FAKE_CUSTOMER["id"])
+        customer = Customer.objects.get(id=FAKE_CUSTOMER["id"])
         self.assertIsNone(customer.default_source)
         self.assertFalse(customer.has_valid_source())
 
@@ -194,7 +198,7 @@ class TestCustomerEvents(EventTestCase):
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
 
-        subscription = Subscription.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
+        subscription = Subscription.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertIn(subscription, self.customer.subscriptions.all())
         self.assertEqual(subscription.status, fake_stripe_event["data"]["object"]["status"])
         self.assertEqual(subscription.quantity, fake_stripe_event["data"]["object"]["quantity"])
@@ -207,13 +211,13 @@ class TestCustomerEvents(EventTestCase):
         event = self._create_event(FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED)
         event.invoke_webhook_handlers()
 
-        Subscription.objects.get(stripe_id=FAKE_SUBSCRIPTION["id"])
+        Subscription.objects.get(id=FAKE_SUBSCRIPTION["id"])
 
         event = self._create_event(FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED)
         event.invoke_webhook_handlers()
 
         with self.assertRaises(Subscription.DoesNotExist):
-            Subscription.objects.get(stripe_id=FAKE_SUBSCRIPTION["id"])
+            Subscription.objects.get(id=FAKE_SUBSCRIPTION["id"])
 
     @patch("stripe.Customer.retrieve")
     @patch("stripe.Event.retrieve")
@@ -237,7 +241,7 @@ class TestDisputeEvents(EventTestCase):
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
         dispute = Dispute.objects.get()
-        self.assertEqual(dispute.stripe_id, FAKE_DISPUTE["id"])
+        self.assertEqual(dispute.id, FAKE_DISPUTE["id"])
 
 
 class TestInvoiceEvents(EventTestCase):
@@ -286,7 +290,7 @@ class TestInvoiceEvents(EventTestCase):
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
 
-        invoice = Invoice.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
+        invoice = Invoice.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(
             invoice.amount_due,
             fake_stripe_event["data"]["object"]["amount_due"] / decimal.Decimal("100")
@@ -307,13 +311,13 @@ class TestInvoiceEvents(EventTestCase):
         event = self._create_event(FAKE_EVENT_INVOICE_CREATED)
         event.invoke_webhook_handlers()
 
-        Invoice.objects.get(stripe_id=FAKE_INVOICE["id"])
+        Invoice.objects.get(id=FAKE_INVOICE["id"])
 
         event = self._create_event(FAKE_EVENT_INVOICE_DELETED)
         event.invoke_webhook_handlers()
 
         with self.assertRaises(Invoice.DoesNotExist):
-            Invoice.objects.get(stripe_id=FAKE_INVOICE["id"])
+            Invoice.objects.get(id=FAKE_INVOICE["id"])
 
     def test_invoice_upcoming(self):
         # Ensure that invoice upcoming events are processed - No actual
@@ -346,7 +350,7 @@ class TestInvoiceItemEvents(EventTestCase):
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
 
-        invoiceitem = InvoiceItem.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
+        invoiceitem = InvoiceItem.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(invoiceitem.amount, fake_stripe_event["data"]["object"]["amount"] / decimal.Decimal("100"))
 
     @patch("djstripe.models.Account.get_default_account")
@@ -366,13 +370,13 @@ class TestInvoiceItemEvents(EventTestCase):
         event = self._create_event(FAKE_EVENT_INVOICEITEM_CREATED)
         event.invoke_webhook_handlers()
 
-        InvoiceItem.objects.get(stripe_id=FAKE_INVOICEITEM["id"])
+        InvoiceItem.objects.get(id=FAKE_INVOICEITEM["id"])
 
         event = self._create_event(FAKE_EVENT_INVOICEITEM_DELETED)
         event.invoke_webhook_handlers()
 
         with self.assertRaises(InvoiceItem.DoesNotExist):
-            InvoiceItem.objects.get(stripe_id=FAKE_INVOICEITEM["id"])
+            InvoiceItem.objects.get(id=FAKE_INVOICEITEM["id"])
 
 
 class TestPlanEvents(EventTestCase):
@@ -387,7 +391,7 @@ class TestPlanEvents(EventTestCase):
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
 
-        plan = Plan.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
+        plan = Plan.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(plan.name, fake_stripe_event["data"]["object"]["name"])
 
     @patch("stripe.Plan.retrieve", return_value=FAKE_PLAN)
@@ -398,7 +402,7 @@ class TestPlanEvents(EventTestCase):
         event = Event.sync_from_stripe_data(FAKE_EVENT_PLAN_REQUEST_IS_OBJECT)
         event.invoke_webhook_handlers()
 
-        plan = Plan.objects.get(stripe_id=FAKE_EVENT_PLAN_REQUEST_IS_OBJECT["data"]["object"]["id"])
+        plan = Plan.objects.get(id=FAKE_EVENT_PLAN_REQUEST_IS_OBJECT["data"]["object"]["id"])
         self.assertEqual(plan.name, FAKE_EVENT_PLAN_REQUEST_IS_OBJECT["data"]["object"]["name"])
 
     @patch('stripe.Plan.retrieve', return_value=FAKE_PLAN)
@@ -407,13 +411,13 @@ class TestPlanEvents(EventTestCase):
         event = self._create_event(FAKE_EVENT_PLAN_CREATED)
         event.invoke_webhook_handlers()
 
-        Plan.objects.get(stripe_id=FAKE_PLAN["id"])
+        Plan.objects.get(id=FAKE_PLAN["id"])
 
         event = self._create_event(FAKE_EVENT_PLAN_DELETED)
         event.invoke_webhook_handlers()
 
         with self.assertRaises(Plan.DoesNotExist):
-            Plan.objects.get(stripe_id=FAKE_PLAN["id"])
+            Plan.objects.get(id=FAKE_PLAN["id"])
 
 
 class TestTransferEvents(EventTestCase):
@@ -428,7 +432,7 @@ class TestTransferEvents(EventTestCase):
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
 
-        transfer = Transfer.objects.get(stripe_id=fake_stripe_event["data"]["object"]["id"])
+        transfer = Transfer.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(transfer.amount, fake_stripe_event["data"]["object"]["amount"] / decimal.Decimal("100"))
         self.assertEqual(transfer.status, fake_stripe_event["data"]["object"]["status"])
 
@@ -437,13 +441,13 @@ class TestTransferEvents(EventTestCase):
         event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
         event.invoke_webhook_handlers()
 
-        Transfer.objects.get(stripe_id=FAKE_TRANSFER["id"])
+        Transfer.objects.get(id=FAKE_TRANSFER["id"])
 
         event = self._create_event(FAKE_EVENT_TRANSFER_DELETED)
         event.invoke_webhook_handlers()
 
         with self.assertRaises(Transfer.DoesNotExist):
-            Transfer.objects.get(stripe_id=FAKE_TRANSFER["id"])
+            Transfer.objects.get(id=FAKE_TRANSFER["id"])
 
         event = self._create_event(FAKE_EVENT_TRANSFER_DELETED)
         event.invoke_webhook_handlers()

@@ -33,9 +33,9 @@ class EventTest(TestCase):
     def test_str(self):
         event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
 
-        self.assertEqual("<type={type}, stripe_id={stripe_id}>".format(
+        self.assertEqual("<type={type}, id={id}>".format(
             type=FAKE_EVENT_TRANSFER_CREATED["type"],
-            stripe_id=FAKE_EVENT_TRANSFER_CREATED["id"]
+            id=FAKE_EVENT_TRANSFER_CREATED["id"]
         ), str(event))
 
     def test_invoke_webhook_handlers_event_with_log_stripe_error(self):

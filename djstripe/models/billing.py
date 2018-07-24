@@ -22,7 +22,7 @@ from .core import Charge, Customer, Product
 
 
 class Coupon(StripeObject):
-    stripe_id = StripeIdField(stripe_name="id", max_length=500)
+    id = StripeIdField(max_length=500)
     amount_off = StripeCurrencyField(
         null=True,
         blank=True,
@@ -76,7 +76,7 @@ class Coupon(StripeObject):
     DURATION_REPEATING = "repeating"
 
     class Meta:
-        unique_together = ("stripe_id", "livemode")
+        unique_together = ("id", "livemode")
 
     stripe_class = stripe.Coupon
     stripe_dashboard_item_name = "coupons"
@@ -315,7 +315,7 @@ class Invoice(StripeObject):
 
     def __str__(self):
         return "Invoice #{number}".format(
-            number=self.number or self.receipt_number or self.stripe_id
+            number=self.number or self.receipt_number or self.id
         )
 
     @classmethod
@@ -388,17 +388,17 @@ class Invoice(StripeObject):
         :rtype: UpcomingInvoice
         """
 
-        # Convert Customer to stripe_id
+        # Convert Customer to id
         if customer is not None and isinstance(customer, StripeObject):
-            customer = customer.stripe_id
+            customer = customer.id
 
-        # Convert Subscription to stripe_id
+        # Convert Subscription to id
         if subscription is not None and isinstance(subscription, StripeObject):
-            subscription = subscription.stripe_id
+            subscription = subscription.id
 
-        # Convert Plan to stripe_id
+        # Convert Plan to id
         if subscription_plan is not None and isinstance(subscription_plan, StripeObject):
-            subscription_plan = subscription_plan.stripe_id
+            subscription_plan = subscription_plan.id
 
         try:
             upcoming_stripe_invoice = cls.stripe_class.upcoming(
@@ -538,11 +538,11 @@ class UpcomingInvoice(Invoice):
         return QuerySetMock.from_iterable(InvoiceItem, self._invoiceitems)
 
     @property
-    def stripe_id(self):
+    def id(self):
         return None
 
-    @stripe_id.setter
-    def stripe_id(self, value):
+    @id.setter
+    def id(self, value):
         return  # noop
 
     def save(self, *args, **kwargs):
@@ -812,7 +812,7 @@ class Plan(StripeObject):
         """ Get or create a Plan."""
 
         try:
-            return Plan.objects.get(stripe_id=kwargs["stripe_id"]), False
+            return Plan.objects.get(id=kwargs["id"]), False
         except Plan.DoesNotExist:
             return cls.create(**kwargs), True
 
@@ -820,8 +820,6 @@ class Plan(StripeObject):
     def create(cls, **kwargs):
         # A few minor things are changed in the api-version of the create call
         api_kwargs = dict(kwargs)
-        api_kwargs["id"] = api_kwargs["stripe_id"]
-        del (api_kwargs["stripe_id"])
         api_kwargs["amount"] = int(api_kwargs["amount"] * 100)
         cls._api_create(**api_kwargs)
 
@@ -830,7 +828,7 @@ class Plan(StripeObject):
         return plan
 
     def __str__(self):
-        return self.name or self.nickname or self.stripe_id
+        return self.name or self.nickname or self.id
 
     def _attach_objects_hook(self, cls, data):
         product = cls._stripe_object_to_product(target_cls=Product, data=data)
@@ -1061,9 +1059,9 @@ class Subscription(StripeObject):
         Stripe (and dj-stripe).
         """
 
-        # Convert Plan to stripe_id
+        # Convert Plan to id
         if plan is not None and isinstance(plan, StripeObject):
-            plan = plan.stripe_id
+            plan = plan.id
 
         kwargs = deepcopy(locals())
         del kwargs["self"]

@@ -40,12 +40,12 @@ class InvoiceItemTest(TestCase):
 
         self.assertEqual(
             str(invoiceitem),
-            "<amount=20, date=2015-08-08 11:26:56+00:00, stripe_id=ii_16XVTY2eZvKYlo2Cxz5n3RaS>"
+            "<amount=20, date=2015-08-08 11:26:56+00:00, id=ii_16XVTY2eZvKYlo2Cxz5n3RaS>"
         )
         invoiceitem.plan = None
         self.assertEqual(
             str(invoiceitem),
-            "<amount=20, date=2015-08-08 11:26:56+00:00, stripe_id=ii_16XVTY2eZvKYlo2Cxz5n3RaS>"
+            "<amount=20, date=2015-08-08 11:26:56+00:00, id=ii_16XVTY2eZvKYlo2Cxz5n3RaS>"
         )
 
     @patch("djstripe.models.Account.get_default_account")
@@ -61,7 +61,7 @@ class InvoiceItemTest(TestCase):
         invoiceitem_data.update({"subscription": FAKE_SUBSCRIPTION_III["id"]})
         invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
 
-        self.assertEqual(FAKE_SUBSCRIPTION_III["id"], invoiceitem.subscription.stripe_id)
+        self.assertEqual(FAKE_SUBSCRIPTION_III["id"], invoiceitem.subscription.id)
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN_II))
@@ -77,4 +77,4 @@ class InvoiceItemTest(TestCase):
         invoiceitem_data.update({"proration": True, "plan": FAKE_PLAN_II["id"]})
         invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
 
-        self.assertEqual(FAKE_PLAN_II["id"], invoiceitem.plan.stripe_id)
+        self.assertEqual(FAKE_PLAN_II["id"], invoiceitem.plan.id)

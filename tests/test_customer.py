@@ -19,12 +19,15 @@ from mock import ANY, patch
 from stripe.error import InvalidRequestError
 
 from djstripe.exceptions import MultipleSubscriptionException
-from djstripe.models import Card, Charge, Coupon, Customer, Invoice, PaymentMethod, Plan, Subscription
+from djstripe.models import (
+    Card, Charge, Coupon, Customer, Invoice, PaymentMethod, Plan, Subscription
+)
 
 from . import (
-    FAKE_ACCOUNT, FAKE_CARD, FAKE_CARD_V, FAKE_CHARGE, FAKE_COUPON, FAKE_CUSTOMER, FAKE_CUSTOMER_II,
-    FAKE_DISCOUNT_CUSTOMER, FAKE_INVOICE, FAKE_INVOICE_III, FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION,
-    FAKE_SUBSCRIPTION_II, FAKE_UPCOMING_INVOICE, StripeList, datetime_to_unix, default_account
+    FAKE_ACCOUNT, FAKE_CARD, FAKE_CARD_V, FAKE_CHARGE, FAKE_COUPON, FAKE_CUSTOMER,
+    FAKE_CUSTOMER_II, FAKE_DISCOUNT_CUSTOMER, FAKE_INVOICE, FAKE_INVOICE_III,
+    FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II,
+    FAKE_UPCOMING_INVOICE, StripeList, datetime_to_unix, default_account
 )
 
 
@@ -45,9 +48,9 @@ class TestCustomer(TestCase):
     def test_str(self):
         self.assertEqual(str(self.customer), self.user.email)
         self.customer.subscriber.email = ""
-        self.assertEqual(str(self.customer), self.customer.stripe_id)
+        self.assertEqual(str(self.customer), self.customer.id)
         self.customer.subscriber = None
-        self.assertEqual(str(self.customer), "{stripe_id} (deleted)".format(stripe_id=self.customer.stripe_id))
+        self.assertEqual(str(self.customer), "{id} (deleted)".format(id=self.customer.id))
 
     def test_account_balance(self):
         self.assertEqual(self.customer.account_balance, 0)
@@ -64,11 +67,11 @@ class TestCustomer(TestCase):
         self.assertEqual(self.customer.pending_charges, 0)
 
     def test_customer_dashboard_url(self):
-        expected_url = "https://dashboard.stripe.com/test/customers/{}".format(self.customer.stripe_id)
+        expected_url = "https://dashboard.stripe.com/test/customers/{}".format(self.customer.id)
         self.assertEqual(self.customer.get_stripe_dashboard_url(), expected_url)
 
         self.customer.livemode = True
-        expected_url = "https://dashboard.stripe.com/customers/{}".format(self.customer.stripe_id)
+        expected_url = "https://dashboard.stripe.com/customers/{}".format(self.customer.id)
         self.assertEqual(self.customer.get_stripe_dashboard_url(), expected_url)
 
         unsaved_customer = Customer()
@@ -113,7 +116,7 @@ class TestCustomer(TestCase):
         customer = fake_customer.create_for_user(user)
 
         self.assertEqual(customer.sources.count(), 1)
-        self.assertEqual(customer.default_source.stripe_id, fake_customer["default_source"]["id"])
+        self.assertEqual(customer.default_source.id, fake_customer["default_source"]["id"])
 
     def test_customer_sync_no_sources(self):
         fake_customer = deepcopy(FAKE_CUSTOMER)
@@ -132,13 +135,13 @@ class TestCustomer(TestCase):
         customer_fake = deepcopy(FAKE_CUSTOMER)
         customer_fake["default_source"] = customer_fake["sources"]["data"][0]["id"] = "card_sync_source_string"
         customer = Customer.sync_from_stripe_data(customer_fake)
-        self.assertEqual(customer.default_source.stripe_id, customer_fake["default_source"])
+        self.assertEqual(customer.default_source.id, customer_fake["default_source"])
         self.assertEqual(customer.sources.count(), 2)
 
     @patch("stripe.Customer.retrieve")
     def test_customer_purge_leaves_customer_record(self, customer_retrieve_fake):
         self.customer.purge()
-        customer = Customer.objects.get(stripe_id=self.customer.stripe_id)
+        customer = Customer.objects.get(id=self.customer.id)
 
         self.assertTrue(customer.subscriber is None)
         self.assertTrue(customer.default_source is None)
@@ -148,7 +151,7 @@ class TestCustomer(TestCase):
     @patch("stripe.Customer.retrieve")
     def test_customer_delete_same_as_purge(self, customer_retrieve_fake):
         self.customer.delete()
-        customer = Customer.objects.get(stripe_id=self.customer.stripe_id)
+        customer = Customer.objects.get(id=self.customer.id)
 
         self.assertTrue(customer.subscriber is None)
         self.assertTrue(customer.default_source is None)
@@ -160,13 +163,13 @@ class TestCustomer(TestCase):
         customer_retrieve_mock.side_effect = InvalidRequestError("No such customer:", "blah")
 
         self.customer.purge()
-        customer = Customer.objects.get(stripe_id=self.customer.stripe_id)
+        customer = Customer.objects.get(id=self.customer.id)
         self.assertTrue(customer.subscriber is None)
         self.assertTrue(customer.default_source is None)
         self.assertTrue(not customer.sources.all())
         self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
 
-        customer_retrieve_mock.assert_called_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY,
+        customer_retrieve_mock.assert_called_with(id=self.customer.id, api_key=settings.STRIPE_SECRET_KEY,
                                                   expand=['default_source'])
         self.assertEqual(3, customer_retrieve_mock.call_count)
 
@@ -177,7 +180,7 @@ class TestCustomer(TestCase):
         with self.assertRaisesMessage(InvalidRequestError, "Unexpected Exception"):
             self.customer.purge()
 
-        customer_retrieve_mock.assert_called_once_with(id=self.customer.stripe_id, api_key=settings.STRIPE_SECRET_KEY,
+        customer_retrieve_mock.assert_called_once_with(id=self.customer.id, api_key=settings.STRIPE_SECRET_KEY,
                                                        expand=['default_source'])
 
     def test_can_charge(self):
@@ -189,7 +192,7 @@ class TestCustomer(TestCase):
         self.customer.add_card(FAKE_CARD_V["id"])
 
         self.assertEqual(2, Card.objects.count())
-        self.assertEqual(FAKE_CARD_V["id"], self.customer.default_source.stripe_id)
+        self.assertEqual(FAKE_CARD_V["id"], self.customer.default_source.id)
 
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_add_card_set_default_false(self, customer_retrieve_mock):
@@ -197,14 +200,14 @@ class TestCustomer(TestCase):
         self.customer.add_card(FAKE_CARD_V["id"], set_default=False)
 
         self.assertEqual(2, Card.objects.count())
-        self.assertEqual(FAKE_CARD["id"], self.customer.default_source.stripe_id)
+        self.assertEqual(FAKE_CARD["id"], self.customer.default_source.id)
 
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_add_card_set_default_false_with_single_card_still_becomes_default(self, customer_retrieve_mock):
         self.customer.add_card(FAKE_CARD["id"], set_default=False)
 
         self.assertEqual(2, Card.objects.count())
-        self.assertEqual(FAKE_CARD["id"], self.customer.default_source.stripe_id)
+        self.assertEqual(FAKE_CARD["id"], self.customer.default_source.id)
 
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
     def test_cannot_charge(self, customer_retrieve_fake):
@@ -269,7 +272,7 @@ class TestCustomer(TestCase):
 
     def test_calculate_refund_amount_full_refund(self):
         charge = Charge(
-            stripe_id="ch_111111",
+            id="ch_111111",
             customer=self.customer,
             amount=decimal.Decimal("500.00")
         )
@@ -277,7 +280,7 @@ class TestCustomer(TestCase):
 
     def test_calculate_refund_amount_partial_refund(self):
         charge = Charge(
-            stripe_id="ch_111111",
+            id="ch_111111",
             customer=self.customer,
             amount=decimal.Decimal("500.00")
         )
@@ -288,7 +291,7 @@ class TestCustomer(TestCase):
 
     def test_calculate_refund_above_max_refund(self):
         charge = Charge(
-            stripe_id="ch_111111",
+            id="ch_111111",
             customer=self.customer,
             amount=decimal.Decimal("500.00")
         )
@@ -371,7 +374,7 @@ class TestCustomer(TestCase):
 
         self.customer.charge(
             amount=decimal.Decimal("10.00"),
-            source=self.card.stripe_id,
+            source=self.card.id,
         )
 
     @patch("djstripe.models.Account.get_default_account")
@@ -404,7 +407,7 @@ class TestCustomer(TestCase):
 
         self.customer.retry_unpaid_invoices()
 
-        invoice = Invoice.objects.get(stripe_id=FAKE_INVOICE_III["id"])
+        invoice = Invoice.objects.get(id=FAKE_INVOICE_III["id"])
         invoice_retry_mock.assert_called_once_with(invoice)
 
     @patch("djstripe.models.Account.get_default_account")
@@ -461,7 +464,7 @@ class TestCustomer(TestCase):
 
         invoice_create_mock.assert_called_once_with(
             api_key=settings.STRIPE_SECRET_KEY,
-            customer=self.customer.stripe_id
+            customer=self.customer.id
         )
 
     @patch("stripe.Invoice.create")
@@ -473,7 +476,7 @@ class TestCustomer(TestCase):
 
         invoice_create_mock.assert_called_once_with(
             api_key=settings.STRIPE_SECRET_KEY,
-            customer=self.customer.stripe_id
+            customer=self.customer.id
         )
 
     @patch("stripe.Coupon.retrieve", return_value=deepcopy(FAKE_COUPON))
@@ -482,7 +485,7 @@ class TestCustomer(TestCase):
         fake_customer = deepcopy(FAKE_CUSTOMER)
         fake_customer["discount"] = deepcopy(FAKE_DISCOUNT_CUSTOMER)
         customer = Customer.sync_from_stripe_data(fake_customer)
-        self.assertEqual(customer.coupon.stripe_id, FAKE_COUPON["id"])
+        self.assertEqual(customer.coupon.id, FAKE_COUPON["id"])
         self.assertIsNotNone(customer.coupon_start)
         self.assertIsNone(customer.coupon_end)
 
@@ -492,18 +495,18 @@ class TestCustomer(TestCase):
         fake_customer["discount"] = deepcopy(FAKE_DISCOUNT_CUSTOMER)
 
         # Set the customer's coupon to be what we'll sync
-        customer = Customer.objects.get(stripe_id=FAKE_CUSTOMER["id"])
+        customer = Customer.objects.get(id=FAKE_CUSTOMER["id"])
         customer.coupon = Coupon.sync_from_stripe_data(FAKE_COUPON)
         customer.save()
 
         customer = Customer.sync_from_stripe_data(fake_customer)
-        self.assertEqual(customer.coupon.stripe_id, FAKE_COUPON["id"])
+        self.assertEqual(customer.coupon.id, FAKE_COUPON["id"])
 
     def test_sync_customer_delete_discount(self):
         test_coupon = Coupon.sync_from_stripe_data(FAKE_COUPON)
         self.customer.coupon = test_coupon
         self.customer.save()
-        self.assertEqual(self.customer.coupon.stripe_id, FAKE_COUPON["id"])
+        self.assertEqual(self.customer.coupon.id, FAKE_COUPON["id"])
 
         customer = Customer.sync_from_stripe_data(FAKE_CUSTOMER)
         self.assertEqual(customer.coupon, None)
@@ -576,7 +579,7 @@ class TestCustomer(TestCase):
     def test_subscribe_plan_string(self, customer_retrieve_mock, subscription_create_mock, send_invoice_mock):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
-        self.customer.subscribe(plan=plan.stripe_id, charge_immediately=True)
+        self.customer.subscribe(plan=plan.id, charge_immediately=True)
         self.assertTrue(send_invoice_mock.called)
 
     @patch("stripe.Subscription.create")
@@ -646,7 +649,7 @@ class TestCustomer(TestCase):
 
         self.customer.subscribe(plan=plan, charge_immediately=False)
 
-        self.customer.has_active_subscription(plan=plan.stripe_id)
+        self.customer.has_active_subscription(plan=plan.id)
 
     @patch("djstripe.models.InvoiceItem.sync_from_stripe_data", return_value="pancakes")
     @patch("stripe.InvoiceItem.create", return_value=deepcopy(FAKE_INVOICEITEM))
@@ -663,7 +666,7 @@ class TestCustomer(TestCase):
         invoiceitem_create_mock.assert_called_once_with(
             api_key=settings.STRIPE_SECRET_KEY,
             amount=5000,
-            customer=self.customer.stripe_id,
+            customer=self.customer.id,
             currency="eur",
             description="test",
             discountable=None,
@@ -679,15 +682,15 @@ class TestCustomer(TestCase):
             amount=decimal.Decimal("50.00"),
             currency="eur",
             description="test",
-            invoice=Invoice(stripe_id=77),
-            subscription=Subscription(stripe_id=25),
+            invoice=Invoice(id=77),
+            subscription=Subscription(id=25),
         )
         self.assertEqual("pancakes", invoiceitem)
 
         invoiceitem_create_mock.assert_called_once_with(
             api_key=settings.STRIPE_SECRET_KEY,
             amount=5000,
-            customer=self.customer.stripe_id,
+            customer=self.customer.id,
             currency="eur",
             description="test",
             discountable=None,
@@ -706,7 +709,7 @@ class TestCustomer(TestCase):
     def test_upcoming_invoice(self, invoice_upcoming_mock, subscription_retrieve_mock, plan_retrieve_mock):
         invoice = self.customer.upcoming_invoice()
         self.assertIsNotNone(invoice)
-        self.assertIsNone(invoice.stripe_id)
+        self.assertIsNone(invoice.id)
         self.assertIsNone(invoice.save())
 
         subscription_retrieve_mock.assert_called_once_with(api_key=ANY, expand=ANY, id=FAKE_SUBSCRIPTION["id"])
@@ -714,10 +717,10 @@ class TestCustomer(TestCase):
 
         items = invoice.invoiceitems.all()
         self.assertEqual(1, len(items))
-        self.assertEqual(FAKE_SUBSCRIPTION["id"], items[0].stripe_id)
+        self.assertEqual(FAKE_SUBSCRIPTION["id"], items[0].id)
 
         self.assertIsNotNone(invoice.plan)
-        self.assertEqual(FAKE_PLAN["id"], invoice.plan.stripe_id)
+        self.assertEqual(FAKE_PLAN["id"], invoice.plan.id)
 
         invoice._invoiceitems = []
         items = invoice.invoiceitems.all()
@@ -727,7 +730,7 @@ class TestCustomer(TestCase):
     @patch("stripe.Customer.retrieve")
     def test_delete_subscriber_purges_customer(self, customer_retrieve_mock):
         self.user.delete()
-        customer = Customer.objects.get(stripe_id=FAKE_CUSTOMER["id"])
+        customer = Customer.objects.get(id=FAKE_CUSTOMER["id"])
         self.assertIsNotNone(customer.date_purged)
 
     @patch("stripe.Customer.retrieve")
