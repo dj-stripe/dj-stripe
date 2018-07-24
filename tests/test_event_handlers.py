@@ -434,7 +434,6 @@ class TestTransferEvents(EventTestCase):
 
         transfer = Transfer.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(transfer.amount, fake_stripe_event["data"]["object"]["amount"] / decimal.Decimal("100"))
-        self.assertEqual(transfer.status, fake_stripe_event["data"]["object"]["status"])
 
     @patch('stripe.Transfer.retrieve', return_value=FAKE_TRANSFER)
     def test_transfer_deleted(self, transfer_retrieve_mock):

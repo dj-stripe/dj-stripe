@@ -58,11 +58,11 @@ class TransferManager(models.Manager):
 
     def during(self, year, month):
         """Return Transfers between a certain time range."""
-        return self.filter(date__year=year, date__month=month)
+        return self.filter(created__year=year, created__month=month)
 
     def paid_totals_for(self, year, month):
         """Return paid Transfers during a certain year, month with total amounts annotated."""
-        return self.during(year, month).filter(status="paid").aggregate(total_amount=models.Sum("amount"))
+        return self.during(year, month).aggregate(total_amount=models.Sum("amount"))
 
 
 class ChargeManager(models.Manager):

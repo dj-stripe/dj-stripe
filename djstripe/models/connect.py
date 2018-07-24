@@ -5,8 +5,7 @@ from .. import enums
 from .. import settings as djstripe_settings
 from ..fields import (
     StripeBooleanField, StripeCharField, StripeCurrencyField,
-    StripeDateTimeField, StripeEnumField, StripeIdField,
-    StripeJSONField, StripeNullBooleanField, StripeTextField
+    StripeEnumField, StripeIdField, StripeJSONField, StripeNullBooleanField
 )
 from ..managers import TransferManager
 from .base import StripeObject
@@ -215,43 +214,6 @@ class Transfer(StripeObject):
         help_text="A string that identifies this transaction as part of a group.",
     )
 
-    # DEPRECATED Fields
-    date = StripeDateTimeField(
-        help_text="Date the transfer is scheduled to arrive in the bank. This doesn't factor in delays like "
-        "weekends or bank holidays."
-    )
-    destination_type = StripeCharField(
-        stripe_name="type",
-        max_length=14,
-        stripe_required=False,
-        help_text="The type of the transfer destination.",
-    )
-    failure_code = StripeEnumField(
-        enum=enums.PayoutFailureCode,
-        stripe_required=False,
-        help_text="Error code explaining reason for transfer failure if available. "
-        "See https://stripe.com/docs/api/python#transfer_failures.",
-    )
-    failure_message = StripeTextField(
-        stripe_required=False,
-        help_text="Message to user further explaining reason for transfer failure if available.",
-    )
-    statement_descriptor = StripeCharField(
-        max_length=22,
-        null=True,
-        help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement "
-        "description may not include <>\"' characters, and will appear on your customer's statement in capital "
-        "letters. Non-ASCII characters are automatically stripped. While most banks display this information "
-        "consistently, some may display it incorrectly or not at all.",
-    )
-    status = StripeEnumField(
-        enum=enums.PayoutStatus,
-        stripe_required=False,
-        help_text="The current status of the transfer. A transfer will be pending until it is submitted to the bank, "
-        "at which point it becomes in_transit. It will then change to paid if the transaction goes through. "
-        "If it does not go through successfully, its status will change to failed or canceled.",
-    )
-
     # Balance transaction can be null if the transfer failed
     fee = StripeCurrencyField(stripe_required=False, nested_name="balance_transaction")
     fee_details = StripeJSONField(
@@ -261,5 +223,4 @@ class Transfer(StripeObject):
     def str_parts(self):
         return [
             "amount={amount}".format(amount=self.amount),
-            "status={status}".format(status=self.status),
         ] + super().str_parts()

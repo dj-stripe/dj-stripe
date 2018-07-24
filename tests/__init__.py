@@ -1079,12 +1079,9 @@ FAKE_TRANSFER = {
     "balance_transaction": deepcopy(FAKE_BALANCE_TRANSACTION_II),
     "created": 1439185846,
     "currency": "usd",
-    "date": 1439185846,
     "description": "Test description - 1439185984",
     "destination": "acct_16Y9B9Fso9hLaeLu",
     "destination_payment": "py_16Y9BKFso9hLaeLueFmWAYUi",
-    "failure_code": None,
-    "failure_message": None,
     "livemode": False,
     "metadata": {},
     "recipient": None,
@@ -1098,8 +1095,6 @@ FAKE_TRANSFER = {
     "reversed": False,
     "source_transaction": None,
     "source_type": "bank_account",
-    "statement_descriptor": None,
-    "status": "paid",
 }
 
 FAKE_TRANSFER_II = {
@@ -1112,11 +1107,8 @@ FAKE_TRANSFER_II = {
     "bank_account": deepcopy(FAKE_BANK_ACCOUNT),
     "created": 1440420000,
     "currency": "usd",
-    "date": 1440420000,
     "description": None,
     "destination": "ba_16hTzo2eZvKYlo2CeSjfb0tS",
-    "failure_code": None,
-    "failure_message": None,
     "livemode": False,
     "metadata": {
         "foo": "bar",
@@ -1132,9 +1124,6 @@ FAKE_TRANSFER_II = {
     "reversed": False,
     "source_transaction": None,
     "source_type": "card",
-    "statement_descriptor": None,
-    "status": "paid",
-    "type": "bank_account",
 }
 
 FAKE_TRANSFER_III = {
@@ -1150,8 +1139,6 @@ FAKE_TRANSFER_III = {
     "date": 1451560845,
     "description": "Transfer+for+test@example.com",
     "destination": "ba_17O4Tz2eZvKYlo2CMYsxroV5",
-    "failure_code": None,
-    "failure_message": None,
     "livemode": False,
     "metadata": {
         "foo2": "bar2",
@@ -1167,9 +1154,6 @@ FAKE_TRANSFER_III = {
     "reversed": False,
     "source_transaction": None,
     "source_type": "card",
-    "statement_descriptor": None,
-    "status": "paid",
-    "type": "bank_account",
 }
 
 FAKE_ACCOUNT = {

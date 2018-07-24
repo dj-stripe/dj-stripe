@@ -27,7 +27,7 @@ class TransferTest(TestCase):
         fake_event_updated.update({"id": "evt_000000000000000000000000"})
         fake_event_updated.update({"type": "transfer.updated"})
         fake_event_updated["data"]["object"]["amount"] = 3057
-        fake_event_updated["data"]["object"]["status"] = "fish"
+        fake_event_updated["data"]["object"]["source_type"] = "fish"
 
         event_retrieve_mock.side_effect = [fake_event_created, fake_event_updated]
         transfer_retrieve_mock.side_effect = [
@@ -43,12 +43,11 @@ class TransferTest(TestCase):
         updated_event = Event.sync_from_stripe_data(fake_event_updated)
         updated_event.invoke_webhook_handlers()
 
-        transfer_instance = Transfer.objects.get(status="fish")
+        transfer_instance = Transfer.objects.get(source_type="fish")
         self.assertEqual(2, transfer_retrieve_mock.call_count)
 
         # Test to string to ensure data was updated
-        self.assertEqual("<amount={amount}, status={status}, id={id}>".format(
+        self.assertEqual("<amount={amount}, id={id}>".format(
             amount=fake_event_updated["data"]["object"]["amount"] / decimal.Decimal("100"),
-            status=fake_event_updated["data"]["object"]["status"],
             id=fake_event_updated["data"]["object"]["id"]
         ), str(transfer_instance))

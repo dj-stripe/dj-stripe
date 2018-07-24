@@ -61,6 +61,30 @@ class Migration(migrations.Migration):
             model_name="charge",
             name="source_type",
         ),
+        migrations.RemoveField(
+            model_name="transfer",
+            name="date",
+        ),
+        migrations.RemoveField(
+            model_name="transfer",
+            name="destination_type",
+        ),
+        migrations.RemoveField(
+            model_name="transfer",
+            name="failure_code",
+        ),
+        migrations.RemoveField(
+            model_name="transfer",
+            name="failure_message",
+        ),
+        migrations.RemoveField(
+            model_name="transfer",
+            name="statement_descriptor",
+        ),
+        migrations.RemoveField(
+            model_name="transfer",
+            name="status",
+        ),
         migrations.AlterModelOptions(
             name="account",
             options={"get_latest_by": "created"},

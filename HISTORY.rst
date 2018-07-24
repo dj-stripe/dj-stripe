@@ -13,6 +13,9 @@ History
 - All ``stripe_id`` fields have been renamed ``id``.
 - ``Charge.source_type`` has been deprecated. Use ``Charge.source.type``.
 - ``Charge.source_stripe_id`` has been deprecated. Use ``Charge.source.id``.
+- All deprecated Transfer fields (Stripe API < 2017-04-06), have been dropped.
+  This includes ``date``, ``destination_type`` (``type``), ``failure_code``,
+  ``failure_message``, ``statement_descriptor`` and ``status``.
 
 
 1.2.1 (2018-07-18)
