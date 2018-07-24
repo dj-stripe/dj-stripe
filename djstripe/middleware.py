@@ -75,7 +75,7 @@ class SubscriptionPaymentMiddleware(MiddlewareMixin):
             return True
 
         # Second we check against matches
-        match = resolve(request.path, request.urlconf)
+        match = resolve(request.path, getattr(request, "urlconf", settings.ROOT_URLCONF))
         if "({0})".format(match.app_name) in EXEMPT:
             return True
 
