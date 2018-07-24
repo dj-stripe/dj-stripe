@@ -3,6 +3,16 @@
 History
 =======
 
+1.3.0 (unreleased)
+------------------
+
+- Dropped previously-deprecated ``Charge.receipt_number`` field.
+- Dropped previously-deprecated ``SubscriptionView``,
+  ``CancelSubscriptionView`` and ``CancelSubscriptionForm``.
+- Removed the default value from ``DJSTRIPE_SUBSCRIPTION_REDIRECT``.
+- All ``stripe_id`` fields have been renamed ``id``.
+
+
 1.2.1 (2018-07-18)
 ------------------
 
@@ -13,16 +23,6 @@ This is a bugfix-only version:
 - Fixed various fields incorrectly marked as required
 - Handle product webhook calls
 - Fix compatibility with stripe-python 2.0.0
-
-
-1.3.0 (unreleased)
-------------------
-
-- Dropped previously-deprecated ``Charge.receipt_number`` field.
-- Dropped previously-deprecated ``SubscriptionView``,
-  ``CancelSubscriptionView`` and ``CancelSubscriptionForm``.
-- Removed the default value from ``DJSTRIPE_SUBSCRIPTION_REDIRECT``.
-- All ``stripe_id`` fields have been renamed ``id``.
 
 
 1.2.0 (2018-06-11)
