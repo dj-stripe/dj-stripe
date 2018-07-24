@@ -34,21 +34,9 @@ class Charge(StripeObject):
     """
     To charge a credit or a debit card, you create a charge object. You can
     retrieve and refund individual charges as well as list all charges. Charges
-    are identified by a unique random ID. (Source: https://stripe.com/docs/api/python#charges)
+    are identified by a unique random ID.
 
-    # = Mapping the values of this field isn't currently on our roadmap.
-        Please use the stripe dashboard to check the value of this field instead.
-
-    Fields not implemented:
-
-    * **object** - Unnecessary. Just check the model name.
-    * **application_fee** - #. Coming soon with stripe connect functionality
-    * **balance_transaction** - #
-    * **order** - #
-    * **refunds** - #
-    * **source_transfer** - #
-
-    .. attention:: Stripe API_VERSION: model fields audited to 2016-06-05 - @jleclanche
+    Stripe documentation: https://stripe.com/docs/api/python#charges
     """
 
     stripe_class = stripe.Charge
@@ -320,18 +308,10 @@ class Charge(StripeObject):
 
 class Customer(StripeObject):
     """
-    Customer objects allow you to perform recurring charges and track multiple charges that are
-    associated with the same customer. (Source: https://stripe.com/docs/api/python#customers)
+    Customer objects allow you to perform recurring charges and track multiple
+    charges that are associated with the same customer.
 
-    # = Mapping the values of this field isn't currently on our roadmap.
-        Please use the stripe dashboard to check the value of this field instead.
-
-    Fields not implemented:
-
-    * **object** - Unnecessary. Just check the model name.
-    * **discount** - #
-
-    .. attention:: Stripe API_VERSION: model fields and methods audited to 2017-06-05 - @jleclanche
+    Stripe documentation: https://stripe.com/docs/api/python#customers
     """
 
     djstripe_subscriber_key = "djstripe_subscriber"
@@ -1009,6 +989,9 @@ class Customer(StripeObject):
 
 
 class Dispute(StripeObject):
+    """
+    Stripe documentation: https://stripe.com/docs/api#disputes
+    """
     stripe_class = stripe.Dispute
     stripe_dashboard_item_name = "disputes"
 
@@ -1038,36 +1021,12 @@ class Dispute(StripeObject):
 
 class Event(StripeObject):
     """
-    Events are POSTed to our webhook url. They provide information about a Stripe
-    event that just happened. Events are processed in detail by their respective
-    models (charge events by the Charge model, etc).
+    Events are Stripe's way of letting you know when something interesting
+    happens in your account.
+    When an interesting event occurs, a new Event object is created and POSTed
+    to the configured webhook URL if the Event type matches.
 
-    **API VERSIONING**
-
-    This is a tricky matter when it comes to webhooks. See the discussion here_.
-
-    .. _here: https://groups.google.com/a/lists.stripe.com/forum/#!topic/api-discuss/h5Y6gzNBZp8
-
-    In this discussion, it is noted that Webhooks are produced in one API version,
-    which will usually be different from the version supported by Stripe plugins
-    (such as djstripe). The solution, described there, is:
-
-    1) validate the receipt of a webhook event by doing an event get using the
-       API version of the received hook event.
-    2) retrieve the referenced object (e.g. the Charge, the Customer, etc) using
-       the plugin's supported API version.
-    3) process that event using the retrieved object which will, only now, be in
-       a format that you are certain to understand
-
-    # = Mapping the values of this field isn't currently on our roadmap.
-        Please use the stripe dashboard to check the value of this field instead.
-
-    Fields not implemented:
-
-    * **object** - Unnecessary. Just check the model name.
-    * **pending_webhooks** - Unnecessary. Use the dashboard.
-
-    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    Stripe documentation: https://stripe.com/docs/api#events
     """
 
     stripe_class = stripe.Event
@@ -1166,6 +1125,9 @@ class Event(StripeObject):
 
 
 class FileUpload(StripeObject):
+    """
+    Stripe documentation: https://stripe.com/docs/api#file_uploads
+    """
     filename = StripeCharField(
         max_length=255,
         help_text="A filename for the file, suitable for saving to a filesystem.",
@@ -1184,6 +1146,12 @@ class FileUpload(StripeObject):
 
 
 class Payout(StripeObject):
+    """
+    A Payout object is created when you receive funds from Stripe, or when you initiate
+    a payout to either a bank account or debit card of a connected Stripe account.
+
+    Stripe documentation: https://stripe.com/docs/api#payouts
+    """
     stripe_class = stripe.Payout
     stripe_dashboard_item_name = "payouts"
 
@@ -1248,7 +1216,9 @@ class Payout(StripeObject):
 
 class Product(StripeObject):
     """
-    https://stripe.com/docs/api#product_object
+    Stripe documentation:
+    - https://stripe.com/docs/api#products
+    - https://stripe.com/docs/api#service_products
     """
 
     stripe_class = stripe.Product
@@ -1350,8 +1320,7 @@ class Product(StripeObject):
 
 class Refund(StripeObject):
     """
-    https://stripe.com/docs/api#refund_object
-    https://stripe.com/docs/refunds
+    Stripe documentation: https://stripe.com/docs/api#refund_object
     """
 
     stripe_class = stripe.Refund

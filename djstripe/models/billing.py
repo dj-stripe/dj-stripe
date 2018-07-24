@@ -129,19 +129,8 @@ class Invoice(StripeObject):
     credit to offset the next invoice. Note that the customer account balance
     does not include unpaid invoices; it only includes balances that need to be
     taken into account when calculating the amount due for the next invoice.
-    (Source: https://stripe.com/docs/api/python#invoices)
 
-    # = Mapping the values of this field isn't currently on our roadmap.
-        Please use the stripe dashboard to check the value of this field instead.
-
-    Fields not implemented:
-
-    * **object** - Unnecessary. Just check the model name.
-    * **discount** - #
-    * **lines** - Unnecessary. Check Subscription and InvoiceItems directly.
-    * **webhooks_delivered_at** - #
-
-    .. attention:: Stripe API_VERSION: model fields audited to 2017-06-05 - @jleclanche
+    Stripe documentation: https://stripe.com/docs/api/python#invoices
     """
 
     stripe_class = stripe.Invoice
@@ -534,7 +523,8 @@ class UpcomingInvoice(Invoice):
 
     @property
     def invoiceitems(self):
-        """ Gets the invoice items associated with this upcoming invoice.
+        """
+        Gets the invoice items associated with this upcoming invoice.
 
         This differs from normal (non-upcoming) invoices, in that upcoming
         invoices are in-memory and do not persist to the database. Therefore,
@@ -561,19 +551,12 @@ class UpcomingInvoice(Invoice):
 
 class InvoiceItem(StripeObject):
     """
-    Sometimes you want to add a charge or credit to a customer but only actually charge the customer's
-    card at the end of a regular billing cycle. This is useful for combining several charges to
-    minimize per-transaction fees or having Stripe tabulate your usage-based billing totals.
-    (Source: https://stripe.com/docs/api/python#invoiceitems)
+    Sometimes you want to add a charge or credit to a customer but only actually
+    charge the customer's card at the end of a regular billing cycle.
+    This is useful for combining several charges to minimize per-transaction fees
+    or having Stripe tabulate your usage-based billing totals.
 
-    # = Mapping the values of this field isn't currently on our roadmap.
-        Please use the stripe dashboard to check the value of this field instead.
-
-    Fields not implemented:
-
-    * **object** - Unnecessary. Just check the model name.
-
-    .. attention:: Stripe API_VERSION: model fields audited to 2017-06-05 - @jleclanche
+    Stripe documentation: https://stripe.com/docs/api/python#invoiceitems
     """
 
     stripe_class = stripe.InvoiceItem
@@ -688,17 +671,10 @@ class InvoiceItem(StripeObject):
 
 class Plan(StripeObject):
     """
-    A subscription plan contains the pricing information for different products and feature levels on your site.
-    (Source: https://stripe.com/docs/api/python#plans)
+    A subscription plan contains the pricing information for different
+    products and feature levels on your site.
 
-    # = Mapping the values of this field isn't currently on our roadmap.
-    Please use the stripe dashboard to check the value of this field instead.
-
-    Fields not implemented:
-
-    * **object** - Unnecessary. Just check the model name.
-
-    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    Stripe documentation: https://stripe.com/docs/api/python#plans)
     """
 
     stripe_class = stripe.Plan
@@ -894,13 +870,13 @@ class Plan(StripeObject):
     # TODO: Move this type of update to the model's save() method so it happens automatically
     # Also, block other fields from being saved.
     def update_name(self):
-        """Update the name of the Plan in Stripe and in the db.
+        """
+        Update the name of the Plan in Stripe and in the db.
 
         - Assumes the object being called has the name attribute already
           reset, but has not been saved.
         - Stripe does not allow for update of any other Plan attributes besides
           name.
-
         """
 
         p = self.api_retrieve()
@@ -912,27 +888,22 @@ class Plan(StripeObject):
 
 class Subscription(StripeObject):
     """
-    Subscriptions allow you to charge a customer's card on a recurring basis. A subscription ties a
-    customer to a particular plan you've created.
+    Subscriptions allow you to charge a customer's card on a recurring basis.
+    A subscription ties a customer to a particular plan you've created.
 
-    A subscription still in its trial period is ``trialing`` and moves to ``active`` when the trial period is over.
-    When payment to renew the subscription fails, the subscription becomes ``past_due``. After Stripe has exhausted
-    all payment retry attempts, the subscription ends up with a status of either ``canceled`` or ``unpaid`` depending
-    on your retry settings. Note that when a subscription has a status of ``unpaid``, no subsequent invoices will be
-    attempted (invoices will be created, but then immediately automatically closed. Additionally, updating customer
-    card details will not lead to Stripe retrying the latest invoice.). After receiving updated card details from a
-    customer, you may choose to reopen and pay their closed invoices.
-    (Source: https://stripe.com/docs/api/python#subscriptions)
+    A subscription still in its trial period is ``trialing`` and moves to ``active``
+    when the trial period is over.
+    When payment to renew the subscription fails, the subscription becomes ``past_due``.
+    After Stripe has exhausted all payment retry attempts, the subscription ends up
+    with a status of either ``canceled`` or ``unpaid`` depending on your retry settings.
+    Note that when a subscription has a status of ``unpaid``, no subsequent invoices
+    will be attempted (invoices will be created, but then immediately automatically closed.
+    Additionally, updating customer card details will not lead to Stripe retrying the
+    latest invoice.).
+    After receiving updated card details from a customer, you may choose to reopen and
+    pay their closed invoices.
 
-    # = Mapping the values of this field isn't currently on our roadmap.
-        Please use the stripe dashboard to check the value of this field instead.
-
-    Fields not implemented:
-
-    * **object** - Unnecessary. Just check the model name.
-    * **discount** - #
-
-    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    Stripe documentation: https://stripe.com/docs/api/python#subscriptions
     """
 
     stripe_class = stripe.Subscription

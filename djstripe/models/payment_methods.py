@@ -124,20 +124,16 @@ class BankAccount(StripeObject):
 class Card(StripeObject):
     """
     You can store multiple cards on a customer in order to charge the customer later.
-    (Source: https://stripe.com/docs/api/python#cards)
 
-    # = Mapping the values of this field isn't currently on our roadmap.
-        Please use the stripe dashboard to check the value of this field instead.
+    This is a legacy model which only applies to the "v2" Stripe API (eg. Checkout.js).
+    You should strive to use the Stripe "v3" API (eg. Stripe Elements).
+    Also see: https://stripe.com/docs/stripe-js/elements/migrating
+    When using Elements, you will not be using Card objects. Instead, you will use
+    Source objects.
+    A Source object of type "card" is equivalent to a Card object. However, Card
+    objects cannot be converted into Source objects by Stripe at this time.
 
-    Fields not implemented:
-
-    * **object** -  Unnecessary. Just check the model name.
-    * **recipient** -  On Stripe's deprecation path.
-    * **account** -  #
-    * **currency** -  #
-    * **default_for_currency** -  #
-
-    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    Stripe documentation: https://stripe.com/docs/api/python#cards
     """
 
     stripe_class = stripe.Card
@@ -245,7 +241,9 @@ class Card(StripeObject):
         return self.customer.get_stripe_dashboard_url()
 
     def remove(self):
-        """Removes a card from this customer's account."""
+        """
+        Removes a card from this customer's account.
+        """
 
         # First, wipe default source on all customers that use this card.
         Customer.objects.filter(default_source=self.stripe_id).update(
@@ -327,6 +325,9 @@ class Card(StripeObject):
 
 
 class Source(StripeObject):
+    """
+    Stripe documentation: https://stripe.com/docs/api#sources
+    """
     amount = StripeCurrencyField(
         null=True,
         blank=True,

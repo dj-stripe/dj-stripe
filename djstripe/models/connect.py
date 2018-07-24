@@ -13,6 +13,9 @@ from .base import StripeObject
 
 
 class Account(StripeObject):
+    """
+    Stripe documentation: https://stripe.com/docs/api#account
+    """
     stripe_class = stripe.Account
 
     business_logo = models.ForeignKey(
@@ -161,23 +164,10 @@ class Account(StripeObject):
 
 class Transfer(StripeObject):
     """
-    When Stripe sends you money or you initiate a transfer to a bank account, debit card, or
-    connected Stripe account, a transfer object will be created.
-    (Source: https://stripe.com/docs/api/python#transfers)
+    When Stripe sends you money or you initiate a transfer to a bank account,
+    debit card, or connected Stripe account, a transfer object will be created.
 
-    # = Mapping the values of this field isn't currently on our roadmap.
-        Please use the stripe dashboard to check the value of this field instead.
-
-    Fields not implemented:
-
-    * **object** - Unnecessary. Just check the model name.
-    * **application_fee** - #
-    * **balance_transaction** - #
-    * **reversals** - #
-
-    .. TODO: Link destination to Card, Account, or Bank Account Models
-
-    .. attention:: Stripe API_VERSION: model fields and methods audited to 2016-03-07 - @kavdev
+    Stripe documentation: https://stripe.com/docs/api/python#transfers
     """
 
     stripe_class = stripe.Transfer
@@ -195,6 +185,7 @@ class Transfer(StripeObject):
     currency = StripeCharField(
         max_length=3, help_text="Three-letter ISO currency code."
     )
+    # TODO: Link destination to Card, Account, or Bank Account Models
     destination = StripeIdField(
         help_text="ID of the bank account, card, or Stripe account the transfer was sent to."
     )
