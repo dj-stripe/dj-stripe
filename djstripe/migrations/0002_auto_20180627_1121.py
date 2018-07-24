@@ -53,6 +53,14 @@ class Migration(migrations.Migration):
             model_name="charge",
             name="receipt_sent",
         ),
+        migrations.RemoveField(
+            model_name="charge",
+            name="source_stripe_id",
+        ),
+        migrations.RemoveField(
+            model_name="charge",
+            name="source_type",
+        ),
         migrations.AlterModelOptions(
             name="account",
             options={"get_latest_by": "created"},

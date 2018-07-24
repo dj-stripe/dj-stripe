@@ -86,7 +86,7 @@ class ChargeTest(TestCase):
         self.assertEqual(0, charge.amount_refunded)
 
         self.assertEqual("card_16YKQh2eZvKYlo2Cblc5Feoo", charge.source_id)
-        self.assertEqual(charge.source_type, LegacySourceType.card)
+        self.assertEqual(charge.source.type, LegacySourceType.card)
 
     @patch("djstripe.models.Account.get_default_account")
     def test_sync_from_stripe_data_max_amount(self, default_account_mock):
@@ -114,7 +114,7 @@ class ChargeTest(TestCase):
 
         charge = Charge.sync_from_stripe_data(fake_charge_copy)
         self.assertEqual("test_id", charge.source_id)
-        self.assertEqual("unsupported", charge.source_type)
+        self.assertEqual("unsupported", charge.source.type)
         self.assertEqual(charge.source, PaymentMethod.objects.get(id="test_id"))
 
     @patch("djstripe.models.Account.get_default_account")

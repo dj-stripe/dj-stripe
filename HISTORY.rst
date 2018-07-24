@@ -11,6 +11,8 @@ History
   ``CancelSubscriptionView`` and ``CancelSubscriptionForm``.
 - Removed the default value from ``DJSTRIPE_SUBSCRIPTION_REDIRECT``.
 - All ``stripe_id`` fields have been renamed ``id``.
+- ``Charge.source_type`` has been deprecated. Use ``Charge.source.type``.
+- ``Charge.source_stripe_id`` has been deprecated. Use ``Charge.source.id``.
 
 
 1.2.1 (2018-07-18)

@@ -1,4 +1,5 @@
 import decimal
+import warnings
 
 import stripe
 from django.db import models
@@ -13,7 +14,7 @@ from .. import webhooks
 from ..exceptions import MultipleSubscriptionException
 from ..fields import (
     PaymentMethodForeignKey, StripeBooleanField, StripeCharField,
-    StripeCurrencyField, StripeDateTimeField, StripeEnumField, StripeIdField,
+    StripeCurrencyField, StripeDateTimeField, StripeEnumField,
     StripeIntegerField, StripeJSONField, StripeNullBooleanField, StripeTextField
 )
 from ..managers import ChargeManager
@@ -165,16 +166,6 @@ class Charge(StripeObject):
     )
 
     # dj-stripe custom stripe fields. Don't try to send these.
-    source_type = StripeEnumField(
-        null=True,
-        enum=enums.LegacySourceType,
-        stripe_name="source.object",
-        help_text="The payment source type. If the payment source is supported by dj-stripe, a corresponding model is "
-        "attached to this Charge via a foreign key matching this field.",
-    )
-    source_stripe_id = StripeIdField(
-        null=True, stripe_name="source.id", help_text="The payment source id."
-    )
     fraudulent = StripeBooleanField(
         default=False, help_text="Whether or not this charge was marked as fraudulent."
     )
@@ -211,6 +202,28 @@ class Charge(StripeObject):
 
         return ""
 
+    @property
+    def source_type(self):
+        """
+        DEPRECATED(2018-07-24): Use `.source.type`.
+        """
+        warnings.warn(
+            "Charge.source_type is deprecated and will be dropped in 1.4.0. "
+            "Use Charge.source.type instead."
+        )
+        return self.source.type
+
+    @property
+    def source_stripe_id(self):
+        """
+        DEPRECATED(2018-07-24): Use `.source.type`.
+        """
+        warnings.warn(
+            "Charge.source_stripe_id is deprecated and will be dropped in 1.4.0. "
+            "Use Charge.source.id instead."
+        )
+        return self.source.id
+
     def _attach_objects_hook(self, cls, data):
         from .payment_methods import PaymentMethod
 
@@ -232,7 +245,7 @@ class Charge(StripeObject):
             self.account = Account.get_default_account()
 
         self.source, _ = PaymentMethod._get_or_create_source(
-            data["source"], self.source_type
+            data["source"], data["source"]["object"]
         )
 
     def _calculate_refund_amount(self, amount=None):
