@@ -125,12 +125,6 @@ class StripeIdField(StripeCharField):
         super().__init__(*args, **defaults)
 
 
-class StripeTextField(StripeFieldMixin, models.TextField):
-    """A field used to define a TextField value according to djstripe logic."""
-
-    pass
-
-
 class StripeDateTimeField(StripeFieldMixin, models.DateTimeField):
     """A field used to define a DateTimeField value according to djstripe logic."""
 

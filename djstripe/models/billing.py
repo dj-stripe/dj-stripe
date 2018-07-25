@@ -12,7 +12,7 @@ from .. import enums
 from .. import settings as djstripe_settings
 from ..fields import (
     JSONField, StripeCharField, StripeDateTimeField, StripeDecimalCurrencyAmountField,
-    StripeEnumField, StripeIdField, StripePercentField, StripeTextField
+    StripeEnumField, StripeIdField, StripePercentField
 )
 from ..managers import SubscriptionManager
 from ..utils import QuerySetMock, get_friendly_currency_amount
@@ -783,7 +783,7 @@ class Plan(StripeObject):
     )
 
     # Legacy fields (pre 2017-08-15)
-    name = StripeTextField(
+    name = models.TextField(
         null=True, blank=True,
         help_text="Name of the plan, to be displayed on invoices and in the web interface.",
     )

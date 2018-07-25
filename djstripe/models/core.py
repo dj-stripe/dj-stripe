@@ -12,9 +12,8 @@ from .. import settings as djstripe_settings
 from .. import webhooks
 from ..exceptions import MultipleSubscriptionException
 from ..fields import (
-    JSONField, PaymentMethodForeignKey, StripeCharField,
-    StripeDateTimeField, StripeDecimalCurrencyAmountField,
-    StripeDecimalField, StripeEnumField, StripeTextField
+    JSONField, PaymentMethodForeignKey, StripeCharField, StripeDateTimeField,
+    StripeDecimalCurrencyAmountField, StripeDecimalField, StripeEnumField
 )
 from ..managers import ChargeManager
 from ..signals import WEBHOOK_SIGNALS
@@ -117,7 +116,7 @@ class Charge(StripeObject):
         null=True,
         help_text="Error code explaining reason for charge failure if available.",
     )
-    failure_message = StripeTextField(
+    failure_message = models.TextField(
         null=True,
         help_text="Message to user further explaining reason for charge failure if available.",
     )
@@ -399,7 +398,7 @@ class Customer(StripeObject):
         help_text="If a coupon is present and has a limited duration, the date that the discount will end.",
     )
     # </discount>
-    email = StripeTextField(null=True)
+    email = models.TextField(null=True)
     shipping = JSONField(
         null=True, blank=True,
         help_text="Shipping information associated with the customer.",
@@ -1093,7 +1092,7 @@ class Event(StripeObject):
         "'automated' event with no associated request.",
         null=True, blank=True,
     )
-    idempotency_key = StripeTextField(null=True, blank=True)
+    idempotency_key = models.TextField(null=True, blank=True)
     type = StripeCharField(max_length=250, help_text="Stripe's event description code")
 
     def str_parts(self):
@@ -1240,7 +1239,7 @@ class Payout(StripeObject):
         help_text="Error code explaining reason for transfer failure if available. "
         "See https://stripe.com/docs/api/python#transfer_failures.",
     )
-    failure_message = StripeTextField(
+    failure_message = models.TextField(
         null=True,
         blank=True,
         help_text="Message to user further explaining reason for payout failure if available.",

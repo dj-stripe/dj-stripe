@@ -7,8 +7,7 @@ from .. import enums
 from .. import settings as djstripe_settings
 from ..exceptions import StripeObjectManipulationException
 from ..fields import (
-    JSONField, StripeCharField, StripeDecimalCurrencyAmountField,
-    StripeEnumField, StripeTextField
+    JSONField, StripeCharField, StripeDecimalCurrencyAmountField, StripeEnumField
 )
 from .base import StripeObject, logger
 from .core import Customer
@@ -138,17 +137,17 @@ class Card(StripeObject):
 
     stripe_class = stripe.Card
 
-    address_city = StripeTextField(null=True, help_text="Billing address city.")
-    address_country = StripeTextField(null=True, help_text="Billing address country.")
-    address_line1 = StripeTextField(null=True, help_text="Billing address (Line 1).")
+    address_city = models.TextField(null=True, help_text="Billing address city.")
+    address_country = models.TextField(null=True, help_text="Billing address country.")
+    address_line1 = models.TextField(null=True, help_text="Billing address (Line 1).")
     address_line1_check = StripeEnumField(
         enum=enums.CardCheckResult,
         null=True,
         help_text=("If `address_line1` was provided, results of the check."),
     )
-    address_line2 = StripeTextField(null=True, help_text="Billing address (Line 2).")
-    address_state = StripeTextField(null=True, help_text="Billing address state.")
-    address_zip = StripeTextField(null=True, help_text="Billing address zip code.")
+    address_line2 = models.TextField(null=True, help_text="Billing address (Line 2).")
+    address_state = models.TextField(null=True, help_text="Billing address state.")
+    address_zip = models.TextField(null=True, help_text="Billing address zip code.")
     address_zip_check = StripeEnumField(
         enum=enums.CardCheckResult,
         null=True,
@@ -172,7 +171,7 @@ class Card(StripeObject):
     )
     exp_month = models.IntegerField(help_text="Card expiration month.")
     exp_year = models.IntegerField(help_text="Card expiration year.")
-    fingerprint = StripeTextField(
+    fingerprint = models.TextField(
         null=True, blank=True,
         help_text="Uniquely identifies this particular card number.",
     )
@@ -180,7 +179,7 @@ class Card(StripeObject):
         enum=enums.CardFundingType, help_text="Card funding type."
     )
     last4 = StripeCharField(max_length=4, help_text="Last four digits of Card number.")
-    name = StripeTextField(null=True, help_text="Cardholder name.")
+    name = models.TextField(null=True, help_text="Cardholder name.")
     tokenization_method = StripeEnumField(
         enum=enums.CardTokenizationMethod,
         null=True,

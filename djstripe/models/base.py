@@ -7,7 +7,7 @@ from django.utils import dateformat, timezone
 from django.utils.encoding import smart_text
 
 from .. import settings as djstripe_settings
-from ..fields import JSONField, StripeDateTimeField, StripeIdField, StripeTextField
+from ..fields import JSONField, StripeDateTimeField, StripeIdField
 from ..managers import StripeObjectManager
 
 
@@ -44,7 +44,7 @@ class StripeObject(models.Model):
         help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional "
         "information about an object in a structured format.",
     )
-    description = StripeTextField(
+    description = models.TextField(
         null=True, blank=True, help_text="A description of this object."
     )
 
