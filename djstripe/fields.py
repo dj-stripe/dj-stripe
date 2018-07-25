@@ -29,28 +29,7 @@ class PaymentMethodForeignKey(models.ForeignKey):
 class StripeFieldMixin:
     """
     Custom fields for all Stripe data.
-
-    This allows keeping track of which database fields are suitable for
-    sending to or receiving from Stripe. Also, allows a few handy extra parameters.
     """
-
-    # This indicates that this field will always appear in a stripe object. It will be
-    # an Exception if we try to parse a stripe object that does not include this field
-    # in the data. If set to False then null=True attribute will be automatically set
-    stripe_required = True
-
-    def __init__(self, *args, **kwargs):
-        """
-        Assign class instance variables based on kwargs.
-
-        Assign extra class instance variables if stripe_required is defined.
-        """
-        self.stripe_required = kwargs.pop('stripe_required', self.stripe_required)
-        if not self.stripe_required:
-            kwargs["null"] = True
-            kwargs["blank"] = True
-
-        super().__init__(*args, **kwargs)
 
     def stripe_to_db(self, data):
         """Convert stripe fields to defined database fields."""

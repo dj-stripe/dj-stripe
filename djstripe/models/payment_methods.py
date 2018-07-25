@@ -173,7 +173,7 @@ class Card(StripeObject):
     exp_month = StripeIntegerField(help_text="Card expiration month.")
     exp_year = StripeIntegerField(help_text="Card expiration year.")
     fingerprint = StripeTextField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text="Uniquely identifies this particular card number.",
     )
     funding = StripeEnumField(
@@ -383,21 +383,21 @@ class Source(StripeObject):
 
     # Flows
     code_verification = StripeJSONField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "Information related to the code verification flow. "
             "Present if the source is authenticated by a verification code (`flow` is `code_verification`)."
         ),
     )
     receiver = StripeJSONField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "Information related to the receiver flow. "
             "Present if the source is a receiver (`flow` is `receiver`)."
         ),
     )
     redirect = StripeJSONField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "Information related to the redirect flow. "
             "Present if the source is authenticated by a redirect (`flow` is `redirect`)."

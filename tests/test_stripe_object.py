@@ -7,7 +7,6 @@
 """
 from django.test import TestCase
 
-from djstripe.fields import StripeCharField
 from djstripe.models import StripeObject
 
 
@@ -22,20 +21,6 @@ SIMPLE_OBJ_RESULT = {
     'metadata': None,
     'created': None
 }
-
-
-class StripeObjectExceptionsTest(TestCase):
-    def test_missing_required_field(self):
-        class HasRequiredField(StripeObject):
-            im_not_optional = StripeCharField()
-
-    def test_missing_nonrequired_field(self):
-        class HasNotRequiredField(StripeObject):
-            im_not_optional = StripeCharField(stripe_required=False)
-
-        # Should be no exception here
-        obj = HasNotRequiredField._stripe_object_to_record(SIMPLE_OBJ)
-        self.assertEqual(obj['im_not_optional'], None)
 
 
 class StripeObjectBasicTest(TestCase):

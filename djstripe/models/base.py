@@ -34,23 +34,21 @@ class StripeObject(models.Model):
     id = StripeIdField(unique=True)
     livemode = StripeNullBooleanField(
         default=None,
-        null=True,
-        stripe_required=False,
+        null=True, blank=True,
         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, "
         "this field indicates whether this record comes from Stripe test mode or live mode operation.",
     )
     created = StripeDateTimeField(
-        null=True,
-        stripe_required=False,
+        null=True, blank=True,
         help_text="The datetime this object was created in stripe.",
     )
     metadata = StripeJSONField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional "
         "information about an object in a structured format.",
     )
     description = StripeTextField(
-        stripe_required=False, help_text="A description of this object."
+        null=True, blank=True, help_text="A description of this object."
     )
 
     djstripe_created = models.DateTimeField(auto_now_add=True, editable=False)

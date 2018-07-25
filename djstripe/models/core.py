@@ -186,7 +186,7 @@ class Charge(StripeObject):
     )
     transfer_group = StripeCharField(
         max_length=255,
-        stripe_required=False,
+        null=True, blank=True,
         help_text="A string that identifies this transaction as part of a group.",
     )
 
@@ -385,7 +385,7 @@ class Customer(StripeObject):
     )
     business_vat_id = StripeCharField(
         max_length=20,
-        stripe_required=False,
+        null=True, blank=True,
         help_text="The customer's VAT identification number.",
     )
     currency = StripeCharField(
@@ -403,21 +403,19 @@ class Customer(StripeObject):
     # <discount>
     coupon = models.ForeignKey("Coupon", null=True, blank=True, on_delete=SET_NULL)
     coupon_start = StripeDateTimeField(
-        null=True,
+        null=True, blank=True,
         editable=False,
-        stripe_required=False,
         help_text="If a coupon is present, the date at which it was applied.",
     )
     coupon_end = StripeDateTimeField(
-        null=True,
+        null=True, blank=True,
         editable=False,
-        stripe_required=False,
         help_text="If a coupon is present and has a limited duration, the date that the discount will end.",
     )
     # </discount>
     email = StripeTextField(null=True)
     shipping = StripeJSONField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text="Shipping information associated with the customer.",
     )
 
@@ -1107,9 +1105,9 @@ class Event(StripeObject):
         help_text="Information about the request that triggered this event, for traceability purposes. If empty "
         "string then this is an old entry without that data. If Null then this is not an old entry, but a Stripe "
         "'automated' event with no associated request.",
-        stripe_required=False,
+        null=True, blank=True,
     )
-    idempotency_key = StripeTextField(null=True, blank=True, stripe_required=False)
+    idempotency_key = StripeTextField(null=True, blank=True)
     type = StripeCharField(max_length=250, help_text="Stripe's event description code")
 
     def str_parts(self):
@@ -1338,21 +1336,21 @@ class Product(StripeObject):
         ),
     )
     deactivate_on = StripeJSONField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "An array of connect application identifiers that cannot purchase "
             "this product. Only applicable to products of `type=good`."
         ),
     )
     images = StripeJSONField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "A list of up to 8 URLs of images for this product, meant to be "
             "displayable to the customer. Only applicable to products of `type=good`."
         ),
     )
     package_dimensions = StripeJSONField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "The dimensions of this product for shipping purposes. "
             "A SKU associated with this product can override this value by having its "
@@ -1360,7 +1358,7 @@ class Product(StripeObject):
         ),
     )
     shippable = StripeNullBooleanField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "Whether this product is a shipped good. "
             "Only applicable to products of `type=good`."
@@ -1424,7 +1422,7 @@ class Refund(StripeObject):
     )
     failure_reason = StripeEnumField(
         enum=enums.RefundFailureReason,
-        stripe_required=False,
+        null=True, blank=True,
         help_text="If the refund failed, the reason for refund failure if known.",
     )
     reason = StripeEnumField(

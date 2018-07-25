@@ -24,12 +24,12 @@ class Account(StripeObject):
     )
     business_name = StripeCharField(
         max_length=255,
-        stripe_required=False,
+        null=True, blank=True,
         help_text=("The publicly visible name of the business"),
     )
     business_primary_color = StripeCharField(
         max_length=7,
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "A CSS hex color value representing the primary branding color for this account"
         ),
@@ -44,7 +44,7 @@ class Account(StripeObject):
     )
     country = StripeCharField(max_length=2, help_text="The country of the account")
     debit_negative_balances = StripeNullBooleanField(
-        stripe_required=False,
+        null=True, blank=True,
         default=False,
         help_text=(
             "A Boolean indicating if Stripe should try to reclaim negative "
@@ -52,7 +52,7 @@ class Account(StripeObject):
         ),
     )
     decline_charge_on = StripeJSONField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "Account-level settings to automatically decline certain types "
             "of charges regardless of the decision of the card issuer"
@@ -80,13 +80,13 @@ class Account(StripeObject):
     )
     # TODO external_accounts = ...
     legal_entity = StripeJSONField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "Information about the legal entity itself, including about the associated account representative"
         ),
     )
     payout_schedule = StripeJSONField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "Details on when funds from charges are available, and when they are paid out to an external account."
         ),
@@ -94,7 +94,7 @@ class Account(StripeObject):
     payout_statement_descriptor = StripeCharField(
         max_length=255,
         default="",
-        stripe_required=False,
+        null=True, blank=True,
         help_text="The text that appears on the bank account statement for payouts.",
     )
     payouts_enabled = StripeBooleanField(
@@ -102,7 +102,7 @@ class Account(StripeObject):
     )
     product_description = StripeCharField(
         max_length=255,
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "Internal-only description of the product sold or service provided by the business. "
             "It’s used by Stripe for risk and underwriting purposes."
@@ -125,7 +125,7 @@ class Account(StripeObject):
     )
     support_url = StripeCharField(
         max_length=200,
-        stripe_required=False,
+        null=True, blank=True,
         help_text=("A publicly shareable URL that provides support for this account"),
     )
     timezone = StripeCharField(
@@ -134,11 +134,11 @@ class Account(StripeObject):
     )
     type = StripeEnumField(enum=enums.AccountType, help_text="The Stripe account type.")
     tos_acceptance = StripeJSONField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text=("Details on the acceptance of the Stripe Services Agreement"),
     )
     verification = StripeJSONField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "Information on the verification state of the account, "
             "including what information is needed and by when"
@@ -179,7 +179,7 @@ class Transfer(StripeObject):
 
     amount = StripeCurrencyField(help_text="The amount transferred")
     amount_reversed = StripeCurrencyField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text="The amount reversed (can be less than the amount attribute on the transfer if a partial "
         "reversal was issued).",
     )
@@ -191,7 +191,7 @@ class Transfer(StripeObject):
         help_text="ID of the bank account, card, or Stripe account the transfer was sent to."
     )
     destination_payment = StripeIdField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text="If the destination is a Stripe account, this will be the ID of the payment that the destination "
         "account received for the transfer.",
     )
@@ -212,7 +212,7 @@ class Transfer(StripeObject):
     )
     transfer_group = StripeCharField(
         max_length=255,
-        stripe_required=False,
+        null=True, blank=True,
         help_text="A string that identifies this transaction as part of a group.",
     )
 

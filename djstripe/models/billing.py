@@ -49,7 +49,7 @@ class Coupon(StripeObject):
     )
     name = StripeCharField(
         max_length=5000,
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "Name of the coupon displayed to customers on for instance invoices or receipts."
         ),
@@ -221,7 +221,7 @@ class Invoice(StripeObject):
     )
     hosted_invoice_url = StripeCharField(
         max_length=799,
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "The URL for the hosted invoice page, which allows customers to view and pay an invoice. "
             "If the invoice has not been frozen yet, this will be null."
@@ -229,7 +229,7 @@ class Invoice(StripeObject):
     )
     invoice_pdf = StripeCharField(
         max_length=799,
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "The link to download the PDF for the invoice. "
             "If the invoice has not been frozen yet, this will be null."
@@ -282,7 +282,7 @@ class Invoice(StripeObject):
         help_text="The subscription that this invoice was prepared for, if any.",
     )
     subscription_proration_date = StripeDateTimeField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text="Only set for upcoming invoices that preview prorations. The time used to calculate prorations.",
     )
     subtotal = StripeCurrencyField(
@@ -604,7 +604,7 @@ class InvoiceItem(StripeObject):
         "customer switched plans.",
     )
     quantity = StripeIntegerField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text="If the invoice item is a proration, the quantity of the subscription for which the proration "
         "was computed.",
     )
@@ -690,7 +690,7 @@ class Plan(StripeObject):
     )
     aggregate_usage = StripeEnumField(
         enum=enums.PlanAggregateUsage,
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "Specifies a usage aggregation strategy for plans of usage_type=metered. "
             "Allowed values are `sum` for summing up all usage during a period, "
@@ -705,7 +705,7 @@ class Plan(StripeObject):
     )
     billing_scheme = StripeEnumField(
         enum=enums.PlanBillingScheme,
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "Describes how to compute the price per period. Either `per_unit` or `tiered`. "
             "`per_unit` indicates that the fixed amount (specified in amount) will be charged "
@@ -728,7 +728,7 @@ class Plan(StripeObject):
     )
     nickname = StripeCharField(
         max_length=5000,
-        stripe_required=False,
+        null=True, blank=True,
         help_text="A brief description of the plan, hidden from customers.",
     )
     product = models.ForeignKey(
@@ -738,7 +738,7 @@ class Plan(StripeObject):
         help_text=("The product whose pricing this plan determines."),
     )
     tiers = StripeJSONField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "Each element represents a pricing tier. "
             "This parameter requires `billing_scheme` to be set to `tiered`."
@@ -746,7 +746,7 @@ class Plan(StripeObject):
     )
     tiers_mode = StripeEnumField(
         enum=enums.PlanTiersMode,
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "Defines if the tiering price should be `graduated` or `volume` based. "
             "In `volume`-based tiering, the maximum quantity within a period "
@@ -755,7 +755,7 @@ class Plan(StripeObject):
         ),
     )
     transform_usage = StripeJSONField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "Apply a transformation to the reported usage or set quantity "
             "before computing the billed price. Cannot be combined with `tiers`."
@@ -781,12 +781,12 @@ class Plan(StripeObject):
 
     # Legacy fields (pre 2017-08-15)
     name = StripeTextField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text="Name of the plan, to be displayed on invoices and in the web interface.",
     )
     statement_descriptor = StripeCharField(
         max_length=22,
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "An arbitrary string to be displayed on your customer's credit card statement. The statement "
             "description may not include <>\"' characters, and will appear on your customer's statement in capital "
@@ -928,7 +928,7 @@ class Subscription(StripeObject):
         ),
     )
     billing_cycle_anchor = StripeDateTimeField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "Determines the date of the first full invoice, and, for plans with `month` or "
             "`year` intervals, the day of the month for subsequent invoices."
@@ -962,7 +962,7 @@ class Subscription(StripeObject):
         help_text="The customer associated with this subscription.",
     )
     days_until_due = StripeIntegerField(
-        stripe_required=False,
+        null=True, blank=True,
         help_text=(
             "Number of days a customer has to pay invoices generated by this subscription. "
             "This value will be `null` for subscriptions where `billing=charge_automatically`."
