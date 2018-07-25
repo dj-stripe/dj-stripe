@@ -406,7 +406,7 @@ class Source(StripeObject):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="sources_v3",
+        related_name="sources",
     )
 
     stripe_class = stripe.Source

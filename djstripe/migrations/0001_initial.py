@@ -493,7 +493,7 @@ class Migration(migrations.Migration):
                 ('receiver', djstripe.fields.JSONField(blank=True, help_text='Information related to the receiver flow. Present if the source is a receiver (`flow` is `receiver`).', null=True)),
                 ('redirect', djstripe.fields.JSONField(blank=True, help_text='Information related to the redirect flow. Present if the source is authenticated by a redirect (`flow` is `redirect`).', null=True)),
                 ('source_data', djstripe.fields.JSONField(help_text='The data corresponding to the source type.')),
-                ('customer', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='sources_v3', to='djstripe.Customer')),
+                ('customer', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='sources', to='djstripe.Customer')),
             ],
             options={
                 'abstract': False,

@@ -116,6 +116,7 @@ class TestCustomer(TestCase):
         user = get_user_model().objects.create_user(username="test_user_sync_non_local_card")
         customer = fake_customer.create_for_user(user)
 
+        self.assertEqual(customer.sources.count(), 0)
         self.assertEqual(customer.legacy_cards.count(), 1)
         self.assertEqual(customer.default_source.id, fake_customer["default_source"]["id"])
 
@@ -128,6 +129,7 @@ class TestCustomer(TestCase):
         user = get_user_model().objects.create_user(username="test_user_sync_non_local_card")
         customer = fake_customer.create_for_user(user)
 
+        self.assertEqual(customer.sources.count(), 0)
         self.assertEqual(customer.legacy_cards.count(), 0)
         self.assertEqual(customer.default_source, None)
 
@@ -173,8 +175,9 @@ class TestCustomer(TestCase):
         self.assertTrue(not customer.sources.all())
         self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
 
-        customer_retrieve_mock.assert_called_with(id=self.customer.id, api_key=settings.STRIPE_SECRET_KEY,
-                                                  expand=['default_source'])
+        customer_retrieve_mock.assert_called_with(
+            id=self.customer.id, api_key=settings.STRIPE_SECRET_KEY, expand=["default_source"]
+        )
         self.assertEqual(3, customer_retrieve_mock.call_count)
 
     @patch("stripe.Customer.retrieve")

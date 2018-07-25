@@ -29,6 +29,7 @@ History
   queryset. In order to correctly transition, you should change all your
   references to ``customer.sources`` to ``customer.legacy_cards`` instead.
   The ``legacy_cards`` attribute already exists in 1.2.0.
+- ``Customer.sources_v3`` is now named ``Customer.sources``.
 
 
 1.2.1 (2018-07-18)
