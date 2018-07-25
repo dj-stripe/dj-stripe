@@ -191,7 +191,30 @@ class ApplicationFee(StripeModel):
         "Whether the fee has been fully refunded. If the fee is only "
         "partially refunded, this attribute will still be false."
     ))
-    # TODO refunds (reverse from ApplicationFeeRefund)
+
+
+class ApplicationFeeRefund(StripeModel):
+    """
+    ApplicationFeeRefund objects allow you to refund an ApplicationFee that
+    has previously been created but not yet refunded.
+    Funds will be refunded to the Stripe account from which the fee was
+    originally collected.
+
+    Stripe documentation: https://stripe.com/docs/api#fee_refunds
+    """
+    description = None
+
+    amount = StripeQuantumCurrencyAmountField(help_text="Amount refunded.")
+    balance_transaction = models.ForeignKey(
+        "BalanceTransaction", on_delete=models.CASCADE,
+        help_text="Balance transaction that describes the impact on your account balance."
+    )
+    currency = StripeCurrencyCodeField()
+    fee = models.ForeignKey(
+        "ApplicationFee", on_delete=models.CASCADE,
+        related_name="refunds",
+        help_text="The application fee that was refunded"
+    )
 
 
 class CountrySpec(StripeModel):
