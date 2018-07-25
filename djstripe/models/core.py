@@ -72,7 +72,16 @@ class Charge(StripeObject):
         help_text="Amount refunded (can be less than the amount attribute on the charge "
         "if a partial refund was issued)."
     )
-    # TODO: application, application_fee, balance_transaction
+    # TODO: application, application_fee
+    balance_transaction = models.ForeignKey(
+        "BalanceTransaction",
+        on_delete=models.SET_NULL,
+        null=True,
+        help_text=(
+            "The balance transaction that describes the impact of this charge "
+            "on your account balance (not including refunds or disputes)."
+        )
+    )
     captured = StripeBooleanField(
         default=False,
         help_text="If the charge was created without capturing, this boolean represents whether or not it is still "
@@ -1200,7 +1209,12 @@ class Payout(StripeObject):
             "This factors in delays like weekends or bank holidays."
         )
     )
-    # TODO: balance_transaction = models.ForeignKey("Transaction")  txn_...
+    balance_transaction = models.ForeignKey(
+        "BalanceTransaction",
+        on_delete=models.SET_NULL,
+        null=True,
+        help_text="Balance transaction that describes the impact on your account balance."
+    )
     currency = StripeCharField(
         max_length=3, help_text="Three-letter ISO currency code."
     )
@@ -1210,7 +1224,16 @@ class Payout(StripeObject):
         null=True,
         help_text="ID of the bank account or card the payout was sent to.",
     )
-    # TODO: failure_balance_transaction = ForeignKey("Transaction", null=True)
+    failure_balance_transaction = models.ForeignKey(
+        "BalanceTransaction",
+        on_delete=models.SET_NULL,
+        null=True,
+        help_text=(
+            "If the payout failed or was canceled, this will be the balance "
+            "transaction that reversed the initial balance transaction, and "
+            "puts the funds from the failed payout back in your balance."
+        )
+    )
     failure_code = StripeEnumField(
         enum=enums.PayoutFailureCode,
         blank=True,
@@ -1362,7 +1385,12 @@ class Refund(StripeObject):
     stripe_class = stripe.Refund
 
     amount = StripeIntegerField(help_text="Amount, in cents.")
-    # balance_transaction = ForeignKey("BalanceTransaction")
+    balance_transaction = models.ForeignKey(
+        "BalanceTransaction",
+        on_delete=models.SET_NULL,
+        null=True,
+        help_text="Balance transaction that describes the impact on your account balance."
+    )
     charge = models.ForeignKey(
         "Charge",
         on_delete=models.CASCADE,
@@ -1370,7 +1398,15 @@ class Refund(StripeObject):
         help_text="The charge that was refunded",
     )
     currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code")
-    # failure_balance_transaction = models.ForeignKey("BalanceTransaction", null=True)
+    failure_balance_transaction = models.ForeignKey(
+        "BalanceTransaction",
+        on_delete=models.SET_NULL,
+        null=True,
+        help_text=(
+            "If the refund failed, this balance transaction describes the adjustment "
+            "made on your account balance that reverses the initial balance transaction."
+        )
+    )
     failure_reason = StripeEnumField(
         enum=enums.RefundFailureReason,
         stripe_required=False,

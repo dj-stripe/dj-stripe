@@ -210,6 +210,32 @@ class Migration(migrations.Migration):
                 "abstract": False,
             },
         ),
+        migrations.AddField(
+            model_name="charge",
+            name="balance_transaction",
+            field=models.ForeignKey(help_text="The balance transaction that describes the impact of this charge on your account balance (not including refunds or disputes).", null=True, on_delete=django.db.models.deletion.SET_NULL, to="djstripe.BalanceTransaction"),
+        ),
+        migrations.AddField(
+            model_name="payout",
+            name="balance_transaction",
+            field=models.ForeignKey(help_text="Balance transaction that describes the impact on your account balance.", null=True, on_delete=django.db.models.deletion.SET_NULL, to="djstripe.BalanceTransaction"),
+        ),
+        migrations.AddField(
+            model_name="payout",
+            name="failure_balance_transaction",
+            field=models.ForeignKey(help_text="If the payout failed or was canceled, this will be the balance transaction that reversed the initial balance transaction, and puts the funds from the failed payout back in your balance.", null=True, on_delete=django.db.models.deletion.SET_NULL, to="djstripe.BalanceTransaction"),
+        ),
+        migrations.AddField(
+            model_name="refund",
+            name="balance_transaction",
+            field=models.ForeignKey(help_text="Balance transaction that describes the impact on your account balance.", null=True, on_delete=django.db.models.deletion.SET_NULL, to="djstripe.BalanceTransaction"),
+        ),
+        migrations.AddField(
+            model_name="refund",
+            name="failure_balance_transaction",
+            field=models.ForeignKey(help_text="If the refund failed, this balance transaction describes the adjustment made on your account balance that reverses the initial balance transaction.", null=True, on_delete=django.db.models.deletion.SET_NULL, to="djstripe.BalanceTransaction"),
+        ),
+
         migrations.RenameField(
             model_name="account",
             old_name="stripe_id",
