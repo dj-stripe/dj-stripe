@@ -11,9 +11,8 @@ from stripe.error import InvalidRequestError
 from .. import enums
 from .. import settings as djstripe_settings
 from ..fields import (
-    StripeBooleanField, StripeCharField, StripeCurrencyField,
-    StripeDateTimeField, StripeEnumField, StripeIdField,
-    StripeJSONField, StripePercentField, StripeTextField
+    StripeCharField, StripeCurrencyField, StripeDateTimeField, StripeEnumField,
+    StripeIdField, StripeJSONField, StripePercentField, StripeTextField
 )
 from ..managers import SubscriptionManager
 from ..utils import QuerySetMock, get_friendly_currency_amount
@@ -68,7 +67,7 @@ class Coupon(StripeObject):
         default=0,
         help_text="Number of times this coupon has been applied to a customer.",
     )
-    # valid = StripeBooleanField(editable=False)
+    # valid = models.BooleanField(editable=False)
 
     # XXX
     DURATION_FOREVER = "forever"
@@ -162,7 +161,7 @@ class Invoice(StripeObject):
         "increment the attempt count. In other words, manual payment attempts after the first attempt do not affect "
         "the retry schedule."
     )
-    attempted = StripeBooleanField(
+    attempted = models.BooleanField(
         default=False,
         help_text="Whether or not an attempt has been made to pay the invoice. An invoice is not attempted until 1 "
         "hour after the ``invoice.created`` webhook, for example, so you might not want to display that invoice as "
@@ -185,7 +184,7 @@ class Invoice(StripeObject):
         related_name="latest_invoice",
         help_text="The latest charge generated for this invoice, if any.",
     )
-    closed = StripeBooleanField(
+    closed = models.BooleanField(
         default=False,
         help_text="Whether or not the invoice is still trying to collect payment. An invoice is closed if it's either "
         "paid or it has been marked closed. A closed invoice will no longer attempt to collect payment.",
@@ -213,7 +212,7 @@ class Invoice(StripeObject):
         help_text="Ending customer balance after attempting to pay invoice. If the invoice has not been attempted "
         "yet, this will be null.",
     )
-    forgiven = StripeBooleanField(
+    forgiven = models.BooleanField(
         default=False,
         help_text="Whether or not the invoice has been forgiven. Forgiving an invoice instructs us to update the "
         "subscription status as if the invoice were successfully paid. Once an invoice has been forgiven, it cannot "
@@ -246,7 +245,7 @@ class Invoice(StripeObject):
             "This starts with the customer’s unique invoice_prefix if it is specified."
         ),
     )
-    paid = StripeBooleanField(
+    paid = models.BooleanField(
         default=False, help_text="The time at which payment will next be attempted."
     )
     period_end = StripeDateTimeField(
@@ -572,7 +571,7 @@ class InvoiceItem(StripeObject):
         help_text="The customer associated with this invoiceitem.",
     )
     date = StripeDateTimeField(help_text="The date on the invoiceitem.")
-    discountable = StripeBooleanField(
+    discountable = models.BooleanField(
         default=False,
         help_text="If True, discounts will apply to this invoice item. Always False for prorations.",
     )
@@ -598,7 +597,7 @@ class InvoiceItem(StripeObject):
         help_text="If the invoice item is a proration, the plan of the subscription for which the proration was "
         "computed.",
     )
-    proration = StripeBooleanField(
+    proration = models.BooleanField(
         default=False,
         help_text="Whether or not the invoice item was created automatically as a proration adjustment when the "
         "customer switched plans.",
@@ -689,7 +688,7 @@ class Plan(StripeObject):
     stripe_class = stripe.Plan
     stripe_dashboard_item_name = "plans"
 
-    active = StripeBooleanField(
+    active = models.BooleanField(
         help_text="Whether the plan is currently available for new subscriptions."
     )
     aggregate_usage = StripeEnumField(
@@ -938,7 +937,7 @@ class Subscription(StripeObject):
             "`year` intervals, the day of the month for subsequent invoices."
         ),
     )
-    cancel_at_period_end = StripeBooleanField(
+    cancel_at_period_end = models.BooleanField(
         default=False,
         help_text="If the subscription has been canceled with the ``at_period_end`` flag set to true, "
         "``cancel_at_period_end`` on the subscription will be true. You can use this attribute to determine whether "

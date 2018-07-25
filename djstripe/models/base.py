@@ -8,8 +8,7 @@ from django.utils.encoding import smart_text
 
 from .. import settings as djstripe_settings
 from ..fields import (
-    StripeDateTimeField, StripeIdField, StripeJSONField,
-    StripeNullBooleanField, StripeTextField
+    StripeDateTimeField, StripeIdField, StripeJSONField, StripeTextField
 )
 from ..managers import StripeObjectManager
 
@@ -32,7 +31,7 @@ class StripeObject(models.Model):
     )
 
     id = StripeIdField(unique=True)
-    livemode = StripeNullBooleanField(
+    livemode = models.NullBooleanField(
         default=None,
         null=True, blank=True,
         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, "

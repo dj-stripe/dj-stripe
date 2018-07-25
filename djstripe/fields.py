@@ -80,18 +80,6 @@ class StripeCurrencyField(StripeDecimalField):
             return val / decimal.Decimal("100")
 
 
-class StripeBooleanField(StripeFieldMixin, models.BooleanField):
-    """A field used to define a boolean value according to djstripe logic."""
-
-    pass
-
-
-class StripeNullBooleanField(StripeFieldMixin, models.NullBooleanField):
-    """A field used to define a NullBooleanField value according to djstripe logic."""
-
-    pass
-
-
 class StripeCharField(StripeFieldMixin, models.CharField):
     """A field used to define a CharField value according to djstripe logic."""
 

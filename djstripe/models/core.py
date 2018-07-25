@@ -12,9 +12,8 @@ from .. import settings as djstripe_settings
 from .. import webhooks
 from ..exceptions import MultipleSubscriptionException
 from ..fields import (
-    PaymentMethodForeignKey, StripeBooleanField, StripeCharField,
-    StripeCurrencyField, StripeDateTimeField, StripeDecimalField,
-    StripeEnumField, StripeJSONField, StripeNullBooleanField, StripeTextField
+    PaymentMethodForeignKey, StripeCharField, StripeCurrencyField, StripeDateTimeField,
+    StripeDecimalField, StripeEnumField, StripeJSONField, StripeTextField
 )
 from ..managers import ChargeManager
 from ..signals import WEBHOOK_SIGNALS
@@ -81,7 +80,7 @@ class Charge(StripeObject):
             "on your account balance (not including refunds or disputes)."
         )
     )
-    captured = StripeBooleanField(
+    captured = models.BooleanField(
         default=False,
         help_text="If the charge was created without capturing, this boolean represents whether or not it is still "
         "uncaptured or has since been captured.",
@@ -135,7 +134,7 @@ class Charge(StripeObject):
     outcome = StripeJSONField(
         help_text="Details about whether or not the payment was accepted, and why."
     )
-    paid = StripeBooleanField(
+    paid = models.BooleanField(
         default=False,
         help_text="True if the charge succeeded, or was successfully authorized for later capture, False otherwise.",
     )
@@ -149,7 +148,7 @@ class Charge(StripeObject):
         max_length=14,
         help_text="The transaction number that appears on email receipts sent for this charge.",
     )
-    refunded = StripeBooleanField(
+    refunded = models.BooleanField(
         default=False,
         help_text="Whether or not the charge has been fully refunded. If the charge is only partially refunded, "
         "this attribute will still be false.",
@@ -383,7 +382,7 @@ class Customer(StripeObject):
     default_source = PaymentMethodForeignKey(
         on_delete=models.SET_NULL, null=True, related_name="customers"
     )
-    delinquent = StripeBooleanField(
+    delinquent = models.BooleanField(
         help_text="Whether or not the latest charge for the customer's latest invoice has failed."
     )
     # <discount>
@@ -1052,7 +1051,7 @@ class Dispute(StripeObject):
     evidence_details = StripeJSONField(
         help_text="Information about the evidence submission."
     )
-    is_charge_refundable = StripeBooleanField(
+    is_charge_refundable = models.BooleanField(
         help_text=(
             "If true, it is still possible to refund the disputed payment. "
             "Once the payment has been fully refunded, no further funds will "
@@ -1300,7 +1299,7 @@ class Product(StripeObject):
     )
 
     # Fields applicable to `good` only
-    active = StripeNullBooleanField(
+    active = models.NullBooleanField(
         help_text=(
             "Whether the product is currently available for purchase. "
             "Only applicable to products of `type=good`."
@@ -1343,7 +1342,7 @@ class Product(StripeObject):
             "own `package_dimensions`. Only applicable to products of `type=good`."
         ),
     )
-    shippable = StripeNullBooleanField(
+    shippable = models.NullBooleanField(
         null=True, blank=True,
         help_text=(
             "Whether this product is a shipped good. "

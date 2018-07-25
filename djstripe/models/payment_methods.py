@@ -7,8 +7,8 @@ from .. import enums
 from .. import settings as djstripe_settings
 from ..exceptions import StripeObjectManipulationException
 from ..fields import (
-    StripeCharField, StripeCurrencyField, StripeEnumField,
-    StripeJSONField, StripeNullBooleanField, StripeTextField
+    StripeCharField, StripeCurrencyField,
+    StripeEnumField, StripeJSONField, StripeTextField
 )
 from .base import StripeObject, logger
 from .core import Customer
@@ -104,7 +104,7 @@ class BankAccount(StripeObject):
     customer = models.ForeignKey(
         "Customer", on_delete=models.SET_NULL, null=True, related_name="bank_account"
     )
-    default_for_currency = StripeNullBooleanField(
+    default_for_currency = models.NullBooleanField(
         help_text="Whether this external account is the default account for its currency."
     )
     fingerprint = StripeCharField(

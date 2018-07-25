@@ -6,8 +6,8 @@ from django.db import models
 from .. import enums
 from .. import settings as djstripe_settings
 from ..fields import (
-    StripeBooleanField, StripeCharField, StripeCurrencyField,
-    StripeEnumField, StripeIdField, StripeJSONField, StripeNullBooleanField
+    StripeCharField, StripeCurrencyField,
+    StripeEnumField, StripeIdField, StripeJSONField
 )
 from ..managers import TransferManager
 from .base import StripeObject
@@ -39,11 +39,11 @@ class Account(StripeObject):
         null=True,
         help_text=("The publicly visible website of the business"),
     )
-    charges_enabled = StripeBooleanField(
+    charges_enabled = models.BooleanField(
         help_text="Whether the account can create live charges"
     )
     country = StripeCharField(max_length=2, help_text="The country of the account")
-    debit_negative_balances = StripeNullBooleanField(
+    debit_negative_balances = models.NullBooleanField(
         null=True, blank=True,
         default=False,
         help_text=(
@@ -62,7 +62,7 @@ class Account(StripeObject):
         max_length=3,
         help_text=("The currency this account has chosen to use as the default"),
     )
-    details_submitted = StripeBooleanField(
+    details_submitted = models.BooleanField(
         help_text=(
             "Whether account details have been submitted. "
             "Standard accounts cannot receive payouts before this is true."
@@ -97,7 +97,7 @@ class Account(StripeObject):
         null=True, blank=True,
         help_text="The text that appears on the bank account statement for payouts.",
     )
-    payouts_enabled = StripeBooleanField(
+    payouts_enabled = models.BooleanField(
         help_text="Whether Stripe can send payouts to this account"
     )
     product_description = StripeCharField(
@@ -196,7 +196,7 @@ class Transfer(StripeObject):
         "account received for the transfer.",
     )
     # reversals = ...
-    reversed = StripeBooleanField(
+    reversed = models.BooleanField(
         default=False,
         help_text="Whether or not the transfer has been fully reversed. If the transfer is only partially "
         "reversed, this attribute will still be false.",
