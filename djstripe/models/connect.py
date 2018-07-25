@@ -162,6 +162,45 @@ class Account(StripeModel):
         return self.display_name or self.business_name
 
 
+class CountrySpec(StripeModel):
+    """
+    Stripe documentation: https://stripe.com/docs/api#country_specs
+    """
+    stripe_class = stripe.CountrySpec
+
+    id = models.CharField(max_length=2, primary_key=True, serialize=True)
+
+    default_currency = StripeCurrencyCodeField(help_text=(
+        "The default currency for this country. "
+        "This applies to both payment methods and bank accounts."
+    ))
+    supported_bank_account_currencies = JSONField(
+        help_text="Currencies that can be accepted in the specific country (for transfers)."
+    )
+    supported_payment_currencies = JSONField(
+        help_text="Currencies that can be accepted in the specified country (for payments)."
+    )
+    supported_payment_methods = JSONField(
+        help_text="Payment methods available in the specified country."
+    )
+    supported_transfer_countries = JSONField(
+        help_text="Countries that can accept transfers from the specified country."
+    )
+    verification_fields = JSONField(
+        help_text="Lists the types of verification data needed to keep an account open."
+    )
+
+    # Get rid of core common fields
+    djstripe_id = None
+    created = None
+    description = None
+    livemode = True
+    metadata = None
+
+    class Meta:
+        pass
+
+
 class Transfer(StripeModel):
     """
     When Stripe sends you money or you initiate a transfer to a bank account,

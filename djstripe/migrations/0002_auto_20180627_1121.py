@@ -176,6 +176,23 @@ class Migration(migrations.Migration):
             options={"get_latest_by": "created"},
         ),
         migrations.CreateModel(
+            name="CountrySpec",
+            fields=[
+                ("djstripe_created", models.DateTimeField(auto_now_add=True)),
+                ("djstripe_updated", models.DateTimeField(auto_now=True)),
+                ("id", models.CharField(max_length=2, primary_key=True, serialize=False)),
+                ("default_currency", djstripe.fields.StripeCurrencyCodeField(help_text="The default currency for this country. This applies to both payment methods and bank accounts.", max_length=3)),
+                ("supported_bank_account_currencies", djstripe.fields.JSONField(help_text="Currencies that can be accepted in the specific country (for transfers).")),
+                ("supported_payment_currencies", djstripe.fields.JSONField(help_text="Currencies that can be accepted in the specified country (for payments).")),
+                ("supported_payment_methods", djstripe.fields.JSONField(help_text="Payment methods available in the specified country.")),
+                ("supported_transfer_countries", djstripe.fields.JSONField(help_text="Countries that can accept transfers from the specified country.")),
+                ("verification_fields", djstripe.fields.JSONField(help_text="Lists the types of verification data needed to keep an account open.")),
+            ],
+            options={
+                "abstract": False,
+            },
+        ),
+        migrations.CreateModel(
             name="BalanceTransaction",
             fields=[
                 ("djstripe_id", models.BigAutoField(primary_key=True, serialize=False, verbose_name="ID")),
