@@ -289,14 +289,19 @@ class SourceStatus(Enum):
 
 class SourceType(Enum):
     ach_credit_transfer = _("ACH Credit Transfer")
+    ach_debit = _("ACH Debit")
     alipay = _("Alipay")
     bancontact = _("Bancontact")
     bitcoin = _("Bitcoin")
     card = _("Card")
+    card_present = _("Card present")
+    eps = _("EPS")
     giropay = _("Giropay")
     ideal = _("iDEAL")
     p24 = _("P24")
+    paper_check = _("Paper check")
     sepa_debit = _("SEPA Direct Debit")
+    sepa_credit_transfer = _("SEPA credit transfer")
     sofort = _("SOFORT")
     three_d_secure = _("3D Secure")
 
