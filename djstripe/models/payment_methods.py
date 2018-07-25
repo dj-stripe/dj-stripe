@@ -7,7 +7,7 @@ from .. import enums
 from .. import settings as djstripe_settings
 from ..exceptions import StripeObjectManipulationException
 from ..fields import (
-    StripeCharField, StripeCurrencyField, StripeEnumField, StripeIntegerField,
+    StripeCharField, StripeCurrencyField, StripeEnumField,
     StripeJSONField, StripeNullBooleanField, StripeTextField
 )
 from .base import StripeObject, logger
@@ -170,8 +170,8 @@ class Card(StripeObject):
         max_length=4,
         help_text="(For tokenized numbers only.) The last four digits of the device account number.",
     )
-    exp_month = StripeIntegerField(help_text="Card expiration month.")
-    exp_year = StripeIntegerField(help_text="Card expiration year.")
+    exp_month = models.IntegerField(help_text="Card expiration month.")
+    exp_year = models.IntegerField(help_text="Card expiration year.")
     fingerprint = StripeTextField(
         null=True, blank=True,
         help_text="Uniquely identifies this particular card number.",

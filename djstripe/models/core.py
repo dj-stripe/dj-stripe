@@ -13,8 +13,8 @@ from .. import webhooks
 from ..exceptions import MultipleSubscriptionException
 from ..fields import (
     PaymentMethodForeignKey, StripeBooleanField, StripeCharField,
-    StripeCurrencyField, StripeDateTimeField, StripeDecimalField, StripeEnumField,
-    StripeIntegerField, StripeJSONField, StripeNullBooleanField, StripeTextField
+    StripeCurrencyField, StripeDateTimeField, StripeDecimalField,
+    StripeEnumField, StripeJSONField, StripeNullBooleanField, StripeTextField
 )
 from ..managers import ChargeManager
 from ..signals import WEBHOOK_SIGNALS
@@ -39,15 +39,15 @@ class BalanceTransaction(StripeObject):
 
     stripe_class = stripe.BalanceTransaction
 
-    amount = StripeIntegerField(help_text="Gross amount of the transaction, in cents.")
+    amount = models.IntegerField(help_text="Gross amount of the transaction, in cents.")
     available_on = StripeDateTimeField(help_text=(
         "The date the transaction's net funds will become available in the Stripe balance."
     ))
     currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code.")
     exchange_rate = StripeDecimalField(null=True, decimal_places=6, max_digits=8)
-    fee = StripeIntegerField(help_text="Fee (in cents) paid for this transaction.")
+    fee = models.IntegerField(help_text="Fee (in cents) paid for this transaction.")
     fee_details = StripeJSONField()
-    net = StripeIntegerField(help_text="Net amount of the transaction, in cents.")
+    net = models.IntegerField(help_text="Net amount of the transaction, in cents.")
     # TODO: source (Reverse lookup only? or generic foreign key?)
     status = StripeEnumField(enum=enums.BalanceTransactionStatus)
     type = StripeEnumField(enum=enums.BalanceTransactionType)
@@ -358,7 +358,7 @@ class Customer(StripeObject):
     expand_fields = ["default_source"]
     stripe_dashboard_item_name = "customers"
 
-    account_balance = StripeIntegerField(
+    account_balance = models.IntegerField(
         help_text=(
             "Current balance, if any, being stored on the customer's account. "
             "If negative, the customer has credit to apply to the next invoice. "
@@ -1039,7 +1039,7 @@ class Dispute(StripeObject):
     stripe_class = stripe.Dispute
     stripe_dashboard_item_name = "disputes"
 
-    amount = StripeIntegerField(
+    amount = models.IntegerField(
         help_text=(
             "Disputed amount. Usually the amount of the charge, but can differ "
             "(usually because of currency fluctuation or because only part of the order is disputed)."
@@ -1179,7 +1179,7 @@ class FileUpload(StripeObject):
     purpose = StripeEnumField(
         enum=enums.FileUploadPurpose, help_text="The purpose of the uploaded file."
     )
-    size = StripeIntegerField(help_text="The size in bytes of the file upload object.")
+    size = models.IntegerField(help_text="The size in bytes of the file upload object.")
     type = StripeEnumField(
         enum=enums.FileUploadType, help_text="The type of the file returned."
     )
@@ -1383,7 +1383,7 @@ class Refund(StripeObject):
 
     stripe_class = stripe.Refund
 
-    amount = StripeIntegerField(help_text="Amount, in cents.")
+    amount = models.IntegerField(help_text="Amount, in cents.")
     balance_transaction = models.ForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,

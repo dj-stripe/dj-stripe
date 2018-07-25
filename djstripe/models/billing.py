@@ -11,9 +11,9 @@ from stripe.error import InvalidRequestError
 from .. import enums
 from .. import settings as djstripe_settings
 from ..fields import (
-    StripeBooleanField, StripeCharField, StripeCurrencyField, StripeDateTimeField,
-    StripeEnumField, StripeIdField, StripeIntegerField, StripeJSONField,
-    StripePercentField, StripePositiveIntegerField, StripeTextField
+    StripeBooleanField, StripeCharField, StripeCurrencyField,
+    StripeDateTimeField, StripeEnumField, StripeIdField,
+    StripeJSONField, StripePercentField, StripeTextField
 )
 from ..managers import SubscriptionManager
 from ..utils import QuerySetMock, get_friendly_currency_amount
@@ -37,12 +37,12 @@ class Coupon(StripeObject):
             "Describes how long a customer who applies this coupon will get the discount."
         ),
     )
-    duration_in_months = StripePositiveIntegerField(
+    duration_in_months = models.PositiveIntegerField(
         null=True,
         blank=True,
         help_text="If `duration` is `repeating`, the number of months the coupon applies.",
     )
-    max_redemptions = StripePositiveIntegerField(
+    max_redemptions = models.PositiveIntegerField(
         null=True,
         blank=True,
         help_text="Maximum number of times this coupon can be redeemed, in total, before it is no longer valid.",
@@ -55,7 +55,7 @@ class Coupon(StripeObject):
         ),
     )
     # This is not a StripePercentField. Only integer values between 1 and 100 are possible.
-    percent_off = StripePositiveIntegerField(
+    percent_off = models.PositiveIntegerField(
         null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(100)]
     )
     redeem_by = StripeDateTimeField(
@@ -63,7 +63,7 @@ class Coupon(StripeObject):
         blank=True,
         help_text="Date after which the coupon can no longer be redeemed. Max 5 years in the future.",
     )
-    times_redeemed = StripePositiveIntegerField(
+    times_redeemed = models.PositiveIntegerField(
         editable=False,
         default=0,
         help_text="Number of times this coupon has been applied to a customer.",
@@ -156,7 +156,7 @@ class Invoice(StripeObject):
         help_text="The fee in cents that will be applied to the invoice and transferred to the application owner's "
         "Stripe account when the invoice is paid.",
     )
-    attempt_count = StripeIntegerField(
+    attempt_count = models.IntegerField(
         help_text="Number of payment attempts made for this invoice, from the perspective of the payment retry "
         "schedule. Any payment attempt counts as the first attempt, and subsequently only automatic retries "
         "increment the attempt count. In other words, manual payment attempts after the first attempt do not affect "
@@ -208,7 +208,7 @@ class Invoice(StripeObject):
             "This value will be null for invoices where billing=charge_automatically."
         ),
     )
-    ending_balance = StripeIntegerField(
+    ending_balance = models.IntegerField(
         null=True,
         help_text="Ending customer balance after attempting to pay invoice. If the invoice has not been attempted "
         "yet, this will be null.",
@@ -262,7 +262,7 @@ class Invoice(StripeObject):
             "This is the transaction number that appears on email receipts sent for this invoice."
         ),
     )
-    starting_balance = StripeIntegerField(
+    starting_balance = models.IntegerField(
         help_text="Starting customer balance before attempting to pay invoice. If the invoice has not been attempted "
         "yet, this will be the current customer balance."
     )
@@ -603,7 +603,7 @@ class InvoiceItem(StripeObject):
         help_text="Whether or not the invoice item was created automatically as a proration adjustment when the "
         "customer switched plans.",
     )
-    quantity = StripeIntegerField(
+    quantity = models.IntegerField(
         null=True, blank=True,
         help_text="If the invoice item is a proration, the quantity of the subscription for which the proration "
         "was computed.",
@@ -724,7 +724,7 @@ class Plan(StripeObject):
         enum=enums.PlanInterval,
         help_text=("The frequency with which a subscription should be billed."),
     )
-    interval_count = StripeIntegerField(
+    interval_count = models.IntegerField(
         null=True,
         help_text=(
             "The number of intervals (specified in the interval property) between each subscription billing."
@@ -765,7 +765,7 @@ class Plan(StripeObject):
             "before computing the billed price. Cannot be combined with `tiers`."
         ),
     )
-    trial_period_days = StripeIntegerField(
+    trial_period_days = models.IntegerField(
         null=True,
         help_text=(
             "Number of trial period days granted when subscribing a customer to this plan. "
@@ -965,7 +965,7 @@ class Subscription(StripeObject):
         related_name="subscriptions",
         help_text="The customer associated with this subscription.",
     )
-    days_until_due = StripeIntegerField(
+    days_until_due = models.IntegerField(
         null=True, blank=True,
         help_text=(
             "Number of days a customer has to pay invoices generated by this subscription. "
@@ -988,7 +988,7 @@ class Subscription(StripeObject):
         related_name="subscriptions",
         help_text="The plan associated with this subscription.",
     )
-    quantity = StripeIntegerField(
+    quantity = models.IntegerField(
         help_text="The quantity applied to this subscription."
     )
     start = StripeDateTimeField(help_text="Date the subscription started.")
@@ -1221,7 +1221,7 @@ class SubscriptionItem(StripeObject):
         related_name="subscription_items",
         help_text="The plan the customer is subscribed to."
     )
-    quantity = StripePositiveIntegerField(help_text=(
+    quantity = models.PositiveIntegerField(help_text=(
         "The quantity of the plan to which the customer should be subscribed."
     ))
     subscription = models.ForeignKey(
@@ -1240,7 +1240,7 @@ class UsageRecord(StripeObject):
     Stripe documentation: https://stripe.com/docs/api#usage_records
     """
 
-    quantity = StripePositiveIntegerField(help_text=(
+    quantity = models.PositiveIntegerField(help_text=(
         "The quantity of the plan to which the customer should be subscribed."
     ))
     subscription_item = models.ForeignKey(
