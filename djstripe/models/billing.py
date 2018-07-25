@@ -585,11 +585,9 @@ class InvoiceItem(StripeObject):
     )
     period = StripeJSONField()
     period_end = StripeDateTimeField(
-        stripe_name="period.end",
         help_text="Might be the date when this invoiceitem's invoice was sent.",
     )
     period_start = StripeDateTimeField(
-        stripe_name="period.start",
         help_text="Might be the date when this invoiceitem was added to the invoice",
     )
     plan = models.ForeignKey(
@@ -618,6 +616,13 @@ class InvoiceItem(StripeObject):
         help_text="The subscription that this invoice item has been created for, if any.",
     )
     # XXX: subscription_item
+
+    @classmethod
+    def _manipulate_stripe_object_hook(cls, data):
+        data["period_start"] = data["period"]["start"]
+        data["period_end"] = data["period"]["end"]
+
+        return data
 
     @classmethod
     def _stripe_object_to_plan(cls, target_cls, data):

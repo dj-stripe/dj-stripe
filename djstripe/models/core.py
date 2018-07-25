@@ -405,14 +405,12 @@ class Customer(StripeObject):
     coupon_start = StripeDateTimeField(
         null=True,
         editable=False,
-        stripe_name="discount.start",
         stripe_required=False,
         help_text="If a coupon is present, the date at which it was applied.",
     )
     coupon_end = StripeDateTimeField(
         null=True,
         editable=False,
-        stripe_name="discount.end",
         stripe_required=False,
         help_text="If a coupon is present and has a limited duration, the date that the discount will end.",
     )
@@ -442,6 +440,15 @@ class Customer(StripeObject):
             return self.subscriber.email
         else:
             return self.id
+
+    @classmethod
+    def _manipulate_stripe_object_hook(cls, data):
+        discount = data.get("discount")
+        if discount:
+            data["coupon_start"] = discount["start"]
+            data["coupon_end"] = discount["end"]
+
+        return data
 
     @classmethod
     def get_or_create(cls, subscriber, livemode=djstripe_settings.STRIPE_LIVE_MODE):
