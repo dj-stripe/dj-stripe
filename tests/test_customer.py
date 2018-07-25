@@ -140,6 +140,7 @@ class TestCustomer(TestCase):
         customer = Customer.sync_from_stripe_data(customer_fake)
         self.assertEqual(customer.default_source.id, customer_fake["default_source"])
         self.assertEqual(customer.legacy_cards.count(), 2)
+        self.assertEqual(len(list(customer.payment_methods)), 2)
 
     @patch("stripe.Customer.retrieve")
     def test_customer_purge_leaves_customer_record(self, customer_retrieve_fake):

@@ -476,6 +476,17 @@ class Customer(StripeObject):
         return abs(min(self.account_balance, 0))
 
     @property
+    def payment_methods(self):
+        """
+        An iterable of all of the customer's payment methods (sources, then legacy cards)
+        """
+        for source in self.sources.iterator():
+            yield source
+
+        for card in self.legacy_cards.iterator():
+            yield card
+
+    @property
     def pending_charges(self):
         """
         The customer is considered to have pending charges if their account_balance is above 0.
