@@ -12,8 +12,8 @@ from .. import settings as djstripe_settings
 from .. import webhooks
 from ..exceptions import MultipleSubscriptionException
 from ..fields import (
-    JSONField, PaymentMethodForeignKey, StripeCharField, StripeDateTimeField,
-    StripeDecimalCurrencyAmountField, StripeDecimalField, StripeEnumField
+    JSONField, PaymentMethodForeignKey, StripeCharField,
+    StripeDateTimeField, StripeDecimalCurrencyAmountField, StripeEnumField
 )
 from ..managers import ChargeManager
 from ..signals import WEBHOOK_SIGNALS
@@ -43,7 +43,7 @@ class BalanceTransaction(StripeObject):
         "The date the transaction's net funds will become available in the Stripe balance."
     ))
     currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code.")
-    exchange_rate = StripeDecimalField(null=True, decimal_places=6, max_digits=8)
+    exchange_rate = models.DecimalField(null=True, decimal_places=6, max_digits=8)
     fee = models.IntegerField(help_text="Fee (in cents) paid for this transaction.")
     fee_details = JSONField()
     net = models.IntegerField(help_text="Net amount of the transaction, in cents.")

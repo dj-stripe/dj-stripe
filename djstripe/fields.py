@@ -26,11 +26,7 @@ class PaymentMethodForeignKey(models.ForeignKey):
         super().__init__(**kwargs)
 
 
-class StripeDecimalField(models.DecimalField):
-    pass
-
-
-class StripePercentField(StripeDecimalField):
+class StripePercentField(models.DecimalField):
     """A field used to define a percent according to djstripe logic."""
 
     def __init__(self, *args, **kwargs):
@@ -44,7 +40,7 @@ class StripePercentField(StripeDecimalField):
         super().__init__(*args, **defaults)
 
 
-class StripeDecimalCurrencyAmountField(StripeDecimalField):
+class StripeDecimalCurrencyAmountField(models.DecimalField):
     """
     A field used to define currency according to djstripe logic.
 

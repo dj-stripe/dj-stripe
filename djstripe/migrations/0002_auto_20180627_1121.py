@@ -179,7 +179,7 @@ class Migration(migrations.Migration):
                 ("amount", models.IntegerField(help_text="Gross amount of the transaction, in cents.")),
                 ("available_on", djstripe.fields.StripeDateTimeField(help_text="The date the transaction's net funds will become available in the Stripe balance.")),
                 ("currency", djstripe.fields.StripeCharField(help_text="Three-letter ISO currency code.", max_length=3)),
-                ("exchange_rate", djstripe.fields.StripeDecimalField(null=True, decimal_places=6, max_digits=8)),
+                ("exchange_rate", models.DecimalField(null=True, decimal_places=6, max_digits=8)),
                 ("fee", models.IntegerField(help_text="Fee (in cents) paid for this transaction.")),
                 ("fee_details", djstripe.fields.JSONField()),
                 ("net", models.IntegerField(help_text="Net amount of the transaction, in cents.")),
