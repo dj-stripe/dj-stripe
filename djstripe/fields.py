@@ -54,6 +54,10 @@ class StripeCurrencyCodeField(models.CharField):
         super().__init__(*args, **defaults)
 
 
+class StripeQuantumCurrencyAmountField(models.IntegerField):
+    pass
+
+
 class StripeDecimalCurrencyAmountField(models.DecimalField):
     """
     A field used to define currency according to djstripe logic.

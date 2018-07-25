@@ -12,8 +12,8 @@ from .. import settings as djstripe_settings
 from .. import webhooks
 from ..exceptions import MultipleSubscriptionException
 from ..fields import (
-    JSONField, PaymentMethodForeignKey, StripeCurrencyCodeField,
-    StripeDateTimeField, StripeDecimalCurrencyAmountField, StripeEnumField
+    JSONField, PaymentMethodForeignKey, StripeCurrencyCodeField, StripeDateTimeField,
+    StripeDecimalCurrencyAmountField, StripeEnumField, StripeQuantumCurrencyAmountField
 )
 from ..managers import ChargeManager
 from ..signals import WEBHOOK_SIGNALS
@@ -38,15 +38,21 @@ class BalanceTransaction(StripeObject):
 
     stripe_class = stripe.BalanceTransaction
 
-    amount = models.IntegerField(help_text="Gross amount of the transaction, in cents.")
+    amount = StripeQuantumCurrencyAmountField(
+        help_text="Gross amount of the transaction, in cents."
+    )
     available_on = StripeDateTimeField(help_text=(
         "The date the transaction's net funds will become available in the Stripe balance."
     ))
     currency = StripeCurrencyCodeField()
     exchange_rate = models.DecimalField(null=True, decimal_places=6, max_digits=8)
-    fee = models.IntegerField(help_text="Fee (in cents) paid for this transaction.")
+    fee = StripeQuantumCurrencyAmountField(
+        help_text="Fee (in cents) paid for this transaction."
+    )
     fee_details = JSONField()
-    net = models.IntegerField(help_text="Net amount of the transaction, in cents.")
+    net = StripeQuantumCurrencyAmountField(
+        help_text="Net amount of the transaction, in cents."
+    )
     # TODO: source (Reverse lookup only? or generic foreign key?)
     status = StripeEnumField(enum=enums.BalanceTransactionStatus)
     type = StripeEnumField(enum=enums.BalanceTransactionType)
@@ -1036,12 +1042,10 @@ class Dispute(StripeObject):
     stripe_class = stripe.Dispute
     stripe_dashboard_item_name = "disputes"
 
-    amount = models.IntegerField(
-        help_text=(
-            "Disputed amount. Usually the amount of the charge, but can differ "
-            "(usually because of currency fluctuation or because only part of the order is disputed)."
-        )
-    )
+    amount = StripeQuantumCurrencyAmountField(help_text=(
+        "Disputed amount. Usually the amount of the charge, but can differ "
+        "(usually because of currency fluctuation or because only part of the order is disputed)."
+    ))
     currency = StripeCurrencyCodeField()
     evidence = JSONField(help_text="Evidence provided to respond to a dispute.")
     evidence_details = JSONField(
@@ -1376,7 +1380,7 @@ class Refund(StripeObject):
 
     stripe_class = stripe.Refund
 
-    amount = models.IntegerField(help_text="Amount, in cents.")
+    amount = StripeQuantumCurrencyAmountField(help_text="Amount, in cents.")
     balance_transaction = models.ForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
