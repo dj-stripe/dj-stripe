@@ -96,7 +96,7 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
    Note that if your system time is not in UTC, some tests will fail. If you want to ignore
    those tests, the --skip-utc command line option is available on runtests.py.::
 
-    $ pip install -r tests/requirements.txt
+    $ pip install tox
     $ tox
 
 7. If your changes altered the models you may need to generate Django migrations::
