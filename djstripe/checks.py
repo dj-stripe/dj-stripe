@@ -121,3 +121,23 @@ def check_stripe_api_host(app_configs=None, **kwargs):
         ))
 
     return messages
+
+
+@checks.register("djstripe")
+def check_webhook_secret(app_configs=None, **kwargs):
+    """
+    Check that DJSTRIPE_WEBHOOK_SECRET looks correct
+    """
+    from django.conf import settings
+
+    messages = []
+
+    secret = settings.DJSTRIPE_WEBHOOK_SECRET
+    if secret and not secret.startswith("whsec_"):
+        messages.append(checks.Warning(
+            "DJSTRIPE_WEBHOOK_SECRET does not look valid",
+            hint="It should start with whsec_...",
+            id="djstripe.W003"
+        ))
+
+    return messages

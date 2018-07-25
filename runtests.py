@@ -143,6 +143,7 @@ def run_test_suite(args):
         ),
         DJSTRIPE_USE_NATIVE_JSONFIELD=os.environ.get("USE_NATIVE_JSONFIELD", "") == "1",
         DJSTRIPE_SUBSCRIPTION_REDIRECT="test_url_subscribe",
+        DJSTRIPE_WEBHOOK_VALIDATION="retrieve_event",
     )
 
     # Avoid AppRegistryNotReady exception

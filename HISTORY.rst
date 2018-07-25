@@ -34,6 +34,8 @@ History
   you to iterate over all of a customer's payment methods (sources then cards).
 - ``Card.customer`` is now nullable and cards are no longer deleted when their
   corresponding customer is deleted (#654).
+- Webhook signature verification is now available and is preferred. Set the
+  ``DJSTRIPE_WEBHOOK_SECRET`` setting to your secret to start using it.
 
 1.2.1 (2018-07-18)
 ------------------

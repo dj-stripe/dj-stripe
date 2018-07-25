@@ -69,6 +69,9 @@ CANCELLATION_AT_PERIOD_END = not getattr(settings, 'DJSTRIPE_PRORATION_POLICY', 
 
 DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
 
+WEBHOOK_TOLERANCE = getattr(settings, "DJSTRIPE_WEBHOOK_TOLERANCE", 300)
+WEBHOOK_SECRET = getattr(settings, "DJSTRIPE_WEBHOOK_SECRET", "")
+
 # Webhook event callbacks allow an application to take control of what happens
 # when an event from Stripe is received.  One suggestion is to put the event
 # onto a task queue (such as celery) for asynchronous processing.

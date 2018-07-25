@@ -11,7 +11,7 @@ import warnings
 from collections import defaultdict
 from copy import deepcopy
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.test.client import Client
 from django.urls import reverse
 from mock import Mock, PropertyMock, call, patch
@@ -31,7 +31,6 @@ def mock_webhook_handler(webhook_event_trigger):
 
 
 class TestWebhook(TestCase):
-
     def _send_event(self, event_data):
         return Client().post(
             reverse("djstripe:webhook"),
@@ -40,20 +39,66 @@ class TestWebhook(TestCase):
             HTTP_STRIPE_SIGNATURE="PLACEHOLDER"
         )
 
-    @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
-    @patch("stripe.Event.retrieve")
-    def test_webhook_with_transfer_event(self, event_retrieve_mock, transfer_retrieve_mock):
-        fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
-        event_retrieve_mock.return_value = fake_event
-
-        resp = self._send_event(fake_event)
-        self.assertEqual(resp.status_code, 200)
-        self.assertTrue(Event.objects.filter(type="transfer.created").exists())
-
-    def test_webhook_with_test_event(self):
+    def test_webhook_test_event(self):
         resp = self._send_event(FAKE_EVENT_TEST_CHARGE_SUCCEEDED)
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(Event.objects.filter(id=TEST_EVENT_ID).exists())
+
+    @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
+    @patch("stripe.Event.retrieve", return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED))
+    def test_webhook_retrieve_event_fail(self, event_retrieve_mock, transfer_retrieve_mock):
+        invalid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+        invalid_event["id"] = "evt_invalid"
+        invalid_event["data"]["valid"] = "not really"
+
+        djstripe_settings.WEBHOOK_SECRET = ""
+        resp = self._send_event(invalid_event)
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
+
+    @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
+    @patch("stripe.Event.retrieve", return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED))
+    def test_webhook_retrieve_event_pass(self, event_retrieve_mock, transfer_retrieve_mock):
+        djstripe_settings.WEBHOOK_SECRET = ""
+        resp = self._send_event(FAKE_EVENT_TRANSFER_CREATED)
+
+        self.assertEqual(resp.status_code, 200)
+
+    @override_settings(DJSTRIPE_WEBHOOK_VALIDATION="verify_signature")
+    @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
+    @patch("stripe.Event.retrieve", return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED))
+    def test_webhook_invalid_verify_signature_fail(self, event_retrieve_mock, transfer_retrieve_mock):
+        invalid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+        invalid_event["id"] = "evt_invalid"
+        invalid_event["data"]["valid"] = "not really"
+
+        djstripe_settings.WEBHOOK_SECRET = "whsec_XXXXX"
+        resp = self._send_event(invalid_event)
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
+
+    @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
+    @patch("stripe.Event.retrieve", return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED))
+    @patch("stripe.WebhookSignature.verify_header", return_value=True)
+    def test_webhook_verify_signature_pass(self, event_retrieve_mock, transfer_retrieve_mock, verify_signature_mock):
+        djstripe_settings.WEBHOOK_SECRET = "whsec_XXXXX"
+        resp = self._send_event(FAKE_EVENT_TRANSFER_CREATED)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
+        verify_signature_mock.called_once_with(FAKE_EVENT_TRANSFER_CREATED, {})
+
+    def test_webhook_no_signature(self):
+        self.assertEqual(WebhookEventTrigger.objects.count(), 0)
+        resp = Client().post(
+            reverse("djstripe:webhook"),
+            "{}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(WebhookEventTrigger.objects.count(), 0)
 
     def test_webhook_no_remote_addr(self):
         self.assertEqual(WebhookEventTrigger.objects.count(), 0)
@@ -81,6 +126,7 @@ class TestWebhook(TestCase):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
 
+        djstripe_settings.WEBHOOK_SECRET = ""
         resp = self._send_event(fake_event)
         self.assertEqual(resp.status_code, 200)
         webhook_event_trigger = WebhookEventTrigger.objects.get()
@@ -92,6 +138,7 @@ class TestWebhook(TestCase):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
 
+        djstripe_settings.WEBHOOK_SECRET = ""
         resp = self._send_event(fake_event)
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(Event.objects.filter(type="transfer.created").exists())

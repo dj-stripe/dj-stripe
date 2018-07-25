@@ -185,6 +185,29 @@ This is where you can set *Stripe.com* to send webhook response. You can set thi
 
 As this is embedded in the URLConf, this must be a resolvable regular expression.
 
+
+DJSTRIPE_WEBHOOK_SECRET (="")
+=================================================
+
+If this is set to a non-empty value, webhook signatures will be verified.
+
+`Learn more about webhook signature verification`_.
+
+.. _Learn more about webhook signature verification: https://stripe.com/docs/webhooks/signatures
+
+This setting controls which type of validation is done on webhooks.
+Value can be ``"verify_signature"`` for signature verification (recommended
+default), ``"retrieve_event"`` for event retrieval (makes an extra HTTP
+request), or ``None`` for no validation at all.
+
+
+DJSTRIPE_WEBHOOK_TOLERANCE (=300)
+=================================
+
+Controls the milliseconds tolerance which wards against replay attacks.
+Leave this to its default value unless you know what you're doing.
+
+
 DJSTRIPE_WEBHOOK_EVENT_CALLBACK (=None)
 =======================================
 

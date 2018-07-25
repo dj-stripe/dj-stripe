@@ -2,6 +2,7 @@ import json
 import warnings
 from traceback import format_exc
 
+import stripe
 from django.db import models
 from django.utils.functional import cached_property
 
@@ -143,6 +144,19 @@ class WebhookEventTrigger(models.Model):
         if self.is_test_event:
             logger.info("Test webhook received: {}".format(local_data))
             return False
+
+        # If the DJSTRIPE_WEBHOOK_SECRET setting is set, use signature verification
+        if djstripe_settings.WEBHOOK_SECRET:
+            try:
+                stripe.WebhookSignature.verify_header(
+                    self.body,
+                    self.headers.get("stripe-signature"),
+                    djstripe_settings.WEBHOOK_SECRET
+                )
+            except stripe.error.SignatureVerificationError:
+                return False
+            else:
+                return True
 
         livemode = local_data["livemode"]
         api_key = api_key or djstripe_settings.get_default_api_key(livemode)
