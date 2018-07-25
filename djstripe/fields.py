@@ -15,9 +15,9 @@ from .utils import convert_tstamp
 
 
 if USE_NATIVE_JSONFIELD:
-    from django.contrib.postgres.fields import JSONField
+    from django.contrib.postgres.fields import JSONField as BaseJSONField
 else:
-    from jsonfield import JSONField
+    from jsonfield import JSONField as BaseJSONField
 
 
 class PaymentMethodForeignKey(models.ForeignKey):
@@ -143,7 +143,7 @@ class StripeDateTimeField(StripeFieldMixin, models.DateTimeField):
             return convert_tstamp(val)
 
 
-class StripeJSONField(StripeFieldMixin, JSONField):
+class JSONField(StripeFieldMixin, BaseJSONField):
     """A field used to define a JSONField value according to djstripe logic."""
 
     pass

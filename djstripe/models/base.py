@@ -7,9 +7,7 @@ from django.utils import dateformat, timezone
 from django.utils.encoding import smart_text
 
 from .. import settings as djstripe_settings
-from ..fields import (
-    StripeDateTimeField, StripeIdField, StripeJSONField, StripeTextField
-)
+from ..fields import JSONField, StripeDateTimeField, StripeIdField, StripeTextField
 from ..managers import StripeObjectManager
 
 
@@ -41,7 +39,7 @@ class StripeObject(models.Model):
         null=True, blank=True,
         help_text="The datetime this object was created in stripe.",
     )
-    metadata = StripeJSONField(
+    metadata = JSONField(
         null=True, blank=True,
         help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional "
         "information about an object in a structured format.",

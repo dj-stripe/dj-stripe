@@ -12,8 +12,9 @@ from .. import settings as djstripe_settings
 from .. import webhooks
 from ..exceptions import MultipleSubscriptionException
 from ..fields import (
-    PaymentMethodForeignKey, StripeCharField, StripeDecimalCurrencyAmountField, StripeDateTimeField,
-    StripeDecimalField, StripeEnumField, StripeJSONField, StripeTextField
+    JSONField, PaymentMethodForeignKey, StripeCharField,
+    StripeDateTimeField, StripeDecimalCurrencyAmountField,
+    StripeDecimalField, StripeEnumField, StripeTextField
 )
 from ..managers import ChargeManager
 from ..signals import WEBHOOK_SIGNALS
@@ -45,7 +46,7 @@ class BalanceTransaction(StripeObject):
     currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code.")
     exchange_rate = StripeDecimalField(null=True, decimal_places=6, max_digits=8)
     fee = models.IntegerField(help_text="Fee (in cents) paid for this transaction.")
-    fee_details = StripeJSONField()
+    fee_details = JSONField()
     net = models.IntegerField(help_text="Net amount of the transaction, in cents.")
     # TODO: source (Reverse lookup only? or generic foreign key?)
     status = StripeEnumField(enum=enums.BalanceTransactionStatus)
@@ -120,7 +121,7 @@ class Charge(StripeObject):
         null=True,
         help_text="Message to user further explaining reason for charge failure if available.",
     )
-    fraud_details = StripeJSONField(
+    fraud_details = JSONField(
         help_text="Hash with information on fraud assessments for the charge."
     )
     invoice = models.ForeignKey(
@@ -131,7 +132,7 @@ class Charge(StripeObject):
         help_text="The invoice this charge is for if one exists.",
     )
     # TODO: on_behalf_of, order
-    outcome = StripeJSONField(
+    outcome = JSONField(
         help_text="Details about whether or not the payment was accepted, and why."
     )
     paid = models.BooleanField(
@@ -154,7 +155,7 @@ class Charge(StripeObject):
         "this attribute will still be false.",
     )
     # TODO: review
-    shipping = StripeJSONField(
+    shipping = JSONField(
         null=True, help_text="Shipping information for the charge"
     )
     source = PaymentMethodForeignKey(
@@ -399,7 +400,7 @@ class Customer(StripeObject):
     )
     # </discount>
     email = StripeTextField(null=True)
-    shipping = StripeJSONField(
+    shipping = JSONField(
         null=True, blank=True,
         help_text="Shipping information associated with the customer.",
     )
@@ -1047,8 +1048,8 @@ class Dispute(StripeObject):
     currency = StripeCharField(
         max_length=3, help_text="Three-letter ISO currency code."
     )
-    evidence = StripeJSONField(help_text="Evidence provided to respond to a dispute.")
-    evidence_details = StripeJSONField(
+    evidence = JSONField(help_text="Evidence provided to respond to a dispute.")
+    evidence_details = JSONField(
         help_text="Information about the evidence submission."
     )
     is_charge_refundable = models.BooleanField(
@@ -1081,7 +1082,7 @@ class Event(StripeObject):
         help_text="the API version at which the event data was "
         "rendered. Blank for old entries only, all new entries will have this value",
     )
-    data = StripeJSONField(
+    data = JSONField(
         help_text="data received at webhook. data should be considered to be garbage until validity check is run "
         "and valid flag is set"
     )
@@ -1305,7 +1306,7 @@ class Product(StripeObject):
             "Only applicable to products of `type=good`."
         )
     )
-    attributes = StripeJSONField(
+    attributes = JSONField(
         null=True,
         help_text=(
             "A list of up to 5 attributes that each SKU can provide values for "
@@ -1320,21 +1321,21 @@ class Product(StripeObject):
             "to the customer. Only applicable to products of `type=good`."
         ),
     )
-    deactivate_on = StripeJSONField(
+    deactivate_on = JSONField(
         null=True, blank=True,
         help_text=(
             "An array of connect application identifiers that cannot purchase "
             "this product. Only applicable to products of `type=good`."
         ),
     )
-    images = StripeJSONField(
+    images = JSONField(
         null=True, blank=True,
         help_text=(
             "A list of up to 8 URLs of images for this product, meant to be "
             "displayable to the customer. Only applicable to products of `type=good`."
         ),
     )
-    package_dimensions = StripeJSONField(
+    package_dimensions = JSONField(
         null=True, blank=True,
         help_text=(
             "The dimensions of this product for shipping purposes. "

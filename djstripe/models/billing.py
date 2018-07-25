@@ -11,8 +11,8 @@ from stripe.error import InvalidRequestError
 from .. import enums
 from .. import settings as djstripe_settings
 from ..fields import (
-    StripeCharField, StripeDecimalCurrencyAmountField, StripeDateTimeField, StripeEnumField,
-    StripeIdField, StripeJSONField, StripePercentField, StripeTextField
+    JSONField, StripeCharField, StripeDateTimeField, StripeDecimalCurrencyAmountField,
+    StripeEnumField, StripeIdField, StripePercentField, StripeTextField
 )
 from ..managers import SubscriptionManager
 from ..utils import QuerySetMock, get_friendly_currency_amount
@@ -582,7 +582,7 @@ class InvoiceItem(StripeObject):
         related_name="invoiceitems",
         help_text="The invoice to which this invoiceitem is attached.",
     )
-    period = StripeJSONField()
+    period = JSONField()
     period_end = StripeDateTimeField(
         help_text="Might be the date when this invoiceitem's invoice was sent.",
     )
@@ -740,7 +740,7 @@ class Plan(StripeObject):
         null=True,
         help_text=("The product whose pricing this plan determines."),
     )
-    tiers = StripeJSONField(
+    tiers = JSONField(
         null=True, blank=True,
         help_text=(
             "Each element represents a pricing tier. "
@@ -757,7 +757,7 @@ class Plan(StripeObject):
             "successively change as the quantity grows."
         ),
     )
-    transform_usage = StripeJSONField(
+    transform_usage = JSONField(
         null=True, blank=True,
         help_text=(
             "Apply a transformation to the reported usage or set quantity "

@@ -6,8 +6,8 @@ from django.db import models
 from .. import enums
 from .. import settings as djstripe_settings
 from ..fields import (
-    StripeCharField, StripeDecimalCurrencyAmountField,
-    StripeEnumField, StripeIdField, StripeJSONField
+    JSONField, StripeCharField, StripeDecimalCurrencyAmountField,
+    StripeEnumField, StripeIdField
 )
 from ..managers import TransferManager
 from .base import StripeObject
@@ -51,7 +51,7 @@ class Account(StripeObject):
             "balances from an attached bank account."
         ),
     )
-    decline_charge_on = StripeJSONField(
+    decline_charge_on = JSONField(
         null=True, blank=True,
         help_text=(
             "Account-level settings to automatically decline certain types "
@@ -79,13 +79,13 @@ class Account(StripeObject):
         max_length=255, help_text="The primary user’s email address."
     )
     # TODO external_accounts = ...
-    legal_entity = StripeJSONField(
+    legal_entity = JSONField(
         null=True, blank=True,
         help_text=(
             "Information about the legal entity itself, including about the associated account representative"
         ),
     )
-    payout_schedule = StripeJSONField(
+    payout_schedule = JSONField(
         null=True, blank=True,
         help_text=(
             "Details on when funds from charges are available, and when they are paid out to an external account."
@@ -133,11 +133,11 @@ class Account(StripeObject):
         help_text=("The timezone used in the Stripe Dashboard for this account."),
     )
     type = StripeEnumField(enum=enums.AccountType, help_text="The Stripe account type.")
-    tos_acceptance = StripeJSONField(
+    tos_acceptance = JSONField(
         null=True, blank=True,
         help_text=("Details on the acceptance of the Stripe Services Agreement"),
     )
-    verification = StripeJSONField(
+    verification = JSONField(
         null=True, blank=True,
         help_text=(
             "Information on the verification state of the account, "

@@ -7,8 +7,8 @@ from .. import enums
 from .. import settings as djstripe_settings
 from ..exceptions import StripeObjectManipulationException
 from ..fields import (
-    StripeCharField, StripeDecimalCurrencyAmountField,
-    StripeEnumField, StripeJSONField, StripeTextField
+    JSONField, StripeCharField, StripeDecimalCurrencyAmountField,
+    StripeEnumField, StripeTextField
 )
 from .base import StripeObject, logger
 from .core import Customer
@@ -350,7 +350,7 @@ class Source(StripeObject):
     flow = StripeEnumField(
         enum=enums.SourceFlow, help_text=("The authentication flow of the source.")
     )
-    owner = StripeJSONField(
+    owner = JSONField(
         help_text=(
             "Information about the owner of the payment instrument that may be "
             "used or required by particular source types."
@@ -382,21 +382,21 @@ class Source(StripeObject):
     )
 
     # Flows
-    code_verification = StripeJSONField(
+    code_verification = JSONField(
         null=True, blank=True,
         help_text=(
             "Information related to the code verification flow. "
             "Present if the source is authenticated by a verification code (`flow` is `code_verification`)."
         ),
     )
-    receiver = StripeJSONField(
+    receiver = JSONField(
         null=True, blank=True,
         help_text=(
             "Information related to the receiver flow. "
             "Present if the source is a receiver (`flow` is `receiver`)."
         ),
     )
-    redirect = StripeJSONField(
+    redirect = JSONField(
         null=True, blank=True,
         help_text=(
             "Information related to the redirect flow. "
@@ -404,7 +404,7 @@ class Source(StripeObject):
         ),
     )
 
-    source_data = StripeJSONField(
+    source_data = JSONField(
         help_text=("The data corresponding to the source type.")
     )
 
