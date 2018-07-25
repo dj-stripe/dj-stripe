@@ -98,24 +98,6 @@ def get_supported_currency_choices(api_key):
     return [(currency, currency.upper()) for currency in supported_payment_currencies]
 
 
-def dict_nested_accessor(d, name):
-    """
-    Access a dictionary value, possibly in a nested dictionary.
-
-    >>> dict_nested_accessor({'id': 'joe'}, 'id')
-    "joe"
-    >>> dict_nested_accessor({'inner': {'id': 'joe'}}, 'inner.id')
-    "joe"
-
-    :type d: dict
-    """
-    names = name.split(".", 1)
-    if len(names) > 1:
-        return dict_nested_accessor(d[names[0]], names[1])
-    else:
-        return d[name]
-
-
 def clear_expired_idempotency_keys():
     from .models import IdempotencyKey
 

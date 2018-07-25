@@ -11,7 +11,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from .settings import USE_NATIVE_JSONFIELD
-from .utils import convert_tstamp, dict_nested_accessor
+from .utils import convert_tstamp
 
 
 if USE_NATIVE_JSONFIELD:
@@ -34,11 +34,6 @@ class StripeFieldMixin:
     sending to or receiving from Stripe. Also, allows a few handy extra parameters.
     """
 
-    # Used if the name at stripe is different from the name in our database
-    # Include a . in name if value is nested in dict in Stripe's object
-    # (e.g.  stripe_name = "data.id"  -->  obj["data"]["id"])
-    stripe_name = None
-
     # This indicates that this field will always appear in a stripe object. It will be
     # an Exception if we try to parse a stripe object that does not include this field
     # in the data. If set to False then null=True attribute will be automatically set
@@ -50,7 +45,6 @@ class StripeFieldMixin:
 
         Assign extra class instance variables if stripe_required is defined.
         """
-        self.stripe_name = kwargs.pop('stripe_name', self.stripe_name)
         self.stripe_required = kwargs.pop('stripe_required', self.stripe_required)
         if not self.stripe_required:
             kwargs["null"] = True
@@ -59,17 +53,9 @@ class StripeFieldMixin:
         super().__init__(*args, **kwargs)
 
     def stripe_to_db(self, data):
-        """Try converting stripe fields to defined database fields."""
+        """Convert stripe fields to defined database fields."""
 
-        try:
-            if self.stripe_name:
-                result = dict_nested_accessor(data, self.stripe_name)
-            else:
-                result = data[self.name]
-        except (KeyError, TypeError):
-            result = None
-
-        return result
+        return data.get(self.name)
 
 
 class StripeDecimalField(StripeFieldMixin, models.DecimalField):
