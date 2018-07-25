@@ -7,10 +7,10 @@
 """
 import sys
 from copy import deepcopy
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
-from mock import patch
 from stripe.error import InvalidRequestError
 
 from djstripe.models import Customer

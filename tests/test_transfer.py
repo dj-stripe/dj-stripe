@@ -7,9 +7,9 @@
 """
 import decimal
 from copy import deepcopy
+from unittest.mock import patch
 
 from django.test.testcases import TestCase
-from mock import patch
 
 from djstripe.models import Event, Transfer
 

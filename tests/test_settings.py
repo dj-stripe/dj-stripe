@@ -6,16 +6,18 @@
 .. moduleauthor:: Lee Skillen (@lskillen)
 
 """
+from unittest.mock import patch
+
 import stripe
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models.base import ModelBase
 from django.test import TestCase
 from django.test.utils import override_settings
-from mock import patch
 
 from djstripe import settings as djstripe_settings
 from djstripe.settings import (
-    get_callback_function, get_stripe_api_version, get_subscriber_model, set_stripe_api_version
+    get_callback_function, get_stripe_api_version,
+    get_subscriber_model, set_stripe_api_version
 )
 
 

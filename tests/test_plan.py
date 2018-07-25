@@ -7,11 +7,11 @@
 """
 from copy import deepcopy
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.conf import settings
 from django.contrib.admin.sites import AdminSite
 from django.test import TestCase
-from mock import patch
 
 from djstripe.admin import PlanAdmin
 from djstripe.models import Plan

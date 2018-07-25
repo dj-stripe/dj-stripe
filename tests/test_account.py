@@ -5,9 +5,10 @@
 .. moduleauthor:: Alex Kavanaugh (@kavdev)
 
 """
+from unittest.mock import patch
+
 from django.conf import settings
 from django.test.testcases import TestCase
-from mock import patch
 
 from djstripe.models import Account
 

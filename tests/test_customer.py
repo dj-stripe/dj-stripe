@@ -10,12 +10,12 @@
 """
 import decimal
 from copy import deepcopy
+from unittest.mock import ANY, patch
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
-from mock import ANY, patch
 from stripe.error import InvalidRequestError
 
 from djstripe.exceptions import MultipleSubscriptionException

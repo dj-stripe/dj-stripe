@@ -8,10 +8,10 @@
 """
 import decimal
 from copy import deepcopy
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from mock import patch
 
 from djstripe.models import (
     Card, Charge, Coupon, Customer, Dispute, Event, Invoice,

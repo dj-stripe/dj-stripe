@@ -11,6 +11,7 @@ from copy import deepcopy
 from datetime import datetime
 from decimal import Decimal
 from unittest import skipIf
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
@@ -18,11 +19,11 @@ from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import timezone
-from mock import patch
 
 from djstripe.models import Subscription
 from djstripe.utils import (
-    convert_tstamp, get_friendly_currency_amount, get_supported_currency_choices, subscriber_has_active_subscription
+    convert_tstamp, get_friendly_currency_amount,
+    get_supported_currency_choices, subscriber_has_active_subscription
 )
 
 from . import FAKE_CUSTOMER, FAKE_SUBSCRIPTION

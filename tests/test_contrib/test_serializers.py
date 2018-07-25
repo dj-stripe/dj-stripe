@@ -8,11 +8,11 @@
 """
 
 from copy import deepcopy
+from unittest.mock import PropertyMock, patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
-from mock import PropertyMock, patch
 
 from djstripe.contrib.rest_framework.serializers import (
     CreateSubscriptionSerializer, SubscriptionSerializer

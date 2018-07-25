@@ -10,11 +10,11 @@ import json
 import warnings
 from collections import defaultdict
 from copy import deepcopy
+from unittest.mock import Mock, PropertyMock, call, patch
 
 from django.test import TestCase, override_settings
 from django.test.client import Client
 from django.urls import reverse
-from mock import Mock, PropertyMock, call, patch
 
 from djstripe import settings as djstripe_settings
 from djstripe import webhooks

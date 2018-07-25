@@ -7,10 +7,10 @@
 """
 from copy import deepcopy
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
-from mock import patch
 
 from djstripe.enums import ChargeStatus, LegacySourceType
 from djstripe.models import Account, Charge, Dispute, PaymentMethod

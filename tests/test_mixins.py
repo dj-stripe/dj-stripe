@@ -6,11 +6,11 @@
 
 """
 from copy import deepcopy
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test.client import RequestFactory
 from django.test.testcases import TestCase
-from mock import patch
 
 from djstripe.mixins import PaymentsContextMixin, SubscriptionMixin
 from djstripe.models import Plan
