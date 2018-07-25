@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 from djstripe import settings as djstripe_settings
-from djstripe.models import StripeObject
+from djstripe.models import StripeModel
 
 
 try:
@@ -14,9 +14,9 @@ except NameError:
 
 class TestSubscriberModelRetrievalMethod(TestCase):
     def setUp(self):
-        self.live_object = StripeObject(livemode=True)
-        self.test_object = StripeObject(livemode=False)
-        self.unk_object = StripeObject(livemode=None)
+        self.live_object = StripeModel(livemode=True)
+        self.test_object = StripeModel(livemode=False)
+        self.unk_object = StripeModel(livemode=None)
 
     @override_settings(
         STRIPE_SECRET_KEY="sk_live_foo",

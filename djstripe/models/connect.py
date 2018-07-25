@@ -10,10 +10,10 @@ from ..fields import (
     StripeDecimalCurrencyAmountField, StripeEnumField, StripeIdField
 )
 from ..managers import TransferManager
-from .base import StripeObject
+from .base import StripeModel
 
 
-class Account(StripeObject):
+class Account(StripeModel):
     """
     Stripe documentation: https://stripe.com/docs/api#account
     """
@@ -162,7 +162,7 @@ class Account(StripeObject):
         return self.display_name or self.business_name
 
 
-class Transfer(StripeObject):
+class Transfer(StripeModel):
     """
     When Stripe sends you money or you initiate a transfer to a bank account,
     debit card, or connected Stripe account, a transfer object will be created.

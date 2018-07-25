@@ -8,13 +8,13 @@ from django.utils.encoding import smart_text
 
 from .. import settings as djstripe_settings
 from ..fields import JSONField, StripeDateTimeField, StripeIdField
-from ..managers import StripeObjectManager
+from ..managers import StripeModelManager
 
 
 logger = logging.getLogger(__name__)
 
 
-class StripeObject(models.Model):
+class StripeModel(models.Model):
     # This must be defined in descendants of this model/mixin
     # e.g. Event, Charge, Customer, etc.
     stripe_class = None
@@ -22,7 +22,7 @@ class StripeObject(models.Model):
     stripe_dashboard_item_name = ""
 
     objects = models.Manager()
-    stripe_objects = StripeObjectManager()
+    stripe_objects = StripeModelManager()
 
     djstripe_id = models.BigAutoField(
         verbose_name="ID", serialize=False, primary_key=True
@@ -439,3 +439,7 @@ class IdempotencyKey(models.Model):
     @property
     def is_expired(self):
         return timezone.now() > self.created + timedelta(hours=24)
+
+
+# Alias (Deprecated, remove in 1.4.0)
+StripeObject = StripeModel

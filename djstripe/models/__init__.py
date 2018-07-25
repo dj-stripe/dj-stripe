@@ -1,4 +1,4 @@
-from .base import IdempotencyKey, StripeObject
+from .base import IdempotencyKey, StripeModel, StripeObject
 from .billing import (
     Coupon, Invoice, InvoiceItem, Plan, Product, Subscription, UpcomingInvoice
 )
@@ -28,6 +28,7 @@ __all__ = [
     "Refund",
     "Source",
     "StripeObject",
+    "StripeModel",
     "Subscription",
     "Transfer",
     "UpcomingInvoice",

@@ -18,7 +18,7 @@ from ..fields import (
 from ..managers import ChargeManager
 from ..signals import WEBHOOK_SIGNALS
 from ..utils import get_friendly_currency_amount
-from .base import StripeObject, logger
+from .base import StripeModel, logger
 from .connect import Account, Transfer
 
 
@@ -29,7 +29,7 @@ djstripe_settings.set_stripe_api_version()
 # TODO: class Balance(...)
 
 
-class BalanceTransaction(StripeObject):
+class BalanceTransaction(StripeModel):
     """
     A single transaction that updates the Stripe balance.
 
@@ -58,7 +58,7 @@ class BalanceTransaction(StripeObject):
     type = StripeEnumField(enum=enums.BalanceTransactionType)
 
 
-class Charge(StripeObject):
+class Charge(StripeModel):
     """
     To charge a credit or a debit card, you create a charge object. You can
     retrieve and refund individual charges as well as list all charges. Charges
@@ -347,7 +347,7 @@ class Charge(StripeObject):
             return target_cls._get_or_create_from_stripe_object(data, "destination")[0]
 
 
-class Customer(StripeObject):
+class Customer(StripeModel):
     """
     Customer objects allow you to perform recurring charges and track multiple
     charges that are associated with the same customer.
@@ -566,7 +566,7 @@ class Customer(StripeObject):
         from .billing import Subscription
 
         # Convert Plan to id
-        if isinstance(plan, StripeObject):
+        if isinstance(plan, StripeModel):
             plan = plan.id
 
         stripe_subscription = Subscription._api_create(
@@ -642,7 +642,7 @@ class Customer(StripeObject):
         currency = currency or "usd"
 
         # Convert Source to id
-        if source and isinstance(source, StripeObject):
+        if source and isinstance(source, StripeModel):
             source = source.id
 
         stripe_charge = Charge._api_create(
@@ -712,11 +712,11 @@ class Customer(StripeObject):
             raise ValueError("You must supply a decimal value representing dollars.")
 
         # Convert Invoice to id
-        if invoice is not None and isinstance(invoice, StripeObject):
+        if invoice is not None and isinstance(invoice, StripeModel):
             invoice = invoice.id
 
         # Convert Subscription to id
-        if subscription is not None and isinstance(subscription, StripeObject):
+        if subscription is not None and isinstance(subscription, StripeModel):
             subscription = subscription.id
 
         stripe_invoiceitem = InvoiceItem._api_create(
@@ -832,7 +832,7 @@ class Customer(StripeObject):
 
         else:
             # Convert Plan to id
-            if isinstance(plan, StripeObject):
+            if isinstance(plan, StripeModel):
                 plan = plan.id
 
             return any(
@@ -928,7 +928,7 @@ class Customer(StripeObject):
 
         The coupon can be a Coupon object, or a valid Stripe Coupon ID.
         """
-        if isinstance(coupon, StripeObject):
+        if isinstance(coupon, StripeModel):
             coupon = coupon.id
 
         stripe_customer = self.api_retrieve()
@@ -1035,7 +1035,7 @@ class Customer(StripeObject):
             Subscription.sync_from_stripe_data(stripe_subscription)
 
 
-class Dispute(StripeObject):
+class Dispute(StripeModel):
     """
     Stripe documentation: https://stripe.com/docs/api#disputes
     """
@@ -1062,7 +1062,7 @@ class Dispute(StripeObject):
     status = StripeEnumField(enum=enums.DisputeStatus)
 
 
-class Event(StripeObject):
+class Event(StripeModel):
     """
     Events are Stripe's way of letting you know when something interesting
     happens in your account.
@@ -1167,7 +1167,7 @@ class Event(StripeObject):
             return Customer._get_or_create_from_stripe_object(data, field)[0]
 
 
-class FileUpload(StripeObject):
+class FileUpload(StripeModel):
     """
     Stripe documentation: https://stripe.com/docs/api#file_uploads
     """
@@ -1188,7 +1188,7 @@ class FileUpload(StripeObject):
     )
 
 
-class Payout(StripeObject):
+class Payout(StripeModel):
     """
     A Payout object is created when you receive funds from Stripe, or when you initiate
     a payout to either a bank account or debit card of a connected Stripe account.
@@ -1269,7 +1269,7 @@ class Payout(StripeObject):
     type = StripeEnumField(enum=enums.PayoutType)
 
 
-class Product(StripeObject):
+class Product(StripeModel):
     """
     Stripe documentation:
     - https://stripe.com/docs/api#products
@@ -1373,7 +1373,7 @@ class Product(StripeObject):
         return self.name
 
 
-class Refund(StripeObject):
+class Refund(StripeModel):
     """
     Stripe documentation: https://stripe.com/docs/api#refund_object
     """

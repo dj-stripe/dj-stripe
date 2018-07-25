@@ -122,8 +122,8 @@ class WebhookEventTriggerAdmin(admin.ModelAdmin):
         return False
 
 
-class StripeObjectAdmin(admin.ModelAdmin):
-    """Base class for all StripeObject-based model admins"""
+class StripeModelAdmin(admin.ModelAdmin):
+    """Base class for all StripeModel-based model admins"""
 
     change_form_template = "djstripe/admin/change_form.html"
 
@@ -169,7 +169,7 @@ class InvoiceItemInline(admin.StackedInline):
 
 
 @admin.register(models.Account)
-class AccountAdmin(StripeObjectAdmin):
+class AccountAdmin(StripeModelAdmin):
     list_display = ("business_url", "country", "default_currency")
     list_filter = ("details_submitted", )
     search_fields = ("business_name", "display_name", "business_url")
@@ -177,7 +177,7 @@ class AccountAdmin(StripeObjectAdmin):
 
 
 @admin.register(models.Charge)
-class ChargeAdmin(StripeObjectAdmin):
+class ChargeAdmin(StripeModelAdmin):
     list_display = (
         "customer", "amount", "description", "paid", "disputed", "refunded", "fee"
     )
@@ -189,7 +189,7 @@ class ChargeAdmin(StripeObjectAdmin):
 
 
 @admin.register(models.Coupon)
-class CouponAdmin(StripeObjectAdmin):
+class CouponAdmin(StripeModelAdmin):
     list_display = (
         "amount_off", "percent_off", "duration", "duration_in_months",
         "redeem_by", "max_redemptions", "times_redeemed"
@@ -199,7 +199,7 @@ class CouponAdmin(StripeObjectAdmin):
 
 
 @admin.register(models.Customer)
-class CustomerAdmin(StripeObjectAdmin):
+class CustomerAdmin(StripeModelAdmin):
     raw_id_fields = ("subscriber", "default_source", "coupon")
     list_display = (
         "subscriber", "email", "currency", "default_source", "coupon",
@@ -211,7 +211,7 @@ class CustomerAdmin(StripeObjectAdmin):
 
 
 @admin.register(models.Dispute)
-class DisputeAdmin(StripeObjectAdmin):
+class DisputeAdmin(StripeModelAdmin):
     list_display = ("reason", "status", "amount", "currency", "is_charge_refundable")
     list_filter = ("is_charge_refundable", "reason", "status")
 
@@ -220,7 +220,7 @@ class DisputeAdmin(StripeObjectAdmin):
 
 
 @admin.register(models.Event)
-class EventAdmin(StripeObjectAdmin):
+class EventAdmin(StripeModelAdmin):
     list_display = ("type", "created", "request_id")
     list_filter = ("type", "created")
     search_fields = ("request_id", )
@@ -230,14 +230,14 @@ class EventAdmin(StripeObjectAdmin):
 
 
 @admin.register(models.FileUpload)
-class FileUploadAdmin(StripeObjectAdmin):
+class FileUploadAdmin(StripeModelAdmin):
     list_display = ("purpose", "size", "type")
     list_filter = ("purpose", "type")
     search_fields = ("filename", )
 
 
 @admin.register(models.Invoice)
-class InvoiceAdmin(StripeObjectAdmin):
+class InvoiceAdmin(StripeModelAdmin):
     list_display = (
         "customer", "number", "paid", "forgiven", "closed", "period_start",
         "period_end", "subtotal", "tax", "tax_percent", "total"
@@ -252,7 +252,7 @@ class InvoiceAdmin(StripeObjectAdmin):
 
 
 @admin.register(models.Plan)
-class PlanAdmin(StripeObjectAdmin):
+class PlanAdmin(StripeModelAdmin):
     radio_fields = {"interval": admin.HORIZONTAL}
 
     def save_model(self, request, obj, form, change):
@@ -275,28 +275,28 @@ class PlanAdmin(StripeObjectAdmin):
 
 
 @admin.register(models.Product)
-class ProductAdmin(StripeObjectAdmin):
+class ProductAdmin(StripeModelAdmin):
     list_display = ("name", "type", "active", "url", "statement_descriptor")
     list_filter = ("type", "active", "shippable")
     search_fields = ("name", "statement_descriptor")
 
 
 @admin.register(models.Refund)
-class RefundAdmin(StripeObjectAdmin):
+class RefundAdmin(StripeModelAdmin):
     list_display = ("amount", "currency", "charge", "reason", "status", "failure_reason")
     list_filter = ("reason", "status")
     search_fields = ("receipt_number", )
 
 
 @admin.register(models.Source)
-class SourceAdmin(StripeObjectAdmin):
+class SourceAdmin(StripeModelAdmin):
     raw_id_fields = ("customer", )
     list_display = ("customer", "type", "status", "amount", "currency", "usage", "flow")
     list_filter = ("type", "status", "usage", "flow")
 
 
 @admin.register(models.Subscription)
-class SubscriptionAdmin(StripeObjectAdmin):
+class SubscriptionAdmin(StripeModelAdmin):
     raw_id_fields = ("customer", )
     list_display = ("customer", "status")
     list_filter = ("status", "cancel_at_period_end")
@@ -311,5 +311,5 @@ class SubscriptionAdmin(StripeObjectAdmin):
 
 
 @admin.register(models.Transfer)
-class TransferAdmin(StripeObjectAdmin):
+class TransferAdmin(StripeModelAdmin):
     list_display = ("amount", "status", "date", "description")

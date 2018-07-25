@@ -10,8 +10,8 @@ import decimal
 from django.db import models
 
 
-class StripeObjectManager(models.Manager):
-    """Manager used in StripeObject."""
+class StripeModelManager(models.Manager):
+    """Manager used in StripeModel."""
     pass
 
 

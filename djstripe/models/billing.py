@@ -17,11 +17,11 @@ from ..fields import (
 )
 from ..managers import SubscriptionManager
 from ..utils import QuerySetMock, get_friendly_currency_amount
-from .base import StripeObject
+from .base import StripeModel
 from .core import Charge, Customer, Product
 
 
-class Coupon(StripeObject):
+class Coupon(StripeModel):
     id = StripeIdField(max_length=500)
     amount_off = StripeDecimalCurrencyAmountField(
         null=True,
@@ -107,7 +107,7 @@ class Coupon(StripeObject):
         )
 
 
-class Invoice(StripeObject):
+class Invoice(StripeModel):
     """
     Invoices are statements of what a customer owes for a particular billing
     period, including subscriptions, invoice items, and any automatic proration
@@ -385,15 +385,15 @@ class Invoice(StripeObject):
         """
 
         # Convert Customer to id
-        if customer is not None and isinstance(customer, StripeObject):
+        if customer is not None and isinstance(customer, StripeModel):
             customer = customer.id
 
         # Convert Subscription to id
-        if subscription is not None and isinstance(subscription, StripeObject):
+        if subscription is not None and isinstance(subscription, StripeModel):
             subscription = subscription.id
 
         # Convert Plan to id
-        if subscription_plan is not None and isinstance(subscription_plan, StripeObject):
+        if subscription_plan is not None and isinstance(subscription_plan, StripeModel):
             subscription_plan = subscription_plan.id
 
         try:
@@ -545,7 +545,7 @@ class UpcomingInvoice(Invoice):
         return  # noop
 
 
-class InvoiceItem(StripeObject):
+class InvoiceItem(StripeModel):
     """
     Sometimes you want to add a charge or credit to a customer but only actually
     charge the customer's card at the end of a regular billing cycle.
@@ -672,7 +672,7 @@ class InvoiceItem(StripeObject):
         ] + super().str_parts()
 
 
-class Plan(StripeObject):
+class Plan(StripeModel):
     """
     A subscription plan contains the pricing information for different
     products and feature levels on your site.
@@ -887,7 +887,7 @@ class Plan(StripeObject):
         self.save()
 
 
-class Subscription(StripeObject):
+class Subscription(StripeModel):
     """
     Subscriptions allow you to charge a customer's card on a recurring basis.
     A subscription ties a customer to a particular plan you've created.
@@ -1062,7 +1062,7 @@ class Subscription(StripeObject):
         """
 
         # Convert Plan to id
-        if plan is not None and isinstance(plan, StripeObject):
+        if plan is not None and isinstance(plan, StripeModel):
             plan = plan.id
 
         kwargs = deepcopy(locals())
@@ -1198,7 +1198,7 @@ class Subscription(StripeObject):
         self.plan = cls._stripe_object_to_plan(target_cls=Plan, data=data)
 
 
-class SubscriptionItem(StripeObject):
+class SubscriptionItem(StripeModel):
     """
     Subscription items allow you to create customer subscriptions
     with more than one plan, making it easy to represent complex billing relationships.
@@ -1225,7 +1225,7 @@ class SubscriptionItem(StripeObject):
     )
 
 
-class UsageRecord(StripeObject):
+class UsageRecord(StripeModel):
     """
     Usage records allow you to continually report usage and metrics to
     Stripe for metered billing of plans.

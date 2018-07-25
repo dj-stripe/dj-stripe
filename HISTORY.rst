@@ -36,6 +36,8 @@ History
   corresponding customer is deleted (#654).
 - Webhook signature verification is now available and is preferred. Set the
   ``DJSTRIPE_WEBHOOK_SECRET`` setting to your secret to start using it.
+- ``StripeObject`` has been renamed ``StripeModel``. An alias remains but will
+  be removed in the next version.
 
 1.2.1 (2018-07-18)
 ------------------

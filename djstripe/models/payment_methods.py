@@ -9,7 +9,7 @@ from ..fields import (
     JSONField, StripeCurrencyCodeField,
     StripeDecimalCurrencyAmountField, StripeEnumField
 )
-from .base import StripeObject, logger
+from .base import StripeModel, logger
 from .core import Customer
 
 
@@ -70,7 +70,7 @@ class PaymentMethod(models.Model):
         return self.object_model.objects.get(id=self.id)
 
 
-class BankAccount(StripeObject):
+class BankAccount(StripeModel):
     account = models.ForeignKey(
         "Account",
         on_delete=models.PROTECT,
@@ -115,7 +115,7 @@ class BankAccount(StripeObject):
     status = StripeEnumField(enum=enums.BankAccountStatus)
 
 
-class Card(StripeObject):
+class Card(StripeModel):
     """
     You can store multiple cards on a customer in order to charge the customer later.
 
@@ -317,7 +317,7 @@ class Card(StripeObject):
         return stripe.Token.create(api_key=api_key, card=card)
 
 
-class Source(StripeObject):
+class Source(StripeModel):
     """
     Stripe documentation: https://stripe.com/docs/api#sources
     """

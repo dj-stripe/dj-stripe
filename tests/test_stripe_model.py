@@ -1,19 +1,19 @@
 """
 .. module:: dj-stripe.tests.test_stripe_object
-   :synopsis: dj-stripe StripeObject Model Tests.
+   :synopsis: dj-stripe StripeModel Model Tests.
 
 .. moduleauthor:: Bill Huneke (@wahuneke)
 
 """
 from django.test import TestCase
 
-from djstripe.models import Customer, StripeObject
+from djstripe.models import Customer, StripeModel
 
 
-class StripeObjectExceptionsTest(TestCase):
+class StripeModelExceptionsTest(TestCase):
     def test_no_object_value(self):
         # Instantiate a stripeobject model class
-        class BasicModel(StripeObject):
+        class BasicModel(StripeModel):
             pass
 
         with self.assertRaises(ValueError):
