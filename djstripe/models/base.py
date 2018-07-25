@@ -8,8 +8,8 @@ from django.utils.encoding import smart_text
 
 from .. import settings as djstripe_settings
 from ..fields import (
-    StripeDateTimeField, StripeFieldMixin, StripeIdField,
-    StripeJSONField, StripeNullBooleanField, StripeTextField
+    StripeDateTimeField, StripeIdField, StripeJSONField,
+    StripeNullBooleanField, StripeTextField
 )
 from ..managers import StripeObjectManager
 
@@ -169,12 +169,20 @@ class StripeObject(models.Model):
         if not cls.is_valid_object(data):
             raise ValueError("Trying to fit a %r into %r. Aborting." % (data["object"], cls.__name__))
 
-        result = dict()
+        result = {}
         # Iterate over all the fields that we know are related to Stripe, let each field work its own magic
-        for field in filter(
-            lambda x: isinstance(x, StripeFieldMixin), cls._meta.fields
-        ):
-            result[field.name] = field.stripe_to_db(manipulated_data)
+        ignore_fields = ["date_purged", "subscriber"]  # XXX: Customer hack
+        for field in cls._meta.fields:
+            if field.name.startswith("djstripe_") or field.name in ignore_fields:
+                continue
+            if isinstance(field, models.ForeignKey):
+                # TODO (#681): Handle foreign keys automatically
+                # For now they're handled in hooks.
+                continue
+            if hasattr(field, "stripe_to_db"):
+                result[field.name] = field.stripe_to_db(manipulated_data)
+            else:
+                result[field.name] = manipulated_data.get(field.name)
 
         return result
 
