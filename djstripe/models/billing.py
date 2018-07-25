@@ -11,7 +11,7 @@ from stripe.error import InvalidRequestError
 from .. import enums
 from .. import settings as djstripe_settings
 from ..fields import (
-    JSONField, StripeCharField, StripeDateTimeField, StripeDecimalCurrencyAmountField,
+    JSONField, StripeDateTimeField, StripeDecimalCurrencyAmountField,
     StripeEnumField, StripeIdField, StripePercentField
 )
 from ..managers import SubscriptionManager
@@ -27,7 +27,7 @@ class Coupon(StripeObject):
         blank=True,
         help_text="Amount that will be taken off the subtotal of any invoices for this customer.",
     )
-    currency = StripeCharField(
+    currency = models.CharField(
         null=True, blank=True, max_length=3, help_text="Three-letter ISO currency code"
     )
     duration = StripeEnumField(
@@ -46,7 +46,7 @@ class Coupon(StripeObject):
         blank=True,
         help_text="Maximum number of times this coupon can be redeemed, in total, before it is no longer valid.",
     )
-    name = StripeCharField(
+    name = models.CharField(
         max_length=5000,
         null=True, blank=True,
         help_text=(
@@ -189,7 +189,7 @@ class Invoice(StripeObject):
         help_text="Whether or not the invoice is still trying to collect payment. An invoice is closed if it's either "
         "paid or it has been marked closed. A closed invoice will no longer attempt to collect payment.",
     )
-    currency = StripeCharField(
+    currency = models.CharField(
         max_length=3, help_text="Three-letter ISO currency code."
     )
     customer = models.ForeignKey(
@@ -218,7 +218,7 @@ class Invoice(StripeObject):
         "subscription status as if the invoice were successfully paid. Once an invoice has been forgiven, it cannot "
         "be unforgiven or reopened.",
     )
-    hosted_invoice_url = StripeCharField(
+    hosted_invoice_url = models.CharField(
         max_length=799,
         null=True, blank=True,
         help_text=(
@@ -226,7 +226,7 @@ class Invoice(StripeObject):
             "If the invoice has not been frozen yet, this will be null."
         ),
     )
-    invoice_pdf = StripeCharField(
+    invoice_pdf = models.CharField(
         max_length=799,
         null=True, blank=True,
         help_text=(
@@ -237,7 +237,7 @@ class Invoice(StripeObject):
     next_payment_attempt = StripeDateTimeField(
         null=True, help_text="The time at which payment will next be attempted."
     )
-    number = StripeCharField(
+    number = models.CharField(
         max_length=64,
         null=True,
         help_text=(
@@ -254,7 +254,7 @@ class Invoice(StripeObject):
     period_start = StripeDateTimeField(
         help_text="Start of the usage period during which invoice items were added to this invoice."
     )
-    receipt_number = StripeCharField(
+    receipt_number = models.CharField(
         max_length=64,
         null=True,
         help_text=(
@@ -265,7 +265,7 @@ class Invoice(StripeObject):
         help_text="Starting customer balance before attempting to pay invoice. If the invoice has not been attempted "
         "yet, this will be the current customer balance."
     )
-    statement_descriptor = StripeCharField(
+    statement_descriptor = models.CharField(
         max_length=22,
         null=True,
         help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement "
@@ -561,7 +561,7 @@ class InvoiceItem(StripeObject):
     stripe_class = stripe.InvoiceItem
 
     amount = StripeDecimalCurrencyAmountField(help_text="Amount invoiced.")
-    currency = StripeCharField(
+    currency = models.CharField(
         max_length=3, help_text="Three-letter ISO currency code."
     )
     customer = models.ForeignKey(
@@ -718,7 +718,7 @@ class Plan(StripeObject):
             "as defined using the tiers and tiers_mode attributes."
         ),
     )
-    currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code")
+    currency = models.CharField(max_length=3, help_text="Three-letter ISO currency code")
     interval = StripeEnumField(
         enum=enums.PlanInterval,
         help_text=("The frequency with which a subscription should be billed."),
@@ -729,7 +729,7 @@ class Plan(StripeObject):
             "The number of intervals (specified in the interval property) between each subscription billing."
         ),
     )
-    nickname = StripeCharField(
+    nickname = models.CharField(
         max_length=5000,
         null=True, blank=True,
         help_text="A brief description of the plan, hidden from customers.",
@@ -787,7 +787,7 @@ class Plan(StripeObject):
         null=True, blank=True,
         help_text="Name of the plan, to be displayed on invoices and in the web interface.",
     )
-    statement_descriptor = StripeCharField(
+    statement_descriptor = models.CharField(
         max_length=22,
         null=True, blank=True,
         help_text=(

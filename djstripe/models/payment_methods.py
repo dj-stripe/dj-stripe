@@ -6,9 +6,7 @@ from stripe.error import InvalidRequestError
 from .. import enums
 from .. import settings as djstripe_settings
 from ..exceptions import StripeObjectManipulationException
-from ..fields import (
-    JSONField, StripeCharField, StripeDecimalCurrencyAmountField, StripeEnumField
-)
+from ..fields import JSONField, StripeDecimalCurrencyAmountField, StripeEnumField
 from .base import StripeObject, logger
 from .core import Customer
 
@@ -77,7 +75,7 @@ class BankAccount(StripeObject):
         related_name="bank_account",
         help_text="The account the charge was made on behalf of. Null here indicates that this value was never set.",
     )
-    account_holder_name = StripeCharField(
+    account_holder_name = models.CharField(
         max_length=5000,
         null=True,
         help_text="The name of the person or business that owns the bank account.",
@@ -86,30 +84,30 @@ class BankAccount(StripeObject):
         enum=enums.BankAccountHolderType,
         help_text="The type of entity that holds the account.",
     )
-    bank_name = StripeCharField(
+    bank_name = models.CharField(
         max_length=255,
         help_text="Name of the bank associated with the routing number (e.g., `WELLS FARGO`).",
     )
-    country = StripeCharField(
+    country = models.CharField(
         max_length=2,
         help_text="Two-letter ISO code representing the country the bank account is located in.",
     )
-    currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code")
+    currency = models.CharField(max_length=3, help_text="Three-letter ISO currency code")
     customer = models.ForeignKey(
         "Customer", on_delete=models.SET_NULL, null=True, related_name="bank_account"
     )
     default_for_currency = models.NullBooleanField(
         help_text="Whether this external account is the default account for its currency."
     )
-    fingerprint = StripeCharField(
+    fingerprint = models.CharField(
         max_length=16,
         help_text=(
             "Uniquely identifies this particular bank account. "
             "You can use this attribute to check whether two bank accounts are the same."
         ),
     )
-    last4 = StripeCharField(max_length=4)
-    routing_number = StripeCharField(
+    last4 = models.CharField(max_length=4)
+    routing_number = models.CharField(
         max_length=255, help_text="The routing transit number for the bank account."
     )
     status = StripeEnumField(enum=enums.BankAccountStatus)
@@ -149,7 +147,7 @@ class Card(StripeObject):
         help_text=("If `address_zip` was provided, results of the check."),
     )
     brand = StripeEnumField(enum=enums.CardBrand, help_text="Card brand.")
-    country = StripeCharField(
+    country = models.CharField(
         null=True,
         max_length=2,
         help_text="Two-letter ISO code representing the country of the card.",
@@ -159,7 +157,7 @@ class Card(StripeObject):
         null=True,
         help_text=("If a CVC was provided, results of the check."),
     )
-    dynamic_last4 = StripeCharField(
+    dynamic_last4 = models.CharField(
         null=True,
         max_length=4,
         help_text="(For tokenized numbers only.) The last four digits of the device account number.",
@@ -173,7 +171,7 @@ class Card(StripeObject):
     funding = StripeEnumField(
         enum=enums.CardFundingType, help_text="Card funding type."
     )
-    last4 = StripeCharField(max_length=4, help_text="Last four digits of Card number.")
+    last4 = models.CharField(max_length=4, help_text="Last four digits of Card number.")
     name = models.TextField(null=True, help_text="Cardholder name.")
     tokenization_method = StripeEnumField(
         enum=enums.CardTokenizationMethod,
@@ -331,14 +329,14 @@ class Source(StripeObject):
             "Required for `single_use` sources."
         ),
     )
-    client_secret = StripeCharField(
+    client_secret = models.CharField(
         max_length=255,
         help_text=(
             "The client secret of the source. "
             "Used for client-side retrieval using a publishable key."
         ),
     )
-    currency = StripeCharField(
+    currency = models.CharField(
         null=True, blank=True, max_length=3, help_text="Three-letter ISO currency code"
     )
     flow = StripeEnumField(
@@ -350,7 +348,7 @@ class Source(StripeObject):
             "used or required by particular source types."
         )
     )
-    statement_descriptor = StripeCharField(
+    statement_descriptor = models.CharField(
         null=True,
         blank=True,
         max_length=255,

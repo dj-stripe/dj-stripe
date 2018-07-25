@@ -16,22 +16,22 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="account",
             name="business_name",
-            field=djstripe.fields.StripeCharField(help_text="The publicly visible name of the business", max_length=255, null=True, blank=True),
+            field=models.CharField(help_text="The publicly visible name of the business", max_length=255, null=True, blank=True),
         ),
         migrations.AlterField(
             model_name="account",
             name="support_url",
-            field=djstripe.fields.StripeCharField(help_text="A publicly shareable URL that provides support for this account", max_length=200, null=True, blank=True),
+            field=models.CharField(help_text="A publicly shareable URL that provides support for this account", max_length=200, null=True, blank=True),
         ),
         migrations.AlterField(
             model_name="charge",
             name="receipt_number",
-            field=djstripe.fields.StripeCharField(help_text="The transaction number that appears on email receipts sent for this charge.", max_length=14, null=True),
+            field=models.CharField(help_text="The transaction number that appears on email receipts sent for this charge.", max_length=14, null=True),
         ),
         migrations.AddField(
             model_name="coupon",
             name="name",
-            field=djstripe.fields.StripeCharField(blank=True, help_text="Name of the coupon displayed to customers on for instance invoices or receipts.", max_length=5000, null=True),
+            field=models.CharField(blank=True, help_text="Name of the coupon displayed to customers on for instance invoices or receipts.", max_length=5000, null=True),
         ),
         migrations.AlterField(
             model_name="product",
@@ -178,7 +178,7 @@ class Migration(migrations.Migration):
                 ("djstripe_updated", models.DateTimeField(auto_now=True)),
                 ("amount", models.IntegerField(help_text="Gross amount of the transaction, in cents.")),
                 ("available_on", djstripe.fields.StripeDateTimeField(help_text="The date the transaction's net funds will become available in the Stripe balance.")),
-                ("currency", djstripe.fields.StripeCharField(help_text="Three-letter ISO currency code.", max_length=3)),
+                ("currency", models.CharField(help_text="Three-letter ISO currency code.", max_length=3)),
                 ("exchange_rate", models.DecimalField(null=True, decimal_places=6, max_digits=8)),
                 ("fee", models.IntegerField(help_text="Fee (in cents) paid for this transaction.")),
                 ("fee_details", djstripe.fields.JSONField()),

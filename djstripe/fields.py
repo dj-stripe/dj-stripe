@@ -65,13 +65,7 @@ class StripeDecimalCurrencyAmountField(models.DecimalField):
             return val / decimal.Decimal("100")
 
 
-class StripeCharField(models.CharField):
-    """A field used to define a CharField value according to djstripe logic."""
-
-    pass
-
-
-class StripeEnumField(StripeCharField):
+class StripeEnumField(models.CharField):
     def __init__(self, enum, *args, **kwargs):
         self.enum = enum
         choices = enum.choices
@@ -89,7 +83,7 @@ class StripeEnumField(StripeCharField):
         return name, path, args, kwargs
 
 
-class StripeIdField(StripeCharField):
+class StripeIdField(models.CharField):
     """A field with enough space to hold any stripe ID."""
 
     def __init__(self, *args, **kwargs):

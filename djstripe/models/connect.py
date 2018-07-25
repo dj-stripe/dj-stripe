@@ -6,8 +6,7 @@ from django.db import models
 from .. import enums
 from .. import settings as djstripe_settings
 from ..fields import (
-    JSONField, StripeCharField, StripeDecimalCurrencyAmountField,
-    StripeEnumField, StripeIdField
+    JSONField, StripeDecimalCurrencyAmountField, StripeEnumField, StripeIdField
 )
 from ..managers import TransferManager
 from .base import StripeObject
@@ -22,19 +21,19 @@ class Account(StripeObject):
     business_logo = models.ForeignKey(
         "FileUpload", on_delete=models.SET_NULL, null=True
     )
-    business_name = StripeCharField(
+    business_name = models.CharField(
         max_length=255,
         null=True, blank=True,
         help_text=("The publicly visible name of the business"),
     )
-    business_primary_color = StripeCharField(
+    business_primary_color = models.CharField(
         max_length=7,
         null=True, blank=True,
         help_text=(
             "A CSS hex color value representing the primary branding color for this account"
         ),
     )
-    business_url = StripeCharField(
+    business_url = models.CharField(
         max_length=200,
         null=True,
         help_text=("The publicly visible website of the business"),
@@ -42,7 +41,7 @@ class Account(StripeObject):
     charges_enabled = models.BooleanField(
         help_text="Whether the account can create live charges"
     )
-    country = StripeCharField(max_length=2, help_text="The country of the account")
+    country = models.CharField(max_length=2, help_text="The country of the account")
     debit_negative_balances = models.NullBooleanField(
         null=True, blank=True,
         default=False,
@@ -58,7 +57,7 @@ class Account(StripeObject):
             "of charges regardless of the decision of the card issuer"
         ),
     )
-    default_currency = StripeCharField(
+    default_currency = models.CharField(
         max_length=3,
         help_text=("The currency this account has chosen to use as the default"),
     )
@@ -68,14 +67,14 @@ class Account(StripeObject):
             "Standard accounts cannot receive payouts before this is true."
         )
     )
-    display_name = StripeCharField(
+    display_name = models.CharField(
         max_length=255,
         help_text=(
             "The display name for this account. "
             "This is used on the Stripe Dashboard to differentiate between accounts."
         ),
     )
-    email = StripeCharField(
+    email = models.CharField(
         max_length=255, help_text="The primary user’s email address."
     )
     # TODO external_accounts = ...
@@ -91,7 +90,7 @@ class Account(StripeObject):
             "Details on when funds from charges are available, and when they are paid out to an external account."
         ),
     )
-    payout_statement_descriptor = StripeCharField(
+    payout_statement_descriptor = models.CharField(
         max_length=255,
         default="",
         null=True, blank=True,
@@ -100,7 +99,7 @@ class Account(StripeObject):
     payouts_enabled = models.BooleanField(
         help_text="Whether Stripe can send payouts to this account"
     )
-    product_description = StripeCharField(
+    product_description = models.CharField(
         max_length=255,
         null=True, blank=True,
         help_text=(
@@ -108,27 +107,27 @@ class Account(StripeObject):
             "It’s used by Stripe for risk and underwriting purposes."
         ),
     )
-    statement_descriptor = StripeCharField(
+    statement_descriptor = models.CharField(
         max_length=255,
         default="",
         help_text=(
             "The default text that appears on credit card statements when a charge is made directly on the account"
         ),
     )
-    support_email = StripeCharField(
+    support_email = models.CharField(
         max_length=255,
         help_text=("A publicly shareable support email address for the business"),
     )
-    support_phone = StripeCharField(
+    support_phone = models.CharField(
         max_length=255,
         help_text=("A publicly shareable support phone number for the business"),
     )
-    support_url = StripeCharField(
+    support_url = models.CharField(
         max_length=200,
         null=True, blank=True,
         help_text=("A publicly shareable URL that provides support for this account"),
     )
-    timezone = StripeCharField(
+    timezone = models.CharField(
         max_length=50,
         help_text=("The timezone used in the Stripe Dashboard for this account."),
     )
@@ -183,7 +182,7 @@ class Transfer(StripeObject):
         help_text="The amount reversed (can be less than the amount attribute on the transfer if a partial "
         "reversal was issued).",
     )
-    currency = StripeCharField(
+    currency = models.CharField(
         max_length=3, help_text="Three-letter ISO currency code."
     )
     # TODO: Link destination to Card, Account, or Bank Account Models
@@ -210,7 +209,7 @@ class Transfer(StripeObject):
         enum=enums.LegacySourceType,
         help_text=("The source balance from which this transfer came."),
     )
-    transfer_group = StripeCharField(
+    transfer_group = models.CharField(
         max_length=255,
         null=True, blank=True,
         help_text="A string that identifies this transaction as part of a group.",

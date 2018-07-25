@@ -12,8 +12,8 @@ from .. import settings as djstripe_settings
 from .. import webhooks
 from ..exceptions import MultipleSubscriptionException
 from ..fields import (
-    JSONField, PaymentMethodForeignKey, StripeCharField,
-    StripeDateTimeField, StripeDecimalCurrencyAmountField, StripeEnumField
+    JSONField, PaymentMethodForeignKey, StripeDateTimeField,
+    StripeDecimalCurrencyAmountField, StripeEnumField
 )
 from ..managers import ChargeManager
 from ..signals import WEBHOOK_SIGNALS
@@ -42,7 +42,7 @@ class BalanceTransaction(StripeObject):
     available_on = StripeDateTimeField(help_text=(
         "The date the transaction's net funds will become available in the Stripe balance."
     ))
-    currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code.")
+    currency = models.CharField(max_length=3, help_text="Three-letter ISO currency code.")
     exchange_rate = models.DecimalField(null=True, decimal_places=6, max_digits=8)
     fee = models.IntegerField(help_text="Fee (in cents) paid for this transaction.")
     fee_details = JSONField()
@@ -85,7 +85,7 @@ class Charge(StripeObject):
         help_text="If the charge was created without capturing, this boolean represents whether or not it is still "
         "uncaptured or has since been captured.",
     )
-    currency = StripeCharField(
+    currency = models.CharField(
         max_length=3,
         help_text="Three-letter ISO currency code representing the currency in which the charge was made.",
     )
@@ -138,12 +138,12 @@ class Charge(StripeObject):
         default=False,
         help_text="True if the charge succeeded, or was successfully authorized for later capture, False otherwise.",
     )
-    receipt_email = StripeCharField(
+    receipt_email = models.CharField(
         null=True,
         max_length=800,  # yup, 800.
         help_text="The email address that the receipt for this charge was sent to.",
     )
-    receipt_number = StripeCharField(
+    receipt_number = models.CharField(
         null=True,
         max_length=14,
         help_text="The transaction number that appears on email receipts sent for this charge.",
@@ -164,7 +164,7 @@ class Charge(StripeObject):
         help_text="The source used for this charge.",
     )
     # TODO: source_transfer
-    statement_descriptor = StripeCharField(
+    statement_descriptor = models.CharField(
         max_length=22,
         null=True,
         help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement "
@@ -182,7 +182,7 @@ class Charge(StripeObject):
         help_text="The transfer to the destination account (only applicable if the charge was created using the "
         "destination parameter).",
     )
-    transfer_group = StripeCharField(
+    transfer_group = models.CharField(
         max_length=255,
         null=True, blank=True,
         help_text="A string that identifies this transaction as part of a group.",
@@ -368,12 +368,12 @@ class Customer(StripeObject):
             "recurring billing purposes (i.e., subscriptions, invoices, invoice items)."
         )
     )
-    business_vat_id = StripeCharField(
+    business_vat_id = models.CharField(
         max_length=20,
         null=True, blank=True,
         help_text="The customer's VAT identification number.",
     )
-    currency = StripeCharField(
+    currency = models.CharField(
         max_length=3,
         null=True,
         help_text="The currency the customer can be charged in for recurring billing purposes (subscriptions, "
@@ -1044,7 +1044,7 @@ class Dispute(StripeObject):
             "(usually because of currency fluctuation or because only part of the order is disputed)."
         )
     )
-    currency = StripeCharField(
+    currency = models.CharField(
         max_length=3, help_text="Three-letter ISO currency code."
     )
     evidence = JSONField(help_text="Evidence provided to respond to a dispute.")
@@ -1075,7 +1075,7 @@ class Event(StripeObject):
     stripe_class = stripe.Event
     stripe_dashboard_item_name = "events"
 
-    api_version = StripeCharField(
+    api_version = models.CharField(
         max_length=15,
         blank=True,
         help_text="the API version at which the event data was "
@@ -1085,7 +1085,7 @@ class Event(StripeObject):
         help_text="data received at webhook. data should be considered to be garbage until validity check is run "
         "and valid flag is set"
     )
-    request_id = StripeCharField(
+    request_id = models.CharField(
         max_length=50,
         help_text="Information about the request that triggered this event, for traceability purposes. If empty "
         "string then this is an old entry without that data. If Null then this is not an old entry, but a Stripe "
@@ -1093,7 +1093,7 @@ class Event(StripeObject):
         null=True, blank=True,
     )
     idempotency_key = models.TextField(null=True, blank=True)
-    type = StripeCharField(max_length=250, help_text="Stripe's event description code")
+    type = models.CharField(max_length=250, help_text="Stripe's event description code")
 
     def str_parts(self):
         return ["type={type}".format(type=self.type)] + super().str_parts()
@@ -1171,7 +1171,7 @@ class FileUpload(StripeObject):
     """
     Stripe documentation: https://stripe.com/docs/api#file_uploads
     """
-    filename = StripeCharField(
+    filename = models.CharField(
         max_length=255,
         help_text="A filename for the file, suitable for saving to a filesystem.",
     )
@@ -1182,7 +1182,7 @@ class FileUpload(StripeObject):
     type = StripeEnumField(
         enum=enums.FileUploadType, help_text="The type of the file returned."
     )
-    url = StripeCharField(
+    url = models.CharField(
         max_length=200,
         help_text="A read-only URL where the uploaded file can be accessed.",
     )
@@ -1213,7 +1213,7 @@ class Payout(StripeObject):
         null=True,
         help_text="Balance transaction that describes the impact on your account balance."
     )
-    currency = StripeCharField(
+    currency = models.CharField(
         max_length=3, help_text="Three-letter ISO currency code."
     )
     destination = models.ForeignKey(
@@ -1253,7 +1253,7 @@ class Payout(StripeObject):
         ),
     )
     # TODO: source_type
-    statement_descriptor = StripeCharField(
+    statement_descriptor = models.CharField(
         max_length=255,
         null=True,
         blank=True,
@@ -1282,7 +1282,7 @@ class Product(StripeObject):
     stripe_dashboard_item_name = "products"
 
     # Fields applicable to both `good` and `service`
-    name = StripeCharField(
+    name = models.CharField(
         max_length=5000,
         help_text=(
             "The product's name, meant to be displayable to the customer. "
@@ -1312,7 +1312,7 @@ class Product(StripeObject):
             '(e.g., `["color", "size"]`). Only applicable to products of `type=good`.'
         ),
     )
-    caption = StripeCharField(
+    caption = models.CharField(
         null=True,
         max_length=5000,
         help_text=(
@@ -1349,7 +1349,7 @@ class Product(StripeObject):
             "Only applicable to products of `type=good`."
         ),
     )
-    url = StripeCharField(
+    url = models.CharField(
         max_length=799,
         null=True,
         help_text=(
@@ -1359,7 +1359,7 @@ class Product(StripeObject):
     )
 
     # Fields available to `service` only
-    statement_descriptor = StripeCharField(
+    statement_descriptor = models.CharField(
         max_length=22,
         null=True,
         help_text=(
@@ -1369,7 +1369,7 @@ class Product(StripeObject):
             "Only available on products of type=`service`."
         ),
     )
-    unit_label = StripeCharField(max_length=12, null=True)
+    unit_label = models.CharField(max_length=12, null=True)
 
     def __str__(self):
         return self.name
@@ -1395,7 +1395,7 @@ class Refund(StripeObject):
         related_name="refunds",
         help_text="The charge that was refunded",
     )
-    currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code")
+    currency = models.CharField(max_length=3, help_text="Three-letter ISO currency code")
     failure_balance_transaction = models.ForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
@@ -1413,7 +1413,7 @@ class Refund(StripeObject):
     reason = StripeEnumField(
         enum=enums.RefundReason, null=True, help_text="Reason for the refund."
     )
-    receipt_number = StripeCharField(
+    receipt_number = models.CharField(
         max_length=9,
         null=True,
         help_text=(
