@@ -62,6 +62,14 @@ class Migration(migrations.Migration):
             name="source_type",
         ),
         migrations.RemoveField(
+            model_name="charge",
+            name="fee",
+        ),
+        migrations.RemoveField(
+            model_name="charge",
+            name="fee_details",
+        ),
+        migrations.RemoveField(
             model_name="transfer",
             name="date",
         ),
@@ -76,6 +84,14 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name="transfer",
             name="failure_message",
+        ),
+        migrations.RemoveField(
+            model_name="transfer",
+            name="fee",
+        ),
+        migrations.RemoveField(
+            model_name="transfer",
+            name="fee_details",
         ),
         migrations.RemoveField(
             model_name="transfer",

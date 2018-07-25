@@ -1,3 +1,5 @@
+import warnings
+
 import stripe
 from django.db import models
 
@@ -214,11 +216,20 @@ class Transfer(StripeObject):
         help_text="A string that identifies this transaction as part of a group.",
     )
 
-    # Balance transaction can be null if the transfer failed
-    fee = StripeCurrencyField(stripe_required=False, nested_name="balance_transaction")
-    fee_details = StripeJSONField(
-        stripe_required=False, nested_name="balance_transaction"
-    )
+    @property
+    def fee(self):
+        if self.balance_transaction:
+            return self.balance_transaction.fee
+
+    @property
+    def fee_details(self):
+        warnings.warn(
+            "Transfer.fee_details is deprecated and will be dropped in 1.4.0. "
+            "Use Transfer.balance_transaction.fee_details instead.",
+            DeprecationWarning
+        )
+        if self.balance_transaction:
+            return self.balance_transaction.fee_details
 
     def str_parts(self):
         return [

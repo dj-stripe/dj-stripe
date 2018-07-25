@@ -18,6 +18,10 @@ History
   ``failure_message``, ``statement_descriptor`` and ``status``.
 - Fixed IntegrityError when ``REMOTE_ADDR`` is missing (#640).
 - New models: ``BalanceTransaction``, ``SubscriptionItem``, ``UsageRecord``
+- The ``fee`` and ``fee_details`` attributes of both the ``Charge`` and
+  ``Transfer`` objects are no longer stored in the database. Instead, they
+  access their respective new ``balance_transaction`` foreign key.
+  Note that ``fee_details`` has been deprecated on both models.
 
 
 1.2.1 (2018-07-18)

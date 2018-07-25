@@ -174,8 +174,6 @@ class ChargeManagerTest(TestCase):
             amount=0,
             amount_refunded=0,
             currency="usd",
-            fee=0,
-            fee_details={},
             status="pending",
         )
 
@@ -186,8 +184,6 @@ class ChargeManagerTest(TestCase):
             amount=decimal.Decimal("20.15"),
             amount_refunded=0,
             currency="usd",
-            fee=decimal.Decimal("4.90"),
-            fee_details={},
             status="succeeded",
             paid=True,
         )
@@ -199,8 +195,6 @@ class ChargeManagerTest(TestCase):
             amount=decimal.Decimal("10.35"),
             amount_refunded=decimal.Decimal("5.35"),
             currency="usd",
-            fee=0,
-            fee_details={},
             status="succeeded",
             paid=True,
         )
@@ -212,8 +206,6 @@ class ChargeManagerTest(TestCase):
             amount=decimal.Decimal("100.00"),
             amount_refunded=decimal.Decimal("80.00"),
             currency="usd",
-            fee=decimal.Decimal("5.00"),
-            fee_details={},
             status="pending",
             paid=False,
         )
@@ -225,8 +217,6 @@ class ChargeManagerTest(TestCase):
             amount=0,
             amount_refunded=0,
             currency="usd",
-            fee=0,
-            fee_details={},
             status="pending",
         )
 
@@ -237,8 +227,6 @@ class ChargeManagerTest(TestCase):
             amount=0,
             amount_refunded=0,
             currency="usd",
-            fee=0,
-            fee_details={},
             status="pending",
         )
 
@@ -249,8 +237,6 @@ class ChargeManagerTest(TestCase):
             amount=0,
             amount_refunded=0,
             currency="usd",
-            fee=0,
-            fee_details={},
             status="pending",
         )
 
@@ -261,8 +247,6 @@ class ChargeManagerTest(TestCase):
             amount=0,
             amount_refunded=0,
             currency="usd",
-            fee=0,
-            fee_details={},
             status="pending",
         )
 
@@ -284,7 +268,6 @@ class ChargeManagerTest(TestCase):
         paid_totals = Charge.objects.paid_totals_for(year=2015, month=4)
 
         self.assertEqual(decimal.Decimal("30.50"), paid_totals["total_amount"], "Total amount is not correct.")
-        self.assertEqual(decimal.Decimal("4.90"), paid_totals["total_fee"], "Total fees is not correct.")
         self.assertEqual(
             decimal.Decimal("5.35"),
             paid_totals["total_refunded"], "Total amount refunded is not correct."

@@ -76,6 +76,5 @@ class ChargeManager(models.Manager):
         """Return paid Charges during a certain year, month with total amount, fee and refunded annotated."""
         return self.during(year, month).filter(paid=True).aggregate(
             total_amount=models.Sum("amount"),
-            total_fee=models.Sum("fee"),
             total_refunded=models.Sum("amount_refunded")
         )

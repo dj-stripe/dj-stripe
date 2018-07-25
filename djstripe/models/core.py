@@ -190,13 +190,6 @@ class Charge(StripeObject):
         help_text="A string that identifies this transaction as part of a group.",
     )
 
-    # Everything below remains to be cleaned up
-    # Balance transaction can be null if the charge failed
-    fee = StripeCurrencyField(stripe_required=False, nested_name="balance_transaction")
-    fee_details = StripeJSONField(
-        stripe_required=False, nested_name="balance_transaction"
-    )
-
     # dj-stripe custom stripe fields. Don't try to send these.
     fraudulent = StripeBooleanField(
         default=False, help_text="Whether or not this charge was marked as fraudulent."
@@ -214,6 +207,21 @@ class Charge(StripeObject):
     @property
     def disputed(self):
         return self.dispute is not None
+
+    @property
+    def fee(self):
+        if self.balance_transaction:
+            return self.balance_transaction.fee
+
+    @property
+    def fee_details(self):
+        warnings.warn(
+            "Charge.fee_details is deprecated and will be dropped in 1.4.0. "
+            "Use Charge.balance_transaction.fee_details instead.",
+            DeprecationWarning
+        )
+        if self.balance_transaction:
+            return self.balance_transaction.fee_details
 
     @property
     def human_readable_amount(self):
