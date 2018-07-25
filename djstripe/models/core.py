@@ -14,7 +14,7 @@ from .. import webhooks
 from ..exceptions import MultipleSubscriptionException
 from ..fields import (
     PaymentMethodForeignKey, StripeBooleanField, StripeCharField,
-    StripeCurrencyField, StripeDateTimeField, StripeEnumField,
+    StripeCurrencyField, StripeDateTimeField, StripeDecimalField, StripeEnumField,
     StripeIntegerField, StripeJSONField, StripeNullBooleanField, StripeTextField
 )
 from ..managers import ChargeManager
@@ -29,6 +29,29 @@ djstripe_settings.set_stripe_api_version()
 
 
 # TODO: class Balance(...)
+
+
+class BalanceTransaction(StripeObject):
+    """
+    A single transaction that updates the Stripe balance.
+
+    Stripe documentation: https://stripe.com/docs/api#balance_transaction_object
+    """
+
+    stripe_class = stripe.BalanceTransaction
+
+    amount = StripeIntegerField(help_text="Gross amount of the transaction, in cents.")
+    available_on = StripeDateTimeField(help_text=(
+        "The date the transaction's net funds will become available in the Stripe balance."
+    ))
+    currency = StripeCharField(max_length=3, help_text="Three-letter ISO currency code.")
+    exchange_rate = StripeDecimalField(null=True, decimal_places=6, max_digits=8)
+    fee = StripeIntegerField(help_text="Fee (in cents) paid for this transaction.")
+    fee_details = StripeJSONField()
+    net = StripeIntegerField(help_text="Net amount of the transaction, in cents.")
+    # TODO: source (Reverse lookup only? or generic foreign key?)
+    status = StripeEnumField(enum=enums.BalanceTransactionStatus)
+    type = StripeEnumField(enum=enums.BalanceTransactionType)
 
 
 class Charge(StripeObject):

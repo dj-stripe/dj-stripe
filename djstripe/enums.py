@@ -75,6 +75,30 @@ class AccountType(Enum):
     custom = _("Custom")
 
 
+class BalanceTransactionStatus(Enum):
+    available = _("Available")
+    pending = _("Pending")
+
+
+class BalanceTransactionType(Enum):
+    adjustment = _("Adjustment")
+    application_fee = _("Application fee")
+    application_fee_refund = _("Application fee refund")
+    charge = _("Charge")
+    network_cost = _("Network cost")
+    payment = _("Payment")
+    payment_failure_refund = _("Payment failure refund")
+    payment_refund = _("Payment refund")
+    payout = _("Payout")
+    payout_cancel = _("Payout cancellation")
+    payout_failure = _("Payout failure")
+    refund = _("Refund")
+    stripe_fee = _("Stripe fee")
+    transfer = _("Transfer")
+    transfer_refund = _("Transfer refund")
+    validation = _("Validation")
+
+
 class BankAccountHolderType(Enum):
     individual = _("Individual")
     company = _("Company")

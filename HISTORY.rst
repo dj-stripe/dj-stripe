@@ -17,6 +17,7 @@ History
   This includes ``date``, ``destination_type`` (``type``), ``failure_code``,
   ``failure_message``, ``statement_descriptor`` and ``status``.
 - Fixed IntegrityError when ``REMOTE_ADDR`` is missing (#640).
+- New models: ``BalanceTransaction``, ``SubscriptionItem``, ``UsageRecord``
 
 
 1.2.1 (2018-07-18)

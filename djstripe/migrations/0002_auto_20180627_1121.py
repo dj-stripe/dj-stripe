@@ -146,6 +146,32 @@ class Migration(migrations.Migration):
             options={"get_latest_by": "created"},
         ),
         migrations.CreateModel(
+            name="BalanceTransaction",
+            fields=[
+                ("djstripe_id", models.BigAutoField(primary_key=True, serialize=False, verbose_name="ID")),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True)),
+                ("livemode", djstripe.fields.StripeNullBooleanField(default=None, help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.")),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, help_text="The datetime this object was created in stripe.", null=True)),
+                ("metadata", djstripe.fields.StripeJSONField(blank=True, help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.", null=True)),
+                ("description", djstripe.fields.StripeTextField(blank=True, help_text="A description of this object.", null=True)),
+                ("djstripe_created", models.DateTimeField(auto_now_add=True)),
+                ("djstripe_updated", models.DateTimeField(auto_now=True)),
+                ("amount", djstripe.fields.StripeIntegerField(help_text="Gross amount of the transaction, in cents.")),
+                ("available_on", djstripe.fields.StripeDateTimeField(help_text="The date the transaction's net funds will become available in the Stripe balance.")),
+                ("currency", djstripe.fields.StripeCharField(help_text="Three-letter ISO currency code.", max_length=3)),
+                ("exchange_rate", djstripe.fields.StripeDecimalField(null=True, decimal_places=6, max_digits=8)),
+                ("fee", djstripe.fields.StripeIntegerField(help_text="Fee (in cents) paid for this transaction.")),
+                ("fee_details", djstripe.fields.StripeJSONField()),
+                ("net", djstripe.fields.StripeIntegerField(help_text="Net amount of the transaction, in cents.")),
+                ("status", djstripe.fields.StripeEnumField(enum=djstripe.enums.BalanceTransactionStatus, max_length=9)),
+                ("type", djstripe.fields.StripeEnumField(enum=djstripe.enums.BalanceTransactionType, max_length=22)),
+            ],
+            options={
+                "get_latest_by": "created",
+                "abstract": False,
+            },
+        ),
+        migrations.CreateModel(
             name="SubscriptionItem",
             fields=[
                 ("djstripe_id", models.BigAutoField(primary_key=True, serialize=False, verbose_name="ID")),
