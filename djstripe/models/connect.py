@@ -6,7 +6,7 @@ from django.db import models
 from .. import enums
 from .. import settings as djstripe_settings
 from ..fields import (
-    StripeCharField, StripeCurrencyField,
+    StripeCharField, StripeDecimalCurrencyAmountField,
     StripeEnumField, StripeIdField, StripeJSONField
 )
 from ..managers import TransferManager
@@ -177,8 +177,8 @@ class Transfer(StripeObject):
 
     objects = TransferManager()
 
-    amount = StripeCurrencyField(help_text="The amount transferred")
-    amount_reversed = StripeCurrencyField(
+    amount = StripeDecimalCurrencyAmountField(help_text="The amount transferred")
+    amount_reversed = StripeDecimalCurrencyAmountField(
         null=True, blank=True,
         help_text="The amount reversed (can be less than the amount attribute on the transfer if a partial "
         "reversal was issued).",

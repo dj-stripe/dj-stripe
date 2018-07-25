@@ -11,7 +11,7 @@ from stripe.error import InvalidRequestError
 from .. import enums
 from .. import settings as djstripe_settings
 from ..fields import (
-    StripeCharField, StripeCurrencyField, StripeDateTimeField, StripeEnumField,
+    StripeCharField, StripeDecimalCurrencyAmountField, StripeDateTimeField, StripeEnumField,
     StripeIdField, StripeJSONField, StripePercentField, StripeTextField
 )
 from ..managers import SubscriptionManager
@@ -22,7 +22,7 @@ from .core import Charge, Customer, Product
 
 class Coupon(StripeObject):
     id = StripeIdField(max_length=500)
-    amount_off = StripeCurrencyField(
+    amount_off = StripeDecimalCurrencyAmountField(
         null=True,
         blank=True,
         help_text="Amount that will be taken off the subtotal of any invoices for this customer.",
@@ -135,22 +135,22 @@ class Invoice(StripeObject):
     stripe_class = stripe.Invoice
     stripe_dashboard_item_name = "invoices"
 
-    amount_due = StripeCurrencyField(
+    amount_due = StripeDecimalCurrencyAmountField(
         help_text="Final amount due at this time for this invoice. If the invoice's total is smaller than the minimum "
         "charge amount, for example, or if there is account credit that can be applied to the invoice, the amount_due "
         "may be 0. If there is a positive starting_balance for the invoice (the customer owes money), the amount_due "
         "will also take that into account. The charge that gets generated for the invoice will be for the amount "
         "specified in amount_due."
     )
-    amount_paid = StripeCurrencyField(
+    amount_paid = StripeDecimalCurrencyAmountField(
         null=True,  # XXX: This is not nullable, but it's a new field
         help_text="The amount, in cents, that was paid.",
     )
-    amount_remaining = StripeCurrencyField(
+    amount_remaining = StripeDecimalCurrencyAmountField(
         null=True,  # XXX: This is not nullable, but it's a new field
         help_text="The amount, in cents, that was paid.",
     )
-    application_fee = StripeCurrencyField(
+    application_fee = StripeDecimalCurrencyAmountField(
         null=True,
         help_text="The fee in cents that will be applied to the invoice and transferred to the application owner's "
         "Stripe account when the invoice is paid.",
@@ -284,10 +284,10 @@ class Invoice(StripeObject):
         null=True, blank=True,
         help_text="Only set for upcoming invoices that preview prorations. The time used to calculate prorations.",
     )
-    subtotal = StripeCurrencyField(
+    subtotal = StripeDecimalCurrencyAmountField(
         help_text="Only set for upcoming invoices that preview prorations. The time used to calculate prorations."
     )
-    tax = StripeCurrencyField(
+    tax = StripeDecimalCurrencyAmountField(
         null=True,
         help_text="The amount of tax included in the total, calculated from ``tax_percent`` and the subtotal. If no "
         "``tax_percent`` is defined, this value will be null.",
@@ -298,7 +298,7 @@ class Invoice(StripeObject):
         "invoice line items and discounts. This field is inherited from the subscription's ``tax_percent`` field, "
         "but can be changed before the invoice is paid. This field defaults to null.",
     )
-    total = StripeCurrencyField("Total after discount.")
+    total = StripeDecimalCurrencyAmountField("Total after discount.")
     webhooks_delivered_at = StripeDateTimeField(
         null=True,
         help_text=(
@@ -560,7 +560,7 @@ class InvoiceItem(StripeObject):
 
     stripe_class = stripe.InvoiceItem
 
-    amount = StripeCurrencyField(help_text="Amount invoiced.")
+    amount = StripeDecimalCurrencyAmountField(help_text="Amount invoiced.")
     currency = StripeCharField(
         max_length=3, help_text="Three-letter ISO currency code."
     )
@@ -703,7 +703,7 @@ class Plan(StripeObject):
             "usage during a period. Defaults to `sum`."
         ),
     )
-    amount = StripeCurrencyField(
+    amount = StripeDecimalCurrencyAmountField(
         help_text="Amount to be charged on the interval specified."
     )
     billing_scheme = StripeEnumField(

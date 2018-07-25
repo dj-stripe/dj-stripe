@@ -55,7 +55,7 @@ class StripePercentField(StripeDecimalField):
         super().__init__(*args, **defaults)
 
 
-class StripeCurrencyField(StripeDecimalField):
+class StripeDecimalCurrencyAmountField(StripeDecimalField):
     """
     A field used to define currency according to djstripe logic.
 

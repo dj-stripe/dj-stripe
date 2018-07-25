@@ -12,7 +12,7 @@ from .. import settings as djstripe_settings
 from .. import webhooks
 from ..exceptions import MultipleSubscriptionException
 from ..fields import (
-    PaymentMethodForeignKey, StripeCharField, StripeCurrencyField, StripeDateTimeField,
+    PaymentMethodForeignKey, StripeCharField, StripeDecimalCurrencyAmountField, StripeDateTimeField,
     StripeDecimalField, StripeEnumField, StripeJSONField, StripeTextField
 )
 from ..managers import ChargeManager
@@ -65,8 +65,8 @@ class Charge(StripeObject):
     expand_fields = ["balance_transaction"]
     stripe_dashboard_item_name = "payments"
 
-    amount = StripeCurrencyField(help_text="Amount charged.")
-    amount_refunded = StripeCurrencyField(
+    amount = StripeDecimalCurrencyAmountField(help_text="Amount charged.")
+    amount_refunded = StripeDecimalCurrencyAmountField(
         help_text="Amount refunded (can be less than the amount attribute on the charge "
         "if a partial refund was issued)."
     )
@@ -1198,7 +1198,7 @@ class Payout(StripeObject):
     stripe_class = stripe.Payout
     stripe_dashboard_item_name = "payouts"
 
-    amount = StripeCurrencyField(
+    amount = StripeDecimalCurrencyAmountField(
         help_text="Amount to be transferred to your bank account or debit card."
     )
     arrival_date = StripeDateTimeField(

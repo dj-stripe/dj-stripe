@@ -7,7 +7,7 @@ from .. import enums
 from .. import settings as djstripe_settings
 from ..exceptions import StripeObjectManipulationException
 from ..fields import (
-    StripeCharField, StripeCurrencyField,
+    StripeCharField, StripeDecimalCurrencyAmountField,
     StripeEnumField, StripeJSONField, StripeTextField
 )
 from .base import StripeObject, logger
@@ -328,7 +328,7 @@ class Source(StripeObject):
     """
     Stripe documentation: https://stripe.com/docs/api#sources
     """
-    amount = StripeCurrencyField(
+    amount = StripeDecimalCurrencyAmountField(
         null=True,
         blank=True,
         help_text=(
