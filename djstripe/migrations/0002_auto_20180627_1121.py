@@ -48,6 +48,11 @@ class Migration(migrations.Migration):
             name="images",
             field=djstripe.fields.JSONField(help_text="A list of up to 8 URLs of images for this product, meant to be displayable to the customer. Only applicable to products of `type=good`.", null=True, blank=True),
         ),
+        migrations.AlterField(
+            model_name="source",
+            name="type",
+            field=djstripe.fields.StripeEnumField(enum=djstripe.enums.SourceType, help_text="The type of the source.", max_length=20),
+        ),
         migrations.AddField(
             model_name="plan",
             name="active",
