@@ -63,11 +63,6 @@ class PaymentMethod(models.Model):
         raise ValueError("Unknown source type: {}".format(type))
 
     @property
-    def stripe_id(self):
-        # Deprecated (transitional)
-        return self.id
-
-    @property
     def object_model(self):
         return self._model_for_type(self.type)
 
