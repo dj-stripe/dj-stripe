@@ -5,7 +5,6 @@
 .. moduleauthor:: Bill Huneke (@wahuneke)
 
 """
-from django.core.exceptions import FieldError
 from django.test import TestCase
 
 from djstripe.fields import StripeCharField
@@ -29,9 +28,6 @@ class StripeObjectExceptionsTest(TestCase):
     def test_missing_required_field(self):
         class HasRequiredField(StripeObject):
             im_not_optional = StripeCharField()
-
-        with self.assertRaises(FieldError):
-            HasRequiredField._stripe_object_to_record(SIMPLE_OBJ)
 
     def test_missing_nonrequired_field(self):
         class HasNotRequiredField(StripeObject):

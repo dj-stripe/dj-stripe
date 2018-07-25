@@ -7,7 +7,6 @@
 """
 import decimal
 
-from django.core.exceptions import FieldError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -68,16 +67,7 @@ class StripeFieldMixin:
             else:
                 result = data[self.name]
         except (KeyError, TypeError):
-            if self.stripe_required:
-                model_name = self.model._meta.object_name if hasattr(self, "model") else ""
-                raise FieldError(
-                    "Required stripe field '{field_name}' was not provided in "
-                    "{model_name} data object.".format(
-                        field_name=self.name, model_name=model_name
-                    )
-                )
-            else:
-                result = None
+            result = None
 
         return result
 
