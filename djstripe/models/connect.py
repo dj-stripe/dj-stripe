@@ -162,6 +162,38 @@ class Account(StripeModel):
         return self.display_name or self.business_name
 
 
+class ApplicationFee(StripeModel):
+    """
+    When you collect a transaction fee on top of a charge made for your
+    user (using Connect), an ApplicationFee is created in your account.
+
+    Stripe documentation: https://stripe.com/docs/api#application_fees
+    """
+    stripe_class = stripe.ApplicationFee
+
+    amount = StripeQuantumCurrencyAmountField(help_text="Amount earned.")
+    amount_refunded = StripeQuantumCurrencyAmountField(
+        help_text="Amount refunded (can be less than the amount attribute "
+        "on the fee if a partial refund was issued)"
+    )
+    # TODO application = ...
+    balance_transaction = models.ForeignKey(
+        "BalanceTransaction", on_delete=models.CASCADE,
+        help_text="Balance transaction that describes the impact on your account balance."
+    )
+    charge = models.ForeignKey(
+        "Charge", on_delete=models.CASCADE,
+        help_text="The charge that the application fee was taken from."
+    )
+    currency = StripeCurrencyCodeField()
+    # TODO originating_transaction = ... (refs. both Charge and Transfer)
+    refunded = models.BooleanField(help_text=(
+        "Whether the fee has been fully refunded. If the fee is only "
+        "partially refunded, this attribute will still be false."
+    ))
+    # TODO refunds (reverse from ApplicationFeeRefund)
+
+
 class CountrySpec(StripeModel):
     """
     Stripe documentation: https://stripe.com/docs/api#country_specs
