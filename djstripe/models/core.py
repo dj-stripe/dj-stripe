@@ -3,7 +3,6 @@ import warnings
 
 import stripe
 from django.db import models
-from django.db.models.deletion import SET_NULL
 from django.utils import timezone
 from django.utils.functional import cached_property
 from stripe.error import InvalidRequestError
@@ -160,7 +159,7 @@ class Charge(StripeObject):
         null=True, help_text="Shipping information for the charge"
     )
     source = PaymentMethodForeignKey(
-        on_delete=SET_NULL,
+        on_delete=models.SET_NULL,
         null=True,
         related_name="charges",
         help_text="The source used for this charge.",
@@ -382,13 +381,13 @@ class Customer(StripeObject):
         "invoices, invoice items).",
     )
     default_source = PaymentMethodForeignKey(
-        on_delete=SET_NULL, null=True, related_name="customers"
+        on_delete=models.SET_NULL, null=True, related_name="customers"
     )
     delinquent = StripeBooleanField(
         help_text="Whether or not the latest charge for the customer's latest invoice has failed."
     )
     # <discount>
-    coupon = models.ForeignKey("Coupon", null=True, blank=True, on_delete=SET_NULL)
+    coupon = models.ForeignKey("Coupon", null=True, blank=True, on_delete=models.SET_NULL)
     coupon_start = StripeDateTimeField(
         null=True, blank=True,
         editable=False,
@@ -410,7 +409,7 @@ class Customer(StripeObject):
     subscriber = models.ForeignKey(
         djstripe_settings.get_subscriber_model_string(),
         null=True,
-        on_delete=SET_NULL,
+        on_delete=models.SET_NULL,
         related_name="djstripe_customers",
     )
     date_purged = models.DateTimeField(null=True, editable=False)
