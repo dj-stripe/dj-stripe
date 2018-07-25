@@ -265,6 +265,11 @@ class Migration(migrations.Migration):
             name="failure_balance_transaction",
             field=models.ForeignKey(help_text="If the refund failed, this balance transaction describes the adjustment made on your account balance that reverses the initial balance transaction.", null=True, on_delete=django.db.models.deletion.SET_NULL, to="djstripe.BalanceTransaction"),
         ),
+        migrations.AddField(
+            model_name="transfer",
+            name="balance_transaction",
+            field=models.ForeignKey(blank=True, help_text="Balance transaction that describes the impact on your account balance.", null=True, on_delete=django.db.models.deletion.SET_NULL, to="djstripe.BalanceTransaction"),
+        ),
         migrations.RenameField(
             model_name="account",
             old_name="stripe_id",

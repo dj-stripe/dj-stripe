@@ -182,6 +182,11 @@ class Transfer(StripeModel):
         help_text="The amount reversed (can be less than the amount attribute on the transfer if a partial "
         "reversal was issued).",
     )
+    balance_transaction = models.ForeignKey(
+        "BalanceTransaction", on_delete=models.SET_NULL,
+        null=True, blank=True,
+        help_text="Balance transaction that describes the impact on your account balance."
+    )
     currency = StripeCurrencyCodeField()
     # TODO: Link destination to Card, Account, or Bank Account Models
     destination = StripeIdField(
