@@ -98,6 +98,9 @@ class IdempotencyKeyAdmin(admin.ModelAdmin):
     list_filter = ("livemode", )
     search_fields = ("uuid", "action")
 
+    def has_add_permission(self, request):
+        return False
+
 
 @admin.register(models.WebhookEventTrigger)
 class WebhookEventTriggerAdmin(admin.ModelAdmin):
@@ -114,6 +117,9 @@ class WebhookEventTriggerAdmin(admin.ModelAdmin):
                 continue
 
             trigger.process()
+
+    def has_add_permission(self, request):
+        return False
 
 
 class StripeObjectAdmin(admin.ModelAdmin):
@@ -208,6 +214,9 @@ class CustomerAdmin(StripeObjectAdmin):
 class DisputeAdmin(StripeObjectAdmin):
     list_display = ("reason", "status", "amount", "currency", "is_charge_refundable")
     list_filter = ("is_charge_refundable", "reason", "status")
+
+    def has_add_permission(self, request):
+        return False
 
 
 @admin.register(models.Event)
