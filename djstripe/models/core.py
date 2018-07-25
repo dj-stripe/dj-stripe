@@ -355,7 +355,6 @@ class Customer(StripeModel):
     Stripe documentation: https://stripe.com/docs/api/python#customers
     """
 
-    djstripe_subscriber_key = "djstripe_subscriber"
     stripe_class = stripe.Customer
     expand_fields = ["default_source"]
     stripe_dashboard_item_name = "customers"
@@ -457,10 +456,11 @@ class Customer(StripeModel):
 
     @classmethod
     def create(cls, subscriber, idempotency_key=None):
+        subscriber_key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
         stripe_customer = cls._api_create(
             email=subscriber.email,
             idempotency_key=idempotency_key,
-            metadata={cls.djstripe_subscriber_key: subscriber.pk},
+            metadata={subscriber_key: subscriber.pk},
         )
         customer, created = Customer.objects.get_or_create(
             id=stripe_customer["id"],
@@ -993,7 +993,8 @@ class Customer(StripeModel):
     def _attach_objects_hook(self, cls, data):
         # When we save a customer to Stripe, we add a reference to its Django PK
         # in the `django_account` key. If we find that, we re-attach that PK.
-        subscriber_id = data.get("metadata", {}).get(self.djstripe_subscriber_key)
+        subscriber_key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
+        subscriber_id = data.get("metadata", {}).get(subscriber_key)
         if subscriber_id:
             cls = djstripe_settings.get_subscriber_model()
             try:

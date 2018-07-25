@@ -88,6 +88,16 @@ Example:
         url(r'^accounts/', include('allauth.urls',  app_name="allauth")),
 
 
+DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY (="djstripe_subscriber")
+=========================================================
+
+Every Customer object created in Stripe is tagged with `metadata`_
+This setting controls what the name of the key in Stripe should be.
+The key name must be a string no more than 40 characters long.
+
+.. _metadata: https://stripe.com/docs/api#metadata
+
+
 DJSTRIPE_SUBSCRIBER_MODEL (=settings.AUTH_USER_MODEL)
 =====================================================
 

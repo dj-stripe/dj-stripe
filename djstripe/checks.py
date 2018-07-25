@@ -141,3 +141,26 @@ def check_webhook_secret(app_configs=None, **kwargs):
         ))
 
     return messages
+
+
+@checks.register("djstripe")
+def check_subscriber_key_length(app_configs=None, **kwargs):
+    """
+    Check that DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY fits in metadata.
+
+    Docs: https://stripe.com/docs/api#metadata
+    """
+    from django.conf import settings
+
+    messages = []
+
+    key = settings.DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY
+    key_size = len(str(key))
+    if key and key_size > 40:
+        messages.append(checks.Error(
+            "DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY must be no more than 40 characters long",
+            hint="Current value: %r (%i characters)" % (key, key_size),
+            id="djstripe.E001"
+        ))
+
+    return messages

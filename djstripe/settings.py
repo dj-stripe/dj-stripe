@@ -77,6 +77,7 @@ WEBHOOK_SECRET = getattr(settings, "DJSTRIPE_WEBHOOK_SECRET", "")
 # onto a task queue (such as celery) for asynchronous processing.
 WEBHOOK_EVENT_CALLBACK = get_callback_function("DJSTRIPE_WEBHOOK_EVENT_CALLBACK")
 
+SUBSCRIBER_CUSTOMER_KEY = getattr(settings, "DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY", "djstripe_subscriber")
 
 TEST_API_KEY = getattr(settings, "STRIPE_TEST_SECRET_KEY", "")
 LIVE_API_KEY = getattr(settings, "STRIPE_LIVE_SECRET_KEY", "")
