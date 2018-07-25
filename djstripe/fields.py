@@ -26,18 +26,7 @@ class PaymentMethodForeignKey(models.ForeignKey):
         super().__init__(**kwargs)
 
 
-class StripeFieldMixin:
-    """
-    Custom fields for all Stripe data.
-    """
-
-    def stripe_to_db(self, data):
-        """Convert stripe fields to defined database fields."""
-
-        return data.get(self.name)
-
-
-class StripeDecimalField(StripeFieldMixin, models.DecimalField):
+class StripeDecimalField(models.DecimalField):
     pass
 
 
@@ -73,14 +62,14 @@ class StripeDecimalCurrencyAmountField(StripeDecimalField):
 
     def stripe_to_db(self, data):
         """Convert the raw value to decimal representation."""
-        val = super().stripe_to_db(data)
+        val = data.get(self.name)
 
         # Note: 0 is a possible return value, which is 'falseish'
         if val is not None:
             return val / decimal.Decimal("100")
 
 
-class StripeCharField(StripeFieldMixin, models.CharField):
+class StripeCharField(models.CharField):
     """A field used to define a CharField value according to djstripe logic."""
 
     pass
@@ -125,19 +114,19 @@ class StripeIdField(StripeCharField):
         super().__init__(*args, **defaults)
 
 
-class StripeDateTimeField(StripeFieldMixin, models.DateTimeField):
+class StripeDateTimeField(models.DateTimeField):
     """A field used to define a DateTimeField value according to djstripe logic."""
 
     def stripe_to_db(self, data):
         """Convert the raw timestamp value to a DateTime representation."""
-        val = super().stripe_to_db(data)
+        val = data.get(self.name)
 
         # Note: 0 is a possible return value, which is 'falseish'
         if val is not None:
             return convert_tstamp(val)
 
 
-class JSONField(StripeFieldMixin, BaseJSONField):
+class JSONField(BaseJSONField):
     """A field used to define a JSONField value according to djstripe logic."""
 
     pass
