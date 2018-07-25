@@ -190,11 +190,6 @@ class Charge(StripeObject):
         help_text="A string that identifies this transaction as part of a group.",
     )
 
-    # dj-stripe custom stripe fields. Don't try to send these.
-    fraudulent = StripeBooleanField(
-        default=False, help_text="Whether or not this charge was marked as fraudulent."
-    )
-
     objects = ChargeManager()
 
     def __str__(self):
@@ -241,6 +236,10 @@ class Charge(StripeObject):
             return "Failed"
 
         return ""
+
+    @property
+    def fraudulent(self):
+        return self.fraud_details and list(self.fraud_details.values())[0] == "fraudulent"
 
     @property
     def source_type(self):
@@ -345,18 +344,6 @@ class Charge(StripeObject):
 
         if "destination" in data and data["destination"]:
             return target_cls._get_or_create_from_stripe_object(data, "destination")[0]
-
-    @classmethod
-    def _manipulate_stripe_object_hook(cls, data):
-        # Assessments reported by you have the key user_report and, if set,
-        # possible values of safe and fraudulent. Assessments from Stripe have
-        # the key stripe_report and, if set, the value fraudulent.
-        data["fraudulent"] = (
-            bool(data["fraud_details"])
-            and list(data["fraud_details"].values())[0] == "fraudulent"
-        )
-
-        return data
 
 
 class Customer(StripeObject):

@@ -22,6 +22,8 @@ History
   ``Transfer`` objects are no longer stored in the database. Instead, they
   access their respective new ``balance_transaction`` foreign key.
   Note that ``fee_details`` has been deprecated on both models.
+- The ``fraudulent`` attribute on ``Charge`` is now a property that checks
+  the ``fraud_details`` field.
 - Object key validity is now always enforced (#503).
 
 

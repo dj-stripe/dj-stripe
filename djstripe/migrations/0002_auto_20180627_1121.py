@@ -51,6 +51,10 @@ class Migration(migrations.Migration):
         ),
         migrations.RemoveField(
             model_name="charge",
+            name="fraudulent",
+        ),
+        migrations.RemoveField(
+            model_name="charge",
             name="receipt_sent",
         ),
         migrations.RemoveField(
