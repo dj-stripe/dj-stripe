@@ -83,6 +83,7 @@ class TestCustomer(TestCase):
 
         user = get_user_model().objects.create_user(username="test_user_sync_unsupported_source")
         synced_customer = fake_customer.create_for_user(user)
+        self.assertEqual(0, synced_customer.legacy_cards.count())
         self.assertEqual(0, synced_customer.sources.count())
         self.assertEqual(
             synced_customer.default_source,
@@ -115,7 +116,7 @@ class TestCustomer(TestCase):
         user = get_user_model().objects.create_user(username="test_user_sync_non_local_card")
         customer = fake_customer.create_for_user(user)
 
-        self.assertEqual(customer.sources.count(), 1)
+        self.assertEqual(customer.legacy_cards.count(), 1)
         self.assertEqual(customer.default_source.id, fake_customer["default_source"]["id"])
 
     def test_customer_sync_no_sources(self):
@@ -127,7 +128,7 @@ class TestCustomer(TestCase):
         user = get_user_model().objects.create_user(username="test_user_sync_non_local_card")
         customer = fake_customer.create_for_user(user)
 
-        self.assertEqual(customer.sources.count(), 0)
+        self.assertEqual(customer.legacy_cards.count(), 0)
         self.assertEqual(customer.default_source, None)
 
     def test_customer_sync_default_source_string(self):
@@ -136,7 +137,7 @@ class TestCustomer(TestCase):
         customer_fake["default_source"] = customer_fake["sources"]["data"][0]["id"] = "card_sync_source_string"
         customer = Customer.sync_from_stripe_data(customer_fake)
         self.assertEqual(customer.default_source.id, customer_fake["default_source"])
-        self.assertEqual(customer.sources.count(), 2)
+        self.assertEqual(customer.legacy_cards.count(), 2)
 
     @patch("stripe.Customer.retrieve")
     def test_customer_purge_leaves_customer_record(self, customer_retrieve_fake):
@@ -145,6 +146,7 @@ class TestCustomer(TestCase):
 
         self.assertTrue(customer.subscriber is None)
         self.assertTrue(customer.default_source is None)
+        self.assertTrue(not customer.legacy_cards.all())
         self.assertTrue(not customer.sources.all())
         self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
 
@@ -155,6 +157,7 @@ class TestCustomer(TestCase):
 
         self.assertTrue(customer.subscriber is None)
         self.assertTrue(customer.default_source is None)
+        self.assertTrue(not customer.legacy_cards.all())
         self.assertTrue(not customer.sources.all())
         self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
 
@@ -166,6 +169,7 @@ class TestCustomer(TestCase):
         customer = Customer.objects.get(id=self.customer.id)
         self.assertTrue(customer.subscriber is None)
         self.assertTrue(customer.default_source is None)
+        self.assertTrue(not customer.legacy_cards.all())
         self.assertTrue(not customer.sources.all())
         self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
 

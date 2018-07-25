@@ -183,7 +183,7 @@ class Card(StripeObject):
     )
 
     customer = models.ForeignKey(
-        "Customer", on_delete=models.CASCADE, related_name="sources"
+        "Customer", on_delete=models.CASCADE, related_name="legacy_cards"
     )
 
     @staticmethod

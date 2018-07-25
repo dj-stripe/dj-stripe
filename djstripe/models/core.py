@@ -469,14 +469,6 @@ class Customer(StripeObject):
         return customer
 
     @property
-    def legacy_cards(self):
-        """
-        Transitional property for Customer.sources.
-        Use this instead of Customer.sources if you want to access the legacy Card queryset.
-        """
-        return self.sources
-
-    @property
     def credits(self):
         """
         The customer is considered to have credits if their account_balance is below 0.
@@ -768,7 +760,7 @@ class Customer(StripeObject):
 
         # Remove sources
         self.default_source = None
-        for source in self.sources.all():
+        for source in self.legacy_cards.all():
             source.remove()
 
         self.date_purged = timezone.now()

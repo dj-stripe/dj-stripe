@@ -150,7 +150,7 @@ class TestCustomerEvents(EventTestCase):
         event.invoke_webhook_handlers()
 
         card = Card.objects.get(id=fake_stripe_event["data"]["object"]["id"])
-        self.assertIn(card, self.customer.sources.all())
+        self.assertIn(card, self.customer.legacy_cards.all())
         self.assertEqual(card.brand, fake_stripe_event["data"]["object"]["brand"])
         self.assertEqual(card.last4, fake_stripe_event["data"]["object"]["last4"])
 

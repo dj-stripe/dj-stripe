@@ -25,6 +25,10 @@ History
 - The ``fraudulent`` attribute on ``Charge`` is now a property that checks
   the ``fraud_details`` field.
 - Object key validity is now always enforced (#503).
+- ``Customer.sources`` no longer refers to a Card queryset, but to a Source
+  queryset. In order to correctly transition, you should change all your
+  references to ``customer.sources`` to ``customer.legacy_cards`` instead.
+  The ``legacy_cards`` attribute already exists in 1.2.0.
 
 
 1.2.1 (2018-07-18)
