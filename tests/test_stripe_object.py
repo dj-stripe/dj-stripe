@@ -7,27 +7,27 @@
 """
 from django.test import TestCase
 
-from djstripe.models import StripeObject
+from djstripe.models import Customer, StripeObject
 
 
-SIMPLE_OBJ = {
-    'id': 'yo',
-    'livemode': True
-}
-SIMPLE_OBJ_RESULT = {
-    'id': 'yo',
-    'description': None,
-    'livemode': True,
-    'metadata': None,
-    'created': None
-}
-
-
-class StripeObjectBasicTest(TestCase):
-    def test_basic_val_to_db(self):
+class StripeObjectExceptionsTest(TestCase):
+    def test_no_object_value(self):
         # Instantiate a stripeobject model class
         class BasicModel(StripeObject):
             pass
 
-        result = BasicModel._stripe_object_to_record(SIMPLE_OBJ)
-        self.assertEqual(result, SIMPLE_OBJ_RESULT)
+        with self.assertRaises(ValueError):
+            # Errors because there's no object value
+            BasicModel._stripe_object_to_record({
+                "id": "test_XXXXXXXX",
+                "livemode": False,
+            })
+
+    def test_bad_object_value(self):
+        with self.assertRaises(ValueError):
+            # Errors because the object is not correct
+            Customer._stripe_object_to_record({
+                "id": "test_XXXXXXXX",
+                "livemode": False,
+                "object": "not_a_customer",
+            })

@@ -643,6 +643,10 @@ class InvoiceItem(StripeObject):
             return self.plan.product.name or str(self.plan)
         return super().__str__()
 
+    @classmethod
+    def is_valid_object(cls, data):
+        return data["object"] in ("invoiceitem", "line_item")
+
     def _attach_objects_hook(self, cls, data):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
 

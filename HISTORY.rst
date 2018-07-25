@@ -22,6 +22,7 @@ History
   ``Transfer`` objects are no longer stored in the database. Instead, they
   access their respective new ``balance_transaction`` foreign key.
   Note that ``fee_details`` has been deprecated on both models.
+- Object key validity is now always enforced (#503).
 
 
 1.2.1 (2018-07-18)

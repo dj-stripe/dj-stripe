@@ -163,6 +163,12 @@ class StripeObject(models.Model):
 
         manipulated_data = cls._manipulate_stripe_object_hook(data)
 
+        if "object" not in data:
+            raise ValueError("Stripe data has no `object` value. Aborting. %r" % (data))
+
+        if not cls.is_valid_object(data):
+            raise ValueError("Trying to fit a %r into %r. Aborting." % (data["object"], cls.__name__))
+
         result = dict()
         # Iterate over all the fields that we know are related to Stripe, let each field work its own magic
         for field in filter(
@@ -171,6 +177,13 @@ class StripeObject(models.Model):
             result[field.name] = field.stripe_to_db(manipulated_data)
 
         return result
+
+    @classmethod
+    def is_valid_object(cls, data):
+        """
+        Returns whether the data is a valid object for the class
+        """
+        return data["object"] == cls.stripe_class.OBJECT_NAME
 
     def _attach_objects_hook(self, cls, data):
         """
