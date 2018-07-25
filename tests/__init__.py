@@ -1256,24 +1256,29 @@ FAKE_EVENT_CUSTOMER_DELETED.update({
 })
 
 FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED = {
-    "id": "AGBWvF5zBm4sMCsLLPZrw9XX",
-    "type": "customer.discount.created",
-    "api_version": "2017-02-14",
+    "id": "evt_test_customer.discount.created",
+    "object": "event",
+    "api_version": "2018-05-21",
     "created": 1439229084,
-    "object": "discount",
-    "pending_webhooks": 0,
-    "request": "req_6l38DHch3whaDj",
     "data": {
         "object": deepcopy(FAKE_DISCOUNT_CUSTOMER),
-    }
+    },
+    "livemode": False,
+    "pending_webhooks": 1,
+    "request": {
+        "id": "req_6l38DHch3whaDj",
+        "idempotency_key": None
+    },
+    "type": "customer.discount.created"
 }
+
 
 FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED = {
     "id": "AGBWvF5zBm4sMCsLLPZrw9XX",
     "type": "customer.discount.deleted",
     "api_version": "2017-02-14",
     "created": 1439229084,
-    "object": "discount",
+    "object": "event",
     "pending_webhooks": 0,
     "request": "req_6l38DHch3whaDj",
     "data": {
@@ -1327,7 +1332,7 @@ FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED.update({
 
 FAKE_EVENT_DISPUTE_CREATED = {
     "id": "evt_16YKQi2eZvKYlo2CT2oe5ff3",
-    "object": "dispute",
+    "object": "event",
     "api_version": "2017-08-15",
     "created": 1439229084,
     "data": {
