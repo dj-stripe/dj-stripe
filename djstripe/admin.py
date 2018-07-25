@@ -158,27 +158,8 @@ class InvoiceItemInline(admin.StackedInline):
     model = models.InvoiceItem
     extra = 0
     readonly_fields = ("id", "created")
-    raw_id_fields = ("customer", "subscription")
+    raw_id_fields = ("customer", "subscription", "plan")
     show_change_link = True
-
-
-def customer_has_source(obj):
-    """Return True if the customer has a source attached to its account."""
-    return obj.customer.default_source is not None
-
-
-customer_has_source.short_description = "Customer Has Source"
-
-
-def customer_email(obj):
-    """Return a string representation of the customer's email."""
-    if obj.customer.subscriber:
-        return str(obj.customer.subscriber.email)
-    else:
-        return ""
-
-
-customer_email.short_description = "Customer"
 
 
 @admin.register(models.Account)
@@ -249,15 +230,15 @@ class FileUploadAdmin(StripeObjectAdmin):
 @admin.register(models.Invoice)
 class InvoiceAdmin(StripeObjectAdmin):
     list_display = (
-        "paid", "forgiven", "closed", customer_email, customer_has_source,
-        "period_start", "period_end", "subtotal", "total"
+        "customer", "number", "paid", "forgiven", "closed", "period_start",
+        "period_end", "subtotal", "tax", "tax_percent", "total"
     )
     list_filter = (
-        InvoiceCustomerHasSourceListFilter, "paid", "forgiven", "closed", "attempted",
-        "date", "period_end",
+        "paid", "forgiven", "closed", "attempted",
+        "date", "due_date", "period_start", "period_end",
     )
     raw_id_fields = ("customer", "charge", "subscription")
-    search_fields = ("customer__id", )
+    search_fields = ("customer__id", "number", "receipt_number")
     inlines = (InvoiceItemInline, )
 
 
