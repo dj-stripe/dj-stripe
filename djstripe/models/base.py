@@ -60,18 +60,18 @@ class StripeObject(models.Model):
         abstract = True
         get_latest_by = "created"
 
+    def _get_base_stripe_dashboard_url(self):
+        return "https://dashboard.stripe.com/{}".format(
+            "test/" if not self.livemode else ""
+        )
+
     def get_stripe_dashboard_url(self):
         """Get the stripe dashboard url for this object."""
-        base_url = "https://dashboard.stripe.com/"
-
-        if not self.livemode:
-            base_url += "test/"
-
         if not self.stripe_dashboard_item_name or not self.id:
             return ""
         else:
             return "{base_url}{item}/{id}".format(
-                base_url=base_url,
+                base_url=self._get_base_stripe_dashboard_url(),
                 item=self.stripe_dashboard_item_name,
                 id=self.id,
             )
