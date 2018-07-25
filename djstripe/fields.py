@@ -7,7 +7,7 @@
 """
 import decimal
 
-from django.core.exceptions import FieldError, ImproperlyConfigured
+from django.core.exceptions import FieldError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -50,54 +50,44 @@ class StripeFieldMixin:
     # in the data. If set to False then null=True attribute will be automatically set
     stripe_required = True
 
-    # If a field was populated in previous API versions but we don't want to drop the old
-    # data for some reason, mark it as deprecated. This will make sure we never try to send
-    # it to Stripe or expect in Stripe data received
-    # This setting automatically implies Null=True
-    deprecated = False
-
     def __init__(self, *args, **kwargs):
         """
         Assign class instance variables based on kwargs.
 
-        Assign extra class instance variables if stripe_required is defined or
-        if deprecated is defined.
+        Assign extra class instance variables if stripe_required is defined.
         """
         self.stripe_name = kwargs.pop('stripe_name', self.stripe_name)
         self.nested_name = kwargs.pop('nested_name', self.nested_name)
         self.stripe_required = kwargs.pop('stripe_required', self.stripe_required)
-        self.deprecated = kwargs.pop('deprecated', self.deprecated)
         if not self.stripe_required:
             kwargs["null"] = True
             kwargs["blank"] = True
-
-        if self.deprecated:
-            kwargs["null"] = True
-            kwargs["blank"] = True
-            kwargs["default"] = None
 
         super().__init__(*args, **kwargs)
 
     def stripe_to_db(self, data):
         """Try converting stripe fields to defined database fields."""
-        if not self.deprecated:
-            try:
-                if self.stripe_name:
-                    result = dict_nested_accessor(data, self.stripe_name)
-                elif self.nested_name:
-                    result = dict_nested_accessor(data, self.nested_name + "." + self.name)
-                else:
-                    result = data[self.name]
-            except (KeyError, TypeError):
-                if self.stripe_required:
-                    model_name = self.model._meta.object_name if hasattr(self, "model") else ""
-                    raise FieldError("Required stripe field '{field_name}' was not"
-                                     " provided in {model_name} data object.".format(field_name=self.name,
-                                                                                     model_name=model_name))
-                else:
-                    result = None
 
-            return result
+        try:
+            if self.stripe_name:
+                result = dict_nested_accessor(data, self.stripe_name)
+            elif self.nested_name:
+                result = dict_nested_accessor(data, self.nested_name + "." + self.name)
+            else:
+                result = data[self.name]
+        except (KeyError, TypeError):
+            if self.stripe_required:
+                model_name = self.model._meta.object_name if hasattr(self, "model") else ""
+                raise FieldError(
+                    "Required stripe field '{field_name}' was not provided in "
+                    "{model_name} data object.".format(
+                        field_name=self.name, model_name=model_name
+                    )
+                )
+            else:
+                result = None
+
+        return result
 
 
 class StripePercentField(StripeFieldMixin, models.DecimalField):
@@ -142,12 +132,7 @@ class StripeCurrencyField(StripeFieldMixin, models.DecimalField):
 class StripeBooleanField(StripeFieldMixin, models.BooleanField):
     """A field used to define a boolean value according to djstripe logic."""
 
-    def __init__(self, *args, **kwargs):
-        """Throw an error when a user tries to deprecate."""
-        if kwargs.get("deprecated", False):
-            raise ImproperlyConfigured("Boolean field cannot be deprecated. Change field type to "
-                                       "StripeNullBooleanField")
-        super().__init__(*args, **kwargs)
+    pass
 
 
 class StripeNullBooleanField(StripeFieldMixin, models.NullBooleanField):

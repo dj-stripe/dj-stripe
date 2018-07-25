@@ -9,21 +9,7 @@
 """
 from django.test.testcases import TestCase
 
-from djstripe.fields import StripeCurrencyField, StripeDateTimeField, StripeTextField
-
-
-class TestDeprecatedField(TestCase):
-    deprecated = StripeTextField(deprecated=True)
-
-    def test_stripe_to_db(self):
-        self.assertEqual(None, self.deprecated.stripe_to_db(data="taco"))
-
-
-class TestDeprecatedDateTimeField(TestCase):
-    deprecated = StripeDateTimeField(deprecated=True)
-
-    def test_stripe_to_db(self):
-        self.assertEqual(None, self.deprecated.stripe_to_db(data="salad"))
+from djstripe.fields import StripeCurrencyField
 
 
 class TestStripeCurrencyField(TestCase):

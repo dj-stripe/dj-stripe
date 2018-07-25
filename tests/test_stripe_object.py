@@ -5,10 +5,10 @@
 .. moduleauthor:: Bill Huneke (@wahuneke)
 
 """
-from django.core.exceptions import FieldError, ImproperlyConfigured
+from django.core.exceptions import FieldError
 from django.test import TestCase
 
-from djstripe.fields import StripeBooleanField, StripeCharField
+from djstripe.fields import StripeCharField
 from djstripe.models import StripeObject
 
 
@@ -26,11 +26,6 @@ SIMPLE_OBJ_RESULT = {
 
 
 class StripeObjectExceptionsTest(TestCase):
-    def test_deprecated_boolean(self):
-        with self.assertRaises(ImproperlyConfigured):
-            class DeprecatedBool(StripeObject):
-                bad = StripeBooleanField(deprecated=True)
-
     def test_missing_required_field(self):
         class HasRequiredField(StripeObject):
             im_not_optional = StripeCharField()
