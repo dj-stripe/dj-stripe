@@ -90,7 +90,11 @@ class StripeFieldMixin:
         return result
 
 
-class StripePercentField(StripeFieldMixin, models.DecimalField):
+class StripeDecimalField(StripeFieldMixin, models.DecimalField):
+    pass
+
+
+class StripePercentField(StripeDecimalField):
     """A field used to define a percent according to djstripe logic."""
 
     def __init__(self, *args, **kwargs):
@@ -104,7 +108,7 @@ class StripePercentField(StripeFieldMixin, models.DecimalField):
         super().__init__(*args, **defaults)
 
 
-class StripeCurrencyField(StripeFieldMixin, models.DecimalField):
+class StripeCurrencyField(StripeDecimalField):
     """
     A field used to define currency according to djstripe logic.
 
