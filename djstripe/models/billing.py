@@ -975,7 +975,6 @@ class Subscription(StripeObject):
             "to a subscription to a new plan), the date the subscription ended."
         )
     )
-    # TODO: items (SubscriptionItem)
     plan = models.ForeignKey(
         "Plan",
         on_delete=models.CASCADE,
