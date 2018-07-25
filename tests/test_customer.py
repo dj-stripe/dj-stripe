@@ -231,7 +231,9 @@ class TestCustomer(TestCase):
     def test_add_coupon_by_id(self, customer_retrieve_mock):
         self.assertEqual(self.customer.coupon, None)
         self.customer.add_coupon(FAKE_COUPON["id"])
-        customer_retrieve_mock.assert_called_once()
+        customer_retrieve_mock.assert_called_once_with(
+            api_key="", expand=["default_source"], id=FAKE_CUSTOMER["id"]
+        )
 
     @patch("stripe.Coupon.retrieve", return_value=deepcopy(FAKE_COUPON))
     @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
@@ -239,7 +241,9 @@ class TestCustomer(TestCase):
         self.assertEqual(self.customer.coupon, None)
         coupon = Coupon.sync_from_stripe_data(FAKE_COUPON)
         self.customer.add_coupon(coupon)
-        customer_retrieve_mock.assert_called_once()
+        customer_retrieve_mock.assert_called_once_with(
+            api_key="", expand=["default_source"], id=FAKE_CUSTOMER["id"]
+        )
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Charge.retrieve")
