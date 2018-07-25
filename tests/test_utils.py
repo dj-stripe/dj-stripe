@@ -1,4 +1,3 @@
-# coding: utf8
 """
 .. module:: dj-stripe.tests.test_utils
    :synopsis: dj-stripe Utilities Tests.
