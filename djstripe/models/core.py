@@ -12,8 +12,8 @@ from .. import settings as djstripe_settings
 from .. import webhooks
 from ..exceptions import MultipleSubscriptionException
 from ..fields import (
-    JSONField, PaymentMethodForeignKey, StripeDateTimeField,
-    StripeDecimalCurrencyAmountField, StripeEnumField
+    JSONField, PaymentMethodForeignKey, StripeCurrencyCodeField,
+    StripeDateTimeField, StripeDecimalCurrencyAmountField, StripeEnumField
 )
 from ..managers import ChargeManager
 from ..signals import WEBHOOK_SIGNALS
@@ -42,7 +42,7 @@ class BalanceTransaction(StripeObject):
     available_on = StripeDateTimeField(help_text=(
         "The date the transaction's net funds will become available in the Stripe balance."
     ))
-    currency = models.CharField(max_length=3, help_text="Three-letter ISO currency code.")
+    currency = StripeCurrencyCodeField()
     exchange_rate = models.DecimalField(null=True, decimal_places=6, max_digits=8)
     fee = models.IntegerField(help_text="Fee (in cents) paid for this transaction.")
     fee_details = JSONField()
@@ -85,10 +85,7 @@ class Charge(StripeObject):
         help_text="If the charge was created without capturing, this boolean represents whether or not it is still "
         "uncaptured or has since been captured.",
     )
-    currency = models.CharField(
-        max_length=3,
-        help_text="Three-letter ISO currency code representing the currency in which the charge was made.",
-    )
+    currency = StripeCurrencyCodeField(help_text="The currency in which the charge was made.")
     customer = models.ForeignKey(
         "Customer",
         on_delete=models.CASCADE,
@@ -373,11 +370,9 @@ class Customer(StripeObject):
         null=True, blank=True,
         help_text="The customer's VAT identification number.",
     )
-    currency = models.CharField(
-        max_length=3,
+    currency = StripeCurrencyCodeField(
         null=True,
-        help_text="The currency the customer can be charged in for recurring billing purposes (subscriptions, "
-        "invoices, invoice items).",
+        help_text="The currency the customer can be charged in for recurring billing purposes"
     )
     default_source = PaymentMethodForeignKey(
         on_delete=models.SET_NULL, null=True, related_name="customers"
@@ -1044,9 +1039,7 @@ class Dispute(StripeObject):
             "(usually because of currency fluctuation or because only part of the order is disputed)."
         )
     )
-    currency = models.CharField(
-        max_length=3, help_text="Three-letter ISO currency code."
-    )
+    currency = StripeCurrencyCodeField()
     evidence = JSONField(help_text="Evidence provided to respond to a dispute.")
     evidence_details = JSONField(
         help_text="Information about the evidence submission."
@@ -1213,9 +1206,7 @@ class Payout(StripeObject):
         null=True,
         help_text="Balance transaction that describes the impact on your account balance."
     )
-    currency = models.CharField(
-        max_length=3, help_text="Three-letter ISO currency code."
-    )
+    currency = StripeCurrencyCodeField()
     destination = models.ForeignKey(
         "BankAccount",
         on_delete=models.PROTECT,
@@ -1395,7 +1386,7 @@ class Refund(StripeObject):
         related_name="refunds",
         help_text="The charge that was refunded",
     )
-    currency = models.CharField(max_length=3, help_text="Three-letter ISO currency code")
+    currency = StripeCurrencyCodeField()
     failure_balance_transaction = models.ForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,

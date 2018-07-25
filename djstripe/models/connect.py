@@ -6,7 +6,8 @@ from django.db import models
 from .. import enums
 from .. import settings as djstripe_settings
 from ..fields import (
-    JSONField, StripeDecimalCurrencyAmountField, StripeEnumField, StripeIdField
+    JSONField, StripeCurrencyCodeField,
+    StripeDecimalCurrencyAmountField, StripeEnumField, StripeIdField
 )
 from ..managers import TransferManager
 from .base import StripeObject
@@ -57,9 +58,8 @@ class Account(StripeObject):
             "of charges regardless of the decision of the card issuer"
         ),
     )
-    default_currency = models.CharField(
-        max_length=3,
-        help_text=("The currency this account has chosen to use as the default"),
+    default_currency = StripeCurrencyCodeField(
+        help_text="The currency this account has chosen to use as the default"
     )
     details_submitted = models.BooleanField(
         help_text=(
@@ -182,9 +182,7 @@ class Transfer(StripeObject):
         help_text="The amount reversed (can be less than the amount attribute on the transfer if a partial "
         "reversal was issued).",
     )
-    currency = models.CharField(
-        max_length=3, help_text="Three-letter ISO currency code."
-    )
+    currency = StripeCurrencyCodeField()
     # TODO: Link destination to Card, Account, or Bank Account Models
     destination = StripeIdField(
         help_text="ID of the bank account, card, or Stripe account the transfer was sent to."

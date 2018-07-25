@@ -11,7 +11,8 @@ from stripe.error import InvalidRequestError
 from .. import enums
 from .. import settings as djstripe_settings
 from ..fields import (
-    JSONField, StripeDateTimeField, StripeDecimalCurrencyAmountField,
+    JSONField, StripeCurrencyCodeField,
+    StripeDateTimeField, StripeDecimalCurrencyAmountField,
     StripeEnumField, StripeIdField, StripePercentField
 )
 from ..managers import SubscriptionManager
@@ -27,9 +28,7 @@ class Coupon(StripeObject):
         blank=True,
         help_text="Amount that will be taken off the subtotal of any invoices for this customer.",
     )
-    currency = models.CharField(
-        null=True, blank=True, max_length=3, help_text="Three-letter ISO currency code"
-    )
+    currency = StripeCurrencyCodeField(null=True, blank=True)
     duration = StripeEnumField(
         enum=enums.CouponDuration,
         help_text=(
@@ -189,9 +188,7 @@ class Invoice(StripeObject):
         help_text="Whether or not the invoice is still trying to collect payment. An invoice is closed if it's either "
         "paid or it has been marked closed. A closed invoice will no longer attempt to collect payment.",
     )
-    currency = models.CharField(
-        max_length=3, help_text="Three-letter ISO currency code."
-    )
+    currency = StripeCurrencyCodeField()
     customer = models.ForeignKey(
         "Customer",
         on_delete=models.CASCADE,
@@ -561,9 +558,7 @@ class InvoiceItem(StripeObject):
     stripe_class = stripe.InvoiceItem
 
     amount = StripeDecimalCurrencyAmountField(help_text="Amount invoiced.")
-    currency = models.CharField(
-        max_length=3, help_text="Three-letter ISO currency code."
-    )
+    currency = StripeCurrencyCodeField()
     customer = models.ForeignKey(
         "Customer",
         on_delete=models.CASCADE,
@@ -718,7 +713,7 @@ class Plan(StripeObject):
             "as defined using the tiers and tiers_mode attributes."
         ),
     )
-    currency = models.CharField(max_length=3, help_text="Three-letter ISO currency code")
+    currency = StripeCurrencyCodeField()
     interval = StripeEnumField(
         enum=enums.PlanInterval,
         help_text=("The frequency with which a subscription should be billed."),

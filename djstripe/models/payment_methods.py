@@ -6,7 +6,10 @@ from stripe.error import InvalidRequestError
 from .. import enums
 from .. import settings as djstripe_settings
 from ..exceptions import StripeObjectManipulationException
-from ..fields import JSONField, StripeDecimalCurrencyAmountField, StripeEnumField
+from ..fields import (
+    JSONField, StripeCurrencyCodeField,
+    StripeDecimalCurrencyAmountField, StripeEnumField
+)
 from .base import StripeObject, logger
 from .core import Customer
 
@@ -92,7 +95,7 @@ class BankAccount(StripeObject):
         max_length=2,
         help_text="Two-letter ISO code representing the country the bank account is located in.",
     )
-    currency = models.CharField(max_length=3, help_text="Three-letter ISO currency code")
+    currency = StripeCurrencyCodeField()
     customer = models.ForeignKey(
         "Customer", on_delete=models.SET_NULL, null=True, related_name="bank_account"
     )
@@ -336,9 +339,7 @@ class Source(StripeObject):
             "Used for client-side retrieval using a publishable key."
         ),
     )
-    currency = models.CharField(
-        null=True, blank=True, max_length=3, help_text="Three-letter ISO currency code"
-    )
+    currency = StripeCurrencyCodeField(null=True, blank=True)
     flow = StripeEnumField(
         enum=enums.SourceFlow, help_text=("The authentication flow of the source.")
     )
