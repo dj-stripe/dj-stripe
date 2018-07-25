@@ -6,8 +6,8 @@ from django.db import models
 from .. import enums
 from .. import settings as djstripe_settings
 from ..fields import (
-    JSONField, StripeCurrencyCodeField,
-    StripeDecimalCurrencyAmountField, StripeEnumField, StripeIdField
+    JSONField, StripeCurrencyCodeField, StripeDecimalCurrencyAmountField,
+    StripeEnumField, StripeIdField, StripeQuantumCurrencyAmountField
 )
 from ..managers import TransferManager
 from .base import StripeModel
@@ -197,7 +197,6 @@ class Transfer(StripeModel):
         help_text="If the destination is a Stripe account, this will be the ID of the payment that the destination "
         "account received for the transfer.",
     )
-    # reversals = ...
     reversed = models.BooleanField(
         default=False,
         help_text="Whether or not the transfer has been fully reversed. If the transfer is only partially "
@@ -237,3 +236,24 @@ class Transfer(StripeModel):
         return [
             "amount={amount}".format(amount=self.amount),
         ] + super().str_parts()
+
+
+class TransferReversal(StripeModel):
+    """
+    Stripe documentation: https://stripe.com/docs/api#transfer_reversals
+    """
+    stripe_class = stripe.Transfer
+
+    amount = StripeQuantumCurrencyAmountField(help_text="Amount, in cents.")
+    balance_transaction = models.ForeignKey(
+        "BalanceTransaction", on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name="transfer_reversals",
+        help_text="Balance transaction that describes the impact on your account balance."
+    )
+    currency = StripeCurrencyCodeField()
+    transfer = models.ForeignKey(
+        "Transfer", on_delete=models.CASCADE,
+        help_text="The transfer that was reversed.",
+        related_name="reversals",
+    )

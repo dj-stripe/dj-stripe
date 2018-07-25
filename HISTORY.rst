@@ -17,7 +17,8 @@ History
   This includes ``date``, ``destination_type`` (``type``), ``failure_code``,
   ``failure_message``, ``statement_descriptor`` and ``status``.
 - Fixed IntegrityError when ``REMOTE_ADDR`` is missing (#640).
-- New models: ``BalanceTransaction``, ``SubscriptionItem``, ``UsageRecord``
+- New models: ``BalanceTransaction``, ``SubscriptionItem``,
+  ``TransferReversal``, ``UsageRecord``
 - The ``fee`` and ``fee_details`` attributes of both the ``Charge`` and
   ``Transfer`` objects are no longer stored in the database. Instead, they
   access their respective new ``balance_transaction`` foreign key.

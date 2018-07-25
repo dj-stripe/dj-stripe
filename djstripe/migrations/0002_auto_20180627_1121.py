@@ -222,6 +222,27 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
+            name="TransferReversal",
+            fields=[
+                ("djstripe_id", models.BigAutoField(primary_key=True, serialize=False, verbose_name="ID")),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True)),
+                ("livemode", models.NullBooleanField(default=None, help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.")),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, help_text="The datetime this object was created in stripe.", null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.", null=True)),
+                ("description", models.TextField(blank=True, help_text="A description of this object.", null=True)),
+                ("djstripe_created", models.DateTimeField(auto_now_add=True)),
+                ("djstripe_updated", models.DateTimeField(auto_now=True)),
+                ("amount", djstripe.fields.StripeQuantumCurrencyAmountField(help_text="Amount, in cents.")),
+                ("currency", djstripe.fields.StripeCurrencyCodeField(help_text="Three-letter ISO currency code", max_length=3)),
+                ("balance_transaction", models.ForeignKey(blank=True, help_text="Balance transaction that describes the impact on your account balance.", null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="transfer_reversals", to="djstripe.BalanceTransaction")),
+                ("transfer", models.ForeignKey(help_text="The transfer that was reversed.", on_delete=django.db.models.deletion.CASCADE, related_name="reversals", to="djstripe.Transfer")),
+            ],
+            options={
+                "get_latest_by": "created",
+                "abstract": False,
+            },
+        ),
+        migrations.CreateModel(
             name="UsageRecord",
             fields=[
                 ("djstripe_id", models.BigAutoField(primary_key=True, serialize=False, verbose_name="ID")),
