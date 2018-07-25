@@ -32,6 +32,8 @@ History
 - ``Customer.sources_v3`` is now named ``Customer.sources``.
 - A new property ``Customer.payment_methods`` is now available, which allows
   you to iterate over all of a customer's payment methods (sources then cards).
+- ``Card.customer`` is now nullable and cards are no longer deleted when their
+  corresponding customer is deleted (#654).
 
 1.2.1 (2018-07-18)
 ------------------

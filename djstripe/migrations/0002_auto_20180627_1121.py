@@ -24,6 +24,11 @@ class Migration(migrations.Migration):
             field=models.CharField(help_text="A publicly shareable URL that provides support for this account", max_length=200, null=True, blank=True),
         ),
         migrations.AlterField(
+            model_name="card",
+            name="customer",
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="legacy_cards", to="djstripe.Customer"),
+        ),
+        migrations.AlterField(
             model_name="charge",
             name="receipt_number",
             field=models.CharField(help_text="The transaction number that appears on email receipts sent for this charge.", max_length=14, null=True),
@@ -255,7 +260,6 @@ class Migration(migrations.Migration):
             name="failure_balance_transaction",
             field=models.ForeignKey(help_text="If the refund failed, this balance transaction describes the adjustment made on your account balance that reverses the initial balance transaction.", null=True, on_delete=django.db.models.deletion.SET_NULL, to="djstripe.BalanceTransaction"),
         ),
-
         migrations.RenameField(
             model_name="account",
             old_name="stripe_id",

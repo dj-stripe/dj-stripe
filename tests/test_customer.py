@@ -135,6 +135,7 @@ class TestCustomer(TestCase):
 
     def test_customer_sync_default_source_string(self):
         Customer.objects.all().delete()
+        Card.objects.all().delete()
         customer_fake = deepcopy(FAKE_CUSTOMER)
         customer_fake["default_source"] = customer_fake["sources"]["data"][0]["id"] = "card_sync_source_string"
         customer = Customer.sync_from_stripe_data(customer_fake)

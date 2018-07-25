@@ -1,5 +1,4 @@
 import stripe
-from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from stripe.error import InvalidRequestError
 
@@ -183,7 +182,10 @@ class Card(StripeObject):
     )
 
     customer = models.ForeignKey(
-        "Customer", on_delete=models.CASCADE, related_name="legacy_cards"
+        "Customer",
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="legacy_cards"
     )
 
     @staticmethod
@@ -226,11 +228,7 @@ class Card(StripeObject):
         )
 
     def _attach_objects_hook(self, cls, data):
-        customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
-        if customer:
-            self.customer = customer
-        else:
-            raise ValidationError("A customer was not attached to this card.")
+        self.customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
 
     def get_stripe_dashboard_url(self):
         return self.customer.get_stripe_dashboard_url()

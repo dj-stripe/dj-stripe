@@ -8,7 +8,6 @@
 from copy import deepcopy
 
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
 from django.test import TestCase
 from mock.mock import ANY, patch
 from stripe.error import InvalidRequestError
@@ -29,8 +28,8 @@ class CardTest(TestCase):
         self.customer.legacy_cards.all().delete()
 
     def test_attach_objects_hook_without_customer(self):
-        with self.assertRaisesMessage(ValidationError, "A customer was not attached to this card."):
-            Card.sync_from_stripe_data(deepcopy(FAKE_CARD_III))
+        card = Card.sync_from_stripe_data(deepcopy(FAKE_CARD_III))
+        self.assertEqual(card.customer, None)
 
     def test_create_card_finds_customer(self):
         card = Card.sync_from_stripe_data(deepcopy(FAKE_CARD))
