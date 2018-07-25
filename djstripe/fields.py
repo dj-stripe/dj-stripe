@@ -49,7 +49,7 @@ class StripePercentField(StripeDecimalField):
         defaults = {
             'decimal_places': 2,
             'max_digits': 5,
-            'validators': [MinValueValidator(1.00), MaxValueValidator(100.00)]
+            'validators': [MinValueValidator(1), MaxValueValidator(100)]
         }
         defaults.update(kwargs)
         super().__init__(*args, **defaults)
