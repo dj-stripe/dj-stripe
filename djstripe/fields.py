@@ -40,11 +40,6 @@ class StripeFieldMixin:
     # (e.g.  stripe_name = "data.id"  -->  obj["data"]["id"])
     stripe_name = None
 
-    # If stripe_name is None, this can also be used to specify a nested value, but
-    # the final value is assumed to be the database field name
-    # (e.g.    nested_name = "data"    -->  obj["data"][db_field_name]
-    nested_name = None
-
     # This indicates that this field will always appear in a stripe object. It will be
     # an Exception if we try to parse a stripe object that does not include this field
     # in the data. If set to False then null=True attribute will be automatically set
@@ -57,7 +52,6 @@ class StripeFieldMixin:
         Assign extra class instance variables if stripe_required is defined.
         """
         self.stripe_name = kwargs.pop('stripe_name', self.stripe_name)
-        self.nested_name = kwargs.pop('nested_name', self.nested_name)
         self.stripe_required = kwargs.pop('stripe_required', self.stripe_required)
         if not self.stripe_required:
             kwargs["null"] = True
@@ -71,8 +65,6 @@ class StripeFieldMixin:
         try:
             if self.stripe_name:
                 result = dict_nested_accessor(data, self.stripe_name)
-            elif self.nested_name:
-                result = dict_nested_accessor(data, self.nested_name + "." + self.name)
             else:
                 result = data[self.name]
         except (KeyError, TypeError):
