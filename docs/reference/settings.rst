@@ -95,6 +95,9 @@ Every Customer object created in Stripe is tagged with `metadata`_
 This setting controls what the name of the key in Stripe should be.
 The key name must be a string no more than 40 characters long.
 
+You may set this to ``None`` or ``""`` to disable that behaviour
+altogether. This is probably not something you want to do, though.
+
 .. _metadata: https://stripe.com/docs/api#metadata
 
 

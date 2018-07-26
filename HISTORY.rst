@@ -46,7 +46,8 @@ History
 - ``StripeObject`` has been renamed ``StripeModel``. An alias remains but will
   be removed in the next version.
 - The metadata key used in the ``Customer`` object can now be configured by
-  changing the ``DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY`` setting.
+  changing the ``DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY`` setting. Setting this to
+  None or an empty string now also disables the behaviour altogether.
 
 1.2.1 (2018-07-18)
 ------------------

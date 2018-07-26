@@ -456,11 +456,15 @@ class Customer(StripeModel):
 
     @classmethod
     def create(cls, subscriber, idempotency_key=None):
+        metadata = {}
         subscriber_key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
+        if subscriber_key not in ("", None):
+            metadata[subscriber_key] = subscriber.pk
+
         stripe_customer = cls._api_create(
             email=subscriber.email,
             idempotency_key=idempotency_key,
-            metadata={subscriber_key: subscriber.pk},
+            metadata=metadata,
         )
         customer, created = Customer.objects.get_or_create(
             id=stripe_customer["id"],
@@ -994,6 +998,10 @@ class Customer(StripeModel):
         # When we save a customer to Stripe, we add a reference to its Django PK
         # in the `django_account` key. If we find that, we re-attach that PK.
         subscriber_key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
+        if subscriber_key in ("", None):
+            # Disabled. Nothing else to do.
+            return
+
         subscriber_id = data.get("metadata", {}).get(subscriber_key)
         if subscriber_id:
             cls = djstripe_settings.get_subscriber_model()

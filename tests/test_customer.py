@@ -18,6 +18,7 @@ from django.test import TestCase
 from django.utils import timezone
 from stripe.error import InvalidRequestError
 
+from djstripe import settings as djstripe_settings
 from djstripe.exceptions import MultipleSubscriptionException
 from djstripe.models import (
     Card, Charge, Coupon, Customer, Invoice, PaymentMethod, Plan, Subscription
@@ -94,19 +95,51 @@ class TestCustomer(TestCase):
         user = get_user_model().objects.create(username="test_metadata", id=12345)
 
         fake_customer = deepcopy(FAKE_CUSTOMER)
+        fake_customer["id"] = "cus_sync_has_subscriber_metadata"
         fake_customer["metadata"] = {"djstripe_subscriber": "12345"}
         customer = Customer.sync_from_stripe_data(fake_customer)
 
         self.assertEqual(customer.subscriber, user)
         self.assertEqual(customer.metadata, {"djstripe_subscriber": "12345"})
 
+    def test_customer_sync_has_subscriber_metadata_disabled(self):
+        user = get_user_model().objects.create(username="test_metadata_disabled", id=98765)
+
+        fake_customer = deepcopy(FAKE_CUSTOMER)
+        fake_customer["id"] = "cus_test_metadata_disabled"
+        fake_customer["metadata"] = {"djstripe_subscriber": "98765"}
+        with patch("djstripe.settings.SUBSCRIBER_CUSTOMER_KEY", return_value=""):
+            customer = Customer.sync_from_stripe_data(fake_customer)
+
+        self.assertNotEqual(customer.subscriber, user)
+        self.assertNotEqual(customer.subscriber_id, 98765)
+
     def test_customer_sync_has_bad_subscriber_metadata(self):
         fake_customer = deepcopy(FAKE_CUSTOMER)
+        fake_customer["id"] = "cus_sync_has_bad_subscriber_metadata"
         fake_customer["metadata"] = {"djstripe_subscriber": "does_not_exist"}
         customer = Customer.sync_from_stripe_data(fake_customer)
 
         self.assertEqual(customer.subscriber, None)
         self.assertEqual(customer.metadata, {"djstripe_subscriber": "does_not_exist"})
+
+    @patch("stripe.Customer.create")
+    def test_customer_create_metadata_disabled(self, customer_mock):
+        user = get_user_model().objects.create_user(username="test_user_create_metadata_disabled")
+
+        fake_customer = deepcopy(FAKE_CUSTOMER)
+        fake_customer["id"] = "cus_test_create_metadata_disabled"
+        customer_mock.return_value = fake_customer
+
+        djstripe_settings.SUBSCRIBER_CUSTOMER_KEY = ""
+        customer = Customer.create(user)
+        djstripe_settings.SUBSCRIBER_CUSTOMER_KEY = "djstripe_subscriber"
+
+        customer_mock.assert_called_once_with(
+            api_key="", email="", idempotency_key=None, metadata={}
+        )
+
+        self.assertEqual(customer.metadata, None)
 
     @patch("stripe.Card.retrieve", return_value=FAKE_CUSTOMER_II["default_source"])
     def test_customer_sync_non_local_card(self, card_retrieve_mock):
@@ -120,14 +153,20 @@ class TestCustomer(TestCase):
         self.assertEqual(customer.legacy_cards.count(), 1)
         self.assertEqual(customer.default_source.id, fake_customer["default_source"]["id"])
 
-    def test_customer_sync_no_sources(self):
+    @patch("stripe.Customer.create")
+    def test_customer_sync_no_sources(self, customer_mock):
         fake_customer = deepcopy(FAKE_CUSTOMER)
         fake_customer["id"] = "cus_test_sync_no_sources"
         fake_customer["default_source"] = None
         fake_customer["sources"] = None
+        customer_mock.return_value = fake_customer
 
         user = get_user_model().objects.create_user(username="test_user_sync_non_local_card")
-        customer = fake_customer.create_for_user(user)
+        customer = Customer.create(user)
+        self.assertEqual(
+            customer_mock.call_args_list[0][1].get("metadata"),
+            {"djstripe_subscriber": user.pk}
+        )
 
         self.assertEqual(customer.sources.count(), 0)
         self.assertEqual(customer.legacy_cards.count(), 0)
