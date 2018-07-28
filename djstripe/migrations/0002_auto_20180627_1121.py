@@ -20,6 +20,21 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name="account",
+            name="display_name",
+            field=models.CharField(blank=True, default="", help_text="The display name for this account. This is used on the Stripe Dashboard to differentiate between accounts.", max_length=255),
+        ),
+        migrations.AlterField(
+            model_name="account",
+            name="support_email",
+            field=models.CharField(blank=True, default="", help_text="A publicly shareable support email address for the business", max_length=255),
+        ),
+        migrations.AlterField(
+            model_name="account",
+            name="support_phone",
+            field=models.CharField(blank=True, default="", help_text="A publicly shareable support phone number for the business", max_length=255),
+        ),
+        migrations.AlterField(
+            model_name="account",
             name="support_url",
             field=models.CharField(help_text="A publicly shareable URL that provides support for this account", max_length=200, null=True, blank=True),
         ),

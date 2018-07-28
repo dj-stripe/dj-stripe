@@ -69,6 +69,7 @@ class Account(StripeModel):
     )
     display_name = models.CharField(
         max_length=255,
+        default="", blank=True,
         help_text=(
             "The display name for this account. "
             "This is used on the Stripe Dashboard to differentiate between accounts."
@@ -116,11 +117,13 @@ class Account(StripeModel):
     )
     support_email = models.CharField(
         max_length=255,
-        help_text=("A publicly shareable support email address for the business"),
+        default="", blank=True,
+        help_text="A publicly shareable support email address for the business",
     )
     support_phone = models.CharField(
         max_length=255,
-        help_text=("A publicly shareable support phone number for the business"),
+        default="", blank=True,
+        help_text="A publicly shareable support phone number for the business",
     )
     support_url = models.CharField(
         max_length=200,
