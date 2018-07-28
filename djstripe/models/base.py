@@ -176,10 +176,16 @@ class StripeModel(models.Model):
                 # TODO (#681): Handle foreign keys automatically
                 # For now they're handled in hooks.
                 continue
+
             if hasattr(field, "stripe_to_db"):
-                result[field.name] = field.stripe_to_db(manipulated_data)
+                field_data = field.stripe_to_db(manipulated_data)
             else:
-                result[field.name] = manipulated_data.get(field.name)
+                field_data = manipulated_data.get(field.name)
+
+            if isinstance(field, (models.CharField, models.TextField)) and field_data is None:
+                field_data = ""
+
+            result[field.name] = field_data
 
         return result
 
