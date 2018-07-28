@@ -276,7 +276,10 @@ class StripeObject(models.Model):
         result = dict()
         # Iterate over all the fields that we know are related to Stripe, let each field work its own magic
         for field in filter(lambda x: isinstance(x, StripeFieldMixin), cls._meta.fields):
-            result[field.name] = field.stripe_to_db(manipulated_data)
+            field_data = field.stripe_to_db(manipulated_data)
+            if isinstance(field, CharField) and field_data is None:
+                field_data = ""
+            result[field.name] = field_data
 
         return result
 

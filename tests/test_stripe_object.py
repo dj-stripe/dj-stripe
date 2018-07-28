@@ -46,7 +46,7 @@ class StripeObjectExceptionsTest(TestCase):
 
         # Should be no exception here
         obj = HasNotRequiredField._stripe_object_to_record(SIMPLE_OBJ)
-        self.assertEqual(obj['im_not_optional'], None)
+        self.assertEqual(obj['im_not_optional'], "")
 
 
 class StripeObjectBasicTest(TestCase):
