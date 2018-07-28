@@ -120,12 +120,13 @@ class CardCheckResult(Enum):
 
 
 class CardBrand(Enum):
-    Visa = _("Visa")
     AmericanExpress = (_("American Express"), "American Express")
-    MasterCard = _("MasterCard")
+    DinersClub = (_("Diners Club"), "Diners Club")
     Discover = _("Discover")
     JCB = _("JCB")
-    DinersClub = (_("Diners Club"), "Diners Club")
+    MasterCard = _("MasterCard")
+    UnionPay = _("UnionPay")
+    Visa = _("Visa")
     Unknown = _("Unknown")
 
 
