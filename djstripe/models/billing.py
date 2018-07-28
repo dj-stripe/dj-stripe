@@ -47,7 +47,7 @@ class Coupon(StripeModel):
     )
     name = models.CharField(
         max_length=5000,
-        null=True, blank=True,
+        default="", blank=True,
         help_text=(
             "Name of the coupon displayed to customers on for instance invoices or receipts."
         ),
@@ -217,7 +217,7 @@ class Invoice(StripeModel):
     )
     hosted_invoice_url = models.CharField(
         max_length=799,
-        null=True, blank=True,
+        default="", blank=True,
         help_text=(
             "The URL for the hosted invoice page, which allows customers to view and pay an invoice. "
             "If the invoice has not been frozen yet, this will be null."
@@ -225,7 +225,7 @@ class Invoice(StripeModel):
     )
     invoice_pdf = models.CharField(
         max_length=799,
-        null=True, blank=True,
+        default="", blank=True,
         help_text=(
             "The link to download the PDF for the invoice. "
             "If the invoice has not been frozen yet, this will be null."
@@ -236,7 +236,7 @@ class Invoice(StripeModel):
     )
     number = models.CharField(
         max_length=64,
-        null=True,
+        default="", blank=True,
         help_text=(
             "A unique, identifying string that appears on emails sent to the customer for this invoice. "
             "This starts with the customer’s unique invoice_prefix if it is specified."
@@ -264,7 +264,7 @@ class Invoice(StripeModel):
     )
     statement_descriptor = models.CharField(
         max_length=22,
-        null=True,
+        default="", blank=True,
         help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement "
         "description may not include <>\"' characters, and will appear on your customer's statement in capital "
         "letters. Non-ASCII characters are automatically stripped. While most banks display this information "
@@ -285,7 +285,7 @@ class Invoice(StripeModel):
         help_text="Only set for upcoming invoices that preview prorations. The time used to calculate prorations."
     )
     tax = StripeDecimalCurrencyAmountField(
-        null=True,
+        null=True, blank=True,
         help_text="The amount of tax included in the total, calculated from ``tax_percent`` and the subtotal. If no "
         "``tax_percent`` is defined, this value will be null.",
     )
@@ -688,7 +688,7 @@ class Plan(StripeModel):
     )
     aggregate_usage = StripeEnumField(
         enum=enums.PlanAggregateUsage,
-        null=True, blank=True,
+        default="", blank=True,
         help_text=(
             "Specifies a usage aggregation strategy for plans of usage_type=metered. "
             "Allowed values are `sum` for summing up all usage during a period, "
@@ -703,7 +703,7 @@ class Plan(StripeModel):
     )
     billing_scheme = StripeEnumField(
         enum=enums.PlanBillingScheme,
-        null=True, blank=True,
+        default="", blank=True,
         help_text=(
             "Describes how to compute the price per period. Either `per_unit` or `tiered`. "
             "`per_unit` indicates that the fixed amount (specified in amount) will be charged "
@@ -716,7 +716,7 @@ class Plan(StripeModel):
     currency = StripeCurrencyCodeField()
     interval = StripeEnumField(
         enum=enums.PlanInterval,
-        help_text=("The frequency with which a subscription should be billed."),
+        help_text="The frequency with which a subscription should be billed.",
     )
     interval_count = models.IntegerField(
         null=True,
@@ -726,7 +726,7 @@ class Plan(StripeModel):
     )
     nickname = models.CharField(
         max_length=5000,
-        null=True, blank=True,
+        default="", blank=True,
         help_text="A brief description of the plan, hidden from customers.",
     )
     product = models.ForeignKey(

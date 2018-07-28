@@ -116,11 +116,11 @@ class Charge(StripeModel):
     )
     failure_code = StripeEnumField(
         enum=enums.ApiErrorCode,
-        null=True,
+        default="", blank=True,
         help_text="Error code explaining reason for charge failure if available.",
     )
-    failure_message = models.TextField(
-        null=True,
+    failure_message = models.CharField(
+        max_length=5000, default="", blank=True,
         help_text="Message to user further explaining reason for charge failure if available.",
     )
     fraud_details = JSONField(
@@ -142,13 +142,13 @@ class Charge(StripeModel):
         help_text="True if the charge succeeded, or was successfully authorized for later capture, False otherwise.",
     )
     receipt_email = models.CharField(
-        null=True,
         max_length=800,  # yup, 800.
+        default="", blank=True,
         help_text="The email address that the receipt for this charge was sent to.",
     )
     receipt_number = models.CharField(
-        null=True,
         max_length=14,
+        default="", blank=True,
         help_text="The transaction number that appears on email receipts sent for this charge.",
     )
     refunded = models.BooleanField(
@@ -169,7 +169,7 @@ class Charge(StripeModel):
     # TODO: source_transfer
     statement_descriptor = models.CharField(
         max_length=22,
-        null=True,
+        default="", blank=True,
         help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement "
         "description may not include <>\"' characters, and will appear on your customer's statement in capital "
         "letters. Non-ASCII characters are automatically stripped. While most banks display this information "
@@ -187,7 +187,7 @@ class Charge(StripeModel):
     )
     transfer_group = models.CharField(
         max_length=255,
-        null=True, blank=True,
+        default="", blank=True,
         help_text="A string that identifies this transaction as part of a group.",
     )
 
@@ -372,11 +372,11 @@ class Customer(StripeModel):
     )
     business_vat_id = models.CharField(
         max_length=20,
-        null=True, blank=True,
+        default="", blank=True,
         help_text="The customer's VAT identification number.",
     )
     currency = StripeCurrencyCodeField(
-        null=True,
+        default="",
         help_text="The currency the customer can be charged in for recurring billing purposes"
     )
     default_source = PaymentMethodForeignKey(
@@ -398,7 +398,7 @@ class Customer(StripeModel):
         help_text="If a coupon is present and has a limited duration, the date that the discount will end.",
     )
     # </discount>
-    email = models.TextField(null=True)
+    email = models.CharField(max_length=5000, db_index=True, default="", blank=True)
     shipping = JSONField(
         null=True, blank=True,
         help_text="Shipping information associated with the customer.",
@@ -1099,9 +1099,9 @@ class Event(StripeModel):
         help_text="Information about the request that triggered this event, for traceability purposes. If empty "
         "string then this is an old entry without that data. If Null then this is not an old entry, but a Stripe "
         "'automated' event with no associated request.",
-        null=True, blank=True,
+        default="", blank=True,
     )
-    idempotency_key = models.TextField(null=True, blank=True)
+    idempotency_key = models.TextField(default="", blank=True)
     type = models.CharField(max_length=250, help_text="Stripe's event description code")
 
     def str_parts(self):
@@ -1118,11 +1118,11 @@ class Event(StripeModel):
         request_obj = data.get("request", None)
         if isinstance(request_obj, dict):
             # Format as of 2017-05-25
-            self.request_id = request_obj.get("request")
-            self.idempotency_key = request_obj.get("idempotency_key")
+            self.request_id = request_obj.get("request") or ""
+            self.idempotency_key = request_obj.get("idempotency_key") or ""
         else:
             # Format before 2017-05-25
-            self.request_id = request_obj
+            self.request_id = request_obj or ""
 
     @classmethod
     def process(cls, data):
@@ -1241,14 +1241,12 @@ class Payout(StripeModel):
     )
     failure_code = StripeEnumField(
         enum=enums.PayoutFailureCode,
-        blank=True,
-        null=True,
+        default="", blank=True,
         help_text="Error code explaining reason for transfer failure if available. "
         "See https://stripe.com/docs/api/python#transfer_failures.",
     )
     failure_message = models.TextField(
-        null=True,
-        blank=True,
+        default="", blank=True,
         help_text="Message to user further explaining reason for payout failure if available.",
     )
     method = StripeEnumField(
@@ -1262,8 +1260,7 @@ class Payout(StripeModel):
     # TODO: source_type
     statement_descriptor = models.CharField(
         max_length=255,
-        null=True,
-        blank=True,
+        default="", blank=True,
         help_text="Extra information about a payout to be displayed on the user's bank statement.",
     )
     status = StripeEnumField(
@@ -1320,7 +1317,7 @@ class Product(StripeModel):
         ),
     )
     caption = models.CharField(
-        null=True,
+        default="", blank=True,
         max_length=5000,
         help_text=(
             "A short one-line description of the product, meant to be displayable"
@@ -1368,7 +1365,7 @@ class Product(StripeModel):
     # Fields available to `service` only
     statement_descriptor = models.CharField(
         max_length=22,
-        null=True,
+        default="", blank=True,
         help_text=(
             "Extra information about a product which will appear on your customer's "
             "credit card statement. In the case that multiple products are billed at "
@@ -1376,7 +1373,7 @@ class Product(StripeModel):
             "Only available on products of type=`service`."
         ),
     )
-    unit_label = models.CharField(max_length=12, null=True)
+    unit_label = models.CharField(max_length=12, default="", blank=True)
 
     def __str__(self):
         return self.name
@@ -1414,15 +1411,15 @@ class Refund(StripeModel):
     )
     failure_reason = StripeEnumField(
         enum=enums.RefundFailureReason,
-        null=True, blank=True,
+        default="", blank=True,
         help_text="If the refund failed, the reason for refund failure if known.",
     )
     reason = StripeEnumField(
-        enum=enums.RefundReason, null=True, help_text="Reason for the refund."
+        enum=enums.RefundReason, blank=True, default="", help_text="Reason for the refund."
     )
     receipt_number = models.CharField(
         max_length=9,
-        null=True,
+        default="", blank=True,
         help_text=(
             "The transaction number that appears on email receipts sent for this charge."
         ),

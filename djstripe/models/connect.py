@@ -24,19 +24,19 @@ class Account(StripeModel):
     )
     business_name = models.CharField(
         max_length=255,
-        null=True, blank=True,
-        help_text=("The publicly visible name of the business"),
+        default="", blank=True,
+        help_text="The publicly visible name of the business",
     )
     business_primary_color = models.CharField(
         max_length=7,
-        null=True, blank=True,
+        default="", blank=True,
         help_text=(
             "A CSS hex color value representing the primary branding color for this account"
         ),
     )
     business_url = models.CharField(
         max_length=200,
-        null=True,
+        default="", blank=True,
         help_text=("The publicly visible website of the business"),
     )
     charges_enabled = models.BooleanField(
@@ -93,8 +93,7 @@ class Account(StripeModel):
     )
     payout_statement_descriptor = models.CharField(
         max_length=255,
-        default="",
-        null=True, blank=True,
+        default="", blank=True,
         help_text="The text that appears on the bank account statement for payouts.",
     )
     payouts_enabled = models.BooleanField(
@@ -102,7 +101,7 @@ class Account(StripeModel):
     )
     product_description = models.CharField(
         max_length=255,
-        null=True, blank=True,
+        default="", blank=True,
         help_text=(
             "Internal-only description of the product sold or service provided by the business. "
             "It’s used by Stripe for risk and underwriting purposes."
@@ -110,7 +109,7 @@ class Account(StripeModel):
     )
     statement_descriptor = models.CharField(
         max_length=255,
-        default="",
+        default="", blank=True,
         help_text=(
             "The default text that appears on credit card statements when a charge is made directly on the account"
         ),
@@ -127,17 +126,17 @@ class Account(StripeModel):
     )
     support_url = models.CharField(
         max_length=200,
-        null=True, blank=True,
-        help_text=("A publicly shareable URL that provides support for this account"),
+        default="", blank=True,
+        help_text="A publicly shareable URL that provides support for this account",
     )
     timezone = models.CharField(
         max_length=50,
-        help_text=("The timezone used in the Stripe Dashboard for this account."),
+        help_text="The timezone used in the Stripe Dashboard for this account.",
     )
     type = StripeEnumField(enum=enums.AccountType, help_text="The Stripe account type.")
     tos_acceptance = JSONField(
         null=True, blank=True,
-        help_text=("Details on the acceptance of the Stripe Services Agreement"),
+        help_text="Details on the acceptance of the Stripe Services Agreement",
     )
     verification = JSONField(
         null=True, blank=True,
@@ -310,7 +309,7 @@ class Transfer(StripeModel):
     )
     transfer_group = models.CharField(
         max_length=255,
-        null=True, blank=True,
+        default="", blank=True,
         help_text="A string that identifies this transaction as part of a group.",
     )
 

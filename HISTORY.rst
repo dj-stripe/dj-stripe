@@ -48,6 +48,8 @@ History
 - The metadata key used in the ``Customer`` object can now be configured by
   changing the ``DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY`` setting. Setting this to
   None or an empty string now also disables the behaviour altogether.
+- Text-type fields in dj-stripe will no longer ever be None. Instead, any falsy
+  text field will return an empty string.
 
 1.2.1 (2018-07-18)
 ------------------

@@ -79,7 +79,7 @@ class BankAccount(StripeModel):
     )
     account_holder_name = models.CharField(
         max_length=5000,
-        null=True,
+        default="", blank=True,
         help_text="The name of the person or business that owns the bank account.",
     )
     account_holder_type = StripeEnumField(
@@ -132,60 +132,84 @@ class Card(StripeModel):
 
     stripe_class = stripe.Card
 
-    address_city = models.TextField(null=True, help_text="Billing address city.")
-    address_country = models.TextField(null=True, help_text="Billing address country.")
-    address_line1 = models.TextField(null=True, help_text="Billing address (Line 1).")
+    address_city = models.TextField(
+        max_length=5000,
+        blank=True, default="",
+        help_text="City/District/Suburb/Town/Village."
+    )
+    address_country = models.CharField(
+        max_length=5000,
+        blank=True, default="",
+        help_text="Billing address country."
+    )
+    address_line1 = models.CharField(
+        max_length=5000,
+        blank=True, default="",
+        help_text="Street address/PO Box/Company name."
+    )
     address_line1_check = StripeEnumField(
         enum=enums.CardCheckResult,
-        null=True,
-        help_text=("If `address_line1` was provided, results of the check."),
+        blank=True, default="",
+        help_text="If `address_line1` was provided, results of the check.",
     )
-    address_line2 = models.TextField(null=True, help_text="Billing address (Line 2).")
-    address_state = models.TextField(null=True, help_text="Billing address state.")
-    address_zip = models.TextField(null=True, help_text="Billing address zip code.")
+    address_line2 = models.CharField(
+        max_length=5000,
+        blank=True, default="",
+        help_text="Apartment/Suite/Unit/Building."
+    )
+    address_state = models.CharField(
+        max_length=5000,
+        blank=True, default="",
+        help_text="State/County/Province/Region."
+    )
+    address_zip = models.CharField(
+        max_length=5000,
+        blank=True, default="",
+        help_text="ZIP or postal code."
+    )
     address_zip_check = StripeEnumField(
         enum=enums.CardCheckResult,
-        null=True,
-        help_text=("If `address_zip` was provided, results of the check."),
+        blank=True, default="",
+        help_text="If `address_zip` was provided, results of the check.",
     )
     brand = StripeEnumField(enum=enums.CardBrand, help_text="Card brand.")
     country = models.CharField(
-        null=True,
         max_length=2,
+        default="", blank=True,
         help_text="Two-letter ISO code representing the country of the card.",
+    )
+    customer = models.ForeignKey(
+        "Customer",
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="legacy_cards"
     )
     cvc_check = StripeEnumField(
         enum=enums.CardCheckResult,
-        null=True,
-        help_text=("If a CVC was provided, results of the check."),
+        default="", blank=True,
+        help_text="If a CVC was provided, results of the check.",
     )
     dynamic_last4 = models.CharField(
-        null=True,
         max_length=4,
+        default="", blank=True,
         help_text="(For tokenized numbers only.) The last four digits of the device account number.",
     )
     exp_month = models.IntegerField(help_text="Card expiration month.")
     exp_year = models.IntegerField(help_text="Card expiration year.")
-    fingerprint = models.TextField(
-        null=True, blank=True,
+    fingerprint = models.CharField(
+        default="", blank=True,
+        max_length=16,
         help_text="Uniquely identifies this particular card number.",
     )
     funding = StripeEnumField(
         enum=enums.CardFundingType, help_text="Card funding type."
     )
     last4 = models.CharField(max_length=4, help_text="Last four digits of Card number.")
-    name = models.TextField(null=True, help_text="Cardholder name.")
+    name = models.CharField(max_length=5000, default="", blank=True, help_text="Cardholder name.")
     tokenization_method = StripeEnumField(
         enum=enums.CardTokenizationMethod,
-        null=True,
+        default="", blank=True,
         help_text="If the card number is tokenized, this is the method that was used.",
-    )
-
-    customer = models.ForeignKey(
-        "Customer",
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="legacy_cards"
     )
 
     @staticmethod
@@ -337,9 +361,9 @@ class Source(StripeModel):
             "Used for client-side retrieval using a publishable key."
         ),
     )
-    currency = StripeCurrencyCodeField(null=True, blank=True)
+    currency = StripeCurrencyCodeField(default="", blank=True)
     flow = StripeEnumField(
-        enum=enums.SourceFlow, help_text=("The authentication flow of the source.")
+        enum=enums.SourceFlow, help_text="The authentication flow of the source."
     )
     owner = JSONField(
         help_text=(
@@ -348,9 +372,8 @@ class Source(StripeModel):
         )
     )
     statement_descriptor = models.CharField(
-        null=True,
-        blank=True,
         max_length=255,
+        default="", blank=True,
         help_text=(
             "Extra information about a source. "
             "This will appear on your customer's statement every time you charge the source."
