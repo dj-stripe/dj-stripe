@@ -11,6 +11,7 @@ from .core import (
     BalanceTransaction, Charge, Customer, Dispute, Event, FileUpload, Payout, Refund
 )
 from .payment_methods import BankAccount, Card, PaymentMethod, Source
+from .sigma import ScheduledQueryRun
 from .webhooks import WebhookEventTrigger
 
 
@@ -36,6 +37,7 @@ __all__ = [
     "Plan",
     "Product",
     "Refund",
+    "ScheduledQueryRun",
     "Source",
     "StripeObject",
     "StripeModel",

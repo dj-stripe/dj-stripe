@@ -273,6 +273,12 @@ class ProductType(Enum):
     service = _("Service")
 
 
+class ScheduledQueryRunStatus(Enum):
+    canceled = _("Canceled")
+    failed = _("Failed")
+    timed_out = _("Timed out")
+
+
 class SourceFlow(Enum):
     redirect = _("Redirect")
     receiver = _("Receiver")

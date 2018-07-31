@@ -6,6 +6,7 @@ History
 1.3.0 (unreleased)
 ------------------
 
+- The Python stripe library minimum version is now ``2.3.0``.
 - Dropped previously-deprecated ``Charge.receipt_number`` field.
 - Dropped previously-deprecated ``SubscriptionView``,
   ``CancelSubscriptionView`` and ``CancelSubscriptionForm``.
@@ -22,6 +23,7 @@ History
   - ``ApplicationFeeRefund``
   - ``BalanceTransaction``
   - ``CountrySpec``
+  - ``ScheduledQuery``
   - ``SubscriptionItem``
   - ``TransferReversal``
   - ``UsageRecord``

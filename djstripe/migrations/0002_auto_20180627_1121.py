@@ -234,6 +234,30 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
+            name="ScheduledQueryRun",
+            fields=[
+                ("djstripe_id", models.BigAutoField(primary_key=True, serialize=False, verbose_name="ID")),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True)),
+                ("livemode", models.NullBooleanField(default=None, help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.")),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, help_text="The datetime this object was created in stripe.", null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.", null=True)),
+                ("description", models.TextField(blank=True, help_text="A description of this object.", null=True)),
+                ("djstripe_created", models.DateTimeField(auto_now_add=True)),
+                ("djstripe_updated", models.DateTimeField(auto_now=True)),
+                ("data_load_time", djstripe.fields.StripeDateTimeField(help_text="When the query was run, Sigma contained a snapshot of your Stripe data at this time.")),
+                ("error", djstripe.fields.JSONField(blank=True, help_text="If the query run was not succeesful, contains information about the failure.", null=True)),
+                ("result_available_until", djstripe.fields.StripeDateTimeField(help_text="Time at which the result expires and is no longer available for download.")),
+                ("sql", models.CharField(help_text="SQL for the query.", max_length=5000)),
+                ("status", djstripe.fields.StripeEnumField(enum=djstripe.enums.ScheduledQueryRunStatus, help_text="The query's execution status.", max_length=9)),
+                ("title", models.CharField(help_text="Title of the query.", max_length=5000)),
+                ("file", models.ForeignKey(blank=True, help_text="The file object representing the results of the query.", null=True, on_delete=django.db.models.deletion.SET_NULL, to="djstripe.FileUpload")),
+            ],
+            options={
+                "get_latest_by": "created",
+                "abstract": False,
+            },
+        ),
+        migrations.CreateModel(
             name="SubscriptionItem",
             fields=[
                 ("djstripe_id", models.BigAutoField(primary_key=True, serialize=False, verbose_name="ID")),
