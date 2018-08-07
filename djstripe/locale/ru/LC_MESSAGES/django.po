@@ -1,0 +1,716 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.3.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-07-25 19:26+0300\n"
+"Last-Translator: Kirill Shilimanov <mawile@hackerdom.ru>\n"
+"Language-Team: Russian <mawile@hackerdom.ru>\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: enums.py:58
+msgid "Invalid number"
+msgstr "Неверный номер"
+
+#: enums.py:59
+msgid "Invalid expiration month"
+msgstr "Неверный месяц истечения"
+
+#: enums.py:60
+msgid "Invalid expiration year"
+msgstr "Неверный год истечения"
+
+#: enums.py:61
+msgid "Invalid security code"
+msgstr "Недействительный код безопасности"
+
+#: enums.py:62
+msgid "Invalid swipe data"
+msgstr "Ошибка чтения магнитной ленты"
+
+#: enums.py:63
+msgid "Incorrect number"
+msgstr "Неверный номер"
+
+#: enums.py:64
+msgid "Expired card"
+msgstr "Срок действия карты истек"
+
+#: enums.py:65
+msgid "Incorrect security code"
+msgstr "Неверный код безопасности"
+
+#: enums.py:66
+msgid "ZIP code failed validation"
+msgstr "Ошибка проверки почтового индекса"
+
+#: enums.py:67
+msgid "Card was declined"
+msgstr "Карта отклонена"
+
+#: enums.py:68
+msgid "No card being charged"
+msgstr "Деньги с карты не сняты"
+
+#: enums.py:69 enums.py:349
+msgid "Processing error"
+msgstr "Ошибка обработки"
+
+#: enums.py:73 enums.py:224
+msgid "Standard"
+msgstr "Standard"
+
+#: enums.py:74
+msgid "Express"
+msgstr "Express"
+
+#: enums.py:75
+msgid "Custom"
+msgstr "На заказ"
+
+#: enums.py:79
+msgid "Available"
+msgstr "Доступно"
+
+#: enums.py:80 enums.py:146 enums.py:230 enums.py:287 enums.py:329 enums.py:341
+#: enums.py:353
+msgid "Pending"
+msgstr "в ожидании"
+
+#: enums.py:84
+msgid "Adjustment"
+msgstr "Корректировка"
+
+#: enums.py:85
+msgid "Application fee"
+msgstr "Абонентская плата"
+
+#: enums.py:86
+msgid "Application fee refund"
+msgstr "Возврат абонентской платы"
+
+#: enums.py:87
+msgid "Charge"
+msgstr "Расход"
+
+#: enums.py:88
+msgid "Network cost"
+msgstr "Сетевая стоимость"
+
+#: enums.py:89
+msgid "Payment"
+msgstr "Платеж"
+
+#: enums.py:90
+msgid "Payment failure refund"
+msgstr "Возврат неудачного платежа"
+
+#: enums.py:91
+msgid "Payment refund"
+msgstr "Возврат платежа"
+
+#: enums.py:92
+msgid "Payout"
+msgstr "Выплата"
+
+#: enums.py:93
+msgid "Payout cancellation"
+msgstr "Отмена выплаты"
+
+#: enums.py:94
+msgid "Payout failure"
+msgstr "Сбой выплаты"
+
+#: enums.py:95
+msgid "Refund"
+msgstr "Возврат"
+
+#: enums.py:96
+msgid "Stripe fee"
+msgstr "Взнос в Stripe"
+
+#: enums.py:97
+msgid "Transfer"
+msgstr "Перевод"
+
+#: enums.py:98
+msgid "Transfer refund"
+msgstr "Возврат перевода"
+
+#: enums.py:99
+msgid "Validation"
+msgstr "Проверка"
+
+#: enums.py:103
+msgid "Individual"
+msgstr "Частное лицо"
+
+#: enums.py:104
+msgid "Company"
+msgstr "Компания"
+
+#: enums.py:108
+msgid "New"
+msgstr "Новый"
+
+#: enums.py:109
+msgid "Validated"
+msgstr "Подтвержденный"
+
+#: enums.py:110
+msgid "Verified"
+msgstr "Проверенный"
+
+#: enums.py:111
+msgid "Verification failed"
+msgstr "Проверка не удалась"
+
+#: enums.py:112
+msgid "Errored"
+msgstr "Ошибочный"
+
+#: enums.py:116
+msgid "Pass"
+msgstr "Успех"
+
+#: enums.py:117
+msgid "Fail"
+msgstr "Отказ"
+
+#: enums.py:118
+msgid "Unavailable"
+msgstr "Недоступен"
+
+#: enums.py:119
+msgid "Unchecked"
+msgstr "Не проверен"
+
+#: enums.py:123
+msgid "Visa"
+msgstr "Visa"
+
+#: enums.py:124
+msgid "American Express"
+msgstr "American Express"
+
+#: enums.py:125
+msgid "MasterCard"
+msgstr "MasterCard"
+
+#: enums.py:126
+msgid "Discover"
+msgstr "Discover"
+
+#: enums.py:127
+msgid "JCB"
+msgstr "JCB"
+
+#: enums.py:128
+msgid "Diners Club"
+msgstr "Diners Club"
+
+#: enums.py:129 enums.py:136 enums.py:319
+msgid "Unknown"
+msgstr "Неизвестная"
+
+#: enums.py:133
+msgid "Credit"
+msgstr "Кредитная"
+
+#: enums.py:134
+msgid "Debit"
+msgstr "Дебитовая"
+
+#: enums.py:135
+msgid "Prepaid"
+msgstr "Предоплаченная"
+
+#: enums.py:140
+msgid "Apple Pay"
+msgstr "Apple Pay"
+
+#: enums.py:141
+msgid "Android Pay"
+msgstr "Android Pay"
+
+#: enums.py:145 enums.py:330 enums.py:342 enums.py:354
+msgid "Succeeded"
+msgstr "Успешно"
+
+#: enums.py:147 enums.py:233 enums.py:286 enums.py:331 enums.py:343
+#: enums.py:356
+msgid "Failed"
+msgstr "Не удалось"
+
+#: enums.py:151
+msgid "Once"
+msgstr "Единоразовый"
+
+#: enums.py:152
+msgid "Multi-month"
+msgstr "Многомесячный"
+
+#: enums.py:153
+msgid "Forever"
+msgstr "Постоянный"
+
+#: enums.py:157
+msgid "Duplicate"
+msgstr "Повторный"
+
+#: enums.py:158 enums.py:324
+msgid "Fraudulent"
+msgstr "Мошеннический"
+
+#: enums.py:159
+msgid "Subscription canceled"
+msgstr "Подписка отменена"
+
+#: enums.py:160
+msgid "Product unacceptable"
+msgstr "Продукт неприемлем"
+
+#: enums.py:161
+msgid "Product not received"
+msgstr "Продукт не получен"
+
+#: enums.py:162
+msgid "Unrecognized"
+msgstr "Не распознано"
+
+#: enums.py:163
+msgid "Credit not processed"
+msgstr "Кредит не обработан"
+
+#: enums.py:164
+msgid "General"
+msgstr "Основной"
+
+#: enums.py:165
+msgid "Incorrect account details"
+msgstr "Неверные данные счета"
+
+#: enums.py:166
+msgid "Insufficient funds"
+msgstr "Недостаточно средств"
+
+#: enums.py:167
+msgid "Bank cannot process"
+msgstr "Банк не может обработать"
+
+#: enums.py:168
+msgid "Debit not authorized"
+msgstr "Дебит не разрешен"
+
+#: enums.py:169
+msgid "Customer-initiated"
+msgstr "По инициативе заказчика"
+
+#: enums.py:173
+msgid "Warning needs response"
+msgstr "Предупреждение требует ответа"
+
+#: enums.py:174
+msgid "Warning under review"
+msgstr "Предупреждение в рассмотрении"
+
+#: enums.py:175
+msgid "Warning closed"
+msgstr "Предупреждение закрыто"
+
+#: enums.py:176
+msgid "Needs response"
+msgstr "Требуется ответ"
+
+#: enums.py:177
+msgid "Under review"
+msgstr "В рассмотрении"
+
+#: enums.py:178
+msgid "Charge refunded"
+msgstr "Платеж возвращен"
+
+#: enums.py:179
+msgid "Won"
+msgstr "Выиграл"
+
+#: enums.py:180
+msgid "Lost"
+msgstr "Проиграл"
+
+#: enums.py:184
+msgid "Dispute evidence"
+msgstr "Доказательства по спору"
+
+#: enums.py:185
+msgid "Identity document"
+msgstr "Удостоверение личности"
+
+#: enums.py:186
+msgid "Загрузка налогового документа пользователя"
+msgstr "Document de taxes de l'utilisateur"
+
+#: enums.py:190
+msgid "PDF"
+msgstr "PDF"
+
+#: enums.py:191
+msgid "JPG"
+msgstr "JPG"
+
+#: enums.py:192
+msgid "PNG"
+msgstr "PNG"
+
+#: enums.py:193
+msgid "CSV"
+msgstr "CSV"
+
+#: enums.py:194
+msgid "XLS"
+msgstr "XLS"
+
+#: enums.py:195
+msgid "XLSX"
+msgstr "XLSX"
+
+#: enums.py:196
+msgid "DOCX"
+msgstr "DOCX"
+
+#: enums.py:200
+msgid "Charge automatically"
+msgstr "Снимать автоматически"
+
+#: enums.py:201
+msgid "Send invoice"
+msgstr "Отправить счет-фактуру"
+
+#: enums.py:210
+msgid "Bank account has been closed."
+msgstr "Банковский счет закрыт."
+
+#: enums.py:211
+msgid "Bank account has been frozen."
+msgstr "Банковский счет заморожен."
+
+#: enums.py:212
+msgid "Bank account has restrictions on payouts allowed."
+msgstr "Банковский счет имеет ограничения по платежам."
+
+#: enums.py:213
+msgid "Destination bank account has changed ownership."
+msgstr "Банковский счет назначения сменил владельца."
+
+#: enums.py:214
+msgid "Bank could not process payout."
+msgstr "Банк не может обработать платеж."
+
+#: enums.py:215
+msgid "Debit transactions not approved on the bank account."
+msgstr "Дебетовые транзакции не утверждены на банковском счете."
+
+#: enums.py:216
+msgid "Stripe account has insufficient funds."
+msgstr "На счете Stripe недостаточно средств."
+
+#: enums.py:217
+msgid "Invalid account number"
+msgstr "Неверный номер счета"
+
+#: enums.py:218
+msgid "Bank account does not support currency."
+msgstr "Валюта не поддерживается банковским счетом."
+
+#: enums.py:219
+msgid "Bank account could not be located."
+msgstr "Банковский счет не найден."
+
+#: enums.py:220
+msgid "Card no longer supported."
+msgstr "Карта не поддерживается."
+
+#: enums.py:225
+msgid "Instant"
+msgstr "Мгновенный"
+
+#: enums.py:229
+msgid "Paid"
+msgstr "Оплачено"
+
+#: enums.py:231
+msgid "In transit"
+msgstr "В пути"
+
+#: enums.py:232 enums.py:283 enums.py:332 enums.py:363
+msgid "Canceled"
+msgstr "Отменен"
+
+#: enums.py:237 enums.py:311 enums.py:372
+msgid "Bank account"
+msgstr "Банковский счет"
+
+#: enums.py:238 enums.py:296 enums.py:310 enums.py:371
+msgid "Card"
+msgstr "Карта"
+
+#: enums.py:242
+msgid "Last during period"
+msgstr "Последний за период"
+
+#: enums.py:243
+msgid "Last ever"
+msgstr "Последний"
+
+#: enums.py:244
+msgid "Max"
+msgstr "Максимум"
+
+#: enums.py:245
+msgid "Sum"
+msgstr "Сумма"
+
+#: enums.py:249
+msgid "Per unit"
+msgstr "За единицу"
+
+#: enums.py:250
+msgid "Tiered"
+msgstr "Многоуровневый"
+
+#: enums.py:254
+msgid "Day"
+msgstr "День"
+
+#: enums.py:255
+msgid "Week"
+msgstr "Неделя"
+
+#: enums.py:256
+msgid "Month"
+msgstr "Месяц"
+
+#: enums.py:257
+msgid "Year"
+msgstr "Год"
+
+#: enums.py:261
+msgid "Metered"
+msgstr "Измеряемый"
+
+#: enums.py:262
+msgid "Licensed"
+msgstr "Лицензированный"
+
+#: enums.py:266
+msgid "Graduated"
+msgstr "Гарантированный"
+
+#: enums.py:267
+msgid "Volume-based"
+msgstr "По объему"
+
+#: enums.py:271
+msgid "Good"
+msgstr "Хороший"
+
+#: enums.py:272
+msgid "Service"
+msgstr "Сервис"
+
+#: enums.py:276
+msgid "Redirect"
+msgstr "Перенаправить"
+
+#: enums.py:277
+msgid "Receiver"
+msgstr "Получатель"
+
+#: enums.py:278
+msgid "Code verification"
+msgstr "Проверка кода"
+
+#: enums.py:279
+msgid "None"
+msgstr "Отсутствует"
+
+#: enums.py:284
+msgid "Chargeable"
+msgstr "Подлежащий оплате"
+
+#: enums.py:285
+msgid "Consumed"
+msgstr "Потребленный"
+
+#: enums.py:291
+msgid "ACH Credit Transfer"
+msgstr "Кредитный перевод ACH"
+
+#: enums.py:292
+msgid "ACH Debit"
+msgstr "Дебит ACH"
+
+#: enums.py:293
+msgid "Alipay"
+msgstr "Alipay"
+
+#: enums.py:294
+msgid "Bancontact"
+msgstr "Bancontact"
+
+#: enums.py:295
+msgid "Bitcoin"
+msgstr "Bitcoin"
+
+#: enums.py:297
+msgid "Card present"
+msgstr "Подарочная карта"
+
+#: enums.py:298
+msgid "EPS"
+msgstr "EPS"
+
+#: enums.py:299
+msgid "Giropay"
+msgstr "Giropay"
+
+#: enums.py:300
+msgid "iDEAL"
+msgstr "iDEAL"
+
+#: enums.py:301
+msgid "P24"
+msgstr "P24"
+
+#: enums.py:302
+msgid "Paper check"
+msgstr "Бумажный чек"
+
+#: enums.py:303
+msgid "SEPA Direct Debit"
+msgstr "Прямой дебет SEPA"
+
+#: enums.py:304
+msgid "SEPA credit transfer"
+msgstr "Кредитный перевод SEPA"
+
+#: enums.py:305
+msgid "SOFORT"
+msgstr "SOFORT"
+
+#: enums.py:306
+msgid "3D Secure"
+msgstr "3D Secure"
+
+#: enums.py:312
+msgid "Bitcoin receiver"
+msgstr "Получатель Bitcoin"
+
+#: enums.py:313
+msgid "Alipay account"
+msgstr "Счет Alipay"
+
+#: enums.py:317
+msgid "Lost or stolen card"
+msgstr "Утерянная/украденная карта"
+
+#: enums.py:318
+msgid "Expired or canceled card"
+msgstr "Истекшая/отозванная карта"
+
+#: enums.py:323
+msgid "Duplicate charge"
+msgstr "Дублированный платеж"
+
+#: enums.py:325
+msgid "Requested by customer"
+msgstr "По запросу покупателя"
+
+#: enums.py:336
+msgid "Reusable"
+msgstr "Многоразовый"
+
+#: enums.py:337
+msgid "Single-use"
+msgstr "Одноразовый"
+
+#: enums.py:347
+msgid "User-aborted"
+msgstr "Отменен пользователем"
+
+#: enums.py:348
+msgid "Declined"
+msgstr "Отказано"
+
+#: enums.py:355
+msgid "Not required"
+msgstr "Не требуется"
+
+#: enums.py:360
+msgid "Trialing"
+msgstr "Пробный период"
+
+#: enums.py:361
+msgid "Active"
+msgstr "Активен"
+
+#: enums.py:362
+msgid "Past due"
+msgstr "Просроченный"
+
+#: enums.py:364
+msgid "Unpaid"
+msgstr "Не оплачен"
+
+#: enums.py:373
+msgid "Source"
+msgstr "Источник"
+
+#: models/billing.py:852
+msgid "day"
+msgstr "день"
+
+#: models/billing.py:853
+msgid "week"
+msgstr "неделя"
+
+#: models/billing.py:854
+msgid "month"
+msgstr "месяц"
+
+#: models/billing.py:855
+msgid "year"
+msgstr "год"
+
+#: models/billing.py:857
+#, python-brace-format
+msgid "{amount}/{interval}"
+msgstr "{amount}/{interval}"
+
+#: models/billing.py:860
+msgid "days"
+msgstr "дней"
+
+#: models/billing.py:861
+msgid "weeks"
+msgstr "недель"
+
+#: models/billing.py:862
+msgid "months"
+msgstr "месяцев"
+
+#: models/billing.py:863
+msgid "years"
+msgstr "лет"
+
+#: models/billing.py:865
+#, python-brace-format
+msgid "{amount} every {interval_count} {interval}"
+msgstr "{amount} за {interval_count} {interval}"
+
+#: templates/djstripe/admin/change_form.html:8
+msgid "View on Stripe Dashboard"
+msgstr "Посмотреть в панели управления Stripe"
