@@ -15,7 +15,7 @@ import djstripe.models
 
 DJSTRIPE_SUBSCRIBER_MODEL = getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", settings.AUTH_USER_MODEL)
 
-# Needed here for external apps that have added the DJSTRIPE_UNSAFE_SUBSCRIBER_MODEL
+# Needed here for external apps that have added the DJSTRIPE_SUBSCRIBER_MODEL
 # *not* in the '__first__' migration of the app, which results in:
 # ValueError: Related model 'DJSTRIPE_SUBSCRIBER_MODEL' cannot be resolved
 DJSTRIPE_SUBSCRIBER_MODEL_MIGRATION_DEPENDENCY = getattr(settings,
