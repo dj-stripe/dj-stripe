@@ -15,13 +15,28 @@ import djstripe.models
 
 DJSTRIPE_SUBSCRIBER_MODEL = getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", settings.AUTH_USER_MODEL)
 
+# Needed here for external apps that have added the DJSTRIPE_SUBSCRIBER_MODEL
+# *not* in the '__first__' migration of the app, which results in:
+# ValueError: Related model 'DJSTRIPE_SUBSCRIBER_MODEL' cannot be resolved
+DJSTRIPE_SUBSCRIBER_MODEL_MIGRATION_DEPENDENCY = getattr(settings,
+                                                         "DJSTRIPE_SUBSCRIBER_MODEL_MIGRATION_DEPENDENCY",
+                                                         '__first__')
+
+DJSTRIPE_SUBSCRIBER_MODEL_DEPENDENCY = migrations.swappable_dependency(DJSTRIPE_SUBSCRIBER_MODEL)
+
+if DJSTRIPE_SUBSCRIBER_MODEL != settings.AUTH_USER_MODEL:
+    DJSTRIPE_SUBSCRIBER_MODEL_DEPENDENCY = migrations.migration.SwappableTuple(
+        (DJSTRIPE_SUBSCRIBER_MODEL.split(".", 1)[0], DJSTRIPE_SUBSCRIBER_MODEL_MIGRATION_DEPENDENCY),
+        DJSTRIPE_SUBSCRIBER_MODEL
+    )
+
 
 class Migration(migrations.Migration):
 
     initial = True
 
     dependencies = [
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        DJSTRIPE_SUBSCRIBER_MODEL_DEPENDENCY,
     ]
 
     operations = [
