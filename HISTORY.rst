@@ -58,6 +58,18 @@ History
 - ``PaymentMethod`` has been renamed to ``DjstripePaymentMethod``.
   An alias remains but will be removed in the next version.
 
+
+1.2.2 (2018-08-11)
+------------------
+
+This is a bugfix-only version:
+
+- Fixed an error with request.urlconf in some setups (#562)
+- Always save text-type fields as empty strings in db instead of null (#713)
+- Fix support for DJSTRIPE_SUBSCRIBER_MODEL_MIGRATION_DEPENDENCY (#707)
+- Fix reactivate() with Stripe API 2018-02-28 and above
+
+
 1.2.1 (2018-07-18)
 ------------------
 
