@@ -309,7 +309,7 @@ class SubscriptionTest(TestCase):
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
 
         self.assertEqual(Subscription.objects.filter(status="canceled").count(), 0)
-        subscription.cancel()
+        subscription.cancel(at_period_end=False)
         self.assertEqual(Subscription.objects.filter(status="canceled").count(), 1)
 
     @patch("djstripe.models.Subscription._api_delete")
@@ -320,4 +320,4 @@ class SubscriptionTest(TestCase):
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
 
         with self.assertRaises(InvalidRequestError):
-            subscription.cancel()
+            subscription.cancel(at_period_end=False)
