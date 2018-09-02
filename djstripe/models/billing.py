@@ -1125,19 +1125,24 @@ class Subscription(StripeModel):
         if self.trial_end and self.trial_end > timezone.now():
             at_period_end = False
 
-        try:
-            stripe_subscription = self._api_delete(at_period_end=at_period_end)
-        except InvalidRequestError as exc:
-            if "No such subscription:" in str(exc):
-                # cancel() works by deleting the subscription. The object still
-                # exists in Stripe however, and can still be retrieved.
-                # If the subscription was already canceled (status=canceled),
-                # that api_retrieve() call will fail with "No such subscription".
-                # However, this may also happen if the subscription legitimately
-                # does not exist, in which case the following line will re-raise.
-                stripe_subscription = self.api_retrieve()
-            else:
-                raise
+        if at_period_end:
+            stripe_subscription = self.api_retrieve()
+            stripe_subscription.cancel_at_period_end = True
+            stripe_subscription.save()
+        else:
+            try:
+                stripe_subscription = self._api_delete()
+            except InvalidRequestError as exc:
+                if "No such subscription:" in str(exc):
+                    # cancel() works by deleting the subscription. The object still
+                    # exists in Stripe however, and can still be retrieved.
+                    # If the subscription was already canceled (status=canceled),
+                    # that api_retrieve() call will fail with "No such subscription".
+                    # However, this may also happen if the subscription legitimately
+                    # does not exist, in which case the following line will re-raise.
+                    stripe_subscription = self.api_retrieve()
+                else:
+                    raise
 
         return Subscription.sync_from_stripe_data(stripe_subscription)
 

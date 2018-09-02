@@ -311,8 +311,10 @@ class SubscriptionTest(TestCase):
         self.assertEqual(Subscription.objects.filter(status="canceled").count(), 1)
 
     @patch("djstripe.models.Subscription._api_delete")
-    def test_cancel_error_in_cancel(self, subscription_delete_mock):
+    @patch("stripe.Subscription.retrieve")
+    def test_cancel_error_in_cancel(self, subscription_delete_mock, subscription_retrieve_mock):
         subscription_delete_mock.side_effect = InvalidRequestError("Unexpected error", "blah")
+        subscription_retrieve_mock.side_effect = InvalidRequestError("Unexpected error", "blah")
 
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
