@@ -54,16 +54,6 @@ If you are proposing a feature:
 * Keep the scope as narrow as possible, to make it easier to implement.
 * Remember that this is a volunteer-driven project, and that contributions are welcome :)
 
-New Modules
------------
-
-As with Django we're aiming for future compatibility with Python 3.x.  Please ensure that any
-new modules use the following future import statement:
-
-```
-from __future__ import absolute_import, division, print_function, unicode_literals
-```
-
 Get Started!
 ------------
 
@@ -122,7 +112,7 @@ Before you submit a pull request, check that it meets these guidelines:
 2. The pull request must not drop code coverage below the current level.
 3. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring.
-4. If the pull request makes changes to a model, include Django migrations (Django 1.7+).
-5. The pull request should work for Python 2.7, 3.4, 3.5 and 3.6. Check
+4. If the pull request makes changes to a model, include Django migrations.
+5. The pull request should work for Python 3.4, 3.5 and 3.6. Check
    https://travis-ci.org/dj-stripe/dj-stripe/pull_requests
    and make sure that the tests pass for all supported Python versions.
