@@ -373,7 +373,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="payout",
             name="failure_balance_transaction",
-            field=models.ForeignKey(help_text="If the payout failed or was canceled, this will be the balance transaction that reversed the initial balance transaction, and puts the funds from the failed payout back in your balance.", null=True, on_delete=django.db.models.deletion.SET_NULL, to="djstripe.BalanceTransaction"),
+            field=models.ForeignKey(help_text="If the payout failed or was canceled, this will be the balance transaction that reversed the initial balance transaction, and puts the funds from the failed payout back in your balance.", null=True, on_delete=django.db.models.deletion.SET_NULL, to="djstripe.BalanceTransaction", related_name="failure_payouts"),
         ),
         migrations.AddField(
             model_name="refund",
@@ -383,7 +383,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="refund",
             name="failure_balance_transaction",
-            field=models.ForeignKey(help_text="If the refund failed, this balance transaction describes the adjustment made on your account balance that reverses the initial balance transaction.", null=True, on_delete=django.db.models.deletion.SET_NULL, to="djstripe.BalanceTransaction"),
+            field=models.ForeignKey(help_text="If the refund failed, this balance transaction describes the adjustment made on your account balance that reverses the initial balance transaction.", null=True, on_delete=django.db.models.deletion.SET_NULL, to="djstripe.BalanceTransaction", related_name="failure_refunds"),
         ),
         migrations.AddField(
             model_name="transfer",

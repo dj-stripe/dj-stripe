@@ -1232,6 +1232,7 @@ class Payout(StripeModel):
     failure_balance_transaction = models.ForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
+        related_name="failure_payouts",
         null=True,
         help_text=(
             "If the payout failed or was canceled, this will be the balance "
@@ -1403,6 +1404,7 @@ class Refund(StripeModel):
     failure_balance_transaction = models.ForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
+        related_name="failure_refunds",
         null=True,
         help_text=(
             "If the refund failed, this balance transaction describes the adjustment "
