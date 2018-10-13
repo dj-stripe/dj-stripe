@@ -66,7 +66,7 @@ def run_test_suite(args):
                 },
             },
         ],
-        ROOT_URLCONF="tests.test_urls",
+        ROOT_URLCONF="tests.urls",
         INSTALLED_APPS=[
             "django.contrib.admin",
             "django.contrib.auth",
