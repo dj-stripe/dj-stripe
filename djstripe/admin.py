@@ -312,4 +312,4 @@ class SubscriptionAdmin(StripeModelAdmin):
 
 @admin.register(models.Transfer)
 class TransferAdmin(StripeModelAdmin):
-    list_display = ("amount", "status", "date", "description")
+    list_display = ("amount", "description")
