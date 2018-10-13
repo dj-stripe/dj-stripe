@@ -7,10 +7,10 @@
 """
 from unittest.mock import patch
 
-from django.conf import settings
 from django.test.testcases import TestCase
 
 from djstripe.models import Account
+from djstripe.settings import STRIPE_SECRET_KEY
 
 from . import FAKE_ACCOUNT
 
@@ -31,4 +31,4 @@ class TestAccount(TestCase):
 
         Account.get_default_account()
 
-        account_retrieve_mock.assert_called_once_with(api_key=settings.STRIPE_SECRET_KEY)
+        account_retrieve_mock.assert_called_once_with(api_key=STRIPE_SECRET_KEY)

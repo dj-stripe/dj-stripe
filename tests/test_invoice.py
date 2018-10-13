@@ -9,12 +9,12 @@
 from copy import deepcopy
 from unittest.mock import ANY, patch
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
 from stripe.error import InvalidRequestError
 
 from djstripe.models import Invoice, Plan, Subscription, UpcomingInvoice
+from djstripe.settings import STRIPE_SECRET_KEY
 
 from . import (
     FAKE_CHARGE, FAKE_CUSTOMER, FAKE_INVOICE, FAKE_INVOICEITEM_II,
@@ -54,7 +54,7 @@ class InvoiceTest(TestCase):
         return_value = invoice.retry()
 
         invoice_retrieve_mock.assert_called_once_with(
-            id=invoice.id, api_key=settings.STRIPE_SECRET_KEY, expand=[]
+            id=invoice.id, api_key=STRIPE_SECRET_KEY, expand=[]
         )
         self.assertTrue(return_value)
 
