@@ -3,6 +3,14 @@
 History
 =======
 
+1.2.3 (2018-10-13)
+------------------
+
+This is a bugfix-only version:
+
+- Updated Subscription.cancel() for compatibility with Stripe 2018-08-23 (#723)
+
+
 1.2.2 (2018-08-11)
 ------------------
 
