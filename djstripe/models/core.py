@@ -398,7 +398,7 @@ class Customer(StripeModel):
         help_text="If a coupon is present and has a limited duration, the date that the discount will end.",
     )
     # </discount>
-    email = models.CharField(max_length=5000, db_index=True, default="", blank=True)
+    email = models.CharField(max_length=800, db_index=True, default="", blank=True)
     shipping = JSONField(
         null=True, blank=True,
         help_text="Shipping information associated with the customer.",

@@ -635,7 +635,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='customer',
             name='email',
-            field=models.CharField(blank=True, db_index=True, default='', max_length=5000),
+            field=models.CharField(blank=True, db_index=True, default='', max_length=800),
         ),
         migrations.AlterField(
             model_name='event',
