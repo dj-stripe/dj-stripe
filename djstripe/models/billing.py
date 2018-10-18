@@ -1,7 +1,6 @@
 from copy import deepcopy
 
 import stripe
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.text import format_lazy
@@ -52,9 +51,14 @@ class Coupon(StripeModel):
             "Name of the coupon displayed to customers on for instance invoices or receipts."
         ),
     )
-    # This is not a StripePercentField. Only integer values between 1 and 100 are possible.
-    percent_off = models.PositiveIntegerField(
-        null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(100)]
+    percent_off = StripePercentField(
+        null=True,
+        blank=True,
+        help_text=(
+            "Percent that will be taken off the subtotal of any invoices for this customer "
+            "for the duration of the coupon. For example, a coupon with percent_off of 50 "
+            "will make a $100 invoice $50 instead."
+        )
     )
     redeem_by = StripeDateTimeField(
         null=True,

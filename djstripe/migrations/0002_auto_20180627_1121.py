@@ -480,6 +480,11 @@ class Migration(migrations.Migration):
             old_name="stripe_id",
             new_name="id",
         ),
+        migrations.AlterField(
+            model_name="coupon",
+            name="percent_off",
+            field=djstripe.fields.StripePercentField(blank=True, decimal_places=2, help_text='Percent that will be taken off the subtotal of any invoices for this customer for the duration of the coupon. For example, a coupon with percent_off of 50 will make a $100 invoice $50 instead.', max_digits=5, null=True, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(100)]),
+        ),
 
         # Update all text-type fields to non-null CharField blank=True default=""
         migrations.AlterField(
