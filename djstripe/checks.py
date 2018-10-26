@@ -128,11 +128,11 @@ def check_webhook_secret(app_configs=None, **kwargs):
     """
     Check that DJSTRIPE_WEBHOOK_SECRET looks correct
     """
-    from django.conf import settings
+    from . import settings as djstripe_settings
 
     messages = []
 
-    secret = settings.DJSTRIPE_WEBHOOK_SECRET
+    secret = djstripe_settings.WEBHOOK_SECRET
     if secret and not secret.startswith("whsec_"):
         messages.append(checks.Warning(
             "DJSTRIPE_WEBHOOK_SECRET does not look valid",
@@ -150,11 +150,11 @@ def check_subscriber_key_length(app_configs=None, **kwargs):
 
     Docs: https://stripe.com/docs/api#metadata
     """
-    from django.conf import settings
+    from . import settings as djstripe_settings
 
     messages = []
 
-    key = settings.DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY
+    key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
     key_size = len(str(key))
     if key and key_size > 40:
         messages.append(checks.Error(

@@ -14,6 +14,7 @@ from django.test.testcases import TestCase
 
 from djstripe.mixins import PaymentsContextMixin, SubscriptionMixin
 from djstripe.models import Plan
+from djstripe.settings import STRIPE_PUBLIC_KEY
 
 from . import FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II
 
@@ -21,8 +22,6 @@ from . import FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II
 class TestPaymentsContextMixin(TestCase):
 
     def test_get_context_data(self):
-        from django.conf import settings
-
         class TestSuperView(object):
             def get_context_data(self):
                 return {}
@@ -32,7 +31,7 @@ class TestPaymentsContextMixin(TestCase):
 
         context = TestView().get_context_data()
         self.assertIn("STRIPE_PUBLIC_KEY", context, "STRIPE_PUBLIC_KEY missing from context.")
-        self.assertEqual(context["STRIPE_PUBLIC_KEY"], settings.STRIPE_PUBLIC_KEY, "Incorrect STRIPE_PUBLIC_KEY.")
+        self.assertEqual(context["STRIPE_PUBLIC_KEY"], STRIPE_PUBLIC_KEY, "Incorrect STRIPE_PUBLIC_KEY.")
 
         self.assertIn("plans", context, "pans missing from context.")
         self.assertEqual(list(Plan.objects.all()), list(context["plans"]), "Incorrect plans.")

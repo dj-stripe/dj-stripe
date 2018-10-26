@@ -9,12 +9,12 @@ from copy import deepcopy
 from decimal import Decimal
 from unittest.mock import patch
 
-from django.conf import settings
 from django.contrib.admin.sites import AdminSite
 from django.test import TestCase
 
 from djstripe.admin import PlanAdmin
 from djstripe.models import Plan
+from djstripe.settings import STRIPE_SECRET_KEY
 
 from . import FAKE_PLAN, FAKE_PLAN_II
 
@@ -90,7 +90,7 @@ class PlanTest(TestCase):
         stripe_plan = self.plan.api_retrieve()
         plan_retrieve_mock.assert_called_once_with(
             id=self.plan_data["id"],
-            api_key=settings.STRIPE_SECRET_KEY,
+            api_key=STRIPE_SECRET_KEY,
             expand=[]
         )
         plan = Plan.sync_from_stripe_data(stripe_plan)

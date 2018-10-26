@@ -12,7 +12,6 @@ import decimal
 from copy import deepcopy
 from unittest.mock import ANY, patch
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
@@ -23,6 +22,7 @@ from djstripe.exceptions import MultipleSubscriptionException
 from djstripe.models import (
     Card, Charge, Coupon, Customer, Invoice, PaymentMethod, Plan, Subscription
 )
+from djstripe.settings import STRIPE_SECRET_KEY
 
 from . import (
     FAKE_ACCOUNT, FAKE_CARD, FAKE_CARD_V, FAKE_CHARGE, FAKE_COUPON, FAKE_CUSTOMER,
@@ -136,7 +136,7 @@ class TestCustomer(TestCase):
         djstripe_settings.SUBSCRIBER_CUSTOMER_KEY = "djstripe_subscriber"
 
         customer_mock.assert_called_once_with(
-            api_key="", email="", idempotency_key=None, metadata={}
+            api_key=STRIPE_SECRET_KEY, email="", idempotency_key=None, metadata={}
         )
 
         self.assertEqual(customer.metadata, None)
@@ -217,7 +217,7 @@ class TestCustomer(TestCase):
         self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
 
         customer_retrieve_mock.assert_called_with(
-            id=self.customer.id, api_key=settings.STRIPE_SECRET_KEY, expand=["default_source"]
+            id=self.customer.id, api_key=STRIPE_SECRET_KEY, expand=["default_source"]
         )
         self.assertEqual(3, customer_retrieve_mock.call_count)
 
@@ -228,7 +228,7 @@ class TestCustomer(TestCase):
         with self.assertRaisesMessage(InvalidRequestError, "Unexpected Exception"):
             self.customer.purge()
 
-        customer_retrieve_mock.assert_called_once_with(id=self.customer.id, api_key=settings.STRIPE_SECRET_KEY,
+        customer_retrieve_mock.assert_called_once_with(id=self.customer.id, api_key=STRIPE_SECRET_KEY,
                                                        expand=['default_source'])
 
     def test_can_charge(self):
@@ -271,7 +271,7 @@ class TestCustomer(TestCase):
         self.assertEqual(self.customer.coupon, None)
         self.customer.add_coupon(FAKE_COUPON["id"])
         customer_retrieve_mock.assert_called_once_with(
-            api_key="", expand=["default_source"], id=FAKE_CUSTOMER["id"]
+            api_key=STRIPE_SECRET_KEY, expand=["default_source"], id=FAKE_CUSTOMER["id"]
         )
 
     @patch("stripe.Coupon.retrieve", return_value=deepcopy(FAKE_COUPON))
@@ -281,7 +281,7 @@ class TestCustomer(TestCase):
         coupon = Coupon.sync_from_stripe_data(FAKE_COUPON)
         self.customer.add_coupon(coupon)
         customer_retrieve_mock.assert_called_once_with(
-            api_key="", expand=["default_source"], id=FAKE_CUSTOMER["id"]
+            api_key=STRIPE_SECRET_KEY, expand=["default_source"], id=FAKE_CUSTOMER["id"]
         )
 
     @patch("djstripe.models.Account.get_default_account")
@@ -515,7 +515,7 @@ class TestCustomer(TestCase):
         self.assertTrue(return_status)
 
         invoice_create_mock.assert_called_once_with(
-            api_key=settings.STRIPE_SECRET_KEY,
+            api_key=STRIPE_SECRET_KEY,
             customer=self.customer.id
         )
 
@@ -527,7 +527,7 @@ class TestCustomer(TestCase):
         self.assertFalse(return_status)
 
         invoice_create_mock.assert_called_once_with(
-            api_key=settings.STRIPE_SECRET_KEY,
+            api_key=STRIPE_SECRET_KEY,
             customer=self.customer.id
         )
 
@@ -716,7 +716,7 @@ class TestCustomer(TestCase):
         self.assertEqual("pancakes", invoiceitem)
 
         invoiceitem_create_mock.assert_called_once_with(
-            api_key=settings.STRIPE_SECRET_KEY,
+            api_key=STRIPE_SECRET_KEY,
             amount=5000,
             customer=self.customer.id,
             currency="eur",
@@ -740,7 +740,7 @@ class TestCustomer(TestCase):
         self.assertEqual("pancakes", invoiceitem)
 
         invoiceitem_create_mock.assert_called_once_with(
-            api_key=settings.STRIPE_SECRET_KEY,
+            api_key=STRIPE_SECRET_KEY,
             amount=5000,
             customer=self.customer.id,
             currency="eur",

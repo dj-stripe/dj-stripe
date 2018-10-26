@@ -66,7 +66,7 @@ def run_test_suite(args):
                 },
             },
         ],
-        ROOT_URLCONF="tests.test_urls",
+        ROOT_URLCONF="tests.urls",
         INSTALLED_APPS=[
             "django.contrib.admin",
             "django.contrib.auth",
@@ -83,8 +83,10 @@ def run_test_suite(args):
             "django.contrib.auth.middleware.AuthenticationMiddleware",
             "django.contrib.messages.middleware.MessageMiddleware"
         ),
-        STRIPE_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", ""),
-        STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", ""),
+        STRIPE_LIVE_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_123"),
+        STRIPE_LIVE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", "sk_test_123"),
+        STRIPE_TEST_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_123"),
+        STRIPE_TEST_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", "sk_test_123"),
         DJSTRIPE_PLANS={
             "test0": {
                 "stripe_plan_id": "test_id_0",

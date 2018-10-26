@@ -519,13 +519,6 @@ class Customer(StripeModel):
         """
         Subscribes this customer to a plan.
 
-        Parameters not implemented:
-
-        * **source** - Subscriptions use the customer's default source. Including the source parameter creates \
-                  a new source for this customer and overrides the default source. This functionality is not \
-                  desired; add a source to the customer before attempting to add a subscription. \
-
-
         :param plan: The plan to which to subscribe the customer.
         :type plan: Plan or string (plan ID)
         :param application_fee_percent: This represents the percentage of the subscription invoice subtotal
@@ -1232,6 +1225,7 @@ class Payout(StripeModel):
     failure_balance_transaction = models.ForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
+        related_name="failure_payouts",
         null=True,
         help_text=(
             "If the payout failed or was canceled, this will be the balance "
@@ -1403,6 +1397,7 @@ class Refund(StripeModel):
     failure_balance_transaction = models.ForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
+        related_name="failure_refunds",
         null=True,
         help_text=(
             "If the refund failed, this balance transaction describes the adjustment "

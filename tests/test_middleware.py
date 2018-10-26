@@ -18,7 +18,7 @@ from . import FAKE_CUSTOMER, FAKE_SUBSCRIPTION, FUTURE_DATE
 
 
 class MiddlewareURLTest(TestCase):
-    urlconf = 'tests.test_urls'
+    urlconf = "tests.urls"
 
     def setUp(self):
         self.settings(ROOT_URLCONF=self.urlconf)
@@ -88,7 +88,7 @@ class MiddlewareURLTest(TestCase):
 
 
 class MiddlewareLogicTest(TestCase):
-    urlconf = 'tests.test_urls'
+    urlconf = "tests.urls"
 
     def setUp(self):
         self.settings(ROOT_URLCONF=self.urlconf)

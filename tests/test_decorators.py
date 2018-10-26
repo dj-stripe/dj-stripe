@@ -23,7 +23,7 @@ from . import FAKE_CUSTOMER, FAKE_SUBSCRIPTION, FUTURE_DATE
 class TestSubscriptionPaymentRequired(TestCase):
 
     def setUp(self):
-        self.settings(ROOT_URLCONF='tests.test_urls')
+        self.settings(ROOT_URLCONF="tests.urls")
         self.factory = RequestFactory()
 
         @subscription_payment_required
