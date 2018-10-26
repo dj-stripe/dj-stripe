@@ -51,6 +51,3 @@ htmlcov
 
 # Virtualenv
 .venv
-
-# IDEA Project Files
-.idea/
