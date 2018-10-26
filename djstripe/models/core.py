@@ -306,7 +306,7 @@ class Charge(StripeModel):
 
         :param amount: A positive decimal amount representing how much of this charge
             to refund. Can only refund up to the unrefunded amount remaining of the charge.
-        :trye amount: Decimal
+        :type amount: Decimal
         :param reason: String indicating the reason for the refund. If set, possible values
             are ``duplicate``, ``fraudulent``, and ``requested_by_customer``. Specifying
             ``fraudulent`` as the reason when you believe the charge to be fraudulent will
@@ -320,16 +320,24 @@ class Charge(StripeModel):
         )
         return self.__class__.sync_from_stripe_data(charge_obj)
 
-    def capture(self):
+    def capture(self, amount=None):
         """
         Capture the payment of an existing, uncaptured, charge.
         This is the second half of the two-step payment flow, where first you
         created a charge with the capture option set to False.
 
         See https://stripe.com/docs/api#capture_charge
+
+        :param amount: The amount to capture, which must be less than or equal to the original amount.
+            Any additional amount will be automatically refunded.
+        :type amount: Decimal
         """
 
-        captured_charge = self.api_retrieve().capture()
+        params = {}
+        if amount:
+            params = {"amount": int(amount * 100)}
+
+        captured_charge = self.api_retrieve().capture(**params)
         return self.__class__.sync_from_stripe_data(captured_charge)
 
     @classmethod
