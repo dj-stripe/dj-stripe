@@ -2753,23 +2753,23 @@ class Product(StripeObject):
         "Whether the product is currently available for purchase. "
         "Only applicable to products of `type=good`."
     ))
-    attributes = StripeJSONField(null=True, help_text=(
+    attributes = StripeJSONField(null=True, blank=True, help_text=(
         "A list of up to 5 attributes that each SKU can provide values for "
         '(e.g., `["color", "size"]`). Only applicable to products of `type=good`.'
     ))
-    caption = StripeCharField(null=True, max_length=5000, help_text=(
+    caption = StripeCharField(null=True, blank=True, max_length=5000, help_text=(
         "A short one-line description of the product, meant to be displayable"
         "to the customer. Only applicable to products of `type=good`."
     ))
-    deactivate_on = StripeJSONField(stripe_required=False, help_text=(
+    deactivate_on = StripeJSONField(stripe_required=False, blank=True, help_text=(
         "An array of connect application identifiers that cannot purchase "
         "this product. Only applicable to products of `type=good`."
     ))
-    images = StripeJSONField(stripe_required=False, help_text=(
+    images = StripeJSONField(stripe_required=False, blank=True, help_text=(
         "A list of up to 8 URLs of images for this product, meant to be "
         "displayable to the customer. Only applicable to products of `type=good`."
     ))
-    package_dimensions = StripeJSONField(stripe_required=False, help_text=(
+    package_dimensions = StripeJSONField(stripe_required=False, blank=True, help_text=(
         "The dimensions of this product for shipping purposes. "
         "A SKU associated with this product can override this value by having its "
         "own `package_dimensions`. Only applicable to products of `type=good`."
@@ -2778,7 +2778,7 @@ class Product(StripeObject):
         "Whether this product is a shipped good. "
         "Only applicable to products of `type=good`."
     ))
-    url = StripeCharField(max_length=799, null=True, help_text=(
+    url = StripeCharField(max_length=799, null=True, blank=True, help_text=(
         "A URL of a publicly-accessible webpage for this product. "
         "Only applicable to products of `type=good`."
     ))
@@ -2790,7 +2790,7 @@ class Product(StripeObject):
         "once, the first statement descriptor will be used. "
         "Only available on products of type=`service`."
     ))
-    unit_label = StripeCharField(max_length=12, null=True)
+    unit_label = StripeCharField(max_length=12, null=True, blank=True)
 
     def __str__(self):
         return self.name
