@@ -2784,13 +2784,13 @@ class Product(StripeObject):
     ))
 
     # Fields available to `service` only
-    statement_descriptor = StripeCharField(max_length=22, null=True, help_text=(
+    statement_descriptor = StripeCharField(stripe_required=False, max_length=22, help_text=(
         "Extra information about a product which will appear on your customer's "
         "credit card statement. In the case that multiple products are billed at "
         "once, the first statement descriptor will be used. "
         "Only available on products of type=`service`."
     ))
-    unit_label = StripeCharField(max_length=12, null=True)
+    unit_label = StripeCharField(stripe_required=False, max_length=12)
 
     def __str__(self):
         return self.name
