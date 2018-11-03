@@ -299,7 +299,6 @@ class SourceType(Enum):
     ach_debit = _("ACH Debit")
     alipay = _("Alipay")
     bancontact = _("Bancontact")
-    bitcoin = _("Bitcoin")
     card = _("Card")
     card_present = _("Card present")
     eps = _("EPS")
@@ -316,7 +315,6 @@ class SourceType(Enum):
 class LegacySourceType(Enum):
     card = _("Card")
     bank_account = _("Bank account")
-    bitcoin_receiver = _("Bitcoin receiver")
     alipay_account = _("Alipay account")
 
 
