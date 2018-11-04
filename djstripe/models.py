@@ -2995,7 +2995,7 @@ class Subscription(StripeObject):
 
         return self.update(prorate=False, trial_end=period_end)
 
-    def cancel(self, at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END):
+    def cancel(self, at_period_end=None):
         """
         Cancels this subscription. If you set the at_period_end parameter to true, the subscription will remain active
         until the end of the period, at which point it will be canceled and not renewed. By default, the subscription
@@ -3018,6 +3018,8 @@ class Subscription(StripeObject):
         .. important:: If a subscription is cancelled during a trial period, the ``at_period_end`` flag will be \
         overridden to False so that the trial ends immediately and the customer's card isn't charged.
         """
+        if at_period_end is None:
+            at_period_end = djstripe_settings.CANCELLATION_AT_PERIOD_END
 
         # If plan has trial days and customer cancels before trial period ends, then end subscription now,
         #     i.e. at_period_end=False
