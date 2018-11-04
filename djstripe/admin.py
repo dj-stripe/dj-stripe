@@ -221,7 +221,7 @@ class DisputeAdmin(StripeModelAdmin):
 
 @admin.register(models.Event)
 class EventAdmin(StripeModelAdmin):
-    list_display = ("type", "created", "request_id")
+    list_display = ("type", "request_id")
     list_filter = ("type", "created")
     search_fields = ("request_id", )
 
