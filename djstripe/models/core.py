@@ -562,6 +562,9 @@ class Customer(StripeModel):
         """
         from .billing import Subscription
 
+        if trial_period_days is None:
+            trial_period_days = plan.trial_period_days
+
         # Convert Plan to id
         if isinstance(plan, StripeModel):
             plan = plan.id
