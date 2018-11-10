@@ -208,6 +208,9 @@ If this is set to a non-empty value, webhook signatures will be verified.
 
 .. _Learn more about webhook signature verification: https://stripe.com/docs/webhooks/signatures
 
+DJSTRIPE_WEBHOOK_VALIDATION= (="verify_signature")
+==================================================
+
 This setting controls which type of validation is done on webhooks.
 Value can be ``"verify_signature"`` for signature verification (recommended
 default), ``"retrieve_event"`` for event retrieval (makes an extra HTTP
