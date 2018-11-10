@@ -151,7 +151,8 @@ class WebhookEventTrigger(models.Model):
                 stripe.WebhookSignature.verify_header(
                     self.body,
                     self.headers.get("stripe-signature"),
-                    djstripe_settings.WEBHOOK_SECRET
+                    djstripe_settings.WEBHOOK_SECRET,
+                    djstripe_settings.WEBHOOK_TOLERANCE,
                 )
             except stripe.error.SignatureVerificationError:
                 return False
