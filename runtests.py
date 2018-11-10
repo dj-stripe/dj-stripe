@@ -62,6 +62,7 @@ def run_test_suite(args):
                 'OPTIONS': {
                     'context_processors': [
                         'django.contrib.auth.context_processors.auth',
+                        'django.contrib.messages.context_processors.messages',
                     ],
                 },
             },
@@ -72,6 +73,7 @@ def run_test_suite(args):
             "django.contrib.auth",
             "django.contrib.contenttypes",
             "django.contrib.sessions",
+            "django.contrib.messages",
             "django.contrib.sites",
             "jsonfield",
             "djstripe",
