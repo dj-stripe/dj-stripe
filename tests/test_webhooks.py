@@ -10,6 +10,7 @@ import json
 import warnings
 from collections import defaultdict
 from copy import deepcopy
+from importlib import reload
 from unittest.mock import Mock, PropertyMock, call, patch
 
 from django.test import TestCase, override_settings
@@ -31,6 +32,10 @@ def mock_webhook_handler(webhook_event_trigger):
 
 
 class TestWebhook(TestCase):
+
+    def tearDown(self):
+        reload(djstripe_settings)
+
     def _send_event(self, event_data):
         return Client().post(
             reverse("djstripe:webhook"),
@@ -44,51 +49,81 @@ class TestWebhook(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(Event.objects.filter(id=TEST_EVENT_ID).exists())
 
+    @override_settings(DJSTRIPE_WEBHOOK_VALIDATION="retrieve_event")
     @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
     @patch("stripe.Event.retrieve", return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED))
     def test_webhook_retrieve_event_fail(self, event_retrieve_mock, transfer_retrieve_mock):
+        reload(djstripe_settings)
+
         invalid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         invalid_event["id"] = "evt_invalid"
         invalid_event["data"]["valid"] = "not really"
 
-        djstripe_settings.WEBHOOK_SECRET = ""
         resp = self._send_event(invalid_event)
 
         self.assertEqual(resp.status_code, 400)
         self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
 
+    @override_settings(DJSTRIPE_WEBHOOK_VALIDATION="retrieve_event")
     @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
     @patch("stripe.Event.retrieve", return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED))
     def test_webhook_retrieve_event_pass(self, event_retrieve_mock, transfer_retrieve_mock):
-        djstripe_settings.WEBHOOK_SECRET = ""
+        reload(djstripe_settings)
+
         resp = self._send_event(FAKE_EVENT_TRANSFER_CREATED)
 
         self.assertEqual(resp.status_code, 200)
+        event_retrieve_mock.assert_called_once_with(
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            id=FAKE_EVENT_TRANSFER_CREATED["id"]
+        )
 
-    @override_settings(DJSTRIPE_WEBHOOK_VALIDATION="verify_signature")
+    @override_settings(DJSTRIPE_WEBHOOK_VALIDATION="verify_signature", DJSTRIPE_WEBHOOK_SECRET="whsec_XXXXX")
     @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
     @patch("stripe.Event.retrieve", return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED))
     def test_webhook_invalid_verify_signature_fail(self, event_retrieve_mock, transfer_retrieve_mock):
+        reload(djstripe_settings)
+
         invalid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         invalid_event["id"] = "evt_invalid"
         invalid_event["data"]["valid"] = "not really"
 
-        djstripe_settings.WEBHOOK_SECRET = "whsec_XXXXX"
         resp = self._send_event(invalid_event)
 
         self.assertEqual(resp.status_code, 400)
         self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
 
+    @override_settings(DJSTRIPE_WEBHOOK_VALIDATION="verify_signature", DJSTRIPE_WEBHOOK_SECRET="whsec_XXXXX")
+    @patch("stripe.WebhookSignature.verify_header", return_value=True)
     @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
     @patch("stripe.Event.retrieve", return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED))
-    @patch("stripe.WebhookSignature.verify_header", return_value=True)
     def test_webhook_verify_signature_pass(self, event_retrieve_mock, transfer_retrieve_mock, verify_signature_mock):
-        djstripe_settings.WEBHOOK_SECRET = "whsec_XXXXX"
+        reload(djstripe_settings)
+
         resp = self._send_event(FAKE_EVENT_TRANSFER_CREATED)
 
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
         verify_signature_mock.called_once_with(FAKE_EVENT_TRANSFER_CREATED, {})
+        event_retrieve_mock.assert_not_called()
+
+    @override_settings(DJSTRIPE_WEBHOOK_VALIDATION=None)
+    @patch("stripe.WebhookSignature.verify_header")
+    @patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
+    @patch("stripe.Event.retrieve", return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED))
+    def test_webhook_no_validation_pass(self, event_retrieve_mock, transfer_retrieve_mock, verify_signature_mock):
+        reload(djstripe_settings)
+
+        invalid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+        invalid_event["id"] = "evt_invalid"
+        invalid_event["data"]["valid"] = "not really"
+
+        resp = self._send_event(invalid_event)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(Event.objects.filter(id="evt_invalid").exists())
+        event_retrieve_mock.assert_not_called()
+        verify_signature_mock.assert_not_called()
 
     def test_webhook_no_signature(self):
         self.assertEqual(WebhookEventTrigger.objects.count(), 0)

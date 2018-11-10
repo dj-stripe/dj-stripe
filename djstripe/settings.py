@@ -70,6 +70,7 @@ CANCELLATION_AT_PERIOD_END = not getattr(settings, 'DJSTRIPE_CANCELLATION_AT_PER
 DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
 
 WEBHOOK_TOLERANCE = getattr(settings, "DJSTRIPE_WEBHOOK_TOLERANCE", stripe.Webhook.DEFAULT_TOLERANCE)
+WEBHOOK_VALIDATION = getattr(settings, "DJSTRIPE_WEBHOOK_VALIDATION", "verify_signature")
 WEBHOOK_SECRET = getattr(settings, "DJSTRIPE_WEBHOOK_SECRET", "")
 
 # Webhook event callbacks allow an application to take control of what happens
