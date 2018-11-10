@@ -41,6 +41,9 @@ nosetests.xml
 .settings/
 .prefs
 
+# Pycharm
+.idea/
+
 # Sphinx
 docs/_build
 docs/_static
