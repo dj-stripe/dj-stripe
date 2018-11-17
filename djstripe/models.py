@@ -2120,8 +2120,8 @@ class Invoice(StripeObject):
         related_name="latest_invoice",
         help_text="The latest charge generated for this invoice, if any."
     )
-    closed = StripeBooleanField(
-        default=False,
+    closed = StripeNullBooleanField(
+        stripe_required=False, default=None,
         help_text="Whether or not the invoice is still trying to collect payment. An invoice is closed if it's either "
         "paid or it has been marked closed. A closed invoice will no longer attempt to collect payment."
     )
@@ -2142,8 +2142,8 @@ class Invoice(StripeObject):
         help_text="Ending customer balance after attempting to pay invoice. If the invoice has not been attempted "
         "yet, this will be null."
     )
-    forgiven = StripeBooleanField(
-        default=False,
+    forgiven = StripeNullBooleanField(
+        stripe_required=False, default=None,
         help_text="Whether or not the invoice has been forgiven. Forgiving an invoice instructs us to update the "
         "subscription status as if the invoice were successfully paid. Once an invoice has been forgiven, it cannot "
         "be unforgiven or reopened."
