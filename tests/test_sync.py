@@ -5,7 +5,7 @@
 .. moduleauthor:: Alex Kavanaugh (@kavdev)
 
 """
-import sys
+import contextlib
 from copy import deepcopy
 from unittest.mock import patch
 
@@ -17,6 +17,20 @@ from djstripe.models import Customer
 from djstripe.sync import sync_subscriber
 
 from . import FAKE_CUSTOMER
+
+
+@contextlib.contextmanager
+def capture_stdout():
+    import sys
+    from io import StringIO
+
+    old_stdout = sys.stdout
+    sys.stdout = StringIO()
+
+    try:
+        yield sys.stdout
+    finally:
+        sys.stdout = old_stdout
 
 
 class TestSyncSubscriber(TestCase):
@@ -48,6 +62,7 @@ class TestSyncSubscriber(TestCase):
     def test_sync_fail(self, stripe_customer_create_mock, api_retrieve_mock, _sync_mock):
         _sync_mock.side_effect = InvalidRequestError("No such customer:", "blah")
 
-        sync_subscriber(self.user)
+        with capture_stdout() as stdout:
+            sync_subscriber(self.user)
 
-        self.assertEqual("ERROR: No such customer:", sys.stdout.getvalue().strip())
+        self.assertEqual("ERROR: No such customer:", stdout.getvalue().strip())
