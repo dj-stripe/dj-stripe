@@ -114,6 +114,35 @@ class InvoiceTest(TestCase):
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
+    def test_status_forgiven_deprecated(self, charge_retrieve_mock, subscription_retrieve_mock, default_account_mock):
+        # forgiven parameter deprecated in API 2018-11-08 - see https://stripe.com/docs/upgrades#2018-11-08
+        default_account_mock.return_value = self.account
+
+        invoice_data = deepcopy(FAKE_INVOICE)
+        invoice_data.update({"paid": False, "closed": False})
+        invoice_data.pop("forgiven")
+        invoice_data["status"] = "uncollectible"
+        invoice = Invoice.sync_from_stripe_data(invoice_data)
+
+        self.assertEqual(Invoice.STATUS_FORGIVEN, invoice.status)
+
+    @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
+    def test_status_forgiven_default(self, charge_retrieve_mock, subscription_retrieve_mock, default_account_mock):
+        # forgiven parameter deprecated in API 2018-11-08 - see https://stripe.com/docs/upgrades#2018-11-08
+        default_account_mock.return_value = self.account
+
+        invoice_data = deepcopy(FAKE_INVOICE)
+        invoice_data.update({"paid": False, "closed": False})
+        invoice_data.pop("forgiven")
+        invoice = Invoice.sync_from_stripe_data(invoice_data)
+
+        self.assertEqual(Invoice.STATUS_OPEN, invoice.status)
+
+    @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
     def test_status_closed(self, charge_retrieve_mock, subscription_retrieve_mock, default_account_mock):
         default_account_mock.return_value = self.account
 
@@ -122,6 +151,36 @@ class InvoiceTest(TestCase):
         invoice = Invoice.sync_from_stripe_data(invoice_data)
 
         self.assertEqual(Invoice.STATUS_CLOSED, invoice.status)
+
+    @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
+    def test_status_closed_deprecated(self, charge_retrieve_mock, subscription_retrieve_mock, default_account_mock):
+        # closed parameter deprecated in API 2018-11-08 - see https://stripe.com/docs/upgrades#2018-11-08
+        default_account_mock.return_value = self.account
+
+        invoice_data = deepcopy(FAKE_INVOICE)
+        invoice_data.update({"paid": False})
+        invoice_data["auto_advance"] = not invoice_data.pop("closed")
+
+        invoice = Invoice.sync_from_stripe_data(invoice_data)
+
+        self.assertEqual(Invoice.STATUS_CLOSED, invoice.status)
+
+    @patch("djstripe.models.Account.get_default_account")
+    @patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
+    def test_status_closed_default(self, charge_retrieve_mock, subscription_retrieve_mock, default_account_mock):
+        # closed parameter deprecated in API 2018-11-08 - see https://stripe.com/docs/upgrades#2018-11-08
+        default_account_mock.return_value = self.account
+
+        invoice_data = deepcopy(FAKE_INVOICE)
+        invoice_data.update({"paid": False})
+        invoice_data.pop("closed")
+
+        invoice = Invoice.sync_from_stripe_data(invoice_data)
+
+        self.assertEqual(Invoice.STATUS_OPEN, invoice.status)
 
     @patch("djstripe.models.Account.get_default_account")
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))

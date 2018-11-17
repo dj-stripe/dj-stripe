@@ -2229,6 +2229,27 @@ class Invoice(StripeObject):
         return "Invoice #{number}".format(number=self.number or self.receipt_number or self.stripe_id)
 
     @classmethod
+    def _manipulate_stripe_object_hook(cls, data):
+        data = super(Invoice, cls)._manipulate_stripe_object_hook(data)
+        # fixup fields to maintain compatibility while avoiding a database migration on the stable branch
+
+        # deprecated in API 2018-11-08 - see https://stripe.com/docs/upgrades#2018-11-08
+        if "closed" not in data:
+            # https://stripe.com/docs/billing/invoices/migrating-new-invoice-states#autoadvance
+            if "auto_advance" in data:
+                data["closed"] = not data["auto_advance"]
+            else:
+                data["closed"] = False
+
+        if "forgiven" not in data:
+            if "status" in data:
+                data["forgiven"] = data["status"] == "uncollectible"
+            else:
+                data["forgiven"] = False
+
+        return data
+
+    @classmethod
     def _stripe_object_to_charge(cls, target_cls, data):
         """
         Search the given manager for the Charge matching this object's ``charge`` field.
