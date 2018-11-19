@@ -1656,6 +1656,7 @@ class BankAccount(StripeObject):
         "Customer", on_delete=models.SET_NULL, null=True, related_name="bank_account"
     )
     default_for_currency = StripeNullBooleanField(
+        stripe_required=False,
         help_text="Whether this external account is the default account for its currency."
     )
     fingerprint = StripeCharField(
