@@ -1633,7 +1633,7 @@ class Refund(StripeObject):
 class BankAccount(StripeObject):
     account = ForeignKey(
         "Account", on_delete=models.PROTECT,
-        related_name="bank_account",
+        related_name="bank_account", null=True,
         help_text="The account the charge was made on behalf of. Null here indicates that this value was never set."
     )
     account_holder_name = StripeCharField(
