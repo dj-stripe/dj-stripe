@@ -3,7 +3,7 @@
 History
 =======
 
-1.3.0 (unreleased)
+2.0.0 (unreleased)
 ------------------
 
 - The Python stripe library minimum version is now ``2.3.0``.
@@ -52,6 +52,7 @@ History
   None or an empty string now also disables the behaviour altogether.
 - Text-type fields in dj-stripe will no longer ever be None. Instead, any falsy
   text field will return an empty string.
+- Switched test runner to pytest-django
 
 1.2.1 (2018-07-18)
 ------------------
@@ -107,7 +108,7 @@ dj-stripe 1.1.0 drops support for Django 1.10 and adds support for
 Django 2.0. Django 1.11+ and Python 2.7+ or 3.4+ are required.
 
 Support for Python versions older than 3.5, and Django versions older
-than 2.0, will be dropped in dj-stripe 1.3.0.
+than 2.0, will be dropped in dj-stripe 2.0.0.
 
 Backwards-incompatible changes and deprecations
 -----------------------------------------------
@@ -122,7 +123,7 @@ Customer, Charge, Invoice, etc models.
 
 Importing those legacy models from ``djstripe.stripe_objects`` will
 yield the new ones. This is deprecated and support for this will be
-dropped in dj-stripe 1.3.0.
+dropped in dj-stripe 2.0.0.
 
 Full support for Stripe Sources (Support for v3 stripe.js)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -141,7 +142,7 @@ can resolve into a Card, a Source, or a BankAccount object.
 -  References to ``Customer.sources`` expecting a queryset of Card
    objects should be updated to ``Customer.legacy_cards``.
 -  The legacy ``StripeSource`` name refers to the ``Card`` model. This
-   will be removed in dj-stripe 1.3.0. Update your references to either
+   will be removed in dj-stripe 2.0.0. Update your references to either
    ``Card`` or ``Source``.
 -  ``enums.SourceType`` has been renamed to ``enums.LegacySourceType``.
    ``enums.SourceType`` now refers to the actual Stripe Source types
@@ -153,7 +154,7 @@ Core fields renamed
 -  The numeric ``id`` field has been renamed to ``djstripe_id``. This
    avoids a clash with the upstream stripe id. Accessing ``.id`` is
    deprecated and \**will reference the upstream ``stripe_id`` in
-   dj-stripe 1.3.0
+   dj-stripe 2.0.0
 
 .. _by filing an issue on GitHub: https://github.com/dj-stripe/dj-stripe/issues
 

@@ -144,6 +144,40 @@ def check_webhook_secret(app_configs=None, **kwargs):
 
 
 @checks.register("djstripe")
+def check_webhook_validation(app_configs=None, **kwargs):
+    """
+    Check that DJSTRIPE_WEBHOOK_VALIDATION is valid
+    """
+    from . import settings as djstripe_settings
+
+    messages = []
+
+    validation_options = ("verify_signature", "retrieve_event")
+
+    if djstripe_settings.WEBHOOK_VALIDATION is None:
+        messages.append(checks.Warning(
+            "Webhook validation is disabled, this is a security risk if the webhook view is enabled",
+            hint="Set DJSTRIPE_WEBHOOK_VALIDATION to one of {}".format(", ".join(validation_options)),
+            id="djstripe.W004"
+        ))
+    elif djstripe_settings.WEBHOOK_VALIDATION == "verify_signature":
+        if not djstripe_settings.WEBHOOK_SECRET:
+            messages.append(checks.Critical(
+                "DJSTRIPE_WEBHOOK_VALIDATION='verify_signature' but DJSTRIPE_WEBHOOK_SECRET is not set",
+                hint="Set DJSTRIPE_WEBHOOK_SECRET or set DJSTRIPE_WEBHOOK_VALIDATION='retrieve_event'",
+                id="djstripe.C006"
+            ))
+    elif djstripe_settings.WEBHOOK_VALIDATION not in validation_options:
+        messages.append(checks.Critical(
+            "DJSTRIPE_WEBHOOK_VALIDATION is invalid",
+            hint="Set DJSTRIPE_WEBHOOK_VALIDATION to one of {} or None".format(", ".join(validation_options)),
+            id="djstripe.C007"
+        ))
+
+    return messages
+
+
+@checks.register("djstripe")
 def check_subscriber_key_length(app_configs=None, **kwargs):
     """
     Check that DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY fits in metadata.

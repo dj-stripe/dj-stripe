@@ -145,13 +145,16 @@ class WebhookEventTrigger(models.Model):
             logger.info("Test webhook received: {}".format(local_data))
             return False
 
-        # If the DJSTRIPE_WEBHOOK_SECRET setting is set, use signature verification
-        if djstripe_settings.WEBHOOK_SECRET:
+        if djstripe_settings.WEBHOOK_VALIDATION is None:
+            # validation disabled
+            return True
+        elif djstripe_settings.WEBHOOK_VALIDATION == "verify_signature" and djstripe_settings.WEBHOOK_SECRET:
             try:
                 stripe.WebhookSignature.verify_header(
                     self.body,
                     self.headers.get("stripe-signature"),
-                    djstripe_settings.WEBHOOK_SECRET
+                    djstripe_settings.WEBHOOK_SECRET,
+                    djstripe_settings.WEBHOOK_TOLERANCE,
                 )
             except stripe.error.SignatureVerificationError:
                 return False

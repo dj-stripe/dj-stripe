@@ -1312,7 +1312,7 @@ class Product(StripeModel):
         )
     )
     attributes = JSONField(
-        null=True,
+        null=True, blank=True,
         help_text=(
             "A list of up to 5 attributes that each SKU can provide values for "
             '(e.g., `["color", "size"]`). Only applicable to products of `type=good`.'
@@ -1357,7 +1357,7 @@ class Product(StripeModel):
     )
     url = models.CharField(
         max_length=799,
-        null=True,
+        null=True, blank=True,
         help_text=(
             "A URL of a publicly-accessible webpage for this product. "
             "Only applicable to products of `type=good`."

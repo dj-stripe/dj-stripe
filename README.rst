@@ -33,6 +33,8 @@ Requirements
 * Django >= 2.0
 * Python >= 3.4
 * Supports Stripe exclusively. For PayPal, see `dj-paypal <https://github.com/HearthSim/dj-paypal>`_ instead.
+* PostgreSQL engine (recommended): >= 9.4
+* MySQL engine: MariaDB >= 10.2 or MySQL >= 5.7
 
 
 Quickstart
