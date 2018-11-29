@@ -55,7 +55,7 @@ subscriber_request_callback = get_callback_function("DJSTRIPE_SUBSCRIBER_MODEL_R
 SUBSCRIBER_MODEL_DB_CONSTRAINT = getattr(
     settings,
     "DJSTRIPE_SUBSCRIBER_MODEL_DB_CONSTRAINT",
-    False
+    True
 )
 
 
