@@ -52,6 +52,12 @@ def get_callback_function(setting_name, default=None):
 subscriber_request_callback = get_callback_function("DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK",
                                                     default=(lambda request: request.user))
 
+SUBSCRIBER_MODEL_DB_CONSTRAINT = getattr(
+    settings,
+    "DJSTRIPE_SUBSCRIBER_MODEL_DB_CONSTRAINT",
+    False
+)
+
 
 def _get_idempotency_key(object_type, action, livemode):
     from .models import IdempotencyKey
