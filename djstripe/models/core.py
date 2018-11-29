@@ -2,6 +2,7 @@ import decimal
 import warnings
 
 import stripe
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -410,6 +411,11 @@ class Customer(StripeModel):
         null=True,
         on_delete=models.SET_NULL,
         related_name="djstripe_customers",
+        db_constraint=getattr(
+            settings,
+            'SUBSCRIBER_MODEL_DB_CONSTRAINT',
+            False
+        )
     )
     date_purged = models.DateTimeField(null=True, editable=False)
 
