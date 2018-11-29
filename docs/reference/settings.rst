@@ -171,6 +171,14 @@ Examples:
 .. note:: This callback only becomes active when ``DJSTRIPE_SUBSCRIBER_MODEL`` is set.
 
 
+DJSTRIPE_SUBSCRIBER_MODEL_DB_CONSTRAINT (=True)
+==================================================
+
+Setting this to ``False`` will make subcriber field of Customer model db_constraint value to be False.
+Do not set this value to ``False`` unless you are not fully aware of what is it about.
+
+This setting might be usefull only if your users are stored in an external application and you are retrieving user information with a custom authentication backend.
+
 DJSTRIPE_USE_NATIVE_JSONFIELD (=False)
 ======================================
 
