@@ -3,19 +3,22 @@ from django.db.models.fields import CharField, EmailField
 
 
 class Organization(Model):
-    """ Model used to test the new custom model setting."""
-    email = EmailField()
+	""" Model used to test the new custom model setting."""
+
+	email = EmailField()
 
 
 class StaticEmailOrganization(Model):
-    """ Model used to test the new custom model setting."""
-    name = CharField(max_length=200, unique=True)
+	""" Model used to test the new custom model setting."""
 
-    @property
-    def email(self):
-        return "static@example.com"
+	name = CharField(max_length=200, unique=True)
+
+	@property
+	def email(self):
+		return "static@example.com"
 
 
 class NoEmailOrganization(Model):
-    """ Model used to test the new custom model setting."""
-    name = CharField(max_length=200, unique=True)
+	""" Model used to test the new custom model setting."""
+
+	name = CharField(max_length=200, unique=True)
