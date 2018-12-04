@@ -113,6 +113,9 @@ Before you submit a pull request, check that it meets these guidelines:
 3. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring.
 4. If the pull request makes changes to a model, include Django migrations.
-5. The pull request should work for Python 3.4, 3.5 and 3.6. Check
+5. The pull request should work for Python 3.6+. Check
    https://travis-ci.org/dj-stripe/dj-stripe/pull_requests
    and make sure that the tests pass for all supported Python versions.
+6. Code formatting: Make sure to install ``tan`` and ``isort`` with
+   ``pip install tan isort`` and run ``tan --use-tabs .; isort -y **/*.py``
+   at the dj-stripe root to keep a consistent style.
