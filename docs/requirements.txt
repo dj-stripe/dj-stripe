@@ -1,0 +1,15 @@
+pip>=10.0.1
+setuptools>=39.2.0
+wheel>=0.31.1
+six>=1.11.0
+django>=2.0.5
+stripe>=1.53.0
+python-doc-inherit>=0.3.0
+jsonfield>=2.0.2
+tqdm>=4.8.4
+
+# Docs
+sphinx>=1.7.4
+sphinx_rtd_theme>=0.1.9
+sphinx-autobuild>=0.6.0
+sphinxcontrib-django
