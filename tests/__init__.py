@@ -658,6 +658,56 @@ FAKE_SUBSCRIPTION_III = SubscriptionDict(
 	}
 )
 
+FAKE_SUBSCRIPTION_MULTI_PLAN = SubscriptionDict(
+	{
+		"id": "sub_E79FrmCOtMMxqp",
+		"object": "subscription",
+		"application_fee_percent": None,
+		"billing": "charge_automatically",
+		"cancel_at_period_end": False,
+		"canceled_at": None,
+		"current_period_end": 1546912192,
+		"current_period_start": 1544233792,
+		"customer": "cus_4UbFSo9tl62jqj",
+		"discount": None,
+		"ended_at": None,
+		"metadata": {},
+		"plan": None,
+		"quantity": None,
+		"start": 1544233792,
+		"status": "active",
+		"tax_percent": None,
+		"trial_end": None,
+		"trial_start": None,
+		"items": {
+			"data": [
+				{
+					"created": 1544233793,
+					"id": "si_E79FjMrM7eM0II",
+					"metadata": {},
+					"object": "subscription_item",
+					"plan": deepcopy(FAKE_PLAN),
+					"quantity": 1,
+					"subscription": "sub_E79FrmCOtMMxqp",
+				},
+				{
+					"created": 1544233793,
+					"id": "si_E79FjKZf0GFOs2",
+					"metadata": {},
+					"object": "subscription_item",
+					"plan": deepcopy(FAKE_PLAN_II),
+					"quantity": 1,
+					"subscription": "sub_E79FrmCOtMMxqp",
+				},
+			],
+			"has_more": False,
+			"object": "list",
+			"total_count": 2,
+			"url": "/v1/subscription_items?subscription=sub_E79FrmCOtMMxqp",
+		},
+	}
+)
+
 
 class Sources(object):
 	def __init__(self, card_fakes):
@@ -754,10 +804,10 @@ FAKE_CUSTOMER_II = CustomerDict(
 		},
 		"subscriptions": {
 			"object": "list",
-			"total_count": 1,
+			"total_count": 2,
 			"has_more": False,
 			"url": "/v1/customers/cus_4UbFSo9tl62jqj/subscriptions",
-			"data": [deepcopy(FAKE_SUBSCRIPTION_III)],
+			"data": [deepcopy(FAKE_SUBSCRIPTION_III), deepcopy(FAKE_SUBSCRIPTION_MULTI_PLAN)],
 		},
 	}
 )

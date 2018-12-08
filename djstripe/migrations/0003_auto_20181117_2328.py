@@ -1242,4 +1242,25 @@ class Migration(migrations.Migration):
 				max_length=5000,
 			),
 		),
+		migrations.AlterField(
+			model_name="subscription",
+			name="plan",
+			field=models.ForeignKey(
+				blank=True,
+				help_text="The plan associated with this subscription. This value will be `null` for multi-plan subscriptions",
+				null=True,
+				on_delete=django.db.models.deletion.CASCADE,
+				related_name="subscriptions",
+				to="djstripe.Plan",
+			),
+		),
+		migrations.AlterField(
+			model_name="subscription",
+			name="quantity",
+			field=models.IntegerField(
+				blank=True,
+				help_text="The quantity applied to this subscription. This value will be `null` for multi-plan subscriptions",
+				null=True,
+			),
+		),
 	]

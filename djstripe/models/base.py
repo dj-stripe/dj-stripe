@@ -397,6 +397,32 @@ class StripeModel(models.Model):
 		if "subscription" in data and data["subscription"]:
 			return target_cls._get_or_create_from_stripe_object(data, "subscription")[0]
 
+	@classmethod
+	def _stripe_object_to_subscription_items(cls, target_cls, data, subscription):
+		"""
+		Retrieves SubscriptionItems for a subscription.
+
+		If the subscription item doesn't exist already then it is created.
+
+		:param target_cls: The target class to instantiate per invoice item.
+		:type target_cls: ``SubscriptionItem``
+		:param data: The data dictionary received from the Stripe API.
+		:type data: dict
+		:param invoice: The invoice object that should hold the invoice items.
+		:type invoice: ``djstripe.models.Subscription``
+		"""
+
+		items = data.get("items")
+		if not items:
+			return []
+
+		subscriptionitems = []
+		for item_data in items.get("data", []):
+			item, _ = target_cls._get_or_create_from_stripe_object(item_data, refetch=False)
+			subscriptionitems.append(item)
+
+		return subscriptionitems
+
 	def _sync(self, record_data):
 		for attr, value in record_data.items():
 			setattr(self, attr, value)

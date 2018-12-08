@@ -990,11 +990,17 @@ class Subscription(StripeModel):
 	)
 	plan = models.ForeignKey(
 		"Plan",
+		null=True,
+		blank=True,
 		on_delete=models.CASCADE,
 		related_name="subscriptions",
-		help_text="The plan associated with this subscription.",
+		help_text="The plan associated with this subscription. This value will be `null` for multi-plan subscriptions",
 	)
-	quantity = models.IntegerField(help_text="The quantity applied to this subscription.")
+	quantity = models.IntegerField(
+		null=True,
+		blank=True,
+		help_text="The quantity applied to this subscription. This value will be `null` for multi-plan subscriptions",
+	)
 	start = StripeDateTimeField(help_text="Date the subscription started.")
 	status = StripeEnumField(
 		enum=enums.SubscriptionStatus, help_text="The status of this subscription."
@@ -1032,7 +1038,8 @@ class Subscription(StripeModel):
 
 		"""
 
-		return target_cls._get_or_create_from_stripe_object(data["plan"])[0]
+		if data["plan"]:
+			return target_cls._get_or_create_from_stripe_object(data["plan"])[0]
 
 	def __str__(self):
 		return "{customer} on {plan}".format(customer=str(self.customer), plan=str(self.plan))
@@ -1214,6 +1221,11 @@ class Subscription(StripeModel):
 		self.customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
 		self.plan = cls._stripe_object_to_plan(target_cls=Plan, data=data)
 
+	def _attach_objects_post_save_hook(self, cls, data):
+		cls._stripe_object_to_subscription_items(
+			target_cls=SubscriptionItem, data=data, subscription=self
+		)
+
 
 class SubscriptionItem(StripeModel):
 	"""
@@ -1240,6 +1252,27 @@ class SubscriptionItem(StripeModel):
 		related_name="items",
 		help_text="The subscription this subscription item belongs to.",
 	)
+
+	@classmethod
+	def _stripe_object_to_plan(cls, target_cls, data):
+		"""
+		Search the given manager for the Plan matching this SubscriptionItem object's ``plan`` field.
+		Note that the plan field is already expanded in each request and is required.
+
+		:param target_cls: The target class
+		:type target_cls: Plan
+		:param data: stripe object
+		:type data: dict
+
+		"""
+
+		return target_cls._get_or_create_from_stripe_object(data["plan"])[0]
+
+	def _attach_objects_hook(self, cls, data):
+		self.subscription = cls._stripe_object_to_subscription(
+			target_cls=Subscription, data=data
+		)
+		self.plan = cls._stripe_object_to_plan(target_cls=Plan, data=data)
 
 
 class UsageRecord(StripeModel):
