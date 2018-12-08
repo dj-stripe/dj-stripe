@@ -148,6 +148,15 @@ class SubscriptionInline(admin.StackedInline):
 	show_change_link = True
 
 
+class SubscriptionItemInline(admin.StackedInline):
+	"""A TabularInline for use models.Subscription."""
+
+	model = models.SubscriptionItem
+	extra = 0
+	readonly_fields = ("id", "created")
+	show_change_link = True
+
+
 class InvoiceItemInline(admin.StackedInline):
 	"""A TabularInline for use InvoiceItem."""
 
@@ -323,6 +332,8 @@ class SubscriptionAdmin(StripeModelAdmin):
 	raw_id_fields = ("customer",)
 	list_display = ("customer", "status")
 	list_filter = ("status", "cancel_at_period_end")
+
+	inlines = (SubscriptionItemInline,)
 
 	def cancel_subscription(self, request, queryset):
 		"""Cancel a subscription."""

@@ -14,8 +14,8 @@ from djstripe.enums import SubscriptionStatus
 from djstripe.models import Plan, Subscription
 
 from . import (
-	FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II, FAKE_SUBSCRIPTION,
-	FAKE_SUBSCRIPTION_CANCELED, datetime_to_unix
+	FAKE_CUSTOMER, FAKE_CUSTOMER_II, FAKE_PLAN, FAKE_PLAN_II, FAKE_SUBSCRIPTION,
+	FAKE_SUBSCRIPTION_CANCELED, FAKE_SUBSCRIPTION_MULTI_PLAN, datetime_to_unix
 )
 
 
@@ -364,3 +364,20 @@ class SubscriptionTest(TestCase):
 
 		with self.assertRaises(InvalidRequestError):
 			subscription.cancel(at_period_end=False)
+
+	@patch("stripe.Plan.retrieve")
+	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER_II))
+	@patch(
+		"stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION_MULTI_PLAN)
+	)
+	def test_sync_multi_plan(
+		self, subscription_retrieve_mock, customer_retrieve_mock, plan_retrieve_mock
+	):
+		subscription_fake = deepcopy(FAKE_SUBSCRIPTION_MULTI_PLAN)
+		subscription = Subscription.sync_from_stripe_data(subscription_fake)
+
+		self.assertIsNone(subscription.plan)
+		self.assertIsNone(subscription.quantity)
+
+		items = subscription.items.all()
+		self.assertEqual(2, len(items))

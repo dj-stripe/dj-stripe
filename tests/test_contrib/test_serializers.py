@@ -69,7 +69,6 @@ class SubscriptionSerializerTest(TestCase):
 			data={
 				"id": "sub_6lsC8pt7IcFpjA",
 				"customer": self.customer.djstripe_id,
-				"billing": "charge_automatically",
 				"plan": self.plan.djstripe_id,
 				"start": now,
 				"status": SubscriptionStatus.active,
@@ -79,7 +78,7 @@ class SubscriptionSerializerTest(TestCase):
 		)
 		self.assertFalse(serializer.is_valid())
 		self.assertEqual(serializer.validated_data, {})
-		self.assertEqual(serializer.errors, {"quantity": ["This field is required."]})
+		self.assertEqual(serializer.errors, {"billing": ["This field is required."]})
 
 
 class CreateSubscriptionSerializerTest(TestCase):
