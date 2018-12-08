@@ -15,7 +15,8 @@ from django.test import TestCase
 from django.utils import timezone
 
 from djstripe.contrib.rest_framework.serializers import (
-	CreateSubscriptionSerializer, SubscriptionSerializer
+	CreateSubscriptionSerializer,
+	SubscriptionSerializer,
 )
 from djstripe.enums import SubscriptionStatus
 from djstripe.models import Plan

@@ -6,8 +6,12 @@ from django.db import models
 from .. import enums
 from .. import settings as djstripe_settings
 from ..fields import (
-	JSONField, StripeCurrencyCodeField, StripeDecimalCurrencyAmountField,
-	StripeEnumField, StripeIdField, StripeQuantumCurrencyAmountField
+	JSONField,
+	StripeCurrencyCodeField,
+	StripeDecimalCurrencyAmountField,
+	StripeEnumField,
+	StripeIdField,
+	StripeQuantumCurrencyAmountField,
 )
 from ..managers import TransferManager
 from .base import StripeModel

@@ -6,7 +6,10 @@ from .. import enums
 from .. import settings as djstripe_settings
 from ..exceptions import StripeObjectManipulationException
 from ..fields import (
-	JSONField, StripeCurrencyCodeField, StripeDecimalCurrencyAmountField, StripeEnumField
+	JSONField,
+	StripeCurrencyCodeField,
+	StripeDecimalCurrencyAmountField,
+	StripeEnumField,
 )
 from .base import StripeModel, logger
 from .core import Customer

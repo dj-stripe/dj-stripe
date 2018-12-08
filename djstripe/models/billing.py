@@ -10,8 +10,13 @@ from stripe.error import InvalidRequestError
 from .. import enums
 from .. import settings as djstripe_settings
 from ..fields import (
-	JSONField, StripeCurrencyCodeField, StripeDateTimeField,
-	StripeDecimalCurrencyAmountField, StripeEnumField, StripeIdField, StripePercentField
+	JSONField,
+	StripeCurrencyCodeField,
+	StripeDateTimeField,
+	StripeDecimalCurrencyAmountField,
+	StripeEnumField,
+	StripeIdField,
+	StripePercentField,
 )
 from ..managers import SubscriptionManager
 from ..utils import QuerySetMock, get_friendly_currency_amount
