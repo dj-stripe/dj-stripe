@@ -125,5 +125,5 @@ Before you submit a pull request, check that it meets these guidelines:
    https://travis-ci.org/dj-stripe/dj-stripe/pull_requests
    and make sure that the tests pass for all supported Python versions.
 6. Code formatting: Make sure to install ``tan`` and ``isort`` with
-   ``pip install tan isort`` and run ``tan --use-tabs .; isort -y **/*.py``
+   ``pip install tan isort`` and run ``tan --use-tabs .; isort -y``
    at the dj-stripe root to keep a consistent style.
