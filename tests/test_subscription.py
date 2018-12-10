@@ -14,12 +14,13 @@ from djstripe.enums import SubscriptionStatus
 from djstripe.models import Plan, Subscription
 
 from . import (
-	FAKE_CUSTOMER, FAKE_CUSTOMER_II, FAKE_PLAN, FAKE_PLAN_II, FAKE_SUBSCRIPTION,
-	FAKE_SUBSCRIPTION_CANCELED, FAKE_SUBSCRIPTION_MULTI_PLAN, datetime_to_unix
+	FAKE_CUSTOMER, FAKE_CUSTOMER_II, FAKE_PLAN, FAKE_PLAN_II,
+	FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_CANCELED,
+	FAKE_SUBSCRIPTION_MULTI_PLAN, AssertStripeFksMixin, datetime_to_unix
 )
 
 
-class SubscriptionTest(TestCase):
+class SubscriptionTest(AssertStripeFksMixin, TestCase):
 	def setUp(self):
 		self.user = get_user_model().objects.create_user(
 			username="pydanny", email="pydanny@gmail.com"
@@ -35,6 +36,11 @@ class SubscriptionTest(TestCase):
 		self.assertEqual(
 			str(subscription),
 			"{email} on {plan}".format(email=self.user.email, plan=str(subscription.plan)),
+		)
+
+		self.assert_fks(
+			subscription,
+			expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"},
 		)
 
 	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
@@ -56,6 +62,11 @@ class SubscriptionTest(TestCase):
 		self.assertTrue(self.customer.has_active_subscription())
 		self.assertTrue(self.customer.has_any_active_subscription())
 
+		self.assert_fks(
+			subscription,
+			expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"},
+		)
+
 	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
 	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
 	def test_is_status_temporarily_current_false(
@@ -72,6 +83,11 @@ class SubscriptionTest(TestCase):
 		self.assertTrue(subscription in self.customer.active_subscriptions)
 		self.assertTrue(self.customer.has_active_subscription())
 		self.assertTrue(self.customer.has_any_active_subscription())
+
+		self.assert_fks(
+			subscription,
+			expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"},
+		)
 
 	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
 	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
@@ -90,6 +106,11 @@ class SubscriptionTest(TestCase):
 		self.assertFalse(subscription in self.customer.active_subscriptions)
 		self.assertFalse(self.customer.has_active_subscription())
 		self.assertFalse(self.customer.has_any_active_subscription())
+
+		self.assert_fks(
+			subscription,
+			expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"},
+		)
 
 	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
 	@patch("stripe.Subscription.retrieve")
@@ -115,6 +136,11 @@ class SubscriptionTest(TestCase):
 		self.assertTrue(self.customer.has_active_subscription())
 		self.assertTrue(self.customer.has_any_active_subscription())
 
+		self.assert_fks(
+			subscription,
+			expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"},
+		)
+
 	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
 	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
@@ -129,6 +155,11 @@ class SubscriptionTest(TestCase):
 
 		self.assertFalse(self.customer.has_active_subscription())
 		self.assertFalse(self.customer.has_any_active_subscription())
+
+		self.assert_fks(
+			subscription,
+			expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"},
+		)
 
 	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
@@ -152,6 +183,11 @@ class SubscriptionTest(TestCase):
 		self.assertTrue(self.customer.has_active_subscription())
 		self.assertTrue(self.customer.has_any_active_subscription())
 
+		self.assert_fks(
+			subscription,
+			expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"},
+		)
+
 	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
 	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
@@ -166,6 +202,11 @@ class SubscriptionTest(TestCase):
 		new_subscription = subscription.update(quantity=4)
 
 		self.assertEqual(4, new_subscription.quantity)
+
+		self.assert_fks(
+			subscription,
+			expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"},
+		)
 
 	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
 	@patch("stripe.Subscription.retrieve")
@@ -184,6 +225,11 @@ class SubscriptionTest(TestCase):
 
 		self.assertEqual(Decimal(0.0), new_subscription.tax_percent)
 
+		self.assert_fks(
+			subscription,
+			expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"},
+		)
+
 	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
 	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
@@ -199,6 +245,13 @@ class SubscriptionTest(TestCase):
 		new_subscription = subscription.update(plan=new_plan)
 
 		self.assertEqual(FAKE_PLAN_II["id"], new_subscription.plan.id)
+
+		self.assert_fks(
+			subscription,
+			expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"},
+		)
+
+		self.assert_fks(new_plan, expected_blank_fks={"djstripe.Plan.product"})
 
 	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
 	@patch("stripe.Subscription.retrieve")
@@ -233,6 +286,11 @@ class SubscriptionTest(TestCase):
 		self.assertFalse(new_subscription in self.customer.active_subscriptions)
 		self.assertFalse(self.customer.has_active_subscription())
 		self.assertFalse(self.customer.has_any_active_subscription())
+
+		self.assert_fks(
+			subscription,
+			expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"},
+		)
 
 	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
 	@patch("stripe.Subscription.retrieve")
@@ -272,6 +330,11 @@ class SubscriptionTest(TestCase):
 		self.assertTrue(self.customer.has_active_subscription())
 		self.assertTrue(self.customer.has_any_active_subscription())
 
+		self.assert_fks(
+			subscription,
+			expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"},
+		)
+
 	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
 	@patch("stripe.Subscription.retrieve")
 	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
@@ -303,6 +366,11 @@ class SubscriptionTest(TestCase):
 		self.assertFalse(new_subscription.is_valid())
 		self.assertFalse(self.customer.has_active_subscription())
 		self.assertFalse(self.customer.has_any_active_subscription())
+
+		self.assert_fks(
+			subscription,
+			expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"},
+		)
 
 	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
 	@patch("stripe.Subscription.retrieve")
@@ -337,6 +405,11 @@ class SubscriptionTest(TestCase):
 		)
 		self.assertEqual(reactivated_subscription.cancel_at_period_end, False)
 
+		self.assert_fks(
+			subscription,
+			expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"},
+		)
+
 	@patch("djstripe.models.Subscription._api_delete")
 	@patch(
 		"stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION_CANCELED)
@@ -355,6 +428,11 @@ class SubscriptionTest(TestCase):
 		subscription.cancel(at_period_end=False)
 		self.assertEqual(Subscription.objects.filter(status="canceled").count(), 1)
 
+		self.assert_fks(
+			subscription,
+			expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"},
+		)
+
 	@patch("djstripe.models.Subscription._api_delete")
 	def test_cancel_error_in_cancel(self, subscription_delete_mock):
 		subscription_delete_mock.side_effect = InvalidRequestError("Unexpected error", "blah")
@@ -364,6 +442,11 @@ class SubscriptionTest(TestCase):
 
 		with self.assertRaises(InvalidRequestError):
 			subscription.cancel(at_period_end=False)
+
+		self.assert_fks(
+			subscription,
+			expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"},
+		)
 
 	@patch("stripe.Plan.retrieve")
 	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER_II))

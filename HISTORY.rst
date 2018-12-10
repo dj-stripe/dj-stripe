@@ -53,6 +53,8 @@ History
 - Text-type fields in dj-stripe will no longer ever be None. Instead, any falsy
   text field will return an empty string.
 - Switched test runner to pytest-django
+- ``StripeModel.sync_from_stripe_data()`` will now automatically retrieve related objects
+  and populate foreign keys.
 
 1.2.1 (2018-07-18)
 ------------------

@@ -11,11 +11,12 @@ from django.test import TestCase
 from djstripe.models import Source
 
 from . import (
-	FAKE_CUSTOMER_III, FAKE_SOURCE, FAKE_SOURCE_II, SourceDict, default_account
+	FAKE_CUSTOMER_III, FAKE_SOURCE, FAKE_SOURCE_II,
+	AssertStripeFksMixin, SourceDict, default_account
 )
 
 
-class SourceTest(TestCase):
+class SourceTest(AssertStripeFksMixin, TestCase):
 	def setUp(self):
 		self.account = default_account()
 		self.user = get_user_model().objects.create_user(
@@ -29,16 +30,22 @@ class SourceTest(TestCase):
 		source = Source.sync_from_stripe_data(deepcopy(FAKE_SOURCE_II))
 		self.assertEqual(source.customer, None)
 
+		self.assert_fks(source, expected_blank_fks={"djstripe.Source.customer"})
+
 	def test_sync_source_finds_customer(self):
 		source = Source.sync_from_stripe_data(deepcopy(FAKE_SOURCE))
 
 		self.assertEqual(self.customer, source.customer)
+
+		self.assert_fks(source, expected_blank_fks={"djstripe.Customer.coupon"})
 
 	def test_str(self):
 		fake_source = deepcopy(FAKE_SOURCE)
 		source = Source.sync_from_stripe_data(fake_source)
 
 		self.assertEqual("<id={}>".format(fake_source["id"]), str(source))
+
+		self.assert_fks(source, expected_blank_fks={"djstripe.Customer.coupon"})
 
 	@patch("stripe.Source.retrieve", return_value=deepcopy(FAKE_SOURCE), autospec=True)
 	def test_detach(self, source_retrieve_mock):
@@ -72,3 +79,5 @@ class SourceTest(TestCase):
 		if sys.version_info >= (3, 6):
 			# this mock isn't working on py34, py35, but it's not strictly necessary for the test
 			mock_detach.assert_called()
+
+		self.assert_fks(source, expected_blank_fks={"djstripe.Source.customer"})

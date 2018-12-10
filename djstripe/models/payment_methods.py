@@ -251,9 +251,6 @@ class Card(StripeModel):
 			.auto_paging_iter()
 		)
 
-	def _attach_objects_hook(self, cls, data):
-		self.customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
-
 	def get_stripe_dashboard_url(self):
 		return self.customer.get_stripe_dashboard_url()
 

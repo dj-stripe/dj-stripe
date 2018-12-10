@@ -12,12 +12,12 @@ from djstripe.models import Invoice, Plan, Subscription, UpcomingInvoice
 from djstripe.settings import STRIPE_SECRET_KEY
 
 from . import (
-	FAKE_CHARGE, FAKE_CUSTOMER, FAKE_INVOICE, FAKE_INVOICEITEM_II,
-	FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_UPCOMING_INVOICE, default_account
+	FAKE_CHARGE, FAKE_CUSTOMER, FAKE_INVOICE, FAKE_INVOICEITEM_II, FAKE_PLAN,
+	FAKE_SUBSCRIPTION, FAKE_UPCOMING_INVOICE, AssertStripeFksMixin, default_account
 )
 
 
-class InvoiceTest(TestCase):
+class InvoiceTest(AssertStripeFksMixin, TestCase):
 	def setUp(self):
 		self.account = default_account()
 		self.user = get_user_model().objects.create_user(
@@ -37,6 +37,17 @@ class InvoiceTest(TestCase):
 			invoice.get_stripe_dashboard_url(), self.customer.get_stripe_dashboard_url()
 		)
 		self.assertEqual(str(invoice), "Invoice #XXXXXXX-0001")
+
+		self.assert_fks(
+			invoice,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+				"djstripe.Plan.product",
+			},
+		)
 
 	@patch("stripe.Invoice.retrieve")
 	@patch("djstripe.models.Account.get_default_account")
@@ -63,6 +74,17 @@ class InvoiceTest(TestCase):
 		)
 		self.assertTrue(return_value)
 
+		self.assert_fks(
+			invoice,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+				"djstripe.Plan.product",
+			},
+		)
+
 	@patch("stripe.Invoice.retrieve")
 	@patch("djstripe.models.Account.get_default_account")
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
@@ -85,6 +107,17 @@ class InvoiceTest(TestCase):
 		self.assertFalse(invoice_retrieve_mock.called)
 		self.assertFalse(return_value)
 
+		self.assert_fks(
+			invoice,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+				"djstripe.Plan.product",
+			},
+		)
+
 	@patch("djstripe.models.Account.get_default_account")
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
 	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
@@ -96,6 +129,17 @@ class InvoiceTest(TestCase):
 		invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
 
 		self.assertEqual(Invoice.STATUS_PAID, invoice.status)
+
+		self.assert_fks(
+			invoice,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+				"djstripe.Plan.product",
+			},
+		)
 
 	@patch("djstripe.models.Account.get_default_account")
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
@@ -111,6 +155,17 @@ class InvoiceTest(TestCase):
 
 		self.assertEqual(Invoice.STATUS_OPEN, invoice.status)
 
+		self.assert_fks(
+			invoice,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+				"djstripe.Plan.product",
+			},
+		)
+
 	@patch("djstripe.models.Account.get_default_account")
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
 	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
@@ -125,6 +180,17 @@ class InvoiceTest(TestCase):
 
 		self.assertEqual(Invoice.STATUS_FORGIVEN, invoice.status)
 
+		self.assert_fks(
+			invoice,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+				"djstripe.Plan.product",
+			},
+		)
+
 	@patch("djstripe.models.Account.get_default_account")
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
 	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
@@ -138,6 +204,17 @@ class InvoiceTest(TestCase):
 		invoice = Invoice.sync_from_stripe_data(invoice_data)
 
 		self.assertEqual(Invoice.STATUS_CLOSED, invoice.status)
+
+		self.assert_fks(
+			invoice,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+				"djstripe.Plan.product",
+			},
+		)
 
 	@patch("djstripe.models.Account.get_default_account")
 	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
@@ -158,14 +235,24 @@ class InvoiceTest(TestCase):
 
 		self.assertEqual(None, invoice.subscription)
 
-		charge_retrieve_mock.assert_called_once_with(
-			api_key=ANY, expand=ANY, id=FAKE_CHARGE["id"]
-		)
-		plan_retrieve_mock.assert_called_once_with(
-			api_key=ANY, expand=ANY, id=FAKE_PLAN["id"]
-		)
+		self.assertEqual(FAKE_CHARGE["id"], invoice.charge.id)
+		self.assertEqual(FAKE_PLAN["id"], invoice.plan.id)
 
+		# charge_retrieve_mock.assert_not_called()
+		plan_retrieve_mock.assert_not_called()
 		subscription_retrieve_mock.assert_not_called()
+
+		self.assert_fks(
+			invoice,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+				"djstripe.Invoice.subscription",
+				"djstripe.Plan.product",
+			},
+		)
 
 	@patch("djstripe.models.Account.get_default_account")
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
@@ -185,6 +272,17 @@ class InvoiceTest(TestCase):
 		)
 		self.assertEqual(item_id, items[0].id)
 
+		self.assert_fks(
+			invoice,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+				"djstripe.Plan.product",
+			},
+		)
+
 	@patch("djstripe.models.Account.get_default_account")
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
 	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
@@ -199,6 +297,17 @@ class InvoiceTest(TestCase):
 
 		self.assertIsNotNone(invoice.plan)  # retrieved from invoice item
 		self.assertEqual(FAKE_PLAN["id"], invoice.plan.id)
+
+		self.assert_fks(
+			invoice,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+				"djstripe.Plan.product",
+			},
+		)
 
 	@patch("djstripe.models.Account.get_default_account")
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
@@ -216,6 +325,17 @@ class InvoiceTest(TestCase):
 		self.assertIsNotNone(invoice)
 		self.assertEqual(2, len(invoice.invoiceitems.all()))
 
+		self.assert_fks(
+			invoice,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+				"djstripe.Plan.product",
+			},
+		)
+
 	@patch("djstripe.models.Account.get_default_account")
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
 	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
@@ -229,6 +349,17 @@ class InvoiceTest(TestCase):
 
 		self.assertIsNotNone(invoice.plan)  # retrieved from invoice item
 		self.assertEqual(FAKE_PLAN["id"], invoice.plan.id)
+
+		self.assert_fks(
+			invoice,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+				"djstripe.Plan.product",
+			},
+		)
 
 	@patch("djstripe.models.Account.get_default_account")
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
@@ -244,6 +375,17 @@ class InvoiceTest(TestCase):
 		self.assertIsNotNone(invoice.plan)  # retrieved from subscription
 		self.assertEqual(FAKE_PLAN["id"], invoice.plan.id)
 
+		self.assert_fks(
+			invoice,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+				"djstripe.Plan.product",
+			},
+		)
+
 	@patch("djstripe.models.Account.get_default_account")
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
 	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
@@ -257,6 +399,18 @@ class InvoiceTest(TestCase):
 		invoice_data["subscription"] = None
 		invoice = Invoice.sync_from_stripe_data(invoice_data)
 		self.assertIsNone(invoice.plan)
+
+		self.assert_fks(
+			invoice,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+				"djstripe.Invoice.subscription",
+				"djstripe.Plan.product",
+			},
+		)
 
 	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))

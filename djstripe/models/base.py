@@ -2,6 +2,7 @@ import logging
 import uuid
 from datetime import timedelta
 
+import django
 from django.db import IntegrityError, models
 from django.utils import dateformat, timezone
 from django.utils.encoding import smart_text
@@ -138,7 +139,7 @@ class StripeModel(models.Model):
 		return data
 
 	@classmethod
-	def _stripe_object_to_record(cls, data):
+	def _stripe_object_to_record(cls, data, current_ids=None, pending_relations=None):
 		"""
 		This takes an object, as it is formatted in Stripe's current API for our object
 		type. In return, it provides a dict. The dict can be used to create a record or
@@ -150,6 +151,10 @@ class StripeModel(models.Model):
 
 		:param data: the object, as sent by Stripe. Parsed from JSON, into a dict
 		:type data: dict
+		:param current_ids: stripe ids of objects that are currently being processed
+		:type current_ids: set
+		:param pending_relations: list of tuples of relations to be attached post-save
+		:type pending_relations: list
 		:return: All the members from the input, translated, mutated, etc
 		:rtype: dict
 		"""
@@ -165,27 +170,94 @@ class StripeModel(models.Model):
 			)
 
 		result = {}
+		if current_ids is None:
+			current_ids = set()
+
 		# Iterate over all the fields that we know are related to Stripe, let each field work its own magic
 		ignore_fields = ["date_purged", "subscriber"]  # XXX: Customer hack
 		for field in cls._meta.fields:
 			if field.name.startswith("djstripe_") or field.name in ignore_fields:
 				continue
 			if isinstance(field, models.ForeignKey):
-				# TODO (#681): Handle foreign keys automatically
-				# For now they're handled in hooks.
-				continue
-
-			if hasattr(field, "stripe_to_db"):
-				field_data = field.stripe_to_db(manipulated_data)
+				field_data, skip = cls._stripe_object_field_to_foreign_key(
+					field=field,
+					manipulated_data=manipulated_data,
+					current_ids=current_ids,
+					pending_relations=pending_relations,
+				)
+				if skip:
+					continue
 			else:
-				field_data = manipulated_data.get(field.name)
+				if hasattr(field, "stripe_to_db"):
+					field_data = field.stripe_to_db(manipulated_data)
+				else:
+					field_data = manipulated_data.get(field.name)
 
-			if isinstance(field, (models.CharField, models.TextField)) and field_data is None:
-				field_data = ""
+				if isinstance(field, (models.CharField, models.TextField)) and field_data is None:
+					field_data = ""
 
 			result[field.name] = field_data
 
 		return result
+
+	@classmethod
+	def _stripe_object_field_to_foreign_key(
+		cls, field, manipulated_data, current_ids=None, pending_relations=None
+	):
+		"""
+		This converts a stripe API field to the dj stripe object it references,
+		so that foreign keys can be connected up automatically.
+
+		:param field:
+		:type field: models.ForeignKey
+		:param manipulated_data:
+		:type manipulated_data: dict
+		:param current_ids: stripe ids of objects that are currently being processed
+		:type current_ids: set
+		:param pending_relations: list of tuples of relations to be attached post-save
+		:type pending_relations: list
+		:return:
+		"""
+		field_data = None
+		field_name = field.name
+		raw_field_data = manipulated_data.get(field_name)
+		refetch = False
+		skip = False
+
+		if issubclass(field.related_model, StripeModel):
+			# see also similar logic in _get_or_create_from_stripe_object
+			if isinstance(raw_field_data, str):
+				# A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}
+				id = raw_field_data
+				refetch = True
+			elif raw_field_data:
+				# A field like {"subscription": {"id": sub_6lsC8pt7IcFpjA", ...}}
+				id = raw_field_data.get("id")
+			else:
+				id = None
+				skip = True
+
+			if id in current_ids:
+				# this object is currently being fetched, don't try to fetch again, to avoid recursion
+				# instead, record the relation that should be be created once "object_id" object exists
+				if pending_relations is not None:
+					object_id = manipulated_data["id"]
+					pending_relations.append((object_id, field, id))
+				skip = True
+
+			if not skip:
+				field_data, _ = field.related_model._get_or_create_from_stripe_object(
+					manipulated_data,
+					field_name,
+					refetch=refetch,
+					current_ids=current_ids,
+					pending_relations=pending_relations,
+				)
+		else:
+			# eg PaymentMethod, handled in hooks
+			skip = True
+
+		return field_data, skip
 
 	@classmethod
 	def is_valid_object(cls, data):
@@ -206,7 +278,7 @@ class StripeModel(models.Model):
 
 		pass
 
-	def _attach_objects_post_save_hook(self, cls, data):
+	def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
 		"""
 		Gets called by this object's create and sync methods just after save.
 		Use this to populate fields after the model is saved.
@@ -216,38 +288,97 @@ class StripeModel(models.Model):
 		:type data: dict
 		"""
 
-		pass
+		unprocessed_pending_relations = []
+		if pending_relations is not None:
+			for post_save_relation in pending_relations:
+				object_id, field, id_ = post_save_relation
+
+				if self.id == id_:
+					# the target instance now exists
+					target = field.model.objects.get(id=object_id)
+					setattr(target, field.name, self)
+					target.save()
+
+					if django.VERSION < (2, 1):
+						# refresh_from_db doesn't clear related objects cache on django<2.1
+						# instead manually clear the instance cache so refresh_from_db will reload it
+						for field in self._meta.concrete_fields:
+							if field.is_relation and field.is_cached(self):
+								field.delete_cached_value(self)
+
+					# reload so that indirect relations back to this object - eg self.charge.invoice = self are set
+					# TODO - reverse the field reference here to avoid hitting the DB?
+					self.refresh_from_db()
+				else:
+					unprocessed_pending_relations.append(post_save_relation)
+
+			if len(pending_relations) != len(unprocessed_pending_relations):
+				# replace in place so passed in list is updated in calling method
+				pending_relations[:] = unprocessed_pending_relations
 
 	@classmethod
-	def _create_from_stripe_object(cls, data, save=True):
+	def _create_from_stripe_object(
+		cls, data, current_ids=None, pending_relations=None, save=True
+	):
 		"""
 		Instantiates a model instance using the provided data object received
 		from Stripe, and saves it to the database if specified.
 
 		:param data: The data dictionary received from the Stripe API.
 		:type data: dict
+		:param current_ids: stripe ids of objects that are currently being processed
+		:type current_ids: set
+		:param pending_relations: list of tuples of relations to be attached post-save
+		:type pending_relations: list
 		:param save: If True, the object is saved after instantiation.
 		:type save: bool
 		:returns: The instantiated object.
 		"""
 
-		instance = cls(**cls._stripe_object_to_record(data))
+		instance = cls(
+			**cls._stripe_object_to_record(
+				data, current_ids=current_ids, pending_relations=pending_relations
+			)
+		)
 		instance._attach_objects_hook(cls, data)
 
 		if save:
 			instance.save(force_insert=True)
 
-		instance._attach_objects_post_save_hook(cls, data)
+		instance._attach_objects_post_save_hook(
+			cls, data, pending_relations=pending_relations
+		)
 
 		return instance
 
 	@classmethod
 	def _get_or_create_from_stripe_object(
-		cls, data, field_name="id", refetch=True, save=True
+		cls,
+		data,
+		field_name="id",
+		refetch=True,
+		current_ids=None,
+		pending_relations=None,
+		save=True,
 	):
+		"""
+
+		:param data:
+		:param field_name:
+		:param refetch:
+		:param current_ids: stripe ids of objects that are currently being processed
+		:type current_ids: set
+		:param pending_relations: list of tuples of relations to be attached post-save
+		:type pending_relations: list
+		:param save:
+		:return:
+		"""
 		field = data.get(field_name)
 		is_nested_data = field_name != "id"
 		should_expand = False
+
+		if pending_relations is None:
+			pending_relations = []
 
 		if isinstance(field, str):
 			# A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}
@@ -285,7 +416,12 @@ class StripeModel(models.Model):
 		)
 
 		try:
-			return cls._create_from_stripe_object(data, save=save), True
+			return (
+				cls._create_from_stripe_object(
+					data, current_ids=current_ids, pending_relations=pending_relations, save=save
+				),
+				True,
+			)
 		except IntegrityError:
 			return cls.stripe_objects.get(id=id), False
 
@@ -293,7 +429,6 @@ class StripeModel(models.Model):
 	def _stripe_object_to_customer(cls, target_cls, data):
 		"""
 		Search the given manager for the Customer matching this object's ``customer`` field.
-
 		:param target_cls: The target class
 		:type target_cls: Customer
 		:param data: stripe object
@@ -302,34 +437,6 @@ class StripeModel(models.Model):
 
 		if "customer" in data and data["customer"]:
 			return target_cls._get_or_create_from_stripe_object(data, "customer")[0]
-
-	@classmethod
-	def _stripe_object_to_transfer(cls, target_cls, data):
-		"""
-		Search the given manager for the Transfer matching this Charge object's ``transfer`` field.
-
-		:param target_cls: The target class
-		:type target_cls: Transfer
-		:param data: stripe object
-		:type data: dict
-		"""
-
-		if "transfer" in data and data["transfer"]:
-			return target_cls._get_or_create_from_stripe_object(data, "transfer")[0]
-
-	@classmethod
-	def _stripe_object_to_invoice(cls, target_cls, data):
-		"""
-		Search the given manager for the Invoice matching this Charge object's ``invoice`` field.
-		Note that the invoice field is required.
-
-		:param target_cls: The target class
-		:type target_cls: Invoice
-		:param data: stripe object
-		:type data: dict
-		"""
-
-		return target_cls._get_or_create_from_stripe_object(data, "invoice")[0]
 
 	@classmethod
 	def _stripe_object_to_invoice_items(cls, target_cls, data, invoice):
@@ -384,20 +491,6 @@ class StripeModel(models.Model):
 		return invoiceitems
 
 	@classmethod
-	def _stripe_object_to_subscription(cls, target_cls, data):
-		"""
-		Search the given manager for the Subscription matching this object's ``subscription`` field.
-
-		:param target_cls: The target class
-		:type target_cls: Subscription
-		:param data: stripe object
-		:type data: dict
-		"""
-
-		if "subscription" in data and data["subscription"]:
-			return target_cls._get_or_create_from_stripe_object(data, "subscription")[0]
-
-	@classmethod
 	def _stripe_object_to_subscription_items(cls, target_cls, data, subscription):
 		"""
 		Retrieves SubscriptionItems for a subscription.
@@ -428,15 +521,22 @@ class StripeModel(models.Model):
 			setattr(self, attr, value)
 
 	@classmethod
-	def sync_from_stripe_data(cls, data):
+	def sync_from_stripe_data(cls, data, field_name="id"):
 		"""
 		Syncs this object from the stripe data provided.
 
 		:param data: stripe object
 		:type data: dict
 		"""
+		current_ids = set()
 
-		instance, created = cls._get_or_create_from_stripe_object(data)
+		if data.get(field_name, None):
+			# stop nested objects from trying to retrieve this object before initial sync is complete
+			current_ids.add(data.get(field_name))
+
+		instance, created = cls._get_or_create_from_stripe_object(
+			data, field_name=field_name, current_ids=current_ids
+		)
 
 		if not created:
 			instance._sync(cls._stripe_object_to_record(data))
