@@ -66,7 +66,16 @@ class TestChargeEvents(EventTestCase):
 	@patch("djstripe.models.Account.get_default_account")
 	@patch("stripe.Charge.retrieve")
 	@patch("stripe.Event.retrieve")
-	def test_charge_created(self, event_retrieve_mock, charge_retrieve_mock, account_mock):
+	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
+	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
+	def test_charge_created(
+		self,
+		subscription_retrieve_mock,
+		invoice_retrieve_mock,
+		event_retrieve_mock,
+		charge_retrieve_mock,
+		account_mock,
+	):
 		FAKE_CUSTOMER.create_for_user(self.user)
 		fake_stripe_event = deepcopy(FAKE_EVENT_CHARGE_SUCCEEDED)
 		event_retrieve_mock.return_value = fake_stripe_event

@@ -9,11 +9,48 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from copy import deepcopy
 from datetime import datetime
 
+from django.db import models
 from django.utils import dateformat, timezone
 
 from djstripe.webhooks import TEST_EVENT_ID
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 FUTURE_DATE = datetime(2100, 4, 30, tzinfo=timezone.utc)
+
+
+class AssertStripeFksMixin:
+	def assert_fks(self, obj, expected_blank_fks, processed_stripe_ids=None):
+		"""
+		Recursively walk through fks on obj, asserting they're not-none
+		:param obj:
+		:param expected_blank_fks: fields that are expected to be None
+		:param processed_stripe_ids: set of objects ids already processed
+		:return:
+		"""
+
+		if processed_stripe_ids is None:
+			processed_stripe_ids = set()
+
+		processed_stripe_ids.add(obj.id)
+
+		for field in obj._meta.fields:
+			if isinstance(field, models.ForeignKey):
+				field_str = str(field)
+				field_value = getattr(obj, field.name)
+
+				if field_str in expected_blank_fks:
+					self.assertIsNone(field_value, field)
+				else:
+					self.assertIsNotNone(field_value, field)
+
+					if field_value.id not in processed_stripe_ids:
+						# recurse into the object if it's not already been checked
+						self.assert_fks(field_value, expected_blank_fks, processed_stripe_ids)
+
+					logger.warning("checked {}".format(field_str))
 
 
 def datetime_to_unix(datetime_):

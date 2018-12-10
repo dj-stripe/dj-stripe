@@ -19,7 +19,7 @@ from ..managers import ChargeManager
 from ..signals import WEBHOOK_SIGNALS
 from ..utils import get_friendly_currency_amount
 from .base import StripeModel, logger
-from .connect import Account, Transfer
+from .connect import Account
 
 # Override the default API version used by the Stripe library.
 djstripe_settings.set_stripe_api_version()
@@ -274,14 +274,6 @@ class Charge(StripeModel):
 
 	def _attach_objects_hook(self, cls, data):
 		from .payment_methods import PaymentMethod
-
-		customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
-		if customer:
-			self.customer = customer
-
-		transfer = cls._stripe_object_to_transfer(target_cls=Transfer, data=data)
-		if transfer:
-			self.transfer = transfer
 
 		# Set the account on this object.
 		destination_account = cls._stripe_object_destination_to_account(
@@ -952,9 +944,13 @@ class Customer(StripeModel):
 		kwargs["customer"] = self
 		return Invoice.upcoming(**kwargs)
 
-	def _attach_objects_post_save_hook(self, cls, data):  # noqa (function complexity)
+	def _attach_objects_post_save_hook(
+		self, cls, data, pending_relations=None
+	):  # noqa (function complexity)
 		from .billing import Coupon
 		from .payment_methods import PaymentMethod
+
+		super()._attach_objects_post_save_hook(cls, data, pending_relations=pending_relations)
 
 		save = False
 
@@ -1444,6 +1440,3 @@ class Refund(StripeModel):
 
 	def get_stripe_dashboard_url(self):
 		return self.charge.get_stripe_dashboard_url()
-
-	def _attach_objects_hook(self, cls, data):
-		self.charge = Charge._get_or_create_from_stripe_object(data, "charge")[0]

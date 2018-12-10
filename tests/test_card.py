@@ -11,10 +11,13 @@ from stripe.error import InvalidRequestError
 from djstripe.exceptions import StripeObjectManipulationException
 from djstripe.models import Card
 
-from . import FAKE_CARD, FAKE_CARD_III, FAKE_CARD_V, FAKE_CUSTOMER, default_account
+from . import (
+	FAKE_CARD, FAKE_CARD_III, FAKE_CARD_V, FAKE_CUSTOMER,
+	AssertStripeFksMixin, default_account
+)
 
 
-class CardTest(TestCase):
+class CardTest(AssertStripeFksMixin, TestCase):
 	def setUp(self):
 		self.account = default_account()
 		self.user = get_user_model().objects.create_user(
@@ -50,6 +53,8 @@ class CardTest(TestCase):
 			),
 			str(card),
 		)
+
+		self.assert_fks(card, expected_blank_fks={"djstripe.Customer.coupon"})
 
 	@patch("stripe.Token.create")
 	def test_card_create_token(self, token_create_mock):

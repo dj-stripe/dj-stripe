@@ -2,6 +2,7 @@
 dj-stripe Decorator Tests.
 """
 from copy import deepcopy
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
@@ -13,7 +14,7 @@ from django.test.client import RequestFactory
 from djstripe.decorators import subscription_payment_required
 from djstripe.models import Subscription
 
-from . import FAKE_CUSTOMER, FAKE_SUBSCRIPTION, FUTURE_DATE
+from . import FAKE_CUSTOMER, FAKE_PLAN, FAKE_SUBSCRIPTION, FUTURE_DATE
 
 
 class TestSubscriptionPaymentRequired(TestCase):
@@ -49,7 +50,8 @@ class TestSubscriptionPaymentRequired(TestCase):
 		response = self.test_view(request)
 		self.assertEqual(response.status_code, 302)
 
-	def test_user_active_subscription(self):
+	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
+	def test_user_active_subscription(self, plan_retrieve_mock):
 		user = get_user_model().objects.create_user(
 			username="pydanny", email="pydanny@gmail.com"
 		)
