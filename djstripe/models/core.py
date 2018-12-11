@@ -123,7 +123,7 @@ class Charge(StripeModel):
 		blank=True,
 		help_text="Error code explaining reason for charge failure if available.",
 	)
-	failure_message = models.CharField(
+	failure_message = models.TextField(
 		max_length=5000,
 		default="",
 		blank=True,
@@ -147,7 +147,7 @@ class Charge(StripeModel):
 		default=False,
 		help_text="True if the charge succeeded, or was successfully authorized for later capture, False otherwise.",
 	)
-	receipt_email = models.CharField(
+	receipt_email = models.TextField(
 		max_length=800,  # yup, 800.
 		default="",
 		blank=True,
@@ -409,7 +409,7 @@ class Customer(StripeModel):
 		help_text="If a coupon is present and has a limited duration, the date that the discount will end.",
 	)
 	# </discount>
-	email = models.CharField(max_length=5000, db_index=True, default="", blank=True)
+	email = models.TextField(max_length=5000, default="", blank=True)
 	shipping = JSONField(
 		null=True, blank=True, help_text="Shipping information associated with the customer."
 	)
@@ -1289,7 +1289,7 @@ class Product(StripeModel):
 	stripe_dashboard_item_name = "products"
 
 	# Fields applicable to both `good` and `service`
-	name = models.CharField(
+	name = models.TextField(
 		max_length=5000,
 		help_text=(
 			"The product's name, meant to be displayable to the customer. "
@@ -1320,7 +1320,7 @@ class Product(StripeModel):
 			'(e.g., `["color", "size"]`). Only applicable to products of `type=good`.'
 		),
 	)
-	caption = models.CharField(
+	caption = models.TextField(
 		default="",
 		blank=True,
 		max_length=5000,

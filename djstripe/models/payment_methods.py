@@ -76,7 +76,7 @@ class BankAccount(StripeModel):
 		related_name="bank_account",
 		help_text="The account the charge was made on behalf of. Null here indicates that this value was never set.",
 	)
-	account_holder_name = models.CharField(
+	account_holder_name = models.TextField(
 		max_length=5000,
 		default="",
 		blank=True,
@@ -138,10 +138,10 @@ class Card(StripeModel):
 		default="",
 		help_text="City/District/Suburb/Town/Village.",
 	)
-	address_country = models.CharField(
+	address_country = models.TextField(
 		max_length=5000, blank=True, default="", help_text="Billing address country."
 	)
-	address_line1 = models.CharField(
+	address_line1 = models.TextField(
 		max_length=5000,
 		blank=True,
 		default="",
@@ -153,13 +153,13 @@ class Card(StripeModel):
 		default="",
 		help_text="If `address_line1` was provided, results of the check.",
 	)
-	address_line2 = models.CharField(
+	address_line2 = models.TextField(
 		max_length=5000, blank=True, default="", help_text="Apartment/Suite/Unit/Building."
 	)
-	address_state = models.CharField(
+	address_state = models.TextField(
 		max_length=5000, blank=True, default="", help_text="State/County/Province/Region."
 	)
-	address_zip = models.CharField(
+	address_zip = models.TextField(
 		max_length=5000, blank=True, default="", help_text="ZIP or postal code."
 	)
 	address_zip_check = StripeEnumField(
@@ -200,7 +200,7 @@ class Card(StripeModel):
 	)
 	funding = StripeEnumField(enum=enums.CardFundingType, help_text="Card funding type.")
 	last4 = models.CharField(max_length=4, help_text="Last four digits of Card number.")
-	name = models.CharField(
+	name = models.TextField(
 		max_length=5000, default="", blank=True, help_text="Cardholder name."
 	)
 	tokenization_method = StripeEnumField(

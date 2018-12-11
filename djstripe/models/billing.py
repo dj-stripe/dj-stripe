@@ -43,7 +43,7 @@ class Coupon(StripeModel):
 		blank=True,
 		help_text="Maximum number of times this coupon can be redeemed, in total, before it is no longer valid.",
 	)
-	name = models.CharField(
+	name = models.TextField(
 		max_length=5000,
 		default="",
 		blank=True,
@@ -219,7 +219,7 @@ class Invoice(StripeModel):
 		"subscription status as if the invoice were successfully paid. Once an invoice has been forgiven, it cannot "
 		"be unforgiven or reopened.",
 	)
-	hosted_invoice_url = models.CharField(
+	hosted_invoice_url = models.TextField(
 		max_length=799,
 		default="",
 		blank=True,
@@ -228,7 +228,7 @@ class Invoice(StripeModel):
 			"If the invoice has not been frozen yet, this will be null."
 		),
 	)
-	invoice_pdf = models.CharField(
+	invoice_pdf = models.TextField(
 		max_length=799,
 		default="",
 		blank=True,
@@ -729,7 +729,7 @@ class Plan(StripeModel):
 			"The number of intervals (specified in the interval property) between each subscription billing."
 		),
 	)
-	nickname = models.CharField(
+	nickname = models.TextField(
 		max_length=5000,
 		default="",
 		blank=True,
