@@ -31,8 +31,8 @@ class ScheduledQueryRun(StripeModel):
 	result_available_until = StripeDateTimeField(
 		help_text="Time at which the result expires and is no longer available for download."
 	)
-	sql = models.CharField(max_length=5000, help_text="SQL for the query.")
+	sql = models.TextField(max_length=5000, help_text="SQL for the query.")
 	status = StripeEnumField(
 		enum=enums.ScheduledQueryRunStatus, help_text="The query's execution status."
 	)
-	title = models.CharField(max_length=5000, help_text="Title of the query.")
+	title = models.TextField(max_length=5000, help_text="Title of the query.")
