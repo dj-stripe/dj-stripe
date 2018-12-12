@@ -11,7 +11,6 @@ from jsonfield import JSONField as UglyJSONField
 from djstripe import fields as fields
 from djstripe import settings as djstripe_settings
 
-
 try:
 	reload
 except NameError:

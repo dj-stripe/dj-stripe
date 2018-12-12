@@ -12,7 +12,6 @@ import djstripe.fields
 import djstripe.models
 from djstripe.models.webhooks import _get_version
 
-
 DJSTRIPE_SUBSCRIBER_MODEL = getattr(
 	settings, "DJSTRIPE_SUBSCRIBER_MODEL", settings.AUTH_USER_MODEL
 )

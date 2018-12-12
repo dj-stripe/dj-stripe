@@ -4,7 +4,6 @@ from django.test.client import RequestFactory
 
 from .. import FAKE_CUSTOMER
 
-
 try:
 	import rest_framework
 except ImportError:

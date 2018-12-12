@@ -19,7 +19,6 @@ import functools
 import itertools
 from collections import defaultdict
 
-
 __all__ = ["handler", "handler_all", "call_handlers"]
 
 

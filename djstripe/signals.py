@@ -8,7 +8,6 @@ from django.dispatch import Signal, receiver
 
 from . import settings as djstripe_settings
 
-
 webhook_processing_error = Signal(providing_args=["data", "exception"])
 
 # A signal for each Event type. See https://stripe.com/docs/api#event_types

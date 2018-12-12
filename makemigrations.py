@@ -13,7 +13,6 @@ from django.conf import settings
 from django.db import connections
 from django.db.utils import OperationalError
 
-
 DEFAULT_SETTINGS = dict(
 	DATABASES={"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}},
 	DEBUG=True,

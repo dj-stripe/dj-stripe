@@ -11,7 +11,6 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db.models.query import QuerySet
 from django.utils import timezone
 
-
 ANONYMOUS_USER_ERROR_MSG = (
 	"dj-stripe's payment checking mechanisms require the user "
 	"be authenticated before use. Please use django.contrib.auth's "

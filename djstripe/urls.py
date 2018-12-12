@@ -20,7 +20,6 @@ from django.conf.urls import url
 from . import settings as app_settings
 from . import views
 
-
 app_name = "djstripe"
 
 urlpatterns = [

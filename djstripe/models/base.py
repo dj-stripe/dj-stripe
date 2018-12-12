@@ -10,7 +10,6 @@ from .. import settings as djstripe_settings
 from ..fields import JSONField, StripeDateTimeField, StripeIdField
 from ..managers import StripeModelManager
 
-
 logger = logging.getLogger(__name__)
 
 

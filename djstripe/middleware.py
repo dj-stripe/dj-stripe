@@ -14,7 +14,6 @@ from django.utils.deprecation import MiddlewareMixin
 from .settings import SUBSCRIPTION_REDIRECT, subscriber_request_callback
 from .utils import subscriber_has_active_subscription
 
-
 DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = getattr(
 	settings, "DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS", ()
 )

@@ -1,6 +1,5 @@
 import os
 
-
 test_db_name = os.environ.get("DJSTRIPE_TEST_DB_NAME", "djstripe")
 test_db_user = os.environ.get("DJSTRIPE_TEST_DB_USER", "postgres")
 test_db_pass = os.environ.get("DJSTRIPE_TEST_DB_PASS", "")

@@ -24,7 +24,6 @@ from djstripe.utils import (
 from . import FAKE_CUSTOMER, FAKE_SUBSCRIPTION
 from .apps.testapp.models import Organization
 
-
 TZ_IS_UTC = time.tzname == ("UTC", "UTC")
 
 

@@ -4,7 +4,6 @@ import sys
 
 from setuptools import setup
 
-
 if sys.argv[-1] == "publish":
 	os.system("python setup.py bdist_wheel upload --sign")
 	sys.exit()
