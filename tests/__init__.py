@@ -484,7 +484,7 @@ FAKE_CHARGE = ChargeDict(
 		"failure_code": None,
 		"failure_message": None,
 		"fraud_details": {},
-		"invoice": "in_7udnik28sj829dj",
+		"invoice": "in_16YHls2eZvKYlo2CwwH968Mc",
 		"livemode": False,
 		"metadata": {},
 		"order": None,
