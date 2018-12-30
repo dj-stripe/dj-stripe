@@ -2,6 +2,7 @@
 Customer Model Tests.
 """
 import decimal
+import sys
 from copy import deepcopy
 from unittest.mock import ANY, patch
 
@@ -23,6 +24,10 @@ from . import (
 	FAKE_INVOICEITEM, FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II,
 	FAKE_UPCOMING_INVOICE, StripeList, datetime_to_unix, default_account
 )
+
+# Don't try and use autospec=True for functions that have a exception side-effect on py3.4
+# see https://bugs.python.org/issue23661
+IS_EXCEPTION_AUTOSPEC_SUPPORTED = sys.version_info >= (3, 5)
 
 
 class TestCustomer(TestCase):
@@ -512,7 +517,7 @@ class TestCustomer(TestCase):
 	@patch(
 		"stripe.Invoice.list", return_value=StripeList(data=[deepcopy(FAKE_INVOICE_III)])
 	)
-	@patch("djstripe.models.Invoice.retry", autospec=True)
+	@patch("djstripe.models.Invoice.retry", autospec=IS_EXCEPTION_AUTOSPEC_SUPPORTED)
 	def test_retry_unpaid_invoices_expected_exception(
 		self,
 		invoice_retry_mock,
@@ -539,7 +544,7 @@ class TestCustomer(TestCase):
 	@patch(
 		"stripe.Invoice.list", return_value=StripeList(data=[deepcopy(FAKE_INVOICE_III)])
 	)
-	@patch("djstripe.models.Invoice.retry", autospec=True)
+	@patch("djstripe.models.Invoice.retry", autospec=IS_EXCEPTION_AUTOSPEC_SUPPORTED)
 	def test_retry_unpaid_invoices_unexpected_exception(
 		self,
 		invoice_retry_mock,
