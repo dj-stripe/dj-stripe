@@ -294,7 +294,21 @@ class TestCustomer(TestCase):
 	def test_add_coupon_by_object(self, customer_retrieve_mock, coupon_retrieve_mock):
 		self.assertEqual(self.customer.coupon, None)
 		coupon = Coupon.sync_from_stripe_data(FAKE_COUPON)
-		self.customer.add_coupon(coupon)
+		fake_discount = deepcopy(FAKE_DISCOUNT_CUSTOMER)
+
+		def fake_customer_save(self, *args, **kwargs):
+			# fake the api coupon update behaviour
+			coupon = self.pop("coupon", None)
+			if coupon:
+				self["discount"] = fake_discount
+			else:
+				self["discount"] = None
+
+			return self
+
+		with patch("tests.CustomerDict.save", new=fake_customer_save):
+			self.customer.add_coupon(coupon)
+
 		customer_retrieve_mock.assert_called_once_with(
 			api_key=STRIPE_SECRET_KEY, expand=["default_source"], id=FAKE_CUSTOMER["id"]
 		)
