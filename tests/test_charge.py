@@ -100,7 +100,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		fake_charge_copy = deepcopy(FAKE_CHARGE)
 		fake_charge_copy.update({"application_fee": {"amount": 0}})
 
-		charge = Charge.sync_from_stripe_data(FAKE_CHARGE)
+		charge = Charge.sync_from_stripe_data(fake_charge_copy)
 
 		self.assertEqual(Decimal("22"), charge.amount)
 		self.assertEqual(True, charge.paid)
