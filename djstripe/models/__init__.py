@@ -4,7 +4,6 @@ from .billing import (
 	Invoice,
 	InvoiceItem,
 	Plan,
-	Product,
 	Subscription,
 	SubscriptionItem,
 	UpcomingInvoice,
@@ -26,6 +25,7 @@ from .core import (
 	Event,
 	FileUpload,
 	Payout,
+	Product,
 	Refund,
 )
 from .payment_methods import BankAccount, Card, PaymentMethod, Source
