@@ -1235,10 +1235,11 @@ class Migration(migrations.Migration):
 			),
 		),
 		migrations.AlterField(
-			model_name='product',
-			name='name',
+			model_name="product",
+			name="name",
 			field=models.TextField(
 				help_text="The product's name, meant to be displayable to the customer. Applicable to both `service` and `good` types.",
-				max_length=5000),
+				max_length=5000,
+			),
 		),
 	]
