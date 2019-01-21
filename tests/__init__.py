@@ -343,6 +343,119 @@ FAKE_CARD_V = CardDict(
 )
 
 
+class SourceDict(dict):
+	def detach(self):
+		self.pop("customer")
+		self.update({"status": "consumed"})
+		return self
+
+
+# Attached, chargeable source
+FAKE_SOURCE = SourceDict(
+	{
+		"id": "src_1DuuGjE6hxNj48TFOAnS5TZq",
+		"object": "source",
+		"amount": None,
+		"card": {
+			"address_line1_check": None,
+			"address_zip_check": "pass",
+			"brand": "Visa",
+			"country": "US",
+			"cvc_check": "pass",
+			"dynamic_last4": None,
+			"exp_month": 10,
+			"exp_year": 2029,
+			"fingerprint": "TmOrYzPdAoO6YFNB",
+			"funding": "credit",
+			"last4": "4242",
+			"name": None,
+			"three_d_secure": "optional",
+			"tokenization_method": None,
+		},
+		"client_secret": "src_client_secret_ENg5dyB1KTXSuyIa7Uv00NbX",
+		"created": 1548046215,
+		"currency": None,
+		"customer": "cus_4QWKsZuuTHcs7X",
+		"flow": "none",
+		"livemode": False,
+		"metadata": {},
+		"owner": {
+			"address": {
+				"city": None,
+				"country": None,
+				"line1": None,
+				"line2": None,
+				"postal_code": "90210",
+				"state": None,
+			},
+			"email": None,
+			"name": None,
+			"phone": None,
+			"verified_address": None,
+			"verified_email": None,
+			"verified_name": None,
+			"verified_phone": None,
+		},
+		"statement_descriptor": None,
+		"status": "chargeable",
+		"type": "card",
+		"usage": "reusable",
+	}
+)
+
+# Detached, consumed source
+FAKE_SOURCE_II = SourceDict(
+	{
+		"id": "src_1DuuGjkE6hxDGaasasjdlajl",
+		"object": "source",
+		"amount": None,
+		"card": {
+			"address_line1_check": None,
+			"address_zip_check": "pass",
+			"brand": "Visa",
+			"country": "US",
+			"cvc_check": "pass",
+			"dynamic_last4": None,
+			"exp_month": 10,
+			"exp_year": 2029,
+			"fingerprint": "TmOrYzPdAoO6YFNB",
+			"funding": "credit",
+			"last4": "4242",
+			"name": None,
+			"three_d_secure": "optional",
+			"tokenization_method": None,
+		},
+		"client_secret": "src_client_secret_ENg5dyB1KTXCAEJGJQWEf67X",
+		"created": 1548046215,
+		"currency": None,
+		"flow": "none",
+		"livemode": False,
+		"metadata": {},
+		"owner": {
+			"address": {
+				"city": None,
+				"country": None,
+				"line1": None,
+				"line2": None,
+				"postal_code": "90210",
+				"state": None,
+			},
+			"email": None,
+			"name": None,
+			"phone": None,
+			"verified_address": None,
+			"verified_email": None,
+			"verified_name": None,
+			"verified_phone": None,
+		},
+		"statement_descriptor": None,
+		"status": "consumed",
+		"type": "card",
+		"usage": "reusable",
+	}
+)
+
+
 class ChargeDict(dict):
 	def refund(self, amount=None, reason=None):
 		self.update({"refunded": True, "amount_refunded": amount})
@@ -808,6 +921,33 @@ FAKE_CUSTOMER_II = CustomerDict(
 			"has_more": False,
 			"url": "/v1/customers/cus_4UbFSo9tl62jqj/subscriptions",
 			"data": [deepcopy(FAKE_SUBSCRIPTION_III), deepcopy(FAKE_SUBSCRIPTION_MULTI_PLAN)],
+		},
+	}
+)
+
+
+# Customer with a Source (instead of Card) as default_source
+FAKE_CUSTOMER_III = CustomerDict(
+	{
+		"id": "cus_4QWKsZuuTHcs7X",
+		"object": "customer",
+		"account_balance": 0,
+		"created": 1439229084,
+		"currency": "usd",
+		"default_source": deepcopy(FAKE_SOURCE),
+		"delinquent": False,
+		"description": "John Doe",
+		"discount": None,
+		"email": "john.doe@example.com",
+		"livemode": False,
+		"metadata": {},
+		"shipping": None,
+		"sources": {
+			"object": "list",
+			"total_count": 1,
+			"has_more": False,
+			"url": "/v1/customers/cus_4QWKsZuuTHcs7X/sources",
+			"data": [deepcopy(FAKE_SOURCE)],
 		},
 	}
 )
