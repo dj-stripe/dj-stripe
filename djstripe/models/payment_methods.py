@@ -447,6 +447,9 @@ class Source(StripeModel):
 		Customer.objects.filter(default_source=self.id).update(default_source=None)
 
 		try:
+			# TODO - we could use the return value of sync_from_stripe_data
+			#  or call its internals - self._sync/_attach_objects_hook etc here
+			#  to update `self` at this point?
 			self.sync_from_stripe_data(self.api_retrieve().detach())
 			return True
 		except (InvalidRequestError, NotImplementedError):
