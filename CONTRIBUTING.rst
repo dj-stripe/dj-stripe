@@ -87,38 +87,21 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
    those tests, the --skip-utc command line option is available on runtests.py.::
 
     $ pip install tox
-      then either
     $ tox
-      to test all environments defined in the tox.ini file, or 
-    $ tox -e py35
-      to test using only python3.5 version and environment 
 
 7. If your changes altered the models you may need to generate Django migrations::
 
     $ python makemigrations.py
 
-8. If you'd like to package the module for use in other projects, or for integration
-  testing purposes:
-
-    $ python setup.py build;
-    $ python -m pip install --upgrade setuptools wheel; 
-    $ python setup sdist bdist_wheel;
-    $ ls dist/dj-stripe*;
-
-9. If you simply need to conduct integration testing while also developing, modifying, or otherwise extending the dj-stripe module in parallel, pip install the absolute path to the root directory from within your other project:
-   
-    $ cd ~/git/myproject/
-    $ pip install ../dj-stripe 
-
-10. Commit your changes and push your branch to GitHub::
+8. Commit your changes and push your branch to GitHub::
 
     $ git add .
     $ git commit -m "Your detailed description of your changes."
     $ git push origin name-of-your-bugfix-or-feature
 
-11. Submit a pull request through the GitHub website.
+9. Submit a pull request through the GitHub website.
 
-12. Congratulations, you're now a dj-stripe contributor!  Have some <3 from us.
+10. Congratulations, you're now a dj-stripe contributor!  Have some <3 from us.
 
 Pull Request Guidelines
 -----------------------
