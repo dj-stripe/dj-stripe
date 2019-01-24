@@ -1181,7 +1181,7 @@ class Migration(migrations.Migration):
 					"amount_remaining",
 					djstripe.fields.StripeDecimalCurrencyAmountField(
 						decimal_places=2,
-						help_text="The amount, in cents, that was paid.",
+						help_text="The amount remaining, in cents, that is due.",
 						max_digits=8,
 						null=True,
 					),
