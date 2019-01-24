@@ -150,7 +150,7 @@ class Invoice(StripeModel):
 	)
 	amount_remaining = StripeDecimalCurrencyAmountField(
 		null=True,  # XXX: This is not nullable, but it's a new field
-		help_text="The amount, in cents, that was paid.",
+		help_text="The amount remaining, in cents, that is due.",
 	)
 	application_fee = StripeDecimalCurrencyAmountField(
 		null=True,
