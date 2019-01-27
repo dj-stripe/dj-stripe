@@ -946,7 +946,7 @@ class Migration(migrations.Migration):
 				default="",
 				enum=djstripe.enums.ApiErrorCode,
 				help_text="Error code explaining reason for charge failure if available.",
-				max_length=20,
+				max_length=42,
 			),
 		),
 		migrations.AlterField(
