@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-07-25 19:26+0300\n"
+"POT-Creation-Date: 2019-01-28 12:02+1300\n"
 "Last-Translator: Jerome Leclanche <jerome@leclan.ch>\n"
 "Language-Team: French <jerome@leclan.ch>\n"
 "Language: fr\n"
@@ -11,703 +11,1053 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+#: enums.py:57
+msgid "Account already exists"
+msgstr ""
+
 #: enums.py:58
-msgid "Invalid number"
-msgstr "Numéro invalide"
+msgid "Account country invalid address"
+msgstr ""
 
 #: enums.py:59
-msgid "Invalid expiration month"
-msgstr "Mois d'expiration invalide"
+msgid "Account invalid"
+msgstr ""
 
 #: enums.py:60
-msgid "Invalid expiration year"
-msgstr "Année d'expiration invalide"
+msgid "Account number invalid"
+msgstr ""
 
 #: enums.py:61
-msgid "Invalid security code"
-msgstr "Code de sécurité invalide"
+msgid "Alipay upgrade required"
+msgstr ""
 
 #: enums.py:62
-msgid "Invalid swipe data"
-msgstr "Données swipe invalide"
+msgid "Amount too large"
+msgstr ""
 
 #: enums.py:63
-msgid "Incorrect number"
-msgstr "Numéro incorrect"
+msgid "Amount too small"
+msgstr ""
 
 #: enums.py:64
-msgid "Expired card"
-msgstr "Carte expirée"
+msgid "Api key expired"
+msgstr ""
 
 #: enums.py:65
-msgid "Incorrect security code"
-msgstr "Code de sécurité incorrect"
+msgid "Balance insufficient"
+msgstr ""
 
 #: enums.py:66
-msgid "ZIP code failed validation"
-msgstr "Validation du code postal échouée"
+#, fuzzy
+#| msgid "Bank account"
+msgid "Bank account exists"
+msgstr "Compte bancaire"
 
 #: enums.py:67
+#, fuzzy
+#| msgid "Bank account"
+msgid "Bank account unusable"
+msgstr "Compte bancaire"
+
+#: enums.py:68
+#, fuzzy
+#| msgid "Bank account"
+msgid "Bank account unverified"
+msgstr "Compte bancaire"
+
+#: enums.py:69
+#, fuzzy
+#| msgid "Bitcoin receiver"
+msgid "Bitcoin upgrade required"
+msgstr "Récipient Bitcoin"
+
+#: enums.py:70
 msgid "Card was declined"
 msgstr "Carte rejetée"
 
-#: enums.py:68
+#: enums.py:71
+#, fuzzy
+#| msgid "Charge refunded"
+msgid "Charge already captured"
+msgstr "Charge remboursée"
+
+#: enums.py:72
+#, fuzzy
+#| msgid "Charge refunded"
+msgid "Charge already refunded"
+msgstr "Charge remboursée"
+
+#: enums.py:73
+#, fuzzy
+#| msgid "Charge refunded"
+msgid "Charge disputed"
+msgstr "Charge remboursée"
+
+#: enums.py:74
+msgid "Charge exceeds source limit"
+msgstr ""
+
+#: enums.py:75
+msgid "Charge expired for capture"
+msgstr ""
+
+#: enums.py:76
+#, fuzzy
+#| msgid "Card no longer supported."
+msgid "Country unsupported"
+msgstr "La carte n'est plus supportée."
+
+#: enums.py:77
+msgid "Coupon expired"
+msgstr ""
+
+#: enums.py:78
+msgid "Customer max subscriptions"
+msgstr ""
+
+#: enums.py:79
+msgid "Email invalid"
+msgstr ""
+
+#: enums.py:80
+msgid "Expired card"
+msgstr "Carte expirée"
+
+#: enums.py:81
+msgid "Idempotency key in use"
+msgstr ""
+
+#: enums.py:82
+#, fuzzy
+#| msgid "Incorrect account details"
+msgid "Incorrect address"
+msgstr "Détails de compte incorrects"
+
+#: enums.py:83
+msgid "Incorrect security code"
+msgstr "Code de sécurité incorrect"
+
+#: enums.py:84
+msgid "Incorrect number"
+msgstr "Numéro incorrect"
+
+#: enums.py:85
+msgid "ZIP code failed validation"
+msgstr "Validation du code postal échouée"
+
+#: enums.py:86
+msgid "Instant payouts unsupported"
+msgstr ""
+
+#: enums.py:87
+#, fuzzy
+#| msgid "Invalid security code"
+msgid "Invalid card type"
+msgstr "Code de sécurité invalide"
+
+#: enums.py:88
+#, fuzzy
+#| msgid "Invalid expiration month"
+msgid "Invalid charge amount"
+msgstr "Mois d'expiration invalide"
+
+#: enums.py:89
+msgid "Invalid security code"
+msgstr "Code de sécurité invalide"
+
+#: enums.py:90
+msgid "Invalid expiration month"
+msgstr "Mois d'expiration invalide"
+
+#: enums.py:91
+msgid "Invalid expiration year"
+msgstr "Année d'expiration invalide"
+
+#: enums.py:92
+msgid "Invalid number"
+msgstr "Numéro invalide"
+
+#: enums.py:93
+#, fuzzy
+#| msgid "Invalid security code"
+msgid "Invalid source usage"
+msgstr "Code de sécurité invalide"
+
+#: enums.py:94
+msgid "Invoice no customer line items"
+msgstr ""
+
+#: enums.py:95
+msgid "Invoice no subscription line items"
+msgstr ""
+
+#: enums.py:96
+msgid "Invoice not editable"
+msgstr ""
+
+#: enums.py:97
+msgid "Invoice upcoming none"
+msgstr ""
+
+#: enums.py:98
+msgid "Livemode mismatch"
+msgstr ""
+
+#: enums.py:99
 msgid "No card being charged"
 msgstr "Aucune carte chargée"
 
-#: enums.py:69 enums.py:349
+#: enums.py:100
+msgid "Not allowed on standard account"
+msgstr ""
+
+#: enums.py:101
+#, fuzzy
+#| msgid "Verification failed"
+msgid "Order creation failed"
+msgstr "Vérification échouée"
+
+#: enums.py:102
+msgid "Order required settings"
+msgstr ""
+
+#: enums.py:103
+msgid "Order status invalid"
+msgstr ""
+
+#: enums.py:104
+msgid "Order upstream timeout"
+msgstr ""
+
+#: enums.py:105
+msgid "Out of inventory"
+msgstr ""
+
+#: enums.py:106
+msgid "Parameter invalid empty"
+msgstr ""
+
+#: enums.py:107
+msgid "Parameter invalid integer"
+msgstr ""
+
+#: enums.py:108
+msgid "Parameter invalid string blank"
+msgstr ""
+
+#: enums.py:109
+msgid "Parameter invalid string empty"
+msgstr ""
+
+#: enums.py:110
+msgid "Parameter missing"
+msgstr ""
+
+#: enums.py:111
+msgid "Parameter unknown"
+msgstr ""
+
+#: enums.py:112
+msgid "Parameters exclusive"
+msgstr ""
+
+#: enums.py:113
+msgid "Payment intent authentication failure"
+msgstr ""
+
+#: enums.py:114
+msgid "Payment intent incompatible payment method"
+msgstr ""
+
+#: enums.py:115
+msgid "Payment intent invalid parameter"
+msgstr ""
+
+#: enums.py:116
+msgid "Payment intent payment attempt failed"
+msgstr ""
+
+#: enums.py:117
+msgid "Payment intent unexpected state"
+msgstr ""
+
+#: enums.py:118
+#, fuzzy
+#| msgid "Payment refund"
+msgid "Payment method unactivated"
+msgstr "Remboursement de paiment"
+
+#: enums.py:119
+msgid "Payment method unexpected state"
+msgstr ""
+
+#: enums.py:120
+#, fuzzy
+#| msgid "Payout failure"
+msgid "Payouts not allowed"
+msgstr "Échec de virement"
+
+#: enums.py:121
+msgid "Platform api key expired"
+msgstr ""
+
+#: enums.py:122
+msgid "Postal code invalid"
+msgstr ""
+
+#: enums.py:123 enums.py:433
 msgid "Processing error"
 msgstr "Erreur de traitement"
 
-#: enums.py:73 enums.py:224
+#: enums.py:124
+#, fuzzy
+#| msgid "Product unacceptable"
+msgid "Product inactive"
+msgstr "Produit inacceptable"
+
+#: enums.py:125
+msgid "Rate limit"
+msgstr ""
+
+#: enums.py:126
+msgid "Resource already exists"
+msgstr ""
+
+#: enums.py:127
+msgid "Resource missing"
+msgstr ""
+
+#: enums.py:128
+msgid "Routing number invalid"
+msgstr ""
+
+#: enums.py:129
+#, fuzzy
+#| msgid "Not required"
+msgid "Secret key required"
+msgstr "Non requis"
+
+#: enums.py:130
+msgid "SEPA unsupported account"
+msgstr ""
+
+#: enums.py:131
+#, fuzzy
+#| msgid "Verification failed"
+msgid "Shipping calculation failed"
+msgstr "Vérification échouée"
+
+#: enums.py:132
+msgid "SKU inactive"
+msgstr ""
+
+#: enums.py:133
+msgid "State unsupported"
+msgstr ""
+
+#: enums.py:134
+msgid "Tax id invalid"
+msgstr ""
+
+#: enums.py:135
+#, fuzzy
+#| msgid "Verification failed"
+msgid "Taxes calculation failed"
+msgstr "Vérification échouée"
+
+#: enums.py:136
+msgid "Testmode charges only"
+msgstr ""
+
+#: enums.py:137
+msgid "TLS version unsupported"
+msgstr ""
+
+#: enums.py:138
+msgid "Token already used"
+msgstr ""
+
+#: enums.py:139
+msgid "Token in use"
+msgstr ""
+
+#: enums.py:140
+#, fuzzy
+#| msgid "Transfer refund"
+msgid "Transfers not allowed"
+msgstr "Remboursement de transfert"
+
+#: enums.py:141
+#, fuzzy
+#| msgid "Verification failed"
+msgid "Upstream order creation failed"
+msgstr "Vérification échouée"
+
+#: enums.py:142
+msgid "URL invalid"
+msgstr ""
+
+#: enums.py:145
+msgid "Invalid swipe data"
+msgstr "Données swipe invalide"
+
+#: enums.py:149 enums.py:302
 msgid "Standard"
 msgstr "Standard"
 
-#: enums.py:74
+#: enums.py:150
 msgid "Express"
 msgstr "Express"
 
-#: enums.py:75
+#: enums.py:151
 msgid "Custom"
 msgstr "Custom"
 
-#: enums.py:79
+#: enums.py:155
 msgid "Available"
 msgstr "Disponible"
 
-#: enums.py:80 enums.py:146 enums.py:230 enums.py:287 enums.py:329 enums.py:341
-#: enums.py:353
+#: enums.py:156 enums.py:223 enums.py:308 enums.py:371 enums.py:413
+#: enums.py:425 enums.py:437
 msgid "Pending"
 msgstr "En attente"
 
-#: enums.py:84
+#: enums.py:160
 msgid "Adjustment"
 msgstr "Ajustement"
 
-#: enums.py:85
+#: enums.py:161
 msgid "Application fee"
 msgstr "Frais d'application"
 
-#: enums.py:86
+#: enums.py:162
 msgid "Application fee refund"
 msgstr "Remboursement de frais d'application"
 
-#: enums.py:87
+#: enums.py:163
 msgid "Charge"
 msgstr "Charge"
 
-#: enums.py:88
+#: enums.py:164
 msgid "Network cost"
 msgstr "Coût de réseau"
 
-#: enums.py:89
+#: enums.py:165
 msgid "Payment"
 msgstr "Paiment"
 
-#: enums.py:90
+#: enums.py:166
 msgid "Payment failure refund"
 msgstr "Remboursement d'échec de paiment"
 
-#: enums.py:91
+#: enums.py:167
 msgid "Payment refund"
 msgstr "Remboursement de paiment"
 
-#: enums.py:92
+#: enums.py:168
 msgid "Payout"
 msgstr "Virement"
 
-#: enums.py:93
+#: enums.py:169
 msgid "Payout cancellation"
 msgstr "Annulation de virement"
 
-#: enums.py:94
+#: enums.py:170
 msgid "Payout failure"
 msgstr "Échec de virement"
 
-#: enums.py:95
+#: enums.py:171
 msgid "Refund"
 msgstr "Remboursement"
 
-#: enums.py:96
+#: enums.py:172
 msgid "Stripe fee"
 msgstr "Frais Stripe"
 
-#: enums.py:97
+#: enums.py:173
 msgid "Transfer"
 msgstr "Transfert"
 
-#: enums.py:98
+#: enums.py:174
 msgid "Transfer refund"
 msgstr "Remboursement de transfert"
 
-#: enums.py:99
+#: enums.py:175
 msgid "Validation"
 msgstr "Validation"
 
-#: enums.py:103
+#: enums.py:179
 msgid "Individual"
 msgstr "Particulier"
 
-#: enums.py:104
+#: enums.py:180
 msgid "Company"
 msgstr "Companie"
 
-#: enums.py:108
+#: enums.py:184
 msgid "New"
 msgstr "Nouveau"
 
-#: enums.py:109
+#: enums.py:185
 msgid "Validated"
 msgstr "Validé"
 
-#: enums.py:110
+#: enums.py:186
 msgid "Verified"
 msgstr "Vérifié"
 
-#: enums.py:111
+#: enums.py:187
 msgid "Verification failed"
 msgstr "Vérification échouée"
 
-#: enums.py:112
+#: enums.py:188
 msgid "Errored"
 msgstr "Erreur"
 
-#: enums.py:116
+#: enums.py:192
 msgid "Pass"
 msgstr "OK"
 
-#: enums.py:117
+#: enums.py:193
 msgid "Fail"
 msgstr "Échoué"
 
-#: enums.py:118
+#: enums.py:194
 msgid "Unavailable"
 msgstr "Indisponible"
 
-#: enums.py:119
+#: enums.py:195
 msgid "Unchecked"
 msgstr "Non vérifié"
 
-#: enums.py:123
-msgid "Visa"
-msgstr "Visa"
-
-#: enums.py:124
+#: enums.py:199
 msgid "American Express"
 msgstr "American Express"
 
-#: enums.py:125
-msgid "MasterCard"
-msgstr "masterCard"
-
-#: enums.py:126
-msgid "Discover"
-msgstr "Discover"
-
-#: enums.py:127
-msgid "JCB"
-msgstr "JCB"
-
-#: enums.py:128
+#: enums.py:200
 msgid "Diners Club"
 msgstr "Diners Club"
 
-#: enums.py:129 enums.py:136 enums.py:319
+#: enums.py:201
+msgid "Discover"
+msgstr "Discover"
+
+#: enums.py:202
+msgid "JCB"
+msgstr "JCB"
+
+#: enums.py:203
+msgid "MasterCard"
+msgstr "masterCard"
+
+#: enums.py:204
+msgid "UnionPay"
+msgstr ""
+
+#: enums.py:205
+msgid "Visa"
+msgstr "Visa"
+
+#: enums.py:206 enums.py:213 enums.py:403
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: enums.py:133
+#: enums.py:210
 msgid "Credit"
 msgstr "Crédit"
 
-#: enums.py:134
+#: enums.py:211
 msgid "Debit"
 msgstr "Débit"
 
-#: enums.py:135
+#: enums.py:212
 msgid "Prepaid"
 msgstr "Prépayée"
 
-#: enums.py:140
+#: enums.py:217
 msgid "Apple Pay"
 msgstr "Apple Pay"
 
-#: enums.py:141
+#: enums.py:218
 msgid "Android Pay"
 msgstr "Android Pay"
 
-#: enums.py:145 enums.py:330 enums.py:342 enums.py:354
+#: enums.py:222 enums.py:414 enums.py:426 enums.py:438
 msgid "Succeeded"
 msgstr "Réussi"
 
-#: enums.py:147 enums.py:233 enums.py:286 enums.py:331 enums.py:343
-#: enums.py:356
+#: enums.py:224 enums.py:311 enums.py:355 enums.py:370 enums.py:415
+#: enums.py:427 enums.py:440
 msgid "Failed"
 msgstr "Échoué"
 
-#: enums.py:151
+#: enums.py:228
 msgid "Once"
 msgstr "Simple"
 
-#: enums.py:152
+#: enums.py:229
 msgid "Multi-month"
 msgstr "Multi-mois"
 
-#: enums.py:153
+#: enums.py:230
 msgid "Forever"
 msgstr "Illimité"
 
-#: enums.py:157
+#: enums.py:234
 msgid "Duplicate"
 msgstr "Doublon"
 
-#: enums.py:158 enums.py:324
+#: enums.py:235 enums.py:408
 msgid "Fraudulent"
 msgstr "Frauduleux"
 
-#: enums.py:159
+#: enums.py:236
 msgid "Subscription canceled"
 msgstr "Abonnement annulé"
 
-#: enums.py:160
+#: enums.py:237
 msgid "Product unacceptable"
 msgstr "Produit inacceptable"
 
-#: enums.py:161
+#: enums.py:238
 msgid "Product not received"
 msgstr "Produit non reçu"
 
-#: enums.py:162
+#: enums.py:239
 msgid "Unrecognized"
 msgstr "Non reconnu"
 
-#: enums.py:163
+#: enums.py:240
 msgid "Credit not processed"
 msgstr "Crédit non traité"
 
-#: enums.py:164
+#: enums.py:241
 msgid "General"
 msgstr "Général"
 
-#: enums.py:165
+#: enums.py:242
 msgid "Incorrect account details"
 msgstr "Détails de compte incorrects"
 
-#: enums.py:166
+#: enums.py:243
 msgid "Insufficient funds"
 msgstr "Fonds insuffisants"
 
-#: enums.py:167
+#: enums.py:244
 msgid "Bank cannot process"
 msgstr "Banque ne peut traiter"
 
-#: enums.py:168
+#: enums.py:245
 msgid "Debit not authorized"
 msgstr "Débit interdit"
 
-#: enums.py:169
+#: enums.py:246
 msgid "Customer-initiated"
 msgstr "Initié par le client"
 
-#: enums.py:173
+#: enums.py:250
 msgid "Warning needs response"
 msgstr "Avertissement en attente de réponse"
 
-#: enums.py:174
+#: enums.py:251
 msgid "Warning under review"
 msgstr "Avertissement en revue"
 
-#: enums.py:175
+#: enums.py:252
 msgid "Warning closed"
 msgstr "Avertissement "
 
-#: enums.py:176
+#: enums.py:253
 msgid "Needs response"
 msgstr "En attente de réponse"
 
-#: enums.py:177
+#: enums.py:254
 msgid "Under review"
 msgstr "En revue"
 
-#: enums.py:178
+#: enums.py:255
 msgid "Charge refunded"
 msgstr "Charge remboursée"
 
-#: enums.py:179
+#: enums.py:256
 msgid "Won"
 msgstr "Gagnée"
 
-#: enums.py:180
+#: enums.py:257
 msgid "Lost"
 msgstr "Perdue"
 
-#: enums.py:184
+#: enums.py:261
 msgid "Dispute evidence"
 msgstr "Preuve de dispute"
 
-#: enums.py:185
+#: enums.py:262
 msgid "Identity document"
 msgstr "Document d'identité"
 
-#: enums.py:186
+#: enums.py:263
 msgid "Tax document user upload"
 msgstr "Document de taxes de l'utilisateur"
 
-#: enums.py:190
+#: enums.py:267
 msgid "PDF"
 msgstr "PDF"
 
-#: enums.py:191
+#: enums.py:268
 msgid "JPG"
 msgstr "JPG"
 
-#: enums.py:192
+#: enums.py:269
 msgid "PNG"
 msgstr "PNG"
 
-#: enums.py:193
+#: enums.py:270
 msgid "CSV"
 msgstr "CSV"
 
-#: enums.py:194
+#: enums.py:271
 msgid "XLS"
 msgstr "XLS"
 
-#: enums.py:195
+#: enums.py:272
 msgid "XLSX"
 msgstr "XLSX"
 
-#: enums.py:196
+#: enums.py:273
 msgid "DOCX"
 msgstr "DOCX"
 
-#: enums.py:200
+#: enums.py:277
 msgid "Charge automatically"
 msgstr "Débit automatique"
 
-#: enums.py:201
+#: enums.py:278
 msgid "Send invoice"
 msgstr "Envoi de facture"
 
-#: enums.py:210
+#: enums.py:288
 msgid "Bank account has been closed."
 msgstr "Compte bancaire fermé"
 
-#: enums.py:211
+#: enums.py:289
 msgid "Bank account has been frozen."
 msgstr "Compte bancaire gelé"
 
-#: enums.py:212
+#: enums.py:290
 msgid "Bank account has restrictions on payouts allowed."
 msgstr "Le compte bancaire a des restrictions sur les virements autorisés"
 
-#: enums.py:213
+#: enums.py:291
 msgid "Destination bank account has changed ownership."
 msgstr "Le compte bancaire destinataire a changé de propriétaire."
 
-#: enums.py:214
+#: enums.py:292
 msgid "Bank could not process payout."
 msgstr "Le compte bancaire n'a pas pu traiter le virement."
 
-#: enums.py:215
+#: enums.py:293
 msgid "Debit transactions not approved on the bank account."
 msgstr ""
 "Les transactions de débit ne sont pas autorisées sur le compte bancaire."
 
-#: enums.py:216
+#: enums.py:294
 msgid "Stripe account has insufficient funds."
 msgstr "Stripe n'a pas suffisamment de fonds."
 
-#: enums.py:217
+#: enums.py:295
 msgid "Invalid account number"
 msgstr "Numéro de compte invalide"
 
-#: enums.py:218
+#: enums.py:296
 msgid "Bank account does not support currency."
 msgstr "Le compte bancaire ne supporte pas la monnaie."
 
-#: enums.py:219
+#: enums.py:297
 msgid "Bank account could not be located."
 msgstr "Le compte bancaire n'a pas été trouvé."
 
-#: enums.py:220
+#: enums.py:298
 msgid "Card no longer supported."
 msgstr "La carte n'est plus supportée."
 
-#: enums.py:225
+#: enums.py:303
 msgid "Instant"
 msgstr "Instant"
 
-#: enums.py:229
+#: enums.py:307
 msgid "Paid"
 msgstr "Payé"
 
-#: enums.py:231
+#: enums.py:309
 msgid "In transit"
 msgstr "En cours"
 
-#: enums.py:232 enums.py:283 enums.py:332 enums.py:363
+#: enums.py:310 enums.py:354 enums.py:367 enums.py:416 enums.py:447
 msgid "Canceled"
 msgstr "Annulé"
 
-#: enums.py:237 enums.py:311 enums.py:372
+#: enums.py:315 enums.py:395 enums.py:457
 msgid "Bank account"
 msgstr "Compte bancaire"
 
-#: enums.py:238 enums.py:296 enums.py:310 enums.py:371
+#: enums.py:316 enums.py:380 enums.py:394 enums.py:456
 msgid "Card"
 msgstr "Carte"
 
-#: enums.py:242
+#: enums.py:320
 msgid "Last during period"
 msgstr "Dernier cette période"
 
-#: enums.py:243
+#: enums.py:321
 msgid "Last ever"
 msgstr "Dernier"
 
-#: enums.py:244
+#: enums.py:322
 msgid "Max"
 msgstr "Max"
 
-#: enums.py:245
+#: enums.py:323
 msgid "Sum"
 msgstr "Somme"
 
-#: enums.py:249
+#: enums.py:327
 msgid "Per unit"
 msgstr "Par unité"
 
-#: enums.py:250
+#: enums.py:328
 msgid "Tiered"
 msgstr "En tiers"
 
-#: enums.py:254
+#: enums.py:332
 msgid "Day"
 msgstr "Jour"
 
-#: enums.py:255
+#: enums.py:333
 msgid "Week"
 msgstr "Semaine"
 
-#: enums.py:256
+#: enums.py:334
 msgid "Month"
 msgstr "Mois"
 
-#: enums.py:257
+#: enums.py:335
 msgid "Year"
 msgstr "Année"
 
-#: enums.py:261
+#: enums.py:339
 msgid "Metered"
 msgstr "Compté"
 
-#: enums.py:262
+#: enums.py:340
 msgid "Licensed"
 msgstr "Sous license"
 
-#: enums.py:266
+#: enums.py:344
 msgid "Graduated"
 msgstr "Gradué"
 
-#: enums.py:267
+#: enums.py:345
 msgid "Volume-based"
 msgstr "Par volume"
 
-#: enums.py:271
+#: enums.py:349
 msgid "Good"
 msgstr "Bien"
 
-#: enums.py:272
+#: enums.py:350
 msgid "Service"
 msgstr "Service"
 
-#: enums.py:276
+#: enums.py:356
+msgid "Timed out"
+msgstr ""
+
+#: enums.py:360
 msgid "Redirect"
 msgstr "Redirection"
 
-#: enums.py:277
+#: enums.py:361
 msgid "Receiver"
 msgstr "Récipient"
 
-#: enums.py:278
+#: enums.py:362
 msgid "Code verification"
 msgstr "Vérification de code"
 
-#: enums.py:279
+#: enums.py:363
 msgid "None"
 msgstr "Aucune"
 
-#: enums.py:284
+#: enums.py:368
 msgid "Chargeable"
 msgstr "Prête a débiter"
 
-#: enums.py:285
+#: enums.py:369
 msgid "Consumed"
 msgstr "Consommée"
 
-#: enums.py:291
+#: enums.py:375
 msgid "ACH Credit Transfer"
 msgstr "Transfert crédit ACH"
 
-#: enums.py:292
+#: enums.py:376
 msgid "ACH Debit"
 msgstr "Débit ACH"
 
-#: enums.py:293
+#: enums.py:377
 msgid "Alipay"
 msgstr "Alipay"
 
-#: enums.py:294
+#: enums.py:378
 msgid "Bancontact"
 msgstr "Bancontact"
 
-#: enums.py:295
+#: enums.py:379
 msgid "Bitcoin"
 msgstr "Bitcoin"
 
-#: enums.py:297
+#: enums.py:381
 msgid "Card present"
 msgstr "Carte présentée"
 
-#: enums.py:298
+#: enums.py:382
 msgid "EPS"
 msgstr "EPS"
 
-#: enums.py:299
+#: enums.py:383
 msgid "Giropay"
 msgstr "Giropay"
 
-#: enums.py:300
+#: enums.py:384
 msgid "iDEAL"
 msgstr "iDEAL"
 
-#: enums.py:301
+#: enums.py:385
 msgid "P24"
 msgstr "P24"
 
-#: enums.py:302
+#: enums.py:386
 msgid "Paper check"
 msgstr "Cheque papier"
 
-#: enums.py:303
+#: enums.py:387
 msgid "SEPA Direct Debit"
 msgstr "Débit direct SEPA"
 
-#: enums.py:304
+#: enums.py:388
 msgid "SEPA credit transfer"
 msgstr "Transfert crédit SEPA"
 
-#: enums.py:305
+#: enums.py:389
 msgid "SOFORT"
 msgstr "SOFORT"
 
-#: enums.py:306
+#: enums.py:390
 msgid "3D Secure"
 msgstr "3D Secure"
 
-#: enums.py:312
+#: enums.py:396
 msgid "Bitcoin receiver"
 msgstr "Récipient Bitcoin"
 
-#: enums.py:313
+#: enums.py:397
 msgid "Alipay account"
 msgstr "Compte Alipay"
 
-#: enums.py:317
+#: enums.py:401
 msgid "Lost or stolen card"
 msgstr "Carte perdue ou volée"
 
-#: enums.py:318
+#: enums.py:402
 msgid "Expired or canceled card"
 msgstr "Carte expirée ou annulée"
 
-#: enums.py:323
+#: enums.py:407
 msgid "Duplicate charge"
 msgstr "Charge double"
 
-#: enums.py:325
+#: enums.py:409
 msgid "Requested by customer"
 msgstr "Demandé par le client"
 
-#: enums.py:336
+#: enums.py:420
 msgid "Reusable"
 msgstr "Réutilisable"
 
-#: enums.py:337
+#: enums.py:421
 msgid "Single-use"
 msgstr "Usage unique"
 
-#: enums.py:347
+#: enums.py:431
 msgid "User-aborted"
 msgstr "Annulé par l'utilisateur"
 
-#: enums.py:348
+#: enums.py:432
 msgid "Declined"
 msgstr "Rejeté"
 
-#: enums.py:355
+#: enums.py:439
 msgid "Not required"
 msgstr "Non requis"
 
-#: enums.py:360
+#: enums.py:444
 msgid "Trialing"
 msgstr "En période d'essai"
 
-#: enums.py:361
+#: enums.py:445
 msgid "Active"
 msgstr "Active"
 
-#: enums.py:362
+#: enums.py:446
 msgid "Past due"
 msgstr "Arriéré dû"
 
-#: enums.py:364
+#: enums.py:448
 msgid "Unpaid"
 msgstr "Non payé"
 
-#: enums.py:373
+#: enums.py:458
 msgid "Source"
 msgstr "Source"
 
-#: models/billing.py:852
+#: models/billing.py:863
 msgid "day"
 msgstr "jour"
 
-#: models/billing.py:853
+#: models/billing.py:864
 msgid "week"
 msgstr "semaine"
 
-#: models/billing.py:854
+#: models/billing.py:865
 msgid "month"
 msgstr "mois"
 
-#: models/billing.py:855
+#: models/billing.py:866
 msgid "year"
 msgstr "an"
 
-#: models/billing.py:857
+#: models/billing.py:868
 #, python-brace-format
 msgid "{amount}/{interval}"
 msgstr "{amount}/{interval}"
 
-#: models/billing.py:860
+#: models/billing.py:871
 msgid "days"
 msgstr "jours"
 
-#: models/billing.py:861
+#: models/billing.py:872
 msgid "weeks"
 msgstr "semaines"
 
-#: models/billing.py:862
+#: models/billing.py:873
 msgid "months"
 msgstr "mois"
 
-#: models/billing.py:863
+#: models/billing.py:874
 msgid "years"
 msgstr "ans"
 
-#: models/billing.py:865
+#: models/billing.py:876
 #, python-brace-format
 msgid "{amount} every {interval_count} {interval}"
 msgstr "{amount} tous les {interval_count} {interval}"
