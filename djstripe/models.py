@@ -2579,7 +2579,10 @@ class Plan(StripeObject):
             "usage during a period. Defaults to `sum`."
         )
     )
-    amount = StripeCurrencyField(help_text="Amount to be charged on the interval specified.")
+    amount = StripeCurrencyField(
+        help_text="Amount to be charged on the interval specified.",
+        null=True,
+    )
     billing_scheme = StripeEnumField(
         enum=enums.PlanBillingScheme, stripe_required=False,
         help_text=(
