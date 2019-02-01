@@ -2723,6 +2723,16 @@ class Plan(StripeObject):
         if product:
             self.product = product
 
+    @classmethod
+    def _manipulate_stripe_object_hook(cls, data):
+        data = super(Plan, cls)._manipulate_stripe_object_hook(data)
+        # Amount can be null if tiered plan
+        # Set to 0 to maintain compatibility while avoiding a database
+        # migration on the stable branch
+        if not data['amount']:
+            data['amount'] = 0
+        return data
+
     @property
     def amount_in_cents(self):
         return int(self.amount * 100)

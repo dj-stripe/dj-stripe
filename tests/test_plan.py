@@ -19,7 +19,7 @@ from six import text_type
 from djstripe.admin import PlanAdmin
 from djstripe.models import Plan
 
-from . import FAKE_PLAN, FAKE_PLAN_II
+from . import FAKE_PLAN, FAKE_PLAN_II, FAKE_TIER_PLAN
 
 
 class TestPlanAdmin(TestCase):
@@ -99,6 +99,12 @@ class PlanTest(TestCase):
         plan = Plan.sync_from_stripe_data(stripe_plan)
         assert plan.amount_in_cents == plan.amount * 100
         assert isinstance(plan.amount_in_cents, int)
+
+    @patch("stripe.Plan.retrieve")
+    def test_stripe_tier_plan(self, plan_retrieve_mock):
+        tier_plan_data = deepcopy(FAKE_TIER_PLAN)
+        plan = Plan.sync_from_stripe_data(tier_plan_data)
+        self.assertEqual(plan.stripe_id, tier_plan_data['id'])
 
 
 class HumanReadablePlanTest(TestCase):
