@@ -1263,4 +1263,15 @@ class Migration(migrations.Migration):
 				null=True,
 			),
 		),
+		migrations.AlterField(
+			model_name="plan",
+			name="amount",
+			field=djstripe.fields.StripeDecimalCurrencyAmountField(
+				blank=True,
+				decimal_places=2,
+				help_text="Amount to be charged on the interval specified.",
+				max_digits=8,
+				null=True,
+			),
+		),
 	]
