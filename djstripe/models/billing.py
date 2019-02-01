@@ -655,7 +655,7 @@ class Plan(StripeModel):
 		),
 	)
 	amount = StripeDecimalCurrencyAmountField(
-		help_text="Amount to be charged on the interval specified."
+		null=True, blank=True, help_text="Amount to be charged on the interval specified."
 	)
 	billing_scheme = StripeEnumField(
 		enum=enums.PlanBillingScheme,

@@ -12,7 +12,7 @@ from djstripe.admin import PlanAdmin
 from djstripe.models import Plan
 from djstripe.settings import STRIPE_SECRET_KEY
 
-from . import FAKE_PLAN, FAKE_PLAN_II, AssertStripeFksMixin
+from . import FAKE_PLAN, FAKE_PLAN_II, FAKE_TIER_PLAN, AssertStripeFksMixin
 
 
 class TestPlanAdmin(TestCase):
@@ -99,6 +99,18 @@ class PlanTest(AssertStripeFksMixin, TestCase):
 		plan = Plan.sync_from_stripe_data(stripe_plan)
 		assert plan.amount_in_cents == plan.amount * 100
 		assert isinstance(plan.amount_in_cents, int)
+
+		self.assert_fks(
+			plan, expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"}
+		)
+
+	@patch("stripe.Plan.retrieve")
+	def test_stripe_tier_plan(self, plan_retrieve_mock):
+		tier_plan_data = deepcopy(FAKE_TIER_PLAN)
+		plan = Plan.sync_from_stripe_data(tier_plan_data)
+		self.assertEqual(plan.id, tier_plan_data["id"])
+		self.assertIsNone(plan.amount)
+		self.assertIsNotNone(plan.tiers)
 
 		self.assert_fks(
 			plan, expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"}
