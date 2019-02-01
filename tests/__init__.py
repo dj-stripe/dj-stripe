@@ -545,6 +545,35 @@ FAKE_PLAN_II = {
     "usage_type": "licensed",
 }
 
+FAKE_TIER_PLAN = {
+    "id": "tier21323",
+    "object": "plan",
+    "amount": None,
+    "created": 1386247539,
+    "currency": "usd",
+    "interval": "month",
+    "interval_count": 1,
+    "livemode": False,
+    "metadata": {},
+    "name": "New plan name",
+    "statement_descriptor": None,
+    "trial_period_days": None,
+    "usage_type": "licensed",
+    "tiers_mode": "graduated",
+    "tiers": [
+        {
+            "flat_amount": 4900,
+            "unit_amount": 1000,
+            "up_to": 5
+        },
+        {
+            "flat_amount": "null",
+            "unit_amount": 900,
+            "up_to": None
+        },
+    ]
+}
+
 
 class SubscriptionDict(dict):
 
