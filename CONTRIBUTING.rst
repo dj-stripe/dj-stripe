@@ -103,6 +103,14 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
 
 10. Congratulations, you're now a dj-stripe contributor!  Have some <3 from us.
 
+Django Migration Policy
+-----------------------
+
+Migrations are considered a breaking change, so it's not usually not acceptable to add a migration to a stable branch.
+
+A workaround to this in the case that the Stripe API data isn't compatible with out model (eg Stripe is sending `null`)
+is to implement the `_manipulate_stripe_object_hook` classmethod on the model.
+
 Pull Request Guidelines
 -----------------------
 
