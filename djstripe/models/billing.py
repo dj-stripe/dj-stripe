@@ -186,7 +186,7 @@ class Invoice(StripeModel):
 		related_name="latest_invoice",
 		help_text="The latest charge generated for this invoice, if any.",
 	)
-	closed = models.BooleanField(
+	closed = models.NullBooleanField(
 		default=False,
 		help_text="Whether or not the invoice is still trying to collect payment. An invoice is closed if it's either "
 		"paid or it has been marked closed. A closed invoice will no longer attempt to collect payment.",
@@ -212,7 +212,7 @@ class Invoice(StripeModel):
 		help_text="Ending customer balance after attempting to pay invoice. If the invoice has not been attempted "
 		"yet, this will be null.",
 	)
-	forgiven = models.BooleanField(
+	forgiven = models.NullBooleanField(
 		default=False,
 		help_text="Whether or not the invoice has been forgiven. Forgiving an invoice instructs us to update the "
 		"subscription status as if the invoice were successfully paid. Once an invoice has been forgiven, it cannot "
@@ -322,6 +322,26 @@ class Invoice(StripeModel):
 		return "Invoice #{number}".format(
 			number=self.number or self.receipt_number or self.id
 		)
+
+	@classmethod
+	def _manipulate_stripe_object_hook(cls, data):
+		data = super()._manipulate_stripe_object_hook(data)
+		# Invoice.closed and .forgiven deprecated in API 2018-11-08 - see https://stripe.com/docs/upgrades#2018-11-08
+
+		if "closed" not in data:
+			# https://stripe.com/docs/billing/invoices/migrating-new-invoice-states#autoadvance
+			if "auto_advance" in data:
+				data["closed"] = not data["auto_advance"]
+			else:
+				data["closed"] = False
+
+		if "forgiven" not in data:
+			if "status" in data:
+				data["forgiven"] = data["status"] == "uncollectible"
+			else:
+				data["forgiven"] = False
+
+		return data
 
 	@classmethod
 	def upcoming(

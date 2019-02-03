@@ -1274,4 +1274,20 @@ class Migration(migrations.Migration):
 				null=True,
 			),
 		),
+		migrations.AlterField(
+			model_name="invoice",
+			name="closed",
+			field=models.NullBooleanField(
+				default=False,
+				help_text="Whether or not the invoice is still trying to collect payment. An invoice is closed if it's either paid or it has been marked closed. A closed invoice will no longer attempt to collect payment.",
+			),
+		),
+		migrations.AlterField(
+			model_name="invoice",
+			name="forgiven",
+			field=models.NullBooleanField(
+				default=False,
+				help_text="Whether or not the invoice has been forgiven. Forgiving an invoice instructs us to update the subscription status as if the invoice were successfully paid. Once an invoice has been forgiven, it cannot be unforgiven or reopened.",
+			),
+		),
 	]
