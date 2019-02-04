@@ -915,7 +915,7 @@ class Customer(StripeObject):
     def subscribe(
         self, plan, charge_immediately=True, application_fee_percent=None, coupon=None,
         quantity=None, metadata=None, tax_percent=None, trial_end=None, trial_from_plan=None,
-        trial_period_days=None
+        trial_period_days=None, billing_cycle_anchor=None
     ):
         """
         Subscribes this customer to a plan.
@@ -935,6 +935,10 @@ class Customer(StripeObject):
                                         application fee percentage.
         :type application_fee_percent: Decimal. Precision is 2; anything more will be ignored. A positive
                                        decimal between 1 and 100.
+        :param billing_cycle_anchor: A future timestamp to anchor the subscription’s billing cycle.
+                                     This is used to determine the date of the first full invoice, and, for plans
+                                     with months or year intervals, the day of the month for subsequent invoices.
+        :type billing_cycle_anchor: integer
         :param coupon: The code of the coupon to apply to this subscription. A coupon applied to a subscription
                        will only affect invoices created for that particular subscription.
         :type coupon: string
@@ -977,6 +981,7 @@ class Customer(StripeObject):
             plan=plan,
             customer=self.stripe_id,
             application_fee_percent=application_fee_percent,
+            billing_cycle_anchor=billing_cycle_anchor,
             coupon=coupon,
             quantity=quantity,
             metadata=metadata,
