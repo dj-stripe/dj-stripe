@@ -510,6 +510,7 @@ class Customer(StripeModel):
 		quantity=None,
 		metadata=None,
 		tax_percent=None,
+		billing_cycle_anchor=None,
 		trial_end=None,
 		trial_from_plan=None,
 		trial_period_days=None,
@@ -536,6 +537,11 @@ class Customer(StripeModel):
 			be calculated and added as tax to the final amount each billing period.
 		:type tax_percent: Decimal. Precision is 2; anything more will be ignored. A positive decimal
 			between 1 and 100.
+		:param billing_cycle_anchor: A future timestamp to anchor the subscription’s billing cycle.
+			This is used to determine the date of the first full invoice, and,
+			for plans with month or year intervals, the day of the month for
+			subsequent invoices.
+		:type billing_cycle_anchor: datetime
 		:param trial_end: The end datetime of the trial period the customer will get before being charged for
 			the first time. If set, this will override the default trial period of the plan the
 			customer is being subscribed to. The special value ``now`` can be provided to end
@@ -571,6 +577,7 @@ class Customer(StripeModel):
 			coupon=coupon,
 			quantity=quantity,
 			metadata=metadata,
+			billing_cycle_anchor=billing_cycle_anchor,
 			tax_percent=tax_percent,
 			trial_end=trial_end,
 			trial_from_plan=trial_from_plan,
