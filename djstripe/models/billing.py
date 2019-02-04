@@ -1048,6 +1048,7 @@ class Subscription(StripeModel):
 		self,
 		plan=None,
 		application_fee_percent=None,
+		billing_cycle_anchor=None,
 		coupon=None,
 		prorate=djstripe_settings.PRORATION_POLICY,
 		proration_date=None,
@@ -1061,6 +1062,12 @@ class Subscription(StripeModel):
 
 		:param plan: The plan to which to subscribe the customer.
 		:type plan: Plan or string (plan ID)
+		:param application_fee_percent:
+		:type application_fee_percent:
+		:param billing_cycle_anchor:
+		:type billing_cycle_anchor:
+		:param coupon:
+		:type coupon:
 		:param prorate: Whether or not to prorate when switching plans. Default is True.
 		:type prorate: boolean
 		:param proration_date:
@@ -1070,6 +1077,14 @@ class Subscription(StripeModel):
 			logic, such as prorating by day instead of by second, by providing the time that you
 			wish to use for proration calculations.
 		:type proration_date: datetime
+		:param metadata:
+		:type metadata:
+		:param quantity:
+		:type quantity:
+		:param tax_percent:
+		:type tax_percent:
+		:param trial_end:
+		:type trial_end:
 
 		.. note:: The default value for ``prorate`` is the DJSTRIPE_PRORATION_POLICY setting.
 
