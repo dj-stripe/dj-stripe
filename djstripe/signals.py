@@ -10,7 +10,7 @@ from . import settings as djstripe_settings
 
 webhook_processing_error = Signal(providing_args=["data", "exception"])
 
-# A signal for each Event type. See https://stripe.com/docs/api#event_types
+# A signal for each Event type. See https://stripe.com/docs/api/events/types
 
 WEBHOOK_SIGNALS = dict(
 	[
@@ -38,6 +38,8 @@ WEBHOOK_SIGNALS = dict(
 			"charge.dispute.funds_reinstated",
 			"charge.dispute.funds_withdrawn",
 			"charge.dispute.updated",
+			"charge.refund.updated",
+			"checkout_beta.session_succeeded",
 			"coupon.created",
 			"coupon.deleted",
 			"coupon.updated",
@@ -58,6 +60,7 @@ WEBHOOK_SIGNALS = dict(
 			"file.created",
 			"invoice.created",
 			"invoice.deleted",
+			"invoice.finalized",
 			"invoice.marked_uncollectible",
 			"invoice.payment_failed",
 			"invoice.payment_succeeded",
@@ -68,8 +71,8 @@ WEBHOOK_SIGNALS = dict(
 			"invoiceitem.created",
 			"invoiceitem.deleted",
 			"invoiceitem.updated",
-			"issuer_fraud_record.created",
 			"issuing_authorization.created",
+			"issuing_authorization.request",
 			"issuing_authorization.updated",
 			"issuing_card.created",
 			"issuing_card.updated",
@@ -77,6 +80,8 @@ WEBHOOK_SIGNALS = dict(
 			"issuing_cardholder.updated",
 			"issuing_dispute.created",
 			"issuing_dispute.updated",
+			"issuing_settlement.created",
+			"issuing_settlement.updated",
 			"issuing_transaction.created",
 			"issuing_transaction.updated",
 			"order.created",
@@ -119,19 +124,22 @@ WEBHOOK_SIGNALS = dict(
 			"source.refund_attributes_required",
 			"source.transaction.created",
 			"source.transaction.updated",
-			"subscription_schedule.canceled",
-			"subscription_schedule.completed",
-			"subscription_schedule.created",
-			"subscription_schedule.released",
-			"subscription_schedule.updated",
 			"topup.canceled",
 			"topup.created",
 			"topup.failed",
 			"topup.reversed",
 			"topup.succeeded",
 			"transfer.created",
-			"transfer.reversed" "transfer.reversed",
+			"transfer.reversed",
 			"transfer.updated",
+			# deprecated (no longer in events_types list) - TODO can be deleted?
+			"issuer_fraud_record.created",
+			"subscription_schedule.canceled",
+			"subscription_schedule.completed",
+			"subscription_schedule.created",
+			"subscription_schedule.released",
+			"subscription_schedule.updated",
+			# special case? - TODO can be deleted?
 			"ping",
 		]
 	]
