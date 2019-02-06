@@ -111,7 +111,9 @@ class ApiErrorCode(Enum):
 	parameter_unknown = _("Parameter unknown")
 	parameters_exclusive = _("Parameters exclusive")
 	payment_intent_authentication_failure = _("Payment intent authentication failure")
-	payment_intent_incompatible_payment_method = _("Payment intent incompatible payment method")
+	payment_intent_incompatible_payment_method = _(
+		"Payment intent incompatible payment method"
+	)
 	payment_intent_invalid_parameter = _("Payment intent invalid parameter")
 	payment_intent_payment_attempt_failed = _("Payment intent payment attempt failed")
 	payment_intent_unexpected_state = _("Payment intent unexpected state")
