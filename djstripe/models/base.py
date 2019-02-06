@@ -516,6 +516,30 @@ class StripeModel(models.Model):
 
 		return subscriptionitems
 
+	@classmethod
+	def _stripe_object_to_refunds(cls, target_cls, data, charge):
+		"""
+		Retrieves Refunds for a charge
+		:param target_cls: The target class to instantiate per invoice item.
+		:type target_cls: ``Refund``
+		:param data: The data dictionary received from the Stripe API.
+		:type data: dict
+		:param charge: The charge object that refunds are for.
+		:type invoice: ``djstripe.models.Refund``
+		:return:
+		"""
+
+		refunds = data.get("refunds")
+		if not refunds:
+			return []
+
+		refund_objs = []
+		for refund_data in refunds.get("data", []):
+			item, _ = target_cls._get_or_create_from_stripe_object(refund_data, refetch=False)
+			refund_objs.append(item)
+
+		return refund_objs
+
 	def _sync(self, record_data):
 		for attr, value in record_data.items():
 			setattr(self, attr, value)

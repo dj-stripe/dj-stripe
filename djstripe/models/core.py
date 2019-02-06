@@ -346,6 +346,11 @@ class Charge(StripeModel):
 		if "destination" in data and data["destination"]:
 			return target_cls._get_or_create_from_stripe_object(data, "destination")[0]
 
+	def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+		super()._attach_objects_post_save_hook(cls, data, pending_relations=pending_relations)
+
+		cls._stripe_object_to_refunds(target_cls=Refund, data=data, charge=self)
+
 
 class Customer(StripeModel):
 	"""
