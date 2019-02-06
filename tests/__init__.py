@@ -599,6 +599,50 @@ FAKE_CHARGE_II = ChargeDict(
 	}
 )
 
+FAKE_CHARGE_REFUNDED = deepcopy(FAKE_CHARGE)
+FAKE_CHARGE_REFUNDED = FAKE_CHARGE_REFUNDED.refund(
+	amount=FAKE_CHARGE_REFUNDED["amount"]
+)
+
+FAKE_REFUND = {
+	"id": "re_1E0he8KatMEEd8456454S01Vc",
+	"object": "refund",
+	"amount": FAKE_CHARGE_REFUNDED["amount_refunded"],
+	"balance_transaction": "txn_1E0he8KaGRDEd998TDswMZuN",
+	"charge": FAKE_CHARGE_REFUNDED["id"],
+	"created": 1549425864,
+	"currency": "usd",
+	"metadata": {},
+	"reason": None,
+	"receipt_number": None,
+	"source_transfer_reversal": None,
+	"status": "succeeded",
+	"transfer_reversal": None,
+}
+
+# Balance transaction associated with the refund
+FAKE_BALANCE_TRANSACTION_REFUND = {
+	"id": "txn_1E0he8KaGRDEd998TDswMZuN",
+	"amount": -1 * FAKE_CHARGE_REFUNDED["amount_refunded"],
+	"available_on": 1549425864,
+	"created": 1549425864,
+	"currency": "usd",
+	"description": "REFUND FOR CHARGE (Payment for invoice G432DF1C-0028)",
+	"exchange_rate": None,
+	"fee": 0,
+	"fee_details": [],
+	"net": -1 * FAKE_CHARGE_REFUNDED["amount_refunded"],
+	"object": "balance_transaction",
+	"source": FAKE_REFUND["id"],
+	"status": "available",
+	"type": "refund",
+}
+
+
+FAKE_CHARGE_REFUNDED["refunds"].update(
+	{"total_count": 1, "data": [deepcopy(FAKE_REFUND)]}
+)
+
 
 FAKE_COUPON = {
 	"id": "fake-coupon-1",

@@ -12,7 +12,8 @@ from djstripe.enums import ChargeStatus, LegacySourceType
 from djstripe.models import Account, Charge, Dispute, PaymentMethod
 
 from . import (
-	FAKE_ACCOUNT, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_FILEUPLOAD, FAKE_INVOICE,
+	FAKE_ACCOUNT, FAKE_BALANCE_TRANSACTION, FAKE_BALANCE_TRANSACTION_REFUND, FAKE_CHARGE,
+	FAKE_CHARGE_REFUNDED, FAKE_CUSTOMER, FAKE_FILEUPLOAD, FAKE_INVOICE, FAKE_REFUND,
 	FAKE_SUBSCRIPTION, FAKE_TRANSFER, AssertStripeFksMixin, default_account
 )
 
@@ -115,6 +116,148 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
 		charge_retrieve_mock.assert_not_called()
 		balance_transaction_retrieve_mock.assert_not_called()
+
+		self.assert_fks(
+			charge,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+				"djstripe.Plan.product",
+			},
+		)
+
+	@patch("djstripe.models.Account.get_default_account")
+	@patch("stripe.Charge.retrieve")
+	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
+	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
+	def test_sync_from_stripe_data_refunded_on_update(
+		self,
+		subscription_retrieve_mock,
+		invoice_retrieve_mock,
+		charge_retrieve_mock,
+		default_account_mock,
+	):
+		# first sync charge (as per test_sync_from_stripe_data) then sync refunded version,
+		# to hit the update code-path instead of insert
+
+		from djstripe.settings import STRIPE_SECRET_KEY
+
+		default_account_mock.return_value = self.account
+
+		fake_charge_copy = deepcopy(FAKE_CHARGE)
+
+		with patch(
+			"stripe.BalanceTransaction.retrieve", return_value=deepcopy(FAKE_BALANCE_TRANSACTION)
+		):
+			charge = Charge.sync_from_stripe_data(fake_charge_copy)
+
+		self.assertEqual(Decimal("22"), charge.amount)
+		self.assertEqual(True, charge.paid)
+		self.assertEqual(False, charge.refunded)
+		self.assertEqual(True, charge.captured)
+		self.assertEqual(False, charge.disputed)
+
+		self.assertEqual(len(charge.refunds.all()), 0)
+
+		fake_charge_refunded_copy = deepcopy(FAKE_CHARGE_REFUNDED)
+
+		with patch(
+			"stripe.BalanceTransaction.retrieve",
+			return_value=deepcopy(FAKE_BALANCE_TRANSACTION_REFUND),
+		) as balance_transaction_retrieve_mock:
+			charge_refunded = Charge.sync_from_stripe_data(fake_charge_refunded_copy)
+
+		self.assertEqual(charge.id, charge_refunded.id)
+
+		self.assertEqual(Decimal("22"), charge_refunded.amount)
+		self.assertEqual(True, charge_refunded.paid)
+		self.assertEqual(True, charge_refunded.refunded)
+		self.assertEqual(True, charge_refunded.captured)
+		self.assertEqual(False, charge_refunded.disputed)
+		self.assertEqual(
+			"VideoDoc consultation for ivanp0001 berkp0001", charge_refunded.description
+		)
+		self.assertEqual(charge_refunded.amount, charge_refunded.amount_refunded)
+
+		charge_retrieve_mock.assert_not_called()
+		balance_transaction_retrieve_mock.assert_called_once_with(
+			api_key=STRIPE_SECRET_KEY, expand=[], id=FAKE_BALANCE_TRANSACTION_REFUND["id"]
+		)
+
+		refunds = list(charge_refunded.refunds.all())
+		self.assertEqual(len(refunds), 1)
+
+		refund = refunds[0]
+
+		self.assertEqual(refund.id, FAKE_REFUND["id"])
+
+		self.assertNotEqual(
+			charge_refunded.balance_transaction.id, refund.balance_transaction.id
+		)
+		self.assertEqual(
+			charge_refunded.balance_transaction.id, FAKE_BALANCE_TRANSACTION["id"]
+		)
+		self.assertEqual(refund.balance_transaction.id, FAKE_BALANCE_TRANSACTION_REFUND["id"])
+
+		self.assert_fks(
+			charge_refunded,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+				"djstripe.Plan.product",
+			},
+		)
+
+	@patch("djstripe.models.Account.get_default_account")
+	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION_REFUND),
+	)
+	@patch("stripe.Charge.retrieve")
+	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
+	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
+	def test_sync_from_stripe_data_refunded(
+		self,
+		subscription_retrieve_mock,
+		invoice_retrieve_mock,
+		charge_retrieve_mock,
+		balance_transaction_retrieve_mock,
+		default_account_mock,
+	):
+		from djstripe.settings import STRIPE_SECRET_KEY
+
+		default_account_mock.return_value = self.account
+		fake_charge_copy = deepcopy(FAKE_CHARGE_REFUNDED)
+
+		charge = Charge.sync_from_stripe_data(fake_charge_copy)
+
+		self.assertEqual(Decimal("22"), charge.amount)
+		self.assertEqual(True, charge.paid)
+		self.assertEqual(True, charge.refunded)
+		self.assertEqual(True, charge.captured)
+		self.assertEqual(False, charge.disputed)
+		self.assertEqual("VideoDoc consultation for ivanp0001 berkp0001", charge.description)
+		self.assertEqual(charge.amount, charge.amount_refunded)
+
+		charge_retrieve_mock.assert_not_called()
+		balance_transaction_retrieve_mock.assert_called_once_with(
+			api_key=STRIPE_SECRET_KEY, expand=[], id=FAKE_BALANCE_TRANSACTION_REFUND["id"]
+		)
+
+		refunds = list(charge.refunds.all())
+		self.assertEqual(len(refunds), 1)
+
+		refund = refunds[0]
+
+		self.assertEqual(refund.id, FAKE_REFUND["id"])
+
+		self.assertNotEqual(charge.balance_transaction.id, refund.balance_transaction.id)
+		self.assertEqual(charge.balance_transaction.id, FAKE_BALANCE_TRANSACTION["id"])
+		self.assertEqual(refund.balance_transaction.id, FAKE_BALANCE_TRANSACTION_REFUND["id"])
 
 		self.assert_fks(
 			charge,
