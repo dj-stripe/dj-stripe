@@ -601,6 +601,7 @@ class Customer(StripeModel):
 		shipping=None,
 		source=None,
 		statement_descriptor=None,
+		idempotency_key=None,
 	):
 		"""
 		Creates a charge for this customer.
@@ -661,6 +662,7 @@ class Customer(StripeModel):
 			customer=self.id,
 			source=source,
 			statement_descriptor=statement_descriptor,
+			idempotency_key=idempotency_key,
 		)
 
 		return Charge.sync_from_stripe_data(stripe_charge)
