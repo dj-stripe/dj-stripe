@@ -1403,7 +1403,7 @@ FAKE_TRANSFER_III = {
 FAKE_ACCOUNT = {
 	"id": "acct_1032D82eZvKYlo2C",
 	"object": "account",
-	"business_logo": None,
+	"business_logo": "file_1E3fssKatMEEd6736724HYAXyj",
 	"business_name": "dj-stripe",
 	"business_primary_color": "#092e20",
 	"business_url": "https://example.com",
@@ -1421,6 +1421,36 @@ FAKE_ACCOUNT = {
 	"timezone": "Etc/UTC",
 	"type": "standard",
 }
+
+FAKE_FILEUPLOAD = {
+	"created": 1550134074,
+	"filename": "logo_preview.png",
+	"id": "file_1E3fssKatMEEd6736724HYAXyj",
+	"links": {
+		"data": [
+			{
+				"created": 1550134074,
+				"expired": False,
+				"expires_at": None,
+				"file": "file_1E3fssKatMEEd6736724HYAXyj",
+				"id": "link_1E3fssKatMEEd673672V0JSH",
+				"livemode": False,
+				"metadata": {},
+				"object": "file_link",
+				"url": "https://files.stripe.com/links/fl_test_69vG4ISDx9Chjklasrf06BJeQo",
+			}
+		],
+		"has_more": False,
+		"object": "list",
+		"url": "/v1/file_links?file=file_1E3fssKatMEEd6736724HYAXyj",
+	},
+	"object": "file_upload",
+	"purpose": "business_logo",
+	"size": 6650,
+	"type": "png",
+	"url": "https://files.stripe.com/files/f_test_BTJFKcS7VDahgkjqw8EVNWlM",
+}
+
 
 FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED = {
 	"id": "evt_XXXXXXXXXXXXXXXXXXXXXXXX",
