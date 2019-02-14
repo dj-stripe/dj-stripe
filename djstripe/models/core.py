@@ -1181,6 +1181,8 @@ class FileUpload(StripeModel):
 	Stripe documentation: https://stripe.com/docs/api#file_uploads
 	"""
 
+	stripe_class = stripe.FileUpload
+
 	filename = models.CharField(
 		max_length=255,
 		help_text="A filename for the file, suitable for saving to a filesystem.",
@@ -1195,6 +1197,15 @@ class FileUpload(StripeModel):
 	url = models.CharField(
 		max_length=200, help_text="A read-only URL where the uploaded file can be accessed."
 	)
+
+	@classmethod
+	def is_valid_object(cls, data):
+		return data["object"] in ("file", "file_upload")
+
+
+# Alias for compatability
+# TODO - rename the model and switch this alias the other way around to match stripe python
+File = FileUpload
 
 
 class Payout(StripeModel):

@@ -12,7 +12,7 @@ from djstripe.enums import ChargeStatus, LegacySourceType
 from djstripe.models import Account, Charge, Dispute, PaymentMethod
 
 from . import (
-	FAKE_ACCOUNT, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_INVOICE,
+	FAKE_ACCOUNT, FAKE_CHARGE, FAKE_CUSTOMER, FAKE_FILEUPLOAD, FAKE_INVOICE,
 	FAKE_SUBSCRIPTION, FAKE_TRANSFER, AssertStripeFksMixin, default_account
 )
 
@@ -292,8 +292,10 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 	@patch("stripe.BalanceTransaction.retrieve")
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
+	@patch("stripe.File.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD))
 	def test_sync_from_stripe_data_with_destination(
 		self,
+		file_retrive_mock,
 		invoice_retrieve_mock,
 		subscription_retrieve_mock,
 		balance_transaction_retrieve_mock,
@@ -321,7 +323,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		self.assert_fks(
 			charge,
 			expected_blank_fks={
-				"djstripe.Account.business_logo",
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
