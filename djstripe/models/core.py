@@ -847,7 +847,6 @@ class Customer(StripeModel):
 		Checks to see if this customer has an active subscription to any plan.
 
 		:returns: True if there exists an active subscription, False otherwise.
-		:throws: TypeError if ``plan`` is None and more than one active subscription exists for this customer.
 		"""
 
 		return len(self._get_valid_subscriptions()) != 0
