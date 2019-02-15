@@ -130,7 +130,7 @@ WEBHOOK_SIGNALS = dict(
 			"topup.reversed",
 			"topup.succeeded",
 			"transfer.created",
-			"transfer.reversed" "transfer.reversed",
+			"transfer.reversed",
 			"transfer.updated",
 			"ping",
 		]
