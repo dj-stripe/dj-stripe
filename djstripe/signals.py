@@ -92,7 +92,6 @@ WEBHOOK_SIGNALS = dict(
 			"payment_intent.amount_capturable_updated",
 			"payment_intent.created",
 			"payment_intent.payment_failed",
-			"payment_intent.requires_capture",
 			"payment_intent.succeeded",
 			"payout.canceled",
 			"payout.created",
@@ -134,6 +133,7 @@ WEBHOOK_SIGNALS = dict(
 			"transfer.updated",
 			# deprecated (no longer in events_types list) - TODO can be deleted?
 			"issuer_fraud_record.created",
+			"payment_intent.requires_capture",
 			"subscription_schedule.canceled",
 			"subscription_schedule.completed",
 			"subscription_schedule.created",
