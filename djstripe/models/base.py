@@ -562,7 +562,7 @@ class StripeModel(models.Model):
 			data, field_name=field_name, current_ids=current_ids
 		)
 
-		if not created:
+		if instance and not created:
 			instance._sync(cls._stripe_object_to_record(data))
 			instance._attach_objects_hook(cls, data)
 			instance.save()
