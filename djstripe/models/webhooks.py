@@ -107,6 +107,9 @@ class WebhookEventTrigger(models.Model):
 			webhook_processing_error.send(
 				sender=WebhookEventTrigger, exception=e, data=getattr(e, "http_body", "")
 			)
+
+			# re-raise the exception so Django sees it
+			raise e
 		finally:
 			obj.save()
 
