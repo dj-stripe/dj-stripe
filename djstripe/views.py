@@ -3,7 +3,7 @@ dj-stripe - Views related to the djstripe app.
 """
 import logging
 
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
@@ -33,10 +33,6 @@ class ProcessWebhookView(View):
 			return HttpResponseBadRequest()
 
 		trigger = WebhookEventTrigger.from_request(request)
-
-		if trigger.exception:
-			# An exception happened, return 500
-			return HttpResponseServerError()
 
 		if trigger.is_test_event:
 			# Since we don't do signature verification, we have to skip trigger.valid

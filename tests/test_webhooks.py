@@ -156,6 +156,29 @@ class TestWebhook(TestCase):
 		event_trigger = WebhookEventTrigger.objects.first()
 		self.assertEqual(event_trigger.remote_ip, "0.0.0.0")
 
+	@patch("djstripe.models.WebhookEventTrigger.validate", return_value=True)
+	@patch("djstripe.models.WebhookEventTrigger.process")
+	def test_webhook_reraise_exception(
+		self, webhook_event_process_mock, webhook_event_validate_mock
+	):
+		class ProcessException(Exception):
+			pass
+
+		exception_message = "process fail"
+
+		webhook_event_process_mock.side_effect = ProcessException(exception_message)
+
+		self.assertEqual(WebhookEventTrigger.objects.count(), 0)
+
+		fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+
+		with self.assertRaisesMessage(ProcessException, exception_message):
+			self._send_event(fake_event)
+
+		self.assertEqual(WebhookEventTrigger.objects.count(), 1)
+		event_trigger = WebhookEventTrigger.objects.first()
+		self.assertEqual(event_trigger.exception, exception_message)
+
 	@patch.object(
 		djstripe_settings, "WEBHOOK_EVENT_CALLBACK", return_value=mock_webhook_handler
 	)
