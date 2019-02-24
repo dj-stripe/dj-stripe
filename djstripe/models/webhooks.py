@@ -99,6 +99,8 @@ class WebhookEventTrigger(models.Model):
 					# Process the item (do not save it, it'll get saved below)
 					obj.process(save=False)
 		except Exception as e:
+			logger.exception("webhook exception")
+
 			max_length = WebhookEventTrigger._meta.get_field("exception").max_length
 			obj.exception = str(e)[:max_length]
 			obj.traceback = format_exc()
