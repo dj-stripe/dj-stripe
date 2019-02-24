@@ -118,3 +118,42 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Plan.product",
 			},
 		)
+
+	@patch("djstripe.models.Account.get_default_account")
+	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN_II))
+	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION_III))
+	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER_II))
+	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE_II))
+	@patch("stripe.Invoice.retrieve")
+	def test_sync_null_invoice(
+		self,
+		invoice_retrieve_mock,
+		charge_retrieve_mock,
+		customer_retrieve_mock,
+		subscription_retrieve_mock,
+		plan_retrieve_mock,
+		default_account_mock,
+	):
+		default_account_mock.return_value = self.account
+
+		invoiceitem_data = deepcopy(FAKE_INVOICEITEM)
+		invoiceitem_data.update(
+			{"proration": True, "plan": FAKE_PLAN_II["id"], "invoice": None}
+		)
+		invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
+
+		self.assertEqual(FAKE_PLAN_II["id"], invoiceitem.plan.id)
+
+		self.assert_fks(
+			invoiceitem,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+				"djstripe.Customer.subscriber",
+				"djstripe.InvoiceItem.invoice",
+				"djstripe.InvoiceItem.subscription",
+				"djstripe.Plan.product",
+			},
+		)

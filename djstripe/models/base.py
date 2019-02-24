@@ -392,6 +392,7 @@ class StripeModel(models.Model):
 		else:
 			# An empty field - We need to return nothing here because there is
 			# no way of knowing what needs to be fetched!
+			# TODO - this path shouldn't be hit, log/assert/exception?
 			return None, False
 
 		try:
