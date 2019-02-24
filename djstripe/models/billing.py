@@ -621,10 +621,11 @@ class InvoiceItem(StripeModel):
 
 	@classmethod
 	def sync_from_stripe_data(cls, data, field_name="id"):
-		# sync the Invoice first to avoid recursive Charge/Invoice loop
-		Invoice.sync_from_stripe_data(
-			data={"invoice": data.get("invoice")}, field_name="invoice"
-		)
+		invoice_data = data.get("invoice")
+
+		if invoice_data:
+			# sync the Invoice first to avoid recursive Charge/Invoice loop
+			Invoice.sync_from_stripe_data(data={"invoice": invoice_data}, field_name="invoice")
 
 		return super().sync_from_stripe_data(data, field_name=field_name)
 
