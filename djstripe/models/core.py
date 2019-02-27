@@ -273,7 +273,7 @@ class Charge(StripeModel):
 		return self.source.id
 
 	def _attach_objects_hook(self, cls, data):
-		from .payment_methods import PaymentMethod
+		from .payment_methods import DjstripePaymentMethod
 
 		# Set the account on this object.
 		destination_account = cls._stripe_object_destination_to_account(
@@ -284,7 +284,7 @@ class Charge(StripeModel):
 		else:
 			self.account = Account.get_default_account()
 
-		self.source, _ = PaymentMethod._get_or_create_source(
+		self.source, _ = DjstripePaymentMethod._get_or_create_source(
 			data["source"], data["source"]["object"]
 		)
 
@@ -752,7 +752,7 @@ class Customer(StripeModel):
 		:type set_default: boolean
 
 		"""
-		from .payment_methods import PaymentMethod
+		from .payment_methods import DjstripePaymentMethod
 
 		stripe_customer = self.api_retrieve()
 		new_stripe_payment_method = stripe_customer.sources.create(source=source)
@@ -761,7 +761,9 @@ class Customer(StripeModel):
 			stripe_customer.default_source = new_stripe_payment_method["id"]
 			stripe_customer.save()
 
-		new_payment_method = PaymentMethod.from_stripe_object(new_stripe_payment_method)
+		new_payment_method = DjstripePaymentMethod.from_stripe_object(
+			new_stripe_payment_method
+		)
 
 		# Change the default source
 		if set_default:
@@ -961,7 +963,7 @@ class Customer(StripeModel):
 		self, cls, data, pending_relations=None
 	):  # noqa (function complexity)
 		from .billing import Coupon
-		from .payment_methods import PaymentMethod
+		from .payment_methods import DjstripePaymentMethod
 
 		super()._attach_objects_post_save_hook(cls, data, pending_relations=pending_relations)
 
@@ -974,7 +976,7 @@ class Customer(StripeModel):
 			# by id when we look at the default_source (we need the source type).
 			sources = {}
 			for source in customer_sources["data"]:
-				obj, _ = PaymentMethod._get_or_create_source(source, source["object"])
+				obj, _ = DjstripePaymentMethod._get_or_create_source(source, source["object"])
 				sources[source["id"]] = obj
 
 		default_source = data.get("default_source")

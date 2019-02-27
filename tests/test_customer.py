@@ -14,7 +14,7 @@ from stripe.error import InvalidRequestError
 from djstripe import settings as djstripe_settings
 from djstripe.exceptions import MultipleSubscriptionException
 from djstripe.models import (
-	Card, Charge, Coupon, Customer, Invoice, PaymentMethod, Plan, Subscription
+	Card, Charge, Coupon, Customer, DjstripePaymentMethod, Invoice, Plan, Subscription
 )
 from djstripe.settings import STRIPE_SECRET_KEY
 
@@ -38,7 +38,9 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		)
 		self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
-		self.payment_method, _ = PaymentMethod._get_or_create_source(FAKE_CARD, "card")
+		self.payment_method, _ = DjstripePaymentMethod._get_or_create_source(
+			FAKE_CARD, "card"
+		)
 		self.card = self.payment_method.resolve()
 
 		self.customer.default_source = self.payment_method
@@ -94,7 +96,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		self.assertEqual(0, synced_customer.sources.count())
 		self.assertEqual(
 			synced_customer.default_source,
-			PaymentMethod.objects.get(id=fake_customer["default_source"]["id"]),
+			DjstripePaymentMethod.objects.get(id=fake_customer["default_source"]["id"]),
 		)
 
 	def test_customer_sync_has_subscriber_metadata(self):
