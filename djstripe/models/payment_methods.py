@@ -12,7 +12,7 @@ from .base import StripeModel, logger
 from .core import Customer
 
 
-class PaymentMethod(models.Model):
+class DjstripePaymentMethod(models.Model):
 	"""
 	An internal model that abstracts the legacy Card and BankAccount
 	objects with Source objects.
@@ -67,6 +67,10 @@ class PaymentMethod(models.Model):
 
 	def resolve(self):
 		return self.object_model.objects.get(id=self.id)
+
+
+# Alias to the old model class, will be removed
+PaymentMethod = DjstripePaymentMethod
 
 
 class BankAccount(StripeModel):

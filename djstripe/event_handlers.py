@@ -89,7 +89,7 @@ def customer_source_webhook_handler(event):
 			# NOTE: for now, customer.sources still points to Card
 			# Also, https://github.com/dj-stripe/dj-stripe/issues/576
 			models.Card.objects.filter(id=customer_data.get("id", "")).delete()
-			models.PaymentMethod.objects.filter(id=customer_data.get("id", "")).delete()
+			models.DjstripePaymentMethod.objects.filter(id=customer_data.get("id", "")).delete()
 		else:
 			_handle_crud_like_event(target_cls=models.Card, event=event)
 

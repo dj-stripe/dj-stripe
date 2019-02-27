@@ -17,7 +17,7 @@ else:
 
 class PaymentMethodForeignKey(models.ForeignKey):
 	def __init__(self, **kwargs):
-		kwargs.setdefault("to", "PaymentMethod")
+		kwargs.setdefault("to", "DjstripePaymentMethod")
 		super().__init__(**kwargs)
 
 

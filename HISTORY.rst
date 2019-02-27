@@ -55,6 +55,8 @@ History
 - Switched test runner to pytest-django
 - ``StripeModel.sync_from_stripe_data()`` will now automatically retrieve related objects
   and populate foreign keys.
+- ``PaymentMethod`` has been renamed to ``DjstripePaymentMethod``.
+  An alias remains but will be removed in the next version.
 
 1.2.1 (2018-07-18)
 ------------------
@@ -134,9 +136,11 @@ Stripe sources (``src_XXXX``) are objects that can arbitrarily reference
 any of the payment method types that Stripe supports. However, the
 legacy ``Card`` object (with object IDs like ``card_XXXX`` or
 ``cc_XXXX``) is not a Source object, and cannot be turned into a Source
-object at this time. In order to support both Card and Source objects in
-ForeignKeys, a new model ``PaymentMethod`` has been devised. That model
-can resolve into a Card, a Source, or a BankAccount object.
+object at this time.
+
+In order to support both Card and Source objects in ForeignKeys,
+a new model ``PaymentMethod`` has been devised (renamed to ``DjstripePaymentMethod``
+in 2.0). That model can resolve into a Card, a Source, or a BankAccount object.
 
 -  **The ``default_source`` attribute on ``Customer`` now refers to a
    ``PaymentMethod`` object**. You will need to call ``.resolve()`` on
