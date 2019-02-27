@@ -5,17 +5,16 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 	def __init__(self, *args, **kwargs):
-		try:
-			# Hack to support sqlite for quick testing. Without this migrations fail with:
-			#    "django.db.utils.NotSupportedError: Renaming the 'djstripe_paymentmethod' table while in a transaction
-			#    is not supported on SQLite because it would break referential integrity.
-			#    Try adding `atomic = False` to the Migration class."
-			from django.db import connection
+		# Hack to support sqlite for quick testing. Without this migrations fail with:
+		#    "django.db.utils.NotSupportedError: Renaming the 'djstripe_paymentmethod' table while in a transaction
+		#    is not supported on SQLite because it would break referential integrity.
+		#    Try adding `atomic = False` to the Migration class."
+		from django.db import connection
 
-			if connection.vendor == "sqlite":
-				self.atomic = False
-		except Exception:
-			pass
+		# use getattr because I think connection.vendor isn't documented
+		if getattr(connection, "vendor", None) == "sqlite":
+			self.atomic = False
+
 		super().__init__(*args, **kwargs)
 
 	dependencies = [("djstripe", "0003_auto_20181117_2328")]
