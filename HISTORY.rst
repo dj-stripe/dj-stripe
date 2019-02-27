@@ -3,6 +3,19 @@
 History
 =======
 
+1.2.4 (2019-02-27)
+------------------
+
+This is a bugfix-only version:
+
+- Allow billing_cycle_anchor argument when creating a subscription (#814)
+- Fixup plan amount null with tier plans (#781)
+- Update Cancel subscription view tests to match backport in f64af57
+- Implement Invoice._manipulate_stripe_object_hook for compatability with API 2018-11-08 (#771)
+- Fix product webhook for type="good" (#724)
+- Add trial_from_plan, trial_period_days args to Customer.subscribe() (#709)
+
+
 1.2.3 (2018-10-13)
 ------------------
 
