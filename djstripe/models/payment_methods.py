@@ -1,3 +1,5 @@
+import warnings
+
 import stripe
 from django.db import models, transaction
 from stripe.error import InvalidRequestError
@@ -12,7 +14,7 @@ from .base import StripeModel, logger
 from .core import Customer
 
 
-class PaymentMethod(models.Model):
+class DjstripePaymentMethod(models.Model):
 	"""
 	An internal model that abstracts the legacy Card and BankAccount
 	objects with Source objects.
@@ -24,6 +26,10 @@ class PaymentMethod(models.Model):
 
 	id = models.CharField(max_length=255, primary_key=True)
 	type = models.CharField(max_length=12, db_index=True)
+
+	class Meta:
+		# preserve original table name
+		db_table = "djstripe_paymentmethod"
 
 	@classmethod
 	def from_stripe_object(cls, data):
@@ -67,6 +73,18 @@ class PaymentMethod(models.Model):
 
 	def resolve(self):
 		return self.object_model.objects.get(id=self.id)
+
+
+class PaymentMethod(DjstripePaymentMethod):
+	class Meta:
+		proxy = True
+
+	def __init__(self, *args, **kwargs):
+		warnings.warn(
+			"PaymentMethod is deprecated and name will be repurposed in future versions, use DjstripePaymentMethod",
+			DeprecationWarning,
+		)
+		super().__init__(*args, **kwargs)
 
 
 class BankAccount(StripeModel):

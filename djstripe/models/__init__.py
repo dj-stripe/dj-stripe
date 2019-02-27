@@ -28,7 +28,13 @@ from .core import (
 	Product,
 	Refund,
 )
-from .payment_methods import BankAccount, Card, PaymentMethod, Source
+from .payment_methods import (
+	BankAccount,
+	Card,
+	DjstripePaymentMethod,
+	PaymentMethod,
+	Source,
+)
 from .sigma import ScheduledQueryRun
 from .webhooks import WebhookEventTrigger
 
@@ -45,6 +51,7 @@ __all__ = [
 	"Coupon",
 	"Customer",
 	"Dispute",
+	"DjstripePaymentMethod",
 	"Event",
 	"FileUpload",
 	"IdempotencyKey",

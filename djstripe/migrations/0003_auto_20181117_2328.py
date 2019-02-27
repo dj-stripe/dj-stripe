@@ -1290,4 +1290,12 @@ class Migration(migrations.Migration):
 				help_text="Whether or not the invoice has been forgiven. Forgiving an invoice instructs us to update the subscription status as if the invoice were successfully paid. Once an invoice has been forgiven, it cannot be unforgiven or reopened.",
 			),
 		),
+		migrations.AlterModelTable(name="PaymentMethod", table="djstripe_paymentmethod"),
+		migrations.RenameModel(old_name="PaymentMethod", new_name="DjstripePaymentMethod"),
+		migrations.CreateModel(
+			name="PaymentMethod",
+			fields=[],
+			options={"proxy": True, "indexes": []},
+			bases=("djstripe.djstripepaymentmethod",),
+		),
 	]

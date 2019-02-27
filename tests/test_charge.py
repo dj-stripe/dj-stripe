@@ -9,7 +9,9 @@ from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
 
 from djstripe.enums import ChargeStatus, LegacySourceType
-from djstripe.models import Account, Charge, Dispute, PaymentMethod
+from djstripe.models import (
+	Account, Charge, Dispute, DjstripePaymentMethod, PaymentMethod
+)
 
 from . import (
 	FAKE_ACCOUNT, FAKE_BALANCE_TRANSACTION, FAKE_BALANCE_TRANSACTION_REFUND, FAKE_CHARGE,
@@ -333,7 +335,10 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		charge = Charge.sync_from_stripe_data(fake_charge_copy)
 		self.assertEqual("test_id", charge.source_id)
 		self.assertEqual("unsupported", charge.source.type)
-		self.assertEqual(charge.source, PaymentMethod.objects.get(id="test_id"))
+		self.assertEqual(charge.source, DjstripePaymentMethod.objects.get(id="test_id"))
+
+		with self.assertWarns(DeprecationWarning):
+			self.assertEqual(charge.source, PaymentMethod.objects.get(id="test_id"))
 
 		charge_retrieve_mock.assert_not_called()
 		balance_transaction_retrieve_mock.assert_not_called()

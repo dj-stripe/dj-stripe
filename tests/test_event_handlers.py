@@ -9,8 +9,8 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from djstripe.models import (
-	Card, Charge, Coupon, Customer, Dispute, Event, Invoice,
-	InvoiceItem, PaymentMethod, Plan, Subscription, Transfer
+	Card, Charge, Coupon, Customer, Dispute, DjstripePaymentMethod,
+	Event, Invoice, InvoiceItem, Plan, Subscription, Transfer
 )
 
 from . import (
@@ -183,7 +183,7 @@ class TestCustomerEvents(EventTestCase):
 		)
 
 	def test_customer_default_source_deleted(self):
-		self.customer.default_source = PaymentMethod.objects.get(id=FAKE_CARD["id"])
+		self.customer.default_source = DjstripePaymentMethod.objects.get(id=FAKE_CARD["id"])
 		self.customer.save()
 		self.assertIsNotNone(self.customer.default_source)
 		self.assertTrue(self.customer.has_valid_source())
