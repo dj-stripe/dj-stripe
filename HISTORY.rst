@@ -7,7 +7,13 @@ History
 ------------------
 
 - The Python stripe library minimum version is now ``2.3.0``.
+- ``PaymentMethod`` has been renamed to ``DjstripePaymentMethod`` (#841).
+  An alias remains but will be removed in the next version.
+- Dropped support for Django < 2.0, Python < 3.4.
+- Dropped previously-deprecated ``stripe_objects`` module.
+- Dropped previously-deprecated ``stripe_timestamp`` field.
 - Dropped previously-deprecated ``Charge.receipt_number`` field.
+- Dropped previously-deprecated ``StripeSource`` alias for ``Card``
 - Dropped previously-deprecated ``SubscriptionView``,
   ``CancelSubscriptionView`` and ``CancelSubscriptionForm``.
 - Removed the default value from ``DJSTRIPE_SUBSCRIPTION_REDIRECT``.
@@ -54,9 +60,10 @@ History
   text field will return an empty string.
 - Switched test runner to pytest-django
 - ``StripeModel.sync_from_stripe_data()`` will now automatically retrieve related objects
-  and populate foreign keys.
-- ``PaymentMethod`` has been renamed to ``DjstripePaymentMethod``.
-  An alias remains but will be removed in the next version.
+  and populate foreign keys (#681)
+- Added ``Coupon.name``
+- Added ``Transfer.balance_transaction``
+- Exceptions in webhooks are now re-raised as well as saved in the database (#833)
 
 
 1.2.4 (2019-02-27)
