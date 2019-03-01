@@ -25,7 +25,7 @@ Features
 * Individual charges
 * Stripe Sources
 * Stripe v2 and v3 support
-* Supports Stripe API `2018-05-21`
+* Supports Stripe API `2019-02-19`
 
 Requirements
 ------------

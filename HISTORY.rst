@@ -3,7 +3,7 @@
 History
 =======
 
-2.0.0 (unreleased)
+2.0.0 (2019-03-01)
 ------------------
 
 - The Python stripe library minimum version is now ``2.3.0``.
