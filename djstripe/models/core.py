@@ -220,7 +220,7 @@ class Charge(StripeModel):
 	@property
 	def fee_details(self):
 		warnings.warn(
-			"Charge.fee_details is deprecated and will be dropped in 1.4.0. "
+			"Charge.fee_details is deprecated and will be dropped in 2.1.0. "
 			"Use Charge.balance_transaction.fee_details instead.",
 			DeprecationWarning,
 		)
@@ -256,7 +256,7 @@ class Charge(StripeModel):
 		DEPRECATED(2018-07-24): Use `.source.type`.
 		"""
 		warnings.warn(
-			"Charge.source_type is deprecated and will be dropped in 1.4.0. "
+			"Charge.source_type is deprecated and will be dropped in 2.1.0. "
 			"Use Charge.source.type instead."
 		)
 		return self.source.type
@@ -267,7 +267,7 @@ class Charge(StripeModel):
 		DEPRECATED(2018-07-24): Use `.source.type`.
 		"""
 		warnings.warn(
-			"Charge.source_stripe_id is deprecated and will be dropped in 1.4.0. "
+			"Charge.source_stripe_id is deprecated and will be dropped in 2.1.0. "
 			"Use Charge.source.id instead."
 		)
 		return self.source.id

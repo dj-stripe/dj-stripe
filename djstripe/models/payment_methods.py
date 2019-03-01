@@ -69,7 +69,7 @@ class DjstripePaymentMethod(models.Model):
 		return self.object_model.objects.get(id=self.id)
 
 
-# Alias to the old model class, will be removed
+# Alias (Deprecated, remove in 2.1.0)
 PaymentMethod = DjstripePaymentMethod
 
 

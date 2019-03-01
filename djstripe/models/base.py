@@ -596,5 +596,5 @@ class IdempotencyKey(models.Model):
 		return timezone.now() > self.created + timedelta(hours=24)
 
 
-# Alias (Deprecated, remove in 1.4.0)
+# Alias (Deprecated, remove in 2.1.0)
 StripeObject = StripeModel

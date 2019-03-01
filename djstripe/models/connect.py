@@ -347,7 +347,7 @@ class Transfer(StripeModel):
 	@property
 	def fee_details(self):
 		warnings.warn(
-			"Transfer.fee_details is deprecated and will be dropped in 1.4.0. "
+			"Transfer.fee_details is deprecated and will be dropped in 2.1.0. "
 			"Use Transfer.balance_transaction.fee_details instead.",
 			DeprecationWarning,
 		)
