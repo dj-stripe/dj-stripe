@@ -624,8 +624,13 @@ class InvoiceItem(StripeModel):
 		invoice_data = data.get("invoice")
 
 		if invoice_data:
-			# sync the Invoice first to avoid recursive Charge/Invoice loop
-			Invoice.sync_from_stripe_data(data={"invoice": invoice_data}, field_name="invoice")
+			# sync the Invoice first if it doesn't yet exist in our DB to avoid recursive Charge/Invoice loop
+			invoice_id = cls._id_from_data(invoice_data)
+			if not Invoice.objects.filter(id=invoice_id).exists():
+				if invoice_id == invoice_data:
+					# we only have the id, fetch the full data
+					invoice_data = Invoice(id=invoice_id).api_retrieve()
+				Invoice.sync_from_stripe_data(data=invoice_data)
 
 		return super().sync_from_stripe_data(data, field_name=field_name)
 
