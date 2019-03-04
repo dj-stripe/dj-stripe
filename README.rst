@@ -56,6 +56,8 @@ Add ``djstripe`` to your ``INSTALLED_APPS``:
         ...
     )
 
+Tell Stripe about the webhook (Stripe webhook docs can be found `here <https://stripe.com/docs/webhooks>`_) using the full URL of your endpoint from the urls.py step above (e.g. ``https://example.com/stripe/webhook``).
+
 Add your Stripe keys and set the operating mode:
 
 .. code-block:: python
@@ -65,6 +67,7 @@ Add your Stripe keys and set the operating mode:
     STRIPE_TEST_PUBLIC_KEY = os.environ.get("STRIPE_TEST_PUBLIC_KEY", "<your publishable key>")
     STRIPE_TEST_SECRET_KEY = os.environ.get("STRIPE_TEST_SECRET_KEY", "<your secret key>")
     STRIPE_LIVE_MODE = False  # Change to True in production
+    DJSTRIPE_WEBHOOK_SECRET = "whsec_xxx"  # Get it from the section in the Stripe dashboard where you added the webhook endpoint
 
 Add some payment plans via the Stripe.com dashboard.
 
@@ -73,8 +76,6 @@ Add to urls.py:
 .. code-block:: python
 
     path("stripe/", include("djstripe.urls", namespace="djstripe")),
-
-Then tell Stripe about the webhook (Stripe webhook docs can be found `here <https://stripe.com/docs/webhooks>`_) using the full URL of your endpoint from the urls.py step above (e.g. ``https://example.com/stripe/webhook``).
 
 Run the commands::
 
