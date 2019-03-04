@@ -2,7 +2,7 @@
 Settings
 ========
 
-STRIPE_API_VERSION (='2017-02-14')
+STRIPE_API_VERSION (='2018-05-21')
 ==================================
 
 The API version used to communicate with the Stripe API is configurable, and
