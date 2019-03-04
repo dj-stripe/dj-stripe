@@ -7,6 +7,7 @@ from unittest.mock import patch
 from django.test.testcases import TestCase
 
 from djstripe.models import InvoiceItem
+from djstripe.settings import STRIPE_SECRET_KEY
 
 from . import (
 	FAKE_CHARGE_II, FAKE_CUSTOMER_II, FAKE_INVOICE_II, FAKE_INVOICEITEM,
@@ -70,17 +71,25 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 		invoiceitem_data.update({"subscription": FAKE_SUBSCRIPTION_III["id"]})
 		invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
 
-		self.assert_fks(
-			invoiceitem,
-			expected_blank_fks={
-				"djstripe.Account.business_logo",
-				"djstripe.Charge.dispute",
-				"djstripe.Charge.transfer",
-				"djstripe.Customer.coupon",
-				"djstripe.Customer.subscriber",
-				"djstripe.Plan.product",
-				"djstripe.InvoiceItem.plan",
-			},
+		expected_blank_fks = {
+			"djstripe.Account.business_logo",
+			"djstripe.Charge.dispute",
+			"djstripe.Charge.transfer",
+			"djstripe.Customer.coupon",
+			"djstripe.Customer.subscriber",
+			"djstripe.Plan.product",
+			"djstripe.InvoiceItem.plan",
+		}
+
+		self.assert_fks(invoiceitem, expected_blank_fks=expected_blank_fks)
+
+		# Coverage of sync of existing data
+		invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
+
+		self.assert_fks(invoiceitem, expected_blank_fks=expected_blank_fks)
+
+		invoice_retrieve_mock.assert_called_once_with(
+			api_key=STRIPE_SECRET_KEY, expand=[], id=FAKE_INVOICE_II["id"]
 		)
 
 	@patch("djstripe.models.Account.get_default_account")
