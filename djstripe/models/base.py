@@ -201,6 +201,25 @@ class StripeModel(models.Model):
 		return result
 
 	@classmethod
+	def _id_from_data(cls, data):
+		"""
+		Extract stripe id from stripe field data
+		:param data:
+		:return:
+		"""
+
+		if isinstance(data, str):
+			# data like "sub_6lsC8pt7IcFpjA"
+			id_ = data
+		elif data:
+			# data like {"id": sub_6lsC8pt7IcFpjA", ...}
+			id_ = data.get("id")
+		else:
+			id_ = None
+
+		return id_
+
+	@classmethod
 	def _stripe_object_field_to_foreign_key(
 		cls, field, manipulated_data, current_ids=None, pending_relations=None
 	):
@@ -225,24 +244,23 @@ class StripeModel(models.Model):
 		skip = False
 
 		if issubclass(field.related_model, StripeModel):
-			# see also similar logic in _get_or_create_from_stripe_object
-			if isinstance(raw_field_data, str):
-				# A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}
-				id = raw_field_data
-				refetch = True
-			elif raw_field_data:
-				# A field like {"subscription": {"id": sub_6lsC8pt7IcFpjA", ...}}
-				id = raw_field_data.get("id")
-			else:
-				id = None
-				skip = True
+			id_ = cls._id_from_data(raw_field_data)
 
-			if id in current_ids:
+			if not raw_field_data:
+				skip = True
+			elif id_ == raw_field_data:
+				# A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}
+				refetch = True
+			else:
+				# A field like {"subscription": {"id": sub_6lsC8pt7IcFpjA", ...}}
+				pass
+
+			if id_ in current_ids:
 				# this object is currently being fetched, don't try to fetch again, to avoid recursion
 				# instead, record the relation that should be be created once "object_id" object exists
 				if pending_relations is not None:
 					object_id = manipulated_data["id"]
-					pending_relations.append((object_id, field, id))
+					pending_relations.append((object_id, field, id_))
 				skip = True
 
 			if not skip:
@@ -380,30 +398,30 @@ class StripeModel(models.Model):
 		if pending_relations is None:
 			pending_relations = []
 
-		if isinstance(field, str):
-			# A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}
-			id = field
-			# We'll have to expand if the field is not "id" (= is nested)
-			should_expand = is_nested_data
-		elif field:
-			# A field like {"subscription": {"id": sub_6lsC8pt7IcFpjA", ...}}
-			data = field
-			id = field.get("id")
-		else:
+		id_ = cls._id_from_data(field)
+
+		if not field:
 			# An empty field - We need to return nothing here because there is
 			# no way of knowing what needs to be fetched!
 			# TODO - this path shouldn't be hit, log/assert/exception?
 			return None, False
+		elif id_ == field:
+			# A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}
+			# We'll have to expand if the field is not "id" (= is nested)
+			should_expand = is_nested_data
+		else:
+			# A field like {"subscription": {"id": sub_6lsC8pt7IcFpjA", ...}}
+			data = field
 
 		try:
-			return cls.stripe_objects.get(id=id), False
+			return cls.stripe_objects.get(id=id_), False
 		except cls.DoesNotExist:
 			if is_nested_data and refetch:
 				# This is what `data` usually looks like:
 				# {"id": "cus_XXXX", "default_source": "card_XXXX"}
 				# Leaving the default field_name ("id") will get_or_create the customer.
 				# If field_name="default_source", we get_or_create the card instead.
-				cls_instance = cls(id=id)
+				cls_instance = cls(id=id_)
 				data = cls_instance.api_retrieve()
 				should_expand = False
 
@@ -424,7 +442,7 @@ class StripeModel(models.Model):
 				True,
 			)
 		except IntegrityError:
-			return cls.stripe_objects.get(id=id), False
+			return cls.stripe_objects.get(id=id_), False
 
 	@classmethod
 	def _stripe_object_to_customer(cls, target_cls, data):
