@@ -3,6 +3,13 @@
 History
 =======
 
+2.0.1 (unreleased)
+------------------
+
+This is a bugfix-only version:
+
+- Fixed an error on ``invoiceitem.updated`` (#848).
+
 2.0.0 (2019-03-01)
 ------------------
 
