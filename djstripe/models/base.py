@@ -575,7 +575,7 @@ class StripeModel(models.Model):
 
 		if data.get(field_name, None):
 			# stop nested objects from trying to retrieve this object before initial sync is complete
-			current_ids.add(data.get(field_name))
+			current_ids.add(cls._id_from_data(data.get(field_name)))
 
 		instance, created = cls._get_or_create_from_stripe_object(
 			data, field_name=field_name, current_ids=current_ids
