@@ -1,7 +1,7 @@
 """
 Webhook event handlers for the various models
 
-Stripe docs for Events: https://stripe.com/docs/api#events
+Stripe docs for Events: https://stripe.com/docs/api/events
 Stripe docs for Webhooks: https://stripe.com/docs/webhooks
 
 TODO: Implement webhook event handlers for all the models that need to respond to webhook events.

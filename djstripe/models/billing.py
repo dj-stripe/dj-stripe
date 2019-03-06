@@ -173,7 +173,7 @@ class Invoice(StripeModel):
 		enum=enums.InvoiceBilling,
 		null=True,
 		help_text=(
-			"When charging automatically, Stripe will attempt to pay this invoice"
+			"When charging automatically, Stripe will attempt to pay this invoice "
 			"using the default source attached to the customer. "
 			"When sending an invoice, Stripe will email this invoice to the customer "
 			"with payment instructions."
@@ -1151,7 +1151,7 @@ class Subscription(StripeModel):
 		The subscription is still active, but is technically canceled and we're just waiting for it to run out.
 
 		You could use this method to give customers limited service after they've canceled. For example, a video
-		on demand service could only allow customers to download their libraries  and do nothing else when their
+		on demand service could only allow customers to download their libraries and do nothing else when their
 		subscription is temporarily current.
 		"""
 
