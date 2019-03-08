@@ -224,6 +224,7 @@ class TestWebhook(TestCase):
 	def test_webhook_good(
 		self, event_retrieve_mock, transfer_retrieve_mock
 	):
+		djstripe_settings.WEBHOOK_SECRET = ""
 		resp = self._send_event(FAKE_EVENT_TRANSFER_CREATED)
 
 		self.assertEqual(resp.status_code, 200)
