@@ -225,7 +225,10 @@ class TestWebhook(TestCase):
 		self, event_retrieve_mock, transfer_retrieve_mock
 	):
 		djstripe_settings.WEBHOOK_SECRET = ""
-		resp = self._send_event(FAKE_EVENT_TRANSFER_CREATED)
+
+		fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+		event_retrieve_mock.return_value = fake_event
+		resp = self._send_event(fake_event)
 
 		self.assertEqual(resp.status_code, 200)
 		self.assertEqual(Event.objects.count(), 1)
