@@ -35,9 +35,7 @@ def customer_webhook_handler(event):
 	if event.customer:
 		# As customers are tied to local users, djstripe will not create
 		# customers that do not already exist locally.
-		_handle_crud_like_event(
-			target_cls=models.Customer, event=event, crud_exact=True
-		)
+		_handle_crud_like_event(target_cls=models.Customer, event=event)
 
 
 @webhooks.handler("customer.discount")
@@ -150,30 +148,22 @@ class CrudType(Enum):
 	DELETED = "deleted"
 
 	@classmethod
-	def determine(cls, event, verb=None, exact=False):
+	def determine(cls, event, verb=None):
 		"""
 		Determine if the event verb is a crud_type (without the 'R') event.
 
 		:param verb: The event verb to examine.
 		:type verb: string (``str``/`unicode``)
-		:param exact: If True, match crud_type to event verb string exactly.
-		:param type: ``bool``
-		:returns: The CrudType state object.
+		:returns: The CrudType enum object.
 		:rtype: ``CrudType``
 		"""
 		verb = verb or event.verb
 
-		def check(crud_type_event):
-			if exact:
-				return verb == crud_type_event
-			else:
-				return verb.endswith(crud_type_event)
-
-		if check("updated"):
+		if verb.endswith("updated"):
 			return CrudType.UPDATED
-		elif check("created"):
+		elif verb.endswith("created"):
 			return CrudType.CREATED
-		elif check("deleted"):
+		elif verb.endswith("deleted"):
 			return CrudType.DELETED
 		else:
 			raise ValueError(verb)
@@ -187,7 +177,6 @@ def _handle_crud_like_event(
 	id=None,
 	customer=None,
 	crud_type=None,
-	crud_exact=False,
 ):
 	"""
 	Helper to process crud_type-like events for objects.
@@ -207,7 +196,6 @@ def _handle_crud_like_event(
 	:param id: The object Stripe ID (defaults to ``object.id``).
 	:param customer: The customer object (defaults to ``event.customer``).
 	:param crud_type: The CrudType object (determined by default).
-	:param crud_exact: If True, match verb against CRUD type exactly.
 	:returns: The object (if any) and the event CrudType.
 	:rtype: ``tuple(obj, CrudType)``
 	"""
@@ -226,7 +214,7 @@ def _handle_crud_like_event(
 	obj = None
 
 	try:
-		crud_type = crud_type or CrudType.determine(event=event, verb=verb, exact=crud_exact)
+		crud_type = crud_type or CrudType.determine(event=event, verb=verb)
 	except ValueError:
 		logger.error(
 			"Ignoring %r Stripe event without valid CRUD type: %r", event.type, event
