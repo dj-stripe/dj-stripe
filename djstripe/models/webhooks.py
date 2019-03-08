@@ -124,7 +124,7 @@ class WebhookEventTrigger(models.Model):
 
 	@property
 	def is_test_event(self):
-		return self.json_body.get("id") == webhooks.TEST_EVENT_ID
+		return self.json_body.get("id").endswith("_00000000000000")
 
 	def validate(self, api_key=None):
 		"""
