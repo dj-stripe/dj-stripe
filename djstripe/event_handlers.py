@@ -222,7 +222,7 @@ def _handle_crud_like_event(
 		)
 		return
 
-	if crud_type.DELETED:
+	if crud_type == CrudType.DELETED:
 		qs = target_cls.objects.filter(id=id)
 		if target_cls is models.Customer and qs.exists():
 			qs.get().purge()
