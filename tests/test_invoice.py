@@ -36,7 +36,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 		self.assertEqual(
 			invoice.get_stripe_dashboard_url(), self.customer.get_stripe_dashboard_url()
 		)
-		self.assertEqual(str(invoice), "Invoice #XXXXXXX-0001")
+		self.assertEqual(str(invoice), "Invoice #XXXXXXX-0001 (Paid)")
 
 		self.assert_fks(
 			invoice,

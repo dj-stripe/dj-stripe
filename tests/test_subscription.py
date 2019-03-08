@@ -35,7 +35,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
 
 		self.assertEqual(
 			str(subscription),
-			"{email} on {plan}".format(email=self.user.email, plan=str(subscription.plan)),
+			"{email} on {plan} ({status})".format(email=self.user.email, plan=subscription.plan, status=subscription.status),
 		)
 
 		self.assert_fks(

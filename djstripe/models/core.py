@@ -1122,9 +1122,6 @@ class Event(StripeModel):
 	idempotency_key = models.TextField(default="", blank=True)
 	type = models.CharField(max_length=250, help_text="Stripe's event description code")
 
-	def __str__(self):
-		return "{type}".format(type=self.type)
-
 	def str_parts(self):
 		return ["type={type}".format(type=self.type)] + super().str_parts()
 

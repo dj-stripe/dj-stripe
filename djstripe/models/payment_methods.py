@@ -221,13 +221,6 @@ class Card(StripeModel):
 		help_text="If the card number is tokenized, this is the method that was used.",
 	)
 
-	def __str__(self):
-		return "{name} ({last4} - {brand})".format(
-			name=self.name,
-			last4=self.last4,
-			brand=self.brand
-		)
-
 	@staticmethod
 	def _get_customer_from_kwargs(**kwargs):
 		if "customer" not in kwargs or not isinstance(kwargs["customer"], Customer):
