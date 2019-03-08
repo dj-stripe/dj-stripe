@@ -58,6 +58,9 @@ class BalanceTransaction(StripeModel):
 	status = StripeEnumField(enum=enums.BalanceTransactionStatus)
 	type = StripeEnumField(enum=enums.BalanceTransactionType)
 
+	def __str__(self):
+		return "{type} ({status})".format(type=self.type, status=self.status)
+
 
 class Charge(StripeModel):
 	"""
@@ -1078,6 +1081,12 @@ class Dispute(StripeModel):
 	reason = StripeEnumField(enum=enums.DisputeReason)
 	status = StripeEnumField(enum=enums.DisputeStatus)
 
+	def __str__(self):
+		return "{reason} ({status})".format(
+			reason=self.reason,
+			status=self.status
+		)
+
 
 class Event(StripeModel):
 	"""
@@ -1112,6 +1121,9 @@ class Event(StripeModel):
 	)
 	idempotency_key = models.TextField(default="", blank=True)
 	type = models.CharField(max_length=250, help_text="Stripe's event description code")
+
+	def __str__(self):
+		return "{type}".format(type=self.type)
 
 	def str_parts(self):
 		return ["type={type}".format(type=self.type)] + super().str_parts()
@@ -1207,6 +1219,9 @@ class FileUpload(StripeModel):
 		max_length=200, help_text="A read-only URL where the uploaded file can be accessed."
 	)
 
+	def __str__(self):
+		return "{filename} ({type})".format(filename=self.filename, type=self.type)
+
 	@classmethod
 	def is_valid_object(cls, data):
 		return data["object"] in ("file", "file_upload")
@@ -1298,6 +1313,9 @@ class Payout(StripeModel):
 		),
 	)
 	type = StripeEnumField(enum=enums.PayoutType)
+
+	def __str__(self):
+		return "{type} ({status})".format(type=self.type, status=self.status)
 
 
 class Product(StripeModel):
@@ -1409,7 +1427,7 @@ class Product(StripeModel):
 	unit_label = models.CharField(max_length=12, default="", blank=True)
 
 	def __str__(self):
-		return self.name
+		return "{name} ({type})".format(name=self.name, type=self.type)
 
 
 class Refund(StripeModel):
@@ -1463,6 +1481,9 @@ class Refund(StripeModel):
 	status = StripeEnumField(
 		enum=enums.RefundFailureReason, help_text="Status of the refund."
 	)
+
+	def __str__(self):
+		return "{reason} ({status})".format(reason=self.reason, status=self.status)
 
 	def get_stripe_dashboard_url(self):
 		return self.charge.get_stripe_dashboard_url()

@@ -319,8 +319,9 @@ class Invoice(StripeModel):
 		ordering = ["-date"]
 
 	def __str__(self):
-		return "Invoice #{number}".format(
-			number=self.number or self.receipt_number or self.id
+		return "Invoice #{number} ({status})".format(
+			number=self.number or self.receipt_number or self.id,
+			status=self.status
 		)
 
 	@classmethod
@@ -985,7 +986,7 @@ class Subscription(StripeModel):
 	objects = SubscriptionManager()
 
 	def __str__(self):
-		return "{customer} on {plan}".format(customer=str(self.customer), plan=str(self.plan))
+		return "{customer} on {plan} ({status})".format(customer=self.customer, plan=self.plan, status=self.status)
 
 	def update(
 		self,
@@ -1209,6 +1210,9 @@ class SubscriptionItem(StripeModel):
 		help_text="The subscription this subscription item belongs to.",
 	)
 
+	def __str__(self):
+		return "{quantity} x {plan}".format(quantity=self.quantity, plan=self.plan)
+
 
 class UsageRecord(StripeModel):
 	"""
@@ -1227,3 +1231,6 @@ class UsageRecord(StripeModel):
 		related_name="usage_records",
 		help_text="The subscription item this usage record contains data for.",
 	)
+
+	def __str__(self):
+		return "{quantity} x {plan}".format(quantity=self.quantity, plan=self.subscription_item.plan)

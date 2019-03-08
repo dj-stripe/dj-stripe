@@ -118,6 +118,13 @@ class BankAccount(StripeModel):
 	)
 	status = StripeEnumField(enum=enums.BankAccountStatus)
 
+	def __str__(self):
+		return "{holder} in {bank} ({status})".format(
+			holder=self.account_holder_name,
+			bank=self.bank_name,
+			status=self.status
+		)
+
 
 class Card(StripeModel):
 	"""
@@ -213,6 +220,13 @@ class Card(StripeModel):
 		blank=True,
 		help_text="If the card number is tokenized, this is the method that was used.",
 	)
+
+	def __str__(self):
+		return "{name} ({last4} - {brand})".format(
+			name=self.name,
+			last4=self.last4,
+			brand=self.brand
+		)
 
 	@staticmethod
 	def _get_customer_from_kwargs(**kwargs):

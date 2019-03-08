@@ -36,3 +36,6 @@ class ScheduledQueryRun(StripeModel):
 		enum=enums.ScheduledQueryRunStatus, help_text="The query's execution status."
 	)
 	title = models.TextField(max_length=5000, help_text="Title of the query.")
+
+	def __str__(self):
+		return "{title} ({status})".format(title=self.title, status=self.status)
