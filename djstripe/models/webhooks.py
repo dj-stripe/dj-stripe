@@ -7,7 +7,6 @@ from django.db import models
 from django.utils.functional import cached_property
 
 from .. import settings as djstripe_settings
-from .. import webhooks
 from ..context_managers import stripe_temporary_api_version
 from ..fields import JSONField
 from ..signals import webhook_processing_error

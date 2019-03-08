@@ -222,13 +222,10 @@ class TestWebhook(TestCase):
 	@patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
 	@patch("stripe.Event.retrieve")
 	def test_webhook_good(
-		self, event_retrieve_mock, transfer_retrieve_mock
+		self, event_retrieve_mock, transfer_retrieve_mock, verify_signature_mock
 	):
-		fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
-		event_retrieve_mock.return_value = fake_event
+		resp = self._send_event(FAKE_EVENT_TRANSFER_CREATED)
 
-		djstripe_settings.WEBHOOK_SECRET = ""
-		resp = self._send_event(fake_event)
 		self.assertEqual(resp.status_code, 200)
 		self.assertEqual(Event.objects.count(), 1)
 		self.assertEqual(WebhookEventTrigger.objects.count(), 1)
