@@ -155,6 +155,7 @@ class TestWebhook(TestCase):
 		self.assertEqual(WebhookEventTrigger.objects.count(), 1)
 		event_trigger = WebhookEventTrigger.objects.first()
 		self.assertEqual(event_trigger.remote_ip, "0.0.0.0")
+		self.assertEqual(event_trigger.is_test_event, True)
 
 	@patch("djstripe.models.WebhookEventTrigger.validate", return_value=True)
 	@patch("djstripe.models.WebhookEventTrigger.process")
@@ -178,6 +179,7 @@ class TestWebhook(TestCase):
 		self.assertEqual(WebhookEventTrigger.objects.count(), 1)
 		event_trigger = WebhookEventTrigger.objects.first()
 		self.assertEqual(event_trigger.exception, exception_message)
+		self.assertEqual(event_trigger.is_test_event, False)
 
 	@patch.object(
 		djstripe_settings, "WEBHOOK_EVENT_CALLBACK", return_value=mock_webhook_handler
