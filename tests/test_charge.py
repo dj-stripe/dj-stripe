@@ -160,7 +160,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		self.assertEqual(False, charge.refunded)
 		self.assertEqual(True, charge.captured)
 		self.assertEqual(False, charge.disputed)
-		self.assertEqual("charge (pending)", str(charge))
 
 		self.assertEqual(len(charge.refunds.all()), 0)
 

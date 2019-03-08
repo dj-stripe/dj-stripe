@@ -14,7 +14,7 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
 
 	def test_str(self):
 		fake_bank_account = deepcopy(FAKE_BANK_ACCOUNT)
-		bank_account = BankAccount.sync_from_stripe_data(bank_account)
+		bank_account = BankAccount.sync_from_stripe_data(fake_bank_account)
 
 		self.assertEqual(
 			"<{holder} in {bank} ({status})".format(

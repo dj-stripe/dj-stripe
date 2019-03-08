@@ -204,13 +204,6 @@ class Charge(StripeModel):
 
 	objects = ChargeManager()
 
-	def __str__(self):
-		amount = self.human_readable_amount
-		status = self.human_readable_status
-		if not status:
-			return amount
-		return "{amount} ({status})".format(amount=amount, status=status)
-
 	@property
 	def disputed(self):
 		return self.dispute is not None
