@@ -216,7 +216,8 @@ def _handle_crud_like_event(
 	try:
 		crud_type = crud_type or CrudType.determine(event=event, verb=verb)
 	except ValueError:
-		logger.error(
+		# Ignore events like .succeeded or .paid
+		logger.debug(
 			"Ignoring %r Stripe event without valid CRUD type: %r", event.type, event
 		)
 		return
