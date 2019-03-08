@@ -468,3 +468,12 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
 
 		items = subscription.items.all()
 		self.assertEqual(2, len(items))
+
+		self.assertEqual(
+			str(items[0]),
+			"1 x New plan name".format(
+				email=self.user.email,
+				plan=subscription.plan,
+				status=subscription.status
+			)
+		)

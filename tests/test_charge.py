@@ -160,6 +160,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		self.assertEqual(False, charge.refunded)
 		self.assertEqual(True, charge.captured)
 		self.assertEqual(False, charge.disputed)
+		self.assertEqual("charge (pending)", str(charge))
 
 		self.assertEqual(len(charge.refunds.all()), 0)
 
@@ -182,6 +183,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 			"VideoDoc consultation for ivanp0001 berkp0001", charge_refunded.description
 		)
 		self.assertEqual(charge_refunded.amount, charge_refunded.amount_refunded)
+		self.assertEqual("refund (available)", str(charge))
 
 		charge_retrieve_mock.assert_not_called()
 		balance_transaction_retrieve_mock.assert_called_once_with(

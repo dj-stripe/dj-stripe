@@ -1231,6 +1231,3 @@ class UsageRecord(StripeModel):
 		related_name="usage_records",
 		help_text="The subscription item this usage record contains data for.",
 	)
-
-	def __str__(self):
-		return "{quantity} x {plan}".format(quantity=self.quantity, plan=self.subscription_item.plan)

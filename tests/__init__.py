@@ -211,7 +211,7 @@ FAKE_BALANCE_TRANSACTION_IV = {
 FAKE_BANK_ACCOUNT = {
 	"id": "ba_16hTzo2eZvKYlo2CeSjfb0tS",
 	"object": "bank_account",
-	"account_holder_name": None,
+	"account_holder_name": "Joe Bloggs",
 	"account_holder_type": None,
 	"bank_name": "STRIPE TEST BANK",
 	"country": "US",

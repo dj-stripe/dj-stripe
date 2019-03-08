@@ -263,6 +263,7 @@ class TestDisputeEvents(EventTestCase):
 		event.invoke_webhook_handlers()
 		dispute = Dispute.objects.get()
 		self.assertEqual(dispute.id, FAKE_DISPUTE["id"])
+		self.assertEqual(str(dispute), "subscription_canceled (needs_response)")
 
 
 class TestInvoiceEvents(EventTestCase):
