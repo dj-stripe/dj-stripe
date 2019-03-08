@@ -222,7 +222,7 @@ class TestWebhook(TestCase):
 	@patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
 	@patch("stripe.Event.retrieve")
 	def test_webhook_good(
-		self, event_retrieve_mock, transfer_retrieve_mock, verify_signature_mock
+		self, event_retrieve_mock, transfer_retrieve_mock
 	):
 		resp = self._send_event(FAKE_EVENT_TRANSFER_CREATED)
 
