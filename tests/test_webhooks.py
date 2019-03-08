@@ -39,9 +39,13 @@ class TestWebhook(TestCase):
 		)
 
 	def test_webhook_test_event(self):
+		self.assertEqual(WebhookEventTrigger.objects.count(), 0)
 		resp = self._send_event(FAKE_EVENT_TEST_CHARGE_SUCCEEDED)
 		self.assertEqual(resp.status_code, 200)
 		self.assertFalse(Event.objects.filter(id=TEST_EVENT_ID).exists())
+		self.assertEqual(WebhookEventTrigger.objects.count(), 1)
+		event_trigger = WebhookEventTrigger.objects.first()
+		self.assertTrue(event_trigger.is_test_event)
 
 	@override_settings(DJSTRIPE_WEBHOOK_VALIDATION="retrieve_event")
 	@patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
@@ -155,7 +159,6 @@ class TestWebhook(TestCase):
 		self.assertEqual(WebhookEventTrigger.objects.count(), 1)
 		event_trigger = WebhookEventTrigger.objects.first()
 		self.assertEqual(event_trigger.remote_ip, "0.0.0.0")
-		self.assertEqual(event_trigger.is_test_event, True)
 
 	@patch("djstripe.models.WebhookEventTrigger.validate", return_value=True)
 	@patch("djstripe.models.WebhookEventTrigger.process")
@@ -179,7 +182,6 @@ class TestWebhook(TestCase):
 		self.assertEqual(WebhookEventTrigger.objects.count(), 1)
 		event_trigger = WebhookEventTrigger.objects.first()
 		self.assertEqual(event_trigger.exception, exception_message)
-		self.assertEqual(event_trigger.is_test_event, False)
 
 	@patch.object(
 		djstripe_settings, "WEBHOOK_EVENT_CALLBACK", return_value=mock_webhook_handler
@@ -216,6 +218,23 @@ class TestWebhook(TestCase):
 		resp = self._send_event(fake_event)
 		self.assertEqual(resp.status_code, 200)
 		self.assertEqual(1, Event.objects.filter(type="transfer.created").count())
+
+	@patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
+	@patch("stripe.Event.retrieve")
+	def test_webhook_good(
+		self, event_retrieve_mock, transfer_retrieve_mock
+	):
+		fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+		event_retrieve_mock.return_value = fake_event
+
+		djstripe_settings.WEBHOOK_SECRET = ""
+		resp = self._send_event(fake_event)
+		self.assertEqual(resp.status_code, 200)
+		self.assertEqual(Event.objects.count(), 1)
+		self.assertEqual(WebhookEventTrigger.objects.count(), 1)
+
+		event_trigger = WebhookEventTrigger.objects.first()
+		self.assertEqual(event_trigger.is_test_event, False)
 
 
 class TestWebhookHandlers(TestCase):
