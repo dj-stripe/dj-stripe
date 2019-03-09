@@ -19,7 +19,27 @@ This is how you use them:
         print("We should probably notify the user at this point")
 
 
-In order to get registrations picked up, you need to put them in a module is imported like models.py or make sure you import it manually.
+You can handle all events related to customers like this:
+
+.. code-block:: python
+    from djstripe import webhooks
+
+    @webhooks.handler("customer")
+    def my_handler(event, **kwargs):
+        print("We should probably notify the user at this point")
+
+
+You can also handle different events in the same handler:
+
+.. code-block:: python
+    from djstripe import webhooks
+
+    @webhooks.handler("plan", "product")
+    def my_handler(event, **kwargs):
+        print("Triggered webhook " + event.type)
+
+.. warning:: In order to get registrations picked up, you need to put them in a module is imported like models.py or make sure you import it manually.
+
 
 Official documentation
 ----------------------
