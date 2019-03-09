@@ -9,6 +9,9 @@ History
 This is a bugfix-only version:
 
 - Fixed an error on ``invoiceitem.updated`` (#848).
+- Handle test webhook properly in recent versions of Stripe API (#779).
+  At some point 2018 Stripe silently changed the ID used for test events and
+  ``evt_00000000000000`` is not used anymore.
 
 2.0.0 (2019-03-01)
 ------------------
