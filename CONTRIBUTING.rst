@@ -91,7 +91,7 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
 
 7. If your changes altered the models you may need to generate Django migrations::
 
-    $ python makemigrations.py
+    $ DJSTRIPE_TEST_DB_VENDOR=sqlite ./manage.py makemigrations
 
 8. Commit your changes and push your branch to GitHub::
 
