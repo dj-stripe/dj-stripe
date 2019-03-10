@@ -1212,7 +1212,7 @@ class Migration(migrations.Migration):
 					"billing",
 					djstripe.fields.StripeEnumField(
 						enum=djstripe.enums.InvoiceBilling,
-						help_text="When charging automatically, Stripe will attempt to pay this invoiceusing the default source attached to the customer. When sending an invoice, Stripe will email this invoice to the customer with payment instructions.",
+						help_text="When charging automatically, Stripe will attempt to pay this invoice using the default source attached to the customer. When sending an invoice, Stripe will email this invoice to the customer with payment instructions.",
 						max_length=20,
 						null=True,
 					),

@@ -1086,7 +1086,7 @@ class Event(StripeModel):
 	When an interesting event occurs, a new Event object is created and POSTed
 	to the configured webhook URL if the Event type matches.
 
-	Stripe documentation: https://stripe.com/docs/api#events
+	Stripe documentation: https://stripe.com/docs/api/events
 	"""
 
 	stripe_class = stripe.Event
