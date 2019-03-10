@@ -3,6 +3,32 @@
 History
 =======
 
+Postgres compatibility issue when upgrading to 2.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you hit this an error like this when running the ``0003_auto_20181117_2328_squashed_0004_auto_20190227_2114`` migration
+on postgres:
+
+```
+django.db.utils.OperationalError: cannot ALTER TABLE "djstripe_card" because it has pending trigger events
+```
+
+Run this command to set any ``NULL`` text fields to ``""`` before running ``./manage migrate``:
+
+```
+./manage.py djstripe_postgres_migration_prep
+```
+
+The command is safe to run multiple times
+
+
+2.0.6 (unreleased)
+------------------
+
+This is a bugfix-only version:
+
+- Added manage command to set null fields to '' to workaround postgres incompatibility with migration 0003 (#850).
+
 2.0.5 (2019-09-12)
 ------------------
 
