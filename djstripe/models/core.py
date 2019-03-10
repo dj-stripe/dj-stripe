@@ -771,6 +771,22 @@ class Customer(StripeModel):
 			self.save()
 
 		return new_payment_method.resolve()
+	
+
+	def remove_card(self, card):
+		for source in self.sources.iterator():
+			if source.id == card['id']:
+				source.remove()
+
+		for legacy_card in self.legacy_cards.all():
+			if legacy_card.id == card['id']:
+				legacy_card.remove()
+
+		if self.default_source and self.default_source.id == card['id']:
+			self.default_source = None
+
+		self.save()
+
 
 	def purge(self):
 		try:
