@@ -84,12 +84,9 @@ def customer_source_webhook_handler(event):
 	# TODO: handle other types of sources (https://stripe.com/docs/api#customer_object-sources)
 	if source_type == SourceType.card:
 		if event.verb.endswith("deleted") and customer_data:
-			# On customer.source.deleted, we do not delete the object, we merely unlink it.
-			# customer = Customer.objects.get(id=customer_data["id"])
-			# NOTE: for now, customer.sources still points to Card
-			# Also, https://github.com/dj-stripe/dj-stripe/issues/576
-			models.Card.objects.filter(id=customer_data.get("id", "")).delete()
-			models.DjstripePaymentMethod.objects.filter(id=customer_data.get("id", "")).delete()
+			# Remove (note: note delete, but remove()) the card from the customer's sources
+			customer = models.Customer.objects.get(id=customer_data.get("customer", ""))
+			customer.remove_card(customer_data)
 		else:
 			_handle_crud_like_event(target_cls=models.Card, event=event)
 
