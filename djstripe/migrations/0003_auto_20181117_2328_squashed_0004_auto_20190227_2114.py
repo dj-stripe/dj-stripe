@@ -8,6 +8,87 @@ import djstripe.enums
 import djstripe.fields
 
 
+def postgres_migration_prep(apps, schema_editor):
+	"""
+	Set null text fields to empty string to workaround incompatibility with migration 0003 on postgres
+	See https://github.com/dj-stripe/dj-stripe/issues/850
+	"""
+
+	Account = apps.get_model("djstripe", "Account")
+	BankAccount = apps.get_model("djstripe", "BankAccount")
+	Card = apps.get_model("djstripe", "Card")
+	Charge = apps.get_model("djstripe", "Charge")
+	Customer = apps.get_model("djstripe", "Customer")
+	Event = apps.get_model("djstripe", "Event")
+	Invoice = apps.get_model("djstripe", "Invoice")
+	Payout = apps.get_model("djstripe", "Payout")
+	Plan = apps.get_model("djstripe", "Plan")
+	Product = apps.get_model("djstripe", "Product")
+	Refund = apps.get_model("djstripe", "Refund")
+	Source = apps.get_model("djstripe", "Source")
+	Transfer = apps.get_model("djstripe", "Transfer")
+
+	model_fields = [
+		(
+			Account,
+			(
+				"business_name",
+				"business_primary_color",
+				"business_url",
+				"payout_statement_descriptor",
+				"product_description",
+				"support_url",
+			),
+		),
+		(BankAccount, ("account_holder_name",)),
+		(
+			Card,
+			(
+				"address_city",
+				"address_country",
+				"address_line1",
+				"address_line1_check",
+				"address_line2",
+				"address_state",
+				"address_zip",
+				"address_zip_check",
+				"country",
+				"cvc_check",
+				"dynamic_last4",
+				"fingerprint",
+				"name",
+				"tokenization_method",
+			),
+		),
+		(
+			Charge,
+			(
+				"failure_code",
+				"failure_message",
+				"receipt_email",
+				"receipt_number",
+				"statement_descriptor",
+				"transfer_group",
+			),
+		),
+		(Customer, ("business_vat_id", "currency", "email")),
+		(Event, ("idempotency_key", "request_id")),
+		(Invoice, ("hosted_invoice_url", "invoice_pdf", "number", "statement_descriptor")),
+		(Payout, ("failure_code", "failure_message", "statement_descriptor")),
+		(Plan, ("aggregate_usage", "billing_scheme", "nickname")),
+		(Product, ("caption", "statement_descriptor", "unit_label")),
+		(Refund, ("failure_reason", "reason", "receipt_number")),
+		(Source, ("currency", "statement_descriptor")),
+		(Transfer, ("transfer_group",)),
+	]
+
+	for model, fields in model_fields:
+		for field in fields:
+			filter_param = {"{}__isnull".format(field): True}
+			update_param = {field: ""}
+			model.objects.filter(**filter_param).update(**update_param)
+
+
 class Migration(migrations.Migration):
 
 	def __init__(self, *args, **kwargs):
@@ -31,6 +112,7 @@ class Migration(migrations.Migration):
 	dependencies = [("djstripe", "0002_auto_20180627_1121")]
 
 	operations = [
+		migrations.RunPython(postgres_migration_prep),
 		migrations.AlterField(
 			model_name="account",
 			name="display_name",
