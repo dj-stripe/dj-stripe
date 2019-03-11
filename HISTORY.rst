@@ -12,6 +12,7 @@ This is a bugfix-only version:
 - Handle test webhook properly in recent versions of Stripe API (#779).
   At some point 2018 Stripe silently changed the ID used for test events and
   ``evt_00000000000000`` is not used anymore.
+- Fixed OperationalError seen in migration 0003 on postgres (#850).
 
 2.0.0 (2019-03-01)
 ------------------
