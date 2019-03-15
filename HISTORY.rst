@@ -13,6 +13,7 @@ This is a bugfix-only version:
   At some point 2018 Stripe silently changed the ID used for test events and
   ``evt_00000000000000`` is not used anymore.
 - Fixed OperationalError seen in migration 0003 on postgres (#850).
+- Fixup missing ``SubscriptionItem.quantity`` on Plans with ``usage_type="metered"`` (#865).
 
 2.0.0 (2019-03-01)
 ------------------

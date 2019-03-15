@@ -770,6 +770,27 @@ FAKE_TIER_PLAN = {
 	],
 }
 
+FAKE_PLAN_METERED = {
+	"id": "plan_fakemetered",
+	"object": "plan",
+	"active": True,
+	"aggregate_usage": "sum",
+	"amount": 200,
+	"billing_scheme": "per_unit",
+	"created": 1552632817,
+	"currency": "usd",
+	"interval": "month",
+	"interval_count": 1,
+	"livemode": False,
+	"metadata": {},
+	"nickname": "Sum Metered Plan",
+	"tiers": None,
+	"tiers_mode": None,
+	"transform_usage": None,
+	"trial_period_days": None,
+	"usage_type": "metered",
+}
+
 
 class SubscriptionDict(dict):
 	def __setattr__(self, name, value):
@@ -778,7 +799,7 @@ class SubscriptionDict(dict):
 
 		# Special case for plan
 		if name == "plan":
-			for plan in [FAKE_PLAN, FAKE_PLAN_II]:
+			for plan in [FAKE_PLAN, FAKE_PLAN_II, FAKE_TIER_PLAN, FAKE_PLAN_METERED]:
 				if value == plan["id"]:
 					value = plan
 
@@ -921,6 +942,43 @@ FAKE_SUBSCRIPTION_MULTI_PLAN = SubscriptionDict(
 			"total_count": 2,
 			"url": "/v1/subscription_items?subscription=sub_E79FrmCOtMMxqp",
 		},
+	}
+)
+
+
+FAKE_SUBSCRIPTION_METERED = SubscriptionDict(
+	{
+		"id": "sub_1rn1dp7WgjMtx9",
+		"object": "subscription",
+		"application_fee_percent": None,
+		"billing": "charge_automatically",
+		"cancel_at_period_end": False,
+		"canceled_at": None,
+		"current_period_end": 1441907581,
+		"current_period_start": 1439229181,
+		"customer": "cus_6lsBvm5rJ0zyHc",
+		"discount": None,
+		"ended_at": None,
+		"metadata": {},
+		"items": {
+			"data": [
+				{
+					"created": 1441907581,
+					"id": "si_UXYmKmJp6aWTw6",
+					"metadata": {},
+					"object": "subscription_item",
+					"plan": deepcopy(FAKE_PLAN_METERED),
+					"subscription": "sub_1rn1dp7WgjMtx9",
+				}
+			]
+		},
+		"plan": deepcopy(FAKE_PLAN_METERED),
+		"quantity": 1,
+		"start": 1439229181,
+		"status": "active",
+		"tax_percent": None,
+		"trial_end": None,
+		"trial_start": None,
 	}
 )
 

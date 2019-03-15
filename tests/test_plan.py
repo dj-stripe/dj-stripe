@@ -9,10 +9,13 @@ from django.contrib.admin.sites import AdminSite
 from django.test import TestCase
 
 from djstripe.admin import PlanAdmin
+from djstripe.enums import PlanUsageType
 from djstripe.models import Plan
 from djstripe.settings import STRIPE_SECRET_KEY
 
-from . import FAKE_PLAN, FAKE_PLAN_II, FAKE_TIER_PLAN, AssertStripeFksMixin
+from . import (
+	FAKE_PLAN, FAKE_PLAN_II, FAKE_PLAN_METERED, FAKE_TIER_PLAN, AssertStripeFksMixin
+)
 
 
 class TestPlanAdmin(TestCase):
@@ -111,6 +114,18 @@ class PlanTest(AssertStripeFksMixin, TestCase):
 		self.assertEqual(plan.id, tier_plan_data["id"])
 		self.assertIsNone(plan.amount)
 		self.assertIsNotNone(plan.tiers)
+
+		self.assert_fks(
+			plan, expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"}
+		)
+
+	@patch("stripe.Plan.retrieve")
+	def test_stripe_metered_plan(self, plan_retrieve_mock):
+		plan_data = deepcopy(FAKE_PLAN_METERED)
+		plan = Plan.sync_from_stripe_data(plan_data)
+		self.assertEqual(plan.id, plan_data["id"])
+		self.assertEqual(plan.usage_type, PlanUsageType.metered)
+		self.assertIsNotNone(plan.amount)
 
 		self.assert_fks(
 			plan, expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"}
