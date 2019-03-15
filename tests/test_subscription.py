@@ -14,8 +14,8 @@ from djstripe.enums import SubscriptionStatus
 from djstripe.models import Plan, Subscription
 
 from . import (
-	FAKE_CUSTOMER, FAKE_CUSTOMER_II, FAKE_PLAN, FAKE_PLAN_II,
-	FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_CANCELED,
+	FAKE_CUSTOMER, FAKE_CUSTOMER_II, FAKE_PLAN, FAKE_PLAN_II, FAKE_PLAN_METERED,
+	FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_CANCELED, FAKE_SUBSCRIPTION_METERED,
 	FAKE_SUBSCRIPTION_MULTI_PLAN, AssertStripeFksMixin, datetime_to_unix
 )
 
@@ -464,3 +464,46 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
 
 		items = subscription.items.all()
 		self.assertEqual(2, len(items))
+
+		self.assert_fks(
+			subscription,
+			expected_blank_fks={
+				"djstripe.Customer.coupon",
+				"djstripe.Customer.subscriber",
+				"djstripe.Plan.product",
+				"djstripe.Subscription.plan",
+			},
+		)
+
+	@patch("stripe.Plan.retrieve")
+	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER_II))
+	@patch(
+		"stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION_METERED)
+	)
+	def test_sync_metered_plan(
+		self, subscription_retrieve_mock, customer_retrieve_mock, plan_retrieve_mock
+	):
+		subscription_fake = deepcopy(FAKE_SUBSCRIPTION_METERED)
+		self.assertNotIn(
+			"quantity",
+			subscription_fake["items"]["data"],
+			"Expect Metered plan SubscriptionItem to have no quantity",
+		)
+
+		subscription = Subscription.sync_from_stripe_data(subscription_fake)
+
+		items = subscription.items.all()
+		self.assertEqual(1, len(items))
+
+		item = items[0]
+
+		self.assertEqual(subscription.quantity, 1)
+		# Note that subscription.quantity is 1, but item.quantity isn't set on metered plans,
+		# it probably should be nullable
+		self.assertEqual(item.quantity, 0)
+		self.assertEqual(item.plan.id, FAKE_PLAN_METERED["id"])
+
+		self.assert_fks(
+			subscription,
+			expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"},
+		)
