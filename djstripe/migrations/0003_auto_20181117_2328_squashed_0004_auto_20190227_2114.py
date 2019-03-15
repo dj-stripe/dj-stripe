@@ -9,7 +9,6 @@ import djstripe.fields
 
 
 class Migration(migrations.Migration):
-
 	def __init__(self, *args, **kwargs):
 		# Hack to support sqlite for quick testing. Without this migrations fail with:
 		#    "django.db.utils.NotSupportedError: Renaming the 'djstripe_paymentmethod' table while in a transaction
