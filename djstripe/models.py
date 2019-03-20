@@ -2970,7 +2970,8 @@ class Subscription(StripeObject):
 
     def update(
         self, plan=None, application_fee_percent=None, coupon=None, prorate=djstripe_settings.PRORATION_POLICY,
-        proration_date=None, metadata=None, quantity=None, tax_percent=None, trial_end=None
+        proration_date=None, metadata=None, quantity=None, tax_percent=None, trial_end=None,
+        cancel_at_period_end=False
     ):
         """
         See `Customer.subscribe() <#djstripe.models.Customer.subscribe>`__
