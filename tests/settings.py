@@ -5,6 +5,7 @@ test_db_name = os.environ.get("DJSTRIPE_TEST_DB_NAME", "djstripe")
 test_db_user = os.environ.get("DJSTRIPE_TEST_DB_USER", test_db_vendor)
 test_db_pass = os.environ.get("DJSTRIPE_TEST_DB_PASS", "")
 test_db_host = os.environ.get("DJSTRIPE_TEST_DB_HOST", "localhost")
+test_db_port = os.environ.get("DJSTRIPE_TEST_DB_PORT", "")
 
 DEBUG = True
 SECRET_KEY = "djstripe"
@@ -23,7 +24,7 @@ if test_db_vendor == "postgres":
 			"USER": test_db_user,
 			"PASSWORD": test_db_pass,
 			"HOST": test_db_host,
-			"PORT": "",
+			"PORT": test_db_port,
 		}
 	}
 elif test_db_vendor == "mysql":
@@ -34,7 +35,7 @@ elif test_db_vendor == "mysql":
 			"USER": test_db_user,
 			"PASSWORD": test_db_pass,
 			"HOST": test_db_host,
-			"PORT": "",
+			"PORT": test_db_port,
 		}
 	}
 elif test_db_vendor == "sqlite":
