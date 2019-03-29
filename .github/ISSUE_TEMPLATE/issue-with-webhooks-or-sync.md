@@ -2,7 +2,7 @@
 name: Issue with webhooks or sync
 about: Create a report to help us improve
 title: ''
-labels: ''
+labels: 'webhook / sync issues'
 assignees: ''
 
 ---
