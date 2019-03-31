@@ -53,6 +53,7 @@ Contents
    :caption: Project
 
    project/contributing.rst
+   project/test_fixtures.rst
    project/authors.rst
    project/history.rst
    project/support.rst

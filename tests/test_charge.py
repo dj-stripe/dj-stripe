@@ -14,9 +14,10 @@ from djstripe.models import (
 )
 
 from . import (
-	FAKE_ACCOUNT, FAKE_BALANCE_TRANSACTION, FAKE_BALANCE_TRANSACTION_REFUND, FAKE_CHARGE,
-	FAKE_CHARGE_REFUNDED, FAKE_CUSTOMER, FAKE_FILEUPLOAD, FAKE_INVOICE, FAKE_PRODUCT,
-	FAKE_REFUND, FAKE_SUBSCRIPTION, FAKE_TRANSFER, IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
+	FAKE_ACCOUNT, FAKE_BALANCE_TRANSACTION, FAKE_BALANCE_TRANSACTION_REFUND,
+	FAKE_CHARGE, FAKE_CHARGE_REFUNDED, FAKE_CUSTOMER, FAKE_FILEUPLOAD,
+	FAKE_INVOICE, FAKE_PLAN, FAKE_PRODUCT, FAKE_REFUND, FAKE_SUBSCRIPTION,
+	FAKE_TRANSFER, IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
 	IS_STATICMETHOD_AUTOSPEC_SUPPORTED, AssertStripeFksMixin, default_account
 )
 
@@ -107,6 +108,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 	)
 	@patch("stripe.Charge.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True)
+	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
 	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	@patch(
 		"stripe.Subscription.retrieve",
@@ -117,6 +119,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		self,
 		subscription_retrieve_mock,
 		product_retrieve_mock,
+		plan_retrieve_mock,
 		invoice_retrieve_mock,
 		charge_retrieve_mock,
 		balance_transaction_retrieve_mock,
@@ -131,15 +134,17 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
 		charge = Charge.sync_from_stripe_data(fake_charge_copy)
 
-		self.assertEqual(Decimal("22"), charge.amount)
+		self.assertEqual(Decimal("20"), charge.amount)
 		self.assertEqual(True, charge.paid)
 		self.assertEqual(False, charge.refunded)
 		self.assertEqual(True, charge.captured)
 		self.assertEqual(False, charge.disputed)
-		self.assertEqual("VideoDoc consultation for ivanp0001 berkp0001", charge.description)
+		self.assertEqual(
+			"Payment for invoice {}".format(FAKE_INVOICE["number"]), charge.description
+		)
 		self.assertEqual(0, charge.amount_refunded)
 
-		self.assertEqual("card_16YKQh2eZvKYlo2Cblc5Feoo", charge.source_id)
+		self.assertEqual(self.customer.default_source.id, charge.source_id)
 		self.assertEqual(charge.source.type, LegacySourceType.card)
 
 		charge_retrieve_mock.assert_not_called()
@@ -191,7 +196,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		):
 			charge = Charge.sync_from_stripe_data(fake_charge_copy)
 
-		self.assertEqual(Decimal("22"), charge.amount)
+		self.assertEqual(Decimal("20"), charge.amount)
 		self.assertEqual(True, charge.paid)
 		self.assertEqual(False, charge.refunded)
 		self.assertEqual(True, charge.captured)
@@ -209,13 +214,13 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
 		self.assertEqual(charge.id, charge_refunded.id)
 
-		self.assertEqual(Decimal("22"), charge_refunded.amount)
+		self.assertEqual(Decimal("20"), charge_refunded.amount)
 		self.assertEqual(True, charge_refunded.paid)
 		self.assertEqual(True, charge_refunded.refunded)
 		self.assertEqual(True, charge_refunded.captured)
 		self.assertEqual(False, charge_refunded.disputed)
 		self.assertEqual(
-			"VideoDoc consultation for ivanp0001 berkp0001", charge_refunded.description
+			"Payment for invoice {}".format(charge.invoice.number), charge_refunded.description
 		)
 		self.assertEqual(charge_refunded.amount, charge_refunded.amount_refunded)
 
@@ -284,13 +289,13 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
 		charge = Charge.sync_from_stripe_data(fake_charge_copy)
 
-		self.assertEqual(Decimal("22"), charge.amount)
+		self.assertEqual(Decimal("20"), charge.amount)
 		self.assertEqual(True, charge.paid)
 		self.assertEqual(True, charge.refunded)
 		self.assertEqual(True, charge.captured)
 		self.assertEqual(False, charge.disputed)
 		self.assertEqual(
-			"VideoDoc consultation for ivanp0001 berkp0001", charge.description
+			"Payment for invoice {}".format(charge.invoice.number), charge.description
 		)
 		self.assertEqual(charge.amount, charge.amount_refunded)
 

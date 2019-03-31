@@ -56,7 +56,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 		self.assertEqual(
 			invoice.get_stripe_dashboard_url(), self.customer.get_stripe_dashboard_url()
 		)
-		self.assertEqual(str(invoice), "Invoice #XXXXXXX-0001")
+		self.assertEqual(str(invoice), "Invoice #{}".format(FAKE_INVOICE["number"]))
 
 		self.assert_fks(
 			invoice,
@@ -464,7 +464,9 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
 		invoice_data = deepcopy(FAKE_INVOICE)
 		invoice_data.update({"paid": False})
+		invoice_data.pop("auto_advance")
 		invoice_data.pop("closed")
+		invoice_data.pop("status")
 
 		invoice = Invoice.sync_from_stripe_data(invoice_data)
 
@@ -484,11 +486,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 		return_value=deepcopy(FAKE_PLAN),
 		autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
 	)
-	@patch(
-		"stripe.Subscription.retrieve",
-		return_value=deepcopy(FAKE_SUBSCRIPTION),
-		autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
-	)
+	@patch("stripe.Subscription.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
 	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
 	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_sync_no_subscription(
@@ -504,6 +502,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
 		invoice_data = deepcopy(FAKE_INVOICE)
 		invoice_data.update({"subscription": None})
+		invoice_data["lines"]["data"][0]["subscription"] = None
 		invoice = Invoice.sync_from_stripe_data(invoice_data)
 
 		self.assertEqual(None, invoice.subscription)
@@ -557,10 +556,13 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
 		items = invoice.invoiceitems.all()
 		self.assertEqual(1, len(items))
-		item_id = "{invoice_id}-{subscription_id}".format(
-			invoice_id=invoice.id, subscription_id=FAKE_SUBSCRIPTION["id"]
-		)
-		self.assertEqual(item_id, items[0].id)
+
+		# Previously the test asserted item_id="{invoice_id}-{subscription_id}",
+		# but this doesn't match what I'm seeing from Stripe
+		# I'm not sure if it's possible to predict the whole item id now, sli seems to not reference anything
+		item_id_prefix = "{invoice_id}-sli_".format(invoice_id=invoice.id)
+		self.assertTrue(items[0].id.startswith(item_id_prefix))
+		self.assertEqual(items[0].subscription.id, FAKE_SUBSCRIPTION["id"])
 
 		self.assert_fks(
 			invoice,
@@ -752,11 +754,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
 		autospec=True,
 	)
-	@patch(
-		"stripe.Subscription.retrieve",
-		return_value=deepcopy(FAKE_SUBSCRIPTION),
-		autospec=True,
-	)
+	@patch("stripe.Subscription.retrieve", autospec=True)
 	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
 	def test_invoice_without_plan(
 		self,
@@ -769,6 +767,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
 		invoice_data = deepcopy(FAKE_INVOICE)
 		invoice_data["lines"]["data"][0]["plan"] = None
+		invoice_data["lines"]["data"][0]["subscription"] = None
 		invoice_data["subscription"] = None
 		invoice = Invoice.sync_from_stripe_data(invoice_data)
 		self.assertIsNone(invoice.plan)

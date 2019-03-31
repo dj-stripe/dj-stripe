@@ -6,10 +6,12 @@ Updated to API VERSION 2016-03-07 with bogus fields.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import json
 import logging
 import sys
 from copy import deepcopy
 from datetime import datetime
+from pathlib import Path
 
 from django.db import models
 from django.utils import dateformat, timezone
@@ -19,6 +21,8 @@ from djstripe.webhooks import TEST_EVENT_ID
 logger = logging.getLogger(__name__)
 
 FUTURE_DATE = datetime(2100, 4, 30, tzinfo=timezone.utc)
+
+FIXTURE_DIR_PATH = Path(__file__).parent.joinpath("fixtures")
 
 
 # Flags for various bugs with mock autospec
@@ -70,6 +74,11 @@ class AssertStripeFksMixin:
 					logger.warning("checked {}".format(field_str))
 
 
+def load_fixture(filename):
+	with FIXTURE_DIR_PATH.joinpath(filename).open("r") as f:
+		return json.load(f)
+
+
 def datetime_to_unix(datetime_):
 	return int(dateformat.format(datetime_, "U"))
 
@@ -101,36 +110,9 @@ def default_account():
 	)
 
 
-FAKE_BALANCE_TRANSACTION = {
-	"id": "txn_16YKQi2eZvKYlo2CNx26h2Wz",
-	"object": "balance_transaction",
-	"amount": 3340,
-	"available_on": 1439769600,
-	"created": 1439229084,
-	"currency": "usd",
-	"description": "Charge for RelyMD consultation for Rakesh Mohan",
-	"fee": 127,
-	"fee_details": [
-		{
-			"amount": 127,
-			"currency": "usd",
-			"type": "stripe_fee",
-			"description": "Stripe processing fees",
-			"application": None,
-		}
-	],
-	"net": 3213,
-	"source": "ch_16YKQi2eZvKYlo2CrCuzbJQx",
-	"sourced_transfers": {
-		"object": "list",
-		"total_count": 0,
-		"has_more": False,
-		"url": "/v1/transfers?source_transaction=ch_16YKQi2eZvKYlo2CrCuzbJQx",
-		"data": [],
-	},
-	"status": "pending",
-	"type": "charge",
-}
+FAKE_BALANCE_TRANSACTION = load_fixture(
+	"balance_transaction_txn_fake_ch_fakefakefakefakefake0001.json"
+)
 
 FAKE_BALANCE_TRANSACTION_II = {
 	"id": "txn_16g5h62eZvKYlo2CQ2AHA89s",
@@ -259,60 +241,8 @@ class CardDict(dict):
 		return self
 
 
-FAKE_CARD = CardDict(
-	{
-		"id": "card_16YKQh2eZvKYlo2Cblc5Feoo",
-		"object": "card",
-		"address_city": None,
-		"address_country": None,
-		"address_line1": None,
-		"address_line1_check": None,
-		"address_line2": None,
-		"address_state": None,
-		"address_zip": None,
-		"address_zip_check": None,
-		"brand": "Visa",
-		"country": "US",
-		"customer": "cus_6lsBvm5rJ0zyHc",
-		"cvc_check": "pass",
-		"dynamic_last4": None,
-		"exp_month": 12,
-		"exp_year": 2016,
-		"funding": "credit",
-		"last4": "4242",
-		"metadata": {},
-		"name": "alex-nesnes@hotmail.fr",
-		"tokenization_method": None,
-	}
-)
-
-FAKE_CARD_II = CardDict(
-	{
-		"id": "card_14Lc4K2eZvKYlo2CcXyAXlDR",
-		"object": "card",
-		"address_city": None,
-		"address_country": None,
-		"address_line1": None,
-		"address_line1_check": None,
-		"address_line2": None,
-		"address_state": None,
-		"address_zip": None,
-		"address_zip_check": None,
-		"brand": "Visa",
-		"country": "US",
-		"customer": "cus_4UbFSo9tl62jqj",
-		"cvc_check": None,
-		"dynamic_last4": None,
-		"exp_month": 7,
-		"exp_year": 2015,
-		"fingerprint": "Xt5EWLLDS7FJjR1c",
-		"funding": "credit",
-		"last4": "4242",
-		"metadata": {},
-		"name": None,
-		"tokenization_method": None,
-	}
-)
+FAKE_CARD = CardDict(load_fixture("card_card_fakefakefakefakefake0001.json"))
+FAKE_CARD_II = CardDict(load_fixture("card_card_fakefakefakefakefake0002.json"))
 
 FAKE_CARD_III = CardDict(
 	{
@@ -336,7 +266,7 @@ FAKE_CARD_III = CardDict(
 		"fingerprint": "Xt5EWLLDS7FJjR1c",
 		"funding": "credit",
 		"last4": "1005",
-		"metadata": {},
+		"metadata": {"djstripe_test_fake_id": "card_fakefakefakefakefake0003"},
 		"name": None,
 		"tokenization_method": None,
 	}
@@ -363,38 +293,13 @@ FAKE_CARD_IV = CardDict(
 		"exp_year": 2018,
 		"funding": "credit",
 		"last4": "4242",
-		"metadata": {},
+		"metadata": {"djstripe_test_fake_id": "card_fakefakefakefakefake0004"},
 		"name": None,
 		"tokenization_method": None,
 	}
 )
 
-FAKE_CARD_V = CardDict(
-	{
-		"id": "card_16YKQh2eZeZvKYlo2CInFeoo",
-		"object": "card",
-		"address_city": None,
-		"address_country": None,
-		"address_line1": None,
-		"address_line1_check": None,
-		"address_line2": None,
-		"address_state": None,
-		"address_zip": None,
-		"address_zip_check": None,
-		"brand": "Visa",
-		"country": "US",
-		"customer": "cus_6lsBvm5rJ0zyHc",
-		"cvc_check": "pass",
-		"dynamic_last4": None,
-		"exp_month": 5,
-		"exp_year": 2015,
-		"funding": "credit",
-		"last4": "4242",
-		"metadata": {},
-		"name": None,
-		"tokenization_method": None,
-	}
-)
+FAKE_CARD_V = CardDict(load_fixture("card_card_fakefakefakefakefake0005.json"))
 
 
 class SourceDict(dict):
@@ -405,57 +310,7 @@ class SourceDict(dict):
 
 
 # Attached, chargeable source
-FAKE_SOURCE = SourceDict(
-	{
-		"id": "src_1DuuGjE6hxNj48TFOAnS5TZq",
-		"object": "source",
-		"amount": None,
-		"card": {
-			"address_line1_check": None,
-			"address_zip_check": "pass",
-			"brand": "Visa",
-			"country": "US",
-			"cvc_check": "pass",
-			"dynamic_last4": None,
-			"exp_month": 10,
-			"exp_year": 2029,
-			"fingerprint": "TmOrYzPdAoO6YFNB",
-			"funding": "credit",
-			"last4": "4242",
-			"name": None,
-			"three_d_secure": "optional",
-			"tokenization_method": None,
-		},
-		"client_secret": "src_client_secret_ENg5dyB1KTXSuyIa7Uv00NbX",
-		"created": 1548046215,
-		"currency": None,
-		"customer": "cus_4QWKsZuuTHcs7X",
-		"flow": "none",
-		"livemode": False,
-		"metadata": {},
-		"owner": {
-			"address": {
-				"city": None,
-				"country": None,
-				"line1": None,
-				"line2": None,
-				"postal_code": "90210",
-				"state": None,
-			},
-			"email": None,
-			"name": None,
-			"phone": None,
-			"verified_address": None,
-			"verified_email": None,
-			"verified_name": None,
-			"verified_phone": None,
-		},
-		"statement_descriptor": None,
-		"status": "chargeable",
-		"type": "card",
-		"usage": "reusable",
-	}
-)
+FAKE_SOURCE = SourceDict(load_fixture("source_src_fakefakefakefakefake0001.json"))
 
 # Detached, consumed source
 FAKE_SOURCE_II = SourceDict(
@@ -484,7 +339,7 @@ FAKE_SOURCE_II = SourceDict(
 		"currency": None,
 		"flow": "none",
 		"livemode": False,
-		"metadata": {},
+		"metadata": {"djstripe_test_fake_id": "src_fakefakefakefakefake0002"},
 		"owner": {
 			"address": {
 				"city": None,
@@ -520,53 +375,8 @@ class ChargeDict(dict):
 		return self
 
 
-FAKE_CHARGE = ChargeDict(
-	{
-		"id": "ch_16YKQi2eZvKYlo2CrCuzbJQx",
-		"object": "charge",
-		"amount": 2200,
-		"amount_refunded": 0,
-		"application_fee": None,
-		"balance_transaction": FAKE_BALANCE_TRANSACTION["id"],
-		"captured": True,
-		"created": 1439229084,
-		"currency": "usd",
-		"customer": "cus_6lsBvm5rJ0zyHc",
-		"description": "VideoDoc consultation for ivanp0001 berkp0001",
-		"destination": None,
-		"dispute": None,
-		"failure_code": None,
-		"failure_message": None,
-		"fraud_details": {},
-		"invoice": "in_16YHls2eZvKYlo2CwwH968Mc",
-		"livemode": False,
-		"metadata": {},
-		"order": None,
-		"outcome": {
-			"network_status": "approved_by_network",
-			"reason": None,
-			"risk_level": "normal",
-			"seller_message": "Payment complete.",
-			"type": "authorized",
-		},
-		"paid": True,
-		"receipt_email": None,
-		"receipt_number": None,
-		"refunded": False,
-		"refunds": {
-			"object": "list",
-			"total_count": 0,
-			"has_more": False,
-			"url": "/v1/charges/ch_16YKQi2eZvKYlo2CrCuzbJQx/refunds",
-			"data": [],
-		},
-		"shipping": None,
-		"source": deepcopy(FAKE_CARD),
-		"source_transfer": None,
-		"statement_descriptor": None,
-		"status": "succeeded",
-	}
-)
+FAKE_CHARGE = ChargeDict(load_fixture("charge_ch_fakefakefakefakefake0001.json"))
+
 
 FAKE_CHARGE_II = ChargeDict(
 	{
@@ -731,48 +541,15 @@ FAKE_DISPUTE = {
 }
 
 
-FAKE_PRODUCT = {
-	"id": "prod_fake1",
-	"object": "product",
-	"active": True,
-	"name": "Fake Product",
-	"type": "service",
-}
+FAKE_PRODUCT = load_fixture("product_prod_fake1.json")
 
+FAKE_PLAN = load_fixture("plan_gold21323.json")
+FAKE_PLAN_II = load_fixture("plan_silver41294.json")
 
-FAKE_PLAN = {
-	"id": "gold21323",
-	"object": "plan",
-	"active": True,
-	"amount": 2000,
-	"created": 1386247539,
-	"currency": "usd",
-	"interval": "month",
-	"interval_count": 1,
-	"livemode": False,
-	"metadata": {},
-	"nickname": "New plan name",
-	"product": FAKE_PRODUCT["id"],
-	"trial_period_days": None,
-	"usage_type": "licensed",
-}
+for plan in (FAKE_PLAN, FAKE_PLAN_II):
+	# sanity check
+	assert plan["product"] == FAKE_PRODUCT["id"]
 
-FAKE_PLAN_II = {
-	"id": "silver41294",
-	"object": "plan",
-	"active": True,
-	"amount": 4000,
-	"created": 1386247539,
-	"currency": "usd",
-	"interval": "week",
-	"interval_count": 1,
-	"livemode": False,
-	"metadata": {},
-	"nickname": "New plan name",
-	"product": FAKE_PRODUCT["id"],
-	"trial_period_days": 12,
-	"usage_type": "licensed",
-}
 
 FAKE_TIER_PLAN = {
 	"id": "tier21323",
@@ -843,27 +620,7 @@ class SubscriptionDict(dict):
 
 
 FAKE_SUBSCRIPTION = SubscriptionDict(
-	{
-		"id": "sub_6lsC8pt7IcFpjA",
-		"object": "subscription",
-		"application_fee_percent": None,
-		"billing": "charge_automatically",
-		"cancel_at_period_end": False,
-		"canceled_at": None,
-		"current_period_end": 1441907581,
-		"current_period_start": 1439229181,
-		"customer": "cus_6lsBvm5rJ0zyHc",
-		"discount": None,
-		"ended_at": None,
-		"metadata": {},
-		"plan": deepcopy(FAKE_PLAN),
-		"quantity": 1,
-		"start": 1439229181,
-		"status": "active",
-		"tax_percent": None,
-		"trial_end": None,
-		"trial_start": None,
-	}
+	load_fixture("subscription_sub_fakefakefakefakefake0001.json")
 )
 
 FAKE_SUBSCRIPTION_NOT_PERIOD_CURRENT = deepcopy(FAKE_SUBSCRIPTION)
@@ -880,101 +637,17 @@ FAKE_SUBSCRIPTION_CANCELED_AT_PERIOD_END["canceled_at"] = 1440907580
 FAKE_SUBSCRIPTION_CANCELED_AT_PERIOD_END["cancel_at_period_end"] = True
 
 FAKE_SUBSCRIPTION_II = SubscriptionDict(
-	{
-		"id": "sub_6mkwMbhaZF9jih",
-		"object": "subscription",
-		"application_fee_percent": None,
-		"billing": "charge_automatically",
-		"cancel_at_period_end": False,
-		"canceled_at": None,
-		"current_period_end": 1442111228,
-		"current_period_start": 1439432828,
-		"customer": "cus_6lsBvm5rJ0zyHc",
-		"discount": None,
-		"ended_at": None,
-		"metadata": {},
-		"plan": deepcopy(FAKE_PLAN_II),
-		"quantity": 1,
-		"start": 1386247539,
-		"status": "active",
-		"tax_percent": None,
-		"trial_end": None,
-		"trial_start": None,
-	}
+	load_fixture("subscription_sub_fakefakefakefakefake0002.json")
 )
+
 
 FAKE_SUBSCRIPTION_III = SubscriptionDict(
-	{
-		"id": "sub_8NDptncNY485qZ",
-		"object": "subscription",
-		"application_fee_percent": None,
-		"billing": "charge_automatically",
-		"cancel_at_period_end": False,
-		"canceled_at": None,
-		"current_period_end": 1464821382,
-		"current_period_start": 1462142982,
-		"customer": "cus_4UbFSo9tl62jqj",
-		"discount": None,
-		"ended_at": None,
-		"metadata": {},
-		"plan": deepcopy(FAKE_PLAN),
-		"quantity": 1,
-		"start": 1462142982,
-		"status": "active",
-		"tax_percent": None,
-		"trial_end": None,
-		"trial_start": None,
-	}
+	load_fixture("subscription_sub_fakefakefakefakefake0003.json")
 )
 
+
 FAKE_SUBSCRIPTION_MULTI_PLAN = SubscriptionDict(
-	{
-		"id": "sub_E79FrmCOtMMxqp",
-		"object": "subscription",
-		"application_fee_percent": None,
-		"billing": "charge_automatically",
-		"cancel_at_period_end": False,
-		"canceled_at": None,
-		"current_period_end": 1546912192,
-		"current_period_start": 1544233792,
-		"customer": "cus_4UbFSo9tl62jqj",
-		"discount": None,
-		"ended_at": None,
-		"metadata": {},
-		"plan": None,
-		"quantity": None,
-		"start": 1544233792,
-		"status": "active",
-		"tax_percent": None,
-		"trial_end": None,
-		"trial_start": None,
-		"items": {
-			"data": [
-				{
-					"created": 1544233793,
-					"id": "si_E79FjMrM7eM0II",
-					"metadata": {},
-					"object": "subscription_item",
-					"plan": deepcopy(FAKE_PLAN),
-					"quantity": 1,
-					"subscription": "sub_E79FrmCOtMMxqp",
-				},
-				{
-					"created": 1544233793,
-					"id": "si_E79FjKZf0GFOs2",
-					"metadata": {},
-					"object": "subscription_item",
-					"plan": deepcopy(FAKE_PLAN_II),
-					"quantity": 1,
-					"subscription": "sub_E79FrmCOtMMxqp",
-				},
-			],
-			"has_more": False,
-			"object": "list",
-			"total_count": 2,
-			"url": "/v1/subscription_items?subscription=sub_E79FrmCOtMMxqp",
-		},
-	}
+	load_fixture("subscription_sub_fakefakefakefakefake0004.json")
 )
 
 
@@ -991,7 +664,7 @@ FAKE_SUBSCRIPTION_METERED = SubscriptionDict(
 		"customer": "cus_6lsBvm5rJ0zyHc",
 		"discount": None,
 		"ended_at": None,
-		"metadata": {},
+		"metadata": {"djstripe_test_fake_id": "sub_fakefakefakefakefake0005"},
 		"items": {
 			"data": [
 				{
@@ -1053,97 +726,19 @@ class CustomerDict(dict):
 		return stripe_customer
 
 
-FAKE_CUSTOMER = CustomerDict(
-	{
-		"id": "cus_6lsBvm5rJ0zyHc",
-		"object": "customer",
-		"account_balance": 0,
-		"created": 1439229084,
-		"currency": "usd",
-		"default_source": deepcopy(FAKE_CARD),
-		"delinquent": False,
-		"description": "Michael Smith",
-		"discount": None,
-		"email": "michael.smith@example.com",
-		"livemode": False,
-		"metadata": {},
-		"shipping": None,
-		"sources": {
-			"object": "list",
-			"total_count": 2,
-			"has_more": False,
-			"url": "/v1/customers/cus_6lsBvm5rJ0zyHc/sources",
-			"data": [deepcopy(FAKE_CARD), deepcopy(FAKE_CARD_V)],
-		},
-		"subscriptions": {
-			"object": "list",
-			"total_count": 2,
-			"has_more": False,
-			"url": "/v1/customers/cus_6lsBvm5rJ0zyHc/subscriptions",
-			"data": [deepcopy(FAKE_SUBSCRIPTION), deepcopy(FAKE_SUBSCRIPTION_II)],
-		},
-	}
-)
+FAKE_CUSTOMER = CustomerDict(load_fixture("customer_cus_6lsBvm5rJ0zyHc.json"))
+if FAKE_CUSTOMER["default_source"]:
+	FAKE_CUSTOMER["default_source"] = CardDict(FAKE_CUSTOMER["default_source"])
+
+for n, d in enumerate(FAKE_CUSTOMER["sources"].get("data", [])):
+	FAKE_CUSTOMER["sources"]["data"][n] = CardDict(d)
 
 
-FAKE_CUSTOMER_II = CustomerDict(
-	{
-		"id": "cus_4UbFSo9tl62jqj",
-		"object": "customer",
-		"account_balance": 0,
-		"created": 1439229084,
-		"currency": "usd",
-		"default_source": deepcopy(FAKE_CARD_II),
-		"delinquent": False,
-		"description": "John Snow",
-		"discount": None,
-		"email": "john.snow@thewall.com",
-		"livemode": False,
-		"metadata": {},
-		"shipping": None,
-		"sources": {
-			"object": "list",
-			"total_count": 1,
-			"has_more": False,
-			"url": "/v1/customers/cus_4UbFSo9tl62jqj/sources",
-			"data": [deepcopy(FAKE_CARD_II)],
-		},
-		"subscriptions": {
-			"object": "list",
-			"total_count": 2,
-			"has_more": False,
-			"url": "/v1/customers/cus_4UbFSo9tl62jqj/subscriptions",
-			"data": [deepcopy(FAKE_SUBSCRIPTION_III), deepcopy(FAKE_SUBSCRIPTION_MULTI_PLAN)],
-		},
-	}
-)
+FAKE_CUSTOMER_II = CustomerDict(load_fixture("customer_cus_4UbFSo9tl62jqj.json"))
 
 
 # Customer with a Source (instead of Card) as default_source
-FAKE_CUSTOMER_III = CustomerDict(
-	{
-		"id": "cus_4QWKsZuuTHcs7X",
-		"object": "customer",
-		"account_balance": 0,
-		"created": 1439229084,
-		"currency": "usd",
-		"default_source": deepcopy(FAKE_SOURCE),
-		"delinquent": False,
-		"description": "John Doe",
-		"discount": None,
-		"email": "john.doe@example.com",
-		"livemode": False,
-		"metadata": {},
-		"shipping": None,
-		"sources": {
-			"object": "list",
-			"total_count": 1,
-			"has_more": False,
-			"url": "/v1/customers/cus_4QWKsZuuTHcs7X/sources",
-			"data": [deepcopy(FAKE_SOURCE)],
-		},
-	}
-)
+FAKE_CUSTOMER_III = CustomerDict(load_fixture("customer_cus_4QWKsZuuTHcs7X.json"))
 
 
 FAKE_DISCOUNT_CUSTOMER = {
@@ -1161,68 +756,8 @@ class InvoiceDict(dict):
 		return self
 
 
-FAKE_INVOICE = InvoiceDict(
-	{
-		"id": "in_16YHls2eZvKYlo2CwwH968Mc",
-		"object": "invoice",
-		"amount_due": 2000,
-		"amount_paid": 2000,
-		"amount_remaining": 0,
-		"application_fee": None,
-		"attempt_count": 1,
-		"attempted": True,
-		"billing": "charge_automatically",
-		"charge": FAKE_CHARGE["id"],
-		"closed": True,
-		"currency": "usd",
-		"customer": "cus_6lsBvm5rJ0zyHc",
-		"date": 1439218864,
-		"description": None,
-		"discount": None,
-		"due_date": None,
-		"ending_balance": 0,
-		"forgiven": False,
-		"lines": {
-			"data": [
-				{
-					"id": FAKE_SUBSCRIPTION["id"],
-					"object": "line_item",
-					"amount": 2000,
-					"currency": "usd",
-					"description": None,
-					"discountable": True,
-					"livemode": True,
-					"metadata": {},
-					"period": {"start": 1441907581, "end": 1444499581},
-					"plan": deepcopy(FAKE_PLAN),
-					"proration": False,
-					"quantity": 1,
-					"subscription": None,
-					"type": "subscription",
-				}
-			],
-			"total_count": 1,
-			"object": "list",
-			"url": "/v1/invoices/in_16YHls2eZvKYlo2CwwH968Mc/lines",
-		},
-		"livemode": False,
-		"metadata": {},
-		"next_payment_attempt": None,
-		"number": "XXXXXXX-0001",
-		"paid": True,
-		"period_end": 1439218689,
-		"period_start": 1439132289,
-		"receipt_number": None,
-		"starting_balance": 0,
-		"statement_descriptor": None,
-		"subscription": FAKE_SUBSCRIPTION["id"],
-		"subtotal": 2000,
-		"tax": None,
-		"tax_percent": None,
-		"total": 2000,
-		"webhooks_delivered_at": 1439218870,
-	}
-)
+FAKE_INVOICE = InvoiceDict(load_fixture("invoice_in_fakefakefakefakefake0001.json"))
+
 
 FAKE_INVOICE_II = InvoiceDict(
 	{
@@ -1393,7 +928,7 @@ FAKE_UPCOMING_INVOICE = InvoiceDict(
 			],
 			"total_count": 1,
 			"object": "list",
-			"url": "/v1/invoices/in_16YHls2eZvKYlo2CwwH968Mc/lines",
+			"url": "/v1/invoices/in_fakefakefakefakefake0001/lines",
 		},
 		"livemode": False,
 		"metadata": {},

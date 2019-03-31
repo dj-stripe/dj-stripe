@@ -388,7 +388,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		self.assertFalse(created2)
 
 		self.assertEqual(refunded_charge.refunded, True)
-		self.assertEqual(refunded_charge.amount_refunded, decimal.Decimal("22.00"))
+		self.assertEqual(refunded_charge.amount_refunded, decimal.Decimal("20.00"))
 
 		self.assert_fks(
 			refunded_charge,
@@ -437,7 +437,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
 		refunded_charge = charge.refund()
 		self.assertEqual(refunded_charge.refunded, True)
-		self.assertEqual(refunded_charge.amount_refunded, decimal.Decimal("22.00"))
+		self.assertEqual(refunded_charge.amount_refunded, decimal.Decimal("20.00"))
 
 		self.assert_fks(
 			refunded_charge,
