@@ -90,7 +90,7 @@ class StripeModel(models.Model):
 		"""
 		Call the stripe API's list operation for this model.
 
-		:param api_key: The api key to use for this request. Defualts to djstripe_settings.STRIPE_SECRET_KEY.
+		:param api_key: The api key to use for this request. Defaults to djstripe_settings.STRIPE_SECRET_KEY.
 		:type api_key: string
 
 		See Stripe documentation for accepted kwargs for each object.
@@ -105,7 +105,7 @@ class StripeModel(models.Model):
 		"""
 		Call the stripe API's create operation for this model.
 
-		:param api_key: The api key to use for this request. Defualts to djstripe_settings.STRIPE_SECRET_KEY.
+		:param api_key: The api key to use for this request. Defaults to djstripe_settings.STRIPE_SECRET_KEY.
 		:type api_key: string
 		"""
 
@@ -115,7 +115,7 @@ class StripeModel(models.Model):
 		"""
 		Call the stripe API's delete operation for this model
 
-		:param api_key: The api key to use for this request. Defualts to djstripe_settings.STRIPE_SECRET_KEY.
+		:param api_key: The api key to use for this request. Defaults to djstripe_settings.STRIPE_SECRET_KEY.
 		:type api_key: string
 		"""
 		api_key = api_key or self.default_api_key

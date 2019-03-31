@@ -757,7 +757,7 @@ class Plan(StripeModel):
 		enum=enums.PlanUsageType,
 		default=enums.PlanUsageType.licensed,
 		help_text=(
-			"Configures how the quantity per period should be determined, can be either"
+			"Configures how the quantity per period should be determined, can be either "
 			"`metered` or `licensed`. `licensed` will automatically bill the `quantity` "
 			"set for a plan when adding it to a subscription, `metered` will aggregate "
 			"the total usage based on usage records. Defaults to `licensed`."
