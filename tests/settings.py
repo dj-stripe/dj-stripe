@@ -82,6 +82,7 @@ INSTALLED_APPS = [
 	"djstripe",
 	"tests",
 	"tests.apps.testapp",
+	"tests.apps.example",
 ]
 
 MIDDLEWARE = (

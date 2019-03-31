@@ -1,0 +1,126 @@
+{
+	"id": "cus_4QWKsZuuTHcs7X",
+	"object": "customer",
+	"account_balance": 0,
+	"address": null,
+	"balance": 0,
+	"created": 1557995167,
+	"currency": null,
+	"default_source": {
+		"id": "src_fakefakefakefakefake0001",
+		"object": "source",
+		"amount": null,
+		"card": {
+			"exp_month": 6,
+			"exp_year": 2020,
+			"last4": "4242",
+			"country": "US",
+			"brand": "Visa",
+			"funding": "credit",
+			"fingerprint": "88PuXw9tEmvYe69o",
+			"three_d_secure": "optional",
+			"name": null,
+			"address_line1_check": null,
+			"address_zip_check": null,
+			"cvc_check": null,
+			"tokenization_method": null,
+			"dynamic_last4": null
+		},
+		"client_secret": "src_client_secret_F5psHouOOldEtvBHgyz6y3FC",
+		"created": 1558230761,
+		"currency": null,
+		"customer": "cus_4QWKsZuuTHcs7X",
+		"flow": "none",
+		"livemode": false,
+		"metadata": {
+			"djstripe_test_fake_id": "src_fakefakefakefakefake0001"
+		},
+		"owner": {
+			"address": null,
+			"email": null,
+			"name": null,
+			"phone": null,
+			"verified_address": null,
+			"verified_email": null,
+			"verified_name": null,
+			"verified_phone": null
+		},
+		"statement_descriptor": null,
+		"status": "chargeable",
+		"type": "card",
+		"usage": "reusable"
+	},
+	"delinquent": false,
+	"description": "John Doe",
+	"discount": null,
+	"email": "john.doe@example.com",
+	"invoice_prefix": "413F249C",
+	"invoice_settings": {
+		"custom_fields": null,
+		"default_payment_method": null,
+		"footer": null
+	},
+	"livemode": false,
+	"metadata": {},
+	"name": null,
+	"phone": null,
+	"preferred_locales": [],
+	"shipping": null,
+	"sources": {
+		"object": "list",
+		"data": [
+			{
+				"id": "src_fakefakefakefakefake0001",
+				"object": "source",
+				"amount": null,
+				"card": {
+					"exp_month": 6,
+					"exp_year": 2020,
+					"last4": "4242",
+					"country": "US",
+					"brand": "Visa",
+					"funding": "credit",
+					"fingerprint": "88PuXw9tEmvYe69o",
+					"three_d_secure": "optional",
+					"name": null,
+					"address_line1_check": null,
+					"address_zip_check": null,
+					"cvc_check": null,
+					"tokenization_method": null,
+					"dynamic_last4": null
+				},
+				"client_secret": "src_client_secret_F5psHouOOldEtvBHgyz6y3FC",
+				"created": 1558230761,
+				"currency": null,
+				"customer": "cus_4QWKsZuuTHcs7X",
+				"flow": "none",
+				"livemode": false,
+				"metadata": {
+					"djstripe_test_fake_id": "src_fakefakefakefakefake0001"
+				},
+				"owner": {
+					"address": null,
+					"email": null,
+					"name": null,
+					"phone": null,
+					"verified_address": null,
+					"verified_email": null,
+					"verified_name": null,
+					"verified_phone": null
+				},
+				"statement_descriptor": null,
+				"status": "chargeable",
+				"type": "card",
+				"usage": "reusable"
+			}
+		],
+		"has_more": false,
+		"total_count": 1,
+		"url": "/v1/customers/cus_4QWKsZuuTHcs7X/sources"
+	},
+	"subscriptions": {},
+	"tax_exempt": "none",
+	"tax_ids": {},
+	"tax_info": null,
+	"tax_info_verification": null
+}
