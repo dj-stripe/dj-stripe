@@ -4,7 +4,7 @@ import warnings
 from datetime import timedelta
 
 import django
-from django.db import IntegrityError, models
+from django.db import IntegrityError, models, transaction
 from django.utils import dateformat, timezone
 from django.utils.encoding import smart_text
 
@@ -436,12 +436,13 @@ class StripeModel(models.Model):
 		)
 
 		try:
-			return (
-				cls._create_from_stripe_object(
-					data, current_ids=current_ids, pending_relations=pending_relations, save=save
-				),
-				True,
-			)
+			with transaction.atomic():
+				return (
+					cls._create_from_stripe_object(
+						data, current_ids=current_ids, pending_relations=pending_relations, save=save
+					),
+					True,
+				)
 		except IntegrityError:
 			return cls.stripe_objects.get(id=id_), False
 
