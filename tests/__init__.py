@@ -6,6 +6,7 @@ Updated to API VERSION 2016-03-07 with bogus fields.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import logging
 from copy import deepcopy
 from datetime import datetime
 
@@ -13,8 +14,6 @@ from django.db import models
 from django.utils import dateformat, timezone
 
 from djstripe.webhooks import TEST_EVENT_ID
-
-import logging
 
 logger = logging.getLogger(__name__)
 
