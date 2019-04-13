@@ -14,7 +14,7 @@ from django.test.client import RequestFactory
 from djstripe.decorators import subscription_payment_required
 from djstripe.models import Subscription
 
-from . import FAKE_CUSTOMER, FAKE_PLAN, FAKE_SUBSCRIPTION, FUTURE_DATE
+from . import FAKE_CUSTOMER, FAKE_PLAN, FAKE_PRODUCT, FAKE_SUBSCRIPTION, FUTURE_DATE
 
 
 class TestSubscriptionPaymentRequired(TestCase):
@@ -51,7 +51,8 @@ class TestSubscriptionPaymentRequired(TestCase):
 		self.assertEqual(response.status_code, 302)
 
 	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
-	def test_user_active_subscription(self, plan_retrieve_mock):
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	def test_user_active_subscription(self, product_retrieve_mock, plan_retrieve_mock):
 		user = get_user_model().objects.create_user(
 			username="pydanny", email="pydanny@gmail.com"
 		)

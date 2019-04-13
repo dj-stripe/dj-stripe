@@ -713,6 +713,14 @@ FAKE_DISPUTE = {
 }
 
 
+FAKE_PRODUCT = {
+	"id": "prod_fake1",
+	"object": "product",
+	"active": True,
+	"name": "Fake Product",
+}
+
+
 FAKE_PLAN = {
 	"id": "gold21323",
 	"object": "plan",
@@ -725,6 +733,7 @@ FAKE_PLAN = {
 	"livemode": False,
 	"metadata": {},
 	"name": "New plan name",
+	"product": FAKE_PRODUCT["id"],
 	"statement_descriptor": None,
 	"trial_period_days": None,
 	"usage_type": "licensed",
@@ -742,6 +751,7 @@ FAKE_PLAN_II = {
 	"livemode": False,
 	"metadata": {},
 	"name": "New plan name",
+	"product": FAKE_PRODUCT["id"],
 	"statement_descriptor": None,
 	"trial_period_days": 12,
 	"usage_type": "licensed",
@@ -759,6 +769,7 @@ FAKE_TIER_PLAN = {
 	"livemode": False,
 	"metadata": {},
 	"name": "New plan name",
+	"product": FAKE_PRODUCT["id"],
 	"statement_descriptor": None,
 	"trial_period_days": None,
 	"usage_type": "licensed",
@@ -783,6 +794,7 @@ FAKE_PLAN_METERED = {
 	"livemode": False,
 	"metadata": {},
 	"nickname": "Sum Metered Plan",
+	"product": FAKE_PRODUCT["id"],
 	"tiers": None,
 	"tiers_mode": None,
 	"transform_usage": None,

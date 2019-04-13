@@ -20,7 +20,7 @@ from djstripe import settings as djstripe_settings
 from djstripe.enums import SubscriptionStatus
 from djstripe.models import Customer, Plan, Subscription
 
-from .. import FAKE_CUSTOMER, FAKE_PLAN, FAKE_SUBSCRIPTION
+from .. import FAKE_CUSTOMER, FAKE_PLAN, FAKE_PRODUCT, FAKE_SUBSCRIPTION
 
 
 class RestSubscriptionTest(APITestCase):
@@ -98,7 +98,8 @@ class RestSubscriptionTest(APITestCase):
 
 		Should return the correct data.
 		"""
-		plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+			plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 		subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
 
 		response = self.client.get(self.url)
@@ -125,7 +126,9 @@ class RestSubscriptionTest(APITestCase):
 			return subscription
 
 		fake_cancelled_subscription = deepcopy(FAKE_SUBSCRIPTION)
-		Subscription.sync_from_stripe_data(fake_cancelled_subscription)
+
+		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+			Subscription.sync_from_stripe_data(fake_cancelled_subscription)
 
 		cancel_subscription_mock.side_effect = _cancel_sub
 

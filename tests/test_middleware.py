@@ -1,6 +1,9 @@
 """
 dj-stripe Middleware Tests.
 """
+from copy import deepcopy
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
@@ -10,7 +13,7 @@ from django.test.utils import modify_settings, override_settings
 from djstripe.middleware import SubscriptionPaymentMiddleware
 from djstripe.models import Customer, Subscription
 
-from . import FAKE_CUSTOMER, FAKE_SUBSCRIPTION, FUTURE_DATE
+from . import FAKE_CUSTOMER, FAKE_PRODUCT, FAKE_SUBSCRIPTION, FUTURE_DATE
 
 
 class MiddlewareURLTest(TestCase):
@@ -98,7 +101,10 @@ class MiddlewareLogicTest(TestCase):
 		self.customer = Customer.sync_from_stripe_data(FAKE_CUSTOMER)
 		self.customer.subscriber = self.user
 		self.customer.save()
-		self.subscription = Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
+
+		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+			self.subscription = Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
+
 		self.middleware = SubscriptionPaymentMiddleware()
 
 	def test_anonymous(self):

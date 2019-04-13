@@ -4,6 +4,7 @@ dj-stripe Model Manager Tests.
 import datetime
 import decimal
 from copy import deepcopy
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -12,7 +13,8 @@ from django.utils import timezone
 from djstripe.models import Charge, Customer, Plan, Subscription, Transfer
 
 from . import (
-	FAKE_PLAN, FAKE_PLAN_II, FAKE_TRANSFER, FAKE_TRANSFER_II, FAKE_TRANSFER_III
+	FAKE_PLAN, FAKE_PLAN_II, FAKE_PRODUCT,
+	FAKE_TRANSFER, FAKE_TRANSFER_II, FAKE_TRANSFER_III
 )
 
 
@@ -25,8 +27,9 @@ class SubscriptionManagerTest(TestCase):
 			2013, 1, 1, 0, 0, 1, tzinfo=timezone.utc
 		)  # more realistic start
 
-		self.plan = Plan.sync_from_stripe_data(FAKE_PLAN)
-		self.plan2 = Plan.sync_from_stripe_data(FAKE_PLAN_II)
+		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+			self.plan = Plan.sync_from_stripe_data(FAKE_PLAN)
+			self.plan2 = Plan.sync_from_stripe_data(FAKE_PLAN_II)
 
 		for i in range(10):
 			user = get_user_model().objects.create_user(

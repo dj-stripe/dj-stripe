@@ -20,7 +20,7 @@ from djstripe.contrib.rest_framework.serializers import (
 from djstripe.enums import SubscriptionStatus
 from djstripe.models import Plan
 
-from .. import FAKE_CUSTOMER, FAKE_PLAN
+from .. import FAKE_CUSTOMER, FAKE_PLAN, FAKE_PRODUCT
 
 
 class SubscriptionSerializerTest(TestCase):
@@ -29,7 +29,9 @@ class SubscriptionSerializerTest(TestCase):
 			username="pydanny", email="pydanny@gmail.com"
 		)
 		self.customer = FAKE_CUSTOMER.create_for_user(self.user)
-		self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+
+		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+			self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
 	def test_valid_serializer(self):
 		now = timezone.now()
@@ -63,7 +65,8 @@ class SubscriptionSerializerTest(TestCase):
 		)
 		self.assertEqual(serializer.errors, {})
 
-	def test_invalid_serializer(self):
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	def test_invalid_serializer(self, product_retrieve_mock):
 		now = timezone.now()
 		serializer = SubscriptionSerializer(
 			data={
@@ -83,7 +86,8 @@ class SubscriptionSerializerTest(TestCase):
 
 class CreateSubscriptionSerializerTest(TestCase):
 	def setUp(self):
-		self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+			self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
 	@patch("stripe.Token.create", return_value=PropertyMock(id="token_test"))
 	def test_valid_serializer(self, stripe_token_mock):
