@@ -21,7 +21,7 @@ from djstripe.utils import (
 	get_supported_currency_choices, subscriber_has_active_subscription
 )
 
-from . import FAKE_CUSTOMER, FAKE_SUBSCRIPTION
+from . import FAKE_CUSTOMER, FAKE_PRODUCT, FAKE_SUBSCRIPTION
 from .apps.testapp.models import Organization
 
 TZ_IS_UTC = time.tzname == ("UTC", "UTC")
@@ -52,7 +52,8 @@ class TestUserHasActiveSubscription(TestCase):
 	def test_user_has_inactive_subscription(self):
 		self.assertFalse(subscriber_has_active_subscription(self.user))
 
-	def test_user_has_active_subscription(self):
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	def test_user_has_active_subscription(self, product_retrieve_mock):
 		subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
 		subscription.current_period_end = timezone.now() + timezone.timedelta(days=10)
 		subscription.save()

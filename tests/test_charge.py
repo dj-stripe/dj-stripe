@@ -15,8 +15,8 @@ from djstripe.models import (
 
 from . import (
 	FAKE_ACCOUNT, FAKE_BALANCE_TRANSACTION, FAKE_BALANCE_TRANSACTION_REFUND, FAKE_CHARGE,
-	FAKE_CHARGE_REFUNDED, FAKE_CUSTOMER, FAKE_FILEUPLOAD, FAKE_INVOICE, FAKE_REFUND,
-	FAKE_SUBSCRIPTION, FAKE_TRANSFER, AssertStripeFksMixin, default_account
+	FAKE_CHARGE_REFUNDED, FAKE_CUSTOMER, FAKE_FILEUPLOAD, FAKE_INVOICE, FAKE_PRODUCT,
+	FAKE_REFUND, FAKE_SUBSCRIPTION, FAKE_TRANSFER, AssertStripeFksMixin, default_account
 )
 
 
@@ -89,10 +89,12 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 	@patch("stripe.BalanceTransaction.retrieve")
 	@patch("stripe.Charge.retrieve")
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
 	def test_sync_from_stripe_data(
 		self,
 		subscription_retrieve_mock,
+		product_retrieve_mock,
 		invoice_retrieve_mock,
 		charge_retrieve_mock,
 		balance_transaction_retrieve_mock,
@@ -126,17 +128,18 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
-				"djstripe.Plan.product",
 			},
 		)
 
 	@patch("djstripe.models.Account.get_default_account")
 	@patch("stripe.Charge.retrieve")
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
 	def test_sync_from_stripe_data_refunded_on_update(
 		self,
 		subscription_retrieve_mock,
+		product_retrieve_mock,
 		invoice_retrieve_mock,
 		charge_retrieve_mock,
 		default_account_mock,
@@ -210,7 +213,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
-				"djstripe.Plan.product",
 			},
 		)
 
@@ -221,10 +223,12 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 	)
 	@patch("stripe.Charge.retrieve")
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
 	def test_sync_from_stripe_data_refunded(
 		self,
 		subscription_retrieve_mock,
+		product_retrieve_mock,
 		invoice_retrieve_mock,
 		charge_retrieve_mock,
 		balance_transaction_retrieve_mock,
@@ -268,19 +272,20 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
-				"djstripe.Plan.product",
 			},
 		)
 
 	@patch("stripe.BalanceTransaction.retrieve")
 	@patch("stripe.Charge.retrieve")
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
 	@patch("djstripe.models.Account.get_default_account")
 	def test_sync_from_stripe_data_max_amount(
 		self,
 		default_account_mock,
 		subscription_retrieve_mock,
+		product_retrieve_mock,
 		invoice_retrieve_mock,
 		charge_retrieve_mock,
 		balance_transaction_retrieve_mock,
@@ -310,19 +315,20 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
-				"djstripe.Plan.product",
 			},
 		)
 
 	@patch("djstripe.models.Account.get_default_account")
 	@patch("stripe.BalanceTransaction.retrieve")
 	@patch("stripe.Charge.retrieve")
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
 	def test_sync_from_stripe_data_unsupported_source(
 		self,
 		invoice_retrieve_mock,
 		subscription_retrieve_mock,
+		product_retrieve_mock,
 		charge_retrieve_mock,
 		balance_transaction_retrieve_mock,
 		default_account_mock,
@@ -350,7 +356,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
-				"djstripe.Plan.product",
 			},
 		)
 
@@ -393,12 +398,14 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 	@patch("stripe.Charge.retrieve")
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
 	@patch("stripe.Transfer.retrieve")
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
 	@patch("djstripe.models.Account.get_default_account")
 	def test_sync_from_stripe_data_with_transfer(
 		self,
 		default_account_mock,
 		subscription_retrieve_mock,
+		product_retrieve_mock,
 		transfer_retrieve_mock,
 		invoice_retrieve_mock,
 		charge_retrieve_mock,
@@ -431,13 +438,13 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Account.business_logo",
 				"djstripe.Charge.dispute",
 				"djstripe.Customer.coupon",
-				"djstripe.Plan.product",
 			},
 		)
 
 	@patch("stripe.Charge.retrieve")
 	@patch("stripe.Account.retrieve")
 	@patch("stripe.BalanceTransaction.retrieve")
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
 	@patch("stripe.File.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD))
@@ -446,6 +453,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		file_retrive_mock,
 		invoice_retrieve_mock,
 		subscription_retrieve_mock,
+		product_retrieve_mock,
 		balance_transaction_retrieve_mock,
 		account_retrieve_mock,
 		charge_retrieve_mock,
@@ -474,6 +482,5 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
-				"djstripe.Plan.product",
 			},
 		)

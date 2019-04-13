@@ -14,7 +14,8 @@ from djstripe.models import Plan
 from djstripe.settings import STRIPE_SECRET_KEY
 
 from . import (
-	FAKE_PLAN, FAKE_PLAN_II, FAKE_PLAN_METERED, FAKE_TIER_PLAN, AssertStripeFksMixin
+	FAKE_PLAN, FAKE_PLAN_II, FAKE_PLAN_METERED,
+	FAKE_PRODUCT, FAKE_TIER_PLAN, AssertStripeFksMixin
 )
 
 
@@ -26,7 +27,9 @@ class TestPlanAdmin(TestCase):
 		pass
 
 	def setUp(self):
-		self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+			self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+
 		self.site = AdminSite()
 		self.plan_admin = PlanAdmin(Plan, self.site)
 
@@ -75,7 +78,8 @@ class TestPlanAdmin(TestCase):
 class PlanTest(AssertStripeFksMixin, TestCase):
 	def setUp(self):
 		self.plan_data = deepcopy(FAKE_PLAN)
-		self.plan = Plan.sync_from_stripe_data(self.plan_data)
+		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+			self.plan = Plan.sync_from_stripe_data(self.plan_data)
 
 	@patch("djstripe.models.Plan.objects.create")
 	@patch("djstripe.models.Plan._api_create")
@@ -103,6 +107,18 @@ class PlanTest(AssertStripeFksMixin, TestCase):
 		assert plan.amount_in_cents == plan.amount * 100
 		assert isinstance(plan.amount_in_cents, int)
 
+		self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
+
+	@patch("stripe.Product.retrieve")
+	def test_stripe_plan_null_product(self, product_retrieve_mock):
+		"""
+		assert that plan.Product can be null for backwards compatibility
+		though note that it is a Stripe required field
+		"""
+		plan_data = deepcopy(FAKE_PLAN_II)
+		del plan_data["product"]
+		plan = Plan.sync_from_stripe_data(plan_data)
+
 		self.assert_fks(
 			plan, expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"}
 		)
@@ -115,9 +131,7 @@ class PlanTest(AssertStripeFksMixin, TestCase):
 		self.assertIsNone(plan.amount)
 		self.assertIsNotNone(plan.tiers)
 
-		self.assert_fks(
-			plan, expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"}
-		)
+		self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
 
 	@patch("stripe.Plan.retrieve")
 	def test_stripe_metered_plan(self, plan_retrieve_mock):
@@ -127,9 +141,7 @@ class PlanTest(AssertStripeFksMixin, TestCase):
 		self.assertEqual(plan.usage_type, PlanUsageType.metered)
 		self.assertIsNotNone(plan.amount)
 
-		self.assert_fks(
-			plan, expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"}
-		)
+		self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
 
 
 class HumanReadablePlanTest(TestCase):

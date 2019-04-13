@@ -12,7 +12,7 @@ from djstripe.mixins import PaymentsContextMixin, SubscriptionMixin
 from djstripe.models import Plan
 from djstripe.settings import STRIPE_PUBLIC_KEY
 
-from . import FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II
+from . import FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II, FAKE_PRODUCT
 
 
 class TestPaymentsContextMixin(TestCase):
@@ -36,8 +36,9 @@ class TestPaymentsContextMixin(TestCase):
 
 class TestSubscriptionMixin(TestCase):
 	def setUp(self):
-		Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-		Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN_II))
+		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+			Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+			Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN_II))
 
 	@patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
 	def test_get_context_data(self, stripe_create_customer_mock):

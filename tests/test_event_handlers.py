@@ -14,19 +14,19 @@ from djstripe.models import (
 )
 
 from . import (
-	FAKE_CARD, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_COUPON, FAKE_CUSTOMER,
-	FAKE_CUSTOMER_II, FAKE_DISPUTE, FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED,
-	FAKE_EVENT_CHARGE_SUCCEEDED, FAKE_EVENT_CUSTOMER_CREATED,
-	FAKE_EVENT_CUSTOMER_DELETED, FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED,
-	FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED, FAKE_EVENT_CUSTOMER_SOURCE_CREATED,
-	FAKE_EVENT_CUSTOMER_SOURCE_DELETED, FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE,
-	FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED, FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED,
-	FAKE_EVENT_DISPUTE_CREATED, FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_INVOICE_DELETED,
-	FAKE_EVENT_INVOICE_UPCOMING, FAKE_EVENT_INVOICEITEM_CREATED,
-	FAKE_EVENT_INVOICEITEM_DELETED, FAKE_EVENT_PLAN_CREATED, FAKE_EVENT_PLAN_DELETED,
-	FAKE_EVENT_PLAN_REQUEST_IS_OBJECT, FAKE_EVENT_TRANSFER_CREATED,
-	FAKE_EVENT_TRANSFER_DELETED, FAKE_INVOICE, FAKE_INVOICE_II, FAKE_INVOICEITEM,
-	FAKE_PLAN, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_III, FAKE_TRANSFER, default_account
+	FAKE_CARD, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_COUPON, FAKE_CUSTOMER, FAKE_CUSTOMER_II,
+	FAKE_DISPUTE, FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED,
+	FAKE_EVENT_CHARGE_SUCCEEDED, FAKE_EVENT_CUSTOMER_CREATED, FAKE_EVENT_CUSTOMER_DELETED,
+	FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED, FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED,
+	FAKE_EVENT_CUSTOMER_SOURCE_CREATED, FAKE_EVENT_CUSTOMER_SOURCE_DELETED,
+	FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE, FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED,
+	FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED, FAKE_EVENT_DISPUTE_CREATED,
+	FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_INVOICE_DELETED, FAKE_EVENT_INVOICE_UPCOMING,
+	FAKE_EVENT_INVOICEITEM_CREATED, FAKE_EVENT_INVOICEITEM_DELETED,
+	FAKE_EVENT_PLAN_CREATED, FAKE_EVENT_PLAN_DELETED, FAKE_EVENT_PLAN_REQUEST_IS_OBJECT,
+	FAKE_EVENT_TRANSFER_CREATED, FAKE_EVENT_TRANSFER_DELETED, FAKE_INVOICE,
+	FAKE_INVOICE_II, FAKE_INVOICEITEM, FAKE_PLAN, FAKE_PRODUCT, FAKE_SUBSCRIPTION,
+	FAKE_SUBSCRIPTION_III, FAKE_TRANSFER, default_account
 )
 
 
@@ -67,10 +67,12 @@ class TestChargeEvents(EventTestCase):
 	@patch("stripe.Charge.retrieve")
 	@patch("stripe.Event.retrieve")
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
 	def test_charge_created(
 		self,
 		subscription_retrieve_mock,
+		product_retrieve_mock,
 		invoice_retrieve_mock,
 		event_retrieve_mock,
 		charge_retrieve_mock,
@@ -204,9 +206,14 @@ class TestCustomerEvents(EventTestCase):
 
 	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
 	@patch("stripe.Event.retrieve")
 	def test_customer_subscription_created(
-		self, event_retrieve_mock, subscription_retrieve_mock, plan_retrieve_mock
+		self,
+		event_retrieve_mock,
+		product_retrieve_mock,
+		subscription_retrieve_mock,
+		plan_retrieve_mock,
 	):
 		fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED)
 		event_retrieve_mock.return_value = fake_stripe_event
@@ -223,9 +230,14 @@ class TestCustomerEvents(EventTestCase):
 
 	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
 	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
 	def test_customer_subscription_deleted(
-		self, customer_retrieve_mock, subscription_retrieve_mock, plan_retrieve_mock
+		self,
+		customer_retrieve_mock,
+		product_retrieve_mock,
+		subscription_retrieve_mock,
+		plan_retrieve_mock,
 	):
 		event = self._create_event(FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED)
 		event.invoke_webhook_handlers()
@@ -272,8 +284,10 @@ class TestInvoiceEvents(EventTestCase):
 	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
 	@patch("stripe.Event.retrieve")
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
 	def test_invoice_created_no_existing_customer(
 		self,
+		product_retrieve_mock,
 		event_retrieve_mock,
 		invoice_retrieve_mock,
 		charge_retrieve_mock,
@@ -301,8 +315,10 @@ class TestInvoiceEvents(EventTestCase):
 	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
 	@patch("stripe.Invoice.retrieve")
 	@patch("stripe.Event.retrieve")
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
 	def test_invoice_created(
 		self,
+		product_retrieve_mock,
 		event_retrieve_mock,
 		invoice_retrieve_mock,
 		charge_retrieve_mock,
@@ -336,8 +352,10 @@ class TestInvoiceEvents(EventTestCase):
 	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
 	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE))
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
 	def test_invoice_deleted(
 		self,
+		product_retrieve_mock,
 		invoice_retrieve_mock,
 		charge_retrieve_mock,
 		subscription_retrieve_mock,
@@ -375,8 +393,10 @@ class TestInvoiceItemEvents(EventTestCase):
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE_II))
 	@patch("stripe.InvoiceItem.retrieve")
 	@patch("stripe.Event.retrieve")
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
 	def test_invoiceitem_created(
 		self,
+		product_retrieve_mock,
 		event_retrieve_mock,
 		invoiceitem_retrieve_mock,
 		invoice_retrieve_mock,
@@ -410,8 +430,10 @@ class TestInvoiceItemEvents(EventTestCase):
 	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE_II))
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE_II))
 	@patch("stripe.InvoiceItem.retrieve", return_value=deepcopy(FAKE_INVOICEITEM))
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
 	def test_invoiceitem_deleted(
 		self,
+		product_retrieve_mock,
 		invoiceitem_retrieve_mock,
 		invoice_retrieve_mock,
 		charge_retrieve_mock,
@@ -440,7 +462,10 @@ class TestInvoiceItemEvents(EventTestCase):
 class TestPlanEvents(EventTestCase):
 	@patch("stripe.Plan.retrieve")
 	@patch("stripe.Event.retrieve")
-	def test_plan_created(self, event_retrieve_mock, plan_retrieve_mock):
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	def test_plan_created(
+		self, product_retrieve_mock, event_retrieve_mock, plan_retrieve_mock
+	):
 		fake_stripe_event = deepcopy(FAKE_EVENT_PLAN_CREATED)
 		event_retrieve_mock.return_value = fake_stripe_event
 		plan_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
@@ -453,7 +478,10 @@ class TestPlanEvents(EventTestCase):
 
 	@patch("stripe.Plan.retrieve", return_value=FAKE_PLAN)
 	@patch("stripe.Event.retrieve", return_value=FAKE_EVENT_PLAN_REQUEST_IS_OBJECT)
-	def test_plan_updated_request_object(self, event_retrieve_mock, plan_retrieve_mock):
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	def test_plan_updated_request_object(
+		self, product_retrieve_mock, event_retrieve_mock, plan_retrieve_mock
+	):
 		plan_retrieve_mock.return_value = FAKE_EVENT_PLAN_REQUEST_IS_OBJECT["data"]["object"]
 
 		event = Event.sync_from_stripe_data(FAKE_EVENT_PLAN_REQUEST_IS_OBJECT)
@@ -465,7 +493,8 @@ class TestPlanEvents(EventTestCase):
 		)
 
 	@patch("stripe.Plan.retrieve", return_value=FAKE_PLAN)
-	def test_plan_deleted(self, plan_retrieve_mock):
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	def test_plan_deleted(self, product_retrieve_mock, plan_retrieve_mock):
 
 		event = self._create_event(FAKE_EVENT_PLAN_CREATED)
 		event.invoke_webhook_handlers()
