@@ -10,7 +10,7 @@ from django.test import TestCase
 
 from djstripe.admin import PlanAdmin
 from djstripe.enums import PlanUsageType
-from djstripe.models import Plan
+from djstripe.models import Plan, Product
 from djstripe.settings import STRIPE_SECRET_KEY
 
 from . import (
@@ -43,7 +43,7 @@ class TestPlanAdmin(TestCase):
 		# Would throw DoesNotExist if it didn't work
 		Plan.objects.get(name="Updated Plan Name")
 
-	@patch("stripe.Plan.create")
+	@patch("stripe.Plan.create", return_value=FAKE_PLAN_II)
 	@patch("stripe.Plan.retrieve")
 	def test_that_admin_save_does_create_new_object(
 		self, plan_retrieve_mock, plan_create_mock
@@ -75,24 +75,86 @@ class TestPlanAdmin(TestCase):
 		Plan.objects.get(name=self.plan.name)
 
 
+class PlanCreateTest(AssertStripeFksMixin, TestCase):
+	def setUp(self):
+		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+			self.stripe_product = Product(id=FAKE_PRODUCT["id"]).api_retrieve()
+
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch("stripe.Plan.create", return_value=deepcopy(FAKE_PLAN))
+	def test_create_from_product_id(self, plan_create_mock, product_retrieve_mock):
+		fake_plan = deepcopy(FAKE_PLAN)
+		fake_plan["amount"] = fake_plan["amount"] / 100
+		self.assertIsInstance(fake_plan["product"], str)
+
+		plan = Plan.create(**fake_plan)
+
+		expected_create_kwargs = deepcopy(FAKE_PLAN)
+		expected_create_kwargs["api_key"] = STRIPE_SECRET_KEY
+
+		plan_create_mock.assert_called_once_with(**expected_create_kwargs)
+
+		self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
+
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch("stripe.Plan.create", return_value=deepcopy(FAKE_PLAN))
+	def test_create_from_stripe_product(self, plan_create_mock, product_retrieve_mock):
+		fake_plan = deepcopy(FAKE_PLAN)
+		fake_plan["product"] = self.stripe_product
+		fake_plan["amount"] = fake_plan["amount"] / 100
+		self.assertIsInstance(fake_plan["product"], dict)
+
+		plan = Plan.create(**fake_plan)
+
+		expected_create_kwargs = deepcopy(FAKE_PLAN)
+		expected_create_kwargs["product"] = self.stripe_product
+
+		plan_create_mock.assert_called_once_with(
+			api_key=STRIPE_SECRET_KEY, **expected_create_kwargs
+		)
+
+		self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
+
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch("stripe.Plan.create", return_value=deepcopy(FAKE_PLAN))
+	def test_create_from_djstripe_product(self, plan_create_mock, product_retrieve_mock):
+		fake_plan = deepcopy(FAKE_PLAN)
+		fake_plan["product"] = Product.sync_from_stripe_data(self.stripe_product)
+		fake_plan["amount"] = fake_plan["amount"] / 100
+		self.assertIsInstance(fake_plan["product"], Product)
+
+		plan = Plan.create(**fake_plan)
+
+		plan_create_mock.assert_called_once_with(api_key=STRIPE_SECRET_KEY, **FAKE_PLAN)
+
+		self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
+
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch("stripe.Plan.create", return_value=deepcopy(FAKE_PLAN))
+	def test_create_with_metadata(self, plan_create_mock, product_retrieve_mock):
+		metadata = {"other_data": "more_data"}
+		fake_plan = deepcopy(FAKE_PLAN)
+		fake_plan["amount"] = fake_plan["amount"] / 100
+		fake_plan["metadata"] = metadata
+		self.assertIsInstance(fake_plan["product"], str)
+
+		plan = Plan.create(**fake_plan)
+
+		expected_create_kwargs = deepcopy(FAKE_PLAN)
+		expected_create_kwargs["metadata"] = metadata
+
+		plan_create_mock.assert_called_once_with(
+			api_key=STRIPE_SECRET_KEY, **expected_create_kwargs
+		)
+
+		self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
+
+
 class PlanTest(AssertStripeFksMixin, TestCase):
 	def setUp(self):
 		self.plan_data = deepcopy(FAKE_PLAN)
 		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
 			self.plan = Plan.sync_from_stripe_data(self.plan_data)
-
-	@patch("djstripe.models.Plan.objects.create")
-	@patch("djstripe.models.Plan._api_create")
-	def test_create_with_metadata(self, api_create_mock, object_create_mock):
-		metadata = {"other_data": "more_data"}
-		Plan.create(metadata=metadata, arg1=1, arg2=2, amount=1, id=1)
-
-		api_create_mock.assert_called_once_with(
-			metadata=metadata, id=1, arg1=1, arg2=2, amount=100
-		)
-		object_create_mock.assert_called_once_with(
-			metadata=metadata, id=1, arg1=1, arg2=2, amount=1
-		)
 
 	def test_str(self):
 		self.assertEqual(str(self.plan), self.plan_data["name"])
