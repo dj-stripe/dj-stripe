@@ -109,6 +109,10 @@ class StripeModel(models.Model):
 		:type api_key: string
 		"""
 
+		for key in kwargs:
+			if isinstance(kwargs[key], StripeModel):
+				kwargs[key] = kwargs[key].id
+
 		return cls.stripe_class.create(api_key=api_key, **kwargs)
 
 	def _api_delete(self, api_key=None, **kwargs):

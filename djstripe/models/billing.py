@@ -799,9 +799,9 @@ class Plan(StripeModel):
 		# A few minor things are changed in the api-version of the create call
 		api_kwargs = dict(kwargs)
 		api_kwargs["amount"] = int(api_kwargs["amount"] * 100)
-		cls._api_create(**api_kwargs)
 
-		plan = Plan.objects.create(**kwargs)
+		stripe_plan = cls._api_create(**api_kwargs)
+		plan = cls.sync_from_stripe_data(stripe_plan)
 
 		return plan
 
