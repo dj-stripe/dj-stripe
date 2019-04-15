@@ -7,3 +7,6 @@ __pycache__
 # Sphinx
 docs/_build
 docs/_static
+
+# SQLite
+*.sqlite3

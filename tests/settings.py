@@ -13,7 +13,7 @@ SECRET_KEY = os.environ.get("DJSTRIPE_TEST_DJANGO_SECRET_KEY", "djstripe")
 SITE_ID = 1
 TIME_ZONE = "UTC"
 USE_TZ = True
-PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
 
 ALLOWED_HOSTS = json.loads(os.environ.get("DJSTRIPE_TEST_ALLOWED_HOSTS_JSON", "[]"))
