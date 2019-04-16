@@ -103,11 +103,6 @@ class Migration(migrations.Migration):
 
 		super().__init__(*args, **kwargs)
 
-	replaces = [
-		("djstripe", "0003_auto_20181117_2328"),
-		("djstripe", "0004_auto_20190227_2114"),
-	]
-
 	dependencies = [("djstripe", "0002_auto_20180627_1121")]
 
 	operations = [
