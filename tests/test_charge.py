@@ -3,7 +3,7 @@ dj-stripe Charge Model Tests.
 """
 from copy import deepcopy
 from decimal import Decimal
-from unittest.mock import call, patch
+from unittest.mock import call, patch, create_autospec
 
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
@@ -598,3 +598,113 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Customer.coupon",
 			},
 		)
+
+	@patch.object(target=Charge, attribute="source", autospec=True)
+	@patch.object(target=Charge, attribute="account", autospec=True)
+	@patch(target="djstripe.models.payment_methods.DjstripePaymentMethod", autospec=True)
+	@patch(target="djstripe.models.core.Account", autospec=True)
+	def test__attach_objects_hook(
+		self, mock_account, mock_payment_method, mock_charge_account, mock_charge_source
+	):
+		"""Test that _attach_objects_hook works as expected."""
+		charge = Charge(
+			amount=50,
+			currency="usd",
+			id="ch_test",
+			status=ChargeStatus.failed,
+			captured=False,
+			paid=False,
+		)
+		mock_cls = create_autospec(spec=Charge, spec_set=True)
+		mock_data = {"source": {"object": "foo"}}
+		mock_payment_method._get_or_create_source.return_value = ("bar", "unused")
+
+		charge._attach_objects_hook(cls=mock_cls, data=mock_data)
+
+		# expect the attributes to be set appropriately
+		self.assertEqual(
+			mock_cls._stripe_object_destination_to_account.return_value, charge.account
+		)
+		self.assertEqual(
+			mock_payment_method._get_or_create_source.return_value[0], charge.source
+		)
+		# expect the appropriate calls to be made
+		mock_cls._stripe_object_destination_to_account.assert_called_once_with(
+			target_cls=mock_account, data=mock_data
+		)
+		mock_payment_method._get_or_create_source.assert_called_once_with(
+			data=mock_data["source"], source_type=mock_data["source"]["object"]
+		)
+
+	@patch.object(target=Charge, attribute="source", autospec=True)
+	@patch.object(target=Charge, attribute="account", autospec=True)
+	@patch(target="djstripe.models.payment_methods.DjstripePaymentMethod", autospec=True)
+	@patch(target="djstripe.models.core.Account", autospec=True)
+	def test__attach_objects_hook_no_destination_account(
+		self, mock_account, mock_payment_method, mock_charge_account, mock_charge_source
+	):
+		"""Test that _attach_objects_hook works as expected when there is no destination account."""
+		charge = Charge(
+			amount=50,
+			currency="usd",
+			id="ch_test",
+			status=ChargeStatus.failed,
+			captured=False,
+			paid=False,
+		)
+		mock_cls = create_autospec(spec=Charge, spec_set=True)
+		mock_cls._stripe_object_destination_to_account.return_value = False
+		mock_data = {"source": {"object": "foo"}}
+		mock_payment_method._get_or_create_source.return_value = ("bar", "unused")
+
+		charge._attach_objects_hook(cls=mock_cls, data=mock_data)
+
+		# expect the attributes to be set appropriately
+		self.assertEqual(mock_account.get_default_account.return_value, charge.account)
+		self.assertEqual(
+			mock_payment_method._get_or_create_source.return_value[0], charge.source
+		)
+		# expect the appropriate calls to be made
+		mock_cls._stripe_object_destination_to_account.assert_called_once_with(
+			target_cls=mock_account, data=mock_data
+		)
+		mock_payment_method._get_or_create_source.assert_called_once_with(
+			data=mock_data["source"], source_type=mock_data["source"]["object"]
+		)
+
+	@patch.object(target=Charge, attribute="source", autospec=True)
+	@patch.object(target=Charge, attribute="account", autospec=True)
+	@patch(target="djstripe.models.payment_methods.DjstripePaymentMethod", autospec=True)
+	@patch(target="djstripe.models.core.Account", autospec=True)
+	def test__attach_objects_hook_missing_source_data(
+		self, mock_account, mock_payment_method, mock_charge_account, mock_charge_source
+	):
+		"""Make sure we handle the case where the source data is empty or insufficient."""
+		charge = Charge(
+			amount=50,
+			currency="usd",
+			id="ch_test",
+			status=ChargeStatus.failed,
+			captured=False,
+			paid=False,
+		)
+		mock_cls = create_autospec(spec=Charge, spec_set=True)
+		# Empty data dict works for this test since we only look up the source key and
+		# everything else is mocked.
+		mock_data = {}
+		starting_source = charge.source
+
+		charge._attach_objects_hook(cls=mock_cls, data=mock_data)
+
+		# source shouldn't be touched
+		self.assertEqual(starting_source, charge.source)
+		mock_payment_method._get_or_create_source.assert_not_called()
+
+		# try again with a source key, but no object sub key.
+		mock_data = {"source": {"foo": "bar"}}
+
+		charge._attach_objects_hook(cls=mock_cls, data=mock_data)
+
+		# source shouldn't be touched
+		self.assertEqual(starting_source, charge.source)
+		mock_payment_method._get_or_create_source.assert_not_called()

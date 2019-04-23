@@ -284,8 +284,18 @@ class Charge(StripeModel):
 		else:
 			self.account = Account.get_default_account()
 
+		# Source doesn't always appear to be present, so handle the case
+		# where it is missing.
+		source_data = data.get("source")
+		if not source_data:
+			return
+
+		source_type = source_data.get("object")
+		if not source_type:
+			return
+
 		self.source, _ = DjstripePaymentMethod._get_or_create_source(
-			data["source"], data["source"]["object"]
+			data=source_data, source_type=source_type
 		)
 
 	def _calculate_refund_amount(self, amount=None):
