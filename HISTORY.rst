@@ -3,6 +3,13 @@
 History
 =======
 
+2.0.2 (unreleased)
+------------------
+
+This is a bugfix-only version:
+
+- Don't save event objects if the webhook processing fails (#832).
+
 2.0.1 (2019-04-29)
 ------------------
 

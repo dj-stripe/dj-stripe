@@ -2,7 +2,7 @@ import decimal
 import warnings
 
 import stripe
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.functional import cached_property
 from stripe.error import InvalidRequestError
@@ -1138,7 +1138,11 @@ class Event(StripeModel):
 		qs = cls.objects.filter(id=data["id"])
 		if qs.exists():
 			return qs.first()
-		else:
+
+		# Rollback any DB operations in the case of failure so
+		# we will retry creating and processing the event the
+		# next time the webhook fires.
+		with transaction.atomic():
 			ret = cls._create_from_stripe_object(data)
 			ret.invoke_webhook_handlers()
 			return ret
