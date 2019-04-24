@@ -235,6 +235,30 @@ class TestWebhook(TestCase):
 		event_trigger = WebhookEventTrigger.objects.first()
 		self.assertEqual(event_trigger.is_test_event, False)
 
+	@patch.object(target=Event, attribute="invoke_webhook_handlers", autospec=True)
+	@patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER))
+	@patch("stripe.Event.retrieve")
+	def test_webhook_error(
+		self, event_retrieve_mock, transfer_retrieve_mock, mock_invoke_webhook_handlers
+	):
+		"""Test the case where webhook processing fails to ensure we rollback
+		and do not commit the Event object to the database.
+		"""
+		mock_invoke_webhook_handlers.side_effect = KeyError("Test error")
+		djstripe_settings.WEBHOOK_SECRET = ""
+
+		fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+		event_retrieve_mock.return_value = fake_event
+		with self.assertRaises(KeyError):
+			self._send_event(fake_event)
+
+		self.assertEqual(Event.objects.count(), 0)
+		self.assertEqual(WebhookEventTrigger.objects.count(), 1)
+
+		event_trigger = WebhookEventTrigger.objects.first()
+		self.assertEqual(event_trigger.is_test_event, False)
+		self.assertEqual(event_trigger.exception, "'Test error'")
+
 
 class TestWebhookHandlers(TestCase):
 	def setUp(self):
