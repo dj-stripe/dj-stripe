@@ -55,6 +55,7 @@ Contents
    project/authors.rst
    project/history.rst
    project/support.rst
+   project/release_process.rst
 
 Constraints
 ------------

@@ -106,10 +106,28 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
 Django Migration Policy
 -----------------------
 
-Migrations are considered a breaking change, so it's not usually not acceptable to add a migration to a stable branch.
+Migrations are considered a breaking change, so it's not usually not acceptable to add a migration to a stable branch,
+it will be a new ``MAJOR.MINOR.0`` release.
 
-A workaround to this in the case that the Stripe API data isn't compatible with out model (eg Stripe is sending `null`)
-is to implement the `_manipulate_stripe_object_hook` classmethod on the model.
+A workaround to this in the case that the Stripe API data isn't compatible with out model (eg Stripe is sending ``null`` to a non-null field)
+is to implement the ``_manipulate_stripe_object_hook`` classmethod on the model.
+
+Avoid new migrations with non-schema changes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+If a code change produces a migration that doesn't alter the database schema (eg changing ``help_text``) then instead of
+adding a new migration you can edit the most recent migration that affects the field in question.
+
+e.g.: https://github.com/dj-stripe/dj-stripe/commit/e2762c38918a90f00c42ecf21187a920bd3a2087
+
+Squash of unreleased migrations on master
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+We aim to keep the number of migration files per release to a minimum per ``MINOR`` release.
+
+In the case where there are several unreleased migrations on master between releases, we squash migrations immediately before release.
+
+So if you're using the master branch with unreleased migrations, ensure you migrate with the squashed migration before upgrading to the next major release.
+
+For more details see the :ref:`squash_migrations` section of the Release process.
 
 Pull Request Guidelines
 -----------------------
