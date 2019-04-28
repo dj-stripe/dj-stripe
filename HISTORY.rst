@@ -3,7 +3,7 @@
 History
 =======
 
-2.0.1 (unreleased)
+2.0.1 (2019-04-29)
 ------------------
 
 This is a bugfix-only version:
@@ -13,7 +13,9 @@ This is a bugfix-only version:
   At some point 2018 Stripe silently changed the ID used for test events and
   ``evt_00000000000000`` is not used anymore.
 - Fixed OperationalError seen in migration 0003 on postgres (#850).
+- Fixed issue with migration 0003 not being unapplied correctly (#882).
 - Fixup missing ``SubscriptionItem.quantity`` on Plans with ``usage_type="metered"`` (#865).
+- Fixed ``Plan.create()`` (#870).
 
 2.0.0 (2019-03-01)
 ------------------
