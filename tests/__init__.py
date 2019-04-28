@@ -718,6 +718,7 @@ FAKE_PRODUCT = {
 	"object": "product",
 	"active": True,
 	"name": "Fake Product",
+	"type": "service",
 }
 
 
