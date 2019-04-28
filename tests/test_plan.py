@@ -157,7 +157,7 @@ class PlanTest(AssertStripeFksMixin, TestCase):
 			self.plan = Plan.sync_from_stripe_data(self.plan_data)
 
 	def test_str(self):
-		self.assertEqual(str(self.plan), self.plan_data["name"])
+		self.assertEqual(str(self.plan), self.plan_data["nickname"])
 
 	@patch("stripe.Plan.retrieve", return_value=FAKE_PLAN)
 	def test_stripe_plan(self, plan_retrieve_mock):

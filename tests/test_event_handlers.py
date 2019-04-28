@@ -474,7 +474,7 @@ class TestPlanEvents(EventTestCase):
 		event.invoke_webhook_handlers()
 
 		plan = Plan.objects.get(id=fake_stripe_event["data"]["object"]["id"])
-		self.assertEqual(plan.name, fake_stripe_event["data"]["object"]["name"])
+		self.assertEqual(plan.nickname, fake_stripe_event["data"]["object"]["nickname"])
 
 	@patch("stripe.Plan.retrieve", return_value=FAKE_PLAN)
 	@patch("stripe.Event.retrieve", return_value=FAKE_EVENT_PLAN_REQUEST_IS_OBJECT)
@@ -489,7 +489,7 @@ class TestPlanEvents(EventTestCase):
 
 		plan = Plan.objects.get(id=FAKE_EVENT_PLAN_REQUEST_IS_OBJECT["data"]["object"]["id"])
 		self.assertEqual(
-			plan.name, FAKE_EVENT_PLAN_REQUEST_IS_OBJECT["data"]["object"]["name"]
+			plan.nickname, FAKE_EVENT_PLAN_REQUEST_IS_OBJECT["data"]["object"]["nickname"]
 		)
 
 	@patch("stripe.Plan.retrieve", return_value=FAKE_PLAN)
