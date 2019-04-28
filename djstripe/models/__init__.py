@@ -8,9 +8,9 @@ from .connect import (
 )
 from .core import (
 	BalanceTransaction, Charge, Customer, Dispute,
-	Event, FileUpload, Payout, Product, Refund
+	Event, FileUpload, Payout, Product, Refund, PaymentIntent
 )
-from .payment_methods import BankAccount, Card, DjstripePaymentMethod, Source
+from .payment_methods import BankAccount, Card, DjstripePaymentMethod, PaymentMethod, Source
 from .sigma import ScheduledQueryRun
 from .webhooks import WebhookEventTrigger
 
@@ -32,6 +32,8 @@ __all__ = [
 	"IdempotencyKey",
 	"Invoice",
 	"InvoiceItem",
+	"PaymentIntent",
+	"PaymentMethod",
 	"Payout",
 	"Plan",
 	"Product",

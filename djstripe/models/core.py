@@ -759,6 +759,12 @@ class Customer(StripeModel):
 
 		return new_payment_method.resolve()
 
+	def add_payment_method(self, payment_method):
+		from .payment_methods import PaymentMethod
+
+		stripe_customer = self.api_retrieve()
+		PaymentMethod.attach(payment_method, stripe_customer)
+
 	def purge(self):
 		try:
 			self._api_delete()
@@ -1218,6 +1224,230 @@ class FileUpload(StripeModel):
 File = FileUpload
 
 
+class PaymentIntent(StripeModel):
+	"""
+	Stripe documentation: https://stripe.com/docs/api#payment_intents
+	"""
+
+	stripe_class = stripe.PaymentIntent
+	stripe_dashboard_item_name = "payment intents"
+
+	amount = StripeQuantumCurrencyAmountField(
+		help_text=(
+			"Amount intended to be collected by this PaymentIntent."
+		)
+	)
+	amount_capturable = StripeQuantumCurrencyAmountField(
+		help_text=(
+			"Amount that can be captured from this PaymentIntent."
+		)
+	)
+	amount_received = StripeQuantumCurrencyAmountField(
+		help_text=(
+			"Amount that was collected by this PaymentIntent."
+		)
+	)
+	# application
+	# application_fee_amount
+	canceled_at = models.DateTimeField(
+		null=True,
+		default=None,
+		help_text=(
+			"Populated when status is canceled, this is the time at which the PaymentIntent was "
+			"canceled. Measured in seconds since the Unix epoch."
+		)
+	)
+	cancellation_reason = models.CharField(
+		max_length=255,
+		null=True,
+		help_text=(
+			"User-given reason for cancellation of this PaymentIntent, one of duplicate, "
+			"fraudulent, requested_by_customer, or failed_invoice."
+		)
+	)
+	capture_method = StripeEnumField(
+		enum=enums.CaptureMethod,
+		help_text=(
+			"Capture method of this PaymentIntent, one of automatic or manual."
+		)
+	)
+	client_secret = models.CharField(
+		max_length=255,
+		help_text=(
+			"The client secret of this PaymentIntent. Used for client-side retrieval using a "
+			"publishable key."
+		)
+	)
+	confirmation_method = StripeEnumField(
+		enum=enums.ConfirmationMethod,
+		help_text=(
+			"Confirmation method of this PaymentIntent, one of manual or automatic."
+		)
+	)
+	currency = StripeCurrencyCodeField()
+	customer = models.ForeignKey(
+		"Customer",
+		null=True,
+		on_delete=models.SET_NULL,
+		help_text=(
+			"ID of the Customer this PaymentIntent is for if one exists."
+		)
+	)
+	description = models.TextField(
+		default='',
+		help_text=(
+			"An arbitrary string attached to the object. Often useful for displaying to users."
+		)
+	)
+	invoice = models.ForeignKey(
+		"Invoice",
+		on_delete=models.SET_NULL,
+		null=True,
+		help_text=(
+			"ID of the invoice that created this PaymentIntent, if it exists."
+		)
+	)
+	last_payment_error = JSONField(
+		help_text=(
+			"The payment error encountered in the previous PaymentIntent confirmation."
+		)
+	)
+	next_action = JSONField(
+		help_text=(
+			"If present, this property tells you what actions you need to take in order for your "
+			"customer to fulfill a payment using the provided source."
+		)
+	)
+	on_behalf_of = models.ForeignKey(
+		"Account",
+		on_delete=models.CASCADE,
+		null=True,
+		help_text="The account (if any) for which the funds of the PaymentIntent are intended.",
+	)
+	payment_method = models.ForeignKey(
+		"PaymentMethod",
+		on_delete=models.SET_NULL,
+		null=True,
+		help_text=(
+			"ID of the payment method used in this PaymentIntent."
+		)
+	)
+	payment_method_types = JSONField(
+		help_text=(
+			"The list of payment method types (e.g. card) that this PaymentIntent is allowed to "
+			"use."
+		)
+	)
+	receipt_email = models.CharField(
+		max_length=255,
+		help_text=(
+			"Email address that the receipt for the resulting payment will be sent to."
+		)
+	)
+	review = models.CharField(
+		max_length=255,
+		help_text=(
+			"ID of the review associated with this PaymentIntent, if any."
+		)
+	)
+	# XXX: Should we use EnumField for this one as it is similar to SetupIntent.usage where we have same
+	# options `on_session` and `off_session` ?
+	setup_future_usage = StripeEnumField(
+		enum=enums.IntentUsage,
+		default=enums.IntentUsage.off_session,
+		help_text=(
+			"Indicates that you intend to make future payments with this"
+			"PaymentIntent’s payment method."
+			"If present, the payment method used with this PaymentIntent can"
+			"be attached to a Customer, even after the transaction completes."
+			"Use `on_session` if you intend to only reuse the payment method"
+			"when your customer is present in your checkout flow. Use `off_session`"
+			"if your customer may or may not be in your checkout flow."
+			"Stripe uses `setup_future_usage` to dynamically optimize your payment flow and"
+			"comply with regional legislation and network rules. For example,"
+			"if your customer is impacted by SCA, using `off_session` will"
+			"ensure that they are authenticated while processing this PaymentIntent."
+			"You will then be able to make later off-session payments for this customer."
+		)
+	)
+	shipping = JSONField(
+		null=True,
+		blank=True,
+		help_text=(
+			"Shipping information for this PaymentIntent."
+		)
+	)
+	statement_descriptor = models.CharField(
+		max_length=255,
+		null=True,
+		blank=True,
+		help_text=(
+			"Extra information about a PaymentIntent. This will appear on your customer’s "
+			"statement when this PaymentIntent succeeds in creating a charge."
+		)
+	)
+	status = StripeEnumField(
+		enum=enums.PaymentIntentStatus,
+		help_text=(
+			"Status of this PaymentIntent, one of requires_payment_method, requires_confirmation, "
+			"requires_action, processing, requires_capture, canceled, or succeeded. "
+			"You can read more about PaymentIntent statuses here."
+		)
+	)
+	transfer_data = JSONField(
+		null=True,
+		blank=True,
+		help_text=(
+			"The data with which to automatically create a Transfer when the payment is finalized. "
+			"See the PaymentIntents Connect usage guide for details."
+		)
+	)
+	transfer_group = models.CharField(
+		max_length=255,
+		help_text=(
+			"A string that identifies the resulting payment as part of a group. See the "
+			"PaymentIntents Connect usage guide for details."
+		)
+	)
+
+	def update(self, api_key=None, **kwargs):
+		"""
+		Call the stripe API's modify operation for this model
+
+		:param api_key: The api key to use for this request. Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+		:type api_key: string
+		"""
+		api_key = api_key or self.default_api_key
+
+		return self.api_retrieve(api_key=api_key).modify(**kwargs)
+
+	def _api_cancel(self, api_key=None, **kwargs):
+		"""
+		Call the stripe API's cancel operation for this model
+
+		:param api_key: The api key to use for this request. Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+		:type api_key: string
+		"""
+		api_key = api_key or self.default_api_key
+
+		return self.api_retrieve(api_key=api_key).cancel(**kwargs)
+
+	def _api_confirm(self, api_key=None, **kwargs):
+		"""
+		Call the stripe API's confirm operation for this model.
+
+		Confirm that your customer intends to pay with current or
+		provided payment method. Upon confirmation, the PaymentIntent
+		will attempt to initiate a payment.
+
+		:param api_key: The api key to use for this request. Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+		:type api_key: string
+		"""
+		api_key = api_key or self.default_api_key
+
+		return self.api_retrieve(api_key=api_key).confirm(**kwargs)
+
+
 class Payout(StripeModel):
 	"""
 	A Payout object is created when you receive funds from Stripe, or when you initiate
@@ -1294,7 +1524,7 @@ class Payout(StripeModel):
 		help_text=(
 			"Current status of the payout. "
 			"A payout will be `pending` until it is submitted to the bank, at which point it "
-			"becomes `in_transit`. I t will then change to paid if the transaction goes through. "
+			"becomes `in_transit`. It will then change to paid if the transaction goes through. "
 			"If it does not go through successfully, its status will change to `failed` or `canceled`."
 		),
 	)

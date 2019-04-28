@@ -104,7 +104,8 @@ def customer_subscription_webhook_handler(event):
 
 
 @webhooks.handler(
-	"transfer", "charge", "coupon", "invoice", "invoiceitem", "plan", "product", "source"
+	"transfer", "charge", "coupon", "invoice", "invoiceitem", "paymentintent", "paymentmethod", "plan",
+	"product", "source",
 )
 def other_object_webhook_handler(event):
 	"""Handle updates to transfer, charge, invoice, invoiceitem, plan, product and source objects.
@@ -117,6 +118,8 @@ def other_object_webhook_handler(event):
 	- plan: https://stripe.com/docs/api#plans
 	- product: https://stripe.com/docs/api#products
 	- source: https://stripe.com/docs/api#sources
+	- payment_method: https://stripe.com/docs/api/payment_methods
+	- payment_intent: https://stripe.com/docs/api/payment_intents
 	"""
 
 	if event.parts[:2] == ["charge", "dispute"]:
@@ -129,6 +132,8 @@ def other_object_webhook_handler(event):
 			"coupon": models.Coupon,
 			"invoice": models.Invoice,
 			"invoiceitem": models.InvoiceItem,
+			"paymentintent": models.PaymentIntent,
+			"paymentmethod": models.PaymentMethod,
 			"plan": models.Plan,
 			"product": models.Product,
 			"transfer": models.Transfer,

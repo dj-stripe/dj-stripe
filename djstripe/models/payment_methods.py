@@ -228,8 +228,8 @@ class Card(StripeModel):
 		# OVERRIDING the parent version of this function
 		# Cards must be manipulated through a customer or account.
 		# TODO: When managed accounts are supported, this method needs to
-		# check if either a customer or account is supplied to determine
-		# the correct object to use.
+		# 	check if either a customer or account is supplied to determine
+		# 	the correct object to use.
 
 		customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
 
@@ -240,8 +240,8 @@ class Card(StripeModel):
 		# OVERRIDING the parent version of this function
 		# Cards must be manipulated through a customer or account.
 		# TODO: When managed accounts are supported, this method needs to
-		# check if either a customer or account is supplied to determine
-		# the correct object to use.
+		# 	check if either a customer or account is supplied to determine
+		# 	the correct object to use.
 
 		customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
 
@@ -455,3 +455,52 @@ class Source(StripeModel):
 			# https://github.com/stripe/stripe-python/issues/376
 			self.sync_from_stripe_data(self.api_retrieve())
 			return False
+
+
+class PaymentMethod(StripeModel):
+	"""
+	Stripe documentation: https://stripe.com/docs/api#payment_methods
+	"""
+
+	billing_details = JSONField(
+		help_text=(
+			"Billing information associated with the PaymentMethod that may be used or "
+			"required by particular types of payment methods."
+		)
+	)
+
+	card = JSONField(
+		help_text=(
+			"If this is a card PaymentMethod, this hash contains details about the card."
+		)
+	)
+
+	card_present = JSONField(
+		help_text=(
+			"If this is an card_present PaymentMethod, this hash contains details about "
+			"the Card Present payment method."
+		)
+	)
+
+	customer = models.ForeignKey(
+		"Customer", on_delete=models.SET_NULL, null=True, blank=True, related_name="payment_methods"
+	)
+
+	type = models.CharField(
+		max_length=255,
+		null=True,
+		blank=True,
+		help_text=(
+			"The type of the PaymentMethod. An additional hash is included on the PaymentMethod"
+			"with a name matching this value. It contains additional information specific to the"
+			"PaymentMethod type."
+		)
+	)
+
+	stripe_class = stripe.PaymentMethod
+	stripe_dashboard_item_name = "payment methods"
+
+	@classmethod
+	def attach(cls, payment_method_id, stripe_customer):
+		stripe_payment_method = stripe.PaymentMethod.attach(payment_method_id, customer=stripe_customer.id)
+		return cls._create_from_stripe_object(stripe_payment_method)
