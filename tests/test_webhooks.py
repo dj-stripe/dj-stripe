@@ -169,7 +169,7 @@ class TestWebhook(TestCase):
 		self.assertEqual(resp.status_code, 400)
 		self.assertEqual(WebhookEventTrigger.objects.count(), 0)
 
-	def test_webhook_no_remote_addr(self):
+	def test_webhook_remote_addr_is_none(self):
 		self.assertEqual(WebhookEventTrigger.objects.count(), 0)
 		with warnings.catch_warnings():
 			warnings.simplefilter("ignore")
@@ -179,6 +179,22 @@ class TestWebhook(TestCase):
 				content_type="application/json",
 				HTTP_STRIPE_SIGNATURE="PLACEHOLDER",
 				REMOTE_ADDR=None,
+			)
+
+		self.assertEqual(WebhookEventTrigger.objects.count(), 1)
+		event_trigger = WebhookEventTrigger.objects.first()
+		self.assertEqual(event_trigger.remote_ip, "0.0.0.0")
+
+	def test_webhook_remote_addr_is_empty_string(self):
+		self.assertEqual(WebhookEventTrigger.objects.count(), 0)
+		with warnings.catch_warnings():
+			warnings.simplefilter("ignore")
+			Client().post(
+				reverse("djstripe:webhook"),
+				"{}",
+				content_type="application/json",
+				HTTP_STRIPE_SIGNATURE="PLACEHOLDER",
+				REMOTE_ADDR="",
 			)
 
 		self.assertEqual(WebhookEventTrigger.objects.count(), 1)
