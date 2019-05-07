@@ -80,7 +80,7 @@ class WebhookEventTrigger(models.Model):
 			body = "(error decoding body)"
 
 		ip = request.META.get("REMOTE_ADDR")
-		if ip is None:
+		if not ip:
 			warnings.warn(
 				"Could not determine remote IP (missing REMOTE_ADDR). "
 				"This is likely an issue with your wsgi/server setup."
