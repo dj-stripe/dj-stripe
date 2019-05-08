@@ -7,6 +7,7 @@ Updated to API VERSION 2016-03-07 with bogus fields.
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import logging
+import sys
 from copy import deepcopy
 from datetime import datetime
 
@@ -18,6 +19,23 @@ from djstripe.webhooks import TEST_EVENT_ID
 logger = logging.getLogger(__name__)
 
 FUTURE_DATE = datetime(2100, 4, 30, tzinfo=timezone.utc)
+
+
+# Flags for various bugs with mock autospec
+# These can be removed once we drop support for the affected python versions
+
+# Don't try and use autospec=True on staticmethods on <py39
+# TODO - enable for appropriate minor versions of py3.7/3.8 once this is live
+# see https://bugs.python.org/issue23078
+IS_STATICMETHOD_AUTOSPEC_SUPPORTED = sys.version_info >= (3, 9)
+
+# Don't try and use autospec=True with assert_called etc on py3.5
+# see https://bugs.python.org/issue28380
+IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED = sys.version_info >= (3, 6)
+
+# Don't try and use autospec=True for functions that have a exception side-effect on py3.4
+# see https://bugs.python.org/issue23661
+IS_EXCEPTION_AUTOSPEC_SUPPORTED = sys.version_info >= (3, 5)
 
 
 class AssertStripeFksMixin:

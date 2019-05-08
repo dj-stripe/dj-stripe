@@ -21,7 +21,9 @@ from djstripe.utils import (
 	get_supported_currency_choices, subscriber_has_active_subscription
 )
 
-from . import FAKE_CUSTOMER, FAKE_PRODUCT, FAKE_SUBSCRIPTION
+from . import (
+	FAKE_CUSTOMER, FAKE_PRODUCT, FAKE_SUBSCRIPTION, IS_STATICMETHOD_AUTOSPEC_SUPPORTED
+)
 from .apps.testapp.models import Organization
 
 TZ_IS_UTC = time.tzname == ("UTC", "UTC")
@@ -52,7 +54,7 @@ class TestUserHasActiveSubscription(TestCase):
 	def test_user_has_inactive_subscription(self):
 		self.assertFalse(subscriber_has_active_subscription(self.user))
 
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_user_has_active_subscription(self, product_retrieve_mock):
 		subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
 		subscription.current_period_end = timezone.now() + timezone.timedelta(days=10)
@@ -100,7 +102,11 @@ class TestGetSupportedCurrencyChoices(TestCase):
 		"stripe.CountrySpec.retrieve",
 		return_value={"supported_payment_currencies": ["usd", "cad", "eur"]},
 	)
-	@patch("stripe.Account.retrieve", return_value={"country": "US"})
+	@patch(
+		"stripe.Account.retrieve",
+		return_value={"country": "US"},
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
 	def test_get_choices(
 		self, stripe_account_retrieve_mock, stripe_countryspec_retrieve_mock
 	):

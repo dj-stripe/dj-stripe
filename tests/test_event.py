@@ -107,7 +107,7 @@ class EventTest(TestCase):
 	# Helpers
 	#
 
-	@patch("stripe.Event.retrieve")
+	@patch("stripe.Event.retrieve", autospec=True)
 	def _create_event(self, event_data, event_retrieve_mock):
 		event_data = deepcopy(event_data)
 		event_retrieve_mock.return_value = event_data

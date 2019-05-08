@@ -50,8 +50,8 @@ class TestSubscriptionPaymentRequired(TestCase):
 		response = self.test_view(request)
 		self.assertEqual(response.status_code, 302)
 
-	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_user_active_subscription(self, product_retrieve_mock, plan_retrieve_mock):
 		user = get_user_model().objects.create_user(
 			username="pydanny", email="pydanny@gmail.com"

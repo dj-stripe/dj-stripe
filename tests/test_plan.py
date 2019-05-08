@@ -27,13 +27,15 @@ class TestPlanAdmin(TestCase):
 		pass
 
 	def setUp(self):
-		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+		with patch(
+			"stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+		):
 			self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
 		self.site = AdminSite()
 		self.plan_admin = PlanAdmin(Plan, self.site)
 
-	@patch("stripe.Plan.retrieve")
+	@patch("stripe.Plan.retrieve", autospec=True)
 	def test_update_name(self, plan_retrieve_mock):
 		new_name = "Updated Plan Name"
 
@@ -43,8 +45,8 @@ class TestPlanAdmin(TestCase):
 		# Would throw DoesNotExist if it didn't work
 		Plan.objects.get(name="Updated Plan Name")
 
-	@patch("stripe.Plan.create", return_value=FAKE_PLAN_II)
-	@patch("stripe.Plan.retrieve")
+	@patch("stripe.Plan.create", return_value=FAKE_PLAN_II, autospec=True)
+	@patch("stripe.Plan.retrieve", autospec=True)
 	def test_that_admin_save_does_create_new_object(
 		self, plan_retrieve_mock, plan_create_mock
 	):
@@ -60,8 +62,8 @@ class TestPlanAdmin(TestCase):
 		# Would throw DoesNotExist if it didn't work
 		Plan.objects.get(id=plan_data["id"])
 
-	@patch("stripe.Plan.create")
-	@patch("stripe.Plan.retrieve")
+	@patch("stripe.Plan.create", autospec=True)
+	@patch("stripe.Plan.retrieve", autospec=True)
 	def test_that_admin_save_does_update_object(
 		self, plan_retrieve_mock, plan_create_mock
 	):
@@ -77,11 +79,13 @@ class TestPlanAdmin(TestCase):
 
 class PlanCreateTest(AssertStripeFksMixin, TestCase):
 	def setUp(self):
-		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+		with patch(
+			"stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+		):
 			self.stripe_product = Product(id=FAKE_PRODUCT["id"]).api_retrieve()
 
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
-	@patch("stripe.Plan.create", return_value=deepcopy(FAKE_PLAN))
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
+	@patch("stripe.Plan.create", return_value=deepcopy(FAKE_PLAN), autospec=True)
 	def test_create_from_product_id(self, plan_create_mock, product_retrieve_mock):
 		fake_plan = deepcopy(FAKE_PLAN)
 		fake_plan["amount"] = fake_plan["amount"] / 100
@@ -96,8 +100,8 @@ class PlanCreateTest(AssertStripeFksMixin, TestCase):
 
 		self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
 
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
-	@patch("stripe.Plan.create", return_value=deepcopy(FAKE_PLAN))
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
+	@patch("stripe.Plan.create", return_value=deepcopy(FAKE_PLAN), autospec=True)
 	def test_create_from_stripe_product(self, plan_create_mock, product_retrieve_mock):
 		fake_plan = deepcopy(FAKE_PLAN)
 		fake_plan["product"] = self.stripe_product
@@ -115,8 +119,8 @@ class PlanCreateTest(AssertStripeFksMixin, TestCase):
 
 		self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
 
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
-	@patch("stripe.Plan.create", return_value=deepcopy(FAKE_PLAN))
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
+	@patch("stripe.Plan.create", return_value=deepcopy(FAKE_PLAN), autospec=True)
 	def test_create_from_djstripe_product(self, plan_create_mock, product_retrieve_mock):
 		fake_plan = deepcopy(FAKE_PLAN)
 		fake_plan["product"] = Product.sync_from_stripe_data(self.stripe_product)
@@ -129,8 +133,8 @@ class PlanCreateTest(AssertStripeFksMixin, TestCase):
 
 		self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
 
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
-	@patch("stripe.Plan.create", return_value=deepcopy(FAKE_PLAN))
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
+	@patch("stripe.Plan.create", return_value=deepcopy(FAKE_PLAN), autospec=True)
 	def test_create_with_metadata(self, plan_create_mock, product_retrieve_mock):
 		metadata = {"other_data": "more_data"}
 		fake_plan = deepcopy(FAKE_PLAN)
@@ -153,13 +157,15 @@ class PlanCreateTest(AssertStripeFksMixin, TestCase):
 class PlanTest(AssertStripeFksMixin, TestCase):
 	def setUp(self):
 		self.plan_data = deepcopy(FAKE_PLAN)
-		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+		with patch(
+			"stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+		):
 			self.plan = Plan.sync_from_stripe_data(self.plan_data)
 
 	def test_str(self):
 		self.assertEqual(str(self.plan), self.plan_data["nickname"])
 
-	@patch("stripe.Plan.retrieve", return_value=FAKE_PLAN)
+	@patch("stripe.Plan.retrieve", return_value=FAKE_PLAN, autospec=True)
 	def test_stripe_plan(self, plan_retrieve_mock):
 		stripe_plan = self.plan.api_retrieve()
 		plan_retrieve_mock.assert_called_once_with(
@@ -171,7 +177,7 @@ class PlanTest(AssertStripeFksMixin, TestCase):
 
 		self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
 
-	@patch("stripe.Product.retrieve")
+	@patch("stripe.Product.retrieve", autospec=True)
 	def test_stripe_plan_null_product(self, product_retrieve_mock):
 		"""
 		assert that plan.Product can be null for backwards compatibility
@@ -185,7 +191,7 @@ class PlanTest(AssertStripeFksMixin, TestCase):
 			plan, expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"}
 		)
 
-	@patch("stripe.Plan.retrieve")
+	@patch("stripe.Plan.retrieve", autospec=True)
 	def test_stripe_tier_plan(self, plan_retrieve_mock):
 		tier_plan_data = deepcopy(FAKE_TIER_PLAN)
 		plan = Plan.sync_from_stripe_data(tier_plan_data)
@@ -195,7 +201,7 @@ class PlanTest(AssertStripeFksMixin, TestCase):
 
 		self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
 
-	@patch("stripe.Plan.retrieve")
+	@patch("stripe.Plan.retrieve", autospec=True)
 	def test_stripe_metered_plan(self, plan_retrieve_mock):
 		plan_data = deepcopy(FAKE_PLAN_METERED)
 		plan = Plan.sync_from_stripe_data(plan_data)

@@ -36,11 +36,13 @@ class TestPaymentsContextMixin(TestCase):
 
 class TestSubscriptionMixin(TestCase):
 	def setUp(self):
-		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+		with patch(
+			"stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+		):
 			Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 			Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN_II))
 
-	@patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER))
+	@patch("stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER), autospec=True)
 	def test_get_context_data(self, stripe_create_customer_mock):
 		class TestSuperView(object):
 			def get_context_data(self):

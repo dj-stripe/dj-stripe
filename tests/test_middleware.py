@@ -102,7 +102,9 @@ class MiddlewareLogicTest(TestCase):
 		self.customer.subscriber = self.user
 		self.customer.save()
 
-		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+		with patch(
+			"stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+		):
 			self.subscription = Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
 
 		self.middleware = SubscriptionPaymentMiddleware()
