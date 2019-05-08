@@ -9,12 +9,15 @@ from django.test.testcases import TestCase
 from djstripe.models import Account
 from djstripe.settings import STRIPE_SECRET_KEY
 
-from . import FAKE_ACCOUNT, FAKE_FILEUPLOAD, AssertStripeFksMixin
+from . import (
+	FAKE_ACCOUNT, FAKE_FILEUPLOAD,
+	IS_STATICMETHOD_AUTOSPEC_SUPPORTED, AssertStripeFksMixin
+)
 
 
 class TestAccount(AssertStripeFksMixin, TestCase):
-	@patch("stripe.Account.retrieve")
-	@patch("stripe.File.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD))
+	@patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
+	@patch("stripe.File.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD), autospec=True)
 	def test_get_connected_account_from_token(
 		self, fileupload_retrieve_mock, account_retrieve_mock
 	):
@@ -26,8 +29,10 @@ class TestAccount(AssertStripeFksMixin, TestCase):
 
 		self.assert_fks(account, expected_blank_fks={})
 
-	@patch("stripe.Account.retrieve")
-	@patch("stripe.FileUpload.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD))
+	@patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
+	@patch(
+		"stripe.FileUpload.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD), autospec=True
+	)
 	def test_get_default_account(self, fileupload_retrieve_mock, account_retrieve_mock):
 		account_retrieve_mock.return_value = FAKE_ACCOUNT
 
@@ -37,8 +42,10 @@ class TestAccount(AssertStripeFksMixin, TestCase):
 
 		self.assert_fks(account, expected_blank_fks={})
 
-	@patch("stripe.Account.retrieve")
-	@patch("stripe.FileUpload.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD))
+	@patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
+	@patch(
+		"stripe.FileUpload.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD), autospec=True
+	)
 	def test_get_default_account_null_logo(
 		self, fileupload_retrieve_mock, account_retrieve_mock
 	):

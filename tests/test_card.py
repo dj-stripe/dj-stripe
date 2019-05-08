@@ -56,7 +56,7 @@ class CardTest(AssertStripeFksMixin, TestCase):
 
 		self.assert_fks(card, expected_blank_fks={"djstripe.Customer.coupon"})
 
-	@patch("stripe.Token.create")
+	@patch("stripe.Token.create", autospec=True)
 	def test_card_create_token(self, token_create_mock):
 		card = {"number": "4242", "exp_month": 5, "exp_year": 2012, "cvc": 445}
 		Card.create_token(**card)
@@ -81,15 +81,15 @@ class CardTest(AssertStripeFksMixin, TestCase):
 		with self.assertRaisesMessage(StripeObjectManipulationException, exception_message):
 			Card.api_list(customer="fish")
 
-	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True)
 	def test_api_create(self, customer_retrieve_mock):
 		stripe_card = Card._api_create(customer=self.customer, source=FAKE_CARD["id"])
 
 		self.assertEqual(FAKE_CARD, stripe_card)
 
-	@patch("tests.CardDict.delete")
-	@patch("stripe.Card.retrieve", return_value=deepcopy(FAKE_CARD))
-	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+	@patch("tests.CardDict.delete", autospec=True)
+	@patch("stripe.Card.retrieve", return_value=deepcopy(FAKE_CARD), autospec=True)
+	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True)
 	def test_remove(self, customer_retrieve_mock, card_retrieve_mock, card_delete_mock):
 		stripe_card = Card._api_create(customer=self.customer, source=FAKE_CARD["id"])
 		Card.sync_from_stripe_data(stripe_card)
@@ -102,7 +102,7 @@ class CardTest(AssertStripeFksMixin, TestCase):
 		self.assertEqual(0, self.customer.legacy_cards.count())
 		self.assertTrue(card_delete_mock.called)
 
-	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True)
 	def test_remove_already_deleted_card(self, customer_retrieve_mock):
 		stripe_card = Card._api_create(customer=self.customer, source=FAKE_CARD["id"])
 		Card.sync_from_stripe_data(stripe_card)
@@ -114,8 +114,8 @@ class CardTest(AssertStripeFksMixin, TestCase):
 		card_object.remove()
 		self.assertEqual(self.customer.legacy_cards.count(), 0)
 
-	@patch("djstripe.models.Card._api_delete")
-	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+	@patch("djstripe.models.Card._api_delete", autospec=True)
+	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True)
 	def test_remove_no_such_source(self, customer_retrieve_mock, card_delete_mock):
 		stripe_card = Card._api_create(customer=self.customer, source=FAKE_CARD["id"])
 		Card.sync_from_stripe_data(stripe_card)
@@ -130,8 +130,8 @@ class CardTest(AssertStripeFksMixin, TestCase):
 		self.assertEqual(0, self.customer.legacy_cards.count())
 		self.assertTrue(card_delete_mock.called)
 
-	@patch("djstripe.models.Card._api_delete")
-	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+	@patch("djstripe.models.Card._api_delete", autospec=True)
+	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True)
 	def test_remove_no_such_customer(self, customer_retrieve_mock, card_delete_mock):
 		stripe_card = Card._api_create(customer=self.customer, source=FAKE_CARD["id"])
 		Card.sync_from_stripe_data(stripe_card)
@@ -146,8 +146,8 @@ class CardTest(AssertStripeFksMixin, TestCase):
 		self.assertEqual(0, self.customer.legacy_cards.count())
 		self.assertTrue(card_delete_mock.called)
 
-	@patch("djstripe.models.Card._api_delete")
-	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+	@patch("djstripe.models.Card._api_delete", autospec=True)
+	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True)
 	def test_remove_unexpected_exception(self, customer_retrieve_mock, card_delete_mock):
 		stripe_card = Card._api_create(customer=self.customer, source=FAKE_CARD["id"])
 		Card.sync_from_stripe_data(stripe_card)
@@ -161,7 +161,7 @@ class CardTest(AssertStripeFksMixin, TestCase):
 		with self.assertRaisesMessage(InvalidRequestError, "Unexpected Exception"):
 			card.remove()
 
-	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER))
+	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True)
 	def test_api_list(self, customer_retrieve_mock):
 		card_list = Card.api_list(customer=self.customer)
 

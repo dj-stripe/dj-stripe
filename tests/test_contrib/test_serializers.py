@@ -30,7 +30,9 @@ class SubscriptionSerializerTest(TestCase):
 		)
 		self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
-		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+		with patch(
+			"stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+		):
 			self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
 	def test_valid_serializer(self):
@@ -65,7 +67,7 @@ class SubscriptionSerializerTest(TestCase):
 		)
 		self.assertEqual(serializer.errors, {})
 
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_invalid_serializer(self, product_retrieve_mock):
 		now = timezone.now()
 		serializer = SubscriptionSerializer(
@@ -86,10 +88,14 @@ class SubscriptionSerializerTest(TestCase):
 
 class CreateSubscriptionSerializerTest(TestCase):
 	def setUp(self):
-		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+		with patch(
+			"stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+		):
 			self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
-	@patch("stripe.Token.create", return_value=PropertyMock(id="token_test"))
+	@patch(
+		"stripe.Token.create", return_value=PropertyMock(id="token_test"), autospec=True
+	)
 	def test_valid_serializer(self, stripe_token_mock):
 		token = stripe_token_mock(card={})
 		serializer = CreateSubscriptionSerializer(
@@ -100,7 +106,9 @@ class CreateSubscriptionSerializerTest(TestCase):
 		self.assertIn("stripe_token", serializer.validated_data)
 		self.assertEqual(serializer.errors, {})
 
-	@patch("stripe.Token.create", return_value=PropertyMock(id="token_test"))
+	@patch(
+		"stripe.Token.create", return_value=PropertyMock(id="token_test"), autospec=True
+	)
 	def test_valid_serializer_non_required_fields(self, stripe_token_mock):
 		"""Test the CreateSubscriptionSerializer is_valid method."""
 		token = stripe_token_mock(card={})

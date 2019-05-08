@@ -13,7 +13,8 @@ from djstripe.settings import STRIPE_SECRET_KEY
 
 from . import (
 	FAKE_CHARGE, FAKE_CUSTOMER, FAKE_INVOICE, FAKE_INVOICEITEM_II, FAKE_PLAN, FAKE_PRODUCT,
-	FAKE_SUBSCRIPTION, FAKE_UPCOMING_INVOICE, AssertStripeFksMixin, default_account
+	FAKE_SUBSCRIPTION, FAKE_UPCOMING_INVOICE, IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
+	IS_STATICMETHOD_AUTOSPEC_SUPPORTED, AssertStripeFksMixin, default_account
 )
 
 
@@ -25,10 +26,17 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 		)
 		self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
-	@patch("djstripe.models.Account.get_default_account")
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch(
+		"djstripe.models.Account.get_default_account",
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_str(
 		self,
 		product_retrieve_mock,
@@ -53,11 +61,18 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 			},
 		)
 
-	@patch("stripe.Invoice.retrieve")
-	@patch("djstripe.models.Account.get_default_account")
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch("stripe.Invoice.retrieve", autospec=True)
+	@patch(
+		"djstripe.models.Account.get_default_account",
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_retry_true(
 		self,
 		product_retrieve_mock,
@@ -90,11 +105,18 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 			},
 		)
 
-	@patch("stripe.Invoice.retrieve")
-	@patch("djstripe.models.Account.get_default_account")
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch("stripe.Invoice.retrieve", autospec=True)
+	@patch(
+		"djstripe.models.Account.get_default_account",
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_retry_false(
 		self,
 		product_retrieve_mock,
@@ -124,10 +146,17 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 			},
 		)
 
-	@patch("djstripe.models.Account.get_default_account")
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch(
+		"djstripe.models.Account.get_default_account",
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_status_paid(
 		self,
 		product_retrieve_mock,
@@ -151,10 +180,17 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 			},
 		)
 
-	@patch("djstripe.models.Account.get_default_account")
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch(
+		"djstripe.models.Account.get_default_account",
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_status_open(
 		self,
 		product_retrieve_mock,
@@ -180,10 +216,17 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 			},
 		)
 
-	@patch("djstripe.models.Account.get_default_account")
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch(
+		"djstripe.models.Account.get_default_account",
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_status_forgiven(
 		self,
 		product_retrieve_mock,
@@ -209,10 +252,17 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 			},
 		)
 
-	@patch("djstripe.models.Account.get_default_account")
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch(
+		"djstripe.models.Account.get_default_account",
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_status_forgiven_deprecated(
 		self,
 		product_retrieve_mock,
@@ -231,10 +281,17 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
 		self.assertEqual(Invoice.STATUS_FORGIVEN, invoice.status)
 
-	@patch("djstripe.models.Account.get_default_account")
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch(
+		"djstripe.models.Account.get_default_account",
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_status_forgiven_default(
 		self,
 		product_retrieve_mock,
@@ -252,10 +309,17 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
 		self.assertEqual(Invoice.STATUS_OPEN, invoice.status)
 
-	@patch("djstripe.models.Account.get_default_account")
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch(
+		"djstripe.models.Account.get_default_account",
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_status_closed(
 		self,
 		product_retrieve_mock,
@@ -281,10 +345,17 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 			},
 		)
 
-	@patch("djstripe.models.Account.get_default_account")
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch(
+		"djstripe.models.Account.get_default_account",
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_status_closed_deprecated(
 		self,
 		product_retrieve_mock,
@@ -303,10 +374,17 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
 		self.assertEqual(Invoice.STATUS_CLOSED, invoice.status)
 
-	@patch("djstripe.models.Account.get_default_account")
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch(
+		"djstripe.models.Account.get_default_account",
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_status_closed_default(
 		self,
 		product_retrieve_mock,
@@ -325,11 +403,22 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
 		self.assertEqual(Invoice.STATUS_OPEN, invoice.status)
 
-	@patch("djstripe.models.Account.get_default_account")
-	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch(
+		"djstripe.models.Account.get_default_account",
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Plan.retrieve",
+		return_value=deepcopy(FAKE_PLAN),
+		autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
+	)
+	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_sync_no_subscription(
 		self,
 		product_retrieve_mock,
@@ -364,10 +453,17 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 			},
 		)
 
-	@patch("djstripe.models.Account.get_default_account")
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch(
+		"djstripe.models.Account.get_default_account",
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_invoice_with_subscription_invoice_items(
 		self,
 		product_retrieve_mock,
@@ -397,10 +493,17 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 			},
 		)
 
-	@patch("djstripe.models.Account.get_default_account")
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch(
+		"djstripe.models.Account.get_default_account",
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_invoice_with_no_invoice_items(
 		self,
 		product_retrieve_mock,
@@ -427,10 +530,17 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 			},
 		)
 
-	@patch("djstripe.models.Account.get_default_account")
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch(
+		"djstripe.models.Account.get_default_account",
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_invoice_with_non_subscription_invoice_items(
 		self,
 		product_retrieve_mock,
@@ -458,10 +568,17 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 			},
 		)
 
-	@patch("djstripe.models.Account.get_default_account")
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch(
+		"djstripe.models.Account.get_default_account",
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_invoice_plan_from_invoice_items(
 		self,
 		product_retrieve_mock,
@@ -487,10 +604,17 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 			},
 		)
 
-	@patch("djstripe.models.Account.get_default_account")
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch(
+		"djstripe.models.Account.get_default_account",
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_invoice_plan_from_subscription(
 		self,
 		product_retrieve_mock,
@@ -516,9 +640,16 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 			},
 		)
 
-	@patch("djstripe.models.Account.get_default_account")
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE))
+	@patch(
+		"djstripe.models.Account.get_default_account",
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
 	def test_invoice_without_plan(
 		self, charge_retrieve_mock, subscription_retrieve_mock, default_account_mock
 	):
@@ -542,10 +673,22 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 			},
 		)
 
-	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Invoice.upcoming", return_value=deepcopy(FAKE_UPCOMING_INVOICE))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch(
+		"stripe.Plan.retrieve",
+		return_value=deepcopy(FAKE_PLAN),
+		autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch(
+		"stripe.Invoice.upcoming",
+		return_value=deepcopy(FAKE_UPCOMING_INVOICE),
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_upcoming_invoice(
 		self,
 		product_retrieve_mock,
@@ -580,10 +723,18 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 		self.assertEqual(0, len(items))
 		self.assertIsNotNone(invoice.plan)
 
-	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Invoice.upcoming", return_value=deepcopy(FAKE_UPCOMING_INVOICE))
+	@patch("stripe.Plan.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch(
+		"stripe.Invoice.upcoming",
+		return_value=deepcopy(FAKE_UPCOMING_INVOICE),
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
 	def test_upcoming_invoice_with_subscription(
 		self,
 		invoice_upcoming_mock,
@@ -604,10 +755,18 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 		self.assertIsNotNone(invoice.plan)
 		self.assertEqual(FAKE_PLAN["id"], invoice.plan.id)
 
-	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN))
-	@patch("stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION))
-	@patch("stripe.Invoice.upcoming", return_value=deepcopy(FAKE_UPCOMING_INVOICE))
-	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT))
+	@patch("stripe.Plan.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
+	@patch(
+		"stripe.Subscription.retrieve",
+		return_value=deepcopy(FAKE_SUBSCRIPTION),
+		autospec=True,
+	)
+	@patch(
+		"stripe.Invoice.upcoming",
+		return_value=deepcopy(FAKE_UPCOMING_INVOICE),
+		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_upcoming_invoice_with_subscription_plan(
 		self,
 		product_retrieve_mock,

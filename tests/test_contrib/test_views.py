@@ -98,7 +98,9 @@ class RestSubscriptionTest(APITestCase):
 
 		Should return the correct data.
 		"""
-		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+		with patch(
+			"stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+		):
 			plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 		subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
 
@@ -110,7 +112,7 @@ class RestSubscriptionTest(APITestCase):
 			response.data["cancel_at_period_end"], subscription.cancel_at_period_end
 		)
 
-	@patch("djstripe.models.Subscription.cancel")
+	@patch("djstripe.models.Subscription.cancel", autospec=True)
 	def test_cancel_subscription(self, cancel_subscription_mock):
 		"""Test a DELETE to the SubscriptionRestView.
 
@@ -127,7 +129,9 @@ class RestSubscriptionTest(APITestCase):
 
 		fake_cancelled_subscription = deepcopy(FAKE_SUBSCRIPTION)
 
-		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+		with patch(
+			"stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+		):
 			Subscription.sync_from_stripe_data(fake_cancelled_subscription)
 
 		cancel_subscription_mock.side_effect = _cancel_sub
@@ -143,7 +147,8 @@ class RestSubscriptionTest(APITestCase):
 		self.assertEqual(Subscription.objects.first().status, SubscriptionStatus.canceled)
 
 		cancel_subscription_mock.assert_called_once_with(
-			at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END
+			Subscription.objects.first(),
+			at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END,
 		)
 		self.assertTrue(self.user.is_authenticated)
 

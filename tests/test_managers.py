@@ -27,7 +27,9 @@ class SubscriptionManagerTest(TestCase):
 			2013, 1, 1, 0, 0, 1, tzinfo=timezone.utc
 		)  # more realistic start
 
-		with patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT)):
+		with patch(
+			"stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+		):
 			self.plan = Plan.sync_from_stripe_data(FAKE_PLAN)
 			self.plan2 = Plan.sync_from_stripe_data(FAKE_PLAN_II)
 
