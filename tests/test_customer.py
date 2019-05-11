@@ -362,6 +362,17 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		charge, created = Charge._get_or_create_from_stripe_object(fake_charge_no_invoice)
 		self.assertTrue(created)
 
+		self.assert_fks(
+			charge,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.invoice",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+			},
+		)
+
 		charge.refund()
 
 		refunded_charge, created2 = Charge._get_or_create_from_stripe_object(
@@ -371,6 +382,17 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
 		self.assertEqual(refunded_charge.refunded, True)
 		self.assertEqual(refunded_charge.amount_refunded, decimal.Decimal("22.00"))
+
+		self.assert_fks(
+			refunded_charge,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.invoice",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+			},
+		)
 
 	@patch(
 		"djstripe.models.Account.get_default_account",
@@ -390,9 +412,31 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		charge, created = Charge._get_or_create_from_stripe_object(fake_charge_no_invoice)
 		self.assertTrue(created)
 
+		self.assert_fks(
+			charge,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.invoice",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+			},
+		)
+
 		refunded_charge = charge.refund()
 		self.assertEqual(refunded_charge.refunded, True)
 		self.assertEqual(refunded_charge.amount_refunded, decimal.Decimal("22.00"))
+
+		self.assert_fks(
+			refunded_charge,
+			expected_blank_fks={
+				"djstripe.Account.business_logo",
+				"djstripe.Charge.dispute",
+				"djstripe.Charge.invoice",
+				"djstripe.Charge.transfer",
+				"djstripe.Customer.coupon",
+			},
+		)
 
 	def test_calculate_refund_amount_full_refund(self):
 		charge = Charge(
