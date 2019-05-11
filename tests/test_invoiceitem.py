@@ -10,8 +10,8 @@ from djstripe.models import InvoiceItem
 from djstripe.settings import STRIPE_SECRET_KEY
 
 from . import (
-	FAKE_CHARGE_II, FAKE_CUSTOMER_II, FAKE_INVOICE_II, FAKE_INVOICEITEM,
-	FAKE_PLAN_II, FAKE_PRODUCT, FAKE_SUBSCRIPTION_III,
+	FAKE_BALANCE_TRANSACTION, FAKE_CHARGE_II, FAKE_CUSTOMER_II, FAKE_INVOICE_II,
+	FAKE_INVOICEITEM, FAKE_PLAN_II, FAKE_PRODUCT, FAKE_SUBSCRIPTION_III,
 	IS_STATICMETHOD_AUTOSPEC_SUPPORTED, AssertStripeFksMixin, default_account
 )
 
@@ -23,6 +23,11 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 	@patch(
 		"djstripe.models.Account.get_default_account",
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
 	)
 	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	@patch(
@@ -44,6 +49,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 		customer_retrieve_mock,
 		subscription_retrieve_mock,
 		product_retrieve_mock,
+		balance_transaction_retrieve_mock,
 		default_account_mock,
 	):
 		default_account_mock.return_value = self.account
@@ -67,6 +73,11 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 		"djstripe.models.Account.get_default_account",
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
+	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
+	)
 	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	@patch(
 		"stripe.Subscription.retrieve",
@@ -87,6 +98,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 		customer_retrieve_mock,
 		subscription_retrieve_mock,
 		product_retrieve_mock,
+		balance_transaction_retrieve_mock,
 		default_account_mock,
 	):
 		default_account_mock.return_value = self.account
@@ -119,6 +131,11 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 		"djstripe.models.Account.get_default_account",
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
+	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
+	)
 	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	@patch(
 		"stripe.Subscription.retrieve",
@@ -137,6 +154,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 		customer_retrieve_mock,
 		subscription_retrieve_mock,
 		product_retrieve_mock,
+		balance_transaction_retrieve_mock,
 		default_account_mock,
 	):
 		default_account_mock.return_value = self.account
@@ -171,6 +189,11 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 		"djstripe.models.Account.get_default_account",
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
+	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
+	)
 	@patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN_II), autospec=True)
 	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	@patch(
@@ -193,6 +216,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 		subscription_retrieve_mock,
 		product_retrieve_mock,
 		plan_retrieve_mock,
+		balance_transaction_retrieve_mock,
 		default_account_mock,
 	):
 		default_account_mock.return_value = self.account

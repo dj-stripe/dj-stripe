@@ -14,14 +14,15 @@ from djstripe.models import (
 )
 
 from . import (
-	FAKE_CARD, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_COUPON, FAKE_CUSTOMER,
-	FAKE_CUSTOMER_II, FAKE_DISPUTE, FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED,
-	FAKE_EVENT_CHARGE_SUCCEEDED, FAKE_EVENT_CUSTOMER_CREATED,
-	FAKE_EVENT_CUSTOMER_DELETED, FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED,
-	FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED, FAKE_EVENT_CUSTOMER_SOURCE_CREATED,
-	FAKE_EVENT_CUSTOMER_SOURCE_DELETED, FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE,
-	FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED, FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED,
-	FAKE_EVENT_DISPUTE_CREATED, FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_INVOICE_DELETED,
+	FAKE_BALANCE_TRANSACTION, FAKE_CARD, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_COUPON,
+	FAKE_CUSTOMER, FAKE_CUSTOMER_II, FAKE_DISPUTE,
+	FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED, FAKE_EVENT_CHARGE_SUCCEEDED,
+	FAKE_EVENT_CUSTOMER_CREATED, FAKE_EVENT_CUSTOMER_DELETED,
+	FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED, FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED,
+	FAKE_EVENT_CUSTOMER_SOURCE_CREATED, FAKE_EVENT_CUSTOMER_SOURCE_DELETED,
+	FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE, FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED,
+	FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED, FAKE_EVENT_DISPUTE_CREATED,
+	FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_INVOICE_DELETED,
 	FAKE_EVENT_INVOICE_UPCOMING, FAKE_EVENT_INVOICEITEM_CREATED,
 	FAKE_EVENT_INVOICEITEM_DELETED, FAKE_EVENT_PLAN_CREATED, FAKE_EVENT_PLAN_DELETED,
 	FAKE_EVENT_PLAN_REQUEST_IS_OBJECT, FAKE_EVENT_TRANSFER_CREATED,
@@ -68,6 +69,9 @@ class TestChargeEvents(EventTestCase):
 		"djstripe.models.Account.get_default_account",
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
+	@patch(
+		"stripe.BalanceTransaction.retrieve", return_value=deepcopy(FAKE_BALANCE_TRANSACTION)
+	)
 	@patch("stripe.Charge.retrieve", autospec=True)
 	@patch("stripe.Event.retrieve", autospec=True)
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True)
@@ -84,6 +88,7 @@ class TestChargeEvents(EventTestCase):
 		invoice_retrieve_mock,
 		event_retrieve_mock,
 		charge_retrieve_mock,
+		balance_transaction_retrieve_mock,
 		account_mock,
 	):
 		FAKE_CUSTOMER.create_for_user(self.user)
@@ -311,6 +316,11 @@ class TestInvoiceEvents(EventTestCase):
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
 	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
+	)
+	@patch(
 		"stripe.Subscription.retrieve",
 		return_value=deepcopy(FAKE_SUBSCRIPTION),
 		autospec=True,
@@ -328,6 +338,7 @@ class TestInvoiceEvents(EventTestCase):
 		charge_retrieve_mock,
 		customer_retrieve_mock,
 		subscription_retrieve_mock,
+		balance_transaction_retrieve_mock,
 		default_account_mock,
 	):
 		default_account_mock.return_value = default_account()
@@ -349,6 +360,11 @@ class TestInvoiceEvents(EventTestCase):
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
 	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
+	)
+	@patch(
 		"stripe.Subscription.retrieve",
 		return_value=deepcopy(FAKE_SUBSCRIPTION),
 		autospec=True,
@@ -366,6 +382,7 @@ class TestInvoiceEvents(EventTestCase):
 		charge_retrieve_mock,
 		customer_retrieve_mock,
 		subscription_retrieve_mock,
+		balance_transaction_retrieve_mock,
 		default_account_mock,
 	):
 		default_account_mock.return_value = default_account()
@@ -395,6 +412,11 @@ class TestInvoiceEvents(EventTestCase):
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
 	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
+	)
+	@patch(
 		"stripe.Subscription.retrieve",
 		return_value=deepcopy(FAKE_SUBSCRIPTION),
 		autospec=True,
@@ -408,6 +430,7 @@ class TestInvoiceEvents(EventTestCase):
 		invoice_retrieve_mock,
 		charge_retrieve_mock,
 		subscription_retrieve_mock,
+		balance_transaction_retrieve_mock,
 		default_account_mock,
 	):
 		default_account_mock.return_value = default_account()
@@ -441,6 +464,11 @@ class TestInvoiceItemEvents(EventTestCase):
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
 	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
+	)
+	@patch(
 		"stripe.Subscription.retrieve",
 		return_value=deepcopy(FAKE_SUBSCRIPTION_III),
 		autospec=True,
@@ -460,6 +488,7 @@ class TestInvoiceItemEvents(EventTestCase):
 		invoice_retrieve_mock,
 		charge_retrieve_mock,
 		subscription_retrieve_mock,
+		balance_transaction_retrieve_mock,
 		default_account_mock,
 	):
 		default_account_mock.return_value = default_account()
@@ -488,6 +517,11 @@ class TestInvoiceItemEvents(EventTestCase):
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
 	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
+	)
+	@patch(
 		"stripe.Subscription.retrieve",
 		return_value=deepcopy(FAKE_SUBSCRIPTION_III),
 		autospec=True,
@@ -507,6 +541,7 @@ class TestInvoiceItemEvents(EventTestCase):
 		invoice_retrieve_mock,
 		charge_retrieve_mock,
 		subscription_retrieve_mock,
+		balance_transaction_retrieve_mock,
 		default_account_mock,
 	):
 		default_account_mock.return_value = default_account()
