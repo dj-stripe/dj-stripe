@@ -18,9 +18,9 @@ from djstripe.models import (
 from djstripe.settings import STRIPE_SECRET_KEY
 
 from . import (
-	FAKE_ACCOUNT, FAKE_CARD, FAKE_CARD_V, FAKE_CHARGE, FAKE_COUPON, FAKE_CUSTOMER,
-	FAKE_CUSTOMER_II, FAKE_DISCOUNT_CUSTOMER, FAKE_INVOICE, FAKE_INVOICE_III,
-	FAKE_INVOICEITEM, FAKE_PLAN, FAKE_PRODUCT, FAKE_SUBSCRIPTION,
+	FAKE_ACCOUNT, FAKE_BALANCE_TRANSACTION, FAKE_CARD, FAKE_CARD_V, FAKE_CHARGE,
+	FAKE_COUPON, FAKE_CUSTOMER, FAKE_CUSTOMER_II, FAKE_DISCOUNT_CUSTOMER, FAKE_INVOICE,
+	FAKE_INVOICE_III, FAKE_INVOICEITEM, FAKE_PLAN, FAKE_PRODUCT, FAKE_SUBSCRIPTION,
 	FAKE_SUBSCRIPTION_II, FAKE_UPCOMING_INVOICE, IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
 	IS_EXCEPTION_AUTOSPEC_SUPPORTED, IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	AssertStripeFksMixin, StripeList, datetime_to_unix, default_account
@@ -350,8 +350,15 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		"djstripe.models.Account.get_default_account",
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
+	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
+	)
 	@patch("stripe.Charge.retrieve", autospec=True)
-	def test_refund_charge(self, charge_retrieve_mock, default_account_mock):
+	def test_refund_charge(
+		self, charge_retrieve_mock, balance_transaction_retrieve_mock, default_account_mock
+	):
 		default_account_mock.return_value = self.account
 
 		fake_charge_no_invoice = deepcopy(FAKE_CHARGE)
@@ -398,9 +405,14 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		"djstripe.models.Account.get_default_account",
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
+	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
+	)
 	@patch("stripe.Charge.retrieve", autospec=True)
 	def test_refund_charge_object_returned(
-		self, charge_retrieve_mock, default_account_mock
+		self, charge_retrieve_mock, balance_transaction_retrieve_mock, default_account_mock
 	):
 		default_account_mock.return_value = self.account
 
@@ -464,10 +476,19 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		"djstripe.models.Account.get_default_account",
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
+	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
+	)
 	@patch("stripe.Charge.retrieve", autospec=True)
 	@patch("stripe.Charge.create", autospec=True)
 	def test_charge_converts_dollars_into_cents(
-		self, charge_create_mock, charge_retrieve_mock, default_account_mock
+		self,
+		charge_create_mock,
+		charge_retrieve_mock,
+		balance_transaction_retrieve_mock,
+		default_account_mock,
 	):
 		default_account_mock.return_value = self.account
 
@@ -486,6 +507,11 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		"djstripe.models.Account.get_default_account",
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
+	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
+	)
 	@patch("stripe.Charge.retrieve", autospec=True)
 	@patch("stripe.Charge.create", autospec=True)
 	@patch("stripe.Invoice.retrieve", autospec=True)
@@ -502,6 +528,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		invoice_retrieve_mock,
 		charge_create_mock,
 		charge_retrieve_mock,
+		balance_transaction_retrieve_mock,
 		default_account_mock,
 	):
 		default_account_mock.return_value = self.account
@@ -525,10 +552,19 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		"djstripe.models.Account.get_default_account",
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
+	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
+	)
 	@patch("stripe.Charge.retrieve", autospec=True)
 	@patch("stripe.Charge.create", autospec=True)
 	def test_charge_passes_extra_arguments(
-		self, charge_create_mock, charge_retrieve_mock, default_account_mock
+		self,
+		charge_create_mock,
+		charge_retrieve_mock,
+		balance_transaction_retrieve_mock,
+		default_account_mock,
 	):
 		default_account_mock.return_value = self.account
 
@@ -550,10 +586,19 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		"djstripe.models.Account.get_default_account",
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
+	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
+	)
 	@patch("stripe.Charge.retrieve", autospec=True)
 	@patch("stripe.Charge.create", autospec=True)
 	def test_charge_string_source(
-		self, charge_create_mock, charge_retrieve_mock, default_account_mock
+		self,
+		charge_create_mock,
+		charge_retrieve_mock,
+		balance_transaction_retrieve_mock,
+		default_account_mock,
 	):
 		default_account_mock.return_value = self.account
 
@@ -569,10 +614,19 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		"djstripe.models.Account.get_default_account",
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
+	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
+	)
 	@patch("stripe.Charge.retrieve", autospec=True)
 	@patch("stripe.Charge.create", autospec=True)
 	def test_charge_card_source(
-		self, charge_create_mock, charge_retrieve_mock, default_account_mock
+		self,
+		charge_create_mock,
+		charge_retrieve_mock,
+		balance_transaction_retrieve_mock,
+		default_account_mock,
 	):
 		default_account_mock.return_value = self.account
 
@@ -587,6 +641,11 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 	@patch(
 		"djstripe.models.Account.get_default_account",
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
 	)
 	@patch(
 		"stripe.Subscription.retrieve",
@@ -610,6 +669,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		charge_retrieve_mock,
 		customer_retrieve_mock,
 		subscription_retrive_mock,
+		balance_transaction_retrieve_mock,
 		default_account_mock,
 	):
 		default_account_mock.return_value = self.account
@@ -622,6 +682,11 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 	@patch(
 		"djstripe.models.Account.get_default_account",
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	)
+	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
 	)
 	@patch(
 		"stripe.Subscription.retrieve",
@@ -645,6 +710,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		charge_retrieve_mock,
 		customer_retrieve_mock,
 		subscription_retrieve_mock,
+		balance_transaction_retrieve_mock,
 		default_account_mock,
 	):
 		default_account_mock.return_value = self.account

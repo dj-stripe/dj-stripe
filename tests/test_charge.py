@@ -3,7 +3,7 @@ dj-stripe Charge Model Tests.
 """
 from copy import deepcopy
 from decimal import Decimal
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
@@ -63,7 +63,14 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
 	@patch("stripe.Charge.retrieve", autospec=True)
-	def test_capture_charge(self, charge_retrieve_mock, default_account_mock):
+	@patch(
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
+	)
+	def test_capture_charge(
+		self, balance_transaction_retrieve_mock, charge_retrieve_mock, default_account_mock
+	):
 		default_account_mock.return_value = self.account
 
 		fake_charge_no_invoice = deepcopy(FAKE_CHARGE)
@@ -94,7 +101,9 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED and IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
 	@patch(
-		"stripe.BalanceTransaction.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
 	)
 	@patch("stripe.Charge.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True)
@@ -113,6 +122,8 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		balance_transaction_retrieve_mock,
 		default_account_mock,
 	):
+		from djstripe.settings import STRIPE_SECRET_KEY
+
 		default_account_mock.return_value = self.account
 
 		fake_charge_copy = deepcopy(FAKE_CHARGE)
@@ -132,7 +143,9 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		self.assertEqual(charge.source.type, LegacySourceType.card)
 
 		charge_retrieve_mock.assert_not_called()
-		balance_transaction_retrieve_mock.assert_not_called()
+		balance_transaction_retrieve_mock.assert_called_once_with(
+			api_key=STRIPE_SECRET_KEY, expand=[], id=FAKE_BALANCE_TRANSACTION["id"]
+		)
 
 		self.assert_fks(
 			charge,
@@ -242,7 +255,10 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 	)
 	@patch(
 		"stripe.BalanceTransaction.retrieve",
-		return_value=deepcopy(FAKE_BALANCE_TRANSACTION_REFUND),
+		side_effect=[
+			deepcopy(FAKE_BALANCE_TRANSACTION),
+			deepcopy(FAKE_BALANCE_TRANSACTION_REFUND),
+		],
 	)
 	@patch("stripe.Charge.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True)
@@ -277,8 +293,15 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		self.assertEqual(charge.amount, charge.amount_refunded)
 
 		charge_retrieve_mock.assert_not_called()
-		balance_transaction_retrieve_mock.assert_called_once_with(
-			api_key=STRIPE_SECRET_KEY, expand=[], id=FAKE_BALANCE_TRANSACTION_REFUND["id"]
+
+		# We expect two calls - for charge and then for charge.refunds
+		balance_transaction_retrieve_mock.assert_has_calls(
+			[
+				call(api_key=STRIPE_SECRET_KEY, expand=[], id=FAKE_BALANCE_TRANSACTION["id"]),
+				call(
+					api_key=STRIPE_SECRET_KEY, expand=[], id=FAKE_BALANCE_TRANSACTION_REFUND["id"]
+				),
+			]
 		)
 
 		refunds = list(charge.refunds.all())
@@ -303,7 +326,9 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		)
 
 	@patch(
-		"stripe.BalanceTransaction.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
 	)
 	@patch("stripe.Charge.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True)
@@ -342,7 +367,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		self.assertEqual(0, charge.amount_refunded)
 
 		charge_retrieve_mock.assert_not_called()
-		balance_transaction_retrieve_mock.assert_not_called()
 
 		self.assert_fks(
 			charge,
@@ -359,7 +383,9 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
 	@patch(
-		"stripe.BalanceTransaction.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
 	)
 	@patch("stripe.Charge.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
 	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
@@ -378,6 +404,8 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		balance_transaction_retrieve_mock,
 		default_account_mock,
 	):
+		from djstripe.settings import STRIPE_SECRET_KEY
+
 		default_account_mock.return_value = self.account
 
 		fake_charge_copy = deepcopy(FAKE_CHARGE)
@@ -392,7 +420,10 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		self.assertEqual(charge.source, PaymentMethod.objects.get(id="test_id"))
 
 		charge_retrieve_mock.assert_not_called()
-		balance_transaction_retrieve_mock.assert_not_called()
+
+		balance_transaction_retrieve_mock.assert_called_once_with(
+			api_key=STRIPE_SECRET_KEY, expand=[], id=FAKE_BALANCE_TRANSACTION["id"]
+		)
 
 		self.assert_fks(
 			charge,
@@ -409,12 +440,16 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	)
 	@patch(
-		"stripe.BalanceTransaction.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
 	)
 	@patch("stripe.Charge.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
 	def test_sync_from_stripe_data_no_customer(
 		self, charge_retrieve_mock, balance_transaction_retrieve_mock, default_account_mock
 	):
+		from djstripe.settings import STRIPE_SECRET_KEY
+
 		default_account_mock.return_value = self.account
 
 		fake_charge_copy = deepcopy(FAKE_CHARGE)
@@ -429,7 +464,9 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		assert charge.customer is None
 
 		charge_retrieve_mock.assert_not_called()
-		balance_transaction_retrieve_mock.assert_not_called()
+		balance_transaction_retrieve_mock.assert_called_once_with(
+			api_key=STRIPE_SECRET_KEY, expand=[], id=FAKE_BALANCE_TRANSACTION["id"]
+		)
 
 		self.assert_fks(
 			charge,
@@ -445,7 +482,9 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		)
 
 	@patch(
-		"stripe.BalanceTransaction.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
 	)
 	@patch("stripe.Charge.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True)
@@ -470,6 +509,8 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		charge_retrieve_mock,
 		balance_transaction_retrieve_mock,
 	):
+		from djstripe.settings import STRIPE_SECRET_KEY
+
 		default_account_mock.return_value = self.account
 
 		fake_transfer = deepcopy(FAKE_TRANSFER)
@@ -489,7 +530,9 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		self.assertEqual(fake_transfer["id"], charge.transfer.id)
 
 		charge_retrieve_mock.assert_not_called()
-		balance_transaction_retrieve_mock.assert_not_called()
+		balance_transaction_retrieve_mock.assert_called_once_with(
+			api_key=STRIPE_SECRET_KEY, expand=[], id=FAKE_BALANCE_TRANSACTION["id"]
+		)
 
 		self.assert_fks(
 			charge,
@@ -503,7 +546,9 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 	@patch("stripe.Charge.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
 	@patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
 	@patch(
-		"stripe.BalanceTransaction.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED
+		"stripe.BalanceTransaction.retrieve",
+		return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+		autospec=True,
 	)
 	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	@patch(
@@ -523,6 +568,8 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		account_retrieve_mock,
 		charge_retrieve_mock,
 	):
+		from djstripe.settings import STRIPE_SECRET_KEY
+
 		account_retrieve_mock.return_value = FAKE_ACCOUNT
 
 		fake_charge_copy = deepcopy(FAKE_CHARGE)
@@ -539,7 +586,9 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		self.assertEqual(account, charge.account)
 
 		charge_retrieve_mock.assert_not_called()
-		balance_transaction_retrieve_mock.assert_not_called()
+		balance_transaction_retrieve_mock.assert_called_once_with(
+			api_key=STRIPE_SECRET_KEY, expand=[], id=FAKE_BALANCE_TRANSACTION["id"]
+		)
 
 		self.assert_fks(
 			charge,
