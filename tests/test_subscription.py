@@ -15,8 +15,9 @@ from djstripe.models import Plan, Subscription
 
 from . import (
 	FAKE_CUSTOMER, FAKE_CUSTOMER_II, FAKE_PLAN, FAKE_PLAN_II, FAKE_PLAN_METERED,
-	FAKE_PRODUCT, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_CANCELED, FAKE_SUBSCRIPTION_METERED,
-	FAKE_SUBSCRIPTION_MULTI_PLAN, AssertStripeFksMixin, datetime_to_unix
+	FAKE_PRODUCT, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_CANCELED,
+	FAKE_SUBSCRIPTION_METERED, FAKE_SUBSCRIPTION_MULTI_PLAN,
+	FAKE_SUBSCRIPTION_NOT_PERIOD_CURRENT, AssertStripeFksMixin, datetime_to_unix
 )
 
 
@@ -150,7 +151,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
 		product_retrieve_mock,
 		plan_retrieve_mock,
 	):
-		subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+		subscription_fake = deepcopy(FAKE_SUBSCRIPTION_NOT_PERIOD_CURRENT)
 		subscription = Subscription.sync_from_stripe_data(subscription_fake)
 
 		with self.assertRaises(ValueError):

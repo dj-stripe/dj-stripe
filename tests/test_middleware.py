@@ -13,7 +13,10 @@ from django.test.utils import modify_settings, override_settings
 from djstripe.middleware import SubscriptionPaymentMiddleware
 from djstripe.models import Customer, Subscription
 
-from . import FAKE_CUSTOMER, FAKE_PRODUCT, FAKE_SUBSCRIPTION, FUTURE_DATE
+from . import (
+	FAKE_CUSTOMER, FAKE_PRODUCT, FAKE_SUBSCRIPTION,
+	FAKE_SUBSCRIPTION_NOT_PERIOD_CURRENT, FUTURE_DATE
+)
 
 
 class MiddlewareURLTest(TestCase):
@@ -140,6 +143,13 @@ class MiddlewareLogicTest(TestCase):
 		self.assertEqual(response, None)
 
 	def test_customer_has_inactive_subscription(self):
+		with patch(
+			"stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+		):
+			self.subscription = Subscription.sync_from_stripe_data(
+				FAKE_SUBSCRIPTION_NOT_PERIOD_CURRENT
+			)
+
 		request = self.factory.get("/testapp_content/")
 		request.user = self.user
 		request.urlconf = self.urlconf
