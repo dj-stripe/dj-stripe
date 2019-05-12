@@ -289,7 +289,9 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		self.assertEqual(True, charge.refunded)
 		self.assertEqual(True, charge.captured)
 		self.assertEqual(False, charge.disputed)
-		self.assertEqual("VideoDoc consultation for ivanp0001 berkp0001", charge.description)
+		self.assertEqual(
+			"VideoDoc consultation for ivanp0001 berkp0001", charge.description
+		)
 		self.assertEqual(charge.amount, charge.amount_refunded)
 
 		charge_retrieve_mock.assert_not_called()
