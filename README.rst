@@ -6,6 +6,10 @@ dj-stripe
    :alt: Build Status
    :target: https://travis-ci.org/dj-stripe/dj-stripe
 
+.. image:: https://readthedocs.org/projects/dj-stripe/badge/
+   :alt: Documentation Status
+   :target: https://dj-stripe.readthedocs.io/
+
 Stripe Models for Django.
 
 
