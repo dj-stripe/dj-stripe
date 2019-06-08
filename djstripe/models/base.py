@@ -568,6 +568,8 @@ class StripeModel(models.Model):
 		"""
 		Syncs this object from the stripe data provided.
 
+		Foreign keys will also be retrieved and synced recursively.
+
 		:param data: stripe object
 		:type data: dict
 		"""

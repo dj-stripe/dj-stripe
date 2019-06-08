@@ -3,7 +3,7 @@ dj-stripe Charge Model Tests.
 """
 from copy import deepcopy
 from decimal import Decimal
-from unittest.mock import call, patch, create_autospec
+from unittest.mock import call, create_autospec, patch
 
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
