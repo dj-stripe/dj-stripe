@@ -9,6 +9,7 @@ History
 - Dropped previously-deprecated ``Charge.fee_details`` property.
 - Dropped previously-deprecated ``Transfer.fee_details`` property.
 - Dropped previously-deprecated ``field_name`` parameter to ``sync_from_stripe_data``
+- Dropped previously-deprecated alias ``StripeObject`` of ``StripeModel``
 
 2.0.3 (2019-06-11)
 ------------------

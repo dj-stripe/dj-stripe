@@ -135,7 +135,7 @@ class StripeModel(models.Model):
 	def _manipulate_stripe_object_hook(cls, data):
 		"""
 		Gets called by this object's stripe object conversion method just before conversion.
-		Use this to populate custom fields in a StripeObject from stripe data.
+		Use this to populate custom fields in a StripeModel from stripe data.
 		"""
 		return data
 
@@ -617,7 +617,3 @@ class IdempotencyKey(models.Model):
 	@property
 	def is_expired(self):
 		return timezone.now() > self.created + timedelta(hours=24)
-
-
-# Alias (Deprecated, remove in 2.1.0)
-StripeObject = StripeModel
