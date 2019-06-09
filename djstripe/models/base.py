@@ -1,5 +1,6 @@
 import logging
 import uuid
+import warnings
 from datetime import timedelta
 
 import django
@@ -564,7 +565,7 @@ class StripeModel(models.Model):
 			setattr(self, attr, value)
 
 	@classmethod
-	def sync_from_stripe_data(cls, data, field_name="id"):
+	def sync_from_stripe_data(cls, data, field_name=None):
 		"""
 		Syncs this object from the stripe data provided.
 
@@ -574,6 +575,14 @@ class StripeModel(models.Model):
 		:type data: dict
 		"""
 		current_ids = set()
+
+		if field_name is None:
+			field_name = "id"
+		else:
+			warnings.warn(
+				"field_name parameter to sync_from_stripe_data is deprecated and will be removed in 2.1.0",
+				DeprecationWarning,
+			)
 
 		if data.get(field_name, None):
 			# stop nested objects from trying to retrieve this object before initial sync is complete
