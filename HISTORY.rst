@@ -143,7 +143,6 @@ You must upgrade to 1.1.0 first.**
 
 Please read the 1.1.0 release notes below for more information.
 
-
 1.1.0 (2018-06-11)
 ------------------
 
@@ -154,11 +153,8 @@ make changes in order to upgrade. Please read the full changelog below.
 If you are having trouble upgrading, you may ask for help `by filing an
 issue on GitHub`_.
 
-Upgrade notes
--------------
-
 Migration reset
-~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^
 
 The next version of dj-stripe, **1.2.0**, will reset all the migrations
 to ``0001_initial``. Migrations are currently in an unmaintainable
@@ -169,7 +165,7 @@ dj-stripe 1.2.0. You must go through 1.1.0 first, run
 ``manage.py migrate djstripe``, then upgrade to 1.2.0.**
 
 Python 2.7 end-of-life
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^
 
 dj-stripe 1.1.0 drops support for Django 1.10 and adds support for
 Django 2.0. Django 1.11+ and Python 2.7+ or 3.4+ are required.
@@ -178,10 +174,10 @@ Support for Python versions older than 3.5, and Django versions older
 than 2.0, will be dropped in dj-stripe 2.0.0.
 
 Backwards-incompatible changes and deprecations
------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Removal of polymorphic models
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""""""""""""""""""""""""""""
 
 The model architecture of dj-stripe has been simplified. Polymorphic
 models have been dropped and the old base StripeCustomer, StripeCharge,
@@ -193,7 +189,7 @@ yield the new ones. This is deprecated and support for this will be
 dropped in dj-stripe 2.0.0.
 
 Full support for Stripe Sources (Support for v3 stripe.js)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Stripe sources (``src_XXXX``) are objects that can arbitrarily reference
 any of the payment method types that Stripe supports. However, the
@@ -218,7 +214,7 @@ in 2.0). That model can resolve into a Card, a Source, or a BankAccount object.
    enum.
 
 Core fields renamed
-~~~~~~~~~~~~~~~~~~~
+"""""""""""""""""""
 
 -  The numeric ``id`` field has been renamed to ``djstripe_id``. This
    avoids a clash with the upstream stripe id. Accessing ``.id`` is
@@ -506,10 +502,11 @@ be and delete them after the migration).
 BIG HUGE NOTE - DON'T OVERLOOK THIS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Subscription and InvoiceItem migration is not possible because old records don't have Stripe IDs (so we can't sync them). Our approach is to delete all local subscription and invoiceitem objects and re-sync them from Stripe.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-We 100% recommend you create a backup of your database before performing this upgrade.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. warning::
+	Subscription and InvoiceItem migration is not possible because old records don't have Stripe IDs (so we can't sync them). Our approach is to delete all local subscription and invoiceitem objects and re-sync them from Stripe.
+
+	We 100% recommend you create a backup of your database before performing this upgrade.
+
 
 Other changes
 ^^^^^^^^^^^^^
