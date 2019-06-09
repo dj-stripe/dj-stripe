@@ -10,9 +10,7 @@ from .core import (
 	BalanceTransaction, Charge, Customer, Dispute,
 	Event, FileUpload, Payout, Product, Refund
 )
-from .payment_methods import (
-	BankAccount, Card, DjstripePaymentMethod, PaymentMethod, Source
-)
+from .payment_methods import BankAccount, Card, DjstripePaymentMethod, Source
 from .sigma import ScheduledQueryRun
 from .webhooks import WebhookEventTrigger
 
@@ -35,7 +33,6 @@ __all__ = [
 	"Invoice",
 	"InvoiceItem",
 	"Payout",
-	"PaymentMethod",
 	"Plan",
 	"Product",
 	"Refund",

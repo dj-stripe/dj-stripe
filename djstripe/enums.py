@@ -450,11 +450,15 @@ class SubscriptionStatus(Enum):
 	unpaid = _("Unpaid")
 
 
-class PaymentMethodType(Enum):
+class DjstripePaymentMethodType(Enum):
 	"""
-	A djstripe-specific enum for the PaymentMethod model.
+	A djstripe-specific enum for the DjStripePaymentMethod model.
 	"""
 
 	card = _("Card")
 	bank_account = _("Bank account")
 	source = _("Source")
+
+
+# Alias (Deprecated, remove in 2.2.0)
+PaymentMethodType = DjstripePaymentMethodType
