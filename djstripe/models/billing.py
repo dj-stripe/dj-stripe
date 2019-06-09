@@ -620,7 +620,7 @@ class InvoiceItem(StripeModel):
 		return data
 
 	@classmethod
-	def sync_from_stripe_data(cls, data, field_name="id"):
+	def sync_from_stripe_data(cls, data, field_name=None):
 		invoice_data = data.get("invoice")
 
 		if invoice_data:

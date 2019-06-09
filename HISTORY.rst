@@ -10,6 +10,7 @@ This is a bugfix-only version:
 
 - Don't save event objects if the webhook processing fails (#832).
 - Fixed IntegrityError when ``REMOTE_ADDR`` is an empty string.
+- Deprecated ``field_name`` parameter to ``sync_from_stripe_data``
 
 2.0.1 (2019-04-29)
 ------------------
