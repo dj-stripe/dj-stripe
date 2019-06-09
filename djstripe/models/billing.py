@@ -620,7 +620,7 @@ class InvoiceItem(StripeModel):
 		return data
 
 	@classmethod
-	def sync_from_stripe_data(cls, data, field_name=None):
+	def sync_from_stripe_data(cls, data):
 		invoice_data = data.get("invoice")
 
 		if invoice_data:
@@ -632,7 +632,7 @@ class InvoiceItem(StripeModel):
 					invoice_data = Invoice(id=invoice_id).api_retrieve()
 				Invoice.sync_from_stripe_data(data=invoice_data)
 
-		return super().sync_from_stripe_data(data, field_name=field_name)
+		return super().sync_from_stripe_data(data)
 
 	def __str__(self):
 		if self.plan and self.plan.product:
