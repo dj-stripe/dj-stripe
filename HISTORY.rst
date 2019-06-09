@@ -11,6 +11,7 @@ History
 - Dropped previously-deprecated ``field_name`` parameter to ``sync_from_stripe_data``
 - Dropped previously-deprecated alias ``StripeObject`` of ``StripeModel``
 - Dropped previously-deprecated alias ``PaymentMethod`` of ``DjstripePaymentMethod``
+- Dropped previously-deprecated properties ``Charge.source_type`` and ``Charge.source_stripe_id``
 - ``enums.PaymentMethodType`` has been deprecated, use ``enums.DjstripePaymentMethodType``
 
 2.0.3 (2019-06-11)

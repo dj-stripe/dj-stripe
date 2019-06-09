@@ -240,28 +240,6 @@ class Charge(StripeModel):
 	def fraudulent(self):
 		return self.fraud_details and list(self.fraud_details.values())[0] == "fraudulent"
 
-	@property
-	def source_type(self):
-		"""
-		DEPRECATED(2018-07-24): Use `.source.type`.
-		"""
-		warnings.warn(
-			"Charge.source_type is deprecated and will be dropped in 2.1.0. "
-			"Use Charge.source.type instead."
-		)
-		return self.source.type
-
-	@property
-	def source_stripe_id(self):
-		"""
-		DEPRECATED(2018-07-24): Use `.source.type`.
-		"""
-		warnings.warn(
-			"Charge.source_stripe_id is deprecated and will be dropped in 2.1.0. "
-			"Use Charge.source.id instead."
-		)
-		return self.source.id
-
 	def _attach_objects_hook(self, cls, data):
 		from .payment_methods import DjstripePaymentMethod
 
