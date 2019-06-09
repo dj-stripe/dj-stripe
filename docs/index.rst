@@ -20,6 +20,7 @@ Contents
    :caption: Getting Started
 
    installation
+   api_versions
 
 .. toctree::
    :caption: Usage
