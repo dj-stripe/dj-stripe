@@ -566,7 +566,7 @@ class StripeModel(models.Model):
 			setattr(self, attr, value)
 
 	@classmethod
-	def sync_from_stripe_data(cls, data, field_name=None):
+	def sync_from_stripe_data(cls, data):
 		"""
 		Syncs this object from the stripe data provided.
 
@@ -576,21 +576,14 @@ class StripeModel(models.Model):
 		:type data: dict
 		"""
 		current_ids = set()
+		data_id = data.get("id")
 
-		if field_name is None:
-			field_name = "id"
-		else:
-			warnings.warn(
-				"field_name parameter to sync_from_stripe_data is deprecated and will be removed in 2.1.0",
-				DeprecationWarning,
-			)
-
-		if data.get(field_name, None):
+		if data_id:
 			# stop nested objects from trying to retrieve this object before initial sync is complete
-			current_ids.add(cls._id_from_data(data.get(field_name)))
+			current_ids.add(data_id)
 
 		instance, created = cls._get_or_create_from_stripe_object(
-			data, field_name=field_name, current_ids=current_ids
+			data, current_ids=current_ids
 		)
 
 		if not created:
