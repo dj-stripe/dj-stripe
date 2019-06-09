@@ -9,6 +9,19 @@ in the docstring for each model.
 Last Updated 2018-05-24
 
 
+Core Resources
+~~~~~~~~~~~~~~
+
+Balance Transaction
+-------------------
+.. autoclass:: djstripe.models.BalanceTransaction
+
+    .. automethod:: djstripe.models.BalanceTransaction.api_list
+    .. automethod:: djstripe.models.BalanceTransaction.api_retrieve
+    .. automethod:: djstripe.models.BalanceTransaction.get_stripe_dashboard_url
+
+    .. automethod:: djstripe.models.BalanceTransaction.sync_from_stripe_data
+
 Charge
 ------
 .. autoclass:: djstripe.models.Charge
@@ -86,7 +99,17 @@ Event
     .. autoattribute:: djstripe.models.Event.customer
 
     .. automethod:: djstripe.models.Event.str_parts
-    .. automethod:: djstripe.models.StripeObject.sync_from_stripe_data
+    .. automethod:: djstripe.models.Event.sync_from_stripe_data
+
+
+File Upload
+-----------
+.. autoclass:: djstripe.models.FileUpload
+
+    .. automethod:: djstripe.models.FileUpload.api_list
+    .. automethod:: djstripe.models.FileUpload.api_retrieve
+
+    .. automethod:: djstripe.models.FileUpload.sync_from_stripe_data
 
 
 Payout
@@ -100,6 +123,31 @@ Payout
     .. automethod:: djstripe.models.Payout.str_parts
     .. automethod:: djstripe.models.Payout.sync_from_stripe_data
 
+
+Product
+-------
+.. autoclass:: djstripe.models.Product
+
+    .. automethod:: djstripe.models.Product.api_list
+    .. automethod:: djstripe.models.Product.api_retrieve
+    .. automethod:: djstripe.models.Product.get_stripe_dashboard_url
+
+    .. automethod:: djstripe.models.Product.sync_from_stripe_data
+
+
+Refund
+------
+.. autoclass:: djstripe.models.Refund
+
+    .. automethod:: djstripe.models.Refund.api_list
+    .. automethod:: djstripe.models.Refund.api_retrieve
+    .. automethod:: djstripe.models.Refund.get_stripe_dashboard_url
+
+    .. automethod:: djstripe.models.Refund.sync_from_stripe_data
+
+
+Payment Methods
+~~~~~~~~~~~~~~~
 
 BankAccount
 -----------
@@ -142,6 +190,9 @@ Source
     .. automethod:: djstripe.models.Source.sync_from_stripe_data
 
 
+Billing
+~~~~~~~
+
 Coupon
 ------
 .. autoclass:: djstripe.models.Coupon
@@ -174,19 +225,15 @@ Invoice
     .. automethod:: djstripe.models.Invoice.sync_from_stripe_data
 
 
-UpcomingInvoice
----------------
-.. autoclass:: djstripe.models.UpcomingInvoice
+InvoiceItem
+-----------
+.. autoclass:: djstripe.models.InvoiceItem
 
-    .. automethod:: djstripe.models.UpcomingInvoice.api_list
-    .. automethod:: djstripe.models.UpcomingInvoice.api_retrieve
-    .. automethod:: djstripe.models.UpcomingInvoice.get_stripe_dashboard_url
+    .. automethod:: djstripe.models.InvoiceItem.api_list
+    .. automethod:: djstripe.models.InvoiceItem.api_retrieve
+    .. automethod:: djstripe.models.InvoiceItem.get_stripe_dashboard_url
 
-    .. autoattribute:: djstripe.models.UpcomingInvoice.invoiceitems
-
-    .. automethod:: djstripe.models.UpcomingInvoice.str_parts
-    .. automethod:: djstripe.models.UpcomingInvoice.sync_from_stripe_data
-
+    .. automethod:: djstripe.models.InvoiceItem.sync_from_stripe_data
 
 InvoiceItem
 -----------
@@ -237,6 +284,45 @@ Subscription
     .. automethod:: djstripe.models.Subscription.sync_from_stripe_data
 
 
+SubscriptionItem
+----------------
+.. autoclass:: djstripe.models.SubscriptionItem
+
+    .. automethod:: djstripe.models.SubscriptionItem.api_list
+    .. automethod:: djstripe.models.SubscriptionItem.api_retrieve
+    .. automethod:: djstripe.models.SubscriptionItem.get_stripe_dashboard_url
+
+    .. automethod:: djstripe.models.SubscriptionItem.sync_from_stripe_data
+
+
+UpcomingInvoice
+---------------
+.. autoclass:: djstripe.models.UpcomingInvoice
+
+    .. automethod:: djstripe.models.UpcomingInvoice.api_list
+    .. automethod:: djstripe.models.UpcomingInvoice.api_retrieve
+    .. automethod:: djstripe.models.UpcomingInvoice.get_stripe_dashboard_url
+
+    .. autoattribute:: djstripe.models.UpcomingInvoice.invoiceitems
+
+    .. automethod:: djstripe.models.UpcomingInvoice.str_parts
+    .. automethod:: djstripe.models.UpcomingInvoice.sync_from_stripe_data
+
+
+UsageRecord
+-----------
+.. autoclass:: djstripe.models.UsageRecord
+
+    .. automethod:: djstripe.models.UsageRecord.api_list
+    .. automethod:: djstripe.models.UsageRecord.api_retrieve
+    .. automethod:: djstripe.models.UsageRecord.get_stripe_dashboard_url
+
+    .. automethod:: djstripe.models.UsageRecord.sync_from_stripe_data
+
+
+Connect
+~~~~~~~
+
 Account
 -------
 .. autoclass:: djstripe.models.Account
@@ -252,6 +338,28 @@ Account
     .. automethod:: djstripe.models.Account.sync_from_stripe_data
 
 
+Application Fee
+---------------
+.. autoclass:: djstripe.models.ApplicationFee
+
+    .. automethod:: djstripe.models.ApplicationFee.api_list
+    .. automethod:: djstripe.models.ApplicationFee.api_retrieve
+    .. automethod:: djstripe.models.ApplicationFee.get_stripe_dashboard_url
+
+    .. automethod:: djstripe.models.ApplicationFee.sync_from_stripe_data
+
+
+Country Spec
+------------
+.. autoclass:: djstripe.models.CountrySpec
+
+    .. automethod:: djstripe.models.CountrySpec.api_list
+    .. automethod:: djstripe.models.CountrySpec.api_retrieve
+    .. automethod:: djstripe.models.CountrySpec.get_stripe_dashboard_url
+
+    .. automethod:: djstripe.models.CountrySpec.sync_from_stripe_data
+
+
 Transfer
 --------
 .. autoclass:: djstripe.models.Transfer
@@ -263,6 +371,42 @@ Transfer
     .. automethod:: djstripe.models.Transfer.str_parts
     .. automethod:: djstripe.models.Transfer.sync_from_stripe_data
 
+
+Transfer Reversal
+-----------------
+.. autoclass:: djstripe.models.TransferReversal
+
+    .. automethod:: djstripe.models.TransferReversal.api_list
+    .. automethod:: djstripe.models.TransferReversal.api_retrieve
+    .. automethod:: djstripe.models.TransferReversal.get_stripe_dashboard_url
+
+    .. automethod:: djstripe.models.TransferReversal.sync_from_stripe_data
+
+
+Fraud
+~~~~~
+
+TODO
+
+Orders
+~~~~~~
+
+TODO
+
+Sigma
+~~~~~
+
+ScheduledQueryRun
+-----------------
+.. autoclass:: djstripe.models.ScheduledQueryRun
+
+    .. automethod:: djstripe.models.ScheduledQueryRun.api_list
+    .. automethod:: djstripe.models.ScheduledQueryRun.api_retrieve
+
+    .. automethod:: djstripe.models.ScheduledQueryRun.sync_from_stripe_data
+
+Webhooks
+~~~~~~~~
 
 WebhookEventTrigger
 -------------------
