@@ -6,6 +6,8 @@ History
 2.1.0 (unreleased)
 ------------------
 
+- Dropped previously-deprecated ``Charge.fee_details`` property.
+- Dropped previously-deprecated ``Transfer.fee_details`` property.
 
 2.0.3 (2019-06-11)
 ------------------

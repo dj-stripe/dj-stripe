@@ -218,16 +218,6 @@ class Charge(StripeModel):
 			return self.balance_transaction.fee
 
 	@property
-	def fee_details(self):
-		warnings.warn(
-			"Charge.fee_details is deprecated and will be dropped in 2.1.0. "
-			"Use Charge.balance_transaction.fee_details instead.",
-			DeprecationWarning,
-		)
-		if self.balance_transaction:
-			return self.balance_transaction.fee_details
-
-	@property
 	def human_readable_amount(self):
 		return get_friendly_currency_amount(self.amount, self.currency)
 
