@@ -69,10 +69,6 @@ class DjstripePaymentMethod(models.Model):
 		return self.object_model.objects.get(id=self.id)
 
 
-# Alias (Deprecated, remove in 2.1.0)
-PaymentMethod = DjstripePaymentMethod
-
-
 class BankAccount(StripeModel):
 	account = models.ForeignKey(
 		"Account",
