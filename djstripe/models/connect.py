@@ -344,16 +344,6 @@ class Transfer(StripeModel):
 		if self.balance_transaction:
 			return self.balance_transaction.fee
 
-	@property
-	def fee_details(self):
-		warnings.warn(
-			"Transfer.fee_details is deprecated and will be dropped in 2.1.0. "
-			"Use Transfer.balance_transaction.fee_details instead.",
-			DeprecationWarning,
-		)
-		if self.balance_transaction:
-			return self.balance_transaction.fee_details
-
 	def str_parts(self):
 		return ["amount={amount}".format(amount=self.amount)] + super().str_parts()
 
