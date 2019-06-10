@@ -8,7 +8,8 @@ History
 
 This is a bugfix-only version:
 
-- When processing stripe event, wrap create object call in transaction (#877)
+- In ``_get_or_create_from_stripe_object``, wrap create ``_create_from_stripe_object`` in transaction,
+  fixes ``TransactionManagementError`` on race condition in webhook processing (#877/#903).
 
 2.0.2 (2019-06-09)
 ------------------

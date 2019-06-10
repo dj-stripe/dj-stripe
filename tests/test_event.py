@@ -9,9 +9,9 @@ from django.test import TestCase
 from stripe.error import StripeError
 
 from djstripe import webhooks
-from djstripe.models import Event
+from djstripe.models import Event, Transfer
 
-from . import FAKE_CUSTOMER, FAKE_EVENT_TRANSFER_CREATED
+from . import FAKE_CUSTOMER, FAKE_EVENT_TRANSFER_CREATED, FAKE_TRANSFER
 
 
 class EventTest(TestCase):
@@ -103,6 +103,34 @@ class EventTest(TestCase):
 		# Make sure the existing event was returned.
 		self.assertEqual(mock_objects.filter.return_value.first.return_value, result)
 
+	@patch("djstripe.models.Event.invoke_webhook_handlers", autospec=True)
+	def test_process_event_failure_rolls_back(self, invoke_webhook_handlers_mock):
+		"""Test that process event rolls back event creation on error
+		"""
+
+		class HandlerException(Exception):
+			pass
+
+		invoke_webhook_handlers_mock.side_effect = HandlerException
+		real_create_from_stripe_object = Event._create_from_stripe_object
+
+		def side_effect(*args, **kwargs):
+			return real_create_from_stripe_object(*args, **kwargs)
+
+		event_data = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+
+		self.assertFalse(Event.objects.filter(id=FAKE_EVENT_TRANSFER_CREATED["id"]).exists())
+
+		with self.assertRaises(HandlerException), patch(
+			"djstripe.models.Event._create_from_stripe_object",
+			side_effect=side_effect,
+			autospec=True,
+		) as create_from_stripe_object_mock:
+			Event.process(data=event_data)
+
+		create_from_stripe_object_mock.assert_called_once_with(event_data)
+		self.assertFalse(Event.objects.filter(id=FAKE_EVENT_TRANSFER_CREATED["id"]).exists())
+
 	#
 	# Helpers
 	#
@@ -113,3 +141,31 @@ class EventTest(TestCase):
 		event_retrieve_mock.return_value = event_data
 		event = Event.sync_from_stripe_data(event_data)
 		return event
+
+
+class EventRaceConditionTest(TestCase):
+	@patch("stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True)
+	def test_process_event_race_condition(self, transfer_retrieve_mock):
+		transfer = Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER))
+		transfer_retrieve_mock.reset_mock()
+		event_data = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+
+		# emulate the race condition in _get_or_create_from_stripe_object where an object is created
+		# by a different request during the call
+		#
+		# Sequence of events:
+		# 1) first Transfer.stripe_objects.get fails with DoesNotExist (due to it not existing in reality,
+		#    but due to our side_effect in the test)
+		# 2) object is really created by a different request in reality
+		# 3) Transfer._create_from_stripe_object fails with IntegrityError due to duplicate id
+		# 4) second Transfer.stripe_objects.get succeeds (due to being created by step 2 in reality, due to
+		#    side effect in the test)
+		side_effect = [Transfer.DoesNotExist(), transfer]
+
+		with patch(
+			"djstripe.models.Transfer.stripe_objects.get", side_effect=side_effect, autospec=True
+		) as transfer_objects_get_mock:
+			Event.process(event_data)
+
+		self.assertEqual(transfer_objects_get_mock.call_count, 2)
+		self.assertEqual(transfer_retrieve_mock.call_count, 1)
