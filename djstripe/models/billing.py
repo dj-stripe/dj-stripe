@@ -1202,9 +1202,10 @@ class SubscriptionItem(StripeModel):
 		related_name="subscription_items",
 		help_text="The plan the customer is subscribed to.",
 	)
-	# TODO - quantity should be nullable, since it's not set for metered plans
 	quantity = models.PositiveIntegerField(
-		help_text=("The quantity of the plan to which the customer should be subscribed.")
+		null=True,
+		blank=True,
+		help_text=("The quantity of the plan to which the customer should be subscribed."),
 	)
 	subscription = models.ForeignKey(
 		"Subscription",
@@ -1212,14 +1213,6 @@ class SubscriptionItem(StripeModel):
 		related_name="items",
 		help_text="The subscription this subscription item belongs to.",
 	)
-
-	@classmethod
-	def _manipulate_stripe_object_hook(cls, data):
-		# for metered plans quantity isn't set, so should be nullable
-		# arguably this should default to 1 instead of 0 (to match subscription)
-		data["quantity"] = data.get("quantity") or 0
-
-		return data
 
 
 class UsageRecord(StripeModel):
