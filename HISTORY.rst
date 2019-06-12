@@ -6,6 +6,7 @@ History
 2.1.0 (unreleased)
 ------------------
 
+- Dropped Django 2.0 support
 - Dropped previously-deprecated ``Charge.fee_details`` property.
 - Dropped previously-deprecated ``Transfer.fee_details`` property.
 - Dropped previously-deprecated ``field_name`` parameter to ``sync_from_stripe_data``

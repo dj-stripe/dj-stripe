@@ -1,9 +1,7 @@
 import logging
 import uuid
-import warnings
 from datetime import timedelta
 
-import django
 from django.db import IntegrityError, models, transaction
 from django.utils import dateformat, timezone
 from django.utils.encoding import smart_text
@@ -317,13 +315,6 @@ class StripeModel(models.Model):
 					target = field.model.objects.get(id=object_id)
 					setattr(target, field.name, self)
 					target.save()
-
-					if django.VERSION < (2, 1):
-						# refresh_from_db doesn't clear related objects cache on django<2.1
-						# instead manually clear the instance cache so refresh_from_db will reload it
-						for field in self._meta.concrete_fields:
-							if field.is_relation and field.is_cached(self):
-								field.delete_cached_value(self)
 
 					# reload so that indirect relations back to this object - eg self.charge.invoice = self are set
 					# TODO - reverse the field reference here to avoid hitting the DB?
