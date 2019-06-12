@@ -536,9 +536,8 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
 		item = items[0]
 
 		self.assertEqual(subscription.quantity, 1)
-		# Note that subscription.quantity is 1, but item.quantity isn't set on metered plans,
-		# it probably should be nullable
-		self.assertEqual(item.quantity, 0)
+		# Note that subscription.quantity is 1, but item.quantity isn't set on metered plans
+		self.assertIsNone(item.quantity)
 		self.assertEqual(item.plan.id, FAKE_PLAN_METERED["id"])
 
 		self.assert_fks(subscription, expected_blank_fks={"djstripe.Customer.coupon"})

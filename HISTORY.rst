@@ -14,6 +14,7 @@ History
 - Dropped previously-deprecated alias ``PaymentMethod`` of ``DjstripePaymentMethod``
 - Dropped previously-deprecated properties ``Charge.source_type`` and ``Charge.source_stripe_id``
 - ``enums.PaymentMethodType`` has been deprecated, use ``enums.DjstripePaymentMethodType``
+- Made ``SubscriptionItem.quantity`` nullable as per Plans with ``usage_type="metered"`` (follow-up to #865)
 
 2.0.3 (2019-06-11)
 ------------------
