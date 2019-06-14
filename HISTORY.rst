@@ -16,6 +16,11 @@ History
 - ``enums.PaymentMethodType`` has been deprecated, use ``enums.DjstripePaymentMethodType``
 - Made ``SubscriptionItem.quantity`` nullable as per Plans with ``usage_type="metered"`` (follow-up to #865)
 
+Changes from API 2018-11-08:
+
+- Added ``Invoice.auto_advance``, deprecated ``Invoice.closed`` and ``Invoice.forgiven``,
+  see https://stripe.com/docs/billing/invoices/migrating-new-invoice-states#autoadvance
+
 2.0.3 (2019-06-11)
 ------------------
 

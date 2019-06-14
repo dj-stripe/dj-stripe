@@ -18,5 +18,12 @@ class Migration(migrations.Migration):
 				help_text="The quantity of the plan to which the customer should be subscribed.",
 				null=True,
 			),
-		)
+		),
+		migrations.AddField(
+			model_name="invoice",
+			name="auto_advance",
+			field=models.NullBooleanField(
+				help_text="Controls whether Stripe will perform automatic collection of the invoice. When false, the invoice’s state will not automatically advance without an explicit action."
+			),
+		),
 	]

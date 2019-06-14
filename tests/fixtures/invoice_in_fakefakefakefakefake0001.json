@@ -11,9 +11,8 @@
 	"attempted": true,
 	"auto_advance": false,
 	"billing": "charge_automatically",
-	"billing_reason": "subscription_update",
+	"billing_reason": "subscription_create",
 	"charge": "ch_fakefakefakefakefake0001",
-	"closed": true,
 	"collection_method": "charge_automatically",
 	"created": 1557995176,
 	"currency": "usd",
@@ -36,7 +35,6 @@
 	"ending_balance": 0,
 	"finalized_at": 1557995176,
 	"footer": null,
-	"forgiven": false,
 	"hosted_invoice_url": "https://pay.stripe.com/invoice/invst_5Z1RsP0atfAS4t9CCnnEDTDyUG",
 	"invoice_pdf": "https://pay.stripe.com/invoice/invst_5Z1RsP0atfAS4t9CCnnEDTDyUG/pdf",
 	"lines": {
