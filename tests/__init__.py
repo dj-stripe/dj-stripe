@@ -769,9 +769,9 @@ FAKE_INVOICE_II = InvoiceDict(
 		"application_fee": None,
 		"attempt_count": 1,
 		"attempted": True,
+		"auto_advance": True,
 		"billing": "charge_automatically",
 		"charge": FAKE_CHARGE_II["id"],
-		"closed": False,
 		"currency": "usd",
 		"customer": "cus_4UbFSo9tl62jqj",
 		"date": 1439785128,
@@ -779,7 +779,6 @@ FAKE_INVOICE_II = InvoiceDict(
 		"discount": None,
 		"due_date": None,
 		"ending_balance": 0,
-		"forgiven": False,
 		"lines": {
 			"data": [
 				{
@@ -833,9 +832,9 @@ FAKE_INVOICE_III = InvoiceDict(
 		"application_fee": None,
 		"attempt_count": 0,
 		"attempted": True,
+		"auto_advance": True,
 		"billing": "charge_automatically",
 		"charge": None,
-		"closed": False,
 		"currency": "usd",
 		"customer": "cus_6lsBvm5rJ0zyHc",
 		"date": 1439425915,
@@ -843,7 +842,6 @@ FAKE_INVOICE_III = InvoiceDict(
 		"discount": None,
 		"due_date": None,
 		"ending_balance": 20,
-		"forgiven": False,
 		"lines": {
 			"data": [
 				{
@@ -898,7 +896,6 @@ FAKE_UPCOMING_INVOICE = InvoiceDict(
 		"attempted": False,
 		"billing": "charge_automatically",
 		"charge": None,
-		"closed": False,
 		"currency": "usd",
 		"customer": FAKE_CUSTOMER["id"],
 		"date": 1439218864,
@@ -906,7 +903,6 @@ FAKE_UPCOMING_INVOICE = InvoiceDict(
 		"discount": None,
 		"due_date": None,
 		"ending_balance": None,
-		"forgiven": False,
 		"lines": {
 			"data": [
 				{

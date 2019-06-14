@@ -318,7 +318,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
 		invoice_data = deepcopy(FAKE_INVOICE)
 		invoice_data.update({"paid": False, "closed": False})
-		invoice_data.pop("forgiven")
+		invoice_data.pop("forgiven", None)  # TODO remove
 		invoice_data["status"] = "uncollectible"
 		invoice = Invoice.sync_from_stripe_data(invoice_data)
 
@@ -353,7 +353,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
 		invoice_data = deepcopy(FAKE_INVOICE)
 		invoice_data.update({"paid": False, "closed": False})
-		invoice_data.pop("forgiven")
+		invoice_data.pop("forgiven", None)  # TODO remove
 		invoice = Invoice.sync_from_stripe_data(invoice_data)
 
 		self.assertEqual(Invoice.STATUS_OPEN, invoice.status)
@@ -429,11 +429,12 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
 		invoice_data = deepcopy(FAKE_INVOICE)
 		invoice_data.update({"paid": False})
-		invoice_data["auto_advance"] = not invoice_data.pop("closed")
+		invoice_data["auto_advance"] = False
 
 		invoice = Invoice.sync_from_stripe_data(invoice_data)
 
 		self.assertEqual(Invoice.STATUS_CLOSED, invoice.status)
+		self.assertEqual(invoice.auto_advance, invoice_data["auto_advance"])
 
 	@patch(
 		"djstripe.models.Account.get_default_account",
@@ -465,7 +466,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 		invoice_data = deepcopy(FAKE_INVOICE)
 		invoice_data.update({"paid": False})
 		invoice_data.pop("auto_advance")
-		invoice_data.pop("closed")
+		invoice_data.pop("closed", None)  # TODO remove
 		invoice_data.pop("status")
 
 		invoice = Invoice.sync_from_stripe_data(invoice_data)

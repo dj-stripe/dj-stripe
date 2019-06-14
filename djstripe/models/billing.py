@@ -152,6 +152,10 @@ class Invoice(StripeModel):
 		null=True,  # XXX: This is not nullable, but it's a new field
 		help_text="The amount remaining, in cents, that is due.",
 	)
+	auto_advance = models.NullBooleanField(
+		help_text="Controls whether Stripe will perform automatic collection of the invoice. "
+		"When false, the invoice’s state will not automatically advance without an explicit action."
+	)
 	application_fee = StripeDecimalCurrencyAmountField(
 		null=True,
 		help_text="The fee in cents that will be applied to the invoice and transferred to the application owner's "
@@ -186,6 +190,7 @@ class Invoice(StripeModel):
 		related_name="latest_invoice",
 		help_text="The latest charge generated for this invoice, if any.",
 	)
+	# deprecated, will be removed in 2.2
 	closed = models.NullBooleanField(
 		default=False,
 		help_text="Whether or not the invoice is still trying to collect payment. An invoice is closed if it's either "
@@ -212,6 +217,7 @@ class Invoice(StripeModel):
 		help_text="Ending customer balance after attempting to pay invoice. If the invoice has not been attempted "
 		"yet, this will be null.",
 	)
+	# deprecated, will be removed in 2.2
 	forgiven = models.NullBooleanField(
 		default=False,
 		help_text="Whether or not the invoice has been forgiven. Forgiving an invoice instructs us to update the "
@@ -329,6 +335,7 @@ class Invoice(StripeModel):
 		# Invoice.closed and .forgiven deprecated in API 2018-11-08 - see https://stripe.com/docs/upgrades#2018-11-08
 
 		if "closed" not in data:
+			# TODO - drop this in 2.2, use auto_advance instead
 			# https://stripe.com/docs/billing/invoices/migrating-new-invoice-states#autoadvance
 			if "auto_advance" in data:
 				data["closed"] = not data["auto_advance"]
@@ -336,6 +343,7 @@ class Invoice(StripeModel):
 				data["closed"] = False
 
 		if "forgiven" not in data:
+			# TODO - drop this in 2.2, use status == "uncollectible" instead
 			if "status" in data:
 				data["forgiven"] = data["status"] == "uncollectible"
 			else:
