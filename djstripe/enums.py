@@ -190,6 +190,11 @@ class BankAccountStatus(Enum):
 	errored = _("Errored")
 
 
+class BusinessType(Enum):
+	individual = _("Individual")
+	company = _("Company")
+
+
 class CardCheckResult(Enum):
 	pass_ = (_("Pass"), "pass")
 	fail = _("Fail")

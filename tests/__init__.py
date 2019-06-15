@@ -1068,26 +1068,33 @@ FAKE_TRANSFER_III = {
 FAKE_ACCOUNT = {
 	"id": "acct_1032D82eZvKYlo2C",
 	"object": "account",
-	"business_logo": "file_1E3fssKatMEEd6736724HYAXyj",
-	"business_name": "dj-stripe",
-	"business_primary_color": "#092e20",
-	"business_url": "https://example.com",
+	"business_profile": {
+		"name": "dj-stripe",
+		"support_email": "djstripe@example.com",
+		"support_phone": None,
+		"support_url": "https://example.com/support/",
+		# TODO - change this since stripe validation actually doesn't allow example.com
+		"url": "https://example.com",
+	},
+	"settings": {
+		"branding": {
+			"icon": "file_4hshrsKatMEEd6736724HYAXyj",
+			"logo": "file_1E3fssKatMEEd6736724HYAXyj",
+			"primary_color": "#092e20",
+		},
+		"dashboard": {"display_name": "dj-stripe", "timezone": "Etc/UTC"},
+		"payments": {"statement_descriptor": "DJSTRIPE"},
+	},
 	"charges_enabled": True,
 	"country": "US",
 	"default_currency": "usd",
 	"details_submitted": True,
-	"display_name": "dj-stripe",
 	"email": "djstripe@example.com",
 	"payouts_enabled": True,
-	"statement_descriptor": "DJSTRIPE",
-	"support_email": "djstripe@example.com",
-	"support_phone": None,
-	"support_url": "https://example.com/support/",
-	"timezone": "Etc/UTC",
 	"type": "standard",
 }
 
-FAKE_FILEUPLOAD = {
+FAKE_FILEUPLOAD_LOGO = {
 	"created": 1550134074,
 	"filename": "logo_preview.png",
 	"id": "file_1E3fssKatMEEd6736724HYAXyj",
@@ -1110,6 +1117,37 @@ FAKE_FILEUPLOAD = {
 		"url": "/v1/file_links?file=file_1E3fssKatMEEd6736724HYAXyj",
 	},
 	"object": "file_upload",
+	"purpose": "business_logo",
+	"size": 6650,
+	"type": "png",
+	"url": "https://files.stripe.com/files/f_test_BTJFKcS7VDahgkjqw8EVNWlM",
+}
+
+
+FAKE_FILEUPLOAD_ICON = {
+	"created": 1550134074,
+	"filename": "icon_preview.png",
+	"id": "file_4hshrsKatMEEd6736724HYAXyj",
+	"links": {
+		"data": [
+			{
+				"created": 1550134074,
+				"expired": False,
+				"expires_at": None,
+				"file": "file_4hshrsKatMEEd6736724HYAXyj",
+				"id": "link_4jsdgsKatMEEd673672V0JSH",
+				"livemode": False,
+				"metadata": {},
+				"object": "file_link",
+				"url": "https://files.stripe.com/links/fl_test_69vG4ISDx9Chjklasrf06BJeQo",
+			}
+		],
+		"has_more": False,
+		"object": "list",
+		"url": "/v1/file_links?file=file_4hshrsKatMEEd6736724HYAXyj",
+	},
+	"object": "file_upload",
+	# Note that purpose="business_logo" for both icon and logo fields
 	"purpose": "business_logo",
 	"size": 6650,
 	"type": "png",

@@ -21,6 +21,20 @@ Changes from API 2018-11-08:
 - Added ``Invoice.auto_advance``, deprecated ``Invoice.closed`` and ``Invoice.forgiven``,
   see https://stripe.com/docs/billing/invoices/migrating-new-invoice-states#autoadvance
 
+Changes from API 2019-02-19:
+
+- Major changes to Account fields, see https://stripe.com/docs/upgrades#2019-02-19
+    Updated Account fields to match API 2019-02-19:
+- Added ``Account.business_profile``, ``.business_type``, ``.company``, ``.individual``, ``.requirements``, ``.settings``
+- Deprecated the existing fields, to be removed in 2.2
+- Special handling of the icon and logo fields:
+	- Renamed ``Account.business_logo`` to ``Account.branding_icon``
+	 (note that in Stripe's API ``Account.business_logo`` was renamed to ``Account.settings.branding_icon``,
+	 and ``Account.business_logo_large`` (which we didn't have a field for) was renamed to ``Account.settings.branding_logo``)
+	- Added deprecated property for ``Account.business_logo``
+	- Added ``Account.branding_logo`` as a ForeignKey
+    - Populate ``Account.branding_icon`` and ``.branding_logo`` from the new ``Account.settings.branding.icon`` and ``.logo``
+
 2.0.3 (2019-06-11)
 ------------------
 

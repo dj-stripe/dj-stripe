@@ -372,7 +372,8 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		self.assert_fks(
 			charge,
 			expected_blank_fks={
-				"djstripe.Account.business_logo",
+				"djstripe.Account.branding_logo",
+				"djstripe.Account.branding_icon",
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.invoice",
 				"djstripe.Charge.transfer",
@@ -393,7 +394,8 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		self.assert_fks(
 			refunded_charge,
 			expected_blank_fks={
-				"djstripe.Account.business_logo",
+				"djstripe.Account.branding_logo",
+				"djstripe.Account.branding_icon",
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.invoice",
 				"djstripe.Charge.transfer",
@@ -427,7 +429,8 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		self.assert_fks(
 			charge,
 			expected_blank_fks={
-				"djstripe.Account.business_logo",
+				"djstripe.Account.branding_logo",
+				"djstripe.Account.branding_icon",
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.invoice",
 				"djstripe.Charge.transfer",
@@ -442,7 +445,8 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		self.assert_fks(
 			refunded_charge,
 			expected_blank_fks={
-				"djstripe.Account.business_logo",
+				"djstripe.Account.branding_logo",
+				"djstripe.Account.branding_icon",
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.invoice",
 				"djstripe.Charge.transfer",
@@ -668,7 +672,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		product_retrieve_mock,
 		charge_retrieve_mock,
 		customer_retrieve_mock,
-		subscription_retrive_mock,
+		subscription_retrieve_mock,
 		balance_transaction_retrieve_mock,
 		default_account_mock,
 	):
@@ -742,7 +746,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		product_retrieve_mock,
 		charge_retrieve_mock,
 		customer_retrieve_mock,
-		subscription_retrive_mock,
+		subscription_retrieve_mock,
 		default_account_mock,
 	):
 		default_account_mock.return_value = self.account
@@ -778,7 +782,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		product_retrieve_mock,
 		charge_retrieve_mock,
 		customer_retrieve_mock,
-		subscription_retrive_mock,
+		subscription_retrieve_mock,
 		default_account_mock,
 	):
 		default_account_mock.return_value = self.account
