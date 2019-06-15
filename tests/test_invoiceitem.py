@@ -108,7 +108,8 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 		invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
 
 		expected_blank_fks = {
-			"djstripe.Account.business_logo",
+			"djstripe.Account.branding_logo",
+			"djstripe.Account.branding_icon",
 			"djstripe.Charge.dispute",
 			"djstripe.Charge.transfer",
 			"djstripe.Customer.coupon",
@@ -170,7 +171,8 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 		invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
 
 		expected_blank_fks = {
-			"djstripe.Account.business_logo",
+			"djstripe.Account.branding_logo",
+			"djstripe.Account.branding_icon",
 			"djstripe.Charge.dispute",
 			"djstripe.Charge.transfer",
 			"djstripe.Customer.coupon",
@@ -230,7 +232,8 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 		self.assert_fks(
 			invoiceitem,
 			expected_blank_fks={
-				"djstripe.Account.business_logo",
+				"djstripe.Account.branding_logo",
+				"djstripe.Account.branding_icon",
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
@@ -278,7 +281,8 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 		self.assert_fks(
 			invoiceitem,
 			expected_blank_fks={
-				"djstripe.Account.business_logo",
+				"djstripe.Account.branding_logo",
+				"djstripe.Account.branding_icon",
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",

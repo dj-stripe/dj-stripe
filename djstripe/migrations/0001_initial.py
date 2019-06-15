@@ -2703,7 +2703,11 @@ class Migration(migrations.Migration):
 			model_name="account",
 			name="business_logo",
 			field=models.ForeignKey(
-				null=True, on_delete=django.db.models.deletion.SET_NULL, to="djstripe.FileUpload"
+				help_text="An icon for the account. Must be square and at least 128px x 128px.",
+				null=True,
+				on_delete=django.db.models.deletion.SET_NULL,
+				related_name="icon_account",
+				to="djstripe.FileUpload",
 			),
 		),
 		migrations.AlterUniqueTogether(

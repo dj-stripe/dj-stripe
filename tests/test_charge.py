@@ -13,9 +13,9 @@ from djstripe.models import Account, Charge, Dispute, DjstripePaymentMethod
 
 from . import (
 	FAKE_ACCOUNT, FAKE_BALANCE_TRANSACTION, FAKE_BALANCE_TRANSACTION_REFUND,
-	FAKE_CHARGE, FAKE_CHARGE_REFUNDED, FAKE_CUSTOMER, FAKE_FILEUPLOAD,
-	FAKE_INVOICE, FAKE_PLAN, FAKE_PRODUCT, FAKE_REFUND, FAKE_SUBSCRIPTION,
-	FAKE_TRANSFER, IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
+	FAKE_CHARGE, FAKE_CHARGE_REFUNDED, FAKE_CUSTOMER, FAKE_FILEUPLOAD_ICON,
+	FAKE_FILEUPLOAD_LOGO, FAKE_INVOICE, FAKE_PLAN, FAKE_PRODUCT, FAKE_REFUND,
+	FAKE_SUBSCRIPTION, FAKE_TRANSFER, IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
 	IS_STATICMETHOD_AUTOSPEC_SUPPORTED, AssertStripeFksMixin, default_account
 )
 
@@ -86,7 +86,8 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		self.assert_fks(
 			charge,
 			expected_blank_fks={
-				"djstripe.Account.business_logo",
+				"djstripe.Account.branding_logo",
+				"djstripe.Account.branding_icon",
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.invoice",
 				"djstripe.Charge.transfer",
@@ -153,7 +154,8 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		self.assert_fks(
 			charge,
 			expected_blank_fks={
-				"djstripe.Account.business_logo",
+				"djstripe.Account.branding_logo",
+				"djstripe.Account.branding_icon",
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
@@ -245,7 +247,8 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		self.assert_fks(
 			charge_refunded,
 			expected_blank_fks={
-				"djstripe.Account.business_logo",
+				"djstripe.Account.branding_logo",
+				"djstripe.Account.branding_icon",
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
@@ -323,7 +326,8 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		self.assert_fks(
 			charge,
 			expected_blank_fks={
-				"djstripe.Account.business_logo",
+				"djstripe.Account.branding_logo",
+				"djstripe.Account.branding_icon",
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
@@ -376,7 +380,8 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		self.assert_fks(
 			charge,
 			expected_blank_fks={
-				"djstripe.Account.business_logo",
+				"djstripe.Account.branding_logo",
+				"djstripe.Account.branding_icon",
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
@@ -430,7 +435,8 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		self.assert_fks(
 			charge,
 			expected_blank_fks={
-				"djstripe.Account.business_logo",
+				"djstripe.Account.branding_logo",
+				"djstripe.Account.branding_icon",
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
@@ -473,7 +479,8 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		self.assert_fks(
 			charge,
 			expected_blank_fks={
-				"djstripe.Account.business_logo",
+				"djstripe.Account.branding_logo",
+				"djstripe.Account.branding_icon",
 				"djstripe.Charge.customer",
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.invoice",
@@ -539,7 +546,8 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		self.assert_fks(
 			charge,
 			expected_blank_fks={
-				"djstripe.Account.business_logo",
+				"djstripe.Account.branding_logo",
+				"djstripe.Account.branding_icon",
 				"djstripe.Charge.dispute",
 				"djstripe.Customer.coupon",
 			},
@@ -559,10 +567,14 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 		autospec=True,
 	)
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True)
-	@patch("stripe.File.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD), autospec=True)
+	@patch(
+		"stripe.File.retrieve",
+		side_effect=[deepcopy(FAKE_FILEUPLOAD_ICON), deepcopy(FAKE_FILEUPLOAD_LOGO)],
+		autospec=True,
+	)
 	def test_sync_from_stripe_data_with_destination(
 		self,
-		file_retrive_mock,
+		file_retrieve_mock,
 		invoice_retrieve_mock,
 		subscription_retrieve_mock,
 		product_retrieve_mock,
