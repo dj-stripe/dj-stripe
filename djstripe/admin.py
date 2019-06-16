@@ -269,7 +269,7 @@ class InvoiceAdmin(StripeModelAdmin):
 		"forgiven",
 		"closed",
 		"attempted",
-		"date",
+		"created",
 		"due_date",
 		"period_start",
 		"period_end",

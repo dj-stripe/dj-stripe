@@ -493,7 +493,7 @@ class StripeModel(models.Model):
 				save = False
 
 			line.setdefault("customer", invoice.customer.id)
-			line.setdefault("date", int(dateformat.format(invoice.date, "U")))
+			line.setdefault("date", int(dateformat.format(invoice.created, "U")))
 
 			item, _ = target_cls._get_or_create_from_stripe_object(
 				line, refetch=False, save=save
