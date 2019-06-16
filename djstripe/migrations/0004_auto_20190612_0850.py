@@ -98,4 +98,14 @@ class Migration(migrations.Migration):
 				null=True,
 			),
 		),
+		migrations.AlterModelOptions(name="invoice", options={"ordering": ["-created"]}),
+		migrations.RenameField(
+			model_name="invoice", old_name="application_fee", new_name="application_fee_amount"
+		),
+		migrations.RemoveField(model_name="invoice", name="date"),
+		migrations.AddField(
+			model_name="invoice",
+			name="status_transitions",
+			field=djstripe.fields.JSONField(blank=True, null=True),
+		),
 	]

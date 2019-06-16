@@ -1,3 +1,4 @@
+import warnings
 from copy import deepcopy
 
 import stripe
@@ -156,7 +157,7 @@ class Invoice(StripeModel):
 		help_text="Controls whether Stripe will perform automatic collection of the invoice. "
 		"When false, the invoice’s state will not automatically advance without an explicit action."
 	)
-	application_fee = StripeDecimalCurrencyAmountField(
+	application_fee_amount = StripeDecimalCurrencyAmountField(
 		null=True,
 		help_text="The fee in cents that will be applied to the invoice and transferred to the application owner's "
 		"Stripe account when the invoice is paid.",
@@ -203,7 +204,6 @@ class Invoice(StripeModel):
 		related_name="invoices",
 		help_text="The customer associated with this invoice.",
 	)
-	date = StripeDateTimeField(help_text="The date on the invoice.")
 	# TODO: discount
 	due_date = StripeDateTimeField(
 		null=True,
@@ -283,6 +283,7 @@ class Invoice(StripeModel):
 		"letters. Non-ASCII characters are automatically stripped. While most banks display this information "
 		"consistently, some may display it incorrectly or not at all.",
 	)
+	status_transitions = JSONField(null=True, blank=True)
 	subscription = models.ForeignKey(
 		"Subscription",
 		null=True,
@@ -322,7 +323,7 @@ class Invoice(StripeModel):
 	)
 
 	class Meta(object):
-		ordering = ["-date"]
+		ordering = ["-created"]
 
 	def __str__(self):
 		return "Invoice #{number}".format(
@@ -472,6 +473,25 @@ class Invoice(StripeModel):
 		if self.closed:
 			return self.STATUS_CLOSED
 		return self.STATUS_OPEN
+
+	# deprecated, will be removed in 2.2
+	@property
+	def application_fee(self):
+		warnings.warn(
+			"Invoice.application_fee has been renamed to .application_fee_amount. "
+			"This alias will be removed in djstripe 2.2",
+			DeprecationWarning,
+		)
+		return self.application_fee_amount
+
+	# deprecated, will be removed in 2.2
+	@property
+	def date(self):
+		warnings.warn(
+			"Invoice.date has been removed, use .created instead.  This alias will be removed in djstripe 2.2",
+			DeprecationWarning,
+		)
+		return self.created
 
 	def get_stripe_dashboard_url(self):
 		return self.customer.get_stripe_dashboard_url()

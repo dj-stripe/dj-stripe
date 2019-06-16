@@ -43,7 +43,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 	)
 	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
 	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
-	def test_str(
+	def test_sync_from_stripe_data(
 		self,
 		product_retrieve_mock,
 		charge_retrieve_mock,
@@ -57,7 +57,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 			invoice.get_stripe_dashboard_url(), self.customer.get_stripe_dashboard_url()
 		)
 		self.assertEqual(str(invoice), "Invoice #{}".format(FAKE_INVOICE["number"]))
-
+		self.assertGreater(len(invoice.status_transitions.keys()), 1)
 		self.assert_fks(
 			invoice,
 			expected_blank_fks={
