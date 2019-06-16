@@ -4,7 +4,7 @@ Settings
 
 .. _setting_stripe_api_version:
 
-STRIPE_API_VERSION (='2018-05-21')
+STRIPE_API_VERSION (='2019-05-16')
 ==================================
 
 The API version used to communicate with the Stripe API is configurable, and

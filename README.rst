@@ -28,7 +28,7 @@ Features
 * Individual charges
 * Stripe Sources
 * Stripe v2 and v3 support
-* Tested with Stripe API `2019-02-19` (see https://dj-stripe.readthedocs.io/en/latest/api_versions.html )
+* Tested with Stripe API `2019-05-16` (see https://dj-stripe.readthedocs.io/en/latest/api_versions.html )
 
 Requirements
 ------------
