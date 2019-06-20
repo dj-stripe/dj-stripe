@@ -106,7 +106,7 @@ class Migration(migrations.Migration):
 	dependencies = [("djstripe", "0002_auto_20180627_1121")]
 
 	operations = [
-		migrations.RunPython(postgres_migration_prep),
+		migrations.RunPython(postgres_migration_prep, migrations.RunPython.noop),
 		migrations.AlterField(
 			model_name="account",
 			name="display_name",

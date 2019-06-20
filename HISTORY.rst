@@ -41,6 +41,13 @@ Changes from API 2019-03-14:
 - Removed ``Invoice.date``, in place of ``Invoice.created`` (added deprecated property for the old name)
 - Added ``Invoice.status_transitions``
 
+2.0.4 (unreleased)
+------------------
+
+This is a bugfix-only version:
+
+- Fixed irreversible migration (#909)
+
 2.0.3 (2019-06-11)
 ------------------
 
