@@ -3,6 +3,13 @@
 History
 =======
 
+2.0.4 (unreleased)
+------------------
+
+This is a bugfix-only version:
+
+- Fixed irreversible migration (#909)
+
 2.0.3 (2019-06-11)
 ------------------
 
