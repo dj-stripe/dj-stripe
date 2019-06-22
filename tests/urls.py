@@ -13,6 +13,7 @@ urlpatterns = [
 	url(r"^home/", empty_view, name="home"),
 	url(r"^admin/", admin.site.urls),
 	url(r"^djstripe/", include("djstripe.urls", namespace="djstripe")),
+	url(r"^example/", include("tests.apps.example.urls")),
 	url(r"^testapp/", include("tests.apps.testapp.urls")),
 	url(
 		r"^testapp_namespaced/",
