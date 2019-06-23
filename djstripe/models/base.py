@@ -427,6 +427,8 @@ class StripeModel(models.Model):
 		)
 
 		try:
+			# We wrap the `_create_from_stripe_object` in a transaction to avoid TransactionManagementError
+			# on subsequent queries in case of the IntegrityError catch below. See PR #903
 			with transaction.atomic():
 				return (
 					cls._create_from_stripe_object(
@@ -435,6 +437,10 @@ class StripeModel(models.Model):
 					True,
 				)
 		except IntegrityError:
+			# Handle the race condition that something else created the object after the `get`
+			# and before `_create_from_stripe_object`.
+			# This is common during webhook handling, since Stripe sends multiple webhook events simultaneously,
+			# each of which will cause recursive syncs. See issue #429
 			return cls.stripe_objects.get(id=id_), False
 
 	@classmethod
