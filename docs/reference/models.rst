@@ -173,7 +173,7 @@ Card
     .. automethod:: djstripe.models.Card.create_token
 
     .. automethod:: djstripe.models.Card.str_parts
-    .. automethod:: djstripe.models.StripeObject.sync_from_stripe_data
+    .. automethod:: djstripe.models.Card.sync_from_stripe_data
 
 
 Source
