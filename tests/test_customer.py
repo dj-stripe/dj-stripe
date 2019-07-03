@@ -221,7 +221,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		customer = Customer.sync_from_stripe_data(customer_fake)
 		self.assertEqual(customer.default_source.id, customer_fake["default_source"])
 		self.assertEqual(customer.legacy_cards.count(), 2)
-		self.assertEqual(len(list(customer.payment_methods)), 2)
+		self.assertEqual(len(list(customer.customer_payment_methods)), 2)
 
 		self.assert_fks(
 			customer,

@@ -467,7 +467,7 @@ class Customer(StripeModel):
 		return abs(min(self.balance, 0))
 
 	@property
-	def payment_methods(self):
+	def customer_payment_methods(self):
 		"""
 		An iterable of all of the customer's payment methods (sources, then legacy cards)
 		"""
