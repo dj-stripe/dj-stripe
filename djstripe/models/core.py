@@ -18,7 +18,7 @@ from ..fields import (
 from ..managers import ChargeManager
 from ..signals import WEBHOOK_SIGNALS
 from ..utils import get_friendly_currency_amount
-from .base import StripeModel, logger
+from .base import IdempotencyKey, StripeModel, logger
 from .connect import Account
 
 # Override the default API version used by the Stripe library.
@@ -771,12 +771,22 @@ class Customer(StripeModel):
 				# The exception was raised for another reason, re-raise it
 				raise
 
+		if self.subscriber:
+			# Delete the idempotency key used by Customer.create()
+			# So re-creating a customer for this subscriber before the key expires
+			# doesn't return the older Customer data
+			idempotency_key = "customer:create:{}".format(self.subscriber.pk)
+			IdempotencyKey.objects.filter(action=idempotency_key).delete()
+
 		self.subscriber = None
 
 		# Remove sources
 		self.default_source = None
 		for source in self.legacy_cards.all():
 			source.remove()
+
+		for source in self.sources.all():
+			source.detach()
 
 		self.date_purged = timezone.now()
 		self.save()
