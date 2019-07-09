@@ -3,6 +3,7 @@ from .billing import (
 	Coupon, Invoice, InvoiceItem, Plan, Subscription,
 	SubscriptionItem, UpcomingInvoice, UsageRecord
 )
+from .checkout import Session
 from .connect import (
 	Account, ApplicationFee, ApplicationFeeRefund, CountrySpec, Transfer, TransferReversal
 )
@@ -40,6 +41,7 @@ __all__ = [
 	"Product",
 	"Refund",
 	"SetupIntent",
+	"Session",
 	"ScheduledQueryRun",
 	"Source",
 	"StripeModel",

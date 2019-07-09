@@ -39,7 +39,7 @@ WEBHOOK_SIGNALS = dict(
 			"charge.dispute.funds_withdrawn",
 			"charge.dispute.updated",
 			"charge.refund.updated",
-			"checkout_beta.session_succeeded",
+			"checkout.session.completed",
 			"coupon.created",
 			"coupon.deleted",
 			"coupon.updated",
@@ -139,6 +139,7 @@ WEBHOOK_SIGNALS = dict(
 			"transfer.reversed",
 			"transfer.updated",
 			# deprecated (no longer in events_types list) - TODO can be deleted?
+			"checkout_beta.session_succeeded",
 			"issuer_fraud_record.created",
 			"payment_intent.requires_capture",
 			"subscription_schedule.canceled",

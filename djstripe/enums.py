@@ -483,6 +483,13 @@ class SourceRedirectStatus(Enum):
 	failed = _("Failed")
 
 
+class SubmitTypeStatus(Enum):
+	auto = _("Auto")
+	book = _("Book")
+	donate = _("donate")
+	pay = _("pay")
+
+
 class SubscriptionStatus(Enum):
 	trialing = _("Trialing")
 	active = _("Active")
