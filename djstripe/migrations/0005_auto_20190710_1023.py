@@ -5,14 +5,10 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('djstripe', '0004_auto_20190612_0850'),
-    ]
+	dependencies = [("djstripe", "0004_auto_20190612_0850")]
 
-    operations = [
-        migrations.RenameField(
-            model_name='customer',
-            old_name='account_balance',
-            new_name='balance',
-        ),
-    ]
+	operations = [
+		migrations.RenameField(
+			model_name="customer", old_name="account_balance", new_name="balance"
+		)
+	]
