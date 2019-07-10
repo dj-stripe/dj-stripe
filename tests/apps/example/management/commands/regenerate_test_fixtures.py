@@ -68,8 +68,8 @@ class Command(BaseCommand):
 		model_extra_readonly_fields = {
 			djstripe.models.Account: ["id"],
 			djstripe.models.Customer: [
+				"account_balance",
 				"currency",
-				"balance",
 				"default_source",
 				"delinquent",
 				"invoice_prefix",
