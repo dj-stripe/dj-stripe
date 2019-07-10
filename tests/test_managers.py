@@ -41,7 +41,7 @@ class SubscriptionManagerTest(TestCase):
 				subscriber=user,
 				id="cus_xxxxxxxxxxxxxx{0}".format(i),
 				livemode=False,
-				account_balance=0,
+				balance=0,
 				delinquent=False,
 			)
 
@@ -63,7 +63,7 @@ class SubscriptionManagerTest(TestCase):
 			subscriber=user,
 			id="cus_xxxxxxxxxxxxxx{0}".format(11),
 			livemode=False,
-			account_balance=0,
+			balance=0,
 			delinquent=False,
 		)
 		Subscription.objects.create(
@@ -85,7 +85,7 @@ class SubscriptionManagerTest(TestCase):
 			subscriber=user,
 			id="cus_xxxxxxxxxxxxxx{0}".format(12),
 			livemode=False,
-			account_balance=0,
+			balance=0,
 			delinquent=False,
 		)
 		Subscription.objects.create(
@@ -156,7 +156,7 @@ class TransferManagerTest(TestCase):
 class ChargeManagerTest(TestCase):
 	def setUp(self):
 		customer = Customer.objects.create(
-			id="cus_XXXXXXX", livemode=False, account_balance=0, delinquent=False
+			id="cus_XXXXXXX", livemode=False, balance=0, delinquent=False
 		)
 
 		self.march_charge = Charge.objects.create(

@@ -51,19 +51,25 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		self.customer.subscriber = None
 		self.assertEqual(str(self.customer), "{id} (deleted)".format(id=self.customer.id))
 
-	def test_account_balance(self):
-		self.assertEqual(self.customer.account_balance, 0)
+	def test_balance(self):
+		self.assertEqual(self.customer.balance, 0)
 		self.assertEqual(self.customer.credits, 0)
 
-		self.customer.account_balance = 1000
-		self.assertEqual(self.customer.account_balance, 1000)
+		self.customer.balance = 1000
+		self.assertEqual(self.customer.balance, 1000)
 		self.assertEqual(self.customer.credits, 0)
 		self.assertEqual(self.customer.pending_charges, 1000)
 
-		self.customer.account_balance = -1000
-		self.assertEqual(self.customer.account_balance, -1000)
+		with self.assertWarns(DeprecationWarning):
+			self.assertEqual(self.customer.balance, self.customer.account_balance)
+
+		self.customer.balance = -1000
+		self.assertEqual(self.customer.balance, -1000)
 		self.assertEqual(self.customer.credits, 1000)
 		self.assertEqual(self.customer.pending_charges, 0)
+
+		with self.assertWarns(DeprecationWarning):
+			self.assertEqual(self.customer.balance, self.customer.account_balance)
 
 	def test_customer_dashboard_url(self):
 		expected_url = "https://dashboard.stripe.com/test/customers/{}".format(

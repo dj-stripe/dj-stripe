@@ -124,9 +124,7 @@ class TestCustomerEvents(EventTestCase):
 		event.invoke_webhook_handlers()
 
 		customer = Customer.objects.get(id=fake_stripe_event["data"]["object"]["id"])
-		self.assertEqual(
-			customer.account_balance, fake_stripe_event["data"]["object"]["account_balance"]
-		)
+		self.assertEqual(customer.balance, fake_stripe_event["data"]["object"]["balance"])
 		self.assertEqual(customer.currency, fake_stripe_event["data"]["object"]["currency"])
 
 	@patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)

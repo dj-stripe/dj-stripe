@@ -215,7 +215,7 @@ class CustomerAdmin(StripeModelAdmin):
 		"currency",
 		"default_source",
 		"coupon",
-		"account_balance",
+		"balance",
 		"business_vat_id",
 	)
 	list_filter = (CustomerHasSourceListFilter, CustomerSubscriptionStatusListFilter)

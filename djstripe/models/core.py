@@ -1,4 +1,5 @@
 import decimal
+import warnings
 
 import stripe
 from django.db import models, transaction
@@ -341,7 +342,7 @@ class Customer(StripeModel):
 	expand_fields = ["default_source"]
 	stripe_dashboard_item_name = "customers"
 
-	account_balance = models.IntegerField(
+	balance = models.IntegerField(
 		help_text=(
 			"Current balance, if any, being stored on the customer's account. "
 			"If negative, the customer has credit to apply to the next invoice. "
@@ -451,7 +452,7 @@ class Customer(StripeModel):
 			defaults={
 				"subscriber": subscriber,
 				"livemode": stripe_customer["livemode"],
-				"account_balance": stripe_customer.get("account_balance", 0),
+				"balance": stripe_customer.get("balance", 0),
 				"delinquent": stripe_customer.get("delinquent", False),
 			},
 		)
@@ -461,9 +462,9 @@ class Customer(StripeModel):
 	@property
 	def credits(self):
 		"""
-		The customer is considered to have credits if their account_balance is below 0.
+		The customer is considered to have credits if their balance is below 0.
 		"""
-		return abs(min(self.account_balance, 0))
+		return abs(min(self.balance, 0))
 
 	@property
 	def payment_methods(self):
@@ -479,9 +480,18 @@ class Customer(StripeModel):
 	@property
 	def pending_charges(self):
 		"""
-		The customer is considered to have pending charges if their account_balance is above 0.
+		The customer is considered to have pending charges if their balance is above 0.
 		"""
-		return max(self.account_balance, 0)
+		return max(self.balance, 0)
+
+	# deprecated, will be removed in 2.2
+	@property
+	def account_balance(self):
+		warnings.warn(
+			"Customer.date has been removed, use .balance instead.  This alias will be removed in djstripe 2.2",
+			DeprecationWarning,
+		)
+		return self.balance
 
 	def subscribe(
 		self,
