@@ -69,7 +69,6 @@ class Command(BaseCommand):
 			djstripe.models.Account: ["id"],
 			djstripe.models.Customer: [
 				"currency",
-				# TODO - replace account_balance with balance
 				"balance",
 				"default_source",
 				"delinquent",

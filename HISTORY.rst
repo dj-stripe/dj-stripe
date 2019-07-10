@@ -41,6 +41,7 @@ Changes from API 2019-03-14:
 - Renamed ``Invoice.application_fee`` to ``Invoice.application_fee_amount`` (added deprecated property for the old name)
 - Removed ``Invoice.date``, in place of ``Invoice.created`` (added deprecated property for the old name)
 - Added ``Invoice.status_transitions``
+- Renamed ``Customer.account_balance`` to ``Customer.balance`` (added deprecated property for the old name)
 
 2.0.4 (unreleased)
 ------------------

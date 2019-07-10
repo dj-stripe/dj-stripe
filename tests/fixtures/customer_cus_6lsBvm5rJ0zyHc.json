@@ -1,7 +1,7 @@
 {
 	"id": "cus_6lsBvm5rJ0zyHc",
 	"object": "customer",
-	"account_balance": 0,
+	"balance": 0,
 	"address": null,
 	"balance": 0,
 	"created": 1557995166,

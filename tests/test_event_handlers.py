@@ -125,7 +125,7 @@ class TestCustomerEvents(EventTestCase):
 
 		customer = Customer.objects.get(id=fake_stripe_event["data"]["object"]["id"])
 		self.assertEqual(
-			customer.account_balance, fake_stripe_event["data"]["object"]["account_balance"]
+			customer.balance, fake_stripe_event["data"]["object"]["balance"]
 		)
 		self.assertEqual(customer.currency, fake_stripe_event["data"]["object"]["currency"])
 
