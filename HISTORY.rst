@@ -15,6 +15,7 @@ History
 - Dropped previously-deprecated properties ``Charge.source_type`` and ``Charge.source_stripe_id``
 - ``enums.PaymentMethodType`` has been deprecated, use ``enums.DjstripePaymentMethodType``
 - Made ``SubscriptionItem.quantity`` nullable as per Plans with ``usage_type="metered"`` (follow-up to #865)
+- Added manage command ``djstripe_sync_models`` (#727, #89)
 
 Changes from API 2018-11-08:
 
