@@ -254,7 +254,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		customer, created = Customer.get_or_create(user)
 		self.assertTrue(IdempotencyKey.objects.filter(action=idempotency_key_action).exists())
 
-		with patch("stripe.Customer.retrieve", autospec=True) as customer_retrieve_fake:
+		with patch("stripe.Customer.retrieve", autospec=True):
 			customer.purge()
 
 		self.assertFalse(
