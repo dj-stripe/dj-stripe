@@ -20,9 +20,10 @@ from djstripe.settings import STRIPE_SECRET_KEY
 
 from . import (
 	FAKE_ACCOUNT, FAKE_BALANCE_TRANSACTION, FAKE_CARD, FAKE_CARD_V, FAKE_CHARGE,
-	FAKE_COUPON, FAKE_CUSTOMER, FAKE_CUSTOMER_II, FAKE_DISCOUNT_CUSTOMER, FAKE_INVOICE,
-	FAKE_INVOICE_III, FAKE_INVOICEITEM, FAKE_PLAN, FAKE_PRODUCT, FAKE_SUBSCRIPTION,
-	FAKE_SUBSCRIPTION_II, FAKE_UPCOMING_INVOICE, IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
+	FAKE_COUPON, FAKE_CUSTOMER, FAKE_CUSTOMER_II, FAKE_CUSTOMER_III,
+	FAKE_DISCOUNT_CUSTOMER, FAKE_INVOICE, FAKE_INVOICE_III, FAKE_INVOICEITEM,
+	FAKE_PLAN, FAKE_PRODUCT, FAKE_SOURCE, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II,
+	FAKE_UPCOMING_INVOICE, IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
 	IS_EXCEPTION_AUTOSPEC_SUPPORTED, IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	AssertStripeFksMixin, StripeList, datetime_to_unix, default_account
 )
@@ -237,6 +238,29 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		self.assertTrue(not customer.legacy_cards.all())
 		self.assertTrue(not customer.sources.all())
 		self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
+
+	@patch("stripe.Customer.create", autospec=True)
+	def test_customer_purge_detaches_sources(self, customer_api_create_fake):
+		fake_customer = deepcopy(FAKE_CUSTOMER_III)
+		customer_api_create_fake.return_value = fake_customer
+
+		user = get_user_model().objects.create_user(
+			username="blah", email=FAKE_CUSTOMER_III["email"]
+		)
+
+		Customer.get_or_create(user)
+		customer = Customer.sync_from_stripe_data(deepcopy(FAKE_CUSTOMER_III))
+
+		self.assertIsNotNone(customer.default_source)
+		self.assertNotEqual(customer.sources.count(), 0)
+
+		with patch("stripe.Customer.retrieve", autospec=True), patch(
+			"stripe.Source.retrieve", return_value=deepcopy(FAKE_SOURCE), autospec=True
+		):
+			customer.purge()
+
+		self.assertIsNone(customer.default_source)
+		self.assertEqual(customer.sources.count(), 0)
 
 	@patch(
 		"stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER_II), autospec=True
