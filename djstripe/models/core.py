@@ -775,8 +775,8 @@ class Customer(StripeModel):
 			# Delete the idempotency key used by Customer.create()
 			# So re-creating a customer for this subscriber before the key expires
 			# doesn't return the older Customer data
-			idempotency_key = "customer:create:{}".format(self.subscriber.pk)
-			IdempotencyKey.objects.filter(action=idempotency_key).delete()
+			idempotency_key_action = "customer:create:{}".format(self.subscriber.pk)
+			IdempotencyKey.objects.filter(action=idempotency_key_action).delete()
 
 		self.subscriber = None
 

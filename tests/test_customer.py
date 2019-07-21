@@ -13,7 +13,8 @@ from stripe.error import InvalidRequestError
 from djstripe import settings as djstripe_settings
 from djstripe.exceptions import MultipleSubscriptionException
 from djstripe.models import (
-	Card, Charge, Coupon, Customer, DjstripePaymentMethod, Invoice, Plan, Subscription
+	Card, Charge, Coupon, Customer, DjstripePaymentMethod,
+	IdempotencyKey, Invoice, Plan, Subscription
 )
 from djstripe.settings import STRIPE_SECRET_KEY
 
@@ -236,6 +237,29 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 		self.assertTrue(not customer.legacy_cards.all())
 		self.assertTrue(not customer.sources.all())
 		self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
+
+	@patch(
+		"stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER_II), autospec=True
+	)
+	def test_customer_purge_deletes_idempotency_key(self, customer_api_create_fake):
+		# We need to call Customer.get_or_create (which setUp doesn't) to get an idempotency key
+		user = get_user_model().objects.create_user(
+			username="blah", email=FAKE_CUSTOMER_II["email"]
+		)
+		idempotency_key_action = "customer:create:{}".format(user.pk)
+		self.assertFalse(
+			IdempotencyKey.objects.filter(action=idempotency_key_action).exists()
+		)
+
+		customer, created = Customer.get_or_create(user)
+		self.assertTrue(IdempotencyKey.objects.filter(action=idempotency_key_action).exists())
+
+		with patch("stripe.Customer.retrieve", autospec=True) as customer_retrieve_fake:
+			customer.purge()
+
+		self.assertFalse(
+			IdempotencyKey.objects.filter(action=idempotency_key_action).exists()
+		)
 
 	@patch("stripe.Customer.retrieve", autospec=True)
 	def test_customer_delete_same_as_purge(self, customer_retrieve_fake):
