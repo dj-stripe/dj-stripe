@@ -66,6 +66,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
+				"djstripe.Subscription.pending_setup_intent"
 			},
 		)
 
@@ -117,6 +118,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -165,6 +167,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -206,6 +209,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -249,6 +253,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -292,6 +297,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -404,6 +410,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -531,6 +538,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
 				"djstripe.Invoice.subscription",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -581,6 +589,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -625,6 +634,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -670,6 +680,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -713,6 +724,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -756,6 +768,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -796,6 +809,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Customer.coupon",
 				"djstripe.Invoice.subscription",
 				"djstripe.Plan.product",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 

@@ -93,6 +93,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
 				"djstripe.Plan.product",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -159,6 +160,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -252,6 +254,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -331,6 +334,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -385,6 +389,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -440,6 +445,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -487,6 +493,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
 				"djstripe.Plan.product",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -550,6 +557,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Account.branding_icon",
 				"djstripe.Charge.dispute",
 				"djstripe.Customer.coupon",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -610,6 +618,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Charge.dispute",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 

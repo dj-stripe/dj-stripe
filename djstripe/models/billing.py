@@ -978,6 +978,16 @@ class Subscription(StripeModel):
 			"to a subscription to a new plan), the date the subscription ended."
 		),
 	)
+	pending_setup_intent = models.ForeignKey(
+		"SetupIntent",
+		null=True,
+		blank=True,
+		on_delete=models.CASCADE,
+		related_name="setup_intents",
+		help_text="We can use this SetupIntent to collect user authentication when creating a subscription "
+		"without immediate payment or updating a subscription’s payment method, allowing you to "
+		"optimize for off-session payments."
+	)
 	plan = models.ForeignKey(
 		"Plan",
 		null=True,

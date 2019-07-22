@@ -94,6 +94,7 @@
 	"metadata": {
 		"djstripe_test_fake_id": "sub_fakefakefakefakefake0004"
 	},
+	"pending_setup_intent": null,
 	"plan": null,
 	"quantity": null,
 	"schedule": null,
