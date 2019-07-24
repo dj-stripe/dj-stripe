@@ -15,4 +15,9 @@ urlpatterns = [
 		views.PurchaseSubscriptionSuccessView.as_view(),
 		name="purchase_subscription_success",
 	),
+	path(
+		"payment-intent",
+		views.PaymentIntentView.as_view(),
+		name="payment_intent",
+	),
 ]

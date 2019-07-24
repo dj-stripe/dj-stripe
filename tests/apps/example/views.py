@@ -94,3 +94,20 @@ class PurchaseSubscriptionSuccessView(DetailView):
 	slug_field = "id"
 	slug_url_kwarg = "id"
 	context_object_name = "subscription"
+
+
+class PaymentIntentView(FormView):
+	"""
+	Example view to demonstrate how to use payment method
+
+	* Create a customer
+	"""
+
+	template_name = "payment_intent.html"
+
+	form_class = forms.PaymentIntentForm
+
+	def get_context_data(self, **kwargs):
+		ctx = super().get_context_data(**kwargs)
+		ctx["STRIPE_PUBLIC_KEY"] = djstripe.settings.STRIPE_PUBLIC_KEY
+		return ctx
