@@ -1346,6 +1346,8 @@ class PaymentIntent(StripeModel):
 	)
 	review = models.CharField(
 		max_length=255,
+		null=True,
+		blank=True,
 		help_text=(
 			"ID of the review associated with this PaymentIntent, if any."
 		)
@@ -1446,6 +1448,104 @@ class PaymentIntent(StripeModel):
 		api_key = api_key or self.default_api_key
 
 		return self.api_retrieve(api_key=api_key).confirm(**kwargs)
+
+
+class SetupIntent(StripeModel):
+	"""
+	A SetupIntent guides you through the process of setting up a customer's payment credentials
+	for future payments. For example, you could use a SetupIntent to set up your customer's
+	card without immediately collecting a payment. Later, you can use PaymentIntents
+	to drive the payment flow.
+
+	NOTE: You should not maintain long-lived, unconfirmed SetupIntents.
+	For security purposes, SetupIntents older than 24 hours may no longer be valid.
+
+	Stripe documentation: https://stripe.com/docs/api#setup_intents
+	"""
+
+	stripe_class = stripe.SetupIntent
+	stripe_dashboard_item_name = "setup intents"
+
+	application = models.CharField(
+		max_length=255,
+		null=True,
+		blank=True,
+		help_text=(
+			"ID of the Connect application that created the SetupIntent."
+		)
+	)
+	cancellation_reason = models.CharField(
+		max_length=255,
+		null=True,
+		help_text=(
+			"Reason for cancellation of this SetupIntent, one of abandoned, requested_by_customer, or duplicate"
+		)
+	)
+	client_secret = models.CharField(
+		max_length=255,
+		null=True,
+		blank=True,
+		help_text=(
+			"The client secret of this SetupIntent. Used for client-side retrieval using a publishable key."
+		)
+	)
+	customer = models.ForeignKey(
+		"Customer",
+		null=True,
+		on_delete=models.SET_NULL,
+		help_text=(
+			"ID of the Customer this SetupIntent belongs to, if one exists."
+		)
+	)
+	last_setup_error = JSONField(
+		null=True,
+		blank=True,
+		help_text=(
+			"The error encountered in the previous SetupIntent confirmation."
+		)
+	)
+	next_action = JSONField(
+		null=True,
+		blank=True,
+		help_text=(
+			"If present, this property tells you what actions you need to take in"
+			"order for your customer to continue payment setup."
+		)
+	)
+	on_behalf_of = models.ForeignKey(
+		"Account",
+		on_delete=models.SET_NULL,
+		null=True,
+		help_text="The account (if any) for which the setup is intended.",
+	)
+	payment_method = models.ForeignKey(
+		"PaymentMethod",
+		on_delete=models.SET_NULL,
+		null=True,
+		help_text=(
+			"ID of the payment method used in this PaymentIntent."
+		)
+	)
+	payment_method_types = JSONField(
+		help_text=(
+			"The list of payment method types (e.g. card) that this PaymentIntent is allowed to "
+			"use."
+		)
+	)
+	status = StripeEnumField(
+		enum=enums.SetupIntentStatus,
+		help_text=(
+			"Status of this SetupIntent, one of requires_payment_method, requires_confirmation,"
+			"requires_action, processing, canceled, or succeeded."
+		)
+	)
+	usage = StripeEnumField(
+		enum=enums.IntentUsage,
+		default=enums.IntentUsage.off_session,
+		help_text=(
+			"Indicates how the payment method is intended to be used in the future."
+		)
+	)
 
 
 class Payout(StripeModel):

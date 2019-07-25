@@ -317,6 +317,10 @@ class PaymentIntentStatus(IntentStatus):
 	requires_capture = _("Capture the funds on the cards which have been put on holds.")
 
 
+class SetupIntentStatus(IntentStatus):
+	succeeded = _("Setup was successful and the payment method is optimized for future payments.")
+
+
 class PayoutFailureCode(Enum):
 	"""
 	Payout failure error codes.

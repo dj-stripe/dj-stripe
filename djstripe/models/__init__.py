@@ -8,7 +8,8 @@ from .connect import (
 )
 from .core import (
 	BalanceTransaction, Charge, Customer, Dispute,
-	Event, FileUpload, Payout, Product, Refund, PaymentIntent
+	Event, FileUpload, PaymentIntent, Payout, Product,
+	Refund, SetupIntent,
 )
 from .payment_methods import BankAccount, Card, DjstripePaymentMethod, PaymentMethod, Source
 from .sigma import ScheduledQueryRun
@@ -38,6 +39,7 @@ __all__ = [
 	"Plan",
 	"Product",
 	"Refund",
+	"SetupIntent",
 	"ScheduledQueryRun",
 	"Source",
 	"StripeModel",
