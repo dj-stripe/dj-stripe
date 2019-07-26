@@ -51,26 +51,22 @@
 
 		<h1 class="is-size-3">Example Payment Intent Manual Configuration</h1>
 
+        <input id="cardholder-name" type="text" placeholder="Cardholder Name">
+        <p class="form-row">
+            <label for="card-element">
+                Credit or debit card
+            </label>
+            <div id="card-element">
+                <!-- A Stripe Element will be inserted here. -->
+            </div>
 
-		<form action="" method="post" id="payment-form">
-			{% csrf_token %}
-			{{form}}
+            <!-- Used to display form errors. -->
+            <div id="card-errors" role="alert"></div>
+            <div id="card-success" role="alert">
+                <span id="success-message"></span>
+            </div>
 
-			<input id="cardholder-name" type="text">
-			<div class="form-row">
-				<label for="card-element">
-					Credit or debit card
-				</label>
-				<div id="card-element">
-					<!-- A Stripe Element will be inserted here. -->
-				</div>
-
-				<!-- Used to display form errors. -->
-				<div id="card-errors" role="alert"></div>
-			</div>
-
-			<button id="card-button">Submit Payment</button>
-		</form>
+        <button id="card-button">Submit Payment</button>
 
 	</div>
 </section>
@@ -116,13 +112,18 @@
 			var errorElement = document.getElementById('card-errors');
 			errorElement.textContent = result.error.message;
 		} else {
-		  // Otherwise send paymentMethod.id to your server (see Step 2)
-		  fetch('/ajax/confirm_payment', {
+		  // Otherwise send paymentMethod.id to your server.
+		  fetch('/example/payment-intent', {
 			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ payment_method_id: result.paymentMethod.id })
+			headers: {
+			    "X-CSRFToken": getCookie("csrftoken"),
+			    'Accept': 'application/json',
+			    'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+			body: JSON.stringify({ 'payment_method_id': result.paymentMethod.id })
 		  }).then(function(result) {
-			// Handle server response (see Step 3)
+			// Handle server response.
 			result.json().then(function(json) {
 			  handleServerResponse(json);
 			})
@@ -131,6 +132,19 @@
 	  });
 	});
 
+    function getCookie(name) {
+      if (!document.cookie) {
+        return null;
+      }
+      const xsrfCookies = document.cookie.split(';')
+        .map(c => c.trim())
+        .filter(c => c.startsWith(name + '='));
+      if (xsrfCookies.length === 0) {
+        return null;
+      }
+      return decodeURIComponent(xsrfCookies[0].split('=')[1]);
+    }
+
 	function handleServerResponse(response) {
 	  if (response.error) {
 	  	var errorElement = document.getElementById('card-errors');
@@ -138,7 +152,7 @@
 	  } else if (response.requires_action) {
 		// Use Stripe.js to handle required card action
 		stripe.handleCardAction(
-		  response.payment_intent_client_secretemail = forms.EmailField()
+		  response.payment_intent_client_secretemail
 		).then(function(result) {
 		  if (result.error) {
 			// Show error in payment form
@@ -155,7 +169,8 @@
 		  }
 		});
 	  } else {
-		// Show success message
+	      // Show success message
+          document.getElementById('success-message').innerHTML = 'Success!!';
 	  }
 	}
 

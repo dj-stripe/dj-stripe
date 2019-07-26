@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 
 from . import views
 
@@ -15,9 +15,5 @@ urlpatterns = [
 		views.PurchaseSubscriptionSuccessView.as_view(),
 		name="purchase_subscription_success",
 	),
-	path(
-		"payment-intent",
-		views.PaymentIntentView.as_view(),
-		name="payment_intent",
-	),
+	re_path(r'payment-intent', views.create_payment_intent),
 ]
