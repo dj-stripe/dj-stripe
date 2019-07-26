@@ -395,7 +395,13 @@ class StripeModel(models.Model):
 		if not field:
 			# An empty field - We need to return nothing here because there is
 			# no way of knowing what needs to be fetched!
-			# TODO - this path shouldn't be hit, log/assert/exception?
+			logger.warning(
+				"empty field %s.%s = %r - this is a bug, please report it to dj-stripe! data = %r",
+				cls.__name__,
+				field_name,
+				field,
+				data,
+			)
 			return None, False
 		elif id_ == field:
 			# A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}
