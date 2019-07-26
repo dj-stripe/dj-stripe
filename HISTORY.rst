@@ -3,7 +3,6 @@
 History
 =======
 
-
 2.1.0 (unreleased)
 ------------------
 
@@ -18,6 +17,11 @@ History
 - Made ``SubscriptionItem.quantity`` nullable as per Plans with ``usage_type="metered"`` (follow-up to #865)
 - Added manage command ``djstripe_sync_models`` (#727, #89)
 - Fixed issue with re-creating a customer after `Customer.purge()` (#916)
+- New models
+    - Payment Intent
+    - Setup Intent
+    - Payment Method
+    - Session
 
 Changes from API 2018-11-08:
 
