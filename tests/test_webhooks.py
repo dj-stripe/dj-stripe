@@ -126,7 +126,7 @@ class TestWebhook(TestCase):
 		autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
 	)
 	def test_webhook_verify_signature_pass(
-		self, event_retrieve_mock, transfer_retrieve_mock, verify_signature_mock
+		self, event_retrieve_mock, transfer_retrieve_mock, verify_header_mock
 	):
 		reload(djstripe_settings)
 
@@ -134,7 +134,12 @@ class TestWebhook(TestCase):
 
 		self.assertEqual(resp.status_code, 200)
 		self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
-		verify_signature_mock.called_once_with(FAKE_EVENT_TRANSFER_CREATED, {})
+		verify_header_mock.assert_called_once_with(
+			json.dumps(FAKE_EVENT_TRANSFER_CREATED),
+			"PLACEHOLDER",
+			djstripe_settings.WEBHOOK_SECRET,
+			djstripe_settings.WEBHOOK_TOLERANCE,
+		)
 		event_retrieve_mock.assert_not_called()
 
 	@override_settings(DJSTRIPE_WEBHOOK_VALIDATION=None)
@@ -146,7 +151,7 @@ class TestWebhook(TestCase):
 		autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
 	)
 	def test_webhook_no_validation_pass(
-		self, event_retrieve_mock, transfer_retrieve_mock, verify_signature_mock
+		self, event_retrieve_mock, transfer_retrieve_mock, verify_header_mock
 	):
 		reload(djstripe_settings)
 
@@ -159,7 +164,7 @@ class TestWebhook(TestCase):
 		self.assertEqual(resp.status_code, 200)
 		self.assertTrue(Event.objects.filter(id="evt_invalid").exists())
 		event_retrieve_mock.assert_not_called()
-		verify_signature_mock.assert_not_called()
+		verify_header_mock.assert_not_called()
 
 	def test_webhook_no_signature(self):
 		self.assertEqual(WebhookEventTrigger.objects.count(), 0)

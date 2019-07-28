@@ -28,10 +28,9 @@ FIXTURE_DIR_PATH = Path(__file__).parent.joinpath("fixtures")
 # Flags for various bugs with mock autospec
 # These can be removed once we drop support for the affected python versions
 
-# Don't try and use autospec=True on staticmethods on <py39
-# TODO - enable for appropriate minor versions of py3.7/3.8 once this is live
+# Don't try and use autospec=True on staticmethods on <py3.7
 # see https://bugs.python.org/issue23078
-IS_STATICMETHOD_AUTOSPEC_SUPPORTED = sys.version_info >= (3, 9)
+IS_STATICMETHOD_AUTOSPEC_SUPPORTED = sys.version_info >= (3, 7, 4)
 
 # Don't try and use autospec=True with assert_called etc on py3.5
 # see https://bugs.python.org/issue28380
