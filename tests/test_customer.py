@@ -19,12 +19,12 @@ from djstripe.models import (
 from djstripe.settings import STRIPE_SECRET_KEY
 
 from . import (
-	FAKE_ACCOUNT, FAKE_BALANCE_TRANSACTION, FAKE_CARD, FAKE_CARD_V, FAKE_CHARGE,
-	FAKE_COUPON, FAKE_CUSTOMER, FAKE_CUSTOMER_II, FAKE_CUSTOMER_III,
-	FAKE_DISCOUNT_CUSTOMER, FAKE_INVOICE, FAKE_INVOICE_III, FAKE_INVOICEITEM,
-	FAKE_PLAN, FAKE_PRODUCT, FAKE_SOURCE, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II,
-	FAKE_UPCOMING_INVOICE, IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
-	IS_EXCEPTION_AUTOSPEC_SUPPORTED, IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+	FAKE_ACCOUNT, FAKE_BALANCE_TRANSACTION, FAKE_CARD, FAKE_CARD_V,
+	FAKE_CHARGE, FAKE_COUPON, FAKE_CUSTOMER, FAKE_CUSTOMER_II,
+	FAKE_CUSTOMER_III, FAKE_DISCOUNT_CUSTOMER, FAKE_INVOICE,
+	FAKE_INVOICE_III, FAKE_INVOICEITEM, FAKE_PLAN, FAKE_PRODUCT, FAKE_SOURCE,
+	FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II, FAKE_UPCOMING_INVOICE,
+	IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED, IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	AssertStripeFksMixin, StripeList, datetime_to_unix, default_account
 )
 
@@ -792,7 +792,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 	@patch(
 		"stripe.Invoice.list", return_value=StripeList(data=[deepcopy(FAKE_INVOICE_III)])
 	)
-	@patch("djstripe.models.Invoice.retry", autospec=IS_EXCEPTION_AUTOSPEC_SUPPORTED)
+	@patch("djstripe.models.Invoice.retry", autospec=True)
 	def test_retry_unpaid_invoices_expected_exception(
 		self,
 		invoice_retry_mock,
@@ -828,7 +828,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 	@patch(
 		"stripe.Invoice.list", return_value=StripeList(data=[deepcopy(FAKE_INVOICE_III)])
 	)
-	@patch("djstripe.models.Invoice.retry", autospec=IS_EXCEPTION_AUTOSPEC_SUPPORTED)
+	@patch("djstripe.models.Invoice.retry", autospec=True)
 	def test_retry_unpaid_invoices_unexpected_exception(
 		self,
 		invoice_retry_mock,

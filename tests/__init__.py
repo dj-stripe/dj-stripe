@@ -37,10 +37,6 @@ IS_STATICMETHOD_AUTOSPEC_SUPPORTED = sys.version_info >= (3, 9)
 # see https://bugs.python.org/issue28380
 IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED = sys.version_info >= (3, 6)
 
-# Don't try and use autospec=True for functions that have a exception side-effect on py3.4
-# see https://bugs.python.org/issue23661
-IS_EXCEPTION_AUTOSPEC_SUPPORTED = sys.version_info >= (3, 5)
-
 
 class AssertStripeFksMixin:
 	def assert_fks(self, obj, expected_blank_fks, processed_stripe_ids=None):
