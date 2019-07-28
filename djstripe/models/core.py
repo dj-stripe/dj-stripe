@@ -147,6 +147,13 @@ class Charge(StripeModel):
 		default=False,
 		help_text="True if the charge succeeded, or was successfully authorized for later capture, False otherwise.",
 	)
+	payment_intent = models.ForeignKey(
+		"PaymentIntent",
+		null=True,
+		on_delete=models.SET_NULL,
+		related_name="charges",
+		help_text=("PaymentIntent associated with this charge, if one exists."),
+	)
 	receipt_email = models.TextField(
 		max_length=800,  # yup, 800.
 		default="",

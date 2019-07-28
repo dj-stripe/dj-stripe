@@ -360,6 +360,9 @@ FAKE_SOURCE_II = SourceDict(
 )
 
 
+FAKE_PAYMENT_INTENT_I = load_fixture("payment_intent_pi_fakefakefakefakefake0001.json")
+
+
 class ChargeDict(dict):
 	def refund(self, amount=None, reason=None):
 		self.update({"refunded": True, "amount_refunded": amount})

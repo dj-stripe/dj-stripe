@@ -92,6 +92,7 @@ class Command(BaseCommand):
 				"last4",
 				"tokenization_method",
 			],
+			djstripe.models.PaymentIntent: ["id"],
 			djstripe.models.Source: [
 				"id",
 				"amount",
@@ -125,11 +126,10 @@ class Command(BaseCommand):
 		Fields that we don't care about the value of, and that preserving
 		allows us to avoid churn in the fixtures
 		"""
-		# TODO payment_intent from this once PaymentIntent model / fixture exists
 		model_sideeffect_fields = {
 			djstripe.models.BalanceTransaction: ["available_on"],
 			djstripe.models.Source: ["client_secret"],
-			djstripe.models.Charge: ["payment_intent", "receipt_url"],
+			djstripe.models.Charge: ["receipt_url"],
 			djstripe.models.Subscription: [
 				"billing_cycle_anchor",
 				"current_period_start",
@@ -150,7 +150,6 @@ class Command(BaseCommand):
 				"webhooks_delivered_at",
 				"period_start",
 				"period_end",
-				"payment_intent",
 				# we don't currently track separate fixtures for SubscriptionItems
 				"subscription_item",
 			],
@@ -180,6 +179,7 @@ class Command(BaseCommand):
 			],
 			djstripe.models.Invoice: [tests.FAKE_INVOICE],
 			djstripe.models.Charge: [tests.FAKE_CHARGE],
+			djstripe.models.PaymentIntent: [tests.FAKE_PAYMENT_INTENT_I],
 			djstripe.models.BalanceTransaction: [tests.FAKE_BALANCE_TRANSACTION],
 		}
 
@@ -264,6 +264,9 @@ class Command(BaseCommand):
 
 			for subscription in customer["subscriptions"]["data"]:
 				self.update_fake_id_map(subscription)
+
+		for payment_intent in djstripe.models.PaymentIntent.api_list():
+			self.update_fake_id_map(payment_intent)
 
 	def update_fake_id_map(self, obj):
 		fake_id = self.get_fake_id(obj)
@@ -360,6 +363,9 @@ class Command(BaseCommand):
 
 		self.stdout.write(f"{model_class.__name__} {id_}", ending="")
 
+		# For objects that we can't directly choose the ids of
+		# (and that will thus vary between stripe accounts)
+		# we fetch the id from a related object
 		if issubclass(model_class, djstripe.models.Account):
 			created, obj = self.get_or_create_stripe_account(
 				old_obj=old_obj, readonly_fields=readonly_fields
@@ -378,6 +384,10 @@ class Command(BaseCommand):
 			)
 		elif issubclass(model_class, djstripe.models.Charge):
 			created, obj = self.get_or_create_stripe_charge(
+				old_obj=old_obj, writable_fields=["metadata"]
+			)
+		elif issubclass(model_class, djstripe.models.PaymentIntent):
+			created, obj = self.get_or_create_stripe_payment_intent(
 				old_obj=old_obj, writable_fields=["metadata"]
 			)
 		elif issubclass(model_class, djstripe.models.BalanceTransaction):
@@ -517,6 +527,29 @@ class Command(BaseCommand):
 			self.stdout.write(f"	found {id_}")
 		except InvalidRequestError:
 			assert False, "Expected to find charge via invoice"
+
+		for k in writable_fields:
+			if isinstance(obj.get(k), dict):
+				# merge dicts (eg metadata)
+				obj[k].update(old_obj.get(k, {}))
+			else:
+				obj[k] = old_obj[k]
+
+		obj.save()
+
+		return created, obj
+
+	def get_or_create_stripe_payment_intent(self, old_obj, writable_fields):
+		invoice = djstripe.models.Invoice(id=old_obj["invoice"]).api_retrieve()
+		id_ = invoice["payment_intent"]
+
+		try:
+			obj = djstripe.models.PaymentIntent(id=id_).api_retrieve()
+			created = False
+
+			self.stdout.write(f"	found {id_}")
+		except InvalidRequestError:
+			assert False, "Expected to find payment_intent via invoice"
 
 		for k in writable_fields:
 			if isinstance(obj.get(k), dict):
