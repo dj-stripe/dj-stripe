@@ -122,6 +122,7 @@ def create_payment_intent(request):
 		except stripe.error.CardError as e:
 			# Display error on client
 			return_data = json.dumps({'error': e.user_message}), 200
+			return HttpResponse(return_data[0], content_type='application/json', status=return_data[1])
 
 		if intent.status == 'requires_action' and intent.next_action.type == 'use_stripe_sdk':
 			# Tell the client to handle the action

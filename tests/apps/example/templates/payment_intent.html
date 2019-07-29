@@ -113,7 +113,7 @@
 			errorElement.textContent = result.error.message;
 		} else {
 		  // Otherwise send paymentMethod.id to your server.
-		  fetch('/example/payment-intent', {
+		  fetch("{% url 'djstripe_example:payment_intent' %}", {
 			method: 'POST',
 			headers: {
               "X-CSRFToken": getCookie("csrftoken"),
@@ -148,18 +148,20 @@
 	function handleServerResponse(response) {
 	  if (response.error) {
 	  	var errorElement = document.getElementById('card-errors');
-	  	errorElement.textContent = response.error.message;
+	  	errorElement.textContent = response.error;
 	  } else if (response.requires_action) {
 		// Use Stripe.js to handle required card action
 		stripe.handleCardAction(
 		  response.payment_intent_client_secret
 		).then(function(result) {
 		  if (result.error) {
-			// Show error in payment form
+		      // Show error in payment form
+              var errorElement = document.getElementById('card-errors');
+              errorElement.textContent = result.error.message;
 		  } else {
 			// The card action has been handled
 			// The PaymentIntent can be confirmed again on the server
-			fetch('/example/payment-intent', {
+			fetch("{% url 'djstripe_example:payment_intent' %}", {
 			  method: 'POST',
 			  headers: {
                   "X-CSRFToken": getCookie("csrftoken"),
@@ -169,8 +171,10 @@
               },
 			  body: JSON.stringify({ payment_intent_id: result.paymentIntent.id })
 			}).then(function(confirmResult) {
-			  return confirmResult.json();
-			}).then(handleServerResponse);
+			  confirmResult.json().then(function(json) {
+			      handleServerResponse(json)
+			  })
+            });
 		  }
 		});
 	  } else {
