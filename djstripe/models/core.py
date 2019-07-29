@@ -1295,23 +1295,15 @@ class PaymentIntent(StripeModel):
 	customer = models.ForeignKey(
 		"Customer",
 		null=True,
-		on_delete=models.SET_NULL,
+		on_delete=models.CASCADE,
 		help_text=(
-			"ID of the Customer this PaymentIntent is for if one exists."
+			"Customer this PaymentIntent is for if one exists."
 		)
 	)
 	description = models.TextField(
 		default='',
 		help_text=(
 			"An arbitrary string attached to the object. Often useful for displaying to users."
-		)
-	)
-	invoice = models.ForeignKey(
-		"Invoice",
-		on_delete=models.SET_NULL,
-		null=True,
-		help_text=(
-			"ID of the invoice that created this PaymentIntent, if it exists."
 		)
 	)
 	last_payment_error = JSONField(
@@ -1336,7 +1328,7 @@ class PaymentIntent(StripeModel):
 		on_delete=models.SET_NULL,
 		null=True,
 		help_text=(
-			"ID of the payment method used in this PaymentIntent."
+			"Payment method used in this PaymentIntent."
 		)
 	)
 	payment_method_types = JSONField(
@@ -1351,19 +1343,9 @@ class PaymentIntent(StripeModel):
 			"Email address that the receipt for the resulting payment will be sent to."
 		)
 	)
-	review = models.CharField(
-		max_length=255,
-		null=True,
-		blank=True,
-		help_text=(
-			"ID of the review associated with this PaymentIntent, if any."
-		)
-	)
-	# XXX: Should we use EnumField for this one as it is similar to SetupIntent.usage where we have same
-	# options `on_session` and `off_session` ?
+	# TODO: Add `review` field after we add Review model.
 	setup_future_usage = StripeEnumField(
 		enum=enums.IntentUsage,
-		default=enums.IntentUsage.off_session,
 		help_text=(
 			"Indicates that you intend to make future payments with this"
 			"PaymentIntent’s payment method."

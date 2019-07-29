@@ -257,6 +257,16 @@ class Invoice(StripeModel):
 	paid = models.BooleanField(
 		default=False, help_text="The time at which payment will next be attempted."
 	)
+	payment_intent = models.OneToOneField(
+		"PaymentIntent",
+		on_delete=models.CASCADE,
+		null=True,
+		help_text=(
+			"The PaymentIntent associated with this invoice. The PaymentIntent is generated "
+			"when the invoice is finalized, and can then be used to pay the invoice."
+			"Note that voiding an invoice will cancel the PaymentIntent"
+		),
+	)
 	period_end = StripeDateTimeField(
 		help_text="End of the usage period during which invoice items were added to this invoice."
 	)

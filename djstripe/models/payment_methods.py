@@ -483,7 +483,15 @@ class PaymentMethod(StripeModel):
 	)
 
 	customer = models.ForeignKey(
-		"Customer", on_delete=models.SET_NULL, null=True, blank=True, related_name="payment_methods"
+		"Customer",
+		on_delete=models.SET_NULL,
+		null=True,
+		blank=True,
+		related_name="payment_methods",
+		help=(
+			"Customer to which this PaymentMethod is saved."
+			"This will not be set when the PaymentMethod has not been saved to a Customer."
+		)
 	)
 
 	type = models.CharField(
