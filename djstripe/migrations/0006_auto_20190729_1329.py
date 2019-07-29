@@ -37,10 +37,6 @@ class Migration(migrations.Migration):
 		# DjStripePaymentMethod, the migrations didn't update the names of index.
 		# In the current migration, we create a new PaymentMethod model, hence before creating it, its
 		# better to rename the old index.
-		#migrations.RunSQL(
-		#	'ALTER INDEX djstripe_paymentmethod_id_0b9251df_like rename TO djstripe_paymentmethod_legacy_id_0b9251df_like',
-		#	'ALTER INDEX djstripe_paymentmethod_legacy_id_0b9251df_like rename TO djstripe_paymentmethod_id_0b9251df_like',
-		#),
 		migrations.RunPython(fix_djstripepaymentmethod_index_name_forwards, fix_djstripepaymentmethod_index_name_backwards),
 		migrations.CreateModel(
 			name='PaymentIntent',
