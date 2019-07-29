@@ -48,7 +48,7 @@ class Session(StripeModel):
 		null=True,
 		on_delete=models.SET_NULL,
 		help_text=(
-			"ID of the Customer this Checkout is for if one exists."
+			"Customer this Checkout is for if one exists."
 		)
 	)
 	customer_email = models.CharField(
@@ -80,7 +80,7 @@ class Session(StripeModel):
 		null=True,
 		on_delete=models.SET_NULL,
 		help_text=(
-			"The ID of the PaymentIntent created if SKUs or line items were provided."
+			"PaymentIntent created if SKUs or line items were provided."
 		)
 	)
 	payment_method_types = JSONField(
@@ -103,7 +103,7 @@ class Session(StripeModel):
 		null=True,
 		on_delete=models.SET_NULL,
 		help_text=(
-			"The ID of the subscription created if one or more plans were provided."
+			"Subscription created if one or more plans were provided."
 		)
 	)
 	success_url = models.CharField(
