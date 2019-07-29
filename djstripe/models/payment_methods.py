@@ -468,32 +468,28 @@ class PaymentMethod(StripeModel):
 			"required by particular types of payment methods."
 		)
 	)
-
 	card = JSONField(
 		help_text=(
 			"If this is a card PaymentMethod, this hash contains details about the card."
 		)
 	)
-
 	card_present = JSONField(
 		help_text=(
 			"If this is an card_present PaymentMethod, this hash contains details about "
 			"the Card Present payment method."
 		)
 	)
-
 	customer = models.ForeignKey(
 		"Customer",
 		on_delete=models.SET_NULL,
 		null=True,
 		blank=True,
 		related_name="payment_methods",
-		help=(
+		help_text=(
 			"Customer to which this PaymentMethod is saved."
 			"This will not be set when the PaymentMethod has not been saved to a Customer."
 		)
 	)
-
 	type = models.CharField(
 		max_length=255,
 		null=True,
