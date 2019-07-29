@@ -1473,6 +1473,7 @@ class SetupIntent(StripeModel):
 	stripe_class = stripe.SetupIntent
 	stripe_dashboard_item_name = "setup intents"
 
+	# TODO: `application` field would go better as Foreign Key. Should be changed after adding new model.
 	application = models.CharField(
 		max_length=255,
 		null=True,
