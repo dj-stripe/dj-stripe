@@ -152,7 +152,7 @@
 	  } else if (response.requires_action) {
 		// Use Stripe.js to handle required card action
 		stripe.handleCardAction(
-		  response.payment_intent_client_secretemail
+		  response.payment_intent_client_secret
 		).then(function(result) {
 		  if (result.error) {
 			// Show error in payment form
