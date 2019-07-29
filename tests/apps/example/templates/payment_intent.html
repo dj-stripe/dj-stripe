@@ -116,10 +116,10 @@
 		  fetch('/example/payment-intent', {
 			method: 'POST',
 			headers: {
-			    "X-CSRFToken": getCookie("csrftoken"),
-			    'Accept': 'application/json',
-			    'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
+              "X-CSRFToken": getCookie("csrftoken"),
+              "Accept": "application/json",
+              "Content-Type": "application/json",
+              "X-Requested-With": "XMLHttpRequest"
             },
 			body: JSON.stringify({ 'payment_method_id': result.paymentMethod.id })
 		  }).then(function(result) {
@@ -159,9 +159,14 @@
 		  } else {
 			// The card action has been handled
 			// The PaymentIntent can be confirmed again on the server
-			fetch('/ajax/confirm_payment', {
+			fetch('/example/payment-intent', {
 			  method: 'POST',
-			  headers: { 'Content-Type': 'application/json' },
+			  headers: {
+                  "X-CSRFToken": getCookie("csrftoken"),
+                  "Accept": "application/json",
+                  "Content-Type": "application/json",
+                  "X-Requested-With": "XMLHttpRequest"
+              },
 			  body: JSON.stringify({ payment_intent_id: result.paymentIntent.id })
 			}).then(function(confirmResult) {
 			  return confirmResult.json();
