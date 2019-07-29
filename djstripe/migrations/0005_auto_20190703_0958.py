@@ -6,6 +6,24 @@ import djstripe.enums
 import djstripe.fields
 
 
+def fix_djstripepaymentmethod_index_name_forwards(apps, schema_editor):
+    # Altering the index is required because while we changed the name of old PaymentMethod model to
+    # DjStripePaymentMethod, the migrations didn't update the names of index.
+    # In the current migration, we create a new PaymentMethod model, hence before creating it, its
+    # better to rename the old index.
+    if schema_editor.connection.vendor == 'postgresql':
+        migrations.RunSQL(
+            'ALTER INDEX djstripe_paymentmethod_id_0b9251df_like rename TO djstripe_paymentmethod_legacy_id_0b9251df_like',
+        )
+
+
+def fix_djstripepaymentmethod_index_name_backwards(apps, schema_editor):
+    if schema_editor.connection.vendor == 'postgresql':
+        migrations.RunSQL(
+            'ALTER INDEX djstripe_paymentmethod_legacy_id_0b9251df_like rename TO djstripe_paymentmethod_id_0b9251df_like',
+        )
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -13,14 +31,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-		# Altering the index is required because while we chnage the name of old PaymentMethod model to
-		# DjStripePaymentMethod, the migrations didn't update the names of index.
-		# In the current migration, we create a new PaymentMethod model, hence before creating it, its
-		# better to rename the old index.
-		migrations.RunSQL(
-			'ALTER INDEX djstripe_paymentmethod_id_0b9251df_like rename TO djstripe_paymentmethod_legacy_id_0b9251df_like',
-			'ALTER INDEX djstripe_paymentmethod_legacy_id_0b9251df_like rename TO djstripe_paymentmethod_id_0b9251df_like',
-		),
+        migrations.RunPython(fix_djstripepaymentmethod_index_name_forwards, fix_djstripepaymentmethod_index_name_backwards),
         migrations.CreateModel(
             name='PaymentMethod',
             fields=[
