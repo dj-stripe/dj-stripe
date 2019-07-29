@@ -1484,7 +1484,7 @@ class SetupIntent(StripeModel):
 		null=True,
 		on_delete=models.SET_NULL,
 		help_text=(
-			"ID of the Customer this SetupIntent belongs to, if one exists."
+			"Customer this SetupIntent belongs to, if one exists."
 		)
 	)
 	last_setup_error = JSONField(
@@ -1513,7 +1513,7 @@ class SetupIntent(StripeModel):
 		on_delete=models.SET_NULL,
 		null=True,
 		help_text=(
-			"ID of the payment method used in this PaymentIntent."
+			"Payment method used in this PaymentIntent."
 		)
 	)
 	payment_method_types = JSONField(
@@ -1569,7 +1569,7 @@ class Payout(StripeModel):
 		"BankAccount",
 		on_delete=models.PROTECT,
 		null=True,
-		help_text="ID of the bank account or card the payout was sent to.",
+		help_text="Bank account or card the payout was sent to.",
 	)
 	failure_balance_transaction = models.ForeignKey(
 		"BalanceTransaction",
