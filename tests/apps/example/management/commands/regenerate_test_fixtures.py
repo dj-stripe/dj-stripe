@@ -569,7 +569,6 @@ class Command(BaseCommand):
 		return created, obj
 
 	def get_or_create_stripe_payment_method(self, old_obj, readonly_fields):
-		djstripe_customer = djstripe.models.Customer(id=old_obj["customer"])
 		id_ = old_obj["id"]
 		type_ = old_obj["type"]
 
