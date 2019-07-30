@@ -1,0 +1,43 @@
+{
+	"id": "pm_1F1ryGIj5QbWNU8NdKUdy9ka",
+	"object": "payment_method",
+	"billing_details": {
+		"address": {
+			"city": null,
+			"country": null,
+			"line1": null,
+			"line2": null,
+			"postal_code": "21212",
+			"state": null
+		},
+		"email": "jenny@example.com",
+		"name": null,
+		"phone": "+15555555555"
+	},
+	"card": {
+		"brand": "visa",
+		"checks": {
+			"address_line1_check": null,
+			"address_postal_code_check": null,
+			"cvc_check": null
+		},
+		"country": "US",
+		"exp_month": 8,
+		"exp_year": 2020,
+		"fingerprint": "WJTDnAWuKKdbSagG",
+		"funding": "credit",
+		"generated_from": null,
+		"last4": "4242",
+		"three_d_secure_usage": {
+			"supported": true
+		},
+		"wallet": null
+	},
+	"created": 123456789,
+	"customer": "cus_6lsBvm5rJ0zyHc",
+	"livemode": false,
+	"metadata": {
+		"order_id": "123456789"
+	},
+	"type": "card"
+}

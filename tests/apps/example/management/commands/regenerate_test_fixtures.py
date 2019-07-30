@@ -93,6 +93,7 @@ class Command(BaseCommand):
 				"tokenization_method",
 			],
 			djstripe.models.PaymentIntent: ["id"],
+			djstripe.models.PaymentMethod: ["id"],
 			djstripe.models.Source: [
 				"id",
 				"amount",
@@ -180,6 +181,7 @@ class Command(BaseCommand):
 			djstripe.models.Invoice: [tests.FAKE_INVOICE],
 			djstripe.models.Charge: [tests.FAKE_CHARGE],
 			djstripe.models.PaymentIntent: [tests.FAKE_PAYMENT_INTENT_I],
+			djstripe.models.PaymentMethod: [tests.FAKE_PAYMENT_METHOD_I],
 			djstripe.models.BalanceTransaction: [tests.FAKE_BALANCE_TRANSACTION],
 		}
 
@@ -390,6 +392,10 @@ class Command(BaseCommand):
 			created, obj = self.get_or_create_stripe_payment_intent(
 				old_obj=old_obj, writable_fields=["metadata"]
 			)
+		elif issubclass(model_class, djstripe.models.PaymentMethod):
+			created, obj = self.get_or_create_stripe_payment_method(
+				old_obj=old_obj, readonly_fields=readonly_fields
+			)
 		elif issubclass(model_class, djstripe.models.BalanceTransaction):
 			created, obj = self.get_or_create_stripe_balance_transaction(old_obj=old_obj)
 		else:
@@ -559,6 +565,39 @@ class Command(BaseCommand):
 				obj[k] = old_obj[k]
 
 		obj.save()
+
+		return created, obj
+
+	def get_or_create_stripe_payment_method(self, old_obj, readonly_fields):
+		djstripe_customer = djstripe.models.Customer(id=old_obj["customer"])
+		id_ = old_obj["id"]
+		type_ = old_obj["type"]
+
+		try:
+			obj = djstripe.models.PaymentMethod(id=id_).api_retrieve()
+			created = False
+
+			self.stdout.write("	found")
+		except InvalidRequestError:
+			self.stdout.write("	creating")
+			create_obj = deepcopy(old_obj)
+			# create in Stripe
+			for k in readonly_fields:
+				create_obj.pop(k, None)
+
+			obj = djstripe.models.PaymentMethod()._api_create(
+				type=type_,
+				card={
+					'number': '4242424242424242',
+					'exp_month': 12,
+					'exp_year': 2020,
+					'cvc': '123',
+				},
+			)
+			for k, v in create_obj.items():
+				setattr(obj, k, v)
+
+			created = True
 
 		return created, obj
 
