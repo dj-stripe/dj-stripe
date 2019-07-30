@@ -766,11 +766,17 @@ class Customer(StripeModel):
 
 		return new_payment_method.resolve()
 
-	def add_payment_method(self, payment_method):
+	def add_payment_method(self, payment_method_id):
+		"""
+		Adds an already existing payment method to this customer's account
+
+		:param payment_method_id: ID of the PaymentMethod to be attached to the customer.
+		:return:
+		"""
 		from .payment_methods import PaymentMethod
 
 		stripe_customer = self.api_retrieve()
-		PaymentMethod.attach(payment_method, stripe_customer)
+		PaymentMethod.attach(payment_method_id, stripe_customer)
 
 	def purge(self):
 		try:
