@@ -587,12 +587,10 @@ class Command(BaseCommand):
 			obj = djstripe.models.PaymentMethod()._api_create(
 				type=type_,
 				card={
-					'number': '4242424242424242',
-					'exp_month': 12,
-					'exp_year': 2020,
-					'cvc': '123',
+					'token': 'tok_visa',
 				},
 			)
+
 			for k, v in create_obj.items():
 				setattr(obj, k, v)
 
