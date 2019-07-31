@@ -7,12 +7,12 @@
 			"country": null,
 			"line1": null,
 			"line2": null,
-			"postal_code": "21212",
+			"postal_code": null,
 			"state": null
 		},
-		"email": "jenny@example.com",
+		"email": null,
 		"name": null,
-		"phone": "+15555555555"
+		"phone": null
 	},
 	"card": {
 		"brand": "visa",
