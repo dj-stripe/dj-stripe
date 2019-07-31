@@ -264,7 +264,9 @@ class Command(BaseCommand):
 			for card in customer.sources.list(limit=100):
 				self.update_fake_id_map(card)
 
-			for payment_method in djstripe.models.PaymentMethod.api_list(customer=customer.id, type="card"):
+			for payment_method in djstripe.models.PaymentMethod.api_list(
+				customer=customer.id, type="card"
+			):
 				self.update_fake_id_map(payment_method)
 
 			for subscription in customer["subscriptions"]["data"]:
@@ -585,7 +587,9 @@ class Command(BaseCommand):
 				type=type_, card={"token": "tok_visa"}
 			)
 
-			stripe.PaymentMethod.attach(obj["id"], customer=customer_id, api_key=djstripe.settings.STRIPE_SECRET_KEY)
+			stripe.PaymentMethod.attach(
+				obj["id"], customer=customer_id, api_key=djstripe.settings.STRIPE_SECRET_KEY
+			)
 
 			for k in writable_fields:
 				if isinstance(obj.get(k), dict):
