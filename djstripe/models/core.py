@@ -766,6 +766,8 @@ class Customer(StripeModel):
 
 		return new_payment_method.resolve()
 
+	# TODO - support setting default payment method (as per set_default param to add_card), see
+	#  see https://stripe.com/docs/api/payment_methods/attach
 	def add_payment_method(self, payment_method_id):
 		"""
 		Adds an already existing payment method to this customer's account

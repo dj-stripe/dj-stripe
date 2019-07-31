@@ -22,8 +22,8 @@ from . import (
 	FAKE_ACCOUNT, FAKE_BALANCE_TRANSACTION, FAKE_CARD, FAKE_CARD_V, FAKE_CHARGE,
 	FAKE_COUPON, FAKE_CUSTOMER, FAKE_CUSTOMER_II, FAKE_CUSTOMER_III,
 	FAKE_DISCOUNT_CUSTOMER, FAKE_INVOICE, FAKE_INVOICE_III, FAKE_INVOICEITEM,
-	FAKE_PAYMENT_INTENT_I, FAKE_PLAN, FAKE_PRODUCT, FAKE_SOURCE,
-	FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II, FAKE_UPCOMING_INVOICE,
+	FAKE_PAYMENT_INTENT_I, FAKE_PAYMENT_METHOD_I, FAKE_PLAN, FAKE_PRODUCT,
+	FAKE_SOURCE, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_II, FAKE_UPCOMING_INVOICE,
 	IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED, IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 	AssertStripeFksMixin, StripeList, datetime_to_unix, default_account
 )
@@ -353,6 +353,19 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
 		self.assertEqual(2, Card.objects.count())
 		self.assertEqual(FAKE_CARD["id"], self.customer.default_source.id)
+
+	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True)
+	@patch("stripe.PaymentMethod.attach", return_value=deepcopy(FAKE_PAYMENT_METHOD_I))
+	def test_add_payment_method(self, customer_retrieve_mock, attach_mock):
+		self.assertEqual(
+			self.customer.payment_methods.filter(id=FAKE_PAYMENT_METHOD_I["id"]).count(), 0
+		)
+
+		self.customer.add_payment_method(FAKE_PAYMENT_METHOD_I["id"])
+
+		self.assertEqual(
+			self.customer.payment_methods.filter(id=FAKE_PAYMENT_METHOD_I["id"]).count(), 1
+		)
 
 	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True)
 	def test_cannot_charge(self, customer_retrieve_fake):
