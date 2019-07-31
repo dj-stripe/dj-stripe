@@ -264,6 +264,9 @@ class Command(BaseCommand):
 			for card in customer.sources.list(limit=100):
 				self.update_fake_id_map(card)
 
+			for payment_method in djstripe.models.PaymentMethod.api_list(customer=customer.id, type="card"):
+				self.update_fake_id_map(payment_method)
+
 			for subscription in customer["subscriptions"]["data"]:
 				self.update_fake_id_map(subscription)
 
@@ -394,7 +397,7 @@ class Command(BaseCommand):
 			)
 		elif issubclass(model_class, djstripe.models.PaymentMethod):
 			created, obj = self.get_or_create_stripe_payment_method(
-				old_obj=old_obj, readonly_fields=readonly_fields
+				old_obj=old_obj, writable_fields=["metadata"]
 			)
 		elif issubclass(model_class, djstripe.models.BalanceTransaction):
 			created, obj = self.get_or_create_stripe_balance_transaction(old_obj=old_obj)
@@ -568,8 +571,9 @@ class Command(BaseCommand):
 
 		return created, obj
 
-	def get_or_create_stripe_payment_method(self, old_obj, readonly_fields):
+	def get_or_create_stripe_payment_method(self, old_obj, writable_fields):
 		id_ = old_obj["id"]
+		customer_id = old_obj["customer"]
 		type_ = old_obj["type"]
 
 		try:
@@ -579,17 +583,21 @@ class Command(BaseCommand):
 			self.stdout.write("	found")
 		except InvalidRequestError:
 			self.stdout.write("	creating")
-			create_obj = deepcopy(old_obj)
-			# create in Stripe
-			for k in readonly_fields:
-				create_obj.pop(k, None)
 
 			obj = djstripe.models.PaymentMethod()._api_create(
 				type=type_, card={"token": "tok_visa"}
 			)
 
-			for k, v in create_obj.items():
-				setattr(obj, k, v)
+			stripe.PaymentMethod.attach(obj["id"], customer=customer_id, api_key=djstripe.settings.STRIPE_SECRET_KEY)
+
+			for k in writable_fields:
+				if isinstance(obj.get(k), dict):
+					# merge dicts (eg metadata)
+					obj[k].update(old_obj.get(k, {}))
+				else:
+					obj[k] = old_obj[k]
+
+			obj.save()
 
 			created = True
 

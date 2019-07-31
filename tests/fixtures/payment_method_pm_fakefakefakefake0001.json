@@ -1,5 +1,5 @@
 {
-	"id": "pm_1F1ryGIj5QbWNU8NdKUdy9ka",
+	"id": "pm_fakefakefakefake0001",
 	"object": "payment_method",
 	"billing_details": {
 		"address": {
@@ -38,6 +38,8 @@
 	"livemode": false,
 	"metadata": {
 		"order_id": "123456789"
+		"order_id": "123456789",
+		"djstripe_test_fake_id": "pm_fakefakefakefake0001"
 	},
 	"type": "card"
 }
