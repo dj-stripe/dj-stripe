@@ -270,9 +270,6 @@ class Command(BaseCommand):
 			for subscription in customer["subscriptions"]["data"]:
 				self.update_fake_id_map(subscription)
 
-		for payment_intent in djstripe.models.PaymentIntent.api_list():
-			self.update_fake_id_map(payment_intent)
-
 	def update_fake_id_map(self, obj):
 		fake_id = self.get_fake_id(obj)
 		actual_id = obj["id"]
