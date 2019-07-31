@@ -196,7 +196,7 @@ class BusinessType(Enum):
 
 
 class CaptureMethod(Enum):
-	automatic = _('Automatic')
+	automatic = _("Automatic")
 	manual = _("Manual")
 
 
@@ -237,7 +237,7 @@ class ChargeStatus(Enum):
 
 
 class ConfirmationMethod(Enum):
-	automatic = _('Automatic')
+	automatic = _("Automatic")
 	manual = _("Manual")
 
 
@@ -305,11 +305,16 @@ class IntentStatus(Enum):
 	Status of Intents which apply both to PaymentIntents
 	and SetupIntents.
 	"""
-	requires_payment_method = _("Intent created and requires a Payment Method to be attached.")
+
+	requires_payment_method = _(
+		"Intent created and requires a Payment Method to be attached."
+	)
 	requires_confirmation = _("Intent is ready to be confirmed.")
 	requires_action = _("Payment Method require additional action, such as 3D secure.")
 	processing = _("Required actions have been handled.")
-	canceled = _("Cancellation invalidates the intent for future confirmation and cannot be undone.")
+	canceled = _(
+		"Cancellation invalidates the intent for future confirmation and cannot be undone."
+	)
 
 
 class PaymentIntentStatus(IntentStatus):
@@ -318,7 +323,9 @@ class PaymentIntentStatus(IntentStatus):
 
 
 class SetupIntentStatus(IntentStatus):
-	succeeded = _("Setup was successful and the payment method is optimized for future payments.")
+	succeeded = _(
+		"Setup was successful and the payment method is optimized for future payments."
+	)
 
 
 class PayoutFailureCode(Enum):

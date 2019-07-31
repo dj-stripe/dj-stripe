@@ -585,10 +585,7 @@ class Command(BaseCommand):
 				create_obj.pop(k, None)
 
 			obj = djstripe.models.PaymentMethod()._api_create(
-				type=type_,
-				card={
-					'token': 'tok_visa',
-				},
+				type=type_, card={"token": "tok_visa"}
 			)
 
 			for k, v in create_obj.items():

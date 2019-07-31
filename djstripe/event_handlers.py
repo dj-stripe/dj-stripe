@@ -104,8 +104,17 @@ def customer_subscription_webhook_handler(event):
 
 
 @webhooks.handler(
-	"transfer", "charge", "coupon", "invoice", "invoiceitem", "paymentintent", "paymentmethod", "plan",
-	"product", "setupintent", "source"
+	"transfer",
+	"charge",
+	"coupon",
+	"invoice",
+	"invoiceitem",
+	"paymentintent",
+	"paymentmethod",
+	"plan",
+	"product",
+	"setupintent",
+	"source",
 )
 def other_object_webhook_handler(event):
 	"""Handle updates to transfer, charge, invoice, invoiceitem, plan, product and source objects.

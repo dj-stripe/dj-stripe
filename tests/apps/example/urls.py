@@ -15,5 +15,5 @@ urlpatterns = [
 		views.PurchaseSubscriptionSuccessView.as_view(),
 		name="purchase_subscription_success",
 	),
-	re_path(r'payment-intent', views.create_payment_intent, name="payment_intent"),
+	re_path(r"payment-intent", views.create_payment_intent, name="payment_intent"),
 ]

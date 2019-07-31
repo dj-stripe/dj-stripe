@@ -996,7 +996,7 @@ class Subscription(StripeModel):
 		related_name="setup_intents",
 		help_text="We can use this SetupIntent to collect user authentication when creating a subscription "
 		"without immediate payment or updating a subscription’s payment method, allowing you to "
-		"optimize for off-session payments."
+		"optimize for off-session payments.",
 	)
 	plan = models.ForeignKey(
 		"Plan",

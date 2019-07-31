@@ -3,10 +3,10 @@ import logging
 
 import stripe
 from django.contrib.auth import get_user_model
+from django.http import HttpResponse
+from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.views.generic import DetailView, FormView
-from django.template.response import TemplateResponse
-from django.http import HttpResponse
 
 import djstripe.models
 import djstripe.settings
@@ -100,47 +100,50 @@ class PurchaseSubscriptionSuccessView(DetailView):
 
 
 def create_payment_intent(request):
-	if request.method == 'POST':
+	if request.method == "POST":
 		intent = None
 		data = json.loads(request.body)
 		try:
-			if 'payment_method_id' in data:
+			if "payment_method_id" in data:
 				# Create the PaymentIntent
 				intent = stripe.PaymentIntent.create(
-					payment_method=data['payment_method_id'],
+					payment_method=data["payment_method_id"],
 					amount=1099,
-					currency='usd',
-					confirmation_method='manual',
+					currency="usd",
+					confirmation_method="manual",
 					confirm=True,
 					api_key=djstripe.settings.STRIPE_SECRET_KEY,
 				)
-			elif 'payment_intent_id' in data:
+			elif "payment_intent_id" in data:
 				intent = stripe.PaymentIntent.confirm(
-					data['payment_intent_id'],
-					api_key=djstripe.settings.STRIPE_SECRET_KEY
+					data["payment_intent_id"], api_key=djstripe.settings.STRIPE_SECRET_KEY
 				)
 		except stripe.error.CardError as e:
 			# Display error on client
-			return_data = json.dumps({'error': e.user_message}), 200
-			return HttpResponse(return_data[0], content_type='application/json', status=return_data[1])
+			return_data = json.dumps({"error": e.user_message}), 200
+			return HttpResponse(
+				return_data[0], content_type="application/json", status=return_data[1]
+			)
 
-		if intent.status == 'requires_action' and intent.next_action.type == 'use_stripe_sdk':
+		if intent.status == "requires_action" and intent.next_action.type == "use_stripe_sdk":
 			# Tell the client to handle the action
-			return_data = json.dumps({
-				'requires_action': True,
-				'payment_intent_client_secret': intent.client_secret,
-			}), 200
-		elif intent.status == 'succeeded':
+			return_data = (
+				json.dumps(
+					{"requires_action": True, "payment_intent_client_secret": intent.client_secret}
+				),
+				200,
+			)
+		elif intent.status == "succeeded":
 			# The payment did not need any additional actions and completed!
 			# Handle post-payment fulfillment
-			return_data = json.dumps({'success': True}), 200
+			return_data = json.dumps({"success": True}), 200
 		else:
 			# Invalid status
-			return_data = json.dumps({'error': 'Invalid PaymentIntent status'}), 500
-		return HttpResponse(return_data[0], content_type='application/json', status=return_data[1])
+			return_data = json.dumps({"error": "Invalid PaymentIntent status"}), 500
+		return HttpResponse(
+			return_data[0], content_type="application/json", status=return_data[1]
+		)
 
 	else:
-		ctx = {
-			'STRIPE_PUBLIC_KEY': djstripe.settings.STRIPE_PUBLIC_KEY
-		}
-		return TemplateResponse(request, 'payment_intent.html', ctx)
+		ctx = {"STRIPE_PUBLIC_KEY": djstripe.settings.STRIPE_PUBLIC_KEY}
+		return TemplateResponse(request, "payment_intent.html", ctx)

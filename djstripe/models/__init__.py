@@ -8,11 +8,12 @@ from .connect import (
 	Account, ApplicationFee, ApplicationFeeRefund, CountrySpec, Transfer, TransferReversal
 )
 from .core import (
-	BalanceTransaction, Charge, Customer, Dispute,
-	Event, FileUpload, PaymentIntent, Payout, Product,
-	Refund, SetupIntent,
+	BalanceTransaction, Charge, Customer, Dispute, Event,
+	FileUpload, PaymentIntent, Payout, Product, Refund, SetupIntent
 )
-from .payment_methods import BankAccount, Card, DjstripePaymentMethod, PaymentMethod, Source
+from .payment_methods import (
+	BankAccount, Card, DjstripePaymentMethod, PaymentMethod, Source
+)
 from .sigma import ScheduledQueryRun
 from .webhooks import WebhookEventTrigger
 

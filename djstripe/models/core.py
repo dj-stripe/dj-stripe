@@ -1246,19 +1246,13 @@ class PaymentIntent(StripeModel):
 	stripe_dashboard_item_name = "payment intents"
 
 	amount = StripeQuantumCurrencyAmountField(
-		help_text=(
-			"Amount intended to be collected by this PaymentIntent."
-		)
+		help_text=("Amount intended to be collected by this PaymentIntent.")
 	)
 	amount_capturable = StripeQuantumCurrencyAmountField(
-		help_text=(
-			"Amount that can be captured from this PaymentIntent."
-		)
+		help_text=("Amount that can be captured from this PaymentIntent.")
 	)
 	amount_received = StripeQuantumCurrencyAmountField(
-		help_text=(
-			"Amount that was collected by this PaymentIntent."
-		)
+		help_text=("Amount that was collected by this PaymentIntent.")
 	)
 	# application
 	# application_fee_amount
@@ -1268,7 +1262,7 @@ class PaymentIntent(StripeModel):
 		help_text=(
 			"Populated when status is canceled, this is the time at which the PaymentIntent was "
 			"canceled. Measured in seconds since the Unix epoch."
-		)
+		),
 	)
 	cancellation_reason = models.CharField(
 		max_length=255,
@@ -1276,41 +1270,35 @@ class PaymentIntent(StripeModel):
 		help_text=(
 			"User-given reason for cancellation of this PaymentIntent, one of duplicate, "
 			"fraudulent, requested_by_customer, or failed_invoice."
-		)
+		),
 	)
 	capture_method = StripeEnumField(
 		enum=enums.CaptureMethod,
-		help_text=(
-			"Capture method of this PaymentIntent, one of automatic or manual."
-		)
+		help_text=("Capture method of this PaymentIntent, one of automatic or manual."),
 	)
 	client_secret = models.CharField(
 		max_length=255,
 		help_text=(
 			"The client secret of this PaymentIntent. Used for client-side retrieval using a "
 			"publishable key."
-		)
+		),
 	)
 	confirmation_method = StripeEnumField(
 		enum=enums.ConfirmationMethod,
-		help_text=(
-			"Confirmation method of this PaymentIntent, one of manual or automatic."
-		)
+		help_text=("Confirmation method of this PaymentIntent, one of manual or automatic."),
 	)
 	currency = StripeCurrencyCodeField()
 	customer = models.ForeignKey(
 		"Customer",
 		null=True,
 		on_delete=models.CASCADE,
-		help_text=(
-			"Customer this PaymentIntent is for if one exists."
-		)
+		help_text=("Customer this PaymentIntent is for if one exists."),
 	)
 	description = models.TextField(
-		default='',
+		default="",
 		help_text=(
 			"An arbitrary string attached to the object. Often useful for displaying to users."
-		)
+		),
 	)
 	last_payment_error = JSONField(
 		help_text=(
@@ -1333,9 +1321,7 @@ class PaymentIntent(StripeModel):
 		"PaymentMethod",
 		on_delete=models.SET_NULL,
 		null=True,
-		help_text=(
-			"Payment method used in this PaymentIntent."
-		)
+		help_text=("Payment method used in this PaymentIntent."),
 	)
 	payment_method_types = JSONField(
 		help_text=(
@@ -1347,7 +1333,7 @@ class PaymentIntent(StripeModel):
 		max_length=255,
 		help_text=(
 			"Email address that the receipt for the resulting payment will be sent to."
-		)
+		),
 	)
 	# TODO: Add `review` field after we add Review model.
 	setup_future_usage = StripeEnumField(
@@ -1365,14 +1351,10 @@ class PaymentIntent(StripeModel):
 			"if your customer is impacted by SCA, using `off_session` will"
 			"ensure that they are authenticated while processing this PaymentIntent."
 			"You will then be able to make later off-session payments for this customer."
-		)
+		),
 	)
 	shipping = JSONField(
-		null=True,
-		blank=True,
-		help_text=(
-			"Shipping information for this PaymentIntent."
-		)
+		null=True, blank=True, help_text=("Shipping information for this PaymentIntent.")
 	)
 	statement_descriptor = models.CharField(
 		max_length=255,
@@ -1381,7 +1363,7 @@ class PaymentIntent(StripeModel):
 		help_text=(
 			"Extra information about a PaymentIntent. This will appear on your customer’s "
 			"statement when this PaymentIntent succeeds in creating a charge."
-		)
+		),
 	)
 	status = StripeEnumField(
 		enum=enums.PaymentIntentStatus,
@@ -1389,7 +1371,7 @@ class PaymentIntent(StripeModel):
 			"Status of this PaymentIntent, one of requires_payment_method, requires_confirmation, "
 			"requires_action, processing, requires_capture, canceled, or succeeded. "
 			"You can read more about PaymentIntent statuses here."
-		)
+		),
 	)
 	transfer_data = JSONField(
 		null=True,
@@ -1397,14 +1379,14 @@ class PaymentIntent(StripeModel):
 		help_text=(
 			"The data with which to automatically create a Transfer when the payment is finalized. "
 			"See the PaymentIntents Connect usage guide for details."
-		)
+		),
 	)
 	transfer_group = models.CharField(
 		max_length=255,
 		help_text=(
 			"A string that identifies the resulting payment as part of a group. See the "
 			"PaymentIntents Connect usage guide for details."
-		)
+		),
 	)
 
 	def update(self, api_key=None, **kwargs):
@@ -1466,16 +1448,14 @@ class SetupIntent(StripeModel):
 		max_length=255,
 		null=True,
 		blank=True,
-		help_text=(
-			"ID of the Connect application that created the SetupIntent."
-		)
+		help_text=("ID of the Connect application that created the SetupIntent."),
 	)
 	cancellation_reason = models.CharField(
 		max_length=255,
 		null=True,
 		help_text=(
 			"Reason for cancellation of this SetupIntent, one of abandoned, requested_by_customer, or duplicate"
-		)
+		),
 	)
 	client_secret = models.CharField(
 		max_length=255,
@@ -1483,22 +1463,18 @@ class SetupIntent(StripeModel):
 		blank=True,
 		help_text=(
 			"The client secret of this SetupIntent. Used for client-side retrieval using a publishable key."
-		)
+		),
 	)
 	customer = models.ForeignKey(
 		"Customer",
 		null=True,
 		on_delete=models.SET_NULL,
-		help_text=(
-			"Customer this SetupIntent belongs to, if one exists."
-		)
+		help_text=("Customer this SetupIntent belongs to, if one exists."),
 	)
 	last_setup_error = JSONField(
 		null=True,
 		blank=True,
-		help_text=(
-			"The error encountered in the previous SetupIntent confirmation."
-		)
+		help_text=("The error encountered in the previous SetupIntent confirmation."),
 	)
 	next_action = JSONField(
 		null=True,
@@ -1506,7 +1482,7 @@ class SetupIntent(StripeModel):
 		help_text=(
 			"If present, this property tells you what actions you need to take in"
 			"order for your customer to continue payment setup."
-		)
+		),
 	)
 	on_behalf_of = models.ForeignKey(
 		"Account",
@@ -1518,9 +1494,7 @@ class SetupIntent(StripeModel):
 		"PaymentMethod",
 		on_delete=models.SET_NULL,
 		null=True,
-		help_text=(
-			"Payment method used in this PaymentIntent."
-		)
+		help_text=("Payment method used in this PaymentIntent."),
 	)
 	payment_method_types = JSONField(
 		help_text=(
@@ -1533,14 +1507,12 @@ class SetupIntent(StripeModel):
 		help_text=(
 			"Status of this SetupIntent, one of requires_payment_method, requires_confirmation,"
 			"requires_action, processing, canceled, or succeeded."
-		)
+		),
 	)
 	usage = StripeEnumField(
 		enum=enums.IntentUsage,
 		default=enums.IntentUsage.off_session,
-		help_text=(
-			"Indicates how the payment method is intended to be used in the future."
-		)
+		help_text=("Indicates how the payment method is intended to be used in the future."),
 	)
 
 

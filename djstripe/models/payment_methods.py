@@ -488,7 +488,7 @@ class PaymentMethod(StripeModel):
 		help_text=(
 			"Customer to which this PaymentMethod is saved."
 			"This will not be set when the PaymentMethod has not been saved to a Customer."
-		)
+		),
 	)
 	type = models.CharField(
 		max_length=255,
@@ -498,7 +498,7 @@ class PaymentMethod(StripeModel):
 			"The type of the PaymentMethod. An additional hash is included on the PaymentMethod"
 			"with a name matching this value. It contains additional information specific to the"
 			"PaymentMethod type."
-		)
+		),
 	)
 
 	stripe_class = stripe.PaymentMethod
@@ -506,5 +506,7 @@ class PaymentMethod(StripeModel):
 
 	@classmethod
 	def attach(cls, payment_method_id, stripe_customer):
-		stripe_payment_method = stripe.PaymentMethod.attach(payment_method_id, customer=stripe_customer.id)
+		stripe_payment_method = stripe.PaymentMethod.attach(
+			payment_method_id, customer=stripe_customer.id
+		)
 		return cls._create_from_stripe_object(stripe_payment_method)
