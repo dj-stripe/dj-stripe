@@ -505,8 +505,10 @@ class PaymentMethod(StripeModel):
 	stripe_dashboard_item_name = "payment methods"
 
 	@classmethod
-	def attach(cls, payment_method_id, stripe_customer):
+	def attach(
+		cls, payment_method_id, stripe_customer, api_key=djstripe_settings.STRIPE_SECRET_KEY
+	):
 		stripe_payment_method = stripe.PaymentMethod.attach(
-			payment_method_id, customer=stripe_customer.id
+			payment_method_id, customer=stripe_customer["id"], api_key=api_key
 		)
 		return cls._create_from_stripe_object(stripe_payment_method)
