@@ -195,6 +195,11 @@ class BusinessType(Enum):
 	company = _("Company")
 
 
+class CaptureMethod(Enum):
+	automatic = _("Automatic")
+	manual = _("Manual")
+
+
 class CardCheckResult(Enum):
 	pass_ = (_("Pass"), "pass")
 	fail = _("Fail")
@@ -229,6 +234,11 @@ class ChargeStatus(Enum):
 	succeeded = _("Succeeded")
 	pending = _("Pending")
 	failed = _("Failed")
+
+
+class ConfirmationMethod(Enum):
+	automatic = _("Automatic")
+	manual = _("Manual")
 
 
 class CouponDuration(Enum):
@@ -283,6 +293,39 @@ class FileUploadType(Enum):
 class InvoiceBilling(Enum):
 	charge_automatically = _("Charge automatically")
 	send_invoice = _("Send invoice")
+
+
+class IntentUsage(Enum):
+	on_session = _("On session")
+	off_session = _("Off session")
+
+
+class IntentStatus(Enum):
+	"""
+	Status of Intents which apply both to PaymentIntents
+	and SetupIntents.
+	"""
+
+	requires_payment_method = _(
+		"Intent created and requires a Payment Method to be attached."
+	)
+	requires_confirmation = _("Intent is ready to be confirmed.")
+	requires_action = _("Payment Method require additional action, such as 3D secure.")
+	processing = _("Required actions have been handled.")
+	canceled = _(
+		"Cancellation invalidates the intent for future confirmation and cannot be undone."
+	)
+
+
+class PaymentIntentStatus(IntentStatus):
+	succeeded = _("The funds are in your account.")
+	requires_capture = _("Capture the funds on the cards which have been put on holds.")
+
+
+class SetupIntentStatus(IntentStatus):
+	succeeded = _(
+		"Setup was successful and the payment method is optimized for future payments."
+	)
 
 
 class PayoutFailureCode(Enum):
@@ -445,6 +488,13 @@ class SourceRedirectStatus(Enum):
 	succeeded = _("Succeeded")
 	not_required = _("Not required")
 	failed = _("Failed")
+
+
+class SubmitTypeStatus(Enum):
+	auto = _("Auto")
+	book = _("Book")
+	donate = _("donate")
+	pay = _("pay")
 
 
 class SubscriptionStatus(Enum):

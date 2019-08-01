@@ -257,6 +257,16 @@ class Invoice(StripeModel):
 	paid = models.BooleanField(
 		default=False, help_text="The time at which payment will next be attempted."
 	)
+	payment_intent = models.OneToOneField(
+		"PaymentIntent",
+		on_delete=models.CASCADE,
+		null=True,
+		help_text=(
+			"The PaymentIntent associated with this invoice. The PaymentIntent is generated "
+			"when the invoice is finalized, and can then be used to pay the invoice."
+			"Note that voiding an invoice will cancel the PaymentIntent"
+		),
+	)
 	period_end = StripeDateTimeField(
 		help_text="End of the usage period during which invoice items were added to this invoice."
 	)
@@ -977,6 +987,16 @@ class Subscription(StripeModel):
 			"If the subscription has ended (either because it was canceled or because the customer was switched "
 			"to a subscription to a new plan), the date the subscription ended."
 		),
+	)
+	pending_setup_intent = models.ForeignKey(
+		"SetupIntent",
+		null=True,
+		blank=True,
+		on_delete=models.CASCADE,
+		related_name="setup_intents",
+		help_text="We can use this SetupIntent to collect user authentication when creating a subscription "
+		"without immediate payment or updating a subscription’s payment method, allowing you to "
+		"optimize for off-session payments.",
 	)
 	plan = models.ForeignKey(
 		"Plan",

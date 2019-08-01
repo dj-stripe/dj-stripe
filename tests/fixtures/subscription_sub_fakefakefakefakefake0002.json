@@ -63,6 +63,7 @@
 	"metadata": {
 		"djstripe_test_fake_id": "sub_fakefakefakefakefake0002"
 	},
+	"pending_setup_intent": null,
 	"plan": {
 		"id": "silver41294",
 		"object": "plan",

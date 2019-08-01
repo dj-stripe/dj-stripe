@@ -249,6 +249,37 @@ class FileUploadAdmin(StripeModelAdmin):
 	search_fields = ("filename",)
 
 
+@admin.register(models.PaymentIntent)
+class PaymentIntentAdmin(StripeModelAdmin):
+	list_display = (
+		"id",
+		"customer",
+		"amount",
+		"currency",
+		"description",
+		"amount_capturable",
+		"amount_received",
+		"receipt_email",
+	)
+	search_fields = ("customer__id", "invoice__id")
+
+
+@admin.register(models.SetupIntent)
+class SetupIntentAdmin(StripeModelAdmin):
+	list_display = (
+		"id",
+		"created",
+		"customer",
+		"description",
+		"on_behalf_of",
+		"payment_method",
+		"payment_method_types",
+		"status",
+	)
+	list_filter = ("status",)
+	search_fields = ("customer__id", "status")
+
+
 @admin.register(models.Invoice)
 class InvoiceAdmin(StripeModelAdmin):
 	list_display = (
@@ -325,6 +356,13 @@ class SourceAdmin(StripeModelAdmin):
 	raw_id_fields = ("customer",)
 	list_display = ("customer", "type", "status", "amount", "currency", "usage", "flow")
 	list_filter = ("type", "status", "usage", "flow")
+
+
+@admin.register(models.PaymentMethod)
+class PaymentMethodAdmin(StripeModelAdmin):
+	raw_id_fields = ("customer",)
+	list_display = ("customer", "billing_details")
+	list_filter = ("customer",)
 
 
 @admin.register(models.Subscription)

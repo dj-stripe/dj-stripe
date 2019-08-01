@@ -111,10 +111,13 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 			"djstripe.Account.branding_logo",
 			"djstripe.Account.branding_icon",
 			"djstripe.Charge.dispute",
+			"djstripe.Charge.payment_intent",
 			"djstripe.Charge.transfer",
 			"djstripe.Customer.coupon",
 			"djstripe.Customer.subscriber",
 			"djstripe.InvoiceItem.plan",
+			"djstripe.Invoice.payment_intent",
+			"djstripe.Subscription.pending_setup_intent",
 		}
 
 		self.assert_fks(invoiceitem, expected_blank_fks=expected_blank_fks)
@@ -174,10 +177,13 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 			"djstripe.Account.branding_logo",
 			"djstripe.Account.branding_icon",
 			"djstripe.Charge.dispute",
+			"djstripe.Charge.payment_intent",
 			"djstripe.Charge.transfer",
 			"djstripe.Customer.coupon",
 			"djstripe.Customer.subscriber",
 			"djstripe.InvoiceItem.plan",
+			"djstripe.Invoice.payment_intent",
+			"djstripe.Subscription.pending_setup_intent",
 		}
 
 		self.assert_fks(invoiceitem, expected_blank_fks=expected_blank_fks)
@@ -235,10 +241,13 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Account.branding_logo",
 				"djstripe.Account.branding_icon",
 				"djstripe.Charge.dispute",
+				"djstripe.Charge.payment_intent",
 				"djstripe.Charge.transfer",
 				"djstripe.Customer.coupon",
 				"djstripe.Customer.subscriber",
 				"djstripe.InvoiceItem.subscription",
+				"djstripe.Invoice.payment_intent",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)
 
@@ -289,5 +298,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 				"djstripe.Customer.subscriber",
 				"djstripe.InvoiceItem.invoice",
 				"djstripe.InvoiceItem.subscription",
+				"djstripe.Invoice.payment_intent",
+				"djstripe.Subscription.pending_setup_intent",
 			},
 		)

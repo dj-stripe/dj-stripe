@@ -22,12 +22,12 @@ from . import (
 	FAKE_EVENT_CUSTOMER_SOURCE_CREATED, FAKE_EVENT_CUSTOMER_SOURCE_DELETED,
 	FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE, FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED,
 	FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED, FAKE_EVENT_DISPUTE_CREATED,
-	FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_INVOICE_DELETED,
-	FAKE_EVENT_INVOICE_UPCOMING, FAKE_EVENT_INVOICEITEM_CREATED,
-	FAKE_EVENT_INVOICEITEM_DELETED, FAKE_EVENT_PLAN_CREATED, FAKE_EVENT_PLAN_DELETED,
-	FAKE_EVENT_PLAN_REQUEST_IS_OBJECT, FAKE_EVENT_TRANSFER_CREATED,
-	FAKE_EVENT_TRANSFER_DELETED, FAKE_INVOICE, FAKE_INVOICE_II, FAKE_INVOICEITEM,
-	FAKE_PLAN, FAKE_PRODUCT, FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_III, FAKE_TRANSFER,
+	FAKE_EVENT_INVOICE_CREATED, FAKE_EVENT_INVOICE_DELETED, FAKE_EVENT_INVOICE_UPCOMING,
+	FAKE_EVENT_INVOICEITEM_CREATED, FAKE_EVENT_INVOICEITEM_DELETED,
+	FAKE_EVENT_PLAN_CREATED, FAKE_EVENT_PLAN_DELETED, FAKE_EVENT_PLAN_REQUEST_IS_OBJECT,
+	FAKE_EVENT_TRANSFER_CREATED, FAKE_EVENT_TRANSFER_DELETED, FAKE_INVOICE,
+	FAKE_INVOICE_II, FAKE_INVOICEITEM, FAKE_PAYMENT_INTENT_I, FAKE_PLAN, FAKE_PRODUCT,
+	FAKE_SUBSCRIPTION, FAKE_SUBSCRIPTION_III, FAKE_TRANSFER,
 	IS_STATICMETHOD_AUTOSPEC_SUPPORTED, default_account
 )
 
@@ -73,6 +73,11 @@ class TestChargeEvents(EventTestCase):
 		"stripe.BalanceTransaction.retrieve", return_value=deepcopy(FAKE_BALANCE_TRANSACTION)
 	)
 	@patch("stripe.Charge.retrieve", autospec=True)
+	@patch(
+		"stripe.PaymentIntent.retrieve",
+		return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
+		autospec=True,
+	)
 	@patch("stripe.Event.retrieve", autospec=True)
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True)
 	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
@@ -87,6 +92,7 @@ class TestChargeEvents(EventTestCase):
 		product_retrieve_mock,
 		invoice_retrieve_mock,
 		event_retrieve_mock,
+		payment_intent_retrieve_mock,
 		charge_retrieve_mock,
 		balance_transaction_retrieve_mock,
 		account_mock,
@@ -325,6 +331,11 @@ class TestInvoiceEvents(EventTestCase):
 	)
 	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True)
 	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch(
+		"stripe.PaymentIntent.retrieve",
+		return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
+		autospec=True,
+	)
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True)
 	@patch("stripe.Event.retrieve", autospec=True)
 	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
@@ -333,6 +344,7 @@ class TestInvoiceEvents(EventTestCase):
 		product_retrieve_mock,
 		event_retrieve_mock,
 		invoice_retrieve_mock,
+		payment_intent_retrieve_mock,
 		charge_retrieve_mock,
 		customer_retrieve_mock,
 		subscription_retrieve_mock,
@@ -369,6 +381,11 @@ class TestInvoiceEvents(EventTestCase):
 	)
 	@patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True)
 	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch(
+		"stripe.PaymentIntent.retrieve",
+		return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
+		autospec=True,
+	)
 	@patch("stripe.Invoice.retrieve", autospec=True)
 	@patch("stripe.Event.retrieve", autospec=True)
 	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
@@ -377,6 +394,7 @@ class TestInvoiceEvents(EventTestCase):
 		product_retrieve_mock,
 		event_retrieve_mock,
 		invoice_retrieve_mock,
+		payment_intent_retrieve_mock,
 		charge_retrieve_mock,
 		customer_retrieve_mock,
 		subscription_retrieve_mock,
@@ -420,12 +438,18 @@ class TestInvoiceEvents(EventTestCase):
 		autospec=True,
 	)
 	@patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+	@patch(
+		"stripe.PaymentIntent.retrieve",
+		return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
+		autospec=True,
+	)
 	@patch("stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True)
 	@patch("stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True)
 	def test_invoice_deleted(
 		self,
 		product_retrieve_mock,
 		invoice_retrieve_mock,
+		payment_intent_retrieve_mock,
 		charge_retrieve_mock,
 		subscription_retrieve_mock,
 		balance_transaction_retrieve_mock,

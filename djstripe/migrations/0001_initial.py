@@ -1580,7 +1580,7 @@ class Migration(migrations.Migration):
 					"status",
 					djstripe.fields.StripeEnumField(
 						enum=djstripe.enums.PayoutStatus,
-						help_text="Current status of the payout. A payout will be `pending` until it is submitted to the bank, at which point it becomes `in_transit`. I t will then change to paid if the transaction goes through. If it does not go through successfully, its status will change to `failed` or `canceled`.",
+						help_text="Current status of the payout. A payout will be `pending` until it is submitted to the bank, at which point it becomes `in_transit`. It will then change to paid if the transaction goes through. If it does not go through successfully, its status will change to `failed` or `canceled`.",
 						max_length=10,
 					),
 				),

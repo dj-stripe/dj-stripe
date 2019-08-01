@@ -17,6 +17,11 @@ History
 - Made ``SubscriptionItem.quantity`` nullable as per Plans with ``usage_type="metered"`` (follow-up to #865)
 - Added manage command ``djstripe_sync_models`` (#727, #89)
 - Fixed issue with re-creating a customer after `Customer.purge()` (#916)
+- New models
+    - Payment Intent
+    - Setup Intent
+    - Payment Method
+    - Session
 
 Changes from API 2018-11-08:
 
@@ -44,6 +49,7 @@ Changes from API 2019-03-14:
 - Removed ``Invoice.date``, in place of ``Invoice.created`` (added deprecated property for the old name)
 - Added ``Invoice.status_transitions``
 - Renamed ``Customer.account_balance`` to ``Customer.balance`` (added deprecated property for the old name)
+- Renamed ``Customer.payment_methods`` to ``Customer.customer_payment_methods``
 
 2.0.4 (unreleased)
 ------------------

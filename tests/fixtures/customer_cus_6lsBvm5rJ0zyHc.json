@@ -179,6 +179,7 @@
 				"metadata": {
 					"djstripe_test_fake_id": "sub_fakefakefakefakefake0002"
 				},
+				"pending_setup_intent": null,
 				"plan": {
 					"id": "silver41294",
 					"object": "plan",
@@ -274,6 +275,7 @@
 				"metadata": {
 					"djstripe_test_fake_id": "sub_fakefakefakefakefake0001"
 				},
+				"pending_setup_intent": null,
 				"plan": {
 					"id": "gold21323",
 					"object": "plan",
