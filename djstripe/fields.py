@@ -37,8 +37,8 @@ class StripePercentField(models.DecimalField):
 
 class StripeCurrencyCodeField(models.CharField):
     """
-	A field used to store a three-letter currency code (eg. usd, eur, ...)
-	"""
+    A field used to store a three-letter currency code (eg. usd, eur, ...)
+    """
 
     def __init__(self, *args, **kwargs):
         defaults = {"max_length": 3, "help_text": "Three-letter ISO currency code"}
@@ -52,10 +52,10 @@ class StripeQuantumCurrencyAmountField(models.IntegerField):
 
 class StripeDecimalCurrencyAmountField(models.DecimalField):
     """
-	A field used to define currency according to djstripe logic.
+    A field used to define currency according to djstripe logic.
 
-	Stripe is always in cents. djstripe stores everything in dollars.
-	"""
+    Stripe is always in cents. djstripe stores everything in dollars.
+    """
 
     def __init__(self, *args, **kwargs):
         """Assign default args to this field."""
@@ -92,13 +92,13 @@ class StripeIdField(models.CharField):
 
     def __init__(self, *args, **kwargs):
         """
-		Assign default args to this field.
+        Assign default args to this field.
 
-		As per: https://stripe.com/docs/upgrades
-		You can safely assume object IDs we generate will never exceed 255
-		characters, but you should be able to handle IDs of up to that
-		length.
-		"""
+        As per: https://stripe.com/docs/upgrades
+        You can safely assume object IDs we generate will never exceed 255
+        characters, but you should be able to handle IDs of up to that
+        length.
+        """
         defaults = {"max_length": 255, "blank": False, "null": False}
         defaults.update(kwargs)
         super().__init__(*args, **defaults)

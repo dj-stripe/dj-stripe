@@ -10,9 +10,9 @@ import djstripe.fields
 
 def postgres_migration_prep(apps, schema_editor):
     """
-	Set null text fields to empty string to workaround incompatibility with migration 0003 on postgres
-	See https://github.com/dj-stripe/dj-stripe/issues/850
-	"""
+    Set null text fields to empty string to workaround incompatibility with migration 0003 on postgres
+    See https://github.com/dj-stripe/dj-stripe/issues/850
+    """
 
     Account = apps.get_model("djstripe", "Account")
     BankAccount = apps.get_model("djstripe", "BankAccount")

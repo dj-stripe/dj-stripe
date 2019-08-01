@@ -23,12 +23,12 @@ def _get_version():
 
 class WebhookEventTrigger(models.Model):
     """
-	An instance of a request that reached the server endpoint for Stripe webhooks.
+    An instance of a request that reached the server endpoint for Stripe webhooks.
 
-	Webhook Events are initially **UNTRUSTED**, as it is possible for any web entity to
-	post any data to our webhook url. Data posted may be valid Stripe information,  garbage, or even malicious.
-	The 'valid' flag in this model monitors this.
-	"""
+    Webhook Events are initially **UNTRUSTED**, as it is possible for any web entity to
+    post any data to our webhook url. Data posted may be valid Stripe information,  garbage, or even malicious.
+    The 'valid' flag in this model monitors this.
+    """
 
     id = models.BigAutoField(primary_key=True)
     remote_ip = models.GenericIPAddressField(
@@ -66,14 +66,14 @@ class WebhookEventTrigger(models.Model):
     @classmethod
     def from_request(cls, request):
         """
-		Create, validate and process a WebhookEventTrigger given a Django
-		request object.
+        Create, validate and process a WebhookEventTrigger given a Django
+        request object.
 
-		The process is three-fold:
-		1. Create a WebhookEventTrigger object from a Django request.
-		2. Validate the WebhookEventTrigger as a Stripe event using the API.
-		3. If valid, process it into an Event object (and child resource).
-		"""
+        The process is three-fold:
+        1. Create a WebhookEventTrigger object from a Django request.
+        2. Validate the WebhookEventTrigger as a Stripe event using the API.
+        3. If valid, process it into an Event object (and child resource).
+        """
 
         headers = fix_django_headers(request.META)
         assert headers
@@ -133,12 +133,12 @@ class WebhookEventTrigger(models.Model):
 
     def validate(self, api_key=None):
         """
-		The original contents of the Event message must be confirmed by
-		refetching it and comparing the fetched data with the original data.
+        The original contents of the Event message must be confirmed by
+        refetching it and comparing the fetched data with the original data.
 
-		This function makes an API call to Stripe to redownload the Event data
-		and returns whether or not it matches the WebhookEventTrigger data.
-		"""
+        This function makes an API call to Stripe to redownload the Event data
+        and returns whether or not it matches the WebhookEventTrigger data.
+        """
 
         local_data = self.json_body
         if "id" not in local_data or "livemode" not in local_data:

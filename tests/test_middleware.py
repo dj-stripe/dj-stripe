@@ -88,10 +88,10 @@ class MiddlewareURLTest(TestCase):
     )
     def test_middleware_loads(self):
         """Check that the middleware can be loaded by django's
-		middleware handlers. This is to check for compatibility across
-		the change to django's middleware class structure. See
-		https://docs.djangoproject.com/en/1.10/topics/http/middleware/#upgrading-pre-django-1-10-style-middleware
-		"""
+        middleware handlers. This is to check for compatibility across
+        the change to django's middleware class structure. See
+        https://docs.djangoproject.com/en/1.10/topics/http/middleware/#upgrading-pre-django-1-10-style-middleware
+        """
         self.client.get("/__debug__")
 
 

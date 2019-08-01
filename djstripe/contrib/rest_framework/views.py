@@ -1,7 +1,7 @@
 """
 .. module:: dj-stripe.contrib.rest_framework.views.
 
-	:synopsis: Views for the dj-stripe REST API.
+    :synopsis: Views for the dj-stripe REST API.
 
 .. moduleauthor:: Philippe Luickx (@philippeluickx)
 
@@ -24,10 +24,10 @@ class SubscriptionRestView(APIView):
 
     def get(self, request, **kwargs):
         """
-		Return the customer's valid subscriptions.
+        Return the customer's valid subscriptions.
 
-		Returns with status code 200.
-		"""
+        Returns with status code 200.
+        """
         customer, _created = Customer.get_or_create(
             subscriber=subscriber_request_callback(self.request)
         )
@@ -37,10 +37,10 @@ class SubscriptionRestView(APIView):
 
     def post(self, request, **kwargs):
         """
-		Create a new current subscription for the user.
+        Create a new current subscription for the user.
 
-		Returns with status code 201.
-		"""
+        Returns with status code 201.
+        """
         serializer = CreateSubscriptionSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -66,10 +66,10 @@ class SubscriptionRestView(APIView):
 
     def delete(self, request, **kwargs):
         """
-		Mark the customers current subscription as cancelled.
+        Mark the customers current subscription as cancelled.
 
-		Returns with status code 204.
-		"""
+        Returns with status code 204.
+        """
         try:
             customer, _created = Customer.get_or_create(
                 subscriber=subscriber_request_callback(self.request)

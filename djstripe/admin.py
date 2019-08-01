@@ -12,22 +12,22 @@ class BaseHasSourceListFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         """
-		Return a list of tuples.
+        Return a list of tuples.
 
-		The first element in each tuple is the coded value for the option that will
-		appear in the URL query. The second element is the
-		human-readable name for the option that will appear
-		in the right sidebar.
-		source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
-		"""
+        The first element in each tuple is the coded value for the option that will
+        appear in the URL query. The second element is the
+        human-readable name for the option that will appear
+        in the right sidebar.
+        source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
+        """
         return (("yes", "Has a source"), ("no", "Has no source"))
 
     def queryset(self, request, queryset):
         """
-		Return the filtered queryset based on the value provided in the query string.
+        Return the filtered queryset based on the value provided in the query string.
 
-		source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
-		"""
+        source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
+        """
         filter_args = {self._filter_arg_key: None}
 
         if self.value() == "yes":
@@ -52,14 +52,14 @@ class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         """
-		Return a list of tuples.
+        Return a list of tuples.
 
-		The first element in each tuple is the coded value for the option that will
-		appear in the URL query. The second element is the
-		human-readable name for the option that will appear
-		in the right sidebar.
-		source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
-		"""
+        The first element in each tuple is the coded value for the option that will
+        appear in the URL query. The second element is the
+        human-readable name for the option that will appear
+        in the right sidebar.
+        source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
+        """
         statuses = [
             [x, x.replace("_", " ").title()]
             for x in models.Subscription.objects.values_list(
@@ -71,10 +71,10 @@ class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         """
-		Return the filtered queryset based on the value provided in the query string.
+        Return the filtered queryset based on the value provided in the query string.
 
-		source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
-		"""
+        source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
+        """
         if self.value() is None:
             return queryset.all()
         else:

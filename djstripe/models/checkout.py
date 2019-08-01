@@ -8,9 +8,9 @@ from .base import StripeModel
 
 class Session(StripeModel):
     """
-	A Checkout Session represents your customer's session as they pay
-	for one-time purchases or subscriptions through Checkout.
-	"""
+    A Checkout Session represents your customer's session as they pay
+    for one-time purchases or subscriptions through Checkout.
+    """
 
     stripe_class = stripe.PaymentIntent
     stripe_dashboard_item_name = "sessions"

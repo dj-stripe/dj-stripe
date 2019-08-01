@@ -8,8 +8,8 @@ from .base import StripeModel
 
 class ScheduledQueryRun(StripeModel):
     """
-	Stripe documentation: https://stripe.com/docs/api#scheduled_queries
-	"""
+    Stripe documentation: https://stripe.com/docs/api#scheduled_queries
+    """
 
     stripe_class = stripe.sigma.ScheduledQueryRun
 

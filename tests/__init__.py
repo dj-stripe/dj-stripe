@@ -40,12 +40,12 @@ IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED = sys.version_info >= (3, 6)
 class AssertStripeFksMixin:
     def assert_fks(self, obj, expected_blank_fks, processed_stripe_ids=None):
         """
-		Recursively walk through fks on obj, asserting they're not-none
-		:param obj:
-		:param expected_blank_fks: fields that are expected to be None
-		:param processed_stripe_ids: set of objects ids already processed
-		:return:
-		"""
+        Recursively walk through fks on obj, asserting they're not-none
+        :param obj:
+        :param expected_blank_fks: fields that are expected to be None
+        :param processed_stripe_ids: set of objects ids already processed
+        :return:
+        """
 
         if processed_stripe_ids is None:
             processed_stripe_ids = set()

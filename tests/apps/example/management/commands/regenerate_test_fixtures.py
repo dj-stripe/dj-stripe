@@ -19,22 +19,22 @@ FAKE_ID_METADATA_KEY = "djstripe_test_fake_id"
 
 class Command(BaseCommand):
     """
-	This does the following:
+    This does the following:
 
-	1) Load existing fixtures from JSON files
-	2) Attempts to read the corresponding objects from Stripe
-	3) If found, for types Stripe doesn't allow us to choose ids for,
-		we build a map between the fake ids in the fixtures and real Stripe ids
-	3) If not found, creates objects in Stripe from the fixtures
-	4) Save objects back as fixtures, using fake ids if available
+    1) Load existing fixtures from JSON files
+    2) Attempts to read the corresponding objects from Stripe
+    3) If found, for types Stripe doesn't allow us to choose ids for,
+        we build a map between the fake ids in the fixtures and real Stripe ids
+    3) If not found, creates objects in Stripe from the fixtures
+    4) Save objects back as fixtures, using fake ids if available
 
-	The rationale for this is so that the fixtures can automatically be updated
-	with Stripe schema changes running this command.
+    The rationale for this is so that the fixtures can automatically be updated
+    with Stripe schema changes running this command.
 
-	This should make keeping our tests and model schema compatible with Stripe
-	schema changes less pain-staking and simplify the process of upgrading
-	the targeted Stripe API version.
-	"""
+    This should make keeping our tests and model schema compatible with Stripe
+    schema changes less pain-staking and simplify the process of upgrading
+    the targeted Stripe API version.
+    """
 
     help = "Command to update test fixtures using a real Stripe account."
 
@@ -63,8 +63,8 @@ class Command(BaseCommand):
         #  maybe using https://github.com/stripe/openapi ? (though that's only for current version)
 
         """
-		Fields that we treat as read-only.  Most of these will cause an error if sent to the Stripe API.
-		"""
+        Fields that we treat as read-only.  Most of these will cause an error if sent to the Stripe API.
+        """
         model_extra_readonly_fields = {
             djstripe.models.Account: ["id"],
             djstripe.models.Customer: [
@@ -124,9 +124,9 @@ class Command(BaseCommand):
         }  # type: Dict[Type[djstripe.models.StripeModel], List[str]]
 
         """
-		Fields that we don't care about the value of, and that preserving
-		allows us to avoid churn in the fixtures
-		"""
+        Fields that we don't care about the value of, and that preserving
+        allows us to avoid churn in the fixtures
+        """
         model_sideeffect_fields = {
             djstripe.models.BalanceTransaction: ["available_on"],
             djstripe.models.Source: ["client_secret"],
@@ -246,14 +246,14 @@ class Command(BaseCommand):
 
     def init_fake_id_map(self):
         """
-		Build a mapping between fake ids stored in Stripe metadata and those obj's actual ids
+        Build a mapping between fake ids stored in Stripe metadata and those obj's actual ids
 
-		We do this so we can have fixtures with stable ids for objects Stripe doesn't allow
-		us to specify an id for (eg Card).
+        We do this so we can have fixtures with stable ids for objects Stripe doesn't allow
+        us to specify an id for (eg Card).
 
-		Fixtures and tests will use the fake ids, when we talk to stripe we use the real ids
-		:return:
-		"""
+        Fixtures and tests will use the fake ids, when we talk to stripe we use the real ids
+        :return:
+        """
 
         for fake_customer in self.fake_data_map[djstripe.models.Customer]:
             try:
@@ -297,10 +297,10 @@ class Command(BaseCommand):
 
     def get_fake_id(self, obj):
         """
-		Get a stable fake id from a real Stripe object, we use this so that fixtures are stable
-		:param obj:
-		:return:
-		"""
+        Get a stable fake id from a real Stripe object, we use this so that fixtures are stable
+        :param obj:
+        :return:
+        """
         fake_id = None
 
         if isinstance(obj, str):
@@ -321,12 +321,12 @@ class Command(BaseCommand):
 
     def fake_json_ids(self, json_str):
         """
-		Replace real ids with fakes ones in the JSON fixture
+        Replace real ids with fakes ones in the JSON fixture
 
-		Do this on the serialized JSON string since it's a simple string replace
-		:param json_str:
-		:return:
-		"""
+        Do this on the serialized JSON string since it's a simple string replace
+        :param json_str:
+        :return:
+        """
         for fake_id, actual_id in self.fake_id_map.items():
             json_str = json_str.replace(actual_id, fake_id)
 
@@ -334,12 +334,12 @@ class Command(BaseCommand):
 
     def unfake_json_ids(self, json_str):
         """
-		Replace fake ids with actual ones in the JSON fixture
+        Replace fake ids with actual ones in the JSON fixture
 
-		Do this on the serialized JSON string since it's a simple string replace
-		:param json_str:
-		:return:
-		"""
+        Do this on the serialized JSON string since it's a simple string replace
+        :param json_str:
+        :return:
+        """
         for fake_id, actual_id in self.fake_id_map.items():
             json_str = json_str.replace(fake_id, actual_id)
 
@@ -361,12 +361,12 @@ class Command(BaseCommand):
         common_sideeffect_fields,
     ):
         """
-		Given a fixture object, update it via stripe
-		:param model_class:
-		:param old_obj:
-		:param readonly_fields:
-		:return:
-		"""
+        Given a fixture object, update it via stripe
+        :param model_class:
+        :param old_obj:
+        :param readonly_fields:
+        :return:
+        """
 
         # restore real ids from Stripe
         old_obj = json.loads(self.unfake_json_ids(json.dumps(old_obj)))
@@ -418,9 +418,9 @@ class Command(BaseCommand):
                 obj = model_class(id=id_).api_retrieve()
                 created = False
 
-                self.stdout.write("	found")
+                self.stdout.write("    found")
             except InvalidRequestError:
-                self.stdout.write("	creating")
+                self.stdout.write("    creating")
 
                 create_obj = deepcopy(old_obj)
 
@@ -459,9 +459,9 @@ class Command(BaseCommand):
             obj = customer.sources.retrieve(id_)
             created = False
 
-            self.stdout.write("	found")
+            self.stdout.write("    found")
         except InvalidRequestError:
-            self.stdout.write("	creating")
+            self.stdout.write("    creating")
 
             create_obj = deepcopy(old_obj)
 
@@ -487,9 +487,9 @@ class Command(BaseCommand):
             obj = customer.sources.retrieve(id_)
             created = False
 
-            self.stdout.write("	found")
+            self.stdout.write("    found")
         except InvalidRequestError:
-            self.stdout.write("	creating")
+            self.stdout.write("    creating")
 
             create_obj = deepcopy(old_obj)
 
@@ -521,7 +521,7 @@ class Command(BaseCommand):
             obj = djstripe.models.Invoice(id=id_).api_retrieve()
             created = False
 
-            self.stdout.write(f"	found {id_}")
+            self.stdout.write(f"    found {id_}")
         except InvalidRequestError:
             assert False, "Expected to find invoice via subscription"
 
@@ -544,7 +544,7 @@ class Command(BaseCommand):
             obj = djstripe.models.Charge(id=id_).api_retrieve()
             created = False
 
-            self.stdout.write(f"	found {id_}")
+            self.stdout.write(f"    found {id_}")
         except InvalidRequestError:
             assert False, "Expected to find charge via invoice"
 
@@ -567,7 +567,7 @@ class Command(BaseCommand):
             obj = djstripe.models.PaymentIntent(id=id_).api_retrieve()
             created = False
 
-            self.stdout.write(f"	found {id_}")
+            self.stdout.write(f"    found {id_}")
         except InvalidRequestError:
             assert False, "Expected to find payment_intent via invoice"
 
@@ -591,9 +591,9 @@ class Command(BaseCommand):
             obj = djstripe.models.PaymentMethod(id=id_).api_retrieve()
             created = False
 
-            self.stdout.write("	found")
+            self.stdout.write("    found")
         except InvalidRequestError:
-            self.stdout.write("	creating")
+            self.stdout.write("    creating")
 
             obj = djstripe.models.PaymentMethod()._api_create(
                 type=type_, card={"token": "tok_visa"}
@@ -631,7 +631,7 @@ class Command(BaseCommand):
             obj = djstripe.models.BalanceTransaction(id=id_).api_retrieve()
             created = False
 
-            self.stdout.write(f"	found {id_}")
+            self.stdout.write(f"    found {id_}")
         except InvalidRequestError:
             assert False, "Expected to find balance transaction via source"
 
@@ -696,8 +696,8 @@ class Command(BaseCommand):
         self, old_obj, new_obj, object_sideeffect_fields, common_sideeffect_fields
     ):
         """
-		Try to preserve values of side-effect fields from old_obj, to reduce churn in fixtures
-		"""
+        Try to preserve values of side-effect fields from old_obj, to reduce churn in fixtures
+        """
         object_name = new_obj.get("object")
         sideeffect_fields = object_sideeffect_fields.get(object_name, set()).union(
             set(common_sideeffect_fields)

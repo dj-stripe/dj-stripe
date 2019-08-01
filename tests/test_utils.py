@@ -72,19 +72,19 @@ class TestUserHasActiveSubscription(TestCase):
 
     def test_custom_subscriber(self):
         """
-		``subscriber_has_active_subscription`` attempts to create a customer object
-		for the current user. This causes a ValueError in this test because the
-		database has already been established with auth.User.
-		"""
+        ``subscriber_has_active_subscription`` attempts to create a customer object
+        for the current user. This causes a ValueError in this test because the
+        database has already been established with auth.User.
+        """
 
         subscriber = Organization.objects.create(email="email@test.com")
         self.assertRaises(ValueError, subscriber_has_active_subscription, subscriber)
 
     def test_anonymous_user(self):
         """
-		This needs to throw an ImproperlyConfigured error so the developer
-		can be guided to properly protect the subscription content.
-		"""
+        This needs to throw an ImproperlyConfigured error so the developer
+        can be guided to properly protect the subscription content.
+        """
 
         anon_user = AnonymousUser()
 

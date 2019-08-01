@@ -26,18 +26,18 @@ sys.path.append(parent)
 
 
 settings.configure(
-	INSTALLED_APPS=[
-		"django.contrib.admin",
-		"django.contrib.auth",
-		"django.contrib.contenttypes",
-		"django.contrib.sessions",
-		"django.contrib.sites",
-		"jsonfield",
-		"djstripe",
-	],
-	SITE_ID=1,
-	STRIPE_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", ""),
-	STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", ""),
+    INSTALLED_APPS=[
+        "django.contrib.admin",
+        "django.contrib.auth",
+        "django.contrib.contenttypes",
+        "django.contrib.sessions",
+        "django.contrib.sites",
+        "jsonfield",
+        "djstripe",
+    ],
+    SITE_ID=1,
+    STRIPE_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", ""),
+    STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", ""),
 )
 
 
@@ -125,12 +125,12 @@ pygments_style = "sphinx"
 on_rtd = os.environ.get("READTHEDOCS", None) == "True"
 
 if not on_rtd:  # only import and set the theme if we're building docs locally
-	import sphinx_rtd_theme
+    import sphinx_rtd_theme
 
-	html_theme = "sphinx_rtd_theme"
-	html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+    html_theme = "sphinx_rtd_theme"
+    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 else:
-	html_theme = "default"
+    html_theme = "default"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -221,13 +221,13 @@ latex_elements = {}
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-	(
-		"index",
-		"dj-stripe.tex",
-		u"dj-stripe Documentation",
-		u"Alexander Kavanaugh",
-		"manual",
-	)
+    (
+        "index",
+        "dj-stripe.tex",
+        u"dj-stripe Documentation",
+        u"Alexander Kavanaugh",
+        "manual",
+    )
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -256,7 +256,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-	("index", "dj-stripe", u"dj-stripe Documentation", [u"Alexander Kavanaugh"], 1)
+    ("index", "dj-stripe", u"dj-stripe Documentation", [u"Alexander Kavanaugh"], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -269,15 +269,15 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-	(
-		"index",
-		"dj-stripe",
-		u"dj-stripe Documentation",
-		u"Alexander Kavanaugh",
-		"dj-stripe",
-		"Django + Stripe Made Easy",
-		"Miscellaneous",
-	)
+    (
+        "index",
+        "dj-stripe",
+        u"dj-stripe Documentation",
+        u"Alexander Kavanaugh",
+        "dj-stripe",
+        "Django + Stripe Made Easy",
+        "Miscellaneous",
+    )
 ]
 
 # Documents to append as an appendix to all manuals.

@@ -16,15 +16,15 @@ logger = logging.getLogger(__name__)
 @method_decorator(csrf_exempt, name="dispatch")
 class ProcessWebhookView(View):
     """
-	A Stripe Webhook handler view.
+    A Stripe Webhook handler view.
 
-	This will create a WebhookEventTrigger instance, verify it,
-	then attempt to process it.
+    This will create a WebhookEventTrigger instance, verify it,
+    then attempt to process it.
 
-	If the webhook cannot be verified, returns HTTP 400.
+    If the webhook cannot be verified, returns HTTP 400.
 
-	If an exception happens during processing, returns HTTP 500.
-	"""
+    If an exception happens during processing, returns HTTP 500.
+    """
 
     def post(self, request):
         if "HTTP_STRIPE_SIGNATURE" not in request.META:

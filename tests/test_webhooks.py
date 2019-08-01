@@ -315,8 +315,8 @@ class TestWebhook(TestCase):
         self, event_retrieve_mock, transfer_retrieve_mock, mock_invoke_webhook_handlers
     ):
         """Test the case where webhook processing fails to ensure we rollback
-		and do not commit the Event object to the database.
-		"""
+        and do not commit the Event object to the database.
+        """
         mock_invoke_webhook_handlers.side_effect = KeyError("Test error")
         djstripe_settings.WEBHOOK_SECRET = ""
 

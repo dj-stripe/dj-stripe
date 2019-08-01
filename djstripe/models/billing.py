@@ -118,27 +118,27 @@ class Coupon(StripeModel):
 
 class Invoice(StripeModel):
     """
-	Invoices are statements of what a customer owes for a particular billing
-	period, including subscriptions, invoice items, and any automatic proration
-	adjustments if necessary.
+    Invoices are statements of what a customer owes for a particular billing
+    period, including subscriptions, invoice items, and any automatic proration
+    adjustments if necessary.
 
-	Once an invoice is created, payment is automatically attempted. Note that
-	the payment, while automatic, does not happen exactly at the time of invoice
-	creation. If you have configured webhooks, the invoice will wait until one
-	hour after the last webhook is successfully sent (or the last webhook times
-	out after failing).
+    Once an invoice is created, payment is automatically attempted. Note that
+    the payment, while automatic, does not happen exactly at the time of invoice
+    creation. If you have configured webhooks, the invoice will wait until one
+    hour after the last webhook is successfully sent (or the last webhook times
+    out after failing).
 
-	Any customer credit on the account is applied before determining how much is
-	due for that invoice (the amount that will be actually charged).
-	If the amount due for the invoice is less than 50 cents (the minimum for a
-	charge), we add the amount to the customer's running account balance to be
-	added to the next invoice. If this amount is negative, it will act as a
-	credit to offset the next invoice. Note that the customer account balance
-	does not include unpaid invoices; it only includes balances that need to be
-	taken into account when calculating the amount due for the next invoice.
+    Any customer credit on the account is applied before determining how much is
+    due for that invoice (the amount that will be actually charged).
+    If the amount due for the invoice is less than 50 cents (the minimum for a
+    charge), we add the amount to the customer's running account balance to be
+    added to the next invoice. If this amount is negative, it will act as a
+    credit to offset the next invoice. Note that the customer account balance
+    does not include unpaid invoices; it only includes balances that need to be
+    taken into account when calculating the amount due for the next invoice.
 
-	Stripe documentation: https://stripe.com/docs/api/python#invoices
-	"""
+    Stripe documentation: https://stripe.com/docs/api/python#invoices
+    """
 
     stripe_class = stripe.Invoice
     stripe_dashboard_item_name = "invoices"
@@ -382,46 +382,46 @@ class Invoice(StripeModel):
         **kwargs
     ):
         """
-		Gets the upcoming preview invoice (singular) for a customer.
+        Gets the upcoming preview invoice (singular) for a customer.
 
-		At any time, you can preview the upcoming
-		invoice for a customer. This will show you all the charges that are
-		pending, including subscription renewal charges, invoice item charges,
-		etc. It will also show you any discount that is applicable to the
-		customer. (Source: https://stripe.com/docs/api#upcoming_invoice)
+        At any time, you can preview the upcoming
+        invoice for a customer. This will show you all the charges that are
+        pending, including subscription renewal charges, invoice item charges,
+        etc. It will also show you any discount that is applicable to the
+        customer. (Source: https://stripe.com/docs/api#upcoming_invoice)
 
-		.. important:: Note that when you are viewing an upcoming invoice, you are simply viewing a preview.
+        .. important:: Note that when you are viewing an upcoming invoice, you are simply viewing a preview.
 
-		:param customer: The identifier of the customer whose upcoming invoice \
-		you'd like to retrieve.
-		:type customer: Customer or string (customer ID)
-		:param coupon: The code of the coupon to apply.
-		:type coupon: str
-		:param subscription: The identifier of the subscription to retrieve an \
-		invoice for.
-		:type subscription: Subscription or string (subscription ID)
-		:param subscription_plan: If set, the invoice returned will preview \
-		updating the subscription given to this plan, or creating a new \
-		subscription to this plan if no subscription is given.
-		:type subscription_plan: Plan or string (plan ID)
-		:param subscription_prorate: If previewing an update to a subscription, \
-		this decides whether the preview will show the result of applying \
-		prorations or not.
-		:type subscription_prorate: bool
-		:param subscription_proration_date: If previewing an update to a \
-		subscription, and doing proration, subscription_proration_date forces \
-		the proration to be calculated as though the update was done at the \
-		specified time.
-		:type subscription_proration_date: datetime
-		:param subscription_quantity: If provided, the invoice returned will \
-		preview updating or creating a subscription with that quantity.
-		:type subscription_quantity: int
-		:param subscription_trial_end: If provided, the invoice returned will \
-		preview updating or creating a subscription with that trial end.
-		:type subscription_trial_end: datetime
-		:returns: The upcoming preview invoice.
-		:rtype: UpcomingInvoice
-		"""
+        :param customer: The identifier of the customer whose upcoming invoice \
+        you'd like to retrieve.
+        :type customer: Customer or string (customer ID)
+        :param coupon: The code of the coupon to apply.
+        :type coupon: str
+        :param subscription: The identifier of the subscription to retrieve an \
+        invoice for.
+        :type subscription: Subscription or string (subscription ID)
+        :param subscription_plan: If set, the invoice returned will preview \
+        updating the subscription given to this plan, or creating a new \
+        subscription to this plan if no subscription is given.
+        :type subscription_plan: Plan or string (plan ID)
+        :param subscription_prorate: If previewing an update to a subscription, \
+        this decides whether the preview will show the result of applying \
+        prorations or not.
+        :type subscription_prorate: bool
+        :param subscription_proration_date: If previewing an update to a \
+        subscription, and doing proration, subscription_proration_date forces \
+        the proration to be calculated as though the update was done at the \
+        specified time.
+        :type subscription_proration_date: datetime
+        :param subscription_quantity: If provided, the invoice returned will \
+        preview updating or creating a subscription with that quantity.
+        :type subscription_quantity: int
+        :param subscription_trial_end: If provided, the invoice returned will \
+        preview updating or creating a subscription with that trial end.
+        :type subscription_trial_end: datetime
+        :returns: The upcoming preview invoice.
+        :rtype: UpcomingInvoice
+        """
 
         # Convert Customer to id
         if customer is not None and isinstance(customer, StripeModel):
@@ -480,8 +480,8 @@ class Invoice(StripeModel):
     @property
     def status(self):
         """ Attempts to label this invoice with a status. Note that an invoice can be more than one of the choices.
-			We just set a priority on which status appears.
-		"""
+            We just set a priority on which status appears.
+        """
 
         if self.paid:
             return self.STATUS_PAID
@@ -528,21 +528,21 @@ class Invoice(StripeModel):
     def plan(self):
         """ Gets the associated plan for this invoice.
 
-		In order to provide a consistent view of invoices, the plan object
-		should be taken from the first invoice item that has one, rather than
-		using the plan associated with the subscription.
+        In order to provide a consistent view of invoices, the plan object
+        should be taken from the first invoice item that has one, rather than
+        using the plan associated with the subscription.
 
-		Subscriptions (and their associated plan) are updated by the customer
-		and represent what is current, but invoice items are immutable within
-		the invoice and stay static/unchanged.
+        Subscriptions (and their associated plan) are updated by the customer
+        and represent what is current, but invoice items are immutable within
+        the invoice and stay static/unchanged.
 
-		In other words, a plan retrieved from an invoice item will represent
-		the plan as it was at the time an invoice was issued.  The plan
-		retrieved from the subscription will be the currently active plan.
+        In other words, a plan retrieved from an invoice item will represent
+        the plan as it was at the time an invoice was issued.  The plan
+        retrieved from the subscription will be the currently active plan.
 
-		:returns: The associated plan for the invoice.
-		:rtype: ``djstripe.Plan``
-		"""
+        :returns: The associated plan for the invoice.
+        :rtype: ``djstripe.Plan``
+        """
 
         for invoiceitem in self.invoiceitems.all():
             if invoiceitem.plan:
@@ -569,16 +569,16 @@ class UpcomingInvoice(Invoice):
     @property
     def invoiceitems(self):
         """
-		Gets the invoice items associated with this upcoming invoice.
+        Gets the invoice items associated with this upcoming invoice.
 
-		This differs from normal (non-upcoming) invoices, in that upcoming
-		invoices are in-memory and do not persist to the database. Therefore,
-		all of the data comes from the Stripe API itself.
+        This differs from normal (non-upcoming) invoices, in that upcoming
+        invoices are in-memory and do not persist to the database. Therefore,
+        all of the data comes from the Stripe API itself.
 
-		Instead of returning a normal queryset for the invoiceitems, this will
-		return a mock of a queryset, but with the data fetched from Stripe - It
-		will act like a normal queryset, but mutation will silently fail.
-		"""
+        Instead of returning a normal queryset for the invoiceitems, this will
+        return a mock of a queryset, but with the data fetched from Stripe - It
+        will act like a normal queryset, but mutation will silently fail.
+        """
 
         return QuerySetMock.from_iterable(InvoiceItem, self._invoiceitems)
 
@@ -596,13 +596,13 @@ class UpcomingInvoice(Invoice):
 
 class InvoiceItem(StripeModel):
     """
-	Sometimes you want to add a charge or credit to a customer but only actually
-	charge the customer's card at the end of a regular billing cycle.
-	This is useful for combining several charges to minimize per-transaction fees
-	or having Stripe tabulate your usage-based billing totals.
+    Sometimes you want to add a charge or credit to a customer but only actually
+    charge the customer's card at the end of a regular billing cycle.
+    This is useful for combining several charges to minimize per-transaction fees
+    or having Stripe tabulate your usage-based billing totals.
 
-	Stripe documentation: https://stripe.com/docs/api/python#invoiceitems
-	"""
+    Stripe documentation: https://stripe.com/docs/api/python#invoiceitems
+    """
 
     stripe_class = stripe.InvoiceItem
 
@@ -704,11 +704,11 @@ class InvoiceItem(StripeModel):
 
 class Plan(StripeModel):
     """
-	A subscription plan contains the pricing information for different
-	products and feature levels on your site.
+    A subscription plan contains the pricing information for different
+    products and feature levels on your site.
 
-	Stripe documentation: https://stripe.com/docs/api/python#plans)
-	"""
+    Stripe documentation: https://stripe.com/docs/api/python#plans)
+    """
 
     stripe_class = stripe.Plan
     stripe_dashboard_item_name = "plans"
@@ -896,13 +896,13 @@ class Plan(StripeModel):
     # Also, block other fields from being saved.
     def update_name(self):
         """
-		Update the name of the Plan in Stripe and in the db.
+        Update the name of the Plan in Stripe and in the db.
 
-		Assumes the object being called has the name attribute already
-		reset, but has not been saved.
+        Assumes the object being called has the name attribute already
+        reset, but has not been saved.
 
-		Stripe does not allow for update of any other Plan attributes besides name.
-		"""
+        Stripe does not allow for update of any other Plan attributes besides name.
+        """
 
         p = self.api_retrieve()
         p.name = self.name
@@ -913,23 +913,23 @@ class Plan(StripeModel):
 
 class Subscription(StripeModel):
     """
-	Subscriptions allow you to charge a customer's card on a recurring basis.
-	A subscription ties a customer to a particular plan you've created.
+    Subscriptions allow you to charge a customer's card on a recurring basis.
+    A subscription ties a customer to a particular plan you've created.
 
-	A subscription still in its trial period is ``trialing`` and moves to ``active``
-	when the trial period is over.
-	When payment to renew the subscription fails, the subscription becomes ``past_due``.
-	After Stripe has exhausted all payment retry attempts, the subscription ends up
-	with a status of either ``canceled`` or ``unpaid`` depending on your retry settings.
-	Note that when a subscription has a status of ``unpaid``, no subsequent invoices
-	will be attempted (invoices will be created, but then immediately automatically closed.
-	Additionally, updating customer card details will not lead to Stripe retrying the
-	latest invoice.).
-	After receiving updated card details from a customer, you may choose to reopen and
-	pay their closed invoices.
+    A subscription still in its trial period is ``trialing`` and moves to ``active``
+    when the trial period is over.
+    When payment to renew the subscription fails, the subscription becomes ``past_due``.
+    After Stripe has exhausted all payment retry attempts, the subscription ends up
+    with a status of either ``canceled`` or ``unpaid`` depending on your retry settings.
+    Note that when a subscription has a status of ``unpaid``, no subsequent invoices
+    will be attempted (invoices will be created, but then immediately automatically closed.
+    Additionally, updating customer card details will not lead to Stripe retrying the
+    latest invoice.).
+    After receiving updated card details from a customer, you may choose to reopen and
+    pay their closed invoices.
 
-	Stripe documentation: https://stripe.com/docs/api/python#subscriptions
-	"""
+    Stripe documentation: https://stripe.com/docs/api/python#subscriptions
+    """
 
     stripe_class = stripe.Subscription
     stripe_dashboard_item_name = "subscriptions"
@@ -1067,39 +1067,39 @@ class Subscription(StripeModel):
         trial_end=None,
     ):
         """
-		See `Customer.subscribe() <#djstripe.models.Customer.subscribe>`__
+        See `Customer.subscribe() <#djstripe.models.Customer.subscribe>`__
 
-		:param plan: The plan to which to subscribe the customer.
-		:type plan: Plan or string (plan ID)
-		:param application_fee_percent:
-		:type application_fee_percent:
-		:param billing_cycle_anchor:
-		:type billing_cycle_anchor:
-		:param coupon:
-		:type coupon:
-		:param prorate: Whether or not to prorate when switching plans. Default is True.
-		:type prorate: boolean
-		:param proration_date:
-			If set, the proration will be calculated as though the subscription was updated at the
-			given time. This can be used to apply exactly the same proration that was previewed
-			with upcoming invoice endpoint. It can also be used to implement custom proration
-			logic, such as prorating by day instead of by second, by providing the time that you
-			wish to use for proration calculations.
-		:type proration_date: datetime
-		:param metadata:
-		:type metadata:
-		:param quantity:
-		:type quantity:
-		:param tax_percent:
-		:type tax_percent:
-		:param trial_end:
-		:type trial_end:
+        :param plan: The plan to which to subscribe the customer.
+        :type plan: Plan or string (plan ID)
+        :param application_fee_percent:
+        :type application_fee_percent:
+        :param billing_cycle_anchor:
+        :type billing_cycle_anchor:
+        :param coupon:
+        :type coupon:
+        :param prorate: Whether or not to prorate when switching plans. Default is True.
+        :type prorate: boolean
+        :param proration_date:
+            If set, the proration will be calculated as though the subscription was updated at the
+            given time. This can be used to apply exactly the same proration that was previewed
+            with upcoming invoice endpoint. It can also be used to implement custom proration
+            logic, such as prorating by day instead of by second, by providing the time that you
+            wish to use for proration calculations.
+        :type proration_date: datetime
+        :param metadata:
+        :type metadata:
+        :param quantity:
+        :type quantity:
+        :param tax_percent:
+        :type tax_percent:
+        :param trial_end:
+        :type trial_end:
 
-		.. note:: The default value for ``prorate`` is the DJSTRIPE_PRORATION_POLICY setting.
+        .. note:: The default value for ``prorate`` is the DJSTRIPE_PRORATION_POLICY setting.
 
-		.. important:: Updating a subscription by changing the plan or quantity creates a new ``Subscription`` in \
-		Stripe (and dj-stripe).
-		"""
+        .. important:: Updating a subscription by changing the plan or quantity creates a new ``Subscription`` in \
+        Stripe (and dj-stripe).
+        """
 
         # Convert Plan to id
         if plan is not None and isinstance(plan, StripeModel):
@@ -1118,11 +1118,11 @@ class Subscription(StripeModel):
 
     def extend(self, delta):
         """
-		Extends this subscription by the provided delta.
+        Extends this subscription by the provided delta.
 
-		:param delta: The timedelta by which to extend this subscription.
-		:type delta: timedelta
-		"""
+        :param delta: The timedelta by which to extend this subscription.
+        :type delta: timedelta
+        """
 
         if delta.total_seconds() < 0:
             raise ValueError("delta must be a positive timedelta.")
@@ -1138,27 +1138,27 @@ class Subscription(StripeModel):
 
     def cancel(self, at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END):
         """
-		Cancels this subscription. If you set the at_period_end parameter to true, the subscription will remain active
-		until the end of the period, at which point it will be canceled and not renewed. By default, the subscription
-		is terminated immediately. In either case, the customer will not be charged again for the subscription. Note,
-		however, that any pending invoice items that you've created will still be charged for at the end of the period
-		unless manually deleted. If you've set the subscription to cancel at period end, any pending prorations will
-		also be left in place and collected at the end of the period, but if the subscription is set to cancel
-		immediately, pending prorations will be removed.
+        Cancels this subscription. If you set the at_period_end parameter to true, the subscription will remain active
+        until the end of the period, at which point it will be canceled and not renewed. By default, the subscription
+        is terminated immediately. In either case, the customer will not be charged again for the subscription. Note,
+        however, that any pending invoice items that you've created will still be charged for at the end of the period
+        unless manually deleted. If you've set the subscription to cancel at period end, any pending prorations will
+        also be left in place and collected at the end of the period, but if the subscription is set to cancel
+        immediately, pending prorations will be removed.
 
-		By default, all unpaid invoices for the customer will be closed upon subscription cancellation. We do this in
-		order to prevent unexpected payment retries once the customer has canceled a subscription. However, you can
-		reopen the invoices manually after subscription cancellation to have us proceed with automatic retries, or you
-		could even re-attempt payment yourself on all unpaid invoices before allowing the customer to cancel the
-		subscription at all.
+        By default, all unpaid invoices for the customer will be closed upon subscription cancellation. We do this in
+        order to prevent unexpected payment retries once the customer has canceled a subscription. However, you can
+        reopen the invoices manually after subscription cancellation to have us proceed with automatic retries, or you
+        could even re-attempt payment yourself on all unpaid invoices before allowing the customer to cancel the
+        subscription at all.
 
-		:param at_period_end: A flag that if set to true will delay the cancellation of the subscription until the end
-			of the current period. Default is False.
-		:type at_period_end: boolean
+        :param at_period_end: A flag that if set to true will delay the cancellation of the subscription until the end
+            of the current period. Default is False.
+        :type at_period_end: boolean
 
-		.. important:: If a subscription is cancelled during a trial period, the ``at_period_end`` flag will be \
-		overridden to False so that the trial ends immediately and the customer's card isn't charged.
-		"""
+        .. important:: If a subscription is cancelled during a trial period, the ``at_period_end`` flag will be \
+        overridden to False so that the trial ends immediately and the customer's card isn't charged.
+        """
 
         # If plan has trial days and customer cancels before
         # trial period ends, then end subscription now,
@@ -1189,15 +1189,15 @@ class Subscription(StripeModel):
 
     def reactivate(self):
         """
-		Reactivates this subscription.
+        Reactivates this subscription.
 
-		If a customer's subscription is canceled with ``at_period_end`` set to True and it has not yet reached the end
-		of the billing period, it can be reactivated. Subscriptions canceled immediately cannot be reactivated.
-		(Source: https://stripe.com/docs/subscriptions/canceling-pausing)
+        If a customer's subscription is canceled with ``at_period_end`` set to True and it has not yet reached the end
+        of the billing period, it can be reactivated. Subscriptions canceled immediately cannot be reactivated.
+        (Source: https://stripe.com/docs/subscriptions/canceling-pausing)
 
-		.. warning:: Reactivating a fully canceled Subscription will fail silently. Be sure to check the returned \
-		Subscription's status.
-		"""
+        .. warning:: Reactivating a fully canceled Subscription will fail silently. Be sure to check the returned \
+        Subscription's status.
+        """
         stripe_subscription = self.api_retrieve()
         stripe_subscription.plan = self.plan.id
         stripe_subscription.cancel_at_period_end = False
@@ -1218,13 +1218,13 @@ class Subscription(StripeModel):
 
     def is_status_temporarily_current(self):
         """
-		A status is temporarily current when the subscription is canceled with the ``at_period_end`` flag.
-		The subscription is still active, but is technically canceled and we're just waiting for it to run out.
+        A status is temporarily current when the subscription is canceled with the ``at_period_end`` flag.
+        The subscription is still active, but is technically canceled and we're just waiting for it to run out.
 
-		You could use this method to give customers limited service after they've canceled. For example, a video
-		on demand service could only allow customers to download their libraries and do nothing else when their
-		subscription is temporarily current.
-		"""
+        You could use this method to give customers limited service after they've canceled. For example, a video
+        on demand service could only allow customers to download their libraries and do nothing else when their
+        subscription is temporarily current.
+        """
 
         return (
             self.canceled_at
@@ -1255,11 +1255,11 @@ class Subscription(StripeModel):
 
 class SubscriptionItem(StripeModel):
     """
-	Subscription items allow you to create customer subscriptions
-	with more than one plan, making it easy to represent complex billing relationships.
+    Subscription items allow you to create customer subscriptions
+    with more than one plan, making it easy to represent complex billing relationships.
 
-	Stripe documentation: https://stripe.com/docs/api#subscription_items
-	"""
+    Stripe documentation: https://stripe.com/docs/api#subscription_items
+    """
 
     stripe_class = stripe.SubscriptionItem
 
@@ -1286,11 +1286,11 @@ class SubscriptionItem(StripeModel):
 
 class UsageRecord(StripeModel):
     """
-	Usage records allow you to continually report usage and metrics to
-	Stripe for metered billing of plans.
+    Usage records allow you to continually report usage and metrics to
+    Stripe for metered billing of plans.
 
-	Stripe documentation: https://stripe.com/docs/api#usage_records
-	"""
+    Stripe documentation: https://stripe.com/docs/api#usage_records
+    """
 
     quantity = models.PositiveIntegerField(
         help_text=(

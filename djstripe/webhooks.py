@@ -9,7 +9,7 @@ registrations are keyed by top-level event type (e.g. "invoice", "customer", etc
 Each registration entry is a list of processors
 Each processor in these lists is a function to be called
 The function signature is:
-	<Event object>
+    <Event object>
 
 There is also a "global registry" which is just a list of processors (as defined above)
 
@@ -32,19 +32,19 @@ TEST_EVENT_ID = "evt_00000000000000"
 
 def handler(*event_types):
     """
-	Decorator that registers a function as a webhook handler.
+    Decorator that registers a function as a webhook handler.
 
-	Functions can be registered for event types (e.g. 'customer') or
-	fully qualified event sub-types (e.g. 'customer.subscription.deleted').
+    Functions can be registered for event types (e.g. 'customer') or
+    fully qualified event sub-types (e.g. 'customer.subscription.deleted').
 
-	If an event type is specified, the handler will receive callbacks for
-	ALL webhook events of that type.  For example, if 'customer' is specified,
-	the handler will receive events for 'customer.subscription.created',
-	'customer.subscription.updated', etc.
+    If an event type is specified, the handler will receive callbacks for
+    ALL webhook events of that type.  For example, if 'customer' is specified,
+    the handler will receive events for 'customer.subscription.created',
+    'customer.subscription.updated', etc.
 
-	:param event_types: The event type(s) that should be handled.
-	:type event_types: str.
-	"""
+    :param event_types: The event type(s) that should be handled.
+    :type event_types: str.
+    """
 
     def decorator(func):
         for event_type in event_types:
@@ -56,10 +56,10 @@ def handler(*event_types):
 
 def handler_all(func=None):
     """
-	Decorator that registers a function as a webhook handler for ALL webhook events.
+    Decorator that registers a function as a webhook handler for ALL webhook events.
 
-	Handles all webhooks regardless of event type or sub-type.
-	"""
+    Handles all webhooks regardless of event type or sub-type.
+    """
     if not func:
         return functools.partial(handler_all)
 
@@ -70,19 +70,19 @@ def handler_all(func=None):
 
 def call_handlers(event):
     """
-	Invoke all handlers for the provided event type/sub-type.
+    Invoke all handlers for the provided event type/sub-type.
 
-	The handlers are invoked in the following order:
+    The handlers are invoked in the following order:
 
-	1. Global handlers
-	2. Event type handlers
-	3. Event sub-type handlers
+    1. Global handlers
+    2. Event type handlers
+    3. Event sub-type handlers
 
-	Handlers within each group are invoked in order of registration.
+    Handlers within each group are invoked in order of registration.
 
-	:param event: The event model object.
-	:type event: ``djstripe.models.Event``
-	"""
+    :param event: The event model object.
+    :type event: ``djstripe.models.Event``
+    """
     chain = [registrations_global]
 
     # Build up a list of handlers with each qualified part of the event

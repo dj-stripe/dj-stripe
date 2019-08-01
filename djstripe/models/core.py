@@ -35,10 +35,10 @@ djstripe_settings.set_stripe_api_version()
 
 class BalanceTransaction(StripeModel):
     """
-	A single transaction that updates the Stripe balance.
+    A single transaction that updates the Stripe balance.
 
-	Stripe documentation: https://stripe.com/docs/api#balance_transaction_object
-	"""
+    Stripe documentation: https://stripe.com/docs/api#balance_transaction_object
+    """
 
     stripe_class = stripe.BalanceTransaction
 
@@ -66,12 +66,12 @@ class BalanceTransaction(StripeModel):
 
 class Charge(StripeModel):
     """
-	To charge a credit or a debit card, you create a charge object. You can
-	retrieve and refund individual charges as well as list all charges. Charges
-	are identified by a unique random ID.
+    To charge a credit or a debit card, you create a charge object. You can
+    retrieve and refund individual charges as well as list all charges. Charges
+    are identified by a unique random ID.
 
-	Stripe documentation: https://stripe.com/docs/api/python#charges
-	"""
+    Stripe documentation: https://stripe.com/docs/api/python#charges
+    """
 
     stripe_class = stripe.Charge
     expand_fields = ["balance_transaction"]
@@ -282,9 +282,9 @@ class Charge(StripeModel):
 
     def _calculate_refund_amount(self, amount=None):
         """
-		:rtype: int
-		:return: amount that can be refunded, in CENTS
-		"""
+        :rtype: int
+        :return: amount that can be refunded, in CENTS
+        """
         eligible_to_refund = self.amount - (self.amount_refunded or 0)
         if amount:
             amount_to_refund = min(eligible_to_refund, amount)
@@ -294,19 +294,19 @@ class Charge(StripeModel):
 
     def refund(self, amount=None, reason=None):
         """
-		Initiate a refund. If amount is not provided, then this will be a full refund.
+        Initiate a refund. If amount is not provided, then this will be a full refund.
 
-		:param amount: A positive decimal amount representing how much of this charge
-			to refund. Can only refund up to the unrefunded amount remaining of the charge.
-		:trye amount: Decimal
-		:param reason: String indicating the reason for the refund. If set, possible values
-			are ``duplicate``, ``fraudulent``, and ``requested_by_customer``. Specifying
-			``fraudulent`` as the reason when you believe the charge to be fraudulent will
-			help Stripe improve their fraud detection algorithms.
+        :param amount: A positive decimal amount representing how much of this charge
+            to refund. Can only refund up to the unrefunded amount remaining of the charge.
+        :trye amount: Decimal
+        :param reason: String indicating the reason for the refund. If set, possible values
+            are ``duplicate``, ``fraudulent``, and ``requested_by_customer``. Specifying
+            ``fraudulent`` as the reason when you believe the charge to be fraudulent will
+            help Stripe improve their fraud detection algorithms.
 
-		:return: Stripe charge object
-		:rtype: dict
-		"""
+        :return: Stripe charge object
+        :rtype: dict
+        """
         charge_obj = self.api_retrieve().refund(
             amount=self._calculate_refund_amount(amount=amount), reason=reason
         )
@@ -314,12 +314,12 @@ class Charge(StripeModel):
 
     def capture(self):
         """
-		Capture the payment of an existing, uncaptured, charge.
-		This is the second half of the two-step payment flow, where first you
-		created a charge with the capture option set to False.
+        Capture the payment of an existing, uncaptured, charge.
+        This is the second half of the two-step payment flow, where first you
+        created a charge with the capture option set to False.
 
-		See https://stripe.com/docs/api#capture_charge
-		"""
+        See https://stripe.com/docs/api#capture_charge
+        """
 
         captured_charge = self.api_retrieve().capture()
         return self.__class__.sync_from_stripe_data(captured_charge)
@@ -327,13 +327,13 @@ class Charge(StripeModel):
     @classmethod
     def _stripe_object_destination_to_account(cls, target_cls, data):
         """
-		Search the given manager for the Account matching this Charge object's ``destination`` field.
+        Search the given manager for the Account matching this Charge object's ``destination`` field.
 
-		:param target_cls: The target class
-		:type target_cls: Account
-		:param data: stripe object
-		:type data: dict
-		"""
+        :param target_cls: The target class
+        :type target_cls: Account
+        :param data: stripe object
+        :type data: dict
+        """
 
         if "destination" in data and data["destination"]:
             return target_cls._get_or_create_from_stripe_object(data, "destination")[0]
@@ -348,11 +348,11 @@ class Charge(StripeModel):
 
 class Customer(StripeModel):
     """
-	Customer objects allow you to perform recurring charges and track multiple
-	charges that are associated with the same customer.
+    Customer objects allow you to perform recurring charges and track multiple
+    charges that are associated with the same customer.
 
-	Stripe documentation: https://stripe.com/docs/api/python#customers
-	"""
+    Stripe documentation: https://stripe.com/docs/api/python#customers
+    """
 
     stripe_class = stripe.Customer
     expand_fields = ["default_source"]
@@ -441,14 +441,14 @@ class Customer(StripeModel):
     @classmethod
     def get_or_create(cls, subscriber, livemode=djstripe_settings.STRIPE_LIVE_MODE):
         """
-		Get or create a dj-stripe customer.
+        Get or create a dj-stripe customer.
 
-		:param subscriber: The subscriber model instance for which to get or create a customer.
-		:type subscriber: User
+        :param subscriber: The subscriber model instance for which to get or create a customer.
+        :type subscriber: User
 
-		:param livemode: Whether to get the subscriber in live or test mode.
-		:type livemode: bool
-		"""
+        :param livemode: Whether to get the subscriber in live or test mode.
+        :type livemode: bool
+        """
 
         try:
             return Customer.objects.get(subscriber=subscriber, livemode=livemode), False
@@ -484,15 +484,15 @@ class Customer(StripeModel):
     @property
     def credits(self):
         """
-		The customer is considered to have credits if their balance is below 0.
-		"""
+        The customer is considered to have credits if their balance is below 0.
+        """
         return abs(min(self.balance, 0))
 
     @property
     def customer_payment_methods(self):
         """
-		An iterable of all of the customer's payment methods (sources, then legacy cards)
-		"""
+        An iterable of all of the customer's payment methods (sources, then legacy cards)
+        """
         for source in self.sources.iterator():
             yield source
 
@@ -502,8 +502,8 @@ class Customer(StripeModel):
     @property
     def pending_charges(self):
         """
-		The customer is considered to have pending charges if their balance is above 0.
-		"""
+        The customer is considered to have pending charges if their balance is above 0.
+        """
         return max(self.balance, 0)
 
     # deprecated, will be removed in 2.2
@@ -530,54 +530,54 @@ class Customer(StripeModel):
         trial_period_days=None,
     ):
         """
-		Subscribes this customer to a plan.
+        Subscribes this customer to a plan.
 
-		:param plan: The plan to which to subscribe the customer.
-		:type plan: Plan or string (plan ID)
-		:param application_fee_percent: This represents the percentage of the subscription invoice subtotal
-			that will be transferred to the application owner's Stripe account.
-			The request must be made with an OAuth key in order to set an
-			application fee percentage.
-		:type application_fee_percent: Decimal. Precision is 2; anything more will be ignored. A positive
-			decimal between 1 and 100.
-		:param coupon: The code of the coupon to apply to this subscription. A coupon applied to a subscription
-			will only affect invoices created for that particular subscription.
-		:type coupon: string
-		:param quantity: The quantity applied to this subscription. Default is 1.
-		:type quantity: integer
-		:param metadata: A set of key/value pairs useful for storing additional information.
-		:type metadata: dict
-		:param tax_percent: This represents the percentage of the subscription invoice subtotal that will
-			be calculated and added as tax to the final amount each billing period.
-		:type tax_percent: Decimal. Precision is 2; anything more will be ignored. A positive decimal
-			between 1 and 100.
-		:param billing_cycle_anchor: A future timestamp to anchor the subscription’s billing cycle.
-			This is used to determine the date of the first full invoice, and,
-			for plans with month or year intervals, the day of the month for
-			subsequent invoices.
-		:type billing_cycle_anchor: datetime
-		:param trial_end: The end datetime of the trial period the customer will get before being charged for
-			the first time. If set, this will override the default trial period of the plan the
-			customer is being subscribed to. The special value ``now`` can be provided to end
-			the customer's trial immediately.
-		:type trial_end: datetime
-		:param charge_immediately: Whether or not to charge for the subscription upon creation. If False, an
-			invoice will be created at the end of this period.
-		:type charge_immediately: boolean
-		:param trial_from_plan: Indicates if a plan’s trial_period_days should be applied to the subscription.
-			Setting trial_end per subscription is preferred, and this defaults to false.
-			Setting this flag to true together with trial_end is not allowed.
-		:type trial_from_plan: boolean
-		:param trial_period_days: Integer representing the number of trial period days before the customer is
-			charged for the first time. This will always overwrite any trials that might
-			apply via a subscribed plan.
-		:type trial_period_days: integer
+        :param plan: The plan to which to subscribe the customer.
+        :type plan: Plan or string (plan ID)
+        :param application_fee_percent: This represents the percentage of the subscription invoice subtotal
+            that will be transferred to the application owner's Stripe account.
+            The request must be made with an OAuth key in order to set an
+            application fee percentage.
+        :type application_fee_percent: Decimal. Precision is 2; anything more will be ignored. A positive
+            decimal between 1 and 100.
+        :param coupon: The code of the coupon to apply to this subscription. A coupon applied to a subscription
+            will only affect invoices created for that particular subscription.
+        :type coupon: string
+        :param quantity: The quantity applied to this subscription. Default is 1.
+        :type quantity: integer
+        :param metadata: A set of key/value pairs useful for storing additional information.
+        :type metadata: dict
+        :param tax_percent: This represents the percentage of the subscription invoice subtotal that will
+            be calculated and added as tax to the final amount each billing period.
+        :type tax_percent: Decimal. Precision is 2; anything more will be ignored. A positive decimal
+            between 1 and 100.
+        :param billing_cycle_anchor: A future timestamp to anchor the subscription’s billing cycle.
+            This is used to determine the date of the first full invoice, and,
+            for plans with month or year intervals, the day of the month for
+            subsequent invoices.
+        :type billing_cycle_anchor: datetime
+        :param trial_end: The end datetime of the trial period the customer will get before being charged for
+            the first time. If set, this will override the default trial period of the plan the
+            customer is being subscribed to. The special value ``now`` can be provided to end
+            the customer's trial immediately.
+        :type trial_end: datetime
+        :param charge_immediately: Whether or not to charge for the subscription upon creation. If False, an
+            invoice will be created at the end of this period.
+        :type charge_immediately: boolean
+        :param trial_from_plan: Indicates if a plan’s trial_period_days should be applied to the subscription.
+            Setting trial_end per subscription is preferred, and this defaults to false.
+            Setting this flag to true together with trial_end is not allowed.
+        :type trial_from_plan: boolean
+        :param trial_period_days: Integer representing the number of trial period days before the customer is
+            charged for the first time. This will always overwrite any trials that might
+            apply via a subscribed plan.
+        :type trial_period_days: integer
 
-		.. Notes:
-		.. ``charge_immediately`` is only available on ``Customer.subscribe()``
-		.. if you're using ``Customer.subscribe()`` instead of ``Customer.subscribe()``, ``plan`` \
-		can only be a string
-		"""
+        .. Notes:
+        .. ``charge_immediately`` is only available on ``Customer.subscribe()``
+        .. if you're using ``Customer.subscribe()`` instead of ``Customer.subscribe()``, ``plan`` \
+        can only be a string
+        """
         from .billing import Subscription
 
         # Convert Plan to id
@@ -618,39 +618,39 @@ class Customer(StripeModel):
         idempotency_key=None,
     ):
         """
-		Creates a charge for this customer.
+        Creates a charge for this customer.
 
-		Parameters not implemented:
+        Parameters not implemented:
 
-		* **receipt_email** - Since this is a charge on a customer, the customer's email address is used.
+        * **receipt_email** - Since this is a charge on a customer, the customer's email address is used.
 
 
-		:param amount: The amount to charge.
-		:type amount: Decimal. Precision is 2; anything more will be ignored.
-		:param currency: 3-letter ISO code for currency
-		:type currency: string
-		:param application_fee: A fee that will be applied to the charge and transfered to the platform owner's
-			account.
-		:type application_fee: Decimal. Precision is 2; anything more will be ignored.
-		:param capture: Whether or not to immediately capture the charge. When false, the charge issues an
-			authorization (or pre-authorization), and will need to be captured later. Uncaptured
-			charges expire in 7 days. Default is True
-		:type capture: bool
-		:param description: An arbitrary string.
-		:type description: string
-		:param destination: An account to make the charge on behalf of.
-		:type destination: Account
-		:param metadata: A set of key/value pairs useful for storing additional information.
-		:type metadata: dict
-		:param shipping: Shipping information for the charge.
-		:type shipping: dict
-		:param source: The source to use for this charge. Must be a source attributed to this customer. If None,
-			the customer's default source is used. Can be either the id of the source or the source object
-			itself.
-		:type source: string, Source
-		:param statement_descriptor: An arbitrary string to be displayed on the customer's credit card statement.
-		:type statement_descriptor: string
-		"""
+        :param amount: The amount to charge.
+        :type amount: Decimal. Precision is 2; anything more will be ignored.
+        :param currency: 3-letter ISO code for currency
+        :type currency: string
+        :param application_fee: A fee that will be applied to the charge and transfered to the platform owner's
+            account.
+        :type application_fee: Decimal. Precision is 2; anything more will be ignored.
+        :param capture: Whether or not to immediately capture the charge. When false, the charge issues an
+            authorization (or pre-authorization), and will need to be captured later. Uncaptured
+            charges expire in 7 days. Default is True
+        :type capture: bool
+        :param description: An arbitrary string.
+        :type description: string
+        :param destination: An account to make the charge on behalf of.
+        :type destination: Account
+        :param metadata: A set of key/value pairs useful for storing additional information.
+        :type metadata: dict
+        :param shipping: Shipping information for the charge.
+        :type shipping: dict
+        :param source: The source to use for this charge. Must be a source attributed to this customer. If None,
+            the customer's default source is used. Can be either the id of the source or the source object
+            itself.
+        :type source: string, Source
+        :param statement_descriptor: An arbitrary string to be displayed on the customer's credit card statement.
+        :type statement_descriptor: string
+        """
 
         if not isinstance(amount, decimal.Decimal):
             raise ValueError("You must supply a decimal value representing dollars.")
@@ -692,38 +692,38 @@ class Customer(StripeModel):
         subscription=None,
     ):
         """
-		Adds an arbitrary charge or credit to the customer's upcoming invoice.
-		Different than creating a charge. Charges are separate bills that get
-		processed immediately. Invoice items are appended to the customer's next
-		invoice. This is extremely useful when adding surcharges to subscriptions.
+        Adds an arbitrary charge or credit to the customer's upcoming invoice.
+        Different than creating a charge. Charges are separate bills that get
+        processed immediately. Invoice items are appended to the customer's next
+        invoice. This is extremely useful when adding surcharges to subscriptions.
 
-		:param amount: The amount to charge.
-		:type amount: Decimal. Precision is 2; anything more will be ignored.
-		:param currency: 3-letter ISO code for currency
-		:type currency: string
-		:param description: An arbitrary string.
-		:type description: string
-		:param discountable: Controls whether discounts apply to this invoice item. Defaults to False for
-			prorations or negative invoice items, and True for all other invoice items.
-		:type discountable: boolean
-		:param invoice: An existing invoice to add this invoice item to. When left blank, the invoice
-			item will be added to the next upcoming scheduled invoice. Use this when adding
-			invoice items in response to an ``invoice.created`` webhook. You cannot add an invoice
-			item to an invoice that has already been paid, attempted or closed.
-		:type invoice: Invoice or string (invoice ID)
-		:param metadata: A set of key/value pairs useful for storing additional information.
-		:type metadata: dict
-		:param subscription: A subscription to add this invoice item to. When left blank, the invoice
-			item will be be added to the next upcoming scheduled invoice. When set,
-			scheduled invoices for subscriptions other than the specified subscription
-			will ignore the invoice item. Use this when you want to express that an
-			invoice item has been accrued within the context of a particular subscription.
-		:type subscription: Subscription or string (subscription ID)
+        :param amount: The amount to charge.
+        :type amount: Decimal. Precision is 2; anything more will be ignored.
+        :param currency: 3-letter ISO code for currency
+        :type currency: string
+        :param description: An arbitrary string.
+        :type description: string
+        :param discountable: Controls whether discounts apply to this invoice item. Defaults to False for
+            prorations or negative invoice items, and True for all other invoice items.
+        :type discountable: boolean
+        :param invoice: An existing invoice to add this invoice item to. When left blank, the invoice
+            item will be added to the next upcoming scheduled invoice. Use this when adding
+            invoice items in response to an ``invoice.created`` webhook. You cannot add an invoice
+            item to an invoice that has already been paid, attempted or closed.
+        :type invoice: Invoice or string (invoice ID)
+        :param metadata: A set of key/value pairs useful for storing additional information.
+        :type metadata: dict
+        :param subscription: A subscription to add this invoice item to. When left blank, the invoice
+            item will be be added to the next upcoming scheduled invoice. When set,
+            scheduled invoices for subscriptions other than the specified subscription
+            will ignore the invoice item. Use this when you want to express that an
+            invoice item has been accrued within the context of a particular subscription.
+        :type subscription: Subscription or string (subscription ID)
 
-		.. Notes:
-		.. if you're using ``Customer.add_invoice_item()`` instead of ``Customer.add_invoice_item()``, \
-		``invoice`` and ``subscriptions`` can only be strings
-		"""
+        .. Notes:
+        .. if you're using ``Customer.add_invoice_item()`` instead of ``Customer.add_invoice_item()``, \
+        ``invoice`` and ``subscriptions`` can only be strings
+        """
         from .billing import InvoiceItem
 
         if not isinstance(amount, decimal.Decimal):
@@ -752,15 +752,15 @@ class Customer(StripeModel):
 
     def add_card(self, source, set_default=True):
         """
-		Adds a card to this customer's account.
+        Adds a card to this customer's account.
 
-		:param source: Either a token, like the ones returned by our Stripe.js, or a dictionary containing a
-			user's credit card details. Stripe will automatically validate the card.
-		:type source: string, dict
-		:param set_default: Whether or not to set the source as the customer's default source
-		:type set_default: boolean
+        :param source: Either a token, like the ones returned by our Stripe.js, or a dictionary containing a
+            user's credit card details. Stripe will automatically validate the card.
+        :type source: string, dict
+        :param set_default: Whether or not to set the source as the customer's default source
+        :type set_default: boolean
 
-		"""
+        """
         from .payment_methods import DjstripePaymentMethod
 
         stripe_customer = self.api_retrieve()
@@ -785,11 +785,11 @@ class Customer(StripeModel):
     #  see https://stripe.com/docs/api/payment_methods/attach
     def add_payment_method(self, payment_method_id):
         """
-		Adds an already existing payment method to this customer's account
+        Adds an already existing payment method to this customer's account
 
-		:param payment_method_id: ID of the PaymentMethod to be attached to the customer.
-		:return:
-		"""
+        :param payment_method_id: ID of the PaymentMethod to be attached to the customer.
+        :return:
+        """
         from .payment_methods import PaymentMethod
 
         stripe_customer = self.api_retrieve()
@@ -831,11 +831,11 @@ class Customer(StripeModel):
     # (or cascades, but that's another matter)
     def delete(self, using=None, keep_parents=False):
         """
-		Overriding the delete method to keep the customer in the records.
-		All identifying information is removed via the purge() method.
+        Overriding the delete method to keep the customer in the records.
+        All identifying information is removed via the purge() method.
 
-		The only way to delete a customer is to use SQL.
-		"""
+        The only way to delete a customer is to use SQL.
+        """
 
         self.purge()
 
@@ -850,17 +850,17 @@ class Customer(StripeModel):
 
     def has_active_subscription(self, plan=None):
         """
-		Checks to see if this customer has an active subscription to the given plan.
+        Checks to see if this customer has an active subscription to the given plan.
 
-		:param plan: The plan for which to check for an active subscription. If plan is None and
-			there exists only one active subscription, this method will check if that subscription
-			is valid. Calling this method with no plan and multiple valid subscriptions for this customer will
-			throw an exception.
-		:type plan: Plan or string (plan ID)
+        :param plan: The plan for which to check for an active subscription. If plan is None and
+            there exists only one active subscription, this method will check if that subscription
+            is valid. Calling this method with no plan and multiple valid subscriptions for this customer will
+            throw an exception.
+        :type plan: Plan or string (plan ID)
 
-		:returns: True if there exists an active subscription, False otherwise.
-		:throws: TypeError if ``plan`` is None and more than one active subscription exists for this customer.
-		"""
+        :returns: True if there exists an active subscription, False otherwise.
+        :throws: TypeError if ``plan`` is None and more than one active subscription exists for this customer.
+        """
 
         if plan is None:
             valid_subscriptions = self._get_valid_subscriptions()
@@ -888,18 +888,18 @@ class Customer(StripeModel):
 
     def has_any_active_subscription(self):
         """
-		Checks to see if this customer has an active subscription to any plan.
+        Checks to see if this customer has an active subscription to any plan.
 
-		:returns: True if there exists an active subscription, False otherwise.
-		"""
+        :returns: True if there exists an active subscription, False otherwise.
+        """
 
         return len(self._get_valid_subscriptions()) != 0
 
     @property
     def active_subscriptions(self):
         """
-		Returns active subscriptions (subscriptions with an active status that end in the future).
-		"""
+        Returns active subscriptions (subscriptions with an active status that end in the future).
+        """
         return self.subscriptions.filter(
             status=enums.SubscriptionStatus.active,
             current_period_end__gt=timezone.now(),
@@ -908,20 +908,20 @@ class Customer(StripeModel):
     @property
     def valid_subscriptions(self):
         """
-		Returns this customer's valid subscriptions (subscriptions that aren't cancelled.
-		"""
+        Returns this customer's valid subscriptions (subscriptions that aren't cancelled.
+        """
         return self.subscriptions.exclude(status=enums.SubscriptionStatus.canceled)
 
     @property
     def subscription(self):
         """
-		Shortcut to get this customer's subscription.
+        Shortcut to get this customer's subscription.
 
-		:returns: None if the customer has no subscriptions, the subscription if
-			the customer has a subscription.
-		:raises MultipleSubscriptionException: Raised if the customer has multiple subscriptions.
-			In this case, use ``Customer.subscriptions`` instead.
-		"""
+        :returns: None if the customer has no subscriptions, the subscription if
+            the customer has a subscription.
+        :raises MultipleSubscriptionException: Raised if the customer has multiple subscriptions.
+            In this case, use ``Customer.subscriptions`` instead.
+        """
 
         subscriptions = self.valid_subscriptions
 
@@ -940,11 +940,11 @@ class Customer(StripeModel):
 
     def send_invoice(self):
         """
-		Pay and send the customer's latest invoice.
+        Pay and send the customer's latest invoice.
 
-		:returns: True if an invoice was able to be created and paid, False otherwise
-			(typically if there was nothing to invoice).
-		"""
+        :returns: True if an invoice was able to be created and paid, False otherwise
+            (typically if there was nothing to invoice).
+        """
         from .billing import Invoice
 
         try:
@@ -971,10 +971,10 @@ class Customer(StripeModel):
 
     def add_coupon(self, coupon, idempotency_key=None):
         """
-		Add a coupon to a Customer.
+        Add a coupon to a Customer.
 
-		The coupon can be a Coupon object, or a valid Stripe Coupon ID.
-		"""
+        The coupon can be a Coupon object, or a valid Stripe Coupon ID.
+        """
         if isinstance(coupon, StripeModel):
             coupon = coupon.id
 
@@ -986,10 +986,10 @@ class Customer(StripeModel):
     def upcoming_invoice(self, **kwargs):
         """ Gets the upcoming preview invoice (singular) for this customer.
 
-		See `Invoice.upcoming() <#djstripe.Invoice.upcoming>`__.
+        See `Invoice.upcoming() <#djstripe.Invoice.upcoming>`__.
 
-		The ``customer`` argument to the ``upcoming()`` call is automatically set by this method.
-		"""
+        The ``customer`` argument to the ``upcoming()`` call is automatically set by this method.
+        """
         from .billing import Invoice
 
         kwargs["customer"] = self
@@ -1097,8 +1097,8 @@ class Customer(StripeModel):
 
 class Dispute(StripeModel):
     """
-	Stripe documentation: https://stripe.com/docs/api#disputes
-	"""
+    Stripe documentation: https://stripe.com/docs/api#disputes
+    """
 
     stripe_class = stripe.Dispute
     stripe_dashboard_item_name = "disputes"
@@ -1125,13 +1125,13 @@ class Dispute(StripeModel):
 
 class Event(StripeModel):
     """
-	Events are Stripe's way of letting you know when something interesting
-	happens in your account.
-	When an interesting event occurs, a new Event object is created and POSTed
-	to the configured webhook URL if the Event type matches.
+    Events are Stripe's way of letting you know when something interesting
+    happens in your account.
+    When an interesting event occurs, a new Event object is created and POSTed
+    to the configured webhook URL if the Event type matches.
 
-	Stripe documentation: https://stripe.com/docs/api/events
-	"""
+    Stripe documentation: https://stripe.com/docs/api/events
+    """
 
     stripe_class = stripe.Event
     stripe_dashboard_item_name = "events"
@@ -1193,12 +1193,12 @@ class Event(StripeModel):
 
     def invoke_webhook_handlers(self):
         """
-		Invokes any webhook handlers that have been registered for this event
-		based on event type or event sub-type.
+        Invokes any webhook handlers that have been registered for this event
+        based on event type or event sub-type.
 
-		See event handlers registered in the ``djstripe.event_handlers`` module
-		(or handlers registered in djstripe plugins or contrib packages).
-		"""
+        See event handlers registered in the ``djstripe.event_handlers`` module
+        (or handlers registered in djstripe plugins or contrib packages).
+        """
 
         webhooks.call_handlers(event=self)
 
@@ -1235,8 +1235,8 @@ class Event(StripeModel):
 
 class FileUpload(StripeModel):
     """
-	Stripe documentation: https://stripe.com/docs/api#file_uploads
-	"""
+    Stripe documentation: https://stripe.com/docs/api#file_uploads
+    """
 
     stripe_class = stripe.FileUpload
 
@@ -1268,8 +1268,8 @@ File = FileUpload
 
 class PaymentIntent(StripeModel):
     """
-	Stripe documentation: https://stripe.com/docs/api#payment_intents
-	"""
+    Stripe documentation: https://stripe.com/docs/api#payment_intents
+    """
 
     stripe_class = stripe.PaymentIntent
     stripe_dashboard_item_name = "payment intents"
@@ -1424,37 +1424,37 @@ class PaymentIntent(StripeModel):
 
     def update(self, api_key=None, **kwargs):
         """
-		Call the stripe API's modify operation for this model
+        Call the stripe API's modify operation for this model
 
-		:param api_key: The api key to use for this request. Defaults to djstripe_settings.STRIPE_SECRET_KEY.
-		:type api_key: string
-		"""
+        :param api_key: The api key to use for this request. Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        """
         api_key = api_key or self.default_api_key
 
         return self.api_retrieve(api_key=api_key).modify(**kwargs)
 
     def _api_cancel(self, api_key=None, **kwargs):
         """
-		Call the stripe API's cancel operation for this model
+        Call the stripe API's cancel operation for this model
 
-		:param api_key: The api key to use for this request. Defaults to djstripe_settings.STRIPE_SECRET_KEY.
-		:type api_key: string
-		"""
+        :param api_key: The api key to use for this request. Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        """
         api_key = api_key or self.default_api_key
 
         return self.api_retrieve(api_key=api_key).cancel(**kwargs)
 
     def _api_confirm(self, api_key=None, **kwargs):
         """
-		Call the stripe API's confirm operation for this model.
+        Call the stripe API's confirm operation for this model.
 
-		Confirm that your customer intends to pay with current or
-		provided payment method. Upon confirmation, the PaymentIntent
-		will attempt to initiate a payment.
+        Confirm that your customer intends to pay with current or
+        provided payment method. Upon confirmation, the PaymentIntent
+        will attempt to initiate a payment.
 
-		:param api_key: The api key to use for this request. Defaults to djstripe_settings.STRIPE_SECRET_KEY.
-		:type api_key: string
-		"""
+        :param api_key: The api key to use for this request. Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        """
         api_key = api_key or self.default_api_key
 
         return self.api_retrieve(api_key=api_key).confirm(**kwargs)
@@ -1462,16 +1462,16 @@ class PaymentIntent(StripeModel):
 
 class SetupIntent(StripeModel):
     """
-	A SetupIntent guides you through the process of setting up a customer's payment credentials
-	for future payments. For example, you could use a SetupIntent to set up your customer's
-	card without immediately collecting a payment. Later, you can use PaymentIntents
-	to drive the payment flow.
+    A SetupIntent guides you through the process of setting up a customer's payment credentials
+    for future payments. For example, you could use a SetupIntent to set up your customer's
+    card without immediately collecting a payment. Later, you can use PaymentIntents
+    to drive the payment flow.
 
-	NOTE: You should not maintain long-lived, unconfirmed SetupIntents.
-	For security purposes, SetupIntents older than 24 hours may no longer be valid.
+    NOTE: You should not maintain long-lived, unconfirmed SetupIntents.
+    For security purposes, SetupIntents older than 24 hours may no longer be valid.
 
-	Stripe documentation: https://stripe.com/docs/api#setup_intents
-	"""
+    Stripe documentation: https://stripe.com/docs/api#setup_intents
+    """
 
     stripe_class = stripe.SetupIntent
     stripe_dashboard_item_name = "setup intents"
@@ -1552,11 +1552,11 @@ class SetupIntent(StripeModel):
 
 class Payout(StripeModel):
     """
-	A Payout object is created when you receive funds from Stripe, or when you initiate
-	a payout to either a bank account or debit card of a connected Stripe account.
+    A Payout object is created when you receive funds from Stripe, or when you initiate
+    a payout to either a bank account or debit card of a connected Stripe account.
 
-	Stripe documentation: https://stripe.com/docs/api#payouts
-	"""
+    Stripe documentation: https://stripe.com/docs/api#payouts
+    """
 
     stripe_class = stripe.Payout
     stripe_dashboard_item_name = "payouts"
@@ -1635,10 +1635,10 @@ class Payout(StripeModel):
 
 class Product(StripeModel):
     """
-	Stripe documentation:
-	- https://stripe.com/docs/api#products
-	- https://stripe.com/docs/api#service_products
-	"""
+    Stripe documentation:
+    - https://stripe.com/docs/api#products
+    - https://stripe.com/docs/api#service_products
+    """
 
     stripe_class = stripe.Product
     stripe_dashboard_item_name = "products"
@@ -1747,8 +1747,8 @@ class Product(StripeModel):
 
 class Refund(StripeModel):
     """
-	Stripe documentation: https://stripe.com/docs/api#refund_object
-	"""
+    Stripe documentation: https://stripe.com/docs/api#refund_object
+    """
 
     stripe_class = stripe.Refund
 

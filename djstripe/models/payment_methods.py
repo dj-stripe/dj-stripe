@@ -17,13 +17,13 @@ from .core import Customer
 
 class DjstripePaymentMethod(models.Model):
     """
-	An internal model that abstracts the legacy Card and BankAccount
-	objects with Source objects.
+    An internal model that abstracts the legacy Card and BankAccount
+    objects with Source objects.
 
-	Contains two fields: `id` and `type`:
-	- `id` is the id of the Stripe object.
-	- `type` can be `card`, `bank_account` or `source`.
-	"""
+    Contains two fields: `id` and `type`:
+    - `id` is the id of the Stripe object.
+    - `type` can be `card`, `bank_account` or `source`.
+    """
 
     id = models.CharField(max_length=255, primary_key=True)
     type = models.CharField(max_length=12, db_index=True)
@@ -120,18 +120,18 @@ class BankAccount(StripeModel):
 
 class Card(StripeModel):
     """
-	You can store multiple cards on a customer in order to charge the customer later.
+    You can store multiple cards on a customer in order to charge the customer later.
 
-	This is a legacy model which only applies to the "v2" Stripe API (eg. Checkout.js).
-	You should strive to use the Stripe "v3" API (eg. Stripe Elements).
-	Also see: https://stripe.com/docs/stripe-js/elements/migrating
-	When using Elements, you will not be using Card objects. Instead, you will use
-	Source objects.
-	A Source object of type "card" is equivalent to a Card object. However, Card
-	objects cannot be converted into Source objects by Stripe at this time.
+    This is a legacy model which only applies to the "v2" Stripe API (eg. Checkout.js).
+    You should strive to use the Stripe "v3" API (eg. Stripe Elements).
+    Also see: https://stripe.com/docs/stripe-js/elements/migrating
+    When using Elements, you will not be using Card objects. Instead, you will use
+    Source objects.
+    A Source object of type "card" is equivalent to a Card object. However, Card
+    objects cannot be converted into Source objects by Stripe at this time.
 
-	Stripe documentation: https://stripe.com/docs/api/python#cards
-	"""
+    Stripe documentation: https://stripe.com/docs/api/python#cards
+    """
 
     stripe_class = stripe.Card
 
@@ -239,8 +239,8 @@ class Card(StripeModel):
         # OVERRIDING the parent version of this function
         # Cards must be manipulated through a customer or account.
         # TODO: When managed accounts are supported, this method needs to
-        # 	check if either a customer or account is supplied to determine
-        # 	the correct object to use.
+        #     check if either a customer or account is supplied to determine
+        #     the correct object to use.
 
         customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
 
@@ -251,8 +251,8 @@ class Card(StripeModel):
         # OVERRIDING the parent version of this function
         # Cards must be manipulated through a customer or account.
         # TODO: When managed accounts are supported, this method needs to
-        # 	check if either a customer or account is supplied to determine
-        # 	the correct object to use.
+        #     check if either a customer or account is supplied to determine
+        #     the correct object to use.
 
         customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
 
@@ -267,8 +267,8 @@ class Card(StripeModel):
 
     def remove(self):
         """
-		Removes a card from this customer's account.
-		"""
+        Removes a card from this customer's account.
+        """
 
         # First, wipe default source on all customers that use this card.
         Customer.objects.filter(default_source=self.id).update(default_source=None)
@@ -321,20 +321,20 @@ class Card(StripeModel):
         **kwargs
     ):
         """
-		Creates a single use token that wraps the details of a credit card. This token can be used in
-		place of a credit card dictionary with any API method. These tokens can only be used once: by
-		creating a new charge object, or attaching them to a customer.
-		(Source: https://stripe.com/docs/api/python#create_card_token)
+        Creates a single use token that wraps the details of a credit card. This token can be used in
+        place of a credit card dictionary with any API method. These tokens can only be used once: by
+        creating a new charge object, or attaching them to a customer.
+        (Source: https://stripe.com/docs/api/python#create_card_token)
 
-		:param exp_month: The card's expiration month.
-		:type exp_month: Two digit int
-		:param exp_year: The card's expiration year.
-		:type exp_year: Two or Four digit int
-		:param number: The card number
-		:type number: string without any separators (no spaces)
-		:param cvc: Card security code.
-		:type cvc: string
-		"""
+        :param exp_month: The card's expiration month.
+        :type exp_month: Two digit int
+        :param exp_year: The card's expiration year.
+        :type exp_year: Two or Four digit int
+        :param number: The card number
+        :type number: string without any separators (no spaces)
+        :param cvc: Card security code.
+        :type cvc: string
+        """
 
         card = {
             "number": number,
@@ -349,8 +349,8 @@ class Card(StripeModel):
 
 class Source(StripeModel):
     """
-	Stripe documentation: https://stripe.com/docs/api#sources
-	"""
+    Stripe documentation: https://stripe.com/docs/api#sources
+    """
 
     amount = StripeDecimalCurrencyAmountField(
         null=True,
@@ -457,8 +457,8 @@ class Source(StripeModel):
 
     def detach(self):
         """
-		Detach the source from its customer.
-		"""
+        Detach the source from its customer.
+        """
 
         # First, wipe default source on all customers that use this.
         Customer.objects.filter(default_source=self.id).update(default_source=None)
@@ -479,8 +479,8 @@ class Source(StripeModel):
 
 class PaymentMethod(StripeModel):
     """
-	Stripe documentation: https://stripe.com/docs/api#payment_methods
-	"""
+    Stripe documentation: https://stripe.com/docs/api#payment_methods
+    """
 
     billing_details = JSONField(
         help_text=(

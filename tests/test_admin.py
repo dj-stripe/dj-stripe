@@ -14,9 +14,9 @@ class TestAdminSite(TestCase):
 
     def test_search_fields(self):
         """
-		Search for errors like this:
-		Bad search field <customer__user__username> for Customer model.
-		"""
+        Search for errors like this:
+        Bad search field <customer__user__username> for Customer model.
+        """
 
         for _model, model_admin in admin.site._registry.items():
             for search_field in getattr(model_admin, "search_fields", []):

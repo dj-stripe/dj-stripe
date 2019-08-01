@@ -19,8 +19,8 @@ from .base import StripeModel
 
 class Account(StripeModel):
     """
-	Stripe documentation: https://stripe.com/docs/api#account
-	"""
+    Stripe documentation: https://stripe.com/docs/api#account
+    """
 
     stripe_class = stripe.Account
     # Special handling of the icon and logo fields, they moved to settings.branding in Stripe 2019-02-19 but we
@@ -266,8 +266,8 @@ class Account(StripeModel):
 
         def empty_string_to_none(v):
             """
-			stripe.StripeObject.__setitem__ doesn't allow = ""
-			"""
+            stripe.StripeObject.__setitem__ doesn't allow = ""
+            """
             if v == "":
                 return None
             else:
@@ -345,11 +345,11 @@ class Account(StripeModel):
 
 class ApplicationFee(StripeModel):
     """
-	When you collect a transaction fee on top of a charge made for your
-	user (using Connect), an ApplicationFee is created in your account.
+    When you collect a transaction fee on top of a charge made for your
+    user (using Connect), an ApplicationFee is created in your account.
 
-	Stripe documentation: https://stripe.com/docs/api#application_fees
-	"""
+    Stripe documentation: https://stripe.com/docs/api#application_fees
+    """
 
     stripe_class = stripe.ApplicationFee
 
@@ -381,13 +381,13 @@ class ApplicationFee(StripeModel):
 
 class ApplicationFeeRefund(StripeModel):
     """
-	ApplicationFeeRefund objects allow you to refund an ApplicationFee that
-	has previously been created but not yet refunded.
-	Funds will be refunded to the Stripe account from which the fee was
-	originally collected.
+    ApplicationFeeRefund objects allow you to refund an ApplicationFee that
+    has previously been created but not yet refunded.
+    Funds will be refunded to the Stripe account from which the fee was
+    originally collected.
 
-	Stripe documentation: https://stripe.com/docs/api#fee_refunds
-	"""
+    Stripe documentation: https://stripe.com/docs/api#fee_refunds
+    """
 
     description = None
 
@@ -408,8 +408,8 @@ class ApplicationFeeRefund(StripeModel):
 
 class CountrySpec(StripeModel):
     """
-	Stripe documentation: https://stripe.com/docs/api#country_specs
-	"""
+    Stripe documentation: https://stripe.com/docs/api#country_specs
+    """
 
     stripe_class = stripe.CountrySpec
 
@@ -450,11 +450,11 @@ class CountrySpec(StripeModel):
 
 class Transfer(StripeModel):
     """
-	When Stripe sends you money or you initiate a transfer to a bank account,
-	debit card, or connected Stripe account, a transfer object will be created.
+    When Stripe sends you money or you initiate a transfer to a bank account,
+    debit card, or connected Stripe account, a transfer object will be created.
 
-	Stripe documentation: https://stripe.com/docs/api/python#transfers
-	"""
+    Stripe documentation: https://stripe.com/docs/api/python#transfers
+    """
 
     stripe_class = stripe.Transfer
     expand_fields = ["balance_transaction"]
@@ -519,8 +519,8 @@ class Transfer(StripeModel):
 
 class TransferReversal(StripeModel):
     """
-	Stripe documentation: https://stripe.com/docs/api#transfer_reversals
-	"""
+    Stripe documentation: https://stripe.com/docs/api#transfer_reversals
+    """
 
     stripe_class = stripe.Transfer
 

@@ -60,8 +60,8 @@ class EventTest(TestCase):
         self, mock_objects, mock__create_from_stripe_object, mock_atomic
     ):
         """Test that process event creates a new event and invokes webhooks
-		when the event doesn't already exist.
-		"""
+        when the event doesn't already exist.
+        """
         # Set up mocks
         mock_objects.filter.return_value.exists.return_value = False
         mock_data = {"id": "foo_id", "other_stuff": "more_things"}
@@ -84,8 +84,8 @@ class EventTest(TestCase):
         self, mock_objects, mock__create_from_stripe_object, mock_atomic
     ):
         """Test that process event returns the existing event and skips webhook processing
-		when the event already exists.
-		"""
+        when the event already exists.
+        """
         # Set up mocks
         mock_objects.filter.return_value.exists.return_value = True
         mock_data = {"id": "foo_id", "other_stuff": "more_things"}
@@ -107,7 +107,7 @@ class EventTest(TestCase):
     @patch("djstripe.models.Event.invoke_webhook_handlers", autospec=True)
     def test_process_event_failure_rolls_back(self, invoke_webhook_handlers_mock):
         """Test that process event rolls back event creation on error
-		"""
+        """
 
         class HandlerException(Exception):
             pass

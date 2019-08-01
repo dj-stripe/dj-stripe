@@ -1,7 +1,7 @@
 """
 .. module:: dj-stripe.contrib.rest_framework.serializers.
 
-	:synopsis: dj-stripe - Serializers to be used with the dj-stripe REST API.
+    :synopsis: dj-stripe - Serializers to be used with the dj-stripe REST API.
 
 .. moduleauthor:: Philippe Luickx (@philippeluickx)
 

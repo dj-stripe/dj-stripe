@@ -1,7 +1,7 @@
 """
 .. module:: dj-stripe.contrib.rest_framework.permissions.
 
-	:synopsis: dj-stripe - Permissions to be used with the dj-stripe REST API.
+    :synopsis: dj-stripe - Permissions to be used with the dj-stripe REST API.
 
 .. moduleauthor:: @kavdev, @pydanny
 
@@ -17,14 +17,14 @@ class DJStripeSubscriptionPermission(BasePermission):
 
     def has_permission(self, request, view):
         """
-		Check if the subscriber has an active subscription.
+        Check if the subscriber has an active subscription.
 
-		Returns false if:
-			* a subscriber isn't passed through the request
+        Returns false if:
+            * a subscriber isn't passed through the request
 
-		See ``utils.subscriber_has_active_subscription`` for more rules.
+        See ``utils.subscriber_has_active_subscription`` for more rules.
 
-		"""
+        """
         try:
             subscriber_has_active_subscription(subscriber_request_callback(request))
         except AttributeError:

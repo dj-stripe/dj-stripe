@@ -14,20 +14,20 @@ DEFAULT_STRIPE_API_VERSION = "2019-05-16"
 
 def get_callback_function(setting_name, default=None):
     """
-	Resolve a callback function based on a setting name.
+    Resolve a callback function based on a setting name.
 
-	If the setting value isn't set, default is returned.  If the setting value
-	is already a callable function, that value is used - If the setting value
-	is a string, an attempt is made to import it.  Anything else will result in
-	a failed import causing ImportError to be raised.
+    If the setting value isn't set, default is returned.  If the setting value
+    is already a callable function, that value is used - If the setting value
+    is a string, an attempt is made to import it.  Anything else will result in
+    a failed import causing ImportError to be raised.
 
-	:param setting_name: The name of the setting to resolve a callback from.
-	:type setting_name: string (``str``/``unicode``)
-	:param default: The default to return if setting isn't populated.
-	:type default: ``bool``
-	:returns: The resolved callback function (if any).
-	:type: ``callable``
-	"""
+    :param setting_name: The name of the setting to resolve a callback from.
+    :type setting_name: string (``str``/``unicode``)
+    :param default: The default to return if setting isn't populated.
+    :type default: ``bool``
+    :returns: The resolved callback function (if any).
+    :type: ``callable``
+    """
     func = getattr(settings, setting_name, None)
     if not func:
         return default
@@ -116,8 +116,8 @@ if hasattr(settings, "STRIPE_API_HOST"):
 
 def get_default_api_key(livemode):
     """
-	Returns the default API key for a value of `livemode`.
-	"""
+    Returns the default API key for a value of `livemode`.
+    """
     if livemode is None:
         # Livemode is unknown. Use the default secret key.
         return STRIPE_SECRET_KEY
@@ -160,15 +160,15 @@ def get_subscriber_model_string():
 
 def get_subscriber_model():
     """
-	Attempt to pull settings.DJSTRIPE_SUBSCRIBER_MODEL.
+    Attempt to pull settings.DJSTRIPE_SUBSCRIBER_MODEL.
 
-	Users have the option of specifying a custom subscriber model via the
-	DJSTRIPE_SUBSCRIBER_MODEL setting.
+    Users have the option of specifying a custom subscriber model via the
+    DJSTRIPE_SUBSCRIBER_MODEL setting.
 
-	This methods falls back to AUTH_USER_MODEL if DJSTRIPE_SUBSCRIBER_MODEL is not set.
+    This methods falls back to AUTH_USER_MODEL if DJSTRIPE_SUBSCRIBER_MODEL is not set.
 
-	Returns the subscriber model that is active in this project.
-	"""
+    Returns the subscriber model that is active in this project.
+    """
     model_name = get_subscriber_model_string()
 
     # Attempt a Django 1.7 app lookup
@@ -211,13 +211,13 @@ def get_stripe_api_version():
 
 def set_stripe_api_version(version=None, validate=True):
     """
-	Set the desired API version to use for Stripe requests.
+    Set the desired API version to use for Stripe requests.
 
-	:param version: The version to set for the Stripe API.
-	:type version: ``str``
-	:param validate: If True validate the value for the specified version).
-	:type validate: ``bool``
-	"""
+    :param version: The version to set for the Stripe API.
+    :type version: ``str``
+    :param validate: If True validate the value for the specified version).
+    :type validate: ``bool``
+    """
     version = version or get_stripe_api_version()
 
     if validate:

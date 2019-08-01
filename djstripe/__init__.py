@@ -11,9 +11,9 @@ default_app_config = "djstripe.DjstripeAppConfig"
 
 class DjstripeAppConfig(AppConfig):
     """
-	An AppConfig for dj-stripe which loads system checks
-	and event handlers once Django is ready.
-	"""
+    An AppConfig for dj-stripe which loads system checks
+    and event handlers once Django is ready.
+    """
 
     name = "djstripe"
 

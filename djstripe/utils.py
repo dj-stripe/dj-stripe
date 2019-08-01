@@ -22,10 +22,10 @@ ANONYMOUS_USER_ERROR_MSG = (
 
 def fix_django_headers(meta):
     """
-	Fix this nonsensical API:
-	https://docs.djangoproject.com/en/1.11/ref/request-response/
-	https://code.djangoproject.com/ticket/20147
-	"""
+    Fix this nonsensical API:
+    https://docs.djangoproject.com/en/1.11/ref/request-response/
+    https://code.djangoproject.com/ticket/20147
+    """
     ret = {}
     for k, v in meta.items():
         if k.startswith("HTTP_"):
@@ -41,28 +41,28 @@ def fix_django_headers(meta):
 
 def subscriber_has_active_subscription(subscriber, plan=None):
     """
-	Helper function to check if a subscriber has an active subscription.
+    Helper function to check if a subscriber has an active subscription.
 
-	Throws improperlyConfigured if the subscriber is an instance of AUTH_USER_MODEL
-	and get_user_model().is_anonymous == True.
+    Throws improperlyConfigured if the subscriber is an instance of AUTH_USER_MODEL
+    and get_user_model().is_anonymous == True.
 
-	Activate subscription rules (or):
-		* customer has active subscription
+    Activate subscription rules (or):
+        * customer has active subscription
 
-	If the subscriber is an instance of AUTH_USER_MODEL, active subscription rules (or):
-		* customer has active subscription
-		* user.is_superuser
-		* user.is_staff
+    If the subscriber is an instance of AUTH_USER_MODEL, active subscription rules (or):
+        * customer has active subscription
+        * user.is_superuser
+        * user.is_staff
 
-	:param subscriber: The subscriber for which to check for an active subscription.
-	:type subscriber: dj-stripe subscriber
-	:param plan: The plan for which to check for an active subscription. If plan is None and
-				there exists only one subscription, this method will check if that subscription
-				is active. Calling this method with no plan and multiple subscriptions will throw
-				an exception.
-	:type plan: Plan or string (plan ID)
+    :param subscriber: The subscriber for which to check for an active subscription.
+    :type subscriber: dj-stripe subscriber
+    :param plan: The plan for which to check for an active subscription. If plan is None and
+                there exists only one subscription, this method will check if that subscription
+                is active. Calling this method with no plan and multiple subscriptions will throw
+                an exception.
+    :type plan: Plan or string (plan ID)
 
-	"""
+    """
     if isinstance(subscriber, AnonymousUser):
         raise ImproperlyConfigured(ANONYMOUS_USER_ERROR_MSG)
 
@@ -79,11 +79,11 @@ def subscriber_has_active_subscription(subscriber, plan=None):
 
 def get_supported_currency_choices(api_key):
     """
-	Pull a stripe account's supported currencies and returns a choices tuple of those supported currencies.
+    Pull a stripe account's supported currencies and returns a choices tuple of those supported currencies.
 
-	:param api_key: The api key associated with the account from which to pull data.
-	:type api_key: str
-	"""
+    :param api_key: The api key associated with the account from which to pull data.
+    :type api_key: str
+    """
     import stripe
 
     stripe.api_key = api_key
@@ -105,10 +105,10 @@ def clear_expired_idempotency_keys():
 
 def convert_tstamp(response):
     """
-	Convert a Stripe API timestamp response (unix epoch) to a native datetime.
+    Convert a Stripe API timestamp response (unix epoch) to a native datetime.
 
-	:rtype: datetime
-	"""
+    :rtype: datetime
+    """
     if response is None:
         # Allow passing None to convert_tstamp()
         return response
@@ -133,9 +133,9 @@ def get_friendly_currency_amount(amount, currency):
 
 class QuerySetMock(QuerySet):
     """
-	A mocked QuerySet class that does not handle updates.
-	Used by UpcomingInvoice.invoiceitems.
-	"""
+    A mocked QuerySet class that does not handle updates.
+    Used by UpcomingInvoice.invoiceitems.
+    """
 
     @classmethod
     def from_iterable(cls, model, iterable):

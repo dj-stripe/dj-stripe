@@ -1,6 +1,6 @@
 """
 .. module:: dj-stripe.tests.test_contrib.test_views
-	:synopsis: dj-stripe Rest views for Subscription Tests.
+    :synopsis: dj-stripe Rest views for Subscription Tests.
 
 .. moduleauthor:: Philippe Luickx (@philippeluickx)
 .. moduleauthor:: Alex Kavanaugh (@kavdev)
@@ -25,8 +25,8 @@ from .. import FAKE_CUSTOMER, FAKE_PLAN, FAKE_PRODUCT, FAKE_SUBSCRIPTION
 
 class RestSubscriptionTest(APITestCase):
     """
-	Test the REST api for subscriptions.
-	"""
+    Test the REST api for subscriptions.
+    """
 
     def setUp(self):
         self.url = reverse("rest_djstripe:subscription")
@@ -41,11 +41,11 @@ class RestSubscriptionTest(APITestCase):
     def test_create_subscription(self, add_card_mock, subscribe_mock):
         """Test a POST to the SubscriptionRestView.
 
-		Should:
-			- Create a Customer object
-			- Add a card to the Customer object
-			- Subcribe the Customer to a plan
-		"""
+        Should:
+            - Create a Customer object
+            - Add a card to the Customer object
+            - Subcribe the Customer to a plan
+        """
         data = {"plan": "test0", "stripe_token": "cake"}
         response = self.client.post(self.url, data)
         self.assertEqual(1, Customer.objects.count())
@@ -63,9 +63,9 @@ class RestSubscriptionTest(APITestCase):
     ):
         """Test a POST to the SubscriptionRestView.
 
-		Should be able to accept an charge_immediately.
-		This will not send an invoice to the customer on subscribe.
-		"""
+        Should be able to accept an charge_immediately.
+        This will not send an invoice to the customer on subscribe.
+        """
         data = {"plan": "test0", "stripe_token": "cake", "charge_immediately": False}
         response = self.client.post(self.url, data)
         self.assertEqual(1, Customer.objects.count())
@@ -79,8 +79,8 @@ class RestSubscriptionTest(APITestCase):
     def test_create_subscription_exception(self, add_card_mock, subscribe_mock):
         """Test a POST to the SubscriptionRestView.
 
-		Should return a 400 when an Exception is raised.
-		"""
+        Should return a 400 when an Exception is raised.
+        """
         subscribe_mock.side_effect = Exception
         data = {"plan": "test0", "stripe_token": "cake"}
         response = self.client.post(self.url, data)
@@ -89,8 +89,8 @@ class RestSubscriptionTest(APITestCase):
     def test_create_subscription_incorrect_data(self):
         """Test a POST to the SubscriptionRestView.
 
-		Should return a 400 when a the serializer is invalid.
-		"""
+        Should return a 400 when a the serializer is invalid.
+        """
         data = {"foo": "bar"}
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -98,8 +98,8 @@ class RestSubscriptionTest(APITestCase):
     def test_get_subscription(self):
         """Test a GET to the SubscriptionRestView.
 
-		Should return the correct data.
-		"""
+        Should return the correct data.
+        """
         with patch(
             "stripe.Product.retrieve",
             return_value=deepcopy(FAKE_PRODUCT),
@@ -120,8 +120,8 @@ class RestSubscriptionTest(APITestCase):
     def test_cancel_subscription(self, cancel_subscription_mock):
         """Test a DELETE to the SubscriptionRestView.
 
-		Should cancel a Customer objects subscription.
-		"""
+        Should cancel a Customer objects subscription.
+        """
 
         def _cancel_sub(*args, **kwargs):
             subscription = Subscription.objects.first()
@@ -163,16 +163,16 @@ class RestSubscriptionTest(APITestCase):
     def test_cancel_subscription_exception(self):
         """Test a DELETE to the SubscriptionRestView.
 
-		Should return a 400 when an exception is raised.
-		"""
+        Should return a 400 when an exception is raised.
+        """
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class RestSubscriptionNotLoggedInTest(APITestCase):
     """
-	Test the exceptions thrown by the subscription rest views.
-	"""
+    Test the exceptions thrown by the subscription rest views.
+    """
 
     def setUp(self):
         self.url = reverse("rest_djstripe:subscription")

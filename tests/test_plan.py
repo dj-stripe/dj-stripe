@@ -200,9 +200,9 @@ class PlanTest(AssertStripeFksMixin, TestCase):
     @patch("stripe.Product.retrieve", autospec=True)
     def test_stripe_plan_null_product(self, product_retrieve_mock):
         """
-		assert that plan.Product can be null for backwards compatibility
-		though note that it is a Stripe required field
-		"""
+        assert that plan.Product can be null for backwards compatibility
+        though note that it is a Stripe required field
+        """
         plan_data = deepcopy(FAKE_PLAN_II)
         del plan_data["product"]
         plan = Plan.sync_from_stripe_data(plan_data)

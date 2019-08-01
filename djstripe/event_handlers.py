@@ -7,9 +7,9 @@ Stripe docs for Webhooks: https://stripe.com/docs/webhooks
 TODO: Implement webhook event handlers for all the models that need to respond to webhook events.
 
 NOTE:
-	Event data is not guaranteed to be in the correct API version format.
-	See #116. When writing a webhook handler, make sure to first
-	re-retrieve the object you wish to process.
+    Event data is not guaranteed to be in the correct API version format.
+    See #116. When writing a webhook handler, make sure to first
+    re-retrieve the object you wish to process.
 
 """
 import logging
@@ -25,12 +25,12 @@ logger = logging.getLogger(__name__)
 def customer_webhook_handler(event):
     """Handle updates to customer objects.
 
-	First determines the crud_type and then handles the event if a customer exists locally.
-	As customers are tied to local users, djstripe will not create customers that
-	do not already exist locally.
+    First determines the crud_type and then handles the event if a customer exists locally.
+    As customers are tied to local users, djstripe will not create customers that
+    do not already exist locally.
 
-	Docs and an example customer webhook response: https://stripe.com/docs/api#customer_object
-	"""
+    Docs and an example customer webhook response: https://stripe.com/docs/api#customer_object
+    """
     if event.customer:
         # As customers are tied to local users, djstripe will not create
         # customers that do not already exist locally.
@@ -43,12 +43,12 @@ def customer_webhook_handler(event):
 def customer_discount_webhook_handler(event):
     """Handle updates to customer discount objects.
 
-	Docs: https://stripe.com/docs/api#discounts
+    Docs: https://stripe.com/docs/api#discounts
 
-	Because there is no concept of a "Discount" model in dj-stripe (due to the
-	lack of a stripe id on them), this is a little different to the other
-	handlers.
-	"""
+    Because there is no concept of a "Discount" model in dj-stripe (due to the
+    lack of a stripe id on them), this is a little different to the other
+    handlers.
+    """
 
     crud_type = CrudType.determine(event=event)
     discount_data = event.data.get("object", {})
@@ -79,8 +79,8 @@ def customer_discount_webhook_handler(event):
 def customer_source_webhook_handler(event):
     """Handle updates to customer payment-source objects.
 
-	Docs: https://stripe.com/docs/api#customer_object-sources.
-	"""
+    Docs: https://stripe.com/docs/api#customer_object-sources.
+    """
     customer_data = event.data.get("object", {})
     source_type = customer_data.get("object", {})
 
@@ -103,8 +103,8 @@ def customer_source_webhook_handler(event):
 def customer_subscription_webhook_handler(event):
     """Handle updates to customer subscription objects.
 
-	Docs an example subscription webhook response: https://stripe.com/docs/api#subscription_object
-	"""
+    Docs an example subscription webhook response: https://stripe.com/docs/api#subscription_object
+    """
     _handle_crud_like_event(target_cls=models.Subscription, event=event)
 
 
@@ -124,17 +124,17 @@ def customer_subscription_webhook_handler(event):
 def other_object_webhook_handler(event):
     """Handle updates to transfer, charge, invoice, invoiceitem, plan, product and source objects.
 
-	Docs for:
-	- charge: https://stripe.com/docs/api#charges
-	- coupon: https://stripe.com/docs/api#coupons
-	- invoice: https://stripe.com/docs/api#invoices
-	- invoiceitem: https://stripe.com/docs/api#invoiceitems
-	- plan: https://stripe.com/docs/api#plans
-	- product: https://stripe.com/docs/api#products
-	- source: https://stripe.com/docs/api#sources
-	- payment_method: https://stripe.com/docs/api/payment_methods
-	- payment_intent: https://stripe.com/docs/api/payment_intents
-	"""
+    Docs for:
+    - charge: https://stripe.com/docs/api#charges
+    - coupon: https://stripe.com/docs/api#coupons
+    - invoice: https://stripe.com/docs/api#invoices
+    - invoiceitem: https://stripe.com/docs/api#invoiceitems
+    - plan: https://stripe.com/docs/api#plans
+    - product: https://stripe.com/docs/api#products
+    - source: https://stripe.com/docs/api#sources
+    - payment_method: https://stripe.com/docs/api/payment_methods
+    - payment_intent: https://stripe.com/docs/api/payment_intents
+    """
 
     if event.parts[:2] == ["charge", "dispute"]:
         # Do not attempt to handle charge.dispute.* events.
@@ -183,15 +183,15 @@ class CrudType(object):
     @classmethod
     def determine(cls, event, verb=None, exact=False):
         """
-		Determine if the event verb is a crud_type (without the 'R') event.
+        Determine if the event verb is a crud_type (without the 'R') event.
 
-		:param verb: The event verb to examine.
-		:type verb: string (``str``/`unicode``)
-		:param exact: If True, match crud_type to event verb string exactly.
-		:param type: ``bool``
-		:returns: The CrudType state object.
-		:rtype: ``CrudType``
-		"""
+        :param verb: The event verb to examine.
+        :type verb: string (``str``/`unicode``)
+        :param exact: If True, match crud_type to event verb string exactly.
+        :param type: ``bool``
+        :returns: The CrudType state object.
+        :rtype: ``CrudType``
+        """
         verb = verb or event.verb
 
         def check(crud_type_event):
@@ -224,28 +224,28 @@ def _handle_crud_like_event(
     crud_valid=False,
 ):
     """
-	Helper to process crud_type-like events for objects.
+    Helper to process crud_type-like events for objects.
 
-	Non-deletes (creates, updates and "anything else" events) are treated as
-	update_or_create events - The object will be retrieved locally, then it is
-	synchronised with the Stripe API for parity.
+    Non-deletes (creates, updates and "anything else" events) are treated as
+    update_or_create events - The object will be retrieved locally, then it is
+    synchronised with the Stripe API for parity.
 
-	Deletes only occur for delete events and cause the object to be deleted
-	from the local database, if it existed.  If it doesn't exist then it is
-	ignored (but the event processing still succeeds).
+    Deletes only occur for delete events and cause the object to be deleted
+    from the local database, if it existed.  If it doesn't exist then it is
+    ignored (but the event processing still succeeds).
 
-	:param target_cls: The djstripe model being handled.
-	:type: ``djstripe.models.StripeModel``
-	:param data: The event object data (defaults to ``event.data``).
-	:param verb: The event verb (defaults to ``event.verb``).
-	:param id: The object Stripe ID (defaults to ``object.id``).
-	:param customer: The customer object (defaults to ``event.customer``).
-	:param crud_type: The CrudType object (determined by default).
-	:param crud_exact: If True, match verb against CRUD type exactly.
-	:param crud_valid: If True, CRUD type must match valid type.
-	:returns: The object (if any) and the event CrudType.
-	:rtype: ``tuple(obj, CrudType)``
-	"""
+    :param target_cls: The djstripe model being handled.
+    :type: ``djstripe.models.StripeModel``
+    :param data: The event object data (defaults to ``event.data``).
+    :param verb: The event verb (defaults to ``event.verb``).
+    :param id: The object Stripe ID (defaults to ``object.id``).
+    :param customer: The customer object (defaults to ``event.customer``).
+    :param crud_type: The CrudType object (determined by default).
+    :param crud_exact: If True, match verb against CRUD type exactly.
+    :param crud_valid: If True, CRUD type must match valid type.
+    :returns: The object (if any) and the event CrudType.
+    :rtype: ``tuple(obj, CrudType)``
+    """
     data = data or event.data
     id = id or data.get("object", {}).get("id", None)
 

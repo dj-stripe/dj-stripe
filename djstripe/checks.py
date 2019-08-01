@@ -33,14 +33,14 @@ def check_stripe_api_key(app_configs=None, **kwargs):
 
 def validate_stripe_api_version(version):
     """
-	Check the API version is formatted correctly for Stripe.
+    Check the API version is formatted correctly for Stripe.
 
-	The expected format is an iso8601 date: `YYYY-MM-DD`
+    The expected format is an iso8601 date: `YYYY-MM-DD`
 
-	:param version: The version to set for the Stripe API.
-	:type version: ``str``
-	:returns bool: Whether the version is formatted correctly.
-	"""
+    :param version: The version to set for the Stripe API.
+    :type version: ``str``
+    :returns bool: Whether the version is formatted correctly.
+    """
     return date_re.match(version)
 
 
@@ -75,8 +75,8 @@ def check_stripe_api_version(app_configs=None, **kwargs):
 @checks.register("djstripe")
 def check_native_jsonfield_postgres_engine(app_configs=None, **kwargs):
     """
-	Check that the DJSTRIPE_USE_NATIVE_JSONFIELD isn't set unless Postgres is in use.
-	"""
+    Check that the DJSTRIPE_USE_NATIVE_JSONFIELD isn't set unless Postgres is in use.
+    """
     from . import settings as djstripe_settings
 
     messages = []
@@ -106,8 +106,8 @@ def check_native_jsonfield_postgres_engine(app_configs=None, **kwargs):
 @checks.register("djstripe")
 def check_stripe_api_host(app_configs=None, **kwargs):
     """
-	Check that STRIPE_API_HOST is not being used in production.
-	"""
+    Check that STRIPE_API_HOST is not being used in production.
+    """
     from django.conf import settings
 
     messages = []
@@ -127,8 +127,8 @@ def check_stripe_api_host(app_configs=None, **kwargs):
 @checks.register("djstripe")
 def check_webhook_secret(app_configs=None, **kwargs):
     """
-	Check that DJSTRIPE_WEBHOOK_SECRET looks correct
-	"""
+    Check that DJSTRIPE_WEBHOOK_SECRET looks correct
+    """
     from . import settings as djstripe_settings
 
     messages = []
@@ -149,8 +149,8 @@ def check_webhook_secret(app_configs=None, **kwargs):
 @checks.register("djstripe")
 def check_webhook_validation(app_configs=None, **kwargs):
     """
-	Check that DJSTRIPE_WEBHOOK_VALIDATION is valid
-	"""
+    Check that DJSTRIPE_WEBHOOK_VALIDATION is valid
+    """
     from . import settings as djstripe_settings
 
     messages = []
@@ -193,10 +193,10 @@ def check_webhook_validation(app_configs=None, **kwargs):
 @checks.register("djstripe")
 def check_subscriber_key_length(app_configs=None, **kwargs):
     """
-	Check that DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY fits in metadata.
+    Check that DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY fits in metadata.
 
-	Docs: https://stripe.com/docs/api#metadata
-	"""
+    Docs: https://stripe.com/docs/api#metadata
+    """
     from . import settings as djstripe_settings
 
     messages = []

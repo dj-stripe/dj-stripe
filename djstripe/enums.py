@@ -50,10 +50,10 @@ class Enum(metaclass=EnumMetaClass):
 
 class ApiErrorCode(Enum):
     """
-	Charge failure error codes.
+    Charge failure error codes.
 
-	https://stripe.com/docs/error-codes
-	"""
+    https://stripe.com/docs/error-codes
+    """
 
     account_already_exists = _("Account already exists")
     account_country_invalid_address = _("Account country invalid address")
@@ -303,9 +303,9 @@ class IntentUsage(Enum):
 
 class IntentStatus(Enum):
     """
-	Status of Intents which apply both to PaymentIntents
-	and SetupIntents.
-	"""
+    Status of Intents which apply both to PaymentIntents
+    and SetupIntents.
+    """
 
     requires_payment_method = _(
         "Intent created and requires a Payment Method to be attached."
@@ -331,10 +331,10 @@ class SetupIntentStatus(IntentStatus):
 
 class PayoutFailureCode(Enum):
     """
-	Payout failure error codes.
+    Payout failure error codes.
 
-	https://stripe.com/docs/api#payout_failures
-	"""
+    https://stripe.com/docs/api#payout_failures
+    """
 
     account_closed = _("Bank account has been closed.")
     account_frozen = _("Bank account has been frozen.")
@@ -508,8 +508,8 @@ class SubscriptionStatus(Enum):
 
 class DjstripePaymentMethodType(Enum):
     """
-	A djstripe-specific enum for the DjStripePaymentMethod model.
-	"""
+    A djstripe-specific enum for the DjStripePaymentMethod model.
+    """
 
     card = _("Card")
     bank_account = _("Bank account")

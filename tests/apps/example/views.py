@@ -21,14 +21,14 @@ User = get_user_model()
 
 class PurchaseSubscriptionView(FormView):
     """
-	Example view to demonstrate how to use dj-stripe to:
+    Example view to demonstrate how to use dj-stripe to:
 
-	* create a Customer
-	* add a card to the Customer
-	* create a Subscription using that card
+    * create a Customer
+    * add a card to the Customer
+    * create a Subscription using that card
 
-	This does a non-logged in purchase for the user of the provided email
-	"""
+    This does a non-logged in purchase for the user of the provided email
+    """
 
     template_name = "purchase_subscription.html"
 
