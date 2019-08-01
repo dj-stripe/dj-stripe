@@ -3,5 +3,5 @@ from django.test import TestCase
 
 
 class TestRunManagePyCheck(TestCase):
-	def test_manage_py_check(self):
-		call_command("check")
+    def test_manage_py_check(self):
+        call_command("check")

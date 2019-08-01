@@ -15,7 +15,7 @@ from .settings import SUBSCRIPTION_REDIRECT, subscriber_request_callback
 from .utils import subscriber_has_active_subscription
 
 DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = getattr(
-	settings, "DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS", ()
+    settings, "DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS", ()
 )
 
 
@@ -25,7 +25,7 @@ EXEMPT.append("[djstripe]")
 
 
 class SubscriptionPaymentMiddleware(MiddlewareMixin):
-	"""
+    """
 	Used to redirect users from subcription-locked request destinations.
 
 	Rules:
@@ -48,50 +48,52 @@ class SubscriptionPaymentMiddleware(MiddlewareMixin):
 		)
 	"""
 
-	def process_request(self, request):
-		"""Check the subscriber's subscription status.
+    def process_request(self, request):
+        """Check the subscriber's subscription status.
 
 		Returns early if request does not outlined in this middleware's docstring.
 		"""
-		if self.is_matching_rule(request):
-			return
+        if self.is_matching_rule(request):
+            return
 
-		return self.check_subscription(request)
+        return self.check_subscription(request)
 
-	def is_matching_rule(self, request):
-		"""Check according to the rules defined in the class docstring."""
-		# First, if in DEBUG mode and with django-debug-toolbar, we skip
-		#   this entire process.
-		if settings.DEBUG and request.path.startswith("/__debug__"):
-			return True
+    def is_matching_rule(self, request):
+        """Check according to the rules defined in the class docstring."""
+        # First, if in DEBUG mode and with django-debug-toolbar, we skip
+        #   this entire process.
+        if settings.DEBUG and request.path.startswith("/__debug__"):
+            return True
 
-		# Second we check against matches
-		match = resolve(request.path, getattr(request, "urlconf", settings.ROOT_URLCONF))
-		if "({0})".format(match.app_name) in EXEMPT:
-			return True
+        # Second we check against matches
+        match = resolve(
+            request.path, getattr(request, "urlconf", settings.ROOT_URLCONF)
+        )
+        if "({0})".format(match.app_name) in EXEMPT:
+            return True
 
-		if "[{0}]".format(match.namespace) in EXEMPT:
-			return True
+        if "[{0}]".format(match.namespace) in EXEMPT:
+            return True
 
-		if "{0}:{1}".format(match.namespace, match.url_name) in EXEMPT:
-			return True
+        if "{0}:{1}".format(match.namespace, match.url_name) in EXEMPT:
+            return True
 
-		if match.url_name in EXEMPT:
-			return True
+        if match.url_name in EXEMPT:
+            return True
 
-		# Third, we check wildcards:
-		for exempt in [x for x in EXEMPT if x.startswith("fn:")]:
-			exempt = exempt.replace("fn:", "")
-			if fnmatch.fnmatch(request.path, exempt):
-				return True
+        # Third, we check wildcards:
+        for exempt in [x for x in EXEMPT if x.startswith("fn:")]:
+            exempt = exempt.replace("fn:", "")
+            if fnmatch.fnmatch(request.path, exempt):
+                return True
 
-		return False
+        return False
 
-	def check_subscription(self, request):
-		"""Redirect to the subscribe page if the user lacks an active subscription."""
-		subscriber = subscriber_request_callback(request)
+    def check_subscription(self, request):
+        """Redirect to the subscribe page if the user lacks an active subscription."""
+        subscriber = subscriber_request_callback(request)
 
-		if not subscriber_has_active_subscription(subscriber):
-			if not SUBSCRIPTION_REDIRECT:
-				raise ImproperlyConfigured("DJSTRIPE_SUBSCRIPTION_REDIRECT is not set.")
-			return redirect(SUBSCRIPTION_REDIRECT)
+        if not subscriber_has_active_subscription(subscriber):
+            if not SUBSCRIPTION_REDIRECT:
+                raise ImproperlyConfigured("DJSTRIPE_SUBSCRIPTION_REDIRECT is not set.")
+            return redirect(SUBSCRIPTION_REDIRECT)

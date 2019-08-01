@@ -3,7 +3,7 @@ from django.http import HttpResponse
 
 
 def testview(request):
-	return HttpResponse()
+    return HttpResponse()
 
 
 app_name = "testapp_namespaced"

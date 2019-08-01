@@ -23,8 +23,10 @@ from . import views
 app_name = "djstripe"
 
 urlpatterns = [
-	# Webhook
-	url(
-		app_settings.DJSTRIPE_WEBHOOK_URL, views.ProcessWebhookView.as_view(), name="webhook"
-	)
+    # Webhook
+    url(
+        app_settings.DJSTRIPE_WEBHOOK_URL,
+        views.ProcessWebhookView.as_view(),
+        name="webhook",
+    )
 ]

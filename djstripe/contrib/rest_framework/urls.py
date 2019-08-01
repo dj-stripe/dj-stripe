@@ -23,6 +23,6 @@ from . import views
 app_name = "djstripe_rest_framework"
 
 urlpatterns = [
-	# REST api
-	url(r"^subscription/$", views.SubscriptionRestView.as_view(), name="subscription")
+    # REST api
+    url(r"^subscription/$", views.SubscriptionRestView.as_view(), name="subscription")
 ]
