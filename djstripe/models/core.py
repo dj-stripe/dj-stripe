@@ -47,7 +47,8 @@ class BalanceTransaction(StripeModel):
     )
     available_on = StripeDateTimeField(
         help_text=(
-            "The date the transaction's net funds will become available in the Stripe balance."
+            "The date the transaction's net funds "
+            "will become available in the Stripe balance."
         )
     )
     currency = StripeCurrencyCodeField()
@@ -79,8 +80,10 @@ class Charge(StripeModel):
 
     amount = StripeDecimalCurrencyAmountField(help_text="Amount charged.")
     amount_refunded = StripeDecimalCurrencyAmountField(
-        help_text="Amount refunded (can be less than the amount attribute on the charge "
-        "if a partial refund was issued)."
+        help_text=(
+            "Amount refunded (can be less than the amount attribute on the charge "
+            "if a partial refund was issued)."
+        )
     )
     # TODO: application, application_fee
     balance_transaction = models.ForeignKey(
@@ -94,8 +97,8 @@ class Charge(StripeModel):
     )
     captured = models.BooleanField(
         default=False,
-        help_text="If the charge was created without capturing, this boolean represents whether or not it is still "
-        "uncaptured or has since been captured.",
+        help_text="If the charge was created without capturing, this boolean represents "
+        "whether or not it is still uncaptured or has since been captured.",
     )
     currency = StripeCurrencyCodeField(
         help_text="The currency in which the charge was made."
@@ -113,7 +116,8 @@ class Charge(StripeModel):
         on_delete=models.CASCADE,
         null=True,
         related_name="charges",
-        help_text="The account the charge was made on behalf of. Null here indicates that this value was never set.",
+        help_text="The account the charge was made on behalf of. "
+        "Null here indicates that this value was never set.",
     )
     dispute = models.ForeignKey(
         "Dispute",
@@ -132,7 +136,8 @@ class Charge(StripeModel):
         max_length=5000,
         default="",
         blank=True,
-        help_text="Message to user further explaining reason for charge failure if available.",
+        help_text="Message to user further explaining reason "
+        "for charge failure if available.",
     )
     fraud_details = JSONField(
         help_text="Hash with information on fraud assessments for the charge."
@@ -150,14 +155,15 @@ class Charge(StripeModel):
     )
     paid = models.BooleanField(
         default=False,
-        help_text="True if the charge succeeded, or was successfully authorized for later capture, False otherwise.",
+        help_text="True if the charge succeeded, "
+        "or was successfully authorized for later capture, False otherwise.",
     )
     payment_intent = models.ForeignKey(
         "PaymentIntent",
         null=True,
         on_delete=models.SET_NULL,
         related_name="charges",
-        help_text=("PaymentIntent associated with this charge, if one exists."),
+        help_text="PaymentIntent associated with this charge, if one exists.",
     )
     receipt_email = models.TextField(
         max_length=800,  # yup, 800.
@@ -169,11 +175,13 @@ class Charge(StripeModel):
         max_length=14,
         default="",
         blank=True,
-        help_text="The transaction number that appears on email receipts sent for this charge.",
+        help_text="The transaction number that appears "
+        "on email receipts sent for this charge.",
     )
     refunded = models.BooleanField(
         default=False,
-        help_text="Whether or not the charge has been fully refunded. If the charge is only partially refunded, "
+        help_text="Whether or not the charge has been fully refunded. "
+        "If the charge is only partially refunded, "
         "this attribute will still be false.",
     )
     # TODO: review
@@ -189,10 +197,12 @@ class Charge(StripeModel):
         max_length=22,
         default="",
         blank=True,
-        help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement "
-        "description may not include <>\"' characters, and will appear on your customer's statement in capital "
-        "letters. Non-ASCII characters are automatically stripped. While most banks display this information "
-        "consistently, some may display it incorrectly or not at all.",
+        help_text="An arbitrary string to be displayed on your customer's "
+        "credit card statement. The statement description may not include <>\"' "
+        "characters, and will appear on your customer's statement in capital letters. "
+        "Non-ASCII characters are automatically stripped. "
+        "While most banks display this information consistently, "
+        "some may display it incorrectly or not at all.",
     )
     status = StripeEnumField(
         enum=enums.ChargeStatus, help_text="The status of the payment."
@@ -201,8 +211,8 @@ class Charge(StripeModel):
         "Transfer",
         null=True,
         on_delete=models.CASCADE,
-        help_text="The transfer to the destination account (only applicable if the charge was created using the "
-        "destination parameter).",
+        help_text="The transfer to the destination account "
+        "(only applicable if the charge was created using the destination parameter).",
     )
     transfer_group = models.CharField(
         max_length=255,
@@ -297,11 +307,13 @@ class Charge(StripeModel):
         Initiate a refund. If amount is not provided, then this will be a full refund.
 
         :param amount: A positive decimal amount representing how much of this charge
-            to refund. Can only refund up to the unrefunded amount remaining of the charge.
+            to refund.
+            Can only refund up to the unrefunded amount remaining of the charge.
         :trye amount: Decimal
-        :param reason: String indicating the reason for the refund. If set, possible values
-            are ``duplicate``, ``fraudulent``, and ``requested_by_customer``. Specifying
-            ``fraudulent`` as the reason when you believe the charge to be fraudulent will
+        :param reason: String indicating the reason for the refund.
+            If set, possible values are ``duplicate``, ``fraudulent``,
+            and ``requested_by_customer``. Specifying ``fraudulent`` as the reason
+            when you believe the charge to be fraudulent will
             help Stripe improve their fraud detection algorithms.
 
         :return: Stripe charge object
@@ -327,7 +339,8 @@ class Charge(StripeModel):
     @classmethod
     def _stripe_object_destination_to_account(cls, target_cls, data):
         """
-        Search the given manager for the Account matching this Charge object's ``destination`` field.
+        Search the given manager for the Account matching this Charge object's
+        ``destination`` field.
 
         :param target_cls: The target class
         :type target_cls: Account
@@ -377,13 +390,15 @@ class Customer(StripeModel):
     )
     currency = StripeCurrencyCodeField(
         default="",
-        help_text="The currency the customer can be charged in for recurring billing purposes",
+        help_text="The currency the customer can be charged in for "
+        "recurring billing purposes",
     )
     default_source = PaymentMethodForeignKey(
         on_delete=models.SET_NULL, null=True, related_name="customers"
     )
     delinquent = models.BooleanField(
-        help_text="Whether or not the latest charge for the customer's latest invoice has failed."
+        help_text="Whether or not the latest charge for the customer's "
+        "latest invoice has failed."
     )
     # <discount>
     coupon = models.ForeignKey(
@@ -399,7 +414,8 @@ class Customer(StripeModel):
         null=True,
         blank=True,
         editable=False,
-        help_text="If a coupon is present and has a limited duration, the date that the discount will end.",
+        help_text="If a coupon is present and has a limited duration, "
+        "the date that the discount will end.",
     )
     # </discount>
     email = models.TextField(max_length=5000, default="", blank=True)
@@ -443,7 +459,8 @@ class Customer(StripeModel):
         """
         Get or create a dj-stripe customer.
 
-        :param subscriber: The subscriber model instance for which to get or create a customer.
+        :param subscriber: The subscriber model instance for which to get or
+            create a customer.
         :type subscriber: User
 
         :param livemode: Whether to get the subscriber in live or test mode.
@@ -491,7 +508,8 @@ class Customer(StripeModel):
     @property
     def customer_payment_methods(self):
         """
-        An iterable of all of the customer's payment methods (sources, then legacy cards)
+        An iterable of all of the customer's payment methods
+        (sources, then legacy cards)
         """
         for source in self.sources.iterator():
             yield source
@@ -510,7 +528,8 @@ class Customer(StripeModel):
     @property
     def account_balance(self):
         warnings.warn(
-            "Customer.date has been removed, use .balance instead.  This alias will be removed in djstripe 2.2",
+            "Customer.date has been removed, use .balance instead. "
+            "This alias will be removed in djstripe 2.2",
             DeprecationWarning,
         )
         return self.balance
@@ -534,49 +553,58 @@ class Customer(StripeModel):
 
         :param plan: The plan to which to subscribe the customer.
         :type plan: Plan or string (plan ID)
-        :param application_fee_percent: This represents the percentage of the subscription invoice subtotal
+        :param application_fee_percent: This represents the percentage of the
+            subscription invoice subtotal
             that will be transferred to the application owner's Stripe account.
             The request must be made with an OAuth key in order to set an
             application fee percentage.
-        :type application_fee_percent: Decimal. Precision is 2; anything more will be ignored. A positive
-            decimal between 1 and 100.
-        :param coupon: The code of the coupon to apply to this subscription. A coupon applied to a subscription
+        :type application_fee_percent: Decimal. Precision is 2; anything more
+            will be ignored. A positive decimal between 1 and 100.
+        :param coupon: The code of the coupon to apply to this subscription.
+            A coupon applied to a subscription
             will only affect invoices created for that particular subscription.
         :type coupon: string
         :param quantity: The quantity applied to this subscription. Default is 1.
         :type quantity: integer
-        :param metadata: A set of key/value pairs useful for storing additional information.
+        :param metadata: A set of key/value pairs useful for storing
+            additional information.
         :type metadata: dict
-        :param tax_percent: This represents the percentage of the subscription invoice subtotal that will
-            be calculated and added as tax to the final amount each billing period.
-        :type tax_percent: Decimal. Precision is 2; anything more will be ignored. A positive decimal
-            between 1 and 100.
-        :param billing_cycle_anchor: A future timestamp to anchor the subscription’s billing cycle.
+        :param tax_percent: This represents the percentage of the subscription invoice
+            subtotal that will be calculated and added as tax to the
+            final amount each billing period.
+        :type tax_percent: Decimal. Precision is 2; anything more will be ignored.
+            A positive decimal between 1 and 100.
+        :param billing_cycle_anchor: A future timestamp to anchor the
+            subscription’s billing cycle.
             This is used to determine the date of the first full invoice, and,
             for plans with month or year intervals, the day of the month for
             subsequent invoices.
         :type billing_cycle_anchor: datetime
-        :param trial_end: The end datetime of the trial period the customer will get before being charged for
-            the first time. If set, this will override the default trial period of the plan the
-            customer is being subscribed to. The special value ``now`` can be provided to end
-            the customer's trial immediately.
+        :param trial_end: The end datetime of the trial period the customer will get
+            before being charged for the first time. If set, this will override
+            the default trial period of the plan the customer is being subscribed to.
+            The special value ``now`` can be provided to end the customer's
+            trial immediately.
         :type trial_end: datetime
-        :param charge_immediately: Whether or not to charge for the subscription upon creation. If False, an
-            invoice will be created at the end of this period.
+        :param charge_immediately: Whether or not to charge for
+            the subscription upon creation.
+            If False, an invoice will be created at the end of this period.
         :type charge_immediately: boolean
-        :param trial_from_plan: Indicates if a plan’s trial_period_days should be applied to the subscription.
+        :param trial_from_plan: Indicates if a plan’s trial_period_days should
+            be applied to the subscription.
             Setting trial_end per subscription is preferred, and this defaults to false.
             Setting this flag to true together with trial_end is not allowed.
         :type trial_from_plan: boolean
-        :param trial_period_days: Integer representing the number of trial period days before the customer is
-            charged for the first time. This will always overwrite any trials that might
-            apply via a subscribed plan.
+        :param trial_period_days: Integer representing the number of trial period days
+            before the customer is charged for the first time.
+            This will always overwrite any trials that might apply
+            via a subscribed plan.
         :type trial_period_days: integer
 
         .. Notes:
         .. ``charge_immediately`` is only available on ``Customer.subscribe()``
-        .. if you're using ``Customer.subscribe()`` instead of ``Customer.subscribe()``, ``plan`` \
-        can only be a string
+        .. if you're using ``Customer.subscribe()``
+        .. instead of ``Customer.subscribe()``, ``plan`` can only be a string
         """
         from .billing import Subscription
 
@@ -622,33 +650,38 @@ class Customer(StripeModel):
 
         Parameters not implemented:
 
-        * **receipt_email** - Since this is a charge on a customer, the customer's email address is used.
+        * **receipt_email** - Since this is a charge on a customer,
+        the customer's email address is used.
 
 
         :param amount: The amount to charge.
         :type amount: Decimal. Precision is 2; anything more will be ignored.
         :param currency: 3-letter ISO code for currency
         :type currency: string
-        :param application_fee: A fee that will be applied to the charge and transfered to the platform owner's
-            account.
+        :param application_fee: A fee that will be applied to the charge and transfered
+            to the platform owner's account.
         :type application_fee: Decimal. Precision is 2; anything more will be ignored.
-        :param capture: Whether or not to immediately capture the charge. When false, the charge issues an
-            authorization (or pre-authorization), and will need to be captured later. Uncaptured
-            charges expire in 7 days. Default is True
+        :param capture: Whether or not to immediately capture the charge.
+            When false, the charge issues an authorization (or pre-authorization),
+            and will need to be captured later. Uncaptured charges expire in 7 days.
+            Default is True
         :type capture: bool
         :param description: An arbitrary string.
         :type description: string
         :param destination: An account to make the charge on behalf of.
         :type destination: Account
-        :param metadata: A set of key/value pairs useful for storing additional information.
+        :param metadata: A set of key/value pairs useful for storing
+            additional information.
         :type metadata: dict
         :param shipping: Shipping information for the charge.
         :type shipping: dict
-        :param source: The source to use for this charge. Must be a source attributed to this customer. If None,
-            the customer's default source is used. Can be either the id of the source or the source object
-            itself.
+        :param source: The source to use for this charge.
+            Must be a source attributed to this customer. If None, the customer's
+            default source is used. Can be either the id of the source or
+            the source object itself.
         :type source: string, Source
-        :param statement_descriptor: An arbitrary string to be displayed on the customer's credit card statement.
+        :param statement_descriptor: An arbitrary string to be displayed on the
+            customer's credit card statement.
         :type statement_descriptor: string
         """
 
@@ -703,26 +736,32 @@ class Customer(StripeModel):
         :type currency: string
         :param description: An arbitrary string.
         :type description: string
-        :param discountable: Controls whether discounts apply to this invoice item. Defaults to False for
-            prorations or negative invoice items, and True for all other invoice items.
+        :param discountable: Controls whether discounts apply to this invoice item.
+            Defaults to False for prorations or negative invoice items,
+            and True for all other invoice items.
         :type discountable: boolean
-        :param invoice: An existing invoice to add this invoice item to. When left blank, the invoice
-            item will be added to the next upcoming scheduled invoice. Use this when adding
-            invoice items in response to an ``invoice.created`` webhook. You cannot add an invoice
+        :param invoice: An existing invoice to add this invoice item to.
+            When left blank, the invoice item will be added to the next upcoming
+             scheduled invoice.
+             Use this when adding invoice items in response to an
+             ``invoice.created`` webhook. You cannot add an invoice
             item to an invoice that has already been paid, attempted or closed.
         :type invoice: Invoice or string (invoice ID)
-        :param metadata: A set of key/value pairs useful for storing additional information.
+        :param metadata: A set of key/value pairs useful for storing
+            additional information.
         :type metadata: dict
-        :param subscription: A subscription to add this invoice item to. When left blank, the invoice
-            item will be be added to the next upcoming scheduled invoice. When set,
-            scheduled invoices for subscriptions other than the specified subscription
-            will ignore the invoice item. Use this when you want to express that an
-            invoice item has been accrued within the context of a particular subscription.
+        :param subscription: A subscription to add this invoice item to.
+            When left blank, the invoice item will be be added to the next upcoming
+            scheduled invoice. When set, scheduled invoices for subscriptions other
+            than the specified subscription will ignore the invoice item.
+            Use this when you want to express that an invoice item has been accrued
+            within the context of a particular subscription.
         :type subscription: Subscription or string (subscription ID)
 
         .. Notes:
-        .. if you're using ``Customer.add_invoice_item()`` instead of ``Customer.add_invoice_item()``, \
-        ``invoice`` and ``subscriptions`` can only be strings
+        .. if you're using ``Customer.add_invoice_item()`` instead of
+        .. ``Customer.add_invoice_item()``, ``invoice`` and ``subscriptions``
+        .. can only be strings
         """
         from .billing import InvoiceItem
 
@@ -754,10 +793,12 @@ class Customer(StripeModel):
         """
         Adds a card to this customer's account.
 
-        :param source: Either a token, like the ones returned by our Stripe.js, or a dictionary containing a
-            user's credit card details. Stripe will automatically validate the card.
+        :param source: Either a token, like the ones returned by our Stripe.js, or a
+            dictionary containing a user's credit card details.
+            Stripe will automatically validate the card.
         :type source: string, dict
-        :param set_default: Whether or not to set the source as the customer's default source
+        :param set_default: Whether or not to set the source as the customer's
+            default source
         :type set_default: boolean
 
         """
@@ -781,13 +822,14 @@ class Customer(StripeModel):
 
         return new_payment_method.resolve()
 
-    # TODO - support setting default payment method (as per set_default param to add_card), see
+    # TODO - support setting default payment method
+    #  (as per set_default param to add_card), see
     #  see https://stripe.com/docs/api/payment_methods/attach
     def add_payment_method(self, payment_method_id):
         """
         Adds an already existing payment method to this customer's account
 
-        :param payment_method_id: ID of the PaymentMethod to be attached to the customer.
+        :param payment_method_id: ID of the PaymentMethod to be attached to the customer
         :return:
         """
         from .payment_methods import PaymentMethod
@@ -827,8 +869,9 @@ class Customer(StripeModel):
         self.date_purged = timezone.now()
         self.save()
 
-    # TODO: Override Queryset.delete() with a custom manager, since this doesn't get called in bulk deletes
-    # (or cascades, but that's another matter)
+    # TODO: Override Queryset.delete() with a custom manager,
+    #  since this doesn't get called in bulk deletes
+    #  (or cascades, but that's another matter)
     def delete(self, using=None, keep_parents=False):
         """
         Overriding the delete method to keep the customer in the records.
@@ -852,14 +895,16 @@ class Customer(StripeModel):
         """
         Checks to see if this customer has an active subscription to the given plan.
 
-        :param plan: The plan for which to check for an active subscription. If plan is None and
-            there exists only one active subscription, this method will check if that subscription
-            is valid. Calling this method with no plan and multiple valid subscriptions for this customer will
-            throw an exception.
+        :param plan: The plan for which to check for an active subscription.
+            If plan is None and there exists only one active subscription,
+            this method will check if that subscription is valid.
+            Calling this method with no plan and multiple valid subscriptions
+            for this customer will throw an exception.
         :type plan: Plan or string (plan ID)
 
         :returns: True if there exists an active subscription, False otherwise.
-        :throws: TypeError if ``plan`` is None and more than one active subscription exists for this customer.
+        :throws: TypeError if ``plan`` is None and more than one active subscription
+            exists for this customer.
         """
 
         if plan is None:
@@ -871,7 +916,8 @@ class Customer(StripeModel):
                 return True
             else:
                 raise TypeError(
-                    "plan cannot be None if more than one valid subscription exists for this customer."
+                    "plan cannot be None if more than one valid subscription "
+                    "exists for this customer."
                 )
 
         else:
@@ -898,7 +944,8 @@ class Customer(StripeModel):
     @property
     def active_subscriptions(self):
         """
-        Returns active subscriptions (subscriptions with an active status that end in the future).
+        Returns active subscriptions
+        (subscriptions with an active status that end in the future).
         """
         return self.subscriptions.filter(
             status=enums.SubscriptionStatus.active,
@@ -908,7 +955,8 @@ class Customer(StripeModel):
     @property
     def valid_subscriptions(self):
         """
-        Returns this customer's valid subscriptions (subscriptions that aren't cancelled.
+        Returns this customer's valid subscriptions
+        (subscriptions that aren't cancelled).
         """
         return self.subscriptions.exclude(status=enums.SubscriptionStatus.canceled)
 
@@ -919,7 +967,8 @@ class Customer(StripeModel):
 
         :returns: None if the customer has no subscriptions, the subscription if
             the customer has a subscription.
-        :raises MultipleSubscriptionException: Raised if the customer has multiple subscriptions.
+        :raises MultipleSubscriptionException: Raised if the customer has multiple
+            subscriptions.
             In this case, use ``Customer.subscriptions`` instead.
         """
 
@@ -951,7 +1000,8 @@ class Customer(StripeModel):
             invoice = Invoice._api_create(customer=self.id)
             invoice.pay()
             return True
-        except InvalidRequestError:  # TODO: Check this for a more specific error message.
+        except InvalidRequestError:  # TODO: Check this for a more
+            #                           specific error message.
             return False  # There was nothing to invoice
 
     def retry_unpaid_invoices(self):
@@ -988,7 +1038,8 @@ class Customer(StripeModel):
 
         See `Invoice.upcoming() <#djstripe.Invoice.upcoming>`__.
 
-        The ``customer`` argument to the ``upcoming()`` call is automatically set by this method.
+        The ``customer`` argument to the ``upcoming()`` call is automatically set
+         by this method.
         """
         from .billing import Invoice
 
@@ -1106,7 +1157,8 @@ class Dispute(StripeModel):
     amount = StripeQuantumCurrencyAmountField(
         help_text=(
             "Disputed amount. Usually the amount of the charge, but can differ "
-            "(usually because of currency fluctuation or because only part of the order is disputed)."
+            "(usually because of currency fluctuation or because only part of "
+            "the order is disputed)."
         )
     )
     currency = StripeCurrencyCodeField()
@@ -1143,13 +1195,14 @@ class Event(StripeModel):
         "rendered. Blank for old entries only, all new entries will have this value",
     )
     data = JSONField(
-        help_text="data received at webhook. data should be considered to be garbage until validity check is run "
-        "and valid flag is set"
+        help_text="data received at webhook. data should be considered to be garbage "
+        "until validity check is run and valid flag is set"
     )
     request_id = models.CharField(
         max_length=50,
-        help_text="Information about the request that triggered this event, for traceability purposes. If empty "
-        "string then this is an old entry without that data. If Null then this is not an old entry, but a Stripe "
+        help_text="Information about the request that triggered this event, "
+        "for traceability purposes. If empty string then this is an old entry "
+        "without that data. If Null then this is not an old entry, but a Stripe "
         "'automated' event with no associated request.",
         default="",
         blank=True,
@@ -1262,7 +1315,8 @@ class FileUpload(StripeModel):
 
 
 # Alias for compatability
-# TODO - rename the model and switch this alias the other way around to match stripe python
+# TODO - rename the model and switch this alias the other way around
+#  to match stripe python
 File = FileUpload
 
 
@@ -1275,13 +1329,13 @@ class PaymentIntent(StripeModel):
     stripe_dashboard_item_name = "payment intents"
 
     amount = StripeQuantumCurrencyAmountField(
-        help_text=("Amount intended to be collected by this PaymentIntent.")
+        help_text="Amount intended to be collected by this PaymentIntent."
     )
     amount_capturable = StripeQuantumCurrencyAmountField(
-        help_text=("Amount that can be captured from this PaymentIntent.")
+        help_text="Amount that can be captured from this PaymentIntent."
     )
     amount_received = StripeQuantumCurrencyAmountField(
-        help_text=("Amount that was collected by this PaymentIntent.")
+        help_text="Amount that was collected by this PaymentIntent."
     )
     # application
     # application_fee_amount
@@ -1289,27 +1343,27 @@ class PaymentIntent(StripeModel):
         null=True,
         default=None,
         help_text=(
-            "Populated when status is canceled, this is the time at which the PaymentIntent was "
-            "canceled. Measured in seconds since the Unix epoch."
+            "Populated when status is canceled, this is the time at which the "
+            "PaymentIntent was canceled. Measured in seconds since the Unix epoch."
         ),
     )
     cancellation_reason = models.CharField(
         max_length=255,
         null=True,
         help_text=(
-            "User-given reason for cancellation of this PaymentIntent, one of duplicate, "
-            "fraudulent, requested_by_customer, or failed_invoice."
+            "User-given reason for cancellation of this PaymentIntent, "
+            "one of duplicate, fraudulent, requested_by_customer, or failed_invoice."
         ),
     )
     capture_method = StripeEnumField(
         enum=enums.CaptureMethod,
-        help_text=("Capture method of this PaymentIntent, one of automatic or manual."),
+        help_text="Capture method of this PaymentIntent, one of automatic or manual.",
     )
     client_secret = models.CharField(
         max_length=255,
         help_text=(
-            "The client secret of this PaymentIntent. Used for client-side retrieval using a "
-            "publishable key."
+            "The client secret of this PaymentIntent. "
+            "Used for client-side retrieval using a publishable key."
         ),
     )
     confirmation_method = StripeEnumField(
@@ -1323,12 +1377,13 @@ class PaymentIntent(StripeModel):
         "Customer",
         null=True,
         on_delete=models.CASCADE,
-        help_text=("Customer this PaymentIntent is for if one exists."),
+        help_text="Customer this PaymentIntent is for if one exists.",
     )
     description = models.TextField(
         default="",
         help_text=(
-            "An arbitrary string attached to the object. Often useful for displaying to users."
+            "An arbitrary string attached to the object."
+            "Often useful for displaying to users."
         ),
     )
     last_payment_error = JSONField(
@@ -1338,26 +1393,27 @@ class PaymentIntent(StripeModel):
     )
     next_action = JSONField(
         help_text=(
-            "If present, this property tells you what actions you need to take in order for your "
-            "customer to fulfill a payment using the provided source."
+            "If present, this property tells you what actions you need to take "
+            "in order for your customer to fulfill a payment using the provided source."
         )
     )
     on_behalf_of = models.ForeignKey(
         "Account",
         on_delete=models.CASCADE,
         null=True,
-        help_text="The account (if any) for which the funds of the PaymentIntent are intended.",
+        help_text="The account (if any) for which the funds of the "
+        "PaymentIntent are intended.",
     )
     payment_method = models.ForeignKey(
         "PaymentMethod",
         on_delete=models.SET_NULL,
         null=True,
-        help_text=("Payment method used in this PaymentIntent."),
+        help_text="Payment method used in this PaymentIntent.",
     )
     payment_method_types = JSONField(
         help_text=(
-            "The list of payment method types (e.g. card) that this PaymentIntent is allowed to "
-            "use."
+            "The list of payment method types (e.g. card) that this "
+            "PaymentIntent is allowed to use."
         )
     )
     receipt_email = models.CharField(
@@ -1377,32 +1433,33 @@ class PaymentIntent(StripeModel):
             "Use `on_session` if you intend to only reuse the payment method"
             "when your customer is present in your checkout flow. Use `off_session`"
             "if your customer may or may not be in your checkout flow."
-            "Stripe uses `setup_future_usage` to dynamically optimize your payment flow and"
-            "comply with regional legislation and network rules. For example,"
-            "if your customer is impacted by SCA, using `off_session` will"
+            "Stripe uses `setup_future_usage` to dynamically optimize "
+            "your payment flow and comply with regional legislation and network rules. "
+            "For example, if your customer is impacted by SCA, using `off_session` will"
             "ensure that they are authenticated while processing this PaymentIntent."
-            "You will then be able to make later off-session payments for this customer."
+            "You will then be able to make later off-session payments "
+            "for this customer."
         ),
     )
     shipping = JSONField(
-        null=True,
-        blank=True,
-        help_text=("Shipping information for this PaymentIntent."),
+        null=True, blank=True, help_text="Shipping information for this PaymentIntent."
     )
     statement_descriptor = models.CharField(
         max_length=255,
         null=True,
         blank=True,
         help_text=(
-            "Extra information about a PaymentIntent. This will appear on your customer’s "
-            "statement when this PaymentIntent succeeds in creating a charge."
+            "Extra information about a PaymentIntent. "
+            "This will appear on your customer’s statement when this "
+            "PaymentIntent succeeds in creating a charge."
         ),
     )
     status = StripeEnumField(
         enum=enums.PaymentIntentStatus,
         help_text=(
-            "Status of this PaymentIntent, one of requires_payment_method, requires_confirmation, "
-            "requires_action, processing, requires_capture, canceled, or succeeded. "
+            "Status of this PaymentIntent, one of requires_payment_method, "
+            "requires_confirmation, requires_action, processing, requires_capture, "
+            "canceled, or succeeded. "
             "You can read more about PaymentIntent statuses here."
         ),
     )
@@ -1410,15 +1467,16 @@ class PaymentIntent(StripeModel):
         null=True,
         blank=True,
         help_text=(
-            "The data with which to automatically create a Transfer when the payment is finalized. "
+            "The data with which to automatically create a Transfer when the payment "
+            "is finalized. "
             "See the PaymentIntents Connect usage guide for details."
         ),
     )
     transfer_group = models.CharField(
         max_length=255,
         help_text=(
-            "A string that identifies the resulting payment as part of a group. See the "
-            "PaymentIntents Connect usage guide for details."
+            "A string that identifies the resulting payment as part of a group. "
+            "See the PaymentIntents Connect usage guide for details."
         ),
     )
 
@@ -1426,7 +1484,8 @@ class PaymentIntent(StripeModel):
         """
         Call the stripe API's modify operation for this model
 
-        :param api_key: The api key to use for this request. Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :param api_key: The api key to use for this request.
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
         api_key = api_key or self.default_api_key
@@ -1437,7 +1496,8 @@ class PaymentIntent(StripeModel):
         """
         Call the stripe API's cancel operation for this model
 
-        :param api_key: The api key to use for this request. Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :param api_key: The api key to use for this request.
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
         api_key = api_key or self.default_api_key
@@ -1452,7 +1512,8 @@ class PaymentIntent(StripeModel):
         provided payment method. Upon confirmation, the PaymentIntent
         will attempt to initiate a payment.
 
-        :param api_key: The api key to use for this request. Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :param api_key: The api key to use for this request.
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
         api_key = api_key or self.default_api_key
@@ -1462,10 +1523,10 @@ class PaymentIntent(StripeModel):
 
 class SetupIntent(StripeModel):
     """
-    A SetupIntent guides you through the process of setting up a customer's payment credentials
-    for future payments. For example, you could use a SetupIntent to set up your customer's
-    card without immediately collecting a payment. Later, you can use PaymentIntents
-    to drive the payment flow.
+    A SetupIntent guides you through the process of setting up a customer's
+    payment credentials for future payments. For example, you could use a SetupIntent
+    to set up your customer's card without immediately collecting a payment.
+    Later, you can use PaymentIntents to drive the payment flow.
 
     NOTE: You should not maintain long-lived, unconfirmed SetupIntents.
     For security purposes, SetupIntents older than 24 hours may no longer be valid.
@@ -1480,13 +1541,14 @@ class SetupIntent(StripeModel):
         max_length=255,
         null=True,
         blank=True,
-        help_text=("ID of the Connect application that created the SetupIntent."),
+        help_text="ID of the Connect application that created the SetupIntent.",
     )
     cancellation_reason = models.CharField(
         max_length=255,
         null=True,
         help_text=(
-            "Reason for cancellation of this SetupIntent, one of abandoned, requested_by_customer, or duplicate"
+            "Reason for cancellation of this SetupIntent, one of abandoned, "
+            "requested_by_customer, or duplicate"
         ),
     )
     client_secret = models.CharField(
@@ -1494,19 +1556,20 @@ class SetupIntent(StripeModel):
         null=True,
         blank=True,
         help_text=(
-            "The client secret of this SetupIntent. Used for client-side retrieval using a publishable key."
+            "The client secret of this SetupIntent."
+            "Used for client-side retrieval using a publishable key."
         ),
     )
     customer = models.ForeignKey(
         "Customer",
         null=True,
         on_delete=models.SET_NULL,
-        help_text=("Customer this SetupIntent belongs to, if one exists."),
+        help_text="Customer this SetupIntent belongs to, if one exists.",
     )
     last_setup_error = JSONField(
         null=True,
         blank=True,
-        help_text=("The error encountered in the previous SetupIntent confirmation."),
+        help_text="The error encountered in the previous SetupIntent confirmation.",
     )
     next_action = JSONField(
         null=True,
@@ -1526,19 +1589,20 @@ class SetupIntent(StripeModel):
         "PaymentMethod",
         on_delete=models.SET_NULL,
         null=True,
-        help_text=("Payment method used in this PaymentIntent."),
+        help_text="Payment method used in this PaymentIntent.",
     )
     payment_method_types = JSONField(
         help_text=(
-            "The list of payment method types (e.g. card) that this PaymentIntent is allowed to "
-            "use."
+            "The list of payment method types (e.g. card) that this PaymentIntent is "
+            "allowed to use."
         )
     )
     status = StripeEnumField(
         enum=enums.SetupIntentStatus,
         help_text=(
-            "Status of this SetupIntent, one of requires_payment_method, requires_confirmation,"
-            "requires_action, processing, canceled, or succeeded."
+            "Status of this SetupIntent, one of requires_payment_method, "
+            "requires_confirmation, requires_action, processing, "
+            "canceled, or succeeded."
         ),
     )
     usage = StripeEnumField(
@@ -1574,7 +1638,8 @@ class Payout(StripeModel):
         "BalanceTransaction",
         on_delete=models.SET_NULL,
         null=True,
-        help_text="Balance transaction that describes the impact on your account balance.",
+        help_text="Balance transaction that describes the impact on your "
+        "account balance.",
     )
     currency = StripeCurrencyCodeField()
     destination = models.ForeignKey(
@@ -1604,7 +1669,8 @@ class Payout(StripeModel):
     failure_message = models.TextField(
         default="",
         blank=True,
-        help_text="Message to user further explaining reason for payout failure if available.",
+        help_text="Message to user further explaining reason for "
+        "payout failure if available.",
     )
     method = StripeEnumField(
         max_length=8,
@@ -1619,15 +1685,18 @@ class Payout(StripeModel):
         max_length=255,
         default="",
         blank=True,
-        help_text="Extra information about a payout to be displayed on the user's bank statement.",
+        help_text="Extra information about a payout to be displayed "
+        "on the user's bank statement.",
     )
     status = StripeEnumField(
         enum=enums.PayoutStatus,
         help_text=(
             "Current status of the payout. "
-            "A payout will be `pending` until it is submitted to the bank, at which point it "
-            "becomes `in_transit`. It will then change to paid if the transaction goes through. "
-            "If it does not go through successfully, its status will change to `failed` or `canceled`."
+            "A payout will be `pending` until it is submitted to the bank, "
+            "at which point it becomes `in_transit`."
+            "It will then change to paid if the transaction goes through. "
+            "If it does not go through successfully, "
+            "its status will change to `failed` or `canceled`."
         ),
     )
     type = StripeEnumField(enum=enums.PayoutType)
