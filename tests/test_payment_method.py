@@ -30,3 +30,22 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
 		)
 
 		self.assert_fks(payment_method, expected_blank_fks={"djstripe.Customer.coupon"})
+
+	# TODO - this should use autospec=True, but it's failing for some reason
+	#   with unexpected keyword argument "customer"
+	@patch("stripe.PaymentMethod.attach", return_value=deepcopy(FAKE_PAYMENT_METHOD_I))
+	def test_attach_synced(self, attach_mock):
+		fake_payment_method = deepcopy(FAKE_PAYMENT_METHOD_I)
+		fake_payment_method["customer"] = None
+
+		payment_method = PaymentMethod.sync_from_stripe_data(fake_payment_method)
+
+		self.assert_fks(
+			payment_method, expected_blank_fks={"djstripe.PaymentMethod.customer"}
+		)
+
+		payment_method = PaymentMethod.attach(
+			payment_method.id, stripe_customer=FAKE_CUSTOMER
+		)
+
+		self.assert_fks(payment_method, expected_blank_fks={"djstripe.Customer.coupon"})
