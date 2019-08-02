@@ -59,11 +59,13 @@ class Command(BaseCommand):
         common_readonly_fields = ["object", "created", "updated", "livemode"]
         common_sideeffect_fields = ["created"]
 
-        # TODO - is it be possible to get a list of which fields are writable from the API?
-        #  maybe using https://github.com/stripe/openapi ? (though that's only for current version)
+        # TODO - is it be possible to get a list of which fields are writable from
+        #  the API?  maybe using https://github.com/stripe/openapi ?
+        #  (though that's only for current version)
 
         """
-        Fields that we treat as read-only.  Most of these will cause an error if sent to the Stripe API.
+        Fields that we treat as read-only.
+        Most of these will cause an error if sent to the Stripe API.
         """
         model_extra_readonly_fields = {
             djstripe.models.Account: ["id"],
@@ -194,13 +196,15 @@ class Command(BaseCommand):
         objs = []
 
         # Regenerate each of the fixture objects via Stripe
-        # We re-fetch objects in a second pass if they were created during the first pass,
-        # to ensure nested objects are up to date (eg Customer.subscriptions),
+        # We re-fetch objects in a second pass if they were created during
+        # the first pass, to ensure nested objects are up to date
+        # (eg Customer.subscriptions),
         for n in range(2):
             any_created = False
             self.stdout.write(f"Updating fixture objects, pass {n}")
 
-            # reset the objects list since we don't want to keep those from the first pass
+            # reset the objects list since we don't want to keep those from
+            # the first pass
             objs.clear()
 
             for model_class, old_objs in self.fake_data_map.items():
@@ -227,10 +231,12 @@ class Command(BaseCommand):
                 break
         else:
             self.stderr.write(
-                "Warning, unexpected behaviour - some fixtures still being created in second pass?"
+                "Warning, unexpected behaviour - some fixtures still being created "
+                "in second pass?"
             )
 
-        # Now the fake_id_map should be complete and the objs should be up to date, save all the fixtures
+        # Now the fake_id_map should be complete and the objs should be up to date,
+        # save all the fixtures
         paths = set()
         for obj in objs:
             path = self.save_fixture(obj)
@@ -246,12 +252,14 @@ class Command(BaseCommand):
 
     def init_fake_id_map(self):
         """
-        Build a mapping between fake ids stored in Stripe metadata and those obj's actual ids
+        Build a mapping between fake ids stored in Stripe metadata and those obj's
+        actual ids
 
-        We do this so we can have fixtures with stable ids for objects Stripe doesn't allow
-        us to specify an id for (eg Card).
+        We do this so we can have fixtures with stable ids for objects Stripe doesn't
+        allow us to specify an id for (eg Card).
 
-        Fixtures and tests will use the fake ids, when we talk to stripe we use the real ids
+        Fixtures and tests will use the fake ids, when we talk to stripe we use the
+        real ids
         :return:
         """
 
@@ -287,7 +295,8 @@ class Command(BaseCommand):
             if fake_id in self.fake_id_map:
                 assert (
                     self.fake_id_map[fake_id] == actual_id
-                ), f"Duplicate fake_id {fake_id} - reset your test Stripe data at https://dashboard.stripe.com/account/data"
+                ), f"Duplicate fake_id {fake_id} - reset your test Stripe data at " \
+                   f"https://dashboard.stripe.com/account/data"
 
             self.fake_id_map[fake_id] = actual_id
 
@@ -297,7 +306,8 @@ class Command(BaseCommand):
 
     def get_fake_id(self, obj):
         """
-        Get a stable fake id from a real Stripe object, we use this so that fixtures are stable
+        Get a stable fake id from a real Stripe object, we use this so that fixtures
+         are stable
         :param obj:
         :return:
         """
@@ -309,10 +319,12 @@ class Command(BaseCommand):
 
             fake_id = real_id_map.get(real_id)
         elif "metadata" in obj:
-            # Note: not all objects have a metadata dict (eg Account, BalanceTransaction don't)
+            # Note: not all objects have a metadata dict
+            # (eg Account, BalanceTransaction don't)
             fake_id = obj.get("metadata", {}).get(FAKE_ID_METADATA_KEY)
         elif obj.get("object") == "balance_transaction":
-            # assume for purposes of fixture generation that 1 balance_transaction per source charge (etc)
+            # assume for purposes of fixture generation that 1 balance_transaction per
+            # source charge (etc)
             fake_source_id = self.get_fake_id(obj["source"])
 
             fake_id = "txn_fake_{}".format(fake_source_id)
@@ -696,7 +708,8 @@ class Command(BaseCommand):
         self, old_obj, new_obj, object_sideeffect_fields, common_sideeffect_fields
     ):
         """
-        Try to preserve values of side-effect fields from old_obj, to reduce churn in fixtures
+        Try to preserve values of side-effect fields from old_obj,
+        to reduce churn in fixtures
         """
         object_name = new_obj.get("object")
         sideeffect_fields = object_sideeffect_fields.get(object_name, set()).union(

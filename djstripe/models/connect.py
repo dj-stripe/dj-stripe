@@ -23,8 +23,8 @@ class Account(StripeModel):
     """
 
     stripe_class = stripe.Account
-    # Special handling of the icon and logo fields, they moved to settings.branding in Stripe 2019-02-19 but we
-    # want them as ForeignKeys
+    # Special handling of the icon and logo fields, they moved to settings.branding
+    # in Stripe 2019-02-19 but we want them as ForeignKeys
     branding_icon = models.ForeignKey(
         "FileUpload",
         on_delete=models.SET_NULL,
@@ -37,39 +37,40 @@ class Account(StripeModel):
         on_delete=models.SET_NULL,
         null=True,
         related_name="logo_account",
-        help_text="A logo for the account that will be used in Checkout instead of the icon "
-        "and without the account’s name next to it if provided. Must be at least 128px x 128px.",
+        help_text="A logo for the account that will be used in Checkout instead of "
+        "the icon and without the account’s name next to it if provided. "
+        "Must be at least 128px x 128px.",
     )
-    # deprecated, will be removed in 2.2.  see https://stripe.com/docs/upgrades#2019-02-19
+    # deprecated, will be removed in 2.2.
+    # see https://stripe.com/docs/upgrades#2019-02-19
     business_name = models.CharField(
         max_length=255,
         default="",
         blank=True,
         help_text="The publicly visible name of the business",
     )
-    # deprecated, will be removed in 2.2. see https://stripe.com/docs/upgrades#2019-02-19
+    # deprecated, will be removed in 2.2.
+    # see https://stripe.com/docs/upgrades#2019-02-19
     business_primary_color = models.CharField(
         max_length=7,
         default="",
         blank=True,
-        help_text=(
-            "A CSS hex color value representing the primary branding color for this account"
-        ),
+        help_text="A CSS hex color value representing the primary branding color for "
+        "this account",
     )
     business_profile = JSONField(
-        null=True,
-        blank=True,
-        help_text=("Optional information related to the business."),
+        null=True, blank=True, help_text="Optional information related to the business."
     )
     business_type = StripeEnumField(
         enum=enums.BusinessType, default="", blank=True, help_text="The business type."
     )
-    # deprecated, will be removed in 2.2. see https://stripe.com/docs/upgrades#2019-02-19
+    # deprecated, will be removed in 2.2.
+    # see https://stripe.com/docs/upgrades#2019-02-19
     business_url = models.CharField(
         max_length=200,
         default="",
         blank=True,
-        help_text=("The publicly visible website of the business"),
+        help_text="The publicly visible website of the business",
     )
     charges_enabled = models.BooleanField(
         help_text="Whether the account can create live charges"
@@ -83,7 +84,8 @@ class Account(StripeModel):
             "This field is null unless business_type is set to company."
         ),
     )
-    # deprecated, will be removed in 2.2. see https://stripe.com/docs/upgrades#2019-02-19
+    # deprecated, will be removed in 2.2.
+    # see https://stripe.com/docs/upgrades#2019-02-19
     debit_negative_balances = models.NullBooleanField(
         null=True,
         blank=True,
@@ -93,7 +95,8 @@ class Account(StripeModel):
             "balances from an attached bank account."
         ),
     )
-    # deprecated, will be removed in 2.2. see https://stripe.com/docs/upgrades#2019-02-19
+    # deprecated, will be removed in 2.2.
+    # see https://stripe.com/docs/upgrades#2019-02-19
     decline_charge_on = JSONField(
         null=True,
         blank=True,
@@ -111,7 +114,8 @@ class Account(StripeModel):
             "Standard accounts cannot receive payouts before this is true."
         )
     )
-    # deprecated, will be removed in 2.2. see https://stripe.com/docs/upgrades#2019-02-19
+    # deprecated, will be removed in 2.2.
+    # see https://stripe.com/docs/upgrades#2019-02-19
     display_name = models.CharField(
         max_length=255,
         default="",
@@ -133,23 +137,24 @@ class Account(StripeModel):
             "This field is null unless business_type is set to individual."
         ),
     )
-    # deprecated, will be removed in 2.2. see https://stripe.com/docs/upgrades#2019-02-19
+    # deprecated, will be removed in 2.2.
+    # see https://stripe.com/docs/upgrades#2019-02-19
     legal_entity = JSONField(
         null=True,
         blank=True,
-        help_text=(
-            "Information about the legal entity itself, including about the associated account representative"
-        ),
+        help_text="Information about the legal entity itself, including about the "
+        "associated account representative",
     )
-    # deprecated, will be removed in 2.2. see https://stripe.com/docs/upgrades#2019-02-19
+    # deprecated, will be removed in 2.2.
+    # see https://stripe.com/docs/upgrades#2019-02-19
     payout_schedule = JSONField(
         null=True,
         blank=True,
-        help_text=(
-            "Details on when funds from charges are available, and when they are paid out to an external account."
-        ),
+        help_text="Details on when funds from charges are available, and when they are "
+        "paid out to an external account.",
     )
-    # deprecated, will be removed in 2.2. see https://stripe.com/docs/upgrades#2019-02-19
+    # deprecated, will be removed in 2.2.
+    # see https://stripe.com/docs/upgrades#2019-02-19
     payout_statement_descriptor = models.CharField(
         max_length=255,
         default="",
@@ -163,18 +168,14 @@ class Account(StripeModel):
         max_length=255,
         default="",
         blank=True,
-        help_text=(
-            "Internal-only description of the product sold or service provided by the business. "
-            "It’s used by Stripe for risk and underwriting purposes."
-        ),
+        help_text="Internal-only description of the product sold or service provided "
+        "by the business. It’s used by Stripe for risk and underwriting purposes.",
     )
     requirements = JSONField(
         null=True,
         blank=True,
-        help_text=(
-            "Information about the requirements for the account, "
-            "including what information needs to be collected, and by when."
-        ),
+        help_text="Information about the requirements for the account, "
+        "including what information needs to be collected, and by when.",
     )
     settings = JSONField(
         null=True,
@@ -183,37 +184,41 @@ class Account(StripeModel):
             "Account options for customizing how the account functions within Stripe."
         ),
     )
-    # deprecated, will be removed in 2.2. see https://stripe.com/docs/upgrades#2019-02-19
+    # deprecated, will be removed in 2.2.
+    # see https://stripe.com/docs/upgrades#2019-02-19
     statement_descriptor = models.CharField(
         max_length=255,
         default="",
         blank=True,
-        help_text=(
-            "The default text that appears on credit card statements when a charge is made directly on the account"
-        ),
+        help_text="The default text that appears on credit card statements when "
+        "a charge is made directly on the account",
     )
-    # deprecated, will be removed in 2.2. see https://stripe.com/docs/upgrades#2019-02-19
+    # deprecated, will be removed in 2.2.
+    # see https://stripe.com/docs/upgrades#2019-02-19
     support_email = models.CharField(
         max_length=255,
         default="",
         blank=True,
         help_text="A publicly shareable support email address for the business",
     )
-    # deprecated, will be removed in 2.2. see https://stripe.com/docs/upgrades#2019-02-19
+    # deprecated, will be removed in 2.2.
+    # see https://stripe.com/docs/upgrades#2019-02-19
     support_phone = models.CharField(
         max_length=255,
         default="",
         blank=True,
         help_text="A publicly shareable support phone number for the business",
     )
-    # deprecated, will be removed in 2.2. see https://stripe.com/docs/upgrades#2019-02-19
+    # deprecated, will be removed in 2.2.
+    # see https://stripe.com/docs/upgrades#2019-02-19
     support_url = models.CharField(
         max_length=200,
         default="",
         blank=True,
         help_text="A publicly shareable URL that provides support for this account",
     )
-    # deprecated, will be removed in 2.2. see https://stripe.com/docs/upgrades#2019-02-19
+    # deprecated, will be removed in 2.2.
+    # see https://stripe.com/docs/upgrades#2019-02-19
     timezone = models.CharField(
         max_length=50,
         help_text="The timezone used in the Stripe Dashboard for this account.",
@@ -224,7 +229,8 @@ class Account(StripeModel):
         blank=True,
         help_text="Details on the acceptance of the Stripe Services Agreement",
     )
-    # deprecated, will be removed in 2.2. see https://stripe.com/docs/upgrades#2019-02-19
+    # deprecated, will be removed in 2.2.
+    # see https://stripe.com/docs/upgrades#2019-02-19
     verification = JSONField(
         null=True,
         blank=True,
@@ -273,8 +279,10 @@ class Account(StripeModel):
             else:
                 return v
 
-        # icon (formerly called business_logo) logo (formerly called business_logo_large)
-        # moved to settings.branding in Stripe 2019-02-19 but we'll keep them to provide the ForeignKey
+        # icon (formerly called business_logo)
+        # logo (formerly called business_logo_large)
+        # moved to settings.branding in Stripe 2019-02-19
+        # but we'll keep them to provide the ForeignKey
         for old, new in [("branding_icon", "icon"), ("branding_logo", "logo")]:
             try:
                 data[old] = data["settings"]["branding"][new]
@@ -362,7 +370,8 @@ class ApplicationFee(StripeModel):
     balance_transaction = models.ForeignKey(
         "BalanceTransaction",
         on_delete=models.CASCADE,
-        help_text="Balance transaction that describes the impact on your account balance.",
+        help_text="Balance transaction that describes the impact on your account"
+        " balance.",
     )
     charge = models.ForeignKey(
         "Charge",
@@ -395,7 +404,8 @@ class ApplicationFeeRefund(StripeModel):
     balance_transaction = models.ForeignKey(
         "BalanceTransaction",
         on_delete=models.CASCADE,
-        help_text="Balance transaction that describes the impact on your account balance.",
+        help_text="Balance transaction that describes the impact on your account "
+        "balance.",
     )
     currency = StripeCurrencyCodeField()
     fee = models.ForeignKey(
@@ -422,10 +432,12 @@ class CountrySpec(StripeModel):
         )
     )
     supported_bank_account_currencies = JSONField(
-        help_text="Currencies that can be accepted in the specific country (for transfers)."
+        help_text="Currencies that can be accepted in the specific country"
+        " (for transfers)."
     )
     supported_payment_currencies = JSONField(
-        help_text="Currencies that can be accepted in the specified country (for payments)."
+        help_text="Currencies that can be accepted in the specified country"
+        " (for payments)."
     )
     supported_payment_methods = JSONField(
         help_text="Payment methods available in the specified country."
@@ -466,40 +478,43 @@ class Transfer(StripeModel):
     amount_reversed = StripeDecimalCurrencyAmountField(
         null=True,
         blank=True,
-        help_text="The amount reversed (can be less than the amount attribute on the transfer if a partial "
-        "reversal was issued).",
+        help_text="The amount reversed (can be less than the amount attribute on the"
+        " transfer if a partial reversal was issued).",
     )
     balance_transaction = models.ForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        help_text="Balance transaction that describes the impact on your account balance.",
+        help_text="Balance transaction that describes the impact on your account"
+        " balance.",
     )
     currency = StripeCurrencyCodeField()
     # TODO: Link destination to Card, Account, or Bank Account Models
     destination = StripeIdField(
-        help_text="ID of the bank account, card, or Stripe account the transfer was sent to."
+        help_text="ID of the bank account, card, or Stripe account the transfer was "
+        "sent to."
     )
     destination_payment = StripeIdField(
         null=True,
         blank=True,
-        help_text="If the destination is a Stripe account, this will be the ID of the payment that the destination "
-        "account received for the transfer.",
+        help_text="If the destination is a Stripe account, this will be the ID of the "
+        "payment that the destination account received for the transfer.",
     )
     reversed = models.BooleanField(
         default=False,
-        help_text="Whether or not the transfer has been fully reversed. If the transfer is only partially "
-        "reversed, this attribute will still be false.",
+        help_text="Whether or not the transfer has been fully reversed. "
+        "If the transfer is only partially reversed, this attribute will still "
+        "be false.",
     )
     source_transaction = StripeIdField(
         null=True,
-        help_text="ID of the charge (or other transaction) that was used to fund the transfer. "
-        "If null, the transfer was funded from the available balance.",
+        help_text="ID of the charge (or other transaction) that was used to fund "
+        "the transfer. If null, the transfer was funded from the available balance.",
     )
     source_type = StripeEnumField(
         enum=enums.LegacySourceType,
-        help_text=("The source balance from which this transfer came."),
+        help_text="The source balance from which this transfer came.",
     )
     transfer_group = models.CharField(
         max_length=255,
@@ -531,7 +546,8 @@ class TransferReversal(StripeModel):
         null=True,
         blank=True,
         related_name="transfer_reversals",
-        help_text="Balance transaction that describes the impact on your account balance.",
+        help_text="Balance transaction that describes the impact on your account "
+        "balance.",
     )
     currency = StripeCurrencyCodeField()
     transfer = models.ForeignKey(
