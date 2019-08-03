@@ -12,14 +12,14 @@ e.g. to populate an empty database from an existing Stripe account.
 
 .. code-block::
 
-	./manage.py djstripe_sync_models
+    ./manage.py djstripe_sync_models
 
 
 With no arguments this will sync all supported models, or a list of models to sync can be provided.
 
 .. code-block::
 
-	./manage.py djstripe_sync_models Invoice Subscription
+    ./manage.py djstripe_sync_models Invoice Subscription
 
 
 Note that this may be redundant since we recursively sync related objects.

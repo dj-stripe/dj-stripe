@@ -5,7 +5,11 @@ root = true
 charset = utf-8
 end_of_line = lf
 indent_size = 4
-indent_style = tab
+indent_style = space
 quote_type = double
 insert_final_newline = true
 trim_trailing_whitespace = true
+max_line_length = 88
+
+[*.json]
+insert_final_newline = false

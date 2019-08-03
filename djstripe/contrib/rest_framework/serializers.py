@@ -1,7 +1,7 @@
 """
 .. module:: dj-stripe.contrib.rest_framework.serializers.
 
-	:synopsis: dj-stripe - Serializers to be used with the dj-stripe REST API.
+    :synopsis: dj-stripe - Serializers to be used with the dj-stripe REST API.
 
 .. moduleauthor:: Philippe Luickx (@philippeluickx)
 
@@ -14,19 +14,21 @@ from djstripe.models import Subscription
 
 
 class SubscriptionSerializer(ModelSerializer):
-	"""A serializer used for the Subscription model."""
+    """A serializer used for the Subscription model."""
 
-	class Meta:
-		"""Model class options."""
+    class Meta:
+        """Model class options."""
 
-		model = Subscription
-		fields = "__all__"
+        model = Subscription
+        fields = "__all__"
 
 
 class CreateSubscriptionSerializer(serializers.Serializer):
-	"""A serializer used to create a Subscription."""
+    """A serializer used to create a Subscription."""
 
-	stripe_token = serializers.CharField(max_length=200)
-	plan = serializers.CharField(max_length=50)
-	charge_immediately = serializers.NullBooleanField(required=False)
-	tax_percent = serializers.DecimalField(required=False, max_digits=5, decimal_places=2)
+    stripe_token = serializers.CharField(max_length=200)
+    plan = serializers.CharField(max_length=50)
+    charge_immediately = serializers.NullBooleanField(required=False)
+    tax_percent = serializers.DecimalField(
+        required=False, max_digits=5, decimal_places=2
+    )
