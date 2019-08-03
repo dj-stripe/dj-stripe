@@ -180,15 +180,15 @@ class Invoice(StripeModel):
     )
     attempt_count = models.IntegerField(
         help_text="Number of payment attempts made for this invoice, "
-        "from the perspective of the payment retry  schedule. "
+        "from the perspective of the payment retry schedule. "
         "Any payment attempt counts as the first attempt, and subsequently "
-        "only automatic retries increment the attempt count."
+        "only automatic retries increment the attempt count. "
         "In other words, manual payment attempts after the first attempt do not affect "
         "the retry schedule."
     )
     attempted = models.BooleanField(
         default=False,
-        help_text="Whether or not an attempt has been made to pay the invoice."
+        help_text="Whether or not an attempt has been made to pay the invoice. "
         "An invoice is not attempted until 1 hour after the ``invoice.created`` "
         "webhook, for example, so you might not want to display that invoice as "
         "unpaid to your users.",
@@ -234,7 +234,7 @@ class Invoice(StripeModel):
     )
     ending_balance = models.IntegerField(
         null=True,
-        help_text="Ending customer balance after attempting to pay invoice."
+        help_text="Ending customer balance after attempting to pay invoice. "
         "If the invoice has not been attempted yet, this will be null.",
     )
     # deprecated, will be removed in 2.2
@@ -283,7 +283,7 @@ class Invoice(StripeModel):
         on_delete=models.CASCADE,
         null=True,
         help_text=(
-            "The PaymentIntent associated with this invoice."
+            "The PaymentIntent associated with this invoice. "
             "The PaymentIntent is generated when the invoice is finalized, "
             "and can then be used to pay the invoice."
             "Note that voiding an invoice will cancel the PaymentIntent"
@@ -649,7 +649,7 @@ class InvoiceItem(StripeModel):
     date = StripeDateTimeField(help_text="The date on the invoiceitem.")
     discountable = models.BooleanField(
         default=False,
-        help_text="If True, discounts will apply to this invoice item."
+        help_text="If True, discounts will apply to this invoice item. "
         "Always False for prorations.",
     )
     invoice = models.ForeignKey(
@@ -683,7 +683,7 @@ class InvoiceItem(StripeModel):
         null=True,
         blank=True,
         help_text="If the invoice item is a proration, the quantity of the "
-        "subscription for which the prorationwas computed.",
+        "subscription for which the proration was computed.",
     )
     subscription = models.ForeignKey(
         "Subscription",

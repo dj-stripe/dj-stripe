@@ -174,7 +174,7 @@ class Migration(migrations.Migration):
                     "setup_future_usage",
                     djstripe.fields.StripeEnumField(
                         enum=djstripe.enums.IntentUsage,
-                        help_text="Indicates that you intend to make future payments with thisPaymentIntent’s payment method.If present, the payment method used with this PaymentIntent canbe attached to a Customer, even after the transaction completes.Use `on_session` if you intend to only reuse the payment methodwhen your customer is present in your checkout flow. Use `off_session`if your customer may or may not be in your checkout flow.Stripe uses `setup_future_usage` to dynamically optimize your payment flow andcomply with regional legislation and network rules. For example,if your customer is impacted by SCA, using `off_session` willensure that they are authenticated while processing this PaymentIntent.You will then be able to make later off-session payments for this customer.",
+                        help_text="Indicates that you intend to make future payments with this PaymentIntent’s payment method. If present, the payment method used with this PaymentIntent can be attached to a Customer, even after the transaction completes. Use `on_session` if you intend to only reuse the payment method when your customer is present in your checkout flow. Use `off_session` if your customer may or may not be in your checkout flow. Stripe uses `setup_future_usage` to dynamically optimize your payment flow and comply with regional legislation and network rules. For example, if your customer is impacted by SCA, using `off_session` will ensure that they are authenticated while processing this PaymentIntent. You will then be able to make later off-session payments for this customer.",
                         max_length=11,
                     ),
                 ),
@@ -302,7 +302,7 @@ class Migration(migrations.Migration):
                     "type",
                     models.CharField(
                         blank=True,
-                        help_text="The type of the PaymentMethod. An additional hash is included on the PaymentMethodwith a name matching this value. It contains additional information specific to thePaymentMethod type.",
+                        help_text="The type of the PaymentMethod. An additional hash is included on the PaymentMethod with a name matching this value. It contains additional information specific to the PaymentMethod type.",
                         max_length=255,
                         null=True,
                     ),
@@ -424,7 +424,7 @@ class Migration(migrations.Migration):
                     "status",
                     djstripe.fields.StripeEnumField(
                         enum=djstripe.enums.SetupIntentStatus,
-                        help_text="Status of this SetupIntent, one of requires_payment_method, requires_confirmation,requires_action, processing, canceled, or succeeded.",
+                        help_text="Status of this SetupIntent, one of requires_payment_method, requires_confirmation, requires_action, processing, canceled, or succeeded.",
                         max_length=9,
                     ),
                 ),
