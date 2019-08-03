@@ -1435,9 +1435,9 @@ class PaymentIntent(StripeModel):
             "if your customer may or may not be in your checkout flow. "
             "Stripe uses `setup_future_usage` to dynamically optimize "
             "your payment flow and comply with regional legislation and network rules. "
-            "For example, if your customer is impacted by SCA, using `off_session` will "
-            "ensure that they are authenticated while processing this PaymentIntent. "
-            "You will then be able to make later off-session payments "
+            "For example, if your customer is impacted by SCA, using `off_session` "
+            "will ensure that they are authenticated while processing this "
+            "PaymentIntent. You will then be able to make later off-session payments "
             "for this customer."
         ),
     )
