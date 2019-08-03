@@ -36,12 +36,12 @@ Changes from API 2019-02-19:
 
 - Special handling of the icon and logo fields:
 
-	- Renamed ``Account.business_logo`` to ``Account.branding_icon``
-	  (note that in Stripe's API ``Account.business_logo`` was renamed to ``Account.settings.branding_icon``,
-	  and ``Account.business_logo_large`` (which we didn't have a field for) was renamed to ``Account.settings.branding_logo``)
-	- Added deprecated property for ``Account.business_logo``
-	- Added ``Account.branding_logo`` as a ForeignKey
-	- Populate ``Account.branding_icon`` and ``.branding_logo`` from the new ``Account.settings.branding.icon`` and ``.logo``
+    - Renamed ``Account.business_logo`` to ``Account.branding_icon``
+      (note that in Stripe's API ``Account.business_logo`` was renamed to ``Account.settings.branding_icon``,
+      and ``Account.business_logo_large`` (which we didn't have a field for) was renamed to ``Account.settings.branding_logo``)
+    - Added deprecated property for ``Account.business_logo``
+    - Added ``Account.branding_logo`` as a ForeignKey
+    - Populate ``Account.branding_icon`` and ``.branding_logo`` from the new ``Account.settings.branding.icon`` and ``.logo``
 
 Changes from API 2019-03-14:
 
@@ -566,9 +566,9 @@ BIG HUGE NOTE - DON'T OVERLOOK THIS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. warning::
-	Subscription and InvoiceItem migration is not possible because old records don't have Stripe IDs (so we can't sync them). Our approach is to delete all local subscription and invoiceitem objects and re-sync them from Stripe.
+    Subscription and InvoiceItem migration is not possible because old records don't have Stripe IDs (so we can't sync them). Our approach is to delete all local subscription and invoiceitem objects and re-sync them from Stripe.
 
-	We 100% recommend you create a backup of your database before performing this upgrade.
+    We 100% recommend you create a backup of your database before performing this upgrade.
 
 
 Other changes
