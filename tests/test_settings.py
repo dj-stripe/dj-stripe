@@ -57,7 +57,8 @@ class TestSubscriberModelRetrievalMethod(TestCase):
     def test_unknown_model(self):
         self.assertRaisesMessage(
             ImproperlyConfigured,
-            "DJSTRIPE_SUBSCRIBER_MODEL refers to model 'testapp.UnknownModel' that has not been installed.",
+            "DJSTRIPE_SUBSCRIBER_MODEL refers to model 'testapp.UnknownModel' "
+            "that has not been installed.",
             get_subscriber_model,
         )
 
@@ -76,8 +77,8 @@ class TestSubscriberModelRetrievalMethod(TestCase):
     def test_no_callback(self):
         self.assertRaisesMessage(
             ImproperlyConfigured,
-            "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be implemented if a DJSTRIPE_SUBSCRIBER_MODEL is "
-            "defined.",
+            "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be implemented "
+            "if a DJSTRIPE_SUBSCRIBER_MODEL is defined.",
             get_subscriber_model,
         )
 

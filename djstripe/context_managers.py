@@ -9,7 +9,8 @@ from . import settings as djstripe_settings
 @contextmanager
 def stripe_temporary_api_version(version, validate=True):
     """
-    Temporarily replace the global api_version used in stripe API calls with the given value.
+    Temporarily replace the global api_version used in stripe API calls with
+     the given value.
 
     The original value is restored as soon as context exits.
     """

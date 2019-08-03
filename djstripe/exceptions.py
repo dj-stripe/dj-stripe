@@ -10,6 +10,9 @@ class MultipleSubscriptionException(Exception):
 
 
 class StripeObjectManipulationException(Exception):
-    """Raised when an attempt to manipulate a non-standalone stripe object is made not through its parent object."""
+    """
+    Raised when an attempt to manipulate a non-standalone stripe object is made
+     not through its parent object.
+    """
 
     pass

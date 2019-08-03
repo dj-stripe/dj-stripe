@@ -323,7 +323,8 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         "stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER_II), autospec=True
     )
     def test_customer_purge_deletes_idempotency_key(self, customer_api_create_fake):
-        # We need to call Customer.get_or_create (which setUp doesn't) to get an idempotency key
+        # We need to call Customer.get_or_create (which setUp doesn't)
+        # to get an idempotency key
         user = get_user_model().objects.create_user(
             username="blah", email=FAKE_CUSTOMER_II["email"]
         )

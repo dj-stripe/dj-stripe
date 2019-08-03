@@ -32,8 +32,9 @@ class StripeModel(models.Model):
         default=None,
         null=True,
         blank=True,
-        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, "
-        "this field indicates whether this record comes from Stripe test mode or live mode operation.",
+        help_text="Null here indicates that the livemode status is unknown or was "
+        "previously unrecorded. Otherwise, this field indicates whether this record "
+        "comes from Stripe test mode or live mode operation.",
     )
     created = StripeDateTimeField(
         null=True,
@@ -43,8 +44,9 @@ class StripeModel(models.Model):
     metadata = JSONField(
         null=True,
         blank=True,
-        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional "
-        "information about an object in a structured format.",
+        help_text="A set of key/value pairs that you can attach to an object. "
+        "It can be useful for storing additional information about an object in "
+        "a structured format.",
     )
     description = models.TextField(
         null=True, blank=True, help_text="A description of this object."
@@ -81,7 +83,8 @@ class StripeModel(models.Model):
         """
         Call the stripe API's retrieve operation for this model.
 
-        :param api_key: The api key to use for this request. Defaults to settings.STRIPE_SECRET_KEY.
+        :param api_key: The api key to use for this request. \
+            Defaults to settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
         api_key = api_key or self.default_api_key
@@ -95,7 +98,8 @@ class StripeModel(models.Model):
         """
         Call the stripe API's list operation for this model.
 
-        :param api_key: The api key to use for this request. Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
 
         See Stripe documentation for accepted kwargs for each object.
@@ -110,7 +114,8 @@ class StripeModel(models.Model):
         """
         Call the stripe API's create operation for this model.
 
-        :param api_key: The api key to use for this request. Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
 
@@ -120,7 +125,8 @@ class StripeModel(models.Model):
         """
         Call the stripe API's delete operation for this model
 
-        :param api_key: The api key to use for this request. Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
         api_key = api_key or self.default_api_key
@@ -138,7 +144,8 @@ class StripeModel(models.Model):
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
         """
-        Gets called by this object's stripe object conversion method just before conversion.
+        Gets called by this object's stripe object conversion method just before
+        conversion.
         Use this to populate custom fields in a StripeModel from stripe data.
         """
         return data
@@ -178,7 +185,8 @@ class StripeModel(models.Model):
         if current_ids is None:
             current_ids = set()
 
-        # Iterate over all the fields that we know are related to Stripe, let each field work its own magic
+        # Iterate over all the fields that we know are related to Stripe,
+        # let each field work its own magic
         ignore_fields = ["date_purged", "subscriber"]  # XXX: Customer hack
         for field in cls._meta.fields:
             if field.name.startswith("djstripe_") or field.name in ignore_fields:
@@ -264,8 +272,9 @@ class StripeModel(models.Model):
                 pass
 
             if id_ in current_ids:
-                # this object is currently being fetched, don't try to fetch again, to avoid recursion
-                # instead, record the relation that should be be created once "object_id" object exists
+                # this object is currently being fetched, don't try to fetch again,
+                # to avoid recursion instead, record the relation that should be
+                # created once "object_id" object exists
                 if pending_relations is not None:
                     object_id = manipulated_data["id"]
                     pending_relations.append((object_id, field, id_))
@@ -325,7 +334,8 @@ class StripeModel(models.Model):
                     setattr(target, field.name, self)
                     target.save()
 
-                    # reload so that indirect relations back to this object - eg self.charge.invoice = self are set
+                    # reload so that indirect relations back to this object
+                    # eg self.charge.invoice = self are set
                     # TODO - reverse the field reference here to avoid hitting the DB?
                     self.refresh_from_db()
                 else:
@@ -405,7 +415,8 @@ class StripeModel(models.Model):
             # An empty field - We need to return nothing here because there is
             # no way of knowing what needs to be fetched!
             logger.warning(
-                "empty field %s.%s = %r - this is a bug, please report it to dj-stripe! data = %r",
+                "empty field %s.%s = %r - this is a bug, "
+                "please report it to dj-stripe! data = %r",
                 cls.__name__,
                 field_name,
                 field,
@@ -442,8 +453,9 @@ class StripeModel(models.Model):
         )
 
         try:
-            # We wrap the `_create_from_stripe_object` in a transaction to avoid TransactionManagementError
-            # on subsequent queries in case of the IntegrityError catch below. See PR #903
+            # We wrap the `_create_from_stripe_object` in a transaction to
+            # avoid TransactionManagementError on subsequent queries in case
+            # of the IntegrityError catch below. See PR #903
             with transaction.atomic():
                 return (
                     cls._create_from_stripe_object(
@@ -455,16 +467,18 @@ class StripeModel(models.Model):
                     True,
                 )
         except IntegrityError:
-            # Handle the race condition that something else created the object after the `get`
-            # and before `_create_from_stripe_object`.
-            # This is common during webhook handling, since Stripe sends multiple webhook events simultaneously,
+            # Handle the race condition that something else created the object
+            # after the `get` and before `_create_from_stripe_object`.
+            # This is common during webhook handling, since Stripe sends
+            # multiple webhook events simultaneously,
             # each of which will cause recursive syncs. See issue #429
             return cls.stripe_objects.get(id=id_), False
 
     @classmethod
     def _stripe_object_to_customer(cls, target_cls, data):
         """
-        Search the given manager for the Customer matching this object's ``customer`` field.
+        Search the given manager for the Customer matching this object's
+        ``customer`` field.
         :param target_cls: The target class
         :type target_cls: Customer
         :param data: stripe object
@@ -598,7 +612,8 @@ class StripeModel(models.Model):
         data_id = data.get("id")
 
         if data_id:
-            # stop nested objects from trying to retrieve this object before initial sync is complete
+            # stop nested objects from trying to retrieve this object before
+            # initial sync is complete
             current_ids.add(data_id)
 
         instance, created = cls._get_or_create_from_stripe_object(

@@ -49,7 +49,9 @@ class SubscriptionManager(models.Manager):
         )
 
     def canceled_plan_summary_for(self, year, month):
-        """Return Subscriptions canceled within a time range with plan counts annotated."""
+        """
+        Return Subscriptions canceled within a time range with plan counts annotated.
+        """
         return (
             self.canceled_during(year, month)
             .values("plan")
@@ -72,7 +74,9 @@ class TransferManager(models.Manager):
         return self.filter(created__year=year, created__month=month)
 
     def paid_totals_for(self, year, month):
-        """Return paid Transfers during a certain year, month with total amounts annotated."""
+        """
+        Return paid Transfers during a certain year, month with total amounts annotated.
+        """
         return self.during(year, month).aggregate(total_amount=models.Sum("amount"))
 
 
@@ -84,7 +88,10 @@ class ChargeManager(models.Manager):
         return self.filter(created__year=year, created__month=month)
 
     def paid_totals_for(self, year, month):
-        """Return paid Charges during a certain year, month with total amount, fee and refunded annotated."""
+        """
+        Return paid Charges during a certain year, month with total amount,
+        fee and refunded annotated.
+        """
         return (
             self.during(year, month)
             .filter(paid=True)

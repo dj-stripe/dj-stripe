@@ -39,8 +39,10 @@ class PurchaseSubscriptionView(FormView):
 
         if djstripe.models.Plan.objects.count() == 0:
             raise Exception(
-                "No Product Plans in the dj-stripe database - create some in your stripe account and "
-                "then run `./manage.py djstripe_sync_plans_from_stripe` (or use the dj-stripe webhooks)"
+                "No Product Plans in the dj-stripe database - create some in your "
+                "stripe account and then "
+                "run `./manage.py djstripe_sync_plans_from_stripe` "
+                "(or use the dj-stripe webhooks)"
             )
 
         ctx["STRIPE_PUBLIC_KEY"] = djstripe.settings.STRIPE_PUBLIC_KEY

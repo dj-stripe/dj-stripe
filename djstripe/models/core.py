@@ -97,8 +97,8 @@ class Charge(StripeModel):
     )
     captured = models.BooleanField(
         default=False,
-        help_text="If the charge was created without capturing, this boolean represents "
-        "whether or not it is still uncaptured or has since been captured.",
+        help_text="If the charge was created without capturing, this boolean "
+        "represents whether or not it is still uncaptured or has since been captured.",
     )
     currency = StripeCurrencyCodeField(
         help_text="The currency in which the charge was made."
@@ -1826,7 +1826,8 @@ class Refund(StripeModel):
         "BalanceTransaction",
         on_delete=models.SET_NULL,
         null=True,
-        help_text="Balance transaction that describes the impact on your account balance.",
+        help_text="Balance transaction that describes the impact on your account "
+        "balance.",
     )
     charge = models.ForeignKey(
         "Charge",
@@ -1840,10 +1841,9 @@ class Refund(StripeModel):
         on_delete=models.SET_NULL,
         related_name="failure_refunds",
         null=True,
-        help_text=(
-            "If the refund failed, this balance transaction describes the adjustment "
-            "made on your account balance that reverses the initial balance transaction."
-        ),
+        help_text="If the refund failed, this balance transaction describes the "
+        "adjustment made on your account balance that reverses the initial "
+        "balance transaction.",
     )
     failure_reason = StripeEnumField(
         enum=enums.RefundFailureReason,
@@ -1861,9 +1861,8 @@ class Refund(StripeModel):
         max_length=9,
         default="",
         blank=True,
-        help_text=(
-            "The transaction number that appears on email receipts sent for this charge."
-        ),
+        help_text="The transaction number that appears on email receipts sent "
+        "for this charge.",
     )
     status = StripeEnumField(
         enum=enums.RefundFailureReason, help_text="Status of the refund."

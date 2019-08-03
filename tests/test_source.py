@@ -75,13 +75,15 @@ class SourceTest(AssertStripeFksMixin, TestCase):
         self.customer.refresh_from_db()
         self.assertIsNone(self.customer.default_source)
 
-        # need to refresh_from_db due to the implementation of Source.detach() - see TODO in method
+        # need to refresh_from_db due to the implementation of Source.detach() -
+        # see TODO in method
         source.refresh_from_db()
         self.assertIsNone(source.customer)
         self.assertEqual(source.status, "consumed")
 
         if sys.version_info >= (3, 6):
-            # this mock isn't working on py34, py35, but it's not strictly necessary for the test
+            # this mock isn't working on py34, py35, but it's not strictly necessary
+            # for the test
             mock_detach.assert_called()
 
         self.assert_fks(source, expected_blank_fks={"djstripe.Source.customer"})

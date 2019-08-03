@@ -18,7 +18,8 @@ class BaseHasSourceListFilter(admin.SimpleListFilter):
         appear in the URL query. The second element is the
         human-readable name for the option that will appear
         in the right sidebar.
-        source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
+        source:
+        https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
         """
         return (("yes", "Has a source"), ("no", "Has no source"))
 
@@ -26,7 +27,8 @@ class BaseHasSourceListFilter(admin.SimpleListFilter):
         """
         Return the filtered queryset based on the value provided in the query string.
 
-        source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
+        source:
+        https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
         """
         filter_args = {self._filter_arg_key: None}
 
@@ -58,7 +60,8 @@ class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
         appear in the URL query. The second element is the
         human-readable name for the option that will appear
         in the right sidebar.
-        source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
+        source:
+        https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
         """
         statuses = [
             [x, x.replace("_", " ").title()]
@@ -73,7 +76,8 @@ class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
         """
         Return the filtered queryset based on the value provided in the query string.
 
-        source: https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
+        source:
+        https://docs.djangoproject.com/en/1.10/ref/contrib/admin/#django.contrib.admin.ModelAdmin.list_filter
         """
         if self.value() is None:
             return queryset.all()
@@ -136,7 +140,8 @@ class StripeModelAdmin(admin.ModelAdmin):
 
     def get_fieldsets(self, request, obj=None):
         common_fields = ("livemode", "id", "created")
-        # Have to remove the fields from the common set, otherwise they'll show up twice.
+        # Have to remove the fields from the common set,
+        # otherwise they'll show up twice.
         fields = [f for f in self.get_fields(request, obj) if f not in common_fields]
         return (
             (None, {"fields": common_fields}),

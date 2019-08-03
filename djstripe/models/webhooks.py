@@ -26,7 +26,8 @@ class WebhookEventTrigger(models.Model):
     An instance of a request that reached the server endpoint for Stripe webhooks.
 
     Webhook Events are initially **UNTRUSTED**, as it is possible for any web entity to
-    post any data to our webhook url. Data posted may be valid Stripe information,  garbage, or even malicious.
+    post any data to our webhook url. Data posted may be valid Stripe information,
+    garbage, or even malicious.
     The 'valid' flag in this model monitors this.
     """
 

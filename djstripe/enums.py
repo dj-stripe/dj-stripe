@@ -314,7 +314,8 @@ class IntentStatus(Enum):
     requires_action = _("Payment Method require additional action, such as 3D secure.")
     processing = _("Required actions have been handled.")
     canceled = _(
-        "Cancellation invalidates the intent for future confirmation and cannot be undone."
+        "Cancellation invalidates the intent for future confirmation and "
+        "cannot be undone."
     )
 
 

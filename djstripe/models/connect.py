@@ -261,7 +261,8 @@ class Account(StripeModel):
     @property
     def business_logo(self):
         warnings.warn(
-            "Account.business_logo has been renamed to branding_icon, this alias will be removed in dj-stripe 2.2",
+            "Account.business_logo has been renamed to branding_icon, "
+            "this alias will be removed in dj-stripe 2.2",
             DeprecationWarning,
         )
         return self.branding_icon

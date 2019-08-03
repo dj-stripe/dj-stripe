@@ -78,19 +78,15 @@ class Session(StripeModel):
         help_text=("PaymentIntent created if SKUs or line items were provided."),
     )
     payment_method_types = JSONField(
-        help_text=(
-            "The list of payment method types (e.g. card) that this Checkout Session is allowed to "
-            "accept."
-        )
+        help_text="The list of payment method types (e.g. card) that this "
+        "Checkout Session is allowed to accept."
     )
     submit_type = StripeEnumField(
         enum=enums.SubmitTypeStatus,
         null=True,
         blank=True,
-        help_text=(
-            "Describes the type of transaction being performed by Checkout"
-            "in order to customize relevant text on the page, such as the submit button."
-        ),
+        help_text="Describes the type of transaction being performed by Checkout"
+        "in order to customize relevant text on the page, such as the submit button.",
     )
     subscription = models.ForeignKey(
         "Subscription",

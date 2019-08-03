@@ -73,7 +73,9 @@ class EventTest(TestCase):
         mock_objects.filter.return_value.exists.assert_called_once_with()
         mock_atomic.return_value.__enter__.assert_called_once_with()
         mock__create_from_stripe_object.assert_called_once_with(mock_data)
-        mock__create_from_stripe_object.return_value.invoke_webhook_handlers.assert_called_once_with()
+        (
+            mock__create_from_stripe_object.return_value.invoke_webhook_handlers
+        ).assert_called_once_with()
         # Make sure the event was returned.
         self.assertEqual(mock__create_from_stripe_object.return_value, result)
 
@@ -83,7 +85,8 @@ class EventTest(TestCase):
     def test_process_event_exists(
         self, mock_objects, mock__create_from_stripe_object, mock_atomic
     ):
-        """Test that process event returns the existing event and skips webhook processing
+        """
+        Test that process event returns the existing event and skips webhook processing
         when the event already exists.
         """
         # Set up mocks
@@ -100,7 +103,9 @@ class EventTest(TestCase):
         mock_atomic.return_value.__enter__.assert_not_called()
         # Using assert_not_called() doesn't work on this in Python 3.5
         self.assertEqual(mock__create_from_stripe_object.call_count, 0)
-        mock__create_from_stripe_object.return_value.invoke_webhook_handlers.assert_not_called()
+        (
+            mock__create_from_stripe_object.return_value.invoke_webhook_handlers
+        ).assert_not_called()
         # Make sure the existing event was returned.
         self.assertEqual(mock_objects.filter.return_value.first.return_value, result)
 
@@ -157,16 +162,17 @@ class EventRaceConditionTest(TestCase):
         transfer_retrieve_mock.reset_mock()
         event_data = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
 
-        # emulate the race condition in _get_or_create_from_stripe_object where an object is created
-        # by a different request during the call
+        # emulate the race condition in _get_or_create_from_stripe_object where
+        # an object is created by a different request during the call
         #
         # Sequence of events:
-        # 1) first Transfer.stripe_objects.get fails with DoesNotExist (due to it not existing in reality,
-        #    but due to our side_effect in the test)
+        # 1) first Transfer.stripe_objects.get fails with DoesNotExist
+        #    (due to it not existing in reality, but due to our side_effect in the test)
         # 2) object is really created by a different request in reality
-        # 3) Transfer._create_from_stripe_object fails with IntegrityError due to duplicate id
-        # 4) second Transfer.stripe_objects.get succeeds (due to being created by step 2 in reality, due to
-        #    side effect in the test)
+        # 3) Transfer._create_from_stripe_object fails with IntegrityError due to
+        #    duplicate id
+        # 4) second Transfer.stripe_objects.get succeeds
+        #    (due to being created by step 2 in reality, due to side effect in the test)
         side_effect = [Transfer.DoesNotExist(), transfer]
 
         with patch(

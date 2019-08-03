@@ -403,7 +403,8 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-        # forgiven parameter deprecated in API 2018-11-08 - see https://stripe.com/docs/upgrades#2018-11-08
+        # forgiven parameter deprecated in API 2018-11-08
+        # see https://stripe.com/docs/upgrades#2018-11-08
         default_account_mock.return_value = self.account
 
         invoice_data = deepcopy(FAKE_INVOICE)
@@ -446,7 +447,8 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-        # forgiven parameter deprecated in API 2018-11-08 - see https://stripe.com/docs/upgrades#2018-11-08
+        # forgiven parameter deprecated in API 2018-11-08
+        # see https://stripe.com/docs/upgrades#2018-11-08
         default_account_mock.return_value = self.account
 
         invoice_data = deepcopy(FAKE_INVOICE)
@@ -542,7 +544,8 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-        # closed parameter deprecated in API 2018-11-08 - see https://stripe.com/docs/upgrades#2018-11-08
+        # closed parameter deprecated in API 2018-11-08
+        # see https://stripe.com/docs/upgrades#2018-11-08
         default_account_mock.return_value = self.account
 
         invoice_data = deepcopy(FAKE_INVOICE)
@@ -586,7 +589,8 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-        # closed parameter deprecated in API 2018-11-08 - see https://stripe.com/docs/upgrades#2018-11-08
+        # closed parameter deprecated in API 2018-11-08
+        # see https://stripe.com/docs/upgrades#2018-11-08
         default_account_mock.return_value = self.account
 
         invoice_data = deepcopy(FAKE_INVOICE)
@@ -706,7 +710,8 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
         # Previously the test asserted item_id="{invoice_id}-{subscription_id}",
         # but this doesn't match what I'm seeing from Stripe
-        # I'm not sure if it's possible to predict the whole item id now, sli seems to not reference anything
+        # I'm not sure if it's possible to predict the whole item id now,
+        # sli seems to not reference anything
         item_id_prefix = "{invoice_id}-sli_".format(invoice_id=invoice.id)
         self.assertTrue(items[0].id.startswith(item_id_prefix))
         self.assertEqual(items[0].subscription.id, FAKE_SUBSCRIPTION["id"])

@@ -4,7 +4,8 @@ Webhook event handlers for the various models
 Stripe docs for Events: https://stripe.com/docs/api/events
 Stripe docs for Webhooks: https://stripe.com/docs/webhooks
 
-TODO: Implement webhook event handlers for all the models that need to respond to webhook events.
+TODO: Implement webhook event handlers for all the models that need to
+      respond to webhook events.
 
 NOTE:
     Event data is not guaranteed to be in the correct API version format.
@@ -25,11 +26,13 @@ logger = logging.getLogger(__name__)
 def customer_webhook_handler(event):
     """Handle updates to customer objects.
 
-    First determines the crud_type and then handles the event if a customer exists locally.
+    First determines the crud_type and then handles the event if a customer
+    exists locally.
     As customers are tied to local users, djstripe will not create customers that
     do not already exist locally.
 
-    Docs and an example customer webhook response: https://stripe.com/docs/api#customer_object
+    Docs and an example customer webhook response:
+    https://stripe.com/docs/api#customer_object
     """
     if event.customer:
         # As customers are tied to local users, djstripe will not create
@@ -84,10 +87,12 @@ def customer_source_webhook_handler(event):
     customer_data = event.data.get("object", {})
     source_type = customer_data.get("object", {})
 
-    # TODO: handle other types of sources (https://stripe.com/docs/api#customer_object-sources)
+    # TODO: handle other types of sources
+    #  (https://stripe.com/docs/api#customer_object-sources)
     if source_type == SourceType.card:
         if event.verb.endswith("deleted") and customer_data:
-            # On customer.source.deleted, we do not delete the object, we merely unlink it.
+            # On customer.source.deleted, we do not delete the object,
+            # we merely unlink it.
             # customer = Customer.objects.get(id=customer_data["id"])
             # NOTE: for now, customer.sources still points to Card
             # Also, https://github.com/dj-stripe/dj-stripe/issues/576
@@ -103,7 +108,8 @@ def customer_source_webhook_handler(event):
 def customer_subscription_webhook_handler(event):
     """Handle updates to customer subscription objects.
 
-    Docs an example subscription webhook response: https://stripe.com/docs/api#subscription_object
+    Docs an example subscription webhook response:
+    https://stripe.com/docs/api#subscription_object
     """
     _handle_crud_like_event(target_cls=models.Subscription, event=event)
 
@@ -122,7 +128,9 @@ def customer_subscription_webhook_handler(event):
     "source",
 )
 def other_object_webhook_handler(event):
-    """Handle updates to transfer, charge, invoice, invoiceitem, plan, product and source objects.
+    """
+    Handle updates to transfer, charge, invoice, invoiceitem, plan, product
+    and source objects.
 
     Docs for:
     - charge: https://stripe.com/docs/api#charges

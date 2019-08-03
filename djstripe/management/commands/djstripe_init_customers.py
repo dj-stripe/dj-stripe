@@ -13,7 +13,9 @@ class Command(BaseCommand):
     help = "Create customer objects for existing subscribers that don't have one"
 
     def handle(self, *args, **options):
-        """Create Customer objects for Subscribers without Customer objects associated."""
+        """
+        Create Customer objects for Subscribers without Customer objects associated.
+        """
         for subscriber in get_subscriber_model().objects.filter(
             djstripe_customers=None
         ):

@@ -13,7 +13,9 @@ from ...utils import subscriber_has_active_subscription
 
 
 class DJStripeSubscriptionPermission(BasePermission):
-    """A permission to be used when wanting to permit users with active subscriptions."""
+    """
+    A permission to be used when wanting to permit users with active subscriptions.
+    """
 
     def has_permission(self, request, view):
         """

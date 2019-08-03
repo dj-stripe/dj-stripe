@@ -80,7 +80,10 @@ def check_native_jsonfield_postgres_engine(app_configs=None, **kwargs):
     from . import settings as djstripe_settings
 
     messages = []
-    error_msg = "DJSTRIPE_USE_NATIVE_JSONFIELD is not compatible with engine {engine} for database {name}"
+    error_msg = (
+        "DJSTRIPE_USE_NATIVE_JSONFIELD is not compatible with engine {engine} "
+        "for database {name}"
+    )
 
     if djstripe_settings.USE_NATIVE_JSONFIELD:
         for db_name, db_config in settings.DATABASES.items():
@@ -95,7 +98,8 @@ def check_native_jsonfield_postgres_engine(app_configs=None, **kwargs):
                 messages.append(
                     checks.Critical(
                         error_msg.format(name=repr(db_name), engine=repr(engine)),
-                        hint="Switch to Postgres, or unset DJSTRIPE_USE_NATIVE_JSONFIELD",
+                        hint="Switch to Postgres, or unset "
+                        "DJSTRIPE_USE_NATIVE_JSONFIELD",
                         id="djstripe.C005",
                     )
                 )
@@ -115,7 +119,8 @@ def check_stripe_api_host(app_configs=None, **kwargs):
     if not settings.DEBUG and hasattr(settings, "STRIPE_API_HOST"):
         messages.append(
             checks.Warning(
-                "STRIPE_API_HOST should not be set in production! This is most likely unintended.",
+                "STRIPE_API_HOST should not be set in production! "
+                "This is most likely unintended.",
                 hint="Remove STRIPE_API_HOST from your Django settings.",
                 id="djstripe.W002",
             )
@@ -160,7 +165,8 @@ def check_webhook_validation(app_configs=None, **kwargs):
     if djstripe_settings.WEBHOOK_VALIDATION is None:
         messages.append(
             checks.Warning(
-                "Webhook validation is disabled, this is a security risk if the webhook view is enabled",
+                "Webhook validation is disabled, this is a security risk if the "
+                "webhook view is enabled",
                 hint="Set DJSTRIPE_WEBHOOK_VALIDATION to one of {}".format(
                     ", ".join(validation_options)
                 ),
@@ -171,8 +177,10 @@ def check_webhook_validation(app_configs=None, **kwargs):
         if not djstripe_settings.WEBHOOK_SECRET:
             messages.append(
                 checks.Critical(
-                    "DJSTRIPE_WEBHOOK_VALIDATION='verify_signature' but DJSTRIPE_WEBHOOK_SECRET is not set",
-                    hint="Set DJSTRIPE_WEBHOOK_SECRET or set DJSTRIPE_WEBHOOK_VALIDATION='retrieve_event'",
+                    "DJSTRIPE_WEBHOOK_VALIDATION='verify_signature' "
+                    "but DJSTRIPE_WEBHOOK_SECRET is not set",
+                    hint="Set DJSTRIPE_WEBHOOK_SECRET or set "
+                    "DJSTRIPE_WEBHOOK_VALIDATION='retrieve_event'",
                     id="djstripe.C006",
                 )
             )
@@ -206,7 +214,8 @@ def check_subscriber_key_length(app_configs=None, **kwargs):
     if key and key_size > 40:
         messages.append(
             checks.Error(
-                "DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY must be no more than 40 characters long",
+                "DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY must be no more than "
+                "40 characters long",
                 hint="Current value: %r (%i characters)" % (key, key_size),
                 id="djstripe.E001",
             )

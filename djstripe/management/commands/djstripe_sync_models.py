@@ -16,7 +16,8 @@ class Command(BaseCommand):
             "args",
             metavar="ModelName",
             nargs="*",
-            help="restricts sync to these model names (default is to sync all supported models)",
+            help="restricts sync to these model names (default is to sync all "
+            "supported models)",
         )
 
     def handle(self, *args, **options):

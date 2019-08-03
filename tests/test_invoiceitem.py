@@ -80,7 +80,8 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         invoiceitem.plan = None
         self.assertEqual(
             str(invoiceitem),
-            "<amount=20, date=2015-08-08 11:26:56+00:00, id=ii_16XVTY2eZvKYlo2Cxz5n3RaS>",
+            "<amount=20, date=2015-08-08 11:26:56+00:00, "
+            "id=ii_16XVTY2eZvKYlo2Cxz5n3RaS>",
         )
 
     @patch(

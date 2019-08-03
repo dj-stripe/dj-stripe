@@ -77,7 +77,8 @@ class BankAccount(StripeModel):
         "Account",
         on_delete=models.PROTECT,
         related_name="bank_account",
-        help_text="The account the charge was made on behalf of. Null here indicates that this value was never set.",
+        help_text="The account the charge was made on behalf of. Null here indicates "
+        "that this value was never set.",
     )
     account_holder_name = models.TextField(
         max_length=5000,
@@ -91,24 +92,28 @@ class BankAccount(StripeModel):
     )
     bank_name = models.CharField(
         max_length=255,
-        help_text="Name of the bank associated with the routing number (e.g., `WELLS FARGO`).",
+        help_text="Name of the bank associated with the routing number "
+        "(e.g., `WELLS FARGO`).",
     )
     country = models.CharField(
         max_length=2,
-        help_text="Two-letter ISO code representing the country the bank account is located in.",
+        help_text="Two-letter ISO code representing the country the bank account "
+        "is located in.",
     )
     currency = StripeCurrencyCodeField()
     customer = models.ForeignKey(
         "Customer", on_delete=models.SET_NULL, null=True, related_name="bank_account"
     )
     default_for_currency = models.NullBooleanField(
-        help_text="Whether this external account is the default account for its currency."
+        help_text="Whether this external account is the default account for "
+        "its currency."
     )
     fingerprint = models.CharField(
         max_length=16,
         help_text=(
             "Uniquely identifies this particular bank account. "
-            "You can use this attribute to check whether two bank accounts are the same."
+            "You can use this attribute to check whether two bank accounts are "
+            "the same."
         ),
     )
     last4 = models.CharField(max_length=4)
@@ -197,7 +202,8 @@ class Card(StripeModel):
         max_length=4,
         default="",
         blank=True,
-        help_text="(For tokenized numbers only.) The last four digits of the device account number.",
+        help_text="(For tokenized numbers only.) The last four digits of the device "
+        "account number.",
     )
     exp_month = models.IntegerField(help_text="Card expiration month.")
     exp_year = models.IntegerField(help_text="Card expiration year.")
@@ -277,8 +283,8 @@ class Card(StripeModel):
             self._api_delete()
         except InvalidRequestError as exc:
             if "No such source:" in str(exc) or "No such customer:" in str(exc):
-                # The exception was thrown because the stripe customer or card was already
-                # deleted on the stripe side, ignore the exception
+                # The exception was thrown because the stripe customer or card
+                # was already deleted on the stripe side, ignore the exception
                 pass
             else:
                 # The exception was raised for another reason, re-raise it
@@ -290,14 +296,16 @@ class Card(StripeModel):
         # OVERRIDING the parent version of this function
         # Cards must be manipulated through a customer or account.
         # TODO: When managed accounts are supported, this method needs to check if
-        # either a customer or account is supplied to determine the correct object to use.
+        # either a customer or account is supplied to determine the
+        # correct object to use.
         api_key = api_key or self.default_api_key
         customer = self.customer.api_retrieve(api_key=api_key)
 
         # If the customer is deleted, the sources attribute will be absent.
         # eg. {"id": "cus_XXXXXXXX", "deleted": True}
         if "sources" not in customer:
-            # We fake a native stripe InvalidRequestError so that it's caught like an invalid ID error.
+            # We fake a native stripe InvalidRequestError so that it's caught
+            # like an invalid ID error.
             raise InvalidRequestError("No such source: %s" % (self.id), "id")
 
         return customer.sources.retrieve(self.id, expand=self.expand_fields)
@@ -321,9 +329,10 @@ class Card(StripeModel):
         **kwargs
     ):
         """
-        Creates a single use token that wraps the details of a credit card. This token can be used in
-        place of a credit card dictionary with any API method. These tokens can only be used once: by
-        creating a new charge object, or attaching them to a customer.
+        Creates a single use token that wraps the details of a credit card.
+        This token can be used in place of a credit card dictionary with any API method.
+        These tokens can only be used once: by creating a new charge object,
+        or attaching them to a customer.
         (Source: https://stripe.com/docs/api/python#create_card_token)
 
         :param exp_month: The card's expiration month.
@@ -382,54 +391,44 @@ class Source(StripeModel):
         max_length=255,
         default="",
         blank=True,
-        help_text=(
-            "Extra information about a source. "
-            "This will appear on your customer's statement every time you charge the source."
-        ),
+        help_text="Extra information about a source. This will appear on your "
+        "customer's statement every time you charge the source.",
     )
     status = StripeEnumField(
         enum=enums.SourceStatus,
-        help_text=(
-            "The status of the source. Only `chargeable` sources can be used to create a charge."
-        ),
+        help_text="The status of the source. Only `chargeable` sources can be used "
+        "to create a charge.",
     )
     type = StripeEnumField(enum=enums.SourceType, help_text="The type of the source.")
     usage = StripeEnumField(
         enum=enums.SourceUsage,
-        help_text=(
-            "Whether this source should be reusable or not. "
-            "Some source types may or may not be reusable by construction, "
-            "while other may leave the option at creation."
-        ),
+        help_text="Whether this source should be reusable or not. "
+        "Some source types may or may not be reusable by construction, "
+        "while other may leave the option at creation.",
     )
 
     # Flows
     code_verification = JSONField(
         null=True,
         blank=True,
-        help_text=(
-            "Information related to the code verification flow. "
-            "Present if the source is authenticated by a verification code (`flow` is `code_verification`)."
-        ),
+        help_text="Information related to the code verification flow. "
+        "Present if the source is authenticated by a verification code "
+        "(`flow` is `code_verification`).",
     )
     receiver = JSONField(
         null=True,
         blank=True,
-        help_text=(
-            "Information related to the receiver flow. "
-            "Present if the source is a receiver (`flow` is `receiver`)."
-        ),
+        help_text="Information related to the receiver flow. "
+        "Present if the source is a receiver (`flow` is `receiver`).",
     )
     redirect = JSONField(
         null=True,
         blank=True,
-        help_text=(
-            "Information related to the redirect flow. "
-            "Present if the source is authenticated by a redirect (`flow` is `redirect`)."
-        ),
+        help_text="Information related to the redirect flow. "
+        "Present if the source is authenticated by a redirect (`flow` is `redirect`).",
     )
 
-    source_data = JSONField(help_text=("The data corresponding to the source type."))
+    source_data = JSONField(help_text="The data corresponding to the source type.")
 
     customer = models.ForeignKey(
         "Customer",
@@ -489,15 +488,12 @@ class PaymentMethod(StripeModel):
         )
     )
     card = JSONField(
-        help_text=(
-            "If this is a card PaymentMethod, this hash contains details about the card."
-        )
+        help_text="If this is a card PaymentMethod, this hash contains details "
+        "about the card."
     )
     card_present = JSONField(
-        help_text=(
-            "If this is an card_present PaymentMethod, this hash contains details about "
-            "the Card Present payment method."
-        )
+        help_text="If this is an card_present PaymentMethod, this hash contains "
+        "details about the Card Present payment method."
     )
     customer = models.ForeignKey(
         "Customer",
@@ -505,20 +501,16 @@ class PaymentMethod(StripeModel):
         null=True,
         blank=True,
         related_name="payment_methods",
-        help_text=(
-            "Customer to which this PaymentMethod is saved."
-            "This will not be set when the PaymentMethod has not been saved to a Customer."
-        ),
+        help_text="Customer to which this PaymentMethod is saved."
+        "This will not be set when the PaymentMethod has not been saved to a Customer.",
     )
     type = models.CharField(
         max_length=255,
         null=True,
         blank=True,
-        help_text=(
-            "The type of the PaymentMethod. An additional hash is included on the PaymentMethod"
-            "with a name matching this value. It contains additional information specific to the"
-            "PaymentMethod type."
-        ),
+        help_text="The type of the PaymentMethod. An additional hash is included "
+        "on the PaymentMethod with a name matching this value. It contains additional "
+        "information specific to the PaymentMethod type.",
     )
 
     stripe_class = stripe.PaymentMethod

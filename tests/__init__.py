@@ -1110,7 +1110,9 @@ FAKE_FILEUPLOAD_LOGO = {
                 "livemode": False,
                 "metadata": {},
                 "object": "file_link",
-                "url": "https://files.stripe.com/links/fl_test_69vG4ISDx9Chjklasrf06BJeQo",
+                "url": (
+                    "https://files.stripe.com/links/fl_test_69vG4ISDx9Chjklasrf06BJeQo"
+                ),
             }
         ],
         "has_more": False,
@@ -1140,7 +1142,9 @@ FAKE_FILEUPLOAD_ICON = {
                 "livemode": False,
                 "metadata": {},
                 "object": "file_link",
-                "url": "https://files.stripe.com/links/fl_test_69vG4ISDx9Chjklasrf06BJeQo",
+                "url": (
+                    "https://files.stripe.com/links/fl_test_69vG4ISDx9Chjklasrf06BJeQo"
+                ),
             }
         ],
         "has_more": False,

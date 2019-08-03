@@ -13,7 +13,8 @@ from .utils import subscriber_has_active_subscription
 
 def subscriber_passes_pay_test(test_func, plan=None, pay_page=SUBSCRIPTION_REDIRECT):
     """
-    Decorator for views that checks the subscriber passes the given test for a "Paid Feature".
+    Decorator for views that checks the subscriber passes the given test for a
+    "Paid Feature".
 
     Redirects to `pay_page` if necessary. The test should be a callable
     that takes the subscriber object and returns True if the subscriber passes.

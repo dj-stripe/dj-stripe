@@ -963,7 +963,8 @@ class Subscription(StripeModel):
     After Stripe has exhausted all payment retry attempts, the subscription ends up
     with a status of either ``canceled`` or ``unpaid`` depending on your retry settings.
     Note that when a subscription has a status of ``unpaid``, no subsequent invoices
-    will be attempted (invoices will be created, but then immediately automatically closed.
+    will be attempted (invoices will be created, but then immediately
+     automatically closed.
     Additionally, updating customer card details will not lead to Stripe retrying the
     latest invoice.).
     After receiving updated card details from a customer, you may choose to reopen and

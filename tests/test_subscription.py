@@ -723,7 +723,8 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         item = items[0]
 
         self.assertEqual(subscription.quantity, 1)
-        # Note that subscription.quantity is 1, but item.quantity isn't set on metered plans
+        # Note that subscription.quantity is 1,
+        # but item.quantity isn't set on metered plans
         self.assertIsNone(item.quantity)
         self.assertEqual(item.plan.id, FAKE_PLAN_METERED["id"])
 

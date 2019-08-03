@@ -237,8 +237,8 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         charge_retrieve_mock,
         default_account_mock,
     ):
-        # first sync charge (as per test_sync_from_stripe_data) then sync refunded version,
-        # to hit the update code-path instead of insert
+        # first sync charge (as per test_sync_from_stripe_data)
+        # then sync refunded version, to hit the update code-path instead of insert
 
         from djstripe.settings import STRIPE_SECRET_KEY
 
@@ -814,7 +814,10 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
     def test__attach_objects_hook_no_destination_account(
         self, mock_account, mock_payment_method, mock_charge_account, mock_charge_source
     ):
-        """Test that _attach_objects_hook works as expected when there is no destination account."""
+        """
+        Test that _attach_objects_hook works as expected when there is no
+         destination account.
+        """
         charge = Charge(
             amount=50,
             currency="usd",
@@ -852,7 +855,9 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
     def test__attach_objects_hook_missing_source_data(
         self, mock_account, mock_payment_method, mock_charge_account, mock_charge_source
     ):
-        """Make sure we handle the case where the source data is empty or insufficient."""
+        """
+        Make sure we handle the case where the source data is empty or insufficient.
+        """
         charge = Charge(
             amount=50,
             currency="usd",

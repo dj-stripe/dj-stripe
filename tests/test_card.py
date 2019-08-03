@@ -48,7 +48,8 @@ class CardTest(AssertStripeFksMixin, TestCase):
         card = Card.sync_from_stripe_data(fake_card)
 
         self.assertEqual(
-            "<brand={brand}, last4={last4}, exp_month={exp_month}, exp_year={exp_year}, id={id}>".format(
+            "<brand={brand}, last4={last4}, exp_month={exp_month}, "
+            "exp_year={exp_year}, id={id}>".format(
                 brand=fake_card["brand"],
                 last4=fake_card["last4"],
                 exp_month=fake_card["exp_month"],
@@ -68,7 +69,10 @@ class CardTest(AssertStripeFksMixin, TestCase):
         token_create_mock.assert_called_with(api_key=ANY, card=card)
 
     def test_api_call_no_customer(self):
-        exception_message = "Cards must be manipulated through a Customer. Pass a Customer object into this call."
+        exception_message = (
+            "Cards must be manipulated through a Customer. "
+            "Pass a Customer object into this call."
+        )
 
         with self.assertRaisesMessage(
             StripeObjectManipulationException, exception_message
@@ -81,7 +85,10 @@ class CardTest(AssertStripeFksMixin, TestCase):
             Card.api_list()
 
     def test_api_call_bad_customer(self):
-        exception_message = "Cards must be manipulated through a Customer. Pass a Customer object into this call."
+        exception_message = (
+            "Cards must be manipulated through a Customer. "
+            "Pass a Customer object into this call."
+        )
 
         with self.assertRaisesMessage(
             StripeObjectManipulationException, exception_message

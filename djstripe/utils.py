@@ -56,10 +56,10 @@ def subscriber_has_active_subscription(subscriber, plan=None):
 
     :param subscriber: The subscriber for which to check for an active subscription.
     :type subscriber: dj-stripe subscriber
-    :param plan: The plan for which to check for an active subscription. If plan is None and
-                there exists only one subscription, this method will check if that subscription
-                is active. Calling this method with no plan and multiple subscriptions will throw
-                an exception.
+    :param plan: The plan for which to check for an active subscription.
+        If plan is None and there exists only one subscription, this method will
+        check if that subscription is active. Calling this method with no plan and
+        multiple subscriptions will throw an exception.
     :type plan: Plan or string (plan ID)
 
     """
@@ -79,7 +79,8 @@ def subscriber_has_active_subscription(subscriber, plan=None):
 
 def get_supported_currency_choices(api_key):
     """
-    Pull a stripe account's supported currencies and returns a choices tuple of those supported currencies.
+    Pull a stripe account's supported currencies and returns a choices tuple of those
+    supported currencies.
 
     :param api_key: The api key associated with the account from which to pull data.
     :type api_key: str

@@ -120,7 +120,8 @@ pygments_style = "sphinx"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 
-# on_rtd is whether we are on readthedocs.org, this line of code grabbed from docs.readthedocs.org
+# on_rtd is whether we are on readthedocs.org,
+# this line of code grabbed from docs.readthedocs.org
 # https://github.com/snide/sphinx_rtd_theme
 on_rtd = os.environ.get("READTHEDOCS", None) == "True"
 
