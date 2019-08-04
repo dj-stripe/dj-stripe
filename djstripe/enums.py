@@ -248,6 +248,12 @@ class CouponDuration(Enum):
     forever = _("Forever")
 
 
+class CustomerTaxExempt(Enum):
+    none = _("None")
+    exempt = _("Exempt")
+    reverse = _("Reverse")
+
+
 class DisputeReason(Enum):
     duplicate = _("Duplicate")
     fraudulent = _("Fraudulent")

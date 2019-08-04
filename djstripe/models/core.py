@@ -371,6 +371,7 @@ class Customer(StripeModel):
     expand_fields = ["default_source"]
     stripe_dashboard_item_name = "customers"
 
+    address = JSONField(null=True, blank=True, help_text="The customer’s address.")
     balance = models.IntegerField(
         help_text=(
             "Current balance, if any, being stored on the customer's account. "
@@ -419,10 +420,46 @@ class Customer(StripeModel):
     )
     # </discount>
     email = models.TextField(max_length=5000, default="", blank=True)
+    invoice_prefix = models.CharField(
+        default="",
+        blank=True,
+        max_length=255,
+        help_text=(
+            "The prefix for the customer used to generate unique invoice numbers."
+        ),
+    )
+    invoice_settings = JSONField(
+        null=True, blank=True, help_text="The customer’s default invoice settings."
+    )
+    name = models.TextField(
+        max_length=5000,
+        default="",
+        blank=True,
+        help_text="The customer’s full name or business name.",
+    )
+    phone = models.TextField(
+        max_length=5000,
+        default="",
+        blank=True,
+        help_text="The customer’s phone number.",
+    )
+    preferred_locales = JSONField(
+        null=True,
+        blank=True,
+        help_text=(
+            "The customer’s preferred locales (languages), ordered by preference."
+        ),
+    )
     shipping = JSONField(
         null=True,
         blank=True,
         help_text="Shipping information associated with the customer.",
+    )
+    tax_exempt = StripeEnumField(
+        enum=enums.CustomerTaxExempt,
+        default="",
+        help_text="Describes the customer’s tax exemption status. When set to reverse, "
+        'invoice and receipt PDFs include the text "Reverse charge".',
     )
 
     # dj-stripe fields
