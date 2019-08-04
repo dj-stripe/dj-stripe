@@ -383,6 +383,8 @@ class Customer(StripeModel):
             "recurring billing purposes (i.e., subscriptions, invoices, invoice items)."
         )
     )
+    # TODO - remove, was deprecated in https://stripe.com/docs/upgrades#2018-08-23
+    #  (to tax_info, which was itself moved to CustomerTaxId)
     business_vat_id = models.CharField(
         max_length=20,
         default="",
