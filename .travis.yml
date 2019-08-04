@@ -19,7 +19,7 @@ matrix:
     - { python: "3.7", env: TOXENV=py37-django22 }
     - { python: "3.7", env: TOXENV=py37-djangomaster }
     - { python: "3.7", env: TOXENV=checkmigrations }
-    - { python: "3.7", env: TOXENV=flake8 }
+    - { python: "3.7", env: TOXENV=lint }
     - { python: "3.7", env: TOXENV=docs }
   allow_failures:
     - env: TOXENV=py37-djangomaster
