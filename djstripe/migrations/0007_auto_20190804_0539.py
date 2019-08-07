@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             model_name="customer",
             name="address",
             field=djstripe.fields.JSONField(
-                blank=True, help_text="The customer’s address.", null=True
+                blank=True, help_text="The customer's address.", null=True
             ),
         ),
         migrations.AddField(
@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
             name="invoice_settings",
             field=djstripe.fields.JSONField(
                 blank=True,
-                help_text="The customer’s default invoice settings.",
+                help_text="The customer's default invoice settings.",
                 null=True,
             ),
         ),
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
             field=models.TextField(
                 blank=True,
                 default="",
-                help_text="The customer’s full name or business name.",
+                help_text="The customer's full name or business name.",
                 max_length=5000,
             ),
         ),
@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
             field=models.TextField(
                 blank=True,
                 default="",
-                help_text="The customer’s phone number.",
+                help_text="The customer's phone number.",
                 max_length=5000,
             ),
         ),
@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
             name="preferred_locales",
             field=djstripe.fields.JSONField(
                 blank=True,
-                help_text="The customer’s preferred locales (languages), ordered by preference.",
+                help_text="The customer's preferred locales (languages), ordered by preference.",
                 null=True,
             ),
         ),
@@ -72,7 +72,7 @@ class Migration(migrations.Migration):
             field=djstripe.fields.StripeEnumField(
                 default="",
                 enum=djstripe.enums.CustomerTaxExempt,
-                help_text='Describes the customer’s tax exemption status. When set to reverse, invoice and receipt PDFs include the text "Reverse charge".',
+                help_text='Describes the customer\'s tax exemption status. When set to reverse, invoice and receipt PDFs include the text "Reverse charge".',
                 max_length=7,
             ),
         ),
