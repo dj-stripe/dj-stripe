@@ -22,6 +22,8 @@ History
     - Setup Intent
     - Payment Method
     - Session
+- Added fields to ``Customer`` model: ``address``, ``invoice_prefix``, ``invoice_settings``, 
+  ``phone``, ``preferred_locales``, ``tax_exempt``
 
 Changes from API 2018-11-08:
 
