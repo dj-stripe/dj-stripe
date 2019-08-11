@@ -656,7 +656,7 @@ class Command(BaseCommand):
         fixture_path = tests.FIXTURE_DIR_PATH.joinpath(f"{type_name}_{id_}.json")
 
         with fixture_path.open("w") as f:
-            json_str = self.fake_json_ids(json.dumps(obj, indent="\t"))
+            json_str = self.fake_json_ids(json.dumps(obj, indent=4))
 
             f.write(json_str)
 
