@@ -61,31 +61,32 @@ class Command(BaseCommand):
         try:
             count = 0
 
-            if model is models.Account:
-                # special case, since own account isn't returned by Account.api_list
-                stripe_obj = models.Account.stripe_class.retrieve(
-                    api_key=settings.STRIPE_SECRET_KEY
-                )
-                count += 1
-                djstripe_obj = model.sync_from_stripe_data(stripe_obj)
-                print(
-                    "  id={id}, pk={pk} ({djstripe_obj})".format(
-                        id=djstripe_obj.id,
-                        pk=djstripe_obj.pk,
-                        djstripe_obj=djstripe_obj,
+            for list_kwargs in self.get_list_kwargs(model):
+                if model is models.Account:
+                    # special case, since own account isn't returned by Account.api_list
+                    stripe_obj = models.Account.stripe_class.retrieve(
+                        api_key=settings.STRIPE_SECRET_KEY
                     )
-                )
+                    count += 1
+                    djstripe_obj = model.sync_from_stripe_data(stripe_obj)
+                    print(
+                        "  id={id}, pk={pk} ({djstripe_obj})".format(
+                            id=djstripe_obj.id,
+                            pk=djstripe_obj.pk,
+                            djstripe_obj=djstripe_obj,
+                        )
+                    )
 
-            for stripe_obj in model.api_list():
-                count += 1
-                djstripe_obj = model.sync_from_stripe_data(stripe_obj)
-                print(
-                    "  id={id}, pk={pk} ({djstripe_obj})".format(
-                        id=djstripe_obj.id,
-                        pk=djstripe_obj.pk,
-                        djstripe_obj=djstripe_obj,
+                for stripe_obj in model.api_list(**list_kwargs):
+                    count += 1
+                    djstripe_obj = model.sync_from_stripe_data(stripe_obj)
+                    print(
+                        "  id={id}, pk={pk} ({djstripe_obj})".format(
+                            id=djstripe_obj.id,
+                            pk=djstripe_obj.pk,
+                            djstripe_obj=djstripe_obj,
+                        )
                     )
-                )
 
             if count == 0:
                 print("  (no results)")
@@ -98,3 +99,24 @@ class Command(BaseCommand):
 
         except Exception as e:
             print(e)
+
+    def get_list_kwargs(self, model):
+        """
+        Returns a sequence of kwargs dicts to pass to model.api_list
+
+        This allows us to sync models that require parameters to api_list
+
+        :param model:
+        :return: Sequence[dict]
+        """
+        if model is models.PaymentMethod:
+            # special case
+            all_list_kwargs = (
+                {"customer": stripe_customer.id, "type": "card"}
+                for stripe_customer in models.Customer.api_list()
+            )
+        else:
+            # one empty dict so we iterate once
+            all_list_kwargs = [{}]
+
+        return all_list_kwargs
