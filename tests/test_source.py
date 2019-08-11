@@ -34,14 +34,26 @@ class SourceTest(AssertStripeFksMixin, TestCase):
         source = Source.sync_from_stripe_data(deepcopy(FAKE_SOURCE_II))
         self.assertEqual(source.customer, None)
 
-        self.assert_fks(source, expected_blank_fks={"djstripe.Source.customer"})
+        self.assert_fks(
+            source,
+            expected_blank_fks={
+                "djstripe.Source.customer",
+                "djstripe.Customer.default_payment_method",
+            },
+        )
 
     def test_sync_source_finds_customer(self):
         source = Source.sync_from_stripe_data(deepcopy(FAKE_SOURCE))
 
         self.assertEqual(self.customer, source.customer)
 
-        self.assert_fks(source, expected_blank_fks={"djstripe.Customer.coupon"})
+        self.assert_fks(
+            source,
+            expected_blank_fks={
+                "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
+            },
+        )
 
     def test_str(self):
         fake_source = deepcopy(FAKE_SOURCE)
@@ -49,7 +61,13 @@ class SourceTest(AssertStripeFksMixin, TestCase):
 
         self.assertEqual("<id={}>".format(fake_source["id"]), str(source))
 
-        self.assert_fks(source, expected_blank_fks={"djstripe.Customer.coupon"})
+        self.assert_fks(
+            source,
+            expected_blank_fks={
+                "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
+            },
+        )
 
     @patch("stripe.Source.retrieve", return_value=deepcopy(FAKE_SOURCE), autospec=True)
     def test_detach(self, source_retrieve_mock):
@@ -86,4 +104,10 @@ class SourceTest(AssertStripeFksMixin, TestCase):
             # for the test
             mock_detach.assert_called()
 
-        self.assert_fks(source, expected_blank_fks={"djstripe.Source.customer"})
+        self.assert_fks(
+            source,
+            expected_blank_fks={
+                "djstripe.Source.customer",
+                "djstripe.Customer.default_payment_method",
+            },
+        )

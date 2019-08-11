@@ -32,7 +32,13 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
             FAKE_PAYMENT_METHOD_I["id"], stripe_customer=FAKE_CUSTOMER
         )
 
-        self.assert_fks(payment_method, expected_blank_fks={"djstripe.Customer.coupon"})
+        self.assert_fks(
+            payment_method,
+            expected_blank_fks={
+                "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
+            },
+        )
 
     # TODO - this should use autospec=True, but it's failing for some reason
     #   with unexpected keyword argument "customer"
@@ -51,4 +57,10 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
             payment_method.id, stripe_customer=FAKE_CUSTOMER
         )
 
-        self.assert_fks(payment_method, expected_blank_fks={"djstripe.Customer.coupon"})
+        self.assert_fks(
+            payment_method,
+            expected_blank_fks={
+                "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
+            },
+        )

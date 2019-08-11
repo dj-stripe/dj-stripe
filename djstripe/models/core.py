@@ -437,6 +437,17 @@ class Customer(StripeModel):
     invoice_settings = JSONField(
         null=True, blank=True, help_text="The customer's default invoice settings."
     )
+    # default_payment_method is actually nested inside invoice_settings
+    # this field is a convenience to provide the foreign key
+    default_payment_method = models.ForeignKey(
+        "PaymentMethod",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="default payment method used for subscriptions and invoices "
+        "for the customer.",
+    )
     name = models.TextField(
         max_length=5000,
         default="",
@@ -865,10 +876,7 @@ class Customer(StripeModel):
 
         return new_payment_method.resolve()
 
-    # TODO - support setting default payment method
-    #  (as per set_default param to add_card), see
-    #  see https://stripe.com/docs/api/payment_methods/attach
-    def add_payment_method(self, payment_method_id):
+    def add_payment_method(self, payment_method_id, set_default=True):
         """
         Adds an already existing payment method to this customer's account
 
@@ -878,7 +886,20 @@ class Customer(StripeModel):
         from .payment_methods import PaymentMethod
 
         stripe_customer = self.api_retrieve()
-        PaymentMethod.attach(payment_method_id, stripe_customer)
+        payment_method = PaymentMethod.attach(payment_method_id, stripe_customer)
+
+        if set_default:
+            stripe_customer["invoice_settings"][
+                "default_payment_method"
+            ] = payment_method_id
+            stripe_customer.save()
+
+            # Note that this logic is duplicated in _attach_objects_hook
+            # (we could do sync_from_stripe_data + refresh_from_db here instead
+            # to avoid the duplication, but this is at least more similar to existing
+            # add_card logic)
+            self.default_payment_method = payment_method
+            self.save()
 
     def purge(self):
         try:
@@ -1162,6 +1183,12 @@ class Customer(StripeModel):
                     self.id,
                 )
                 self.subscriber = None
+
+        # Populate the object id for our default_payment_method field (or set it None)
+        # Note that this duplicates the logic of add_payment_method
+        data["default_payment_method"] = data.get("invoice_settings", {}).get(
+            "default_payment_method"
+        )
 
     # SYNC methods should be dropped in favor of the master sync infrastructure proposed
     def _sync_invoices(self, **kwargs):

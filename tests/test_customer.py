@@ -166,6 +166,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             customer,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.subscriber",
             },
         )
@@ -183,6 +184,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             customer,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.subscriber",
             },
         )
@@ -211,6 +213,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             customer,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.default_source",
             },
         )
@@ -283,6 +286,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             customer,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.default_source",
             },
         )
@@ -303,6 +307,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             customer,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.subscriber",
             },
         )
@@ -456,6 +461,27 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             0,
         )
 
+        self.customer.add_payment_method(FAKE_PAYMENT_METHOD_I["id"], set_default=False)
+
+        self.assertEqual(
+            self.customer.payment_methods.filter(
+                id=FAKE_PAYMENT_METHOD_I["id"]
+            ).count(),
+            1,
+        )
+
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    @patch("stripe.PaymentMethod.attach", return_value=deepcopy(FAKE_PAYMENT_METHOD_I))
+    def test_add_payment_method_set_default(self, customer_retrieve_mock, attach_mock):
+        self.assertEqual(
+            self.customer.payment_methods.filter(
+                id=FAKE_PAYMENT_METHOD_I["id"]
+            ).count(),
+            0,
+        )
+
         self.customer.add_payment_method(FAKE_PAYMENT_METHOD_I["id"])
 
         self.assertEqual(
@@ -515,7 +541,10 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         self.customer.refresh_from_db()
 
-        self.assert_fks(self.customer, expected_blank_fks={})
+        self.assert_fks(
+            self.customer,
+            expected_blank_fks={"djstripe.Customer.default_payment_method"},
+        )
 
     @patch(
         "djstripe.models.Account.get_default_account",
@@ -562,6 +591,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 "djstripe.Charge.invoice",
                 "djstripe.Charge.transfer",
                 "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
                 "djstripe.PaymentIntent.invoice (related name)",
                 "djstripe.PaymentIntent.on_behalf_of",
                 "djstripe.PaymentIntent.payment_method",
@@ -588,6 +618,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 "djstripe.Charge.invoice",
                 "djstripe.Charge.transfer",
                 "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
                 "djstripe.PaymentIntent.invoice (related name)",
                 "djstripe.PaymentIntent.on_behalf_of",
                 "djstripe.PaymentIntent.payment_method",
@@ -639,6 +670,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 "djstripe.Charge.invoice",
                 "djstripe.Charge.transfer",
                 "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
                 "djstripe.PaymentIntent.invoice (related name)",
                 "djstripe.PaymentIntent.on_behalf_of",
                 "djstripe.PaymentIntent.payment_method",
@@ -659,6 +691,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 "djstripe.Charge.invoice",
                 "djstripe.Charge.transfer",
                 "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
                 "djstripe.PaymentIntent.invoice (related name)",
                 "djstripe.PaymentIntent.on_behalf_of",
                 "djstripe.PaymentIntent.payment_method",
