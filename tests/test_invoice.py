@@ -37,6 +37,17 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         )
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
+        self.default_expected_blank_fks = {
+            "djstripe.Account.branding_logo",
+            "djstripe.Account.branding_icon",
+            "djstripe.Charge.dispute",
+            "djstripe.Charge.transfer",
+            "djstripe.Customer.coupon",
+            "djstripe.PaymentIntent.on_behalf_of",
+            "djstripe.PaymentIntent.payment_method",
+            "djstripe.Subscription.pending_setup_intent",
+        }
+
     @patch(
         "djstripe.models.Account.get_default_account",
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
@@ -76,19 +87,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         )
         self.assertEqual(str(invoice), "Invoice #{}".format(FAKE_INVOICE["number"]))
         self.assertGreater(len(invoice.status_transitions.keys()), 1)
-        self.assert_fks(
-            invoice,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.Subscription.pending_setup_intent",
-            },
-        )
+        self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
 
     @patch("stripe.Invoice.retrieve", autospec=True)
     @patch(
@@ -138,19 +137,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         )
         self.assertTrue(return_value)
 
-        self.assert_fks(
-            invoice,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.Subscription.pending_setup_intent",
-            },
-        )
+        self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
 
     @patch("stripe.Invoice.retrieve", autospec=True)
     @patch(
@@ -197,19 +184,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         self.assertFalse(invoice_retrieve_mock.called)
         self.assertFalse(return_value)
 
-        self.assert_fks(
-            invoice,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.Subscription.pending_setup_intent",
-            },
-        )
+        self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
 
     @patch(
         "djstripe.models.Account.get_default_account",
@@ -249,19 +224,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
         self.assertEqual(Invoice.STATUS_PAID, invoice.status)
 
-        self.assert_fks(
-            invoice,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.Subscription.pending_setup_intent",
-            },
-        )
+        self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
 
     @patch(
         "djstripe.models.Account.get_default_account",
@@ -303,19 +266,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
         self.assertEqual(Invoice.STATUS_OPEN, invoice.status)
 
-        self.assert_fks(
-            invoice,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.Subscription.pending_setup_intent",
-            },
-        )
+        self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
 
     @patch(
         "djstripe.models.Account.get_default_account",
@@ -357,19 +308,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
         self.assertEqual(Invoice.STATUS_FORGIVEN, invoice.status)
 
-        self.assert_fks(
-            invoice,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.Subscription.pending_setup_intent",
-            },
-        )
+        self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
 
     @patch(
         "djstripe.models.Account.get_default_account",
@@ -498,19 +437,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
         self.assertEqual(Invoice.STATUS_CLOSED, invoice.status)
 
-        self.assert_fks(
-            invoice,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.Subscription.pending_setup_intent",
-            },
-        )
+        self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
 
     @patch(
         "djstripe.models.Account.get_default_account",
@@ -655,17 +582,8 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             invoice,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.Invoice.subscription",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            expected_blank_fks=self.default_expected_blank_fks
+            | {"djstripe.Invoice.subscription"},
         )
 
     @patch(
@@ -716,19 +634,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         self.assertTrue(items[0].id.startswith(item_id_prefix))
         self.assertEqual(items[0].subscription.id, FAKE_SUBSCRIPTION["id"])
 
-        self.assert_fks(
-            invoice,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.Subscription.pending_setup_intent",
-            },
-        )
+        self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
 
     @patch(
         "djstripe.models.Account.get_default_account",
@@ -771,19 +677,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         self.assertIsNotNone(invoice.plan)  # retrieved from invoice item
         self.assertEqual(FAKE_PLAN["id"], invoice.plan.id)
 
-        self.assert_fks(
-            invoice,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.Subscription.pending_setup_intent",
-            },
-        )
+        self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
 
     @patch(
         "djstripe.models.Account.get_default_account",
@@ -827,19 +721,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         self.assertIsNotNone(invoice)
         self.assertEqual(2, len(invoice.invoiceitems.all()))
 
-        self.assert_fks(
-            invoice,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.Subscription.pending_setup_intent",
-            },
-        )
+        self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
 
     @patch(
         "djstripe.models.Account.get_default_account",
@@ -881,19 +763,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         self.assertIsNotNone(invoice.plan)  # retrieved from invoice item
         self.assertEqual(FAKE_PLAN["id"], invoice.plan.id)
 
-        self.assert_fks(
-            invoice,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.Subscription.pending_setup_intent",
-            },
-        )
+        self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
 
     @patch(
         "djstripe.models.Account.get_default_account",
@@ -935,19 +805,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         self.assertIsNotNone(invoice.plan)  # retrieved from subscription
         self.assertEqual(FAKE_PLAN["id"], invoice.plan.id)
 
-        self.assert_fks(
-            invoice,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.Subscription.pending_setup_intent",
-            },
-        )
+        self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
 
     @patch(
         "djstripe.models.Account.get_default_account",
@@ -984,18 +842,8 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             invoice,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.Invoice.subscription",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.Plan.product",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            expected_blank_fks=self.default_expected_blank_fks
+            | {"djstripe.Invoice.subscription"},
         )
 
     @patch(

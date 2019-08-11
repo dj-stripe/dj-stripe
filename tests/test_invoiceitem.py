@@ -28,6 +28,18 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
         self.account = default_account()
 
+        self.default_expected_blank_fks = {
+            "djstripe.Account.branding_logo",
+            "djstripe.Account.branding_icon",
+            "djstripe.Charge.dispute",
+            "djstripe.Charge.payment_intent",
+            "djstripe.Charge.transfer",
+            "djstripe.Customer.coupon",
+            "djstripe.Customer.subscriber",
+            "djstripe.Invoice.payment_intent",
+            "djstripe.Subscription.pending_setup_intent",
+        }
+
     @patch(
         "djstripe.models.Account.get_default_account",
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
@@ -128,17 +140,8 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         invoiceitem_data.update({"subscription": FAKE_SUBSCRIPTION_III["id"]})
         invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
 
-        expected_blank_fks = {
-            "djstripe.Account.branding_logo",
-            "djstripe.Account.branding_icon",
-            "djstripe.Charge.dispute",
-            "djstripe.Charge.payment_intent",
-            "djstripe.Charge.transfer",
-            "djstripe.Customer.coupon",
-            "djstripe.Customer.subscriber",
-            "djstripe.InvoiceItem.plan",
-            "djstripe.Invoice.payment_intent",
-            "djstripe.Subscription.pending_setup_intent",
+        expected_blank_fks = self.default_expected_blank_fks | {
+            "djstripe.InvoiceItem.plan"
         }
 
         self.assert_fks(invoiceitem, expected_blank_fks=expected_blank_fks)
@@ -200,17 +203,8 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         )
         invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
 
-        expected_blank_fks = {
-            "djstripe.Account.branding_logo",
-            "djstripe.Account.branding_icon",
-            "djstripe.Charge.dispute",
-            "djstripe.Charge.payment_intent",
-            "djstripe.Charge.transfer",
-            "djstripe.Customer.coupon",
-            "djstripe.Customer.subscriber",
-            "djstripe.InvoiceItem.plan",
-            "djstripe.Invoice.payment_intent",
-            "djstripe.Subscription.pending_setup_intent",
+        expected_blank_fks = self.default_expected_blank_fks | {
+            "djstripe.InvoiceItem.plan"
         }
 
         self.assert_fks(invoiceitem, expected_blank_fks=expected_blank_fks)
@@ -270,18 +264,8 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             invoiceitem,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.payment_intent",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.Customer.subscriber",
-                "djstripe.InvoiceItem.subscription",
-                "djstripe.Invoice.payment_intent",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            expected_blank_fks=self.default_expected_blank_fks
+            | {"djstripe.InvoiceItem.subscription"},
         )
 
     @patch(
@@ -328,16 +312,6 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             invoiceitem,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.Customer.subscriber",
-                "djstripe.InvoiceItem.invoice",
-                "djstripe.InvoiceItem.subscription",
-                "djstripe.Invoice.payment_intent",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            expected_blank_fks=self.default_expected_blank_fks
+            | {"djstripe.InvoiceItem.invoice", "djstripe.InvoiceItem.subscription"},
         )

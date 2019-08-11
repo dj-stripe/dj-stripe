@@ -41,6 +41,14 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         )
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
         self.account = default_account()
+        self.default_expected_blank_fks = {
+            "djstripe.Charge.dispute",
+            "djstripe.Charge.transfer",
+            "djstripe.Customer.coupon",
+            "djstripe.PaymentIntent.on_behalf_of",
+            "djstripe.PaymentIntent.payment_method",
+            "djstripe.Subscription.pending_setup_intent",
+        }
 
     def test_str(self):
         charge = Charge(
@@ -112,18 +120,13 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             charge,
-            expected_blank_fks={
+            expected_blank_fks=self.default_expected_blank_fks
+            | {
                 "djstripe.Account.branding_logo",
                 "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
                 "djstripe.Charge.invoice",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
                 "djstripe.PaymentIntent.invoice",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
                 "djstripe.Plan.product",
-                "djstripe.Subscription.pending_setup_intent",
             },
         )
 
@@ -195,16 +198,8 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             charge,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            expected_blank_fks=self.default_expected_blank_fks
+            | {"djstripe.Account.branding_logo", "djstripe.Account.branding_icon"},
         )
 
     @patch(
@@ -307,16 +302,8 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             charge_refunded,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.Subscription.pending_setup_intent",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-            },
+            expected_blank_fks=self.default_expected_blank_fks
+            | {"djstripe.Account.branding_logo", "djstripe.Account.branding_icon"},
         )
 
     @patch(
@@ -409,16 +396,8 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             charge,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.Subscription.pending_setup_intent",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-            },
+            expected_blank_fks=self.default_expected_blank_fks
+            | {"djstripe.Account.branding_logo", "djstripe.Account.branding_icon"},
         )
 
     @patch(
@@ -476,16 +455,8 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             charge,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            expected_blank_fks=self.default_expected_blank_fks
+            | {"djstripe.Account.branding_logo", "djstripe.Account.branding_icon"},
         )
 
     @patch(
@@ -544,16 +515,8 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             charge,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            expected_blank_fks=self.default_expected_blank_fks
+            | {"djstripe.Account.branding_logo", "djstripe.Account.branding_icon"},
         )
 
     @patch(
@@ -601,19 +564,14 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             charge,
-            expected_blank_fks={
+            expected_blank_fks=self.default_expected_blank_fks
+            | {
                 "djstripe.Account.branding_logo",
                 "djstripe.Account.branding_icon",
                 "djstripe.Charge.customer",
-                "djstripe.Charge.dispute",
                 "djstripe.Charge.invoice",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
                 "djstripe.PaymentIntent.invoice",
                 "djstripe.Plan.product",
-                "djstripe.Subscription.pending_setup_intent",
             },
         )
 
@@ -682,15 +640,11 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             charge,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.dispute",
-                "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            expected_blank_fks=(
+                self.default_expected_blank_fks
+                | {"djstripe.Account.branding_logo", "djstripe.Account.branding_icon"}
+            )
+            - {"djstripe.Charge.transfer"},
         )
 
     @patch("stripe.Charge.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
@@ -754,17 +708,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
             api_key=STRIPE_SECRET_KEY, expand=[], id=FAKE_BALANCE_TRANSACTION["id"]
         )
 
-        self.assert_fks(
-            charge,
-            expected_blank_fks={
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.Subscription.pending_setup_intent",
-            },
-        )
+        self.assert_fks(charge, expected_blank_fks=self.default_expected_blank_fks)
 
     @patch.object(target=Charge, attribute="source", autospec=True)
     @patch.object(target=Charge, attribute="account", autospec=True)

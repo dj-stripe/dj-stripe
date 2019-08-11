@@ -37,6 +37,11 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         )
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
+        self.default_expected_blank_fks = {
+            "djstripe.Customer.coupon",
+            "djstripe.Subscription.pending_setup_intent",
+        }
+
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
@@ -58,11 +63,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         )
 
         self.assert_fks(
-            subscription,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            subscription, expected_blank_fks=self.default_expected_blank_fks
         )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
@@ -90,11 +91,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertTrue(self.customer.has_any_active_subscription())
 
         self.assert_fks(
-            subscription,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            subscription, expected_blank_fks=self.default_expected_blank_fks
         )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
@@ -120,11 +117,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertTrue(self.customer.has_any_active_subscription())
 
         self.assert_fks(
-            subscription,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            subscription, expected_blank_fks=self.default_expected_blank_fks
         )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
@@ -151,11 +144,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertFalse(self.customer.has_any_active_subscription())
 
         self.assert_fks(
-            subscription,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            subscription, expected_blank_fks=self.default_expected_blank_fks
         )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
@@ -192,11 +181,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertTrue(self.customer.has_any_active_subscription())
 
         self.assert_fks(
-            subscription,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            subscription, expected_blank_fks=self.default_expected_blank_fks
         )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
@@ -228,11 +213,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertFalse(self.customer.has_any_active_subscription())
 
         self.assert_fks(
-            subscription,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            subscription, expected_blank_fks=self.default_expected_blank_fks
         )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
@@ -271,11 +252,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertTrue(self.customer.has_any_active_subscription())
 
         self.assert_fks(
-            subscription,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            subscription, expected_blank_fks=self.default_expected_blank_fks
         )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
@@ -307,11 +284,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(4, new_subscription.quantity)
 
         self.assert_fks(
-            subscription,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            subscription, expected_blank_fks=self.default_expected_blank_fks
         )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
@@ -341,11 +314,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(Decimal(0.0), new_subscription.tax_percent)
 
         self.assert_fks(
-            subscription,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            subscription, expected_blank_fks=self.default_expected_blank_fks
         )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
@@ -378,11 +347,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(FAKE_PLAN_II["id"], new_subscription.plan.id)
 
         self.assert_fks(
-            subscription,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            subscription, expected_blank_fks=self.default_expected_blank_fks
         )
 
         self.assert_fks(new_plan, expected_blank_fks={})
@@ -431,11 +396,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertFalse(self.customer.has_any_active_subscription())
 
         self.assert_fks(
-            subscription,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            subscription, expected_blank_fks=self.default_expected_blank_fks
         )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
@@ -486,11 +447,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertTrue(self.customer.has_any_active_subscription())
 
         self.assert_fks(
-            subscription,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            subscription, expected_blank_fks=self.default_expected_blank_fks
         )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
@@ -535,11 +492,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertFalse(self.customer.has_any_active_subscription())
 
         self.assert_fks(
-            subscription,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            subscription, expected_blank_fks=self.default_expected_blank_fks
         )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
@@ -585,11 +538,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(reactivated_subscription.cancel_at_period_end, False)
 
         self.assert_fks(
-            subscription,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            subscription, expected_blank_fks=self.default_expected_blank_fks
         )
 
     @patch("djstripe.models.Subscription._api_delete", autospec=True)
@@ -618,11 +567,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(Subscription.objects.filter(status="canceled").count(), 1)
 
         self.assert_fks(
-            subscription,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            subscription, expected_blank_fks=self.default_expected_blank_fks
         )
 
     @patch("djstripe.models.Subscription._api_delete", autospec=True)
@@ -643,11 +588,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
             subscription.cancel(at_period_end=False)
 
         self.assert_fks(
-            subscription,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            subscription, expected_blank_fks=self.default_expected_blank_fks
         )
 
     @patch("stripe.Plan.retrieve", autospec=True)
@@ -681,12 +622,8 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             subscription,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Customer.subscriber",
-                "djstripe.Subscription.plan",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            expected_blank_fks=self.default_expected_blank_fks
+            | {"djstripe.Customer.subscriber", "djstripe.Subscription.plan"},
         )
 
     @patch("stripe.Plan.retrieve", autospec=True)
@@ -729,9 +666,5 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(item.plan.id, FAKE_PLAN_METERED["id"])
 
         self.assert_fks(
-            subscription,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Subscription.pending_setup_intent",
-            },
+            subscription, expected_blank_fks=self.default_expected_blank_fks
         )
