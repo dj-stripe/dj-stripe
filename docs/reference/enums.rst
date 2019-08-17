@@ -1,12 +1,32 @@
 Enumerations
 ============
 
-Last Updated 2018-05-24
-
+Last Updated 2019-09-17
 
 ApiErrorCode
 ------------
 .. autoclass:: djstripe.enums.ApiErrorCode
+    :members:
+    :undoc-members:
+
+
+AccountType
+-----------
+.. autoclass:: djstripe.enums.AccountType
+    :members:
+    :undoc-members:
+
+
+BalanceTransactionStatus
+------------------------
+.. autoclass:: djstripe.enums.BalanceTransactionStatus
+    :members:
+    :undoc-members:
+
+
+BalanceTransactionType
+----------------------
+.. autoclass:: djstripe.enums.BalanceTransactionType
     :members:
     :undoc-members:
 
@@ -21,6 +41,20 @@ BankAccountHolderType
 BankAccountStatus
 -----------------
 .. autoclass:: djstripe.enums.BankAccountStatus
+    :members:
+    :undoc-members:
+
+
+BusinessType
+------------
+.. autoclass:: djstripe.enums.BusinessType
+    :members:
+    :undoc-members:
+
+
+CaptureMethod
+-------------
+.. autoclass:: djstripe.enums.CaptureMethod
     :members:
     :undoc-members:
 
@@ -60,9 +94,23 @@ ChargeStatus
     :undoc-members:
 
 
+ConfirmationMethod
+------------------
+.. autoclass:: djstripe.enums.ConfirmationMethod
+    :members:
+    :undoc-members:
+
+
 CouponDuration
 --------------
 .. autoclass:: djstripe.enums.CouponDuration
+    :members:
+    :undoc-members:
+
+
+CustomerTaxExempt
+-----------------
+.. autoclass:: djstripe.enums.CustomerTaxExempt
     :members:
     :undoc-members:
 
@@ -77,6 +125,55 @@ DisputeReason
 DisputeStatus
 -------------
 .. autoclass:: djstripe.enums.DisputeStatus
+    :members:
+    :undoc-members:
+
+
+FileUploadPurpose
+-----------------
+.. autoclass:: djstripe.enums.FileUploadPurpose
+    :members:
+    :undoc-members:
+
+
+FileUploadType
+--------------
+.. autoclass:: djstripe.enums.FileUploadType
+    :members:
+    :undoc-members:
+
+
+InvoiceBilling
+--------------
+.. autoclass:: djstripe.enums.InvoiceBilling
+    :members:
+    :undoc-members:
+
+
+IntentUsage
+-----------
+.. autoclass:: djstripe.enums.IntentUsage
+    :members:
+    :undoc-members:
+
+
+IntentStatus
+------------
+.. autoclass:: djstripe.enums.IntentStatus
+    :members:
+    :undoc-members:
+
+
+PaymentIntentStatus
+-------------------
+.. autoclass:: djstripe.enums.PaymentIntentStatus
+    :members:
+    :undoc-members:
+
+
+SetupIntentStatus
+-----------------
+.. autoclass:: djstripe.enums.SetupIntentStatus
     :members:
     :undoc-members:
 
@@ -109,9 +206,51 @@ PayoutType
     :undoc-members:
 
 
+PlanAggregateUsage
+------------------
+.. autoclass:: djstripe.enums.PlanAggregateUsage
+    :members:
+    :undoc-members:
+
+
+PlanBillingScheme
+-----------------
+.. autoclass:: djstripe.enums.PlanBillingScheme
+    :members:
+    :undoc-members:
+
+
 PlanInterval
 ------------
 .. autoclass:: djstripe.enums.PlanInterval
+    :members:
+    :undoc-members:
+
+
+PlanUsageType
+-------------
+.. autoclass:: djstripe.enums.PlanUsageType
+    :members:
+    :undoc-members:
+
+
+PlanTiersMode
+-------------
+.. autoclass:: djstripe.enums.PlanTiersMode
+    :members:
+    :undoc-members:
+
+
+ProductType
+-----------
+.. autoclass:: djstripe.enums.ProductType
+    :members:
+    :undoc-members:
+
+
+ScheduledQueryRunStatus
+-----------------------
+.. autoclass:: djstripe.enums.ScheduledQueryRunStatus
     :members:
     :undoc-members:
 
@@ -144,6 +283,27 @@ LegacySourceType
     :undoc-members:
 
 
+RefundFailureReason
+-------------------
+.. autoclass:: djstripe.enums.RefundFailureReason
+    :members:
+    :undoc-members:
+
+
+RefundReason
+------------
+.. autoclass:: djstripe.enums.RefundReason
+    :members:
+    :undoc-members:
+
+
+RefundStatus
+------------
+.. autoclass:: djstripe.enums.RefundStatus
+    :members:
+    :undoc-members:
+
+
 SourceUsage
 -----------
 .. autoclass:: djstripe.enums.SourceUsage
@@ -168,6 +328,13 @@ SourceRedirectFailureReason
 SourceRedirectStatus
 --------------------
 .. autoclass:: djstripe.enums.SourceRedirectStatus
+    :members:
+    :undoc-members:
+
+
+SubmitTypeStatus
+----------------
+.. autoclass:: djstripe.enums.SubmitTypeStatus
     :members:
     :undoc-members:
 
