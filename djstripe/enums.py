@@ -325,12 +325,34 @@ class IntentStatus(Enum):
     )
 
 
-class PaymentIntentStatus(IntentStatus):
-    succeeded = _("The funds are in your account.")
+# TODO - maybe refactor Enum so that inheritance works,
+#  then PaymentIntentStatus/SetupIntentStatus can inherit from IntentStatus
+class PaymentIntentStatus(Enum):
+    requires_payment_method = _(
+        "Intent created and requires a Payment Method to be attached."
+    )
+    requires_confirmation = _("Intent is ready to be confirmed.")
+    requires_action = _("Payment Method require additional action, such as 3D secure.")
+    processing = _("Required actions have been handled.")
     requires_capture = _("Capture the funds on the cards which have been put on holds.")
+    canceled = _(
+        "Cancellation invalidates the intent for future confirmation and "
+        "cannot be undone."
+    )
+    succeeded = _("The funds are in your account.")
 
 
-class SetupIntentStatus(IntentStatus):
+class SetupIntentStatus(Enum):
+    requires_payment_method = _(
+        "Intent created and requires a Payment Method to be attached."
+    )
+    requires_confirmation = _("Intent is ready to be confirmed.")
+    requires_action = _("Payment Method require additional action, such as 3D secure.")
+    processing = _("Required actions have been handled.")
+    canceled = _(
+        "Cancellation invalidates the intent for future confirmation and "
+        "cannot be undone."
+    )
     succeeded = _(
         "Setup was successful and the payment method is optimized for future payments."
     )

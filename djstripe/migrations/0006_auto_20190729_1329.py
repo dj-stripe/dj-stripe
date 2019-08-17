@@ -99,6 +99,7 @@ class Migration(migrations.Migration):
                         default=None,
                         help_text="Populated when status is canceled, this is the time at which the PaymentIntent was canceled. Measured in seconds since the Unix epoch.",
                         null=True,
+                        blank=True,
                     ),
                 ),
                 (
@@ -107,6 +108,7 @@ class Migration(migrations.Migration):
                         help_text="User-given reason for cancellation of this PaymentIntent, one of duplicate, fraudulent, requested_by_customer, or failed_invoice.",
                         max_length=255,
                         null=True,
+                        blank=True,
                     ),
                 ),
                 (
@@ -215,6 +217,7 @@ class Migration(migrations.Migration):
                     "transfer_group",
                     models.CharField(
                         help_text="A string that identifies the resulting payment as part of a group. See the PaymentIntents Connect usage guide for details.",
+                        blank=True,
                         max_length=255,
                     ),
                 ),
@@ -232,6 +235,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         help_text="The account (if any) for which the funds of the PaymentIntent are intended.",
                         null=True,
+                        blank=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.Account",
                     ),
@@ -386,6 +390,7 @@ class Migration(migrations.Migration):
                     models.CharField(
                         help_text="Reason for cancellation of this SetupIntent, one of abandoned, requested_by_customer, or duplicate",
                         max_length=255,
+                        blank=True,
                         null=True,
                     ),
                 ),
@@ -442,6 +447,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         help_text="Customer this SetupIntent belongs to, if one exists.",
                         null=True,
+                        blank=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.Customer",
                     ),
@@ -451,6 +457,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         help_text="The account (if any) for which the setup is intended.",
                         null=True,
+                        blank=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.Account",
                     ),
@@ -460,6 +467,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         help_text="Payment method used in this PaymentIntent.",
                         null=True,
+                        blank=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.PaymentMethod",
                     ),
@@ -622,6 +630,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 help_text="Payment method used in this PaymentIntent.",
                 null=True,
+                blank=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 to="djstripe.PaymentMethod",
             ),

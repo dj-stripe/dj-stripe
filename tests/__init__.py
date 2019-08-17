@@ -365,6 +365,14 @@ FAKE_SOURCE_II = SourceDict(
 FAKE_PAYMENT_INTENT_I = load_fixture("payment_intent_pi_fakefakefakefakefake0001.json")
 FAKE_PAYMENT_METHOD_I = load_fixture("payment_method_pm_fakefakefakefake0001.json")
 
+# TODO - add to regenerate_test_fixtures and replace this with a JSON fixture
+FAKE_SETUP_INTENT_I = {
+    "id": "seti_fakefakefakefake0001",
+    "object": "setup_intent",
+    "payment_method_types": ["card"],
+    "usage": "off_session",
+}
+
 
 class ChargeDict(dict):
     def refund(self, amount=None, reason=None):
