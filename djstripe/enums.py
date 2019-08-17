@@ -325,12 +325,23 @@ class IntentStatus(Enum):
     )
 
 
-class PaymentIntentStatus(IntentStatus):
-    succeeded = _("The funds are in your account.")
+# TODO - maybe refactor Enum so that inheritance works?
+class PaymentIntentStatus(Enum):
+    requires_payment_method = IntentStatus.requires_payment_method
+    requires_confirmation = IntentStatus.requires_confirmation
+    requires_action = IntentStatus.requires_action
+    processing = IntentStatus.processing
     requires_capture = _("Capture the funds on the cards which have been put on holds.")
+    canceled = IntentStatus.canceled
+    succeeded = _("The funds are in your account.")
 
 
-class SetupIntentStatus(IntentStatus):
+class SetupIntentStatus(Enum):
+    requires_payment_method = IntentStatus.requires_payment_method
+    requires_confirmation = IntentStatus.requires_confirmation
+    requires_action = IntentStatus.requires_action
+    processing = IntentStatus.processing
+    canceled = IntentStatus.canceled
     succeeded = _(
         "Setup was successful and the payment method is optimized for future payments."
     )

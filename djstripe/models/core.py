@@ -1380,14 +1380,17 @@ class PaymentIntent(StripeModel):
     # application_fee_amount
     canceled_at = models.DateTimeField(
         null=True,
+        blank=True,
         default=None,
         help_text=(
             "Populated when status is canceled, this is the time at which the "
             "PaymentIntent was canceled. Measured in seconds since the Unix epoch."
         ),
     )
+    # TODO - this should probably be either a nullable Enum or a non-nullable Charfield
     cancellation_reason = models.CharField(
         max_length=255,
+        blank=True,
         null=True,
         help_text=(
             "User-given reason for cancellation of this PaymentIntent, "
@@ -1426,20 +1429,25 @@ class PaymentIntent(StripeModel):
         ),
     )
     last_payment_error = JSONField(
+        null=True,
+        blank=True,
         help_text=(
             "The payment error encountered in the previous PaymentIntent confirmation."
-        )
+        ),
     )
     next_action = JSONField(
+        null=True,
+        blank=True,
         help_text=(
             "If present, this property tells you what actions you need to take "
             "in order for your customer to fulfill a payment using the provided source."
-        )
+        ),
     )
     on_behalf_of = models.ForeignKey(
         "Account",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
         help_text="The account (if any) for which the funds of the "
         "PaymentIntent are intended.",
     )
@@ -1447,6 +1455,7 @@ class PaymentIntent(StripeModel):
         "PaymentMethod",
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
         help_text="Payment method used in this PaymentIntent.",
     )
     payment_method_types = JSONField(
@@ -1456,6 +1465,8 @@ class PaymentIntent(StripeModel):
         )
     )
     receipt_email = models.CharField(
+        null=True,
+        blank=True,
         max_length=255,
         help_text=(
             "Email address that the receipt for the resulting payment will be sent to."
@@ -1464,6 +1475,8 @@ class PaymentIntent(StripeModel):
     # TODO: Add `review` field after we add Review model.
     setup_future_usage = StripeEnumField(
         enum=enums.IntentUsage,
+        null=True,
+        blank=True,
         help_text=(
             "Indicates that you intend to make future payments with this "
             "PaymentIntent’s payment method. "
@@ -1512,6 +1525,7 @@ class PaymentIntent(StripeModel):
         ),
     )
     transfer_group = models.CharField(
+        blank=True,
         max_length=255,
         help_text=(
             "A string that identifies the resulting payment as part of a group. "
@@ -1585,6 +1599,7 @@ class SetupIntent(StripeModel):
     cancellation_reason = models.CharField(
         max_length=255,
         null=True,
+        blank=True,
         help_text=(
             "Reason for cancellation of this SetupIntent, one of abandoned, "
             "requested_by_customer, or duplicate"
@@ -1602,6 +1617,7 @@ class SetupIntent(StripeModel):
     customer = models.ForeignKey(
         "Customer",
         null=True,
+        blank=True,
         on_delete=models.SET_NULL,
         help_text="Customer this SetupIntent belongs to, if one exists.",
     )
@@ -1622,12 +1638,14 @@ class SetupIntent(StripeModel):
         "Account",
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
         help_text="The account (if any) for which the setup is intended.",
     )
     payment_method = models.ForeignKey(
         "PaymentMethod",
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
         help_text="Payment method used in this PaymentIntent.",
     )
     payment_method_types = JSONField(
