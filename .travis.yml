@@ -38,6 +38,8 @@ install:
 
 before_script:
   - psql -U postgres -c 'CREATE DATABASE "djstripe";'
+  # load mysql timezones
+  - mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root mysql
 
 script:
   - tox
