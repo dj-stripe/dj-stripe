@@ -232,6 +232,8 @@ FAKE_BANK_ACCOUNT_II = {
     "status": "new",
 }
 
+FAKE_BANK_ACCOUNT_SOURCE = load_fixture("bank_account_ba_fakefakefakefakefake0003.json")
+
 
 class CardDict(dict):
     def delete(self):
@@ -748,6 +750,12 @@ FAKE_CUSTOMER_II = CustomerDict(load_fixture("customer_cus_4UbFSo9tl62jqj.json")
 
 # Customer with a Source (instead of Card) as default_source
 FAKE_CUSTOMER_III = CustomerDict(load_fixture("customer_cus_4QWKsZuuTHcs7X.json"))
+
+
+# Customer with a Bank Account as default_source
+FAKE_CUSTOMER_IV = CustomerDict(
+    load_fixture("customer_cus_example_with_bank_account.json")
+)
 
 
 FAKE_DISCOUNT_CUSTOMER = {

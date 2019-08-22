@@ -76,6 +76,8 @@ class BankAccount(StripeModel):
     account = models.ForeignKey(
         "Account",
         on_delete=models.PROTECT,
+        null=True,
+        blank=True,
         related_name="bank_account",
         help_text="The account the charge was made on behalf of. Null here indicates "
         "that this value was never set.",
@@ -121,6 +123,52 @@ class BankAccount(StripeModel):
         max_length=255, help_text="The routing transit number for the bank account."
     )
     status = StripeEnumField(enum=enums.BankAccountStatus)
+
+    stripe_class = stripe.BankAccount
+
+    @staticmethod
+    def _get_customer_from_kwargs(**kwargs):
+        if "customer" not in kwargs or not isinstance(kwargs["customer"], Customer):
+            raise StripeObjectManipulationException(
+                "Bank Accounts must be manipulated through a Customer. "
+                "Pass a Customer object into this call."
+            )
+
+        customer = kwargs["customer"]
+        del kwargs["customer"]
+
+        return customer, kwargs
+
+    @classmethod
+    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        # OVERRIDING the parent version of this function
+        # Bank Account must be manipulated through a customer or account.
+        # TODO: When managed accounts are supported, this method needs to
+        #     check if either a customer or account is supplied to determine
+        #     the correct object to use.
+
+        customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
+
+        return customer.api_retrieve().sources.create(api_key=api_key, **clean_kwargs)
+
+    @classmethod
+    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        # OVERRIDING the parent version of this function
+        # Bank Accounts must be manipulated through a customer or account.
+        # TODO: When managed accounts are supported, this method needs to
+        #     check if either a customer or account is supplied to determine
+        #     the correct object to use.
+
+        customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
+
+        return (
+            customer.api_retrieve(api_key=api_key)
+            .sources.list(object="bank_account", **clean_kwargs)
+            .auto_paging_iter()
+        )
+
+    def get_stripe_dashboard_url(self):
+        return self.customer.get_stripe_dashboard_url()
 
 
 class Card(StripeModel):
