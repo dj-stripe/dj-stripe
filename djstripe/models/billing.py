@@ -877,15 +877,6 @@ class Plan(StripeModel):
         ordering = ["amount"]
 
     @classmethod
-    def get_or_create(cls, **kwargs):
-        """ Get or create a Plan."""
-
-        try:
-            return Plan.objects.get(id=kwargs["id"]), False
-        except Plan.DoesNotExist:
-            return cls.create(**kwargs), True
-
-    @classmethod
     def create(cls, **kwargs):
         # A few minor things are changed in the api-version of the create call
         api_kwargs = dict(kwargs)
