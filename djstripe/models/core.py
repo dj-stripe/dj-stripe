@@ -1427,7 +1427,7 @@ class Product(StripeModel):
 		""" Get or create a Product."""
 
 		try:
-			return Product.objects.get(stripe_id=kwargs['id']), False
+			return Product.objects.get(id=kwargs['id']), False
 		except Product.DoesNotExist:
 			return cls.create(**kwargs), True
 
