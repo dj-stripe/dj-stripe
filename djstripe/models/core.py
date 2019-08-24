@@ -1422,26 +1422,6 @@ class Product(StripeModel):
 	)
 	unit_label = models.CharField(max_length=12, default="", blank=True)
 
-	@classmethod
-	def get_or_create(cls, **kwargs):
-		""" Get or create a Product."""
-
-		try:
-			return Product.objects.get(id=kwargs['id']), False
-		except Product.DoesNotExist:
-			return cls.create(**kwargs), True
-
-	@classmethod
-	def create(cls, **kwargs):
-		# A few minor things are changed in the api-version of the create call
-		api_kwargs = dict(kwargs)
-
-		stripe_plan = cls._api_create(**api_kwargs)
-
-		product = cls.sync_from_stripe_data(stripe_plan)
-
-		return product
-
 	def __str__(self):
 		return self.name
 

@@ -371,6 +371,24 @@ class StripeModel(models.Model):
 		return instance
 
 	@classmethod
+	def get_or_create(cls, **kwargs):
+		""" Get or create an object of this class."""
+
+		try:
+			return cls.objects.get(id=kwargs['id']), False
+		except Product.DoesNotExist:
+			return cls.create(**kwargs), True
+
+	@classmethod
+	def create(cls, **kwargs):
+		api_kwargs = dict(kwargs)
+
+		stripe_plan = cls._api_create(**api_kwargs)
+		object = cls.sync_from_stripe_data(stripe_plan)
+
+		return object
+
+	@classmethod
 	def _get_or_create_from_stripe_object(
 		cls,
 		data,
