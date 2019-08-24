@@ -20,6 +20,7 @@ Contents
    :caption: Getting Started
 
    installation
+   api_versions
 
 .. toctree::
    :caption: Usage
@@ -55,6 +56,7 @@ Contents
    project/authors.rst
    project/history.rst
    project/support.rst
+   project/release_process.rst
 
 Constraints
 ------------

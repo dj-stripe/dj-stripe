@@ -1,20 +1,15 @@
 """
-.. module:: djstripe.exceptions.
-
-   :synopsis: dj-stripe Exceptions.
-
-.. moduleauthor:: @kavdev
-
+dj-stripe Exceptions.
 """
 
 
 class MultipleSubscriptionException(Exception):
-    """Raised when a Customer has multiple Subscriptions and only one is expected."""
+	"""Raised when a Customer has multiple Subscriptions and only one is expected."""
 
-    pass
+	pass
 
 
 class StripeObjectManipulationException(Exception):
-    """Raised when an attempt to manipulate a non-standalone stripe object is made not through its parent object."""
+	"""Raised when an attempt to manipulate a non-standalone stripe object is made not through its parent object."""
 
-    pass
+	pass

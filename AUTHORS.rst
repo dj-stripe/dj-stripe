@@ -8,6 +8,7 @@ Development Lead
 * Daniel Greenfeld <pydanny@gmail.com>
 * Jerome Leclanche (@jleclanche)
 * Lee Skillen (@lskillen)
+* John Carter (@therefromhere)
 
 Contributors
 ------------

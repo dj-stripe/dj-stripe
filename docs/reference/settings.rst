@@ -2,7 +2,9 @@
 Settings
 ========
 
-STRIPE_API_VERSION (='2017-02-14')
+.. _setting_stripe_api_version:
+
+STRIPE_API_VERSION (='2018-05-21')
 ==================================
 
 The API version used to communicate with the Stripe API is configurable, and
@@ -23,6 +25,9 @@ small differences such as a new enumeration value might cause issues.
 For this reason it is best to assume that only the default version is supported.
 
 For more information on API versioning, see the `stripe documentation`_.
+
+See also :doc:`../api_versions`.
+
 
 DJSTRIPE_IDEMPOTENCY_KEY_CALLBACK (=djstripe.settings._get_idempotency_key)
 ===========================================================================
@@ -207,6 +212,9 @@ If this is set to a non-empty value, webhook signatures will be verified.
 `Learn more about webhook signature verification`_.
 
 .. _Learn more about webhook signature verification: https://stripe.com/docs/webhooks/signatures
+
+DJSTRIPE_WEBHOOK_VALIDATION= (="verify_signature")
+==================================================
 
 This setting controls which type of validation is done on webhooks.
 Value can be ``"verify_signature"`` for signature verification (recommended

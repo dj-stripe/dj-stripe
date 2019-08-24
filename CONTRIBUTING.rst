@@ -54,16 +54,6 @@ If you are proposing a feature:
 * Keep the scope as narrow as possible, to make it easier to implement.
 * Remember that this is a volunteer-driven project, and that contributions are welcome :)
 
-New Modules
------------
-
-As with Django we're aiming for future compatibility with Python 3.x.  Please ensure that any
-new modules use the following future import statement:
-
-```
-from __future__ import absolute_import, division, print_function, unicode_literals
-```
-
 Get Started!
 ------------
 
@@ -91,7 +81,7 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
    Now you can make your changes locally.
 
 6. When you're done making changes, check that your changes pass the tests, including
-   testing other Python versions with tox. runtests will output both command line and
+   testing other Python versions with tox. pytest will output both command line and
    html coverage statistics and will warn you if your changes caused code coverage to drop.
    Note that if your system time is not in UTC, some tests will fail. If you want to ignore
    those tests, the --skip-utc command line option is available on runtests.py.::
@@ -101,7 +91,7 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
 
 7. If your changes altered the models you may need to generate Django migrations::
 
-    $ python makemigrations.py
+    $ DJSTRIPE_TEST_DB_VENDOR=sqlite ./manage.py makemigrations
 
 8. Commit your changes and push your branch to GitHub::
 
@@ -113,6 +103,32 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
 
 10. Congratulations, you're now a dj-stripe contributor!  Have some <3 from us.
 
+Django Migration Policy
+-----------------------
+
+Migrations are considered a breaking change, so it's not usually not acceptable to add a migration to a stable branch,
+it will be a new ``MAJOR.MINOR.0`` release.
+
+A workaround to this in the case that the Stripe API data isn't compatible with out model (eg Stripe is sending ``null`` to a non-null field)
+is to implement the ``_manipulate_stripe_object_hook`` classmethod on the model.
+
+Avoid new migrations with non-schema changes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+If a code change produces a migration that doesn't alter the database schema (eg changing ``help_text``) then instead of
+adding a new migration you can edit the most recent migration that affects the field in question.
+
+e.g.: https://github.com/dj-stripe/dj-stripe/commit/e2762c38918a90f00c42ecf21187a920bd3a2087
+
+Squash of unreleased migrations on master
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+We aim to keep the number of migration files per release to a minimum per ``MINOR`` release.
+
+In the case where there are several unreleased migrations on master between releases, we squash migrations immediately before release.
+
+So if you're using the master branch with unreleased migrations, ensure you migrate with the squashed migration before upgrading to the next major release.
+
+For more details see the :ref:`squash_migrations` section of the Release process.
+
 Pull Request Guidelines
 -----------------------
 
@@ -122,7 +138,10 @@ Before you submit a pull request, check that it meets these guidelines:
 2. The pull request must not drop code coverage below the current level.
 3. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring.
-4. If the pull request makes changes to a model, include Django migrations (Django 1.7+).
-5. The pull request should work for Python 2.7, 3.4, 3.5 and 3.6. Check
+4. If the pull request makes changes to a model, include Django migrations.
+5. The pull request should work for Python 3.6+. Check
    https://travis-ci.org/dj-stripe/dj-stripe/pull_requests
    and make sure that the tests pass for all supported Python versions.
+6. Code formatting: Make sure to install ``tan`` and ``isort`` with
+   ``pip install tan isort`` and run ``tan --use-tabs .; isort -y``
+   at the dj-stripe root to keep a consistent style.

@@ -3,11 +3,48 @@
 History
 =======
 
-1.3.0 (unreleased)
+2.0.3 (2019-06-11)
+------------------
+
+This is a bugfix-only version:
+
+- In ``_get_or_create_from_stripe_object``, wrap create ``_create_from_stripe_object`` in transaction,
+  fixes ``TransactionManagementError`` on race condition in webhook processing (#877/#903).
+
+2.0.2 (2019-06-09)
+------------------
+
+This is a bugfix-only version:
+
+- Don't save event objects if the webhook processing fails (#832).
+- Fixed IntegrityError when ``REMOTE_ADDR`` is an empty string.
+- Deprecated ``field_name`` parameter to ``sync_from_stripe_data``
+
+2.0.1 (2019-04-29)
+------------------
+
+This is a bugfix-only version:
+
+- Fixed an error on ``invoiceitem.updated`` (#848).
+- Handle test webhook properly in recent versions of Stripe API (#779).
+  At some point 2018 Stripe silently changed the ID used for test events and
+  ``evt_00000000000000`` is not used anymore.
+- Fixed OperationalError seen in migration 0003 on postgres (#850).
+- Fixed issue with migration 0003 not being unapplied correctly (#882).
+- Fixup missing ``SubscriptionItem.quantity`` on Plans with ``usage_type="metered"`` (#865).
+- Fixed ``Plan.create()`` (#870).
+
+2.0.0 (2019-03-01)
 ------------------
 
 - The Python stripe library minimum version is now ``2.3.0``.
+- ``PaymentMethod`` has been renamed to ``DjstripePaymentMethod`` (#841).
+  An alias remains but will be removed in the next version.
+- Dropped support for Django < 2.0, Python < 3.4.
+- Dropped previously-deprecated ``stripe_objects`` module.
+- Dropped previously-deprecated ``stripe_timestamp`` field.
 - Dropped previously-deprecated ``Charge.receipt_number`` field.
+- Dropped previously-deprecated ``StripeSource`` alias for ``Card``
 - Dropped previously-deprecated ``SubscriptionView``,
   ``CancelSubscriptionView`` and ``CancelSubscriptionForm``.
 - Removed the default value from ``DJSTRIPE_SUBSCRIPTION_REDIRECT``.
@@ -52,6 +89,45 @@ History
   None or an empty string now also disables the behaviour altogether.
 - Text-type fields in dj-stripe will no longer ever be None. Instead, any falsy
   text field will return an empty string.
+- Switched test runner to pytest-django
+- ``StripeModel.sync_from_stripe_data()`` will now automatically retrieve related objects
+  and populate foreign keys (#681)
+- Added ``Coupon.name``
+- Added ``Transfer.balance_transaction``
+- Exceptions in webhooks are now re-raised as well as saved in the database (#833)
+
+
+1.2.4 (2019-02-27)
+------------------
+
+This is a bugfix-only version:
+
+- Allow billing_cycle_anchor argument when creating a subscription (#814)
+- Fixup plan amount null with tier plans (#781)
+- Update Cancel subscription view tests to match backport in f64af57
+- Implement Invoice._manipulate_stripe_object_hook for compatability with API 2018-11-08 (#771)
+- Fix product webhook for type="good" (#724)
+- Add trial_from_plan, trial_period_days args to Customer.subscribe() (#709)
+
+
+1.2.3 (2018-10-13)
+------------------
+
+This is a bugfix-only version:
+
+- Updated Subscription.cancel() for compatibility with Stripe 2018-08-23 (#723)
+
+
+1.2.2 (2018-08-11)
+------------------
+
+This is a bugfix-only version:
+
+- Fixed an error with request.urlconf in some setups (#562)
+- Always save text-type fields as empty strings in db instead of null (#713)
+- Fix support for DJSTRIPE_SUBSCRIBER_MODEL_MIGRATION_DEPENDENCY (#707)
+- Fix reactivate() with Stripe API 2018-02-28 and above
+
 
 1.2.1 (2018-07-18)
 ------------------
@@ -75,7 +151,6 @@ You must upgrade to 1.1.0 first.**
 
 Please read the 1.1.0 release notes below for more information.
 
-
 1.1.0 (2018-06-11)
 ------------------
 
@@ -86,11 +161,8 @@ make changes in order to upgrade. Please read the full changelog below.
 If you are having trouble upgrading, you may ask for help `by filing an
 issue on GitHub`_.
 
-Upgrade notes
--------------
-
 Migration reset
-~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^
 
 The next version of dj-stripe, **1.2.0**, will reset all the migrations
 to ``0001_initial``. Migrations are currently in an unmaintainable
@@ -101,19 +173,19 @@ dj-stripe 1.2.0. You must go through 1.1.0 first, run
 ``manage.py migrate djstripe``, then upgrade to 1.2.0.**
 
 Python 2.7 end-of-life
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^
 
 dj-stripe 1.1.0 drops support for Django 1.10 and adds support for
 Django 2.0. Django 1.11+ and Python 2.7+ or 3.4+ are required.
 
 Support for Python versions older than 3.5, and Django versions older
-than 2.0, will be dropped in dj-stripe 1.3.0.
+than 2.0, will be dropped in dj-stripe 2.0.0.
 
 Backwards-incompatible changes and deprecations
------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Removal of polymorphic models
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""""""""""""""""""""""""""""
 
 The model architecture of dj-stripe has been simplified. Polymorphic
 models have been dropped and the old base StripeCustomer, StripeCharge,
@@ -122,18 +194,20 @@ Customer, Charge, Invoice, etc models.
 
 Importing those legacy models from ``djstripe.stripe_objects`` will
 yield the new ones. This is deprecated and support for this will be
-dropped in dj-stripe 1.3.0.
+dropped in dj-stripe 2.0.0.
 
 Full support for Stripe Sources (Support for v3 stripe.js)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Stripe sources (``src_XXXX``) are objects that can arbitrarily reference
 any of the payment method types that Stripe supports. However, the
 legacy ``Card`` object (with object IDs like ``card_XXXX`` or
 ``cc_XXXX``) is not a Source object, and cannot be turned into a Source
-object at this time. In order to support both Card and Source objects in
-ForeignKeys, a new model ``PaymentMethod`` has been devised. That model
-can resolve into a Card, a Source, or a BankAccount object.
+object at this time.
+
+In order to support both Card and Source objects in ForeignKeys,
+a new model ``PaymentMethod`` has been devised (renamed to ``DjstripePaymentMethod``
+in 2.0). That model can resolve into a Card, a Source, or a BankAccount object.
 
 -  **The ``default_source`` attribute on ``Customer`` now refers to a
    ``PaymentMethod`` object**. You will need to call ``.resolve()`` on
@@ -141,19 +215,19 @@ can resolve into a Card, a Source, or a BankAccount object.
 -  References to ``Customer.sources`` expecting a queryset of Card
    objects should be updated to ``Customer.legacy_cards``.
 -  The legacy ``StripeSource`` name refers to the ``Card`` model. This
-   will be removed in dj-stripe 1.3.0. Update your references to either
+   will be removed in dj-stripe 2.0.0. Update your references to either
    ``Card`` or ``Source``.
 -  ``enums.SourceType`` has been renamed to ``enums.LegacySourceType``.
    ``enums.SourceType`` now refers to the actual Stripe Source types
    enum.
 
 Core fields renamed
-~~~~~~~~~~~~~~~~~~~
+"""""""""""""""""""
 
 -  The numeric ``id`` field has been renamed to ``djstripe_id``. This
    avoids a clash with the upstream stripe id. Accessing ``.id`` is
    deprecated and \**will reference the upstream ``stripe_id`` in
-   dj-stripe 1.3.0
+   dj-stripe 2.0.0
 
 .. _by filing an issue on GitHub: https://github.com/dj-stripe/dj-stripe/issues
 
@@ -436,10 +510,11 @@ be and delete them after the migration).
 BIG HUGE NOTE - DON'T OVERLOOK THIS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Subscription and InvoiceItem migration is not possible because old records don't have Stripe IDs (so we can't sync them). Our approach is to delete all local subscription and invoiceitem objects and re-sync them from Stripe.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-We 100% recommend you create a backup of your database before performing this upgrade.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. warning::
+	Subscription and InvoiceItem migration is not possible because old records don't have Stripe IDs (so we can't sync them). Our approach is to delete all local subscription and invoiceitem objects and re-sync them from Stripe.
+
+	We 100% recommend you create a backup of your database before performing this upgrade.
+
 
 Other changes
 ^^^^^^^^^^^^^

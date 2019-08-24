@@ -1,10 +1,13 @@
-=========
 dj-stripe
 =========
 
 .. image:: https://travis-ci.org/dj-stripe/dj-stripe.png
    :alt: Build Status
    :target: https://travis-ci.org/dj-stripe/dj-stripe
+
+.. image:: https://readthedocs.org/projects/dj-stripe/badge/
+   :alt: Documentation Status
+   :target: https://dj-stripe.readthedocs.io/
 
 Stripe Models for Django.
 
@@ -25,7 +28,7 @@ Features
 * Individual charges
 * Stripe Sources
 * Stripe v2 and v3 support
-* Supports Stripe API `2018-05-21`
+* Tested with Stripe API `2019-02-19` (see https://dj-stripe.readthedocs.io/en/latest/api_versions.html )
 
 Requirements
 ------------
@@ -33,6 +36,8 @@ Requirements
 * Django >= 2.0
 * Python >= 3.4
 * Supports Stripe exclusively. For PayPal, see `dj-paypal <https://github.com/HearthSim/dj-paypal>`_ instead.
+* PostgreSQL engine (recommended): >= 9.4
+* MySQL engine: MariaDB >= 10.2 or MySQL >= 5.7
 
 
 Quickstart
@@ -54,6 +59,8 @@ Add ``djstripe`` to your ``INSTALLED_APPS``:
         ...
     )
 
+Tell Stripe about the webhook (Stripe webhook docs can be found `here <https://stripe.com/docs/webhooks>`_) using the full URL of your endpoint from the urls.py step above (e.g. ``https://example.com/stripe/webhook``).
+
 Add your Stripe keys and set the operating mode:
 
 .. code-block:: python
@@ -63,6 +70,7 @@ Add your Stripe keys and set the operating mode:
     STRIPE_TEST_PUBLIC_KEY = os.environ.get("STRIPE_TEST_PUBLIC_KEY", "<your publishable key>")
     STRIPE_TEST_SECRET_KEY = os.environ.get("STRIPE_TEST_SECRET_KEY", "<your secret key>")
     STRIPE_LIVE_MODE = False  # Change to True in production
+    DJSTRIPE_WEBHOOK_SECRET = "whsec_xxx"  # Get it from the section in the Stripe dashboard where you added the webhook endpoint
 
 Add some payment plans via the Stripe.com dashboard.
 
@@ -71,8 +79,6 @@ Add to urls.py:
 .. code-block:: python
 
     path("stripe/", include("djstripe.urls", namespace="djstripe")),
-
-Then tell Stripe about the webhook (Stripe webhook docs can be found `here <https://stripe.com/docs/webhooks>`_) using the full URL of your endpoint from the urls.py step above (e.g. ``https://example.com/stripe/webhook``).
 
 Run the commands::
 
