@@ -1426,10 +1426,10 @@ class Product(StripeModel):
 	def get_or_create(cls, **kwargs):
 		""" Get or create a Product."""
 
-	try:
-		return Product.objects.get(stripe_id=kwargs['id']), False
-	except Product.DoesNotExist:
-		return cls.create(**kwargs), True
+		try:
+			return Product.objects.get(stripe_id=kwargs['id']), False
+		except Product.DoesNotExist:
+			return cls.create(**kwargs), True
 
 	@classmethod
 	def create(cls, **kwargs):
