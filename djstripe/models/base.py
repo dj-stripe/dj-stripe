@@ -376,7 +376,7 @@ class StripeModel(models.Model):
 
 		try:
 			return cls.objects.get(id=kwargs['id']), False
-		except Product.DoesNotExist:
+		except cls.DoesNotExist:
 			return cls.create(**kwargs), True
 
 	@classmethod
