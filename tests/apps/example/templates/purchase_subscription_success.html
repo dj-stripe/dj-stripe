@@ -1,0 +1,17 @@
+{% extends "example_base.html" %}
+
+{% block content %}
+
+<section class="section">
+    <div class="container">
+        Subscription "{{ subscription }}" created
+    </div>
+
+    <div class="container">
+        <a href="{% url " djstripe_example:purchase_subscription" %}" >
+        Back to purchase page
+        </a>
+    </div>
+</section>
+
+{% endblock %}}

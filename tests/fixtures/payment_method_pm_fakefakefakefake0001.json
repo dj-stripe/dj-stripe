@@ -1,0 +1,44 @@
+{
+    "id": "pm_fakefakefakefake0001",
+    "object": "payment_method",
+    "billing_details": {
+        "address": {
+            "city": null,
+            "country": null,
+            "line1": null,
+            "line2": null,
+            "postal_code": null,
+            "state": null
+        },
+        "email": null,
+        "name": null,
+        "phone": null
+    },
+    "card": {
+        "brand": "visa",
+        "checks": {
+            "address_line1_check": null,
+            "address_postal_code_check": null,
+            "cvc_check": null
+        },
+        "country": "US",
+        "exp_month": 8,
+        "exp_year": 2020,
+        "fingerprint": "WJTDnAWuKKdbSagG",
+        "funding": "credit",
+        "generated_from": null,
+        "last4": "4242",
+        "three_d_secure_usage": {
+            "supported": true
+        },
+        "wallet": null
+    },
+    "created": 123456789,
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "livemode": false,
+    "metadata": {
+        "order_id": "123456789",
+        "djstripe_test_fake_id": "pm_fakefakefakefake0001"
+    },
+    "type": "card"
+}

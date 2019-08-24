@@ -28,13 +28,13 @@ Features
 * Individual charges
 * Stripe Sources
 * Stripe v2 and v3 support
-* Tested with Stripe API `2019-02-19` (see https://dj-stripe.readthedocs.io/en/latest/api_versions.html )
+* Tested with Stripe API `2019-05-16` (see https://dj-stripe.readthedocs.io/en/latest/api_versions.html )
 
 Requirements
 ------------
 
-* Django >= 2.0
-* Python >= 3.4
+* Django >= 2.1
+* Python >= 3.5
 * Supports Stripe exclusively. For PayPal, see `dj-paypal <https://github.com/HearthSim/dj-paypal>`_ instead.
 * PostgreSQL engine (recommended): >= 9.4
 * MySQL engine: MariaDB >= 10.2 or MySQL >= 5.7

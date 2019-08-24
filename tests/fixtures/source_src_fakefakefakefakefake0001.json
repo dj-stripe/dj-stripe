@@ -1,0 +1,44 @@
+{
+    "id": "src_fakefakefakefakefake0001",
+    "object": "source",
+    "amount": null,
+    "card": {
+        "exp_month": 6,
+        "exp_year": 2020,
+        "last4": "4242",
+        "country": "US",
+        "brand": "Visa",
+        "funding": "credit",
+        "fingerprint": "88PuXw9tEmvYe69o",
+        "three_d_secure": "optional",
+        "name": null,
+        "address_line1_check": null,
+        "address_zip_check": null,
+        "cvc_check": null,
+        "tokenization_method": null,
+        "dynamic_last4": null
+    },
+    "client_secret": "src_client_secret_F4oXYTWIpC9GV8qeLoVS9Wqk",
+    "created": 1557995173,
+    "currency": null,
+    "customer": "cus_4QWKsZuuTHcs7X",
+    "flow": "none",
+    "livemode": false,
+    "metadata": {
+        "djstripe_test_fake_id": "src_fakefakefakefakefake0001"
+    },
+    "owner": {
+        "address": null,
+        "email": null,
+        "name": null,
+        "phone": null,
+        "verified_address": null,
+        "verified_email": null,
+        "verified_name": null,
+        "verified_phone": null
+    },
+    "statement_descriptor": null,
+    "status": "chargeable",
+    "type": "card",
+    "usage": "reusable"
+}

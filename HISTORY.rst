@@ -3,6 +3,64 @@
 History
 =======
 
+2.1.0 (unreleased)
+------------------
+
+- Dropped Django 2.0 support
+- The Python stripe library minimum version is now ``2.32.0``.
+- Dropped previously-deprecated ``Charge.fee_details`` property.
+- Dropped previously-deprecated ``Transfer.fee_details`` property.
+- Dropped previously-deprecated ``field_name`` parameter to ``sync_from_stripe_data``
+- Dropped previously-deprecated alias ``StripeObject`` of ``StripeModel``
+- Dropped previously-deprecated alias ``PaymentMethod`` of ``DjstripePaymentMethod``
+- Dropped previously-deprecated properties ``Charge.source_type`` and ``Charge.source_stripe_id``
+- ``enums.PaymentMethodType`` has been deprecated, use ``enums.DjstripePaymentMethodType``
+- Made ``SubscriptionItem.quantity`` nullable as per Plans with ``usage_type="metered"`` (follow-up to #865)
+- Added manage command ``djstripe_sync_models`` (#727, #89)
+- Fixed issue with re-creating a customer after `Customer.purge()` (#916)
+- New models
+    - Payment Intent
+    - Setup Intent
+    - Payment Method
+    - Session
+- Added fields to ``Customer`` model: ``address``, ``invoice_prefix``, ``invoice_settings``, 
+  ``phone``, ``preferred_locales``, ``tax_exempt``
+
+Changes from API 2018-11-08:
+
+- Added ``Invoice.auto_advance``, deprecated ``Invoice.closed`` and ``Invoice.forgiven``,
+  see https://stripe.com/docs/billing/invoices/migrating-new-invoice-states#autoadvance
+
+Changes from API 2019-02-19:
+
+- Major changes to Account fields, see https://stripe.com/docs/upgrades#2019-02-19 , updated Account fields to match API 2019-02-19:
+- Added ``Account.business_profile``, ``.business_type``, ``.company``, ``.individual``, ``.requirements``, ``.settings``
+- Deprecated the existing fields, to be removed in 2.2
+
+- Special handling of the icon and logo fields:
+
+    - Renamed ``Account.business_logo`` to ``Account.branding_icon``
+      (note that in Stripe's API ``Account.business_logo`` was renamed to ``Account.settings.branding_icon``,
+      and ``Account.business_logo_large`` (which we didn't have a field for) was renamed to ``Account.settings.branding_logo``)
+    - Added deprecated property for ``Account.business_logo``
+    - Added ``Account.branding_logo`` as a ForeignKey
+    - Populate ``Account.branding_icon`` and ``.branding_logo`` from the new ``Account.settings.branding.icon`` and ``.logo``
+
+Changes from API 2019-03-14:
+
+- Renamed ``Invoice.application_fee`` to ``Invoice.application_fee_amount`` (added deprecated property for the old name)
+- Removed ``Invoice.date``, in place of ``Invoice.created`` (added deprecated property for the old name)
+- Added ``Invoice.status_transitions``
+- Renamed ``Customer.account_balance`` to ``Customer.balance`` (added deprecated property for the old name)
+- Renamed ``Customer.payment_methods`` to ``Customer.customer_payment_methods``
+
+2.0.4 (unreleased)
+------------------
+
+This is a bugfix-only version:
+
+- Fixed irreversible migration (#909)
+
 2.0.3 (2019-06-11)
 ------------------
 
@@ -511,9 +569,9 @@ BIG HUGE NOTE - DON'T OVERLOOK THIS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. warning::
-	Subscription and InvoiceItem migration is not possible because old records don't have Stripe IDs (so we can't sync them). Our approach is to delete all local subscription and invoiceitem objects and re-sync them from Stripe.
+    Subscription and InvoiceItem migration is not possible because old records don't have Stripe IDs (so we can't sync them). Our approach is to delete all local subscription and invoiceitem objects and re-sync them from Stripe.
 
-	We 100% recommend you create a backup of your database before performing this upgrade.
+    We 100% recommend you create a backup of your database before performing this upgrade.
 
 
 Other changes

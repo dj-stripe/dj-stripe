@@ -1,0 +1,24 @@
+{
+    "id": "txn_fake_ch_fakefakefakefakefake0001",
+    "object": "balance_transaction",
+    "amount": 2000,
+    "available_on": 1558569600,
+    "created": 1557995177,
+    "currency": "usd",
+    "description": "Payment for invoice 3D77FB04-0001",
+    "exchange_rate": null,
+    "fee": 88,
+    "fee_details": [
+        {
+            "amount": 88,
+            "application": null,
+            "currency": "usd",
+            "description": "Stripe processing fees",
+            "type": "stripe_fee"
+        }
+    ],
+    "net": 1912,
+    "source": "ch_fakefakefakefakefake0001",
+    "status": "pending",
+    "type": "charge"
+}
