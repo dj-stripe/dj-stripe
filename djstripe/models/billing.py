@@ -113,7 +113,6 @@ class Coupon(StripeModel):
 
         return plan
 
-
     @property
     def human_readable_amount(self):
         if self.percent_off:
