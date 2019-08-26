@@ -204,6 +204,16 @@ FAKE_BALANCE_TRANSACTION_IV = {
     "type": "charge",
 }
 
+
+class LegacySourceDict(dict):
+    def delete(self):
+        return self
+
+
+class BankAccountDict(LegacySourceDict):
+    pass
+
+
 FAKE_BANK_ACCOUNT = {
     "id": "ba_16hTzo2eZvKYlo2CeSjfb0tS",
     "object": "bank_account",
@@ -232,12 +242,13 @@ FAKE_BANK_ACCOUNT_II = {
     "status": "new",
 }
 
-FAKE_BANK_ACCOUNT_SOURCE = load_fixture("bank_account_ba_fakefakefakefakefake0003.json")
+FAKE_BANK_ACCOUNT_SOURCE = BankAccountDict(
+    load_fixture("bank_account_ba_fakefakefakefakefake0003.json")
+)
 
 
-class CardDict(dict):
-    def delete(self):
-        return self
+class CardDict(LegacySourceDict):
+    pass
 
 
 FAKE_CARD = CardDict(load_fixture("card_card_fakefakefakefakefake0001.json"))
@@ -717,7 +728,30 @@ class Sources(object):
         return StripeList(data=self.card_fakes)
 
 
+def convert_source_dict(data):
+    if data:
+        source_type = data["object"]
+        if source_type == "card":
+            data = CardDict(data)
+        elif source_type == "bank_account":
+            data = BankAccountDict(data)
+        elif source_type == "source":
+            data = SourceDict(data)
+        else:
+            raise ValueError("Unknown source type: {}".format(source_type))
+
+    return data
+
+
 class CustomerDict(dict):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self["default_source"] = convert_source_dict(self["default_source"])
+
+        for n, d in enumerate(self["sources"].get("data", [])):
+            self["sources"]["data"][n] = convert_source_dict(d)
+
     def save(self, idempotency_key=None):
         return self
 
@@ -738,11 +772,6 @@ class CustomerDict(dict):
 
 
 FAKE_CUSTOMER = CustomerDict(load_fixture("customer_cus_6lsBvm5rJ0zyHc.json"))
-if FAKE_CUSTOMER["default_source"]:
-    FAKE_CUSTOMER["default_source"] = CardDict(FAKE_CUSTOMER["default_source"])
-
-for n, d in enumerate(FAKE_CUSTOMER["sources"].get("data", [])):
-    FAKE_CUSTOMER["sources"]["data"][n] = CardDict(d)
 
 
 FAKE_CUSTOMER_II = CustomerDict(load_fixture("customer_cus_4UbFSo9tl62jqj.json"))

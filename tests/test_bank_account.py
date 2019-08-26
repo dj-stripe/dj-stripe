@@ -34,7 +34,7 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
 
     def test_api_call_no_customer(self):
         exception_message = (
-            "Bank Accounts must be manipulated through a Customer. "
+            "BankAccounts must be manipulated through a Customer. "
             "Pass a Customer object into this call."
         )
 
@@ -50,7 +50,7 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
 
     def test_api_call_bad_customer(self):
         exception_message = (
-            "Bank Accounts must be manipulated through a Customer. "
+            "BankAccounts must be manipulated through a Customer. "
             "Pass a Customer object into this call."
         )
 
@@ -63,6 +63,66 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
             StripeObjectManipulationException, exception_message
         ):
             BankAccount.api_list(customer="fish")
+
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER_IV),
+        autospec=True,
+    )
+    def test_api_create(self, customer_retrieve_mock):
+        stripe_card = BankAccount._api_create(
+            customer=self.customer, source=FAKE_BANK_ACCOUNT_SOURCE["id"]
+        )
+
+        self.assertEqual(FAKE_BANK_ACCOUNT_SOURCE, stripe_card)
+
+    @patch("tests.BankAccountDict.delete", autospec=True)
+    @patch(
+        "stripe.BankAccount.retrieve",
+        return_value=deepcopy(FAKE_BANK_ACCOUNT_SOURCE),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER_IV),
+        autospec=True,
+    )
+    def test_remove(
+        self,
+        customer_retrieve_mock,
+        bank_account_retrieve_mock,
+        bank_account_delete_mock,
+    ):
+        stripe_bank_account = BankAccount._api_create(
+            customer=self.customer, source=FAKE_BANK_ACCOUNT_SOURCE["id"]
+        )
+        BankAccount.sync_from_stripe_data(stripe_bank_account)
+
+        self.assertEqual(1, self.customer.bank_account.count())
+
+        bank_account = self.customer.bank_account.all()[0]
+        bank_account.remove()
+
+        self.assertEqual(0, self.customer.bank_account.count())
+        self.assertTrue(bank_account_delete_mock.called)
+
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER_IV),
+        autospec=True,
+    )
+    def test_remove_already_deleted_card(self, customer_retrieve_mock):
+        stripe_bank_account = BankAccount._api_create(
+            customer=self.customer, source=FAKE_BANK_ACCOUNT_SOURCE["id"]
+        )
+        BankAccount.sync_from_stripe_data(stripe_bank_account)
+
+        self.assertEqual(self.customer.bank_account.count(), 1)
+        bank_account_object = self.customer.bank_account.first()
+        BankAccount.objects.filter(id=stripe_bank_account["id"]).delete()
+        self.assertEqual(self.customer.bank_account.count(), 0)
+        bank_account_object.remove()
+        self.assertEqual(self.customer.bank_account.count(), 0)
 
     @patch(
         "stripe.Customer.retrieve",
