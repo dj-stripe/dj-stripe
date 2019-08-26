@@ -5,21 +5,30 @@ dj-stripe Bank Account Model Tests.
 from copy import deepcopy
 from unittest.mock import patch
 
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from djstripe.exceptions import StripeObjectManipulationException
-from djstripe.models import BankAccount, Customer
-
-from . import FAKE_BANK_ACCOUNT_SOURCE, FAKE_CUSTOMER_IV, AssertStripeFksMixin
+from djstripe.models import BankAccount
+from . import (
+    FAKE_BANK_ACCOUNT_SOURCE,
+    FAKE_CUSTOMER_IV,
+    AssertStripeFksMixin,
+    default_account,
+)
 
 
 class BankAccountTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
+        self.account = default_account()
+        self.user = get_user_model().objects.create_user(
+            username="testuser", email="djstripe@example.com"
+        )
         fake_empty_customer = deepcopy(FAKE_CUSTOMER_IV)
         fake_empty_customer["default_source"] = None
         fake_empty_customer["sources"] = []
 
-        self.customer = Customer.sync_from_stripe_data(fake_empty_customer)
+        self.customer = fake_empty_customer.create_for_user(self.user)
 
     def test_create_bank_account_finds_customer(self):
         bank_account = BankAccount.sync_from_stripe_data(
@@ -30,6 +39,15 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(
             bank_account.get_stripe_dashboard_url(),
             self.customer.get_stripe_dashboard_url(),
+        )
+
+        self.assert_fks(
+            bank_account,
+            expected_blank_fks={
+                "djstripe.BankAccount.account",
+                "djstripe.Customer.default_source",
+                "djstripe.Customer.coupon",
+            },
         )
 
     def test_api_call_no_customer(self):
@@ -70,11 +88,11 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     def test_api_create(self, customer_retrieve_mock):
-        stripe_card = BankAccount._api_create(
+        stripe_bank_account = BankAccount._api_create(
             customer=self.customer, source=FAKE_BANK_ACCOUNT_SOURCE["id"]
         )
 
-        self.assertEqual(FAKE_BANK_ACCOUNT_SOURCE, stripe_card)
+        self.assertEqual(FAKE_BANK_ACCOUNT_SOURCE, stripe_bank_account)
 
     @patch("tests.BankAccountDict.delete", autospec=True)
     @patch(

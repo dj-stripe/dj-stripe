@@ -27,9 +27,11 @@ class CardTest(AssertStripeFksMixin, TestCase):
         self.user = get_user_model().objects.create_user(
             username="testuser", email="djstripe@example.com"
         )
-        self.customer = FAKE_CUSTOMER.create_for_user(self.user)
-        self.customer.sources.all().delete()
-        self.customer.legacy_cards.all().delete()
+        fake_empty_customer = deepcopy(FAKE_CUSTOMER)
+        fake_empty_customer["default_source"] = None
+        fake_empty_customer["sources"] = []
+
+        self.customer = fake_empty_customer.create_for_user(self.user)
 
     def test_attach_objects_hook_without_customer(self):
         card = Card.sync_from_stripe_data(deepcopy(FAKE_CARD_III))
@@ -41,6 +43,15 @@ class CardTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(self.customer, card.customer)
         self.assertEqual(
             card.get_stripe_dashboard_url(), self.customer.get_stripe_dashboard_url()
+        )
+
+        self.assert_fks(
+            card,
+            expected_blank_fks={
+                "djstripe.BankAccount.account",
+                "djstripe.Customer.coupon",
+                "djstripe.Customer.default_source",
+            },
         )
 
     def test_str(self):
@@ -59,7 +70,13 @@ class CardTest(AssertStripeFksMixin, TestCase):
             str(card),
         )
 
-        self.assert_fks(card, expected_blank_fks={"djstripe.Customer.coupon"})
+        self.assert_fks(
+            card,
+            expected_blank_fks={
+                "djstripe.Customer.coupon",
+                "djstripe.Customer.default_source",
+            },
+        )
 
     @patch("stripe.Token.create", autospec=True)
     def test_card_create_token(self, token_create_mock):

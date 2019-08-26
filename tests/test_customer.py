@@ -256,6 +256,8 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             customer.default_source.id, fake_customer["default_source"]["id"]
         )
 
+        self.assert_fks(customer, expected_blank_fks={"djstripe.Customer.coupon"})
+
     @patch("stripe.Customer.create", autospec=True)
     def test_customer_sync_no_sources(self, customer_mock):
         fake_customer = deepcopy(FAKE_CUSTOMER)
