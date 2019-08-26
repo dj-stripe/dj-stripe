@@ -18,12 +18,13 @@ History
 - Made ``SubscriptionItem.quantity`` nullable as per Plans with ``usage_type="metered"`` (follow-up to #865)
 - Added manage command ``djstripe_sync_models`` (#727, #89)
 - Fixed issue with re-creating a customer after `Customer.purge()` (#916)
+- Fixed sync of Customer Bank Accounts (#829)
 - New models
     - Payment Intent
     - Setup Intent
     - Payment Method
     - Session
-- Added fields to ``Customer`` model: ``address``, ``invoice_prefix``, ``invoice_settings``, 
+- Added fields to ``Customer`` model: ``address``, ``invoice_prefix``, ``invoice_settings``,
   ``phone``, ``preferred_locales``, ``tax_exempt``
 
 Changes from API 2018-11-08:

@@ -72,10 +72,103 @@ class DjstripePaymentMethod(models.Model):
         return self.object_model.objects.get(id=self.id)
 
 
-class BankAccount(StripeModel):
+class LegacySourceMixin:
+    """
+    Mixin for functionality shared between the legacy Card & BankAccount sources
+    """
+
+    @classmethod
+    def _get_customer_from_kwargs(cls, **kwargs):
+        if "customer" not in kwargs or not isinstance(kwargs["customer"], Customer):
+            raise StripeObjectManipulationException(
+                "{}s must be manipulated through a Customer. "
+                "Pass a Customer object into this call.".format(cls.__name__)
+            )
+
+        customer = kwargs["customer"]
+        del kwargs["customer"]
+
+        return customer, kwargs
+
+    @classmethod
+    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        # OVERRIDING the parent version of this function
+        # Cards & Bank Accounts must be manipulated through a customer or account.
+        # TODO: When managed accounts are supported, this method needs to
+        #     check if either a customer or account is supplied to determine
+        #     the correct object to use.
+
+        customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
+
+        return customer.api_retrieve().sources.create(api_key=api_key, **clean_kwargs)
+
+    @classmethod
+    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        # OVERRIDING the parent version of this function
+        # Cards & Bank Accounts must be manipulated through a customer or account.
+        # TODO: When managed accounts are supported, this method needs to
+        #     check if either a customer or account is supplied to determine
+        #     the correct object to use.
+
+        customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
+
+        return (
+            customer.api_retrieve(api_key=api_key)
+            .sources.list(object=cls.stripe_class.OBJECT_NAME, **clean_kwargs)
+            .auto_paging_iter()
+        )
+
+    def get_stripe_dashboard_url(self):
+        return self.customer.get_stripe_dashboard_url()
+
+    def remove(self):
+        """
+        Removes a legacy source from this customer's account.
+        """
+
+        # First, wipe default source on all customers that use this card.
+        Customer.objects.filter(default_source=self.id).update(default_source=None)
+
+        try:
+            self._api_delete()
+        except InvalidRequestError as exc:
+            if "No such source:" in str(exc) or "No such customer:" in str(exc):
+                # The exception was thrown because the stripe customer or card
+                # was already deleted on the stripe side, ignore the exception
+                pass
+            else:
+                # The exception was raised for another reason, re-raise it
+                raise
+
+        self.delete()
+
+    def api_retrieve(self, api_key=None):
+        # OVERRIDING the parent version of this function
+        # Cards & Banks Accounts must be manipulated through a customer or account.
+        # TODO: When managed accounts are supported, this method needs to check if
+        # either a customer or account is supplied to determine the
+        # correct object to use.
+        api_key = api_key or self.default_api_key
+        customer = self.customer.api_retrieve(api_key=api_key)
+
+        # If the customer is deleted, the sources attribute will be absent.
+        # eg. {"id": "cus_XXXXXXXX", "deleted": True}
+        if "sources" not in customer:
+            # We fake a native stripe InvalidRequestError so that it's caught
+            # like an invalid ID error.
+            raise InvalidRequestError("No such source: %s" % (self.id), "id")
+
+        return customer.sources.retrieve(self.id, expand=self.expand_fields)
+
+
+class BankAccount(LegacySourceMixin, StripeModel):
+    stripe_class = stripe.BankAccount
+
     account = models.ForeignKey(
         "Account",
         on_delete=models.PROTECT,
+        null=True,
+        blank=True,
         related_name="bank_account",
         help_text="The account the charge was made on behalf of. Null here indicates "
         "that this value was never set.",
@@ -123,7 +216,7 @@ class BankAccount(StripeModel):
     status = StripeEnumField(enum=enums.BankAccountStatus)
 
 
-class Card(StripeModel):
+class Card(LegacySourceMixin, StripeModel):
     """
     You can store multiple cards on a customer in order to charge the customer later.
 
@@ -226,89 +319,6 @@ class Card(StripeModel):
         blank=True,
         help_text="If the card number is tokenized, this is the method that was used.",
     )
-
-    @staticmethod
-    def _get_customer_from_kwargs(**kwargs):
-        if "customer" not in kwargs or not isinstance(kwargs["customer"], Customer):
-            raise StripeObjectManipulationException(
-                "Cards must be manipulated through a Customer. "
-                "Pass a Customer object into this call."
-            )
-
-        customer = kwargs["customer"]
-        del kwargs["customer"]
-
-        return customer, kwargs
-
-    @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
-        # OVERRIDING the parent version of this function
-        # Cards must be manipulated through a customer or account.
-        # TODO: When managed accounts are supported, this method needs to
-        #     check if either a customer or account is supplied to determine
-        #     the correct object to use.
-
-        customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
-
-        return customer.api_retrieve().sources.create(api_key=api_key, **clean_kwargs)
-
-    @classmethod
-    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
-        # OVERRIDING the parent version of this function
-        # Cards must be manipulated through a customer or account.
-        # TODO: When managed accounts are supported, this method needs to
-        #     check if either a customer or account is supplied to determine
-        #     the correct object to use.
-
-        customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
-
-        return (
-            customer.api_retrieve(api_key=api_key)
-            .sources.list(object="card", **clean_kwargs)
-            .auto_paging_iter()
-        )
-
-    def get_stripe_dashboard_url(self):
-        return self.customer.get_stripe_dashboard_url()
-
-    def remove(self):
-        """
-        Removes a card from this customer's account.
-        """
-
-        # First, wipe default source on all customers that use this card.
-        Customer.objects.filter(default_source=self.id).update(default_source=None)
-
-        try:
-            self._api_delete()
-        except InvalidRequestError as exc:
-            if "No such source:" in str(exc) or "No such customer:" in str(exc):
-                # The exception was thrown because the stripe customer or card
-                # was already deleted on the stripe side, ignore the exception
-                pass
-            else:
-                # The exception was raised for another reason, re-raise it
-                raise
-
-        self.delete()
-
-    def api_retrieve(self, api_key=None):
-        # OVERRIDING the parent version of this function
-        # Cards must be manipulated through a customer or account.
-        # TODO: When managed accounts are supported, this method needs to check if
-        # either a customer or account is supplied to determine the
-        # correct object to use.
-        api_key = api_key or self.default_api_key
-        customer = self.customer.api_retrieve(api_key=api_key)
-
-        # If the customer is deleted, the sources attribute will be absent.
-        # eg. {"id": "cus_XXXXXXXX", "deleted": True}
-        if "sources" not in customer:
-            # We fake a native stripe InvalidRequestError so that it's caught
-            # like an invalid ID error.
-            raise InvalidRequestError("No such source: %s" % (self.id), "id")
-
-        return customer.sources.retrieve(self.id, expand=self.expand_fields)
 
     def str_parts(self):
         return [

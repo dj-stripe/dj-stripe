@@ -35,6 +35,7 @@ from . import (
     FAKE_CUSTOMER,
     FAKE_CUSTOMER_II,
     FAKE_CUSTOMER_III,
+    FAKE_CUSTOMER_IV,
     FAKE_DISCOUNT_CUSTOMER,
     FAKE_INVOICE,
     FAKE_INVOICE_III,
@@ -235,6 +236,27 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assertEqual(
             customer.default_source.id, fake_customer["default_source"]["id"]
         )
+
+    @patch(
+        "stripe.BankAccount.retrieve",
+        return_value=FAKE_CUSTOMER_IV["default_source"],
+        autospec=True,
+    )
+    def test_customer_sync_bank_account_source(self, bank_account_retrieve_mock):
+        fake_customer = deepcopy(FAKE_CUSTOMER_IV)
+        user = get_user_model().objects.create_user(
+            username="test_user_sync_bank_account_source"
+        )
+        customer = fake_customer.create_for_user(user)
+
+        self.assertEqual(customer.sources.count(), 0)
+        self.assertEqual(customer.legacy_cards.count(), 0)
+        self.assertEqual(customer.bank_account.count(), 1)
+        self.assertEqual(
+            customer.default_source.id, fake_customer["default_source"]["id"]
+        )
+
+        self.assert_fks(customer, expected_blank_fks={"djstripe.Customer.coupon"})
 
     @patch("stripe.Customer.create", autospec=True)
     def test_customer_sync_no_sources(self, customer_mock):
