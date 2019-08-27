@@ -414,9 +414,9 @@ class StripeModel(models.Model):
                 api_kwargs[k] = api_kwargs[k].id
 
         stripe_plan = cls._api_create(**api_kwargs)
-        object = cls.sync_from_stripe_data(stripe_plan)
+        obj = cls.sync_from_stripe_data(stripe_plan)
 
-        return object
+        return obj
 
     @classmethod
     def _get_or_create_from_stripe_object(
