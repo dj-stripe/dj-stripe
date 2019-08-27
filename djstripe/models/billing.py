@@ -889,20 +889,6 @@ class Plan(StripeModel):
     class Meta(object):
         ordering = ["amount"]
 
-    @classmethod
-    def create(cls, **kwargs):
-        # A few minor things are changed in the api-version of the create call
-        api_kwargs = dict(kwargs)
-        api_kwargs["amount"] = int(api_kwargs["amount"] * 100)
-
-        if isinstance(api_kwargs.get("product"), StripeModel):
-            api_kwargs["product"] = api_kwargs["product"].id
-
-        stripe_plan = cls._api_create(**api_kwargs)
-        plan = cls.sync_from_stripe_data(stripe_plan)
-
-        return plan
-
     def __str__(self):
         return self.name or self.nickname or self.id
 

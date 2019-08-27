@@ -393,6 +393,18 @@ class StripeModel(models.Model):
     def create(cls, **kwargs):
         api_kwargs = dict(kwargs)
 
+        amount_fields = [
+            "amount", "amount_capturable", "amount_due", "amount_off", "amount_paid", "amount_received",
+            "amount_refunded", "amount_remaining", "amount_reversed"
+        ]
+
+        for field in amount_fields:
+            if field in api_kwargs:
+                api_kwargs[field] = int(api_kwargs[field] * 100)
+
+        if isinstance(api_kwargs.get("product"), StripeModel):
+            api_kwargs["product"] = api_kwargs["product"].id
+
         stripe_plan = cls._api_create(**api_kwargs)
         object = cls.sync_from_stripe_data(stripe_plan)
 
