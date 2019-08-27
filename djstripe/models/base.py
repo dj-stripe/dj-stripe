@@ -394,8 +394,8 @@ class StripeModel(models.Model):
         api_kwargs = dict(kwargs)
 
         amount_fields = [
-            "amount", "amount_capturable", "amount_due", "amount_off", "amount_paid", "amount_received",
-            "amount_refunded", "amount_remaining", "amount_reversed"
+            "amount", "amount_capturable", "amount_due", "amount_off", "amount_paid",
+            "amount_received", "amount_refunded", "amount_remaining", "amount_reversed"
         ]
 
         for field in amount_fields:
