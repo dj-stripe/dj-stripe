@@ -385,7 +385,7 @@ class StripeModel(models.Model):
         """ Get or create an object of this class."""
 
         try:
-            return cls.objects.get(id=kwargs['id']), False
+            return cls.objects.get(id=kwargs["id"]), False
         except cls.DoesNotExist:
             return cls.create(**kwargs), True
 
@@ -394,8 +394,15 @@ class StripeModel(models.Model):
         api_kwargs = dict(kwargs)
 
         amount_fields = [
-            "amount", "amount_capturable", "amount_due", "amount_off", "amount_paid",
-            "amount_received", "amount_refunded", "amount_remaining", "amount_reversed"
+            "amount",
+            "amount_capturable",
+            "amount_due",
+            "amount_off",
+            "amount_paid",
+            "amount_received",
+            "amount_refunded",
+            "amount_remaining",
+            "amount_reversed",
         ]
 
         for field in amount_fields:
