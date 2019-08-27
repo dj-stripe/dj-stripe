@@ -402,8 +402,9 @@ class StripeModel(models.Model):
             if field in api_kwargs:
                 api_kwargs[field] = int(api_kwargs[field] * 100)
 
-        if isinstance(api_kwargs.get("product"), StripeModel):
-            api_kwargs["product"] = api_kwargs["product"].id
+        for k, v in api_kwargs.items():
+            if isinstance(v, StripeModel):
+                api_kwargs[k] = api_kwargs[k].id
 
         stripe_plan = cls._api_create(**api_kwargs)
         object = cls.sync_from_stripe_data(stripe_plan)
