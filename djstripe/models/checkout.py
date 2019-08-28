@@ -12,11 +12,11 @@ class Session(StripeModel):
     for one-time purchases or subscriptions through Checkout.
     """
 
-    stripe_class = stripe.PaymentIntent
+    stripe_class = stripe.checkout.Session
     stripe_dashboard_item_name = "sessions"
 
-    biling_address_collection = models.CharField(
-        max_length=255,
+    billing_address_collection = StripeEnumField(
+        enum=enums.SessionBillingAddressCollection,
         null=True,
         blank=True,
         help_text=(
@@ -70,6 +70,13 @@ class Session(StripeModel):
             "The IETF language tag of the locale Checkout is displayed in."
             "If blank or auto, the browser’s locale is used."
         ),
+    )
+    mode = StripeEnumField(
+        enum=enums.SessionMode,
+        null=True,
+        blank=True,
+        help_text="The mode of the Checkout Session, "
+        "one of payment, setup, or subscription.",
     )
     payment_intent = models.ForeignKey(
         "PaymentIntent",

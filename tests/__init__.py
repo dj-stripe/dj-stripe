@@ -387,6 +387,41 @@ FAKE_SETUP_INTENT_I = {
 }
 
 
+# TODO - add to regenerate_test_fixtures and replace this with a JSON fixture
+#  (will need to use a different payment_intent fixture)
+FAKE_SESSION_I = {
+    "id": "cs_test_OAgNmy75Td25OeREvKUs8XZ7SjMPO9qAplqHO1sBaEjOg9fYbaeMh2nA",
+    "object": "checkout.session",
+    "billing_address_collection": None,
+    "cancel_url": "https://example.com/cancel",
+    "client_reference_id": None,
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "customer_email": None,
+    "display_items": [
+        {
+            "amount": 1500,
+            "currency": "usd",
+            "custom": {
+                "description": "Comfortable cotton t-shirt",
+                "images": None,
+                "name": "T-shirt",
+            },
+            "quantity": 2,
+            "type": "custom",
+        }
+    ],
+    "livemode": False,
+    "locale": None,
+    "mode": None,
+    "payment_intent": FAKE_PAYMENT_INTENT_I["id"],
+    "payment_method_types": ["card"],
+    "setup_intent": None,
+    "submit_type": None,
+    "subscription": None,
+    "success_url": "https://example.com/success",
+}
+
+
 class ChargeDict(dict):
     def refund(self, amount=None, reason=None):
         self.update({"refunded": True, "amount_refunded": amount})
