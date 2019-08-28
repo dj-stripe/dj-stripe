@@ -10,6 +10,7 @@ from django.test import TestCase
 
 from djstripe.exceptions import StripeObjectManipulationException
 from djstripe.models import BankAccount
+
 from . import (
     FAKE_BANK_ACCOUNT_SOURCE,
     FAKE_CUSTOMER_IV,
