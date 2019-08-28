@@ -1365,7 +1365,7 @@ class PaymentIntent(StripeModel):
     """
 
     stripe_class = stripe.PaymentIntent
-    stripe_dashboard_item_name = "payment intents"
+    stripe_dashboard_item_name = "payments"
 
     amount = StripeQuantumCurrencyAmountField(
         help_text="Amount intended to be collected by this PaymentIntent."
@@ -1588,7 +1588,6 @@ class SetupIntent(StripeModel):
     """
 
     stripe_class = stripe.SetupIntent
-    stripe_dashboard_item_name = "setup intents"
 
     application = models.CharField(
         max_length=255,

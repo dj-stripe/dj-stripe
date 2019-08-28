@@ -13,7 +13,6 @@ class Session(StripeModel):
     """
 
     stripe_class = stripe.checkout.Session
-    stripe_dashboard_item_name = "sessions"
 
     billing_address_collection = StripeEnumField(
         enum=enums.SessionBillingAddressCollection,

@@ -524,7 +524,6 @@ class PaymentMethod(StripeModel):
     )
 
     stripe_class = stripe.PaymentMethod
-    stripe_dashboard_item_name = "payment methods"
 
     @classmethod
     def attach(
