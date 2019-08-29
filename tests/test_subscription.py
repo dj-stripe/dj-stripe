@@ -8,26 +8,17 @@ from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
-from stripe.error import InvalidRequestError
-
 from djstripe.enums import SubscriptionStatus
 from djstripe.models import Plan, Subscription
+from stripe.error import InvalidRequestError
 
-from . import (
-    FAKE_CUSTOMER,
-    FAKE_CUSTOMER_II,
-    FAKE_PLAN,
-    FAKE_PLAN_II,
-    FAKE_PLAN_METERED,
-    FAKE_PRODUCT,
-    FAKE_SUBSCRIPTION,
-    FAKE_SUBSCRIPTION_CANCELED,
-    FAKE_SUBSCRIPTION_METERED,
-    FAKE_SUBSCRIPTION_MULTI_PLAN,
-    FAKE_SUBSCRIPTION_NOT_PERIOD_CURRENT,
-    AssertStripeFksMixin,
-    datetime_to_unix,
-)
+from . import (FAKE_CUSTOMER, FAKE_CUSTOMER_II, FAKE_PLAN, FAKE_PLAN_II,
+               FAKE_PLAN_METERED, FAKE_PRODUCT, FAKE_SUBSCRIPTION,
+               FAKE_SUBSCRIPTION_CANCELED, FAKE_SUBSCRIPTION_METERED,
+               FAKE_SUBSCRIPTION_MULTI_PLAN,
+               FAKE_SUBSCRIPTION_NOT_PERIOD_CURRENT,
+               FAKE_SUBSCRIPTION_TRIAL_END_NOW, AssertStripeFksMixin,
+               datetime_to_unix)
 
 
 class SubscriptionTest(AssertStripeFksMixin, TestCase):
@@ -668,3 +659,26 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             subscription, expected_blank_fks=self.default_expected_blank_fks
         )
+
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.Subscription.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_TRIAL_END_NOW),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    def test_trial_ends_now(
+        self,
+        customer_retrieve_mock,
+        subscription_retrieve_mock,
+        product_retrieve_mock,
+        plan_retrieve_mock,
+    ):
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION_TRIAL_END_NOW)
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
+        self.assertEqual(subscription.trial_end.date(),timezone.datetime.now().date())

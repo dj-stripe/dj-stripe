@@ -4,7 +4,8 @@ A Fake or multiple fakes for each stripe object.
 Originally collected using API VERSION 2015-07-28.
 Updated to API VERSION 2016-03-07 with bogus fields.
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import json
 import logging
@@ -15,7 +16,6 @@ from pathlib import Path
 
 from django.db import models
 from django.utils import dateformat, timezone
-
 from djstripe.webhooks import TEST_EVENT_ID
 
 logger = logging.getLogger(__name__)
@@ -701,6 +701,9 @@ FAKE_SUBSCRIPTION_II = SubscriptionDict(
 FAKE_SUBSCRIPTION_III = SubscriptionDict(
     load_fixture("subscription_sub_fakefakefakefakefake0003.json")
 )
+
+FAKE_SUBSCRIPTION_TRIAL_END_NOW = deepcopy(FAKE_SUBSCRIPTION)
+FAKE_SUBSCRIPTION_TRIAL_END_NOW['trial_end'] = "now"
 
 
 FAKE_SUBSCRIPTION_MULTI_PLAN = SubscriptionDict(

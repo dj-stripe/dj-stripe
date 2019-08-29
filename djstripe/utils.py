@@ -116,7 +116,8 @@ def convert_tstamp(response):
 
     # Overrides the set timezone to UTC - I think...
     tz = timezone.utc if settings.USE_TZ else None
-
+    if response == "now":
+        return timezone.datetime.utcnow().replace(tzinfo=tz)
     return datetime.datetime.fromtimestamp(response, tz)
 
 
