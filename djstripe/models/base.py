@@ -7,7 +7,7 @@ from django.utils import dateformat, timezone
 from django.utils.encoding import smart_text
 
 from .. import settings as djstripe_settings
-from ..fields import JSONField, StripeDateTimeField, StripeIdField
+from ..fields import JSONField, StripeDateTimeField, StripeIdField, StripeDecimalCurrencyAmountField
 from ..managers import StripeModelManager
 
 logger = logging.getLogger(__name__)
@@ -393,23 +393,10 @@ class StripeModel(models.Model):
     def create(cls, **kwargs):
         api_kwargs = dict(kwargs)
 
-        amount_fields = [
-            "amount",
-            "amount_capturable",
-            "amount_due",
-            "amount_off",
-            "amount_paid",
-            "amount_received",
-            "amount_refunded",
-            "amount_remaining",
-            "amount_reversed",
-        ]
-
-        for field in amount_fields:
-            if field in api_kwargs:
-                api_kwargs[field] = int(api_kwargs[field] * 100)
-
         for k, v in api_kwargs.items():
+            field = cls._meta.get_field(k)
+            if isinstance(field, StripeDecimalCurrencyAmountField):
+                api_kwargs[k] = int(api_kwargs[k] * 100)
             if isinstance(v, StripeModel):
                 api_kwargs[k] = api_kwargs[k].id
 
