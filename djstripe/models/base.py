@@ -7,7 +7,12 @@ from django.utils import dateformat, timezone
 from django.utils.encoding import smart_text
 
 from .. import settings as djstripe_settings
-from ..fields import JSONField, StripeDateTimeField, StripeIdField, StripeDecimalCurrencyAmountField
+from ..fields import (
+    JSONField,
+    StripeDateTimeField,
+    StripeIdField,
+    StripeDecimalCurrencyAmountField,
+)
 from ..managers import StripeModelManager
 
 logger = logging.getLogger(__name__)
@@ -394,7 +399,7 @@ class StripeModel(models.Model):
         api_kwargs = dict(kwargs)
 
         for k, v in api_kwargs.items():
-            if k != 'object':  # We want to ignore the Stripe API's object attribute
+            if k != "object":  # We want to ignore the Stripe API's object attribute
                 field = cls._meta.get_field(k)
                 if isinstance(field, StripeDecimalCurrencyAmountField):
                     api_kwargs[k] = int(api_kwargs[k] * 100)
