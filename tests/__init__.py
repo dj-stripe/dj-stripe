@@ -1427,6 +1427,18 @@ FAKE_EVENT_INVOICEITEM_DELETED.update(
     {"id": "evt_187IHD2eZvKYloJfdsnnfs34", "type": "invoiceitem.deleted"}
 )
 
+FAKE_EVENT_PAYMENT_METHOD_ATTACHED = {
+    "id": "evt_1FDOwDKatMEEd998o5FyxxAB",
+    "object": "event",
+    "api_version": "2019-08-14",
+    "created": 1567228549,
+    "data": {"object": deepcopy(FAKE_PAYMENT_METHOD_I)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": {"id": "req_9c9djVqxUZIKNr", "idempotency_key": None},
+    "type": "payment_method.attached",
+}
+
 FAKE_EVENT_PLAN_CREATED = {
     "id": "evt_1877X72eZvKYlo2CLK6daFxu",
     "object": "event",
