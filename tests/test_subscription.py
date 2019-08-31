@@ -391,6 +391,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(False, new_subscription.cancel_at_period_end)
         self.assertEqual(new_subscription.canceled_at, new_subscription.ended_at)
         self.assertFalse(new_subscription.is_valid())
+        self.assertFalse(new_subscription.is_status_temporarily_current())
         self.assertFalse(new_subscription in self.customer.active_subscriptions)
         self.assertFalse(self.customer.has_active_subscription())
         self.assertFalse(self.customer.has_any_active_subscription())
@@ -444,6 +445,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(True, new_subscription.cancel_at_period_end)
         self.assertNotEqual(new_subscription.canceled_at, new_subscription.ended_at)
         self.assertTrue(new_subscription.is_valid())
+        self.assertTrue(new_subscription.is_status_temporarily_current())
         self.assertTrue(self.customer.has_active_subscription())
         self.assertTrue(self.customer.has_any_active_subscription())
 
