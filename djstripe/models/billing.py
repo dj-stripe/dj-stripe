@@ -1,10 +1,12 @@
 import warnings
+from datetime import datetime
 from copy import deepcopy
 
 import stripe
 from django.db import models
 from django.utils import timezone
 from django.utils.text import format_lazy
+from django.utils.timezone import utc
 from django.utils.translation import gettext_lazy as _
 from stripe.error import InvalidRequestError
 
@@ -1295,8 +1297,8 @@ class Subscription(StripeModel):
 
         return (
             self.canceled_at
-            and self.start < self.canceled_at
             and self.cancel_at_period_end
+            and datetime.utcnow().replace(tzinfo=utc) < self.current_period_end
         )
 
     def is_valid(self):
