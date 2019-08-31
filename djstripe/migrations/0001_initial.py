@@ -2457,7 +2457,7 @@ class Migration(migrations.Migration):
                 (
                     "start",
                     djstripe.fields.StripeDateTimeField(
-                        help_text="Date the subscription started."
+                        help_text="Date of the last substantial change to this subscription. For example, a change to the items array, or a change of status, will reset this timestamp."
                     ),
                 ),
                 (
