@@ -436,6 +436,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertTrue(subscription in self.customer.active_subscriptions)
 
         new_subscription = subscription.cancel(at_period_end=True)
+
         self.assertEqual(self.customer.active_subscriptions.count(), 1)
         self.assertTrue(new_subscription in self.customer.active_subscriptions)
 
