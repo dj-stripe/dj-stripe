@@ -537,7 +537,12 @@ class Customer(StripeModel):
         return data
 
     @classmethod
-    def get_or_create(cls, subscriber, livemode=djstripe_settings.STRIPE_LIVE_MODE):
+    def get_or_create(
+        cls,
+        subscriber,
+        livemode=djstripe_settings.STRIPE_LIVE_MODE,
+        stripe_account=None,
+    ):
         """
         Get or create a dj-stripe customer.
 
@@ -556,17 +561,27 @@ class Customer(StripeModel):
             idempotency_key = djstripe_settings.get_idempotency_key(
                 "customer", action, livemode
             )
-            return cls.create(subscriber, idempotency_key=idempotency_key), True
+            return (
+                cls.create(
+                    subscriber,
+                    idempotency_key=idempotency_key,
+                    stripe_account=stripe_account,
+                ),
+                True,
+            )
 
     @classmethod
-    def create(cls, subscriber, idempotency_key=None):
+    def create(cls, subscriber, idempotency_key=None, stripe_account=None):
         metadata = {}
         subscriber_key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
         if subscriber_key not in ("", None):
             metadata[subscriber_key] = subscriber.pk
 
         stripe_customer = cls._api_create(
-            email=subscriber.email, idempotency_key=idempotency_key, metadata=metadata
+            email=subscriber.email,
+            idempotency_key=idempotency_key,
+            metadata=metadata,
+            stripe_account=stripe_account,
         )
         customer, created = Customer.objects.get_or_create(
             id=stripe_customer["id"],

@@ -154,7 +154,10 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         self.assert_fks(invoiceitem, expected_blank_fks=expected_blank_fks)
 
         invoice_retrieve_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY, expand=[], id=FAKE_INVOICE_II["id"]
+            api_key=STRIPE_SECRET_KEY,
+            expand=[],
+            id=FAKE_INVOICE_II["id"],
+            stripe_account=None,
         )
 
     @patch(

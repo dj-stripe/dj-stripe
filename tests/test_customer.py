@@ -206,7 +206,11 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         djstripe_settings.SUBSCRIBER_CUSTOMER_KEY = "djstripe_subscriber"
 
         customer_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY, email="", idempotency_key=None, metadata={}
+            api_key=STRIPE_SECRET_KEY,
+            email="",
+            idempotency_key=None,
+            metadata={},
+            stripe_account=None,
         )
 
         self.assertEqual(customer.metadata, None)
@@ -406,7 +410,10 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
 
         customer_retrieve_mock.assert_called_with(
-            id=self.customer.id, api_key=STRIPE_SECRET_KEY, expand=["default_source"]
+            id=self.customer.id,
+            api_key=STRIPE_SECRET_KEY,
+            expand=["default_source"],
+            stripe_account=None,
         )
         self.assertEqual(3, customer_retrieve_mock.call_count)
 
@@ -420,7 +427,10 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             self.customer.purge()
 
         customer_retrieve_mock.assert_called_once_with(
-            id=self.customer.id, api_key=STRIPE_SECRET_KEY, expand=["default_source"]
+            id=self.customer.id,
+            api_key=STRIPE_SECRET_KEY,
+            expand=["default_source"],
+            stripe_account=None,
         )
 
     def test_can_charge(self):
@@ -618,7 +628,10 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assertEqual(self.customer.coupon, None)
         self.customer.add_coupon(FAKE_COUPON["id"])
         customer_retrieve_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY, expand=["default_source"], id=FAKE_CUSTOMER["id"]
+            api_key=STRIPE_SECRET_KEY,
+            expand=["default_source"],
+            id=FAKE_CUSTOMER["id"],
+            stripe_account=None,
         )
 
     @patch("stripe.Coupon.retrieve", return_value=deepcopy(FAKE_COUPON), autospec=True)
@@ -644,7 +657,10 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             self.customer.add_coupon(coupon)
 
         customer_retrieve_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY, expand=["default_source"], id=FAKE_CUSTOMER["id"]
+            api_key=STRIPE_SECRET_KEY,
+            expand=["default_source"],
+            id=FAKE_CUSTOMER["id"],
+            stripe_account=None,
         )
 
         self.customer.refresh_from_db()
@@ -1714,7 +1730,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assertIsNone(invoice.save())
 
         subscription_retrieve_mock.assert_called_once_with(
-            api_key=ANY, expand=ANY, id=FAKE_SUBSCRIPTION["id"]
+            api_key=ANY, expand=ANY, id=FAKE_SUBSCRIPTION["id"], stripe_account=None
         )
         plan_retrieve_mock.assert_not_called()
 

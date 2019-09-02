@@ -4,6 +4,7 @@ dj-stripe Account Tests.
 from copy import deepcopy
 from unittest.mock import patch
 
+import pytest
 from django.test.testcases import TestCase
 
 from djstripe.models import Account
@@ -90,3 +91,39 @@ class TestAccount(AssertStripeFksMixin, TestCase):
                 "djstripe.Account.branding_icon",
             },
         )
+
+
+@pytest.mark.parametrize(
+    "mock_account_id, other_mock_account_id, expected_stripe_account",
+    (
+        ("acct_fakefakefakefake001", None, "acct_fakefakefakefake001"),
+        (
+            "acct_fakefakefakefake001",
+            "acct_fakefakefakefake002",
+            "acct_fakefakefakefake002",
+        ),
+    ),
+)
+@patch(
+    target="djstripe.models.connect.StripeModel._create_from_stripe_object",
+    autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+)
+def test_account__create_from_stripe_object(
+    mock_super__create_from_stripe_object,
+    mock_account_id,
+    other_mock_account_id,
+    expected_stripe_account,
+):
+    """Ensure that we are setting the ID value correctly."""
+    mock_data = {"id": mock_account_id}
+    Account._create_from_stripe_object(
+        data=mock_data, stripe_account=other_mock_account_id
+    )
+
+    mock_super__create_from_stripe_object.assert_called_once_with(
+        data=mock_data,
+        current_ids=None,
+        pending_relations=None,
+        save=True,
+        stripe_account=expected_stripe_account,
+    )
