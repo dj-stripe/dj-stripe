@@ -502,8 +502,10 @@ class PaymentMethod(StripeModel):
         "about the card."
     )
     card_present = JSONField(
+        null=True,
+        blank=True,
         help_text="If this is an card_present PaymentMethod, this hash contains "
-        "details about the Card Present payment method."
+        "details about the Card Present payment method.",
     )
     customer = models.ForeignKey(
         "Customer",
