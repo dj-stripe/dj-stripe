@@ -25,6 +25,24 @@ With no arguments this will sync all supported models, or a list of models to sy
 Note that this may be redundant since we recursively sync related objects.
 
 
+You can manually reprocess events using the management commands ``djstripe_process_events``.
+By default this processes all events, but options can be passed to limit the events processed.
+Note the Stripe API documents a limitation where events are only guaranteed to be available for
+30 days.
+
+.. code-block::
+
+    # all events
+    ./manage.py djstripe_process_events
+    # failed events (events with pending webhooks or where all webhook delivery attempts failed)
+    ./manage.py djstripe_process_events --failed
+    # filter by event type (all payment_intent events in this example)
+    ./manage.py djstripe_process_events --type payment_intent.*
+    # specific events by ID
+    ./manage.py djstripe_process_events --ids evt_foo evt_bar
+    # more output for debugging processing failures
+    ./manage.py djstripe_process_events -v 2
+
 In Code
 -------
 
