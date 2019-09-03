@@ -18,6 +18,7 @@ from djstripe.models import (
     Event,
     Invoice,
     InvoiceItem,
+    PaymentMethod,
     Plan,
     Subscription,
     Transfer,
@@ -49,6 +50,7 @@ from . import (
     FAKE_EVENT_INVOICE_UPCOMING,
     FAKE_EVENT_INVOICEITEM_CREATED,
     FAKE_EVENT_INVOICEITEM_DELETED,
+    FAKE_EVENT_PAYMENT_METHOD_ATTACHED,
     FAKE_EVENT_PLAN_CREATED,
     FAKE_EVENT_PLAN_DELETED,
     FAKE_EVENT_PLAN_REQUEST_IS_OBJECT,
@@ -64,6 +66,7 @@ from . import (
     FAKE_SUBSCRIPTION_III,
     FAKE_TRANSFER,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    AssertStripeFksMixin,
     default_account,
 )
 
@@ -735,6 +738,32 @@ class TestPlanEvents(EventTestCase):
 
         with self.assertRaises(Plan.DoesNotExist):
             Plan.objects.get(id=FAKE_PLAN["id"])
+
+
+class TestPaymentMethodEvents(AssertStripeFksMixin, EventTestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username="fake_customer_1", email=FAKE_CUSTOMER["email"]
+        )
+        self.customer = FAKE_CUSTOMER.create_for_user(self.user)
+
+    @patch("stripe.PaymentMethod.retrieve", autospec=True)
+    @patch("stripe.Event.retrieve", autospec=True)
+    def test_payment_method_attached(
+        self, event_retrieve_mock, payment_method_retrieve_mock
+    ):
+        fake_stripe_event = deepcopy(FAKE_EVENT_PAYMENT_METHOD_ATTACHED)
+        event_retrieve_mock.return_value = fake_stripe_event
+        payment_method_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        payment_method = PaymentMethod.objects.get(
+            id=fake_stripe_event["data"]["object"]["id"]
+        )
+
+        self.assert_fks(payment_method, expected_blank_fks={"djstripe.Customer.coupon"})
 
 
 class TestTransferEvents(EventTestCase):

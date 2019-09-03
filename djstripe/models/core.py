@@ -140,7 +140,9 @@ class Charge(StripeModel):
         "for charge failure if available.",
     )
     fraud_details = JSONField(
-        help_text="Hash with information on fraud assessments for the charge."
+        help_text="Hash with information on fraud assessments for the charge.",
+        null=True,
+        blank=True,
     )
     invoice = models.ForeignKey(
         "Invoice",
@@ -151,7 +153,9 @@ class Charge(StripeModel):
     )
     # TODO: on_behalf_of, order
     outcome = JSONField(
-        help_text="Details about whether or not the payment was accepted, and why."
+        help_text="Details about whether or not the payment was accepted, and why.",
+        null=True,
+        blank=True,
     )
     paid = models.BooleanField(
         default=False,
@@ -1365,7 +1369,7 @@ class PaymentIntent(StripeModel):
     """
 
     stripe_class = stripe.PaymentIntent
-    stripe_dashboard_item_name = "payment intents"
+    stripe_dashboard_item_name = "payments"
 
     amount = StripeQuantumCurrencyAmountField(
         help_text="Amount intended to be collected by this PaymentIntent."
@@ -1588,7 +1592,6 @@ class SetupIntent(StripeModel):
     """
 
     stripe_class = stripe.SetupIntent
-    stripe_dashboard_item_name = "setup intents"
 
     application = models.CharField(
         max_length=255,

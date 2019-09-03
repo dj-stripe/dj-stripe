@@ -496,6 +496,17 @@ class RefundStatus(Enum):
     canceled = _("Canceled")
 
 
+class SessionBillingAddressCollection(Enum):
+    auto = _("Auto")
+    required = _("Required")
+
+
+class SessionMode(Enum):
+    payment = _("Payment")
+    setup = _("Setup")
+    subscription = _("Subscription")
+
+
 class SourceUsage(Enum):
     reusable = _("Reusable")
     single_use = _("Single-use")

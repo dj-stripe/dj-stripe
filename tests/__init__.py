@@ -204,6 +204,16 @@ FAKE_BALANCE_TRANSACTION_IV = {
     "type": "charge",
 }
 
+
+class LegacySourceDict(dict):
+    def delete(self):
+        return self
+
+
+class BankAccountDict(LegacySourceDict):
+    pass
+
+
 FAKE_BANK_ACCOUNT = {
     "id": "ba_16hTzo2eZvKYlo2CeSjfb0tS",
     "object": "bank_account",
@@ -232,10 +242,13 @@ FAKE_BANK_ACCOUNT_II = {
     "status": "new",
 }
 
+FAKE_BANK_ACCOUNT_SOURCE = BankAccountDict(
+    load_fixture("bank_account_ba_fakefakefakefakefake0003.json")
+)
 
-class CardDict(dict):
-    def delete(self):
-        return self
+
+class CardDict(LegacySourceDict):
+    pass
 
 
 FAKE_CARD = CardDict(load_fixture("card_card_fakefakefakefakefake0001.json"))
@@ -371,6 +384,41 @@ FAKE_SETUP_INTENT_I = {
     "object": "setup_intent",
     "payment_method_types": ["card"],
     "usage": "off_session",
+}
+
+
+# TODO - add to regenerate_test_fixtures and replace this with a JSON fixture
+#  (will need to use a different payment_intent fixture)
+FAKE_SESSION_I = {
+    "id": "cs_test_OAgNmy75Td25OeREvKUs8XZ7SjMPO9qAplqHO1sBaEjOg9fYbaeMh2nA",
+    "object": "checkout.session",
+    "billing_address_collection": None,
+    "cancel_url": "https://example.com/cancel",
+    "client_reference_id": None,
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "customer_email": None,
+    "display_items": [
+        {
+            "amount": 1500,
+            "currency": "usd",
+            "custom": {
+                "description": "Comfortable cotton t-shirt",
+                "images": None,
+                "name": "T-shirt",
+            },
+            "quantity": 2,
+            "type": "custom",
+        }
+    ],
+    "livemode": False,
+    "locale": None,
+    "mode": None,
+    "payment_intent": FAKE_PAYMENT_INTENT_I["id"],
+    "payment_method_types": ["card"],
+    "setup_intent": None,
+    "submit_type": None,
+    "subscription": None,
+    "success_url": "https://example.com/success",
 }
 
 
@@ -715,7 +763,30 @@ class Sources(object):
         return StripeList(data=self.card_fakes)
 
 
+def convert_source_dict(data):
+    if data:
+        source_type = data["object"]
+        if source_type == "card":
+            data = CardDict(data)
+        elif source_type == "bank_account":
+            data = BankAccountDict(data)
+        elif source_type == "source":
+            data = SourceDict(data)
+        else:
+            raise ValueError("Unknown source type: {}".format(source_type))
+
+    return data
+
+
 class CustomerDict(dict):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self["default_source"] = convert_source_dict(self["default_source"])
+
+        for n, d in enumerate(self["sources"].get("data", [])):
+            self["sources"]["data"][n] = convert_source_dict(d)
+
     def save(self, idempotency_key=None):
         return self
 
@@ -736,11 +807,6 @@ class CustomerDict(dict):
 
 
 FAKE_CUSTOMER = CustomerDict(load_fixture("customer_cus_6lsBvm5rJ0zyHc.json"))
-if FAKE_CUSTOMER["default_source"]:
-    FAKE_CUSTOMER["default_source"] = CardDict(FAKE_CUSTOMER["default_source"])
-
-for n, d in enumerate(FAKE_CUSTOMER["sources"].get("data", [])):
-    FAKE_CUSTOMER["sources"]["data"][n] = CardDict(d)
 
 
 FAKE_CUSTOMER_II = CustomerDict(load_fixture("customer_cus_4UbFSo9tl62jqj.json"))
@@ -748,6 +814,12 @@ FAKE_CUSTOMER_II = CustomerDict(load_fixture("customer_cus_4UbFSo9tl62jqj.json")
 
 # Customer with a Source (instead of Card) as default_source
 FAKE_CUSTOMER_III = CustomerDict(load_fixture("customer_cus_4QWKsZuuTHcs7X.json"))
+
+
+# Customer with a Bank Account as default_source
+FAKE_CUSTOMER_IV = CustomerDict(
+    load_fixture("customer_cus_example_with_bank_account.json")
+)
 
 
 FAKE_DISCOUNT_CUSTOMER = {
@@ -1354,6 +1426,18 @@ FAKE_EVENT_INVOICEITEM_DELETED = deepcopy(FAKE_EVENT_INVOICEITEM_CREATED)
 FAKE_EVENT_INVOICEITEM_DELETED.update(
     {"id": "evt_187IHD2eZvKYloJfdsnnfs34", "type": "invoiceitem.deleted"}
 )
+
+FAKE_EVENT_PAYMENT_METHOD_ATTACHED = {
+    "id": "evt_1FDOwDKatMEEd998o5FyxxAB",
+    "object": "event",
+    "api_version": "2019-08-14",
+    "created": 1567228549,
+    "data": {"object": deepcopy(FAKE_PAYMENT_METHOD_I)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": {"id": "req_9c9djVqxUZIKNr", "idempotency_key": None},
+    "type": "payment_method.attached",
+}
 
 FAKE_EVENT_PLAN_CREATED = {
     "id": "evt_1877X72eZvKYlo2CLK6daFxu",

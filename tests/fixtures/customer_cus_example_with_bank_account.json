@@ -1,0 +1,74 @@
+{
+    "id": "cus_example_with_bank_account",
+    "object": "customer",
+    "account_balance": 0,
+    "address": null,
+    "balance": 0,
+    "created": 1566463428,
+    "currency": null,
+    "default_source": {
+        "id": "ba_fakefakefakefakefake0003",
+        "object": "bank_account",
+        "account_holder_name": "Jane Austen",
+        "account_holder_type": "individual",
+        "bank_name": "STRIPE TEST BANK",
+        "country": "US",
+        "currency": "usd",
+        "customer": "cus_example_with_bank_account",
+        "fingerprint": "6HQmlfTrD91HjjlV",
+        "last4": "6789",
+        "metadata": {
+            "djstripe_test_fake_id": "ba_fakefakefakefakefake0003",
+            "djstripe_test_fixture_account_number": "000123456789"
+        },
+        "routing_number": "110000000",
+        "status": "new"
+    },
+    "delinquent": false,
+    "description": null,
+    "discount": null,
+    "email": "jane.austen@example.com",
+    "invoice_prefix": "431D68C0",
+    "invoice_settings": {
+        "custom_fields": null,
+        "default_payment_method": null,
+        "footer": null
+    },
+    "livemode": false,
+    "metadata": {},
+    "name": "Jane Austen",
+    "phone": null,
+    "preferred_locales": [],
+    "shipping": null,
+    "sources": {
+        "object": "list",
+        "data": [
+            {
+                "id": "ba_fakefakefakefakefake0003",
+                "object": "bank_account",
+                "account_holder_name": "Jane Austen",
+                "account_holder_type": "individual",
+                "bank_name": "STRIPE TEST BANK",
+                "country": "US",
+                "currency": "usd",
+                "customer": "cus_example_with_bank_account",
+                "fingerprint": "6HQmlfTrD91HjjlV",
+                "last4": "6789",
+                "metadata": {
+                    "djstripe_test_fake_id": "ba_fakefakefakefakefake0003",
+                    "djstripe_test_fixture_account_number": "000123456789"
+                },
+                "routing_number": "110000000",
+                "status": "new"
+            }
+        ],
+        "has_more": false,
+        "total_count": 1,
+        "url": "/v1/customers/cus_example_with_bank_account/sources"
+    },
+    "subscriptions": {},
+    "tax_exempt": "none",
+    "tax_ids": {},
+    "tax_info": null,
+    "tax_info_verification": null
+}

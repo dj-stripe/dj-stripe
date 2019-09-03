@@ -120,11 +120,11 @@ def customer_subscription_webhook_handler(event):
     "coupon",
     "invoice",
     "invoiceitem",
-    "paymentintent",
-    "paymentmethod",
+    "payment_intent",
+    "payment_method",
     "plan",
     "product",
-    "setupintent",
+    "setup_intent",
     "source",
 )
 def other_object_webhook_handler(event):
@@ -154,12 +154,12 @@ def other_object_webhook_handler(event):
             "coupon": models.Coupon,
             "invoice": models.Invoice,
             "invoiceitem": models.InvoiceItem,
-            "paymentintent": models.PaymentIntent,
-            "paymentmethod": models.PaymentMethod,
+            "payment_intent": models.PaymentIntent,
+            "payment_method": models.PaymentMethod,
             "plan": models.Plan,
             "product": models.Product,
             "transfer": models.Transfer,
-            "setupintent": models.SetupIntent,
+            "setup_intent": models.SetupIntent,
             "source": models.Source,
         }.get(event.category)
 

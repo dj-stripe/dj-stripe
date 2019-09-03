@@ -1,0 +1,18 @@
+{
+    "id": "ba_fakefakefakefakefake0003",
+    "object": "bank_account",
+    "account_holder_name": "Jane Austen",
+    "account_holder_type": "individual",
+    "bank_name": "STRIPE TEST BANK",
+    "country": "US",
+    "currency": "usd",
+    "customer": "cus_example_with_bank_account",
+    "fingerprint": "6HQmlfTrD91HjjlV",
+    "last4": "6789",
+    "metadata": {
+        "djstripe_test_fake_id": "ba_fakefakefakefakefake0003",
+        "djstripe_test_fixture_account_number": "000123456789"
+    },
+    "routing_number": "110000000",
+    "status": "new"
+}

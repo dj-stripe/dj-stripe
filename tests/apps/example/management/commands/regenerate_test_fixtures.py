@@ -78,6 +78,14 @@ class Command(BaseCommand):
                 "subscriptions",
                 "sources",
             ],
+            djstripe.models.BankAccount: [
+                "id",
+                "bank_name",
+                "customer",
+                "last4",
+                "fingerprint",
+                "status",
+            ],
             djstripe.models.Card: [
                 "id",
                 "address_line1_check",
@@ -169,7 +177,9 @@ class Command(BaseCommand):
                 tests.FAKE_CUSTOMER,
                 tests.FAKE_CUSTOMER_II,
                 tests.FAKE_CUSTOMER_III,
+                tests.FAKE_CUSTOMER_IV,
             ],
+            djstripe.models.BankAccount: [tests.FAKE_BANK_ACCOUNT_SOURCE],
             djstripe.models.Card: [
                 tests.FAKE_CARD,
                 tests.FAKE_CARD_II,
@@ -394,6 +404,10 @@ class Command(BaseCommand):
             created, obj = self.get_or_create_stripe_account(
                 old_obj=old_obj, readonly_fields=readonly_fields
             )
+        elif issubclass(model_class, djstripe.models.BankAccount):
+            created, obj = self.get_or_create_stripe_bank_account(
+                old_obj=old_obj, readonly_fields=readonly_fields
+            )
         elif issubclass(model_class, djstripe.models.Card):
             created, obj = self.get_or_create_stripe_card(
                 old_obj=old_obj, readonly_fields=readonly_fields
@@ -462,6 +476,38 @@ class Command(BaseCommand):
         obj = djstripe.models.Account().api_retrieve()
 
         return True, obj
+
+    def get_or_create_stripe_bank_account(self, old_obj, readonly_fields):
+        customer = djstripe.models.Customer(id=old_obj["customer"]).api_retrieve()
+        id_ = old_obj["id"]
+
+        try:
+            obj = customer.sources.retrieve(id_)
+            created = False
+
+            self.stdout.write("    found")
+        except InvalidRequestError:
+            self.stdout.write("    creating")
+
+            create_obj = deepcopy(old_obj)
+
+            # create in Stripe
+            for k in readonly_fields:
+                create_obj.pop(k, None)
+
+            # see https://stripe.com/docs/connect/testing#account-numbers
+            # we've stash the account number in the metadata
+            # so we can regenerate the fixture
+            create_obj["account_number"] = old_obj["metadata"][
+                "djstripe_test_fixture_account_number"
+            ]
+            create_obj["object"] = "bank_account"
+
+            obj = customer.sources.create(source=create_obj)
+
+            created = True
+
+        return created, obj
 
     def get_or_create_stripe_card(self, old_obj, readonly_fields):
         customer = djstripe.models.Customer(id=old_obj["customer"]).api_retrieve()
