@@ -95,7 +95,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "canceled_at",
-                    models.DateTimeField(
+                    djstripe.fields.StripeDateTimeField(
                         default=None,
                         help_text="Populated when status is canceled, this is the time at which the PaymentIntent was canceled. Measured in seconds since the Unix epoch.",
                         null=True,
