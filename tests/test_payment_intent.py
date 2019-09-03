@@ -5,7 +5,7 @@ from copy import deepcopy
 from unittest.mock import patch
 
 from django.test import TestCase
-from tests import FAKE_CUSTOMER, FAKE_PAYMENT_INTENT_I, AssertStripeFksMixin
+from tests import FAKE_CUSTOMER, FAKE_PAYMENT_INTENT_I, FAKE_PAYMENT_INTENT_II, AssertStripeFksMixin
 
 from djstripe.models import PaymentIntent
 
@@ -52,3 +52,14 @@ class PaymentIntentTest(AssertStripeFksMixin, TestCase):
             payment_intent.status = status
             payment_intent.full_clean()
             payment_intent.save()
+
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    def test_canceled_intent(self, customer_retrieve_mock):
+        fake_payment_intent = deepcopy(FAKE_PAYMENT_INTENT_II)
+
+        payment_intent = PaymentIntent.sync_from_stripe_data(fake_payment_intent)
+
+        payment_intent.full_clean()
+        payment_intent.save()
