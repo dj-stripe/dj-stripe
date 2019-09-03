@@ -140,7 +140,9 @@ class Charge(StripeModel):
         "for charge failure if available.",
     )
     fraud_details = JSONField(
-        help_text="Hash with information on fraud assessments for the charge."
+        help_text="Hash with information on fraud assessments for the charge.",
+        null=True,
+        blank=True,
     )
     invoice = models.ForeignKey(
         "Invoice",
@@ -151,7 +153,9 @@ class Charge(StripeModel):
     )
     # TODO: on_behalf_of, order
     outcome = JSONField(
-        help_text="Details about whether or not the payment was accepted, and why."
+        help_text="Details about whether or not the payment was accepted, and why.",
+        null=True,
+        blank=True,
     )
     paid = models.BooleanField(
         default=False,
