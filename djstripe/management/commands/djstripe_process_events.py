@@ -22,7 +22,8 @@ class Command(VerbosityAwareOutputMixin, BaseCommand):
 
     def add_arguments(self, parser):
         """Add optional arugments to filter Events by."""
-        # Use a mutually exclusive group to prevent multiple arguments being specified together.
+        # Use a mutually exclusive group to prevent multiple arguments being
+        # specified together.
         group = parser.add_mutually_exclusive_group()
         group.add_argument(
             "--ids",
@@ -53,7 +54,8 @@ class Command(VerbosityAwareOutputMixin, BaseCommand):
         failed = options["failed"]
         type_filter = options["type"]
 
-        # Args are mutually exclusive, so output what we are doing based on that assumption.
+        # Args are mutually exclusive,
+        # so output what we are doing based on that assumption.
         if failed:
             self.output("Processing all failed events")
         elif type_filter:
@@ -84,6 +86,9 @@ class Command(VerbosityAwareOutputMixin, BaseCommand):
 
             listed_events = models.Event.api_list(**list_kwargs)
 
+        self.process_events(listed_events)
+
+    def process_events(self, listed_events):
         # Process each listed event. Capture failures and continue,
         # outputting debug information as verbosity dictates.
         count = 0

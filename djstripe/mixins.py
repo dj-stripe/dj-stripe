@@ -38,7 +38,9 @@ class SubscriptionMixin(PaymentsContextMixin):
 
 
 class VerbosityAwareOutputMixin:
-    """A mixin class to provide verbosity aware output functions for management commands."""
+    """
+    A mixin class to provide verbosity aware output functions for management commands.
+    """
 
     def set_verbosity(self, options):
         """Set the verbosity based off the passed in options."""
