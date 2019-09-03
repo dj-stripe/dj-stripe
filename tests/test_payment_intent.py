@@ -59,8 +59,8 @@ class PaymentIntentTest(AssertStripeFksMixin, TestCase):
     def test_canceled_intent(self, customer_retrieve_mock):
         fake_payment_intent = deepcopy(FAKE_PAYMENT_INTENT_I)
 
-        fake_payment_intent['status'] = 'canceled'
-        fake_payment_intent['canceled_at'] = 1567524169
+        fake_payment_intent["status"] = "canceled"
+        fake_payment_intent["canceled_at"] = 1567524169
 
         for reason in (
             "duplicate",
@@ -69,9 +69,9 @@ class PaymentIntentTest(AssertStripeFksMixin, TestCase):
             "abandoned",
             "failed_invoice",
             "void_invoice",
-            "automatic"
+            "automatic",
         ):
-            fake_payment_intent['cancellation_reason'] = reason
+            fake_payment_intent["cancellation_reason"] = reason
             payment_intent = PaymentIntent.sync_from_stripe_data(fake_payment_intent)
             payment_intent.full_clean()
             payment_intent.save()
