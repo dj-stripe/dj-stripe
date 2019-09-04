@@ -227,10 +227,22 @@ class StripeModel(models.Model):
         # Iterate over all the fields that we know are related to Stripe,
         # let each field work its own magic
         ignore_fields = ["date_purged", "subscriber"]  # XXX: Customer hack
-        for field in cls._meta.fields:
+        for field in cls._meta.get_fields():
             if field.name.startswith("djstripe_") or field.name in ignore_fields:
                 continue
-            if isinstance(field, models.ForeignKey):
+            if isinstance(
+                field, (models.ManyToManyRel, models.ManyToOneRel)
+            ) and not isinstance(field, models.OneToOneRel):
+                # We don't currently support syncing from
+                # reverse side of Many relationship
+                continue
+
+            if isinstance(field, models.OneToOneRel):
+                # This is the reverse side of a OneToOneField,
+                # record the current id so we don't get into a loop
+                current_ids.add(cls._id_from_data(manipulated_data["id"]))
+
+            if isinstance(field, (models.ForeignKey, models.OneToOneRel)):
                 field_data, skip = cls._stripe_object_field_to_foreign_key(
                     field=field,
                     manipulated_data=manipulated_data,
