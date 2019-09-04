@@ -564,6 +564,9 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 "djstripe.PaymentIntent.invoice",
                 "djstripe.PaymentIntent.on_behalf_of",
                 "djstripe.PaymentIntent.payment_method",
+                # reverse OneToOneFields
+                "djstripe.Invoice.charge",
+                "djstripe.Invoice.payment_intent",
             },
         )
 
@@ -589,6 +592,9 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 "djstripe.PaymentIntent.invoice",
                 "djstripe.PaymentIntent.on_behalf_of",
                 "djstripe.PaymentIntent.payment_method",
+                # reverse OneToOneFields
+                "djstripe.Invoice.charge",
+                "djstripe.Invoice.payment_intent",
             },
         )
 
@@ -639,6 +645,9 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 "djstripe.PaymentIntent.invoice",
                 "djstripe.PaymentIntent.on_behalf_of",
                 "djstripe.PaymentIntent.payment_method",
+                # reverse OneToOneFields
+                "djstripe.Invoice.charge",
+                "djstripe.Invoice.payment_intent",
             },
         )
 
@@ -658,6 +667,9 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 "djstripe.PaymentIntent.invoice",
                 "djstripe.PaymentIntent.on_behalf_of",
                 "djstripe.PaymentIntent.payment_method",
+                # reverse OneToOneFields
+                "djstripe.Invoice.charge",
+                "djstripe.Invoice.payment_intent",
             },
         )
 

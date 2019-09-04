@@ -127,6 +127,9 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
                 "djstripe.Charge.invoice",
                 "djstripe.PaymentIntent.invoice",
                 "djstripe.Plan.product",
+                # reverse OneToOneFields
+                "djstripe.Invoice.charge",
+                "djstripe.Invoice.payment_intent",
             },
         )
 
@@ -569,6 +572,9 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
                 "djstripe.Charge.invoice",
                 "djstripe.PaymentIntent.invoice",
                 "djstripe.Plan.product",
+                # reverse OneToOneFields
+                "djstripe.Invoice.charge",
+                "djstripe.Invoice.payment_intent",
             },
         )
 

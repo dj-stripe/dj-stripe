@@ -39,5 +39,7 @@ class SessionTest(AssertStripeFksMixin, TestCase):
                 "djstripe.PaymentIntent.on_behalf_of",
                 "djstripe.PaymentIntent.payment_method",
                 "djstripe.Session.subscription",
+                # reverse OneToOneFields
+                "djstripe.Invoice.payment_intent",
             },
         )

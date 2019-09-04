@@ -13,6 +13,7 @@ from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils import dateformat, timezone
 
@@ -52,15 +53,27 @@ class AssertStripeFksMixin:
 
         processed_stripe_ids.add(obj.id)
 
-        for field in obj._meta.fields:
-            if isinstance(field, models.ForeignKey):
-                field_str = str(field)
-                field_value = getattr(obj, field.name)
+        for field in obj._meta.get_fields():
+            if isinstance(field, (models.ForeignKey, models.OneToOneRel)):
+                if isinstance(field, models.OneToOneRel):
+                    if field.parent_link:
+                        # skip checking model inheritance links
+                        continue
+
+                    # Check reverse OneToOneFields
+                    field_str = str(field.field)
+                else:
+                    field_str = str(field)
+
+                try:
+                    field_value = getattr(obj, field.name)
+                except ObjectDoesNotExist:
+                    field_value = None
 
                 if field_str in expected_blank_fks:
-                    self.assertIsNone(field_value, field)
+                    self.assertIsNone(field_value, field_str)
                 else:
-                    self.assertIsNotNone(field_value, field)
+                    self.assertIsNotNone(field_value, field_str)
 
                     if field_value.id not in processed_stripe_ids:
                         # recurse into the object if it's not already been checked
