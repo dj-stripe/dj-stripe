@@ -17,6 +17,7 @@ from tests import (
     FAKE_PRODUCT,
     FAKE_SESSION_I,
     FAKE_SUBSCRIPTION,
+    IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
 )
 
@@ -25,7 +26,9 @@ from djstripe.models import Session
 
 class SessionTest(AssertStripeFksMixin, TestCase):
     @patch(
-        "stripe.Account.retrieve", return_value=deepcopy(FAKE_ACCOUNT), autospec=True
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_ACCOUNT),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",

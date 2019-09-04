@@ -16,6 +16,7 @@ from tests import (
     FAKE_PAYMENT_INTENT_I,
     FAKE_PRODUCT,
     FAKE_SUBSCRIPTION,
+    IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
 )
 
@@ -24,7 +25,9 @@ from djstripe.models import PaymentIntent
 
 class PaymentIntentTest(AssertStripeFksMixin, TestCase):
     @patch(
-        "stripe.Account.retrieve", return_value=deepcopy(FAKE_ACCOUNT), autospec=True
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_ACCOUNT),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -84,9 +87,46 @@ class PaymentIntentTest(AssertStripeFksMixin, TestCase):
         )
 
     @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_ACCOUNT),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
+    @patch(
+        "stripe.BalanceTransaction.retrieve",
+        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        autospec=True,
+    )
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+    @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
-    def test_status_enum(self, customer_retrieve_mock):
+    @patch(
+        "stripe.FileUpload.retrieve",
+        side_effect=[deepcopy(FAKE_FILEUPLOAD_ICON), deepcopy(FAKE_FILEUPLOAD_LOGO)],
+        autospec=True,
+    )
+    @patch(
+        "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
+    )
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.Subscription.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION),
+        autospec=True,
+    )
+    def test_status_enum(
+        self,
+        subscription_retrieve_mock,
+        product_retrieve_mock,
+        invoice_retrieve_mock,
+        file_retrieve_mock,
+        customer_retrieve_mock,
+        charge_retrieve_mock,
+        balance_transaction_retrieve_mock,
+        account_retrieve_mock,
+    ):
         fake_payment_intent = deepcopy(FAKE_PAYMENT_INTENT_I)
 
         for status in (
@@ -105,9 +145,46 @@ class PaymentIntentTest(AssertStripeFksMixin, TestCase):
             payment_intent.full_clean()
 
     @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_ACCOUNT),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
+    @patch(
+        "stripe.BalanceTransaction.retrieve",
+        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        autospec=True,
+    )
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+    @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
-    def test_canceled_intent(self, customer_retrieve_mock):
+    @patch(
+        "stripe.FileUpload.retrieve",
+        side_effect=[deepcopy(FAKE_FILEUPLOAD_ICON), deepcopy(FAKE_FILEUPLOAD_LOGO)],
+        autospec=True,
+    )
+    @patch(
+        "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
+    )
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.Subscription.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION),
+        autospec=True,
+    )
+    def test_cancelled_intent(
+        self,
+        subscription_retrieve_mock,
+        product_retrieve_mock,
+        invoice_retrieve_mock,
+        file_retrieve_mock,
+        customer_retrieve_mock,
+        charge_retrieve_mock,
+        balance_transaction_retrieve_mock,
+        account_retrieve_mock,
+    ):
         fake_payment_intent = deepcopy(FAKE_PAYMENT_INTENT_I)
 
         fake_payment_intent["status"] = "canceled"
