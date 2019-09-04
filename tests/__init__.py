@@ -61,7 +61,10 @@ class AssertStripeFksMixin:
                         continue
 
                     # Check reverse OneToOneFields
-                    field_str = str(field.field)
+                    # Hack - there's probably a better way to generate this name?
+                    reverse_id_name = str(field.remote_field.foreign_related_fields[0])
+                    field_str = reverse_id_name.replace("djstripe_id", field.name)
+                    field_str += " (related name)"
                 else:
                     field_str = str(field)
 

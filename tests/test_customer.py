@@ -558,15 +558,13 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 "djstripe.Account.branding_logo",
                 "djstripe.Account.branding_icon",
                 "djstripe.Charge.dispute",
+                "djstripe.Charge.latest_invoice (related name)",
                 "djstripe.Charge.invoice",
                 "djstripe.Charge.transfer",
                 "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.invoice",
+                "djstripe.PaymentIntent.invoice (related name)",
                 "djstripe.PaymentIntent.on_behalf_of",
                 "djstripe.PaymentIntent.payment_method",
-                # reverse OneToOneFields
-                "djstripe.Invoice.charge",
-                "djstripe.Invoice.payment_intent",
             },
         )
 
@@ -586,15 +584,13 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 "djstripe.Account.branding_logo",
                 "djstripe.Account.branding_icon",
                 "djstripe.Charge.dispute",
+                "djstripe.Charge.latest_invoice (related name)",
                 "djstripe.Charge.invoice",
                 "djstripe.Charge.transfer",
                 "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.invoice",
+                "djstripe.PaymentIntent.invoice (related name)",
                 "djstripe.PaymentIntent.on_behalf_of",
                 "djstripe.PaymentIntent.payment_method",
-                # reverse OneToOneFields
-                "djstripe.Invoice.charge",
-                "djstripe.Invoice.payment_intent",
             },
         )
 
@@ -639,15 +635,13 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 "djstripe.Account.branding_logo",
                 "djstripe.Account.branding_icon",
                 "djstripe.Charge.dispute",
+                "djstripe.Charge.latest_invoice (related name)",
                 "djstripe.Charge.invoice",
                 "djstripe.Charge.transfer",
                 "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.invoice",
+                "djstripe.PaymentIntent.invoice (related name)",
                 "djstripe.PaymentIntent.on_behalf_of",
                 "djstripe.PaymentIntent.payment_method",
-                # reverse OneToOneFields
-                "djstripe.Invoice.charge",
-                "djstripe.Invoice.payment_intent",
             },
         )
 
@@ -661,15 +655,13 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 "djstripe.Account.branding_logo",
                 "djstripe.Account.branding_icon",
                 "djstripe.Charge.dispute",
+                "djstripe.Charge.latest_invoice (related name)",
                 "djstripe.Charge.invoice",
                 "djstripe.Charge.transfer",
                 "djstripe.Customer.coupon",
-                "djstripe.PaymentIntent.invoice",
+                "djstripe.PaymentIntent.invoice (related name)",
                 "djstripe.PaymentIntent.on_behalf_of",
                 "djstripe.PaymentIntent.payment_method",
-                # reverse OneToOneFields
-                "djstripe.Invoice.charge",
-                "djstripe.Invoice.payment_intent",
             },
         )
 

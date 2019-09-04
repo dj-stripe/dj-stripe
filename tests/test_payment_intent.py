@@ -24,10 +24,9 @@ class PaymentIntentTest(AssertStripeFksMixin, TestCase):
             expected_blank_fks={
                 "djstripe.Customer.coupon",
                 "djstripe.Customer.subscriber",
+                "djstripe.PaymentIntent.invoice (related name)",
                 "djstripe.PaymentIntent.on_behalf_of",
                 "djstripe.PaymentIntent.payment_method",
-                # reverse OneToOneFields
-                "djstripe.Invoice.payment_intent",
             },
         )
 

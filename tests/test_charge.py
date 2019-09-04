@@ -124,12 +124,10 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
             | {
                 "djstripe.Account.branding_logo",
                 "djstripe.Account.branding_icon",
+                "djstripe.Charge.latest_invoice (related name)",
                 "djstripe.Charge.invoice",
-                "djstripe.PaymentIntent.invoice",
+                "djstripe.PaymentIntent.invoice (related name)",
                 "djstripe.Plan.product",
-                # reverse OneToOneFields
-                "djstripe.Invoice.charge",
-                "djstripe.Invoice.payment_intent",
             },
         )
 
@@ -569,12 +567,10 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
                 "djstripe.Account.branding_logo",
                 "djstripe.Account.branding_icon",
                 "djstripe.Charge.customer",
+                "djstripe.Charge.latest_invoice (related name)",
                 "djstripe.Charge.invoice",
-                "djstripe.PaymentIntent.invoice",
+                "djstripe.PaymentIntent.invoice (related name)",
                 "djstripe.Plan.product",
-                # reverse OneToOneFields
-                "djstripe.Invoice.charge",
-                "djstripe.Invoice.payment_intent",
             },
         )
 
