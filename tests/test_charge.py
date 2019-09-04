@@ -184,7 +184,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(True, charge.captured)
         self.assertEqual(False, charge.disputed)
         self.assertEqual(
-            "Payment for invoice {}".format(FAKE_INVOICE["number"]), charge.description
+            "Invoice {}".format(FAKE_INVOICE["number"]), charge.description
         )
         self.assertEqual(0, charge.amount_refunded)
 
@@ -271,8 +271,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(True, charge_refunded.captured)
         self.assertEqual(False, charge_refunded.disputed)
         self.assertEqual(
-            "Payment for invoice {}".format(charge.invoice.number),
-            charge_refunded.description,
+            "Invoice {}".format(charge.invoice.number), charge_refunded.description
         )
         self.assertEqual(charge_refunded.amount, charge_refunded.amount_refunded)
 
@@ -356,9 +355,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(True, charge.refunded)
         self.assertEqual(True, charge.captured)
         self.assertEqual(False, charge.disputed)
-        self.assertEqual(
-            "Payment for invoice {}".format(charge.invoice.number), charge.description
-        )
+        self.assertEqual("Invoice {}".format(charge.invoice.number), charge.description)
         self.assertEqual(charge.amount, charge.amount_refunded)
 
         charge_retrieve_mock.assert_not_called()
