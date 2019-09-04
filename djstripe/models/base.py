@@ -12,6 +12,7 @@ from ..fields import (
     StripeDateTimeField,
     StripeIdField,
     StripeDecimalCurrencyAmountField,
+    StripeQuantumCurrencyAmountField,
 )
 from ..managers import StripeModelManager
 
