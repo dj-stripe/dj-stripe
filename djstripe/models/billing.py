@@ -1,6 +1,5 @@
 import warnings
 from copy import deepcopy
-from datetime import datetime
 
 import stripe
 from django.db import models
@@ -1302,7 +1301,7 @@ class Subscription(StripeModel):
         return (
             self.canceled_at
             and self.cancel_at_period_end
-            and datetime.utcnow().replace(tzinfo=utc) < self.current_period_end
+            and timezone.now() < self.current_period_end
         )
 
     def is_valid(self):
