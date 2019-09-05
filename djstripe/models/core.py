@@ -316,6 +316,10 @@ class Charge(StripeModel):
             data=source_data, source_type=source_type
         )
 
+        # TODO - this shouldn't be necessary, but payment_intent is failing to sync
+        #   due to issue with OneToOne field handling
+        self.payment_intent = cls._stripe_object_to_payment_intent(target_cls=PaymentIntent, data=data)
+
     def _calculate_refund_amount(self, amount=None):
         """
         :rtype: int

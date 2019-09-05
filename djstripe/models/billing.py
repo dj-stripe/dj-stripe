@@ -208,6 +208,8 @@ class Invoice(StripeModel):
         "Charge",
         on_delete=models.CASCADE,
         null=True,
+        # TODO - seems like this should just be called "invoice" ?
+        #  (currently that classes with a ForeignKey though)
         related_name="latest_invoice",
         help_text="The latest charge generated for this invoice, if any.",
     )

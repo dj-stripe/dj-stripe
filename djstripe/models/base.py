@@ -240,7 +240,8 @@ class StripeModel(models.Model):
             if isinstance(field, models.OneToOneRel):
                 # This is the reverse side of a OneToOneField,
                 # record the current id so we don't get into a loop
-                current_ids.add(cls._id_from_data(manipulated_data["id"]))
+                id_ = cls._id_from_data(manipulated_data)
+                current_ids.add(id_)
 
             if isinstance(field, (models.ForeignKey, models.OneToOneRel)):
                 field_data, skip = cls._stripe_object_field_to_foreign_key(
@@ -395,12 +396,19 @@ class StripeModel(models.Model):
                     # the target instance now exists
                     target = field.model.objects.get(id=object_id)
                     setattr(target, field.name, self)
-                    target.save()
 
-                    # reload so that indirect relations back to this object
-                    # eg self.charge.invoice = self are set
-                    # TODO - reverse the field reference here to avoid hitting the DB?
-                    self.refresh_from_db()
+                    if isinstance(field, models.OneToOneRel):
+                        # this is a reverse relationship, so the relation exists on self
+                        self.save()
+                    else:
+                        # this is a forward relation on the target,
+                        # so we need to save it
+                        target.save()
+
+                        # reload so that indirect relations back to this object
+                        # eg self.charge.invoice = self are set
+                        # TODO - reverse the field reference here to avoid hitting the DB?
+                        self.refresh_from_db()
                 else:
                     unprocessed_pending_relations.append(post_save_relation)
 
@@ -566,6 +574,24 @@ class StripeModel(models.Model):
 
         if "customer" in data and data["customer"]:
             return target_cls._get_or_create_from_stripe_object(data, "customer")[0]
+
+    @classmethod
+    def _stripe_object_to_payment_intent(cls, target_cls, data):
+        """
+        Search the given manager for the PaymentIntent matching this object's
+        ``payment_intent`` field.
+        :param target_cls: The target class
+        :type target_cls: Customer
+        :param data: stripe object
+        :type data: dict
+        """
+
+        if "payment_intent" in data and data["payment_intent"]:
+            id_ = cls._id_from_data(data["payment_intent"])
+            current_ids = {id_}
+            pending_relations = []
+
+            return target_cls._get_or_create_from_stripe_object(data, "payment_intent", current_ids=current_ids, pending_relations=[])[0]
 
     @classmethod
     def _stripe_object_to_invoice_items(cls, target_cls, data, invoice):
