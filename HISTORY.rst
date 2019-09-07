@@ -10,6 +10,15 @@ This is a bugfix-only version:
 
 - Updated webhook signals list (#1000)
 
+Upcoming migration of currency fields (storage as cents instead of dollars)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Please be aware that we're looking at standardising our currency storage fields
+as integer quanta (cents) instead of Decimal (dollar) values, to match stripe.
+
+This is intended to be part of the 3.0 release, since it will involve some breaking
+changes.  See #955 for details and discussion.
+
 2.1.0 (2019-09-12)
 ------------------
 
