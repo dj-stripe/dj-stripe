@@ -1196,7 +1196,7 @@ class Subscription(StripeModel):
         """
         Cancels this subscription. If you set the at_period_end parameter to true,
         the subscription will remain active until the end of the period, at which point
-        it will be canceled and not renewed. By default, the subscriptionis terminated
+        it will be canceled and not renewed. By default, the subscription is terminated
         immediately. In either case, the customer will not be charged again for
         the subscription. Note, however, that any pending invoice items that you've
         created will still be charged for at the end of the period unless manually

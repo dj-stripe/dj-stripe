@@ -17,7 +17,7 @@ History
 - ``enums.PaymentMethodType`` has been deprecated, use ``enums.DjstripePaymentMethodType``
 - Made ``SubscriptionItem.quantity`` nullable as per Plans with ``usage_type="metered"`` (follow-up to #865)
 - Added manage commands ``djstripe_sync_models`` and ``djstripe_process_events`` (#727, #89)
-- Fixed issue with re-creating a customer after `Customer.purge()` (#916)
+- Fixed issue with re-creating a customer after ``Customer.purge()`` (#916)
 - Fixed sync of Customer Bank Accounts (#829)
 - Fixed ``Subscription.is_status_temporarily_current()`` (#852)
 - New models
