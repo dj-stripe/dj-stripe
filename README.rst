@@ -28,8 +28,8 @@ Features
 * Individual charges
 * Stripe Sources
 * Stripe v2 and v3 support
+* Supports SCA regulations, Checkout Sessions, and Payment Intents
 * Tested with Stripe API `2019-05-16` (see https://dj-stripe.readthedocs.io/en/latest/api_versions.html )
-* Supports `SCA regulations, Checkout Sessions, and Payment Intents <https://github.com/dj-stripe/dj-stripe/commit/23ab8577e314d9a4720ce401ab743f3a4f382b01>`_
 
 Requirements
 ------------
