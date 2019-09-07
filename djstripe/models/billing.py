@@ -18,6 +18,7 @@ from ..fields import (
     StripeEnumField,
     StripeIdField,
     StripePercentField,
+    StripeQuantumCurrencyAmountField,
 )
 from ..managers import SubscriptionManager
 from ..utils import QuerySetMock, get_friendly_currency_amount
@@ -232,7 +233,7 @@ class Invoice(StripeModel):
             "This value will be null for invoices where billing=charge_automatically."
         ),
     )
-    ending_balance = models.IntegerField(
+    ending_balance = StripeQuantumCurrencyAmountField(
         null=True,
         help_text="Ending customer balance after attempting to pay invoice. "
         "If the invoice has not been attempted yet, this will be null.",
@@ -305,7 +306,7 @@ class Invoice(StripeModel):
             "sent for this invoice."
         ),
     )
-    starting_balance = models.IntegerField(
+    starting_balance = StripeQuantumCurrencyAmountField(
         help_text="Starting customer balance before attempting to pay invoice. "
         "If the invoice has not been attempted "
         "yet, this will be the current customer balance."
