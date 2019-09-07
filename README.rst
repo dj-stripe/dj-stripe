@@ -29,7 +29,7 @@ Features
 * Stripe Sources
 * Stripe v2 and v3 support
 * Supports SCA regulations, Checkout Sessions, and Payment Intents
-* Tested with Stripe API `2019-05-16` (see https://dj-stripe.readthedocs.io/en/latest/api_versions.html )
+* Tested with Stripe API `2019-08-14` (see https://dj-stripe.readthedocs.io/en/latest/api_versions.html )
 
 Requirements
 ------------
