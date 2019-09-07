@@ -376,7 +376,7 @@ class Customer(StripeModel):
     stripe_dashboard_item_name = "customers"
 
     address = JSONField(null=True, blank=True, help_text="The customer's address.")
-    balance = models.IntegerField(
+    balance = StripeQuantumCurrencyAmountField(
         help_text=(
             "Current balance, if any, being stored on the customer's account. "
             "If negative, the customer has credit to apply to the next invoice. "
