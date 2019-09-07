@@ -19,6 +19,7 @@ History
 - Added manage commands ``djstripe_sync_models`` and ``djstripe_process_events`` (#727, #89)
 - Fixed issue with re-creating a customer after `Customer.purge()` (#916)
 - Fixed sync of Customer Bank Accounts (#829)
+- Fixed ``Subscription.is_status_temporarily_current()`` (#852)
 - New models
     - Payment Intent
     - Setup Intent
