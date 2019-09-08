@@ -4,6 +4,7 @@
     "active": true,
     "aggregate_usage": null,
     "amount": 4000,
+    "amount_decimal": "4000",
     "billing_scheme": "per_unit",
     "created": 1557995176,
     "currency": "usd",

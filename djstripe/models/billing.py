@@ -18,6 +18,7 @@ from ..fields import (
     StripeEnumField,
     StripeIdField,
     StripePercentField,
+    StripeQuantumCurrencyAmountField,
 )
 from ..managers import SubscriptionManager
 from ..utils import QuerySetMock, get_friendly_currency_amount
@@ -232,7 +233,7 @@ class Invoice(StripeModel):
             "This value will be null for invoices where billing=charge_automatically."
         ),
     )
-    ending_balance = models.IntegerField(
+    ending_balance = StripeQuantumCurrencyAmountField(
         null=True,
         help_text="Ending customer balance after attempting to pay invoice. "
         "If the invoice has not been attempted yet, this will be null.",
@@ -305,7 +306,7 @@ class Invoice(StripeModel):
             "sent for this invoice."
         ),
     )
-    starting_balance = models.IntegerField(
+    starting_balance = StripeQuantumCurrencyAmountField(
         help_text="Starting customer balance before attempting to pay invoice. "
         "If the invoice has not been attempted "
         "yet, this will be the current customer balance."
@@ -1049,7 +1050,11 @@ class Subscription(StripeModel):
         help_text="The quantity applied to this subscription. This value will be "
         "`null` for multi-plan subscriptions",
     )
-    start = StripeDateTimeField(help_text="Date the subscription started.")
+    start = StripeDateTimeField(
+        help_text="Date of the last substantial change to "
+        "this subscription. For example, a change to the items array, or a change "
+        "of status, will reset this timestamp."
+    )
     status = StripeEnumField(
         enum=enums.SubscriptionStatus, help_text="The status of this subscription."
     )
@@ -1169,7 +1174,7 @@ class Subscription(StripeModel):
         """
         Cancels this subscription. If you set the at_period_end parameter to true,
         the subscription will remain active until the end of the period, at which point
-        it will be canceled and not renewed. By default, the subscriptionis terminated
+        it will be canceled and not renewed. By default, the subscription is terminated
         immediately. In either case, the customer will not be charged again for
         the subscription. Note, however, that any pending invoice items that you've
         created will still be charged for at the end of the period unless manually
@@ -1272,8 +1277,8 @@ class Subscription(StripeModel):
 
         return (
             self.canceled_at
-            and self.start < self.canceled_at
             and self.cancel_at_period_end
+            and timezone.now() < self.current_period_end
         )
 
     def is_valid(self):

@@ -59,6 +59,7 @@
                     "active": true,
                     "aggregate_usage": null,
                     "amount": 2000,
+                    "amount_decimal": "2000",
                     "billing_scheme": "per_unit",
                     "created": 1558230763,
                     "currency": "usd",
@@ -92,7 +93,7 @@
         "djstripe_test_fake_id": "in_fakefakefakefakefake0001"
     },
     "next_payment_attempt": null,
-    "number": "3D77FB04-0001",
+    "number": "7759B3BE-0001",
     "paid": true,
     "payment_intent": "pi_fakefakefakefakefake0001",
     "period_end": 1557995176,

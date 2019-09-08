@@ -104,6 +104,10 @@ class Command(BaseCommand):
             ],
             djstripe.models.PaymentIntent: ["id"],
             djstripe.models.PaymentMethod: ["id"],
+            djstripe.models.Plan: [
+                # Can only specify one of amount and amount_decimal
+                "amount_decimal"
+            ],
             djstripe.models.Source: [
                 "id",
                 "amount",

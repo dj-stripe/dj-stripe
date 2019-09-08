@@ -376,7 +376,7 @@ class Customer(StripeModel):
     stripe_dashboard_item_name = "customers"
 
     address = JSONField(null=True, blank=True, help_text="The customer's address.")
-    balance = models.IntegerField(
+    balance = StripeQuantumCurrencyAmountField(
         help_text=(
             "Current balance, if any, being stored on the customer's account. "
             "If negative, the customer has credit to apply to the next invoice. "
@@ -1382,7 +1382,7 @@ class PaymentIntent(StripeModel):
     )
     # application
     # application_fee_amount
-    canceled_at = models.DateTimeField(
+    canceled_at = StripeDateTimeField(
         null=True,
         blank=True,
         default=None,
@@ -1391,6 +1391,7 @@ class PaymentIntent(StripeModel):
             "PaymentIntent was canceled. Measured in seconds since the Unix epoch."
         ),
     )
+
     # TODO - this should probably be either a nullable Enum or a non-nullable Charfield
     cancellation_reason = models.CharField(
         max_length=255,

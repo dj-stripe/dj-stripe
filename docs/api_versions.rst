@@ -17,7 +17,7 @@ For new accounts this will be the latest Stripe version.  When upgrading version
 the latest version.  See https://stripe.com/docs/upgrades#how-can-i-upgrade-my-api
 
 This is the version used by Stripe when sending webhook data to you (though during webhook processing, dj-stripe
-re-fetches the data with its preferred version).  It's also the and it's the default version used by the Stripe API, but
+re-fetches the data with its preferred version).  It's also the default version used by the Stripe API, but
 dj-stripe overrides the API version when talking to stripe (this override is triggered on import of ``djstripe.models``).
 
 As a result your Stripe account API version is mostly irrelevant, though from time to time we will increase the

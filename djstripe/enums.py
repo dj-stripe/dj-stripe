@@ -539,6 +539,8 @@ class SubmitTypeStatus(Enum):
 
 
 class SubscriptionStatus(Enum):
+    incomplete = _("Incomplete")
+    incomplete_expired = _("Incomplete Expired")
     trialing = _("Trialing")
     active = _("Active")
     past_due = _("Past due")

@@ -54,7 +54,7 @@
     "description": "John Doe",
     "discount": null,
     "email": "john.doe@example.com",
-    "invoice_prefix": "413F249C",
+    "invoice_prefix": "B23380FA",
     "invoice_settings": {
         "custom_fields": null,
         "default_payment_method": null,
