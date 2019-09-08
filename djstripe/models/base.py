@@ -402,7 +402,9 @@ class StripeModel(models.Model):
         for k, v in api_kwargs.items():
             if k != "object":  # We want to ignore the Stripe API's object attribute
                 field = cls._meta.get_field(k)
-                if isinstance(field, StripeDecimalCurrencyAmountField) or isinstance(field, StripeQuantumCurrencyAmountField):
+                if isinstance(field, StripeDecimalCurrencyAmountField) or isinstance(
+                    field, StripeQuantumCurrencyAmountField
+                ):
                     api_kwargs[k] = int(api_kwargs[k] * 100)
             if isinstance(v, StripeModel):
                 api_kwargs[k] = api_kwargs[k].id
