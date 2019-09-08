@@ -881,23 +881,25 @@ class Customer(StripeModel):
 
         return new_payment_method.resolve()
 
-    def add_payment_method(self, payment_method_id, set_default=True):
+    def add_payment_method(self, payment_method, set_default=True):
         """
         Adds an already existing payment method to this customer's account
 
-        :param payment_method_id: ID of the PaymentMethod to be attached to the customer
+        :param payment_method: PaymentMethod to be attached to the customer
+        :type payment_method: str, PaymentMethod
         :param set_default: If true, this will be set as the default_payment_method
+        :type: bool
         :return:
         """
         from .payment_methods import PaymentMethod
 
         stripe_customer = self.api_retrieve()
-        payment_method = PaymentMethod.attach(payment_method_id, stripe_customer)
+        payment_method = PaymentMethod.attach(payment_method, stripe_customer)
 
         if set_default:
             stripe_customer["invoice_settings"][
                 "default_payment_method"
-            ] = payment_method_id
+            ] = payment_method.id
             stripe_customer.save()
 
             # Refresh self from the stripe customer, this should have two effects:
