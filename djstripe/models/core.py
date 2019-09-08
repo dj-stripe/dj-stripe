@@ -1059,7 +1059,9 @@ class Customer(StripeModel):
     def can_charge(self):
         """Determines if this customer is able to be charged."""
 
-        return self.has_valid_source() and self.date_purged is None
+        return (
+            self.has_valid_source() or self.default_payment_method is not None
+        ) and self.date_purged is None
 
     def send_invoice(self):
         """

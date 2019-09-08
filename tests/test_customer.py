@@ -494,13 +494,19 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(self.customer, expected_blank_fks={"djstripe.Customer.coupon"})
 
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
+    @patch("stripe.Customer.retrieve", autospec=True)
     @patch("stripe.PaymentMethod.attach", return_value=deepcopy(FAKE_PAYMENT_METHOD_I))
     def test_add_payment_method_set_default_true(
         self, attach_mock, customer_retrieve_mock
     ):
+        # clear default source so we can check can_charge()
+        fake_customer = deepcopy(FAKE_CUSTOMER)
+        fake_customer["default_source"] = None
+        customer_retrieve_mock.return_value = fake_customer
+
+        self.customer.default_source = None
+        self.customer.save()
+
         self.assertEqual(
             self.customer.payment_methods.filter(
                 id=FAKE_PAYMENT_METHOD_I["id"]
@@ -531,15 +537,32 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             self.customer.invoice_settings["default_payment_method"],
         )
 
-        self.assert_fks(self.customer, expected_blank_fks={"djstripe.Customer.coupon"})
+        self.assertTrue(
+            self.customer.can_charge(),
+            "Expect to be able to charge since we've set a default_payment_method",
+        )
 
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
+        self.assert_fks(
+            self.customer,
+            expected_blank_fks={
+                "djstripe.Customer.coupon",
+                "djstripe.Customer.default_source",
+            },
+        )
+
+    @patch("stripe.Customer.retrieve", autospec=True)
     @patch("stripe.PaymentMethod.attach", return_value=deepcopy(FAKE_PAYMENT_METHOD_I))
     def test_add_payment_method_set_default_false(
         self, attach_mock, customer_retrieve_mock
     ):
+        # clear default source so we can check can_charge()
+        fake_customer = deepcopy(FAKE_CUSTOMER)
+        fake_customer["default_source"] = None
+        customer_retrieve_mock.return_value = fake_customer
+
+        self.customer.default_source = None
+        self.customer.save()
+
         self.assertEqual(
             self.customer.payment_methods.filter(
                 id=FAKE_PAYMENT_METHOD_I["id"]
@@ -560,11 +583,18 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             1,
         )
 
+        self.assertFalse(
+            self.customer.can_charge(),
+            "Expect not to be able to charge since we've not set a "
+            "default_payment_method",
+        )
+
         self.assert_fks(
             self.customer,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
+                "djstripe.Customer.default_source",
             },
         )
 
