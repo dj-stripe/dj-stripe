@@ -506,6 +506,11 @@ class Customer(StripeModel):
             data["coupon_start"] = discount["start"]
             data["coupon_end"] = discount["end"]
 
+        # Populate the object id for our default_payment_method field (or set it None)
+        data["default_payment_method"] = data.get("invoice_settings", {}).get(
+            "default_payment_method"
+        )
+
         return data
 
     @classmethod
@@ -881,6 +886,7 @@ class Customer(StripeModel):
         Adds an already existing payment method to this customer's account
 
         :param payment_method_id: ID of the PaymentMethod to be attached to the customer
+        :param set_default: If true, this will be set as the default_payment_method
         :return:
         """
         from .payment_methods import PaymentMethod
@@ -894,12 +900,14 @@ class Customer(StripeModel):
             ] = payment_method_id
             stripe_customer.save()
 
-            # Note that this logic is duplicated in _attach_objects_hook
-            # (we could do sync_from_stripe_data + refresh_from_db here instead
-            # to avoid the duplication, but this is at least more similar to existing
-            # add_card logic)
-            self.default_payment_method = payment_method
-            self.save()
+            # Refresh self from the stripe customer, this should have two effects:
+            # 1) sets self.default_payment_method (we rely on logic in
+            # Customer._manipulate_stripe_object_hook to do this)
+            # 2) updates self.invoice_settings.default_payment_methods
+            self.sync_from_stripe_data(stripe_customer)
+            self.refresh_from_db()
+
+        return payment_method
 
     def purge(self):
         try:
@@ -1183,12 +1191,6 @@ class Customer(StripeModel):
                     self.id,
                 )
                 self.subscriber = None
-
-        # Populate the object id for our default_payment_method field (or set it None)
-        # Note that this duplicates the logic of add_payment_method
-        data["default_payment_method"] = data.get("invoice_settings", {}).get(
-            "default_payment_method"
-        )
 
     # SYNC methods should be dropped in favor of the master sync infrastructure proposed
     def _sync_invoices(self, **kwargs):

@@ -259,7 +259,13 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             customer.default_source.id, fake_customer["default_source"]["id"]
         )
 
-        self.assert_fks(customer, expected_blank_fks={"djstripe.Customer.coupon"})
+        self.assert_fks(
+            customer,
+            expected_blank_fks={
+                "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
+            },
+        )
 
     @patch("stripe.Customer.create", autospec=True)
     def test_customer_sync_no_sources(self, customer_mock):
@@ -465,7 +471,9 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         customer_retrieve_mock.return_value = deepcopy(FAKE_PAYMENT_METHOD_I)
 
-        self.customer.add_payment_method(FAKE_PAYMENT_METHOD_I["id"])
+        payment_method = self.customer.add_payment_method(FAKE_PAYMENT_METHOD_I["id"])
+
+        self.assertEqual(payment_method.customer.id, self.customer.id)
 
         self.assertEqual(
             self.customer.payment_methods.filter(
@@ -486,13 +494,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             self.customer.invoice_settings["default_payment_method"],
         )
 
-        # self.assert_fks(
-        #     self.customer,
-        #     expected_blank_fks={
-        #         "djstripe.Customer.coupon",
-        #         "djstripe.Customer.default_source",
-        #     },
-        # )
+        self.assert_fks(self.customer, expected_blank_fks={"djstripe.Customer.coupon"})
 
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
@@ -508,7 +510,11 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             0,
         )
 
-        self.customer.add_payment_method(FAKE_PAYMENT_METHOD_I["id"], set_default=False)
+        payment_method = self.customer.add_payment_method(
+            FAKE_PAYMENT_METHOD_I["id"], set_default=False
+        )
+
+        self.assertEqual(payment_method.customer.id, self.customer.id)
 
         self.assertEqual(
             self.customer.payment_methods.filter(

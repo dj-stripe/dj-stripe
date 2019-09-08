@@ -46,6 +46,7 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
             bank_account,
             expected_blank_fks={
                 "djstripe.BankAccount.account",
+                "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.default_source",
                 "djstripe.Customer.coupon",
             },
