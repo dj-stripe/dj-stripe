@@ -20,6 +20,7 @@ from djstripe.models import (
     DjstripePaymentMethod,
     IdempotencyKey,
     Invoice,
+    PaymentMethod,
     Plan,
     Subscription,
 )
@@ -454,6 +455,44 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         self.assertEqual(2, Card.objects.count())
         self.assertEqual(FAKE_CARD["id"], self.customer.default_source.id)
+
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    @patch("stripe.PaymentMethod.attach", return_value=deepcopy(FAKE_PAYMENT_METHOD_I))
+    def test_add_payment_method_obj(self, attach_mock, customer_retrieve_mock):
+        self.assertEqual(
+            self.customer.payment_methods.filter(
+                id=FAKE_PAYMENT_METHOD_I["id"]
+            ).count(),
+            0,
+        )
+
+        payment_method = PaymentMethod.sync_from_stripe_data(FAKE_PAYMENT_METHOD_I)
+        payment_method = self.customer.add_payment_method(payment_method)
+
+        self.assertEqual(payment_method.customer.id, self.customer.id)
+
+        self.assertEqual(
+            self.customer.payment_methods.filter(
+                id=FAKE_PAYMENT_METHOD_I["id"]
+            ).count(),
+            1,
+        )
+
+        self.assertEqual(
+            self.customer.payment_methods.filter(
+                id=FAKE_PAYMENT_METHOD_I["id"]
+            ).first(),
+            self.customer.default_payment_method,
+        )
+
+        self.assertEqual(
+            self.customer.default_payment_method.id,
+            self.customer.invoice_settings["default_payment_method"],
+        )
+
+        self.assert_fks(self.customer, expected_blank_fks={"djstripe.Customer.coupon"})
 
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
