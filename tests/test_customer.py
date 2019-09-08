@@ -458,9 +458,9 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
-    @patch("stripe.PaymentMethod.attach")
+    @patch("stripe.PaymentMethod.attach", return_value=deepcopy(FAKE_PAYMENT_METHOD_I))
     def test_add_payment_method_set_default_true(
-        self, customer_retrieve_mock, attach_mock
+        self, attach_mock, customer_retrieve_mock
     ):
         self.assertEqual(
             self.customer.payment_methods.filter(
@@ -468,8 +468,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             ).count(),
             0,
         )
-
-        customer_retrieve_mock.return_value = deepcopy(FAKE_PAYMENT_METHOD_I)
 
         payment_method = self.customer.add_payment_method(FAKE_PAYMENT_METHOD_I["id"])
 
@@ -501,7 +499,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
     )
     @patch("stripe.PaymentMethod.attach", return_value=deepcopy(FAKE_PAYMENT_METHOD_I))
     def test_add_payment_method_set_default_false(
-        self, customer_retrieve_mock, attach_mock
+        self, attach_mock, customer_retrieve_mock
     ):
         self.assertEqual(
             self.customer.payment_methods.filter(
