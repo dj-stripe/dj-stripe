@@ -45,6 +45,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
             "djstripe.Charge.dispute",
             "djstripe.Charge.transfer",
             "djstripe.Customer.coupon",
+            "djstripe.Customer.default_payment_method",
             "djstripe.PaymentIntent.on_behalf_of",
             "djstripe.PaymentIntent.payment_method",
             "djstripe.Subscription.pending_setup_intent",

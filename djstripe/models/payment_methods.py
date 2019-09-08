@@ -529,12 +529,32 @@ class PaymentMethod(StripeModel):
 
     @classmethod
     def attach(
-        cls,
-        payment_method_id,
-        stripe_customer,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        cls, payment_method, customer, api_key=djstripe_settings.STRIPE_SECRET_KEY
     ):
+        """
+        Attach a payment method to a customer
+        :param payment_method:
+        :type payment_method: str, PaymentMethod
+        :param customer:
+        :type customer: str, Customer
+        :param api_key:
+        :return:
+        """
+
+        if isinstance(payment_method, StripeModel):
+            payment_method = payment_method.id
+
+        if isinstance(customer, StripeModel):
+            customer = customer.id
+
+        extra_kwargs = {}
+        if not isinstance(payment_method, stripe.PaymentMethod):
+            # send api_key if we're not passing in a Stripe object
+            # avoids "Received unknown parameter: api_key" since api uses the
+            # key cached in the Stripe object
+            extra_kwargs = {"api_key": api_key}
+
         stripe_payment_method = stripe.PaymentMethod.attach(
-            payment_method_id, customer=stripe_customer["id"], api_key=api_key
+            payment_method, customer=customer, **extra_kwargs
         )
         return cls.sync_from_stripe_data(stripe_payment_method)

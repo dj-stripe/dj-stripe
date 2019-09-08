@@ -763,7 +763,13 @@ class TestPaymentMethodEvents(AssertStripeFksMixin, EventTestCase):
             id=fake_stripe_event["data"]["object"]["id"]
         )
 
-        self.assert_fks(payment_method, expected_blank_fks={"djstripe.Customer.coupon"})
+        self.assert_fks(
+            payment_method,
+            expected_blank_fks={
+                "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
+            },
+        )
 
 
 class TestTransferEvents(EventTestCase):
