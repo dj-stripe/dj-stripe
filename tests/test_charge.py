@@ -193,6 +193,9 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(self.customer.default_source.id, charge.source_id)
         self.assertEqual(charge.source.type, LegacySourceType.card)
 
+        self.assertGreater(len(charge.receipt_url), 1)
+        self.assertTrue(charge.payment_method_details["type"])
+
         charge_retrieve_mock.assert_not_called()
         balance_transaction_retrieve_mock.assert_called_once_with(
             api_key=STRIPE_SECRET_KEY, expand=[], id=FAKE_BALANCE_TRANSACTION["id"]
