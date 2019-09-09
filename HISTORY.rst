@@ -55,6 +55,7 @@ Changes from API 2019-03-14:
 - Added ``Invoice.status_transitions``
 - Renamed ``Customer.account_balance`` to ``Customer.balance`` (added deprecated property for the old name)
 - Renamed ``Customer.payment_methods`` to ``Customer.customer_payment_methods``
+- Added new ``SubscriptionStatus.incomplete`` and ``SubscriptionStatus.incomplete_expired`` statuses (#974)
 
 2.0.4 (2019-09-09)
 ------------------
