@@ -1,6 +1,7 @@
 """
 dj-stripe PaymenthMethod Model Tests.
 """
+import sys
 from copy import deepcopy
 from unittest.mock import patch
 
@@ -11,7 +12,7 @@ from tests import (
     FAKE_PAYMENT_METHOD_I,
     AssertStripeFksMixin,
     default_account,
-)
+    PaymentMethodDict)
 
 from djstripe.models import PaymentMethod
 
@@ -76,6 +77,52 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
             expected_blank_fks={
                 "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
+            },
+        )
+
+    @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
+        autospec=True,
+    )
+    def test_detach(self, source_retrieve_mock):
+        original_detach = PaymentMethodDict.detach
+
+        def mocked_detach(self):
+            return original_detach(self)
+
+        PaymentMethod.sync_from_stripe_data(deepcopy(FAKE_PAYMENT_METHOD_I))
+
+        self.assertEqual(1, self.customer.payment_methods.count())
+
+        payment_method = self.customer.payment_methods.first()
+
+        with patch(
+            "tests.PaymentMethod.detach", side_effect=mocked_detach, autospec=True
+        ) as mock_detach:
+            payment_method.detach()
+
+        self.assertEqual(0, self.customer.payment_methods.count())
+        # need to refresh_from_db since default_payment_method was cleared with a query
+        self.customer.refresh_from_db()
+        self.assertIsNone(self.customer.default_payment_method)
+
+
+        # need to refresh_from_db due to the implementation of Source.detach() -
+        # see TODO in method
+        payment_method.refresh_from_db()
+        self.assertIsNone(payment_method.customer)
+
+        if sys.version_info >= (3, 6):
+            # this mock isn't working on py34, py35, but it's not strictly necessary
+            # for the test
+            mock_detach.assert_called()
+
+        self.assert_fks(
+            payment_method,
+            expected_blank_fks={
+                # "djstripe.Source.customer",
+                # "djstripe.Customer.default_payment_method",
             },
         )
 
