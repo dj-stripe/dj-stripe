@@ -56,7 +56,7 @@ Changes from API 2019-03-14:
 - Renamed ``Customer.account_balance`` to ``Customer.balance`` (added deprecated property for the old name)
 - Renamed ``Customer.payment_methods`` to ``Customer.customer_payment_methods``
 
-2.0.4 (unreleased)
+2.0.4 (2019-09-09)
 ------------------
 
 This is a bugfix-only version:
