@@ -111,6 +111,7 @@ class Charge(StripeModel):
         help_text="The customer associated with this charge.",
     )
     # XXX: destination
+    # TODO - has this been renamed to on_behalf_of?
     account = models.ForeignKey(
         "Account",
         on_delete=models.CASCADE,
@@ -151,7 +152,7 @@ class Charge(StripeModel):
         related_name="charges",
         help_text="The invoice this charge is for if one exists.",
     )
-    # TODO: on_behalf_of, order
+    # TODO: on_behalf_of (see account above), order
     outcome = JSONField(
         help_text="Details about whether or not the payment was accepted, and why.",
         null=True,
