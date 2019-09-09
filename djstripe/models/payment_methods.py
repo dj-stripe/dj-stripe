@@ -527,6 +527,13 @@ class PaymentMethod(StripeModel):
 
     stripe_class = stripe.PaymentMethod
 
+    def _attach_objects_hook(self, cls, data):
+        customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
+        if customer:
+            self.customer = customer
+        else:
+            self.customer = None
+
     @classmethod
     def attach(
         cls, payment_method, customer, api_key=djstripe_settings.STRIPE_SECRET_KEY

@@ -78,3 +78,24 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
                 "djstripe.Customer.default_payment_method",
             },
         )
+
+    def test_sync_null_customer(self):
+        payment_method = PaymentMethod.sync_from_stripe_data(
+            deepcopy(FAKE_PAYMENT_METHOD_I)
+        )
+
+        self.assertIsNotNone(payment_method.customer)
+
+        # simulate remote detach
+        fake_payment_method_no_customer = deepcopy(FAKE_PAYMENT_METHOD_I)
+        fake_payment_method_no_customer["customer"] = None
+
+        payment_method = PaymentMethod.sync_from_stripe_data(
+            fake_payment_method_no_customer
+        )
+
+        self.assertIsNone(payment_method.customer)
+
+        self.assert_fks(
+            payment_method, expected_blank_fks={"djstripe.PaymentMethod.customer"}
+        )
