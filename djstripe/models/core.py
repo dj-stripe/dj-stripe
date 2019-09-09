@@ -170,6 +170,12 @@ class Charge(StripeModel):
         related_name="charges",
         help_text="PaymentIntent associated with this charge, if one exists.",
     )
+    # TODO payment_method
+    payment_method_details = JSONField(
+        help_text="Details about the payment method at the time of the transaction.",
+        null=True,
+        blank=True,
+    )
     receipt_email = models.TextField(
         max_length=800,  # yup, 800.
         default="",
@@ -182,6 +188,15 @@ class Charge(StripeModel):
         blank=True,
         help_text="The transaction number that appears "
         "on email receipts sent for this charge.",
+    )
+    receipt_url = models.TextField(
+        max_length=5000,
+        default="",
+        blank=True,
+        help_text="This is the URL to view the receipt for this charge. "
+        "The receipt is kept up-to-date to the latest state of the charge, "
+        "including any refunds. If the charge is for an Invoice, "
+        "the receipt will be stylized as an Invoice receipt.",
     )
     refunded = models.BooleanField(
         default=False,
