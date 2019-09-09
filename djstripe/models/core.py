@@ -170,7 +170,13 @@ class Charge(StripeModel):
         related_name="charges",
         help_text="PaymentIntent associated with this charge, if one exists.",
     )
-    # TODO payment_method
+    payment_method = models.ForeignKey(
+        "PaymentMethod",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="charges",
+        help_text="PaymentMethod used in this charge.",
+    )
     payment_method_details = JSONField(
         help_text="Details about the payment method at the time of the transaction.",
         null=True,
