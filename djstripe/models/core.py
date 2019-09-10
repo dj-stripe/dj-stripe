@@ -1455,8 +1455,8 @@ class PaymentIntent(StripeModel):
         enum=enums.CaptureMethod,
         help_text="Capture method of this PaymentIntent, one of automatic or manual.",
     )
-    client_secret = models.CharField(
-        max_length=255,
+    client_secret = models.TextField(
+        max_length=5000,
         help_text=(
             "The client secret of this PaymentIntent. "
             "Used for client-side retrieval using a publishable key."
@@ -1476,6 +1476,7 @@ class PaymentIntent(StripeModel):
         help_text="Customer this PaymentIntent is for if one exists.",
     )
     description = models.TextField(
+        max_length=1000,
         default="",
         help_text=(
             "An arbitrary string attached to the object. "
@@ -1519,7 +1520,6 @@ class PaymentIntent(StripeModel):
         )
     )
     receipt_email = models.CharField(
-        null=True,
         blank=True,
         max_length=255,
         help_text=(
@@ -1551,13 +1551,12 @@ class PaymentIntent(StripeModel):
         null=True, blank=True, help_text="Shipping information for this PaymentIntent."
     )
     statement_descriptor = models.CharField(
-        max_length=255,
-        null=True,
+        max_length=22,
         blank=True,
         help_text=(
-            "Extra information about a PaymentIntent. "
-            "This will appear on your customer’s statement when this "
-            "PaymentIntent succeeds in creating a charge."
+            "For non-card charges, you can use this value as the complete description "
+            "that appears on your customers’ statements. Must contain at least one "
+            "letter, maximum 22 characters."
         ),
     )
     status = StripeEnumField(
@@ -1645,7 +1644,6 @@ class SetupIntent(StripeModel):
 
     application = models.CharField(
         max_length=255,
-        null=True,
         blank=True,
         help_text="ID of the Connect application that created the SetupIntent.",
     )
@@ -1657,9 +1655,8 @@ class SetupIntent(StripeModel):
             "requested_by_customer, or duplicate"
         ),
     )
-    client_secret = models.CharField(
-        max_length=255,
-        null=True,
+    client_secret = models.TextField(
+        max_length=5000,
         blank=True,
         help_text=(
             "The client secret of this SetupIntent. "

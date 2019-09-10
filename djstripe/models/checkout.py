@@ -16,25 +16,22 @@ class Session(StripeModel):
 
     billing_address_collection = StripeEnumField(
         enum=enums.SessionBillingAddressCollection,
-        null=True,
         blank=True,
         help_text=(
             "The value (auto or required) for whether Checkout"
             "collected the customer’s billing address."
         ),
     )
-    cancel_url = models.CharField(
-        max_length=255,
-        null=True,
+    cancel_url = models.TextField(
+        max_length=5000,
         blank=True,
         help_text=(
             "The URL the customer will be directed to if they"
             "decide to cancel payment and return to your website."
         ),
     )
-    client_reference_id = models.CharField(
-        max_length=255,
-        null=True,
+    client_reference_id = models.TextField(
+        max_length=5000,
         blank=True,
         help_text=(
             "A unique string to reference the Checkout Session."
@@ -50,7 +47,6 @@ class Session(StripeModel):
     )
     customer_email = models.CharField(
         max_length=255,
-        null=True,
         blank=True,
         help_text=(
             "If provided, this value will be used when the Customer object is created."
@@ -63,7 +59,6 @@ class Session(StripeModel):
     )
     locale = models.CharField(
         max_length=255,
-        null=True,
         blank=True,
         help_text=(
             "The IETF language tag of the locale Checkout is displayed in."
@@ -72,7 +67,6 @@ class Session(StripeModel):
     )
     mode = StripeEnumField(
         enum=enums.SessionMode,
-        null=True,
         blank=True,
         help_text="The mode of the Checkout Session, "
         "one of payment, setup, or subscription.",
@@ -89,7 +83,6 @@ class Session(StripeModel):
     )
     submit_type = StripeEnumField(
         enum=enums.SubmitTypeStatus,
-        null=True,
         blank=True,
         help_text="Describes the type of transaction being performed by Checkout"
         "in order to customize relevant text on the page, such as the submit button.",
@@ -100,9 +93,8 @@ class Session(StripeModel):
         on_delete=models.SET_NULL,
         help_text=("Subscription created if one or more plans were provided."),
     )
-    success_url = models.CharField(
-        max_length=255,
-        null=True,
+    success_url = models.TextField(
+        max_length=5000,
         blank=True,
         help_text=(
             "The URL the customer will be directed to after the payment or subscription"

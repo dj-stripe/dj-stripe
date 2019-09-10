@@ -518,7 +518,6 @@ class PaymentMethod(StripeModel):
     )
     type = models.CharField(
         max_length=255,
-        null=True,
         blank=True,
         help_text="The type of the PaymentMethod. An additional hash is included "
         "on the PaymentMethod with a name matching this value. It contains additional "
