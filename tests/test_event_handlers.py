@@ -27,6 +27,7 @@ from djstripe.models import (
 from . import (
     FAKE_BALANCE_TRANSACTION,
     FAKE_CARD,
+    FAKE_CARD_AS_PAYMENT_METHOD,
     FAKE_CHARGE,
     FAKE_CHARGE_II,
     FAKE_COUPON,
@@ -118,6 +119,11 @@ class TestChargeEvents(EventTestCase):
         return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
         autospec=True,
     )
+    @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
+        autospec=True,
+    )
     @patch("stripe.Event.retrieve", autospec=True)
     @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
@@ -136,6 +142,7 @@ class TestChargeEvents(EventTestCase):
         product_retrieve_mock,
         invoice_retrieve_mock,
         event_retrieve_mock,
+        paymentmethod_card_retrieve_mock,
         payment_intent_retrieve_mock,
         charge_retrieve_mock,
         balance_transaction_retrieve_mock,
@@ -408,11 +415,17 @@ class TestInvoiceEvents(EventTestCase):
     )
     @patch("stripe.Event.retrieve", autospec=True)
     @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
+        autospec=True,
+    )
+    @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     def test_invoice_created_no_existing_customer(
         self,
         product_retrieve_mock,
+        paymentmethod_card_retrieve_mock,
         event_retrieve_mock,
         invoice_retrieve_mock,
         payment_intent_retrieve_mock,
@@ -462,11 +475,17 @@ class TestInvoiceEvents(EventTestCase):
     @patch("stripe.Invoice.retrieve", autospec=True)
     @patch("stripe.Event.retrieve", autospec=True)
     @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
+        autospec=True,
+    )
+    @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     def test_invoice_created(
         self,
         product_retrieve_mock,
+        paymentmethod_card_retrieve_mock,
         event_retrieve_mock,
         invoice_retrieve_mock,
         payment_intent_retrieve_mock,
@@ -522,11 +541,17 @@ class TestInvoiceEvents(EventTestCase):
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
     )
     @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
+        autospec=True,
+    )
+    @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     def test_invoice_deleted(
         self,
         product_retrieve_mock,
+        paymentmethod_card_retrieve_mock,
         invoice_retrieve_mock,
         payment_intent_retrieve_mock,
         charge_retrieve_mock,
