@@ -345,14 +345,17 @@ class Card(LegacySourceMixin, StripeModel):
         or attaching them to a customer.
         (Source: https://stripe.com/docs/api/python#create_card_token)
 
-        :param exp_month: The card's expiration month.
-        :type exp_month: Two digit int
-        :param exp_year: The card's expiration year.
-        :type exp_year: Two or Four digit int
-        :param number: The card number
-        :type number: string without any separators (no spaces)
+        :param number: The card number without any separators (no spaces)
+        :type number: str
+        :param exp_month: The card's expiration month. (two digits)
+        :type exp_month: int
+        :param exp_year: The card's expiration year. (four digits)
+        :type exp_year: int
         :param cvc: Card security code.
-        :type cvc: string
+        :type cvc: str
+        :param api_key:
+        :type api_key: str
+        :rtype: stripe.Token
         """
 
         card = {
@@ -467,6 +470,9 @@ class Source(StripeModel):
     def detach(self):
         """
         Detach the source from its customer.
+
+        :return:
+        :rtype: bool
         """
 
         # First, wipe default source on all customers that use this.
@@ -542,9 +548,11 @@ class PaymentMethod(StripeModel):
         :param payment_method:
         :type payment_method: str, PaymentMethod
         :param customer:
-        :type customer: str, Customer
+        :type customer: Union[str, Customer]
         :param api_key:
+        :type api_key: str
         :return:
+        :rtype: PaymentMethod
         """
 
         if isinstance(payment_method, StripeModel):

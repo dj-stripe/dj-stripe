@@ -335,15 +335,16 @@ class Charge(StripeModel):
         :param amount: A positive decimal amount representing how much of this charge
             to refund.
             Can only refund up to the unrefunded amount remaining of the charge.
-        :trye amount: Decimal
+        :type amount: Decimal
         :param reason: String indicating the reason for the refund.
             If set, possible values are ``duplicate``, ``fraudulent``,
             and ``requested_by_customer``. Specifying ``fraudulent`` as the reason
             when you believe the charge to be fraudulent will
             help Stripe improve their fraud detection algorithms.
+        :param reason: str
 
-        :return: Stripe charge object
-        :rtype: dict
+        :return: Charge object
+        :rtype: Charge
         """
         charge_obj = self.api_retrieve().refund(
             amount=self._calculate_refund_amount(amount=amount), reason=reason

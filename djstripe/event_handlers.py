@@ -193,12 +193,14 @@ class CrudType(object):
         """
         Determine if the event verb is a crud_type (without the 'R') event.
 
+        :param event:
+        :type event: models.Event
         :param verb: The event verb to examine.
-        :type verb: string (``str``/`unicode``)
+        :type verb: str
         :param exact: If True, match crud_type to event verb string exactly.
-        :param type: ``bool``
+        :type exact: bool
         :returns: The CrudType state object.
-        :rtype: ``CrudType``
+        :rtype: CrudType
         """
         verb = verb or event.verb
 
@@ -243,16 +245,20 @@ def _handle_crud_like_event(
     ignored (but the event processing still succeeds).
 
     :param target_cls: The djstripe model being handled.
-    :type: ``djstripe.models.StripeModel``
+    :type target_cls: models.StripeModel
+    :param event: The event object
+    :type event: models.Event
     :param data: The event object data (defaults to ``event.data``).
     :param verb: The event verb (defaults to ``event.verb``).
+    :type verb: str
     :param id: The object Stripe ID (defaults to ``object.id``).
+    :type id: str
     :param customer: The customer object (defaults to ``event.customer``).
     :param crud_type: The CrudType object (determined by default).
     :param crud_exact: If True, match verb against CRUD type exactly.
     :param crud_valid: If True, CRUD type must match valid type.
     :returns: The object (if any) and the event CrudType.
-    :rtype: ``tuple(obj, CrudType)``
+    :rtype: Tuple[models.StripeModel, CrudType]
     """
     data = data or event.data
     id = id or data.get("object", {}).get("id", None)
