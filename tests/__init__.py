@@ -398,7 +398,9 @@ FAKE_PAYMENT_METHOD_I = load_fixture("payment_method_pm_fakefakefakefake0001.jso
 FAKE_SETUP_INTENT_I = {
     "id": "seti_fakefakefakefake0001",
     "object": "setup_intent",
+    "cancellation_reason": None,
     "payment_method_types": ["card"],
+    "status": "requires_payment_method",
     "usage": "off_session",
 }
 

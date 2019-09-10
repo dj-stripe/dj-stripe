@@ -210,6 +210,8 @@ class StripeModel(models.Model):
                     isinstance(field, (models.CharField, models.TextField))
                     and field_data is None
                 ):
+                    # TODO - this applies to StripeEnumField as well, since it
+                    #  sub-classes CharField, is that intentional?
                     field_data = ""
 
             result[field.name] = field_data
