@@ -58,6 +58,13 @@ Changes from API 2019-03-14:
 - Added new ``SubscriptionStatus.incomplete`` and ``SubscriptionStatus.incomplete_expired`` statuses (#974)
 - Added new ``BalanceTransactionType`` values (#983)
 
+2.0.5 (2019-09-12)
+------------------
+
+This is a bugfix-only version:
+
+- Avoid stripe==2.36.0 due to regression (#991)
+
 2.0.4 (2019-09-09)
 ------------------
 
