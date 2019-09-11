@@ -3,6 +3,13 @@
 History
 =======
 
+2.0.5 (unreleased)
+------------------
+
+This is a bugfix-only version:
+
+- Avoid stripe==2.36.0 due to regression (#991)
+
 2.0.4 (2019-09-09)
 ------------------
 
