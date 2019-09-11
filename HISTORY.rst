@@ -7,7 +7,7 @@ History
 ------------------
 
 - Dropped Django 2.0 support
-- The Python stripe library minimum version is now ``2.32.0``.
+- The Python stripe library minimum version is now ``2.32.0``, also ``2.36.0`` is excluded due to a regression (#991).
 - Dropped previously-deprecated ``Charge.fee_details`` property.
 - Dropped previously-deprecated ``Transfer.fee_details`` property.
 - Dropped previously-deprecated ``field_name`` parameter to ``sync_from_stripe_data``
