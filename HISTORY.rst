@@ -3,7 +3,7 @@
 History
 =======
 
-2.1.0 (unreleased)
+2.1.0 (2019-09-12)
 ------------------
 
 - Dropped Django 2.0 support
@@ -67,7 +67,7 @@ unreleased migrations on the master branch (migration numbers >=0004) have been 
 If you have been using the 2.1.0dev branch from master, you'll need to run the squashed
 migrations migrations before upgrading to >=2.1.0.
 
-The simplest way to do this is to ``pip install dj-stripe==2.1.0rc`` and migrate, alternatively check out that git tag.
+The simplest way to do this is to ``pip install dj-stripe==2.1.0rc0`` and migrate, alternatively check out the ``2.1.0rc0`` git tag.
 
 2.0.5 (2019-09-12)
 ------------------
