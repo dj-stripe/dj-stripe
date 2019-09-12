@@ -407,7 +407,7 @@ class StripeModel(models.Model):
             ):  # We want to ignore the Stripe API's object attribute
                 field = cls._meta.get_field(key)
                 if isinstance(field, StripeDecimalCurrencyAmountField):
-                    if not isinstance(amount, decimal.Decimal):
+                    if not isinstance(value, decimal.Decimal):
                         raise ValueError(
                             "{key} must be a decimal value representing dollars.".format(
                                 key=key
