@@ -345,14 +345,17 @@ class Card(LegacySourceMixin, StripeModel):
         or attaching them to a customer.
         (Source: https://stripe.com/docs/api/python#create_card_token)
 
-        :param exp_month: The card's expiration month.
-        :type exp_month: Two digit int
-        :param exp_year: The card's expiration year.
-        :type exp_year: Two or Four digit int
-        :param number: The card number
-        :type number: string without any separators (no spaces)
+        :param number: The card number without any separators (no spaces)
+        :type number: str
+        :param exp_month: The card's expiration month. (two digits)
+        :type exp_month: int
+        :param exp_year: The card's expiration year. (four digits)
+        :type exp_year: int
         :param cvc: Card security code.
-        :type cvc: string
+        :type cvc: str
+        :param api_key:
+        :type api_key: str
+        :rtype: stripe.Token
         """
 
         card = {
@@ -467,6 +470,9 @@ class Source(StripeModel):
     def detach(self):
         """
         Detach the source from its customer.
+
+        :return:
+        :rtype: bool
         """
 
         # First, wipe default source on all customers that use this.
@@ -518,7 +524,6 @@ class PaymentMethod(StripeModel):
     )
     type = models.CharField(
         max_length=255,
-        null=True,
         blank=True,
         help_text="The type of the PaymentMethod. An additional hash is included "
         "on the PaymentMethod with a name matching this value. It contains additional "
@@ -527,14 +532,43 @@ class PaymentMethod(StripeModel):
 
     stripe_class = stripe.PaymentMethod
 
+    def _attach_objects_hook(self, cls, data):
+        customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
+        if customer:
+            self.customer = customer
+        else:
+            self.customer = None
+
     @classmethod
     def attach(
-        cls,
-        payment_method_id,
-        stripe_customer,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        cls, payment_method, customer, api_key=djstripe_settings.STRIPE_SECRET_KEY
     ):
+        """
+        Attach a payment method to a customer
+        :param payment_method:
+        :type payment_method: str, PaymentMethod
+        :param customer:
+        :type customer: Union[str, Customer]
+        :param api_key:
+        :type api_key: str
+        :return:
+        :rtype: PaymentMethod
+        """
+
+        if isinstance(payment_method, StripeModel):
+            payment_method = payment_method.id
+
+        if isinstance(customer, StripeModel):
+            customer = customer.id
+
+        extra_kwargs = {}
+        if not isinstance(payment_method, stripe.PaymentMethod):
+            # send api_key if we're not passing in a Stripe object
+            # avoids "Received unknown parameter: api_key" since api uses the
+            # key cached in the Stripe object
+            extra_kwargs = {"api_key": api_key}
+
         stripe_payment_method = stripe.PaymentMethod.attach(
-            payment_method_id, customer=stripe_customer["id"], api_key=api_key
+            payment_method, customer=customer, **extra_kwargs
         )
         return cls.sync_from_stripe_data(stripe_payment_method)

@@ -216,6 +216,8 @@ class StripeModel(models.Model):
                     isinstance(field, (models.CharField, models.TextField))
                     and field_data is None
                 ):
+                    # TODO - this applies to StripeEnumField as well, since it
+                    #  sub-classes CharField, is that intentional?
                     field_data = ""
 
             result[field.name] = field_data
@@ -435,6 +437,7 @@ class StripeModel(models.Model):
         :type pending_relations: list
         :param save:
         :return:
+        :rtype: cls, bool
         """
         field = data.get(field_name)
         is_nested_data = field_name != "id"
@@ -533,7 +536,7 @@ class StripeModel(models.Model):
         database (i.e. ephemeral) then the invoice items are also not saved.
 
         :param target_cls: The target class to instantiate per invoice item.
-        :type target_cls: ``InvoiceItem``
+        :type target_cls:  Type[djstripe.models.InvoiceItem]
         :param data: The data dictionary received from the Stripe API.
         :type data: dict
         :param invoice: The invoice object that should hold the invoice items.
@@ -582,11 +585,11 @@ class StripeModel(models.Model):
         If the subscription item doesn't exist already then it is created.
 
         :param target_cls: The target class to instantiate per invoice item.
-        :type target_cls: ``SubscriptionItem``
+        :type target_cls: Type[djstripe.models.SubscriptionItem]
         :param data: The data dictionary received from the Stripe API.
         :type data: dict
-        :param invoice: The invoice object that should hold the invoice items.
-        :type invoice: ``djstripe.models.Subscription``
+        :param subscription: The subscription object that should hold the items.
+        :type subscription: djstripe.models.Subscription
         """
 
         items = data.get("items")
@@ -606,12 +609,12 @@ class StripeModel(models.Model):
     def _stripe_object_to_refunds(cls, target_cls, data, charge):
         """
         Retrieves Refunds for a charge
-        :param target_cls: The target class to instantiate per invoice item.
-        :type target_cls: ``Refund``
+        :param target_cls: The target class to instantiate per refund
+        :type target_cls: Type[djstripe.models.Refund]
         :param data: The data dictionary received from the Stripe API.
         :type data: dict
         :param charge: The charge object that refunds are for.
-        :type invoice: ``djstripe.models.Refund``
+        :type charge: djstripe.models.Refund
         :return:
         """
 
@@ -641,6 +644,7 @@ class StripeModel(models.Model):
 
         :param data: stripe object
         :type data: dict
+        :rtype: cls
         """
         current_ids = set()
         data_id = data.get("id")
@@ -684,4 +688,7 @@ class IdempotencyKey(models.Model):
 
     @property
     def is_expired(self):
+        """
+        :rtype: bool
+        """
         return timezone.now() > self.created + timedelta(hours=24)

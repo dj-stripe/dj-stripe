@@ -201,7 +201,10 @@ class Command(BaseCommand):
             djstripe.models.Invoice: [tests.FAKE_INVOICE],
             djstripe.models.Charge: [tests.FAKE_CHARGE],
             djstripe.models.PaymentIntent: [tests.FAKE_PAYMENT_INTENT_I],
-            djstripe.models.PaymentMethod: [tests.FAKE_PAYMENT_METHOD_I],
+            djstripe.models.PaymentMethod: [
+                tests.FAKE_PAYMENT_METHOD_I,
+                tests.FAKE_CARD_AS_PAYMENT_METHOD,
+            ],
             djstripe.models.BalanceTransaction: [tests.FAKE_BALANCE_TRANSACTION],
         }
 

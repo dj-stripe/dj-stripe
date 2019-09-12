@@ -111,6 +111,7 @@ class Charge(StripeModel):
         help_text="The customer associated with this charge.",
     )
     # XXX: destination
+    # TODO - has this been renamed to on_behalf_of?
     account = models.ForeignKey(
         "Account",
         on_delete=models.CASCADE,
@@ -151,7 +152,7 @@ class Charge(StripeModel):
         related_name="charges",
         help_text="The invoice this charge is for if one exists.",
     )
-    # TODO: on_behalf_of, order
+    # TODO: on_behalf_of (see account above), order
     outcome = JSONField(
         help_text="Details about whether or not the payment was accepted, and why.",
         null=True,
@@ -169,6 +170,18 @@ class Charge(StripeModel):
         related_name="charges",
         help_text="PaymentIntent associated with this charge, if one exists.",
     )
+    payment_method = models.ForeignKey(
+        "PaymentMethod",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="charges",
+        help_text="PaymentMethod used in this charge.",
+    )
+    payment_method_details = JSONField(
+        help_text="Details about the payment method at the time of the transaction.",
+        null=True,
+        blank=True,
+    )
     receipt_email = models.TextField(
         max_length=800,  # yup, 800.
         default="",
@@ -181,6 +194,15 @@ class Charge(StripeModel):
         blank=True,
         help_text="The transaction number that appears "
         "on email receipts sent for this charge.",
+    )
+    receipt_url = models.TextField(
+        max_length=5000,
+        default="",
+        blank=True,
+        help_text="This is the URL to view the receipt for this charge. "
+        "The receipt is kept up-to-date to the latest state of the charge, "
+        "including any refunds. If the charge is for an Invoice, "
+        "the receipt will be stylized as an Invoice receipt.",
     )
     refunded = models.BooleanField(
         default=False,
@@ -313,15 +335,16 @@ class Charge(StripeModel):
         :param amount: A positive decimal amount representing how much of this charge
             to refund.
             Can only refund up to the unrefunded amount remaining of the charge.
-        :trye amount: Decimal
+        :type amount: Decimal
         :param reason: String indicating the reason for the refund.
             If set, possible values are ``duplicate``, ``fraudulent``,
             and ``requested_by_customer``. Specifying ``fraudulent`` as the reason
             when you believe the charge to be fraudulent will
             help Stripe improve their fraud detection algorithms.
+        :param reason: str
 
-        :return: Stripe charge object
-        :rtype: dict
+        :return: Charge object
+        :rtype: Charge
         """
         charge_obj = self.api_retrieve().refund(
             amount=self._calculate_refund_amount(amount=amount), reason=reason
@@ -437,6 +460,17 @@ class Customer(StripeModel):
     invoice_settings = JSONField(
         null=True, blank=True, help_text="The customer's default invoice settings."
     )
+    # default_payment_method is actually nested inside invoice_settings
+    # this field is a convenience to provide the foreign key
+    default_payment_method = models.ForeignKey(
+        "PaymentMethod",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="default payment method used for subscriptions and invoices "
+        "for the customer.",
+    )
     name = models.TextField(
         max_length=5000,
         default="",
@@ -494,6 +528,11 @@ class Customer(StripeModel):
         if discount:
             data["coupon_start"] = discount["start"]
             data["coupon_end"] = discount["end"]
+
+        # Populate the object id for our default_payment_method field (or set it None)
+        data["default_payment_method"] = data.get("invoice_settings", {}).get(
+            "default_payment_method"
+        )
 
         return data
 
@@ -865,20 +904,35 @@ class Customer(StripeModel):
 
         return new_payment_method.resolve()
 
-    # TODO - support setting default payment method
-    #  (as per set_default param to add_card), see
-    #  see https://stripe.com/docs/api/payment_methods/attach
-    def add_payment_method(self, payment_method_id):
+    def add_payment_method(self, payment_method, set_default=True):
         """
         Adds an already existing payment method to this customer's account
 
-        :param payment_method_id: ID of the PaymentMethod to be attached to the customer
+        :param payment_method: PaymentMethod to be attached to the customer
+        :type payment_method: str, PaymentMethod
+        :param set_default: If true, this will be set as the default_payment_method
+        :type: bool
         :return:
         """
         from .payment_methods import PaymentMethod
 
         stripe_customer = self.api_retrieve()
-        PaymentMethod.attach(payment_method_id, stripe_customer)
+        payment_method = PaymentMethod.attach(payment_method, stripe_customer)
+
+        if set_default:
+            stripe_customer["invoice_settings"][
+                "default_payment_method"
+            ] = payment_method.id
+            stripe_customer.save()
+
+            # Refresh self from the stripe customer, this should have two effects:
+            # 1) sets self.default_payment_method (we rely on logic in
+            # Customer._manipulate_stripe_object_hook to do this)
+            # 2) updates self.invoice_settings.default_payment_methods
+            self.sync_from_stripe_data(stripe_customer)
+            self.refresh_from_db()
+
+        return payment_method
 
     def purge(self):
         try:
@@ -1028,7 +1082,9 @@ class Customer(StripeModel):
     def can_charge(self):
         """Determines if this customer is able to be charged."""
 
-        return self.has_valid_source() and self.date_purged is None
+        return (
+            self.has_valid_source() or self.default_payment_method is not None
+        ) and self.date_purged is None
 
     def send_invoice(self):
         """
@@ -1392,22 +1448,22 @@ class PaymentIntent(StripeModel):
         ),
     )
 
-    # TODO - this should probably be either a nullable Enum or a non-nullable Charfield
-    cancellation_reason = models.CharField(
-        max_length=255,
+    cancellation_reason = StripeEnumField(
+        enum=enums.PaymentIntentCancellationReason,
         blank=True,
-        null=True,
         help_text=(
-            "User-given reason for cancellation of this PaymentIntent, "
-            "one of duplicate, fraudulent, requested_by_customer, or failed_invoice."
+            "Reason for cancellation of this PaymentIntent, either user-provided "
+            "(duplicate, fraudulent, requested_by_customer, or abandoned) or "
+            "generated by Stripe internally (failed_invoice, void_invoice, "
+            "or automatic)."
         ),
     )
     capture_method = StripeEnumField(
         enum=enums.CaptureMethod,
         help_text="Capture method of this PaymentIntent, one of automatic or manual.",
     )
-    client_secret = models.CharField(
-        max_length=255,
+    client_secret = models.TextField(
+        max_length=5000,
         help_text=(
             "The client secret of this PaymentIntent. "
             "Used for client-side retrieval using a publishable key."
@@ -1427,6 +1483,7 @@ class PaymentIntent(StripeModel):
         help_text="Customer this PaymentIntent is for if one exists.",
     )
     description = models.TextField(
+        max_length=1000,
         default="",
         help_text=(
             "An arbitrary string attached to the object. "
@@ -1470,7 +1527,6 @@ class PaymentIntent(StripeModel):
         )
     )
     receipt_email = models.CharField(
-        null=True,
         blank=True,
         max_length=255,
         help_text=(
@@ -1502,13 +1558,12 @@ class PaymentIntent(StripeModel):
         null=True, blank=True, help_text="Shipping information for this PaymentIntent."
     )
     statement_descriptor = models.CharField(
-        max_length=255,
-        null=True,
+        max_length=22,
         blank=True,
         help_text=(
-            "Extra information about a PaymentIntent. "
-            "This will appear on your customer’s statement when this "
-            "PaymentIntent succeeds in creating a charge."
+            "For non-card charges, you can use this value as the complete description "
+            "that appears on your customers’ statements. Must contain at least one "
+            "letter, maximum 22 characters."
         ),
     )
     status = StripeEnumField(
@@ -1596,22 +1651,19 @@ class SetupIntent(StripeModel):
 
     application = models.CharField(
         max_length=255,
-        null=True,
         blank=True,
         help_text="ID of the Connect application that created the SetupIntent.",
     )
-    cancellation_reason = models.CharField(
-        max_length=255,
-        null=True,
+    cancellation_reason = StripeEnumField(
+        enum=enums.SetupIntentCancellationReason,
         blank=True,
         help_text=(
             "Reason for cancellation of this SetupIntent, one of abandoned, "
             "requested_by_customer, or duplicate"
         ),
     )
-    client_secret = models.CharField(
-        max_length=255,
-        null=True,
+    client_secret = models.TextField(
+        max_length=5000,
         blank=True,
         help_text=(
             "The client secret of this SetupIntent. "

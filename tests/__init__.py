@@ -268,6 +268,12 @@ class CardDict(LegacySourceDict):
 
 
 FAKE_CARD = CardDict(load_fixture("card_card_fakefakefakefakefake0001.json"))
+
+# FAKE_CARD, but accessed as a PaymentMethod
+FAKE_CARD_AS_PAYMENT_METHOD = load_fixture(
+    "payment_method_card_fakefakefakefakefake0001.json"
+)
+
 FAKE_CARD_II = CardDict(load_fixture("card_card_fakefakefakefakefake0002.json"))
 
 FAKE_CARD_III = CardDict(
@@ -398,7 +404,9 @@ FAKE_PAYMENT_METHOD_I = load_fixture("payment_method_pm_fakefakefakefake0001.jso
 FAKE_SETUP_INTENT_I = {
     "id": "seti_fakefakefakefake0001",
     "object": "setup_intent",
+    "cancellation_reason": None,
     "payment_method_types": ["card"],
+    "status": "requires_payment_method",
     "usage": "off_session",
 }
 

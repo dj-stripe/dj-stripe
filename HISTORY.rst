@@ -7,7 +7,7 @@ History
 ------------------
 
 - Dropped Django 2.0 support
-- The Python stripe library minimum version is now ``2.32.0``.
+- The Python stripe library minimum version is now ``2.32.0``, also ``2.36.0`` is excluded due to a regression (#991).
 - Dropped previously-deprecated ``Charge.fee_details`` property.
 - Dropped previously-deprecated ``Transfer.fee_details`` property.
 - Dropped previously-deprecated ``field_name`` parameter to ``sync_from_stripe_data``
@@ -55,8 +55,28 @@ Changes from API 2019-03-14:
 - Added ``Invoice.status_transitions``
 - Renamed ``Customer.account_balance`` to ``Customer.balance`` (added deprecated property for the old name)
 - Renamed ``Customer.payment_methods`` to ``Customer.customer_payment_methods``
+- Added new ``SubscriptionStatus.incomplete`` and ``SubscriptionStatus.incomplete_expired`` statuses (#974)
+- Added new ``BalanceTransactionType`` values (#983)
 
-2.0.4 (unreleased)
+Squashed dev migrations
+^^^^^^^^^^^^^^^^^^^^^^^
+
+As per our `migration policy <https://dj-stripe.readthedocs.io/en/latest/project/contributing.html#squash-of-unreleased-migrations-on-master>`_
+unreleased migrations on the master branch (migration numbers >=0004) have been squashed.
+
+If you have been using the 2.1.0dev branch from master, you'll need to run the squashed
+migrations migrations before upgrading to >=2.1.0.
+
+The simplest way to do this is to ``pip install dj-stripe==2.1.0rc`` and migrate, alternatively check out that git tag.
+
+2.0.5 (2019-09-12)
+------------------
+
+This is a bugfix-only version:
+
+- Avoid stripe==2.36.0 due to regression (#991)
+
+2.0.4 (2019-09-09)
 ------------------
 
 This is a bugfix-only version:
