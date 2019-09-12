@@ -410,18 +410,16 @@ class StripeModel(models.Model):
                 if isinstance(field, StripeDecimalCurrencyAmountField):
                     if not isinstance(value, decimal.Decimal):
                         raise ValueError(
-                            "{key} must be a decimal value representing dollars.".format(
-                                key=key
-                            )
+                            "{key} must be a decimal value "
+                            "representing dollars.".format(key=key)
                         )
                     api_kwargs[key] = int(api_kwargs[key] * 100)
                 if isinstance(
                     field, StripeQuantumCurrencyAmountField
                 ) and not isinstance(value, int):
                     raise ValueError(
-                        "{key} must be an integer value representing cents.".format(
-                            key=key
-                        )
+                        "{key} must be an integer value "
+                        "representing cents.".format(key=key)
                     )
             if isinstance(value, StripeModel):
                 api_kwargs[key] = api_kwargs[key].id
