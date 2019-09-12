@@ -401,18 +401,20 @@ class StripeModel(models.Model):
     def create(cls, **kwargs):
         api_kwargs = dict(kwargs)
 
-        for k, v in api_kwargs.items():
-            if k != "object":  # We want to ignore the Stripe API's object attribute
-                field = cls._meta.get_field(k)
-                if isinstance(field, StripeDecimalCurrencyAmountField) or isinstance(
-                    field, StripeQuantumCurrencyAmountField
-                ):
-                    api_kwargs[k] = int(api_kwargs[k] * 100)
-            if isinstance(v, StripeModel):
-                api_kwargs[k] = api_kwargs[k].id
+        for key, value in api_kwargs.items():
+            if key != "object" and not key.endswith("_decimal"):  # We want to ignore the Stripe API's object attribute
+                field = cls._meta.get_field(key)
+                if isinstance(field, StripeDecimalCurrencyAmountField):
+                    if not isinstance(amount, decimal.Decimal):
+                        raise ValueError("{key} must be a decimal value representing dollars.".format(key=key))
+                    api_kwargs[key] = int(api_kwargs[key] * 100)
+                if isinstance(field, StripeQuantumCurrencyAmountField) and not isinstance(value, int):
+                    raise ValueError("{key} must be an integer value representing cents.".format(key=key))
+            if isinstance(value, StripeModel):
+                api_kwargs[key] = api_kwargs[key].id
 
-        stripe_plan = cls._api_create(**api_kwargs)
-        obj = cls.sync_from_stripe_data(stripe_plan)
+        stripe_obj = cls._api_create(**api_kwargs)
+        obj = cls.sync_from_stripe_data(stripe_obj)
 
         return obj
 
