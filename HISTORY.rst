@@ -3,7 +3,7 @@
 History
 =======
 
-2.1.0 (unreleased)
+2.1.0 (2019-09-12)
 ------------------
 
 - Dropped Django 2.0 support
