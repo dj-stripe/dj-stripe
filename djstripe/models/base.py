@@ -11,8 +11,8 @@ from .. import settings as djstripe_settings
 from ..fields import (
     JSONField,
     StripeDateTimeField,
-    StripeIdField,
     StripeDecimalCurrencyAmountField,
+    StripeIdField,
     StripeQuantumCurrencyAmountField,
 )
 from ..managers import StripeModelManager
