@@ -29,26 +29,6 @@ def fix_djstripepaymentmethod_index_name_backwards(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    replaces = [
-        ("djstripe", "0004_auto_20190612_0850"),
-        ("djstripe", "0005_auto_20190710_1023"),
-        ("djstripe", "0006_auto_20190729_1329"),
-        ("djstripe", "0007_auto_20190804_0539"),
-        ("djstripe", "0008_auto_20190817_0053"),
-        ("djstripe", "0009_auto_20190822_0948"),
-        ("djstripe", "0010_auto_20190828_0844"),
-        ("djstripe", "0011_auto_20190828_0852"),
-        ("djstripe", "0012_auto_20190902_1713"),
-        ("djstripe", "0013_auto_20190903_0230"),
-        ("djstripe", "0014_auto_20190906_2013"),
-        ("djstripe", "0015_customer_default_payment_method"),
-        ("djstripe", "0016_auto_20190909_1002"),
-        ("djstripe", "0017_auto_20190909_1123"),
-        ("djstripe", "0018_auto_20190910_0759"),
-        ("djstripe", "0019_auto_20190910_0827"),
-        ("djstripe", "0020_charge_payment_method"),
-    ]
-
     dependencies = [
         ("djstripe", "0003_auto_20181117_2328_squashed_0004_auto_20190227_2114")
     ]
