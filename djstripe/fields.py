@@ -47,14 +47,22 @@ class StripeCurrencyCodeField(models.CharField):
 
 
 class StripeQuantumCurrencyAmountField(models.IntegerField):
+    """
+    A field used to store currency amounts in cents (etc) as per stripe.
+    """
+
     pass
 
 
 class StripeDecimalCurrencyAmountField(models.DecimalField):
     """
-    A field used to define currency according to djstripe logic.
+    A legacy field to store currency amounts in dollars (etc).
 
-    Stripe is always in cents. djstripe stores everything in dollars.
+    Stripe is always in cents. Historically djstripe stored everything in dollars.
+
+    Note: Don't use this for new fields, use StripeQuantumCurrencyAmountField instead.
+    We're planning on migrating existing fields in dj-stripe 3.0,
+    see https://github.com/dj-stripe/dj-stripe/issues/955
     """
 
     def __init__(self, *args, **kwargs):
