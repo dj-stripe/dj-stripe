@@ -3,6 +3,13 @@
 History
 =======
 
+2.1.1 (unreleased)
+------------------
+
+This is a bugfix-only version:
+
+- Updated webhook signals list (#1000)
+
 2.1.0 (2019-09-12)
 ------------------
 
