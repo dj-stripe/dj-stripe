@@ -8,6 +8,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 
+from . import settings as djstripe_settings
 from .models import WebhookEventTrigger
 
 logger = logging.getLogger(__name__)
@@ -34,8 +35,12 @@ class ProcessWebhookView(View):
 
         trigger = WebhookEventTrigger.from_request(request)
 
-        if trigger.is_test_event:
-            # Since we don't do signature verification, we have to skip trigger.valid
+        if (
+            trigger.is_test_event
+            and djstripe_settings.WEBHOOK_VALIDATION != "verify_signature"
+        ):
+            # Since we're not doing signature verification,
+            # we have to skip trigger.valid
             return HttpResponse("Test webhook successfully received!")
 
         if not trigger.valid:

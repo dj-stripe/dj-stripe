@@ -145,10 +145,6 @@ class WebhookEventTrigger(models.Model):
         if "id" not in local_data or "livemode" not in local_data:
             return False
 
-        if self.is_test_event:
-            logger.info("Test webhook received: {}".format(local_data))
-            return False
-
         if djstripe_settings.WEBHOOK_VALIDATION is None:
             # validation disabled
             return True
