@@ -960,12 +960,15 @@ class Subscription(StripeModel):
 
     A subscription still in its trial period is ``trialing`` and moves to ``active``
     when the trial period is over.
+
     When payment to renew the subscription fails, the subscription becomes ``past_due``.
     After Stripe has exhausted all payment retry attempts, the subscription ends up
     with a status of either ``canceled`` or ``unpaid`` depending on your retry settings.
+
     Note that when a subscription has a status of ``unpaid``, no subsequent invoices
     will be attempted (invoices will be created, but then immediately
-     automatically closed.
+    automatically closed.
+
     Additionally, updating customer card details will not lead to Stripe retrying the
     latest invoice.).
     After receiving updated card details from a customer, you may choose to reopen and
@@ -1290,11 +1293,11 @@ class Subscription(StripeModel):
         A status is temporarily current when the subscription is canceled with the
         ``at_period_end`` flag.
         The subscription is still active, but is technically canceled and we're just
-         waiting for it to run out.
+        waiting for it to run out.
 
         You could use this method to give customers limited service after they've
         canceled. For example, a video on demand service could only allow customers
-         to download their libraries and do nothing else when their
+        to download their libraries and do nothing else when their
         subscription is temporarily current.
         """
 

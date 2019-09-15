@@ -732,7 +732,7 @@ class Customer(StripeModel):
 
         Parameters not implemented:
 
-        * **receipt_email** - Since this is a charge on a customer,
+        * **receipt_email** - Since this is a charge on a customer, \
         the customer's email address is used.
 
 
@@ -823,20 +823,20 @@ class Customer(StripeModel):
             and True for all other invoice items.
         :type discountable: boolean
         :param invoice: An existing invoice to add this invoice item to.
-            When left blank, the invoice item will be added to the next upcoming
-             scheduled invoice.
-             Use this when adding invoice items in response to an
-             ``invoice.created`` webhook. You cannot add an invoice
+            When left blank, the invoice item will be added to the next upcoming \
+             scheduled invoice. \
+             Use this when adding invoice items in response to an \
+             ``invoice.created`` webhook. You cannot add an invoice \
             item to an invoice that has already been paid, attempted or closed.
         :type invoice: Invoice or string (invoice ID)
         :param metadata: A set of key/value pairs useful for storing
             additional information.
         :type metadata: dict
         :param subscription: A subscription to add this invoice item to.
-            When left blank, the invoice item will be be added to the next upcoming
-            scheduled invoice. When set, scheduled invoices for subscriptions other
-            than the specified subscription will ignore the invoice item.
-            Use this when you want to express that an invoice item has been accrued
+            When left blank, the invoice item will be be added to the next upcoming \
+            scheduled invoice. When set, scheduled invoices for subscriptions other \
+            than the specified subscription will ignore the invoice item. \
+            Use this when you want to express that an invoice item has been accrued \
             within the context of a particular subscription.
         :type subscription: Subscription or string (subscription ID)
 
