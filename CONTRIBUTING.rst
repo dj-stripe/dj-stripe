@@ -64,11 +64,22 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
 
     $ git clone git@github.com:your_name_here/dj-stripe.git
 
-3. Assuming the tests are run against PostgreSQL::
+3. Set up your test database.  If you're running tests using PostgreSQL::
 
     $ createdb djstripe
 
-4. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
+   or if you want to test vs sqlite (for convenience) or MySQL, they can be selected
+   by setting this environment variable::
+
+    $ export DJSTRIPE_TEST_DB_VENDOR=sqlite
+
+   or ::
+
+    $ export DJSTRIPE_TEST_DB_VENDOR=mysql
+
+   For postgres and mysql, the database host,port,username and password can be set with environment variables, see ``tests/settings.py``
+
+4. Install your local copy into a virtualenv. Assuming you have ``virtualenvwrapper`` installed, this is how you set up your fork for local development::
 
     $ mkvirtualenv dj-stripe
     $ cd dj-stripe/
@@ -80,11 +91,14 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
 
    Now you can make your changes locally.
 
-6. When you're done making changes, check that your changes pass the tests, including
-   testing other Python versions with tox. pytest will output both command line and
-   html coverage statistics and will warn you if your changes caused code coverage to drop.
-   Note that if your system time is not in UTC, some tests will fail. If you want to ignore
-   those tests, the --skip-utc command line option is available on runtests.py.::
+6. When you're done making changes, check that your changes pass the tests.
+   A quick test run can be done as follows::
+
+   $ DJSTRIPE_TEST_DB_VENDOR=sqlite pytest --reuse-db
+
+   You should also check that the tests pass with other python and Django versions with tox.
+   pytest will output both command line and html coverage statistics and will warn you
+   if your changes caused code coverage to drop.::
 
     $ pip install tox
     $ tox
