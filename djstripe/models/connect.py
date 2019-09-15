@@ -351,6 +351,29 @@ class Account(StripeModel):
 
         return data
 
+    @classmethod
+    def _create_from_stripe_object(
+        cls,
+        data,
+        current_ids=None,
+        pending_relations=None,
+        save=True,
+        stripe_account=None,
+    ):
+        """
+        Set the stripe_account to the id of the Account instance being created.
+
+        This ensures that the foreign-key relations that may exist in stripe are
+        fetched using the appropriate connected account ID.
+        """
+        return super()._create_from_stripe_object(
+            data=data,
+            current_ids=current_ids,
+            pending_relations=pending_relations,
+            save=save,
+            stripe_account=data["id"] if not stripe_account else stripe_account,
+        )
+
 
 class ApplicationFee(StripeModel):
     """

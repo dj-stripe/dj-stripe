@@ -189,7 +189,10 @@ class PlanTest(AssertStripeFksMixin, TestCase):
     def test_stripe_plan(self, plan_retrieve_mock):
         stripe_plan = self.plan.api_retrieve()
         plan_retrieve_mock.assert_called_once_with(
-            id=self.plan_data["id"], api_key=STRIPE_SECRET_KEY, expand=[]
+            id=self.plan_data["id"],
+            api_key=STRIPE_SECRET_KEY,
+            expand=[],
+            stripe_account=None,
         )
         plan = Plan.sync_from_stripe_data(stripe_plan)
         assert plan.amount_in_cents == plan.amount * 100

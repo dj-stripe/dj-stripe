@@ -142,14 +142,16 @@ class LegacySourceMixin:
 
         self.delete()
 
-    def api_retrieve(self, api_key=None):
+    def api_retrieve(self, api_key=None, stripe_account=None):
         # OVERRIDING the parent version of this function
         # Cards & Banks Accounts must be manipulated through a customer or account.
         # TODO: When managed accounts are supported, this method needs to check if
         # either a customer or account is supplied to determine the
         # correct object to use.
         api_key = api_key or self.default_api_key
-        customer = self.customer.api_retrieve(api_key=api_key)
+        customer = self.customer.api_retrieve(
+            api_key=api_key, stripe_account=stripe_account
+        )
 
         # If the customer is deleted, the sources attribute will be absent.
         # eg. {"id": "cus_XXXXXXXX", "deleted": True}
@@ -158,6 +160,8 @@ class LegacySourceMixin:
             # like an invalid ID error.
             raise InvalidRequestError("No such source: %s" % (self.id), "id")
 
+        # This will retrieve the source using the account ID where the customer resides,
+        # so we don't have to pass `stripe_account`.
         return customer.sources.retrieve(self.id, expand=self.expand_fields)
 
 

@@ -211,7 +211,10 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
         charge_retrieve_mock.assert_not_called()
         balance_transaction_retrieve_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY, expand=[], id=FAKE_BALANCE_TRANSACTION["id"]
+            api_key=STRIPE_SECRET_KEY,
+            expand=[],
+            id=FAKE_BALANCE_TRANSACTION["id"],
+            stripe_account=None,
         )
 
         self.assert_fks(
@@ -304,6 +307,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
             api_key=STRIPE_SECRET_KEY,
             expand=[],
             id=FAKE_BALANCE_TRANSACTION_REFUND["id"],
+            stripe_account=None,
         )
 
         refunds = list(charge_refunded.refunds.all())
@@ -397,11 +401,13 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
                     api_key=STRIPE_SECRET_KEY,
                     expand=[],
                     id=FAKE_BALANCE_TRANSACTION["id"],
+                    stripe_account=None,
                 ),
                 call(
                     api_key=STRIPE_SECRET_KEY,
                     expand=[],
                     id=FAKE_BALANCE_TRANSACTION_REFUND["id"],
+                    stripe_account=None,
                 ),
             ]
         )
@@ -549,7 +555,10 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         charge_retrieve_mock.assert_not_called()
 
         balance_transaction_retrieve_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY, expand=[], id=FAKE_BALANCE_TRANSACTION["id"]
+            api_key=STRIPE_SECRET_KEY,
+            expand=[],
+            id=FAKE_BALANCE_TRANSACTION["id"],
+            stripe_account=None,
         )
 
         self.assert_fks(
@@ -604,7 +613,10 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
         charge_retrieve_mock.assert_not_called()
         balance_transaction_retrieve_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY, expand=[], id=FAKE_BALANCE_TRANSACTION["id"]
+            api_key=STRIPE_SECRET_KEY,
+            expand=[],
+            id=FAKE_BALANCE_TRANSACTION["id"],
+            stripe_account=None,
         )
 
         self.assert_fks(
@@ -687,7 +699,10 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
         charge_retrieve_mock.assert_not_called()
         balance_transaction_retrieve_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY, expand=[], id=FAKE_BALANCE_TRANSACTION["id"]
+            api_key=STRIPE_SECRET_KEY,
+            expand=[],
+            id=FAKE_BALANCE_TRANSACTION["id"],
+            stripe_account=None,
         )
 
         self.assert_fks(
@@ -763,7 +778,10 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
         charge_retrieve_mock.assert_not_called()
         balance_transaction_retrieve_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY, expand=[], id=FAKE_BALANCE_TRANSACTION["id"]
+            api_key=STRIPE_SECRET_KEY,
+            expand=[],
+            id=FAKE_BALANCE_TRANSACTION["id"],
+            stripe_account=None,
         )
 
         self.assert_fks(charge, expected_blank_fks=self.default_expected_blank_fks)
