@@ -1068,9 +1068,14 @@ class Customer(StripeModel):
     def valid_subscriptions(self):
         """
         Returns this customer's valid subscriptions
-        (subscriptions that aren't cancelled).
+        (subscriptions that aren't canceled or incomplete_expired).
         """
-        return self.subscriptions.exclude(status=enums.SubscriptionStatus.canceled)
+        return self.subscriptions.exclude(
+            status__in=[
+                enums.SubscriptionStatus.canceled,
+                enums.SubscriptionStatus.incomplete_expired,
+            ]
+        )
 
     @property
     def subscription(self):

@@ -10,6 +10,7 @@ This is a bugfix-only version:
 
 - Updated webhook signals list (#1000)
 - Fixed issue syncing PaymentIntent with destination charge (#960)
+- Fixed `Customer.subscription` & `.valid_subscriptions()` to ignore `status=incomplete_expired` (#1006)
 
 Upcoming migration of currency fields (storage as cents instead of dollars)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
