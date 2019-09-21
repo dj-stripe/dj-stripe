@@ -642,7 +642,7 @@ Other changes
 * CancelSubscriptionView redirect is now more flexible (Thanks @jleclanche) #418
 * Customer.sync_cards() (Thanks @jleclanche) #438
 * Many stability fixes, bugfixes, and code cleanup (Thanks @jleclanche)
-* Support syncing cancelled subscriptions (Thanks @jleclanche) #443
+* Support syncing canceled subscriptions (Thanks @jleclanche) #443
 * Improved admin interface (Thanks @jleclanche with @jameshiew) #451
 * Support concurrent TEST + LIVE API keys (Fix webhook event processing for both modes) (Thanks @jleclanche) #461
 * Added Stripe Dashboard link to admin change panel (Thanks @jleclanche) #465
@@ -723,7 +723,7 @@ Other changes
 * Fixed create a token call in change_card.html (Thanks @dollydagr)
 * Fix ``charge.dispute.closed`` typo. (Thanks @ipmb)
 * Fix contributing docs formatting. (Thanks @audreyr)
-* Fix subscription cancelled_at_period_end field sync on plan upgrade (Thanks @nigma)
+* Fix subscription canceled_at_period_end field sync on plan upgrade (Thanks @nigma)
 * Remove "account" bug in Middleware (Thanks @sromero84)
 * Fix correct plan selection on subscription in subscribe_form template. (Thanks Yasmine Charif)
 * Fix subscription status in account, _subscription_status, and cancel_subscription templates. (Thanks Yasmine Charif)

@@ -128,7 +128,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
-    def test_is_status_temporarily_current_false_and_cancelled(
+    def test_is_status_temporarily_current_false_and_canceled(
         self, customer_retrieve_mock, product_retrieve_mock, plan_retrieve_mock
     ):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)

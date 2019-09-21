@@ -66,7 +66,7 @@ class SubscriptionRestView(APIView):
 
     def delete(self, request, **kwargs):
         """
-        Mark the customers current subscription as cancelled.
+        Mark the customers current subscription as canceled.
 
         Returns with status code 204.
         """

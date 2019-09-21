@@ -131,14 +131,14 @@ class RestSubscriptionTest(APITestCase):
             subscription.save()
             return subscription
 
-        fake_cancelled_subscription = deepcopy(FAKE_SUBSCRIPTION)
+        fake_canceled_subscription = deepcopy(FAKE_SUBSCRIPTION)
 
         with patch(
             "stripe.Product.retrieve",
             return_value=deepcopy(FAKE_PRODUCT),
             autospec=True,
         ):
-            Subscription.sync_from_stripe_data(fake_cancelled_subscription)
+            Subscription.sync_from_stripe_data(fake_canceled_subscription)
 
         cancel_subscription_mock.side_effect = _cancel_sub
 
@@ -148,7 +148,7 @@ class RestSubscriptionTest(APITestCase):
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-        # Cancelled means flagged as cancelled, so it should still be there
+        # Cancelled means flagged as canceled, so it should still be there
         self.assertEqual(1, Subscription.objects.count())
         self.assertEqual(
             Subscription.objects.first().status, SubscriptionStatus.canceled

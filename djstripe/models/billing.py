@@ -1221,7 +1221,7 @@ class Subscription(StripeModel):
             of the subscription until the end of the current period. Default is False.
         :type at_period_end: boolean
 
-        .. important:: If a subscription is cancelled during a trial period, \
+        .. important:: If a subscription is canceled during a trial period, \
         the ``at_period_end`` flag will be overridden to False so that the trial ends \
         immediately and the customer's card isn't charged.
         """
