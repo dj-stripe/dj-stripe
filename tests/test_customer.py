@@ -1539,9 +1539,52 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.customer.subscribe(plan=plan, charge_immediately=False)
 
         self.assertEqual(2, self.customer.subscriptions.count())
+        self.assertEqual(2, len(self.customer.valid_subscriptions))
 
         with self.assertRaises(MultipleSubscriptionException):
             self.customer.subscription
+
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    def test_subscription_shortcut_with_invalid_subscriptions(
+        self, product_retrieve_mock, customer_retrieve_mock
+    ):
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+
+        self.assert_fks(plan, expected_blank_fks={})
+
+        fake_subscriptions = [
+            deepcopy(FAKE_SUBSCRIPTION),
+            deepcopy(FAKE_SUBSCRIPTION),
+            deepcopy(FAKE_SUBSCRIPTION),
+        ]
+
+        # update the status of all but one to be invalid,
+        # we need to also change the id for sync to work
+        fake_subscriptions[1]["status"] = "canceled"
+        fake_subscriptions[1]["id"] = fake_subscriptions[1]["id"] + "foo1"
+        fake_subscriptions[2]["status"] = "incomplete_expired"
+        fake_subscriptions[2]["id"] = fake_subscriptions[2]["id"] + "foo2"
+
+        for fake_subscription in fake_subscriptions:
+            with patch(
+                "stripe.Subscription.create",
+                autospec=True,
+                side_effect=[fake_subscription],
+            ):
+                self.customer.subscribe(plan=plan, charge_immediately=False)
+
+        self.assertEqual(3, self.customer.subscriptions.count())
+        self.assertEqual(1, len(self.customer.valid_subscriptions))
+        self.assertEqual(
+            self.customer.valid_subscriptions[0], self.customer.subscription
+        )
+
+        self.assertEqual(fake_subscriptions[0]["id"], self.customer.subscription.id)
 
     @patch("stripe.Subscription.create", autospec=True)
     @patch(
