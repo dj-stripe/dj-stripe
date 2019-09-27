@@ -7,6 +7,7 @@ from unittest.mock import ANY, call, patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from stripe.error import InvalidRequestError
 
 from djstripe.models import (
     Card,
@@ -36,6 +37,8 @@ from . import (
     FAKE_CUSTOMER_II,
     FAKE_DISPUTE,
     FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED,
+    FAKE_EVENT_CARD_PAYMENT_METHOD_ATTACHED,
+    FAKE_EVENT_CARD_PAYMENT_METHOD_DETACHED,
     FAKE_EVENT_CHARGE_SUCCEEDED,
     FAKE_EVENT_CUSTOMER_CREATED,
     FAKE_EVENT_CUSTOMER_DELETED,
@@ -54,6 +57,7 @@ from . import (
     FAKE_EVENT_INVOICEITEM_DELETED,
     FAKE_EVENT_PAYMENT_INTENT_SUCCEEDED_DESTINATION_CHARGE,
     FAKE_EVENT_PAYMENT_METHOD_ATTACHED,
+    FAKE_EVENT_PAYMENT_METHOD_DETACHED,
     FAKE_EVENT_PLAN_CREATED,
     FAKE_EVENT_PLAN_DELETED,
     FAKE_EVENT_PLAN_REQUEST_IS_OBJECT,
@@ -800,6 +804,88 @@ class TestPaymentMethodEvents(AssertStripeFksMixin, EventTestCase):
                 "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
             },
+        )
+
+    @patch("stripe.PaymentMethod.retrieve", autospec=True)
+    @patch("stripe.Event.retrieve", autospec=True)
+    def test_card_payment_method_attached(
+        self, event_retrieve_mock, payment_method_retrieve_mock
+    ):
+        # Attach of a legacy id="card_xxx" payment method should behave exactly
+        # as per a normal "native" id="pm_yyy" payment_method.
+        fake_stripe_event = deepcopy(FAKE_EVENT_CARD_PAYMENT_METHOD_ATTACHED)
+        event_retrieve_mock.return_value = fake_stripe_event
+        payment_method_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        payment_method = PaymentMethod.objects.get(
+            id=fake_stripe_event["data"]["object"]["id"]
+        )
+
+        self.assert_fks(
+            payment_method,
+            expected_blank_fks={
+                "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
+            },
+        )
+
+    @patch("stripe.PaymentMethod.retrieve", autospec=True)
+    @patch("stripe.Event.retrieve", autospec=True)
+    def test_payment_method_detached(
+        self, event_retrieve_mock, payment_method_retrieve_mock
+    ):
+        fake_stripe_event = deepcopy(FAKE_EVENT_PAYMENT_METHOD_DETACHED)
+        event_retrieve_mock.return_value = fake_stripe_event
+        payment_method_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        payment_method = PaymentMethod.objects.get(
+            id=fake_stripe_event["data"]["object"]["id"]
+        )
+
+        self.assertIsNone(
+            payment_method.customer,
+            "Detach of a payment_method should set customer to null",
+        )
+
+        self.assert_fks(
+            payment_method, expected_blank_fks={"djstripe.PaymentMethod.customer"}
+        )
+
+    @patch(
+        "stripe.PaymentMethod.retrieve",
+        side_effect=InvalidRequestError(
+            message="No such payment_method: card_xxxx",
+            param="payment_method",
+            code="resource_missing",
+        ),
+        autospec=True,
+    )
+    @patch("stripe.Event.retrieve", autospec=True)
+    def test_card_payment_method_detached(
+        self, event_retrieve_mock, payment_method_retrieve_mock
+    ):
+        # Detach of a legacy id="card_xxx" payment method is handled specially,
+        # since the card is deleted by Stripe and therefore PaymetMethod.retrieve fails
+
+        fake_stripe_event = deepcopy(FAKE_EVENT_CARD_PAYMENT_METHOD_DETACHED)
+        event_retrieve_mock.return_value = fake_stripe_event
+        payment_method_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        self.assertEqual(
+            PaymentMethod.objects.filter(
+                id=fake_stripe_event["data"]["object"]["id"]
+            ).count(),
+            0,
+            "Detach of a 'card_' payment_method should delete it",
         )
 
 
