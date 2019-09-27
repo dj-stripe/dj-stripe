@@ -245,7 +245,7 @@ def _handle_crud_like_event(
     ignored (but the event processing still succeeds).
 
     :param target_cls: The djstripe model being handled.
-    :type target_cls: models.StripeModel
+    :type target_cls: Type[models.StripeModel]
     :param event: The event object
     :type event: models.Event
     :param data: The event object data (defaults to ``event.data``).
