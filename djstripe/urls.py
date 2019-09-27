@@ -3,7 +3,7 @@ Urls related to the djstripe app.
 
 Wire this into the root URLConf this way::
 
-    re_path(r"^stripe/", include("djstripe.urls", namespace="djstripe")),
+    path("stripe/", include("djstripe.urls", namespace="djstripe")),
     # url can be changed
     # Call to 'djstripe.urls' and 'namespace' must stay as is
 
