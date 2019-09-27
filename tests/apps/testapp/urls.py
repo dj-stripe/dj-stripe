@@ -1,5 +1,6 @@
-from django.conf.urls import include, url
+from django.conf.urls import include
 from django.http import HttpResponse
+from django.urls import path
 
 
 def empty_view(request):
@@ -7,10 +8,10 @@ def empty_view(request):
 
 
 urlpatterns = [
-    url(r"^$", empty_view, name="test_url_name"),
-    url(r"^djstripe/", include("djstripe.urls", namespace="djstripe")),
-    url(
-        r"^rest_djstripe/",
+    path("", empty_view, name="test_url_name"),
+    path("djstripe/", include("djstripe.urls", namespace="djstripe")),
+    path(
+        "rest_djstripe/",
         include("djstripe.contrib.rest_framework.urls", namespace="rest_djstripe"),
     ),
 ]

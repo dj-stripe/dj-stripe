@@ -1,5 +1,5 @@
-from django.conf.urls import url
 from django.http import HttpResponse
+from django.urls import path
 
 
 def testview(request):
@@ -8,4 +8,4 @@ def testview(request):
 
 app_name = "testapp_namespaced"
 
-urlpatterns = [url(r"^$", testview, name="test_url_namespaced")]
+urlpatterns = [path("", testview, name="test_url_namespaced")]

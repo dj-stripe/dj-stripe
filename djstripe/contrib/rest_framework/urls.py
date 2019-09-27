@@ -7,8 +7,8 @@
 
 Wire this into the root URLConf this way::
 
-    url(
-        r'^api/v1/stripe/',
+    path(
+        'api/v1/stripe/',
         include('djstripe.contrib.rest_framework.urls', namespace="rest_djstripe")
     ),
     # url can be changed
@@ -16,7 +16,7 @@ Wire this into the root URLConf this way::
 
 """
 
-from django.conf.urls import url
+from django.urls import path
 
 from . import views
 
@@ -24,5 +24,5 @@ app_name = "djstripe_rest_framework"
 
 urlpatterns = [
     # REST api
-    url(r"^subscription/$", views.SubscriptionRestView.as_view(), name="subscription")
+    path("subscription/", views.SubscriptionRestView.as_view(), name="subscription")
 ]
