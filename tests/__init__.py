@@ -1463,6 +1463,45 @@ FAKE_EVENT_PAYMENT_METHOD_ATTACHED = {
     "type": "payment_method.attached",
 }
 
+FAKE_EVENT_PAYMENT_METHOD_DETACHED = {
+    "id": "evt_1FDOwDKatMEEd998o5Fdadfds",
+    "object": "event",
+    "api_version": "2019-08-14",
+    "created": 1567228549,
+    "data": {"object": deepcopy(FAKE_PAYMENT_METHOD_I)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": {"id": "req_9c9djVqxcxgdfg", "idempotency_key": None},
+    "type": "payment_method.detached",
+}
+FAKE_EVENT_PAYMENT_METHOD_DETACHED["data"]["object"]["customer"] = None
+
+FAKE_EVENT_CARD_PAYMENT_METHOD_ATTACHED = {
+    "id": "evt_1FDOwDKatMEEd998o5Fghgfh",
+    "object": "event",
+    "api_version": "2019-08-14",
+    "created": 1567228549,
+    "data": {"object": deepcopy(FAKE_CARD_AS_PAYMENT_METHOD)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": {"id": "req_9c9djVqxUhgfh", "idempotency_key": None},
+    "type": "payment_method.attached",
+}
+
+FAKE_EVENT_CARD_PAYMENT_METHOD_DETACHED = {
+    "id": "evt_1FDOwDKatMEEd998o5435345",
+    "object": "event",
+    "api_version": "2019-08-14",
+    "created": 1567228549,
+    "data": {"object": deepcopy(FAKE_CARD_AS_PAYMENT_METHOD)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": {"id": "req_9c9djVqx6tgeg", "idempotency_key": None},
+    "type": "payment_method.detached",
+}
+# Note that the event from Stripe doesn't have customer = None
+
+
 FAKE_EVENT_PLAN_CREATED = {
     "id": "evt_1877X72eZvKYlo2CLK6daFxu",
     "object": "event",
