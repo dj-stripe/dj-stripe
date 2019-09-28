@@ -30,8 +30,8 @@ class Coupon(StripeModel):
     amount_off = StripeDecimalCurrencyAmountField(
         null=True,
         blank=True,
-        help_text="Amount that will be taken off the subtotal of any invoices "
-        "for this customer.",
+        help_text="Amount (as decimal) that will be taken off the subtotal of any "
+        "invoices for this customer.",
     )
     currency = StripeCurrencyCodeField(null=True, blank=True)
     duration = StripeEnumField(
@@ -152,7 +152,7 @@ class Invoice(StripeModel):
     stripe_dashboard_item_name = "invoices"
 
     amount_due = StripeDecimalCurrencyAmountField(
-        help_text="Final amount due at this time for this invoice. "
+        help_text="Final amount due (as decimal) at this time for this invoice. "
         "If the invoice's total is smaller than the minimum charge amount, "
         "for example, or if there is account credit that can be applied to the "
         "invoice, the amount_due may be 0. If there is a positive starting_balance "
@@ -162,11 +162,11 @@ class Invoice(StripeModel):
     )
     amount_paid = StripeDecimalCurrencyAmountField(
         null=True,  # XXX: This is not nullable, but it's a new field
-        help_text="The amount, in cents, that was paid.",
+        help_text="The amount, (as decimal), that was paid.",
     )
     amount_remaining = StripeDecimalCurrencyAmountField(
         null=True,  # XXX: This is not nullable, but it's a new field
-        help_text="The amount remaining, in cents, that is due.",
+        help_text="The amount remaining, (as decimal), that is due.",
     )
     auto_advance = models.NullBooleanField(
         help_text="Controls whether Stripe will perform automatic collection of the "
@@ -175,7 +175,7 @@ class Invoice(StripeModel):
     )
     application_fee_amount = StripeDecimalCurrencyAmountField(
         null=True,
-        help_text="The fee in cents that will be applied to the invoice and "
+        help_text="The fee (as decimal) that will be applied to the invoice and "
         "transferred to the application owner's "
         "Stripe account when the invoice is paid.",
     )
@@ -235,7 +235,7 @@ class Invoice(StripeModel):
     )
     ending_balance = StripeQuantumCurrencyAmountField(
         null=True,
-        help_text="Ending customer balance after attempting to pay invoice. "
+        help_text="Ending customer balance (in cents) after attempting to pay invoice. "
         "If the invoice has not been attempted yet, this will be null.",
     )
     # deprecated, will be removed in 2.2
@@ -307,9 +307,9 @@ class Invoice(StripeModel):
         ),
     )
     starting_balance = StripeQuantumCurrencyAmountField(
-        help_text="Starting customer balance before attempting to pay invoice. "
-        "If the invoice has not been attempted "
-        "yet, this will be the current customer balance."
+        help_text="Starting customer balance (in cents) before attempting to pay "
+        "invoice. If the invoice has not been attempted yet, this will be the "
+        "current customer balance."
     )
     statement_descriptor = models.CharField(
         max_length=22,
@@ -337,14 +337,14 @@ class Invoice(StripeModel):
         "The time used to calculate prorations.",
     )
     subtotal = StripeDecimalCurrencyAmountField(
-        help_text="Only set for upcoming invoices that preview prorations. "
-        "The time used to calculate prorations."
+        help_text="Total (as decimal) of all subscriptions, invoice items, "
+        "and prorations on the invoice before any discount or tax is applied."
     )
     tax = StripeDecimalCurrencyAmountField(
         null=True,
         blank=True,
-        help_text="The amount of tax included in the total, calculated from "
-        "``tax_percent`` and the subtotal. If no "
+        help_text="The amount (as decimal) of tax included in the total, calculated "
+        "from ``tax_percent`` and the subtotal. If no "
         "``tax_percent`` is defined, this value will be null.",
     )
     tax_percent = StripePercentField(
@@ -354,7 +354,7 @@ class Invoice(StripeModel):
         "This field is inherited from the subscription's ``tax_percent`` field, "
         "but can be changed before the invoice is paid. This field defaults to null.",
     )
-    total = StripeDecimalCurrencyAmountField("Total after discount.")
+    total = StripeDecimalCurrencyAmountField("Total (as decimal) after discount.")
     webhooks_delivered_at = StripeDateTimeField(
         null=True,
         help_text=(
@@ -639,7 +639,7 @@ class InvoiceItem(StripeModel):
 
     stripe_class = stripe.InvoiceItem
 
-    amount = StripeDecimalCurrencyAmountField(help_text="Amount invoiced.")
+    amount = StripeDecimalCurrencyAmountField(help_text="Amount invoiced (as decimal).")
     currency = StripeCurrencyCodeField()
     customer = models.ForeignKey(
         "Customer",
@@ -768,7 +768,7 @@ class Plan(StripeModel):
     amount = StripeDecimalCurrencyAmountField(
         null=True,
         blank=True,
-        help_text="Amount to be charged on the interval specified.",
+        help_text="Amount (as decimal) to be charged on the interval specified.",
     )
     billing_scheme = StripeEnumField(
         enum=enums.PlanBillingScheme,

@@ -382,7 +382,7 @@ class Source(StripeModel):
         null=True,
         blank=True,
         help_text=(
-            "Amount associated with the source. "
+            "Amount (as decimal) associated with the source. "
             "This is the amount for which the source will be chargeable once ready. "
             "Required for `single_use` sources."
         ),

@@ -78,11 +78,11 @@ class Charge(StripeModel):
     expand_fields = ["balance_transaction"]
     stripe_dashboard_item_name = "payments"
 
-    amount = StripeDecimalCurrencyAmountField(help_text="Amount charged.")
+    amount = StripeDecimalCurrencyAmountField(help_text="Amount charged (as decimal).")
     amount_refunded = StripeDecimalCurrencyAmountField(
         help_text=(
-            "Amount refunded (can be less than the amount attribute on the charge "
-            "if a partial refund was issued)."
+            "Amount (as decimal) refunded (can be less than the amount attribute on the "
+            "charge if a partial refund was issued)."
         )
     )
     # TODO: application, application_fee
@@ -401,7 +401,8 @@ class Customer(StripeModel):
     address = JSONField(null=True, blank=True, help_text="The customer's address.")
     balance = StripeQuantumCurrencyAmountField(
         help_text=(
-            "Current balance, if any, being stored on the customer's account. "
+            "Current balance (in cents), if any, being stored on the customer's "
+            "account. "
             "If negative, the customer has credit to apply to the next invoice. "
             "If positive, the customer has an amount owed that will be added to the "
             "next invoice. The balance does not refer to any unpaid invoices; it "
@@ -1275,7 +1276,8 @@ class Dispute(StripeModel):
 
     amount = StripeQuantumCurrencyAmountField(
         help_text=(
-            "Disputed amount. Usually the amount of the charge, but can differ "
+            "Disputed amount (in cents). Usually the amount of the charge, "
+            "but can differ "
             "(usually because of currency fluctuation or because only part of "
             "the order is disputed)."
         )
@@ -1448,13 +1450,13 @@ class PaymentIntent(StripeModel):
     stripe_dashboard_item_name = "payments"
 
     amount = StripeQuantumCurrencyAmountField(
-        help_text="Amount intended to be collected by this PaymentIntent."
+        help_text="Amount (in cents) intended to be collected by this PaymentIntent."
     )
     amount_capturable = StripeQuantumCurrencyAmountField(
-        help_text="Amount that can be captured from this PaymentIntent."
+        help_text="Amount (in cents) that can be captured from this PaymentIntent."
     )
     amount_received = StripeQuantumCurrencyAmountField(
-        help_text="Amount that was collected by this PaymentIntent."
+        help_text="Amount (in cents) that was collected by this PaymentIntent."
     )
     # application
     # application_fee_amount
@@ -1759,7 +1761,8 @@ class Payout(StripeModel):
     stripe_dashboard_item_name = "payouts"
 
     amount = StripeDecimalCurrencyAmountField(
-        help_text="Amount to be transferred to your bank account or debit card."
+        help_text="Amount (as decimal) to be transferred to your bank account or "
+        "debit card."
     )
     arrival_date = StripeDateTimeField(
         help_text=(
