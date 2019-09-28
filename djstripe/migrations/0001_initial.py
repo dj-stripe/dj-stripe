@@ -594,14 +594,16 @@ class Migration(migrations.Migration):
                 (
                     "amount",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        decimal_places=2, help_text="Amount charged.", max_digits=8
+                        decimal_places=2,
+                        help_text="Amount charged (as decimal).",
+                        max_digits=8,
                     ),
                 ),
                 (
                     "amount_refunded",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
                         decimal_places=2,
-                        help_text="Amount refunded (can be less than the amount attribute on the charge if a partial refund was issued).",
+                        help_text="Amount (as decimal) refunded (can be less than the amount attribute on the charge if a partial refund was issued).",
                         max_digits=8,
                     ),
                 ),
@@ -804,7 +806,7 @@ class Migration(migrations.Migration):
                     djstripe.fields.StripeDecimalCurrencyAmountField(
                         blank=True,
                         decimal_places=2,
-                        help_text="Amount that will be taken off the subtotal of any invoices for this customer.",
+                        help_text="Amount (as decimal) that will be taken off the subtotal of any invoices for this customer.",
                         max_digits=8,
                         null=True,
                     ),
@@ -918,7 +920,7 @@ class Migration(migrations.Migration):
                 (
                     "account_balance",
                     djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Current balance, if any, being stored on the customer's account. If negative, the customer has credit to apply to the next invoice. If positive, the customer has an amount owed that will be added to the next invoice. The balance does not refer to any unpaid invoices; it solely takes into account amounts that have yet to be successfully applied to any invoice. This balance is only taken into account for recurring billing purposes (i.e., subscriptions, invoices, invoice items)."
+                        help_text="Current balance (in cents), if any, being stored on the customer's account. If negative, the customer has credit to apply to the next invoice. If positive, the customer has an amount owed that will be added to the next invoice. The balance does not refer to any unpaid invoices; it solely takes into account amounts that have yet to be successfully applied to any invoice. This balance is only taken into account for recurring billing purposes (i.e., subscriptions, invoices, invoice items)."
                     ),
                 ),
                 (
@@ -1030,7 +1032,7 @@ class Migration(migrations.Migration):
                 (
                     "amount",
                     djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Disputed amount. Usually the amount of the charge, but can differ (usually because of currency fluctuation or because only part of the order is disputed)."
+                        help_text="Disputed amount (in cents). Usually the amount of the charge, but can differ (usually because of currency fluctuation or because only part of the order is disputed)."
                     ),
                 ),
                 (
@@ -1302,7 +1304,7 @@ class Migration(migrations.Migration):
                     "amount_due",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
                         decimal_places=2,
-                        help_text="Final amount due at this time for this invoice. If the invoice's total is smaller than the minimum charge amount, for example, or if there is account credit that can be applied to the invoice, the amount_due may be 0. If there is a positive starting_balance for the invoice (the customer owes money), the amount_due will also take that into account. The charge that gets generated for the invoice will be for the amount specified in amount_due.",
+                        help_text="Final amount due (as decimal) at this time for this invoice. If the invoice's total is smaller than the minimum charge amount, for example, or if there is account credit that can be applied to the invoice, the amount_due may be 0. If there is a positive starting_balance for the invoice (the customer owes money), the amount_due will also take that into account. The charge that gets generated for the invoice will be for the amount specified in amount_due.",
                         max_digits=8,
                     ),
                 ),
@@ -1310,7 +1312,7 @@ class Migration(migrations.Migration):
                     "amount_paid",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
                         decimal_places=2,
-                        help_text="The amount, in cents, that was paid.",
+                        help_text="The amount, (as decimal), that was paid.",
                         max_digits=8,
                         null=True,
                     ),
@@ -1319,7 +1321,7 @@ class Migration(migrations.Migration):
                     "amount_remaining",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
                         decimal_places=2,
-                        help_text="The amount remaining, in cents, that is due.",
+                        help_text="The amount remaining, (as decimal), that is due.",
                         max_digits=8,
                         null=True,
                     ),
@@ -1328,7 +1330,7 @@ class Migration(migrations.Migration):
                     "application_fee",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
                         decimal_places=2,
-                        help_text="The fee in cents that will be applied to the invoice and transferred to the application owner's Stripe account when the invoice is paid.",
+                        help_text="The fee (as decimal) that will be applied to the invoice and transferred to the application owner's Stripe account when the invoice is paid.",
                         max_digits=8,
                         null=True,
                     ),
@@ -1384,7 +1386,7 @@ class Migration(migrations.Migration):
                 (
                     "ending_balance",
                     djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Ending customer balance after attempting to pay invoice. If the invoice has not been attempted yet, this will be null.",
+                        help_text="Ending customer balance (in cents) after attempting to pay invoice. If the invoice has not been attempted yet, this will be null.",
                         null=True,
                     ),
                 ),
@@ -1459,7 +1461,7 @@ class Migration(migrations.Migration):
                 (
                     "starting_balance",
                     djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Starting customer balance before attempting to pay invoice. If the invoice has not been attempted yet, this will be the current customer balance."
+                        help_text="Starting customer balance (in cents) before attempting to pay invoice. If the invoice has not been attempted yet, this will be the current customer balance."
                     ),
                 ),
                 (
@@ -1483,7 +1485,7 @@ class Migration(migrations.Migration):
                     "subtotal",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
                         decimal_places=2,
-                        help_text="Only set for upcoming invoices that preview prorations. The time used to calculate prorations.",
+                        help_text="Total (as decimal) of all subscriptions, invoice items, and prorations on the invoice before any discount or tax is applied.",
                         max_digits=8,
                     ),
                 ),
@@ -1491,7 +1493,7 @@ class Migration(migrations.Migration):
                     "tax",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
                         decimal_places=2,
-                        help_text="The amount of tax included in the total, calculated from ``tax_percent`` and the subtotal. If no ``tax_percent`` is defined, this value will be null.",
+                        help_text="The amount (as decimal) of tax included in the total, calculated from ``tax_percent`` and the subtotal. If no ``tax_percent`` is defined, this value will be null.",
                         max_digits=8,
                         null=True,
                         blank=True,
@@ -1515,7 +1517,7 @@ class Migration(migrations.Migration):
                     djstripe.fields.StripeDecimalCurrencyAmountField(
                         decimal_places=2,
                         max_digits=8,
-                        verbose_name="Total after discount.",
+                        verbose_name="Total (as decimal) after discount.",
                     ),
                 ),
                 (
@@ -1575,7 +1577,9 @@ class Migration(migrations.Migration):
                 (
                     "amount",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        decimal_places=2, help_text="Amount invoiced.", max_digits=8
+                        decimal_places=2,
+                        help_text="Amount invoiced (as decimal).",
+                        max_digits=8,
                     ),
                 ),
                 (
@@ -1695,7 +1699,7 @@ class Migration(migrations.Migration):
                     "amount",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
                         decimal_places=2,
-                        help_text="Amount to be transferred to your bank account or debit card.",
+                        help_text="Amount (as decimal) to be transferred to your bank account or debit card.",
                         max_digits=8,
                     ),
                 ),
@@ -1830,7 +1834,7 @@ class Migration(migrations.Migration):
                     "amount",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
                         decimal_places=2,
-                        help_text="Amount to be charged on the interval specified.",
+                        help_text="Amount (as decimal) to be charged on the interval specified.",
                         max_digits=8,
                     ),
                 ),
@@ -2220,7 +2224,7 @@ class Migration(migrations.Migration):
                     djstripe.fields.StripeDecimalCurrencyAmountField(
                         blank=True,
                         decimal_places=2,
-                        help_text="Amount associated with the source. This is the amount for which the source will be chargeable once ready. Required for `single_use` sources.",
+                        help_text="Amount (as decimal) associated with the source. This is the amount for which the source will be chargeable once ready. Required for `single_use` sources.",
                         max_digits=8,
                         null=True,
                     ),
@@ -2575,7 +2579,7 @@ class Migration(migrations.Migration):
                     "amount_reversed",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
                         decimal_places=2,
-                        help_text="The amount reversed (can be less than the amount attribute on the transfer if a partial reversal was issued).",
+                        help_text="The amount (as decimal) reversed (can be less than the amount attribute on the transfer if a partial reversal was issued).",
                         max_digits=8,
                         null=True,
                         blank=True,
