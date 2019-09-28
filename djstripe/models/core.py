@@ -81,8 +81,8 @@ class Charge(StripeModel):
     amount = StripeDecimalCurrencyAmountField(help_text="Amount charged (as decimal).")
     amount_refunded = StripeDecimalCurrencyAmountField(
         help_text=(
-            "Amount (as decimal) refunded (can be less than the amount attribute on the "
-            "charge if a partial refund was issued)."
+            "Amount (as decimal) refunded (can be less than the amount attribute on "
+            "the charge if a partial refund was issued)."
         )
     )
     # TODO: application, application_fee
