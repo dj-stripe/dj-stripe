@@ -14,6 +14,7 @@ This is a bugfix-only version:
 - Fixed error on ``paymentmethod.detached`` event with ``card_xxx`` payment methods (#967).
 - Updated ``help_text`` on all currency fields to make it clear if they're holding integer cents
   (``StripeQuantumCurrencyAmountField``) or decimal dollar (or euro, pound etc) (``StripeDecimalCurrencyAmountField``) (#999)
+- Documented our preferred Django model field types (#986)
 
 Upcoming migration of currency fields (storage as cents instead of dollars)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
