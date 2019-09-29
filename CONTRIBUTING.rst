@@ -117,6 +117,58 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
 
 10. Congratulations, you're now a dj-stripe contributor!  Have some <3 from us.
 
+Preferred Django Model Field Types
+----------------------------------
+
+When mapping from Stripe API field types to Django model fields, we try to follow
+Django best practises where practical.
+
+The following types should be preferred for fields that map to the Stripe API
+(which is almost all fields in our models).
+
+Strings
+~~~~~~~
+
+* Stripe API string fields have a `default maximum length of 5,000 characters <https://github.com/stripe/openapi/issues/26#issuecomment-392957633>`_.
+* In some cases a maximum length (``maxLength``) is specified in the `Stripe OpenAPI schema`_.
+* We follow `Django's recommendation <https://docs.djangoproject.com/en/dev/ref/models/fields/#null>`_
+  and avoid using null on string fields (which means we store ``""`` for string fields
+  that are ``null`` in stripe). Note that is enforced in the sync logic in
+  `StripeModel._stripe_object_to_record <https://github.com/dj-stripe/dj-stripe/blob/master/djstripe/models/base.py>`_.
+* For long string fields (eg above 255 characters) we prefer ``TextField`` over ``Charfield``.
+
+Therefore the default type for string fields that don't have a maxLength specified in the
+`Stripe OpenAPI schema`_ should usually be::
+
+    str_field = TextField(max_length=5000, default=", blank=True, help_text="...")
+
+.. _Stripe OpenAPI schema: https://github.com/stripe/openapi/tree/master/openapi
+
+Enumerations
+~~~~~~~~~~~~
+
+Fields that have a defined set of values can be implemented using ``StripeEnumField``.
+
+Hash (dictionaries)
+~~~~~~~~~~~~~~~~~~~
+
+Use the ``JSONField`` in ``djstripe.fields``, see also the ``DJSTRIPE_USE_NATIVE_JSONFIELD`` setting.
+
+Currency amounts
+~~~~~~~~~~~~~~~~
+
+Stripe handles all currency amounts as integer cents, we currently have a mixture of
+fields as integer cents and decimal (eg dollar, euro etc) values, but we are aiming
+to standardise on cents (see https://github.com/dj-stripe/dj-stripe/issues/955).
+
+All new currency amount fields should use ``StripeQuantumCurrencyAmountField``.
+
+Dates and Datetimes
+~~~~~~~~~~~~~~~~~~~
+
+The Stripe API uses an integer timestamp (seconds since the Unix epoch) for dates and
+datetimes.  We store this as a datetime field, using ``StripeDateTimeField``.
+
 Django Migration Policy
 -----------------------
 
