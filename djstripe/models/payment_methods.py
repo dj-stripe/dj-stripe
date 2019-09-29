@@ -580,15 +580,16 @@ class PaymentMethod(StripeModel):
     def detach(self):
         """
         Detach the payment method from its customer.
-        """
 
+        :return: Returns true if the payment method was newly detached, \
+                 false if it was already detached
+        :rtype: bool
+        """
         # Find customers that use this
-        customers = Customer.objects.filter(default_payment_method=self.id).all()
+        customers = Customer.objects.filter(default_payment_method=self).all()
+        changed = True
 
         try:
-            # TODO - we could use the return value of sync_from_stripe_data
-            #  or call its internals - self._sync/_attach_objects_hook etc here
-            #  to update `self` at this point?
             self.sync_from_stripe_data(self.api_retrieve().detach())
 
             # resync customer to update .default_payment_method and
@@ -596,8 +597,11 @@ class PaymentMethod(StripeModel):
             for customer in customers:
                 Customer.sync_from_stripe_data(customer.api_retrieve())
 
-            return True
         except (InvalidRequestError,):
             # The source was already detached. Resyncing.
             self.sync_from_stripe_data(self.api_retrieve())
-            return False
+            changed = False
+
+        self.refresh_from_db()
+
+        return changed

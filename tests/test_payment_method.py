@@ -7,14 +7,16 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from tests import (
+
+from djstripe.models import PaymentMethod
+
+from . import (
     FAKE_CUSTOMER,
     FAKE_PAYMENT_METHOD_I,
     AssertStripeFksMixin,
+    PaymentMethodDict,
     default_account,
-    PaymentMethodDict)
-
-from djstripe.models import PaymentMethod
+)
 
 
 class PaymentMethodTest(AssertStripeFksMixin, TestCase):
@@ -88,8 +90,8 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
     def test_detach(self, source_retrieve_mock):
         original_detach = PaymentMethodDict.detach
 
-        def mocked_detach(self):
-            return original_detach(self)
+        def mocked_detach(*args, **kwargs):
+            return original_detach(*args, **kwargs)
 
         PaymentMethod.sync_from_stripe_data(deepcopy(FAKE_PAYMENT_METHOD_I))
 
@@ -98,7 +100,7 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
         payment_method = self.customer.payment_methods.first()
 
         with patch(
-            "tests.PaymentMethod.detach", side_effect=mocked_detach, autospec=True
+            "tests.PaymentMethodDict.detach", side_effect=mocked_detach, autospec=True
         ) as mock_detach:
             payment_method.detach()
 
@@ -107,10 +109,6 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
         self.customer.refresh_from_db()
         self.assertIsNone(self.customer.default_payment_method)
 
-
-        # need to refresh_from_db due to the implementation of Source.detach() -
-        # see TODO in method
-        payment_method.refresh_from_db()
         self.assertIsNone(payment_method.customer)
 
         if sys.version_info >= (3, 6):
@@ -119,11 +117,7 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
             mock_detach.assert_called()
 
         self.assert_fks(
-            payment_method,
-            expected_blank_fks={
-                # "djstripe.Source.customer",
-                # "djstripe.Customer.default_payment_method",
-            },
+            payment_method, expected_blank_fks={"djstripe.PaymentMethod.customer"}
         )
 
     def test_sync_null_customer(self):
