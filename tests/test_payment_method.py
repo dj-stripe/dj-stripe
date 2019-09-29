@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from stripe.error import InvalidRequestError
 
 from djstripe.models import PaymentMethod
 
@@ -82,18 +83,64 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
             },
         )
 
-    @patch(
-        "stripe.PaymentMethod.retrieve",
-        return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
-        autospec=True,
-    )
-    def test_detach(self, source_retrieve_mock):
+    def test_detach(self):
         original_detach = PaymentMethodDict.detach
 
         def mocked_detach(*args, **kwargs):
             return original_detach(*args, **kwargs)
 
-        PaymentMethod.sync_from_stripe_data(deepcopy(FAKE_PAYMENT_METHOD_I))
+        with patch(
+            "stripe.PaymentMethod.retrieve",
+            return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
+            autospec=True,
+        ):
+            PaymentMethod.sync_from_stripe_data(deepcopy(FAKE_PAYMENT_METHOD_I))
+
+        self.assertEqual(1, self.customer.payment_methods.count())
+
+        payment_method = self.customer.payment_methods.first()
+
+        with patch(
+            "tests.PaymentMethodDict.detach", side_effect=mocked_detach, autospec=True
+        ) as mock_detach, patch(
+            "stripe.PaymentMethod.retrieve",
+            return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
+            autospec=True,
+        ):
+            self.assertTrue(payment_method.detach())
+
+        self.assertEqual(0, self.customer.payment_methods.count())
+        self.assertIsNone(self.customer.default_payment_method)
+
+        self.assertIsNone(payment_method.customer)
+
+        if sys.version_info >= (3, 6):
+            # this mock isn't working on py34, py35, but it's not strictly necessary
+            # for the test
+            mock_detach.assert_called()
+
+        self.assert_fks(
+            payment_method, expected_blank_fks={"djstripe.PaymentMethod.customer"}
+        )
+
+        with patch(
+            "tests.PaymentMethodDict.detach",
+            side_effect=InvalidRequestError(
+                message="A source must be attached to a customer to be used "
+                "as a `payment_method`",
+                param="payment_method",
+            ),
+            autospec=True,
+        ) as mock_detach, patch(
+            "stripe.PaymentMethod.retrieve",
+            return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
+            autospec=True,
+        ) as payment_method_retrieve_mock:
+            payment_method_retrieve_mock.return_value["customer"] = None
+
+            self.assertFalse(
+                payment_method.detach(), "Second call to detach should return false"
+            )
 
         self.assertEqual(1, self.customer.payment_methods.count())
 
