@@ -576,3 +576,43 @@ class PaymentMethod(StripeModel):
             payment_method, customer=customer, **extra_kwargs
         )
         return cls.sync_from_stripe_data(stripe_payment_method)
+
+    def detach(self):
+        """
+        Detach the payment method from its customer.
+
+        :return: Returns true if the payment method was newly detached, \
+                 false if it was already detached
+        :rtype: bool
+        """
+        # Find customers that use this
+        customers = Customer.objects.filter(default_payment_method=self).all()
+        changed = True
+
+        # special handling is needed for legacy "card"-type PaymentMethods,
+        # since detaching them deletes them within Stripe.
+        # see https://github.com/dj-stripe/dj-stripe/pull/967
+        is_legacy_card = self.id.startswith("card_")
+
+        try:
+            self.sync_from_stripe_data(self.api_retrieve().detach())
+
+            # resync customer to update .default_payment_method and
+            # .invoice_settings.default_payment_method
+            for customer in customers:
+                Customer.sync_from_stripe_data(customer.api_retrieve())
+
+        except (InvalidRequestError,):
+            # The source was already detached. Resyncing.
+
+            if self.pk and not is_legacy_card:
+                self.sync_from_stripe_data(self.api_retrieve())
+            changed = False
+
+        if self.pk:
+            if is_legacy_card:
+                self.delete()
+            else:
+                self.refresh_from_db()
+
+        return changed
