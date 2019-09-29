@@ -269,11 +269,6 @@ class CardDict(LegacySourceDict):
 
 FAKE_CARD = CardDict(load_fixture("card_card_fakefakefakefakefake0001.json"))
 
-# FAKE_CARD, but accessed as a PaymentMethod
-FAKE_CARD_AS_PAYMENT_METHOD = load_fixture(
-    "payment_method_card_fakefakefakefakefake0001.json"
-)
-
 FAKE_CARD_II = CardDict(load_fixture("card_card_fakefakefakefakefake0002.json"))
 
 FAKE_CARD_III = CardDict(
@@ -408,6 +403,11 @@ class PaymentMethodDict(dict):
 
 FAKE_PAYMENT_METHOD_I = PaymentMethodDict(
     load_fixture("payment_method_pm_fakefakefakefake0001.json")
+)
+
+# FAKE_CARD, but accessed as a PaymentMethod
+FAKE_CARD_AS_PAYMENT_METHOD = PaymentMethodDict(
+    load_fixture("payment_method_card_fakefakefakefakefake0001.json")
 )
 
 

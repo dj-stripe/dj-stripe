@@ -599,9 +599,17 @@ class PaymentMethod(StripeModel):
 
         except (InvalidRequestError,):
             # The source was already detached. Resyncing.
-            self.sync_from_stripe_data(self.api_retrieve())
+
+            if self.pk and not self.id.startswith("card_"):
+                self.sync_from_stripe_data(self.api_retrieve())
             changed = False
 
-        self.refresh_from_db()
+        if self.pk:
+            if self.id.startswith("card_"):
+                # special handling for detached card-type PaymentMethods as per
+                # https://github.com/dj-stripe/dj-stripe/pull/1013
+                self.delete()
+            else:
+                self.refresh_from_db()
 
         return changed
