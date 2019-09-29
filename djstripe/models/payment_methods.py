@@ -589,6 +589,11 @@ class PaymentMethod(StripeModel):
         customers = Customer.objects.filter(default_payment_method=self).all()
         changed = True
 
+        # special handling is needed for legacy "card"-type PaymentMethods,
+        # since detaching them deletes them within Stripe.
+        # see https://github.com/dj-stripe/dj-stripe/pull/967
+        is_card = self.id.startswith("card_")
+
         try:
             self.sync_from_stripe_data(self.api_retrieve().detach())
 
@@ -600,14 +605,12 @@ class PaymentMethod(StripeModel):
         except (InvalidRequestError,):
             # The source was already detached. Resyncing.
 
-            if self.pk and not self.id.startswith("card_"):
+            if self.pk and not is_card:
                 self.sync_from_stripe_data(self.api_retrieve())
             changed = False
 
         if self.pk:
-            if self.id.startswith("card_"):
-                # special handling for detached card-type PaymentMethods as per
-                # https://github.com/dj-stripe/dj-stripe/pull/1013
+            if is_card:
                 self.delete()
             else:
                 self.refresh_from_db()
