@@ -12,6 +12,7 @@ This is a bugfix-only version:
 - Fixed issue syncing PaymentIntent with destination charge (#960).
 - Fixed ``Customer.subscription`` & ``.valid_subscriptions()`` to ignore ``status=incomplete_expired`` (#1006).
 - Fixed error on ``paymentmethod.detached`` event with ``card_xxx`` payment methods (#967).
+- Added ``PaymentMethod.detach()`` (#943).
 - Updated ``help_text`` on all currency fields to make it clear if they're holding integer cents
   (``StripeQuantumCurrencyAmountField``) or decimal dollar (or euro, pound etc) (``StripeDecimalCurrencyAmountField``) (#999)
 - Documented our preferred Django model field types (#986)
