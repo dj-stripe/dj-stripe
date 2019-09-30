@@ -3,7 +3,7 @@
 History
 =======
 
-2.1.1 (unreleased)
+2.1.1 (2019-10-01)
 ------------------
 
 This is a bugfix-only version:
