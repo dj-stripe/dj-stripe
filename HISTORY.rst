@@ -6,7 +6,7 @@ History
 2.2.0 (unreleased)
 ------------------
 
-- Change urls.py to use the new style urls
+- Change urls.py to use the new style urls.
 
 2.1.1 (2019-10-01)
 ------------------
