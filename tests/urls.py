@@ -1,6 +1,7 @@
-from django.conf.urls import include, url
+from django.conf.urls import include
 from django.contrib import admin
 from django.http.response import HttpResponse
+from django.urls import path
 
 admin.autodiscover()
 
@@ -10,19 +11,19 @@ def empty_view(request):
 
 
 urlpatterns = [
-    url(r"^home/", empty_view, name="home"),
-    url(r"^admin/", admin.site.urls),
-    url(r"^djstripe/", include("djstripe.urls", namespace="djstripe")),
-    url(r"^example/", include("tests.apps.example.urls")),
-    url(r"^testapp/", include("tests.apps.testapp.urls")),
-    url(
-        r"^testapp_namespaced/",
+    path("home/", empty_view, name="home"),
+    path("admin/", admin.site.urls),
+    path("djstripe/", include("djstripe.urls", namespace="djstripe")),
+    path("example/", include("tests.apps.example.urls")),
+    path("testapp/", include("tests.apps.testapp.urls")),
+    path(
+        "testapp_namespaced/",
         include("tests.apps.testapp_namespaced.urls", namespace="testapp_namespaced"),
     ),
     # Represents protected content
-    url(r"^testapp_content/", include("tests.apps.testapp_content.urls")),
+    path("testapp_content/", include("tests.apps.testapp_content.urls")),
     # For testing fnmatches
-    url(r"test_fnmatch/extra_text/$", empty_view, name="test_fnmatch"),
+    path("test_fnmatch/extra_text/", empty_view, name="test_fnmatch"),
     # Default for DJSTRIPE_SUBSCRIPTION_REDIRECT
-    url(r"subscribe/$", empty_view, name="test_url_subscribe"),
+    path("subscribe/", empty_view, name="test_url_subscribe"),
 ]
