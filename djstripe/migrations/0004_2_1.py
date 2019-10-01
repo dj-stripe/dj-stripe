@@ -414,19 +414,19 @@ class Migration(migrations.Migration):
                 (
                     "amount",
                     djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Amount intended to be collected by this PaymentIntent."
+                        help_text="Amount (in cents) intended to be collected by this PaymentIntent."
                     ),
                 ),
                 (
                     "amount_capturable",
                     djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Amount that can be captured from this PaymentIntent."
+                        help_text="Amount (in cents) that can be captured from this PaymentIntent."
                     ),
                 ),
                 (
                     "amount_received",
                     djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Amount that was collected by this PaymentIntent."
+                        help_text="Amount (in cents) that was collected by this PaymentIntent."
                     ),
                 ),
                 (

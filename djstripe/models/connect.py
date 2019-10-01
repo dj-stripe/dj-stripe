@@ -385,9 +385,9 @@ class ApplicationFee(StripeModel):
 
     stripe_class = stripe.ApplicationFee
 
-    amount = StripeQuantumCurrencyAmountField(help_text="Amount earned.")
+    amount = StripeQuantumCurrencyAmountField(help_text="Amount earned, in cents.")
     amount_refunded = StripeQuantumCurrencyAmountField(
-        help_text="Amount refunded (can be less than the amount attribute "
+        help_text="Amount in cents refunded (can be less than the amount attribute "
         "on the fee if a partial refund was issued)"
     )
     # TODO application = ...
@@ -424,7 +424,7 @@ class ApplicationFeeRefund(StripeModel):
 
     description = None
 
-    amount = StripeQuantumCurrencyAmountField(help_text="Amount refunded.")
+    amount = StripeQuantumCurrencyAmountField(help_text="Amount refunded, in cents.")
     balance_transaction = models.ForeignKey(
         "BalanceTransaction",
         on_delete=models.CASCADE,
@@ -502,8 +502,8 @@ class Transfer(StripeModel):
     amount_reversed = StripeDecimalCurrencyAmountField(
         null=True,
         blank=True,
-        help_text="The amount reversed (can be less than the amount attribute on the"
-        " transfer if a partial reversal was issued).",
+        help_text="The amount (as decimal) reversed (can be less than the amount "
+        "attribute on the transfer if a partial reversal was issued).",
     )
     balance_transaction = models.ForeignKey(
         "BalanceTransaction",

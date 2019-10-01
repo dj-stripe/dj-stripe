@@ -3,15 +3,24 @@
 History
 =======
 
-2.1.1 (unreleased)
+2.2.0 (unreleased)
+------------------
+
+- Change urls.py to use the new style urls
+
+2.1.1 (2019-10-01)
 ------------------
 
 This is a bugfix-only version:
 
-- Updated webhook signals list (#1000)
-- Fixed issue syncing PaymentIntent with destination charge (#960)
-- Fixed `Customer.subscription` & `.valid_subscriptions()` to ignore `status=incomplete_expired` (#1006)
-- Change urls.py to use the new style urls
+- Updated webhook signals list (#1000).
+- Fixed issue syncing PaymentIntent with destination charge (#960).
+- Fixed ``Customer.subscription`` & ``.valid_subscriptions()`` to ignore ``status=incomplete_expired`` (#1006).
+- Fixed error on ``paymentmethod.detached`` event with ``card_xxx`` payment methods (#967).
+- Added ``PaymentMethod.detach()`` (#943).
+- Updated ``help_text`` on all currency fields to make it clear if they're holding integer cents
+  (``StripeQuantumCurrencyAmountField``) or decimal dollar (or euro, pound etc) (``StripeDecimalCurrencyAmountField``) (#999)
+- Documented our preferred Django model field types (#986)
 
 Upcoming migration of currency fields (storage as cents instead of dollars)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

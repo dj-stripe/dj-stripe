@@ -269,11 +269,6 @@ class CardDict(LegacySourceDict):
 
 FAKE_CARD = CardDict(load_fixture("card_card_fakefakefakefakefake0001.json"))
 
-# FAKE_CARD, but accessed as a PaymentMethod
-FAKE_CARD_AS_PAYMENT_METHOD = load_fixture(
-    "payment_method_card_fakefakefakefakefake0001.json"
-)
-
 FAKE_CARD_II = CardDict(load_fixture("card_card_fakefakefakefakefake0002.json"))
 
 FAKE_CARD_III = CardDict(
@@ -398,7 +393,23 @@ FAKE_SOURCE_II = SourceDict(
 
 
 FAKE_PAYMENT_INTENT_I = load_fixture("payment_intent_pi_fakefakefakefakefake0001.json")
-FAKE_PAYMENT_METHOD_I = load_fixture("payment_method_pm_fakefakefakefake0001.json")
+
+
+class PaymentMethodDict(dict):
+    def detach(self):
+        self.pop("customer")
+        return self
+
+
+FAKE_PAYMENT_METHOD_I = PaymentMethodDict(
+    load_fixture("payment_method_pm_fakefakefakefake0001.json")
+)
+
+# FAKE_CARD, but accessed as a PaymentMethod
+FAKE_CARD_AS_PAYMENT_METHOD = PaymentMethodDict(
+    load_fixture("payment_method_card_fakefakefakefakefake0001.json")
+)
+
 
 # TODO - add to regenerate_test_fixtures and replace this with a JSON fixture
 FAKE_SETUP_INTENT_I = {
@@ -1462,6 +1473,45 @@ FAKE_EVENT_PAYMENT_METHOD_ATTACHED = {
     "request": {"id": "req_9c9djVqxUZIKNr", "idempotency_key": None},
     "type": "payment_method.attached",
 }
+
+FAKE_EVENT_PAYMENT_METHOD_DETACHED = {
+    "id": "evt_1FDOwDKatMEEd998o5Fdadfds",
+    "object": "event",
+    "api_version": "2019-08-14",
+    "created": 1567228549,
+    "data": {"object": deepcopy(FAKE_PAYMENT_METHOD_I)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": {"id": "req_9c9djVqxcxgdfg", "idempotency_key": None},
+    "type": "payment_method.detached",
+}
+FAKE_EVENT_PAYMENT_METHOD_DETACHED["data"]["object"]["customer"] = None
+
+FAKE_EVENT_CARD_PAYMENT_METHOD_ATTACHED = {
+    "id": "evt_1FDOwDKatMEEd998o5Fghgfh",
+    "object": "event",
+    "api_version": "2019-08-14",
+    "created": 1567228549,
+    "data": {"object": deepcopy(FAKE_CARD_AS_PAYMENT_METHOD)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": {"id": "req_9c9djVqxUhgfh", "idempotency_key": None},
+    "type": "payment_method.attached",
+}
+
+FAKE_EVENT_CARD_PAYMENT_METHOD_DETACHED = {
+    "id": "evt_1FDOwDKatMEEd998o5435345",
+    "object": "event",
+    "api_version": "2019-08-14",
+    "created": 1567228549,
+    "data": {"object": deepcopy(FAKE_CARD_AS_PAYMENT_METHOD)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": {"id": "req_9c9djVqx6tgeg", "idempotency_key": None},
+    "type": "payment_method.detached",
+}
+# Note that the event from Stripe doesn't have customer = None
+
 
 FAKE_EVENT_PLAN_CREATED = {
     "id": "evt_1877X72eZvKYlo2CLK6daFxu",

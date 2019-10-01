@@ -712,13 +712,13 @@ class Migration(migrations.Migration):
                 (
                     "amount",
                     djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Amount earned."
+                        help_text="Amount earned, in cents."
                     ),
                 ),
                 (
                     "amount_refunded",
                     djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Amount refunded (can be less than the amount attribute on the fee if a partial refund was issued)"
+                        help_text="Amount in cents refunded (can be less than the amount attribute on the fee if a partial refund was issued)"
                     ),
                 ),
                 (
@@ -790,7 +790,7 @@ class Migration(migrations.Migration):
                 (
                     "amount",
                     djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Amount refunded."
+                        help_text="Amount refunded, in cents."
                     ),
                 ),
                 (
@@ -1478,7 +1478,7 @@ class Migration(migrations.Migration):
             field=djstripe.fields.StripeDecimalCurrencyAmountField(
                 blank=True,
                 decimal_places=2,
-                help_text="Amount to be charged on the interval specified.",
+                help_text="Amount (as decimal) to be charged on the interval specified.",
                 max_digits=8,
                 null=True,
             ),

@@ -114,6 +114,35 @@ def customer_subscription_webhook_handler(event):
     _handle_crud_like_event(target_cls=models.Subscription, event=event)
 
 
+@webhooks.handler("payment_method")
+def payment_method_handler(event):
+    """
+    Handle updates to payment_method objects
+    :param event:
+    :return:
+
+    Docs for:
+    - payment_method: https://stripe.com/docs/api/payment_methods
+    """
+    id_ = event.data.get("object", {}).get("id", None)
+
+    if (
+        event.parts == ["payment_method", "detached"]
+        and id_
+        and id_.startswith("card_")
+    ):
+        # Special case to handle a quirk in stripe's wrapping of legacy "card" objects
+        # with payment_methods - card objects are deleted on detach, so treat this as
+        # a delete event
+        _handle_crud_like_event(
+            target_cls=models.PaymentMethod,
+            event=event,
+            crud_type=CrudType(deleted=True),
+        )
+    else:
+        _handle_crud_like_event(target_cls=models.PaymentMethod, event=event)
+
+
 @webhooks.handler(
     "transfer",
     "charge",
@@ -121,7 +150,6 @@ def customer_subscription_webhook_handler(event):
     "invoice",
     "invoiceitem",
     "payment_intent",
-    "payment_method",
     "plan",
     "product",
     "setup_intent",
@@ -129,8 +157,8 @@ def customer_subscription_webhook_handler(event):
 )
 def other_object_webhook_handler(event):
     """
-    Handle updates to transfer, charge, invoice, invoiceitem, plan, product
-    and source objects.
+    Handle updates to transfer, charge, coupon, invoice, invoiceitem, payment_intent,
+    plan, product, setup_intent and source objects.
 
     Docs for:
     - charge: https://stripe.com/docs/api#charges
@@ -140,7 +168,6 @@ def other_object_webhook_handler(event):
     - plan: https://stripe.com/docs/api#plans
     - product: https://stripe.com/docs/api#products
     - source: https://stripe.com/docs/api#sources
-    - payment_method: https://stripe.com/docs/api/payment_methods
     - payment_intent: https://stripe.com/docs/api/payment_intents
     """
 
@@ -155,7 +182,6 @@ def other_object_webhook_handler(event):
             "invoice": models.Invoice,
             "invoiceitem": models.InvoiceItem,
             "payment_intent": models.PaymentIntent,
-            "payment_method": models.PaymentMethod,
             "plan": models.Plan,
             "product": models.Product,
             "transfer": models.Transfer,
@@ -245,7 +271,7 @@ def _handle_crud_like_event(
     ignored (but the event processing still succeeds).
 
     :param target_cls: The djstripe model being handled.
-    :type target_cls: models.StripeModel
+    :type target_cls: Type[models.StripeModel]
     :param event: The event object
     :type event: models.Event
     :param data: The event object data (defaults to ``event.data``).
