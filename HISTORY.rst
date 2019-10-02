@@ -6,6 +6,26 @@ History
 2.2.0 (unreleased)
 ------------------
 
+- Dropped previously-deprecated ``Account`` fields (see https://stripe.com/docs/upgrades#2019-02-19 ):
+    - ``.business_name``
+    - ``.business_primary_color``
+    - ``.business_url`` (changed to a property)
+    - ``.debit_negative_balances``
+    - ``.decline_charge_on``
+    - ``.display_name``
+    - ``.legal_entity``
+    - ``.payout_schedule``
+    - ``.payout_statement_descriptor``
+    - ``.statement_descriptor``
+    - ``.support_email``
+    - ``.support_phone``
+    - ``.support_url``
+    - ``.timezone``
+    - ``.verification``
+- Dropped previously-deprecated ``Account.business_logo`` property (renamed to ``.branding_icon``)
+- Dropped previously-deprecated ``Customer.account_balance`` property (renamed to ``.balance``)
+- Dropped previously-deprecated properties ``Invoice.application_fee``, ``Invoice.date``
+- Dropped previously-deprecated enum ``PaymentMethodType`` (use ``DjstripePaymentMethodType`` instead)
 - Change urls.py to use the new style urls.
 
 2.1.1 (2019-10-01)

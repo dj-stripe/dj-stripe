@@ -59,9 +59,6 @@ class TestAccount(AssertStripeFksMixin, TestCase):
         self.assertEqual(account.settings["branding"]["icon"], account.branding_icon.id)
         self.assertEqual(account.settings["branding"]["logo"], account.branding_logo.id)
 
-        with self.assertWarns(DeprecationWarning):
-            self.assertEqual(account.business_logo.id, account.branding_icon.id)
-
         self.assertNotEqual(account.branding_logo.id, account.branding_icon.id)
 
         self.assert_fks(account, expected_blank_fks={})

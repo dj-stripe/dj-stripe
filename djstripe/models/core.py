@@ -1,5 +1,4 @@
 import decimal
-import warnings
 
 import stripe
 from django.db import models, transaction
@@ -621,16 +620,6 @@ class Customer(StripeModel):
         The customer is considered to have pending charges if their balance is above 0.
         """
         return max(self.balance, 0)
-
-    # deprecated, will be removed in 2.2
-    @property
-    def account_balance(self):
-        warnings.warn(
-            "Customer.date has been removed, use .balance instead. "
-            "This alias will be removed in djstripe 2.2",
-            DeprecationWarning,
-        )
-        return self.balance
 
     def subscribe(
         self,
