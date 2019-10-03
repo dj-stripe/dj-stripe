@@ -61,6 +61,7 @@
             "exp_year": 2020,
             "fingerprint": "88PuXw9tEmvYe69o",
             "funding": "credit",
+            "installments": null,
             "last4": "4242",
             "three_d_secure": null,
             "wallet": null

@@ -75,6 +75,7 @@
                         "exp_year": 2020,
                         "fingerprint": "XBb4pv4IRQeImoJN",
                         "funding": "credit",
+                        "installments": null,
                         "last4": "4242",
                         "three_d_secure": null,
                         "wallet": null
@@ -142,6 +143,7 @@
     "payment_method": null,
     "payment_method_options": {
         "card": {
+            "installments": null,
             "request_three_d_secure": "automatic"
         }
     },
