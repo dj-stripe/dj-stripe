@@ -27,6 +27,8 @@ History
 - Dropped previously-deprecated ``Customer.account_balance`` property (renamed to ``.balance``)
 - Dropped previously-deprecated properties ``Invoice.application_fee``, ``Invoice.date``
 - Dropped previously-deprecated enum ``PaymentMethodType`` (use ``DjstripePaymentMethodType`` instead)
+- Renamed ``Invoice.billing`` to ``.collection_method`` (added deprecated property for the old name).
+- Updated ``Invoice`` model to add missing fields.
 - Change urls.py to use the new style urls.
 
 Warning about safe uninstall of jsonfield on upgrade
