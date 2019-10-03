@@ -590,7 +590,3 @@ class DjstripePaymentMethodType(Enum):
     card = _("Card")
     bank_account = _("Bank account")
     source = _("Source")
-
-
-# Alias (Deprecated, remove in 2.2.0)
-PaymentMethodType = DjstripePaymentMethodType

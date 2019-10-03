@@ -1,4 +1,3 @@
-import warnings
 from copy import deepcopy
 
 import stripe
@@ -522,26 +521,6 @@ class Invoice(StripeModel):
         if self.closed:
             return self.STATUS_CLOSED
         return self.STATUS_OPEN
-
-    # deprecated, will be removed in 2.2
-    @property
-    def application_fee(self):
-        warnings.warn(
-            "Invoice.application_fee has been renamed to .application_fee_amount. "
-            "This alias will be removed in djstripe 2.2",
-            DeprecationWarning,
-        )
-        return self.application_fee_amount
-
-    # deprecated, will be removed in 2.2
-    @property
-    def date(self):
-        warnings.warn(
-            "Invoice.date has been removed, use .created instead."
-            "This alias will be removed in djstripe 2.2",
-            DeprecationWarning,
-        )
-        return self.created
 
     def get_stripe_dashboard_url(self):
         return self.customer.get_stripe_dashboard_url()
