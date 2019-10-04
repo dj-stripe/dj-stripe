@@ -42,7 +42,12 @@ Warning about safe uninstall of jsonfield on upgrade
 
 
     Otherwise, ``pip uninstall jsonfield`` will remove jsonfield2’s ``jsonfield``
-    module from ``site-packages``. running the above command should resolve this if you have hit this issue).
+    module from ``site-packages``, which would cause errors like ``ImportError: cannot import name 'JSONField' from 'jsonfield' (unknown location)``
+
+    If you have hit this ImportError already after upgrading, running this should resolve it::
+
+        # remove both jsonfield packages before reinstall to fix ImportError:
+        pip uninstall jsonfield jsonfield2 -y && pip install "dj-stripe>=2.2.0dev"
 
 .. _jsonfield: https://github.com/dmkoch/django-jsonfield/
 .. _jsonfield2: https://github.com/rpkilby/jsonfield2/
