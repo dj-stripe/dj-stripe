@@ -27,6 +27,19 @@ History
 - Dropped previously-deprecated properties ``Invoice.application_fee``, ``Invoice.date``
 - Dropped previously-deprecated enum ``PaymentMethodType`` (use ``DjstripePaymentMethodType`` instead)
 - Change urls.py to use the new style urls.
+- Upgraded `jsonfield`_ dependency to `jsonfield2`_, for Django 3 forward-compatibility.
+
+.. warning::
+
+    Both **jsonfield** and **jsonfield2** use the same import path, so be sure
+    to install jsonfield2 *after* uninstalling jsonfield in an existing virtualenv.
+    Otherwise, a ``pip uninstall jsonfield`` will remove jsonfield2’s ``jsonfield``
+    module from ``site-packages``.
+
+.. _jsonfield: https://github.com/dmkoch/django-jsonfield/
+.. _jsonfield2: https://github.com/rpkilby/jsonfield2/
+
+    
 
 2.1.1 (2019-10-01)
 ------------------
