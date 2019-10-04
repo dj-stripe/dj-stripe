@@ -6,6 +6,7 @@ History
 2.2.0 (unreleased)
 ------------------
 
+- Changed `JSONField` dependent package from `jsonfield`_ to `jsonfield2`_, for Django 3 compatibility (see warning below).
 - Dropped previously-deprecated ``Account`` fields (see https://stripe.com/docs/upgrades#2019-02-19 ):
     - ``.business_name``
     - ``.business_primary_color``
@@ -27,14 +28,20 @@ History
 - Dropped previously-deprecated properties ``Invoice.application_fee``, ``Invoice.date``
 - Dropped previously-deprecated enum ``PaymentMethodType`` (use ``DjstripePaymentMethodType`` instead)
 - Change urls.py to use the new style urls.
-- Upgraded `jsonfield`_ dependency to `jsonfield2`_, for Django 3 forward-compatibility.
+
+Safe uninstall of jsonfield if upgrading from dj-stripe<2.2
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. warning::
 
-    Both **jsonfield** and **jsonfield2** use the same import path, so be sure
-    to install jsonfield2 *after* uninstalling jsonfield in an existing virtualenv.
-    Otherwise, a ``pip uninstall jsonfield`` will remove jsonfield2’s ``jsonfield``
-    module from ``site-packages``.
+    Both **jsonfield** and **jsonfield2** use the same import path, so if upgrading to dj-stripe>=2.2
+    in an existing virtualenv, sure to uninstall jsonfield first.  eg::
+    
+    pip uninstall jsonfield -y && pip install "dj-stripe>=2.2.0dev"
+    
+    
+    Otherwise, ``pip uninstall jsonfield`` will remove jsonfield2’s ``jsonfield``
+    module from ``site-packages`` (running the above command should resolve this if you have hit this issue).
 
 .. _jsonfield: https://github.com/dmkoch/django-jsonfield/
 .. _jsonfield2: https://github.com/rpkilby/jsonfield2/
