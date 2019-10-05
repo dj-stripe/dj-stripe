@@ -5,7 +5,6 @@ from functools import wraps
 
 from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import redirect
-from django.utils.decorators import available_attrs
 
 from .settings import SUBSCRIPTION_REDIRECT, subscriber_request_callback
 from .utils import subscriber_has_active_subscription
@@ -21,7 +20,7 @@ def subscriber_passes_pay_test(test_func, plan=None, pay_page=SUBSCRIPTION_REDIR
     """
 
     def decorator(view_func):
-        @wraps(view_func, assigned=available_attrs(view_func))
+        @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
             if test_func(subscriber_request_callback(request), plan):
                 return view_func(request, *args, **kwargs)
