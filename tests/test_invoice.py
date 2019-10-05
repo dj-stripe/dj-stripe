@@ -98,6 +98,10 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         self.assertGreater(len(invoice.status_transitions.keys()), 1)
         self.assertTrue(bool(invoice.account_country))
         self.assertTrue(bool(invoice.account_name))
+        self.assertTrue(bool(invoice.collection_method))
+
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(invoice.billing, invoice.collection_method)
 
         self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
 
