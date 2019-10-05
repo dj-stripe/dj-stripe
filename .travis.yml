@@ -14,9 +14,9 @@ matrix:
     # Only test postgres_native_json, mysql & sqlite vs latest python to reduce combinations
     - { python: "3.5", env: TOXENV=py35-django21-postgres }
     - { python: "3.5", env: TOXENV=py35-django22-postgres }
-    - { python: "3.5", env: TOXENV=py35-django22-postgres }
     - { python: "3.6", env: TOXENV=py36-django21-postgres }
     - { python: "3.6", env: TOXENV=py36-django22-postgres }
+    - { python: "3.6", env: TOXENV=py36-django30-postgres }
     - { python: "3.7", env: TOXENV=py37-django21-postgres }
     - { python: "3.7", env: TOXENV=py37-django21-postgres_native_json }
     - { python: "3.7", env: TOXENV=py37-django21-mysql }
@@ -25,11 +25,20 @@ matrix:
     - { python: "3.7", env: TOXENV=py37-django22-postgres_native_json }
     - { python: "3.7", env: TOXENV=py37-django22-mysql }
     - { python: "3.7", env: TOXENV=py37-django22-sqlite }
+    - { python: "3.7", env: TOXENV=py37-django30-postgres }
+    - { python: "3.7", env: TOXENV=py37-django30-postgres_native_json }
+    - { python: "3.7", env: TOXENV=py37-django30-mysql }
+    - { python: "3.7", env: TOXENV=py37-django30-sqlite }
     - { python: "3.7", env: TOXENV=py37-djangomaster-postgres }
     - { python: "3.7", env: TOXENV=checkmigrations }
     - { python: "3.7", env: TOXENV=lint }
     - { python: "3.7", env: TOXENV=docs }
   allow_failures:
+    - env: TOXENV=py36-django30-postgres
+    - env: TOXENV=py37-django30-postgres
+    - env: TOXENV=py37-django30-mysql
+    - env: TOXENV=py37-django30-sqlite
+    - env: TOXENV=py37-django30-postgres_native_json
     - env: TOXENV=py37-djangomaster-postgres
 
 services:
