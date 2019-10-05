@@ -5,7 +5,7 @@ from datetime import timedelta
 from django.apps import apps
 from django.db import IntegrityError, models, transaction
 from django.utils import dateformat, timezone
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 
 from .. import settings as djstripe_settings
 from ..fields import JSONField, StripeDateTimeField, StripeIdField
@@ -697,7 +697,7 @@ class StripeModel(models.Model):
         return instance
 
     def __str__(self):
-        return smart_text("<{list}>".format(list=", ".join(self.str_parts())))
+        return smart_str("<{list}>".format(list=", ".join(self.str_parts())))
 
 
 class IdempotencyKey(models.Model):
