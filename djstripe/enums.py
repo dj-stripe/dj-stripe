@@ -311,9 +311,23 @@ class FileUploadType(Enum):
     docx = _("DOCX")
 
 
-class InvoiceBilling(Enum):
+class InvoiceBillingReason(Enum):
+    subscription_cycle = _("Subscription cycle")
+    subscription_create = _("Subscription create")
+    subscription_update = _("Subscription update")
+    subscription = _("Subscription")
+    manual = _("Manual")
+    upcoming = _("Upcoming")
+    subscription_threshold = _("Subscription threshold")
+
+
+class InvoiceCollectionMethod(Enum):
     charge_automatically = _("Charge automatically")
     send_invoice = _("Send invoice")
+
+
+# deprecated, will be removed in 2.3
+InvoiceBilling = InvoiceCollectionMethod
 
 
 class IntentUsage(Enum):

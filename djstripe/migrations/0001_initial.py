@@ -1332,6 +1332,7 @@ class Migration(migrations.Migration):
                         decimal_places=2,
                         help_text="The fee (as decimal) that will be applied to the invoice and transferred to the application owner's Stripe account when the invoice is paid.",
                         max_digits=8,
+                        blank=True,
                         null=True,
                     ),
                 ),
@@ -1381,6 +1382,7 @@ class Migration(migrations.Migration):
                     djstripe.fields.StripeDateTimeField(
                         help_text="The date on which payment for this invoice is due. This value will be null for invoices where billing=charge_automatically.",
                         null=True,
+                        blank=True,
                     ),
                 ),
                 (
@@ -1420,6 +1422,7 @@ class Migration(migrations.Migration):
                     djstripe.fields.StripeDateTimeField(
                         help_text="The time at which payment will next be attempted.",
                         null=True,
+                        blank=True,
                     ),
                 ),
                 (
@@ -1456,6 +1459,7 @@ class Migration(migrations.Migration):
                         help_text="This is the transaction number that appears on email receipts sent for this invoice.",
                         max_length=64,
                         null=True,
+                        blank=True,
                     ),
                 ),
                 (
@@ -1506,6 +1510,7 @@ class Migration(migrations.Migration):
                         help_text="This percentage of the subtotal has been added to the total amount of the invoice, including invoice line items and discounts. This field is inherited from the subscription's ``tax_percent`` field, but can be changed before the invoice is paid. This field defaults to null.",
                         max_digits=5,
                         null=True,
+                        blank=True,
                         validators=[
                             django.core.validators.MinValueValidator(1.0),
                             django.core.validators.MaxValueValidator(100.0),

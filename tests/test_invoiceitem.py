@@ -38,6 +38,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
             "djstripe.Customer.coupon",
             "djstripe.Customer.default_payment_method",
             "djstripe.Customer.subscriber",
+            "djstripe.Invoice.default_payment_method",
             "djstripe.Invoice.payment_intent",
             "djstripe.Subscription.pending_setup_intent",
         }
