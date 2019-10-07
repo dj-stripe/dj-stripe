@@ -32,6 +32,7 @@ History
 - Dropped previously-deprecated enum ``PaymentMethodType`` (use ``DjstripePaymentMethodType`` instead)
 - Renamed ``Invoice.billing`` to ``.collection_method`` (added deprecated property for the old name).
 - Updated ``Invoice`` model to add missing fields.
+- Added ``TaxRate`` model.
 - Change urls.py to use the new style urls.
 - Update forward relation fields in the admin to be raw id fields.
 - Updated ``StripeQuantumCurrencyAmountField`` and ``StripeDecimalCurrencyAmountField`` to support Stripe Large Charges (#1045).

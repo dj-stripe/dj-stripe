@@ -27,7 +27,23 @@
     "customer_tax_ids": [],
     "default_payment_method": null,
     "default_source": null,
-    "default_tax_rates": [],
+    "default_tax_rates": [
+        {
+            "id": "txr_fakefakefakefakefake0001",
+            "object": "tax_rate",
+            "active": true,
+            "created": 1570921289,
+            "description": null,
+            "display_name": "VAT",
+            "inclusive": true,
+            "jurisdiction": "Example1",
+            "livemode": false,
+            "metadata": {
+                "djstripe_test_fake_id": "txr_fakefakefakefakefake0001"
+            },
+            "percentage": 15.0
+        }
+    ],
     "description": null,
     "discount": null,
     "due_date": null,
@@ -79,7 +95,13 @@
                 "quantity": 1,
                 "subscription": "sub_fakefakefakefakefake0001",
                 "subscription_item": "si_FBXFzo2zBOeeMy",
-                "tax_amounts": [],
+                "tax_amounts": [
+                    {
+                        "amount": 261,
+                        "inclusive": true,
+                        "tax_rate": "txr_fakefakefakefakefake0001"
+                    }
+                ],
                 "tax_rates": [],
                 "type": "subscription"
             }
@@ -112,9 +134,15 @@
     },
     "subscription": "sub_fakefakefakefakefake0001",
     "subtotal": 2000,
-    "tax": null,
+    "tax": 261,
     "tax_percent": null,
     "total": 2000,
-    "total_tax_amounts": [],
+    "total_tax_amounts": [
+        {
+            "amount": 261,
+            "inclusive": true,
+            "tax_rate": "txr_fakefakefakefakefake0001"
+        }
+    ],
     "webhooks_delivered_at": 1557995178
 }

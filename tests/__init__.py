@@ -1062,6 +1062,11 @@ FAKE_UPCOMING_INVOICE = InvoiceDict(
     }
 )
 
+FAKE_TAX_RATE_EXAMPLE_1_VAT = load_fixture("tax_rate_txr_fakefakefakefakefake0001.json")
+FAKE_TAX_RATE_EXAMPLE_2_SALES = load_fixture(
+    "tax_rate_txr_fakefakefakefakefake0002.json"
+)
+
 FAKE_INVOICEITEM = {
     "id": "ii_16XVTY2eZvKYlo2Cxz5n3RaS",
     "object": "invoiceitem",
@@ -1099,6 +1104,29 @@ FAKE_INVOICEITEM_II = {
     "quantity": None,
     "subscription": None,
 }
+
+# Invoice item with tax_rates
+# TODO generate this
+FAKE_INVOICEITEM_III = {
+    "id": "ii_16XVTY2eZvKYlo2Cxz5n3RaS",
+    "object": "invoiceitem",
+    "amount": 2000,
+    "currency": "usd",
+    "customer": FAKE_CUSTOMER_II["id"],
+    "date": 1439033216,
+    "description": "One-time setup fee",
+    "discountable": True,
+    "invoice": FAKE_INVOICE_II["id"],
+    "livemode": False,
+    "metadata": {"key1": "value1", "key2": "value2"},
+    "period": {"start": 1439033216, "end": 1439033216},
+    "plan": None,
+    "proration": False,
+    "quantity": None,
+    "subscription": None,
+    "tax_rates": [FAKE_TAX_RATE_EXAMPLE_1_VAT],
+}
+
 
 FAKE_TRANSFER = {
     "id": "tr_16Y9BK2eZvKYlo2CR0ySu1BA",
