@@ -6,6 +6,7 @@ from .billing import (
     Plan,
     Subscription,
     SubscriptionItem,
+    TaxRate,
     UpcomingInvoice,
     UsageRecord,
 )
@@ -72,6 +73,7 @@ __all__ = [
     "StripeModel",
     "Subscription",
     "SubscriptionItem",
+    "TaxRate",
     "Transfer",
     "TransferReversal",
     "UpcomingInvoice",

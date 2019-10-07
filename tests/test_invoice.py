@@ -22,6 +22,7 @@ from . import (
     FAKE_PLAN,
     FAKE_PRODUCT,
     FAKE_SUBSCRIPTION,
+    FAKE_TAX_RATE_EXAMPLE_1_VAT,
     FAKE_UPCOMING_INVOICE,
     IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
@@ -102,6 +103,22 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
         with self.assertWarns(DeprecationWarning):
             self.assertEqual(invoice.billing, invoice.collection_method)
+
+        self.assertEqual(invoice.default_tax_rates.count(), 1)
+        self.assertEqual(
+            invoice.default_tax_rates.first().id, FAKE_TAX_RATE_EXAMPLE_1_VAT["id"]
+        )
+
+        self.assertEqual(invoice.total_tax_amounts.count(), 1)
+
+        first_tax_amount = invoice.total_tax_amounts.first()
+        self.assertEqual(
+            first_tax_amount.tax_rate.id, FAKE_TAX_RATE_EXAMPLE_1_VAT["id"]
+        )
+        self.assertEqual(
+            first_tax_amount.inclusive, FAKE_TAX_RATE_EXAMPLE_1_VAT["inclusive"]
+        )
+        self.assertEqual(first_tax_amount.amount, 261)
 
         self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
 

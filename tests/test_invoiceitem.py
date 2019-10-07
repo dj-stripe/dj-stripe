@@ -15,9 +15,11 @@ from . import (
     FAKE_CUSTOMER_II,
     FAKE_INVOICE_II,
     FAKE_INVOICEITEM,
+    FAKE_INVOICEITEM_III,
     FAKE_PLAN_II,
     FAKE_PRODUCT,
     FAKE_SUBSCRIPTION_III,
+    FAKE_TAX_RATE_EXAMPLE_1_VAT,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
     default_account,
@@ -320,4 +322,53 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
             invoiceitem,
             expected_blank_fks=self.default_expected_blank_fks
             | {"djstripe.InvoiceItem.invoice", "djstripe.InvoiceItem.subscription"},
+        )
+
+    @patch(
+        "djstripe.models.Account.get_default_account",
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
+    @patch(
+        "stripe.BalanceTransaction.retrieve",
+        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.Subscription.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_III),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER_II),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE_II), autospec=True
+    )
+    @patch(
+        "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE_II), autospec=True
+    )
+    def test_sync_with_taxes(
+        self,
+        invoice_retrieve_mock,
+        charge_retrieve_mock,
+        customer_retrieve_mock,
+        subscription_retrieve_mock,
+        product_retrieve_mock,
+        balance_transaction_retrieve_mock,
+        default_account_mock,
+    ):
+        default_account_mock.return_value = self.account
+
+        invoiceitem_data = deepcopy(FAKE_INVOICEITEM_III)
+        invoiceitem_data["plan"] = FAKE_PLAN_II
+        invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
+
+        self.assertEqual(invoiceitem.tax_rates.count(), 1)
+        self.assertEqual(
+            invoiceitem.tax_rates.first().id, FAKE_TAX_RATE_EXAMPLE_1_VAT["id"]
         )

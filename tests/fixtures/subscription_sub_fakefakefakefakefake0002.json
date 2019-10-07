@@ -55,7 +55,23 @@
                 },
                 "quantity": 1,
                 "subscription": "sub_fakefakefakefakefake0002",
-                "tax_rates": []
+                "tax_rates": [
+                    {
+                        "id": "txr_fakefakefakefakefake0001",
+                        "object": "tax_rate",
+                        "active": true,
+                        "created": 1570944265,
+                        "description": null,
+                        "display_name": "VAT",
+                        "inclusive": true,
+                        "jurisdiction": "Example1",
+                        "livemode": false,
+                        "metadata": {
+                            "djstripe_test_fake_id": "txr_fakefakefakefakefake0001"
+                        },
+                        "percentage": 15.0
+                    }
+                ]
             }
         ],
         "has_more": false,

@@ -1,0 +1,15 @@
+{
+    "id": "txr_fakefakefakefakefake0001",
+    "object": "tax_rate",
+    "active": true,
+    "created": 1570435136,
+    "description": null,
+    "display_name": "VAT",
+    "inclusive": true,
+    "jurisdiction": "Example1",
+    "livemode": false,
+    "metadata": {
+        "djstripe_test_fake_id": "txr_fakefakefakefakefake0001"
+    },
+    "percentage": 15.0
+}
