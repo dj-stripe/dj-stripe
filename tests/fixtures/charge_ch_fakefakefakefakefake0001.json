@@ -24,7 +24,7 @@
     "created": 1557995177,
     "currency": "usd",
     "customer": "cus_6lsBvm5rJ0zyHc",
-    "description": "Invoice 7759B3BE-0001",
+    "description": "Subscription creation",
     "destination": null,
     "dispute": null,
     "failure_code": null,
@@ -63,6 +63,7 @@
             "funding": "credit",
             "installments": null,
             "last4": "4242",
+            "network": "visa",
             "three_d_secure": null,
             "wallet": null
         },
