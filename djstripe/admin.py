@@ -6,6 +6,25 @@ from django.contrib import admin
 from . import models
 
 
+def get_forward_relation_fields_for_model(model):
+    """Return an iterable of the field names that are forward relations,
+    I.E ManyToManyField, OneToOneField, and ForeignKey.
+
+    Useful for perhaps ensuring the admin is always using raw ID fields for
+    newly added forward relation fields.
+    """
+    return [
+        field.name
+        for field in model._meta.get_fields()
+        # Get only relation fields
+        if field.is_relation
+        # Exclude auto relation fields, like reverse one to one.
+        and not field.auto_created
+        # We only want forward relations.
+        and any((field.many_to_many, field.one_to_one, field.many_to_one))
+    ]
+
+
 class BaseHasSourceListFilter(admin.SimpleListFilter):
     title = "source presence"
     parameter_name = "has_source"
@@ -107,7 +126,7 @@ class WebhookEventTriggerAdmin(admin.ModelAdmin):
         "djstripe_version",
     )
     list_filter = ("created", "valid", "processed")
-    raw_id_fields = ("event",)
+    raw_id_fields = get_forward_relation_fields_for_model(models.WebhookEventTrigger)
 
     def reprocess(self, request, queryset):
         for trigger in queryset:
@@ -173,7 +192,7 @@ class InvoiceItemInline(admin.StackedInline):
     model = models.InvoiceItem
     extra = 0
     readonly_fields = ("id", "created")
-    raw_id_fields = ("customer", "subscription", "plan")
+    raw_id_fields = get_forward_relation_fields_for_model(model)
     show_change_link = True
 
 
@@ -182,7 +201,7 @@ class AccountAdmin(StripeModelAdmin):
     list_display = ("business_url", "country", "default_currency")
     list_filter = ("details_submitted",)
     search_fields = ("business_name", "display_name", "business_url")
-    raw_id_fields = ("branding_icon",)
+    raw_id_fields = get_forward_relation_fields_for_model(models.Account)
 
 
 @admin.register(models.Charge)
@@ -198,7 +217,7 @@ class ChargeAdmin(StripeModelAdmin):
     )
     search_fields = ("customer__id", "invoice__id")
     list_filter = ("status", "paid", "refunded", "captured")
-    raw_id_fields = ("customer", "dispute", "invoice", "source", "transfer")
+    raw_id_fields = get_forward_relation_fields_for_model(models.Charge)
 
 
 @admin.register(models.Coupon)
@@ -218,7 +237,7 @@ class CouponAdmin(StripeModelAdmin):
 
 @admin.register(models.Customer)
 class CustomerAdmin(StripeModelAdmin):
-    raw_id_fields = ("subscriber", "default_source", "coupon")
+    raw_id_fields = get_forward_relation_fields_for_model(models.Customer)
     list_display = (
         "subscriber",
         "email",
@@ -315,7 +334,7 @@ class InvoiceAdmin(StripeModelAdmin):
         "period_start",
         "period_end",
     )
-    raw_id_fields = ("customer", "charge", "subscription")
+    raw_id_fields = get_forward_relation_fields_for_model(models.Invoice)
     search_fields = ("customer__id", "number", "receipt_number")
     inlines = (InvoiceItemInline,)
 
@@ -370,21 +389,21 @@ class RefundAdmin(StripeModelAdmin):
 
 @admin.register(models.Source)
 class SourceAdmin(StripeModelAdmin):
-    raw_id_fields = ("customer",)
+    raw_id_fields = get_forward_relation_fields_for_model(models.Source)
     list_display = ("customer", "type", "status", "amount", "currency", "usage", "flow")
     list_filter = ("type", "status", "usage", "flow")
 
 
 @admin.register(models.PaymentMethod)
 class PaymentMethodAdmin(StripeModelAdmin):
-    raw_id_fields = ("customer",)
+    raw_id_fields = get_forward_relation_fields_for_model(models.PaymentMethod)
     list_display = ("customer", "billing_details")
     list_filter = ("customer",)
 
 
 @admin.register(models.Subscription)
 class SubscriptionAdmin(StripeModelAdmin):
-    raw_id_fields = ("customer",)
+    raw_id_fields = get_forward_relation_fields_for_model(models.Subscription)
     list_display = ("customer", "status")
     list_filter = ("status", "cancel_at_period_end")
 
