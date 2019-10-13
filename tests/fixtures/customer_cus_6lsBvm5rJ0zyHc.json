@@ -175,7 +175,7 @@
                     "total_count": 1,
                     "url": "/v1/subscription_items?subscription=sub_fakefakefakefakefake0002"
                 },
-                "latest_invoice": "in_1EhAAgCOCguPTL2BajlVgKGV",
+                "latest_invoice": "in_fakefakefakefakefake0004",
                 "livemode": false,
                 "metadata": {
                     "djstripe_test_fake_id": "sub_fakefakefakefakefake0002"

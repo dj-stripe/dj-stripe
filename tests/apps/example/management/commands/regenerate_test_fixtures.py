@@ -198,7 +198,7 @@ class Command(BaseCommand):
                 tests.FAKE_SUBSCRIPTION_III,
                 tests.FAKE_SUBSCRIPTION_MULTI_PLAN,
             ],
-            djstripe.models.Invoice: [tests.FAKE_INVOICE],
+            djstripe.models.Invoice: [tests.FAKE_INVOICE, tests.FAKE_INVOICE_IV],
             djstripe.models.Charge: [tests.FAKE_CHARGE],
             djstripe.models.PaymentIntent: [tests.FAKE_PAYMENT_INTENT_I],
             djstripe.models.PaymentMethod: [

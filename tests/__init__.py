@@ -873,6 +873,7 @@ class InvoiceDict(dict):
 
 
 FAKE_INVOICE = InvoiceDict(load_fixture("invoice_in_fakefakefakefakefake0001.json"))
+FAKE_INVOICE_IV = InvoiceDict(load_fixture("invoice_in_fakefakefakefakefake0004.json"))
 
 
 FAKE_INVOICE_II = InvoiceDict(
