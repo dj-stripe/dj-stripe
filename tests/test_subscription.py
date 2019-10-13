@@ -22,6 +22,7 @@ from . import (
     FAKE_PRODUCT,
     FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_CANCELED,
+    FAKE_SUBSCRIPTION_II,
     FAKE_SUBSCRIPTION_METERED,
     FAKE_SUBSCRIPTION_MULTI_PLAN,
     FAKE_SUBSCRIPTION_NOT_PERIOD_CURRENT,
@@ -62,6 +63,23 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
                 email=self.user.email, plan=str(subscription.plan)
             ),
         )
+
+        self.assert_fks(
+            subscription, expected_blank_fks=self.default_expected_blank_fks
+        )
+
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN_II), autospec=True)
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    def test_sync_from_stripe_data2(
+        self, customer_retrieve_mock, product_retrieve_mock, plan_retrieve_mock
+    ):
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION_II)
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
 
         self.assert_fks(
             subscription, expected_blank_fks=self.default_expected_blank_fks
