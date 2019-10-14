@@ -30,6 +30,7 @@ History
 - Renamed ``Invoice.billing`` to ``.collection_method`` (added deprecated property for the old name).
 - Updated ``Invoice`` model to add missing fields.
 - Change urls.py to use the new style urls.
+- Update forward relation fields in the admin to be raw id fields.
 
 Warning about safe uninstall of jsonfield on upgrade
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

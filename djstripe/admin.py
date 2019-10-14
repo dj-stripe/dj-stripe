@@ -6,6 +6,25 @@ from django.contrib import admin
 from . import models
 
 
+def get_forward_relation_fields_for_model(model):
+    """Return an iterable of the field names that are forward relations,
+    I.E ManyToManyField, OneToOneField, and ForeignKey.
+
+    Useful for perhaps ensuring the admin is always using raw ID fields for
+    newly added forward relation fields.
+    """
+    return [
+        field.name
+        for field in model._meta.get_fields()
+        # Get only relation fields
+        if field.is_relation
+        # Exclude auto relation fields, like reverse one to one.
+        and not field.auto_created
+        # We only want forward relations.
+        and any((field.many_to_many, field.one_to_one, field.many_to_one))
+    ]
+
+
 class BaseHasSourceListFilter(admin.SimpleListFilter):
     title = "source presence"
     parameter_name = "has_source"
@@ -107,7 +126,7 @@ class WebhookEventTriggerAdmin(admin.ModelAdmin):
         "djstripe_version",
     )
     list_filter = ("created", "valid", "processed")
-    raw_id_fields = ("event",)
+    raw_id_fields = get_forward_relation_fields_for_model(models.WebhookEventTrigger)
 
     def reprocess(self, request, queryset):
         for trigger in queryset:
@@ -125,6 +144,11 @@ class StripeModelAdmin(admin.ModelAdmin):
     """Base class for all StripeModel-based model admins"""
 
     change_form_template = "djstripe/admin/change_form.html"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.raw_id_fields = get_forward_relation_fields_for_model(self.model)
 
     def get_list_display(self, request):
         return ("id",) + self.list_display + ("created", "livemode")
@@ -155,6 +179,7 @@ class SubscriptionInline(admin.StackedInline):
     model = models.Subscription
     extra = 0
     readonly_fields = ("id", "created")
+    raw_id_fields = get_forward_relation_fields_for_model(model)
     show_change_link = True
 
 
@@ -164,6 +189,7 @@ class SubscriptionItemInline(admin.StackedInline):
     model = models.SubscriptionItem
     extra = 0
     readonly_fields = ("id", "created")
+    raw_id_fields = get_forward_relation_fields_for_model(model)
     show_change_link = True
 
 
@@ -173,7 +199,7 @@ class InvoiceItemInline(admin.StackedInline):
     model = models.InvoiceItem
     extra = 0
     readonly_fields = ("id", "created")
-    raw_id_fields = ("customer", "subscription", "plan")
+    raw_id_fields = get_forward_relation_fields_for_model(model)
     show_change_link = True
 
 
@@ -182,7 +208,6 @@ class AccountAdmin(StripeModelAdmin):
     list_display = ("business_url", "country", "default_currency")
     list_filter = ("details_submitted",)
     search_fields = ("settings", "business_profile")
-    raw_id_fields = ("branding_icon",)
 
 
 @admin.register(models.Charge)
@@ -198,7 +223,6 @@ class ChargeAdmin(StripeModelAdmin):
     )
     search_fields = ("customer__id", "invoice__id")
     list_filter = ("status", "paid", "refunded", "captured")
-    raw_id_fields = ("customer", "dispute", "invoice", "source", "transfer")
 
 
 @admin.register(models.Coupon)
@@ -218,7 +242,6 @@ class CouponAdmin(StripeModelAdmin):
 
 @admin.register(models.Customer)
 class CustomerAdmin(StripeModelAdmin):
-    raw_id_fields = ("subscriber", "default_source", "coupon")
     list_display = (
         "subscriber",
         "email",
@@ -315,7 +338,6 @@ class InvoiceAdmin(StripeModelAdmin):
         "period_start",
         "period_end",
     )
-    raw_id_fields = ("customer", "charge", "subscription")
     search_fields = ("customer__id", "number", "receipt_number")
     inlines = (InvoiceItemInline,)
 
@@ -370,21 +392,18 @@ class RefundAdmin(StripeModelAdmin):
 
 @admin.register(models.Source)
 class SourceAdmin(StripeModelAdmin):
-    raw_id_fields = ("customer",)
     list_display = ("customer", "type", "status", "amount", "currency", "usage", "flow")
     list_filter = ("type", "status", "usage", "flow")
 
 
 @admin.register(models.PaymentMethod)
 class PaymentMethodAdmin(StripeModelAdmin):
-    raw_id_fields = ("customer",)
     list_display = ("customer", "billing_details")
     list_filter = ("customer",)
 
 
 @admin.register(models.Subscription)
 class SubscriptionAdmin(StripeModelAdmin):
-    raw_id_fields = ("customer",)
     list_display = ("customer", "status")
     list_filter = ("status", "cancel_at_period_end")
 
