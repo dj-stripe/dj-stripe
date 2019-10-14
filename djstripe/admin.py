@@ -145,6 +145,11 @@ class StripeModelAdmin(admin.ModelAdmin):
 
     change_form_template = "djstripe/admin/change_form.html"
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.raw_id_fields = get_forward_relation_fields_for_model(self.model)
+
     def get_list_display(self, request):
         return ("id",) + self.list_display + ("created", "livemode")
 
@@ -174,6 +179,7 @@ class SubscriptionInline(admin.StackedInline):
     model = models.Subscription
     extra = 0
     readonly_fields = ("id", "created")
+    raw_id_fields = get_forward_relation_fields_for_model(model)
     show_change_link = True
 
 
@@ -183,6 +189,7 @@ class SubscriptionItemInline(admin.StackedInline):
     model = models.SubscriptionItem
     extra = 0
     readonly_fields = ("id", "created")
+    raw_id_fields = get_forward_relation_fields_for_model(model)
     show_change_link = True
 
 
@@ -201,7 +208,6 @@ class AccountAdmin(StripeModelAdmin):
     list_display = ("business_url", "country", "default_currency")
     list_filter = ("details_submitted",)
     search_fields = ("business_name", "display_name", "business_url")
-    raw_id_fields = get_forward_relation_fields_for_model(models.Account)
 
 
 @admin.register(models.Charge)
@@ -217,7 +223,6 @@ class ChargeAdmin(StripeModelAdmin):
     )
     search_fields = ("customer__id", "invoice__id")
     list_filter = ("status", "paid", "refunded", "captured")
-    raw_id_fields = get_forward_relation_fields_for_model(models.Charge)
 
 
 @admin.register(models.Coupon)
@@ -237,7 +242,6 @@ class CouponAdmin(StripeModelAdmin):
 
 @admin.register(models.Customer)
 class CustomerAdmin(StripeModelAdmin):
-    raw_id_fields = get_forward_relation_fields_for_model(models.Customer)
     list_display = (
         "subscriber",
         "email",
@@ -334,7 +338,6 @@ class InvoiceAdmin(StripeModelAdmin):
         "period_start",
         "period_end",
     )
-    raw_id_fields = get_forward_relation_fields_for_model(models.Invoice)
     search_fields = ("customer__id", "number", "receipt_number")
     inlines = (InvoiceItemInline,)
 
@@ -389,21 +392,18 @@ class RefundAdmin(StripeModelAdmin):
 
 @admin.register(models.Source)
 class SourceAdmin(StripeModelAdmin):
-    raw_id_fields = get_forward_relation_fields_for_model(models.Source)
     list_display = ("customer", "type", "status", "amount", "currency", "usage", "flow")
     list_filter = ("type", "status", "usage", "flow")
 
 
 @admin.register(models.PaymentMethod)
 class PaymentMethodAdmin(StripeModelAdmin):
-    raw_id_fields = get_forward_relation_fields_for_model(models.PaymentMethod)
     list_display = ("customer", "billing_details")
     list_filter = ("customer",)
 
 
 @admin.register(models.Subscription)
 class SubscriptionAdmin(StripeModelAdmin):
-    raw_id_fields = get_forward_relation_fields_for_model(models.Subscription)
     list_display = ("customer", "status")
     list_filter = ("status", "cancel_at_period_end")
 
