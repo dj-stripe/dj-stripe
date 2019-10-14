@@ -133,7 +133,7 @@ class Account(StripeModel):
     def __str__(self):
         return (
             self.settings.get("dashboard", {}).get("display_name")
-            or self.business_profile.get("business_name")
+            or self.business_profile.get("name")
             or super().__str__()
         )
 
