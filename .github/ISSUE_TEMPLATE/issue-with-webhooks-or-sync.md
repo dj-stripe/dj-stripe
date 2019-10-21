@@ -22,7 +22,7 @@ e.g.:
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
-If relevant it's very helpful to include webhook tracebacks and content (note that these are logged in the database at /admin/djstripe/webhookeventtrigger/ )
+If relevant it's very helpful to include webhook tracebacks and content (note that these are logged in the database and are visible in django admin - eg http://127.0.0.1:8000/admin/djstripe/webhookeventtrigger/ )
 
 **Environment**
 - dj-stripe version: [e.g. master at <hash>, 2.0.0 etc]
