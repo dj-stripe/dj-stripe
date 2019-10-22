@@ -72,10 +72,9 @@ Configure readthedocs
 
 If this is this is a new stable branch then do the following on https://readthedocs.org/dashboard/dj-stripe/versions/
 
-* Find the new ``stable/MAJOR.MINOR`` branch name and mark it as active (and then save)
-* Change the default version to this new branch
+* Find the new ``stable/MAJOR.MINOR`` branch name and mark it as active (and then save).
 
 Release on pypi
 ---------------
 
-TODO
+See https://packaging.python.org/tutorials/packaging-projects/#generating-distribution-archives
