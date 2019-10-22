@@ -5,24 +5,32 @@ Installation
 Get the distribution
 ---------------------
 
-At the command line::
+Install dj-stripe:
 
-    $ pip install dj-stripe
+.. code-block:: bash
 
+    pip install dj-stripe
 
 Configuration
 ---------------
-
 
 Add ``djstripe`` to your ``INSTALLED_APPS``:
 
 .. code-block:: python
 
-    INSTALLED_APPS += [
-        'django.contrib.sites',
-        # ...,
+    INSTALLED_APPS =(
+        ...
         "djstripe",
-    ]
+        ...
+    )
+
+Add to urls.py:
+
+.. code-block:: python
+
+    path("stripe/", include("djstripe.urls", namespace="djstripe")),
+
+Tell Stripe about the webhook (Stripe webhook docs can be found `here <https://stripe.com/docs/webhooks>`_) using the full URL of your endpoint from the urls.py step above (e.g. ``https://example.com/stripe/webhook``).
 
 Add your Stripe keys and set the operating mode:
 
@@ -32,17 +40,10 @@ Add your Stripe keys and set the operating mode:
     STRIPE_LIVE_SECRET_KEY = os.environ.get("STRIPE_LIVE_SECRET_KEY", "<your secret key>")
     STRIPE_TEST_PUBLIC_KEY = os.environ.get("STRIPE_TEST_PUBLIC_KEY", "<your publishable key>")
     STRIPE_TEST_SECRET_KEY = os.environ.get("STRIPE_TEST_SECRET_KEY", "<your secret key>")
-    STRIPE_LIVE_MODE = <True or False>
+    STRIPE_LIVE_MODE = False  # Change to True in production
+    DJSTRIPE_WEBHOOK_SECRET = "whsec_xxx"  # Get it from the section in the Stripe dashboard where you added the webhook endpoint
 
-Add some payment plans via the Stripe.com dashboard or the django ORM.
-
-Add the following to the `urlpatterns` in your `urls.py` to expose the webhook endpoint:
-
-.. code-block:: python
-
-    url(r"^stripe/", include("djstripe.urls", namespace="djstripe")),
-
-Then tell Stripe about the webhook (Stripe webhook docs can be found `here <https://stripe.com/docs/webhooks>`_) using the full URL of your endpoint from the urls.py step above (e.g. ``https://example.com/stripe/webhook``).
+Add some payment plans via the Stripe.com dashboard.
 
 Run the commands::
 
@@ -50,10 +51,13 @@ Run the commands::
 
     python manage.py djstripe_init_customers
 
+    python manage.py djstripe_sync_plans_from_stripe
+
 Running Tests
 --------------
 
 Assuming the tests are run against PostgreSQL::
 
     createdb djstripe
+    pip install tox
     tox
