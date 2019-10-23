@@ -53,6 +53,9 @@ Run the commands::
 
     python manage.py djstripe_sync_plans_from_stripe
 
+See https://dj-stripe.readthedocs.io/en/latest/stripe_elements_js.html for notes about
+usage of the Stripe Elements frontend JS library.
+
 Running Tests
 --------------
 

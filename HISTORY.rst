@@ -55,6 +55,12 @@ Warning about safe uninstall of jsonfield on upgrade
 .. _jsonfield: https://github.com/dmkoch/django-jsonfield/
 .. _jsonfield2: https://github.com/rpkilby/jsonfield2/
 
+Note on usage of Stripe Elements JS
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+See https://dj-stripe.readthedocs.io/en/latest/stripe_elements_js.html for notes about
+usage of the Stripe Elements frontend JS library.
+
+TLDR: if you haven't yet migrated to PaymentIntents, prefer ``stripe.createSource()`` to ``stripe.createToken()``.
 
 
 2.1.1 (2019-10-01)

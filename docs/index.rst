@@ -21,6 +21,7 @@ Contents
 
    installation
    api_versions
+   stripe_elements_js
 
 .. toctree::
    :caption: Usage
