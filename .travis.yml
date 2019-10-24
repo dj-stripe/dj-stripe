@@ -11,12 +11,14 @@ matrix:
   fast_finish: true
 
   include:
-    # Only test postgres_native_json, mysql & sqlite vs latest python to reduce combinations
+    # Don't test postgres_native_json, mysql & sqlite vs all python versions to reduce combinations
     - { python: "3.5", env: TOXENV=py35-django21-postgres }
     - { python: "3.5", env: TOXENV=py35-django22-postgres }
+
     - { python: "3.6", env: TOXENV=py36-django21-postgres }
     - { python: "3.6", env: TOXENV=py36-django22-postgres }
     - { python: "3.6", env: TOXENV=py36-django30-postgres }
+
     - { python: "3.7", env: TOXENV=py37-django21-postgres }
     - { python: "3.7", env: TOXENV=py37-django21-postgres_native_json }
     - { python: "3.7", env: TOXENV=py37-django21-mysql }
@@ -30,6 +32,10 @@ matrix:
     - { python: "3.7", env: TOXENV=py37-django30-mysql }
     - { python: "3.7", env: TOXENV=py37-django30-sqlite }
     - { python: "3.7", env: TOXENV=py37-djangomaster-postgres }
+
+    - { python: "3.8", env: TOXENV=py38-django22-postgres }
+    - { python: "3.8", env: TOXENV=py38-django30-postgres }
+
     - { python: "3.7", env: TOXENV=checkmigrations }
     - { python: "3.7", env: TOXENV=lint }
     - { python: "3.7", env: TOXENV=docs }
