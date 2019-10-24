@@ -34,11 +34,6 @@ matrix:
     - { python: "3.7", env: TOXENV=lint }
     - { python: "3.7", env: TOXENV=docs }
   allow_failures:
-    - env: TOXENV=py36-django30-postgres
-    - env: TOXENV=py37-django30-postgres
-    - env: TOXENV=py37-django30-mysql
-    - env: TOXENV=py37-django30-sqlite
-    - env: TOXENV=py37-django30-postgres_native_json
     - env: TOXENV=py37-djangomaster-postgres
 
 services:
