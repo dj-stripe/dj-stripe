@@ -8,6 +8,7 @@ History
 
 - Changed ``JSONField`` dependency package from `jsonfield`_ to `jsonfield2`_, for Django 3 compatibility (see `Warning about safe uninstall of jsonfield on upgrade`_).
 - Added support for Django 3.0 (requires jsonfield2>=3.0.3).
+- Added support for python 3.8.
 - Dropped previously-deprecated ``Account`` fields (see https://stripe.com/docs/upgrades#2019-02-19 ):
     - ``.business_name``
     - ``.business_primary_color``
