@@ -8,12 +8,15 @@
 """
 
 from rest_framework import serializers
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, ValidationError
 
+from djstripe.enums import SubscriptionStatus
 from djstripe.models import Subscription
+from djstripe.settings import CANCELLATION_AT_PERIOD_END
+from .mixins import AutoCustomerModelSerializerMixin
 
 
-class SubscriptionSerializer(ModelSerializer):
+class SubscriptionSerializer(AutoCustomerModelSerializerMixin, ModelSerializer):
     """A serializer used for the Subscription model."""
 
     class Meta:
@@ -22,13 +25,41 @@ class SubscriptionSerializer(ModelSerializer):
         model = Subscription
         exclude = ["default_tax_rates"]
 
-
-class CreateSubscriptionSerializer(serializers.Serializer):
-    """A serializer used to create a Subscription."""
-
-    stripe_token = serializers.CharField(max_length=200)
-    plan = serializers.CharField(max_length=50)
+    stripe_token = serializers.CharField(max_length=200, required=True)
+    plan = serializers.CharField(max_length=50, required=True)
     charge_immediately = serializers.NullBooleanField(required=False)
     tax_percent = serializers.DecimalField(
         required=False, max_digits=5, decimal_places=2
     )
+
+    def create(self, validated_data: dict):
+        self.customer.add_card(validated_data.get("stripe_token"))
+        charge_immediately = validated_data.get("charge_immediately", True)
+        try:
+            subscription = self.customer.subscribe(validated_data.get("plan"),
+                                                   charge_immediately)
+        except Exception as e:
+            msg = 'Something went wrong processing the payment: ' + str(e)
+            raise ValidationError(detail=msg)
+        else:
+            return subscription
+
+    def update(self, instance: Subscription, validated_data: dict):
+        # We use UPDATE instead of DELETE to cancel a subscription, since
+        # cancelling means change the internal state, but not remove it from the DB.
+
+        status = validated_data.get('status')
+
+        # It is usual ambiguity of expressing a ACTION through REST APIs which
+        # are fundamentally based on manipulating resources.
+        if status == SubscriptionStatus.canceled != instance.status:
+            try:
+                instance.cancel(at_period_end=CANCELLATION_AT_PERIOD_END)
+            except Exception as e:
+                msg = 'Something went wrong cancelling the subscription: ' + str(e)
+                raise ValidationError(detail=msg)
+
+        # Applying the update of all other fields.
+        Subscription.objects.filter(pk=instance.pk).update(**validated_data)
+        instance.refresh_from_db()
+        return instance
