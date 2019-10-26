@@ -7,78 +7,49 @@
 
 """
 
-from rest_framework import status
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
-from ...models import Customer
-from ...settings import CANCELLATION_AT_PERIOD_END, subscriber_request_callback
-from .serializers import CreateSubscriptionSerializer, SubscriptionSerializer
+from ...models import Subscription
+from ...settings import subscriber_request_callback
+from .serializers import SubscriptionSerializer
+from .permissions import IsSubscriptionOwner
+from .mixins import AutoCreateCustomerMixin
 
 
-class SubscriptionRestView(APIView):
-    """API Endpoints for the Subscription object."""
+class SubscriptionListView(AutoCreateCustomerMixin, ListCreateAPIView):
+    """API Endpoints for the Subscription object.
+
+    See the serializer methods about how the creation of a Subscription is
+    handled.
+    """
 
     permission_classes = (IsAuthenticated,)
+    serializer_class = SubscriptionSerializer
 
-    def get(self, request, **kwargs):
+    def get_queryset(self):
+        """Override of the class property `queryset` to ensure the Subscriptions
+        returned are those of the authenticated user.
         """
-        Return the customer's valid subscriptions.
+        # It is neither the role of a GET method (which should have no effect on data),
+        # nor that of a _Subscription_ endpoint to check for an existing customer,
+        # or create one if necessary. See AutoCreateCustomerMixin.
+        subscriber = subscriber_request_callback(self.request)
+        return Subscription.objects.filter(subscriber=subscriber)
 
-        Returns with status code 200.
-        """
-        customer, _created = Customer.get_or_create(
-            subscriber=subscriber_request_callback(self.request)
-        )
 
-        serializer = SubscriptionSerializer(customer.subscription)
-        return Response(serializer.data)
+class SubscriptionDetailView(RetrieveUpdateAPIView):
+    """API Endpoints for one Subscription object.
 
-    def post(self, request, **kwargs):
-        """
-        Create a new current subscription for the user.
+    The View does not include the Destroy (DELETE method) keyword, preventing
+    to actually delete a Subscription instance. To *cancel* a subscription,
+    one must change its "status" through an PUT method.
 
-        Returns with status code 201.
-        """
-        serializer = CreateSubscriptionSerializer(data=request.data)
+    AutoCreateCustomerMixin is NOT included, as it makes no real sense
+    to create a non-existing Customer when accessing an existing Subscription
+    object, which should have been gone through the ListAPIView first anyway.
+    """
 
-        if serializer.is_valid():
-            try:
-                customer, _created = Customer.get_or_create(
-                    subscriber=subscriber_request_callback(self.request)
-                )
-                customer.add_card(serializer.data["stripe_token"])
-                charge_immediately = serializer.data.get("charge_immediately")
-                if charge_immediately is None:
-                    charge_immediately = True
-
-                customer.subscribe(serializer.data["plan"], charge_immediately)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            except Exception:
-                # TODO: Better error messages
-                return Response(
-                    "Something went wrong processing the payment.",
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, **kwargs):
-        """
-        Mark the customers current subscription as canceled.
-
-        Returns with status code 204.
-        """
-        try:
-            customer, _created = Customer.get_or_create(
-                subscriber=subscriber_request_callback(self.request)
-            )
-            customer.subscription.cancel(at_period_end=CANCELLATION_AT_PERIOD_END)
-
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Exception:
-            return Response(
-                "Something went wrong cancelling the subscription.",
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+    queryset = Subscription.objects.all()
+    permission_classes = (IsAuthenticated, IsSubscriptionOwner)
+    serializer_class = SubscriptionSerializer
