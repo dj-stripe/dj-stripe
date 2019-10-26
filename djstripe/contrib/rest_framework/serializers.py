@@ -20,8 +20,6 @@ class SubscriptionSerializer(AutoCustomerModelSerializerMixin, ModelSerializer):
     """A serializer used for the Subscription model."""
 
     class Meta:
-        """Model class options."""
-
         model = Subscription
         exclude = ["default_tax_rates"]
 
