@@ -23,6 +23,15 @@ from . import views
 app_name = "djstripe_rest_framework"
 
 urlpatterns = [
-    # REST api
-    path("subscription/", views.SubscriptionRestView.as_view(), name="subscription")
+    # Authenticated Endpoint for accessing list of Subscriptions
+    path("subscriptions/",
+         views.SubscriptionListView.as_view(),
+         name="subscription-list"),
+
+    # Authenticated Endpoint for accessing the detail of one Subscription.
+    # Identification is made with Django's model "pk", but it could possibly be
+    # extended to other (id, dj_stripeid...)
+    path("subscriptions/<int:pk>",
+         views.SubscriptionDetailView.as_view(),
+         name="subscription-detail")
 ]
