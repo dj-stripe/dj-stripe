@@ -10,3 +10,6 @@ docs/_static
 
 # SQLite
 *.sqlite3
+
+# IntelliJ / PyCharm etc.
+.idea
