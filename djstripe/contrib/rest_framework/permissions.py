@@ -31,3 +31,17 @@ class DJStripeSubscriptionPermission(BasePermission):
             subscriber_has_active_subscription(subscriber_request_callback(request))
         except AttributeError:
             return False
+
+
+class IsSubscriptionOwner(BasePermission):
+    """
+    Check if the subscriber associated with the request is the owner of the
+     requested subscription.
+
+    Returns false if:
+        * the request subscriber isn't the same as the subscription subscriber.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        subscriber = subscriber_request_callback(request)
+        return obj.subscriber == subscriber
