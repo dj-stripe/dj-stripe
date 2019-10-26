@@ -27,17 +27,11 @@ class SubscriptionSerializer(AutoCustomerModelSerializerMixin, ModelSerializer):
 
     stripe_token = serializers.CharField(max_length=200, required=True)
     plan = serializers.CharField(max_length=50, required=True)
-    charge_immediately = serializers.NullBooleanField(required=False)
-    tax_percent = serializers.DecimalField(
-        required=False, max_digits=5, decimal_places=2
-    )
 
     def create(self, validated_data: dict):
-        self.customer.add_card(validated_data.get("stripe_token"))
-        charge_immediately = validated_data.get("charge_immediately", True)
+        self.customer.add_card(validated_data.pop("stripe_token"))
         try:
-            subscription = self.customer.subscribe(validated_data.get("plan"),
-                                                   charge_immediately)
+            subscription = self.customer.subscribe(**validated_data)
         except Exception as e:
             msg = 'Something went wrong processing the payment: ' + str(e)
             raise ValidationError(detail=msg)
