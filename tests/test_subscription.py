@@ -397,8 +397,8 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         canceled_subscription_fake["canceled_at"] = cancel_timestamp
         canceled_subscription_fake["ended_at"] = cancel_timestamp
         subscription_retrieve_mock.return_value = (
-            canceled_subscription_fake
-        )  # retrieve().delete()
+            canceled_subscription_fake  # retrieve().delete()
+        )
 
         self.assertTrue(self.customer.has_active_subscription())
         self.assertEqual(self.customer.active_subscriptions.count(), 1)
@@ -447,8 +447,8 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         )
         canceled_subscription_fake["canceled_at"] = datetime_to_unix(timezone.now())
         subscription_retrieve_mock.return_value = (
-            canceled_subscription_fake
-        )  # retrieve().delete()
+            canceled_subscription_fake  # retrieve().delete()
+        )
 
         self.assertTrue(self.customer.has_active_subscription())
         self.assertTrue(self.customer.has_any_active_subscription())
@@ -498,8 +498,8 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         canceled_subscription_fake["canceled_at"] = cancel_timestamp
         canceled_subscription_fake["ended_at"] = cancel_timestamp
         subscription_retrieve_mock.return_value = (
-            canceled_subscription_fake
-        )  # retrieve().delete()
+            canceled_subscription_fake  # retrieve().delete()
+        )
 
         self.assertTrue(self.customer.has_active_subscription())
         self.assertTrue(self.customer.has_any_active_subscription())
