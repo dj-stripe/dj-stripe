@@ -33,6 +33,7 @@ History
 - Updated ``Invoice`` model to add missing fields.
 - Change urls.py to use the new style urls.
 - Update forward relation fields in the admin to be raw id fields.
+- Updated ``StripeQuantumCurrencyAmountField`` and ``StripeDecimalCurrencyAmountField`` to support Stripe Large Charges.
 
 Warning about safe uninstall of jsonfield on upgrade
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
