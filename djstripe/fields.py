@@ -46,7 +46,7 @@ class StripeCurrencyCodeField(models.CharField):
         super().__init__(*args, **defaults)
 
 
-class StripeQuantumCurrencyAmountField(models.IntegerField):
+class StripeQuantumCurrencyAmountField(models.BigIntegerField):
     """
     A field used to store currency amounts in cents (etc) as per stripe.
     """
@@ -67,7 +67,7 @@ class StripeDecimalCurrencyAmountField(models.DecimalField):
 
     def __init__(self, *args, **kwargs):
         """Assign default args to this field."""
-        defaults = {"decimal_places": 2, "max_digits": 8}
+        defaults = {"decimal_places": 2, "max_digits": 11}
         defaults.update(kwargs)
         super().__init__(*args, **defaults)
 
