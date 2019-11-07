@@ -52,6 +52,7 @@ class StripeQuantumCurrencyAmountField(models.BigIntegerField):
     By contacting stripe support, some accounts will have their limit raised to 11
     digits, hence the use of BigIntegerField instead of IntegerField
     """
+
     pass
 
 
