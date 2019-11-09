@@ -23,7 +23,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import logging
 
 from . import models, webhooks
-from .enums import SourceType
+from .enums import SourceType, SubscriptionStatus
 from .utils import convert_tstamp
 
 
@@ -114,10 +114,7 @@ def customer_subscription_webhook_handler(event):
     """
 
     # Don't delete canceled subscriptions - https://github.com/dj-stripe/dj-stripe/issues/599#issuecomment-460143642
-    crud_type = CrudType.determine(event=event)
-    if crud_type.deleted:
-        crud_type = CrudType(updated=True)
-    _handle_crud_like_event(target_cls=models.Subscription, event=event, crud_type=crud_type)
+    _handle_crud_like_event(target_cls=models.Subscription, event=event)
 
 
 @webhooks.handler("transfer", "charge", "coupon", "invoice", "invoiceitem", "plan", "product")
@@ -257,6 +254,11 @@ def _handle_crud_like_event(target_cls, event, data=None, verb=None,
         qs = target_cls.objects.filter(stripe_id=stripe_id)
         if target_cls is models.Customer and qs.exists():
             qs.get().purge()
+        elif target_cls is models.Subscription and qs.exists():
+            sub = qs.get()
+            sub.status = SubscriptionStatus.canceled
+            sub.canceled_at = event.created
+            sub.save()
         else:
             obj = target_cls.objects.filter(stripe_id=stripe_id).delete()
     else:

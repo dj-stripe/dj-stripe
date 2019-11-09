@@ -19,6 +19,8 @@ from djstripe.models import (
     Card, Charge, Coupon, Customer, Dispute, Event, Invoice, InvoiceItem, PaymentMethod, Plan, Subscription, Transfer
 )
 
+from djstripe.enums import SubscriptionStatus
+
 from . import (
     FAKE_CARD, FAKE_CHARGE, FAKE_CHARGE_II, FAKE_COUPON, FAKE_CUSTOMER, FAKE_CUSTOMER_II, FAKE_DISPUTE,
     FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED, FAKE_EVENT_CHARGE_SUCCEEDED, FAKE_EVENT_CUSTOMER_CREATED,
@@ -209,13 +211,15 @@ class TestCustomerEvents(EventTestCase):
         event = self._create_event(FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED)
         event.invoke_webhook_handlers()
 
-        Subscription.objects.get(stripe_id=FAKE_SUBSCRIPTION["id"])
+        sub = Subscription.objects.get(stripe_id=FAKE_SUBSCRIPTION["id"])
+        self.assertEqual(sub.status, SubscriptionStatus.active)
 
         event = self._create_event(FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED)
         event.invoke_webhook_handlers()
 
-        with self.assertRaises(Subscription.DoesNotExist):
-            Subscription.objects.get(stripe_id=FAKE_SUBSCRIPTION["id"])
+        sub = Subscription.objects.get(stripe_id=FAKE_SUBSCRIPTION["id"])
+        # Check that Subscription is canceled and not deleted
+        self.assertEqual(sub.status, SubscriptionStatus.canceled)
 
     @patch("stripe.Customer.retrieve")
     @patch("stripe.Event.retrieve")
