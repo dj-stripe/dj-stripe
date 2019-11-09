@@ -112,8 +112,6 @@ def customer_subscription_webhook_handler(event):
 
     Docs an example subscription webhook response: https://stripe.com/docs/api#subscription_object
     """
-
-    # Don't delete canceled subscriptions - https://github.com/dj-stripe/dj-stripe/issues/599#issuecomment-460143642
     _handle_crud_like_event(target_cls=models.Subscription, event=event)
 
 
