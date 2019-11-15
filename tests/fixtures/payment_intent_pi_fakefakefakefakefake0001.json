@@ -41,6 +41,7 @@
                 "description": "Subscription creation",
                 "destination": null,
                 "dispute": null,
+                "disputed": false,
                 "failure_code": null,
                 "failure_message": null,
                 "fraud_details": {},
@@ -77,6 +78,7 @@
                         "funding": "credit",
                         "installments": null,
                         "last4": "4242",
+                        "network": "visa",
                         "three_d_secure": null,
                         "wallet": null
                     },

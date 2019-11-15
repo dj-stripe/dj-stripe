@@ -135,6 +135,9 @@
                 "default_tax_rates": [],
                 "discount": null,
                 "ended_at": null,
+                "invoice_customer_balance_settings": {
+                    "consume_applied_balance_on_void": true
+                },
                 "items": {
                     "object": "list",
                     "data": [
@@ -180,6 +183,8 @@
                 "metadata": {
                     "djstripe_test_fake_id": "sub_fakefakefakefakefake0002"
                 },
+                "next_pending_invoice_item_invoice": null,
+                "pending_invoice_item_interval": null,
                 "pending_setup_intent": null,
                 "plan": {
                     "id": "silver41294",
@@ -233,6 +238,9 @@
                 "default_tax_rates": [],
                 "discount": null,
                 "ended_at": null,
+                "invoice_customer_balance_settings": {
+                    "consume_applied_balance_on_void": true
+                },
                 "items": {
                     "object": "list",
                     "data": [
@@ -278,6 +286,8 @@
                 "metadata": {
                     "djstripe_test_fake_id": "sub_fakefakefakefakefake0001"
                 },
+                "next_pending_invoice_item_invoice": null,
+                "pending_invoice_item_interval": null,
                 "pending_setup_intent": null,
                 "plan": {
                     "id": "gold21323",
