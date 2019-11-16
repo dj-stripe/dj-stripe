@@ -9,6 +9,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from stripe.error import InvalidRequestError
 
+from djstripe.enums import SubscriptionStatus
 from djstripe.models import (
     Card,
     Charge,
@@ -74,6 +75,7 @@ from . import (
     FAKE_PLAN,
     FAKE_PRODUCT,
     FAKE_SUBSCRIPTION,
+    FAKE_SUBSCRIPTION_CANCELED,
     FAKE_SUBSCRIPTION_III,
     FAKE_TRANSFER,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
@@ -353,13 +355,18 @@ class TestCustomerEvents(EventTestCase):
         event = self._create_event(FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED)
         event.invoke_webhook_handlers()
 
-        Subscription.objects.get(id=FAKE_SUBSCRIPTION["id"])
+        sub = Subscription.objects.get(id=FAKE_SUBSCRIPTION["id"])
+        self.assertEqual(sub.status, SubscriptionStatus.active)
+
+        subscription_retrieve_mock.return_value = deepcopy(FAKE_SUBSCRIPTION_CANCELED)
 
         event = self._create_event(FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED)
         event.invoke_webhook_handlers()
 
-        with self.assertRaises(Subscription.DoesNotExist):
-            Subscription.objects.get(id=FAKE_SUBSCRIPTION["id"])
+        sub = Subscription.objects.get(id=FAKE_SUBSCRIPTION["id"])
+        # Check that Subscription is canceled and not deleted
+        self.assertEqual(sub.status, SubscriptionStatus.canceled)
+        self.assertIsNotNone(sub.canceled_at)
 
     @patch("stripe.Customer.retrieve", autospec=True)
     @patch("stripe.Event.retrieve", autospec=True)

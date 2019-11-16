@@ -112,11 +112,15 @@ def customer_subscription_webhook_handler(event):
     https://stripe.com/docs/api#subscription_object
     """
 
-    # Don't delete canceled subscriptions - https://github.com/dj-stripe/dj-stripe/issues/599#issuecomment-460143642
+    # customer.subscription.deleted doesn't actually delete the subscription
+    # on the stripe side, it updates it to canceled status, so override
+    # crud_type to update to match.
     crud_type = CrudType.determine(event=event)
     if crud_type.deleted:
         crud_type = CrudType(updated=True)
-    _handle_crud_like_event(target_cls=models.Subscription, event=event, crud_type=crud_type)
+    _handle_crud_like_event(
+        target_cls=models.Subscription, event=event, crud_type=crud_type
+    )
 
 
 @webhooks.handler("payment_method")
