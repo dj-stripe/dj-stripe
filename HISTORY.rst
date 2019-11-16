@@ -34,6 +34,8 @@ History
 - Change urls.py to use the new style urls.
 - Update forward relation fields in the admin to be raw id fields.
 - Updated ``StripeQuantumCurrencyAmountField`` and ``StripeDecimalCurrencyAmountField`` to support Stripe Large Charges (#1045).
+- Update event handling so ``customer.subscription.deleted`` updates subscriptions to ``status="canceled"`` instead of
+  deleting it from our database,  to match Stripe's behaviour (#599).
 
 Warning about safe uninstall of jsonfield on upgrade
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
