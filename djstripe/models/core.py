@@ -711,12 +711,18 @@ class Customer(StripeModel):
             trial_end=trial_end,
             trial_from_plan=trial_from_plan,
             trial_period_days=trial_period_days,
+            expand=["latest_invoice.payment_intent"], #XXX Hotfix for https://stripe.com/docs/billing/subscriptions/set-up-subscription#manage-sub-status
         )
+
+        #XXX Hotfix for https://stripe.com/docs/billing/subscriptions/set-up-subscription#manage-sub-status
+        if 'latest_invoice' in stripe_subscription and 'payment_intent' in stripe_subscription['latest_invoice']:
+            status = stripe_subscription['latest_invoice']['payment_intent']['status']
+            client_secret = stripe_subscription['latest_invoice']['payment_intent']['client_secret']
 
         if charge_immediately:
             self.send_invoice()
 
-        return Subscription.sync_from_stripe_data(stripe_subscription)
+        return (Subscription.sync_from_stripe_data(stripe_subscription), status, client_secret)
 
     def charge(
         self,
