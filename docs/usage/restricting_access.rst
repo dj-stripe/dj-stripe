@@ -103,7 +103,7 @@ If you want to quickly constrain a single Class-Based View, the ``djstripe.decor
         @method_decorator(login_required)
         @method_decorator(subscription_payment_required)
         def dispatch(self, *args, **kwargs):
-            return super(MyConstrainedView, self).dispatch(*args, **kwargs)
+            return super().dispatch(*args, **kwargs)
 
 
 If you are unfamiliar with this technique please read the following documentation `here <https://docs.djangoproject.com/en/1.5/topics/class-based-views/intro/#decorating-the-class>`_.
