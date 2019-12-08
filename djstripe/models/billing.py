@@ -733,7 +733,7 @@ class UpcomingInvoice(Invoice):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._invoiceitems = []
-        # self._default_tax_rates = []
+        self._default_tax_rates = []
 
     def get_stripe_dashboard_url(self):
         return ""
@@ -744,14 +744,14 @@ class UpcomingInvoice(Invoice):
             target_cls=InvoiceItem, data=data, invoice=self
         )
 
-    # def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
-    #     super()._attach_objects_post_save_hook(
-    #         cls, data, pending_relations=pending_relations
-    #     )
-    #
-    #     self._default_tax_rates = cls._stripe_object_to_default_tax_rates(
-    #         target_cls=TaxRate, data=data
-    #     )
+    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+        super()._attach_objects_post_save_hook(
+            cls, data, pending_relations=pending_relations
+        )
+
+        self._default_tax_rates = cls._stripe_object_to_default_tax_rates(
+            target_cls=TaxRate, data=data
+        )
 
     @property
     def invoiceitems(self):
@@ -769,13 +769,13 @@ class UpcomingInvoice(Invoice):
 
         return QuerySetMock.from_iterable(InvoiceItem, self._invoiceitems)
 
-    # @property
-    # def default_tax_rates(self):
-    #     """
-    #     Gets the default tax rates associated with this upcoming invoice.
-    #     :return:
-    #     """
-    #     return QuerySetMock.from_iterable(TaxRate, self._default_tax_rates)
+    @property
+    def default_tax_rates(self):
+        """
+        Gets the default tax rates associated with this upcoming invoice.
+        :return:
+        """
+        return QuerySetMock.from_iterable(TaxRate, self._default_tax_rates)
 
     @property
     def id(self):
