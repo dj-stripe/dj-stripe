@@ -9,13 +9,19 @@ import djstripe.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('djstripe', '0007_auto_20191107_0118'),
+        ("djstripe", "0007_auto_20191107_0118"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='refund',
-            name='reason',
-            field=djstripe.fields.StripeEnumField(blank=True, default='', enum=djstripe.enums.RefundReason, help_text='Reason for the refund.', max_length=25),
+            model_name="refund",
+            name="reason",
+            field=djstripe.fields.StripeEnumField(
+                blank=True,
+                default="",
+                enum=djstripe.enums.RefundReason,
+                help_text="Reason for the refund.",
+                max_length=25,
+            ),
         ),
     ]
