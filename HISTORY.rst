@@ -36,6 +36,8 @@ History
 - Updated ``StripeQuantumCurrencyAmountField`` and ``StripeDecimalCurrencyAmountField`` to support Stripe Large Charges (#1045).
 - Update event handling so ``customer.subscription.deleted`` updates subscriptions to ``status="canceled"`` instead of
   deleting it from our database,  to match Stripe's behaviour (#599).
+- Added missing ``Refund.reason`` value, increases field width (#1075).
+- Fixed ``Refund.status`` definition, reduces field width (#1076).
 
 Warning about safe uninstall of jsonfield on upgrade
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

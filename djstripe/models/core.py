@@ -1966,6 +1966,7 @@ class Refund(StripeModel):
         on_delete=models.SET_NULL,
         related_name="failure_refunds",
         null=True,
+        blank=True,
         help_text="If the refund failed, this balance transaction describes the "
         "adjustment made on your account balance that reverses the initial "
         "balance transaction.",
@@ -1990,7 +1991,7 @@ class Refund(StripeModel):
         "for this charge.",
     )
     status = StripeEnumField(
-        enum=enums.RefundFailureReason, help_text="Status of the refund."
+        blank=True, enum=enums.RefundStatus, help_text="Status of the refund."
     )
 
     def get_stripe_dashboard_url(self):

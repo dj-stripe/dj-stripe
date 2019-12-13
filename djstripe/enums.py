@@ -535,6 +535,7 @@ class RefundReason(Enum):
     duplicate = _("Duplicate charge")
     fraudulent = _("Fraudulent")
     requested_by_customer = _("Requested by customer")
+    expired_uncaptured_charge = _("Expired uncaptured charge")
 
 
 class RefundStatus(Enum):

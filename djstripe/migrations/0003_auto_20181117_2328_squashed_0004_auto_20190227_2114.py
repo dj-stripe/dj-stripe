@@ -866,6 +866,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 help_text="If the refund failed, this balance transaction describes the adjustment made on your account balance that reverses the initial balance transaction.",
                 null=True,
+                blank=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 to="djstripe.BalanceTransaction",
                 related_name="failure_refunds",
