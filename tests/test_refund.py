@@ -82,7 +82,8 @@ class RefundTest(AssertStripeFksMixin, TestCase):
         default_account_mock,
     ):
         default_account_mock.return_value = self.account
-        invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
+        # TODO - remove invoice sync
+        Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
 
         fake_refund = deepcopy(FAKE_REFUND)
 
@@ -133,7 +134,8 @@ class RefundTest(AssertStripeFksMixin, TestCase):
         default_account_mock,
     ):
         default_account_mock.return_value = self.account
-        invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
+        # TODO - remove invoice sync
+        Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
 
         balance_transaction_retrieve_mock.return_value = deepcopy(
             FAKE_BALANCE_TRANSACTION_REFUND
@@ -197,7 +199,8 @@ class RefundTest(AssertStripeFksMixin, TestCase):
         default_account_mock,
     ):
         default_account_mock.return_value = self.account
-        invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
+        # TODO - remove invoice sync
+        Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
 
         balance_transaction_retrieve_mock.return_value = deepcopy(
             FAKE_BALANCE_TRANSACTION_REFUND
