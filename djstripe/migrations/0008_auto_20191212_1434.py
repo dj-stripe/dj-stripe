@@ -24,4 +24,14 @@ class Migration(migrations.Migration):
                 max_length=25,
             ),
         ),
+        migrations.AlterField(
+            model_name="refund",
+            name="status",
+            field=djstripe.fields.StripeEnumField(
+                blank=True,
+                enum=djstripe.enums.RefundStatus,
+                help_text="Status of the refund.",
+                max_length=9,
+            ),
+        ),
     ]
