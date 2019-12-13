@@ -27,7 +27,10 @@ from .base import StripeModel
 
 class DjstripeInvoiceTotalTaxAmount(models.Model):
     """
-    An internal models that holds the value of elements of Invoice.total_tax_amounts
+    An internal model that holds the value of elements of Invoice.total_tax_amounts
+
+    Note that this is named with the prefix Djstripe to avoid potential
+    collision with a Stripe API object name.
     """
 
     invoice = models.ForeignKey(
