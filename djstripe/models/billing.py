@@ -328,6 +328,8 @@ class BaseInvoice(StripeModel):
     # TODO: default_source
     default_tax_rates = models.ManyToManyField(
         "TaxRate",
+        # explicitly specify the joining table name as though the joining model
+        # was defined with through="DjstripeInvoiceDefaultTaxRate"
         db_table="djstripe_djstripeinvoicedefaulttaxrate",
         related_name="+",
         blank=True,
@@ -892,6 +894,8 @@ class InvoiceItem(StripeModel):
     # XXX: subscription_item
     tax_rates = models.ManyToManyField(
         "TaxRate",
+        # explicitly specify the joining table name as though the joining model
+        # was defined with through="DjstripeInvoiceItemTaxRate"
         db_table="djstripe_djstripeinvoiceitemtaxrate",
         related_name="+",
         blank=True,
@@ -1259,6 +1263,8 @@ class Subscription(StripeModel):
     )
     default_tax_rates = models.ManyToManyField(
         "TaxRate",
+        # explicitly specify the joining table name as though the joining model
+        # was defined with through="DjstripeSubscriptionDefaultTaxRate"
         db_table="djstripe_djstripesubscriptiondefaulttaxrate",
         related_name="+",
         blank=True,
@@ -1590,6 +1596,8 @@ class SubscriptionItem(StripeModel):
     )
     tax_rates = models.ManyToManyField(
         "TaxRate",
+        # explicitly specify the joining table name as though the joining model
+        # was defined with through="DjstripeSubscriptionItemTaxRate"
         db_table="djstripe_djstripesubscriptionitemtaxrate",
         related_name="+",
         blank=True,
