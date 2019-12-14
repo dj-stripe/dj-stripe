@@ -26,6 +26,7 @@ from . import (
     FAKE_SUBSCRIPTION_METERED,
     FAKE_SUBSCRIPTION_MULTI_PLAN,
     FAKE_SUBSCRIPTION_NOT_PERIOD_CURRENT,
+    FAKE_TAX_RATE_EXAMPLE_1_VAT,
     AssertStripeFksMixin,
     datetime_to_unix,
 )
@@ -51,7 +52,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
-    def test_str(
+    def test_sync_from_stripe_data(
         self, customer_retrieve_mock, product_retrieve_mock, plan_retrieve_mock
     ):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
@@ -62,6 +63,11 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
             "{email} on {plan}".format(
                 email=self.user.email, plan=str(subscription.plan)
             ),
+        )
+
+        self.assertEqual(subscription.default_tax_rates.count(), 1)
+        self.assertEqual(
+            subscription.default_tax_rates.first().id, FAKE_TAX_RATE_EXAMPLE_1_VAT["id"]
         )
 
         self.assert_fks(
@@ -75,7 +81,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
-    def test_sync_from_stripe_data2(
+    def test_sync_items_with_tax_rates(
         self, customer_retrieve_mock, product_retrieve_mock, plan_retrieve_mock
     ):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION_II)
@@ -83,6 +89,14 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             subscription, expected_blank_fks=self.default_expected_blank_fks
+        )
+
+        self.assertEqual(subscription.default_tax_rates.count(), 0)
+        first_item = subscription.items.first()
+
+        self.assertEqual(first_item.tax_rates.count(), 1)
+        self.assertEqual(
+            first_item.tax_rates.first().id, FAKE_TAX_RATE_EXAMPLE_1_VAT["id"]
         )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)

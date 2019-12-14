@@ -22,6 +22,8 @@ from . import (
     FAKE_PLAN,
     FAKE_PRODUCT,
     FAKE_SUBSCRIPTION,
+    FAKE_TAX_RATE_EXAMPLE_1_VAT,
+    FAKE_TAX_RATE_EXAMPLE_2_SALES,
     FAKE_UPCOMING_INVOICE,
     IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
@@ -105,7 +107,125 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         with self.assertWarns(DeprecationWarning):
             self.assertEqual(invoice.billing, invoice.collection_method)
 
+        self.assertEqual(invoice.default_tax_rates.count(), 1)
+        self.assertEqual(
+            invoice.default_tax_rates.first().id, FAKE_TAX_RATE_EXAMPLE_1_VAT["id"]
+        )
+
+        self.assertEqual(invoice.total_tax_amounts.count(), 1)
+
+        first_tax_amount = invoice.total_tax_amounts.first()
+        self.assertEqual(
+            first_tax_amount.tax_rate.id, FAKE_TAX_RATE_EXAMPLE_1_VAT["id"]
+        )
+        self.assertEqual(
+            first_tax_amount.inclusive, FAKE_TAX_RATE_EXAMPLE_1_VAT["inclusive"]
+        )
+        self.assertEqual(first_tax_amount.amount, 261)
+
         self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
+
+    @patch(
+        "djstripe.models.Account.get_default_account",
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
+    @patch(
+        "stripe.BalanceTransaction.retrieve",
+        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Subscription.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION),
+        autospec=True,
+    )
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+    @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    def test_sync_from_stripe_data_update_total_tax_amounts(
+        self,
+        product_retrieve_mock,
+        payment_intent_retrieve_mock,
+        paymentmethod_card_retrieve_mock,
+        charge_retrieve_mock,
+        subscription_retrieve_mock,
+        balance_transaction_retrieve_mock,
+        default_account_mock,
+    ):
+        default_account_mock.return_value = self.account
+        invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
+
+        # as per basic sync test
+        self.assertEqual(invoice.default_tax_rates.count(), 1)
+        self.assertEqual(
+            invoice.default_tax_rates.first().id, FAKE_TAX_RATE_EXAMPLE_1_VAT["id"]
+        )
+
+        self.assertEqual(invoice.total_tax_amounts.count(), 1)
+
+        first_tax_amount = invoice.total_tax_amounts.first()
+        self.assertEqual(
+            first_tax_amount.tax_rate.id, FAKE_TAX_RATE_EXAMPLE_1_VAT["id"]
+        )
+        self.assertEqual(
+            first_tax_amount.inclusive, FAKE_TAX_RATE_EXAMPLE_1_VAT["inclusive"]
+        )
+        self.assertEqual(first_tax_amount.amount, 261)
+        self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
+
+        # Now update with a different tax rate
+        # TODO - should update tax rate in invoice items etc as well,
+        #  but here we're mainly testing that invoice.total_tax_rates is
+        #  correctly updated
+        fake_updated_invoice = deepcopy(FAKE_INVOICE)
+        fake_tax_rate_2 = deepcopy(FAKE_TAX_RATE_EXAMPLE_2_SALES)
+
+        new_tax_amount = int(
+            fake_updated_invoice["total"] * fake_tax_rate_2["percentage"] / 100
+        )
+
+        fake_updated_invoice.update(
+            {
+                "default_tax_rates": [fake_tax_rate_2],
+                "tax": new_tax_amount,
+                "total": fake_updated_invoice["total"] + new_tax_amount,
+                "total_tax_amounts": [
+                    {
+                        "amount": new_tax_amount,
+                        "inclusive": False,
+                        "tax_rate": fake_tax_rate_2["id"],
+                    }
+                ],
+            }
+        )
+
+        invoice_updated = Invoice.sync_from_stripe_data(fake_updated_invoice)
+
+        self.assertEqual(invoice_updated.default_tax_rates.count(), 1)
+        self.assertEqual(
+            invoice_updated.default_tax_rates.first().id, fake_tax_rate_2["id"]
+        )
+
+        self.assertEqual(invoice_updated.total_tax_amounts.count(), 1)
+
+        first_tax_amount = invoice_updated.total_tax_amounts.first()
+        self.assertEqual(first_tax_amount.tax_rate.id, fake_tax_rate_2["id"])
+        self.assertEqual(first_tax_amount.inclusive, fake_tax_rate_2["inclusive"])
+        self.assertEqual(first_tax_amount.amount, new_tax_amount)
+        self.assert_fks(
+            invoice_updated, expected_blank_fks=self.default_expected_blank_fks
+        )
 
     @patch(
         "djstripe.models.Account.get_default_account",
@@ -1128,6 +1248,22 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         items = invoice.invoiceitems.all()
         self.assertEqual(0, len(items))
         self.assertIsNotNone(invoice.plan)
+
+        self.assertEqual(invoice.default_tax_rates.count(), 1)
+        self.assertEqual(
+            invoice.default_tax_rates.first().id, FAKE_TAX_RATE_EXAMPLE_1_VAT["id"]
+        )
+
+        self.assertEqual(invoice.total_tax_amounts.count(), 1)
+
+        first_tax_amount = invoice.total_tax_amounts.first()
+        self.assertEqual(
+            first_tax_amount.tax_rate.id, FAKE_TAX_RATE_EXAMPLE_1_VAT["id"]
+        )
+        self.assertEqual(
+            first_tax_amount.inclusive, FAKE_TAX_RATE_EXAMPLE_1_VAT["inclusive"]
+        )
+        self.assertEqual(first_tax_amount.amount, 261)
 
     @patch("stripe.Plan.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
     @patch(

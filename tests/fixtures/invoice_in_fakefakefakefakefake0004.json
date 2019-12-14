@@ -79,8 +79,30 @@
                 "quantity": 1,
                 "subscription": "sub_fakefakefakefakefake0002",
                 "subscription_item": "si_FywlrQT40WNc91",
-                "tax_amounts": [],
-                "tax_rates": [],
+                "tax_amounts": [
+                    {
+                        "amount": 522,
+                        "inclusive": true,
+                        "tax_rate": "txr_fakefakefakefakefake0001"
+                    }
+                ],
+                "tax_rates": [
+                    {
+                        "id": "txr_fakefakefakefakefake0001",
+                        "object": "tax_rate",
+                        "active": true,
+                        "created": 1570944265,
+                        "description": null,
+                        "display_name": "VAT",
+                        "inclusive": true,
+                        "jurisdiction": "Example1",
+                        "livemode": false,
+                        "metadata": {
+                            "djstripe_test_fake_id": "txr_fakefakefakefakefake0001"
+                        },
+                        "percentage": 15.0
+                    }
+                ],
                 "type": "subscription"
             }
         ],
@@ -112,9 +134,15 @@
     },
     "subscription": "sub_fakefakefakefakefake0002",
     "subtotal": 4000,
-    "tax": null,
+    "tax": 522,
     "tax_percent": null,
     "total": 4000,
-    "total_tax_amounts": [],
+    "total_tax_amounts": [
+        {
+            "amount": 522,
+            "inclusive": true,
+            "tax_rate": "txr_fakefakefakefakefake0001"
+        }
+    ],
     "webhooks_delivered_at": 1570941591
 }

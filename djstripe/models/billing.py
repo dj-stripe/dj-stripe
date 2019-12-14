@@ -25,6 +25,62 @@ from ..utils import QuerySetMock, get_friendly_currency_amount
 from .base import StripeModel
 
 
+class DjstripeInvoiceTotalTaxAmount(models.Model):
+    """
+    An internal model that holds the value of elements of Invoice.total_tax_amounts
+
+    Note that this is named with the prefix Djstripe to avoid potential
+    collision with a Stripe API object name.
+    """
+
+    invoice = models.ForeignKey(
+        "Invoice", on_delete=models.CASCADE, related_name="total_tax_amounts"
+    )
+
+    amount = StripeQuantumCurrencyAmountField(
+        help_text="The amount, in cents, of the tax."
+    )
+    inclusive = models.BooleanField(
+        help_text="Whether this tax amount is inclusive or exclusive."
+    )
+    tax_rate = models.ForeignKey(
+        "TaxRate",
+        on_delete=models.CASCADE,
+        help_text="The tax rate that was applied to get this tax amount.",
+    )
+
+    class Meta:
+        unique_together = ["invoice", "tax_rate"]
+
+
+class DjstripeUpcomingInvoiceTotalTaxAmount(models.Model):
+    """
+    As per DjstripeInvoiceTotalTaxAmount, except for UpcomingInvoice
+    """
+
+    invoice = models.ForeignKey(
+        # Don't define related_name since property is defined in UpcomingInvoice
+        "UpcomingInvoice",
+        on_delete=models.CASCADE,
+        related_name="+",
+    )
+
+    amount = StripeQuantumCurrencyAmountField(
+        help_text="The amount, in cents, of the tax."
+    )
+    inclusive = models.BooleanField(
+        help_text="Whether this tax amount is inclusive or exclusive."
+    )
+    tax_rate = models.ForeignKey(
+        "TaxRate",
+        on_delete=models.CASCADE,
+        help_text="The tax rate that was applied to get this tax amount.",
+    )
+
+    class Meta:
+        unique_together = ["invoice", "tax_rate"]
+
+
 class Coupon(StripeModel):
     id = StripeIdField(max_length=500)
     amount_off = StripeDecimalCurrencyAmountField(
@@ -298,6 +354,7 @@ class BaseInvoice(StripeModel):
         "method in the customer’s invoice settings.",
     )
     # TODO: default_source
+    # Note: default_tax_rates is handled in the subclasses since it's a ManyToManyField
     # TODO: discount
     due_date = StripeDateTimeField(
         null=True,
@@ -459,7 +516,6 @@ class BaseInvoice(StripeModel):
         "more information on which threshold rules triggered the invoice.",
     )
     total = StripeDecimalCurrencyAmountField("Total (as decimal) after discount.")
-    # TODO total_tax_amounts
     webhooks_delivered_at = StripeDateTimeField(
         null=True,
         help_text=(
@@ -707,6 +763,28 @@ class Invoice(BaseInvoice):
     # Note:
     # Most fields are defined on BaseInvoice so they're shared with UpcomingInvoice.
     # ManyToManyFields are an exception, since UpcomingInvoice doesn't exist in the db.
+    default_tax_rates = models.ManyToManyField(
+        "TaxRate",
+        # explicitly specify the joining table name as though the joining model
+        # was defined with through="DjstripeInvoiceDefaultTaxRate"
+        db_table="djstripe_djstripeinvoicedefaulttaxrate",
+        related_name="+",
+        blank=True,
+        help_text="The tax rates applied to this invoice, if any.",
+    )
+
+    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+        super()._attach_objects_post_save_hook(
+            cls, data, pending_relations=pending_relations
+        )
+
+        self.default_tax_rates.set(
+            cls._stripe_object_to_default_tax_rates(target_cls=TaxRate, data=data)
+        )
+
+        cls._stripe_object_set_total_tax_amounts(
+            target_cls=DjstripeInvoiceTotalTaxAmount, data=data, instance=self
+        )
 
 
 class UpcomingInvoice(BaseInvoice):
@@ -722,6 +800,8 @@ class UpcomingInvoice(BaseInvoice):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._invoiceitems = []
+        self._default_tax_rates = []
+        self._total_tax_amounts = []
 
     def get_stripe_dashboard_url(self):
         return ""
@@ -731,6 +811,37 @@ class UpcomingInvoice(BaseInvoice):
         self._invoiceitems = cls._stripe_object_to_invoice_items(
             target_cls=InvoiceItem, data=data, invoice=self
         )
+
+    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+        super()._attach_objects_post_save_hook(
+            cls, data, pending_relations=pending_relations
+        )
+
+        self._default_tax_rates = cls._stripe_object_to_default_tax_rates(
+            target_cls=TaxRate, data=data
+        )
+
+        total_tax_amounts = []
+
+        for tax_amount_data in data.get("total_tax_amounts", []):
+            tax_rate_data = tax_amount_data["tax_rate"]
+            if isinstance(tax_rate_data, str):
+                tax_rate_data = {"tax_rate": tax_rate_data}
+
+            tax_rate, _ = TaxRate._get_or_create_from_stripe_object(
+                tax_rate_data, field_name="tax_rate", refetch=True
+            )
+
+            tax_amount = DjstripeUpcomingInvoiceTotalTaxAmount(
+                invoice=self,
+                amount=tax_amount_data["amount"],
+                inclusive=tax_amount_data["inclusive"],
+                tax_rate=tax_rate,
+            )
+
+            total_tax_amounts.append(tax_amount)
+
+        self._total_tax_amounts = total_tax_amounts
 
     @property
     def invoiceitems(self):
@@ -747,6 +858,24 @@ class UpcomingInvoice(BaseInvoice):
         """
 
         return QuerySetMock.from_iterable(InvoiceItem, self._invoiceitems)
+
+    @property
+    def default_tax_rates(self):
+        """
+        Gets the default tax rates associated with this upcoming invoice.
+        :return:
+        """
+        return QuerySetMock.from_iterable(TaxRate, self._default_tax_rates)
+
+    @property
+    def total_tax_amounts(self):
+        """
+        Gets the total tax amounts associated with this upcoming invoice.
+        :return:
+        """
+        return QuerySetMock.from_iterable(
+            DjstripeUpcomingInvoiceTotalTaxAmount, self._total_tax_amounts
+        )
 
     @property
     def id(self):
@@ -828,6 +957,17 @@ class InvoiceItem(StripeModel):
         "if any.",
     )
     # XXX: subscription_item
+    tax_rates = models.ManyToManyField(
+        "TaxRate",
+        # explicitly specify the joining table name as though the joining model
+        # was defined with through="DjstripeInvoiceItemTaxRate"
+        db_table="djstripe_djstripeinvoiceitemtaxrate",
+        related_name="+",
+        blank=True,
+        help_text="The tax rates which apply to this invoice item. When set, "
+        "the default_tax_rates on the invoice do not apply to this "
+        "invoice item.",
+    )
 
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
@@ -835,6 +975,17 @@ class InvoiceItem(StripeModel):
         data["period_end"] = data["period"]["end"]
 
         return data
+
+    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+        super()._attach_objects_post_save_hook(
+            cls, data, pending_relations=pending_relations
+        )
+
+        if self.pk:
+            # only call .set() on saved instance (ie don't on items of UpcomingInvoice)
+            self.tax_rates.set(
+                cls._stripe_object_to_tax_rates(target_cls=TaxRate, data=data)
+            )
 
     @classmethod
     def sync_from_stripe_data(cls, data):
@@ -1175,6 +1326,17 @@ class Subscription(StripeModel):
         "subscription. This value will be `null` for subscriptions where "
         "`billing=charge_automatically`.",
     )
+    default_tax_rates = models.ManyToManyField(
+        "TaxRate",
+        # explicitly specify the joining table name as though the joining model
+        # was defined with through="DjstripeSubscriptionDefaultTaxRate"
+        db_table="djstripe_djstripesubscriptiondefaulttaxrate",
+        related_name="+",
+        blank=True,
+        help_text="The tax rates that will apply to any subscription item "
+        "that does not have tax_rates set. Invoices created will have their "
+        "default_tax_rates populated from the subscription.",
+    )
     # TODO: discount
     ended_at = StripeDateTimeField(
         null=True,
@@ -1463,6 +1625,10 @@ class Subscription(StripeModel):
             target_cls=SubscriptionItem, data=data, subscription=self
         )
 
+        self.default_tax_rates.set(
+            cls._stripe_object_to_default_tax_rates(target_cls=TaxRate, data=data)
+        )
+
 
 class SubscriptionItem(StripeModel):
     """
@@ -1492,6 +1658,62 @@ class SubscriptionItem(StripeModel):
         on_delete=models.CASCADE,
         related_name="items",
         help_text="The subscription this subscription item belongs to.",
+    )
+    tax_rates = models.ManyToManyField(
+        "TaxRate",
+        # explicitly specify the joining table name as though the joining model
+        # was defined with through="DjstripeSubscriptionItemTaxRate"
+        db_table="djstripe_djstripesubscriptionitemtaxrate",
+        related_name="+",
+        blank=True,
+        help_text="The tax rates which apply to this subscription_item. When set, "
+        "the default_tax_rates on the subscription do not apply to this "
+        "subscription_item.",
+    )
+
+    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+        super()._attach_objects_post_save_hook(
+            cls, data, pending_relations=pending_relations
+        )
+
+        self.tax_rates.set(
+            cls._stripe_object_to_tax_rates(target_cls=TaxRate, data=data)
+        )
+
+
+class TaxRate(StripeModel):
+    """
+    Tax rates can be applied to invoices and subscriptions to collect tax.
+
+    Stripe documentation: https://stripe.com/docs/api/tax_rates
+    """
+
+    stripe_class = stripe.TaxRate
+
+    active = models.BooleanField(
+        default=True,
+        help_text="Defaults to true. When set to false, this tax rate cannot be "
+        "applied to objects in the API, but will still be applied to subscriptions "
+        "and invoices that already have it set.",
+    )
+    display_name = models.CharField(
+        max_length=50,
+        default="",
+        blank=True,
+        help_text="The display name of the tax rates as it will appear to your "
+        "customer on their receipt email, PDF, and the hosted invoice page.",
+    )
+    inclusive = models.BooleanField(
+        help_text="This specifies if the tax rate is inclusive or exclusive."
+    )
+    jurisdiction = models.CharField(
+        max_length=50,
+        default="",
+        blank=True,
+        help_text="The jurisdiction for the tax rate.",
+    )
+    percentage = StripePercentField(
+        help_text="This represents the tax rate percent out of 100."
     )
 
 

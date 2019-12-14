@@ -419,6 +419,12 @@ class SubscriptionAdmin(StripeModelAdmin):
     actions = (cancel_subscription,)
 
 
+@admin.register(models.TaxRate)
+class TaxRateAdmin(StripeModelAdmin):
+    list_display = ("active", "display_name", "inclusive", "jurisdiction", "percentage")
+    list_filter = ("active", "inclusive", "jurisdiction")
+
+
 @admin.register(models.Transfer)
 class TransferAdmin(StripeModelAdmin):
     list_display = ("amount", "description")

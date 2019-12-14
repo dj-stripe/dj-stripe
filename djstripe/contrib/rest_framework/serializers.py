@@ -20,7 +20,7 @@ class SubscriptionSerializer(ModelSerializer):
         """Model class options."""
 
         model = Subscription
-        fields = "__all__"
+        exclude = ["default_tax_rates"]
 
 
 class CreateSubscriptionSerializer(serializers.Serializer):
