@@ -124,28 +124,13 @@ class Coupon(StripeModel):
         )
 
 
-class Invoice(StripeModel):
+class BaseInvoice(StripeModel):
     """
-    Invoices are statements of what a customer owes for a particular billing
-    period, including subscriptions, invoice items, and any automatic proration
-    adjustments if necessary.
+    The abstract base model shared by Invoice and UpcomingInvoice
 
-    Once an invoice is created, payment is automatically attempted. Note that
-    the payment, while automatic, does not happen exactly at the time of invoice
-    creation. If you have configured webhooks, the invoice will wait until one
-    hour after the last webhook is successfully sent (or the last webhook times
-    out after failing).
-
-    Any customer credit on the account is applied before determining how much is
-    due for that invoice (the amount that will be actually charged).
-    If the amount due for the invoice is less than 50 cents (the minimum for a
-    charge), we add the amount to the customer's running account balance to be
-    added to the next invoice. If this amount is negative, it will act as a
-    credit to offset the next invoice. Note that the customer account balance
-    does not include unpaid invoices; it only includes balances that need to be
-    taken into account when calculating the amount due for the next invoice.
-
-    Stripe documentation: https://stripe.com/docs/api/python#invoices
+    Note:
+    Most fields are defined on BaseInvoice so they're available to both models.
+    ManyToManyFields are an exception, since UpcomingInvoice doesn't exist in the db.
     """
 
     stripe_class = stripe.Invoice
@@ -228,7 +213,9 @@ class Invoice(StripeModel):
         "Charge",
         on_delete=models.CASCADE,
         null=True,
-        related_name="latest_invoice",
+        # we need to use the %(class)s placeholder to avoid related name
+        # clashes between Invoice and UpcomingInvoice
+        related_name="latest_%(class)s",
         help_text="The latest charge generated for this invoice, if any.",
     )
     # deprecated, will be removed in 2.2
@@ -252,7 +239,9 @@ class Invoice(StripeModel):
     customer = models.ForeignKey(
         "Customer",
         on_delete=models.CASCADE,
-        related_name="invoices",
+        # we need to use the %(class)s placeholder to avoid related name
+        # clashes between Invoice and UpcomingInvoice
+        related_name="%(class)ss",
         help_text="The customer associated with this invoice.",
     )
     customer_address = JSONField(
@@ -432,7 +421,9 @@ class Invoice(StripeModel):
     subscription = models.ForeignKey(
         "Subscription",
         null=True,
-        related_name="invoices",
+        # we need to use the %(class)s placeholder to avoid related name
+        # clashes between Invoice and UpcomingInvoice
+        related_name="%(class)ss",
         on_delete=models.SET_NULL,
         help_text="The subscription that this invoice was prepared for, if any.",
     )
@@ -479,7 +470,8 @@ class Invoice(StripeModel):
         ),
     )
 
-    class Meta(object):
+    class Meta:
+        abstract = True
         ordering = ["-created"]
 
     def __str__(self):
@@ -688,7 +680,45 @@ class Invoice(StripeModel):
             return self.subscription.plan
 
 
-class UpcomingInvoice(Invoice):
+class Invoice(BaseInvoice):
+    """
+    Invoices are statements of what a customer owes for a particular billing
+    period, including subscriptions, invoice items, and any automatic proration
+    adjustments if necessary.
+
+    Once an invoice is created, payment is automatically attempted. Note that
+    the payment, while automatic, does not happen exactly at the time of invoice
+    creation. If you have configured webhooks, the invoice will wait until one
+    hour after the last webhook is successfully sent (or the last webhook times
+    out after failing).
+
+    Any customer credit on the account is applied before determining how much is
+    due for that invoice (the amount that will be actually charged).
+    If the amount due for the invoice is less than 50 cents (the minimum for a
+    charge), we add the amount to the customer's running account balance to be
+    added to the next invoice. If this amount is negative, it will act as a
+    credit to offset the next invoice. Note that the customer account balance
+    does not include unpaid invoices; it only includes balances that need to be
+    taken into account when calculating the amount due for the next invoice.
+
+    Stripe documentation: https://stripe.com/docs/api/python#invoices
+    """
+
+    # Note:
+    # Most fields are defined on BaseInvoice so they're shared with UpcomingInvoice.
+    # ManyToManyFields are an exception, since UpcomingInvoice doesn't exist in the db.
+
+
+class UpcomingInvoice(BaseInvoice):
+    """
+    The preview of an upcoming invoice - does not exist in the Django database.
+
+    See BaseInvoice.upcoming()
+
+    Logically it should be set abstract, but that doesn't quite work since we
+    do actually want to instantiate the model and use relations.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._invoiceitems = []
