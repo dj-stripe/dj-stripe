@@ -599,11 +599,11 @@ class StripeModel(models.Model):
     @classmethod
     def _stripe_object_set_total_tax_amounts(cls, target_cls, data, instance):
         """
-        Set total tax amounts on Subscription or Invoice instance
+        Set total tax amounts on Invoice instance
         :param target_cls:
         :param data:
         :param instance:
-        :type instance: Union[djstripe.models.Invoice, djstripe.models.Subscription]
+        :type instance: djstripe.models.Invoice
         :return:
         """
         from .billing import TaxRate

@@ -326,15 +326,7 @@ class BaseInvoice(StripeModel):
         "method in the customer’s invoice settings.",
     )
     # TODO: default_source
-    default_tax_rates = models.ManyToManyField(
-        "TaxRate",
-        # explicitly specify the joining table name as though the joining model
-        # was defined with through="DjstripeInvoiceDefaultTaxRate"
-        db_table="djstripe_djstripeinvoicedefaulttaxrate",
-        related_name="+",
-        blank=True,
-        help_text="The tax rates applied to this invoice, if any.",
-    )
+    # Note: default_tax_rates is handled in the subclasses since it's a ManyToManyField
     # TODO: discount
     due_date = StripeDateTimeField(
         null=True,
@@ -688,16 +680,6 @@ class BaseInvoice(StripeModel):
             target_cls=InvoiceItem, data=data, invoice=self
         )
 
-        if self.pk:
-            # only call .set() on saved instance (ie don't on UpcomingInvoice)
-            self.default_tax_rates.set(
-                cls._stripe_object_to_default_tax_rates(target_cls=TaxRate, data=data)
-            )
-
-            cls._stripe_object_set_total_tax_amounts(
-                target_cls=DjstripeInvoiceTotalTaxAmount, data=data, instance=self
-            )
-
     @property
     def plan(self):
         """ Gets the associated plan for this invoice.
@@ -753,6 +735,28 @@ class Invoice(BaseInvoice):
     # Note:
     # Most fields are defined on BaseInvoice so they're shared with UpcomingInvoice.
     # ManyToManyFields are an exception, since UpcomingInvoice doesn't exist in the db.
+    default_tax_rates = models.ManyToManyField(
+        "TaxRate",
+        # explicitly specify the joining table name as though the joining model
+        # was defined with through="DjstripeInvoiceDefaultTaxRate"
+        db_table="djstripe_djstripeinvoicedefaulttaxrate",
+        related_name="+",
+        blank=True,
+        help_text="The tax rates applied to this invoice, if any.",
+    )
+
+    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+        super()._attach_objects_post_save_hook(
+            cls, data, pending_relations=pending_relations
+        )
+
+        self.default_tax_rates.set(
+            cls._stripe_object_to_default_tax_rates(target_cls=TaxRate, data=data)
+        )
+
+        cls._stripe_object_set_total_tax_amounts(
+            target_cls=DjstripeInvoiceTotalTaxAmount, data=data, instance=self
+        )
 
 
 class UpcomingInvoice(BaseInvoice):
@@ -768,7 +772,8 @@ class UpcomingInvoice(BaseInvoice):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._invoiceitems = []
-        # self._default_tax_rates = []
+        self._default_tax_rates = []
+        self._total_tax_amounts = []
 
     def get_stripe_dashboard_url(self):
         return ""
@@ -779,14 +784,36 @@ class UpcomingInvoice(BaseInvoice):
             target_cls=InvoiceItem, data=data, invoice=self
         )
 
-    # def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
-    #     super()._attach_objects_post_save_hook(
-    #         cls, data, pending_relations=pending_relations
-    #     )
-    #
-    #     self._default_tax_rates = cls._stripe_object_to_default_tax_rates(
-    #         target_cls=TaxRate, data=data
-    #     )
+    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+        super()._attach_objects_post_save_hook(
+            cls, data, pending_relations=pending_relations
+        )
+
+        self._default_tax_rates = cls._stripe_object_to_default_tax_rates(
+            target_cls=TaxRate, data=data
+        )
+
+        total_tax_amounts = []
+
+        for tax_amount_data in data.get("total_tax_amounts", []):
+            tax_rate_data = tax_amount_data["tax_rate"]
+            if isinstance(tax_rate_data, str):
+                tax_rate_data = {"tax_rate": tax_rate_data}
+
+            tax_rate, _ = TaxRate._get_or_create_from_stripe_object(
+                tax_rate_data, field_name="tax_rate", refetch=True
+            )
+
+            tax_amount = DjstripeInvoiceTotalTaxAmount(
+                invoice=self,
+                amount=tax_amount_data["amount"],
+                inclusive=tax_amount_data["inclusive"],
+                tax_rate=tax_rate,
+            )
+
+            total_tax_amounts.append(tax_amount)
+
+        self._total_tax_amounts = total_tax_amounts
 
     @property
     def invoiceitems(self):
@@ -804,13 +831,23 @@ class UpcomingInvoice(BaseInvoice):
 
         return QuerySetMock.from_iterable(InvoiceItem, self._invoiceitems)
 
-    # @property
-    # def default_tax_rates(self):
-    #     """
-    #     Gets the default tax rates associated with this upcoming invoice.
-    #     :return:
-    #     """
-    #     return QuerySetMock.from_iterable(TaxRate, self._default_tax_rates)
+    @property
+    def default_tax_rates(self):
+        """
+        Gets the default tax rates associated with this upcoming invoice.
+        :return:
+        """
+        return QuerySetMock.from_iterable(TaxRate, self._default_tax_rates)
+
+    @property
+    def total_tax_amounts(self):
+        """
+        Gets the total tax amounts associated with this upcoming invoice.
+        :return:
+        """
+        return QuerySetMock.from_iterable(
+            DjstripeInvoiceTotalTaxAmount, self._total_tax_amounts
+        )
 
     @property
     def id(self):
