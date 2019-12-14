@@ -274,7 +274,7 @@ class BaseInvoice(StripeModel):
         related_name="latest_%(class)s",
         help_text="The latest charge generated for this invoice, if any.",
     )
-    # deprecated, will be removed in 2.2
+    # deprecated, will be removed in 2.3
     closed = models.NullBooleanField(
         default=False,
         help_text="Whether or not the invoice is still trying to collect payment."
@@ -372,7 +372,7 @@ class BaseInvoice(StripeModel):
     footer = models.TextField(
         max_length=5000, blank=True, help_text="Footer displayed on the invoice."
     )
-    # deprecated, will be removed in 2.2
+    # deprecated, will be removed in 2.3
     forgiven = models.NullBooleanField(
         default=False,
         help_text="Whether or not the invoice has been forgiven. "
@@ -542,7 +542,7 @@ class BaseInvoice(StripeModel):
         # see https://stripe.com/docs/upgrades#2018-11-08
 
         if "closed" not in data:
-            # TODO - drop this in 2.2, use auto_advance instead
+            # TODO - drop this in 2.3, use auto_advance instead
             # https://stripe.com/docs/billing/invoices/migrating-new-invoice-states#autoadvance
             if "auto_advance" in data:
                 data["closed"] = not data["auto_advance"]
@@ -550,7 +550,7 @@ class BaseInvoice(StripeModel):
                 data["closed"] = False
 
         if "forgiven" not in data:
-            # TODO - drop this in 2.2, use status == "uncollectible" instead
+            # TODO - drop this in 2.3, use status == "uncollectible" instead
             if "status" in data:
                 data["forgiven"] = data["status"] == "uncollectible"
             else:
@@ -671,6 +671,16 @@ class BaseInvoice(StripeModel):
 
     @property
     def status(self):
+        warnings.warn(
+            "Invoice.status will be redefined in djstripe 2.3, use "
+            "Invoice.legacy_status to keep the old values",
+            DeprecationWarning,
+        )
+
+        return self.legacy_status
+
+    @property
+    def legacy_status(self):
         """
         Attempts to label this invoice with a status.
         Note that an invoice can be more than one of the choices.
