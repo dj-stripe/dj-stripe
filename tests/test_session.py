@@ -40,6 +40,7 @@ class SessionTest(AssertStripeFksMixin, TestCase):
                 "djstripe.PaymentIntent.invoice (related name)",
                 "djstripe.PaymentIntent.on_behalf_of",
                 "djstripe.PaymentIntent.payment_method",
+                "djstripe.PaymentIntent.upcominginvoice (related name)",
                 "djstripe.Session.subscription",
             },
         )

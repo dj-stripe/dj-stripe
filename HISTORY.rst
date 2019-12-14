@@ -9,6 +9,7 @@ History
 - Changed ``JSONField`` dependency package from `jsonfield`_ to `jsonfield2`_, for Django 3 compatibility (see `Warning about safe uninstall of jsonfield on upgrade`_). Note that Django 2.1 requires jsonfield<3.1.
 - Added support for Django 3.0 (requires jsonfield2>=3.0.3).
 - Added support for python 3.8.
+- Refactored ``UpcomingInvoice``, so it's no longer a subclass of ``Invoice`` (to allow ``Invoice`` to use ``ManyToManyFields``).
 - Dropped previously-deprecated ``Account`` fields (see https://stripe.com/docs/upgrades#2019-02-19 ):
     - ``.business_name``
     - ``.business_primary_color``
