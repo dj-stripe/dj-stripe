@@ -42,12 +42,14 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
             "djstripe.Account.branding_logo",
             "djstripe.Account.branding_icon",
             "djstripe.Charge.dispute",
+            "djstripe.Charge.latest_upcominginvoice (related name)",
             "djstripe.Charge.transfer",
             "djstripe.Customer.coupon",
             "djstripe.Customer.default_payment_method",
             "djstripe.Invoice.default_payment_method",
             "djstripe.PaymentIntent.on_behalf_of",
             "djstripe.PaymentIntent.payment_method",
+            "djstripe.PaymentIntent.upcominginvoice (related name)",
             "djstripe.Subscription.pending_setup_intent",
         }
 

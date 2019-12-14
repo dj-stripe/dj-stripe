@@ -32,6 +32,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
             "djstripe.Account.branding_logo",
             "djstripe.Account.branding_icon",
             "djstripe.Charge.dispute",
+            "djstripe.Charge.latest_upcominginvoice (related name)",
             "djstripe.Charge.payment_intent",
             "djstripe.Charge.payment_method",
             "djstripe.Charge.transfer",
