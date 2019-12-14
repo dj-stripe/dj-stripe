@@ -489,7 +489,10 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
         invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
 
-        self.assertEqual(Invoice.STATUS_PAID, invoice.status)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(Invoice.STATUS_PAID, invoice.status)
+
+        self.assertEqual(Invoice.STATUS_PAID, invoice.legacy_status)
 
         self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
 
@@ -537,7 +540,10 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         invoice_data.update({"paid": False, "closed": False})
         invoice = Invoice.sync_from_stripe_data(invoice_data)
 
-        self.assertEqual(Invoice.STATUS_OPEN, invoice.status)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(Invoice.STATUS_OPEN, invoice.status)
+
+        self.assertEqual(Invoice.STATUS_OPEN, invoice.legacy_status)
 
         self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
 
@@ -585,7 +591,10 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         invoice_data.update({"paid": False, "closed": False, "forgiven": True})
         invoice = Invoice.sync_from_stripe_data(invoice_data)
 
-        self.assertEqual(Invoice.STATUS_FORGIVEN, invoice.status)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(Invoice.STATUS_FORGIVEN, invoice.status)
+
+        self.assertEqual(Invoice.STATUS_FORGIVEN, invoice.legacy_status)
 
         self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
 
@@ -637,7 +646,10 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         invoice_data["status"] = "uncollectible"
         invoice = Invoice.sync_from_stripe_data(invoice_data)
 
-        self.assertEqual(Invoice.STATUS_FORGIVEN, invoice.status)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(Invoice.STATUS_FORGIVEN, invoice.status)
+
+        self.assertEqual(Invoice.STATUS_FORGIVEN, invoice.legacy_status)
 
     @patch(
         "djstripe.models.Account.get_default_account",
@@ -686,7 +698,10 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         invoice_data.pop("forgiven", None)  # TODO remove
         invoice = Invoice.sync_from_stripe_data(invoice_data)
 
-        self.assertEqual(Invoice.STATUS_OPEN, invoice.status)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(Invoice.STATUS_OPEN, invoice.status)
+
+        self.assertEqual(Invoice.STATUS_OPEN, invoice.legacy_status)
 
     @patch(
         "djstripe.models.Account.get_default_account",
@@ -732,7 +747,10 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         invoice_data.update({"paid": False})
         invoice = Invoice.sync_from_stripe_data(invoice_data)
 
-        self.assertEqual(Invoice.STATUS_CLOSED, invoice.status)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(Invoice.STATUS_CLOSED, invoice.status)
+
+        self.assertEqual(Invoice.STATUS_CLOSED, invoice.legacy_status)
 
         self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)
 
@@ -784,7 +802,11 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
         invoice = Invoice.sync_from_stripe_data(invoice_data)
 
-        self.assertEqual(Invoice.STATUS_CLOSED, invoice.status)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(Invoice.STATUS_CLOSED, invoice.status)
+
+        self.assertEqual(Invoice.STATUS_CLOSED, invoice.legacy_status)
+
         self.assertEqual(invoice.auto_advance, invoice_data["auto_advance"])
 
     @patch(
@@ -837,7 +859,10 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
 
         invoice = Invoice.sync_from_stripe_data(invoice_data)
 
-        self.assertEqual(Invoice.STATUS_OPEN, invoice.status)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(Invoice.STATUS_OPEN, invoice.status)
+
+        self.assertEqual(Invoice.STATUS_OPEN, invoice.legacy_status)
 
     @patch(
         "djstripe.models.Account.get_default_account",

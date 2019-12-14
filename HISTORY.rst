@@ -41,6 +41,7 @@ History
   deleting it from our database,  to match Stripe's behaviour (#599).
 - Added missing ``Refund.reason`` value, increases field width (#1075).
 - Fixed ``Refund.status`` definition, reduces field width (#1076).
+- Deprecated non-standard ``Invoice.status`` (renamed to ``Invoice.legacy_status``) to make way for the Stripe field (preparation for #1020).
 
 Warning about safe uninstall of jsonfield on upgrade
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
