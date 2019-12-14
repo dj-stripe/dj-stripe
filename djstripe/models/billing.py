@@ -53,6 +53,34 @@ class DjstripeInvoiceTotalTaxAmount(models.Model):
         unique_together = ["invoice", "tax_rate"]
 
 
+class DjstripeUpcomingInvoiceTotalTaxAmount(models.Model):
+    """
+    As per DjstripeInvoiceTotalTaxAmount, except for UpcomingInvoice
+    """
+
+    invoice = models.ForeignKey(
+        # Don't define related_name since property is defined in UpcomingInvoice
+        "UpcomingInvoice",
+        on_delete=models.CASCADE,
+        related_name="+",
+    )
+
+    amount = StripeQuantumCurrencyAmountField(
+        help_text="The amount, in cents, of the tax."
+    )
+    inclusive = models.BooleanField(
+        help_text="Whether this tax amount is inclusive or exclusive."
+    )
+    tax_rate = models.ForeignKey(
+        "TaxRate",
+        on_delete=models.CASCADE,
+        help_text="The tax rate that was applied to get this tax amount.",
+    )
+
+    class Meta:
+        unique_together = ["invoice", "tax_rate"]
+
+
 class Coupon(StripeModel):
     id = StripeIdField(max_length=500)
     amount_off = StripeDecimalCurrencyAmountField(
@@ -804,7 +832,7 @@ class UpcomingInvoice(BaseInvoice):
                 tax_rate_data, field_name="tax_rate", refetch=True
             )
 
-            tax_amount = DjstripeInvoiceTotalTaxAmount(
+            tax_amount = DjstripeUpcomingInvoiceTotalTaxAmount(
                 invoice=self,
                 amount=tax_amount_data["amount"],
                 inclusive=tax_amount_data["inclusive"],
@@ -846,7 +874,7 @@ class UpcomingInvoice(BaseInvoice):
         :return:
         """
         return QuerySetMock.from_iterable(
-            DjstripeInvoiceTotalTaxAmount, self._total_tax_amounts
+            DjstripeUpcomingInvoiceTotalTaxAmount, self._total_tax_amounts
         )
 
     @property
