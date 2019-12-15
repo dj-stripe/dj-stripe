@@ -32,6 +32,7 @@ History
 - Dropped previously-deprecated enum ``PaymentMethodType`` (use ``DjstripePaymentMethodType`` instead)
 - Renamed ``Invoice.billing`` to ``.collection_method`` (added deprecated property for the old name).
 - Updated ``Invoice`` model to add missing fields.
+- Added ``Subscription.latest_invoice`` field.
 - Added ``TaxRate`` model, and ``Invoice.default_tax_rates``, ``InvoiceItem.tax_rates``,
   ``Invoice.total_tax_amounts``, ``Subscription.default_tax_rates``, ``SubscriptionItem.tax_rates`` (#1027).
 - Change urls.py to use the new style urls.

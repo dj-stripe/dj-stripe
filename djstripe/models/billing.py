@@ -1355,6 +1355,13 @@ class Subscription(StripeModel):
         "because the customer was switched to a subscription to a new plan), "
         "the date the subscription ended.",
     )
+    latest_invoice = models.ForeignKey(
+        "Invoice",
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="+",
+        help_text="The most recent invoice this subscription has generated.",
+    )
     pending_setup_intent = models.ForeignKey(
         "SetupIntent",
         null=True,
