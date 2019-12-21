@@ -916,8 +916,8 @@ class Customer(StripeModel):
         :param payment_method: PaymentMethod to be attached to the customer
         :type payment_method: str, PaymentMethod
         :param set_default: If true, this will be set as the default_payment_method
-        :type: bool
-        :return:
+        :type set_default: bool
+        :rtype: PaymentMethod
         """
         from .payment_methods import PaymentMethod
 
