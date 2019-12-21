@@ -59,6 +59,7 @@ Customer
 .. automethod:: djstripe.models.Customer.charge
 .. automethod:: djstripe.models.Customer.add_invoice_item
 .. automethod:: djstripe.models.Customer.add_card
+.. automethod:: djstripe.models.Customer.add_payment_method
 .. automethod:: djstripe.models.Customer.purge
 .. automethod:: djstripe.models.Customer.has_active_subscription
 .. automethod:: djstripe.models.Customer.has_any_active_subscription
