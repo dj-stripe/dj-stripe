@@ -1,4 +1,6 @@
 import decimal
+from decimal import Decimal
+from typing import Optional, Type
 
 import stripe
 from django.db import models, transaction
@@ -256,20 +258,20 @@ class Charge(StripeModel):
         return "{amount} ({status})".format(amount=amount, status=status)
 
     @property
-    def disputed(self):
+    def disputed(self) -> bool:
         return self.dispute is not None
 
     @property
-    def fee(self):
+    def fee(self) -> int:
         if self.balance_transaction:
             return self.balance_transaction.fee
 
     @property
-    def human_readable_amount(self):
+    def human_readable_amount(self) -> str:
         return get_friendly_currency_amount(self.amount, self.currency)
 
     @property
-    def human_readable_status(self):
+    def human_readable_status(self) -> str:
         if not self.captured:
             return "Uncaptured"
         elif self.disputed:
@@ -284,12 +286,12 @@ class Charge(StripeModel):
         return ""
 
     @property
-    def fraudulent(self):
+    def fraudulent(self) -> bool:
         return (
             self.fraud_details and list(self.fraud_details.values())[0] == "fraudulent"
         )
 
-    def _attach_objects_hook(self, cls, data):
+    def _attach_objects_hook(self, cls: Type["Charge"], data: dict):
         from .payment_methods import DjstripePaymentMethod
 
         # Set the account on this object.
@@ -315,9 +317,8 @@ class Charge(StripeModel):
             data=source_data, source_type=source_type
         )
 
-    def _calculate_refund_amount(self, amount=None):
+    def _calculate_refund_amount(self, amount: Decimal = None) -> int:
         """
-        :rtype: int
         :return: amount that can be refunded, in CENTS
         """
         eligible_to_refund = self.amount - (self.amount_refunded or 0)
@@ -327,30 +328,27 @@ class Charge(StripeModel):
             amount_to_refund = eligible_to_refund
         return int(amount_to_refund * 100)
 
-    def refund(self, amount=None, reason=None):
+    def refund(self, amount: Decimal = None, reason: str = None) -> "Charge":
         """
         Initiate a refund. If amount is not provided, then this will be a full refund.
 
         :param amount: A positive decimal amount representing how much of this charge
             to refund.
             Can only refund up to the unrefunded amount remaining of the charge.
-        :type amount: Decimal
         :param reason: String indicating the reason for the refund.
             If set, possible values are ``duplicate``, ``fraudulent``,
             and ``requested_by_customer``. Specifying ``fraudulent`` as the reason
             when you believe the charge to be fraudulent will
             help Stripe improve their fraud detection algorithms.
-        :param reason: str
 
         :return: Charge object
-        :rtype: Charge
         """
         charge_obj = self.api_retrieve().refund(
             amount=self._calculate_refund_amount(amount=amount), reason=reason
         )
         return self.__class__.sync_from_stripe_data(charge_obj)
 
-    def capture(self):
+    def capture(self) -> "Charge":
         """
         Capture the payment of an existing, uncaptured, charge.
         This is the second half of the two-step payment flow, where first you
@@ -363,15 +361,15 @@ class Charge(StripeModel):
         return self.__class__.sync_from_stripe_data(captured_charge)
 
     @classmethod
-    def _stripe_object_destination_to_account(cls, target_cls, data):
+    def _stripe_object_destination_to_account(
+        cls, target_cls: Type["Account"], data: dict
+    ) -> Optional["Account"]:
         """
         Search the given manager for the Account matching this Charge object's
         ``destination`` field.
 
         :param target_cls: The target class
-        :type target_cls: Account
         :param data: stripe object
-        :type data: dict
         """
 
         if "destination" in data and data["destination"]:

@@ -3,6 +3,7 @@ Utility functions related to the djstripe app.
 """
 
 import datetime
+from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -124,7 +125,7 @@ def convert_tstamp(response):
 CURRENCY_SIGILS = {"CAD": "$", "EUR": "€", "GBP": "£", "USD": "$"}
 
 
-def get_friendly_currency_amount(amount, currency):
+def get_friendly_currency_amount(amount: Decimal, currency: str) -> str:
     currency = currency.upper()
     sigil = CURRENCY_SIGILS.get(currency, "")
     return "{sigil}{amount:.2f} {currency}".format(

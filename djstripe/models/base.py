@@ -1,6 +1,7 @@
 import logging
 import uuid
 from datetime import timedelta
+from typing import TYPE_CHECKING, Iterator, List, Optional, Tuple, Type, Union
 
 from django.apps import apps
 from django.db import IntegrityError, models, transaction
@@ -10,6 +11,11 @@ from django.utils.encoding import smart_str
 from .. import settings as djstripe_settings
 from ..fields import JSONField, StripeDateTimeField, StripeIdField
 from ..managers import StripeModelManager
+
+if TYPE_CHECKING:
+    # Note this import should only be used to reference string names in type hints
+    import djstripe.models
+    from stripe.api_resources.abstract import APIResource
 
 logger = logging.getLogger(__name__)
 
@@ -60,12 +66,12 @@ class StripeModel(models.Model):
         abstract = True
         get_latest_by = "created"
 
-    def _get_base_stripe_dashboard_url(self):
+    def _get_base_stripe_dashboard_url(self) -> str:
         return "https://dashboard.stripe.com/{}".format(
             "test/" if not self.livemode else ""
         )
 
-    def get_stripe_dashboard_url(self):
+    def get_stripe_dashboard_url(self) -> str:
         """Get the stripe dashboard url for this object."""
         if not self.stripe_dashboard_item_name or not self.id:
             return ""
@@ -80,16 +86,16 @@ class StripeModel(models.Model):
     def default_api_key(self):
         return djstripe_settings.get_default_api_key(self.livemode)
 
-    def api_retrieve(self, api_key=None, stripe_account=None):
+    def api_retrieve(
+        self, api_key: str = None, stripe_account: str = None
+    ) -> "APIResource":
         """
         Call the stripe API's retrieve operation for this model.
 
         :param api_key: The api key to use for this request. \
             Defaults to settings.STRIPE_SECRET_KEY.
-        :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.
-        :type stripe_account: string
         """
         api_key = api_key or self.default_api_key
         # Prefer passed in stripe_account if set.
@@ -124,7 +130,9 @@ class StripeModel(models.Model):
         )
 
     @classmethod
-    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def api_list(
+        cls, api_key: str = djstripe_settings.STRIPE_SECRET_KEY, **kwargs
+    ) -> Iterator["APIResource"]:
         """
         Call the stripe API's list operation for this model.
 
@@ -140,27 +148,28 @@ class StripeModel(models.Model):
         return cls.stripe_class.list(api_key=api_key, **kwargs).auto_paging_iter()
 
     @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(
+        cls, api_key: str = djstripe_settings.STRIPE_SECRET_KEY, **kwargs
+    ) -> "APIResource":
         """
         Call the stripe API's create operation for this model.
 
         :param api_key: The api key to use for this request. \
             Defaults to djstripe_settings.STRIPE_SECRET_KEY.
-        :type api_key: string
         """
 
         return cls.stripe_class.create(api_key=api_key, **kwargs)
 
-    def _api_delete(self, api_key=None, stripe_account=None, **kwargs):
+    def _api_delete(
+        self, api_key: str = None, stripe_account: str = None, **kwargs
+    ) -> "APIResource":
         """
         Call the stripe API's delete operation for this model
 
         :param api_key: The api key to use for this request. \
             Defaults to djstripe_settings.STRIPE_SECRET_KEY.
-        :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.
-        :type stripe_account: string
         """
         api_key = api_key or self.default_api_key
 
@@ -168,7 +177,7 @@ class StripeModel(models.Model):
             **kwargs
         )
 
-    def str_parts(self):
+    def str_parts(self) -> List[str]:
         """
         Extend this to add information to the string representation of the object
 
@@ -177,7 +186,7 @@ class StripeModel(models.Model):
         return ["id={id}".format(id=self.id)]
 
     @classmethod
-    def _manipulate_stripe_object_hook(cls, data):
+    def _manipulate_stripe_object_hook(cls, data: dict) -> dict:
         """
         Gets called by this object's stripe object conversion method just before
         conversion.
@@ -187,8 +196,12 @@ class StripeModel(models.Model):
 
     @classmethod
     def _stripe_object_to_record(
-        cls, data, current_ids=None, pending_relations=None, stripe_account=None
-    ):
+        cls,
+        data: dict,
+        current_ids: set = None,
+        pending_relations: list = None,
+        stripe_account: str = None,
+    ) -> dict:
         """
         This takes an object, as it is formatted in Stripe's current API for our object
         type. In return, it provides a dict. The dict can be used to create a record or
@@ -199,16 +212,11 @@ class StripeModel(models.Model):
         (so that an objects.create() call would not fail).
 
         :param data: the object, as sent by Stripe. Parsed from JSON, into a dict
-        :type data: dict
         :param current_ids: stripe ids of objects that are currently being processed
-        :type current_ids: set
         :param pending_relations: list of tuples of relations to be attached post-save
-        :type pending_relations: list
         :param stripe_account: The optional connected account \
             for which this request is being made.
-        :type stripe_account: string
         :return: All the members from the input, translated, mutated, etc
-        :rtype: dict
         """
         manipulated_data = cls._manipulate_stripe_object_hook(data)
 
@@ -259,7 +267,7 @@ class StripeModel(models.Model):
         return result
 
     @classmethod
-    def _id_from_data(cls, data):
+    def _id_from_data(cls, data: dict) -> Optional[str]:
         """
         Extract stripe id from stripe field data
         :param data:
@@ -280,27 +288,22 @@ class StripeModel(models.Model):
     @classmethod
     def _stripe_object_field_to_foreign_key(
         cls,
-        field,
-        manipulated_data,
-        current_ids=None,
-        pending_relations=None,
-        stripe_account=None,
-    ):
+        field: models.ForeignKey,
+        manipulated_data: dict,
+        current_ids: set = None,
+        pending_relations: list = None,
+        stripe_account: str = None,
+    ) -> Tuple[Optional["StripeModel"], bool]:
         """
         This converts a stripe API field to the dj stripe object it references,
         so that foreign keys can be connected up automatically.
 
         :param field:
-        :type field: models.ForeignKey
         :param manipulated_data:
-        :type manipulated_data: dict
         :param current_ids: stripe ids of objects that are currently being processed
-        :type current_ids: set
         :param pending_relations: list of tuples of relations to be attached post-save
-        :type pending_relations: list
         :param stripe_account: The optional connected account \
             for which this request is being made.
-        :type stripe_account: string
         :return:
         """
         field_data = None
@@ -346,13 +349,13 @@ class StripeModel(models.Model):
         return field_data, skip
 
     @classmethod
-    def is_valid_object(cls, data):
+    def is_valid_object(cls, data: dict) -> bool:
         """
         Returns whether the data is a valid object for the class
         """
         return data["object"] == cls.stripe_class.OBJECT_NAME
 
-    def _attach_objects_hook(self, cls, data):
+    def _attach_objects_hook(self, cls: Type["StripeModel"], data: dict):
         """
         Gets called by this object's create and sync methods just before save.
         Use this to populate fields before the model is saved.
@@ -364,14 +367,15 @@ class StripeModel(models.Model):
 
         pass
 
-    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+    def _attach_objects_post_save_hook(
+        self, cls: Type["StripeModel"], data: dict, pending_relations: list = None
+    ):
         """
         Gets called by this object's create and sync methods just after save.
         Use this to populate fields after the model is saved.
 
         :param cls: The target class for the instantiated object.
         :param data: The data dictionary received from the Stripe API.
-        :type data: dict
         """
 
         unprocessed_pending_relations = []
@@ -399,27 +403,22 @@ class StripeModel(models.Model):
     @classmethod
     def _create_from_stripe_object(
         cls,
-        data,
-        current_ids=None,
-        pending_relations=None,
-        save=True,
-        stripe_account=None,
-    ):
+        data: dict,
+        current_ids: set = None,
+        pending_relations: list = None,
+        save: bool = True,
+        stripe_account: str = None,
+    ) -> "StripeModel":
         """
         Instantiates a model instance using the provided data object received
         from Stripe, and saves it to the database if specified.
 
         :param data: The data dictionary received from the Stripe API.
-        :type data: dict
         :param current_ids: stripe ids of objects that are currently being processed
-        :type current_ids: set
         :param pending_relations: list of tuples of relations to be attached post-save
-        :type pending_relations: list
         :param save: If True, the object is saved after instantiation.
-        :type save: bool
         :param stripe_account: The optional connected account \
             for which this request is being made.
-        :type stripe_account: string
         :returns: The instantiated object.
         """
         instance = cls(
@@ -444,27 +443,24 @@ class StripeModel(models.Model):
     @classmethod
     def _get_or_create_from_stripe_object(
         cls,
-        data,
-        field_name="id",
-        refetch=True,
-        current_ids=None,
-        pending_relations=None,
-        save=True,
-        stripe_account=None,
-    ):
+        data: dict,
+        field_name: str = "id",
+        refetch: bool = True,
+        current_ids: set = None,
+        pending_relations: list = None,
+        save: bool = True,
+        stripe_account: str = None,
+    ) -> Tuple[Optional["StripeModel"], bool]:
         """
 
         :param data:
         :param field_name:
         :param refetch:
         :param current_ids: stripe ids of objects that are currently being processed
-        :type current_ids: set
         :param pending_relations: list of tuples of relations to be attached post-save
-        :type pending_relations: list
         :param save:
         :param stripe_account: The optional connected account \
             for which this request is being made.
-        :type stripe_account: string
         :return:
         :rtype: cls, bool
         """
@@ -542,27 +538,31 @@ class StripeModel(models.Model):
             return cls.stripe_objects.get(id=id_), False
 
     @classmethod
-    def _stripe_object_to_customer(cls, target_cls, data):
+    def _stripe_object_to_customer(
+        cls, target_cls: Type["StripeModel"], data: dict
+    ) -> "djstripe.models.Customer":
         """
         Search the given manager for the Customer matching this object's
         ``customer`` field.
         :param target_cls: The target class
-        :type target_cls: Customer
         :param data: stripe object
-        :type data: dict
         """
 
         if "customer" in data and data["customer"]:
             return target_cls._get_or_create_from_stripe_object(data, "customer")[0]
 
     @classmethod
-    def _stripe_object_to_default_tax_rates(cls, target_cls, data):
+    def _stripe_object_to_default_tax_rates(
+        cls,
+        target_cls: Union[
+            Type["djstripe.models.Invoice"], Type["djstripe.models.Subscription"]
+        ],
+        data: dict,
+    ) -> List["djstripe.models.TaxRate"]:
         """
         Retrieves TaxRates for a Subscription or Invoice
         :param target_cls:
         :param data:
-        :param instance:
-        :type instance: Union[djstripe.models.Invoice, djstripe.models.Subscription]
         :return:
         """
         tax_rates = []
@@ -576,14 +576,17 @@ class StripeModel(models.Model):
         return tax_rates
 
     @classmethod
-    def _stripe_object_to_tax_rates(cls, target_cls, data):
+    def _stripe_object_to_tax_rates(
+        cls,
+        target_cls: Union[
+            Type["djstripe.models.InvoicItem"], Type["djstripe.models.SubscriptionItem"]
+        ],
+        data: dict,
+    ) -> List["djstripe.models.TaxRate"]:
         """
         Retrieves TaxRates for a SubscriptionItem or InvoiceItem
         :param target_cls:
         :param data:
-        :param instance:
-        :type instance: Union[djstripe.models.InvoiceItem,
-                              djstripe.models.SubscriptionItem]
         :return:
         """
         tax_rates = []
@@ -597,14 +600,17 @@ class StripeModel(models.Model):
         return tax_rates
 
     @classmethod
-    def _stripe_object_set_total_tax_amounts(cls, target_cls, data, instance):
+    def _stripe_object_set_total_tax_amounts(
+        cls,
+        target_cls: Type["djstripe.models.Invoice"],
+        data: dict,
+        instance: "djstripe.models.Invoice",
+    ):
         """
         Set total tax amounts on Invoice instance
         :param target_cls:
         :param data:
         :param instance:
-        :type instance: djstripe.models.Invoice
-        :return:
         """
         from .billing import TaxRate
 
@@ -630,7 +636,12 @@ class StripeModel(models.Model):
         instance.total_tax_amounts.exclude(pk__in=pks).delete()
 
     @classmethod
-    def _stripe_object_to_invoice_items(cls, target_cls, data, invoice):
+    def _stripe_object_to_invoice_items(
+        cls,
+        target_cls: Type["djstripe.models.InvoiceItem"],
+        data: dict,
+        invoice: "djstripe.models.Invoice",
+    ) -> List["djstripe.models.InvoiceItem"]:
         """
         Retrieves InvoiceItems for an invoice.
 
@@ -682,18 +693,20 @@ class StripeModel(models.Model):
         return invoiceitems
 
     @classmethod
-    def _stripe_object_to_subscription_items(cls, target_cls, data, subscription):
+    def _stripe_object_to_subscription_items(
+        cls,
+        target_cls: Type["djstripe.models.SubscriptionItem"],
+        data: dict,
+        subscription: "djstripe.models.Subscription",
+    ) -> List["djstripe.models.SubscriptionItem"]:
         """
         Retrieves SubscriptionItems for a subscription.
 
         If the subscription item doesn't exist already then it is created.
 
         :param target_cls: The target class to instantiate per invoice item.
-        :type target_cls: Type[djstripe.models.SubscriptionItem]
         :param data: The data dictionary received from the Stripe API.
-        :type data: dict
         :param subscription: The subscription object that should hold the items.
-        :type subscription: djstripe.models.Subscription
         """
 
         items = data.get("items")
@@ -710,16 +723,17 @@ class StripeModel(models.Model):
         return subscriptionitems
 
     @classmethod
-    def _stripe_object_to_refunds(cls, target_cls, data, charge):
+    def _stripe_object_to_refunds(
+        cls,
+        target_cls: Type["djstripe.models.Refund"],
+        data: dict,
+        charge: "djstripe.models.Charge",
+    ) -> List["djstripe.models.Refund"]:
         """
         Retrieves Refunds for a charge
         :param target_cls: The target class to instantiate per refund
-        :type target_cls: Type[djstripe.models.Refund]
         :param data: The data dictionary received from the Stripe API.
-        :type data: dict
         :param charge: The charge object that refunds are for.
-        :type charge: djstripe.models.Refund
-        :return:
         """
 
         refunds = data.get("refunds")
@@ -740,7 +754,7 @@ class StripeModel(models.Model):
             setattr(self, attr, value)
 
     @classmethod
-    def sync_from_stripe_data(cls, data):
+    def sync_from_stripe_data(cls, data: dict) -> "StripeModel":
         """
         Syncs this object from the stripe data provided.
 
@@ -791,8 +805,5 @@ class IdempotencyKey(models.Model):
         return str(self.uuid)
 
     @property
-    def is_expired(self):
-        """
-        :rtype: bool
-        """
+    def is_expired(self) -> bool:
         return timezone.now() > self.created + timedelta(hours=24)
