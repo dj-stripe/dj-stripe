@@ -1,0 +1,15 @@
+{
+    "id": "txr_fakefakefakefakefake0002",
+    "object": "tax_rate",
+    "active": true,
+    "created": 1570436740,
+    "description": "Example2 Sales Tax",
+    "display_name": "Sales tax",
+    "inclusive": false,
+    "jurisdiction": "Example2",
+    "livemode": false,
+    "metadata": {
+        "djstripe_test_fake_id": "txr_fakefakefakefakefake0002"
+    },
+    "percentage": 4.25
+}

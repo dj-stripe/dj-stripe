@@ -6,7 +6,7 @@ Each model is tied closely to its corresponding object in the stripe dashboard.
 Fields that are not implemented for each model have a short reason behind the decision
 in the docstring for each model.
 
-Last Updated 2018-05-24
+Last Updated 2019-12-21
 
 
 Core Resources
@@ -53,11 +53,13 @@ Customer
 .. automethod:: djstripe.models.Customer.get_or_create
 .. autoattribute:: djstripe.models.Customer.legacy_cards
 .. autoattribute:: djstripe.models.Customer.credits
+.. autoattribute:: djstripe.models.Customer.customer_payment_methods
 .. autoattribute:: djstripe.models.Customer.pending_charges
 .. automethod:: djstripe.models.Customer.subscribe
 .. automethod:: djstripe.models.Customer.charge
 .. automethod:: djstripe.models.Customer.add_invoice_item
 .. automethod:: djstripe.models.Customer.add_card
+.. automethod:: djstripe.models.Customer.add_payment_method
 .. automethod:: djstripe.models.Customer.purge
 .. automethod:: djstripe.models.Customer.has_active_subscription
 .. automethod:: djstripe.models.Customer.has_any_active_subscription
@@ -131,6 +133,19 @@ Payout
 .. automethod:: djstripe.models.Payout.sync_from_stripe_data
 
 
+PaymentIntent
+-------------
+.. autoclass:: djstripe.models.PaymentIntent
+
+
+.. automethod:: djstripe.models.PaymentIntent.api_list
+.. automethod:: djstripe.models.PaymentIntent.api_retrieve
+.. automethod:: djstripe.models.PaymentIntent.get_stripe_dashboard_url
+
+.. automethod:: djstripe.models.PaymentIntent.str_parts
+.. automethod:: djstripe.models.PaymentIntent.sync_from_stripe_data
+
+
 Product
 -------
 .. autoclass:: djstripe.models.Product
@@ -186,6 +201,20 @@ Card
 .. automethod:: djstripe.models.Card.str_parts
 .. automethod:: djstripe.models.Card.sync_from_stripe_data
 
+PaymentMethod
+-------------
+.. autoclass:: djstripe.models.PaymentMethod
+
+
+.. automethod:: djstripe.models.PaymentMethod.api_list
+.. automethod:: djstripe.models.PaymentMethod.api_retrieve
+.. automethod:: djstripe.models.PaymentMethod.get_stripe_dashboard_url
+
+.. automethod:: djstripe.models.PaymentMethod.attach
+.. automethod:: djstripe.models.PaymentMethod.detach
+
+.. automethod:: djstripe.models.PaymentMethod.str_parts
+.. automethod:: djstripe.models.PaymentMethod.sync_from_stripe_data
 
 Source
 ------
@@ -312,6 +341,18 @@ SubscriptionItem
 .. automethod:: djstripe.models.SubscriptionItem.get_stripe_dashboard_url
 
 .. automethod:: djstripe.models.SubscriptionItem.sync_from_stripe_data
+
+
+TaxRate
+-------
+.. autoclass:: djstripe.models.TaxRate
+
+
+.. automethod:: djstripe.models.TaxRate.api_list
+.. automethod:: djstripe.models.TaxRate.api_retrieve
+.. automethod:: djstripe.models.TaxRate.get_stripe_dashboard_url
+
+.. automethod:: djstripe.models.TaxRate.sync_from_stripe_data
 
 
 UpcomingInvoice

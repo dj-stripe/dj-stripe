@@ -916,8 +916,8 @@ class Customer(StripeModel):
         :param payment_method: PaymentMethod to be attached to the customer
         :type payment_method: str, PaymentMethod
         :param set_default: If true, this will be set as the default_payment_method
-        :type: bool
-        :return:
+        :type set_default: bool
+        :rtype: PaymentMethod
         """
         from .payment_methods import PaymentMethod
 
@@ -1966,6 +1966,7 @@ class Refund(StripeModel):
         on_delete=models.SET_NULL,
         related_name="failure_refunds",
         null=True,
+        blank=True,
         help_text="If the refund failed, this balance transaction describes the "
         "adjustment made on your account balance that reverses the initial "
         "balance transaction.",
@@ -1990,7 +1991,7 @@ class Refund(StripeModel):
         "for this charge.",
     )
     status = StripeEnumField(
-        enum=enums.RefundFailureReason, help_text="Status of the refund."
+        blank=True, enum=enums.RefundStatus, help_text="Status of the refund."
     )
 
     def get_stripe_dashboard_url(self):

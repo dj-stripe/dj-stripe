@@ -3,13 +3,18 @@
 History
 =======
 
+2.3.0 (unreleased)
+------------------
+
+- Dropped support for Django 2.1.
+
 2.2.0 (unreleased)
 ------------------
 
-- Changed ``JSONField`` dependency package from `jsonfield`_ to `jsonfield2`_, for Django 3 compatibility (see `Warning about safe uninstall of jsonfield on upgrade`_).
+- Changed ``JSONField`` dependency package from `jsonfield`_ to `jsonfield2`_, for Django 3 compatibility (see `Warning about safe uninstall of jsonfield on upgrade`_). Note that Django 2.1 requires jsonfield<3.1.
 - Added support for Django 3.0 (requires jsonfield2>=3.0.3).
 - Added support for python 3.8.
-- Dropped support for Django 2.1.
+- Refactored ``UpcomingInvoice``, so it's no longer a subclass of ``Invoice`` (to allow ``Invoice`` to use ``ManyToManyFields``).
 - Dropped previously-deprecated ``Account`` fields (see https://stripe.com/docs/upgrades#2019-02-19 ):
     - ``.business_name``
     - ``.business_primary_color``
@@ -32,11 +37,16 @@ History
 - Dropped previously-deprecated enum ``PaymentMethodType`` (use ``DjstripePaymentMethodType`` instead)
 - Renamed ``Invoice.billing`` to ``.collection_method`` (added deprecated property for the old name).
 - Updated ``Invoice`` model to add missing fields.
+- Added ``TaxRate`` model, and ``Invoice.default_tax_rates``, ``InvoiceItem.tax_rates``,
+  ``Invoice.total_tax_amounts``, ``Subscription.default_tax_rates``, ``SubscriptionItem.tax_rates`` (#1027).
 - Change urls.py to use the new style urls.
 - Update forward relation fields in the admin to be raw id fields.
 - Updated ``StripeQuantumCurrencyAmountField`` and ``StripeDecimalCurrencyAmountField`` to support Stripe Large Charges (#1045).
 - Update event handling so ``customer.subscription.deleted`` updates subscriptions to ``status="canceled"`` instead of
   deleting it from our database,  to match Stripe's behaviour (#599).
+- Added missing ``Refund.reason`` value, increases field width (#1075).
+- Fixed ``Refund.status`` definition, reduces field width (#1076).
+- Deprecated non-standard ``Invoice.status`` (renamed to ``Invoice.legacy_status``) to make way for the Stripe field (preparation for #1020).
 
 Warning about safe uninstall of jsonfield on upgrade
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

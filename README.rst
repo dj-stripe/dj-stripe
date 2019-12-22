@@ -1,7 +1,7 @@
 dj-stripe
 =========
 
-.. image:: https://travis-ci.org/dj-stripe/dj-stripe.png
+.. image:: https://travis-ci.org/dj-stripe/dj-stripe.svg?branch=master
    :alt: Build Status
    :target: https://travis-ci.org/dj-stripe/dj-stripe
 

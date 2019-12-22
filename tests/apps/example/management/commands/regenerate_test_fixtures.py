@@ -135,6 +135,7 @@ class Command(BaseCommand):
                 "start_date",
                 "status",
             ],
+            djstripe.models.TaxRate: ["id"],
         }  # type: Dict[Type[djstripe.models.StripeModel], List[str]]
 
         """
@@ -192,6 +193,10 @@ class Command(BaseCommand):
             djstripe.models.Source: [tests.FAKE_SOURCE],
             djstripe.models.Product: [tests.FAKE_PRODUCT],
             djstripe.models.Plan: [tests.FAKE_PLAN, tests.FAKE_PLAN_II],
+            djstripe.models.TaxRate: [
+                tests.FAKE_TAX_RATE_EXAMPLE_1_VAT,
+                tests.FAKE_TAX_RATE_EXAMPLE_2_SALES,
+            ],
             djstripe.models.Subscription: [
                 tests.FAKE_SUBSCRIPTION,
                 tests.FAKE_SUBSCRIPTION_II,
@@ -303,6 +308,9 @@ class Command(BaseCommand):
 
             for subscription in customer["subscriptions"]["data"]:
                 self.update_fake_id_map(subscription)
+
+        for tax_rate in djstripe.models.TaxRate.api_list():
+            self.update_fake_id_map(tax_rate)
 
     def update_fake_id_map(self, obj):
         fake_id = self.get_fake_id(obj)
@@ -716,7 +724,7 @@ class Command(BaseCommand):
         return fixture_path
 
     def pre_process_subscription(self, create_obj):
-        # flatten plan/items on create
+        # flatten plan/items/tax rates on create
 
         items = create_obj.get("items", {}).get("data", [])
 
@@ -745,6 +753,13 @@ class Command(BaseCommand):
                 create_item["plan"] = djstripe.models.StripeModel._id_from_data(
                     create_item["plan"]
                 )
+
+                if create_item.get("tax_rates", []):
+                    create_item["tax_rates"] = [
+                        djstripe.models.StripeModel._id_from_data(t)
+                        for t in create_item["tax_rates"]
+                    ]
+
                 create_items.append(create_item)
 
             create_obj["items"] = create_items
@@ -754,6 +769,15 @@ class Command(BaseCommand):
             create_obj["plan"] = djstripe.models.StripeModel._id_from_data(
                 create_obj["plan"]
             )
+
+        if create_obj.get("default_tax_rates", []):
+            create_obj["default_tax_rates"] = [
+                djstripe.models.StripeModel._id_from_data(t)
+                for t in create_obj["default_tax_rates"]
+            ]
+
+            # don't send both default_tax_rates and tax_percent
+            create_obj.pop("tax_percent", None)
 
         return create_obj
 
