@@ -101,8 +101,7 @@ class EventTest(TestCase):
         mock_objects.filter.return_value.first.assert_called_once_with()
         # Make sure the webhook actions and event object creation were not performed.
         mock_atomic.return_value.__enter__.assert_not_called()
-        # Using assert_not_called() doesn't work on this in Python 3.5
-        self.assertEqual(mock__create_from_stripe_object.call_count, 0)
+        mock__create_from_stripe_object.assert_not_called()
         (
             mock__create_from_stripe_object.return_value.invoke_webhook_handlers
         ).assert_not_called()

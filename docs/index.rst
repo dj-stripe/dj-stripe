@@ -5,7 +5,7 @@ Django + Stripe Made Easy
 * Designed for easy implementation of post-registration subscription forms
 * Single-unit purchases
 * Works with Django >= 2.2
-* Works with Python >= 3.5
+* Works with Python >= 3.6
 * Built-in migrations
 * Dead-Easy installation
 * Leverages the best of the 3rd party Django package ecosystem

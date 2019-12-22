@@ -21,7 +21,6 @@ from . import (
     FAKE_EVENT_TEST_CHARGE_SUCCEEDED,
     FAKE_EVENT_TRANSFER_CREATED,
     FAKE_TRANSFER,
-    IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 )
 
@@ -129,8 +128,7 @@ class TestWebhook(TestCase):
     @patch(
         "stripe.WebhookSignature.verify_header",
         return_value=True,
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED
-        and IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch(
         "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
@@ -138,7 +136,7 @@ class TestWebhook(TestCase):
     @patch(
         "stripe.Event.retrieve",
         return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED),
-        autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_webhook_verify_signature_pass(
         self, event_retrieve_mock, transfer_retrieve_mock, verify_header_mock
@@ -165,7 +163,7 @@ class TestWebhook(TestCase):
     @patch(
         "stripe.Event.retrieve",
         return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED),
-        autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_webhook_no_validation_pass(
         self, event_retrieve_mock, transfer_retrieve_mock, verify_header_mock

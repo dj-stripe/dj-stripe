@@ -33,10 +33,6 @@ FIXTURE_DIR_PATH = Path(__file__).parent.joinpath("fixtures")
 # see https://bugs.python.org/issue23078
 IS_STATICMETHOD_AUTOSPEC_SUPPORTED = sys.version_info >= (3, 7, 4)
 
-# Don't try and use autospec=True with assert_called etc on py3.5
-# see https://bugs.python.org/issue28380
-IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED = sys.version_info >= (3, 6)
-
 
 class AssertStripeFksMixin:
     def assert_fks(self, obj, expected_blank_fks, processed_stripe_ids=None):
