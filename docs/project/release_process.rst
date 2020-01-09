@@ -18,7 +18,7 @@ If there's more than one unreleased migration on master consider squashing them 
 immediately before tagging the new release:
 
 * Create a new squashed migration with ``./manage.py squashmigrations`` (only squash migrations that have never been in a tagged release)
-* Commit the squashed migration on master with a commit message like "Squash migrations" (this will allow users who running master to safely upgrade)
+* Commit the squashed migration on master with a commit message like "Squash x.y.0dev migrations" (this will allow users who running master to safely upgrade, see note below about rc package)
 * Then transition the squashed migration to a normal migration as per Django:
 	* Delete all the migration files it replaces
 	* Update all migrations that depend on the deleted migrations to depend on the squashed migration instead
@@ -27,6 +27,21 @@ immediately before tagging the new release:
 * Then do the normal release process - bump version as another commit and tag the release
 
 See https://docs.djangoproject.com/en/dev/topics/migrations/#migration-squashing
+
+Tag + package squashed migrations as rc package (optional)
+----------------------------------------------------------
+
+As a convenience to users who are running master, an rc version can be created to
+package the squashed migration.
+
+To do this, immediately after the "Squash x.y.0dev migrations" commit, follow the
+steps below but with a x.y.0rc0 version to tag and package a rc version.
+
+Users who have been using the x.y.0dev code from master can then run the squashed
+migrations migrations before upgrading to >=x.y.0.
+
+The simplest way to do this is to ``pip install dj-stripe==x.y.0rc0`` and migrate,
+or alternatively check out the ``x.y.0rc0`` git tag and migrate.
 
 Prepare changes for the release commit
 --------------------------------------
