@@ -3,7 +3,7 @@
 History
 =======
 
-2.2.0 (unreleased)
+2.2.0 (2020-01-13)
 ------------------
 
 - Changed ``JSONField`` dependency package from `jsonfield`_ to `jsonfield2`_, for Django 3 compatibility (see `Warning about safe uninstall of jsonfield on upgrade`_). Note that Django 2.1 requires jsonfield<3.1.
