@@ -10,16 +10,6 @@ import djstripe.fields
 
 class Migration(migrations.Migration):
 
-    replaces = [
-        ("djstripe", "0005_auto_20191002_1012"),
-        ("djstripe", "0006_auto_20191005_0907"),
-        ("djstripe", "0007_auto_20191107_0118"),
-        ("djstripe", "0008_auto_20191212_1434"),
-        ("djstripe", "0009_delete_upcominginvoice"),
-        ("djstripe", "0010_upcominginvoice"),
-        ("djstripe", "0011_auto_20191214_0453"),
-    ]
-
     dependencies = [
         ("djstripe", "0004_2_1"),
     ]
