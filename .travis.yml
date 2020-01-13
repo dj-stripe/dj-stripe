@@ -12,17 +12,11 @@ matrix:
 
   include:
     # Don't test postgres_native_json, mysql & sqlite vs all python versions to reduce combinations
-    - { python: "3.5", env: TOXENV=py35-django21-postgres }
     - { python: "3.5", env: TOXENV=py35-django22-postgres }
 
-    - { python: "3.6", env: TOXENV=py36-django21-postgres }
     - { python: "3.6", env: TOXENV=py36-django22-postgres }
     - { python: "3.6", env: TOXENV=py36-django30-postgres }
 
-    - { python: "3.7", env: TOXENV=py37-django21-postgres }
-    - { python: "3.7", env: TOXENV=py37-django21-postgres_native_json }
-    - { python: "3.7", env: TOXENV=py37-django21-mysql }
-    - { python: "3.7", env: TOXENV=py37-django21-sqlite }
     - { python: "3.7", env: TOXENV=py37-django22-postgres }
     - { python: "3.7", env: TOXENV=py37-django22-postgres_native_json }
     - { python: "3.7", env: TOXENV=py37-django22-mysql }
