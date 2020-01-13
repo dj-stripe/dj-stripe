@@ -6,7 +6,8 @@ History
 2.3.0 (unreleased)
 ------------------
 
-- Dropped support for Django 2.1.
+- Dropped support for Django 2.1 (#1056).
+- Dropped support for python 3.5 (#1073).
 
 2.2.0 (2020-01-13)
 ------------------
