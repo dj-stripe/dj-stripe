@@ -28,7 +28,6 @@ from . import (
     FAKE_REFUND,
     FAKE_SUBSCRIPTION,
     FAKE_TRANSFER,
-    IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
     default_account,
@@ -228,7 +227,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         "djstripe.models.Account.get_default_account",
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
-    @patch("stripe.Charge.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Charge.retrieve", autospec=True)
     @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
     )
@@ -343,7 +342,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
             deepcopy(FAKE_BALANCE_TRANSACTION_REFUND),
         ],
     )
-    @patch("stripe.Charge.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Charge.retrieve", autospec=True)
     @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
     )
@@ -437,7 +436,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
         autospec=True,
     )
-    @patch("stripe.Charge.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Charge.retrieve", autospec=True)
     @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
     )
@@ -504,9 +503,9 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.BalanceTransaction.retrieve",
         return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
-        autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
-    @patch("stripe.Charge.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Charge.retrieve", autospec=True)
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
@@ -575,7 +574,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
         autospec=True,
     )
-    @patch("stripe.Charge.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Charge.retrieve", autospec=True)
     @patch("stripe.PaymentIntent.retrieve", autospec=True)
     @patch(
         "stripe.PaymentMethod.retrieve",
@@ -637,7 +636,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
         autospec=True,
     )
-    @patch("stripe.Charge.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Charge.retrieve", autospec=True)
     @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
     )
@@ -713,7 +712,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
             - {"djstripe.Charge.transfer"},
         )
 
-    @patch("stripe.Charge.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Charge.retrieve", autospec=True)
     @patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
     @patch(
         "stripe.BalanceTransaction.retrieve",

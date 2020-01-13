@@ -25,7 +25,6 @@ from . import (
     FAKE_TAX_RATE_EXAMPLE_1_VAT,
     FAKE_TAX_RATE_EXAMPLE_2_SALES,
     FAKE_UPCOMING_INVOICE,
-    IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
     default_account,
@@ -879,11 +878,9 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     @patch(
-        "stripe.Plan.retrieve",
-        return_value=deepcopy(FAKE_PLAN),
-        autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
+        "stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True,
     )
-    @patch("stripe.Subscription.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Subscription.retrieve", autospec=True)
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
     @patch(
         "stripe.PaymentIntent.retrieve",
@@ -1223,9 +1220,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         )
 
     @patch(
-        "stripe.Plan.retrieve",
-        return_value=deepcopy(FAKE_PLAN),
-        autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED,
+        "stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True,
     )
     @patch(
         "stripe.Subscription.retrieve",
@@ -1290,7 +1285,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         )
         self.assertEqual(first_tax_amount.amount, 261)
 
-    @patch("stripe.Plan.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Plan.retrieve", autospec=True)
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
@@ -1326,7 +1321,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         self.assertIsNotNone(invoice.plan)
         self.assertEqual(FAKE_PLAN["id"], invoice.plan.id)
 
-    @patch("stripe.Plan.retrieve", autospec=IS_ASSERT_CALLED_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Plan.retrieve", autospec=True)
     @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
