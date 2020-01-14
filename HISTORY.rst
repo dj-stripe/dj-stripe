@@ -3,6 +3,13 @@
 History
 =======
 
+2.2.1 (2020-01-14)
+------------------
+
+This is a bugfix-only version:
+
+- Fixed bad package build.
+
 2.2.0 (2020-01-13)
 ------------------
 
