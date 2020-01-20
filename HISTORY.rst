@@ -8,7 +8,7 @@ History
 
 - Dropped support for Django 2.1 (#1056).
 - Dropped support for python 3.5 (#1073).
-- Fixed handling of ``TaxRate`` events (#1094)
+- Fixed handling of ``TaxRate`` events (#1094).
 
 2.2.0 (2020-01-13)
 ------------------
