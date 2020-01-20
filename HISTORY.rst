@@ -3,6 +3,13 @@
 History
 =======
 
+2.2.2 (unreleased)
+------------------
+
+This is a bugfix-only version:
+
+- Fixed handling of ``TaxRate`` events (#1094).
+
 2.2.1 (2020-01-14)
 ------------------
 
