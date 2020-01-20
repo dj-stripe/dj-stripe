@@ -338,6 +338,62 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
             # trigger model field validation (including enum value choices check)
             invoice.full_clean()
 
+    @patch(
+        "djstripe.models.Account.get_default_account",
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
+    @patch(
+        "stripe.BalanceTransaction.retrieve",
+        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Subscription.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION),
+        autospec=True,
+    )
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+    @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    def test_invoice_status_enum(
+        self,
+        product_retrieve_mock,
+        payment_intent_retrieve_mock,
+        paymentmethod_card_retrieve_mock,
+        charge_retrieve_mock,
+        subscription_retrieve_mock,
+        balance_transaction_retrieve_mock,
+        default_account_mock,
+    ):
+        default_account_mock.return_value = self.account
+        fake_invoice = deepcopy(FAKE_INVOICE)
+
+        for status in (
+            "draft",
+            "open",
+            "paid",
+            "uncollectible",
+            "void",
+        ):
+            fake_invoice["status"] = status
+
+            invoice = Invoice.sync_from_stripe_data(fake_invoice)
+            self.assertEqual(invoice.status, status)
+
+            # trigger model field validation (including enum value choices check)
+            invoice.full_clean()
+
     @patch("stripe.Invoice.retrieve", autospec=True)
     @patch(
         "djstripe.models.Account.get_default_account",
