@@ -36,10 +36,15 @@ Requirements
 
 * Django >= 2.2
 * Python >= 3.6
-* Supports Stripe exclusively. For PayPal, see `dj-paypal <https://github.com/HearthSim/dj-paypal>`_ instead.
+* Supports Stripe exclusively. See "Similar Libraries" below for other solutions.
 * PostgreSQL engine (recommended): >= 9.4
 * MySQL engine: MariaDB >= 10.2 or MySQL >= 5.7
 
+Similar libraries
+-----------------
+
+* `dj-paypal <https://github.com/HearthSim/dj-paypal>`_ (`PayPal <https://www.paypal.com/>`_)
+* `dj-paddle <https://github.com/dj-paddle/dj-paddle>`_ (`Paddle <https://paddle.com/>`_)
 
 Quickstart
 ----------
