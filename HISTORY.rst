@@ -9,6 +9,10 @@ History
 - Dropped support for Django 2.1 (#1056).
 - Dropped support for python 3.5 (#1073).
 - Fixed handling of ``TaxRate`` events (#1094).
+- Dropped previously-deprecated ``Invoice`` fields (see https://stripe.com/docs/upgrades#2018-11-08 ):
+    - ``.closed``
+    - ``.forgiven``
+- Added ``Invoice.status`` and ``enums.InvoiceStatus`` (#1020).
 
 2.2.2 (2020-01-20)
 ------------------
