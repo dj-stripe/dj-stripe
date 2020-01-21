@@ -319,8 +319,6 @@ class InvoiceAdmin(StripeModelAdmin):
         "customer",
         "number",
         "paid",
-        "forgiven",
-        "closed",
         "period_start",
         "period_end",
         "subtotal",
@@ -330,8 +328,6 @@ class InvoiceAdmin(StripeModelAdmin):
     )
     list_filter = (
         "paid",
-        "forgiven",
-        "closed",
         "attempted",
         "created",
         "due_date",

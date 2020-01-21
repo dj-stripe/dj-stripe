@@ -274,13 +274,6 @@ class BaseInvoice(StripeModel):
         related_name="latest_%(class)s",
         help_text="The latest charge generated for this invoice, if any.",
     )
-    # deprecated, will be removed in 2.3
-    closed = models.NullBooleanField(
-        default=False,
-        help_text="Whether or not the invoice is still trying to collect payment."
-        " An invoice is closed if it's either paid or it has been marked closed. "
-        "A closed invoice will no longer attempt to collect payment.",
-    )
     collection_method = StripeEnumField(
         enum=enums.InvoiceBilling,
         null=True,
@@ -371,14 +364,6 @@ class BaseInvoice(StripeModel):
     )
     footer = models.TextField(
         max_length=5000, blank=True, help_text="Footer displayed on the invoice."
-    )
-    # deprecated, will be removed in 2.3
-    forgiven = models.NullBooleanField(
-        default=False,
-        help_text="Whether or not the invoice has been forgiven. "
-        "Forgiving an invoice instructs us to update the subscription status as "
-        "if the invoice were successfully paid. Once an invoice has been forgiven, "
-        "it cannot be unforgiven or reopened.",
     )
     hosted_invoice_url = models.TextField(
         max_length=799,
@@ -473,7 +458,13 @@ class BaseInvoice(StripeModel):
         "While most banks display this information consistently, "
         "some may display it incorrectly or not at all.",
     )
-    # TODO status
+    status = StripeEnumField(
+        default="",
+        blank=True,
+        enum=enums.InvoiceStatus,
+        help_text="The status of the invoice, one of draft, open, paid, "
+        "uncollectible, or void.",
+    )
     status_transitions = JSONField(null=True, blank=True)
     subscription = models.ForeignKey(
         "Subscription",
@@ -534,29 +525,6 @@ class BaseInvoice(StripeModel):
         return "Invoice #{number}".format(
             number=self.number or self.receipt_number or self.id
         )
-
-    @classmethod
-    def _manipulate_stripe_object_hook(cls, data):
-        data = super()._manipulate_stripe_object_hook(data)
-        # Invoice.closed and .forgiven deprecated in API 2018-11-08 -
-        # see https://stripe.com/docs/upgrades#2018-11-08
-
-        if "closed" not in data:
-            # TODO - drop this in 2.3, use auto_advance instead
-            # https://stripe.com/docs/billing/invoices/migrating-new-invoice-states#autoadvance
-            if "auto_advance" in data:
-                data["closed"] = not data["auto_advance"]
-            else:
-                data["closed"] = False
-
-        if "forgiven" not in data:
-            # TODO - drop this in 2.3, use status == "uncollectible" instead
-            if "status" in data:
-                data["forgiven"] = data["status"] == "uncollectible"
-            else:
-                data["forgiven"] = False
-
-        return data
 
     @classmethod
     def upcoming(
@@ -653,9 +621,13 @@ class BaseInvoice(StripeModel):
         )
 
     def retry(self):
-        """ Retry payment on this invoice if it isn't paid, closed, or forgiven."""
+        """ Retry payment on this invoice if it isn't paid or uncollectible."""
 
-        if not self.paid and not self.forgiven and not self.closed:
+        if (
+            self.status != enums.InvoiceStatus.paid
+            and self.status != enums.InvoiceStatus.uncollectible
+            and self.auto_advance
+        ):
             stripe_invoice = self.api_retrieve()
             updated_stripe_invoice = (
                 stripe_invoice.pay()
@@ -663,37 +635,6 @@ class BaseInvoice(StripeModel):
             type(self).sync_from_stripe_data(updated_stripe_invoice)
             return True
         return False
-
-    STATUS_PAID = "Paid"
-    STATUS_FORGIVEN = "Forgiven"
-    STATUS_CLOSED = "Closed"
-    STATUS_OPEN = "Open"
-
-    @property
-    def status(self):
-        warnings.warn(
-            "Invoice.status will be redefined in djstripe 2.3, use "
-            "Invoice.legacy_status to keep the old values",
-            DeprecationWarning,
-        )
-
-        return self.legacy_status
-
-    @property
-    def legacy_status(self):
-        """
-        Attempts to label this invoice with a status.
-        Note that an invoice can be more than one of the choices.
-        We just set a priority on which status appears.
-        """
-
-        if self.paid:
-            return self.STATUS_PAID
-        if self.forgiven:
-            return self.STATUS_FORGIVEN
-        if self.closed:
-            return self.STATUS_CLOSED
-        return self.STATUS_OPEN
 
     @property
     def billing(self):

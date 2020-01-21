@@ -261,7 +261,6 @@ Invoice
 
 .. automethod:: djstripe.models.Invoice.upcoming
 .. automethod:: djstripe.models.Invoice.retry
-.. autoattribute:: djstripe.models.Invoice.status
 .. autoattribute:: djstripe.models.Invoice.plan
 
 .. automethod:: djstripe.models.Invoice.str_parts

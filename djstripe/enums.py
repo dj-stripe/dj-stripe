@@ -330,6 +330,14 @@ class InvoiceCollectionMethod(Enum):
 InvoiceBilling = InvoiceCollectionMethod
 
 
+class InvoiceStatus(Enum):
+    draft = _("Draft")
+    open = _("Open")
+    paid = _("Paid")
+    uncollectible = _("Uncollectible")
+    void = _("Void")
+
+
 class IntentUsage(Enum):
     on_session = _("On session")
     off_session = _("Off session")

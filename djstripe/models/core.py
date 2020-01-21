@@ -1117,7 +1117,7 @@ class Customer(StripeModel):
         """ Attempt to retry collecting payment on the customer's unpaid invoices."""
 
         self._sync_invoices()
-        for invoice in self.invoices.filter(paid=False, closed=False):
+        for invoice in self.invoices.filter(auto_advance=True).exclude(status="paid"):
             try:
                 invoice.retry()  # Always retry unpaid invoices
             except InvalidRequestError as exc:
