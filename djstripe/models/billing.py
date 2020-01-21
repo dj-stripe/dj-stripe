@@ -1392,7 +1392,7 @@ class Subscription(StripeModel):
         help_text="The quantity applied to this subscription. This value will be "
         "`null` for multi-plan subscriptions",
     )
-    # TODO: schedule (implement model SubscriptionSchedule)
+    # TODO: schedule (implement model SubscriptionSchedule, see #899)
     # TODO: rename start to start_date? or deprecate?
     start = StripeDateTimeField(
         help_text="Date of the last substantial change to "
