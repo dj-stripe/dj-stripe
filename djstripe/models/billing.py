@@ -1660,6 +1660,7 @@ class Subscription(StripeModel):
 
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
+        # TODO: Remove in 2.4
         data["legacy_tax_percent"] = data["tax_percent"]
 
         return data
