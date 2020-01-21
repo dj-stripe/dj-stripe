@@ -721,6 +721,7 @@ class Invoice(BaseInvoice):
     default_source = PaymentMethodForeignKey(
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
         related_name="invoices",
         help_text="ID of the default payment source for the invoice. "
         "It must belong to the customer associated with the invoice and be "
@@ -1313,11 +1314,12 @@ class Subscription(StripeModel):
         help_text="ID of the default payment method for the subscription. "
         "It must belong to the customer associated with the subscription. "
         "If not set, invoices will use the default payment method in the "
-        "customer’s invoice settings."
+        "customer’s invoice settings.",
     )
     default_source = PaymentMethodForeignKey(
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
         related_name="subscriptions",
         help_text="ID of the default payment source for the subscription. "
         "It must belong to the customer associated with the subscription "
@@ -1349,14 +1351,14 @@ class Subscription(StripeModel):
         blank=True,
         help_text="Specifies the approximate timestamp on which any pending "
         "invoice items will be billed according to the schedule provided at "
-        "pending_invoice_item_interval."
+        "pending_invoice_item_interval.",
     )
     pending_invoice_item_interval = JSONField(
         null=True,
         blank=True,
         help_text="Specifies an interval for how often to bill for any "
         "pending invoice items. It is analogous to calling Create an invoice "
-        "for the given subscription at the specified interval."
+        "for the given subscription at the specified interval.",
     )
     pending_setup_intent = models.ForeignKey(
         "SetupIntent",
@@ -1419,7 +1421,6 @@ class Subscription(StripeModel):
         )
         return self.legacy_tax_percent
 
-    # XXX: Can I do like this? How will assign work?
     legacy_tax_percent = StripePercentField(
         null=True,
         blank=True,
@@ -1656,6 +1657,12 @@ class Subscription(StripeModel):
             return False
 
         return True
+
+    @classmethod
+    def _manipulate_stripe_object_hook(cls, data):
+        data["legacy_tax_percent"] = data["tax_percent"]
+
+        return data
 
     def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
         super()._attach_objects_post_save_hook(

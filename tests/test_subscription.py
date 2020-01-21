@@ -42,6 +42,8 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.default_expected_blank_fks = {
             "djstripe.Customer.coupon",
             "djstripe.Customer.default_payment_method",
+            "djstripe.Subscription.default_payment_method",
+            "djstripe.Subscription.default_source",
             "djstripe.Subscription.pending_setup_intent",
         }
 
@@ -340,11 +342,11 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         subscription_retrieve_mock.return_value = subscription_fake
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
 
-        self.assertEqual(Decimal(20.0), subscription.tax_percent)
+        self.assertEqual(Decimal(20.0), subscription.legacy_tax_percent)
 
         new_subscription = subscription.update(tax_percent=Decimal(0.0))
 
-        self.assertEqual(Decimal(0.0), new_subscription.tax_percent)
+        self.assertEqual(Decimal(0.0), new_subscription.legacy_tax_percent)
 
         self.assert_fks(
             subscription, expected_blank_fks=self.default_expected_blank_fks
