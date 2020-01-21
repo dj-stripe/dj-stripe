@@ -28,7 +28,6 @@ class Migration(migrations.Migration):
             field=djstripe.fields.JSONField(
                 blank=True,
                 help_text="Describes the current discount applied to this subscription, if there is one. When billing, a discount applied to a subscription overrides a discount applied on a customer-wide basis.",
-                load_kwargs={},
                 null=True,
             ),
         ),
@@ -49,7 +48,6 @@ class Migration(migrations.Migration):
             name="discount",
             field=djstripe.fields.JSONField(
                 blank=True,
-                load_kwargs={},
                 null=True,
             ),
         ),
@@ -68,7 +66,6 @@ class Migration(migrations.Migration):
             field=djstripe.fields.JSONField(
                 blank=True,
                 help_text="Specifies an interval for how often to bill for any pending invoice items. It is analogous to calling Create an invoice for the given subscription at the specified interval.",
-                load_kwargs={},
                 null=True,
             ),
         ),
@@ -78,7 +75,6 @@ class Migration(migrations.Migration):
             field=djstripe.fields.JSONField(
                 blank=True,
                 help_text="If specified, pending updates that will be applied to the subscription once the latest_invoice has been paid.",
-                load_kwargs={},
                 null=True,
             ),
         ),
@@ -99,7 +95,6 @@ class Migration(migrations.Migration):
             field=djstripe.fields.JSONField(
                 blank=True,
                 help_text="Describes the current discount applied to this subscription, if there is one. When billing, a discount applied to a subscription overrides a discount applied on a customer-wide basis.",
-                load_kwargs={},
                 null=True,
             ),
         ),
