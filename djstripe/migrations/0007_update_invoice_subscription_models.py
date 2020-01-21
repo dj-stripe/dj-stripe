@@ -46,10 +46,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="subscription",
             name="discount",
-            field=djstripe.fields.JSONField(
-                blank=True,
-                null=True,
-            ),
+            field=djstripe.fields.JSONField(blank=True, null=True,),
         ),
         migrations.AddField(
             model_name="subscription",
