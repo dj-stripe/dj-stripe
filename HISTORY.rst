@@ -12,6 +12,7 @@ History
 - Dropped previously-deprecated ``Invoice`` fields (see https://stripe.com/docs/upgrades#2018-11-08 ):
     - ``.closed``
     - ``.forgiven``
+    - ``.billing``
 - Added ``Invoice.status`` and ``enums.InvoiceStatus`` (#1020).
 
 2.2.2 (2020-01-20)
