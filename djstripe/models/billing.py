@@ -1393,11 +1393,16 @@ class Subscription(StripeModel):
         "`null` for multi-plan subscriptions",
     )
     # TODO: schedule (implement model SubscriptionSchedule, see #899)
-    # TODO: rename start to start_date? or deprecate?
-    start = StripeDateTimeField(
+    legacy_start = StripeDateTimeField(
         help_text="Date of the last substantial change to "
         "this subscription. For example, a change to the items array, or a change "
         "of status, will reset this timestamp."
+    )
+    start_date = StripeDateTimeField(
+        null=True,
+        blank=True,
+        help_text="Date when the subscription was first created. The date "
+        "might differ from the created date due to backdating.",
     )
     status = StripeEnumField(
         enum=enums.SubscriptionStatus, help_text="The status of this subscription."
@@ -1411,6 +1416,15 @@ class Subscription(StripeModel):
             DeprecationWarning,
         )
         return self.collection_method
+
+    @property
+    def start(self):
+        warnings.warn(
+            "Invoice.start is deprecated and this alias will be removed in "
+            "djstripe 2.4. USe Invoice.start_date instead.",
+            DeprecationWarning,
+        )
+        return self.legacy_start
 
     @property
     def tax_percent(self):
@@ -1661,7 +1675,9 @@ class Subscription(StripeModel):
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
         # TODO: Remove in 2.4
+        # XXX: Should we use data.get() instead?
         data["legacy_tax_percent"] = data["tax_percent"]
+        data["legacy_start"] = data["start"]
 
         return data
 

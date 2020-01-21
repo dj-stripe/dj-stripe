@@ -18,7 +18,7 @@ class SubscriptionManager(models.Manager):
     def started_during(self, year, month):
         """Return Subscriptions not in trial status between a certain time range."""
         return self.exclude(status="trialing").filter(
-            start__year=year, start__month=month
+            legacy_start__year=year, legacy_start__month=month
         )
 
     def active(self):

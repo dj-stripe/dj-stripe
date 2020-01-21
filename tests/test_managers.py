@@ -59,7 +59,7 @@ class SubscriptionManagerTest(TestCase):
                 current_period_start=period_start,
                 current_period_end=period_end,
                 status="active",
-                start=start,
+                legacy_start=start,
                 quantity=1,
             )
 
@@ -81,7 +81,7 @@ class SubscriptionManagerTest(TestCase):
             current_period_end=period_end,
             status="canceled",
             canceled_at=period_end,
-            start=start,
+            legacy_start=start,
             quantity=1,
         )
 
@@ -102,7 +102,7 @@ class SubscriptionManagerTest(TestCase):
             current_period_start=period_start,
             current_period_end=period_end,
             status="active",
-            start=start,
+            legacy_start=start,
             quantity=1,
         )
 
