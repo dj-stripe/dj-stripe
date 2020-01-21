@@ -12,6 +12,7 @@ from .. import enums
 from .. import settings as djstripe_settings
 from ..fields import (
     JSONField,
+    PaymentMethodForeignKey,
     StripeCurrencyCodeField,
     StripeDateTimeField,
     StripeDecimalCurrencyAmountField,
@@ -346,9 +347,15 @@ class BaseInvoice(StripeModel):
         "subscription’s default payment method, if any, or to the default payment "
         "method in the customer’s invoice settings.",
     )
-    # TODO: default_source
-    # Note: default_tax_rates is handled in the subclasses since it's a ManyToManyField
-    # TODO: discount
+    # Note: default_tax_rates is handled in the subclasses since it's a
+    # ManyToManyField, otherwise reverse accessors clash
+    discount = JSONField(
+        null=True,
+        blank=True,
+        help_text="Describes the current discount applied to this "
+        "subscription, if there is one. When billing, a discount applied to a "
+        "subscription overrides a discount applied on a customer-wide basis.",
+    )
     due_date = StripeDateTimeField(
         null=True,
         blank=True,
@@ -711,6 +718,16 @@ class Invoice(BaseInvoice):
     Stripe documentation: https://stripe.com/docs/api/python#invoices
     """
 
+    default_source = PaymentMethodForeignKey(
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="invoices",
+        help_text="ID of the default payment source for the invoice. "
+        "It must belong to the customer associated with the invoice and be "
+        "in a chargeable state. If not set, defaults to the subscription’s "
+        "default source, if any, or to the customer’s default source.",
+    )
+
     # Note:
     # Most fields are defined on BaseInvoice so they're shared with UpcomingInvoice.
     # ManyToManyFields are an exception, since UpcomingInvoice doesn't exist in the db.
@@ -747,6 +764,16 @@ class UpcomingInvoice(BaseInvoice):
     Logically it should be set abstract, but that doesn't quite work since we
     do actually want to instantiate the model and use relations.
     """
+
+    default_source = PaymentMethodForeignKey(
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="upcoming_invoices",
+        help_text="ID of the default payment source for the invoice. "
+        "It must belong to the customer associated with the invoice and be "
+        "in a chargeable state. If not set, defaults to the subscription’s "
+        "default source, if any, or to the customer’s default source.",
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1222,14 +1249,6 @@ class Subscription(StripeModel):
         "subscription invoice amount that will be transferred to the application "
         "owner's Stripe account each billing period.",
     )
-    billing = StripeEnumField(
-        enum=enums.InvoiceBilling,
-        help_text="Either `charge_automatically`, or `send_invoice`. When charging "
-        "automatically, Stripe will attempt to pay this subscription at the end of the "
-        "cycle using the default source attached to the customer. "
-        "When sending an invoice, Stripe will email your customer an invoice with "
-        "payment instructions.",
-    )
     billing_cycle_anchor = StripeDateTimeField(
         null=True,
         blank=True,
@@ -1256,6 +1275,14 @@ class Subscription(StripeModel):
         "not the end of the subscription period when the subscription is automatically "
         "moved to a canceled state.",
     )
+    collection_method = StripeEnumField(
+        enum=enums.InvoiceCollectionMethod,
+        help_text="Either `charge_automatically`, or `send_invoice`. When charging "
+        "automatically, Stripe will attempt to pay this subscription at the end of the "
+        "cycle using the default source attached to the customer. "
+        "When sending an invoice, Stripe will email your customer an invoice with "
+        "payment instructions.",
+    )
     current_period_end = StripeDateTimeField(
         help_text="End of the current period for which the subscription has been "
         "invoiced. At the end of this period, a new invoice will be created."
@@ -1277,6 +1304,26 @@ class Subscription(StripeModel):
         "subscription. This value will be `null` for subscriptions where "
         "`billing=charge_automatically`.",
     )
+    default_payment_method = models.ForeignKey(
+        "PaymentMethod",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="ID of the default payment method for the subscription. "
+        "It must belong to the customer associated with the subscription. "
+        "If not set, invoices will use the default payment method in the "
+        "customer’s invoice settings."
+    )
+    default_source = PaymentMethodForeignKey(
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="subscriptions",
+        help_text="ID of the default payment source for the subscription. "
+        "It must belong to the customer associated with the subscription "
+        "and be in a chargeable state. If not set, defaults to the customer’s "
+        "default source.",
+    )
     default_tax_rates = models.ManyToManyField(
         "TaxRate",
         # explicitly specify the joining table name as though the joining model
@@ -1288,13 +1335,28 @@ class Subscription(StripeModel):
         "that does not have tax_rates set. Invoices created will have their "
         "default_tax_rates populated from the subscription.",
     )
-    # TODO: discount
+    discount = JSONField(null=True, blank=True)
     ended_at = StripeDateTimeField(
         null=True,
         blank=True,
         help_text="If the subscription has ended (either because it was canceled or "
         "because the customer was switched to a subscription to a new plan), "
         "the date the subscription ended.",
+    )
+    # TODO: latest_invoice (issue #1067)
+    next_pending_invoice_item_invoice = StripeDateTimeField(
+        null=True,
+        blank=True,
+        help_text="Specifies the approximate timestamp on which any pending "
+        "invoice items will be billed according to the schedule provided at "
+        "pending_invoice_item_interval."
+    )
+    pending_invoice_item_interval = JSONField(
+        null=True,
+        blank=True,
+        help_text="Specifies an interval for how often to bill for any "
+        "pending invoice items. It is analogous to calling Create an invoice "
+        "for the given subscription at the specified interval."
     )
     pending_setup_intent = models.ForeignKey(
         "SetupIntent",
@@ -1306,6 +1368,12 @@ class Subscription(StripeModel):
         "when creating a subscription without immediate payment or updating a "
         "subscription’s payment method, allowing you to "
         "optimize for off-session payments.",
+    )
+    pending_update = JSONField(
+        null=True,
+        blank=True,
+        help_text="If specified, pending updates that will be applied to the "
+        "subscription once the latest_invoice has been paid.",
     )
     plan = models.ForeignKey(
         "Plan",
@@ -1322,6 +1390,8 @@ class Subscription(StripeModel):
         help_text="The quantity applied to this subscription. This value will be "
         "`null` for multi-plan subscriptions",
     )
+    # TODO: schedule (implement model SubscriptionSchedule)
+    # TODO: rename start to start_date? or deprecate?
     start = StripeDateTimeField(
         help_text="Date of the last substantial change to "
         "this subscription. For example, a change to the items array, or a change "
@@ -1330,7 +1400,27 @@ class Subscription(StripeModel):
     status = StripeEnumField(
         enum=enums.SubscriptionStatus, help_text="The status of this subscription."
     )
-    tax_percent = StripePercentField(
+
+    @property
+    def billing(self):
+        warnings.warn(
+            "Invoice.billing has been renamed to .collection_method. "
+            "This alias will be removed in djstripe 2.4",
+            DeprecationWarning,
+        )
+        return self.collection_method
+
+    @property
+    def tax_percent(self):
+        warnings.warn(
+            "Subscription.tax_percent has been deprecated and will be removed "
+            "in djstripe 2.4",
+            DeprecationWarning,
+        )
+        return self.legacy_tax_percent
+
+    # XXX: Can I do like this? How will assign work?
+    legacy_tax_percent = StripePercentField(
         null=True,
         blank=True,
         help_text="A positive decimal (with at most two decimal places) "
