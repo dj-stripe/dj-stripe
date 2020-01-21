@@ -104,9 +104,6 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         self.assertTrue(bool(invoice.account_name))
         self.assertTrue(bool(invoice.collection_method))
 
-        with self.assertWarns(DeprecationWarning):
-            self.assertEqual(invoice.billing, invoice.collection_method)
-
         self.assertEqual(invoice.default_tax_rates.count(), 1)
         self.assertEqual(
             invoice.default_tax_rates.first().id, FAKE_TAX_RATE_EXAMPLE_1_VAT["id"]

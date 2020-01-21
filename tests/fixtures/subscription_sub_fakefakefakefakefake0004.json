@@ -2,7 +2,6 @@
     "id": "sub_fakefakefakefakefake0004",
     "object": "subscription",
     "application_fee_percent": null,
-    "billing": "charge_automatically",
     "billing_cycle_anchor": 1557995182,
     "billing_thresholds": null,
     "cancel_at": null,

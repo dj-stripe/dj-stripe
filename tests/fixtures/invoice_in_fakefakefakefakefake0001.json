@@ -10,7 +10,6 @@
     "attempt_count": 1,
     "attempted": true,
     "auto_advance": false,
-    "billing": "charge_automatically",
     "billing_reason": "subscription_create",
     "charge": "ch_fakefakefakefakefake0001",
     "collection_method": "charge_automatically",

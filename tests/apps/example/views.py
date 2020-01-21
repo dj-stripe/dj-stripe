@@ -72,7 +72,7 @@ class PurchaseSubscriptionView(FormView):
         stripe_subscription = stripe.Subscription.create(
             customer=customer.id,
             items=[{"plan": plan.id}],
-            billing="charge_automatically",
+            collection_method="charge_automatically",
             # tax_percent=15,
             api_key=djstripe.settings.STRIPE_SECRET_KEY,
         )
