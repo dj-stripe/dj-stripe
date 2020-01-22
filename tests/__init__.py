@@ -768,6 +768,7 @@ FAKE_SUBSCRIPTION_METERED = SubscriptionDict(
         "plan": deepcopy(FAKE_PLAN_METERED),
         "quantity": 1,
         "start": 1439229181,
+        "start_date": 1439229181,
         "status": "active",
         "tax_percent": None,
         "trial_end": None,

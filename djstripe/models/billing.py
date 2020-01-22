@@ -1421,7 +1421,7 @@ class Subscription(StripeModel):
     def start(self):
         warnings.warn(
             "Invoice.start is deprecated and this alias will be removed in "
-            "djstripe 2.4. USe Invoice.start_date instead.",
+            "djstripe 2.4. Use Invoice.start_date instead.",
             DeprecationWarning,
         )
         return self.legacy_start
@@ -1430,7 +1430,7 @@ class Subscription(StripeModel):
     def tax_percent(self):
         warnings.warn(
             "Subscription.tax_percent has been deprecated and will be removed "
-            "in djstripe 2.4",
+            "in djstripe 2.4. Use Invoice .default_tax_rates instead.",
             DeprecationWarning,
         )
         return self.legacy_tax_percent
