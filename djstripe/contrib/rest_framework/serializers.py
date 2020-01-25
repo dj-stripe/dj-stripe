@@ -8,6 +8,7 @@
 """
 
 from rest_framework import serializers
+from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.serializers import ModelSerializer, ValidationError
 
 from djstripe.enums import SubscriptionStatus
@@ -17,24 +18,16 @@ from .mixins import AutoCustomerModelSerializerMixin
 
 
 class SubscriptionSerializer(AutoCustomerModelSerializerMixin, ModelSerializer):
-    """A serializer used for the Subscription model."""
+    """A base serializer used for the Subscription model."""
 
     class Meta:
         model = Subscription
         exclude = ["default_tax_rates"]
 
-    stripe_token = serializers.CharField(max_length=200, required=True)
     plan = serializers.CharField(max_length=50, required=True)
 
-    def create(self, validated_data: dict):
-        self.customer.add_card(validated_data.pop("stripe_token"))
-        try:
-            subscription = self.customer.subscribe(**validated_data)
-        except Exception as e:
-            msg = 'Something went wrong processing the payment: ' + str(e)
-            raise ValidationError(detail=msg)
-        else:
-            return subscription
+    def create(self, validated_data):
+        raise MethodNotAllowed('POST')
 
     def update(self, instance: Subscription, validated_data: dict):
         # We use UPDATE instead of DELETE to cancel a subscription, since
@@ -55,3 +48,22 @@ class SubscriptionSerializer(AutoCustomerModelSerializerMixin, ModelSerializer):
         Subscription.objects.filter(pk=instance.pk).update(**validated_data)
         instance.refresh_from_db()
         return instance
+
+
+class CreateSubscriptionSerializer(SubscriptionSerializer):
+    """Extend the standard SubscriptionSerializer for the case of creation,
+    which must include a stripe_token field, although it doesn't belong
+    to the model itself."""
+
+    stripe_token = serializers.CharField(max_length=200, required=True)
+
+    def create(self, validated_data: dict):
+        stripe_token = validated_data.pop("stripe_token")
+        self.customer.add_card(stripe_token)
+        try:
+            subscription = self.customer.subscribe(**validated_data)
+        except Exception as e:
+            msg = 'Something went wrong processing the payment: ' + str(e)
+            raise ValidationError(detail=msg)
+        else:
+            return subscription
