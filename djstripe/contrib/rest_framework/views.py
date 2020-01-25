@@ -12,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from ...models import Subscription
 from ...settings import subscriber_request_callback
-from .serializers import SubscriptionSerializer
+from .serializers import SubscriptionSerializer, CreateSubscriptionSerializer
 from .permissions import IsSubscriptionOwner
 from .mixins import AutoCreateCustomerMixin
 
@@ -25,7 +25,11 @@ class SubscriptionListView(AutoCreateCustomerMixin, ListCreateAPIView):
     """
 
     permission_classes = (IsAuthenticated,)
-    serializer_class = SubscriptionSerializer
+
+    def get_serializer_class(self):
+        if self.request.method.upper() == 'POST':
+            return CreateSubscriptionSerializer
+        return SubscriptionSerializer
 
     def get_queryset(self):
         """Override of the class property `queryset` to ensure the Subscriptions
