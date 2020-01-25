@@ -29,7 +29,7 @@ class RestSubscriptionTest(APITestCase):
     """
 
     def setUp(self):
-        self.url = reverse("rest_djstripe:subscription")
+        self.url_list = reverse("rest_djstripe:subscription-list")
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com", password="password"
         )
