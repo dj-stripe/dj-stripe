@@ -12,7 +12,7 @@ from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.serializers import ModelSerializer, ValidationError
 
 from djstripe.enums import SubscriptionStatus
-from djstripe.models import Subscription
+from djstripe.models import Subscription, Customer
 from djstripe.settings import CANCELLATION_AT_PERIOD_END
 from .mixins import AutoCustomerModelSerializerMixin
 
@@ -24,6 +24,17 @@ class SubscriptionSerializer(AutoCustomerModelSerializerMixin, ModelSerializer):
         model = Subscription
         exclude = ["default_tax_rates"]
 
+    # not required
+    id = serializers.CharField(required=False)
+    billing = serializers.CharField(required=False)
+    current_period_end = serializers.DateTimeField(required=False)
+    current_period_start = serializers.DateTimeField(required=False)
+    start = serializers.DateTimeField(required=False)
+    status = serializers.CharField(required=False)
+    customer = serializers.PrimaryKeyRelatedField(required=False, queryset=Customer.objects.all())
+    charge_immediately = serializers.NullBooleanField(required=False, default=True)
+
+    # required
     plan = serializers.CharField(max_length=50, required=True)
 
     def create(self, validated_data):
