@@ -20,7 +20,7 @@ class AutoCreateCustomerMixin(APIView):
         """
         result = super().dispatch(request, *args, **kwargs)
         if not request.user.is_anonymous:
-            Customer.get_or_create(subscriber=subscriber_request_callback(self.request))
+            Customer.objects.get_or_create(subscriber=subscriber_request_callback(self.request))
         return result
 
 
