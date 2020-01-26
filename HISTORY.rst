@@ -3,6 +3,13 @@
 History
 =======
 
+2.2.3 (Unreleased)
+------------------
+
+This is a bugfix-only version:
+
+- Use jsonfield2 < 3.1 to keep Django 2.1 support until we explicitly drop it.
+
 2.2.2 (2020-01-20)
 ------------------
 
