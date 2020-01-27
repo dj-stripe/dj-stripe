@@ -24,10 +24,10 @@ History
     - ``.pending_invoice_item_interval``
     - ``.pending_update``
     - ``.start_date``
-- Deprecated the following fields (#1087):
+- Deprecated the following fields - will be removed in 2.4 (#1087):
     - ``Subscription.billing`` (use ``.collection_method`` instead)
-    - ``Subscription.start`` (renamed to ``.legacy_start``)
-    - ``Subscription.tax_percent`` (renamed to ``.legacy_tax_percent``)
+    - ``Subscription.start`` (use ``.start_date`` instead)
+    - ``Subscription.tax_percent`` (use ``.default_tax_rates`` instead)
 
 2.2.2 (2020-01-20)
 ------------------

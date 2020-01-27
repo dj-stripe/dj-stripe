@@ -1393,7 +1393,8 @@ class Subscription(StripeModel):
         "`null` for multi-plan subscriptions",
     )
     # TODO: schedule (implement model SubscriptionSchedule, see #899)
-    legacy_start = StripeDateTimeField(
+    # .start is deprecated - will be removed in 2.4 - use .start_date instead
+    start = StripeDateTimeField(
         help_text="Date of the last substantial change to "
         "this subscription. For example, a change to the items array, or a change "
         "of status, will reset this timestamp."
@@ -1417,25 +1418,8 @@ class Subscription(StripeModel):
         )
         return self.collection_method
 
-    @property
-    def start(self):
-        warnings.warn(
-            "Invoice.start is deprecated and this alias will be removed in "
-            "djstripe 2.4. Use Invoice.start_date instead.",
-            DeprecationWarning,
-        )
-        return self.legacy_start
-
-    @property
-    def tax_percent(self):
-        warnings.warn(
-            "Subscription.tax_percent has been deprecated and will be removed "
-            "in djstripe 2.4. Use Invoice .default_tax_rates instead.",
-            DeprecationWarning,
-        )
-        return self.legacy_tax_percent
-
-    legacy_tax_percent = StripePercentField(
+    # deprecated - will be removed in 2.4 - use .default_tax_rates instead
+    tax_percent = StripePercentField(
         null=True,
         blank=True,
         help_text="A positive decimal (with at most two decimal places) "
@@ -1671,15 +1655,6 @@ class Subscription(StripeModel):
             return False
 
         return True
-
-    @classmethod
-    def _manipulate_stripe_object_hook(cls, data):
-        # TODO: Remove in 2.4
-        # XXX: Should we use data.get() instead?
-        data["legacy_tax_percent"] = data["tax_percent"]
-        data["legacy_start"] = data["start"]
-
-        return data
 
     def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
         super()._attach_objects_post_save_hook(
