@@ -13,6 +13,7 @@ History
     - ``.closed``
     - ``.forgiven``
 - Added ``Invoice.status`` and ``enums.InvoiceStatus`` (#1020).
+- Fixed str(Account) crash when settings or business_profile were NULL (#1104).
 
 2.2.2 (2020-01-20)
 ------------------
