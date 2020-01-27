@@ -46,7 +46,7 @@ class SubscriptionSerializer(AutoCustomerModelSerializerMixin, ModelSerializer):
 
         status = validated_data.get('status')
 
-        # It is usual ambiguity of expressing a ACTION through REST APIs which
+        # It is a usual ambiguity of expressing an ACTION through REST APIs which
         # are fundamentally based on manipulating resources.
         if status == SubscriptionStatus.canceled != instance.status:
             try:
@@ -73,6 +73,10 @@ class CreateSubscriptionSerializer(SubscriptionSerializer):
         self.customer.add_card(stripe_token)
         try:
             subscription = self.customer.subscribe(**validated_data)
+            # It is key to attach a 'stripe_token' attribute to the instance to fake
+            # a model property, and let the subsequent representation of the new instance
+            # (recursive call to .to_representation() method) succeeds.
+            subscription.stripe_token = stripe_token
         except Exception as e:
             msg = 'Something went wrong processing the payment: ' + str(e)
             raise ValidationError(detail=msg)
