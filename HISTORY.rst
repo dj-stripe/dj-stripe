@@ -12,6 +12,8 @@ History
 - Dropped previously-deprecated ``Invoice`` fields (see https://stripe.com/docs/upgrades#2018-11-08 ):
     - ``.closed``
     - ``.forgiven``
+- Added ``Invoice.status`` and ``enums.InvoiceStatus`` (#1020).
+- Fixed str(Account) crash when settings or business_profile were NULL (#1104).
 - Dropped previously-deprecated ``enums.InvoiceStatus`` (#1020).
 - Added new ``Invoice`` fields (#1020, #1087):
     - ``.discount``
