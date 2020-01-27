@@ -12,7 +12,7 @@ from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.serializers import ModelSerializer, ValidationError
 
 from djstripe.enums import SubscriptionStatus
-from djstripe.models import Subscription, Customer
+from djstripe.models import Subscription, Customer, SetupIntent
 from djstripe.settings import CANCELLATION_AT_PERIOD_END
 from .mixins import AutoCustomerModelSerializerMixin
 
@@ -24,18 +24,36 @@ class SubscriptionSerializer(AutoCustomerModelSerializerMixin, ModelSerializer):
         model = Subscription
         exclude = ["default_tax_rates"]
 
+    # required at deserialization
+    plan = serializers.CharField(max_length=50, required=True)
+
     # not required
     id = serializers.CharField(required=False)
+    application_fee_percent = serializers.DecimalField(
+        required=False, max_digits=5, decimal_places=2
+    )
     billing = serializers.CharField(required=False)
+    billing_cycle_anchor = serializers.DateTimeField(required=False)
+    cancel_at_period_end = serializers.NullBooleanField(required=False)
+    canceled_at = serializers.DateTimeField(required=False)
     current_period_end = serializers.DateTimeField(required=False)
     current_period_start = serializers.DateTimeField(required=False)
+    customer = serializers.PrimaryKeyRelatedField(
+        required=False, queryset=Customer.objects.all()
+    )
+    days_until_due = serializers.IntegerField(required=False)
+    ended_at = serializers.DateTimeField(required=False)
+    pending_setup_intent = serializers.PrimaryKeyRelatedField(
+        required=False, queryset=SetupIntent.objects.all()
+    )
+    quantity = serializers.IntegerField(required=False)
     start = serializers.DateTimeField(required=False)
     status = serializers.CharField(required=False)
-    customer = serializers.PrimaryKeyRelatedField(required=False, queryset=Customer.objects.all())
-    charge_immediately = serializers.NullBooleanField(required=False, default=True)
-
-    # required
-    plan = serializers.CharField(max_length=50, required=True)
+    tax_percent = serializers.DecimalField(
+        required=False, max_digits=5, decimal_places=2
+    )
+    trial_end = serializers.DateTimeField(required=False)
+    trial_start = serializers.DateTimeField(required=False)
 
     def create(self, validated_data):
         raise MethodNotAllowed('POST')
@@ -67,6 +85,7 @@ class CreateSubscriptionSerializer(SubscriptionSerializer):
     to the model itself."""
 
     stripe_token = serializers.CharField(max_length=200, required=True)
+    charge_immediately = serializers.NullBooleanField(required=False, default=True)
 
     def create(self, validated_data: dict):
         stripe_token = validated_data.pop("stripe_token")
