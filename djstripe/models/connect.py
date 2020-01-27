@@ -131,9 +131,11 @@ class Account(StripeModel):
         return cls._get_or_create_from_stripe_object(account_data)[0]
 
     def __str__(self):
+        settings = self.settings or {}
+        business_profile = self.business_profile or {}
         return (
-            self.settings.get("dashboard", {}).get("display_name")
-            or self.business_profile.get("name")
+            settings.get("dashboard", {}).get("display_name")
+            or business_profile.get("name")
             or super().__str__()
         )
 

@@ -156,3 +156,11 @@ def test_account__create_from_stripe_object(
         save=True,
         stripe_account=expected_stripe_account,
     )
+
+
+def test__str__null_settings_null_business_profile():
+    """Test that __str__ doesn't crash when settings and business_profile are NULL."""
+    account = Account()
+    account.settings = None
+    account.business_profile = None
+    assert str(account) == "<id=>"
