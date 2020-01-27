@@ -23,11 +23,7 @@ from djstripe.models import Customer, Plan, Subscription
 from .. import FAKE_CUSTOMER, FAKE_PLAN, FAKE_PRODUCT, FAKE_SUBSCRIPTION
 
 
-class RestSubscriptionTest(APITestCase):
-    """
-    Test the REST api for subscriptions.
-    """
-
+class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
     def setUp(self):
         self.url_list = reverse("rest_djstripe:subscription-list")
         self.user = get_user_model().objects.create_user(
@@ -36,10 +32,13 @@ class RestSubscriptionTest(APITestCase):
         self.assertTrue(self.client.login(username="pydanny", password="password"))
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
-    @patch("djstripe.models.Customer.subscribe", autospec=True)
+    # The return_value of .subscribe is mandatory because normal serialization fails
+    # on Decimal and DateTime fields: a Mock instance is provided in place
+    # because @patch and make the conversion from string impossible.
+    @patch("djstripe.models.Customer.subscribe", autospec=True, return_value=Subscription())
     @patch("djstripe.models.Customer.add_card", autospec=True)
     def test_create_subscription(self, add_card_mock, subscribe_mock):
-        """Test a POST to the SubscriptionRestView.
+        """Test a POST to the Subscription List endpoint.
 
         Should:
             - Create a Customer object
@@ -47,34 +46,35 @@ class RestSubscriptionTest(APITestCase):
             - Subcribe the Customer to a plan
         """
         data = {"plan": "test0", "stripe_token": "cake"}
-        response = self.client.post(self.url, data)
+        response = self.client.post(self.url_list, data, format='json')
         self.assertEqual(1, Customer.objects.count())
         customer = Customer.objects.get()
         add_card_mock.assert_called_once_with(customer, "cake")
         subscribe_mock.assert_called_once_with(customer, "test0", True)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        data["charge_immediately"] = None
-        self.assertEqual(response.data, data)
+        # Do not test data content in views. Values will be string representation
+        # of MagicMock of the values.
 
-    @patch("djstripe.models.Customer.subscribe", autospec=True)
+    @patch("djstripe.models.Customer.subscribe", autospec=True, return_value=Subscription())
     @patch("djstripe.models.Customer.add_card", autospec=True)
     def test_create_subscription_charge_immediately(
-        self, add_card_mock, subscribe_mock
+            self, add_card_mock, subscribe_mock
     ):
-        """Test a POST to the SubscriptionRestView.
+        """Test a POST to the Subscription List endpoint.
 
-        Should be able to accept an charge_immediately.
+        Should be able to accept a charge_immediately.
         This will not send an invoice to the customer on subscribe.
         """
         data = {"plan": "test0", "stripe_token": "cake", "charge_immediately": False}
-        response = self.client.post(self.url, data)
+        response = self.client.post(self.url_list, data)
         self.assertEqual(1, Customer.objects.count())
         customer = Customer.objects.get()
         subscribe_mock.assert_called_once_with(customer, "test0", False)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data, data)
+        # Do not test data content in views. Values will be string representation
+        # of MagicMock of the values.
 
-    @patch("djstripe.models.Customer.subscribe", autospec=True)
+    @patch("djstripe.models.Customer.subscribe", autospec=True, return_value=Subscription())
     @patch("djstripe.models.Customer.add_card", autospec=True)
     def test_create_subscription_exception(self, add_card_mock, subscribe_mock):
         """Test a POST to the SubscriptionRestView.
@@ -83,7 +83,7 @@ class RestSubscriptionTest(APITestCase):
         """
         subscribe_mock.side_effect = Exception
         data = {"plan": "test0", "stripe_token": "cake"}
-        response = self.client.post(self.url, data)
+        response = self.client.post(self.url_list, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_subscription_incorrect_data(self):
@@ -92,7 +92,7 @@ class RestSubscriptionTest(APITestCase):
         Should return a 400 when a the serializer is invalid.
         """
         data = {"foo": "bar"}
-        response = self.client.post(self.url, data)
+        response = self.client.post(self.url_list, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get_subscription(self):
@@ -101,14 +101,14 @@ class RestSubscriptionTest(APITestCase):
         Should return the correct data.
         """
         with patch(
-            "stripe.Product.retrieve",
-            return_value=deepcopy(FAKE_PRODUCT),
-            autospec=True,
+                "stripe.Product.retrieve",
+                return_value=deepcopy(FAKE_PRODUCT),
+                autospec=True,
         ):
             plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
 
-        response = self.client.get(self.url)
+        response = self.client.get(self.url_list)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["plan"], plan.djstripe_id)
         self.assertEqual(response.data["status"], subscription.status)
@@ -134,9 +134,9 @@ class RestSubscriptionTest(APITestCase):
         fake_canceled_subscription = deepcopy(FAKE_SUBSCRIPTION)
 
         with patch(
-            "stripe.Product.retrieve",
-            return_value=deepcopy(FAKE_PRODUCT),
-            autospec=True,
+                "stripe.Product.retrieve",
+                return_value=deepcopy(FAKE_PRODUCT),
+                autospec=True,
         ):
             Subscription.sync_from_stripe_data(fake_canceled_subscription)
 
@@ -145,7 +145,7 @@ class RestSubscriptionTest(APITestCase):
         self.assertEqual(1, Subscription.objects.count())
         self.assertEqual(Subscription.objects.first().status, SubscriptionStatus.active)
 
-        response = self.client.delete(self.url)
+        response = self.client.delete(self.url_list)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         # Cancelled means flagged as canceled, so it should still be there
@@ -165,19 +165,19 @@ class RestSubscriptionTest(APITestCase):
 
         Should return a 400 when an exception is raised.
         """
-        response = self.client.delete(self.url)
+        response = self.client.delete(self.url_list)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-class RestSubscriptionNotLoggedInTest(APITestCase):
+class SubscriptionListCreateAPIViewAnonymousTestCase(APITestCase):
     """
     Test the exceptions thrown by the subscription rest views.
     """
 
     def setUp(self):
-        self.url = reverse("rest_djstripe:subscription")
+        self.url_list = reverse("rest_djstripe:subscription-list")
 
     def test_create_subscription_not_logged_in(self):
         data = {"plan": "test0", "stripe_token": "cake"}
-        response = self.client.post(self.url, data)
+        response = self.client.post(self.url_list, data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
