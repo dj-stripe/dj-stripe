@@ -12,7 +12,7 @@ from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.serializers import ModelSerializer, ValidationError
 
 from djstripe.enums import SubscriptionStatus
-from djstripe.models import Subscription, Customer, SetupIntent
+from djstripe.models import Subscription, Customer, SetupIntent, Plan
 from djstripe.settings import CANCELLATION_AT_PERIOD_END
 from .mixins import AutoCustomerModelSerializerMixin
 
@@ -25,7 +25,9 @@ class SubscriptionSerializer(AutoCustomerModelSerializerMixin, ModelSerializer):
         exclude = ["default_tax_rates"]
 
     # required at deserialization
-    plan = serializers.CharField(max_length=50, required=True)
+    plan = serializers.PrimaryKeyRelatedField(
+        required=True, queryset=Plan.objects.all()
+    )
 
     # not required
     id = serializers.CharField(required=False)
