@@ -49,11 +49,12 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
         data = {"plan": plan.djstripe_id, "stripe_token": "cake"}
         response = self.client.post(self.url_list, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
         self.assertEqual(1, Customer.objects.count())
         customer = Customer.objects.get()
         add_card_mock.assert_called_once_with(customer, "cake")
         subscribe_mock.assert_called_once_with(customer, "test0", True)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         # Do not test data content in views. Values will be string representation
         # of MagicMock of the values.
 
