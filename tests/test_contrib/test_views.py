@@ -54,7 +54,7 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         self.assertEqual(1, Customer.objects.count())
         customer = Customer.objects.get()
         add_card_mock.assert_called_once_with(customer, "cake")
-        subscribe_mock.assert_called_once_with(customer, "test0", True)
+        subscribe_mock.assert_called_once_with(customer, plan, True)
         # Do not test data content in views. Values will be string representation
         # of MagicMock of the values.
 
