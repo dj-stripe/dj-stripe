@@ -723,7 +723,7 @@ class Invoice(BaseInvoice):
         null=True,
         blank=True,
         related_name="invoices",
-        help_text="ID of the default payment source for the invoice. "
+        help_text="The default payment source for the invoice. "
         "It must belong to the customer associated with the invoice and be "
         "in a chargeable state. If not set, defaults to the subscription’s "
         "default source, if any, or to the customer’s default source.",
@@ -770,7 +770,7 @@ class UpcomingInvoice(BaseInvoice):
         on_delete=models.SET_NULL,
         null=True,
         related_name="upcoming_invoices",
-        help_text="ID of the default payment source for the invoice. "
+        help_text="The default payment source for the invoice. "
         "It must belong to the customer associated with the invoice and be "
         "in a chargeable state. If not set, defaults to the subscription’s "
         "default source, if any, or to the customer’s default source.",
@@ -1311,7 +1311,7 @@ class Subscription(StripeModel):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="+",
-        help_text="ID of the default payment method for the subscription. "
+        help_text="The default payment method for the subscription. "
         "It must belong to the customer associated with the subscription. "
         "If not set, invoices will use the default payment method in the "
         "customer’s invoice settings.",
@@ -1321,7 +1321,7 @@ class Subscription(StripeModel):
         null=True,
         blank=True,
         related_name="subscriptions",
-        help_text="ID of the default payment source for the subscription. "
+        help_text="The default payment source for the subscription. "
         "It must belong to the customer associated with the subscription "
         "and be in a chargeable state. If not set, defaults to the customer’s "
         "default source.",

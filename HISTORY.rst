@@ -12,9 +12,13 @@ History
 - Dropped previously-deprecated ``Invoice`` fields (see https://stripe.com/docs/upgrades#2018-11-08 ):
     - ``.closed``
     - ``.forgiven``
+- Dropped previously-deprecated ``enums.InvoiceStatus`` (#1020).
+- Deprecated the following fields - will be removed in 2.4 (#1087):
+    - ``Subscription.billing`` (use ``.collection_method`` instead)
+    - ``Subscription.start`` (use ``.start_date`` instead)
+    - ``Subscription.tax_percent`` (use ``.default_tax_rates`` instead)
 - Added ``Invoice.status`` and ``enums.InvoiceStatus`` (#1020).
 - Fixed str(Account) crash when settings or business_profile were NULL (#1104).
-- Dropped previously-deprecated ``enums.InvoiceStatus`` (#1020).
 - Added new ``Invoice`` fields (#1020, #1087):
     - ``.discount``
     - ``.default_source``
@@ -26,10 +30,6 @@ History
     - ``.pending_invoice_item_interval``
     - ``.pending_update``
     - ``.start_date``
-- Deprecated the following fields - will be removed in 2.4 (#1087):
-    - ``Subscription.billing`` (use ``.collection_method`` instead)
-    - ``Subscription.start`` (use ``.start_date`` instead)
-    - ``Subscription.tax_percent`` (use ``.default_tax_rates`` instead)
 
 2.2.2 (2020-01-20)
 ------------------

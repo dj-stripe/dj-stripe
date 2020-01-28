@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
             name="default_payment_method",
             field=models.ForeignKey(
                 blank=True,
-                help_text="ID of the default payment method for the subscription. It must belong to the customer associated with the subscription. If not set, invoices will use the default payment method in the customer’s invoice settings.",
+                help_text="The default payment method for the subscription. It must belong to the customer associated with the subscription. If not set, invoices will use the default payment method in the customer’s invoice settings.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="+",
@@ -83,7 +83,7 @@ class Migration(migrations.Migration):
             model_name="upcominginvoice",
             name="default_source",
             field=djstripe.fields.PaymentMethodForeignKey(
-                help_text="ID of the default payment source for the invoice. It must belong to the customer associated with the invoice and be in a chargeable state. If not set, defaults to the subscription’s default source, if any, or to the customer’s default source.",
+                help_text="The default payment source for the invoice. It must belong to the customer associated with the invoice and be in a chargeable state. If not set, defaults to the subscription’s default source, if any, or to the customer’s default source.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="upcoming_invoices",
@@ -104,7 +104,7 @@ class Migration(migrations.Migration):
             name="default_source",
             field=djstripe.fields.PaymentMethodForeignKey(
                 blank=True,
-                help_text="ID of the default payment source for the invoice. It must belong to the customer associated with the invoice and be in a chargeable state. If not set, defaults to the subscription’s default source, if any, or to the customer’s default source.",
+                help_text="The default payment source for the invoice. It must belong to the customer associated with the invoice and be in a chargeable state. If not set, defaults to the subscription’s default source, if any, or to the customer’s default source.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="invoices",
@@ -116,7 +116,7 @@ class Migration(migrations.Migration):
             name="default_source",
             field=djstripe.fields.PaymentMethodForeignKey(
                 blank=True,
-                help_text="ID of the default payment source for the subscription. It must belong to the customer associated with the subscription and be in a chargeable state. If not set, defaults to the customer’s default source.",
+                help_text="The default payment source for the subscription. It must belong to the customer associated with the subscription and be in a chargeable state. If not set, defaults to the customer’s default source.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="subscriptions",
