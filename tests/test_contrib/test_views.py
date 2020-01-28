@@ -35,9 +35,10 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
     # The return_value of .subscribe is mandatory because normal serialization fails
     # on Decimal and DateTime fields: a Mock instance is provided in place
     # because @patch and make the conversion from string impossible.
+    @patch("stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT))
     @patch("djstripe.models.Customer.subscribe", autospec=True, return_value=Subscription())
     @patch("djstripe.models.Customer.add_card", autospec=True)
-    def test_create_subscription(self, add_card_mock, subscribe_mock):
+    def test_create_subscription(self, add_card_mock, subscribe_mock, retrieve_mock):
         """Test a POST to the Subscription List endpoint.
 
         Should:
@@ -45,7 +46,8 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
             - Add a card to the Customer object
             - Subcribe the Customer to a plan
         """
-        data = {"plan": "test0", "stripe_token": "cake"}
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+        data = {"plan": plan.djstripe_id, "stripe_token": "cake"}
         response = self.client.post(self.url_list, data, format='json')
         self.assertEqual(1, Customer.objects.count())
         customer = Customer.objects.get()
