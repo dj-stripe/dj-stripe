@@ -95,20 +95,17 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         response = self.client.post(self.url_list, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_get_subscription(self):
+    @patch("stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT))
+    def test_get_subscription(self, retrieve_mock):
         """Test a GET to the SubscriptionRestView.
 
         Should return the correct data.
         """
-        with patch(
-                "stripe.Product.retrieve",
-                return_value=deepcopy(FAKE_PRODUCT),
-                autospec=True,
-        ):
-            plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
 
-        response = self.client.get(self.url_list)
+        url = reverse("rest_djstripe:subscription-detail", kwargs={'pk': subscription.pk})
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["plan"], plan.djstripe_id)
         self.assertEqual(response.data["status"], subscription.status)
