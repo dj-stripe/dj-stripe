@@ -44,4 +44,4 @@ class IsSubscriptionOwner(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         subscriber = subscriber_request_callback(request)
-        return obj.subscriber == subscriber
+        return obj.customer.subscriber == subscriber
