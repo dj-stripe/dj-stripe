@@ -581,9 +581,6 @@ class StripeModel(models.Model):
         Retrieves TaxRates for a SubscriptionItem or InvoiceItem
         :param target_cls:
         :param data:
-        :param instance:
-        :type instance: Union[djstripe.models.InvoiceItem,
-                              djstripe.models.SubscriptionItem]
         :return:
         """
         tax_rates = []

@@ -42,6 +42,8 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.default_expected_blank_fks = {
             "djstripe.Customer.coupon",
             "djstripe.Customer.default_payment_method",
+            "djstripe.Subscription.default_payment_method",
+            "djstripe.Subscription.default_source",
             "djstripe.Subscription.pending_setup_intent",
         }
 
