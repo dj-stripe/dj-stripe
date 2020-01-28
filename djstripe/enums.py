@@ -326,10 +326,6 @@ class InvoiceCollectionMethod(Enum):
     send_invoice = _("Send invoice")
 
 
-# deprecated, will be removed in 2.3
-InvoiceBilling = InvoiceCollectionMethod
-
-
 class InvoiceStatus(Enum):
     draft = _("Draft")
     open = _("Open")

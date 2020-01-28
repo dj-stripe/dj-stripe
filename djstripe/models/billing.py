@@ -1,4 +1,3 @@
-import warnings
 from copy import deepcopy
 
 import stripe
@@ -275,7 +274,7 @@ class BaseInvoice(StripeModel):
         help_text="The latest charge generated for this invoice, if any.",
     )
     collection_method = StripeEnumField(
-        enum=enums.InvoiceBilling,
+        enum=enums.InvoiceCollectionMethod,
         null=True,
         help_text=(
             "When charging automatically, Stripe will attempt to pay this invoice "
@@ -635,15 +634,6 @@ class BaseInvoice(StripeModel):
             type(self).sync_from_stripe_data(updated_stripe_invoice)
             return True
         return False
-
-    @property
-    def billing(self):
-        warnings.warn(
-            "Invoice.billing has been renamed to .collection_method. "
-            "This alias will be removed in djstripe 2.3",
-            DeprecationWarning,
-        )
-        return self.collection_method
 
     def get_stripe_dashboard_url(self):
         return self.customer.get_stripe_dashboard_url()
@@ -1223,7 +1213,7 @@ class Subscription(StripeModel):
         "owner's Stripe account each billing period.",
     )
     billing = StripeEnumField(
-        enum=enums.InvoiceBilling,
+        enum=enums.InvoiceCollectionMethod,
         help_text="Either `charge_automatically`, or `send_invoice`. When charging "
         "automatically, Stripe will attempt to pay this subscription at the end of the "
         "cycle using the default source attached to the customer. "
