@@ -58,22 +58,25 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         # Do not test data content in views. Values will be string representation
         # of MagicMock of the values.
 
+    @patch("stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT))
     @patch("djstripe.models.Customer.subscribe", autospec=True, return_value=Subscription())
     @patch("djstripe.models.Customer.add_card", autospec=True)
     def test_create_subscription_charge_immediately(
-            self, add_card_mock, subscribe_mock
+            self, add_card_mock, subscribe_mock, retrieve_mock
     ):
         """Test a POST to the Subscription List endpoint.
 
         Should be able to accept a charge_immediately.
         This will not send an invoice to the customer on subscribe.
         """
-        data = {"plan": "test0", "stripe_token": "cake", "charge_immediately": False}
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+        data = {"plan": plan.djstripe_id, "stripe_token": "cake", "charge_immediately": False}
         response = self.client.post(self.url_list, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
         self.assertEqual(1, Customer.objects.count())
         customer = Customer.objects.get()
-        subscribe_mock.assert_called_once_with(customer, "test0", False)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        subscribe_mock.assert_called_once_with(customer, plan, False)
         # Do not test data content in views. Values will be string representation
         # of MagicMock of the values.
 
