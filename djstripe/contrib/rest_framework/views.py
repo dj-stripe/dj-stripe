@@ -39,7 +39,8 @@ class SubscriptionListView(AutoCreateCustomerMixin, ListCreateAPIView):
         # nor that of a _Subscription_ endpoint to check for an existing customer,
         # or create one if necessary. See AutoCreateCustomerMixin.
         subscriber = subscriber_request_callback(self.request)
-        return Subscription.objects.filter(subscriber=subscriber)
+        return Subscription.objects.filter(customer__subscriber=subscriber)
+
 
 
 class SubscriptionDetailView(RetrieveUpdateAPIView):
