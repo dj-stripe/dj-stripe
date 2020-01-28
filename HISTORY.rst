@@ -12,6 +12,7 @@ History
 - Dropped previously-deprecated ``Invoice`` fields (see https://stripe.com/docs/upgrades#2018-11-08 ):
     - ``.closed``
     - ``.forgiven``
+    - ``.billing`` (renamed to ``.collection_method``)
 - Dropped previously-deprecated ``enums.InvoiceStatus`` (#1020).
 - Deprecated the following fields - will be removed in 2.4 (#1087):
     - ``Subscription.billing`` (use ``.collection_method`` instead)
