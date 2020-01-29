@@ -7,16 +7,23 @@
 
 """
 
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, ListAPIView, RetrieveAPIView
+from rest_framework.generics import (
+    ListAPIView,
+    ListCreateAPIView,
+    RetrieveAPIView,
+    RetrieveUpdateAPIView,
+)
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
-from ...models import Subscription, Plan
+from ...models import Plan, Subscription
 from ...settings import subscriber_request_callback
-from .serializers import (
-    SubscriptionSerializer, CreateSubscriptionSerializer, PlanSerializer
-)
-from .permissions import IsSubscriptionOwner
 from .mixins import AutoCreateCustomerMixin
+from .permissions import IsSubscriptionOwner
+from .serializers import (
+    CreateSubscriptionSerializer,
+    PlanSerializer,
+    SubscriptionSerializer,
+)
 
 
 class SubscriptionListView(AutoCreateCustomerMixin, ListCreateAPIView):
@@ -29,7 +36,7 @@ class SubscriptionListView(AutoCreateCustomerMixin, ListCreateAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_serializer_class(self):
-        if self.request.method.upper() == 'POST':
+        if self.request.method.upper() == "POST":
             return CreateSubscriptionSerializer
         return SubscriptionSerializer
 

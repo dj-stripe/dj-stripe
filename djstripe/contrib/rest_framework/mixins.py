@@ -1,8 +1,8 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework.views import APIView
 
-from ...settings import subscriber_request_callback, STRIPE_LIVE_MODE
 from ...models import Customer
+from ...settings import STRIPE_LIVE_MODE, subscriber_request_callback
 
 
 class AutoCreateCustomerMixin(APIView):
@@ -20,7 +20,9 @@ class AutoCreateCustomerMixin(APIView):
         """
         result = super().dispatch(request, *args, **kwargs)
         if not request.user.is_anonymous:
-            Customer.objects.get_or_create(subscriber=subscriber_request_callback(self.request))
+            Customer.objects.get_or_create(
+                subscriber=subscriber_request_callback(self.request)
+            )
         return result
 
 
@@ -31,10 +33,11 @@ class AutoCustomerModelSerializerMixin(ModelSerializer):
 
     @property
     def customer(self):
-        subscriber = subscriber_request_callback(self.context.get('request'))
+        subscriber = subscriber_request_callback(self.context.get("request"))
         try:
-            customer = Customer.objects.get(subscriber=subscriber,
-                                            livemode=STRIPE_LIVE_MODE)
+            customer = Customer.objects.get(
+                subscriber=subscriber, livemode=STRIPE_LIVE_MODE
+            )
         except Customer.DoesNotExist:
             return None
         else:

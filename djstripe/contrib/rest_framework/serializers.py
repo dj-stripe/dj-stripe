@@ -12,8 +12,9 @@ from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.serializers import ModelSerializer, ValidationError
 
 from djstripe.enums import SubscriptionStatus
-from djstripe.models import Subscription, Customer, SetupIntent, Plan
+from djstripe.models import Customer, Plan, SetupIntent, Subscription
 from djstripe.settings import CANCELLATION_AT_PERIOD_END
+
 from .mixins import AutoCustomerModelSerializerMixin
 
 
@@ -56,13 +57,13 @@ class SubscriptionSerializer(AutoCustomerModelSerializerMixin, ModelSerializer):
     trial_start = serializers.DateTimeField(required=False)
 
     def create(self, validated_data):
-        raise MethodNotAllowed('POST')
+        raise MethodNotAllowed("POST")
 
     def update(self, instance: Subscription, validated_data: dict):
         # We use UPDATE instead of DELETE to cancel a subscription, since
         # cancelling means change the internal state, but not remove it from the DB.
 
-        status = validated_data.get('status')
+        status = validated_data.get("status")
 
         # It is a usual ambiguity of expressing an ACTION through REST APIs which
         # are fundamentally based on manipulating resources.
@@ -70,7 +71,7 @@ class SubscriptionSerializer(AutoCustomerModelSerializerMixin, ModelSerializer):
             try:
                 instance.cancel(at_period_end=CANCELLATION_AT_PERIOD_END)
             except Exception as e:
-                msg = 'Something went wrong cancelling the subscription: ' + str(e)
+                msg = "Something went wrong cancelling the subscription: " + str(e)
                 raise ValidationError(detail=msg)
 
         # Applying the update of all other fields.
@@ -102,7 +103,7 @@ class CreateSubscriptionSerializer(SubscriptionSerializer):
             # (recursive call to .to_representation() method) succeeds.
             subscription.stripe_token = stripe_token
         except Exception as e:
-            msg = 'Something went wrong processing the payment: ' + str(e)
+            msg = "Something went wrong processing the payment: " + str(e)
             raise ValidationError(detail=msg)
         else:
             return subscription
@@ -111,4 +112,4 @@ class CreateSubscriptionSerializer(SubscriptionSerializer):
 class PlanSerializer(ModelSerializer):
     class Meta:
         model = Plan
-        fields = '__all__'
+        fields = "__all__"

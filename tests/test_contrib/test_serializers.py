@@ -16,9 +16,9 @@ from django.utils import timezone
 from rest_framework.exceptions import ErrorDetail
 
 from djstripe.contrib.rest_framework.serializers import (
-    SubscriptionSerializer, CreateSubscriptionSerializer
+    CreateSubscriptionSerializer,
+    SubscriptionSerializer,
 )
-
 from djstripe.enums import SubscriptionStatus
 from djstripe.models import Plan, Subscription
 
@@ -33,9 +33,9 @@ class SubscriptionSerializerTest(TestCase):
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
         with patch(
-                "stripe.Product.retrieve",
-                return_value=deepcopy(FAKE_PRODUCT),
-                autospec=True,
+            "stripe.Product.retrieve",
+            return_value=deepcopy(FAKE_PRODUCT),
+            autospec=True,
         ):
             self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
@@ -94,9 +94,9 @@ class CreateSubscriptionSerializerTest(TestCase):
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
         with patch(
-                "stripe.Product.retrieve",
-                return_value=deepcopy(FAKE_PRODUCT),
-                autospec=True,
+            "stripe.Product.retrieve",
+            return_value=deepcopy(FAKE_PRODUCT),
+            autospec=True,
         ):
             self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
@@ -138,8 +138,8 @@ class CreateSubscriptionSerializerTest(TestCase):
         self.assertFalse(serializer.is_valid())
         self.assertEqual(serializer.validated_data, {})
         self.assertEqual(
-            serializer.errors.get('stripe_token'),
-            [ErrorDetail(string='This field is required.', code='required')]
+            serializer.errors.get("stripe_token"),
+            [ErrorDetail(string="This field is required.", code="required")],
         )
 
     @patch(
@@ -152,6 +152,6 @@ class CreateSubscriptionSerializerTest(TestCase):
         self.assertFalse(serializer.is_valid())
         self.assertEqual(serializer.validated_data, {})
         self.assertEqual(
-            serializer.errors.get('plan'),
-            [ErrorDetail(string='This field is required.', code='required')]
+            serializer.errors.get("plan"),
+            [ErrorDetail(string="This field is required.", code="required")],
         )

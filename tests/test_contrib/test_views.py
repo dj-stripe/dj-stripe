@@ -35,8 +35,12 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
     # The return_value of .subscribe is mandatory because normal serialization fails
     # on Decimal and DateTime fields: a Mock instance is provided in place
     # because @patch and make the conversion from string impossible.
-    @patch("stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT))
-    @patch("djstripe.models.Customer.subscribe", autospec=True, return_value=Subscription())
+    @patch(
+        "stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT)
+    )
+    @patch(
+        "djstripe.models.Customer.subscribe", autospec=True, return_value=Subscription()
+    )
     @patch("djstripe.models.Customer.add_card", autospec=True)
     def test_create_subscription(self, add_card_mock, subscribe_mock, retrieve_mock):
         """Test a POST to the Subscription List endpoint.
@@ -48,7 +52,7 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         """
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
         data = {"plan": plan.djstripe_id, "stripe_token": "cake"}
-        response = self.client.post(self.url_list, data, format='json')
+        response = self.client.post(self.url_list, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         self.assertEqual(1, Customer.objects.count())
@@ -58,11 +62,15 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         # Do not test data content in views. Values will be string representation
         # of MagicMock of the values.
 
-    @patch("stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT))
-    @patch("djstripe.models.Customer.subscribe", autospec=True, return_value=Subscription())
+    @patch(
+        "stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT)
+    )
+    @patch(
+        "djstripe.models.Customer.subscribe", autospec=True, return_value=Subscription()
+    )
     @patch("djstripe.models.Customer.add_card", autospec=True)
     def test_create_subscription_charge_immediately(
-            self, add_card_mock, subscribe_mock, retrieve_mock
+        self, add_card_mock, subscribe_mock, retrieve_mock
     ):
         """Test a POST to the Subscription List endpoint.
 
@@ -70,7 +78,11 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         This will not send an invoice to the customer on subscribe.
         """
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-        data = {"plan": plan.djstripe_id, "stripe_token": "cake", "charge_immediately": False}
+        data = {
+            "plan": plan.djstripe_id,
+            "stripe_token": "cake",
+            "charge_immediately": False,
+        }
         response = self.client.post(self.url_list, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -80,7 +92,9 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         # Do not test data content in views. Values will be string representation
         # of MagicMock of the values.
 
-    @patch("djstripe.models.Customer.subscribe", autospec=True, return_value=Subscription())
+    @patch(
+        "djstripe.models.Customer.subscribe", autospec=True, return_value=Subscription()
+    )
     @patch("djstripe.models.Customer.add_card", autospec=True)
     def test_create_subscription_exception(self, add_card_mock, subscribe_mock):
         """Test a POST to the SubscriptionRestView.
@@ -101,7 +115,9 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         response = self.client.post(self.url_list, data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @patch("stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT))
+    @patch(
+        "stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT)
+    )
     def test_get_subscription(self, retrieve_mock):
         """Test a GET to the SubscriptionRestView.
 
@@ -110,7 +126,9 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
 
-        url = reverse("rest_djstripe:subscription-detail", kwargs={'pk': subscription.pk})
+        url = reverse(
+            "rest_djstripe:subscription-detail", kwargs={"pk": subscription.pk}
+        )
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["plan"], plan.djstripe_id)
@@ -119,7 +137,9 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
             response.data["cancel_at_period_end"], subscription.cancel_at_period_end
         )
 
-    @patch("stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT))
+    @patch(
+        "stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT)
+    )
     @patch("djstripe.models.Subscription.cancel", autospec=True)
     def test_cancel_subscription(self, cancel_subscription_mock, retrieve_mock):
         """Test a DELETE to the SubscriptionRestView.
@@ -143,8 +163,10 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         self.assertEqual(1, Subscription.objects.count())
         self.assertEqual(Subscription.objects.first().status, SubscriptionStatus.active)
 
-        url = reverse("rest_djstripe:subscription-detail", kwargs={'pk': subscription.pk})
-        response = self.client.put(url, data={'status': SubscriptionStatus.canceled})
+        url = reverse(
+            "rest_djstripe:subscription-detail", kwargs={"pk": subscription.pk}
+        )
+        response = self.client.put(url, data={"status": SubscriptionStatus.canceled})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Cancelled means flagged as canceled, so it should still be there
@@ -195,7 +217,7 @@ class PlanListAPIViewAnonymousTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_post_new_plans(self):
-        response = self.client.post(self.url_list, data={'nickname': 'John Doe'})
+        response = self.client.post(self.url_list, data={"nickname": "John Doe"})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
@@ -204,23 +226,29 @@ class PlanDetailAPIViewAnonymousTestCase(APITestCase):
     Test the anonymous access to the LIST endpoint for Plans.
     """
 
-    @patch("stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT))
+    @patch(
+        "stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT)
+    )
     def test_get_detail_of_plan(self, retrieve_mock):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-        url = reverse('rest_djstripe:plan-detail', kwargs={'pk': plan.pk})
+        url = reverse("rest_djstripe:plan-detail", kwargs={"pk": plan.pk})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    @patch("stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT))
+    @patch(
+        "stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT)
+    )
     def test_update_new_plans(self, retrieve_mock):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-        url = reverse('rest_djstripe:plan-detail', kwargs={'pk': plan.pk})
-        response = self.client.put(url, data={'nickname': 'John Doe'})
+        url = reverse("rest_djstripe:plan-detail", kwargs={"pk": plan.pk})
+        response = self.client.put(url, data={"nickname": "John Doe"})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    @patch("stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT))
+    @patch(
+        "stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT)
+    )
     def test_delete_new_plans(self, retrieve_mock):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-        url = reverse('rest_djstripe:plan-detail', kwargs={'pk': plan.pk})
-        response = self.client.delete(url, data={'nickname': 'John Doe'})
+        url = reverse("rest_djstripe:plan-detail", kwargs={"pk": plan.pk})
+        response = self.client.delete(url, data={"nickname": "John Doe"})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
