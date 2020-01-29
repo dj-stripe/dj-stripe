@@ -108,10 +108,10 @@ class CreateSubscriptionSerializerTest(TestCase):
         creation"""
         token = stripe_token_mock(card={})
         serializer = CreateSubscriptionSerializer(
-            data={"plan": self.plan.id, "stripe_token": token.id}
+            data={"plan": self.plan.pk, "stripe_token": token.id}
         )
         self.assertTrue(serializer.is_valid())
-        self.assertEqual(serializer.validated_data["plan"], str(self.plan.id))
+        self.assertEqual(serializer.validated_data["plan"], self.plan)
         self.assertIn("stripe_token", serializer.validated_data)
         self.assertEqual(serializer.errors, {})
 
@@ -124,7 +124,7 @@ class CreateSubscriptionSerializerTest(TestCase):
         token = stripe_token_mock(card={})
         serializer = CreateSubscriptionSerializer(
             data={
-                "plan": self.plan.id,
+                "plan": self.plan.pk,
                 "stripe_token": token.id,
                 "charge_immediately": True,
                 "tax_percent": 13.00,
