@@ -119,8 +119,9 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
             response.data["cancel_at_period_end"], subscription.cancel_at_period_end
         )
 
+    @patch("stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT))
     @patch("djstripe.models.Subscription.cancel", autospec=True)
-    def test_cancel_subscription(self, cancel_subscription_mock):
+    def test_cancel_subscription(self, cancel_subscription_mock, retrieve_mock):
         """Test a DELETE to the SubscriptionRestView.
 
         Should cancel a Customer objects subscription.
@@ -135,21 +136,16 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
             return subscription
 
         fake_canceled_subscription = deepcopy(FAKE_SUBSCRIPTION)
-
-        with patch(
-                "stripe.Product.retrieve",
-                return_value=deepcopy(FAKE_PRODUCT),
-                autospec=True,
-        ):
-            Subscription.sync_from_stripe_data(fake_canceled_subscription)
+        subscription = Subscription.sync_from_stripe_data(fake_canceled_subscription)
 
         cancel_subscription_mock.side_effect = _cancel_sub
 
         self.assertEqual(1, Subscription.objects.count())
         self.assertEqual(Subscription.objects.first().status, SubscriptionStatus.active)
 
-        response = self.client.delete(self.url_list)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        url = reverse("rest_djstripe:subscription-detail", kwargs={'pk': subscription.pk})
+        response = self.client.put(url, data={'status': SubscriptionStatus.canceled})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Cancelled means flagged as canceled, so it should still be there
         self.assertEqual(1, Subscription.objects.count())
@@ -164,12 +160,12 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         self.assertTrue(self.user.is_authenticated)
 
     def test_cancel_subscription_exception(self):
-        """Test a DELETE to the SubscriptionRestView.
+        """Test a DELETE call to the Subscriptions List endpoint.
 
-        Should return a 400 when an exception is raised.
+        Should return a 405, that is method is not allowed on LIST endpoint.
         """
         response = self.client.delete(self.url_list)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class SubscriptionListCreateAPIViewAnonymousTestCase(APITestCase):

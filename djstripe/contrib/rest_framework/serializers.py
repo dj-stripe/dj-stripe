@@ -24,12 +24,10 @@ class SubscriptionSerializer(AutoCustomerModelSerializerMixin, ModelSerializer):
         model = Subscription
         exclude = ["default_tax_rates"]
 
-    # required at deserialization
     plan = serializers.PrimaryKeyRelatedField(
-        required=True, queryset=Plan.objects.all()
+        required=False, queryset=Plan.objects.all()
     )
 
-    # not required
     id = serializers.CharField(required=False)
     application_fee_percent = serializers.DecimalField(
         required=False, max_digits=5, decimal_places=2
@@ -85,6 +83,11 @@ class CreateSubscriptionSerializer(SubscriptionSerializer):
     """Extend the standard SubscriptionSerializer for the case of creation,
     which must include a stripe_token field, although it doesn't belong
     to the model itself."""
+
+    # Required on creation
+    plan = serializers.PrimaryKeyRelatedField(
+        required=True, queryset=Plan.objects.all()
+    )
 
     stripe_token = serializers.CharField(max_length=200, required=True)
     charge_immediately = serializers.NullBooleanField(required=False, default=True)
