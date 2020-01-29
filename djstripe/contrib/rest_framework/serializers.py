@@ -106,3 +106,9 @@ class CreateSubscriptionSerializer(SubscriptionSerializer):
             raise ValidationError(detail=msg)
         else:
             return subscription
+
+
+class PlanSerializer(ModelSerializer):
+    class Meta:
+        model = Plan
+        fields = '__all__'

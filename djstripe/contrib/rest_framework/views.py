@@ -7,12 +7,14 @@
 
 """
 
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateAPIView, ListAPIView, RetrieveAPIView
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
-from ...models import Subscription
+from ...models import Subscription, Plan
 from ...settings import subscriber_request_callback
-from .serializers import SubscriptionSerializer, CreateSubscriptionSerializer
+from .serializers import (
+    SubscriptionSerializer, CreateSubscriptionSerializer, PlanSerializer
+)
 from .permissions import IsSubscriptionOwner
 from .mixins import AutoCreateCustomerMixin
 
@@ -42,9 +44,8 @@ class SubscriptionListView(AutoCreateCustomerMixin, ListCreateAPIView):
         return Subscription.objects.filter(customer__subscriber=subscriber)
 
 
-
 class SubscriptionDetailView(RetrieveUpdateAPIView):
-    """API Endpoints for one Subscription object.
+    """API Endpoint for one Subscription object.
 
     The View does not include the Destroy (DELETE method) keyword, preventing
     to actually delete a Subscription instance. To *cancel* a subscription,
@@ -58,3 +59,15 @@ class SubscriptionDetailView(RetrieveUpdateAPIView):
     queryset = Subscription.objects.all()
     permission_classes = (IsAuthenticated, IsSubscriptionOwner)
     serializer_class = SubscriptionSerializer
+
+
+class PlanListView(ListAPIView):
+    queryset = Plan.objects.all()
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    serializer_class = PlanSerializer
+
+
+class PlanDetailView(RetrieveAPIView):
+    queryset = Plan.objects.all()
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    serializer_class = PlanSerializer

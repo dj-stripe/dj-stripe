@@ -180,3 +180,47 @@ class SubscriptionListCreateAPIViewAnonymousTestCase(APITestCase):
         data = {"plan": "test0", "stripe_token": "cake"}
         response = self.client.post(self.url_list, data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class PlanListAPIViewAnonymousTestCase(APITestCase):
+    """
+    Test the anonymous access to the LIST endpoint for Plans.
+    """
+
+    def setUp(self):
+        self.url_list = reverse("rest_djstripe:plan-list")
+
+    def test_get_list_of_plans(self):
+        response = self.client.get(self.url_list)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_post_new_plans(self):
+        response = self.client.post(self.url_list, data={'nickname': 'John Doe'})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class PlanDetailAPIViewAnonymousTestCase(APITestCase):
+    """
+    Test the anonymous access to the LIST endpoint for Plans.
+    """
+
+    @patch("stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT))
+    def test_get_detail_of_plan(self, retrieve_mock):
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+        url = reverse('rest_djstripe:plan-detail', kwargs={'pk': plan.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    @patch("stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT))
+    def test_update_new_plans(self, retrieve_mock):
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+        url = reverse('rest_djstripe:plan-detail', kwargs={'pk': plan.pk})
+        response = self.client.put(url, data={'nickname': 'John Doe'})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    @patch("stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT))
+    def test_delete_new_plans(self, retrieve_mock):
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+        url = reverse('rest_djstripe:plan-detail', kwargs={'pk': plan.pk})
+        response = self.client.delete(url, data={'nickname': 'John Doe'})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
