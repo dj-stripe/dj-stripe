@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.sites",
     "django.contrib.staticfiles",
+    "rest_framework",
     "jsonfield",
     "djstripe",
     "tests",
