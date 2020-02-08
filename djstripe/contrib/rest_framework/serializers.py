@@ -33,7 +33,7 @@ class SubscriptionSerializer(AutoCustomerModelSerializerMixin, ModelSerializer):
     application_fee_percent = serializers.DecimalField(
         required=False, max_digits=5, decimal_places=2
     )
-    billing = serializers.CharField(required=False)
+    collection_method = serializers.CharField(required=False)
     billing_cycle_anchor = serializers.DateTimeField(required=False)
     cancel_at_period_end = serializers.NullBooleanField(required=False)
     canceled_at = serializers.DateTimeField(required=False)

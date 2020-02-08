@@ -43,7 +43,7 @@ class SubscriptionSerializerTest(TestCase):
         self.subcription_data = {
             "id": "sub_6lsC8pt7IcFpjA",
             "customer": self.customer,
-            "billing": "charge_automatically",
+            "collection_method": "charge_automatically",
             "plan": self.plan,
             "quantity": 2,
             "start": now,
