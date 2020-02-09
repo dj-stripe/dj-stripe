@@ -56,6 +56,11 @@ class SubscriptionSerializer(AutoCustomerModelSerializerMixin, ModelSerializer):
     trial_end = serializers.DateTimeField(required=False)
     trial_start = serializers.DateTimeField(required=False)
 
+    def validate_status(self, value):
+        if value not in dir(SubscriptionStatus):
+            raise ValidationError({'detail': 'Invalid SubscriptionStatus {}'.format(value)})
+        return value
+
     def create(self, validated_data):
         raise MethodNotAllowed("POST")
 
