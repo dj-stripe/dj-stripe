@@ -5,7 +5,7 @@ from ...models import Customer
 from ...settings import STRIPE_LIVE_MODE, subscriber_request_callback
 
 
-class AutoCreateCustomerMixin(APIView):
+class AutoCreateCustomerMixin:
     """Small mixin that can be included in REST API Views.
 
     If included, it will automatically create a Customer instance
@@ -26,7 +26,7 @@ class AutoCreateCustomerMixin(APIView):
         return result
 
 
-class AutoCustomerModelSerializerMixin(ModelSerializer):
+class AutoCustomerModelSerializerMixin:
     """Small mixin to easily provide access to the relevant customer
     inside ModelSerializers.
     """
