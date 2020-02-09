@@ -12,7 +12,7 @@ from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.serializers import ModelSerializer, ValidationError
 
 from djstripe.enums import SubscriptionStatus
-from djstripe.models import Customer, Plan, SetupIntent, Subscription
+from djstripe.models import Customer, Plan, SetupIntent, Subscription, Product
 from djstripe.settings import CANCELLATION_AT_PERIOD_END
 
 from .mixins import AutoCustomerModelSerializerMixin
@@ -117,4 +117,29 @@ class CreateSubscriptionSerializer(SubscriptionSerializer):
 class PlanSerializer(ModelSerializer):
     class Meta:
         model = Plan
-        fields = "__all__"
+        fields = ('active', 'aggregate_usage', 'amount', 'billing_scheme', 'currency',
+                  'interval', 'interval_count', 'nickname', 'product', 'tiers',
+                  'tiers_mode', 'transform_usage', 'trial_period_days', 'usage_type',
+                  'name', 'statement_descriptor')
+
+    active = serializers.BooleanField()
+    aggregate_usage = serializers.CharField(required=False)
+    amount = serializers.DecimalField(
+        required=False, max_digits=11, decimal_places=2
+    )
+    billing_scheme = serializers.CharField(required=False)
+    currency = serializers.CharField(required=False)
+    interval = serializers.CharField()
+    interval_count = serializers.IntegerField(required=False)
+    nickname = serializers.CharField(required=False)
+    product = serializers.PrimaryKeyRelatedField(
+        required=False, queryset=Product.objects.all()
+    )
+    tiers = serializers.JSONField(required=False)
+    tiers_mode = serializers.CharField(required=False)
+    transform_usage = serializers.JSONField(required=False)
+    trial_period_days = serializers.IntegerField(required=False)
+    usage_type = serializers.CharField()
+
+    name = serializers.CharField(required=False)
+    statement_descriptor = serializers.CharField(required=False)
