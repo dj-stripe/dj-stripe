@@ -134,9 +134,10 @@ class SubscriptionListView(AutoCreateCustomerMixin, ListCreateAPIView):
 class SubscriptionDetailView(RetrieveUpdateAPIView):
     """API Endpoint for one Subscription object.
 
-    The View does not include the Destroy (DELETE method) keyword, preventing
+    The View does not include the Destroy (DELETE HTTP method) keyword, preventing
     to actually delete a Subscription instance. To *cancel* a subscription,
-    one must change its "status" through an PUT method.
+    one must change its "status" through PUT/PATCH methods (but see delete method
+    implementation below).
 
     AutoCreateCustomerMixin is NOT included, as it makes no real sense
     to create a non-existing Customer when accessing an existing Subscription
