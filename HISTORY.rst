@@ -6,6 +6,7 @@ History
 2.3.0 (unreleased)
 ------------------
 
+- Changed ``JSONField`` dependency back to `jsonfield`_ from `jsonfield2`_ (see `Warning about safe uninstall of jsonfield2 on upgrade`_).
 - Dropped support for Django 2.1 (#1056).
 - Dropped support for python 3.5 (#1073).
 - Fixed handling of ``TaxRate`` events (#1094).
@@ -31,6 +32,34 @@ History
     - ``.pending_invoice_item_interval``
     - ``.pending_update``
     - ``.start_date``
+
+Warning about safe uninstall of jsonfield2 on upgrade
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. warning::
+
+    Both **jsonfield** and **jsonfield2** use the same import path, so if upgrading from dj-stripe~=2.2.0
+    in an existing virtualenv, be sure to uninstall jsonfield2 first.  eg::
+
+        # ensure jsonfield is uninstalled before we install jsonfield2
+        pip uninstall jsonfield2 -y && pip install "dj-stripe>=2.3.0dev"
+
+
+    Otherwise, ``pip uninstall jsonfield2`` will remove jsonfield's ``jsonfield``
+    module from ``site-packages``, which would cause errors like
+    ``ImportError: cannot import name 'JSONField' from 'jsonfield' (unknown location)``
+
+    If you have hit this ImportError already after upgrading, running this should resolve it::
+
+        # remove both jsonfield packages before reinstall to fix ImportError:
+        pip uninstall jsonfield jsonfield2 -y && pip install "dj-stripe>=2.3.0dev"
+
+    Note that this is only necessary if upgrading from dj-stripe 2.2.x, which temporarily
+    depended on jsonfield2. This process is not necessary if upgrading from an earlier
+    version of dj-stripe.
+
+.. _jsonfield: https://github.com/rpkilby/jsonfield/
+.. _jsonfield2: https://github.com/rpkilby/jsonfield2/
 
 2.2.2 (2020-01-20)
 ------------------
@@ -92,7 +121,7 @@ Warning about safe uninstall of jsonfield on upgrade
 .. warning::
 
     Both **jsonfield** and **jsonfield2** use the same import path, so if upgrading to dj-stripe>=2.2
-    in an existing virtualenv, sure to uninstall jsonfield first.  eg::
+    in an existing virtualenv, be sure to uninstall jsonfield first.  eg::
 
         # ensure jsonfield is uninstalled before we install jsonfield2
         pip uninstall jsonfield -y && pip install "dj-stripe>=2.2.0dev"
@@ -106,7 +135,7 @@ Warning about safe uninstall of jsonfield on upgrade
         # remove both jsonfield packages before reinstall to fix ImportError:
         pip uninstall jsonfield jsonfield2 -y && pip install "dj-stripe>=2.2.0dev"
 
-.. _jsonfield: https://github.com/dmkoch/django-jsonfield/
+.. _jsonfield: https://github.com/rpkilby/jsonfield/
 .. _jsonfield2: https://github.com/rpkilby/jsonfield2/
 
 Note on usage of Stripe Elements JS
