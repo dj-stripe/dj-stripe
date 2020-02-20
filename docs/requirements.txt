@@ -5,7 +5,6 @@ six>=1.11.0
 django>=2.0.5
 stripe>=2.41.0
 python-doc-inherit>=0.3.0
-jsonfield2>=3.0.3
 tqdm>=4.8.4
 
 # Docs
