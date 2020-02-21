@@ -56,6 +56,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
             "djstripe.Subscription.default_payment_method",
             "djstripe.Subscription.default_source",
             "djstripe.Subscription.pending_setup_intent",
+            "djstripe.Subscription.schedule",
         }
 
     @patch(

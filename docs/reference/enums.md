@@ -256,6 +256,16 @@
 ::: djstripe.enums.SubmitTypeStatus
     :members:
 
+## SubscriptionScheduleEndBehavior
+
+::: djstripe.enums.SubscriptionScheduleEndBehavior
+    :members:
+
+## SubscriptionScheduleStatus
+
+::: djstripe.enums.SubscriptionScheduleStatus
+    :members:
+
 ## SubscriptionStatus
 
 ::: djstripe.enums.SubscriptionStatus

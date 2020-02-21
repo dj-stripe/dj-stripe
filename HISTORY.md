@@ -12,6 +12,8 @@
 
 -   First-class support for the Price model, replacing Plans.
 
+-   Support subscription schedules (\#899).
+
 -   Support multi-item subscriptions.
 
 -   Support for API keys in the database.

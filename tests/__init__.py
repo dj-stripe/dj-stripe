@@ -1056,6 +1056,62 @@ FAKE_SUBSCRIPTION_METERED = SubscriptionDict(
     }
 )
 
+FAKE_SUBSCRIPTION_SCHEDULE = {
+    "id": "sub_sched_1Hm7q6Fz0jfFqjGs2OxOSCzD",
+    "object": "subscription_schedule",
+    "canceled_at": None,
+    "completed_at": None,
+    "created": 1605056974,
+    "current_phase": None,
+    "customer": "cus_4UbFSo9tl62jqj",  # FAKE_CUSTOMER_II
+    "default_settings": {
+        "billing_cycle_anchor": "automatic",
+        "billing_thresholds": None,
+        "collection_method": "charge_automatically",
+        "default_payment_method": None,
+        "default_source": None,
+        "invoice_settings": None,
+        "transfer_data": None,
+    },
+    "end_behavior": "release",
+    "livemode": False,
+    "metadata": {},
+    "phases": [
+        {
+            "add_invoice_items": [],
+            "application_fee_percent": None,
+            "billing_cycle_anchor": None,
+            "billing_thresholds": None,
+            "collection_method": None,
+            "coupon": None,
+            "default_payment_method": None,
+            "default_tax_rates": [],
+            "end_date": 1637195591,
+            "invoice_settings": None,
+            "plans": [
+                {
+                    "billing_thresholds": None,
+                    "plan": FAKE_PLAN_II["id"],
+                    "price": FAKE_PRICE_II["id"],
+                    "quantity": None,
+                    "tax_rates": [],
+                }
+            ],
+            "prorate": True,
+            "proration_behavior": "create_prorations",
+            "start_date": 1605659591,
+            "tax_percent": None,
+            "transfer_data": None,
+            "trial_end": None,
+        }
+    ],
+    "released_at": None,
+    "released_subscription": None,
+    "renewal_interval": None,
+    "status": "not_started",
+    "subscription": None,
+}
+
 
 class Sources(object):
     def __init__(self, card_fakes):
@@ -2099,4 +2155,51 @@ FAKE_EVENT_PAYMENT_INTENT_SUCCEEDED_DESTINATION_CHARGE = {
     "pending_webhooks": 1,
     "request": {"id": "req_AJAmnJE4eiPIzb", "idempotency_key": None},
     "type": "payment_intent.succeeded",
+}
+
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED = {
+    "id": "evt_1Hm7q6Fz0jfFqjGsJSG4N91w",
+    "object": "event",
+    "api_version": "2020-03-02",
+    "created": 1605056974,
+    "data": {"object": deepcopy(FAKE_SUBSCRIPTION_SCHEDULE)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": {
+        "id": "req_Pttj3aW5RJwees",
+        "idempotency_key": "d2a77191-cc07-4c60-abab-5fb11357bd63",
+    },
+    "type": "subscription_schedule.created",
+}
+
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED = deepcopy(
+    FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED
+)
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED["id"] = "sub_sched_1Hm86MFz0jfFqjGsc5iEdZee"
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED["type"] = "subscription_schedule.updated"
+# FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED["data"]["object"]["released_at"] = 1605058030
+# FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED["data"]["object"]["status"] = "released"
+# FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED["data"]["previous_attributes"] = {
+#     "released_at": None,
+#     "status": "not_started",
+# }
+
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_RELEASED = deepcopy(
+    FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED
+)
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_RELEASED["id"] = "evt_1Hm878Fz0jfFqjGsClU9gE79"
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_RELEASED["type"] = "subscription_schedule.released"
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_RELEASED["data"]["object"]["released_at"] = 1605058030
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_RELEASED["data"]["object"]["status"] = "released"
+
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED = deepcopy(
+    FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED
+)
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED["id"] = "evt_1Hm80YFz0jfFqjGs7kKvT7RE"
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED["type"] = "subscription_schedule.canceled"
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED["data"]["object"]["canceled_at"] = 1605057622
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED["data"]["object"]["status"] = "canceled"
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED["data"]["previous_attributes"] = {
+    "released_at": None,
+    "status": "not_started",
 }

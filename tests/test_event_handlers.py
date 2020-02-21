@@ -24,6 +24,7 @@ from djstripe.models import (
     Plan,
     Price,
     Subscription,
+    SubscriptionSchedule,
     Transfer,
 )
 
@@ -66,6 +67,10 @@ from . import (
     FAKE_EVENT_PRICE_CREATED,
     FAKE_EVENT_PRICE_DELETED,
     FAKE_EVENT_PRICE_UPDATED,
+    FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED,
+    FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED,
+    FAKE_EVENT_SUBSCRIPTION_SCHEDULE_RELEASED,
+    FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED,
     FAKE_EVENT_TRANSFER_CREATED,
     FAKE_EVENT_TRANSFER_DELETED,
     FAKE_FILEUPLOAD_ICON,
@@ -84,6 +89,7 @@ from . import (
     FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_CANCELED,
     FAKE_SUBSCRIPTION_III,
+    FAKE_SUBSCRIPTION_SCHEDULE,
     FAKE_TRANSFER,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
@@ -811,6 +817,169 @@ class TestPlanEvents(EventTestCase):
 
         with self.assertRaises(Plan.DoesNotExist):
             Plan.objects.get(id=FAKE_PLAN["id"])
+
+
+class TestSubscriptionScheduleEvents(EventTestCase):
+
+    # TODO: test the following subscription_schedule events:
+    #       * subscription_schedule.aborted
+    #       * subscription_schedule.completed
+    #       * subscription_schedule.expiring
+
+    @patch(
+        "stripe.SubscriptionSchedule.retrieve",
+        return_value=FAKE_SUBSCRIPTION_SCHEDULE,
+        autospec=True,
+    )
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER_II),
+        autospec=True,
+    )
+    def test_subscription_schedule_created(
+        self, customer_retrieve_mock, schedule_retrieve_mock
+    ):
+
+        event = Event.sync_from_stripe_data(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED)
+        event.invoke_webhook_handlers()
+
+        schedule = SubscriptionSchedule.objects.get(
+            id=FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED["data"]["object"]["id"]
+        )
+
+        assert (
+            schedule.id
+            == FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED["data"]["object"]["id"]
+        )
+        assert schedule.status == "not_started"
+
+    @patch("stripe.SubscriptionSchedule.retrieve", autospec=True)
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER_II),
+        autospec=True,
+    )
+    def test_subscription_schedule_canceled(
+        self, customer_retrieve_mock, schedule_retrieve_mock
+    ):
+
+        fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
+        fake_stripe_event["data"]["object"]["canceled_at"] = 1605058030
+        fake_stripe_event["data"]["object"]["status"] = "canceled"
+        fake_stripe_event["data"]["previous_attributes"] = {
+            "canceled_at": None,
+            "status": "not_started",
+        }
+
+        schedule_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        schedule = SubscriptionSchedule.objects.get(
+            id=fake_stripe_event["data"]["object"]["id"]
+        )
+
+        assert schedule.status == "canceled"
+        assert schedule.canceled_at is not None
+
+        schedule_retrieve_mock.return_value = FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED[
+            "data"
+        ]["object"]
+
+        event = Event.sync_from_stripe_data(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED)
+        event.invoke_webhook_handlers()
+
+        schedule.refresh_from_db()
+
+        assert schedule.status == "canceled"
+        assert schedule.canceled_at is not None
+
+    @patch("stripe.SubscriptionSchedule.retrieve", autospec=True)
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER_II),
+        autospec=True,
+    )
+    def test_subscription_schedule_released(
+        self, customer_retrieve_mock, schedule_retrieve_mock
+    ):
+
+        fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
+        fake_stripe_event["data"]["object"]["released_at"] = 1605058030
+        fake_stripe_event["data"]["object"]["status"] = "released"
+        fake_stripe_event["data"]["previous_attributes"] = {
+            "released_at": None,
+            "status": "not_started",
+        }
+
+        schedule_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        schedule = SubscriptionSchedule.objects.get(
+            id=fake_stripe_event["data"]["object"]["id"]
+        )
+
+        assert schedule.status == "released"
+        assert schedule.released_at is not None
+
+        schedule_retrieve_mock.return_value = FAKE_EVENT_SUBSCRIPTION_SCHEDULE_RELEASED[
+            "data"
+        ]["object"]
+
+        event = Event.sync_from_stripe_data(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_RELEASED)
+        event.invoke_webhook_handlers()
+
+        schedule.refresh_from_db()
+
+        assert schedule.status == "released"
+        assert schedule.released_at is not None
+
+    @patch("stripe.SubscriptionSchedule.retrieve", autospec=True)
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER_II),
+        autospec=True,
+    )
+    def test_subscription_schedule_updated(
+        self, customer_retrieve_mock, schedule_retrieve_mock
+    ):
+
+        schedule_retrieve_mock.return_value = FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED[
+            "data"
+        ]["object"]
+
+        event = Event.sync_from_stripe_data(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED)
+        event.invoke_webhook_handlers()
+
+        schedule = SubscriptionSchedule.objects.get(
+            id=FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED["data"]["object"]["id"]
+        )
+
+        assert schedule.status == "not_started"
+        assert schedule.released_at is None
+
+        fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
+        fake_stripe_event["data"]["object"]["released_at"] = 1605058030
+        fake_stripe_event["data"]["object"]["status"] = "released"
+        fake_stripe_event["data"]["previous_attributes"] = {
+            "released_at": None,
+            "status": "not_started",
+        }
+
+        schedule_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        schedule = SubscriptionSchedule.objects.get(
+            id=fake_stripe_event["data"]["object"]["id"]
+        )
+
+        assert schedule.status == "released"
+        assert schedule.released_at is not None
 
 
 class TestPriceEvents(EventTestCase):
