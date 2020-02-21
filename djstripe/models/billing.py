@@ -1404,7 +1404,14 @@ class Subscription(StripeModel):
         help_text="The quantity applied to this subscription. This value will be "
         "`null` for multi-plan subscriptions",
     )
-    # TODO: schedule (implement model SubscriptionSchedule, see #899)
+    schedule = models.ForeignKey(
+        "SubscriptionSchedule",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="subscriptions",
+        help_text="The schedule associated with this subscription.",
+    )
     start_date = StripeDateTimeField(
         null=True,
         blank=True,
@@ -1719,6 +1726,75 @@ class SubscriptionItem(StripeModel):
         self.tax_rates.set(
             cls._stripe_object_to_tax_rates(target_cls=TaxRate, data=data)
         )
+
+
+class SubscriptionSchedule(StripeModel):
+    """
+    Subscription schedules allow you to create and manage the lifecycle
+    of a subscription by predefining expected changes.
+
+    Stripe documentation: https://stripe.com/docs/api/subscription_schedules
+    """
+
+    stripe_class = stripe.SubscriptionSchedule
+
+    canceled_at = StripeDateTimeField(
+        null=True,
+        blank=True,
+        help_text="Time at which the subscription schedule was canceled.",
+    )
+    completed_at = StripeDateTimeField(
+        null=True,
+        blank=True,
+        help_text="Time at which the subscription schedule was completed.",
+    )
+    current_phase = JSONField(
+        null=True,
+        blank=True,
+        help_text="Object representing the start and end dates for the "
+        "current phase of the subscription schedule, if it is `active`.",
+    )
+    customer = models.ForeignKey(
+        "Customer",
+        on_delete=models.CASCADE,
+        related_name="schedules",
+        help_text="The customer who owns the subscription schedule.",
+    )
+    default_settings = JSONField(
+        null=True,
+        blank=True,
+        help_text="Object representing the subscription schedule’s default settings.",
+    )
+    end_behavior = StripeEnumField(
+        enum=enums.SubscriptionScheduleEndBehavior,
+        help_text="Behavior of the subscription schedule and underlying "
+        "subscription when it ends.",
+    )
+    phases = JSONField(
+        null=True,
+        blank=True,
+        help_text="Configuration for the subscription schedule’s phases.",
+    )
+    released_at = StripeDateTimeField(
+        null=True,
+        blank=True,
+        help_text="Time at which the subscription schedule was released.",
+    )
+    released_subscription = models.ForeignKey(
+        "Subscription",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="released_schedules",
+        help_text="The subscription once managed by this subscription schedule "
+        "(if it is released).",
+    )
+    status = StripeEnumField(
+        enum=enums.SubscriptionScheduleStatus,
+        help_text="The present status of the subscription schedule. Possible "
+        "values are `not_started`, `active`, `completed`, `released`, and "
+        "`canceled`.",
+    )
 
 
 class TaxId(StripeModel):

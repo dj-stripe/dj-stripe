@@ -660,6 +660,19 @@ class SubmitTypeStatus(Enum):
     pay = _("pay")
 
 
+class SubscriptionScheduleEndBehavior(Enum):
+    release = _("Release")
+    cancel = _("Cancel")
+
+
+class SubscriptionScheduleStatus(Enum):
+    not_started = _("Not started")
+    active = _("Active")
+    completed = _("Completed")
+    released = _("Released")
+    canceled = _("Canceled")
+
+
 class SubscriptionStatus(Enum):
     incomplete = _("Incomplete")
     incomplete_expired = _("Incomplete Expired")

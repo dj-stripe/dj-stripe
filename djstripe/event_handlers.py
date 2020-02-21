@@ -172,6 +172,7 @@ def payment_method_handler(event):
     "price",
     "product",
     "setup_intent",
+    "subscription_schedule",
     "source",
     "tax_rate",
     "transfer",
@@ -179,7 +180,8 @@ def payment_method_handler(event):
 def other_object_webhook_handler(event):
     """
     Handle updates to charge, coupon, invoice, invoiceitem, payment_intent,
-    plan, product, setup_intent, source, tax_rate and transfer objects.
+    plan, product, setup_intent, subscription_schedule, source, tax_rate
+    and transfer objects.
 
     Docs for:
     - charge: https://stripe.com/docs/api/charges
@@ -191,6 +193,7 @@ def other_object_webhook_handler(event):
     - price: https://stripe.com/docs/api/prices
     - product: https://stripe.com/docs/api/products
     - setup_intent: https://stripe.com/docs/api/setup_intents
+    - subscription_schedule: https://stripe.com/docs/api/subscription_schedules
     - source: https://stripe.com/docs/api/sources
     - tax_rate: https://stripe.com/docs/api/tax_rates/
     - transfer: https://stripe.com/docs/api/transfers
@@ -212,6 +215,7 @@ def other_object_webhook_handler(event):
             "product": models.Product,
             "transfer": models.Transfer,
             "setup_intent": models.SetupIntent,
+            "subscription_schedule": models.SubscriptionSchedule,
             "source": models.Source,
             "tax_rate": models.TaxRate,
         }.get(event.category)
