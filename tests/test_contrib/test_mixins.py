@@ -26,13 +26,13 @@ class AutoCreateCustomerMixinTest(APITestCase):
         self.assertTrue(self.client.login(username="pydanny", password="password"))
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
         url = reverse("rest_djstripe:subscription-list")
-        response = self.client.get(url)
+        self.client.get(url)
         mock_get_or_create.assert_called_once()
 
     @patch("djstripe.models.Customer.objects.get_or_create", autospec=True)
     def test_customer_create_when_anonymous(self, mock_get_or_create):
         url = reverse("rest_djstripe:subscription-list")
-        response = self.client.get(url)
+        self.client.get(url)
         mock_get_or_create.assert_not_called()
 
 

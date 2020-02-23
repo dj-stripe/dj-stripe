@@ -145,7 +145,7 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
 
         Should return the updated data.
         """
-        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+        Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
         url = reverse(
             "rest_djstripe:subscription-detail", kwargs={"id": subscription.id}
@@ -161,7 +161,7 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
 
         Should return a 400 for a failed updated.
         """
-        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+        Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
         url = reverse(
             "rest_djstripe:subscription-detail", kwargs={"id": subscription.id}

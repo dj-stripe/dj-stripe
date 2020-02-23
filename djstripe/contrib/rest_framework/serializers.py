@@ -12,7 +12,7 @@ from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.serializers import ModelSerializer, ValidationError
 
 from djstripe.enums import SubscriptionStatus
-from djstripe.models import Customer, Plan, Product, SetupIntent, Subscription
+from djstripe.models import Plan, Subscription
 from djstripe.settings import CANCELLATION_AT_PERIOD_END
 
 from .mixins import AutoCustomerModelSerializerMixin
@@ -136,8 +136,8 @@ class CreateSubscriptionSerializer(SubscriptionSerializer):
             # to succeed.
             subscription.plan = validated_data.get("plan")
             # It is key to attach a 'stripe_token' attribute to the instance to fake
-            # a model property, and let the subsequent representation of the new instance
-            # (recursive call to .to_representation() method) succeeds.
+            # a model property, and let the subsequent representation of the new
+            # instance (recursive call to .to_representation() method) succeeds.
             subscription.stripe_token = stripe_token
             return subscription
 

@@ -1,6 +1,3 @@
-from rest_framework.serializers import ModelSerializer
-from rest_framework.views import APIView
-
 from ...models import Customer
 from ...settings import STRIPE_LIVE_MODE, subscriber_request_callback
 
