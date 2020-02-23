@@ -181,6 +181,50 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         )
         self.assertTrue(self.user.is_authenticated)
 
+    @patch(
+        "stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT)
+    )
+    @patch("djstripe.models.Subscription.cancel", autospec=True)
+    def test_cancel_subscription_with_delete(self, cancel_subscription_mock, retrieve_mock):
+        """Test a cancel through a DELETE method.
+
+        Should cancel a Customer objects subscription.
+        """
+
+        def _cancel_sub(*args, **kwargs):
+            subscription = Subscription.objects.first()
+            subscription.status = SubscriptionStatus.canceled
+            subscription.canceled_at = timezone.now()
+            subscription.ended_at = timezone.now()
+            subscription.save()
+            return subscription
+
+        fake_canceled_subscription = deepcopy(FAKE_SUBSCRIPTION)
+        subscription = Subscription.sync_from_stripe_data(fake_canceled_subscription)
+
+        cancel_subscription_mock.side_effect = _cancel_sub
+
+        self.assertEqual(1, Subscription.objects.count())
+        self.assertEqual(Subscription.objects.first().status, SubscriptionStatus.active)
+
+        url = reverse(
+            "rest_djstripe:subscription-detail", kwargs={"id": subscription.id}
+        )
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Cancelled means flagged as canceled, so it should still be there
+        self.assertEqual(1, Subscription.objects.count())
+        self.assertEqual(
+            Subscription.objects.first().status, SubscriptionStatus.canceled
+        )
+
+        cancel_subscription_mock.assert_called_once_with(
+            Subscription.objects.first(),
+            at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END,
+        )
+        self.assertTrue(self.user.is_authenticated)
+
     def test_cancel_subscription_exception(self):
         """Test a DELETE call to the Subscriptions List endpoint.
 
