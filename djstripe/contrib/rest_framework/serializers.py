@@ -115,10 +115,12 @@ class CreateSubscriptionSerializer(SubscriptionSerializer):
 class PlanSerializer(ModelSerializer):
     class Meta:
         model = Plan
-        fields = ('active', 'aggregate_usage', 'amount', 'billing_scheme', 'currency',
-                  'interval', 'interval_count', 'nickname', 'product', 'tiers',
-                  'tiers_mode', 'transform_usage', 'trial_period_days', 'usage_type',
-                  'name', 'statement_descriptor')
+        fields = ('id', 'active', 'aggregate_usage', 'amount', 'billing_scheme',
+                  'currency', 'interval', 'interval_count', 'nickname', 'product',
+                  'tiers', 'tiers_mode', 'transform_usage', 'trial_period_days',
+                  'usage_type', 'name', 'statement_descriptor')
+
+    id = serializers.SlugField()
 
     active = serializers.BooleanField()
     aggregate_usage = serializers.CharField(required=False)
