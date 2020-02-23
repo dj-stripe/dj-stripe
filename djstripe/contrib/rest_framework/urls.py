@@ -23,7 +23,7 @@ from . import views
 app_name = "djstripe_rest_framework"
 
 urlpatterns = [
-    # Deprecated endpoint, replaced by the. Use the two endpoints below instead.
+    # Deprecated endpoint. Use the two endpoints below instead.
     path("subscription/", views.SubscriptionRestView.as_view(), name="subscription"),
 
     # Authenticated Endpoint for accessing list of Subscriptions
