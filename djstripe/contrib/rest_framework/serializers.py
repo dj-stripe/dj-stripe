@@ -113,14 +113,14 @@ class CreateSubscriptionSerializer(SubscriptionSerializer):
         self.customer.add_card(stripe_token)
         try:
             subscription = self.customer.subscribe(**validated_data)
-            # It is key to attach a 'stripe_token' attribute to the instance to fake
-            # a model property, and let the subsequent representation of the new instance
-            # (recursive call to .to_representation() method) succeeds.
-            subscription.stripe_token = stripe_token
         except Exception as e:
             msg = "Something went wrong processing the payment: " + str(e)
             raise ValidationError(detail=msg)
         else:
+            # It is key to attach a 'stripe_token' attribute to the instance to fake
+            # a model property, and let the subsequent representation of the new instance
+            # (recursive call to .to_representation() method) succeeds.
+            subscription.stripe_token = stripe_token
             return subscription
 
 
