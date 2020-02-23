@@ -147,7 +147,7 @@ class CreateSubscriptionSerializerTest(TestCase):
         token = stripe_token_mock(card={})
         serializer = CreateSubscriptionSerializer(
             data={
-                "plan": self.plan.pk,
+                "plan": self.plan.id,
                 "stripe_token": token.id,
                 "charge_immediately": True,
                 "tax_percent": 13.00,

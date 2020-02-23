@@ -34,14 +34,13 @@ urlpatterns = [
     # Identification is made with Django's model "pk", but it could possibly be
     # extended to other (id, dj_stripeid...)
     path(
-        "subscriptions/<int:pk>",
+        "subscriptions/<str:id>",
         views.SubscriptionDetailView.as_view(),
         name="subscription-detail",
     ),
     # Read-only Endpoint for accessing list of Plans
     path("plans/", views.PlanListView.as_view(), name="plan-list"),
     # Read-only Endpoint for accessing the detail of one Plan.
-    # Identification is made with Django's model "pk", but it could possibly be
-    # extended to other (id, dj_stripeid...)
-    path("plans/<int:pk>", views.PlanDetailView.as_view(), name="plan-detail"),
+    # Identification is made with Stripe ID (which is a string).
+    path("plans/<str:id>", views.PlanDetailView.as_view(), name="plan-detail"),
 ]

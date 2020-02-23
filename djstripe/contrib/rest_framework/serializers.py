@@ -98,9 +98,11 @@ class CreateSubscriptionSerializer(SubscriptionSerializer):
         # nested nature when validating the final data. This can't be done in a
         # specialized validate_plan function (where the value will appear as provided
         # in POST request, that is, the correct ID slug string.)
-        attrs.update(plan=attrs.pop('plan').get('id'))
+        plan_id = attrs.pop('plan').get('id')
 
-        if not Plan.objects.filter(id=attrs.get('plan')).exists():
+        if Plan.objects.filter(id=plan_id).exists():
+            attrs.update(plan=Plan.objects.get(id=plan_id))
+        else:
             msg = "Unknown / invalid Plan id: " + str(attrs.get('plan'))
             raise ValidationError(detail=msg)
 

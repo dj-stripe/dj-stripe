@@ -51,7 +51,7 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
             - Subcribe the Customer to a plan
         """
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-        data = {"plan": plan.djstripe_id, "stripe_token": "cake"}
+        data = {"plan": plan.id, "stripe_token": "cake"}
         response = self.client.post(self.url_list, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -79,7 +79,7 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         """
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
         data = {
-            "plan": plan.djstripe_id,
+            "plan": plan.id,
             "stripe_token": "cake",
             "charge_immediately": False,
         }
@@ -127,11 +127,11 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
 
         url = reverse(
-            "rest_djstripe:subscription-detail", kwargs={"pk": subscription.pk}
+            "rest_djstripe:subscription-detail", kwargs={"id": subscription.id}
         )
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["plan"], plan.djstripe_id)
+        self.assertEqual(response.data["plan"], plan.id)
         self.assertEqual(response.data["status"], subscription.status)
         self.assertEqual(
             response.data["cancel_at_period_end"], subscription.cancel_at_period_end
@@ -164,7 +164,7 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         self.assertEqual(Subscription.objects.first().status, SubscriptionStatus.active)
 
         url = reverse(
-            "rest_djstripe:subscription-detail", kwargs={"pk": subscription.pk}
+            "rest_djstripe:subscription-detail", kwargs={"id": subscription.id}
         )
         response = self.client.put(url, data={"status": SubscriptionStatus.canceled})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -231,7 +231,7 @@ class PlanDetailAPIViewAnonymousTestCase(APITestCase):
     )
     def test_get_detail_of_plan(self, retrieve_mock):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-        url = reverse("rest_djstripe:plan-detail", kwargs={"pk": plan.pk})
+        url = reverse("rest_djstripe:plan-detail", kwargs={"id": plan.id})
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -240,7 +240,7 @@ class PlanDetailAPIViewAnonymousTestCase(APITestCase):
     )
     def test_update_new_plans(self, retrieve_mock):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-        url = reverse("rest_djstripe:plan-detail", kwargs={"pk": plan.pk})
+        url = reverse("rest_djstripe:plan-detail", kwargs={"id": plan.id})
         response = self.client.put(url, data={"nickname": "John Doe"})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -249,6 +249,6 @@ class PlanDetailAPIViewAnonymousTestCase(APITestCase):
     )
     def test_delete_new_plans(self, retrieve_mock):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-        url = reverse("rest_djstripe:plan-detail", kwargs={"pk": plan.pk})
+        url = reverse("rest_djstripe:plan-detail", kwargs={"id": plan.id})
         response = self.client.delete(url, data={"nickname": "John Doe"})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
