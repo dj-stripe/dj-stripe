@@ -73,30 +73,6 @@ class SubscriptionSerializerTest(TestCase):
         serializer = SubscriptionSerializer(self.subscription)
         self.assertEqual(serializer.data['plan'], self.plan.id)
 
-    # This test is ambiguous as it is originally used for PUT/update methods. However,
-    # creating a serializer only with data={} parameter is for creating instances,
-    # hence checking the billing fields contradicts the other test below which uses the
-    # dedicated CreateSubscriptionSerializer class.
-    # @patch(
-    #     "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    # )
-    # def test_invalid_serializer_existing_instance(self, product_retrieve_mock):
-    #     now = timezone.now()
-    #     serializer = SubscriptionSerializer(
-    #         data={
-    #             "id": "sub_6lsC8pt7IcFpjA",
-    #             "customer": self.customer.djstripe_id,
-    #             "plan": self.plan.djstripe_id,
-    #             "start": now,
-    #             "status": SubscriptionStatus.active,
-    #             "current_period_end": now + timezone.timedelta(days=5),
-    #             "current_period_start": now,
-    #         }
-    #     )
-    #     self.assertFalse(serializer.is_valid())
-    #     self.assertEqual(serializer.validated_data, {})
-    #     self.assertEqual(serializer.errors, {"billing": ["This field is required."]})
-
 
 class CreateSubscriptionSerializerTest(TestCase):
     def setUp(self):
