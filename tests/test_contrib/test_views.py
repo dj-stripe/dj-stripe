@@ -142,7 +142,7 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
     )
     @patch("djstripe.models.Subscription.cancel", autospec=True)
     def test_cancel_subscription(self, cancel_subscription_mock, retrieve_mock):
-        """Test a DELETE to the SubscriptionRestView.
+        """Test a cancel through a PUT method.
 
         Should cancel a Customer objects subscription.
         """
