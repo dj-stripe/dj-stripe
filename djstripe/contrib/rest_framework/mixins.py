@@ -34,6 +34,8 @@ class AutoCustomerModelSerializerMixin:
     @property
     def customer(self):
         subscriber = subscriber_request_callback(self.context.get("request"))
+        if subscriber.is_anonymous:
+            return None
         try:
             customer = Customer.objects.get(
                 subscriber=subscriber, livemode=STRIPE_LIVE_MODE
