@@ -25,9 +25,7 @@ class SubscriptionSerializer(AutoCustomerModelSerializerMixin, ModelSerializer):
         model = Subscription
         exclude = ["default_tax_rates"]
 
-    plan = serializers.PrimaryKeyRelatedField(
-        required=False, queryset=Plan.objects.all()
-    )
+    plan = serializers.SlugField(required=False, source="plan.id")
 
     id = serializers.CharField(required=False)
     application_fee_percent = serializers.DecimalField(

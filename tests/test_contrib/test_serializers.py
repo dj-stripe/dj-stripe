@@ -61,6 +61,15 @@ class SubscriptionSerializerTest(TestCase):
         serializer = SubscriptionSerializer(self.subscription)
         self.assertIsNotNone(serializer.data)
 
+    @patch(
+        "stripe.Token.create", return_value=PropertyMock(id="token_test"), autospec=True
+    )
+    def test_valid_serializer_use_plan_id(self, stripe_token_mock):
+        """The base subscription serializer must refer to its Plan relationship
+        though its stripe id."""
+        serializer = SubscriptionSerializer(self.subscription)
+        self.assertEqual(serializer.data['plan'], self.plan.id)
+
     # This test is ambiguous as it is originally used for PUT/update methods. However,
     # creating a serializer only with data={} parameter is for creating instances,
     # hence checking the billing fields contradicts the other test below which uses the
