@@ -14,6 +14,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 from rest_framework.exceptions import ErrorDetail
+from rest_framework.serializers import ValidationError
 
 from djstripe.contrib.rest_framework.serializers import (
     CreateSubscriptionSerializer,
@@ -117,10 +118,10 @@ class CreateSubscriptionSerializerTest(TestCase):
         creation"""
         token = stripe_token_mock(card={})
         serializer = CreateSubscriptionSerializer(
-            data={"plan": self.plan.pk, "stripe_token": token.id}
+            data={"plan": self.plan.id, "stripe_token": token.id}
         )
         self.assertTrue(serializer.is_valid())
-        self.assertEqual(serializer.validated_data["plan"], self.plan)
+        self.assertEqual(serializer.validated_data["plan"], self.plan.id)
         self.assertIn("stripe_token", serializer.validated_data)
         self.assertEqual(serializer.errors, {})
 

@@ -89,12 +89,22 @@ class CreateSubscriptionSerializer(SubscriptionSerializer):
     to the model itself."""
 
     # Required on creation
-    plan = serializers.PrimaryKeyRelatedField(
-        required=True, queryset=Plan.objects.all()
-    )
-
+    plan = serializers.SlugField(required=True, source="plan.id")
     stripe_token = serializers.CharField(max_length=200, required=True)
     charge_immediately = serializers.NullBooleanField(required=False, default=True)
+
+    def validate(self, attrs):
+        # Since we use source=plan.id in field declaration, one must overcome its
+        # nested nature when validating the final data. This can't be done in a
+        # specialized validate_plan function (where the value will appear as provided
+        # in POST request, that is, the correct ID slug string.)
+        attrs.update(plan=attrs.pop('plan').get('id'))
+
+        if not Plan.objects.filter(id=attrs.get('plan')).exists():
+            msg = "Unknown / invalid Plan id: " + str(attrs.get('plan'))
+            raise ValidationError(detail=msg)
+
+        return attrs
 
     def create(self, validated_data: dict):
         stripe_token = validated_data.pop("stripe_token")
