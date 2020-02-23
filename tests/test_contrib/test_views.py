@@ -96,8 +96,8 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         "djstripe.models.Customer.subscribe", autospec=True, return_value=Subscription()
     )
     @patch("djstripe.models.Customer.add_card", autospec=True)
-    def test_create_subscription_exception(self, add_card_mock, subscribe_mock):
-        """Test a POST to the SubscriptionRestView.
+    def test_create_subscription_with_wrong_plan(self, add_card_mock, subscribe_mock):
+        """Test a POST to the Subscription List endpoint.
 
         Should return a 400 when an Exception is raised.
         """
@@ -107,7 +107,7 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_subscription_incorrect_data(self):
-        """Test a POST to the SubscriptionRestView.
+        """Test a POST to the Subscription List endpoint.
 
         Should return a 400 when a the serializer is invalid.
         """
@@ -119,7 +119,7 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         "stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT)
     )
     def test_get_subscription(self, retrieve_mock):
-        """Test a GET to the SubscriptionRestView.
+        """Test a GET to the Subscription Detail endpoint.
 
         Should return the correct data.
         """
@@ -136,6 +136,38 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         self.assertEqual(
             response.data["cancel_at_period_end"], subscription.cancel_at_period_end
         )
+
+    @patch(
+        "stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT)
+    )
+    def test_update_subscription_valid_data(self, retrieve_mock):
+        """Test a PUT to the Subscription Detail endpoint.
+
+        Should return the updated data.
+        """
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+        subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
+        url = reverse(
+            "rest_djstripe:subscription-detail", kwargs={"id": subscription.id}
+        )
+        response = self.client.put(url, data={'status': SubscriptionStatus.unpaid})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    @patch(
+        "stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT)
+    )
+    def test_update_subscription_invalid_data(self, retrieve_mock):
+        """Test a PUT to the Subscription Detail endpoint.
+
+        Should return a 400 for a failed updated.
+        """
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+        subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
+        url = reverse(
+            "rest_djstripe:subscription-detail", kwargs={"id": subscription.id}
+        )
+        response = self.client.put(url, data={'status': 'wrong subscription status'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @patch(
         "stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT)
