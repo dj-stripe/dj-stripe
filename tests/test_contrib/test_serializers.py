@@ -128,6 +128,19 @@ class CreateSubscriptionSerializerTest(TestCase):
     @patch(
         "stripe.Token.create", return_value=PropertyMock(id="token_test"), autospec=True
     )
+    def test_valid_serializer_with_wrong_plan_id(self, stripe_token_mock):
+        """The serializer must be valid when provided with minimal data for instance
+        creation"""
+        token = stripe_token_mock(card={})
+        serializer = CreateSubscriptionSerializer(
+            data={"plan": 'dummy_plan_id', "stripe_token": token.id}
+        )
+        with self.assertRaises(ValidationError):
+            self.assertFalse(serializer.is_valid(raise_exception=True))
+
+    @patch(
+        "stripe.Token.create", return_value=PropertyMock(id="token_test"), autospec=True
+    )
     def test_valid_serializer_with_non_required_fields(self, stripe_token_mock):
         """The serializer must be valid when provided with data including non
          reuired field for instance creation"""
