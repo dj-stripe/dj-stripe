@@ -10,7 +10,7 @@ from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from rest_framework.request import Request
 from rest_framework.reverse import reverse
-from rest_framework.test import APITestCase, APIRequestFactory, force_authenticate
+from rest_framework.test import APIRequestFactory, APITestCase, force_authenticate
 
 from djstripe.contrib.rest_framework.serializers import SubscriptionSerializer
 

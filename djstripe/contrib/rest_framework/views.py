@@ -9,8 +9,6 @@
 import warnings
 
 from rest_framework import status
-from rest_framework.views import APIView
-
 from rest_framework.generics import (
     ListAPIView,
     ListCreateAPIView,
@@ -19,19 +17,19 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from ...enums import SubscriptionStatus
-from ...models import Plan, Subscription, Customer
+from ...models import Customer, Plan, Subscription
 from ...settings import CANCELLATION_AT_PERIOD_END, subscriber_request_callback
-
 from .mixins import AutoCreateCustomerMixin
 from .permissions import IsSubscriptionOwner
 from .serializers import (
     CreateSubscriptionSerializer,
+    DeprecatedCreateSubscriptionSerializer,
+    DeprecatedSubscriptionSerializer,
     PlanSerializer,
     SubscriptionSerializer,
-    DeprecatedSubscriptionSerializer,
-    DeprecatedCreateSubscriptionSerializer
 )
 
 

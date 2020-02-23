@@ -12,7 +12,7 @@ from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.serializers import ModelSerializer, ValidationError
 
 from djstripe.enums import SubscriptionStatus
-from djstripe.models import Customer, Plan, SetupIntent, Subscription, Product
+from djstripe.models import Customer, Plan, Product, SetupIntent, Subscription
 from djstripe.settings import CANCELLATION_AT_PERIOD_END
 
 from .mixins import AutoCustomerModelSerializerMixin

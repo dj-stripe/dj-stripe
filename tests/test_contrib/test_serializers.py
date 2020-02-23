@@ -18,9 +18,9 @@ from rest_framework.serializers import ValidationError
 
 from djstripe.contrib.rest_framework.serializers import (
     CreateSubscriptionSerializer,
-    SubscriptionSerializer,
+    DeprecatedCreateSubscriptionSerializer,
     DeprecatedSubscriptionSerializer,
-    DeprecatedCreateSubscriptionSerializer
+    SubscriptionSerializer,
 )
 from djstripe.enums import SubscriptionStatus
 from djstripe.models import Plan, Subscription
