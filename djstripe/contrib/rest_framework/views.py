@@ -147,6 +147,7 @@ class SubscriptionDetailView(RetrieveUpdateAPIView):
     queryset = Subscription.objects.all()
     permission_classes = (IsAuthenticated, IsSubscriptionOwner)
     serializer_class = SubscriptionSerializer
+    lookup_field = "id"
 
     def delete(self, request, *args, **kwargs):
         # To stick to Stripe way of doing, we must enable the DELETE method to cancel
@@ -171,3 +172,4 @@ class PlanDetailView(RetrieveAPIView):
     queryset = Plan.objects.all()
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = PlanSerializer
+    lookup_field = "id"
