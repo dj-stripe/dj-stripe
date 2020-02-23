@@ -151,14 +151,17 @@ class SubscriptionDetailView(RetrieveUpdateAPIView):
 
     def delete(self, request, *args, **kwargs):
         # To stick to Stripe way of doing, we must enable the DELETE method to cancel
-        # a subscription. Bur the default implementation truly deletes the object.
+        # a subscription. But the default implementation truly deletes the object.
         # Hence we override it here to simulate a partial update (PATCH).
         # See https://stackoverflow.com/a/21262262/707984 for explanations about
         # _mutable.
-        mutable = request.data._mutable
-        request.data._mutable = True
+        mutable = False
+        if getattr(request.data, '_mutable', None) is not None:
+            mutable = request.data._mutable
+            request.data._mutable = True
         request.data.update(status=SubscriptionStatus.canceled)
-        request.data._mutable = mutable
+        if getattr(request.data, '_mutable', None) is not None:
+            request.data._mutable = mutable
         return self.partial_update(request, *args, **kwargs)
 
 
