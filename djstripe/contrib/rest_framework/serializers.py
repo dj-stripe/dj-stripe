@@ -25,28 +25,42 @@ class SubscriptionSerializer(AutoCustomerModelSerializerMixin, ModelSerializer):
         model = Subscription
         exclude = ["default_tax_rates"]
 
-    plan = serializers.SlugField(required=False, source="plan.id")
-
+    # StripeModel fields
     id = serializers.CharField(required=False)
+    created = serializers.DateTimeField(required=False)
+    metadata = serializers.JSONField(required=False)
+    description = serializers.CharField(required=False)
+
+    # Subscription-specific fields
     application_fee_percent = serializers.DecimalField(
         required=False, max_digits=5, decimal_places=2
     )
-    collection_method = serializers.CharField(required=False)
     billing_cycle_anchor = serializers.DateTimeField(required=False)
     cancel_at_period_end = serializers.NullBooleanField(required=False)
     canceled_at = serializers.DateTimeField(required=False)
+    collection_method = serializers.CharField(required=False)
     current_period_end = serializers.DateTimeField(required=False)
     current_period_start = serializers.DateTimeField(required=False)
-    customer = serializers.PrimaryKeyRelatedField(
-        required=False, queryset=Customer.objects.all()
-    )
+    customer = serializers.SlugField(required=False, source="customer.id")
     days_until_due = serializers.IntegerField(required=False)
-    ended_at = serializers.DateTimeField(required=False)
-    pending_setup_intent = serializers.PrimaryKeyRelatedField(
-        required=False, queryset=SetupIntent.objects.all()
+    default_payment_method = serializers.SlugField(
+        required=False, source="default_payment_method.id"
     )
+    default_source = serializers.SlugField(
+        required=False, source="default_source.id"
+    )
+    discount = serializers.JSONField(required=False)
+    ended_at = serializers.DateTimeField(required=False)
+    next_pending_invoice_item_invoice = serializers.DateTimeField(required=False)
+    pending_invoice_item_interval = serializers.JSONField(required=False)
+    pending_setup_intent = serializers.SlugField(
+        required=False, source="pending_setup_intent.id"
+    )
+    pending_update = serializers.JSONField(required=False)
+    plan = serializers.SlugField(required=False, source="plan.id")
     quantity = serializers.IntegerField(required=False)
     start = serializers.DateTimeField(required=False)
+    start_date = serializers.DateTimeField(required=False)
     status = serializers.CharField(required=False)
     tax_percent = serializers.DecimalField(
         required=False, max_digits=5, decimal_places=2
@@ -131,13 +145,19 @@ class CreateSubscriptionSerializer(SubscriptionSerializer):
 class PlanSerializer(ModelSerializer):
     class Meta:
         model = Plan
-        fields = ('id', 'active', 'aggregate_usage', 'amount', 'billing_scheme',
+        fields = ('id', 'created', 'metadata', 'description',
+                  'active', 'aggregate_usage', 'amount', 'billing_scheme',
                   'currency', 'interval', 'interval_count', 'nickname', 'product',
                   'tiers', 'tiers_mode', 'transform_usage', 'trial_period_days',
                   'usage_type', 'name', 'statement_descriptor')
 
-    id = serializers.SlugField()
+    # StripeModel fields
+    id = serializers.SlugField(required=False)
+    created = serializers.DateTimeField(required=False)
+    metadata = serializers.JSONField(required=False)
+    description = serializers.CharField(required=False)
 
+    # Plan-specific fields
     active = serializers.BooleanField()
     aggregate_usage = serializers.CharField(required=False)
     amount = serializers.DecimalField(
@@ -148,15 +168,14 @@ class PlanSerializer(ModelSerializer):
     interval = serializers.CharField()
     interval_count = serializers.IntegerField(required=False)
     nickname = serializers.CharField(required=False)
-    product = serializers.PrimaryKeyRelatedField(
-        required=False, queryset=Product.objects.all()
-    )
+    product = serializers.SlugField(required=True, source="product.id")
     tiers = serializers.JSONField(required=False)
     tiers_mode = serializers.CharField(required=False)
     transform_usage = serializers.JSONField(required=False)
     trial_period_days = serializers.IntegerField(required=False)
     usage_type = serializers.CharField()
 
+    # Legacy fields (pre 2017-08-15)
     name = serializers.CharField(required=False)
     statement_descriptor = serializers.CharField(required=False)
 
