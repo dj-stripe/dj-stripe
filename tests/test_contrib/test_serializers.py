@@ -121,7 +121,7 @@ class CreateSubscriptionSerializerTest(TestCase):
             data={"plan": self.plan.id, "stripe_token": token.id}
         )
         self.assertTrue(serializer.is_valid())
-        self.assertEqual(serializer.validated_data["plan"], self.plan.id)
+        self.assertEqual(serializer.validated_data["plan"], self.plan)
         self.assertIn("stripe_token", serializer.validated_data)
         self.assertEqual(serializer.errors, {})
 
