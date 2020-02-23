@@ -117,6 +117,10 @@ class CreateSubscriptionSerializer(SubscriptionSerializer):
             msg = "Something went wrong processing the payment: " + str(e)
             raise ValidationError(detail=msg)
         else:
+            # Plan instance is missing after subscribe. Bug in _api_create()?
+            # But plan instance is nonetheless mandatory for to_representation()
+            # to succeed.
+            subscription.plan = validated_data.get('plan')
             # It is key to attach a 'stripe_token' attribute to the instance to fake
             # a model property, and let the subsequent representation of the new instance
             # (recursive call to .to_representation() method) succeeds.
