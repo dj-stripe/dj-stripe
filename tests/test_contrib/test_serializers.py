@@ -71,7 +71,7 @@ class SubscriptionSerializerTest(TestCase):
         """The base subscription serializer must refer to its Plan relationship
         though its stripe id."""
         serializer = SubscriptionSerializer(self.subscription)
-        self.assertEqual(serializer.data['plan'], self.plan.id)
+        self.assertEqual(serializer.data["plan"], self.plan.id)
 
 
 class CreateSubscriptionSerializerTest(TestCase):
@@ -111,7 +111,7 @@ class CreateSubscriptionSerializerTest(TestCase):
         creation"""
         token = stripe_token_mock(card={})
         serializer = CreateSubscriptionSerializer(
-            data={"plan": 'dummy_plan_id', "stripe_token": token.id}
+            data={"plan": "dummy_plan_id", "stripe_token": token.id}
         )
         with self.assertRaises(ValidationError):
             self.assertFalse(serializer.is_valid(raise_exception=True))
@@ -169,9 +169,9 @@ class DeprecatedSubscriptionSerializerTest(TestCase):
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
         with patch(
-                "stripe.Product.retrieve",
-                return_value=deepcopy(FAKE_PRODUCT),
-                autospec=True,
+            "stripe.Product.retrieve",
+            return_value=deepcopy(FAKE_PRODUCT),
+            autospec=True,
         ):
             self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
@@ -233,9 +233,9 @@ class DeprecatedSubscriptionSerializerTest(TestCase):
 class DeprecatedCreateSubscriptionSerializerTest(TestCase):
     def setUp(self):
         with patch(
-                "stripe.Product.retrieve",
-                return_value=deepcopy(FAKE_PRODUCT),
-                autospec=True,
+            "stripe.Product.retrieve",
+            return_value=deepcopy(FAKE_PRODUCT),
+            autospec=True,
         ):
             self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 

@@ -24,8 +24,11 @@ app_name = "djstripe_rest_framework"
 
 urlpatterns = [
     # Deprecated endpoint. Use the two endpoints below instead.
-    path("subscription/", views.DeprecatedSubscriptionRestView.as_view(), name="subscription"),
-
+    path(
+        "subscription/",
+        views.DeprecatedSubscriptionRestView.as_view(),
+        name="subscription",
+    ),
     # Authenticated Endpoint for accessing list of Subscriptions
     path(
         "subscriptions/", views.SubscriptionListView.as_view(), name="subscription-list"

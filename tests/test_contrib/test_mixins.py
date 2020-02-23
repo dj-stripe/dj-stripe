@@ -18,9 +18,7 @@ from .. import FAKE_CUSTOMER
 
 
 class AutoCreateCustomerMixinTest(APITestCase):
-    @patch(
-        "djstripe.models.Customer.objects.get_or_create", autospec=True
-    )
+    @patch("djstripe.models.Customer.objects.get_or_create", autospec=True)
     def test_customer_create_when_authenticated(self, mock_get_or_create):
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com", password="password"
@@ -31,9 +29,7 @@ class AutoCreateCustomerMixinTest(APITestCase):
         response = self.client.get(url)
         mock_get_or_create.assert_called_once()
 
-    @patch(
-        "djstripe.models.Customer.objects.get_or_create", autospec=True
-    )
+    @patch("djstripe.models.Customer.objects.get_or_create", autospec=True)
     def test_customer_create_when_anonymous(self, mock_get_or_create):
         url = reverse("rest_djstripe:subscription-list")
         response = self.client.get(url)
@@ -51,11 +47,11 @@ class AutoCustomerModelSerializerMixinTest(APITestCase):
 
         # Preparing request context
         factory = APIRequestFactory()
-        wsgi_request = factory.get('/')
+        wsgi_request = factory.get("/")
         force_authenticate(wsgi_request, user=user)
 
         # Performing test
-        serializer = SubscriptionSerializer(context={'request': Request(wsgi_request)})
+        serializer = SubscriptionSerializer(context={"request": Request(wsgi_request)})
         self.assertEqual(serializer.customer, customer)
 
     def test_customer_accessor_when_authenticated_but_no_customer(self):
@@ -67,18 +63,18 @@ class AutoCustomerModelSerializerMixinTest(APITestCase):
 
         # Preparing request context
         factory = APIRequestFactory()
-        wsgi_request = factory.get('/')
+        wsgi_request = factory.get("/")
         force_authenticate(wsgi_request, user=user)
 
         # Performing test
-        serializer = SubscriptionSerializer(context={'request': Request(wsgi_request)})
+        serializer = SubscriptionSerializer(context={"request": Request(wsgi_request)})
         self.assertIsNone(serializer.customer)
 
     def test_customer_accessor_when_anonymous(self):
         # Preparing request context
         factory = APIRequestFactory()
-        wsgi_request = factory.get('/')
+        wsgi_request = factory.get("/")
 
         # Performing test
-        serializer = SubscriptionSerializer(context={'request': Request(wsgi_request)})
+        serializer = SubscriptionSerializer(context={"request": Request(wsgi_request)})
         self.assertIsNone(serializer.customer)

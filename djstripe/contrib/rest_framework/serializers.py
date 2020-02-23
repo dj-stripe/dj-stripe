@@ -46,9 +46,7 @@ class SubscriptionSerializer(AutoCustomerModelSerializerMixin, ModelSerializer):
     default_payment_method = serializers.SlugField(
         required=False, source="default_payment_method.id"
     )
-    default_source = serializers.SlugField(
-        required=False, source="default_source.id"
-    )
+    default_source = serializers.SlugField(required=False, source="default_source.id")
     discount = serializers.JSONField(required=False)
     ended_at = serializers.DateTimeField(required=False)
     next_pending_invoice_item_invoice = serializers.DateTimeField(required=False)
@@ -70,7 +68,9 @@ class SubscriptionSerializer(AutoCustomerModelSerializerMixin, ModelSerializer):
 
     def validate_status(self, value):
         if value not in dir(SubscriptionStatus):
-            raise ValidationError({'detail': 'Invalid SubscriptionStatus {}'.format(value)})
+            raise ValidationError(
+                {"detail": "Invalid SubscriptionStatus {}".format(value)}
+            )
         return value
 
     def create(self, validated_data):
@@ -112,12 +112,12 @@ class CreateSubscriptionSerializer(SubscriptionSerializer):
         # nested nature when validating the final data. This can't be done in a
         # specialized validate_plan function (where the value will appear as provided
         # in POST request, that is, the correct ID slug string.)
-        plan_id = attrs.pop('plan').get('id')
+        plan_id = attrs.pop("plan").get("id")
 
         if Plan.objects.filter(id=plan_id).exists():
             attrs.update(plan=Plan.objects.get(id=plan_id))
         else:
-            msg = "Unknown / invalid Plan id: " + str(attrs.get('plan'))
+            msg = "Unknown / invalid Plan id: " + str(attrs.get("plan"))
             raise ValidationError(detail=msg)
 
         return attrs
@@ -134,7 +134,7 @@ class CreateSubscriptionSerializer(SubscriptionSerializer):
             # Plan instance is missing after subscribe. Bug in _api_create()?
             # But plan instance is nonetheless mandatory for to_representation()
             # to succeed.
-            subscription.plan = validated_data.get('plan')
+            subscription.plan = validated_data.get("plan")
             # It is key to attach a 'stripe_token' attribute to the instance to fake
             # a model property, and let the subsequent representation of the new instance
             # (recursive call to .to_representation() method) succeeds.
@@ -145,11 +145,28 @@ class CreateSubscriptionSerializer(SubscriptionSerializer):
 class PlanSerializer(ModelSerializer):
     class Meta:
         model = Plan
-        fields = ('id', 'created', 'metadata', 'description',
-                  'active', 'aggregate_usage', 'amount', 'billing_scheme',
-                  'currency', 'interval', 'interval_count', 'nickname', 'product',
-                  'tiers', 'tiers_mode', 'transform_usage', 'trial_period_days',
-                  'usage_type', 'name', 'statement_descriptor')
+        fields = (
+            "id",
+            "created",
+            "metadata",
+            "description",
+            "active",
+            "aggregate_usage",
+            "amount",
+            "billing_scheme",
+            "currency",
+            "interval",
+            "interval_count",
+            "nickname",
+            "product",
+            "tiers",
+            "tiers_mode",
+            "transform_usage",
+            "trial_period_days",
+            "usage_type",
+            "name",
+            "statement_descriptor",
+        )
 
     # StripeModel fields
     id = serializers.SlugField(required=False)
@@ -160,9 +177,7 @@ class PlanSerializer(ModelSerializer):
     # Plan-specific fields
     active = serializers.BooleanField()
     aggregate_usage = serializers.CharField(required=False)
-    amount = serializers.DecimalField(
-        required=False, max_digits=11, decimal_places=2
-    )
+    amount = serializers.DecimalField(required=False, max_digits=11, decimal_places=2)
     billing_scheme = serializers.CharField(required=False)
     currency = serializers.CharField(required=False)
     interval = serializers.CharField()

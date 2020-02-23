@@ -185,7 +185,9 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         "stripe.Product.retrieve", autospec=True, return_value=deepcopy(FAKE_PRODUCT)
     )
     @patch("djstripe.models.Subscription.cancel", autospec=True)
-    def test_cancel_subscription_with_delete(self, cancel_subscription_mock, retrieve_mock):
+    def test_cancel_subscription_with_delete(
+        self, cancel_subscription_mock, retrieve_mock
+    ):
         """Test a cancel through a DELETE method.
 
         Should cancel a Customer objects subscription.
@@ -337,7 +339,7 @@ class RestSubscriptionTest(APITestCase):
     @patch("djstripe.models.Customer.subscribe", autospec=True)
     @patch("djstripe.models.Customer.add_card", autospec=True)
     def test_create_subscription_charge_immediately(
-            self, add_card_mock, subscribe_mock
+        self, add_card_mock, subscribe_mock
     ):
         """Test a POST to the SubscriptionRestView.
 
@@ -379,9 +381,9 @@ class RestSubscriptionTest(APITestCase):
         Should return the correct data.
         """
         with patch(
-                "stripe.Product.retrieve",
-                return_value=deepcopy(FAKE_PRODUCT),
-                autospec=True,
+            "stripe.Product.retrieve",
+            return_value=deepcopy(FAKE_PRODUCT),
+            autospec=True,
         ):
             plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
         subscription = Subscription.sync_from_stripe_data(deepcopy(FAKE_SUBSCRIPTION))
@@ -412,9 +414,9 @@ class RestSubscriptionTest(APITestCase):
         fake_canceled_subscription = deepcopy(FAKE_SUBSCRIPTION)
 
         with patch(
-                "stripe.Product.retrieve",
-                return_value=deepcopy(FAKE_PRODUCT),
-                autospec=True,
+            "stripe.Product.retrieve",
+            return_value=deepcopy(FAKE_PRODUCT),
+            autospec=True,
         ):
             Subscription.sync_from_stripe_data(fake_canceled_subscription)
 

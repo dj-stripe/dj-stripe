@@ -83,11 +83,11 @@ class SubscriptionDetailView(RetrieveUpdateAPIView):
         # See https://stackoverflow.com/a/21262262/707984 for explanations about
         # _mutable.
         mutable = False
-        if getattr(request.data, '_mutable', None) is not None:
+        if getattr(request.data, "_mutable", None) is not None:
             mutable = request.data._mutable
             request.data._mutable = True
         request.data.update(status=SubscriptionStatus.canceled)
-        if getattr(request.data, '_mutable', None) is not None:
+        if getattr(request.data, "_mutable", None) is not None:
             request.data._mutable = mutable
         return self.partial_update(request, *args, **kwargs)
 
@@ -119,7 +119,7 @@ class DeprecatedSubscriptionRestView(APIView):
 
         Returns with status code 200.
         """
-        warnings.warn('This view is deprecated. Use the new REST endpoints instead.')
+        warnings.warn("This view is deprecated. Use the new REST endpoints instead.")
 
         customer, _created = Customer.get_or_create(
             subscriber=subscriber_request_callback(self.request)
@@ -134,7 +134,7 @@ class DeprecatedSubscriptionRestView(APIView):
 
         Returns with status code 201.
         """
-        warnings.warn('This view is deprecated. Use the new REST endpoints instead.')
+        warnings.warn("This view is deprecated. Use the new REST endpoints instead.")
 
         serializer = DeprecatedCreateSubscriptionSerializer(data=request.data)
 
@@ -165,7 +165,7 @@ class DeprecatedSubscriptionRestView(APIView):
 
         Returns with status code 204.
         """
-        warnings.warn('This view is deprecated. Use the new REST endpoints instead.')
+        warnings.warn("This view is deprecated. Use the new REST endpoints instead.")
 
         try:
             customer, _created = Customer.get_or_create(
