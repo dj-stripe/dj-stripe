@@ -113,7 +113,7 @@ class CreateSubscriptionSerializerTest(TestCase):
     @patch(
         "stripe.Token.create", return_value=PropertyMock(id="token_test"), autospec=True
     )
-    def test_valid_serializer_wth_minimal_data(self, stripe_token_mock):
+    def test_valid_serializer_with_minimal_data(self, stripe_token_mock):
         """The serializer must be valid when provided with minimal data for instance
         creation"""
         token = stripe_token_mock(card={})
