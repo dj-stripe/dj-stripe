@@ -150,7 +150,7 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         url = reverse(
             "rest_djstripe:subscription-detail", kwargs={"id": subscription.id}
         )
-        response = self.client.put(url, data={'status': SubscriptionStatus.unpaid})
+        response = self.client.put(url, data={"status": SubscriptionStatus.unpaid})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     @patch(
@@ -166,7 +166,7 @@ class SubscriptionListCreateAPIViewAuthenticatedTestCase(APITestCase):
         url = reverse(
             "rest_djstripe:subscription-detail", kwargs={"id": subscription.id}
         )
-        response = self.client.put(url, data={'status': 'wrong subscription status'})
+        response = self.client.put(url, data={"status": "wrong subscription status"})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @patch(
