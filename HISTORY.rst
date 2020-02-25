@@ -3,7 +3,7 @@
 History
 =======
 
-2.2.3 (unreleased)
+2.2.3 (2020-02-25)
 ------------------
 
 - Changed ``JSONField`` dependency back to `jsonfield`_ from `jsonfield2`_ (see `Warning about safe uninstall of jsonfield2 on upgrade`_).
