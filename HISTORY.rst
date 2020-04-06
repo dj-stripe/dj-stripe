@@ -67,6 +67,7 @@ Warning about safe uninstall of jsonfield2 on upgrade
 This is a bugfix-only version:
 
 - Fixed handling of ``TaxRate`` events (#1094).
+- Fixed pagination issue in ``Invoice.sync_from_stripe_data`` (#1134)
 
 2.2.1 (2020-01-14)
 ------------------
