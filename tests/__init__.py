@@ -5,7 +5,6 @@ Originally collected using API VERSION 2015-07-28.
 Updated to API VERSION 2016-03-07 with bogus fields.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
-from typing import Any
 
 import json
 import logging
@@ -13,6 +12,7 @@ import sys
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
