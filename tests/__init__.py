@@ -175,9 +175,8 @@ class StripeList(dict):
     def list(self, **kwargs: Any) -> 'StripeList':
         """Add a list method to the StripeList which returns itself.
 
-        list() arbitrarily accepts keyword arguments, but will always return the full iterable.
-
-        Be careful if you expect the argument accepting functionality of Stripe's list() method.
+        list() accepts arbitrary kwargs, be careful is you expect the
+        argument-accepting functionality of Stripe's list() method.
         """
         return self
 
