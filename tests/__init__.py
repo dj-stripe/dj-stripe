@@ -12,6 +12,7 @@ import sys
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -92,19 +93,100 @@ def datetime_to_unix(datetime_):
     return int(dateformat.format(datetime_, "U"))
 
 
+class StripeItem(dict):
+    """Flexible class built to mock any generic Stripe object.
+
+    Implements object access + deletion methods to match the behavior
+    of Stripe's library, which allows both object + dictionary access.
+
+    Has a delete method since (most) Stripe objects can be deleted.
+    """
+
+    def __getattr__(self, name):
+        """Give StripeItem normal object access to match Stripe behavior."""
+        if name in self:
+            return self[name]
+        else:
+            raise AttributeError("No such attribute: " + name)
+
+    def __setattr__(self, name, value):
+        self[name] = value
+
+    def __delattr__(self, name):
+        if name in self:
+            del self[name]
+        else:
+            raise AttributeError("No such attribute: " + name)
+
+    def delete(self) -> bool:
+        """Superficial mock that adds a deleted attribute."""
+        self.deleted = True
+
+        return self.deleted
+
+
 class StripeList(dict):
+    """Mock a generic Stripe Iterable.
+
+    It has the relevant attributes of a stripe iterable (has_more, data).
+
+    This mock is important so we can use stripe's `list` method in our testing.
+    StripeList.list() will return the StripeList.
+
+    Additionally, iterating over instances of MockStripeIterable will iterate over
+    the data attribute, just like Stripe iterables.
+
+    Attributes:
+        has_more: mock has_more flag. Default False.
+        **kwargs: all of the fields of the stripe object, generally as a dictionary.
+    """
+
     object = "list"
-    has_more = False
     url = "/v1/fakes"
+    has_more = False
 
-    def __init__(self, data):
-        self.data = data
+    def __getattr__(self, name):
+        """Give StripeItem normal object access to match Stripe behavior."""
+        if name in self:
+            return self[name]
+        else:
+            raise AttributeError("No such attribute: " + name)
 
-    def __getitem__(self, key):
-        return self.getattr(key)
+    def __setattr__(self, name, value):
+        self[name] = value
 
-    def auto_paging_iter(self):
-        return self.data
+    def __delattr__(self, name):
+        if name in self:
+            del self[name]
+        else:
+            raise AttributeError("No such attribute: " + name)
+
+    def __iter__(self) -> Any:
+        """Make StripeList an iterable, to match the Stripe iterable behavior."""
+        self.iter_copy = self.data.copy()
+        return self
+
+    def __next__(self) -> StripeItem:
+        """Define iteration for StripeList."""
+        if len(self.iter_copy) > 0:
+            return self.iter_copy.pop(0)
+        else:
+            raise StopIteration()
+
+    def list(self, **kwargs: Any) -> "StripeList":
+        """Add a list method to the StripeList which returns itself.
+
+        list() accepts arbitrary kwargs, be careful is you expect the
+        argument-accepting functionality of Stripe's list() method.
+        """
+        return self
+
+    def auto_paging_iter(self) -> "StripeList":
+        """Add an auto_paging_iter method to the StripeList which returns itself.
+
+        The StripeList is an iterable, so this mimics the real behavior.
+        """
+        return self
 
     @property
     def total_count(self):
@@ -864,7 +946,12 @@ FAKE_DISCOUNT_CUSTOMER = {
 }
 
 
-class InvoiceDict(dict):
+class InvoiceDict(StripeItem):
+    def __init__(self, *args, **kwargs):
+        """Match Stripe's behavior: return a stripe iterable on `invoice.lines`."""
+        super().__init__(*args, **kwargs)
+        self.lines = StripeList(self.lines)
+
     def pay(self):
         return self
 

@@ -152,4 +152,4 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
     def test_api_list(self, customer_retrieve_mock):
         bank_account_list = BankAccount.api_list(customer=self.customer)
 
-        self.assertEqual([FAKE_BANK_ACCOUNT_SOURCE], bank_account_list)
+        self.assertEqual([FAKE_BANK_ACCOUNT_SOURCE], [i for i in bank_account_list])

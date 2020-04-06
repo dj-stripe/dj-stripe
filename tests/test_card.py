@@ -221,4 +221,4 @@ class CardTest(AssertStripeFksMixin, TestCase):
     def test_api_list(self, customer_retrieve_mock):
         card_list = Card.api_list(customer=self.customer)
 
-        self.assertEqual([FAKE_CARD, FAKE_CARD_V], card_list)
+        self.assertEqual([FAKE_CARD, FAKE_CARD_V], [i for i in card_list])

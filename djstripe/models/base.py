@@ -649,7 +649,7 @@ class StripeModel(models.Model):
             return []
 
         invoiceitems = []
-        for line in lines.get("data", []):
+        for line in lines.auto_paging_iter():
             if invoice.id:
                 save = True
                 line.setdefault("invoice", invoice.id)
