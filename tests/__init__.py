@@ -140,6 +140,7 @@ class StripeList(dict):
         has_more: mock has_more flag. Default False.
         **kwargs: all of the fields of the stripe object, generally as a dictionary.
     """
+
     object = "list"
     url = "/v1/fakes"
     has_more = False
@@ -172,7 +173,7 @@ class StripeList(dict):
         else:
             raise StopIteration()
 
-    def list(self, **kwargs: Any) -> 'StripeList':
+    def list(self, **kwargs: Any) -> "StripeList":
         """Add a list method to the StripeList which returns itself.
 
         list() accepts arbitrary kwargs, be careful is you expect the
@@ -180,7 +181,7 @@ class StripeList(dict):
         """
         return self
 
-    def auto_paging_iter(self) -> 'StripeList':
+    def auto_paging_iter(self) -> "StripeList":
         """Add an auto_paging_iter method to the StripeList which returns itself.
 
         The StripeList is an iterable, so this mimics the real behavior.
