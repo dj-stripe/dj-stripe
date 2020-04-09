@@ -745,7 +745,7 @@ class Customer(StripeModel):
         :type amount: Decimal. Precision is 2; anything more will be ignored.
         :param currency: 3-letter ISO code for currency
         :type currency: string
-        :param application_fee: A fee that will be applied to the charge and transfered
+        :param application_fee: A fee that will be applied to the charge and transferred
             to the platform owner's account.
         :type application_fee: Decimal. Precision is 2; anything more will be ignored.
         :param capture: Whether or not to immediately capture the charge.
