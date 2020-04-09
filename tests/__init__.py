@@ -766,7 +766,12 @@ FAKE_PLAN_METERED = {
 }
 
 
-class SubscriptionDict(dict):
+class SubscriptionDict(StripeItem):
+    def __init__(self, *args, **kwargs):
+        """Match Stripe's behavior: return a stripe iterable on `subscription.items`."""
+        super().__init__(*args, **kwargs)
+        self["items"] = StripeList(self["items"])
+
     def __setattr__(self, name, value):
         if type(value) == datetime:
             value = datetime_to_unix(value)

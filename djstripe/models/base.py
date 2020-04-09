@@ -698,7 +698,7 @@ class StripeModel(models.Model):
             return []
 
         subscriptionitems = []
-        for item_data in items.get("data", []):
+        for item_data in items.auto_paging_iter():
             item, _ = target_cls._get_or_create_from_stripe_object(
                 item_data, refetch=False
             )
