@@ -10,6 +10,7 @@ History
 - Dropped support for Django 2.1 (#1056).
 - Dropped support for python 3.5 (#1073).
 - Fixed handling of ``TaxRate`` events (#1094).
+- Fixed pagination issue in ``Invoice.sync_from_stripe_data`` (#1052).
 - Dropped previously-deprecated ``Invoice`` fields (see https://stripe.com/docs/upgrades#2018-11-08 ):
     - ``.closed``
     - ``.forgiven``
@@ -67,7 +68,6 @@ Warning about safe uninstall of jsonfield2 on upgrade
 This is a bugfix-only version:
 
 - Fixed handling of ``TaxRate`` events (#1094).
-- Fixed pagination issue in ``Invoice.sync_from_stripe_data`` (#1134)
 
 2.2.1 (2020-01-14)
 ------------------
