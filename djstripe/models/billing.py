@@ -405,7 +405,12 @@ class BaseInvoice(StripeModel):
         ),
     )
     paid = models.BooleanField(
-        default=False, help_text="The time at which payment will next be attempted."
+        default=False,
+        help_text=(
+            "Whether payment was successfully collected for this invoice. An invoice "
+            "can be paid (most commonly) with a charge or with credit from the "
+            "customer’s account balance."
+        ),
     )
     payment_intent = models.OneToOneField(
         "PaymentIntent",
