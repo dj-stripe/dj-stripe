@@ -724,7 +724,7 @@ class StripeModel(models.Model):
             return []
 
         refund_objs = []
-        for refund_data in refunds.get("data", []):
+        for refund_data in refunds.auto_paging_iter():
             item, _ = target_cls._get_or_create_from_stripe_object(
                 refund_data, refetch=False
             )

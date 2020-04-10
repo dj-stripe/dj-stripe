@@ -535,7 +535,12 @@ FAKE_SESSION_I = {
 }
 
 
-class ChargeDict(dict):
+class ChargeDict(StripeItem):
+    def __init__(self, *args, **kwargs):
+        """Match Stripe's behavior: return a stripe iterable on `charge.refunds`."""
+        super().__init__(*args, **kwargs)
+        self.refunds = StripeList(self.refunds)
+
     def refund(self, amount=None, reason=None):
         self.update({"refunded": True, "amount_refunded": amount})
         return self

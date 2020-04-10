@@ -11,7 +11,7 @@ History
 - Dropped support for python 3.5 (#1073).
 - Fixed handling of ``TaxRate`` events (#1094).
 - Fixed pagination issue in ``Invoice.sync_from_stripe_data`` (#1052).
-- Fixed pagination issue in ``Subscription.sync_from_stripe_data`` (#1054).
+- Fixed pagination issues in ``Subscription`` & ``Charge`` ``.sync_from_stripe_data`` (#1054).
 - Dropped previously-deprecated ``Invoice`` fields (see https://stripe.com/docs/upgrades#2018-11-08 ):
     - ``.closed``
     - ``.forgiven``
