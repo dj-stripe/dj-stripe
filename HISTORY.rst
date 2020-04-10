@@ -12,6 +12,7 @@ History
 - Fixed handling of ``TaxRate`` events (#1094).
 - Fixed pagination issue in ``Invoice.sync_from_stripe_data`` (#1052).
 - Fixed pagination issues in ``Subscription`` & ``Charge`` ``.sync_from_stripe_data`` (#1054).
+- Tidyup ``_stripe_object_set_total_tax_amounts`` unique handling (#1139).
 - Dropped previously-deprecated ``Invoice`` fields (see https://stripe.com/docs/upgrades#2018-11-08 ):
     - ``.closed``
     - ``.forgiven``
