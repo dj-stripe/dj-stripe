@@ -617,9 +617,11 @@ class StripeModel(models.Model):
             )
             tax_amount, _ = target_cls.objects.update_or_create(
                 invoice=instance,
-                amount=tax_amount_data["amount"],
-                inclusive=tax_amount_data["inclusive"],
                 tax_rate=tax_rate,
+                defaults={
+                    "amount": tax_amount_data["amount"],
+                    "inclusive": tax_amount_data["inclusive"],
+                },
             )
 
             pks.append(tax_amount.pk)
