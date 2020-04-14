@@ -2,11 +2,14 @@
 dj-stripe Account Tests.
 """
 from copy import deepcopy
+from importlib import reload
 from unittest.mock import patch
 
 import pytest
 from django.test.testcases import TestCase
+from django.test.utils import override_settings
 
+from djstripe import settings as djstripe_settings
 from djstripe.models import Account
 from djstripe.settings import STRIPE_SECRET_KEY
 
@@ -120,6 +123,29 @@ def test_account_str(
     account = Account.get_default_account()
 
     assert str(account) == expected_account_str
+
+
+class TestAccountRestrictedKeys(TestCase):
+    @override_settings(
+        STRIPE_TEST_SECRET_KEY="rk_test_blah",
+        STRIPE_TEST_PUBLIC_KEY="pk_test_foo",
+        STRIPE_LIVE_MODE=False,
+    )
+    @patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
+    def test_account_str_restricted_key(self, account_retrieve_mock):
+        """
+        Test that we do not attempt to retrieve account ID with restricted keys.
+        """
+        reload(djstripe_settings)
+        assert djstripe_settings.STRIPE_SECRET_KEY == "rk_test_blah"
+
+        account = Account.get_default_account()
+
+        assert account is None
+        account_retrieve_mock.assert_not_called()
+
+    def tearDown(self):
+        reload(djstripe_settings)
 
 
 @pytest.mark.parametrize(
