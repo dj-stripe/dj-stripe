@@ -410,8 +410,9 @@ class SourceAdmin(StripeModelAdmin):
 @admin.register(models.PaymentMethod)
 class PaymentMethodAdmin(StripeModelAdmin):
     list_display = ("customer", "billing_details")
-    list_filter = ("customer",)
+    list_filter = ("type",)
     list_select_related = ("customer", "customer__subscriber")
+    search_fields = ("customer__id",)
 
 
 @admin.register(models.Subscription)
