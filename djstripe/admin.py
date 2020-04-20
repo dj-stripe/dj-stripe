@@ -126,6 +126,7 @@ class WebhookEventTriggerAdmin(admin.ModelAdmin):
         "djstripe_version",
     )
     list_filter = ("created", "valid", "processed")
+    list_select_related = ("event",)
     raw_id_fields = get_forward_relation_fields_for_model(models.WebhookEventTrigger)
 
     def reprocess(self, request, queryset):
@@ -221,6 +222,11 @@ class ChargeAdmin(StripeModelAdmin):
         "refunded",
         "fee",
     )
+    list_select_related = (
+        "customer",
+        "customer__subscriber",
+        "balance_transaction",
+    )
     search_fields = ("customer__id", "invoice__id")
     list_filter = ("status", "paid", "refunded", "captured")
 
@@ -251,6 +257,7 @@ class CustomerAdmin(StripeModelAdmin):
         "balance",
         "business_vat_id",
     )
+    list_select_related = ("subscriber", "default_source", "coupon")
     list_filter = (CustomerHasSourceListFilter, CustomerSubscriptionStatusListFilter)
     search_fields = ("email", "description")
     inlines = (SubscriptionInline,)
@@ -294,6 +301,7 @@ class PaymentIntentAdmin(StripeModelAdmin):
         "amount_received",
         "receipt_email",
     )
+    list_select_related = ("customer", "customer__subscriber")
     search_fields = ("customer__id", "invoice__id")
 
 
@@ -310,6 +318,11 @@ class SetupIntentAdmin(StripeModelAdmin):
         "status",
     )
     list_filter = ("status",)
+    list_select_related = (
+        "customer",
+        "customer__subscriber",
+        "payment_method",
+    )
     search_fields = ("customer__id", "status")
 
 
@@ -334,6 +347,7 @@ class InvoiceAdmin(StripeModelAdmin):
         "period_start",
         "period_end",
     )
+    list_select_related = ("customer", "customer__subscriber")
     search_fields = ("customer__id", "number", "receipt_number")
     inlines = (InvoiceItemInline,)
 
@@ -390,18 +404,21 @@ class RefundAdmin(StripeModelAdmin):
 class SourceAdmin(StripeModelAdmin):
     list_display = ("customer", "type", "status", "amount", "currency", "usage", "flow")
     list_filter = ("type", "status", "usage", "flow")
+    list_select_related = ("customer", "customer__subscriber")
 
 
 @admin.register(models.PaymentMethod)
 class PaymentMethodAdmin(StripeModelAdmin):
     list_display = ("customer", "billing_details")
     list_filter = ("customer",)
+    list_select_related = ("customer", "customer__subscriber")
 
 
 @admin.register(models.Subscription)
 class SubscriptionAdmin(StripeModelAdmin):
     list_display = ("customer", "status")
     list_filter = ("status", "cancel_at_period_end")
+    list_select_related = ("customer", "customer__subscriber")
 
     inlines = (SubscriptionItemInline,)
 
