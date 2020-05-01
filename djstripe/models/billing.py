@@ -319,7 +319,7 @@ class BaseInvoice(StripeModel):
         max_length=5000,
         blank=True,
         help_text="The customer’s phone number. Until the invoice is finalized, "
-        "this field will equal customer.phone_. Once the invoice is finalized, "
+        "this field will equal customer.phone. Once the invoice is finalized, "
         "this field will no longer be updated.",
     )
     customer_shipping = JSONField(
