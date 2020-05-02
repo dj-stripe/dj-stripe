@@ -10,14 +10,14 @@ Command line
 You can sync your database with stripe using the manage command ``djstripe_sync_models``,
 e.g. to populate an empty database from an existing Stripe account.
 
-.. code-block::
+.. code-block:: bash
 
     ./manage.py djstripe_sync_models
 
 
 With no arguments this will sync all supported models, or a list of models to sync can be provided.
 
-.. code-block::
+.. code-block:: bash
 
     ./manage.py djstripe_sync_models Invoice Subscription
 
@@ -30,7 +30,7 @@ By default this processes all events, but options can be passed to limit the eve
 Note the Stripe API documents a limitation where events are only guaranteed to be available for
 30 days.
 
-.. code-block::
+.. code-block:: bash
 
     # all events
     ./manage.py djstripe_process_events

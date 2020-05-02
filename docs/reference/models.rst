@@ -276,17 +276,6 @@ InvoiceItem
 .. automethod:: djstripe.models.InvoiceItem.api_retrieve
 .. automethod:: djstripe.models.InvoiceItem.get_stripe_dashboard_url
 
-.. automethod:: djstripe.models.InvoiceItem.sync_from_stripe_data
-
-InvoiceItem
------------
-.. autoclass:: djstripe.models.InvoiceItem
-
-
-.. automethod:: djstripe.models.InvoiceItem.api_list
-.. automethod:: djstripe.models.InvoiceItem.api_retrieve
-.. automethod:: djstripe.models.InvoiceItem.get_stripe_dashboard_url
-
 .. automethod:: djstripe.models.InvoiceItem.str_parts
 .. automethod:: djstripe.models.InvoiceItem.sync_from_stripe_data
 
