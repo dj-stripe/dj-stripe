@@ -97,7 +97,7 @@ class Migration(migrations.Migration):
             name="customer_phone",
             field=models.TextField(
                 blank=True,
-                help_text="The customer’s phone number. Until the invoice is finalized, this field will equal customer.phone_. Once the invoice is finalized, this field will no longer be updated.",
+                help_text="The customer’s phone number. Until the invoice is finalized, this field will equal customer.phone. Once the invoice is finalized, this field will no longer be updated.",
                 max_length=5000,
             ),
         ),
@@ -518,7 +518,7 @@ class Migration(migrations.Migration):
                     "customer_phone",
                     models.TextField(
                         blank=True,
-                        help_text="The customer’s phone number. Until the invoice is finalized, this field will equal customer.phone_. Once the invoice is finalized, this field will no longer be updated.",
+                        help_text="The customer’s phone number. Until the invoice is finalized, this field will equal customer.phone. Once the invoice is finalized, this field will no longer be updated.",
                         max_length=5000,
                     ),
                 ),
