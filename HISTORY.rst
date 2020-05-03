@@ -7,6 +7,7 @@ History
 ------------------
 
 - Made ``Account.payouts_enabled`` nullable (#1107).
+- Increased max_length of ``DjstripePaymentMethod.type``, as first step towards support of `alipay_account` (#1120).
 
 2.3.0 (2020-04-19)
 ------------------

@@ -26,7 +26,7 @@ class DjstripePaymentMethod(models.Model):
     """
 
     id = models.CharField(max_length=255, primary_key=True)
-    type = models.CharField(max_length=12, db_index=True)
+    type = models.CharField(max_length=50, db_index=True)
 
     @classmethod
     def from_stripe_object(cls, data):
