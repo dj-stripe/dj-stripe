@@ -3,6 +3,11 @@
 History
 =======
 
+2.4.0 (unreleased)
+------------------
+
+- Made ``Account.payouts_enabled`` nullable (#1107).
+
 2.3.0 (2020-04-19)
 ------------------
 
