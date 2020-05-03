@@ -79,7 +79,7 @@ class Account(StripeModel):
         ),
     )
     payouts_enabled = models.BooleanField(
-        help_text="Whether Stripe can send payouts to this account"
+        null=True, help_text="Whether Stripe can send payouts to this account"
     )
     product_description = models.CharField(
         max_length=255,
