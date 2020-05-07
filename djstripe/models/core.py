@@ -1938,6 +1938,30 @@ class Product(StripeModel):
     def __str__(self):
         return self.name
 
+    @classmethod
+    def get_or_create(cls, **kwargs):
+        """ Get or create a Plan."""
+
+        try:
+            return cls.objects.get(id=kwargs.get("id")), False
+        except cls.DoesNotExist:
+            return cls.create(**kwargs), True
+
+    @classmethod
+    def create(cls, **kwargs):
+        # A few minor things are changed in the api-version of the create call
+        api_kwargs = dict(kwargs)
+        api_kwargs.pop("livemode")
+        api_kwargs.pop("caption")
+
+        api_kwargs = {k: v for k, v in api_kwargs.items() if v is not None and v != ""}
+
+        print(api_kwargs)
+
+        stripe_product = cls._api_create(**api_kwargs)
+        plan = cls.sync_from_stripe_data(stripe_product)
+        return plan
+
 
 class Refund(StripeModel):
     """

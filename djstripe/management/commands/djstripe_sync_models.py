@@ -1,3 +1,4 @@
+import traceback
 from typing import List
 
 from django.apps import apps
@@ -98,7 +99,7 @@ class Command(BaseCommand):
                 )
 
         except Exception as e:
-            print(e)
+            traceback.print_exc()
 
     def get_list_kwargs(self, model):
         """

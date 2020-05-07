@@ -1025,8 +1025,6 @@ class Plan(StripeModel):
         ),
     )
     amount = StripeDecimalCurrencyAmountField(
-        null=True,
-        blank=True,
         help_text="Amount (as decimal) to be charged on the interval specified.",
     )
     billing_scheme = StripeEnumField(
@@ -1059,7 +1057,6 @@ class Plan(StripeModel):
     nickname = models.TextField(
         max_length=5000,
         default="",
-        blank=True,
         help_text="A brief description of the plan, hidden from customers.",
     )
     product = models.ForeignKey(
@@ -1121,6 +1118,7 @@ class Plan(StripeModel):
         help_text="Name of the plan, to be displayed on invoices and in "
         "the web interface.",
     )
+
     statement_descriptor = models.CharField(
         max_length=22,
         null=True,
@@ -1141,7 +1139,7 @@ class Plan(StripeModel):
         """ Get or create a Plan."""
 
         try:
-            return Plan.objects.get(id=kwargs["id"]), False
+            return Plan.objects.get(id=kwargs.get("id")), False
         except Plan.DoesNotExist:
             return cls.create(**kwargs), True
 
@@ -1149,11 +1147,15 @@ class Plan(StripeModel):
     def create(cls, **kwargs):
         # A few minor things are changed in the api-version of the create call
         api_kwargs = dict(kwargs)
+        api_kwargs.pop("livemode")
+        api_kwargs.pop("description")
+        api_kwargs.pop("name")
         api_kwargs["amount"] = int(api_kwargs["amount"] * 100)
 
         if isinstance(api_kwargs.get("product"), StripeModel):
             api_kwargs["product"] = api_kwargs["product"].id
 
+        api_kwargs = {k: v for k, v in api_kwargs.items() if v is not None and v != ""}
         stripe_plan = cls._api_create(**api_kwargs)
         plan = cls.sync_from_stripe_data(stripe_plan)
 

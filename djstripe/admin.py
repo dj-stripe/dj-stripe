@@ -371,6 +371,13 @@ class ProductAdmin(StripeModelAdmin):
     list_filter = ("type", "active", "shippable")
     search_fields = ("name", "statement_descriptor")
 
+    def save_model(self, request, obj, form, change):
+        """Update or create objects using our custom methods that sync with Stripe."""
+        if change:
+            pass
+        else:
+            models.Product.get_or_create(**form.cleaned_data)
+
 
 @admin.register(models.Refund)
 class RefundAdmin(StripeModelAdmin):
