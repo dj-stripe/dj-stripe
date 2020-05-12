@@ -6,6 +6,7 @@ from django.apps import apps
 from django.db import IntegrityError, models, transaction
 from django.utils import dateformat, timezone
 from django.utils.encoding import smart_str
+from stripe.error import InvalidRequestError
 
 from .. import settings as djstripe_settings
 from ..fields import JSONField, StripeDateTimeField, StripeIdField
@@ -505,9 +506,13 @@ class StripeModel(models.Model):
                 # {"id": "cus_XXXX", "default_source": "card_XXXX"}
                 # Leaving the default field_name ("id") will get_or_create the customer.
                 # If field_name="default_source", we get_or_create the card instead.
-                cls_instance = cls(id=id_)
-                data = cls_instance.api_retrieve(stripe_account=stripe_account)
-                should_expand = False
+                try:
+                    cls_instance = cls(id=id_)
+                    data = cls_instance.api_retrieve(stripe_account=stripe_account)
+                    should_expand = False
+                except InvalidRequestError:
+                    return None, False
+
 
         # The next thing to happen will be the "create from stripe object" call.
         # At this point, if we don't have data to start with (field is a str),
