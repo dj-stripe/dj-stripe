@@ -395,8 +395,7 @@ class SourceAdmin(StripeModelAdmin):
 @admin.register(models.PaymentMethod)
 class PaymentMethodAdmin(StripeModelAdmin):
     list_display = ("customer", "billing_details")
-    list_filter = ("customer",)
-
+    
 
 @admin.register(models.Subscription)
 class SubscriptionAdmin(StripeModelAdmin):
