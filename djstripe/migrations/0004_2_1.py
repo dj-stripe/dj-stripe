@@ -482,6 +482,7 @@ class Migration(migrations.Migration):
                         default="",
                         help_text="An arbitrary string attached to the object. Often useful for displaying to users.",
                         max_length=1000,
+                        blank=True,
                     ),
                 ),
                 (
