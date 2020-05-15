@@ -1496,6 +1496,7 @@ class PaymentIntent(StripeModel):
     description = models.TextField(
         max_length=1000,
         default="",
+        blank=True,
         help_text=(
             "An arbitrary string attached to the object. "
             "Often useful for displaying to users."
