@@ -1,6 +1,0 @@
-include AUTHORS.rst
-include CONTRIBUTING.rst
-include HISTORY.rst
-include LICENSE
-include README.rst
-recursive-include djstripe *.html *.png *.gif *.py *.txt

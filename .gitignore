@@ -13,3 +13,6 @@ docs/_static
 # Coverage
 /cover
 .coverage
+
+# Do not commit Poetry lockfiles for libraries
+poetry.lock
