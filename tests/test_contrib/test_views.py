@@ -110,7 +110,7 @@ class RestSubscriptionTest(APITestCase):
 
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["plan"], plan.djstripe_id)
+        self.assertEqual(response.data["plan"], plan.pk)
         self.assertEqual(response.data["status"], subscription.status)
         self.assertEqual(
             response.data["cancel_at_period_end"], subscription.cancel_at_period_end
