@@ -8,7 +8,7 @@ from django.utils.functional import cached_property
 
 from .. import settings as djstripe_settings
 from ..context_managers import stripe_temporary_api_version
-from ..fields import JSONField
+from ..fields import JSONField, StripeForeignKey
 from ..signals import webhook_processing_error
 from ..utils import fix_django_headers
 from .base import logger
@@ -49,7 +49,7 @@ class WebhookEventTrigger(models.Model):
     traceback = models.TextField(
         blank=True, help_text="Traceback if an exception was thrown during processing"
     )
-    event = models.ForeignKey(
+    event = StripeForeignKey(
         "Event",
         on_delete=models.SET_NULL,
         null=True,

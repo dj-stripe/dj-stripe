@@ -8,6 +8,7 @@ from ..fields import (
     StripeCurrencyCodeField,
     StripeDecimalCurrencyAmountField,
     StripeEnumField,
+    StripeForeignKey,
     StripeIdField,
     StripeQuantumCurrencyAmountField,
 )
@@ -23,14 +24,14 @@ class Account(StripeModel):
     stripe_class = stripe.Account
     # Special handling of the icon and logo fields, they moved to settings.branding
     # in Stripe 2019-02-19 but we want them as ForeignKeys
-    branding_icon = models.ForeignKey(
+    branding_icon = StripeForeignKey(
         "FileUpload",
         on_delete=models.SET_NULL,
         null=True,
         related_name="icon_account",
         help_text="An icon for the account. Must be square and at least 128px x 128px.",
     )
-    branding_logo = models.ForeignKey(
+    branding_logo = StripeForeignKey(
         "FileUpload",
         on_delete=models.SET_NULL,
         null=True,
@@ -209,13 +210,13 @@ class ApplicationFee(StripeModel):
         "on the fee if a partial refund was issued)"
     )
     # TODO application = ...
-    balance_transaction = models.ForeignKey(
+    balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.CASCADE,
         help_text="Balance transaction that describes the impact on your account"
         " balance.",
     )
-    charge = models.ForeignKey(
+    charge = StripeForeignKey(
         "Charge",
         on_delete=models.CASCADE,
         help_text="The charge that the application fee was taken from.",
@@ -243,14 +244,14 @@ class ApplicationFeeRefund(StripeModel):
     description = None
 
     amount = StripeQuantumCurrencyAmountField(help_text="Amount refunded, in cents.")
-    balance_transaction = models.ForeignKey(
+    balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.CASCADE,
         help_text="Balance transaction that describes the impact on your account "
         "balance.",
     )
     currency = StripeCurrencyCodeField()
-    fee = models.ForeignKey(
+    fee = StripeForeignKey(
         "ApplicationFee",
         on_delete=models.CASCADE,
         related_name="refunds",
@@ -323,7 +324,7 @@ class Transfer(StripeModel):
         help_text="The amount (as decimal) reversed (can be less than the amount "
         "attribute on the transfer if a partial reversal was issued).",
     )
-    balance_transaction = models.ForeignKey(
+    balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
         null=True,
@@ -382,7 +383,7 @@ class TransferReversal(StripeModel):
     stripe_class = stripe.Transfer
 
     amount = StripeQuantumCurrencyAmountField(help_text="Amount, in cents.")
-    balance_transaction = models.ForeignKey(
+    balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
         null=True,
@@ -392,7 +393,7 @@ class TransferReversal(StripeModel):
         "balance.",
     )
     currency = StripeCurrencyCodeField()
-    transfer = models.ForeignKey(
+    transfer = StripeForeignKey(
         "Transfer",
         on_delete=models.CASCADE,
         help_text="The transfer that was reversed.",

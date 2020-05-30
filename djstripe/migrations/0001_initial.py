@@ -388,7 +388,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "account",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="The account the charge was made on behalf of. Null here indicates that this value was never set.",
                         on_delete=django.db.models.deletion.PROTECT,
                         related_name="bank_account",
@@ -760,7 +760,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "account",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="The account the charge was made on behalf of. Null here indicates that this value was never set.",
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
@@ -1661,7 +1661,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "customer",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="The customer associated with this invoiceitem.",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="invoiceitems",
@@ -1798,7 +1798,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "destination",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="ID of the bank account or card the payout was sent to.",
                         null=True,
                         on_delete=django.db.models.deletion.PROTECT,
@@ -2207,7 +2207,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "charge",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="The charge that was refunded",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="refunds",
@@ -2368,7 +2368,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "customer",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
@@ -2550,7 +2550,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "customer",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="The customer associated with this subscription.",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="subscriptions",
@@ -2794,7 +2794,7 @@ class Migration(migrations.Migration):
                 ("updated", models.DateTimeField(auto_now=True)),
                 (
                     "event",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         blank=True,
                         help_text="Event object contained in the (valid) Webhook",
                         null=True,
@@ -2825,7 +2825,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="plan",
             name="product",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 help_text="The product whose pricing this plan determines.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
@@ -2835,7 +2835,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="invoiceitem",
             name="invoice",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 help_text="The invoice to which this invoiceitem is attached.",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
@@ -2857,7 +2857,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="invoiceitem",
             name="subscription",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 help_text="The subscription that this invoice item has been created for, if any.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
@@ -2879,7 +2879,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="invoice",
             name="customer",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 help_text="The customer associated with this invoice.",
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="invoices",
@@ -2889,7 +2889,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="invoice",
             name="subscription",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 help_text="The subscription that this invoice was prepared for, if any.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
@@ -2926,7 +2926,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="charge",
             name="customer",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 help_text="The customer associated with this charge.",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
@@ -2937,7 +2937,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="charge",
             name="dispute",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 help_text="Details about the dispute if the charge has been disputed.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
@@ -2948,7 +2948,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="charge",
             name="invoice",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 help_text="The invoice this charge is for if one exists.",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
@@ -2970,7 +2970,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="charge",
             name="transfer",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 help_text="The transfer to the destination account (only applicable if the charge was created using the destination parameter).",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
@@ -2980,7 +2980,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="card",
             name="customer",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="legacy_cards",
                 to="djstripe.Customer",
@@ -2989,7 +2989,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="bankaccount",
             name="customer",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="bank_account",
@@ -2999,7 +2999,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="account",
             name="business_logo",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 help_text="An icon for the account. Must be square and at least 128px x 128px.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,

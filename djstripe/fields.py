@@ -19,6 +19,10 @@ else:
     from jsonfield import JSONField as BaseJSONField
 
 
+class StripeForeignKey(models.ForeignKey):
+    pass
+
+
 class PaymentMethodForeignKey(models.ForeignKey):
     def __init__(self, **kwargs):
         kwargs.setdefault("to", "DjstripePaymentMethod")

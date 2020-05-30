@@ -17,6 +17,7 @@ from ..fields import (
     StripeDateTimeField,
     StripeDecimalCurrencyAmountField,
     StripeEnumField,
+    StripeForeignKey,
     StripeIdField,
     StripePercentField,
     StripeQuantumCurrencyAmountField,
@@ -34,7 +35,7 @@ class DjstripeInvoiceTotalTaxAmount(models.Model):
     collision with a Stripe API object name.
     """
 
-    invoice = models.ForeignKey(
+    invoice = StripeForeignKey(
         "Invoice", on_delete=models.CASCADE, related_name="total_tax_amounts"
     )
 
@@ -44,7 +45,7 @@ class DjstripeInvoiceTotalTaxAmount(models.Model):
     inclusive = models.BooleanField(
         help_text="Whether this tax amount is inclusive or exclusive."
     )
-    tax_rate = models.ForeignKey(
+    tax_rate = StripeForeignKey(
         "TaxRate",
         on_delete=models.CASCADE,
         help_text="The tax rate that was applied to get this tax amount.",
@@ -72,7 +73,7 @@ class DjstripeUpcomingInvoiceTotalTaxAmount(models.Model):
     inclusive = models.BooleanField(
         help_text="Whether this tax amount is inclusive or exclusive."
     )
-    tax_rate = models.ForeignKey(
+    tax_rate = StripeForeignKey(
         "TaxRate",
         on_delete=models.CASCADE,
         help_text="The tax rate that was applied to get this tax amount.",
@@ -287,7 +288,7 @@ class BaseInvoice(StripeModel):
         ),
     )
     currency = StripeCurrencyCodeField()
-    customer = models.ForeignKey(
+    customer = StripeForeignKey(
         "Customer",
         on_delete=models.CASCADE,
         # we need to use the %(class)s placeholder to avoid related name
@@ -337,7 +338,7 @@ class BaseInvoice(StripeModel):
         "this field will equal customer.tax_exempt. Once the invoice is "
         "finalized, this field will no longer be updated.",
     )
-    default_payment_method = models.ForeignKey(
+    default_payment_method = StripeForeignKey(
         "PaymentMethod",
         null=True,
         blank=True,
@@ -479,7 +480,7 @@ class BaseInvoice(StripeModel):
         "uncollectible, or void.",
     )
     status_transitions = JSONField(null=True, blank=True)
-    subscription = models.ForeignKey(
+    subscription = StripeForeignKey(
         "Subscription",
         null=True,
         # we need to use the %(class)s placeholder to avoid related name
@@ -879,7 +880,7 @@ class InvoiceItem(StripeModel):
 
     amount = StripeDecimalCurrencyAmountField(help_text="Amount invoiced (as decimal).")
     currency = StripeCurrencyCodeField()
-    customer = models.ForeignKey(
+    customer = StripeForeignKey(
         "Customer",
         on_delete=models.CASCADE,
         related_name="invoiceitems",
@@ -891,7 +892,7 @@ class InvoiceItem(StripeModel):
         help_text="If True, discounts will apply to this invoice item. "
         "Always False for prorations.",
     )
-    invoice = models.ForeignKey(
+    invoice = StripeForeignKey(
         "Invoice",
         on_delete=models.CASCADE,
         null=True,
@@ -924,7 +925,7 @@ class InvoiceItem(StripeModel):
         help_text="If the invoice item is a proration, the quantity of the "
         "subscription for which the proration was computed.",
     )
-    subscription = models.ForeignKey(
+    subscription = StripeForeignKey(
         "Subscription",
         null=True,
         related_name="invoiceitems",
@@ -1063,7 +1064,7 @@ class Plan(StripeModel):
         blank=True,
         help_text="A brief description of the plan, hidden from customers.",
     )
-    product = models.ForeignKey(
+    product = StripeForeignKey(
         "Product",
         on_delete=models.SET_NULL,
         null=True,
@@ -1289,7 +1290,7 @@ class Subscription(StripeModel):
         help_text="Start of the current period for which the subscription has "
         "been invoiced."
     )
-    customer = models.ForeignKey(
+    customer = StripeForeignKey(
         "Customer",
         on_delete=models.CASCADE,
         related_name="subscriptions",
@@ -1302,7 +1303,7 @@ class Subscription(StripeModel):
         "subscription. This value will be `null` for subscriptions where "
         "`billing=charge_automatically`.",
     )
-    default_payment_method = models.ForeignKey(
+    default_payment_method = StripeForeignKey(
         "PaymentMethod",
         null=True,
         blank=True,
@@ -1357,7 +1358,7 @@ class Subscription(StripeModel):
         "pending invoice items. It is analogous to calling Create an invoice "
         "for the given subscription at the specified interval.",
     )
-    pending_setup_intent = models.ForeignKey(
+    pending_setup_intent = StripeForeignKey(
         "SetupIntent",
         null=True,
         blank=True,
@@ -1690,7 +1691,7 @@ class SubscriptionItem(StripeModel):
             "The quantity of the plan to which the customer should be subscribed."
         ),
     )
-    subscription = models.ForeignKey(
+    subscription = StripeForeignKey(
         "Subscription",
         on_delete=models.CASCADE,
         related_name="items",
@@ -1767,7 +1768,7 @@ class UsageRecord(StripeModel):
             "The quantity of the plan to which the customer should be subscribed."
         )
     )
-    subscription_item = models.ForeignKey(
+    subscription_item = StripeForeignKey(
         "SubscriptionItem",
         on_delete=models.CASCADE,
         related_name="usage_records",

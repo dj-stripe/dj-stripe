@@ -65,7 +65,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="account",
             name="branding_logo",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 help_text="A logo for the account that will be used in Checkout instead of the icon and without the account’s name next to it if provided. Must be at least 128px x 128px.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
@@ -219,7 +219,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "customer",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         blank=True,
                         help_text="Customer to which this PaymentMethod is saved.This will not be set when the PaymentMethod has not been saved to a Customer.",
                         null=True,
@@ -234,7 +234,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="payout",
             name="destination",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 help_text="Bank account or card the payout was sent to.",
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
@@ -350,7 +350,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "customer",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         blank=True,
                         help_text="Customer this SetupIntent belongs to, if one exists.",
                         null=True,
@@ -360,7 +360,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "on_behalf_of",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         blank=True,
                         help_text="The account (if any) for which the setup is intended.",
                         null=True,
@@ -370,7 +370,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "payment_method",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         blank=True,
                         help_text="Payment method used in this PaymentIntent.",
                         null=True,
@@ -574,7 +574,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "customer",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="Customer this PaymentIntent is for if one exists.",
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
@@ -583,7 +583,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "on_behalf_of",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         blank=True,
                         help_text="The account (if any) for which the funds of the PaymentIntent are intended.",
                         null=True,
@@ -593,7 +593,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "payment_method",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         blank=True,
                         help_text="Payment method used in this PaymentIntent.",
                         null=True,
@@ -607,7 +607,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="charge",
             name="payment_intent",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 help_text="PaymentIntent associated with this charge, if one exists.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
@@ -628,7 +628,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="subscription",
             name="pending_setup_intent",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 blank=True,
                 help_text="We can use this SetupIntent to collect user authentication when creating a subscription without immediate payment or updating a subscription’s payment method, allowing you to optimize for off-session payments.",
                 null=True,
@@ -705,7 +705,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="bankaccount",
             name="account",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 blank=True,
                 help_text="The account the charge was made on behalf of. Null here indicates that this value was never set.",
                 null=True,
@@ -744,7 +744,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="customer",
             name="default_payment_method",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 blank=True,
                 help_text="default payment method used for subscriptions and invoices for the customer.",
                 null=True,
@@ -896,7 +896,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "customer",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="Customer this Checkout is for if one exists.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
@@ -905,7 +905,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "payment_intent",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="PaymentIntent created if SKUs or line items were provided.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
@@ -914,7 +914,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "subscription",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="Subscription created if one or more plans were provided.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
@@ -936,7 +936,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="charge",
             name="payment_method",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 help_text="PaymentMethod used in this charge.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,

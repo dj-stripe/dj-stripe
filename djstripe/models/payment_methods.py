@@ -10,6 +10,7 @@ from ..fields import (
     StripeCurrencyCodeField,
     StripeDecimalCurrencyAmountField,
     StripeEnumField,
+    StripeForeignKey,
 )
 from .base import StripeModel, logger
 from .core import Customer
@@ -168,7 +169,7 @@ class LegacySourceMixin:
 class BankAccount(LegacySourceMixin, StripeModel):
     stripe_class = stripe.BankAccount
 
-    account = models.ForeignKey(
+    account = StripeForeignKey(
         "Account",
         on_delete=models.PROTECT,
         null=True,
@@ -198,7 +199,7 @@ class BankAccount(LegacySourceMixin, StripeModel):
         "is located in.",
     )
     currency = StripeCurrencyCodeField()
-    customer = models.ForeignKey(
+    customer = StripeForeignKey(
         "Customer", on_delete=models.SET_NULL, null=True, related_name="bank_account"
     )
     default_for_currency = models.BooleanField(
@@ -287,7 +288,7 @@ class Card(LegacySourceMixin, StripeModel):
         blank=True,
         help_text="Two-letter ISO code representing the country of the card.",
     )
-    customer = models.ForeignKey(
+    customer = StripeForeignKey(
         "Customer", on_delete=models.SET_NULL, null=True, related_name="legacy_cards"
     )
     cvc_check = StripeEnumField(
@@ -448,7 +449,7 @@ class Source(StripeModel):
 
     source_data = JSONField(help_text="The data corresponding to the source type.")
 
-    customer = models.ForeignKey(
+    customer = StripeForeignKey(
         "Customer",
         on_delete=models.SET_NULL,
         null=True,
@@ -518,7 +519,7 @@ class PaymentMethod(StripeModel):
         help_text="If this is an card_present PaymentMethod, this hash contains "
         "details about the Card Present payment method.",
     )
-    customer = models.ForeignKey(
+    customer = StripeForeignKey(
         "Customer",
         on_delete=models.SET_NULL,
         null=True,

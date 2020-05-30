@@ -2,7 +2,7 @@ import stripe
 from django.db import models
 
 from .. import enums
-from ..fields import JSONField, StripeEnumField
+from ..fields import JSONField, StripeEnumField, StripeForeignKey
 from .base import StripeModel
 
 
@@ -39,7 +39,7 @@ class Session(StripeModel):
             "can be used to reconcile the session with your internal systems."
         ),
     )
-    customer = models.ForeignKey(
+    customer = StripeForeignKey(
         "Customer",
         null=True,
         on_delete=models.SET_NULL,
@@ -71,7 +71,7 @@ class Session(StripeModel):
         help_text="The mode of the Checkout Session, "
         "one of payment, setup, or subscription.",
     )
-    payment_intent = models.ForeignKey(
+    payment_intent = StripeForeignKey(
         "PaymentIntent",
         null=True,
         on_delete=models.SET_NULL,
@@ -87,7 +87,7 @@ class Session(StripeModel):
         help_text="Describes the type of transaction being performed by Checkout"
         "in order to customize relevant text on the page, such as the submit button.",
     )
-    subscription = models.ForeignKey(
+    subscription = StripeForeignKey(
         "Subscription",
         null=True,
         on_delete=models.SET_NULL,

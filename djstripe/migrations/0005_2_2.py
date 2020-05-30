@@ -123,7 +123,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="invoice",
             name="default_payment_method",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 blank=True,
                 help_text="Default payment method for the invoice. It must belong to the customer associated with the invoice. If not set, defaults to the subscription’s default payment method, if any, or to the default payment method in the customer’s invoice settings.",
                 null=True,
@@ -747,7 +747,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "customer",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="The customer associated with this invoice.",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="upcominginvoices",
@@ -756,7 +756,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "default_payment_method",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         blank=True,
                         help_text="Default payment method for the invoice. It must belong to the customer associated with the invoice. If not set, defaults to the subscription’s default payment method, if any, or to the default payment method in the customer’s invoice settings.",
                         null=True,
@@ -776,7 +776,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "subscription",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="The subscription that this invoice was prepared for, if any.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
@@ -785,7 +785,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"ordering": ["-created"], "abstract": False,},
+            options={"ordering": ["-created"], "abstract": False},
         ),
         migrations.CreateModel(
             name="TaxRate",
@@ -874,7 +874,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"get_latest_by": "created", "abstract": False,},
+            options={"get_latest_by": "created", "abstract": False},
         ),
         migrations.AddField(
             model_name="invoice",
@@ -954,14 +954,14 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "tax_rate",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="The tax rate that was applied to get this tax amount.",
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.TaxRate",
                     ),
                 ),
             ],
-            options={"unique_together": {("invoice", "tax_rate")},},
+            options={"unique_together": {("invoice", "tax_rate")}},
         ),
         migrations.CreateModel(
             name="DjstripeInvoiceTotalTaxAmount",
@@ -989,7 +989,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "invoice",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="total_tax_amounts",
                         to="djstripe.Invoice",
@@ -997,13 +997,13 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "tax_rate",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="The tax rate that was applied to get this tax amount.",
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.TaxRate",
                     ),
                 ),
             ],
-            options={"unique_together": {("invoice", "tax_rate")},},
+            options={"unique_together": {("invoice", "tax_rate")}},
         ),
     ]

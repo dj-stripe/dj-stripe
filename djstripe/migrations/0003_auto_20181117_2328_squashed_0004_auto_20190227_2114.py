@@ -143,7 +143,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="card",
             name="customer",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="legacy_cards",
@@ -458,7 +458,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "file",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         blank=True,
                         help_text="The file object representing the results of the query.",
                         null=True,
@@ -529,7 +529,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "subscription",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="The subscription this subscription item belongs to.",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="items",
@@ -596,7 +596,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "balance_transaction",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         blank=True,
                         help_text="Balance transaction that describes the impact on your account balance.",
                         null=True,
@@ -607,7 +607,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "transfer",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="The transfer that was reversed.",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="reversals",
@@ -668,7 +668,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "subscription_item",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="The subscription item this usage record contains data for.",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="usage_records",
@@ -747,7 +747,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "balance_transaction",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="Balance transaction that describes the impact on your account balance.",
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.BalanceTransaction",
@@ -755,7 +755,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "charge",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="The charge that the application fee was taken from.",
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.Charge",
@@ -815,7 +815,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "balance_transaction",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="Balance transaction that describes the impact on your account balance.",
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.BalanceTransaction",
@@ -823,7 +823,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "fee",
-                    models.ForeignKey(
+                    djstripe.fields.StripeForeignKey(
                         help_text="The application fee that was refunded",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="refunds",
@@ -836,7 +836,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="charge",
             name="balance_transaction",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 help_text="The balance transaction that describes the impact of this charge on your account balance (not including refunds or disputes).",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
@@ -846,7 +846,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="payout",
             name="balance_transaction",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 help_text="Balance transaction that describes the impact on your account balance.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
@@ -856,7 +856,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="payout",
             name="failure_balance_transaction",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 help_text="If the payout failed or was canceled, this will be the balance transaction that reversed the initial balance transaction, and puts the funds from the failed payout back in your balance.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
@@ -867,7 +867,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="refund",
             name="balance_transaction",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 help_text="Balance transaction that describes the impact on your account balance.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
@@ -877,7 +877,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="refund",
             name="failure_balance_transaction",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 help_text="If the refund failed, this balance transaction describes the adjustment made on your account balance that reverses the initial balance transaction.",
                 null=True,
                 blank=True,
@@ -889,7 +889,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="transfer",
             name="balance_transaction",
-            field=models.ForeignKey(
+            field=djstripe.fields.StripeForeignKey(
                 blank=True,
                 help_text="Balance transaction that describes the impact on your account balance.",
                 null=True,

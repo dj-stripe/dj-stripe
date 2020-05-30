@@ -17,6 +17,7 @@ from ..fields import (
     StripeDateTimeField,
     StripeDecimalCurrencyAmountField,
     StripeEnumField,
+    StripeForeignKey,
     StripeQuantumCurrencyAmountField,
 )
 from ..managers import ChargeManager
@@ -85,7 +86,7 @@ class Charge(StripeModel):
         )
     )
     # TODO: application, application_fee
-    balance_transaction = models.ForeignKey(
+    balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
         null=True,
@@ -102,7 +103,7 @@ class Charge(StripeModel):
     currency = StripeCurrencyCodeField(
         help_text="The currency in which the charge was made."
     )
-    customer = models.ForeignKey(
+    customer = StripeForeignKey(
         "Customer",
         on_delete=models.CASCADE,
         null=True,
@@ -111,7 +112,7 @@ class Charge(StripeModel):
     )
     # XXX: destination
     # TODO - has this been renamed to on_behalf_of?
-    account = models.ForeignKey(
+    account = StripeForeignKey(
         "Account",
         on_delete=models.CASCADE,
         null=True,
@@ -119,7 +120,7 @@ class Charge(StripeModel):
         help_text="The account the charge was made on behalf of. "
         "Null here indicates that this value was never set.",
     )
-    dispute = models.ForeignKey(
+    dispute = StripeForeignKey(
         "Dispute",
         on_delete=models.SET_NULL,
         null=True,
@@ -144,7 +145,7 @@ class Charge(StripeModel):
         null=True,
         blank=True,
     )
-    invoice = models.ForeignKey(
+    invoice = StripeForeignKey(
         "Invoice",
         on_delete=models.CASCADE,
         null=True,
@@ -162,14 +163,14 @@ class Charge(StripeModel):
         help_text="True if the charge succeeded, "
         "or was successfully authorized for later capture, False otherwise.",
     )
-    payment_intent = models.ForeignKey(
+    payment_intent = StripeForeignKey(
         "PaymentIntent",
         null=True,
         on_delete=models.SET_NULL,
         related_name="charges",
         help_text="PaymentIntent associated with this charge, if one exists.",
     )
-    payment_method = models.ForeignKey(
+    payment_method = StripeForeignKey(
         "PaymentMethod",
         null=True,
         on_delete=models.SET_NULL,
@@ -232,7 +233,7 @@ class Charge(StripeModel):
     status = StripeEnumField(
         enum=enums.ChargeStatus, help_text="The status of the payment."
     )
-    transfer = models.ForeignKey(
+    transfer = StripeForeignKey(
         "Transfer",
         null=True,
         on_delete=models.CASCADE,
@@ -462,7 +463,7 @@ class Customer(StripeModel):
     )
     # default_payment_method is actually nested inside invoice_settings
     # this field is a convenience to provide the foreign key
-    default_payment_method = models.ForeignKey(
+    default_payment_method = StripeForeignKey(
         "PaymentMethod",
         null=True,
         blank=True,
@@ -1487,7 +1488,7 @@ class PaymentIntent(StripeModel):
         ),
     )
     currency = StripeCurrencyCodeField()
-    customer = models.ForeignKey(
+    customer = StripeForeignKey(
         "Customer",
         null=True,
         on_delete=models.CASCADE,
@@ -1517,7 +1518,7 @@ class PaymentIntent(StripeModel):
             "in order for your customer to fulfill a payment using the provided source."
         ),
     )
-    on_behalf_of = models.ForeignKey(
+    on_behalf_of = StripeForeignKey(
         "Account",
         on_delete=models.CASCADE,
         null=True,
@@ -1525,7 +1526,7 @@ class PaymentIntent(StripeModel):
         help_text="The account (if any) for which the funds of the "
         "PaymentIntent are intended.",
     )
-    payment_method = models.ForeignKey(
+    payment_method = StripeForeignKey(
         "PaymentMethod",
         on_delete=models.SET_NULL,
         null=True,
@@ -1682,7 +1683,7 @@ class SetupIntent(StripeModel):
             "Used for client-side retrieval using a publishable key."
         ),
     )
-    customer = models.ForeignKey(
+    customer = StripeForeignKey(
         "Customer",
         null=True,
         blank=True,
@@ -1702,14 +1703,14 @@ class SetupIntent(StripeModel):
             "order for your customer to continue payment setup."
         ),
     )
-    on_behalf_of = models.ForeignKey(
+    on_behalf_of = StripeForeignKey(
         "Account",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         help_text="The account (if any) for which the setup is intended.",
     )
-    payment_method = models.ForeignKey(
+    payment_method = StripeForeignKey(
         "PaymentMethod",
         on_delete=models.SET_NULL,
         null=True,
@@ -1760,7 +1761,7 @@ class Payout(StripeModel):
             "This factors in delays like weekends or bank holidays."
         )
     )
-    balance_transaction = models.ForeignKey(
+    balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
         null=True,
@@ -1768,13 +1769,13 @@ class Payout(StripeModel):
         "account balance.",
     )
     currency = StripeCurrencyCodeField()
-    destination = models.ForeignKey(
+    destination = StripeForeignKey(
         "BankAccount",
         on_delete=models.PROTECT,
         null=True,
         help_text="Bank account or card the payout was sent to.",
     )
-    failure_balance_transaction = models.ForeignKey(
+    failure_balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
         related_name="failure_payouts",
@@ -1949,21 +1950,21 @@ class Refund(StripeModel):
     stripe_class = stripe.Refund
 
     amount = StripeQuantumCurrencyAmountField(help_text="Amount, in cents.")
-    balance_transaction = models.ForeignKey(
+    balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
         null=True,
         help_text="Balance transaction that describes the impact on your account "
         "balance.",
     )
-    charge = models.ForeignKey(
+    charge = StripeForeignKey(
         "Charge",
         on_delete=models.CASCADE,
         related_name="refunds",
         help_text="The charge that was refunded",
     )
     currency = StripeCurrencyCodeField()
-    failure_balance_transaction = models.ForeignKey(
+    failure_balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
         related_name="failure_refunds",

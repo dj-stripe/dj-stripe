@@ -2,7 +2,7 @@ import stripe
 from django.db import models
 
 from .. import enums
-from ..fields import JSONField, StripeDateTimeField, StripeEnumField
+from ..fields import JSONField, StripeDateTimeField, StripeEnumField, StripeForeignKey
 from .base import StripeModel
 
 
@@ -23,7 +23,7 @@ class ScheduledQueryRun(StripeModel):
         help_text="If the query run was not succeesful, contains information "
         "about the failure.",
     )
-    file = models.ForeignKey(
+    file = StripeForeignKey(
         "FileUpload",
         on_delete=models.SET_NULL,
         null=True,
