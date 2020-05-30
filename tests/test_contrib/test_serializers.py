@@ -44,8 +44,8 @@ class SubscriptionSerializerTest(TestCase):
             data={
                 "id": "sub_6lsC8pt7IcFpjA",
                 "collection_method": "charge_automatically",
-                "customer": self.customer.djstripe_id,
-                "plan": self.plan.djstripe_id,
+                "customer": self.customer.pk,
+                "plan": self.plan.pk,
                 "quantity": 2,
                 "start": now,
                 "status": SubscriptionStatus.active,
@@ -78,8 +78,8 @@ class SubscriptionSerializerTest(TestCase):
         serializer = SubscriptionSerializer(
             data={
                 "id": "sub_6lsC8pt7IcFpjA",
-                "customer": self.customer.djstripe_id,
-                "plan": self.plan.djstripe_id,
+                "customer": self.customer.pk,
+                "plan": self.plan.pk,
                 "start": now,
                 "status": SubscriptionStatus.active,
                 "current_period_end": now + timezone.timedelta(days=5),
