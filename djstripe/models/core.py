@@ -31,8 +31,6 @@ from .connect import Account
 # Override the default API version used by the Stripe library.
 djstripe_settings.set_stripe_api_version()
 
-# TODO: class Balance(...)
-
 
 class BalanceTransaction(StripeModel):
     """
