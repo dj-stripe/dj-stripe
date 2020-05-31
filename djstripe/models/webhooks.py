@@ -4,13 +4,13 @@ from traceback import format_exc
 
 import stripe
 from django.db import models
+from django.utils.datastructures import CaseInsensitiveMapping
 from django.utils.functional import cached_property
 
 from .. import settings as djstripe_settings
 from ..context_managers import stripe_temporary_api_version
 from ..fields import JSONField, StripeForeignKey
 from ..signals import webhook_processing_error
-from ..utils import fix_django_headers
 from .base import logger
 from .core import Event
 
@@ -76,8 +76,6 @@ class WebhookEventTrigger(models.Model):
         3. If valid, process it into an Event object (and child resource).
         """
 
-        headers = fix_django_headers(request.META)
-        assert headers
         try:
             body = request.body.decode(request.encoding or "utf-8")
         except Exception:
@@ -90,7 +88,7 @@ class WebhookEventTrigger(models.Model):
                 "This is likely an issue with your wsgi/server setup."
             )
             ip = "0.0.0.0"
-        obj = cls.objects.create(headers=headers, body=body, remote_ip=ip)
+        obj = cls.objects.create(headers=dict(request.headers), body=body, remote_ip=ip)
 
         try:
             obj.valid = obj.validate()
@@ -156,10 +154,12 @@ class WebhookEventTrigger(models.Model):
             djstripe_settings.WEBHOOK_VALIDATION == "verify_signature"
             and djstripe_settings.WEBHOOK_SECRET
         ):
+            # HTTP headers are case-insensitive, but we store them as a dict.
+            headers = CaseInsensitiveMapping(self.headers)
             try:
                 stripe.WebhookSignature.verify_header(
                     self.body,
-                    self.headers.get("stripe-signature"),
+                    headers.get("stripe-signature"),
                     djstripe_settings.WEBHOOK_SECRET,
                     djstripe_settings.WEBHOOK_TOLERANCE,
                 )
