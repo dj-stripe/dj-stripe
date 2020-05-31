@@ -292,7 +292,6 @@ class FileUploadAdmin(StripeModelAdmin):
 @admin.register(models.PaymentIntent)
 class PaymentIntentAdmin(StripeModelAdmin):
     list_display = (
-        "id",
         "customer",
         "amount",
         "currency",
@@ -308,7 +307,6 @@ class PaymentIntentAdmin(StripeModelAdmin):
 @admin.register(models.SetupIntent)
 class SetupIntentAdmin(StripeModelAdmin):
     list_display = (
-        "id",
         "created",
         "customer",
         "description",
