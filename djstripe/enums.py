@@ -154,6 +154,41 @@ class AccountType(Enum):
     custom = _("Custom")
 
 
+class BalanceTransactionReportingCategory(Enum):
+    """
+    https://stripe.com/docs/reports/reporting-categories
+    """
+
+    advance = _("Advance")
+    advance_funding = _("Advance funding")
+    anticipation_repayment = _("Anticipation loan repayment (BR)")
+    charge = _("Charge")
+    charge_failure = _("Charge failure")
+    connect_collection_transfer = _("Stripe Connect collection transfer")
+    connect_reserved_funds = _("Stripe Connect reserved funds")
+    dispute = _("Dispute")
+    dispute_reversal = _("Dispute reversal")
+    fee = _("Stripe fee")
+    issuing_authorization_hold = _("Issuing authorization hold")
+    issuing_authorization_release = _("Issuing authorization release")
+    issuing_dispute = _("Issuing dispute")
+    issuing_transaction = _("Issuing transaction")
+    other_adjustment = _("Other adjustment")
+    partial_capture_reversal = _("Partial capture reversal")
+    payout = _("Payout")
+    payout_reversal = _("Payout reversal")
+    platform_earning = _("Stripe Connect platform earning")
+    platform_earning_refund = _("Stripe Connect platform earning refund")
+    refund = _("Refund")
+    refund_failure = _("Refund failure")
+    risk_reserved_funds = _("Risk-reserved funds")
+    tax = _("Tax")
+    topup = _("Top-up")
+    topup_reversal = _("Top-up reversal")
+    transfer = _("Stripe Connect transfer")
+    transfer_reversal = _("Stripe Connect transfer reversal")
+
+
 class BalanceTransactionStatus(Enum):
     available = _("Available")
     pending = _("Pending")

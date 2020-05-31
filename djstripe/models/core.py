@@ -61,6 +61,10 @@ class BalanceTransaction(StripeModel):
         help_text="Net amount of the transaction, in cents."
     )
     # TODO: source (Reverse lookup only? or generic foreign key?)
+    reporting_category = StripeEnumField(
+        enum=enums.BalanceTransactionReportingCategory,
+        help_text="More information: https://stripe.com/docs/reports/reporting-categories",
+    )
     status = StripeEnumField(enum=enums.BalanceTransactionStatus)
     type = StripeEnumField(enum=enums.BalanceTransactionType)
 
