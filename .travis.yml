@@ -27,6 +27,7 @@ matrix:
 
     - { python: "3.8", env: TOXENV=py38-django22-postgres }
     - { python: "3.8", env: TOXENV=py38-django30-postgres }
+    - { python: "3.8", env: TOXENV=py38-django31-postgres }
 
     - { python: "3.7", env: TOXENV=checkmigrations }
     - { python: "3.7", env: TOXENV=lint }
