@@ -18,6 +18,7 @@ from ..fields import (
     StripeDecimalCurrencyAmountField,
     StripeEnumField,
     StripeForeignKey,
+    StripeIdField,
     StripeQuantumCurrencyAmountField,
 )
 from ..managers import ChargeManager
@@ -60,7 +61,7 @@ class BalanceTransaction(StripeModel):
     net = StripeQuantumCurrencyAmountField(
         help_text="Net amount of the transaction, in cents."
     )
-    # TODO: source (Reverse lookup only? or generic foreign key?)
+    source = StripeIdField()
     reporting_category = StripeEnumField(
         enum=enums.BalanceTransactionReportingCategory,
         help_text="More information: https://stripe.com/docs/reports/reporting-categories",

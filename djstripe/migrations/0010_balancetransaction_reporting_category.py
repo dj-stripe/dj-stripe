@@ -24,4 +24,10 @@ class Migration(migrations.Migration):
             ),
             preserve_default=False,
         ),
+        migrations.AddField(
+            model_name="balancetransaction",
+            name="source",
+            field=djstripe.fields.StripeIdField(default="", max_length=255),
+            preserve_default=False,
+        ),
     ]
