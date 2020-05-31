@@ -211,6 +211,26 @@ class AccountAdmin(StripeModelAdmin):
     search_fields = ("settings", "business_profile")
 
 
+@admin.register(models.BalanceTransaction)
+class BalanceTransactionAdmin(StripeModelAdmin):
+    list_display = (
+        "type",
+        "net",
+        "amount",
+        "fee",
+        "currency",
+        "available_on",
+        "status",
+    )
+    list_filter = ("status", "type")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(models.Charge)
 class ChargeAdmin(StripeModelAdmin):
     list_display = (
