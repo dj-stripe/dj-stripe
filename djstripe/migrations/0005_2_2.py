@@ -2,6 +2,7 @@
 
 import django.core.validators
 import django.db.models.deletion
+from django.conf import settings
 from django.db import migrations, models
 
 import djstripe.enums
@@ -130,6 +131,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="+",
                 to="djstripe.PaymentMethod",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AddField(
@@ -752,6 +754,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="upcominginvoices",
                         to="djstripe.Customer",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
                 (
@@ -763,6 +766,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="+",
                         to="djstripe.PaymentMethod",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
                 (
@@ -782,6 +786,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="upcominginvoices",
                         to="djstripe.Subscription",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
             ],
@@ -958,6 +963,7 @@ class Migration(migrations.Migration):
                         help_text="The tax rate that was applied to get this tax amount.",
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.TaxRate",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
             ],
@@ -993,6 +999,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="total_tax_amounts",
                         to="djstripe.Invoice",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
                 (
@@ -1001,6 +1008,7 @@ class Migration(migrations.Migration):
                         help_text="The tax rate that was applied to get this tax amount.",
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.TaxRate",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
             ],

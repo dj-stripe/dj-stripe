@@ -229,3 +229,36 @@ def check_subscriber_key_length(app_configs=None, **kwargs):
         )
 
     return messages
+
+
+@checks.register("djstripe")
+def check_djstripe_settings_foreign_key_to_field(app_configs=None, **kwargs):
+    """
+    Check that DJSTRIPE_FOREIGN_KEY_TO_FIELD is set to a valid value.
+    """
+    from django.conf import settings
+
+    setting_name = "DJSTRIPE_FOREIGN_KEY_TO_FIELD"
+    hint = (
+        f'Set {setting_name} to "id" if this is a new installation, '
+        f'otherwise set it to "djstripe_id".'
+    )
+    messages = []
+
+    if not hasattr(settings, setting_name):
+        messages.append(
+            checks.Error(
+                "%s is not set." % (setting_name), hint=hint, id="djstripe.E002",
+            )
+        )
+    elif getattr(settings, setting_name) not in ("id", "djstripe_id"):
+        messages.append(
+            checks.Error(
+                "%r is not a valid value for %s."
+                % (getattr(settings, setting_name), setting_name),
+                hint=hint,
+                id="djstripe.E003",
+            )
+        )
+
+    return messages

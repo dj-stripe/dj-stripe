@@ -387,6 +387,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.PROTECT,
                         related_name="bank_account",
                         to="djstripe.Account",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
             ],
@@ -754,6 +755,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="charges",
                         to="djstripe.Account",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
             ],
@@ -1636,6 +1638,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="invoiceitems",
                         to="djstripe.Customer",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
             ],
@@ -1770,6 +1773,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.PROTECT,
                         to="djstripe.BankAccount",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
             ],
@@ -2170,6 +2174,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="refunds",
                         to="djstripe.Charge",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
             ],
@@ -2329,6 +2334,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="sources",
                         to="djstripe.Customer",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
             ],
@@ -2507,6 +2513,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="subscriptions",
                         to="djstripe.Customer",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
                 (
@@ -2749,6 +2756,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.Event",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
             ],
@@ -2779,6 +2787,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 to="djstripe.Product",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AddField(
@@ -2790,6 +2799,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="invoiceitems",
                 to="djstripe.Invoice",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AddField(
@@ -2812,6 +2822,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="invoiceitems",
                 to="djstripe.Subscription",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AddField(
@@ -2833,6 +2844,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="invoices",
                 to="djstripe.Customer",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AddField(
@@ -2844,6 +2856,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="invoices",
                 to="djstripe.Subscription",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AlterUniqueTogether(
@@ -2881,6 +2894,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="charges",
                 to="djstripe.Customer",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AddField(
@@ -2892,6 +2906,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="charges",
                 to="djstripe.Dispute",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AddField(
@@ -2903,6 +2918,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="charges",
                 to="djstripe.Invoice",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AddField(
@@ -2924,6 +2940,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 to="djstripe.Transfer",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AddField(
@@ -2933,6 +2950,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="legacy_cards",
                 to="djstripe.Customer",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AddField(
@@ -2943,6 +2961,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="bank_account",
                 to="djstripe.Customer",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AddField(
@@ -2954,6 +2973,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="icon_account",
                 to="djstripe.FileUpload",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AlterUniqueTogether(

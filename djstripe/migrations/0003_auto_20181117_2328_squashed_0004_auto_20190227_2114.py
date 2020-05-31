@@ -2,6 +2,7 @@
 
 import django.core.validators
 import django.db.models.deletion
+from django.conf import settings
 from django.db import migrations, models
 
 import djstripe.enums
@@ -148,6 +149,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="legacy_cards",
                 to="djstripe.Customer",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AddField(
@@ -464,6 +466,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.FileUpload",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
             ],
@@ -534,6 +537,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="items",
                         to="djstripe.Subscription",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
             ],
@@ -603,6 +607,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="transfer_reversals",
                         to="djstripe.BalanceTransaction",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
                 (
@@ -612,6 +617,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="reversals",
                         to="djstripe.Transfer",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
             ],
@@ -673,6 +679,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="usage_records",
                         to="djstripe.SubscriptionItem",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
             ],
@@ -819,6 +826,7 @@ class Migration(migrations.Migration):
                         help_text="Balance transaction that describes the impact on your account balance.",
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.BalanceTransaction",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
                 (
@@ -828,6 +836,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="refunds",
                         to="djstripe.ApplicationFee",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
             ],
@@ -841,6 +850,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 to="djstripe.BalanceTransaction",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AddField(
@@ -851,6 +861,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 to="djstripe.BalanceTransaction",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AddField(
@@ -862,6 +873,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.SET_NULL,
                 to="djstripe.BalanceTransaction",
                 related_name="failure_payouts",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AddField(
@@ -872,6 +884,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 to="djstripe.BalanceTransaction",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AddField(
@@ -884,6 +897,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.SET_NULL,
                 to="djstripe.BalanceTransaction",
                 related_name="failure_refunds",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AddField(
@@ -895,6 +909,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 to="djstripe.BalanceTransaction",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
         ),
         migrations.AlterField(

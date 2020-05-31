@@ -3,6 +3,7 @@ dj-stripe Custom Field Definitions
 """
 import decimal
 
+from django.conf import SettingsReference, settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -20,7 +21,20 @@ else:
 
 
 class StripeForeignKey(models.ForeignKey):
-    pass
+    setting_name = "DJSTRIPE_FOREIGN_KEY_TO_FIELD"
+
+    def __init__(self, *args, **kwargs):
+        # The default value will only come into play if the check for
+        # that setting has been disabled.
+        kwargs["to_field"] = getattr(settings, self.setting_name, "id")
+        super().__init__(*args, **kwargs)
+
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        kwargs["to_field"] = SettingsReference(
+            getattr(settings, self.setting_name, "id"), self.setting_name
+        )
+        return name, path, args, kwargs
 
 
 class PaymentMethodForeignKey(models.ForeignKey):
