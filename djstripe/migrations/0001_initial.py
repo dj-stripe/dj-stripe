@@ -60,8 +60,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -127,7 +129,8 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "debit_negative_balances",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=False,
                         help_text="A Boolean indicating if Stripe should try to reclaim negative balances from an attached bank account.",
                     ),
@@ -286,8 +289,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -354,8 +359,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "default_for_currency",
-                    models.NullBooleanField(
-                        help_text="Whether this external account is the default account for its currency."
+                    models.BooleanField(
+                        null=True,
+                        help_text="Whether this external account is the default account for its currency.",
                     ),
                 ),
                 (
@@ -406,8 +412,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -562,8 +570,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -771,8 +781,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -888,8 +900,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -1000,8 +1014,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -1089,8 +1105,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -1166,8 +1184,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -1271,8 +1291,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -1550,8 +1572,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -1671,8 +1695,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -1796,8 +1822,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -1960,8 +1988,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -2006,8 +2036,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "active",
-                    models.NullBooleanField(
-                        help_text="Whether the product is currently available for purchase. Only applicable to products of `type=good`."
+                    models.BooleanField(
+                        null=True,
+                        help_text="Whether the product is currently available for purchase. Only applicable to products of `type=good`.",
                     ),
                 ),
                 (
@@ -2051,8 +2082,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "shippable",
-                    models.NullBooleanField(
-                        help_text="Whether this product is a shipped good. Only applicable to products of `type=good`."
+                    models.BooleanField(
+                        null=True,
+                        blank=True,
+                        help_text="Whether this product is a shipped good. Only applicable to products of `type=good`.",
                     ),
                 ),
                 (
@@ -2092,8 +2125,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -2195,8 +2230,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -2355,8 +2392,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -2543,8 +2582,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),

@@ -54,8 +54,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="invoice",
             name="auto_advance",
-            field=models.NullBooleanField(
-                help_text="Controls whether Stripe will perform automatic collection of the invoice. When false, the invoice’s state will not automatically advance without an explicit action."
+            field=models.BooleanField(
+                null=True,
+                help_text="Controls whether Stripe will perform automatic collection of the invoice. When false, the invoice’s state will not automatically advance without an explicit action.",
             ),
         ),
         migrations.RenameField(
@@ -157,8 +158,10 @@ class Migration(migrations.Migration):
                 ("id", djstripe.fields.StripeIdField(max_length=255, unique=True)),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -250,8 +253,10 @@ class Migration(migrations.Migration):
                 ("id", djstripe.fields.StripeIdField(max_length=255, unique=True)),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -388,8 +393,10 @@ class Migration(migrations.Migration):
                 ("id", djstripe.fields.StripeIdField(max_length=255, unique=True)),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -784,8 +791,10 @@ class Migration(migrations.Migration):
                 ("id", djstripe.fields.StripeIdField(max_length=255, unique=True)),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),

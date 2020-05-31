@@ -357,8 +357,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
@@ -454,8 +456,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "auto_advance",
-                    models.NullBooleanField(
-                        help_text="Controls whether Stripe will perform automatic collection of the invoice. When false, the invoice’s state will not automatically advance without an explicit action."
+                    models.BooleanField(
+                        null=True,
+                        help_text="Controls whether Stripe will perform automatic collection of the invoice. When false, the invoice’s state will not automatically advance without an explicit action.",
                     ),
                 ),
                 (
@@ -470,7 +473,8 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "closed",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=False,
                         help_text="Whether or not the invoice is still trying to collect payment. An invoice is closed if it's either paid or it has been marked closed. A closed invoice will no longer attempt to collect payment.",
                     ),
@@ -564,7 +568,8 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "forgiven",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=False,
                         help_text="Whether or not the invoice has been forgiven. Forgiving an invoice instructs us to update the subscription status as if the invoice were successfully paid. Once an invoice has been forgiven, it cannot be unforgiven or reopened.",
                     ),
@@ -794,8 +799,10 @@ class Migration(migrations.Migration):
                 ("id", djstripe.fields.StripeIdField(max_length=255, unique=True)),
                 (
                     "livemode",
-                    models.NullBooleanField(
+                    models.BooleanField(
+                        null=True,
                         default=None,
+                        blank=True,
                         help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
                     ),
                 ),
