@@ -245,6 +245,7 @@ class Migration(migrations.Migration):
                     models.CharField(
                         help_text="The timezone used in the Stripe Dashboard for this account.",
                         max_length=50,
+                        default="",
                     ),
                 ),
                 (
@@ -1396,7 +1397,7 @@ class Migration(migrations.Migration):
                 (
                     "date",
                     djstripe.fields.StripeDateTimeField(
-                        help_text="The date on the invoice."
+                        help_text="The date on the invoice.", null=True
                     ),
                 ),
                 (
@@ -2061,6 +2062,7 @@ class Migration(migrations.Migration):
                 (
                     "deactivate_on",
                     djstripe.fields.JSONField(
+                        null=True,
                         blank=True,
                         help_text="An array of connect application identifiers that cannot purchase this product. Only applicable to products of `type=good`.",
                     ),
