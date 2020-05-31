@@ -1,6 +1,7 @@
 import decimal
 
 import stripe
+from django.apps import apps
 from django.db import models, transaction
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -29,7 +30,6 @@ from .connect import Account
 
 # Override the default API version used by the Stripe library.
 djstripe_settings.set_stripe_api_version()
-
 
 # TODO: class Balance(...)
 
@@ -68,6 +68,15 @@ class BalanceTransaction(StripeModel):
     )
     status = StripeEnumField(enum=enums.BalanceTransactionStatus)
     type = StripeEnumField(enum=enums.BalanceTransactionType)
+
+    def get_source_class(self):
+        return apps.get_model("djstripe", self.type)
+
+    def get_source_instance(self):
+        return self.get_source_class().objects.get(id=self.source)
+
+    def get_stripe_dashboard_url(self):
+        return self.get_source_instance().get_stripe_dashboard_url()
 
 
 class Charge(StripeModel):
