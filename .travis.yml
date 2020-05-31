@@ -16,18 +16,23 @@ matrix:
     - { python: "3.6", env: TOXENV=py36-django30-postgres }
 
     - { python: "3.7", env: TOXENV=py37-django22-postgres }
-    - { python: "3.7", env: TOXENV=py37-django22-postgres_native_json }
+    - { python: "3.7", env: TOXENV=py37-django22-postgres-nativejson }
     - { python: "3.7", env: TOXENV=py37-django22-mysql }
     - { python: "3.7", env: TOXENV=py37-django22-sqlite }
     - { python: "3.7", env: TOXENV=py37-django30-postgres }
-    - { python: "3.7", env: TOXENV=py37-django30-postgres_native_json }
+    - { python: "3.7", env: TOXENV=py37-django30-postgres-nativejson }
     - { python: "3.7", env: TOXENV=py37-django30-mysql }
     - { python: "3.7", env: TOXENV=py37-django30-sqlite }
     - { python: "3.7", env: TOXENV=py37-djangomaster-postgres }
 
     - { python: "3.8", env: TOXENV=py38-django22-postgres }
     - { python: "3.8", env: TOXENV=py38-django30-postgres }
-    - { python: "3.8", env: TOXENV=py38-django31-postgres }
+
+    - { python: "3.8", env: TOXENV=py38-django31-sqlite }
+    - { python: "3.8", env: TOXENV=py38-django31-sqlite-nativejson }
+    - { python: "3.8", env: TOXENV=py38-django31-mysql }
+    - { python: "3.8", env: TOXENV=py38-django31-mysql-nativejson }
+    - { python: "3.8", env: TOXENV=py38-django31-postgres-nativejson }
 
     - { python: "3.7", env: TOXENV=checkmigrations }
     - { python: "3.7", env: TOXENV=lint }
