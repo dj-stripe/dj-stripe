@@ -1,6 +1,7 @@
 """
 dj-stripe System Checks
 """
+import django
 from django.conf import settings
 from django.core import checks
 from django.utils.dateparse import date_re
@@ -84,6 +85,12 @@ def check_native_jsonfield_postgres_engine(app_configs=None, **kwargs):
         "DJSTRIPE_USE_NATIVE_JSONFIELD is not compatible with engine {engine} "
         "for database {name}"
     )
+
+    # This error check is skipped on Django 3.1+, because the native JSONField
+    # will be used, which is compatible with mysql and sqlite.
+    # https://docs.djangoproject.com/en/dev/releases/3.1/#postgresql-jsonfield
+    if django.VERSION >= (3, 1):
+        return messages
 
     if djstripe_settings.USE_NATIVE_JSONFIELD:
         for db_name, db_config in settings.DATABASES.items():
