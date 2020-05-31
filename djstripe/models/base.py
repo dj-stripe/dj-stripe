@@ -29,9 +29,9 @@ class StripeModel(models.Model):
     )
 
     id = StripeIdField(unique=True)
-    livemode = models.NullBooleanField(
-        default=None,
+    livemode = models.BooleanField(
         null=True,
+        default=None,
         blank=True,
         help_text="Null here indicates that the livemode status is unknown or was "
         "previously unrecorded. Otherwise, this field indicates whether this record "
