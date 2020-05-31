@@ -21,6 +21,8 @@ class Account(StripeModel):
     Stripe documentation: https://stripe.com/docs/api#account
     """
 
+    djstripe_owner_account = None
+
     stripe_class = stripe.Account
     # Special handling of the icon and logo fields, they moved to settings.branding
     # in Stripe 2019-02-19 but we want them as ForeignKeys

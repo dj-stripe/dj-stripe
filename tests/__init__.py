@@ -36,6 +36,23 @@ IS_STATICMETHOD_AUTOSPEC_SUPPORTED = sys.version_info >= (3, 7, 4)
 
 
 class AssertStripeFksMixin:
+    def _get_field_str(self, field) -> str:
+        if isinstance(field, models.OneToOneRel):
+            if field.parent_link:
+                return ""
+            else:
+                reverse_id_name = str(field.remote_field.foreign_related_fields[0])
+                return (
+                    reverse_id_name.replace("djstripe_id", field.name)
+                    + " (related name)"
+                )
+
+        elif isinstance(field, models.ForeignKey):
+            return str(field)
+
+        else:
+            return ""
+
     def assert_fks(self, obj, expected_blank_fks, processed_stripe_ids=None):
         """
         Recursively walk through fks on obj, asserting they're not-none
@@ -51,37 +68,27 @@ class AssertStripeFksMixin:
         processed_stripe_ids.add(obj.id)
 
         for field in obj._meta.get_fields():
-            if isinstance(field, (models.ForeignKey, models.OneToOneRel)):
-                if isinstance(field, models.OneToOneRel):
-                    if field.parent_link:
-                        # skip checking model inheritance links
-                        continue
+            field_str = self._get_field_str(field)
+            if not field_str or field_str.endswith(".djstripe_owner_account"):
+                continue
 
-                    # Check reverse OneToOneFields
-                    # Hack - there's probably a better way to generate this name?
-                    reverse_id_name = str(field.remote_field.foreign_related_fields[0])
-                    field_str = reverse_id_name.replace("djstripe_id", field.name)
-                    field_str += " (related name)"
-                else:
-                    field_str = str(field)
+            try:
+                field_value = getattr(obj, field.name)
+            except ObjectDoesNotExist:
+                field_value = None
 
-                try:
-                    field_value = getattr(obj, field.name)
-                except ObjectDoesNotExist:
-                    field_value = None
+            if field_str in expected_blank_fks:
+                self.assertIsNone(field_value, field_str)
+            else:
+                self.assertIsNotNone(field_value, field_str)
 
-                if field_str in expected_blank_fks:
-                    self.assertIsNone(field_value, field_str)
-                else:
-                    self.assertIsNotNone(field_value, field_str)
+                if field_value.id not in processed_stripe_ids:
+                    # recurse into the object if it's not already been checked
+                    self.assert_fks(
+                        field_value, expected_blank_fks, processed_stripe_ids
+                    )
 
-                    if field_value.id not in processed_stripe_ids:
-                        # recurse into the object if it's not already been checked
-                        self.assert_fks(
-                            field_value, expected_blank_fks, processed_stripe_ids
-                        )
-
-                    logger.warning("checked {}".format(field_str))
+                logger.warning("checked {}".format(field_str))
 
 
 def load_fixture(filename):

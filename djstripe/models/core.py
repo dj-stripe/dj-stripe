@@ -1539,6 +1539,7 @@ class PaymentIntent(StripeModel):
         blank=True,
         help_text="The account (if any) for which the funds of the "
         "PaymentIntent are intended.",
+        related_name="payment_intents",
     )
     payment_method = StripeForeignKey(
         "PaymentMethod",
@@ -1723,6 +1724,7 @@ class SetupIntent(StripeModel):
         null=True,
         blank=True,
         help_text="The account (if any) for which the setup is intended.",
+        related_name="setup_intents",
     )
     payment_method = StripeForeignKey(
         "PaymentMethod",

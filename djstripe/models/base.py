@@ -8,7 +8,7 @@ from django.utils import dateformat, timezone
 from django.utils.encoding import smart_str
 
 from .. import settings as djstripe_settings
-from ..fields import JSONField, StripeDateTimeField, StripeIdField
+from ..fields import JSONField, StripeDateTimeField, StripeForeignKey, StripeIdField
 from ..managers import StripeModelManager
 
 logger = logging.getLogger(__name__)
@@ -27,8 +27,17 @@ class StripeModel(models.Model):
     djstripe_id = models.BigAutoField(
         verbose_name="ID", serialize=False, primary_key=True
     )
-
     id = StripeIdField(unique=True)
+
+    djstripe_owner_account = StripeForeignKey(
+        "djstripe.Account",
+        on_delete=models.CASCADE,
+        to_field="id",
+        null=True,
+        blank=True,
+        help_text="The Stripe Account this object belongs to.",
+    )
+
     livemode = models.BooleanField(
         null=True,
         default=None,
