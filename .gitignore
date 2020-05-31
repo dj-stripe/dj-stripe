@@ -1,6 +1,5 @@
 *.py[cod]
 __pycache__
-.coverage
 .tox
 *.mo
 
@@ -10,3 +9,7 @@ docs/_static
 
 # SQLite
 *.sqlite3
+
+# Coverage
+/cover
+.coverage
