@@ -54,10 +54,7 @@ class Migration(migrations.Migration):
                         primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                (
-                    "stripe_id",
-                    djstripe.fields.StripeIdField(max_length=255, unique=True),
-                ),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True),),
                 (
                     "livemode",
                     models.BooleanField(
@@ -284,10 +281,7 @@ class Migration(migrations.Migration):
                         primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                (
-                    "stripe_id",
-                    djstripe.fields.StripeIdField(max_length=255, unique=True),
-                ),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True),),
                 (
                     "livemode",
                     models.BooleanField(
@@ -407,10 +401,7 @@ class Migration(migrations.Migration):
                         primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                (
-                    "stripe_id",
-                    djstripe.fields.StripeIdField(max_length=255, unique=True),
-                ),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True),),
                 (
                     "livemode",
                     models.BooleanField(
@@ -565,10 +556,7 @@ class Migration(migrations.Migration):
                         primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                (
-                    "stripe_id",
-                    djstripe.fields.StripeIdField(max_length=255, unique=True),
-                ),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True),),
                 (
                     "livemode",
                     models.BooleanField(
@@ -813,7 +801,7 @@ class Migration(migrations.Migration):
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True)),
                 ("djstripe_updated", models.DateTimeField(auto_now=True)),
-                ("stripe_id", djstripe.fields.StripeIdField(max_length=500)),
+                ("id", djstripe.fields.StripeIdField(max_length=500)),
                 (
                     "amount_off",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
@@ -895,10 +883,7 @@ class Migration(migrations.Migration):
                         primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                (
-                    "stripe_id",
-                    djstripe.fields.StripeIdField(max_length=255, unique=True),
-                ),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True),),
                 (
                     "livemode",
                     models.BooleanField(
@@ -1009,10 +994,7 @@ class Migration(migrations.Migration):
                         primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                (
-                    "stripe_id",
-                    djstripe.fields.StripeIdField(max_length=255, unique=True),
-                ),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True),),
                 (
                     "livemode",
                     models.BooleanField(
@@ -1100,10 +1082,7 @@ class Migration(migrations.Migration):
                         primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                (
-                    "stripe_id",
-                    djstripe.fields.StripeIdField(max_length=255, unique=True),
-                ),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True),),
                 (
                     "livemode",
                     models.BooleanField(
@@ -1179,10 +1158,7 @@ class Migration(migrations.Migration):
                         primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                (
-                    "stripe_id",
-                    djstripe.fields.StripeIdField(max_length=255, unique=True),
-                ),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True),),
                 (
                     "livemode",
                     models.BooleanField(
@@ -1286,10 +1262,7 @@ class Migration(migrations.Migration):
                         primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                (
-                    "stripe_id",
-                    djstripe.fields.StripeIdField(max_length=255, unique=True),
-                ),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True),),
                 (
                     "livemode",
                     models.BooleanField(
@@ -1567,10 +1540,7 @@ class Migration(migrations.Migration):
                         primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                (
-                    "stripe_id",
-                    djstripe.fields.StripeIdField(max_length=255, unique=True),
-                ),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True),),
                 (
                     "livemode",
                     models.BooleanField(
@@ -1690,10 +1660,7 @@ class Migration(migrations.Migration):
                         primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                (
-                    "stripe_id",
-                    djstripe.fields.StripeIdField(max_length=255, unique=True),
-                ),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True),),
                 (
                     "livemode",
                     models.BooleanField(
@@ -1817,10 +1784,7 @@ class Migration(migrations.Migration):
                         primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                (
-                    "stripe_id",
-                    djstripe.fields.StripeIdField(max_length=255, unique=True),
-                ),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True),),
                 (
                     "livemode",
                     models.BooleanField(
@@ -1983,10 +1947,7 @@ class Migration(migrations.Migration):
                         primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                (
-                    "stripe_id",
-                    djstripe.fields.StripeIdField(max_length=255, unique=True),
-                ),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True),),
                 (
                     "livemode",
                     models.BooleanField(
@@ -2121,10 +2082,7 @@ class Migration(migrations.Migration):
                         primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                (
-                    "stripe_id",
-                    djstripe.fields.StripeIdField(max_length=255, unique=True),
-                ),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True),),
                 (
                     "livemode",
                     models.BooleanField(
@@ -2226,10 +2184,7 @@ class Migration(migrations.Migration):
                         primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                (
-                    "stripe_id",
-                    djstripe.fields.StripeIdField(max_length=255, unique=True),
-                ),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True),),
                 (
                     "livemode",
                     models.BooleanField(
@@ -2388,10 +2343,7 @@ class Migration(migrations.Migration):
                         primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                (
-                    "stripe_id",
-                    djstripe.fields.StripeIdField(max_length=255, unique=True),
-                ),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True),),
                 (
                     "livemode",
                     models.BooleanField(
@@ -2578,10 +2530,7 @@ class Migration(migrations.Migration):
                         primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
-                (
-                    "stripe_id",
-                    djstripe.fields.StripeIdField(max_length=255, unique=True),
-                ),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True),),
                 (
                     "livemode",
                     models.BooleanField(
@@ -2921,7 +2870,7 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AlterUniqueTogether(
-            name="coupon", unique_together={("stripe_id", "livemode")}
+            name="coupon", unique_together={("id", "livemode")}
         ),
         migrations.AddField(
             model_name="charge",

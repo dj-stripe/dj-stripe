@@ -897,54 +897,6 @@ class Migration(migrations.Migration):
                 to="djstripe.BalanceTransaction",
             ),
         ),
-        migrations.RenameField(
-            model_name="account", old_name="stripe_id", new_name="id"
-        ),
-        migrations.RenameField(
-            model_name="bankaccount", old_name="stripe_id", new_name="id"
-        ),
-        migrations.RenameField(model_name="card", old_name="stripe_id", new_name="id"),
-        migrations.RenameField(
-            model_name="charge", old_name="stripe_id", new_name="id"
-        ),
-        migrations.RenameField(
-            model_name="customer", old_name="stripe_id", new_name="id"
-        ),
-        migrations.RenameField(
-            model_name="dispute", old_name="stripe_id", new_name="id"
-        ),
-        migrations.RenameField(model_name="event", old_name="stripe_id", new_name="id"),
-        migrations.RenameField(
-            model_name="fileupload", old_name="stripe_id", new_name="id"
-        ),
-        migrations.RenameField(
-            model_name="invoice", old_name="stripe_id", new_name="id"
-        ),
-        migrations.RenameField(
-            model_name="invoiceitem", old_name="stripe_id", new_name="id"
-        ),
-        migrations.RenameField(
-            model_name="payout", old_name="stripe_id", new_name="id"
-        ),
-        migrations.RenameField(model_name="plan", old_name="stripe_id", new_name="id"),
-        migrations.RenameField(
-            model_name="product", old_name="stripe_id", new_name="id"
-        ),
-        migrations.RenameField(
-            model_name="refund", old_name="stripe_id", new_name="id"
-        ),
-        migrations.RenameField(
-            model_name="source", old_name="stripe_id", new_name="id"
-        ),
-        migrations.RenameField(
-            model_name="subscription", old_name="stripe_id", new_name="id"
-        ),
-        migrations.RenameField(
-            model_name="transfer", old_name="stripe_id", new_name="id"
-        ),
-        migrations.RenameField(
-            model_name="coupon", old_name="stripe_id", new_name="id"
-        ),
         migrations.AlterField(
             model_name="coupon",
             name="percent_off",
