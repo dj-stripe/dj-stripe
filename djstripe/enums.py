@@ -299,6 +299,7 @@ class FileUploadPurpose(Enum):
     dispute_evidence = _("Dispute evidence")
     identity_document = _("Identity document")
     tax_document_user_upload = _("Tax document user upload")
+    document_provider_identity_document = _("Document provider identity document")
 
 
 class FileUploadType(Enum):
