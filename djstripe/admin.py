@@ -211,6 +211,13 @@ class AccountAdmin(StripeModelAdmin):
     search_fields = ("settings", "business_profile")
 
 
+@admin.register(models.APIKey)
+class APIKeyAdmin(StripeModelAdmin):
+    list_display = ("type",)
+    list_filter = ("type",)
+    search_fields = ("name",)
+
+
 @admin.register(models.BalanceTransaction)
 class BalanceTransactionAdmin(StripeModelAdmin):
     list_display = (

@@ -1,3 +1,4 @@
+from .api import APIKey
 from .base import IdempotencyKey, StripeModel
 from .billing import (
     Coupon,
@@ -44,6 +45,7 @@ from .webhooks import WebhookEventTrigger
 
 __all__ = [
     "Account",
+    "APIKey",
     "ApplicationFee",
     "ApplicationFeeRefund",
     "BalanceTransaction",

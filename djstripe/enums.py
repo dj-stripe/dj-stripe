@@ -48,6 +48,16 @@ class Enum(metaclass=EnumMetaClass):
     pass
 
 
+class APIKeyType(Enum):
+    """
+    API Key Types (internal model only)
+    """
+
+    publishable = _("Publishable key")
+    secret = _("Secret key")
+    restricted = _("Restricted key")
+
+
 class ApiErrorCode(Enum):
     """
     Charge failure error codes.
