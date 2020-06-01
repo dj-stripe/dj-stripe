@@ -64,7 +64,9 @@ class BalanceTransaction(StripeModel):
     source = StripeIdField()
     reporting_category = StripeEnumField(
         enum=enums.BalanceTransactionReportingCategory,
-        help_text="More information: https://stripe.com/docs/reports/reporting-categories",
+        help_text=(
+            "More information: https://stripe.com/docs/reports/reporting-categories"
+        ),
     )
     status = StripeEnumField(enum=enums.BalanceTransactionStatus)
     type = StripeEnumField(enum=enums.BalanceTransactionType)
