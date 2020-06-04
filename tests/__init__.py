@@ -197,7 +197,10 @@ def default_account():
     from djstripe.models import Account
 
     return Account.objects.create(
-        charges_enabled=True, details_submitted=True, payouts_enabled=True
+        id="acct_TESTXXXXX",
+        charges_enabled=True,
+        details_submitted=True,
+        payouts_enabled=True,
     )
 
 
