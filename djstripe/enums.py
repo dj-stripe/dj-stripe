@@ -560,20 +560,25 @@ class SourceStatus(Enum):
 class SourceType(Enum):
     ach_credit_transfer = _("ACH Credit Transfer")
     ach_debit = _("ACH Debit")
+    acss_debit = _("ACSS Debit")
     alipay = _("Alipay")
+    au_becs_debit = _("BECS Debit (AU)")
     bancontact = _("Bancontact")
-    bitcoin = _("Bitcoin")
+    bitcoin = _("Bitcoin (Legacy)")
     card = _("Card")
     card_present = _("Card present")
     eps = _("EPS")
     giropay = _("Giropay")
     ideal = _("iDEAL")
+    klarna = _("Klarna")
+    multibanco = _("Multibanco")
     p24 = _("P24")
     paper_check = _("Paper check")
-    sepa_debit = _("SEPA Direct Debit")
     sepa_credit_transfer = _("SEPA credit transfer")
+    sepa_debit = _("SEPA Direct Debit")
     sofort = _("SOFORT")
     three_d_secure = _("3D Secure")
+    wechat = _("WeChat")
 
 
 class LegacySourceType(Enum):
