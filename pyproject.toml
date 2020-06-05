@@ -42,6 +42,13 @@ jsonfield = ">=3.0"
 stripe = ">=2.48.0"
 
 [tool.poetry.dev-dependencies]
+djangorestframework = "^3.11.0"
+psycopg2 = "^2.8.5"
+flake8 = "^3.8.2"
+isort = "^4.3.21"
+black = "^19.10b0"
+pytest = "^5.4.3"
+pytest-django = "^3.9.0"
 
 [build-system]
 requires = ["poetry>=1.0.4"]
