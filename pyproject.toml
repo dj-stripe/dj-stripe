@@ -39,8 +39,7 @@ exclude = [
 python = "^3.6"
 Django = ">=2.2"
 jsonfield = ">=3.0"
-# avoid 2.36.0, see https://github.com/dj-stripe/dj-stripe/issues/991
-stripe = ">=2.32.0,!=2.36.0"
+stripe = ">=2.48.0"
 
 [tool.poetry.dev-dependencies]
 
