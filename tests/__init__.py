@@ -8,6 +8,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import json
 import logging
+import os
 import sys
 from copy import deepcopy
 from datetime import datetime
@@ -20,6 +21,7 @@ from django.utils import dateformat, timezone
 
 from djstripe.webhooks import TEST_EVENT_ID
 
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tests.settings")
 logger = logging.getLogger(__name__)
 
 FUTURE_DATE = datetime(2100, 4, 30, tzinfo=timezone.utc)
