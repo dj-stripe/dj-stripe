@@ -60,12 +60,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
 
-        self.assertEqual(
-            str(subscription),
-            "{email} on {plan}".format(
-                email=self.user.email, plan=str(subscription.plan)
-            ),
-        )
+        self.assertEqual(str(subscription), f"{self.user} on {subscription.plan}")
 
         self.assertEqual(subscription.default_tax_rates.count(), 1)
         self.assertEqual(

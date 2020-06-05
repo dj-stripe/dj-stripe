@@ -76,13 +76,9 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.account = default_account()
 
     def test_str(self):
-        self.assertEqual(str(self.customer), self.user.email)
-        self.customer.subscriber.email = ""
-        self.assertEqual(str(self.customer), self.customer.id)
+        self.assertEqual(str(self.customer), str(self.user))
         self.customer.subscriber = None
-        self.assertEqual(
-            str(self.customer), "{id} (deleted)".format(id=self.customer.id)
-        )
+        self.assertEqual(str(self.customer), self.customer.description)
 
     def test_balance(self):
         self.assertEqual(self.customer.balance, 0)
