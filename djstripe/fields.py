@@ -126,7 +126,8 @@ class StripeEnumField(models.CharField):
     def deconstruct(self):
         name, path, args, kwargs = super().deconstruct()
         kwargs["enum"] = self.enum
-        del kwargs["choices"]
+        if "choices" in kwargs:
+            del kwargs["choices"]
         return name, path, args, kwargs
 
 
