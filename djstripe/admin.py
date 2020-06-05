@@ -353,17 +353,7 @@ class SetupIntentAdmin(StripeModelAdmin):
 
 @admin.register(models.Invoice)
 class InvoiceAdmin(StripeModelAdmin):
-    list_display = (
-        "customer",
-        "number",
-        "paid",
-        "period_start",
-        "period_end",
-        "subtotal",
-        "tax",
-        "tax_percent",
-        "total",
-    )
+    list_display = ("total", "paid", "currency", "number", "customer", "due_date")
     list_filter = (
         "paid",
         "attempted",
