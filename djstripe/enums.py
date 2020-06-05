@@ -341,8 +341,16 @@ class DisputeStatus(Enum):
 
 
 class FileUploadPurpose(Enum):
+    additional_verification = _("Additional verification")
+    business_icon = _("Business icon")
+    business_logo = _("Business logo")
+    customer_signature = _("Customer signature")
     dispute_evidence = _("Dispute evidence")
+    finance_report_run = _("Finance report run")
     identity_document = _("Identity document")
+    invoice_statement = _("Invoice statement")
+    pci_document = _("PCI document")
+    sigma_scheduled_query = _("Sigma scheduled query")
     tax_document_user_upload = _("Tax document user upload")
     document_provider_identity_document = _("Document provider identity document")
 
