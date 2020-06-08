@@ -1,3 +1,4 @@
+import re
 from base64 import b64encode
 from uuid import uuid4
 
@@ -18,6 +19,29 @@ def generate_api_key_id() -> str:
     return f"djstripe_mk_{generated_id}"
 
 
+def get_api_key_details_by_prefix(api_key: str):
+    sre = re.match(API_KEY_REGEX, api_key)
+    if not sre:
+        raise ValueError(f"Invalid API key: {api_key!r}")
+
+    key_type = {
+        "pk": APIKeyType.publishable,
+        "sk": APIKeyType.secret,
+        "rk": APIKeyType.restricted,
+    }.get(sre.group(1), "")
+    livemode = {"test": False, "live": True}.get(sre.group(2))
+
+    return key_type, livemode
+
+
+class APIKeyManager(models.Manager):
+    def get_or_create_by_api_key(self, secret: str):
+        key_type, livemode = get_api_key_details_by_prefix(secret)
+        return super().get_or_create(
+            secret=secret, defaults={"type": key_type, "livemode": livemode}
+        )
+
+
 class APIKey(StripeModel):
     object = "api_key"
 
@@ -27,6 +51,8 @@ class APIKey(StripeModel):
     secret = models.CharField(
         max_length=50, validators=[RegexValidator(regex=API_KEY_REGEX)], unique=True
     )
+
+    objects = APIKeyManager()
 
     def get_stripe_dashboard_url(self):
         return self._get_base_stripe_dashboard_url() + "apikeys"

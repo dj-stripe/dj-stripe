@@ -195,6 +195,14 @@ class StripeModel(models.Model):
         return data
 
     @classmethod
+    def _find_owner_account(cls, data):
+        api_key = getattr(data, "api_key", "")
+        if api_key:
+            from .account import Account
+
+            return Account.get_or_retrieve_for_api_key(api_key)
+
+    @classmethod
     def _stripe_object_to_record(
         cls, data, current_ids=None, pending_relations=None, stripe_account=None
     ):
@@ -262,6 +270,12 @@ class StripeModel(models.Model):
                     field_data = ""
 
             result[field.name] = field_data
+
+        # For all objects other than the account object itself, get the API key
+        # attached to the request, and get the matching Account for that key.
+        owner_account = cls._find_owner_account(data)
+        if owner_account:
+            result["djstripe_owner_account"] = owner_account
 
         return result
 
