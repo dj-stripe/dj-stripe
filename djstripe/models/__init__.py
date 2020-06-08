@@ -1,3 +1,4 @@
+from .account import Account
 from .api import APIKey
 from .base import IdempotencyKey, StripeModel
 from .billing import (
@@ -13,7 +14,6 @@ from .billing import (
 )
 from .checkout import Session
 from .connect import (
-    Account,
     ApplicationFee,
     ApplicationFeeRefund,
     CountrySpec,

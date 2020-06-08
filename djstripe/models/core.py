@@ -25,8 +25,8 @@ from ..fields import (
 from ..managers import ChargeManager
 from ..signals import WEBHOOK_SIGNALS
 from ..utils import get_friendly_currency_amount
+from .account import Account
 from .base import IdempotencyKey, StripeModel, logger
-from .connect import Account
 
 # Override the default API version used by the Stripe library.
 djstripe_settings.set_stripe_api_version()
