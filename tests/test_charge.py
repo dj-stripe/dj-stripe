@@ -131,6 +131,8 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         captured_charge = charge.capture()
         self.assertTrue(captured_charge.captured)
 
+        self.assertFalse(captured_charge.fraudulent)
+
         self.assert_fks(
             charge,
             expected_blank_fks=self.default_expected_blank_fks

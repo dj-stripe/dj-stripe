@@ -66,6 +66,10 @@ class TestAccount(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(account, expected_blank_fks={})
 
+        self.assertEqual(account.business_url, "https://example.com")
+        account.business_profile = None
+        self.assertEqual(account.business_url, None)
+
     @patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
     @patch(
         "stripe.FileUpload.retrieve",

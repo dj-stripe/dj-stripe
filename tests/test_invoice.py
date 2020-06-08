@@ -1127,6 +1127,9 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         self.assertIsNone(invoice.save())
         self.assertEqual(invoice.get_stripe_dashboard_url(), "")
 
+        invoice.id = "foo"
+        self.assertIsNone(invoice.id)
+
         subscription_retrieve_mock.assert_called_once_with(
             api_key=ANY, expand=ANY, id=FAKE_SUBSCRIPTION["id"], stripe_account=None
         )

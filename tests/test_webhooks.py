@@ -396,6 +396,10 @@ class TestWebhookHandlers(TestCase):
         self.assertEqual(2, func_mock.call_count)
         func_mock.assert_has_calls([call(event=event1), call(event=event2)])
 
+    def test_webhook_event_trigger_invalid_body(self):
+        trigger = WebhookEventTrigger(remote_ip="127.0.0.1", body="invalid json")
+        assert not trigger.json_body
+
     #
     # Helpers
     #

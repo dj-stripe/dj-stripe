@@ -26,7 +26,12 @@ class TestSubscriptionPaymentRequired(TestCase):
         def test_view(request):
             return HttpResponse()
 
+        @subscription_payment_required(pay_page=None)
+        def test_view_bad(request):
+            return HttpResponse()
+
         self.test_view = test_view
+        self.test_view_bad = test_view_bad
 
     def test_direct(self):
         subscription_payment_required(function=None)
@@ -49,6 +54,9 @@ class TestSubscriptionPaymentRequired(TestCase):
 
         response = self.test_view(request)
         self.assertEqual(response.status_code, 302)
+
+        with self.assertRaises(ImproperlyConfigured):
+            self.test_view_bad(request)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
