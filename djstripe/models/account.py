@@ -147,15 +147,6 @@ class Account(StripeModel):
     def _manipulate_stripe_object_hook(cls, data):
         data = super()._manipulate_stripe_object_hook(data)
 
-        def empty_string_to_none(v):
-            """
-            stripe.StripeObject.__setitem__ doesn't allow = ""
-            """
-            if v == "":
-                return None
-            else:
-                return v
-
         # icon (formerly called business_logo)
         # logo (formerly called business_logo_large)
         # moved to settings.branding in Stripe 2019-02-19
