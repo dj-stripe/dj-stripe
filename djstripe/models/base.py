@@ -221,12 +221,10 @@ class StripeModel(models.Model):
         """
         manipulated_data = cls._manipulate_stripe_object_hook(data)
 
-        if "object" not in data:
-            raise ValueError("Stripe data has no `object` value. Aborting. %r" % (data))
-
         if not cls.is_valid_object(data):
             raise ValueError(
-                "Trying to fit a %r into %r. Aborting." % (data["object"], cls.__name__)
+                "Trying to fit a %r into %r. Aborting."
+                % (data.get("object", ""), cls.__name__)
             )
 
         result = {}
@@ -359,7 +357,7 @@ class StripeModel(models.Model):
         """
         Returns whether the data is a valid object for the class
         """
-        return data["object"] == cls.stripe_class.OBJECT_NAME
+        return "object" in data and data["object"] == cls.stripe_class.OBJECT_NAME
 
     def _attach_objects_hook(self, cls, data):
         """

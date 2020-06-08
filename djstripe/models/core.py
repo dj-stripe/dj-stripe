@@ -1434,7 +1434,7 @@ class FileUpload(StripeModel):
 
     @classmethod
     def is_valid_object(cls, data):
-        return data["object"] in ("file", "file_upload")
+        return "object" in data and data["object"] in ("file", "file_upload")
 
 
 # Alias for compatability
