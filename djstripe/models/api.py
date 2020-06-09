@@ -25,7 +25,7 @@ class APIKey(StripeModel):
     type = StripeEnumField(enum=APIKeyType)
     name = models.CharField("Key name", max_length=100, blank=True)
     secret = models.CharField(
-        max_length=50, validators=[RegexValidator(regex=API_KEY_REGEX)]
+        max_length=50, validators=[RegexValidator(regex=API_KEY_REGEX)], unique=True
     )
 
     def get_stripe_dashboard_url(self):
