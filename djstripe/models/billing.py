@@ -1,4 +1,3 @@
-import warnings
 from copy import deepcopy
 
 import stripe
@@ -1406,15 +1405,6 @@ class Subscription(StripeModel):
     status = StripeEnumField(
         enum=enums.SubscriptionStatus, help_text="The status of this subscription."
     )
-
-    @property
-    def billing(self):
-        warnings.warn(
-            "Invoice.billing has been renamed to .collection_method. "
-            "This alias will be removed in djstripe 2.4",
-            DeprecationWarning,
-        )
-        return self.collection_method
 
     # deprecated - will be removed in 2.4 - use .default_tax_rates instead
     tax_percent = StripePercentField(
