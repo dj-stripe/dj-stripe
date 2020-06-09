@@ -170,7 +170,7 @@ WEBHOOK_SIGNALS = dict(
             "transfer.failed",
             "transfer.paid",
             "transfer.reversed",
-            "transfer.updated"
+            "transfer.updated",
             # deprecated (no longer in events_types list) - TODO can be deleted?
             "checkout_beta.session_succeeded",
             "issuer_fraud_record.created",
@@ -180,6 +180,10 @@ WEBHOOK_SIGNALS = dict(
             "subscription_schedule.created",
             "subscription_schedule.released",
             "subscription_schedule.updated",
+            "issuing_dispute.created",		
+            "issuing_dispute.updated",		
+            "issuing_settlement.created",		
+            "issuing_settlement.updated",
             # special case? - TODO can be deleted?
             "ping",
         ]
