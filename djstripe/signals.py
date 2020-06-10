@@ -180,9 +180,9 @@ WEBHOOK_SIGNALS = dict(
             "subscription_schedule.created",
             "subscription_schedule.released",
             "subscription_schedule.updated",
-            "issuing_dispute.created",		
-            "issuing_dispute.updated",		
-            "issuing_settlement.created",		
+            "issuing_dispute.created",
+            "issuing_dispute.updated",
+            "issuing_settlement.created",
             "issuing_settlement.updated",
             # special case? - TODO can be deleted?
             "ping",
