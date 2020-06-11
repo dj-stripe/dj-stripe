@@ -152,7 +152,7 @@ class StripeModelAdmin(admin.ModelAdmin):
         self.raw_id_fields = get_forward_relation_fields_for_model(self.model)
 
     def get_list_display(self, request):
-        return ("id",) + self.list_display + ("created", "livemode")
+        return ("__str__", "id") + self.list_display + ("created", "livemode")
 
     def get_list_filter(self, request):
         return self.list_filter + ("created", "livemode")
