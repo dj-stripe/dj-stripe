@@ -10,7 +10,7 @@ from ..fields import StripeEnumField
 from .base import StripeModel
 
 # A regex to validate API key format
-API_KEY_REGEX = r"^(pk|sk|rk)_(test|live)_([a-zA-Z0-9]{24,34})"
+API_KEY_REGEX = r"^(pk|sk|rk)_(test|live)_([a-zA-Z0-9]{24,99})"
 
 
 def generate_api_key_id() -> str:
@@ -49,7 +49,7 @@ class APIKey(StripeModel):
     type = StripeEnumField(enum=APIKeyType)
     name = models.CharField("Key name", max_length=100, blank=True)
     secret = models.CharField(
-        max_length=50, validators=[RegexValidator(regex=API_KEY_REGEX)], unique=True
+        max_length=128, validators=[RegexValidator(regex=API_KEY_REGEX)], unique=True
     )
 
     objects = APIKeyManager()
