@@ -250,6 +250,11 @@ class BankAccountStatus(Enum):
     errored = _("Errored")
 
 
+class BillingScheme(Enum):
+    per_unit = _("Per-unit")
+    tiered = _("Tiered")
+
+
 class BusinessType(Enum):
     individual = _("Individual")
     company = _("Company")
@@ -500,11 +505,6 @@ class PlanAggregateUsage(Enum):
     last_ever = _("Last ever")
     max = _("Max")
     sum = _("Sum")
-
-
-class PlanBillingScheme(Enum):
-    per_unit = _("Per unit")
-    tiered = _("Tiered")
 
 
 class PlanInterval(Enum):

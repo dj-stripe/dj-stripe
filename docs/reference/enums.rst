@@ -52,6 +52,13 @@ BusinessType
     :undoc-members:
 
 
+BillingScheme
+-----------------
+.. autoclass:: djstripe.enums.BillingScheme
+    :members:
+    :undoc-members:
+
+
 CaptureMethod
 -------------
 .. autoclass:: djstripe.enums.CaptureMethod
@@ -209,13 +216,6 @@ PayoutType
 PlanAggregateUsage
 ------------------
 .. autoclass:: djstripe.enums.PlanAggregateUsage
-    :members:
-    :undoc-members:
-
-
-PlanBillingScheme
------------------
-.. autoclass:: djstripe.enums.PlanBillingScheme
     :members:
     :undoc-members:
 

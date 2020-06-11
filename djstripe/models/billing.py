@@ -1031,7 +1031,7 @@ class Plan(StripeModel):
         help_text="Amount (as decimal) to be charged on the interval specified.",
     )
     billing_scheme = StripeEnumField(
-        enum=enums.PlanBillingScheme,
+        enum=enums.BillingScheme,
         default="",
         blank=True,
         help_text=(
