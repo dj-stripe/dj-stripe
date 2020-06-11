@@ -45,18 +45,18 @@ class Command(BaseCommand):
         model_name = model.__name__
 
         if not issubclass(model, models.StripeModel):
-            print("Skipping {} (not a StripeModel)".format(model_name))
+            self.stdout.write("Skipping {} (not a StripeModel)".format(model_name))
             return
 
         if model.stripe_class is None:
-            print("Skipping {} (no stripe_class)".format(model_name))
+            self.stdout.write("Skipping {} (no stripe_class)".format(model_name))
             return
 
         if not hasattr(model.stripe_class, "list"):
-            print("Skipping {} (no stripe_class.list)".format(model_name))
+            self.stdout.write("Skipping {} (no stripe_class.list)".format(model_name))
             return
 
-        print("Syncing {}:".format(model_name))
+        self.stdout.write("Syncing {}:".format(model_name))
 
         try:
             count = 0
@@ -69,7 +69,7 @@ class Command(BaseCommand):
                     )
                     count += 1
                     djstripe_obj = model.sync_from_stripe_data(stripe_obj)
-                    print(
+                    self.stdout.write(
                         "  id={id}, pk={pk} ({djstripe_obj})".format(
                             id=djstripe_obj.id,
                             pk=djstripe_obj.pk,
@@ -80,7 +80,7 @@ class Command(BaseCommand):
                 for stripe_obj in model.api_list(**list_kwargs):
                     count += 1
                     djstripe_obj = model.sync_from_stripe_data(stripe_obj)
-                    print(
+                    self.stdout.write(
                         "  id={id}, pk={pk} ({djstripe_obj})".format(
                             id=djstripe_obj.id,
                             pk=djstripe_obj.pk,
@@ -89,16 +89,16 @@ class Command(BaseCommand):
                     )
 
             if count == 0:
-                print("  (no results)")
+                self.stdout.write("  (no results)")
             else:
-                print(
+                self.stdout.write(
                     "  Synced {count} {model_name}".format(
                         count=count, model_name=model_name
                     )
                 )
 
         except Exception as e:
-            print(e)
+            self.stderr.write(str(e))
 
     def get_list_kwargs(self, model):
         """
