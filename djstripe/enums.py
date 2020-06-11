@@ -524,6 +524,11 @@ class PlanTiersMode(Enum):
     volume = _("Volume-based")
 
 
+class PriceType(Enum):
+    one_time = _("One-time")
+    recurring = _("Recurring")
+
+
 class ProductType(Enum):
     good = _("Good")
     service = _("Service")
