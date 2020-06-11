@@ -394,6 +394,15 @@ class PlanAdmin(StripeModelAdmin):
         return readonly_fields
 
 
+@admin.register(models.Price)
+class PriceAdmin(StripeModelAdmin):
+    list_display = ("product", "currency", "active")
+    list_filter = ("active", "type", "aggregate_usage", "billing_scheme", "tiers_mode")
+    raw_id_fields = ("product",)
+    search_fields = ("nickname",)
+    radio_fields = {"type": admin.HORIZONTAL}
+
+
 @admin.register(models.Product)
 class ProductAdmin(StripeModelAdmin):
     list_display = ("name", "type", "active", "url", "statement_descriptor")
