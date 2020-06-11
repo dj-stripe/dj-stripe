@@ -54,6 +54,10 @@ class Command(BaseCommand):
         if model is models.UpcomingInvoice:
             return False, "Upcoming Invoices are virtual only"
 
+        if not settings.STRIPE_LIVE_MODE:
+            if model is models.ScheduledQueryRun:
+                return False, "only available in live mode"
+
         return True, ""
 
     def sync_model(self, model):
