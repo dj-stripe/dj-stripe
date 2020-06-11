@@ -110,6 +110,10 @@ class StripeDecimalCurrencyAmountField(models.DecimalField):
         """Convert the raw value to decimal representation."""
         val = data.get(self.name)
 
+        # If already a string, it's decimal in the API (eg. Prices).
+        if isinstance(val, str):
+            return decimal.Decimal(val)
+
         # Note: 0 is a possible return value, which is 'falseish'
         if val is not None:
             return val / decimal.Decimal("100")
