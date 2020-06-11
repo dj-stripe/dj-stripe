@@ -41,19 +41,27 @@ class Command(BaseCommand):
         for model in model_list:
             self.sync_model(model)
 
+    def _should_sync_model(self, model):
+        if not issubclass(model, models.StripeModel):
+            return False, "not a StripeModel"
+
+        if model.stripe_class is None:
+            return False, "no stripe_class"
+
+        if not hasattr(model.stripe_class, "list"):
+            return False, "no stripe_class.list"
+
+        if model is models.UpcomingInvoice:
+            return False, "Upcoming Invoices are virtual only"
+
+        return True, ""
+
     def sync_model(self, model):
         model_name = model.__name__
 
-        if not issubclass(model, models.StripeModel):
-            self.stdout.write("Skipping {} (not a StripeModel)".format(model_name))
-            return
-
-        if model.stripe_class is None:
-            self.stdout.write("Skipping {} (no stripe_class)".format(model_name))
-            return
-
-        if not hasattr(model.stripe_class, "list"):
-            self.stdout.write("Skipping {} (no stripe_class.list)".format(model_name))
+        should_sync, reason = self._should_sync_model(model)
+        if not should_sync:
+            self.stdout.write(f"Skipping {model}: {reason}")
             return
 
         self.stdout.write("Syncing {}:".format(model_name))
