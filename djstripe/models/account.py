@@ -3,12 +3,7 @@ from django.db import models, transaction
 
 from .. import enums
 from .. import settings as djstripe_settings
-from ..fields import (
-    JSONField,
-    StripeCurrencyCodeField,
-    StripeEnumField,
-    StripeForeignKey,
-)
+from ..fields import JSONField, StripeCurrencyCodeField, StripeEnumField
 from .api import APIKey
 from .base import StripeModel
 
@@ -21,24 +16,6 @@ class Account(StripeModel):
     djstripe_owner_account = None
 
     stripe_class = stripe.Account
-    # Special handling of the icon and logo fields, they moved to settings.branding
-    # in Stripe 2019-02-19 but we want them as ForeignKeys
-    branding_icon = StripeForeignKey(
-        "FileUpload",
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="icon_account",
-        help_text="An icon for the account. Must be square and at least 128px x 128px.",
-    )
-    branding_logo = StripeForeignKey(
-        "FileUpload",
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="logo_account",
-        help_text="A logo for the account that will be used in Checkout instead of "
-        "the icon and without the account’s name next to it if provided. "
-        "Must be at least 128px x 128px.",
-    )
     business_profile = JSONField(
         null=True, blank=True, help_text="Optional information related to the business."
     )
@@ -153,22 +130,6 @@ class Account(StripeModel):
             or super().__str__()
         )
 
-    @classmethod  # noqa: C901
-    def _manipulate_stripe_object_hook(cls, data):
-        data = super()._manipulate_stripe_object_hook(data)
-
-        # icon (formerly called business_logo)
-        # logo (formerly called business_logo_large)
-        # moved to settings.branding in Stripe 2019-02-19
-        # but we'll keep them to provide the ForeignKey
-        for old, new in [("branding_icon", "icon"), ("branding_logo", "logo")]:
-            try:
-                data[old] = data["settings"]["branding"][new]
-            except KeyError:
-                pass
-
-        return data
-
     @classmethod
     def _create_from_stripe_object(
         cls,
@@ -196,3 +157,49 @@ class Account(StripeModel):
     def _find_owner_account(cls, data):
         # Account model never has an owner account (it's always itself)
         return None
+
+    # "Special" handling of the icon and logo fields
+    # Previously available as properties, they moved to
+    # settings.branding in Stripe 2019-02-19.
+    # Currently, they return a FileUpload ID
+    @property
+    def branding_icon(self):
+        from ..models.core import FileUpload
+
+        id = self.settings.get("branding", {}).get("icon")
+        return FileUpload.objects.filter(id=id).first() if id else None
+
+    @property
+    def branding_logo(self):
+        from ..models.core import FileUpload
+
+        id = self.settings.get("branding", {}).get("logo")
+        return FileUpload.objects.filter(id=id).first() if id else None
+
+    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+        from ..models.core import FileUpload
+
+        super()._attach_objects_post_save_hook(
+            cls, data, pending_relations=pending_relations
+        )
+
+        # Retrieve and save the FileUploads in the settings.branding object.
+        for field in "icon", "logo":
+            file_upload_id = self.settings.get("branding", {}).get(field)
+            if file_upload_id:
+                try:
+                    FileUpload.sync_from_stripe_data(
+                        FileUpload(id=file_upload_id).api_retrieve(
+                            stripe_account=self.id
+                        )
+                    )
+                except stripe.error.PermissionError:
+                    # No permission to retrieve the data with the key
+                    pass
+                except stripe.error.InvalidRequestError as e:
+                    if "a similar object exists in" in str(e):
+                        # HACK around a Stripe bug.
+                        # See #830 and commit c09d25f52bfdcf883e9eec0bf6c25af1771a644a
+                        pass
+                    else:
+                        raise

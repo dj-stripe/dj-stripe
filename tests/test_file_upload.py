@@ -1,3 +1,4 @@
+from copy import deepcopy
 from unittest.mock import ANY, call, patch
 
 import pytest
@@ -8,7 +9,11 @@ from . import FAKE_ACCOUNT, FAKE_FILEUPLOAD_ICON, FAKE_FILEUPLOAD_LOGO
 
 
 @pytest.mark.django_db
-@patch(target="stripe.FileUpload.retrieve", autospec=True)
+@patch(
+    target="stripe.FileUpload.retrieve",
+    autospec=True,
+    return_value=deepcopy(FAKE_FILEUPLOAD_ICON),
+)
 def test_file_upload_api_retrieve(mock_file_upload_retrieve):
     """Expect file_upload to use the ID of the account referring
     to it to retrieve itself.
