@@ -3,6 +3,7 @@ from django.db import models, transaction
 
 from .. import enums
 from .. import settings as djstripe_settings
+from ..enums import APIKeyType
 from ..fields import JSONField, StripeCurrencyCodeField, StripeEnumField
 from .api import APIKey
 from .base import StripeModel
@@ -84,6 +85,18 @@ class Account(StripeModel):
         blank=True,
         help_text="Details on the acceptance of the Stripe Services Agreement",
     )
+
+    @property
+    def default_api_key(self) -> str:
+        return self.get_default_api_key()
+
+    def get_default_api_key(self) -> str:
+        api_key = APIKey.objects.filter(
+            djstripe_owner_account=self, type=APIKeyType.secret
+        ).first()
+        if api_key:
+            return api_key.secret
+        return djstripe_settings.get_default_api_key(self.livemode)
 
     @property
     def business_url(self):

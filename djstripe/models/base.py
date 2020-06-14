@@ -93,6 +93,10 @@ class StripeModel(models.Model):
 
     @property
     def default_api_key(self):
+        # If the class is abstract (StripeModel), fall back to default key.
+        if not self._meta.abstract:
+            if self.djstripe_owner_account:
+                return self.djstripe_owner_account.get_default_api_key()
         return djstripe_settings.get_default_api_key(self.livemode)
 
     def _get_stripe_account_id(self, api_key=None):
@@ -148,14 +152,13 @@ class StripeModel(models.Model):
             for which this request is being made.
         :type stripe_account: string
         """
-        api_key = api_key or self.default_api_key
         # Prefer passed in stripe_account if set.
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
         return self.stripe_class.retrieve(
             id=self.id,
-            api_key=api_key,
+            api_key=api_key or self.default_api_key,
             expand=self.expand_fields,
             stripe_account=stripe_account,
         )
