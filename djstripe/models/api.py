@@ -60,6 +60,11 @@ class APIKey(StripeModel):
     def __str__(self):
         return self.name or self.secret_redacted
 
+    def clean(self):
+        if self.type == APIKeyType.secret and not self.djstripe_owner_account:
+            self.refresh_account()
+        return super().clean()
+
     def refresh_account(self):
         from .account import Account
 
