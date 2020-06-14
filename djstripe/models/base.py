@@ -755,10 +755,6 @@ class StripeModel(models.Model):
 
         return refund_objs
 
-    def _sync(self, record_data):
-        for attr, value in record_data.items():
-            setattr(self, attr, value)
-
     @classmethod
     def sync_from_stripe_data(cls, data):
         """
@@ -783,7 +779,9 @@ class StripeModel(models.Model):
         )
 
         if not created:
-            instance._sync(cls._stripe_object_to_record(data))
+            record_data = cls._stripe_object_to_record(data)
+            for attr, value in record_data.items():
+                setattr(instance, attr, value)
             instance._attach_objects_hook(cls, data)
             instance.save()
             instance._attach_objects_post_save_hook(cls, data)

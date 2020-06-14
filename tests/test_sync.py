@@ -56,14 +56,14 @@ class TestSyncSubscriber(TestCase):
         sync_subscriber(self.user)
         self.assertEqual(1, Customer.objects.count())
         self.assertEqual(
-            FAKE_CUSTOMER, Customer.objects.get(subscriber=self.user).api_retrieve()
+            FAKE_CUSTOMER["id"],
+            Customer.objects.get(subscriber=self.user).api_retrieve()["id"],
         )
 
         _sync_subscriptions_mock.assert_called_once_with(Customer.objects.first())
         _sync_invoices_mock.assert_called_once_with(Customer.objects.first())
         _sync_charges_mock.assert_called_once_with(Customer.objects.first())
 
-    @patch("djstripe.models.Customer._sync", autospec=True)
     @patch(
         "djstripe.models.Customer.api_retrieve",
         return_value=deepcopy(FAKE_CUSTOMER),
@@ -72,10 +72,8 @@ class TestSyncSubscriber(TestCase):
     @patch(
         "stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
-    def test_sync_fail(
-        self, stripe_customer_create_mock, api_retrieve_mock, _sync_mock
-    ):
-        _sync_mock.side_effect = InvalidRequestError("No such customer:", "blah")
+    def test_sync_fail(self, stripe_customer_create_mock, api_retrieve_mock):
+        api_retrieve_mock.side_effect = InvalidRequestError("No such customer:", "blah")
 
         with capture_stdout() as stdout:
             sync_subscriber(self.user)
