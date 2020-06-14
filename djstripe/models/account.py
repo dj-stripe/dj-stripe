@@ -140,18 +140,7 @@ class Account(StripeModel):
         with transaction.atomic():
             apikey_instance, _ = APIKey.objects.get_or_create_by_api_key(api_key)
             if not apikey_instance.djstripe_owner_account:
-                account_data = Account.stripe_class.retrieve(api_key=api_key)
-                # NOTE: Do not immediately use _get_or_create_from_stripe_object() here.
-                # Account needs to exist for things to work. Make a stub if necessary.
-                account, created = Account.objects.get_or_create(
-                    id=account_data["id"],
-                    defaults={"charges_enabled": False, "details_submitted": False},
-                )
-                if created:
-                    # If it's just been created, now we can sync the account.
-                    Account.sync_from_stripe_data(account_data)
-                apikey_instance.djstripe_owner_account = account
-                apikey_instance.save()
+                apikey_instance.refresh_account()
 
             return apikey_instance.djstripe_owner_account
 
