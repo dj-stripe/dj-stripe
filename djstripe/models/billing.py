@@ -1525,12 +1525,6 @@ class Subscription(StripeModel):
         "`null` for multi-plan subscriptions",
     )
     # TODO: schedule (implement model SubscriptionSchedule, see #899)
-    # .start is deprecated - will be removed in 2.4 - use .start_date instead
-    start = StripeDateTimeField(
-        help_text="Date of the last substantial change to "
-        "this subscription. For example, a change to the items array, or a change "
-        "of status, will reset this timestamp."
-    )
     start_date = StripeDateTimeField(
         null=True,
         blank=True,
