@@ -70,6 +70,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             subscription, expected_blank_fks=self.default_expected_blank_fks
         )
+        self.assertEqual(datetime_to_unix(subscription.cancel_at), 1624553655)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN_II), autospec=True)
     @patch(
