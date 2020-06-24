@@ -1391,6 +1391,11 @@ class Subscription(StripeModel):
             "invoices."
         ),
     )
+    cancel_at = StripeDateTimeField(
+        null=True,
+        blank=True,
+        help_text="A date in the future at which the subscription will automatically get canceled."
+    )
     cancel_at_period_end = models.BooleanField(
         default=False,
         help_text="If the subscription has been canceled with the ``at_period_end`` "
