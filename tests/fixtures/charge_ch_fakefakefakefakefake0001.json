@@ -20,6 +20,7 @@
         "name": "alex-nesnes@hotmail.fr",
         "phone": null
     },
+    "calculated_statement_descriptor": "Stripe",
     "captured": true,
     "created": 1557995177,
     "currency": "usd",
@@ -42,7 +43,7 @@
         "network_status": "approved_by_network",
         "reason": null,
         "risk_level": "normal",
-        "risk_score": 42,
+        "risk_score": 2,
         "seller_message": "Payment complete.",
         "type": "authorized"
     },
@@ -59,7 +60,7 @@
             },
             "country": "US",
             "exp_month": 6,
-            "exp_year": 2020,
+            "exp_year": 2021,
             "fingerprint": "88PuXw9tEmvYe69o",
             "funding": "credit",
             "installments": null,
@@ -94,11 +95,13 @@
         "cvc_check": null,
         "dynamic_last4": null,
         "exp_month": 6,
-        "exp_year": 2020,
+        "exp_year": 2021,
         "fingerprint": "88PuXw9tEmvYe69o",
         "funding": "credit",
         "last4": "4242",
-        "metadata": {},
+        "metadata": {
+            "djstripe_test_fake_id": "card_fakefakefakefakefake0001"
+        },
         "name": "alex-nesnes@hotmail.fr",
         "tokenization_method": null
     },

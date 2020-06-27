@@ -1,7 +1,6 @@
 {
     "id": "cus_6lsBvm5rJ0zyHc",
     "object": "customer",
-    "account_balance": 0,
     "address": null,
     "balance": 0,
     "created": 1557995166,
@@ -23,7 +22,7 @@
         "cvc_check": null,
         "dynamic_last4": null,
         "exp_month": 6,
-        "exp_year": 2020,
+        "exp_year": 2021,
         "fingerprint": "88PuXw9tEmvYe69o",
         "funding": "credit",
         "last4": "4242",
@@ -37,7 +36,7 @@
     "description": "Michael Smith",
     "discount": null,
     "email": "michael.smith@example.com",
-    "invoice_prefix": "7759B3BE",
+    "invoice_prefix": "E5B23224",
     "invoice_settings": {
         "custom_fields": null,
         "default_payment_method": null,
@@ -46,6 +45,7 @@
     "livemode": false,
     "metadata": {},
     "name": null,
+    "next_invoice_sequence": 3,
     "phone": null,
     "preferred_locales": [],
     "shipping": null,
@@ -69,7 +69,7 @@
                 "cvc_check": null,
                 "dynamic_last4": null,
                 "exp_month": 6,
-                "exp_year": 2020,
+                "exp_year": 2021,
                 "fingerprint": "88PuXw9tEmvYe69o",
                 "funding": "credit",
                 "last4": "4242",
@@ -96,7 +96,7 @@
                 "cvc_check": null,
                 "dynamic_last4": null,
                 "exp_month": 6,
-                "exp_year": 2020,
+                "exp_year": 2021,
                 "fingerprint": "88PuXw9tEmvYe69o",
                 "funding": "credit",
                 "last4": "4242",
@@ -118,7 +118,6 @@
                 "id": "sub_fakefakefakefakefake0002",
                 "object": "subscription",
                 "application_fee_percent": null,
-                "billing": "charge_automatically",
                 "billing_cycle_anchor": 1558230766,
                 "billing_thresholds": null,
                 "cancel_at": null,
@@ -135,9 +134,6 @@
                 "default_tax_rates": [],
                 "discount": null,
                 "ended_at": null,
-                "invoice_customer_balance_settings": {
-                    "consume_applied_balance_on_void": true
-                },
                 "items": {
                     "object": "list",
                     "data": [
@@ -169,6 +165,31 @@
                                 "trial_period_days": 12,
                                 "usage_type": "licensed"
                             },
+                            "price": {
+                                "id": "silver41294",
+                                "object": "price",
+                                "active": true,
+                                "billing_scheme": "per_unit",
+                                "created": 1593225979,
+                                "currency": "usd",
+                                "livemode": false,
+                                "lookup_key": null,
+                                "metadata": {},
+                                "nickname": "New plan name",
+                                "product": "prod_fake1",
+                                "recurring": {
+                                    "aggregate_usage": null,
+                                    "interval": "month",
+                                    "interval_count": 1,
+                                    "trial_period_days": 12,
+                                    "usage_type": "licensed"
+                                },
+                                "tiers_mode": null,
+                                "transform_quantity": null,
+                                "type": "recurring",
+                                "unit_amount": 4000,
+                                "unit_amount_decimal": "4000"
+                            },
                             "quantity": 1,
                             "subscription": "sub_fakefakefakefakefake0002",
                             "tax_rates": [
@@ -176,7 +197,7 @@
                                     "id": "txr_fakefakefakefakefake0001",
                                     "object": "tax_rate",
                                     "active": true,
-                                    "created": 1570944265,
+                                    "created": 1593225980,
                                     "description": null,
                                     "display_name": "VAT",
                                     "inclusive": true,
@@ -200,8 +221,10 @@
                     "djstripe_test_fake_id": "sub_fakefakefakefakefake0002"
                 },
                 "next_pending_invoice_item_invoice": null,
+                "pause_collection": null,
                 "pending_invoice_item_interval": null,
                 "pending_setup_intent": null,
+                "pending_update": null,
                 "plan": {
                     "id": "silver41294",
                     "object": "plan",
@@ -226,10 +249,10 @@
                 },
                 "quantity": 1,
                 "schedule": null,
-                "start": 1558230766,
                 "start_date": 1559476702,
                 "status": "active",
                 "tax_percent": null,
+                "transfer_data": null,
                 "trial_end": null,
                 "trial_start": null
             },
@@ -237,7 +260,6 @@
                 "id": "sub_fakefakefakefakefake0001",
                 "object": "subscription",
                 "application_fee_percent": null,
-                "billing": "charge_automatically",
                 "billing_cycle_anchor": 1558230764,
                 "billing_thresholds": null,
                 "cancel_at": null,
@@ -256,7 +278,7 @@
                         "id": "txr_fakefakefakefakefake0001",
                         "object": "tax_rate",
                         "active": true,
-                        "created": 1570921289,
+                        "created": 1593225980,
                         "description": null,
                         "display_name": "VAT",
                         "inclusive": true,
@@ -270,9 +292,6 @@
                 ],
                 "discount": null,
                 "ended_at": null,
-                "invoice_customer_balance_settings": {
-                    "consume_applied_balance_on_void": true
-                },
                 "items": {
                     "object": "list",
                     "data": [
@@ -304,6 +323,31 @@
                                 "trial_period_days": null,
                                 "usage_type": "licensed"
                             },
+                            "price": {
+                                "id": "gold21323",
+                                "object": "price",
+                                "active": true,
+                                "billing_scheme": "per_unit",
+                                "created": 1593225979,
+                                "currency": "usd",
+                                "livemode": false,
+                                "lookup_key": null,
+                                "metadata": {},
+                                "nickname": "New plan name",
+                                "product": "prod_fake1",
+                                "recurring": {
+                                    "aggregate_usage": null,
+                                    "interval": "month",
+                                    "interval_count": 1,
+                                    "trial_period_days": null,
+                                    "usage_type": "licensed"
+                                },
+                                "tiers_mode": null,
+                                "transform_quantity": null,
+                                "type": "recurring",
+                                "unit_amount": 2000,
+                                "unit_amount_decimal": "2000"
+                            },
                             "quantity": 1,
                             "subscription": "sub_fakefakefakefakefake0001",
                             "tax_rates": []
@@ -319,8 +363,10 @@
                     "djstripe_test_fake_id": "sub_fakefakefakefakefake0001"
                 },
                 "next_pending_invoice_item_invoice": null,
+                "pause_collection": null,
                 "pending_invoice_item_interval": null,
                 "pending_setup_intent": null,
+                "pending_update": null,
                 "plan": {
                     "id": "gold21323",
                     "object": "plan",
@@ -345,10 +391,10 @@
                 },
                 "quantity": 1,
                 "schedule": null,
-                "start": 1558230764,
                 "start_date": 1559476700,
                 "status": "active",
                 "tax_percent": null,
+                "transfer_data": null,
                 "trial_end": null,
                 "trial_start": null
             }
@@ -358,7 +404,5 @@
         "url": "/v1/customers/cus_6lsBvm5rJ0zyHc/subscriptions"
     },
     "tax_exempt": "none",
-    "tax_ids": {},
-    "tax_info": null,
-    "tax_info_verification": null
+    "tax_ids": {}
 }

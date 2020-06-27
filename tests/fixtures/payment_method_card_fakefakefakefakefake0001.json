@@ -23,11 +23,17 @@
         },
         "country": "US",
         "exp_month": 6,
-        "exp_year": 2020,
+        "exp_year": 2021,
         "fingerprint": "88PuXw9tEmvYe69o",
         "funding": "credit",
         "generated_from": null,
         "last4": "4242",
+        "networks": {
+            "available": [
+                "visa"
+            ],
+            "preferred": null
+        },
         "three_d_secure_usage": {
             "supported": true
         },

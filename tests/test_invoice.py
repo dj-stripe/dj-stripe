@@ -852,7 +852,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         # but this doesn't match what I'm seeing from Stripe
         # I'm not sure if it's possible to predict the whole item id now,
         # sli seems to not reference anything
-        item_id_prefix = "{invoice_id}-sli_".format(invoice_id=invoice.id)
+        item_id_prefix = "{invoice_id}-il_".format(invoice_id=invoice.id)
         self.assertTrue(items[0].id.startswith(item_id_prefix))
         self.assertEqual(items[0].subscription.id, FAKE_SUBSCRIPTION["id"])
 

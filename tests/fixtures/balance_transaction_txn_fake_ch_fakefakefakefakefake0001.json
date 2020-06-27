@@ -18,6 +18,7 @@
         }
     ],
     "net": 1912,
+    "reporting_category": "charge",
     "source": "ch_fakefakefakefakefake0001",
     "status": "pending",
     "type": "charge"

@@ -126,10 +126,16 @@ class Command(BaseCommand):
                 "id",
                 # not actually read-only
                 "billing_cycle_anchor",
-                # seem that this is replacing "billing"? (but they can't both be set)
-                "collection_method",
+                "billing",
                 "current_period_end",
                 "current_period_start",
+                # workaround for "the
+                # `invoice_customer_balance_settings[consume_applied_balance_on_void]`
+                # parameter is only supported in API version 2019-11-05 and below.
+                # See
+                # https://stripe.com/docs/api#versioning and
+                # https://stripe.com/docs/upgrades#2019-12-03 for more detail.
+                "invoice_customer_balance_settings",
                 "latest_invoice",
                 "start",
                 "start_date",
