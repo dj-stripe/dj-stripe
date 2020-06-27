@@ -85,11 +85,9 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
 
    For postgres and mysql, the database host,port,username and password can be set with environment variables, see ``tests/settings.py``
 
-4. Install your local copy into a virtualenv. Assuming you have ``virtualenvwrapper`` installed, this is how you set up your fork for local development::
+4. Install the dev dependencies. Assuming you have ``poetry`` installed (see https://python-poetry.org/docs/#installation )::
 
-    $ mkvirtualenv dj-stripe
-    $ cd dj-stripe/
-    $ python setup.py develop
+    $ poetry install
 
 5. Create a branch for local development::
 
@@ -100,7 +98,8 @@ Ready to contribute? Here's how to set up `dj-stripe` for local development.
 6. When you're done making changes, check that your changes pass the tests.
    A quick test run can be done as follows::
 
-   $ DJSTRIPE_TEST_DB_VENDOR=sqlite pytest --reuse-db
+   $ DJSTRIPE_TEST_DB_VENDOR=sqlite poetry run pytest --reuse-db
+
 
    You should also check that the tests pass with other python and Django versions with tox.
    pytest will output both command line and html coverage statistics and will warn you
