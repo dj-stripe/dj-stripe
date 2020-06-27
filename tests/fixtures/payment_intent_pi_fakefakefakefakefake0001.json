@@ -34,6 +34,7 @@
                     "name": "alex-nesnes@hotmail.fr",
                     "phone": null
                 },
+                "calculated_statement_descriptor": "Stripe",
                 "captured": true,
                 "created": 1562801159,
                 "currency": "usd",
@@ -56,7 +57,7 @@
                     "network_status": "approved_by_network",
                     "reason": null,
                     "risk_level": "normal",
-                    "risk_score": 60,
+                    "risk_score": 2,
                     "seller_message": "Payment complete.",
                     "type": "authorized"
                 },
@@ -72,9 +73,9 @@
                             "cvc_check": null
                         },
                         "country": "US",
-                        "exp_month": 7,
-                        "exp_year": 2020,
-                        "fingerprint": "XBb4pv4IRQeImoJN",
+                        "exp_month": 6,
+                        "exp_year": 2021,
+                        "fingerprint": "88PuXw9tEmvYe69o",
                         "funding": "credit",
                         "installments": null,
                         "last4": "4242",
@@ -107,12 +108,14 @@
                     "customer": "cus_6lsBvm5rJ0zyHc",
                     "cvc_check": null,
                     "dynamic_last4": null,
-                    "exp_month": 7,
-                    "exp_year": 2020,
-                    "fingerprint": "XBb4pv4IRQeImoJN",
+                    "exp_month": 6,
+                    "exp_year": 2021,
+                    "fingerprint": "88PuXw9tEmvYe69o",
                     "funding": "credit",
                     "last4": "4242",
-                    "metadata": {},
+                    "metadata": {
+                        "djstripe_test_fake_id": "card_fakefakefakefakefake0001"
+                    },
                     "name": "alex-nesnes@hotmail.fr",
                     "tokenization_method": null
                 },
@@ -128,7 +131,7 @@
         "total_count": 1,
         "url": "/v1/charges?payment_intent=pi_fakefakefakefakefake0001"
     },
-    "client_secret": "pi_fakefakefakefakefake0001_secret_ThITPIod1Ij6loKD5KOhEYqMA",
+    "client_secret": "pi_fakefakefakefakefake0001_secret_fu8Bf1uEyWIbQwB7f4xCQ7iTX",
     "confirmation_method": "automatic",
     "created": 1562801159,
     "currency": "usd",
@@ -146,6 +149,7 @@
     "payment_method_options": {
         "card": {
             "installments": null,
+            "network": null,
             "request_three_d_secure": "automatic"
         }
     },

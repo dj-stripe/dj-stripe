@@ -1,7 +1,6 @@
 {
     "id": "cus_example_with_bank_account",
     "object": "customer",
-    "account_balance": 0,
     "address": null,
     "balance": 0,
     "created": 1566463428,
@@ -15,7 +14,7 @@
         "country": "US",
         "currency": "usd",
         "customer": "cus_example_with_bank_account",
-        "fingerprint": "6HQmlfTrD91HjjlV",
+        "fingerprint": "PzC4f6ki9HTDR1cc",
         "last4": "6789",
         "metadata": {
             "djstripe_test_fake_id": "ba_fakefakefakefakefake0003",
@@ -28,7 +27,7 @@
     "description": null,
     "discount": null,
     "email": "jane.austen@example.com",
-    "invoice_prefix": "5E93BD77",
+    "invoice_prefix": "905A7617",
     "invoice_settings": {
         "custom_fields": null,
         "default_payment_method": null,
@@ -37,6 +36,7 @@
     "livemode": false,
     "metadata": {},
     "name": "Jane Austen",
+    "next_invoice_sequence": 1,
     "phone": null,
     "preferred_locales": [],
     "shipping": null,
@@ -52,7 +52,7 @@
                 "country": "US",
                 "currency": "usd",
                 "customer": "cus_example_with_bank_account",
-                "fingerprint": "6HQmlfTrD91HjjlV",
+                "fingerprint": "PzC4f6ki9HTDR1cc",
                 "last4": "6789",
                 "metadata": {
                     "djstripe_test_fake_id": "ba_fakefakefakefakefake0003",
@@ -68,7 +68,5 @@
     },
     "subscriptions": {},
     "tax_exempt": "none",
-    "tax_ids": {},
-    "tax_info": null,
-    "tax_info_verification": null
+    "tax_ids": {}
 }
