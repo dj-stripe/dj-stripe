@@ -1395,7 +1395,7 @@ class Subscription(StripeModel):
         null=True,
         blank=True,
         help_text="A date in the future at which the subscription will automatically "
-        "get canceled."
+        "get canceled.",
     )
     cancel_at_period_end = models.BooleanField(
         default=False,
