@@ -58,7 +58,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self, customer_retrieve_mock, product_retrieve_mock, plan_retrieve_mock
     ):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_fake['cancel_at'] = 1624553655
+        subscription_fake["cancel_at"] = 1624553655
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
 
         self.assertEqual(str(subscription), f"{self.user} on {subscription.plan}")
