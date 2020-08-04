@@ -414,6 +414,7 @@ class Customer(StripeModel):
 
     address = JSONField(null=True, blank=True, help_text="The customer's address.")
     balance = StripeQuantumCurrencyAmountField(
+        default=0,
         help_text=(
             "Current balance (in cents), if any, being stored on the customer's "
             "account. "
@@ -423,7 +424,7 @@ class Customer(StripeModel):
             "solely takes into account amounts that have yet to be successfully "
             "applied to any invoice. This balance is only taken into account for "
             "recurring billing purposes (i.e., subscriptions, invoices, invoice items)."
-        )
+        ),
     )
     # TODO - remove, was deprecated in https://stripe.com/docs/upgrades#2018-08-23
     #  (to tax_info, which was itself moved to CustomerTaxId)
@@ -442,8 +443,9 @@ class Customer(StripeModel):
         on_delete=models.SET_NULL, null=True, related_name="customers"
     )
     delinquent = models.BooleanField(
+        default=False,
         help_text="Whether or not the latest charge for the customer's "
-        "latest invoice has failed."
+        "latest invoice has failed.",
     )
     # <discount>
     coupon = models.ForeignKey(
