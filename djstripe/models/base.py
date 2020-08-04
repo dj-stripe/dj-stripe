@@ -840,6 +840,7 @@ class StripeModel(models.Model):
         """
         current_ids = set()
         data_id = data.get("id")
+        stripe_account = getattr(data, "stripe_account", None)
 
         if data_id:
             # stop nested objects from trying to retrieve this object before
@@ -847,11 +848,14 @@ class StripeModel(models.Model):
             current_ids.add(data_id)
 
         instance, created = cls._get_or_create_from_stripe_object(
-            data, current_ids=current_ids
+            data, current_ids=current_ids,
+            stripe_account=stripe_account,
         )
 
         if not created:
-            record_data = cls._stripe_object_to_record(data)
+            record_data = cls._stripe_object_to_record(
+                data, stripe_account=stripe_account
+            )
             for attr, value in record_data.items():
                 setattr(instance, attr, value)
             instance._attach_objects_hook(cls, data)
