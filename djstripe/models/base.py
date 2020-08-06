@@ -70,8 +70,13 @@ class StripeModel(models.Model):
         get_latest_by = "created"
 
     def _get_base_stripe_dashboard_url(self):
-        return "https://dashboard.stripe.com/{}".format(
-            "test/" if not self.livemode else ""
+        owner_path_prefix = (
+            (self.djstripe_owner_account.id + "/")
+            if self.djstripe_owner_account
+            else ""
+        )
+        return "https://dashboard.stripe.com/{}{}".format(
+            owner_path_prefix, "test/" if not self.livemode else ""
         )
 
     def get_stripe_dashboard_url(self):
