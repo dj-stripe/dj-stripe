@@ -66,11 +66,11 @@ class APIKeyTest(TestCase):
     def test_get_stripe_dashboard_url(self):
         self.assertEqual(
             self.apikey_test.get_stripe_dashboard_url(),
-            "https://dashboard.stripe.com/test/apikeys",
+            "https://dashboard.stripe.com/acct_TESTXXXXX/test/apikeys",
         )
         self.assertEqual(
             self.apikey_live.get_stripe_dashboard_url(),
-            "https://dashboard.stripe.com/apikeys",
+            "https://dashboard.stripe.com/acct_TESTXXXXX/apikeys",
         )
 
     def test_secret_redacted(self):
