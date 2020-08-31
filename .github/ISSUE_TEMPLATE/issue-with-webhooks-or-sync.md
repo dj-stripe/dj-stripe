@@ -1,8 +1,9 @@
 ---
 name: Issue with webhooks or sync
-about: Create a report to help us improve
+about: For issues happening specifically when data is being synced from Stripe to
+  Dj-Stripe
 title: ''
-labels: 'webhook / sync issues'
+labels: webhook / sync issues
 assignees: ''
 
 ---
@@ -34,6 +35,3 @@ If relevant it's very helpful to include webhook tracebacks and content (note th
 **Can you reproduce the issue with the latest version of master?**
 
 [Yes / No]
-
-**Additional context**
-Add any other context about the problem here.
