@@ -1,1 +1,0 @@
-Represents protected content

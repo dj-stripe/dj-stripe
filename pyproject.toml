@@ -8,7 +8,7 @@ authors = [
     "Jerome Leclanche <jerome@leclan.ch>",
     "John Carter <john@therefromhere.org>",
 ]
-readme = "README.rst"
+readme = "README.md"
 repository = "https://github.com/dj-stripe/dj-stripe"
 documentation = "https://dj-stripe.readthedocs.io/"
 classifiers = [
@@ -26,9 +26,9 @@ packages = [
     { include = "djstripe" }
 ]
 include = [
-    "AUTHORS.rst",
-    "CONTRIBUTING.rst",
-    "HISTORY.rst",
+    "AUTHORS.md",
+    "CONTRIBUTING.md",
+    "HISTORY.md",
     "LICENSE",
 ]
 exclude = [
