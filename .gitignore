@@ -14,5 +14,8 @@ docs/_static
 /cover
 .coverage
 
+# Editor files
+.vscode
+
 # Do not commit Poetry lockfiles for libraries
 poetry.lock
