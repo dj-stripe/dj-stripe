@@ -757,7 +757,9 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     @patch(
-        "stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True,
+        "stripe.Plan.retrieve",
+        return_value=deepcopy(FAKE_PLAN),
+        autospec=True,
     )
     @patch("stripe.Subscription.retrieve", autospec=True)
     @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
@@ -1099,7 +1101,9 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         )
 
     @patch(
-        "stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True,
+        "stripe.Plan.retrieve",
+        return_value=deepcopy(FAKE_PLAN),
+        autospec=True,
     )
     @patch(
         "stripe.Subscription.retrieve",

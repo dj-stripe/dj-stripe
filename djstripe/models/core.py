@@ -1158,7 +1158,7 @@ class Customer(StripeModel):
         return self.__class__.sync_from_stripe_data(stripe_customer)
 
     def upcoming_invoice(self, **kwargs):
-        """ Gets the upcoming preview invoice (singular) for this customer.
+        """Gets the upcoming preview invoice (singular) for this customer.
 
         See `Invoice.upcoming() <#djstripe.Invoice.upcoming>`__.
 

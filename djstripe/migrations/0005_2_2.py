@@ -16,25 +16,70 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="account", name="business_name",),
-        migrations.RemoveField(model_name="account", name="business_primary_color",),
-        migrations.RemoveField(model_name="account", name="business_url",),
-        migrations.RemoveField(model_name="account", name="debit_negative_balances",),
-        migrations.RemoveField(model_name="account", name="decline_charge_on",),
-        migrations.RemoveField(model_name="account", name="display_name",),
-        migrations.RemoveField(model_name="account", name="legal_entity",),
-        migrations.RemoveField(model_name="account", name="payout_schedule",),
         migrations.RemoveField(
-            model_name="account", name="payout_statement_descriptor",
+            model_name="account",
+            name="business_name",
         ),
-        migrations.RemoveField(model_name="account", name="statement_descriptor",),
-        migrations.RemoveField(model_name="account", name="support_email",),
-        migrations.RemoveField(model_name="account", name="support_phone",),
-        migrations.RemoveField(model_name="account", name="support_url",),
-        migrations.RemoveField(model_name="account", name="timezone",),
-        migrations.RemoveField(model_name="account", name="verification",),
+        migrations.RemoveField(
+            model_name="account",
+            name="business_primary_color",
+        ),
+        migrations.RemoveField(
+            model_name="account",
+            name="business_url",
+        ),
+        migrations.RemoveField(
+            model_name="account",
+            name="debit_negative_balances",
+        ),
+        migrations.RemoveField(
+            model_name="account",
+            name="decline_charge_on",
+        ),
+        migrations.RemoveField(
+            model_name="account",
+            name="display_name",
+        ),
+        migrations.RemoveField(
+            model_name="account",
+            name="legal_entity",
+        ),
+        migrations.RemoveField(
+            model_name="account",
+            name="payout_schedule",
+        ),
+        migrations.RemoveField(
+            model_name="account",
+            name="payout_statement_descriptor",
+        ),
+        migrations.RemoveField(
+            model_name="account",
+            name="statement_descriptor",
+        ),
+        migrations.RemoveField(
+            model_name="account",
+            name="support_email",
+        ),
+        migrations.RemoveField(
+            model_name="account",
+            name="support_phone",
+        ),
+        migrations.RemoveField(
+            model_name="account",
+            name="support_url",
+        ),
+        migrations.RemoveField(
+            model_name="account",
+            name="timezone",
+        ),
+        migrations.RemoveField(
+            model_name="account",
+            name="verification",
+        ),
         migrations.RenameField(
-            model_name="invoice", old_name="billing", new_name="collection_method",
+            model_name="invoice",
+            old_name="billing",
+            new_name="collection_method",
         ),
         migrations.AddField(
             model_name="invoice",
@@ -347,7 +392,9 @@ class Migration(migrations.Migration):
                 max_length=9,
             ),
         ),
-        migrations.DeleteModel(name="UpcomingInvoice",),
+        migrations.DeleteModel(
+            name="UpcomingInvoice",
+        ),
         migrations.CreateModel(
             name="UpcomingInvoice",
             fields=[

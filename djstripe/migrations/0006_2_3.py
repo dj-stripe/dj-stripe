@@ -15,10 +15,22 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="invoice", name="closed",),
-        migrations.RemoveField(model_name="invoice", name="forgiven",),
-        migrations.RemoveField(model_name="upcominginvoice", name="closed",),
-        migrations.RemoveField(model_name="upcominginvoice", name="forgiven",),
+        migrations.RemoveField(
+            model_name="invoice",
+            name="closed",
+        ),
+        migrations.RemoveField(
+            model_name="invoice",
+            name="forgiven",
+        ),
+        migrations.RemoveField(
+            model_name="upcominginvoice",
+            name="closed",
+        ),
+        migrations.RemoveField(
+            model_name="upcominginvoice",
+            name="forgiven",
+        ),
         migrations.AddField(
             model_name="invoice",
             name="status",
@@ -42,7 +54,9 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.RenameField(
-            model_name="subscription", old_name="billing", new_name="collection_method",
+            model_name="subscription",
+            old_name="billing",
+            new_name="collection_method",
         ),
         migrations.AddField(
             model_name="invoice",

@@ -665,7 +665,7 @@ class BaseInvoice(StripeModel):
 
     @property
     def plan(self):
-        """ Gets the associated plan for this invoice.
+        """Gets the associated plan for this invoice.
 
         In order to provide a consistent view of invoices, the plan object
         should be taken from the first invoice item that has one, rather than
