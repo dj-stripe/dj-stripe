@@ -4,9 +4,8 @@ __pycache__
 dj_stripe.egg-info
 *.mo
 
-# Sphinx
-docs/_build
-docs/_static
+# mkdocs
+site/
 
 # SQLite
 *.sqlite3

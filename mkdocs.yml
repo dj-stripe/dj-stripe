@@ -1,0 +1,47 @@
+site_name: Dj-Stripe
+site_url: https://dj-stripe.readthedocs.io/
+site_description: Django + Stripe Made Easy
+site_author: Dj-Stripe Team
+
+repo_url: https://github.com/dj-stripe/dj-stripe/
+
+theme:
+  name: readthedocs
+  highlightjs: true
+  hljs_languages:
+    - yaml
+    - django
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: installation.md
+    - A note on Stripe API Versions: api_versions.md
+    - A note on Stripe Stripe Elements JS methods: stripe_elements_js.md
+  - Usage:
+    - Checking if a customer has a subscription: usage/checking_customer_subscription.md
+    - Subscribing a customer to a plan: usage/subscribing_customers.md
+    - Creating a one-off charge for a customer: usage/one_off_charges.md
+    - Restricting access to only active subscribers: usage/restricting_access.md
+    - Managing subscriptions and payment sources: usage/managing_subscriptions.md
+    - Creating invoices: usage/creating_invoices.md
+    - Running reports: usage/running_reports.md
+    - Webhooks: usage/webhooks.md
+    - Manually syncing data with Stripe: usage/manually_syncing_with_stripe.md
+    - Cookbook: usage/cookbook.md
+  - Reference:
+    - Context Managers: reference/context_managers.md
+    - Decorators: reference/decorators.md
+    - Enumerations: reference/enums.md
+    - Managers: reference/managers.md
+    - Middleware: reference/middleware.md
+    - Models: reference/models.md
+    - Settings: reference/settings.md
+    - Utilities: reference/utils.md
+  - Project:
+    - Contributing: project/contributing.md
+    - Test Fixtures: project/test_fixtures.md
+    - Credits: project/authors.md
+    - History: project/history.md
+    - Support: project/support.md
+    - Release Process: project/release_process.md
