@@ -1,6 +1,7 @@
 *.py[cod]
 __pycache__
 .tox
+dj_stripe.egg-info
 *.mo
 
 # Sphinx
