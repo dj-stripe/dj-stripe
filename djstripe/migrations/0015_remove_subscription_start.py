@@ -10,5 +10,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(model_name="subscription", name="start",),
+        migrations.RemoveField(
+            model_name="subscription",
+            name="start",
+        ),
     ]

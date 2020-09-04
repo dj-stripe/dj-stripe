@@ -110,8 +110,7 @@ class EventTest(TestCase):
 
     @patch("djstripe.models.Event.invoke_webhook_handlers", autospec=True)
     def test_process_event_failure_rolls_back(self, invoke_webhook_handlers_mock):
-        """Test that process event rolls back event creation on error
-        """
+        """Test that process event rolls back event creation on error"""
 
         class HandlerException(Exception):
             pass

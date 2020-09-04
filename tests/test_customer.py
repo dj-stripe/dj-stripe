@@ -1740,7 +1740,9 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             self.customer.add_invoice_item(amount=5000, currency="usd")
 
     @patch(
-        "stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True,
+        "stripe.Plan.retrieve",
+        return_value=deepcopy(FAKE_PLAN),
+        autospec=True,
     )
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True

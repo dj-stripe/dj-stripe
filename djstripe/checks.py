@@ -283,7 +283,9 @@ def check_djstripe_settings_foreign_key_to_field(app_configs=None, **kwargs):
     if not hasattr(settings, setting_name):
         messages.append(
             checks.Error(
-                "%s is not set." % (setting_name), hint=hint, id="djstripe.E002",
+                "%s is not set." % (setting_name),
+                hint=hint,
+                id="djstripe.E002",
             )
         )
     elif getattr(settings, setting_name) not in ("id", "djstripe_id"):
