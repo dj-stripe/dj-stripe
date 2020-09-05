@@ -1,18 +1,10 @@
 # A note on Stripe Elements JS methods
 
-<div class="note">
+!!! note
 
-<div class="title">
-
-Note
-
-</div>
-
-TLDR: If you haven't yet migrated to PaymentIntents, prefer
-`stripe.createSource()` over `stripe.createToken()` for better
-compatibility with PaymentMethods.
-
-</div>
+    TLDR: If you haven't yet migrated to PaymentIntents, prefer
+    `stripe.createSource()` over `stripe.createToken()` for better
+    compatibility with PaymentMethods.
 
 A point that can cause confusion when integrating Stripe on the web is
 that there are multiple generations of frontend JS APIs that use Stripe

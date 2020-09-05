@@ -79,30 +79,26 @@ Rules:
 
 Example:
 
+    ```py
     DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = (
         "(allauth)",  # anything in the django-allauth URLConf
         "[blogs]",  # Anything in the blogs namespace
         "products:detail",  # A ProductDetail view you want shown to non-payers
         "home",  # Site homepage
     )
+    ```
 
-<div class="note">
+!!! note
 
-<div class="title">
+    Adding app_names to applications.
 
-Note
+    To make the `(allauth)` work, you may need to define an app_name in the
+    `include()` function in the URLConf. For example:
 
-</div>
-
-Adding app_names to applications.
-
-To make the `(allauth)` work, you may need to define an app_name in the
-`include()` function in the URLConf. For example:
-
-    # in urls.py
-    url(r'^accounts/', include('allauth.urls',  app_name="allauth")),
-
-</div>
+    ```py
+        # in urls.py
+        url(r'^accounts/', include('allauth.urls',  app_name="allauth")),
+    ```
 
 ## DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY (="djstripe_subscriber")
 
@@ -155,43 +151,38 @@ object and returns an instance of DJSTRIPE_SUBSCRIBER_MODEL
 
 Examples:
 
-<span class="title-ref">middleware.py</span>
+```py
+# middleware.py
 
-    class DynamicOrganizationIDMiddleware(object):
-        """ Adds the current organization's ID based on the subdomain."""
+class DynamicOrganizationIDMiddleware(object):
+    """ Adds the current organization's ID based on the subdomain."""
 
-        def process_request(self, request):
-            subdomain = parse_subdomain(request.get_host())
+    def process_request(self, request):
+        subdomain = parse_subdomain(request.get_host())
 
-            try:
-                organization = Organization.objects.get(subdomain=subdomain)
-            except Organization.DoesNotExist:
-                return TemplateResponse(request=request, template='404.html', status=404)
-            else:
-                organization_id = organization.id
+        try:
+            organization = Organization.objects.get(subdomain=subdomain)
+        except Organization.DoesNotExist:
+            return TemplateResponse(request=request, template='404.html', status=404)
+        else:
+            organization_id = organization.id
 
-            request.organization_id = organization_id
+        request.organization_id = organization_id
+```
 
-<span class="title-ref">settings.py</span>
+```py
+# settings.py
 
-    def organization_request_callback(request):
-        """ Gets an organization instance from the id passed through ``request``"""
+def organization_request_callback(request):
+    """ Gets an organization instance from the id passed through ``request``"""
 
-        from <models_path> import Organization  # Import models here to avoid an ``AppRegistryNotReady`` exception
-        return Organization.objects.get(id=request.organization_id)
+    from <models_path> import Organization  # Import models here to avoid an ``AppRegistryNotReady`` exception
+    return Organization.objects.get(id=request.organization_id)
+```
 
-<div class="note">
+!!! note
 
-<div class="title">
-
-Note
-
-</div>
-
-This callback only becomes active when `DJSTRIPE_SUBSCRIBER_MODEL` is
-set.
-
-</div>
+    This callback only becomes active when `DJSTRIPE_SUBSCRIBER_MODEL` is set.
 
 ## DJSTRIPE_USE_NATIVE_JSONFIELD (=False)
 
@@ -206,29 +197,13 @@ conveniently. Django also supports [querying
 JSONField](https://docs.djangoproject.com/en/1.11/ref/contrib/postgres/fields/#querying-jsonfield)
 with the ORM.
 
-<div class="note">
+!!! note
 
-<div class="title">
+    This is only supported on Postgres databases.
 
-Note
+!!! attention
 
-</div>
-
-This is only supported on Postgres databases.
-
-</div>
-
-<div class="note">
-
-<div class="title">
-
-Note
-
-</div>
-
-**Migrating between native and non-native must be done manually.**
-
-</div>
+    **Migrating between native and non-native must be done manually.**
 
 ## DJSTRIPE_WEBHOOK_URL (=r"^webhook/\$")
 
@@ -270,31 +245,35 @@ for asynchronous processing.
 
 Examples:
 
-<span class="title-ref">callbacks.py</span>
+```py
 
-    def webhook_event_callback(event):
-        """ Dispatches the event to celery for processing. """
-        from . import tasks
-        # Ansychronous hand-off to celery so that we can continue immediately
-        tasks.process_webhook_event.s(event).apply_async()
+# callbacks.py
+def webhook_event_callback(event):
+    """ Dispatches the event to celery for processing. """
+    from . import tasks
+    # Ansychronous hand-off to celery so that we can continue immediately
+    tasks.process_webhook_event.s(event).apply_async()
+```
 
-<span class="title-ref">tasks.py</span>
+```py
+# tasks.py
+from stripe.error import StripeError
 
-    from stripe.error import StripeError
+@shared_task(bind=True)
+def process_webhook_event(self, event):
+    """ Processes events from Stripe asynchronously. """
+    logger.info("Processing Stripe event: %s", str(event))
+    try:
+        event.process(raise_exception=True)
+    except StripeError as exc:
+        logger.error("Failed to process Stripe event: %s", str(event))
+        raise self.retry(exc=exc, countdown=60)  # retry after 60 seconds
+```
 
-    @shared_task(bind=True)
-    def process_webhook_event(self, event):
-        """ Processes events from Stripe asynchronously. """
-        logger.info("Processing Stripe event: %s", str(event))
-        try:
-            event.process(raise_exception=True)
-        except StripeError as exc:
-            logger.error("Failed to process Stripe event: %s", str(event))
-            raise self.retry(exc=exc, countdown=60)  # retry after 60 seconds
-
-<span class="title-ref">settings.py</span>
-
-    DJSTRIPE_WEBHOOK_EVENT_CALLBACK = 'callbacks.webhook_event_callback'
+```py
+# settings.py
+DJSTRIPE_WEBHOOK_EVENT_CALLBACK = 'callbacks.webhook_event_callback'
+```
 
 ## STRIPE_API_HOST (= unset)
 

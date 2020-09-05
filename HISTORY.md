@@ -64,36 +64,28 @@
 
 ### Warning about safe uninstall of jsonfield2 on upgrade
 
-<div class="warning">
+!!! warning
 
-<div class="title">
+    Both **jsonfield** and **jsonfield2** use the same import path, so if
+    upgrading from dj-stripe\~=2.2.0 in an existing virtualenv, be sure to
+    uninstall jsonfield2 first. eg:
 
-Warning
+        # ensure jsonfield is uninstalled before we install jsonfield2
+        pip uninstall jsonfield2 -y && pip install "dj-stripe>=2.3.0dev"
 
-</div>
+    Otherwise, `pip uninstall jsonfield2` will remove jsonfield's
+    `jsonfield` module from `site-packages`, which would cause errors like
+    `ImportError: cannot import name 'JSONField' from 'jsonfield' (unknown location)`
 
-Both **jsonfield** and **jsonfield2** use the same import path, so if
-upgrading from dj-stripe\~=2.2.0 in an existing virtualenv, be sure to
-uninstall jsonfield2 first. eg:
+    If you have hit this ImportError already after upgrading, running this
+    should resolve it:
 
-    # ensure jsonfield is uninstalled before we install jsonfield2
-    pip uninstall jsonfield2 -y && pip install "dj-stripe>=2.3.0dev"
+        # remove both jsonfield packages before reinstall to fix ImportError:
+        pip uninstall jsonfield jsonfield2 -y && pip install "dj-stripe>=2.3.0dev"
 
-Otherwise, `pip uninstall jsonfield2` will remove jsonfield's
-`jsonfield` module from `site-packages`, which would cause errors like
-`ImportError: cannot import name 'JSONField' from 'jsonfield' (unknown location)`
-
-If you have hit this ImportError already after upgrading, running this
-should resolve it:
-
-    # remove both jsonfield packages before reinstall to fix ImportError:
-    pip uninstall jsonfield jsonfield2 -y && pip install "dj-stripe>=2.3.0dev"
-
-Note that this is only necessary if upgrading from dj-stripe 2.2.x,
-which temporarily depended on jsonfield2. This process is not necessary
-if upgrading from an earlier version of dj-stripe.
-
-</div>
+    Note that this is only necessary if upgrading from dj-stripe 2.2.x,
+    which temporarily depended on jsonfield2. This process is not necessary
+    if upgrading from an earlier version of dj-stripe.
 
 ## 2.2.2 (2020-01-20)
 
@@ -185,32 +177,24 @@ This is a bugfix-only version:
 
 ### Warning about safe uninstall of jsonfield on upgrade
 
-<div class="warning">
+!!! warning
 
-<div class="title">
+    Both **jsonfield** and **jsonfield2** use the same import path, so if
+    upgrading to dj-stripe&gt;=2.2 in an existing virtualenv, be sure to
+    uninstall jsonfield first. eg:
 
-Warning
+        # ensure jsonfield is uninstalled before we install jsonfield2
+        pip uninstall jsonfield -y && pip install "dj-stripe>=2.2.0dev"
 
-</div>
+    Otherwise, `pip uninstall jsonfield` will remove jsonfield2’s
+    `jsonfield` module from `site-packages`, which would cause errors like
+    `ImportError: cannot import name 'JSONField' from 'jsonfield' (unknown location)`
 
-Both **jsonfield** and **jsonfield2** use the same import path, so if
-upgrading to dj-stripe&gt;=2.2 in an existing virtualenv, be sure to
-uninstall jsonfield first. eg:
+    If you have hit this ImportError already after upgrading, running this
+    should resolve it:
 
-    # ensure jsonfield is uninstalled before we install jsonfield2
-    pip uninstall jsonfield -y && pip install "dj-stripe>=2.2.0dev"
-
-Otherwise, `pip uninstall jsonfield` will remove jsonfield2’s
-`jsonfield` module from `site-packages`, which would cause errors like
-`ImportError: cannot import name 'JSONField' from 'jsonfield' (unknown location)`
-
-If you have hit this ImportError already after upgrading, running this
-should resolve it:
-
-    # remove both jsonfield packages before reinstall to fix ImportError:
-    pip uninstall jsonfield jsonfield2 -y && pip install "dj-stripe>=2.2.0dev"
-
-</div>
+        # remove both jsonfield packages before reinstall to fix ImportError:
+        pip uninstall jsonfield jsonfield2 -y && pip install "dj-stripe>=2.2.0dev"
 
 ### Note on usage of Stripe Elements JS
 
@@ -866,23 +850,15 @@ be and delete them after the migration).
 
 ### BIG HUGE NOTE - DON'T OVERLOOK THIS
 
-<div class="warning">
+!!! warning
 
-<div class="title">
+    Subscription and InvoiceItem migration is not possible because old
+    records don't have Stripe IDs (so we can't sync them). Our approach is
+    to delete all local subscription and invoiceitem objects and re-sync
+    them from Stripe.
 
-Warning
-
-</div>
-
-Subscription and InvoiceItem migration is not possible because old
-records don't have Stripe IDs (so we can't sync them). Our approach is
-to delete all local subscription and invoiceitem objects and re-sync
-them from Stripe.
-
-We 100% recommend you create a backup of your database before performing
-this upgrade.
-
-</div>
+    We 100% recommend you create a backup of your database before performing
+    this upgrade.
 
 ### Other changes
 

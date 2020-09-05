@@ -1,24 +1,12 @@
 # Release Process
 
-<div class="contents">
+!!! note
 
-</div>
+    Before `MAJOR` or `MINOR` releases:
 
-<div class="attention">
-
-<div class="title">
-
-Attention
-
-</div>
-
-Before `MAJOR` or `MINOR` releases:
-
--   Review deprecation notes (eg search for "deprecated") and remove
-    deprecated features as appropriate
--   Squash migrations (ONLY on unreleased migrations) - see below
-
-</div>
+    -   Review deprecation notes (eg search for "deprecated") and remove
+        deprecated features as appropriate
+    -   Squash migrations (ONLY on unreleased migrations) - see below
 
 ## Squash migrations
 
@@ -90,20 +78,12 @@ migrate, or alternatively check out the `x.y.0rc0` git tag and migrate.
 
 ## Create signed release commit tag
 
-<div class="note">
+!!! note
 
-<div class="title">
+    Before doing this you should have a GPG key set up on github
 
-Note
-
-</div>
-
-Before doing this you should have a GPG key set up on github
-
-If you don't have a GPG key already, one method is via
-<https://keybase.io/> , and then add it to your github profile.
-
-</div>
+    If you don't have a GPG key already, one method is via
+    <https://keybase.io/> , and then add it to your github profile.
 
 -   Create a release tag with the above staged changes (where `$VERSION`
     is the version number to be released:

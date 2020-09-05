@@ -26,6 +26,7 @@ options can be passed to limit the events processed. Note the Stripe API
 documents a limitation where events are only guaranteed to be available
 for 30 days.
 
+```sh
     # all events
     ./manage.py djstripe_process_events
     # failed events (events with pending webhooks or where all webhook delivery attempts failed)
@@ -36,6 +37,7 @@ for 30 days.
     ./manage.py djstripe_process_events --ids evt_foo evt_bar
     # more output for debugging processing failures
     ./manage.py djstripe_process_events -v 2
+```
 
 ## In Code
 
@@ -48,9 +50,3 @@ exists on all dj-stripe model classes.
 
 E.g. creating a product using the Stripe API, and then syncing the API
 return data to Django using dj-stripe:
-
-<div class="literalinclude" start-after="def" dedent="1">
-
-examples/manually_syncing_with_stripe.py
-
-</div>
