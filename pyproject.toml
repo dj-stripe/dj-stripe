@@ -49,6 +49,8 @@ isort = "^4.3.21"
 black = "^20.8b1"
 pytest = "^5.4.3"
 pytest-django = "^3.9.0"
+mkautodoc = "^0.1.0"
+mkdocs = "^1.1.2"
 
 [build-system]
 requires = ["poetry>=1.0.4"]

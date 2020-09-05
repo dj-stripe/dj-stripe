@@ -12,6 +12,9 @@ theme:
     - yaml
     - django
 
+markdown_extensions:
+  - mkautodoc
+
 nav:
   - Home: index.md
   - Getting Started:

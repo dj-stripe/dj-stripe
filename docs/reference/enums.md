@@ -1,395 +1,247 @@
 # Enumerations
 
-Last Updated 2019-09-17
 
 ## ApiErrorCode
 
-<div class="autoclass" members="" undoc-members="">
+::: djstripe.enums.ApiErrorCode
 
-djstripe.enums.ApiErrorCode
-
-</div>
 
 ## AccountType
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.AccountType
-
-</div>
+::: djstripe.enums.AccountType
+    :members:
 
 ## BalanceTransactionStatus
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.BalanceTransactionStatus
-
-</div>
+::: djstripe.enums.BalanceTransactionStatus
+    :members:
 
 ## BalanceTransactionType
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.BalanceTransactionType
-
-</div>
+::: djstripe.enums.BalanceTransactionType
+    :members:
 
 ## BankAccountHolderType
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.BankAccountHolderType
-
-</div>
+::: djstripe.enums.BankAccountHolderType
+    :members:
 
 ## BankAccountStatus
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.BankAccountStatus
-
-</div>
+::: djstripe.enums.BankAccountStatus
+    :members:
 
 ## BusinessType
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.BusinessType
-
-</div>
+::: djstripe.enums.BusinessType
+    :members:
 
 ## BillingScheme
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.BillingScheme
-
-</div>
+::: djstripe.enums.BillingScheme
+    :members:
 
 ## CaptureMethod
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.CaptureMethod
-
-</div>
+::: djstripe.enums.CaptureMethod
+    :members:
 
 ## CardCheckResult
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.CardCheckResult
-
-</div>
+::: djstripe.enums.CardCheckResult
+    :members:
 
 ## CardBrand
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.CardBrand
-
-</div>
+::: djstripe.enums.CardBrand
+    :members:
 
 ## CardFundingType
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.CardFundingType
-
-</div>
+::: djstripe.enums.CardFundingType
+    :members:
 
 ## CardTokenizationMethod
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.CardTokenizationMethod
-
-</div>
+::: djstripe.enums.CardTokenizationMethod
+    :members:
 
 ## ChargeStatus
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.ChargeStatus
-
-</div>
+::: djstripe.enums.ChargeStatus
+    :members:
 
 ## ConfirmationMethod
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.ConfirmationMethod
-
-</div>
+::: djstripe.enums.ConfirmationMethod
+    :members:
 
 ## CouponDuration
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.CouponDuration
-
-</div>
+::: djstripe.enums.CouponDuration
+    :members:
 
 ## CustomerTaxExempt
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.CustomerTaxExempt
-
-</div>
+::: djstripe.enums.CustomerTaxExempt
+    :members:
 
 ## DisputeReason
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.DisputeReason
-
-</div>
+::: djstripe.enums.DisputeReason
+    :members:
 
 ## DisputeStatus
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.DisputeStatus
-
-</div>
+::: djstripe.enums.DisputeStatus
+    :members:
 
 ## FileUploadPurpose
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.FileUploadPurpose
-
-</div>
+::: djstripe.enums.FileUploadPurpose
+    :members:
 
 ## FileUploadType
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.FileUploadType
-
-</div>
+::: djstripe.enums.FileUploadType
+    :members:
 
 ## InvoiceCollectionMethod
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.InvoiceCollectionMethod
-
-</div>
+::: djstripe.enums.InvoiceCollectionMethod
+    :members:
 
 ## IntentUsage
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.IntentUsage
-
-</div>
+::: djstripe.enums.IntentUsage
+    :members:
 
 ## IntentStatus
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.IntentStatus
-
-</div>
+::: djstripe.enums.IntentStatus
+    :members:
 
 ## PaymentIntentStatus
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.PaymentIntentStatus
-
-</div>
+::: djstripe.enums.PaymentIntentStatus
+    :members:
 
 ## SetupIntentStatus
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.SetupIntentStatus
-
-</div>
+::: djstripe.enums.SetupIntentStatus
+    :members:
 
 ## PayoutFailureCode
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.PayoutFailureCode
-
-</div>
+::: djstripe.enums.PayoutFailureCode
+    :members:
 
 ## PayoutMethod
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.PayoutMethod
-
-</div>
+::: djstripe.enums.PayoutMethod
+    :members:
 
 ## PayoutStatus
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.PayoutStatus
-
-</div>
+::: djstripe.enums.PayoutStatus
+    :members:
 
 ## PayoutType
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.PayoutType
-
-</div>
+::: djstripe.enums.PayoutType
+    :members:
 
 ## PlanAggregateUsage
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.PlanAggregateUsage
-
-</div>
+::: djstripe.enums.PlanAggregateUsage
+    :members:
 
 ## PlanInterval
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.PlanInterval
-
-</div>
+::: djstripe.enums.PlanInterval
+    :members:
 
 ## PlanUsageType
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.PlanUsageType
-
-</div>
+::: djstripe.enums.PlanUsageType
+    :members:
 
 ## PlanTiersMode
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.PlanTiersMode
-
-</div>
+::: djstripe.enums.PlanTiersMode
+    :members:
 
 ## ProductType
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.ProductType
-
-</div>
+::: djstripe.enums.ProductType
+    :members:
 
 ## ScheduledQueryRunStatus
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.ScheduledQueryRunStatus
-
-</div>
+::: djstripe.enums.ScheduledQueryRunStatus
+    :members:
 
 ## SourceFlow
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.SourceFlow
-
-</div>
+::: djstripe.enums.SourceFlow
+    :members:
 
 ## SourceStatus
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.SourceStatus
-
-</div>
+::: djstripe.enums.SourceStatus
+    :members:
 
 ## SourceType
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.SourceType
-
-</div>
+::: djstripe.enums.SourceType
+    :members:
 
 ## LegacySourceType
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.LegacySourceType
-
-</div>
+::: djstripe.enums.LegacySourceType
+    :members:
 
 ## RefundFailureReason
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.RefundFailureReason
-
-</div>
+::: djstripe.enums.RefundFailureReason
+    :members:
 
 ## RefundReason
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.RefundReason
-
-</div>
+::: djstripe.enums.RefundReason
+    :members:
 
 ## RefundStatus
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.RefundStatus
-
-</div>
+::: djstripe.enums.RefundStatus
+    :members:
 
 ## SourceUsage
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.SourceUsage
-
-</div>
+::: djstripe.enums.SourceUsage
+    :members:
 
 ## SourceCodeVerificationStatus
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.SourceCodeVerificationStatus
-
-</div>
+::: djstripe.enums.SourceCodeVerificationStatus
+    :members:
 
 ## SourceRedirectFailureReason
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.SourceRedirectFailureReason
-
-</div>
+::: djstripe.enums.SourceRedirectFailureReason
+    :members:
 
 ## SourceRedirectStatus
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.SourceRedirectStatus
-
-</div>
+::: djstripe.enums.SourceRedirectStatus
+    :members:
 
 ## SubmitTypeStatus
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.SubmitTypeStatus
-
-</div>
+::: djstripe.enums.SubmitTypeStatus
+    :members:
 
 ## SubscriptionStatus
 
-<div class="autoclass" members="" undoc-members="">
-
-djstripe.enums.SubscriptionStatus
-
-</div>
+::: djstripe.enums.SubscriptionStatus
+    :members:

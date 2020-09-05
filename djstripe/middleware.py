@@ -20,22 +20,24 @@ class SubscriptionPaymentMiddleware(MiddlewareMixin):
 
     Rules:
 
-        * "(app_name)" means everything from this app is exempt
-        * "[namespace]" means everything with this name is exempt
-        * "namespace:name" means this namespaced URL is exempt
-        * "name" means this URL is exempt
-        * The entire djstripe namespace is exempt
-        * If settings.DEBUG is True, then django-debug-toolbar is exempt
-        * A 'fn:' prefix means the rest of the URL is fnmatch'd.
+    - "(app_name)" means everything from this app is exempt
+    - "[namespace]" means everything with this name is exempt
+    - "namespace:name" means this namespaced URL is exempt
+    - "name" means this URL is exempt
+    - The entire djstripe namespace is exempt
+    - If settings.DEBUG is True, then django-debug-toolbar is exempt
+    - A 'fn:' prefix means the rest of the URL is fnmatch'd.
 
-    Example::
+    Example:
 
-        DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = (
-            "[blogs]",  # Anything in the blogs namespace
-            "products:detail",  # A ProductDetail view you want shown to non-payers
-            "home",  # Site homepage
-            "fn:/accounts*",  # anything in the accounts/ URL path
-        )
+    ```py
+    DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = (
+        "[blogs]",  # Anything in the blogs namespace
+        "products:detail",  # A ProductDetail view you want shown to non-payers
+        "home",  # Site homepage
+        "fn:/accounts*",  # anything in the accounts/ URL path
+    )
+    ```
     """
 
     def process_request(self, request):
