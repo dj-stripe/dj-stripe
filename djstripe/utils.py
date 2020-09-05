@@ -6,7 +6,6 @@ import datetime
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models.query import QuerySet
 from django.utils import timezone
@@ -44,8 +43,11 @@ def subscriber_has_active_subscription(subscriber, plan=None):
     :type plan: Plan or string (plan ID)
 
     """
-    if isinstance(subscriber, AnonymousUser):
-        raise ImproperlyConfigured(ANONYMOUS_USER_ERROR_MSG)
+    try:
+        if subscriber.is_anonymous:
+            raise ImproperlyConfigured(ANONYMOUS_USER_ERROR_MSG)
+    except AttributeError:
+        pass
 
     if isinstance(subscriber, get_user_model()):
         if subscriber.is_superuser or subscriber.is_staff:
