@@ -11,17 +11,7 @@ from django.shortcuts import redirect
 from django.urls import resolve
 from django.utils.deprecation import MiddlewareMixin
 
-from .settings import SUBSCRIPTION_REDIRECT, subscriber_request_callback
 from .utils import subscriber_has_active_subscription
-
-DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = getattr(
-    settings, "DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS", ()
-)
-
-
-# So we don't have crazy long lines of code
-EXEMPT = list(DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS)
-EXEMPT.append("[djstripe]")
 
 
 class SubscriptionPaymentMiddleware(MiddlewareMixin):
@@ -62,27 +52,31 @@ class SubscriptionPaymentMiddleware(MiddlewareMixin):
         """Check according to the rules defined in the class docstring."""
         # First, if in DEBUG mode and with django-debug-toolbar, we skip
         #   this entire process.
+        from .settings import SUBSCRIPTION_REQUIRED_EXCEPTION_URLS
+
         if settings.DEBUG and request.path.startswith("/__debug__"):
             return True
+
+        exempt_urls = list(SUBSCRIPTION_REQUIRED_EXCEPTION_URLS) + ["[djstripe]"]
 
         # Second we check against matches
         match = resolve(
             request.path, getattr(request, "urlconf", settings.ROOT_URLCONF)
         )
-        if "({0})".format(match.app_name) in EXEMPT:
+        if "({0})".format(match.app_name) in exempt_urls:
             return True
 
-        if "[{0}]".format(match.namespace) in EXEMPT:
+        if "[{0}]".format(match.namespace) in exempt_urls:
             return True
 
-        if "{0}:{1}".format(match.namespace, match.url_name) in EXEMPT:
+        if "{0}:{1}".format(match.namespace, match.url_name) in exempt_urls:
             return True
 
-        if match.url_name in EXEMPT:
+        if match.url_name in exempt_urls:
             return True
 
         # Third, we check wildcards:
-        for exempt in [x for x in EXEMPT if x.startswith("fn:")]:
+        for exempt in [x for x in exempt_urls if x.startswith("fn:")]:
             exempt = exempt.replace("fn:", "")
             if fnmatch.fnmatch(request.path, exempt):
                 return True
@@ -91,6 +85,8 @@ class SubscriptionPaymentMiddleware(MiddlewareMixin):
 
     def check_subscription(self, request):
         """Redirect to the subscribe page if the user lacks an active subscription."""
+        from .settings import SUBSCRIPTION_REDIRECT, subscriber_request_callback
+
         subscriber = subscriber_request_callback(request)
 
         if not subscriber_has_active_subscription(subscriber):
