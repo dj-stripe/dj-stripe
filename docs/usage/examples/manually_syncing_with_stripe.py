@@ -1,7 +1,8 @@
 def example():
+    import stripe
+
     import djstripe.models
     import djstripe.settings
-    import stripe
 
     # stripe API return value is a dict-like object
     stripe_data = stripe.Product.create(

@@ -5,9 +5,9 @@ from copy import deepcopy
 from unittest.mock import patch
 
 from django.test import TestCase
-from tests import FAKE_CUSTOMER, FAKE_PAYMENT_INTENT_I, AssertStripeFksMixin
 
 from djstripe.models import PaymentIntent
+from tests import FAKE_CUSTOMER, FAKE_PAYMENT_INTENT_I, AssertStripeFksMixin
 
 
 class PaymentIntentTest(AssertStripeFksMixin, TestCase):

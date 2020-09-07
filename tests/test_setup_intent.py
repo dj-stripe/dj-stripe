@@ -5,9 +5,9 @@ from copy import deepcopy
 from unittest.mock import patch
 
 from django.test import TestCase
-from tests import FAKE_CUSTOMER, FAKE_SETUP_INTENT_I, AssertStripeFksMixin
 
 from djstripe.models import SetupIntent
+from tests import FAKE_CUSTOMER, FAKE_SETUP_INTENT_I, AssertStripeFksMixin
 
 
 class SetupIntentTest(AssertStripeFksMixin, TestCase):

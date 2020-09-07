@@ -1,9 +1,9 @@
 from unittest.mock import patch
 
 from django.test import TestCase
-from docs.usage.examples import manually_syncing_with_stripe
 
 import djstripe.models
+from docs.usage.examples import manually_syncing_with_stripe
 
 
 class CheckExamplesTest(TestCase):

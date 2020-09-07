@@ -4,12 +4,12 @@ from typing import Dict, List, Set, Type
 
 import stripe.api_resources
 import stripe.stripe_object
-import tests
 from django.core.management import BaseCommand
 from stripe.error import InvalidRequestError
 
 import djstripe.models
 import djstripe.settings
+import tests
 
 """
 Key used to store fake ids in the real stripe object's metadata dict

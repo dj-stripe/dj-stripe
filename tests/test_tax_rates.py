@@ -5,13 +5,13 @@ from copy import deepcopy
 from decimal import Decimal
 
 from django.test import TestCase
+
+from djstripe.models import TaxRate
 from tests import (
     FAKE_TAX_RATE_EXAMPLE_1_VAT,
     FAKE_TAX_RATE_EXAMPLE_2_SALES,
     AssertStripeFksMixin,
 )
-
-from djstripe.models import TaxRate
 
 
 class TaxRateTest(AssertStripeFksMixin, TestCase):
