@@ -1,0 +1,88 @@
+name: CI tests
+
+on: [push]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+        env:
+          - TOXENV: django22-postgres,django22-postgres-nativejson
+          - TOXENV: django22-sqlite
+          - TOXENV: django22-mysql
+          - TOXENV: django30-postgres,django30-postgres-nativejson
+          - TOXENV: django30-sqlite,django30-sqlite-nativejson
+          - TOXENV: django30-mysql,django30-mysql-nativejson
+          - TOXENV: django31-postgres,django31-postgres-nativejson
+
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_PASSWORD: djstripe
+          POSTGRES_DB: djstripe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: djstripe
+          MYSQL_DATABASE: djstripe
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools wheel
+        python -m pip install tox codecov
+    - name: Test with tox
+      run: tox -e postgres,postgres-nativejson
+    - name: Check test coverage
+      run: codecov
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: python -m pip install flake8 isort black
+      - name: Check for flake8 issues
+        run: flake8 .
+      - name: Check code formatting with Black
+        run: black . --check
+      - name: Check import ordering with isort
+        run: isort . --check --diff
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: python -m pip install tox
+      - name: Build documentation
+        run: tox -e docs

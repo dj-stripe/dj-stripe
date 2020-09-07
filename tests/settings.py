@@ -4,8 +4,7 @@ import os
 test_db_vendor = os.environ.get("DJSTRIPE_TEST_DB_VENDOR", "postgres")
 test_db_name = os.environ.get("DJSTRIPE_TEST_DB_NAME", "djstripe")
 test_db_user = os.environ.get("DJSTRIPE_TEST_DB_USER", test_db_vendor)
-test_db_pass = os.environ.get("DJSTRIPE_TEST_DB_PASS", "")
-test_db_host = os.environ.get("DJSTRIPE_TEST_DB_HOST", "localhost")
+test_db_pass = os.environ.get("DJSTRIPE_TEST_DB_PASS", "djstripe")
 test_db_port = os.environ.get("DJSTRIPE_TEST_DB_PORT", "")
 
 DEBUG = True
@@ -25,7 +24,7 @@ if test_db_vendor == "postgres":
             "NAME": test_db_name,
             "USER": test_db_user,
             "PASSWORD": test_db_pass,
-            "HOST": test_db_host,
+            "HOST": os.environ.get("DJSTRIPE_TEST_DB_HOST", "localhost"),
             "PORT": test_db_port,
         }
     }
@@ -34,9 +33,9 @@ elif test_db_vendor == "mysql":
         "default": {
             "ENGINE": "django.db.backends.mysql",
             "NAME": test_db_name,
-            "USER": test_db_user,
+            "USER": os.environ.get("DJSTRIPE_TEST_DB_USER", "root"),
             "PASSWORD": test_db_pass,
-            "HOST": test_db_host,
+            "HOST": os.environ.get("DJSTRIPE_TEST_DB_HOST", "127.0.0.1"),
             "PORT": test_db_port,
         }
     }
