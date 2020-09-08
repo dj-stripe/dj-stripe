@@ -799,13 +799,11 @@ class UpcomingInvoice(BaseInvoice):
         total_tax_amounts = []
 
         for tax_amount_data in data.get("total_tax_amounts", []):
-            tax_rate_data = tax_amount_data["tax_rate"]
-            if isinstance(tax_rate_data, str):
-                tax_rate_data = {"tax_rate": tax_rate_data}
+            tax_rate_id = tax_amount_data["tax_rate"]
+            if not isinstance(tax_rate_id, str):
+                tax_rate_id = tax_rate_id["tax_rate"]
 
-            tax_rate, _ = TaxRate._get_or_create_from_stripe_object(
-                tax_rate_data, field_name="tax_rate", refetch=True
-            )
+            tax_rate = TaxRate._get_or_retrieve(id=tax_rate_id)
 
             tax_amount = DjstripeUpcomingInvoiceTotalTaxAmount(
                 invoice=self,
