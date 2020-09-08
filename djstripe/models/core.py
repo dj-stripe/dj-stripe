@@ -1528,12 +1528,14 @@ class Event(StripeModel):
     def customer(self):
         data = self.data["object"]
         if data["object"] == "customer":
-            field = "id"
+            customer_id = data.get("id")
         else:
-            field = "customer"
+            customer_id = data.get("customer")
 
-        if data.get(field):
-            return Customer._get_or_create_from_stripe_object(data, field)[0]
+        if customer_id:
+            return Customer._get_or_retrieve(
+                id=customer_id, djstripe_owner_account=self.djstripe_owner_account
+            )
 
 
 class FileUpload(StripeModel):
