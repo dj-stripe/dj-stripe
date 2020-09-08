@@ -866,6 +866,21 @@ class StripeModel(models.Model):
 
         return instance
 
+    @classmethod
+    def _get_or_retrieve(cls, **kwargs):
+        try:
+            return cls.objects.get(**kwargs)
+        except cls.DoesNotExist:
+            pass
+
+        djstripe_owner_account = kwargs.pop("djstripe_owner_account", None)
+        if djstripe_owner_account:
+            kwargs["stripe_account"] = djstripe_owner_account.id
+
+        data = cls.stripe_class.retrieve(**kwargs)
+        instance = cls.sync_from_stripe_data(data)
+        return instance
+
     def __str__(self):
         return smart_str("<{list}>".format(list=", ".join(self.str_parts())))
 
