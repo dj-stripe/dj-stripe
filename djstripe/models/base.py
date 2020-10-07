@@ -6,6 +6,7 @@ from django.apps import apps
 from django.db import IntegrityError, models, transaction
 from django.utils import dateformat, timezone
 from django.utils.encoding import smart_str
+from stripe.error import InvalidRequestError
 
 from .. import settings as djstripe_settings
 from ..fields import JSONField, StripeDateTimeField, StripeForeignKey, StripeIdField
@@ -532,7 +533,19 @@ class StripeModel(models.Model):
                 # Leaving the default field_name ("id") will get_or_create the customer.
                 # If field_name="default_source", we get_or_create the card instead.
                 cls_instance = cls(id=id_)
-                data = cls_instance.api_retrieve(stripe_account=stripe_account)
+                try:
+                    data = cls_instance.api_retrieve(stripe_account=stripe_account)
+                except InvalidRequestError as e:
+                    # HACK around a Stripe bug.
+                    # When a FileUpload is retrieved from the Account object,
+                    # a mismatch between live and test mode is possible depending
+                    # on whether the file (usually the logo) was uploaded in live or test.
+                    # Reported to Stripe in August 2020.
+                    # Context: https://github.com/dj-stripe/dj-stripe/issues/830
+                    if "a similar object exists in" in str(e):
+                        pass
+                    else:
+                        raise
                 should_expand = False
 
         # The next thing to happen will be the "create from stripe object" call.
