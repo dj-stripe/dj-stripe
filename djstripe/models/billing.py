@@ -1626,13 +1626,9 @@ class Subscription(StripeModel):
         kwargs = deepcopy(locals())
         del kwargs["self"]
 
-        stripe_subscription = self.api_retrieve()
+        stripe_subscription = self._api_update(**kwargs)
 
-        for kwarg, value in kwargs.items():
-            if value is not None:
-                setattr(stripe_subscription, kwarg, value)
-
-        return Subscription.sync_from_stripe_data(stripe_subscription.save())
+        return Subscription.sync_from_stripe_data(stripe_subscription)
 
     def extend(self, delta):
         """
@@ -1691,9 +1687,7 @@ class Subscription(StripeModel):
             at_period_end = False
 
         if at_period_end:
-            stripe_subscription = self.api_retrieve()
-            stripe_subscription.cancel_at_period_end = True
-            stripe_subscription.save()
+            stripe_subscription = self._api_update(cancel_at_period_end=True)
         else:
             try:
                 stripe_subscription = self._api_delete()
