@@ -133,6 +133,23 @@ class StripeItem(dict):
 
         return self.deleted
 
+    @classmethod
+    def class_url(cls):
+        return "/v1/test-items/"
+
+    def instance_url(self):
+        """Superficial mock that emulates instance_url."""
+        id = self.get("id")
+        base = self.class_url()
+        return "%s/%s" % (base, id)
+
+    def request(self, method, url, params) -> dict:
+        """Superficial mock that emulates request method."""
+        assert method == "post"
+        for key, value in params.items():
+            self.__setattr__(key, value)
+        return self
+
 
 class StripeList(dict):
     """Mock a generic Stripe Iterable.
