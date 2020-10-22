@@ -1,8 +1,8 @@
 # dj-stripe
 
 [![Build Status](https://travis-ci.org/dj-stripe/dj-stripe.svg?branch=master)](https://travis-ci.org/dj-stripe/dj-stripe)
-
 [![Documentation Status](https://readthedocs.org/projects/dj-stripe/badge/)](https://dj-stripe.readthedocs.io/)
+[![Sponsor dj-stripe](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub)](https://github.com/sponsors/dj-stripe)
 
 Stripe Models for Django.
 
@@ -96,10 +96,24 @@ Assuming the tests are run against PostgreSQL:
     pip install tox
     tox
 
+# Funding this project
+
+You can now become a sponsor to dj-stripe with [GitHub Sponsors](https://github.com/sponsors/dj-stripe).
+
+We've been bringing dj-stripe to the world for over 7 years and are excited to be able to start
+dedicating some real resources to the project.
+
+Your sponsorship helps us keep a team of maintainers actively working to improve dj-stripe and
+ensure it stays up-to-date with the latest Stripe changes. If you're using dj-stripe in a commercial
+capacity and have the ability to start a sponsorship, we'd greatly appreciate the contribution.
+
+All contributions through GitHub sponsors flow into our [Open Collective](https://opencollective.com/dj-stripe),
+which holds our funds and keeps an open ledger on how donations are spent.
+
 # Follows Best Practices
 
-[<img src="https://twoscoops.smugmug.com/Two-Scoops-Press-Media-Kit/i-C8s5jkn/0/O/favicon-152.png" id="Two Scoops Logo" class="align-center" alt="Two Scoops of Django" />](https://www.twoscoopspress.org/products/two-scoops-of-django-1-11)
+[<img src="https://cdn.shopify.com/s/files/1/0304/6901/products/2017-06-29-tsd11-sticker-02_250X500.png" id="Two Scoops Logo" class="align-center" alt="Two Scoops of Django" />](https://www.feldroy.com/products/two-scoops-of-django-1-11)
 
 This project follows best practices as espoused in [Two Scoops of
 Django: Best Practices for Django
-1.11](https://twoscoopspress.org/products/two-scoops-of-django-1-11).
+1.11](https://www.feldroy.com/products/two-scoops-of-django-1-11).
