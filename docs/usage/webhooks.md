@@ -49,10 +49,10 @@ def my_handler(event, **kwargs):
     print("Triggered webhook " + event.type)
 ```
 
-!!! warnring
+!!! warning
 
     In order to get registrations picked up, you need to put them in a
-    module is imported like models.py or make sure you import it manually.
+    module that is imported like models.py or make sure you import it manually.
 
 Webhook event creation and processing is now wrapped in a
 `transaction.atomic()` block to better handle webhook errors. This will
