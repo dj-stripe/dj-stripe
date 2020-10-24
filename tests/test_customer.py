@@ -1740,9 +1740,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             self.customer.add_invoice_item(amount=5000, currency="usd")
 
     @patch(
-        "stripe.Plan.retrieve",
-        return_value=deepcopy(FAKE_PLAN),
-        autospec=True,
+        "stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True,
     )
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
@@ -1785,12 +1783,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         items = invoice.invoiceitems.all()
         self.assertEqual(0, len(items))
         self.assertIsNotNone(invoice.plan)
-
-    @patch("stripe.Customer.retrieve", autospec=True)
-    def test_delete_subscriber_purges_customer(self, customer_retrieve_mock):
-        self.user.delete()
-        customer = Customer.objects.get(id=FAKE_CUSTOMER["id"])
-        self.assertIsNotNone(customer.date_purged)
 
     @patch("stripe.Customer.retrieve", autospec=True)
     def test_delete_subscriber_without_customer_is_noop(self, customer_retrieve_mock):
