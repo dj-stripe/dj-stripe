@@ -1183,11 +1183,11 @@ class Customer(StripeModel):
         save = False
 
         customer_sources = data.get("sources")
+        sources = {}
         if customer_sources:
             # Have to create sources before we handle the default_source
             # We save all of them in the `sources` dict, so that we can find them
             # by id when we look at the default_source (we need the source type).
-            sources = {}
             for source in customer_sources["data"]:
                 obj, _ = DjstripePaymentMethod._get_or_create_source(
                     source, source["object"]
@@ -1200,10 +1200,11 @@ class Customer(StripeModel):
                 default_source_id = default_source
             else:
                 default_source_id = default_source["id"]
-            source = sources[default_source_id]
 
-            save = self.default_source != source
-            self.default_source = source
+            if default_source_id in sources:
+                source = sources[default_source_id]
+                save = self.default_source != source
+                self.default_source = source
 
         discount = data.get("discount")
         if discount:
