@@ -17,7 +17,7 @@ class DJStripeSubscriptionPermission(BasePermission):
     A permission to be used when wanting to permit users with active subscriptions.
     """
 
-    def has_permission(self, request, view):
+    def has_permission(self, request, view) -> bool:
         """
         Check if the subscriber has an active subscription.
 
@@ -28,6 +28,8 @@ class DJStripeSubscriptionPermission(BasePermission):
 
         """
         try:
-            subscriber_has_active_subscription(subscriber_request_callback(request))
+            return subscriber_has_active_subscription(
+                subscriber_request_callback(request)
+            )
         except AttributeError:
             return False
