@@ -468,6 +468,7 @@ class StripeModel(models.Model):
 
         return instance
 
+    # flake8: noqa (C901)
     @classmethod
     def _get_or_create_from_stripe_object(
         cls,
@@ -539,8 +540,8 @@ class StripeModel(models.Model):
                     # HACK around a Stripe bug.
                     # When a FileUpload is retrieved from the Account object,
                     # a mismatch between live and test mode is possible depending
-                    # on whether the file (usually the logo) was uploaded in live or test.
-                    # Reported to Stripe in August 2020.
+                    # on whether the file (usually the logo) was uploaded in live
+                    # or test. Reported to Stripe in August 2020.
                     # Context: https://github.com/dj-stripe/dj-stripe/issues/830
                     if "a similar object exists in" in str(e):
                         pass
