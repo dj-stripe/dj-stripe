@@ -28,7 +28,9 @@ class CreateSubscriptionSerializer(serializers.Serializer):
 
     stripe_token = serializers.CharField(max_length=200)
     plan = serializers.CharField(max_length=50)
-    charge_immediately = serializers.BooleanField(required=False, allow_null=True, default=None)
+    charge_immediately = serializers.BooleanField(
+        required=False, allow_null=True, default=None
+    )
     tax_percent = serializers.DecimalField(
         required=False, max_digits=5, decimal_places=2
     )
