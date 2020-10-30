@@ -68,7 +68,7 @@ class TestAccount(AssertStripeFksMixin, TestCase):
 
         self.assertEqual(account.business_url, "https://example.com")
         account.business_profile = None
-        self.assertEqual(account.business_url, None)
+        self.assertEqual(account.business_url, "")
 
     @patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
     @patch(

@@ -99,12 +99,13 @@ class Account(StripeModel):
         return djstripe_settings.get_default_api_key(self.livemode)
 
     @property
-    def business_url(self):
+    def business_url(self) -> str:
         """
         The business’s publicly available website.
-        :rtype: Optional[str]
         """
-        return (self.business_profile or {}).get("url")
+        if self.business_profile:
+            return self.business_profile.get("url", "")
+        return ""
 
     @classmethod
     def get_connected_account_from_token(cls, access_token):
