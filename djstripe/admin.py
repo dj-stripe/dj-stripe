@@ -447,14 +447,14 @@ class SubscriptionAdmin(StripeModelAdmin):
 
     inlines = (SubscriptionItemInline,)
 
-    def cancel_subscription(self, request, queryset):
+    def _cancel(self, request, queryset):
         """Cancel a subscription."""
         for subscription in queryset:
             subscription.cancel()
 
-    cancel_subscription.short_description = "Cancel selected subscriptions"
+    _cancel.short_description = "Cancel selected subscriptions"  # type: ignore # noqa
 
-    actions = (cancel_subscription,)
+    actions = (_cancel,)
 
 
 @admin.register(models.TaxRate)

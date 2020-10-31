@@ -3,6 +3,7 @@ Utility functions related to the djstripe app.
 """
 
 import datetime
+from typing import Optional
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -87,11 +88,9 @@ def clear_expired_idempotency_keys():
     IdempotencyKey.objects.filter(created__lt=threshold).delete()
 
 
-def convert_tstamp(response):
+def convert_tstamp(response) -> Optional[datetime.datetime]:
     """
     Convert a Stripe API timestamp response (unix epoch) to a native datetime.
-
-    :rtype: datetime
     """
     if response is None:
         # Allow passing None to convert_tstamp()
@@ -107,7 +106,7 @@ def convert_tstamp(response):
 CURRENCY_SIGILS = {"CAD": "$", "EUR": "€", "GBP": "£", "USD": "$"}
 
 
-def get_friendly_currency_amount(amount, currency):
+def get_friendly_currency_amount(amount, currency: str) -> str:
     currency = currency.upper()
     sigil = CURRENCY_SIGILS.get(currency, "")
     return "{sigil}{amount:.2f} {currency}".format(

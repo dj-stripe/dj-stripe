@@ -1,3 +1,5 @@
+from typing import Union
+
 import stripe
 from django.db import models, transaction
 from stripe.error import InvalidRequestError
@@ -337,13 +339,13 @@ class Card(LegacySourceMixin, StripeModel):
     @classmethod
     def create_token(
         cls,
-        number,
-        exp_month,
-        exp_year,
-        cvc,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        number: str,
+        exp_month: int,
+        exp_year: int,
+        cvc: str,
+        api_key: str = djstripe_settings.STRIPE_SECRET_KEY,
         **kwargs
-    ):
+    ) -> stripe.Token:
         """
         Creates a single use token that wraps the details of a credit card.
         This token can be used in place of a credit card dictionary with any API method.
@@ -352,16 +354,10 @@ class Card(LegacySourceMixin, StripeModel):
         (Source: https://stripe.com/docs/api/python#create_card_token)
 
         :param number: The card number without any separators (no spaces)
-        :type number: str
         :param exp_month: The card's expiration month. (two digits)
-        :type exp_month: int
         :param exp_year: The card's expiration year. (four digits)
-        :type exp_year: int
         :param cvc: Card security code.
-        :type cvc: str
-        :param api_key:
-        :type api_key: str
-        :rtype: stripe.Token
+        :param api_key: The API key to use
         """
 
         card = {
@@ -473,12 +469,9 @@ class Source(StripeModel):
         else:
             self.customer = None
 
-    def detach(self):
+    def detach(self) -> bool:
         """
         Detach the source from its customer.
-
-        :return:
-        :rtype: bool
         """
 
         # First, wipe default source on all customers that use this.
@@ -547,18 +540,13 @@ class PaymentMethod(StripeModel):
 
     @classmethod
     def attach(
-        cls, payment_method, customer, api_key=djstripe_settings.STRIPE_SECRET_KEY
-    ):
+        cls,
+        payment_method: Union[str, "PaymentMethod"],
+        customer: Union[str, Customer],
+        api_key: str = djstripe_settings.STRIPE_SECRET_KEY,
+    ) -> "PaymentMethod":
         """
         Attach a payment method to a customer
-        :param payment_method:
-        :type payment_method: str, PaymentMethod
-        :param customer:
-        :type customer: Union[str, Customer]
-        :param api_key:
-        :type api_key: str
-        :return:
-        :rtype: PaymentMethod
         """
 
         if isinstance(payment_method, StripeModel):

@@ -1,4 +1,5 @@
-import decimal
+from decimal import Decimal
+from typing import Optional
 
 import stripe
 from django.apps import apps
@@ -271,7 +272,7 @@ class Charge(StripeModel):
         return "{amount} ({status})".format(amount=amount, status=status)
 
     @property
-    def disputed(self):
+    def disputed(self) -> bool:
         return self.dispute is not None
 
     @property
@@ -280,11 +281,11 @@ class Charge(StripeModel):
             return self.balance_transaction.fee
 
     @property
-    def human_readable_amount(self):
+    def human_readable_amount(self) -> str:
         return get_friendly_currency_amount(self.amount, self.currency)
 
     @property
-    def human_readable_status(self):
+    def human_readable_status(self) -> str:
         if not self.captured:
             return "Uncaptured"
         elif self.disputed:
@@ -299,7 +300,7 @@ class Charge(StripeModel):
         return ""
 
     @property
-    def fraudulent(self):
+    def fraudulent(self) -> bool:
         return (
             self.fraud_details and list(self.fraud_details.values())[0] == "fraudulent"
         )
@@ -330,42 +331,36 @@ class Charge(StripeModel):
             data=source_data, source_type=source_type
         )
 
-    def _calculate_refund_amount(self, amount=None):
+    def _calculate_refund_amount(self, amount: Optional[Decimal]) -> int:
         """
-        :rtype: int
-        :return: amount that can be refunded, in CENTS
+        Returns the amount that can be refunded (in cents)
         """
         eligible_to_refund = self.amount - (self.amount_refunded or 0)
-        if amount:
-            amount_to_refund = min(eligible_to_refund, amount)
-        else:
-            amount_to_refund = eligible_to_refund
+        amount_to_refund = (
+            min(eligible_to_refund, amount) if amount else eligible_to_refund
+        )
+
         return int(amount_to_refund * 100)
 
-    def refund(self, amount=None, reason=None):
+    def refund(self, amount: Decimal = None, reason: str = None) -> "Charge":
         """
-        Initiate a refund. If amount is not provided, then this will be a full refund.
+        Initiate a refund. Returns the charge object.
 
         :param amount: A positive decimal amount representing how much of this charge
-            to refund.
+            to refund. If amount is not provided, then this will be a full refund.
             Can only refund up to the unrefunded amount remaining of the charge.
-        :type amount: Decimal
         :param reason: String indicating the reason for the refund.
             If set, possible values are ``duplicate``, ``fraudulent``,
             and ``requested_by_customer``. Specifying ``fraudulent`` as the reason
             when you believe the charge to be fraudulent will
             help Stripe improve their fraud detection algorithms.
-        :param reason: str
-
-        :return: Charge object
-        :rtype: Charge
         """
         charge_obj = self.api_retrieve().refund(
             amount=self._calculate_refund_amount(amount=amount), reason=reason
         )
         return self.__class__.sync_from_stripe_data(charge_obj)
 
-    def capture(self):
+    def capture(self) -> "Charge":
         """
         Capture the payment of an existing, uncaptured, charge.
         This is the second half of the two-step payment flow, where first you
@@ -787,7 +782,7 @@ class Customer(StripeModel):
         :type statement_descriptor: string
         """
 
-        if not isinstance(amount, decimal.Decimal):
+        if not isinstance(amount, Decimal):
             raise ValueError("You must supply a decimal value representing dollars.")
 
         # TODO: better default detection (should charge in customer default)
@@ -867,7 +862,7 @@ class Customer(StripeModel):
         """
         from .billing import InvoiceItem
 
-        if not isinstance(amount, decimal.Decimal):
+        if not isinstance(amount, Decimal):
             raise ValueError("You must supply a decimal value representing dollars.")
 
         # Convert Invoice to id

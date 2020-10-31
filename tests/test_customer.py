@@ -831,12 +831,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             },
         )
 
-    def test_calculate_refund_amount_full_refund(self):
-        charge = Charge(
-            id="ch_111111", customer=self.customer, amount=decimal.Decimal("500.00")
-        )
-        self.assertEqual(charge._calculate_refund_amount(), 50000)
-
     def test_calculate_refund_amount_partial_refund(self):
         charge = Charge(
             id="ch_111111", customer=self.customer, amount=decimal.Decimal("500.00")

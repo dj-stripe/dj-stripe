@@ -1,4 +1,5 @@
 from copy import deepcopy
+from typing import Optional
 
 import stripe
 from django.db import models
@@ -549,7 +550,7 @@ class BaseInvoice(StripeModel):
         subscription_quantity=None,
         subscription_trial_end=None,
         **kwargs
-    ):
+    ) -> Optional["UpcomingInvoice"]:
         """
         Gets the upcoming preview invoice (singular) for a customer.
 
@@ -590,7 +591,6 @@ class BaseInvoice(StripeModel):
         preview updating or creating a subscription with that trial end.
         :type subscription_trial_end: datetime
         :returns: The upcoming preview invoice.
-        :rtype: UpcomingInvoice
         """
 
         # Convert Customer to id
@@ -621,7 +621,7 @@ class BaseInvoice(StripeModel):
         except InvalidRequestError as exc:
             if str(exc) != "Nothing to invoice for customer":
                 raise
-            return
+            return None
 
         # Workaround for "id" being missing (upcoming invoices don't persist).
         upcoming_stripe_invoice["id"] = "upcoming"
@@ -661,7 +661,7 @@ class BaseInvoice(StripeModel):
         )
 
     @property
-    def plan(self):
+    def plan(self) -> Optional["Plan"]:
         """Gets the associated plan for this invoice.
 
         In order to provide a consistent view of invoices, the plan object
@@ -677,7 +677,6 @@ class BaseInvoice(StripeModel):
         retrieved from the subscription will be the currently active plan.
 
         :returns: The associated plan for the invoice.
-        :rtype: ``djstripe.Plan``
         """
 
         for invoiceitem in self.invoiceitems.all():
@@ -686,6 +685,8 @@ class BaseInvoice(StripeModel):
 
         if self.subscription:
             return self.subscription.plan
+
+        return None
 
 
 class Invoice(BaseInvoice):
