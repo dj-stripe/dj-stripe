@@ -6,6 +6,14 @@ from django.contrib import admin
 from . import models
 
 
+class ReadOnlyMixin:
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
 def get_forward_relation_fields_for_model(model):
     """Return an iterable of the field names that are forward relations,
     I.E ManyToManyField, OneToOneField, and ForeignKey.
@@ -105,17 +113,14 @@ class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
 
 
 @admin.register(models.IdempotencyKey)
-class IdempotencyKeyAdmin(admin.ModelAdmin):
+class IdempotencyKeyAdmin(ReadOnlyMixin, admin.ModelAdmin):
     list_display = ("uuid", "action", "created", "is_expired", "livemode")
     list_filter = ("livemode",)
     search_fields = ("uuid", "action")
 
-    def has_add_permission(self, request):
-        return False
-
 
 @admin.register(models.WebhookEventTrigger)
-class WebhookEventTriggerAdmin(admin.ModelAdmin):
+class WebhookEventTriggerAdmin(ReadOnlyMixin, admin.ModelAdmin):
     list_display = (
         "created",
         "event",
@@ -136,9 +141,6 @@ class WebhookEventTriggerAdmin(admin.ModelAdmin):
                 continue
 
             trigger.process()
-
-    def has_add_permission(self, request):
-        return False
 
 
 class StripeModelAdmin(admin.ModelAdmin):
@@ -219,7 +221,7 @@ class APIKeyAdmin(StripeModelAdmin):
 
 
 @admin.register(models.BalanceTransaction)
-class BalanceTransactionAdmin(StripeModelAdmin):
+class BalanceTransactionAdmin(ReadOnlyMixin, StripeModelAdmin):
     list_display = (
         "type",
         "net",
@@ -230,12 +232,6 @@ class BalanceTransactionAdmin(StripeModelAdmin):
         "status",
     )
     list_filter = ("status", "type")
-
-    def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
 
 
 @admin.register(models.Charge)
@@ -291,22 +287,16 @@ class CustomerAdmin(StripeModelAdmin):
 
 
 @admin.register(models.Dispute)
-class DisputeAdmin(StripeModelAdmin):
+class DisputeAdmin(ReadOnlyMixin, StripeModelAdmin):
     list_display = ("reason", "status", "amount", "currency", "is_charge_refundable")
     list_filter = ("is_charge_refundable", "reason", "status")
 
-    def has_add_permission(self, request):
-        return False
-
 
 @admin.register(models.Event)
-class EventAdmin(StripeModelAdmin):
+class EventAdmin(ReadOnlyMixin, StripeModelAdmin):
     list_display = ("type", "request_id")
     list_filter = ("type", "created")
     search_fields = ("request_id",)
-
-    def has_add_permission(self, request):
-        return False
 
 
 @admin.register(models.FileUpload)
