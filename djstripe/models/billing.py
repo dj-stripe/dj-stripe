@@ -142,11 +142,6 @@ class Coupon(StripeModel):
     )
     # valid = models.BooleanField(editable=False)
 
-    # XXX
-    DURATION_FOREVER = "forever"
-    DURATION_ONCE = "once"
-    DURATION_REPEATING = "repeating"
-
     class Meta:
         unique_together = ("id", "livemode")
 
@@ -168,7 +163,7 @@ class Coupon(StripeModel):
 
     @property
     def human_readable(self):
-        if self.duration == self.DURATION_REPEATING:
+        if self.duration == enums.CouponDuration.repeating:
             if self.duration_in_months == 1:
                 duration = "for {duration_in_months} month"
             else:
