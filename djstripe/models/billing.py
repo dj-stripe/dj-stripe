@@ -157,8 +157,10 @@ class Coupon(StripeModel):
     def human_readable_amount(self):
         if self.percent_off:
             amount = "{percent_off}%".format(percent_off=self.percent_off)
-        else:
+        elif self.currency:
             amount = get_friendly_currency_amount(self.amount_off or 0, self.currency)
+        else:
+            amount = "(invalid amount)"
         return "{amount} off".format(amount=amount)
 
     @property
