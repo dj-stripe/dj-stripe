@@ -710,7 +710,7 @@ class Customer(StripeModel):
             plan = plan.id
 
         stripe_subscription = Subscription._api_create(
-            plan=plan,
+            items=[plan],
             customer=self.id,
             application_fee_percent=application_fee_percent,
             coupon=coupon,
