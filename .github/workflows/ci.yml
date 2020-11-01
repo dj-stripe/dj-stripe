@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8, 3.9]
         env:
           - TOXENV: django22-postgres,django22-postgres-nativejson,django22-sqlite,django22-mysql
           - TOXENV: django30-postgres,django30-postgres-nativejson
