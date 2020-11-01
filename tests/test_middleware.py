@@ -31,7 +31,7 @@ class MiddlewareURLTest(TestCase):
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
-        self.middleware = SubscriptionPaymentMiddleware()
+        self.middleware = SubscriptionPaymentMiddleware(lambda r: r)
 
     def test_appname(self):
         request = self.factory.get("/admin/")
@@ -115,7 +115,7 @@ class MiddlewareLogicTest(TestCase):
         ):
             self.subscription = Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
 
-        self.middleware = SubscriptionPaymentMiddleware()
+        self.middleware = SubscriptionPaymentMiddleware(lambda r: r)
 
     def test_anonymous(self):
         request = self.factory.get("/djstripe/webhook/")
