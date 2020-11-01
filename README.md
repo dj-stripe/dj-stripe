@@ -109,11 +109,3 @@ capacity and have the ability to start a sponsorship, we'd greatly appreciate th
 
 All contributions through GitHub sponsors flow into our [Open Collective](https://opencollective.com/dj-stripe),
 which holds our funds and keeps an open ledger on how donations are spent.
-
-# Follows Best Practices
-
-[<img src="https://cdn.shopify.com/s/files/1/0304/6901/products/2017-06-29-tsd11-sticker-02_250X500.png" id="Two Scoops Logo" class="align-center" alt="Two Scoops of Django" />](https://www.feldroy.com/products/two-scoops-of-django-1-11)
-
-This project follows best practices as espoused in [Two Scoops of
-Django: Best Practices for Django
-1.11](https://www.feldroy.com/products/two-scoops-of-django-1-11).
