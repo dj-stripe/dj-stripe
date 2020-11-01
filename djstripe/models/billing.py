@@ -1194,25 +1194,6 @@ class Plan(StripeModel):
             template, amount=amount, interval=interval, interval_count=interval_count
         )
 
-    # TODO: Move this type of update to the model's save() method
-    #  so it happens automatically
-    #  Also, block other fields from being saved.
-    def update_name(self):
-        """
-        Update the name of the Plan in Stripe and in the db.
-
-        Assumes the object being called has the name attribute already
-        reset, but has not been saved.
-
-        Stripe does not allow for update of any other Plan attributes besides name.
-        """
-
-        p = self.api_retrieve()
-        p.name = self.name
-        p.save()
-
-        self.save()
-
 
 class Price(StripeModel):
     """

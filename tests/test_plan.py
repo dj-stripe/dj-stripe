@@ -5,10 +5,8 @@ from copy import deepcopy
 from decimal import Decimal
 from unittest.mock import patch
 
-from django.contrib.admin.sites import AdminSite
 from django.test import TestCase
 
-from djstripe.admin import PlanAdmin
 from djstripe.enums import PlanUsageType
 from djstripe.models import Plan, Product
 from djstripe.settings import STRIPE_SECRET_KEY
@@ -21,66 +19,6 @@ from . import (
     FAKE_TIER_PLAN,
     AssertStripeFksMixin,
 )
-
-
-class TestPlanAdmin(TestCase):
-    class FakeForm(object):
-        cleaned_data = {}
-
-    class FakeRequest(object):
-        pass
-
-    def setUp(self):
-        with patch(
-            "stripe.Product.retrieve",
-            return_value=deepcopy(FAKE_PRODUCT),
-            autospec=True,
-        ):
-            self.plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-
-        self.site = AdminSite()
-        self.plan_admin = PlanAdmin(Plan, self.site)
-
-    @patch("stripe.Plan.retrieve", autospec=True)
-    def test_update_name(self, plan_retrieve_mock):
-        new_name = "Updated Plan Name"
-
-        self.plan.name = new_name
-        self.plan.update_name()
-
-        # Would throw DoesNotExist if it didn't work
-        Plan.objects.get(name="Updated Plan Name")
-
-    @patch("stripe.Plan.create", return_value=FAKE_PLAN_II, autospec=True)
-    @patch("stripe.Plan.retrieve", autospec=True)
-    def test_that_admin_save_does_create_new_object(
-        self, plan_retrieve_mock, plan_create_mock
-    ):
-        fake_form = self.FakeForm()
-        plan_data = Plan._stripe_object_to_record(deepcopy(FAKE_PLAN_II))
-
-        fake_form.cleaned_data = plan_data
-
-        self.plan_admin.save_model(
-            request=self.FakeRequest(), obj=None, form=fake_form, change=False
-        )
-
-        # Would throw DoesNotExist if it didn't work
-        Plan.objects.get(id=plan_data["id"])
-
-    @patch("stripe.Plan.create", autospec=True)
-    @patch("stripe.Plan.retrieve", autospec=True)
-    def test_that_admin_save_does_update_object(
-        self, plan_retrieve_mock, plan_create_mock
-    ):
-        self.plan.name = "A new name (again)"
-
-        self.plan_admin.save_model(
-            request=self.FakeRequest(), obj=self.plan, form=self.FakeForm(), change=True
-        )
-
-        # Would throw DoesNotExist if it didn't work
-        Plan.objects.get(name=self.plan.name)
 
 
 class PlanCreateTest(AssertStripeFksMixin, TestCase):

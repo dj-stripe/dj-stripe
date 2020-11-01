@@ -361,13 +361,6 @@ class InvoiceAdmin(StripeModelAdmin):
 class PlanAdmin(StripeModelAdmin):
     radio_fields = {"interval": admin.HORIZONTAL}
 
-    def save_model(self, request, obj, form, change):
-        """Update or create objects using our custom methods that sync with Stripe."""
-        if change:
-            obj.update_name()
-        else:
-            models.Plan.get_or_create(**form.cleaned_data)
-
     def get_readonly_fields(self, request, obj=None):
         """Return extra readonly_fields."""
         readonly_fields = super().get_readonly_fields(request, obj)
