@@ -388,6 +388,7 @@ class BaseInvoice(StripeModel):
             "If the invoice has not been frozen yet, this will be null."
         ),
     )
+    # TODO: Implement "lines" (InvoiceLineItem related_field)
     next_payment_attempt = StripeDateTimeField(
         null=True,
         blank=True,
@@ -1079,7 +1080,7 @@ class Plan(StripeModel):
         ),
     )
     tiers_mode = StripeEnumField(
-        enum=enums.PlanTiersMode,
+        enum=enums.PriceTiersMode,
         null=True,
         blank=True,
         help_text=(
@@ -1105,8 +1106,8 @@ class Plan(StripeModel):
         ),
     )
     usage_type = StripeEnumField(
-        enum=enums.PlanUsageType,
-        default=enums.PlanUsageType.licensed,
+        enum=enums.PriceUsageType,
+        default=enums.PriceUsageType.licensed,
         help_text=(
             "Configures how the quantity per period should be determined, "
             "can be either `metered` or `licensed`. `licensed` will automatically "
@@ -1193,138 +1194,6 @@ class Plan(StripeModel):
         return format_lazy(
             template, amount=amount, interval=interval, interval_count=interval_count
         )
-
-
-class Price(StripeModel):
-    """
-    Prices define the unit cost, currency, and (optional) billing cycle for
-    both recurring and one-time purchases of products.
-
-    Price and Plan objects are the same, but use a different representation.
-    Creating a Price in Stripe also makes a Plan available, and vice versa.
-    Price objects are a more recent API representation, support more features.
-
-    Stripe documentation:
-    - https://stripe.com/docs/api/prices
-    - https://stripe.com/docs/billing/prices-guide
-    """
-
-    stripe_class = stripe.Price
-    stripe_dashboard_item_name = "prices"
-
-    active = models.BooleanField(
-        help_text="Whether the price can be used for new purchases."
-    )
-    currency = StripeCurrencyCodeField()
-    nickname = models.CharField(
-        max_length=250,
-        blank=True,
-        help_text="A brief description of the plan, hidden from customers.",
-    )
-    product = StripeForeignKey(
-        "Product",
-        on_delete=models.CASCADE,
-        related_name="prices",
-        help_text="The product this price is associated with.",
-    )
-    recurring = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "The recurring components of a price such as `interval` and `usage_type`."
-        ),
-    )
-    type = StripeEnumField(
-        enum=enums.PriceType,
-        help_text=(
-            "Whether the price is for a one-time purchase or a recurring "
-            "(subscription) purchase."
-        ),
-    )
-    unit_amount = StripeQuantumCurrencyAmountField(
-        null=True,
-        blank=True,
-        help_text=(
-            "The unit amount in cents to be charged, represented as a whole "
-            "integer if possible. Null if a sub-cent precision is required."
-        ),
-    )
-    unit_amount_decimal = StripeDecimalCurrencyAmountField(
-        null=True,
-        blank=True,
-        max_digits=19,
-        decimal_places=12,
-        help_text=(
-            "The unit amount in cents to be charged, represented as a decimal "
-            "string with at most 12 decimal places."
-        ),
-    )
-
-    # More attributes…
-    aggregate_usage = StripeEnumField(
-        enum=enums.PlanAggregateUsage,
-        blank=True,
-        help_text=(
-            "Specifies a usage aggregation strategy for plans of usage_type=metered. "
-            "Allowed values are `sum` for summing up all usage during a period, "
-            "`last_during_period` for picking the last usage record reported within a "
-            "period, `last_ever` for picking the last usage record ever (across period "
-            "bounds) or max which picks the usage record with the maximum reported "
-            "usage during a period. Defaults to `sum`."
-        ),
-    )
-    billing_scheme = StripeEnumField(
-        enum=enums.BillingScheme,
-        blank=True,
-        help_text=(
-            "Describes how to compute the price per period. "
-            "Either `per_unit` or `tiered`. "
-            "`per_unit` indicates that the fixed amount (specified in amount) "
-            "will be charged per unit in quantity "
-            "(for plans with `usage_type=licensed`), or per unit of total "
-            "usage (for plans with `usage_type=metered`). "
-            "`tiered` indicates that the unit pricing will be computed using "
-            "a tiering strategy as defined using the tiers and tiers_mode attributes."
-        ),
-    )
-    tiers = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Each element represents a pricing tier. "
-            "This parameter requires `billing_scheme` to be set to `tiered`."
-        ),
-    )
-    tiers_mode = StripeEnumField(
-        enum=enums.PlanTiersMode,
-        null=True,
-        blank=True,
-        help_text=(
-            "Defines if the tiering price should be `graduated` or `volume` based. "
-            "In `volume`-based tiering, the maximum quantity within a period "
-            "determines the per unit price, in `graduated` tiering pricing can "
-            "successively change as the quantity grows."
-        ),
-    )
-    transform_usage = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Apply a transformation to the reported usage or set quantity "
-            "before computing the billed price. Cannot be combined with `tiers`."
-        ),
-    )
-    trial_period_days = models.IntegerField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Number of trial period days granted when subscribing a customer "
-            "to this plan. Null if no trial period is present."
-        ),
-    )
-
-    def __str__(self):
-        return self.nickname or self.id
 
 
 class Subscription(StripeModel):
@@ -1462,6 +1331,7 @@ class Subscription(StripeModel):
         "because the customer was switched to a subscription to a new plan), "
         "the date the subscription ended.",
     )
+
     # TODO: latest_invoice (issue #1067)
     next_pending_invoice_item_invoice = StripeDateTimeField(
         null=True,
@@ -1776,11 +1646,20 @@ class SubscriptionItem(StripeModel):
 
     stripe_class = stripe.SubscriptionItem
 
+    # TODO: deprecate plan
     plan = models.ForeignKey(
         "Plan",
         on_delete=models.CASCADE,
         related_name="subscription_items",
         help_text="The plan the customer is subscribed to.",
+    )
+    price = models.ForeignKey(
+        "Price",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="subscription_items",
+        help_text="The price the customer is subscribed to.",
     )
     quantity = models.PositiveIntegerField(
         null=True,

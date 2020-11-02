@@ -10,7 +10,9 @@ from .settings import SUBSCRIPTION_REDIRECT, subscriber_request_callback
 from .utils import subscriber_has_active_subscription
 
 
-def subscriber_passes_pay_test(test_func, plan=None, pay_page=SUBSCRIPTION_REDIRECT):
+def subscriber_passes_pay_test(
+    test_func, price=None, plan=None, pay_page=SUBSCRIPTION_REDIRECT
+):
     """
     Decorator for views that checks the subscriber passes the given test for a
     "Paid Feature".
@@ -22,7 +24,7 @@ def subscriber_passes_pay_test(test_func, plan=None, pay_page=SUBSCRIPTION_REDIR
     def decorator(view_func):
         @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
-            if test_func(subscriber_request_callback(request), plan):
+            if test_func(subscriber_request_callback(request), price, plan):
                 return view_func(request, *args, **kwargs)
 
             if not pay_page:
@@ -36,7 +38,7 @@ def subscriber_passes_pay_test(test_func, plan=None, pay_page=SUBSCRIPTION_REDIR
 
 
 def subscription_payment_required(
-    function=None, plan=None, pay_page=SUBSCRIPTION_REDIRECT
+    function=None, price=None, plan=None, pay_page=SUBSCRIPTION_REDIRECT
 ):
     """
     Decorator for views that require subscription payment.
@@ -44,7 +46,7 @@ def subscription_payment_required(
     Redirects to `pay_page` if necessary.
     """
     actual_decorator = subscriber_passes_pay_test(
-        subscriber_has_active_subscription, plan=plan, pay_page=pay_page
+        subscriber_has_active_subscription, price=price, plan=plan, pay_page=pay_page
     )
     if function:
         return actual_decorator(function)

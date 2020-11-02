@@ -800,6 +800,101 @@ FAKE_PLAN_METERED = {
 }
 
 
+FAKE_PRICE = load_fixture("price_gold21323.json")
+
+# sanity check
+assert FAKE_PRICE["product"] == FAKE_PRODUCT["id"]
+
+
+FAKE_TIER_PRICE = {
+    "active": True,
+    "billing_scheme": "tiered",
+    "created": 1386247539,
+    "currency": "usd",
+    "id": "price_tier21323",
+    "livemode": False,
+    "lookup_key": None,
+    "metadata": {},
+    "nickname": "New price name",
+    "object": "price",
+    "product": FAKE_PRODUCT["id"],
+    "recurring": {
+        "aggregate_usage": None,
+        "interval": "month",
+        "interval_count": 1,
+        "trial_period_days": None,
+        "usage_type": "licensed",
+    },
+    "tiers": [
+        {
+            "flat_amount": 4900,
+            "flat_amount_decimal": "4900",
+            "unit_amount": 1000,
+            "unit_amount_decimal": "1000",
+            "up_to": 5,
+        },
+        {
+            "flat_amount": None,
+            "flat_amount_decimal": None,
+            "unit_amount": 900,
+            "unit_amount_decimal": "900",
+            "up_to": None,
+        },
+    ],
+    "tiers_mode": "graduated",
+    "transform_quantity": None,
+    "type": "recurring",
+    "unit_amount": None,
+    "unit_amount_decimal": None,
+}
+
+FAKE_PRICE_METERED = {
+    "active": True,
+    "billing_scheme": "per_unit",
+    "created": 1552632817,
+    "currency": "usd",
+    "id": "price_fakemetered",
+    "livemode": False,
+    "lookup_key": None,
+    "metadata": {},
+    "nickname": "Sum Metered Price",
+    "object": "price",
+    "product": FAKE_PRODUCT["id"],
+    "recurring": {
+        "aggregate_usage": "sum",
+        "interval": "month",
+        "interval_count": 1,
+        "trial_period_days": None,
+        "usage_type": "metered",
+    },
+    "tiers_mode": None,
+    "transform_quantity": None,
+    "type": "recurring",
+    "unit_amount": 200,
+    "unit_amount_decimal": "200",
+}
+
+FAKE_PRICE_ONETIME = {
+    "active": True,
+    "billing_scheme": "per_unit",
+    "created": 1552632818,
+    "currency": "usd",
+    "id": "price_fakeonetime",
+    "livemode": False,
+    "lookup_key": None,
+    "metadata": {},
+    "nickname": "One-Time Price",
+    "object": "price",
+    "product": FAKE_PRODUCT["id"],
+    "recurring": None,
+    "tiers_mode": None,
+    "transform_quantity": None,
+    "type": "one_time",
+    "unit_amount": 2000,
+    "unit_amount_decimal": "2000",
+}
+
+
 class SubscriptionDict(StripeItem):
     def __init__(self, *args, **kwargs):
         """Match Stripe's behavior: return a stripe iterable on `subscription.items`."""
