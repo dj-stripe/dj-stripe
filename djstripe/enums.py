@@ -514,12 +514,7 @@ class PlanInterval(Enum):
     year = _("Year")
 
 
-class PlanUsageType(Enum):
-    metered = _("Metered")
-    licensed = _("Licensed")
-
-
-class PlanTiersMode(Enum):
+class PriceTiersMode(Enum):
     graduated = _("Graduated")
     volume = _("Volume-based")
 
@@ -527,6 +522,16 @@ class PlanTiersMode(Enum):
 class PriceType(Enum):
     one_time = _("One-time")
     recurring = _("Recurring")
+
+
+class PriceUsageType(Enum):
+    metered = _("Metered")
+    licensed = _("Licensed")
+
+
+# Legacy
+PlanTiersMode = PriceTiersMode
+PlanUsageType = PriceUsageType
 
 
 class ProductType(Enum):

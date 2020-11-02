@@ -380,7 +380,7 @@ class PlanAdmin(StripeModelAdmin):
 @admin.register(models.Price)
 class PriceAdmin(StripeModelAdmin):
     list_display = ("product", "currency", "active")
-    list_filter = ("active", "type", "aggregate_usage", "billing_scheme", "tiers_mode")
+    list_filter = ("active", "type", "billing_scheme", "tiers_mode")
     raw_id_fields = ("product",)
     search_fields = ("nickname",)
     radio_fields = {"type": admin.HORIZONTAL}

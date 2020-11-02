@@ -159,6 +159,7 @@ def payment_method_handler(event):
     "invoiceitem",
     "payment_intent",
     "plan",
+    "price",
     "product",
     "setup_intent",
     "source",
@@ -177,6 +178,7 @@ def other_object_webhook_handler(event):
     - invoiceitem: https://stripe.com/docs/api/invoiceitems
     - payment_intent: https://stripe.com/docs/api/payment_intents
     - plan: https://stripe.com/docs/api/plans
+    - price: https://stripe.com/docs/api/prices
     - product: https://stripe.com/docs/api/products
     - setup_intent: https://stripe.com/docs/api/setup_intents
     - source: https://stripe.com/docs/api/sources
@@ -196,6 +198,7 @@ def other_object_webhook_handler(event):
             "invoiceitem": models.InvoiceItem,
             "payment_intent": models.PaymentIntent,
             "plan": models.Plan,
+            "price": models.Price,
             "product": models.Product,
             "transfer": models.Transfer,
             "setup_intent": models.SetupIntent,

@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from django.test import TestCase
 
-from djstripe.enums import PlanUsageType
+from djstripe.enums import PriceUsageType
 from djstripe.models import Plan, Product
 from djstripe.settings import STRIPE_SECRET_KEY
 
@@ -168,7 +168,7 @@ class PlanTest(AssertStripeFksMixin, TestCase):
         plan_data = deepcopy(FAKE_PLAN_METERED)
         plan = Plan.sync_from_stripe_data(plan_data)
         self.assertEqual(plan.id, plan_data["id"])
-        self.assertEqual(plan.usage_type, PlanUsageType.metered)
+        self.assertEqual(plan.usage_type, PriceUsageType.metered)
         self.assertIsNotNone(plan.amount)
 
         self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
