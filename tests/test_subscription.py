@@ -671,6 +671,93 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     @patch(
+        "stripe.Subscription.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_MULTI_PLAN),
+    )
+    def test_update_multi_plan(
+        self,
+        subscription_retrieve_mock,
+        customer_retrieve_mock,
+        product_retrieve_mock,
+        plan_retrieve_mock,
+    ):
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION_MULTI_PLAN)
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
+
+        self.assertIsNone(subscription.plan)
+        self.assertIsNone(subscription.quantity)
+
+        items = subscription.items.all()
+        self.assertEqual(2, len(items))
+
+        # Simulate a webhook received with one plan that has been removed
+        del subscription_fake["items"]["data"][1]
+        subscription_fake["items"]["total_count"] = 1
+
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
+        items = subscription.items.all()
+        self.assertEqual(1, len(items))
+
+        self.assert_fks(
+            subscription,
+            expected_blank_fks=self.default_expected_blank_fks
+            | {"djstripe.Customer.subscriber", "djstripe.Subscription.plan"},
+        )
+
+    @patch("stripe.Plan.retrieve", autospec=True)
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER_II),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Subscription.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_MULTI_PLAN),
+    )
+    def test_remove_all_multi_plan(
+        self,
+        subscription_retrieve_mock,
+        customer_retrieve_mock,
+        product_retrieve_mock,
+        plan_retrieve_mock,
+    ):
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION_MULTI_PLAN)
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
+
+        self.assertIsNone(subscription.plan)
+        self.assertIsNone(subscription.quantity)
+
+        items = subscription.items.all()
+        self.assertEqual(2, len(items))
+
+        # Simulate a webhook received with no more plan
+        del subscription_fake["items"]["data"][1]
+        del subscription_fake["items"]["data"][0]
+        subscription_fake["items"]["total_count"] = 0
+
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
+        items = subscription.items.all()
+        self.assertEqual(0, len(items))
+
+        self.assert_fks(
+            subscription,
+            expected_blank_fks=self.default_expected_blank_fks
+            | {"djstripe.Customer.subscriber", "djstripe.Subscription.plan"},
+        )
+
+    @patch("stripe.Plan.retrieve", autospec=True)
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER_II),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve", return_value=deepcopy(FAKE_SUBSCRIPTION_METERED)
     )
     def test_sync_metered_plan(
