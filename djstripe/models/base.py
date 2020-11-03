@@ -787,14 +787,18 @@ class StripeModel(models.Model):
 
         items = data.get("items")
         if not items:
+            subscription.items.delete()
             return []
 
+        pks = []
         subscriptionitems = []
         for item_data in items.auto_paging_iter():
             item, _ = target_cls._get_or_create_from_stripe_object(
                 item_data, refetch=False
             )
+            pks.append(item.pk)
             subscriptionitems.append(item)
+        subscription.items.exclude(pk__in=pks).delete()
 
         return subscriptionitems
 
