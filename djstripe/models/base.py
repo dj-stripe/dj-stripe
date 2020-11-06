@@ -560,11 +560,10 @@ class StripeModel(models.Model):
             # no way of knowing what needs to be fetched!
             logger.warning(
                 "empty field %s.%s = %r - this is a bug, "
-                "please report it to dj-stripe! data = %r",
+                "please report it to dj-stripe!",
                 cls.__name__,
                 field_name,
                 field,
-                data,
             )
             return None, False
         elif id_ == field:
