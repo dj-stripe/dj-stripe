@@ -549,7 +549,7 @@ class BaseInvoice(StripeModel):
         subscription_proration_date=None,
         subscription_quantity=None,
         subscription_trial_end=None,
-        **kwargs
+        **kwargs,
     ) -> Optional["UpcomingInvoice"]:
         """
         Gets the upcoming preview invoice (singular) for a customer.
@@ -616,7 +616,7 @@ class BaseInvoice(StripeModel):
                 subscription_proration_date=subscription_proration_date,
                 subscription_quantity=subscription_quantity,
                 subscription_trial_end=subscription_trial_end,
-                **kwargs
+                **kwargs,
             )
         except InvalidRequestError as exc:
             if str(exc) != "Nothing to invoice for customer":
@@ -1851,6 +1851,9 @@ class TaxRate(StripeModel):
     percentage = StripePercentField(
         help_text="This represents the tax rate percent out of 100."
     )
+
+    def __str__(self):
+        return f"{self.display_name} – {self.jurisdiction} at {self.percentage}%"
 
 
 class UsageRecord(StripeModel):
