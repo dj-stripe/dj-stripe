@@ -123,6 +123,16 @@ def customer_subscription_webhook_handler(event):
     )
 
 
+@webhooks.handler("customer.tax_id")
+def customer_tax_id_webhook_handler(event):
+    """
+    Handle updates to customer tax ID objects.
+    """
+    _handle_crud_like_event(
+        target_cls=models.TaxId, event=event, crud_type=CrudType.determine(event=event)
+    )
+
+
 @webhooks.handler("payment_method")
 def payment_method_handler(event):
     """

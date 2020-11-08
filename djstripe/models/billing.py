@@ -1696,6 +1696,48 @@ class SubscriptionItem(StripeModel):
         )
 
 
+class TaxId(StripeModel):
+    stripe_class = stripe.TaxId
+    description = None
+    metadata = None
+
+    country = models.CharField(
+        max_length=2,
+        help_text="Two-letter ISO code representing the country of the tax ID.",
+    )
+    customer = StripeForeignKey(
+        "djstripe.customer", on_delete=models.CASCADE, related_name="tax_ids"
+    )
+    type = StripeEnumField(
+        enum=enums.TaxIdType, help_text="The status of this subscription."
+    )
+    value = models.CharField(max_length=50, help_text="Value of the tax ID.")
+    verification = JSONField(help_text="Tax ID verification information.")
+
+    def __str__(self):
+        return self.value
+
+    class Meta:
+        verbose_name = "Tax ID"
+        verbose_name_plural = "Tax IDs"
+
+    def api_retrieve(self, api_key=None, stripe_account=None):
+        if not stripe_account:
+            stripe_account = self._get_stripe_account_id(api_key)
+
+        customer = self.customer.api_retrieve(
+            api_key=api_key or self.default_api_key,
+            stripe_account=stripe_account,
+        )
+        return customer.retrieve_tax_id(
+            customer.id,
+            self.id,
+            api_key=api_key or self.default_api_key,
+            expand=self.expand_fields,
+            stripe_account=stripe_account,
+        )
+
+
 class TaxRate(StripeModel):
     """
     Tax rates can be applied to invoices and subscriptions to collect tax.

@@ -670,6 +670,42 @@ class SubscriptionStatus(Enum):
     unpaid = _("Unpaid")
 
 
+class TaxIdType(Enum):
+    ae_trn = _("AE TRN")
+    au_abn = _("AU ABN")
+    br_cnp = _("BR CNP")
+    br_cpf = _("BR CPF")
+    ca_bn = _("CA BN")
+    ca_qst = _("CA QST")
+    ch_vat = _("CH VAT")
+    cl_tin = _("CL TIN")
+    es_cif = _("ES CIF")
+    eu_vat = _("EU VAT")
+    hk_br = _("HK BR")
+    id_npw = _("ID NPW")
+    in_gst = _("IN GST")
+    jp_cn = _("JP CN")
+    jp_rn = _("JP RN")
+    kr_brn = _("KR BRN")
+    li_uid = _("LI UID")
+    mx_rfc = _("MX RFC")
+    my_frp = _("MY FRP")
+    my_itn = _("MY ITN")
+    my_sst = _("MY SST")
+    no_vat = _("NO VAT")
+    nz_gst = _("NZ GST")
+    ru_inn = _("RU INN")
+    ru_kpp = _("RU KPP")
+    sa_vat = _("SA VAT")
+    sg_gst = _("SG GST")
+    sg_uen = _("SG UEN")
+    th_vat = _("TH VAT")
+    tw_vat = _("TW VAT")
+    us_ein = _("US EIN")
+    za_vat = _("ZA VAT")
+    unknown = _("Unknown")
+
+
 class DjstripePaymentMethodType(Enum):
     """
     A djstripe-specific enum for the DjStripePaymentMethod model.
