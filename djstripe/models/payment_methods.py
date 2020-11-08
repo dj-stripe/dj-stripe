@@ -182,7 +182,6 @@ class BankAccount(LegacySourceMixin, StripeModel):
     )
     account_holder_name = models.TextField(
         max_length=5000,
-        default="",
         blank=True,
         help_text="The name of the person or business that owns the bank account.",
     )
