@@ -186,6 +186,23 @@ class SubscriptionInline(admin.StackedInline):
     show_change_link = True
 
 
+class TaxIdInline(admin.TabularInline):
+    """A TabularInline for use models.Subscription."""
+
+    model = models.TaxId
+    extra = 0
+    max_num = 5
+    readonly_fields = (
+        "id",
+        "created",
+        "verification",
+        "livemode",
+        "country",
+        "djstripe_owner_account",
+    )
+    show_change_link = True
+
+
 class SubscriptionItemInline(admin.StackedInline):
     """A TabularInline for use models.Subscription."""
 
@@ -283,7 +300,7 @@ class CustomerAdmin(StripeModelAdmin):
     list_select_related = ("subscriber", "default_source", "coupon")
     list_filter = (CustomerHasSourceListFilter, CustomerSubscriptionStatusListFilter)
     search_fields = ("email", "description")
-    inlines = (SubscriptionInline,)
+    inlines = (SubscriptionInline, TaxIdInline)
 
 
 @admin.register(models.Dispute)
