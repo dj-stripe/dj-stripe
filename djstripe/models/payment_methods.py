@@ -227,6 +227,13 @@ class BankAccount(LegacySourceMixin, StripeModel):
     )
     status = StripeEnumField(enum=enums.BankAccountStatus)
 
+    def api_retrieve(self, **kwargs):
+        if not self.customer:
+            raise NotImplementedError(
+                "Cannot retrieve bank accounts not associated with a customer"
+            )
+        return super().api_retrieve(**kwargs)
+
 
 class Card(LegacySourceMixin, StripeModel):
     """
