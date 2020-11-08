@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 
 import stripe
 from django.db import models, transaction
@@ -80,6 +80,8 @@ class LegacySourceMixin:
     Mixin for functionality shared between the legacy Card & BankAccount sources
     """
 
+    customer: Optional[StripeForeignKey]
+
     @classmethod
     def _get_customer_from_kwargs(cls, **kwargs):
         if "customer" not in kwargs or not isinstance(kwargs["customer"], Customer):
@@ -121,8 +123,11 @@ class LegacySourceMixin:
             .auto_paging_iter()
         )
 
-    def get_stripe_dashboard_url(self):
-        return self.customer.get_stripe_dashboard_url()
+    def get_stripe_dashboard_url(self) -> str:
+        if self.customer:
+            return self.customer.get_stripe_dashboard_url()
+        else:
+            return ""
 
     def remove(self):
         """
