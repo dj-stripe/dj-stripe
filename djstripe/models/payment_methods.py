@@ -166,7 +166,7 @@ class LegacySourceMixin:
         if "sources" not in customer:
             # We fake a native stripe InvalidRequestError so that it's caught
             # like an invalid ID error.
-            raise InvalidRequestError("No such source: %s" % (self.id), "id")
+            raise InvalidRequestError(f"No such source: {self.id!r}", "id")
 
         # This will retrieve the source using the account ID where the customer resides,
         # so we don't have to pass `stripe_account`.
@@ -348,7 +348,7 @@ class Card(LegacySourceMixin, StripeModel):
         exp_year: int,
         cvc: str,
         api_key: str = djstripe_settings.STRIPE_SECRET_KEY,
-        **kwargs
+        **kwargs,
     ) -> stripe.Token:
         """
         Creates a single use token that wraps the details of a credit card.
