@@ -20,6 +20,7 @@ nav:
   - Home: index.md
   - Getting Started:
     - Installation: installation.md
+    - A note on Stripe API keys: api_keys.md
     - A note on Stripe API Versions: api_versions.md
     - A note on Stripe Stripe Elements JS methods: stripe_elements_js.md
   - Usage:

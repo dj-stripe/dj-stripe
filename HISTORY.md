@@ -2,10 +2,58 @@
 
 ## 2.4.0 (unreleased)
 
+!!! warning
+
+    This release fixes rolling back migrations. In order to migrate to
+    dj-stripe 2.4.0, you will have to be in an already-migrated 2.2+
+    installation of dj-stripe.
+
+-   Support Django 3.1.
+
+-   First-class support for the Price model, replacing Plans.
+
+-   Support multi-item subscriptions.
+
+-   Support for API keys in the database.
+    Check [API keys](https://dj-stripe.readthedocs.io/en/latest/api_keys.html).
+
+-   Support for multiple Stripe accounts.
+
+-   Add DJSTRIPE_USE_NATIVE_JSONFIELD setting to use Django 3.1 native
+    JSONField over django-jsonfield.
+
+-   Add support for Reporting categories, TaxIds and the following fields:
+    -   `BalanceTransaction.source`
+    -   `Subscription.cancel_at`
+    -   `InvoiceItem.unit_amount`
+    -   `InvoiceItem.unit_amount_decimal`
+    -   `alipay_account` in `DjstripePaymentMethodType`
+    and updated the following models:
+    -   `FileUploadPurpose`
+    -   `SourceTypes`
+
 -   Made `Account.payouts_enabled` nullable (\#1107).
+
+-   Add an owner account to every StripeModel.
+
+-   Rename PlanBillingScheme to BillingScheme.
+
+-   Remove `Plan.update_name()` and these previously-deprecated fields:
+    - `Customer.business_vat_id`
+    - `Subscription.start`
+    - `Subscription.billing`
+
+-   Increase minimum stripe-python version to 2.48.0.
+
+-   Upgrade default Stripe API version to 2020-03-02.
+
 -   Increased max_length of `DjstripePaymentMethod.type`, as first step
     towards support of <span class="title-ref">alipay_account</span>
     (\#1120).
+
+-   Fixed Account.get_default_account() for Restricted API Keys.
+
+-   Fixed Account logo sync failure on test mode (\#830).
 
 ## 2.3.0 (2020-04-19)
 
