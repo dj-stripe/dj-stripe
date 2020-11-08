@@ -537,14 +537,6 @@ class Customer(StripeModel):
             "recurring billing purposes (i.e., subscriptions, invoices, invoice items)."
         ),
     )
-    # TODO - remove, was deprecated in https://stripe.com/docs/upgrades#2018-08-23
-    #  (to tax_info, which was itself moved to CustomerTaxId)
-    business_vat_id = models.CharField(
-        max_length=20,
-        default="",
-        blank=True,
-        help_text="The customer's VAT identification number.",
-    )
     currency = StripeCurrencyCodeField(
         default="",
         help_text="The currency the customer can be charged in for "
@@ -1348,6 +1340,16 @@ class Customer(StripeModel):
             customer=self.id, status="all", **kwargs
         ):
             Subscription.sync_from_stripe_data(stripe_subscription)
+
+    @property
+    def business_vat_id(self) -> str:
+        warnings.warn(
+            "Customer.business_vat_id is deprecated and will be removed in 2.5.0."
+            "Use TaxId model instead.",
+            DeprecationWarning,
+        )
+
+        return ""
 
 
 class Dispute(StripeModel):

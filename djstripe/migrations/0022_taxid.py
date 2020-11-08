@@ -95,4 +95,8 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "Tax IDs",
             },
         ),
+        migrations.RemoveField(
+            model_name="customer",
+            name="business_vat_id",
+        ),
     ]
