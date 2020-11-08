@@ -670,6 +670,7 @@ class DjstripePaymentMethodType(Enum):
     A djstripe-specific enum for the DjStripePaymentMethod model.
     """
 
+    alipay_account = _("Alipay account")
     card = _("Card")
     bank_account = _("Bank account")
     source = _("Source")
