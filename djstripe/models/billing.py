@@ -943,6 +943,20 @@ class InvoiceItem(StripeModel):
         "the default_tax_rates on the invoice do not apply to this "
         "invoice item.",
     )
+    unit_amount = StripeQuantumCurrencyAmountField(
+        null=True,
+        blank=True,
+        help_text="Unit amount (in the `currency` specified) of the invoice item.",
+    )
+    unit_amount_decimal = StripeDecimalCurrencyAmountField(
+        null=True,
+        blank=True,
+        max_digits=19,
+        decimal_places=12,
+        help_text=(
+            "Same as `unit_amount`, but contains a decimal value with at most 12 decimal places."
+        ),
+    )
 
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
