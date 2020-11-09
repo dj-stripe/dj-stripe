@@ -59,35 +59,6 @@ class SubscriptionManager(models.Manager):
             .annotate(count=models.Count("plan"))
         )
 
-    def started_price_summary_for(self, year, month):
-        """Return started_during Subscriptions with price counts annotated."""
-        return (
-            self.started_during(year, month)
-            .values("price")
-            .order_by()
-            .annotate(count=models.Count("price"))
-        )
-
-    def active_price_summary(self):
-        """Return active Subscriptions with price counts annotated."""
-        return (
-            self.active()
-            .values("price")
-            .order_by()
-            .annotate(count=models.Count("price"))
-        )
-
-    def canceled_price_summary_for(self, year, month):
-        """
-        Return Subscriptions canceled within a time range with price counts annotated.
-        """
-        return (
-            self.canceled_during(year, month)
-            .values("price")
-            .order_by()
-            .annotate(count=models.Count("price"))
-        )
-
     def churn(self):
         """Return number of canceled Subscriptions divided by active Subscriptions."""
         canceled = self.canceled().count()
