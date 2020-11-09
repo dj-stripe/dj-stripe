@@ -1874,6 +1874,7 @@ class Migration(migrations.Migration):
                         decimal_places=2,
                         help_text="Amount (as decimal) to be charged on the interval specified.",
                         max_digits=8,
+                        null=True,
                     ),
                 ),
                 (
