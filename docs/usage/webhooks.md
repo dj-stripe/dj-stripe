@@ -44,7 +44,7 @@ You can also handle different events in the same handler:
 ```py
 from djstripe import webhooks
 
-@webhooks.handler("plan", "product")
+@webhooks.handler("price", "product")
 def my_handler(event, **kwargs):
     print("Triggered webhook " + event.type)
 ```
@@ -69,7 +69,7 @@ from djstripe import webhooks
 def do_something():
     pass  # send a mail, invalidate a cache, fire off a Celery task, etc.
 
-@webhooks.handler("plan", "product")
+@webhooks.handler("price", "product")
 def my_handler(event, **kwargs):
     transaction.on_commit(do_something)
 ```

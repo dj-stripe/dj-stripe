@@ -1,13 +1,18 @@
-# Subscribing a customer to a plan
+# Subscribing a customer to a price (or plan)
 
 For your convenience, dj-stripe provides a
 `djstripe.models.Customer.subscribe` method that will try to charge the
 customer immediately unless you specify `charge_immediately=False`
 
 ```py
+price = Price.objects.get(nickname="one_price")
+customer = Customer.objects.first()
+customer.subscribe(price=price)
+
+# If you still use legacy Plans...
 plan = Plan.objects.get(nickname="one_plan")
 customer = Customer.objects.first()
-customer.subscribe(plan)
+customer.subscribe(plan=plan)
 ```
 
 However in some cases `djstripe.models.Customer.subscribe` might not
