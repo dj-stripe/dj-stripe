@@ -954,7 +954,8 @@ class InvoiceItem(StripeModel):
         max_digits=19,
         decimal_places=12,
         help_text=(
-            "Same as `unit_amount`, but contains a decimal value with at most 12 decimal places."
+            "Same as `unit_amount`, but contains a decimal value with "
+            "at most 12 decimal places."
         ),
     )
 
