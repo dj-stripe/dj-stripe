@@ -501,6 +501,9 @@ FAKE_SOURCE_II = SourceDict(
 
 FAKE_PAYMENT_INTENT_I = load_fixture("payment_intent_pi_fakefakefakefakefake0001.json")
 
+FAKE_PAYMENT_INTENT_II = deepcopy(FAKE_PAYMENT_INTENT_I)
+FAKE_PAYMENT_INTENT_II["customer"] = "cus_4UbFSo9tl62jqj"  # FAKE_CUSTOMER_II
+
 
 class PaymentMethodDict(dict):
     def detach(self):
@@ -511,6 +514,9 @@ class PaymentMethodDict(dict):
 FAKE_PAYMENT_METHOD_I = PaymentMethodDict(
     load_fixture("payment_method_pm_fakefakefakefake0001.json")
 )
+
+FAKE_PAYMENT_METHOD_II = deepcopy(FAKE_PAYMENT_METHOD_I)
+FAKE_PAYMENT_METHOD_II["customer"] = "cus_4UbFSo9tl62jqj"  # FAKE_CUSTOMER_II
 
 # FAKE_CARD, but accessed as a PaymentMethod
 FAKE_CARD_AS_PAYMENT_METHOD = PaymentMethodDict(
@@ -587,9 +593,25 @@ FAKE_CHARGE_II = ChargeDict(
         "id": "ch_16ag432eZvKYlo2CGDe6lvVs",
         "object": "charge",
         "amount": 3000,
+        "amount_captured": 0,
         "amount_refunded": 0,
         "application_fee": None,
+        "application_fee_amount": None,
         "balance_transaction": FAKE_BALANCE_TRANSACTION["id"],
+        "billing_details": {
+            "address": {
+                "city": None,
+                "country": "US",
+                "line1": None,
+                "line2": None,
+                "postal_code": "92082",
+                "state": None,
+            },
+            "email": "kyoung@hotmail.com",
+            "name": "John Foo",
+            "phone": None,
+        },
+        "calculated_statement_descriptor": "Stripe",
         "captured": False,
         "created": 1439788903,
         "currency": "usd",
@@ -597,23 +619,50 @@ FAKE_CHARGE_II = ChargeDict(
         "description": None,
         "destination": None,
         "dispute": None,
+        "disputed": False,
         "failure_code": "expired_card",
         "failure_message": "Your card has expired.",
         "fraud_details": {},
         "invoice": "in_16af5A2eZvKYlo2CJjANLL81",
         "livemode": False,
         "metadata": {},
+        "on_behalf_of": None,
         "order": None,
         "outcome": {
             "network_status": "declined_by_network",
             "reason": "expired_card",
             "risk_level": "normal",
+            "risk_score": 1,
             "seller_message": "The bank returned the decline code `expired_card`.",
             "type": "issuer_declined",
         },
         "paid": False,
+        "payment_intent": FAKE_PAYMENT_INTENT_II["id"],
+        "payment_method": FAKE_CARD_AS_PAYMENT_METHOD["id"],
+        "payment_method_details": {
+            "card": {
+                "brand": "visa",
+                "checks": {
+                    "address_line1_check": None,
+                    "address_postal_code_check": None,
+                    "cvc_check": None,
+                },
+                "country": "US",
+                "exp_month": 6,
+                "exp_year": 2021,
+                "fingerprint": "88PuXw9tEmvYe69o",
+                "funding": "credit",
+                "installments": None,
+                "last4": "4242",
+                "network": "visa",
+                "three_d_secure": None,
+                "wallet": None,
+            },
+            "type": "card",
+        },
         "receipt_email": None,
         "receipt_number": None,
+        "receipt_url": None,
         "refunded": False,
         "refunds": {
             "object": "list",
@@ -622,11 +671,15 @@ FAKE_CHARGE_II = ChargeDict(
             "url": "/v1/charges/ch_16ag432eZvKYlo2CGDe6lvVs/refunds",
             "data": [],
         },
+        "review": None,
         "shipping": None,
         "source": deepcopy(FAKE_CARD_II),
         "source_transfer": None,
         "statement_descriptor": None,
+        "statement_descriptor_suffix": None,
         "status": "failed",
+        "transfer_data": None,
+        "transfer_group": None,
     }
 )
 
@@ -808,7 +861,7 @@ for price in (FAKE_PRICE, FAKE_PRICE_II):
     assert price["product"] == FAKE_PRODUCT["id"]
 
 
-FAKE_TIER_PRICE = {
+FAKE_PRICE_TIER = {
     "active": True,
     "billing_scheme": "tiered",
     "created": 1386247539,
@@ -907,8 +960,17 @@ class SubscriptionDict(StripeItem):
         if type(value) == datetime:
             value = datetime_to_unix(value)
 
-        # Special case for plan
-        if name == "plan":
+        # Special case for price and plan
+        if name == "price":
+            for price in [
+                FAKE_PRICE,
+                FAKE_PRICE_II,
+                FAKE_PRICE_TIER,
+                FAKE_PRICE_METERED,
+            ]:
+                if value == price["id"]:
+                    value = price
+        elif name == "plan":
             for plan in [FAKE_PLAN, FAKE_PLAN_II, FAKE_TIER_PLAN, FAKE_PLAN_METERED]:
                 if value == plan["id"]:
                     value = plan
@@ -1326,14 +1388,20 @@ FAKE_INVOICEITEM = {
     "date": 1439033216,
     "description": "One-time setup fee",
     "discountable": True,
+    "discounts": [],
     "invoice": FAKE_INVOICE_II["id"],
     "livemode": False,
     "metadata": {"key1": "value1", "key2": "value2"},
     "period": {"start": 1439033216, "end": 1439033216},
     "plan": None,
+    "price": None,
     "proration": False,
     "quantity": None,
     "subscription": None,
+    "subscription_item": None,
+    "tax_rates": [],
+    "unit_amount": 2000,
+    "unit_amount_decimal": "2000",
 }
 
 FAKE_INVOICEITEM_II = {
@@ -1345,14 +1413,20 @@ FAKE_INVOICEITEM_II = {
     "date": 1439033216,
     "description": "One-time setup fee",
     "discountable": True,
+    "discounts": [],
     "invoice": FAKE_INVOICE["id"],
     "livemode": False,
     "metadata": {"key1": "value1", "key2": "value2"},
     "period": {"start": 1439033216, "end": 1439033216},
     "plan": None,
+    "price": None,
     "proration": False,
     "quantity": None,
     "subscription": None,
+    "subscription_item": None,
+    "tax_rates": [],
+    "unit_amount": 2000,
+    "unit_amount_decimal": "2000",
 }
 
 # Invoice item with tax_rates
@@ -1366,15 +1440,20 @@ FAKE_INVOICEITEM_III = {
     "date": 1439033216,
     "description": "One-time setup fee",
     "discountable": True,
+    "discounts": [],
     "invoice": FAKE_INVOICE_II["id"],
     "livemode": False,
     "metadata": {"key1": "value1", "key2": "value2"},
     "period": {"start": 1439033216, "end": 1439033216},
     "plan": None,
+    "price": None,
     "proration": False,
     "quantity": None,
     "subscription": None,
+    "subscription_item": None,
     "tax_rates": [FAKE_TAX_RATE_EXAMPLE_1_VAT],
+    "unit_amount": 2000,
+    "unit_amount_decimal": "2000",
 }
 
 
@@ -1807,6 +1886,38 @@ FAKE_EVENT_PLAN_CREATED = {
 FAKE_EVENT_PLAN_DELETED = deepcopy(FAKE_EVENT_PLAN_CREATED)
 FAKE_EVENT_PLAN_DELETED.update(
     {"id": "evt_1877X72eZvKYl2jkds32jJFc", "type": "plan.deleted"}
+)
+
+FAKE_EVENT_PRICE_CREATED = {
+    "id": "evt_1HlZWCFz0jfFqjGsXOiPW10r",
+    "object": "event",
+    "api_version": "2020-03-02",
+    "created": 1604925044,
+    "data": {"object": deepcopy(FAKE_PRICE)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": {"id": "req_Nq7dDuP0HRrqcP", "idempotency_key": None},
+    "type": "price.created",
+}
+
+FAKE_EVENT_PRICE_UPDATED = {
+    "id": "evt_1HlZbxFz0jfFqjGsZwiHHf7h",
+    "object": "event",
+    "api_version": "2020-03-02",
+    "created": 1604925401,
+    "data": {
+        "object": FAKE_PRICE,
+        "previous_attributes": {"unit_amount": 2000, "unit_amount_decimal": "2000"},
+    },
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": {"id": "req_78pnxbwPMvOIwe", "idempotency_key": None},
+    "type": "price.updated",
+}
+
+FAKE_EVENT_PRICE_DELETED = deepcopy(FAKE_EVENT_PRICE_CREATED)
+FAKE_EVENT_PRICE_DELETED.update(
+    {"id": "evt_1HlZelFz0jfFqjGs0F4BML2l", "type": "price.deleted"}
 )
 
 FAKE_EVENT_TRANSFER_CREATED = {

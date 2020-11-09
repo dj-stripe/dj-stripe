@@ -31,6 +31,9 @@ from . import (
     datetime_to_unix,
 )
 
+# TODO: test with Prices instead of Plans when creating Subscriptions
+# with Prices is fully supported
+
 
 class SubscriptionTest(AssertStripeFksMixin, TestCase):
     def setUp(self):

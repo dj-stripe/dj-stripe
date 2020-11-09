@@ -15,8 +15,8 @@ from . import (
     FAKE_PRICE,
     FAKE_PRICE_METERED,
     FAKE_PRICE_ONETIME,
+    FAKE_PRICE_TIER,
     FAKE_PRODUCT,
-    FAKE_TIER_PRICE,
     AssertStripeFksMixin,
 )
 
@@ -148,7 +148,7 @@ class PriceTest(AssertStripeFksMixin, TestCase):
 
     @patch("stripe.Price.retrieve", autospec=True)
     def test_stripe_tier_price(self, price_retrieve_mock):
-        price_data = deepcopy(FAKE_TIER_PRICE)
+        price_data = deepcopy(FAKE_PRICE_TIER)
         price = Price.sync_from_stripe_data(price_data)
         assert price.id == price_data["id"]
         assert price.unit_amount is None

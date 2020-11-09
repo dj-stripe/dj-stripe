@@ -2,6 +2,7 @@
     "id": "ch_fakefakefakefakefake0001",
     "object": "charge",
     "amount": 2000,
+    "amount_captured": 0,
     "amount_refunded": 0,
     "application": null,
     "application_fee": null,

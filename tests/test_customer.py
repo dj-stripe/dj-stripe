@@ -23,6 +23,7 @@ from djstripe.models import (
     PaymentMethod,
     Plan,
     Price,
+    Product,
     Subscription,
 )
 from djstripe.settings import STRIPE_SECRET_KEY
@@ -1617,8 +1618,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         with self.assertRaises(TypeError):
             self.customer.has_active_subscription()
 
-    # TODO: test is_subscribed_to()
-
     @patch(
         "djstripe.models.InvoiceItem.sync_from_stripe_data",
         return_value="pancakes",
@@ -1745,6 +1744,54 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.user.delete()
         for customer in self.user.djstripe_customers.all():
             self.assertIsNone(customer.date_purged)
+
+    @patch("stripe.Subscription.create", autospec=True)
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    def test_is_subscribed_to_with_product(
+        self, product_retrieve_mock, customer_retrieve_mock, subscription_create_mock
+    ):
+        price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
+        product = Product.sync_from_stripe_data(deepcopy(FAKE_PRODUCT))
+
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription_fake["current_period_end"] = datetime_to_unix(
+            timezone.now() + timezone.timedelta(days=7)
+        )
+
+        subscription_create_mock.return_value = subscription_fake
+
+        self.customer.subscribe(price=price, charge_immediately=False)
+
+        assert self.customer.is_subscribed_to(product)
+
+    @patch("stripe.Subscription.create", autospec=True)
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    def test_is_subscribed_to_with_product_string(
+        self, product_retrieve_mock, customer_retrieve_mock, subscription_create_mock
+    ):
+        price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
+        product = Product.sync_from_stripe_data(deepcopy(FAKE_PRODUCT))
+
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription_fake["current_period_end"] = datetime_to_unix(
+            timezone.now() + timezone.timedelta(days=7)
+        )
+
+        subscription_create_mock.return_value = subscription_fake
+
+        self.customer.subscribe(price=price, charge_immediately=False)
+
+        assert self.customer.is_subscribed_to(product.id)
 
 
 # These tests use Plan which is deprecated in favor of Price
