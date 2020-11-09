@@ -761,6 +761,11 @@ class Migration(migrations.Migration):
                 "ordering": ["unit_amount"],
             },
         ),
+        # Oddly, this is repeated. Django bug?
+        migrations.AlterModelOptions(
+            name="price",
+            options={"ordering": ["unit_amount"]},
+        ),
         migrations.AddField(
             model_name="subscriptionitem",
             name="price",
