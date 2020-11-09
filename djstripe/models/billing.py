@@ -890,6 +890,7 @@ class InvoiceItem(StripeModel):
         help_text="If True, discounts will apply to this invoice item. "
         "Always False for prorations.",
     )
+    # TODO: discounts
     invoice = StripeForeignKey(
         "Invoice",
         on_delete=models.CASCADE,
@@ -907,9 +908,16 @@ class InvoiceItem(StripeModel):
     plan = models.ForeignKey(
         "Plan",
         null=True,
-        related_name="invoiceitems",
         on_delete=models.SET_NULL,
         help_text="If the invoice item is a proration, the plan of the subscription "
+        "for which the proration was computed.",
+    )
+    price = models.ForeignKey(
+        "Price",
+        null=True,
+        related_name="invoiceitems",
+        on_delete=models.SET_NULL,
+        help_text="If the invoice item is a proration, the price of the subscription "
         "for which the proration was computed.",
     )
     proration = models.BooleanField(
@@ -994,6 +1002,8 @@ class InvoiceItem(StripeModel):
         return super().sync_from_stripe_data(data)
 
     def __str__(self):
+        if self.price and self.price.product:
+            return self.price.product.name or str(self.price)
         if self.plan and self.plan.product:
             return self.plan.product.name or str(self.plan)
         return super().__str__()
