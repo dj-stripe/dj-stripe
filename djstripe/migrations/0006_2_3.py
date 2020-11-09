@@ -10,9 +10,7 @@ import djstripe.fields
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("djstripe", "0005_2_2"),
-    ]
+    dependencies = [("djstripe", "0005_2_2")]
 
     operations = [
         migrations.RemoveField(

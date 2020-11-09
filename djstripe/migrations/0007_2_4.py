@@ -11,9 +11,7 @@ import djstripe.models.api
 
 
 class Migration(migrations.Migration):
-    dependencies = [
-        ("djstripe", "0006_2_3"),
-    ]
+    dependencies = [("djstripe", "0006_2_3")]
 
     operations = [
         migrations.AlterField(
