@@ -142,6 +142,10 @@ class SubscriptionManagerTest(TestCase):
             if plan["plan"] == self.plan2:
                 self.assertEqual(plan["count"], 0)
 
+    # TODO: test started_price_summary_for, active_price_summary,
+    # and canceled_price_summary_for when creating Subscriptions with Prices
+    # is fully supported
+
     def test_churn(self):
         self.assertEqual(
             Subscription.objects.churn(), decimal.Decimal("1") / decimal.Decimal("11")

@@ -16,6 +16,8 @@ from . import (
     FAKE_INVOICE_II,
     FAKE_INVOICEITEM,
     FAKE_INVOICEITEM_III,
+    FAKE_PAYMENT_INTENT_II,
+    FAKE_PAYMENT_METHOD_II,
     FAKE_PLAN_II,
     FAKE_PRICE_II,
     FAKE_PRODUCT,
@@ -36,8 +38,6 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
             "djstripe.Account.branding_icon",
             "djstripe.Charge.dispute",
             "djstripe.Charge.latest_upcominginvoice (related name)",
-            "djstripe.Charge.payment_intent",
-            "djstripe.Charge.payment_method",
             "djstripe.Charge.transfer",
             "djstripe.Customer.coupon",
             "djstripe.Customer.default_payment_method",
@@ -45,6 +45,10 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
             "djstripe.Invoice.default_payment_method",
             "djstripe.Invoice.default_source",
             "djstripe.Invoice.payment_intent",
+            "djstripe.PaymentIntent.invoice (related name)",
+            "djstripe.PaymentIntent.on_behalf_of",
+            "djstripe.PaymentIntent.payment_method",
+            "djstripe.PaymentIntent.upcominginvoice (related name)",
             "djstripe.Subscription.default_payment_method",
             "djstripe.Subscription.default_source",
             "djstripe.Subscription.pending_setup_intent",
@@ -68,6 +72,16 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_METHOD_II),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_INTENT_II),
+        autospec=True,
+    )
+    @patch(
         "stripe.Customer.retrieve",
         return_value=deepcopy(FAKE_CUSTOMER_II),
         autospec=True,
@@ -83,6 +97,8 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         invoice_retrieve_mock,
         charge_retrieve_mock,
         customer_retrieve_mock,
+        paymentintent_retrieve_mock,
+        paymentmethod_retrieve_mock,
         subscription_retrieve_mock,
         product_retrieve_mock,
         balance_transaction_retrieve_mock,
@@ -126,6 +142,16 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_METHOD_II),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_INTENT_II),
+        autospec=True,
+    )
+    @patch(
         "stripe.Customer.retrieve",
         return_value=deepcopy(FAKE_CUSTOMER_II),
         autospec=True,
@@ -141,6 +167,8 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         invoice_retrieve_mock,
         charge_retrieve_mock,
         customer_retrieve_mock,
+        paymentintent_retrieve_mock,
+        paymentmethod_retrieve_mock,
         subscription_retrieve_mock,
         product_retrieve_mock,
         balance_transaction_retrieve_mock,
@@ -189,6 +217,16 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_METHOD_II),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_INTENT_II),
+        autospec=True,
+    )
+    @patch(
         "stripe.Customer.retrieve",
         return_value=deepcopy(FAKE_CUSTOMER_II),
         autospec=True,
@@ -202,6 +240,8 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         invoice_retrieve_mock,
         charge_retrieve_mock,
         customer_retrieve_mock,
+        paymentintent_retrieve_mock,
+        paymentmethod_retrieve_mock,
         subscription_retrieve_mock,
         product_retrieve_mock,
         balance_transaction_retrieve_mock,
@@ -251,6 +291,16 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_METHOD_II),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_INTENT_II),
+        autospec=True,
+    )
+    @patch(
         "stripe.Customer.retrieve",
         return_value=deepcopy(FAKE_CUSTOMER_II),
         autospec=True,
@@ -266,6 +316,8 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         invoice_retrieve_mock,
         charge_retrieve_mock,
         customer_retrieve_mock,
+        paymentintent_retrieve_mock,
+        paymentmethod_retrieve_mock,
         subscription_retrieve_mock,
         product_retrieve_mock,
         plan_retrieve_mock,
@@ -376,11 +428,23 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         "stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE_II), autospec=True
     )
     @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_METHOD_II),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_INTENT_II),
+        autospec=True,
+    )
+    @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE_II), autospec=True
     )
     def test_sync_with_taxes(
         self,
         invoice_retrieve_mock,
+        paymentintent_retrieve_mock,
+        paymentmethod_retrieve_mock,
         charge_retrieve_mock,
         customer_retrieve_mock,
         subscription_retrieve_mock,

@@ -197,8 +197,9 @@ class Command(BaseCommand):
                 tests.FAKE_CARD_V,
             ],
             djstripe.models.Source: [tests.FAKE_SOURCE],
-            djstripe.models.Product: [tests.FAKE_PRODUCT],
             djstripe.models.Plan: [tests.FAKE_PLAN, tests.FAKE_PLAN_II],
+            djstripe.models.Price: [tests.FAKE_PRICE, tests.FAKE_PRICE_II],
+            djstripe.models.Product: [tests.FAKE_PRODUCT],
             djstripe.models.TaxRate: [
                 tests.FAKE_TAX_RATE_EXAMPLE_1_VAT,
                 tests.FAKE_TAX_RATE_EXAMPLE_2_SALES,

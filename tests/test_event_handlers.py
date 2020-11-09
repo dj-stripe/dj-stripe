@@ -1,8 +1,8 @@
 """
 dj-stripe Event Handler tests
 """
-import decimal
 from copy import deepcopy
+from decimal import Decimal
 from unittest.mock import ANY, call, patch
 
 from django.contrib.auth import get_user_model
@@ -22,6 +22,7 @@ from djstripe.models import (
     InvoiceItem,
     PaymentMethod,
     Plan,
+    Price,
     Subscription,
     Transfer,
 )
@@ -62,6 +63,9 @@ from . import (
     FAKE_EVENT_PLAN_CREATED,
     FAKE_EVENT_PLAN_DELETED,
     FAKE_EVENT_PLAN_REQUEST_IS_OBJECT,
+    FAKE_EVENT_PRICE_CREATED,
+    FAKE_EVENT_PRICE_DELETED,
+    FAKE_EVENT_PRICE_UPDATED,
     FAKE_EVENT_TRANSFER_CREATED,
     FAKE_EVENT_TRANSFER_DELETED,
     FAKE_FILEUPLOAD_ICON,
@@ -71,8 +75,11 @@ from . import (
     FAKE_INVOICEITEM,
     FAKE_PAYMENT_INTENT_DESTINATION_CHARGE,
     FAKE_PAYMENT_INTENT_I,
+    FAKE_PAYMENT_INTENT_II,
     FAKE_PAYMENT_METHOD_I,
+    FAKE_PAYMENT_METHOD_II,
     FAKE_PLAN,
+    FAKE_PRICE,
     FAKE_PRODUCT,
     FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_CANCELED,
@@ -172,7 +179,7 @@ class TestChargeEvents(EventTestCase):
         charge = Charge.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(
             charge.amount,
-            fake_stripe_event["data"]["object"]["amount"] / decimal.Decimal("100"),
+            fake_stripe_event["data"]["object"]["amount"] / Decimal("100"),
         )
         self.assertEqual(charge.status, fake_stripe_event["data"]["object"]["status"])
 
@@ -530,7 +537,7 @@ class TestInvoiceEvents(EventTestCase):
         invoice = Invoice.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(
             invoice.amount_due,
-            fake_stripe_event["data"]["object"]["amount_due"] / decimal.Decimal("100"),
+            fake_stripe_event["data"]["object"]["amount_due"] / Decimal("100"),
         )
         self.assertEqual(invoice.paid, fake_stripe_event["data"]["object"]["paid"])
 
@@ -620,6 +627,16 @@ class TestInvoiceItemEvents(EventTestCase):
         "stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE_II), autospec=True
     )
     @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_METHOD_II),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_INTENT_II),
+        autospec=True,
+    )
+    @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE_II), autospec=True
     )
     @patch("stripe.InvoiceItem.retrieve", autospec=True)
@@ -633,6 +650,8 @@ class TestInvoiceItemEvents(EventTestCase):
         event_retrieve_mock,
         invoiceitem_retrieve_mock,
         invoice_retrieve_mock,
+        paymentintent_retrieve_mock,
+        paymentmethod_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
         balance_transaction_retrieve_mock,
@@ -658,7 +677,7 @@ class TestInvoiceItemEvents(EventTestCase):
         )
         self.assertEqual(
             invoiceitem.amount,
-            fake_stripe_event["data"]["object"]["amount"] / decimal.Decimal("100"),
+            fake_stripe_event["data"]["object"]["amount"] / Decimal("100"),
         )
 
     @patch(
@@ -679,6 +698,16 @@ class TestInvoiceItemEvents(EventTestCase):
         "stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE_II), autospec=True
     )
     @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_METHOD_II),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_INTENT_II),
+        autospec=True,
+    )
+    @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE_II), autospec=True
     )
     @patch(
@@ -694,6 +723,8 @@ class TestInvoiceItemEvents(EventTestCase):
         product_retrieve_mock,
         invoiceitem_retrieve_mock,
         invoice_retrieve_mock,
+        paymentintent_retrieve_mock,
+        paymentmethod_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
         balance_transaction_retrieve_mock,
@@ -780,6 +811,70 @@ class TestPlanEvents(EventTestCase):
 
         with self.assertRaises(Plan.DoesNotExist):
             Plan.objects.get(id=FAKE_PLAN["id"])
+
+
+class TestPriceEvents(EventTestCase):
+    @patch("stripe.Price.retrieve", autospec=True)
+    @patch("stripe.Event.retrieve", autospec=True)
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    def test_price_created(
+        self, product_retrieve_mock, event_retrieve_mock, price_retrieve_mock
+    ):
+        fake_stripe_event = deepcopy(FAKE_EVENT_PRICE_CREATED)
+        event_retrieve_mock.return_value = fake_stripe_event
+        price_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        price = Price.objects.get(id=fake_stripe_event["data"]["object"]["id"])
+        self.assertEqual(
+            price.nickname, fake_stripe_event["data"]["object"]["nickname"]
+        )
+
+    @patch("stripe.Price.retrieve", return_value=FAKE_PRICE, autospec=True)
+    @patch(
+        "stripe.Event.retrieve", return_value=FAKE_EVENT_PRICE_UPDATED, autospec=True
+    )
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    def test_price_updated(
+        self, product_retrieve_mock, event_retrieve_mock, price_retrieve_mock
+    ):
+        price_retrieve_mock.return_value = FAKE_EVENT_PRICE_UPDATED["data"]["object"]
+
+        event = Event.sync_from_stripe_data(FAKE_EVENT_PRICE_UPDATED)
+        event.invoke_webhook_handlers()
+
+        price = Price.objects.get(id=FAKE_EVENT_PRICE_UPDATED["data"]["object"]["id"])
+        self.assertEqual(
+            price.unit_amount,
+            FAKE_EVENT_PRICE_UPDATED["data"]["object"]["unit_amount"],
+        )
+        self.assertEqual(
+            price.unit_amount_decimal,
+            Decimal(FAKE_EVENT_PRICE_UPDATED["data"]["object"]["unit_amount_decimal"]),
+        )
+
+    @patch("stripe.Price.retrieve", return_value=FAKE_PRICE, autospec=True)
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    def test_price_deleted(self, product_retrieve_mock, price_retrieve_mock):
+
+        event = self._create_event(FAKE_EVENT_PRICE_CREATED)
+        event.invoke_webhook_handlers()
+
+        Price.objects.get(id=FAKE_PRICE["id"])
+
+        event = self._create_event(FAKE_EVENT_PRICE_DELETED)
+        event.invoke_webhook_handlers()
+
+        with self.assertRaises(Price.DoesNotExist):
+            Price.objects.get(id=FAKE_PRICE["id"])
 
 
 class TestPaymentMethodEvents(AssertStripeFksMixin, EventTestCase):
@@ -910,7 +1005,7 @@ class TestTransferEvents(EventTestCase):
         transfer = Transfer.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(
             transfer.amount,
-            fake_stripe_event["data"]["object"]["amount"] / decimal.Decimal("100"),
+            fake_stripe_event["data"]["object"]["amount"] / Decimal("100"),
         )
 
     @patch("stripe.Transfer.retrieve", return_value=FAKE_TRANSFER, autospec=True)
