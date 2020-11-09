@@ -1431,7 +1431,7 @@ class Event(StripeModel):
         request_obj = data.get("request", None)
         if isinstance(request_obj, dict):
             # Format as of 2017-05-25
-            self.request_id = request_obj.get("request") or ""
+            self.request_id = request_obj.get("id") or ""
             self.idempotency_key = request_obj.get("idempotency_key") or ""
         else:
             # Format before 2017-05-25
