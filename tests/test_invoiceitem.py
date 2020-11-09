@@ -17,6 +17,7 @@ from . import (
     FAKE_INVOICEITEM,
     FAKE_INVOICEITEM_III,
     FAKE_PLAN_II,
+    FAKE_PRICE_II,
     FAKE_PRODUCT,
     FAKE_SUBSCRIPTION_III,
     FAKE_TAX_RATE_EXAMPLE_1_VAT,
@@ -91,6 +92,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 
         invoiceitem_data = deepcopy(FAKE_INVOICEITEM)
         invoiceitem_data["plan"] = FAKE_PLAN_II
+        invoiceitem_data["price"] = FAKE_PRICE_II
         invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
         self.assertEqual(
             invoiceitem.get_stripe_dashboard_url(),
@@ -99,6 +101,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 
         self.assertEqual(str(invoiceitem), FAKE_PRODUCT["name"])
         invoiceitem.plan = None
+        invoiceitem.price = None
         self.assertEqual(
             str(invoiceitem),
             "<amount=20, date=2015-08-08 11:26:56+00:00, "
@@ -150,7 +153,8 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
 
         expected_blank_fks = self.default_expected_blank_fks | {
-            "djstripe.InvoiceItem.plan"
+            "djstripe.InvoiceItem.plan",
+            "djstripe.InvoiceItem.price",
         }
 
         self.assert_fks(invoiceitem, expected_blank_fks=expected_blank_fks)
@@ -216,7 +220,8 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
 
         expected_blank_fks = self.default_expected_blank_fks | {
-            "djstripe.InvoiceItem.plan"
+            "djstripe.InvoiceItem.plan",
+            "djstripe.InvoiceItem.price",
         }
 
         self.assert_fks(invoiceitem, expected_blank_fks=expected_blank_fks)
@@ -235,6 +240,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
         autospec=True,
     )
+    @patch("stripe.Price.retrieve", return_value=deepcopy(FAKE_PRICE_II), autospec=True)
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN_II), autospec=True)
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
@@ -263,16 +269,24 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         subscription_retrieve_mock,
         product_retrieve_mock,
         plan_retrieve_mock,
+        price_retrieve_mock,
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
         default_account_mock.return_value = self.account
 
         invoiceitem_data = deepcopy(FAKE_INVOICEITEM)
-        invoiceitem_data.update({"proration": True, "plan": FAKE_PLAN_II["id"]})
+        invoiceitem_data.update(
+            {
+                "proration": True,
+                "plan": FAKE_PLAN_II["id"],
+                "price": FAKE_PRICE_II["id"],
+            }
+        )
         invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
 
         self.assertEqual(FAKE_PLAN_II["id"], invoiceitem.plan.id)
+        self.assertEqual(FAKE_PRICE_II["id"], invoiceitem.price.id)
 
         self.assert_fks(
             invoiceitem,
@@ -284,6 +298,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         "djstripe.models.Account.get_default_account",
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
+    @patch("stripe.Price.retrieve", return_value=deepcopy(FAKE_PRICE_II), autospec=True)
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN_II), autospec=True)
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
@@ -310,17 +325,24 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         subscription_retrieve_mock,
         product_retrieve_mock,
         plan_retrieve_mock,
+        price_retrieve_mock,
         default_account_mock,
     ):
         default_account_mock.return_value = self.account
 
         invoiceitem_data = deepcopy(FAKE_INVOICEITEM)
         invoiceitem_data.update(
-            {"proration": True, "plan": FAKE_PLAN_II["id"], "invoice": None}
+            {
+                "proration": True,
+                "plan": FAKE_PLAN_II["id"],
+                "price": FAKE_PRICE_II["id"],
+                "invoice": None,
+            }
         )
         invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
 
         self.assertEqual(FAKE_PLAN_II["id"], invoiceitem.plan.id)
+        self.assertEqual(FAKE_PRICE_II["id"], invoiceitem.price.id)
 
         self.assert_fks(
             invoiceitem,
@@ -370,6 +392,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 
         invoiceitem_data = deepcopy(FAKE_INVOICEITEM_III)
         invoiceitem_data["plan"] = FAKE_PLAN_II
+        invoiceitem_data["price"] = FAKE_PRICE_II
         invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
 
         self.assertEqual(invoiceitem.tax_rates.count(), 1)

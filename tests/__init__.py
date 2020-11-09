@@ -801,9 +801,11 @@ FAKE_PLAN_METERED = {
 
 
 FAKE_PRICE = load_fixture("price_gold21323.json")
+FAKE_PRICE_II = load_fixture("price_silver41294.json")
 
-# sanity check
-assert FAKE_PRICE["product"] == FAKE_PRODUCT["id"]
+for price in (FAKE_PRICE, FAKE_PRICE_II):
+    # sanity check
+    assert price["product"] == FAKE_PRODUCT["id"]
 
 
 FAKE_TIER_PRICE = {
