@@ -57,6 +57,12 @@ djstripe.models.Charge
     :docstring:
     :members: api_list api_retrieve get_stripe_dashboard_url sync_from_stripe_data
 
+### Price
+
+::: djstripe.models.Price
+    :docstring:
+    :members: api_list api_retrieve get_stripe_dashboard_url get_or_create amount_in_cents human_readable_price sync_from_stripe_data
+
 ### Product
 
 ::: djstripe.models.Product
