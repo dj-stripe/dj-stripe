@@ -1886,6 +1886,8 @@ class UsageRecord(StripeModel):
     Stripe documentation: https://stripe.com/docs/api#usage_records
     """
 
+    stripe_class = stripe.UsageRecord
+
     quantity = models.PositiveIntegerField(
         help_text=(
             "The quantity of the plan to which the customer should be subscribed."
