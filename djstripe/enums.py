@@ -474,6 +474,12 @@ class PayoutMethod(Enum):
     instant = _("Instant")
 
 
+class PayoutSourceType(Enum):
+    bank_account = _("Bank account")
+    fpx = _("Financial Process Exchange (FPX)")
+    card = _("Card")
+
+
 class PayoutStatus(Enum):
     paid = _("Paid")
     pending = _("Pending")

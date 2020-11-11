@@ -1859,6 +1859,12 @@ class Payout(StripeModel):
             "This factors in delays like weekends or bank holidays."
         )
     )
+    automatic = models.BooleanField(
+        help_text=(
+            "`true` if the payout was created by an automated payout schedule, "
+            "and `false` if it was requested manually."
+        )
+    )
     balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
@@ -1878,6 +1884,7 @@ class Payout(StripeModel):
         on_delete=models.SET_NULL,
         related_name="failure_payouts",
         null=True,
+        blank=True,
         help_text=(
             "If the payout failed or was canceled, this will be the balance "
             "transaction that reversed the initial balance transaction, and "
@@ -1888,14 +1895,18 @@ class Payout(StripeModel):
         enum=enums.PayoutFailureCode,
         default="",
         blank=True,
-        help_text="Error code explaining reason for transfer failure if available. "
-        "See https://stripe.com/docs/api/python#transfer_failures.",
+        help_text=(
+            "Error code explaining reason for transfer failure if available. "
+            "See https://stripe.com/docs/api/python#transfer_failures."
+        ),
     )
     failure_message = models.TextField(
         default="",
         blank=True,
-        help_text="Message to user further explaining reason for "
-        "payout failure if available.",
+        help_text=(
+            "Message to user further explaining reason for "
+            "payout failure if available."
+        ),
     )
     method = StripeEnumField(
         max_length=8,
@@ -1905,7 +1916,18 @@ class Payout(StripeModel):
             "`instant` is only supported for payouts to debit cards."
         ),
     )
-    # TODO: source_type
+    # TODO: `original_payout` impl as OneToOne, with `reversed_by` reverse relation
+    # original_payout = StripeForeignKey(
+    #     "Payout",
+    #     on_delete=models.SET_NULL,
+    #     null=True,
+    #     blank=True,
+    #     help_text="If the payout reverses another, this is the original payout.",
+    # )
+    source_type = StripeEnumField(
+        enum=enums.PayoutSourceType,
+        help_text="The source balance this payout came from.",
+    )
     statement_descriptor = models.CharField(
         max_length=255,
         default="",
