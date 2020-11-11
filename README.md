@@ -23,7 +23,7 @@ The full documentation is available here:
 -   Stripe Sources
 -   Stripe v2 and v3 support
 -   Supports SCA regulations, Checkout Sessions, and Payment Intents
--   Tested with Stripe API <span class="title-ref">2019-09-09</span>
+-   Tested with Stripe API <span class="title-ref">2020-03-02</span>
     (see <https://dj-stripe.readthedocs.io/en/latest/api_versions.html>
     )
 
