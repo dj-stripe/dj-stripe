@@ -2731,7 +2731,8 @@ class Migration(migrations.Migration):
             field=djstripe.fields.StripeForeignKey(
                 help_text="The customer associated with this charge.",
                 null=True,
-                on_delete=django.db.models.deletion.CASCADE,
+                blank=True,
+                on_delete=django.db.models.deletion.SET_NULL,
                 related_name="charges",
                 to="djstripe.customer",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
