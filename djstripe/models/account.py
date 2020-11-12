@@ -1,3 +1,5 @@
+import warnings
+
 import stripe
 from django.db import models, transaction
 
@@ -109,6 +111,11 @@ class Account(StripeModel):
 
     @classmethod
     def get_connected_account_from_token(cls, access_token):
+        warnings.warn(
+            "Account.get_connected_account_from_token is deprecated."
+            "Use Account.get_or_retrieve_for_api_key() instead.",
+            DeprecationWarning,
+        )
         account_data = cls.stripe_class.retrieve(api_key=access_token)
 
         return cls._get_or_create_from_stripe_object(account_data)[0]
