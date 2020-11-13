@@ -1847,6 +1847,7 @@ class Payout(StripeModel):
     Stripe documentation: https://stripe.com/docs/api#payouts
     """
 
+    expand_fields = ["destination"]
     stripe_class = stripe.Payout
     stripe_dashboard_item_name = "payouts"
 
