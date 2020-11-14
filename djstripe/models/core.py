@@ -97,13 +97,35 @@ class Charge(StripeModel):
     stripe_dashboard_item_name = "payments"
 
     amount = StripeDecimalCurrencyAmountField(help_text="Amount charged (as decimal).")
+    amount_captured = StripeDecimalCurrencyAmountField(
+        null=True,
+        help_text=(
+            "Amount (as decimal) captured (can be less than the amount attribute "
+            "on the charge if a partial capture was issued)."
+        ),
+    )
     amount_refunded = StripeDecimalCurrencyAmountField(
         help_text=(
             "Amount (as decimal) refunded (can be less than the amount attribute on "
             "the charge if a partial refund was issued)."
         )
     )
-    # TODO: application, application_fee
+    application = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="ID of the Connect application that created the charge.",
+    )
+    application_fee = StripeDecimalCurrencyAmountField(
+        null=True,
+        blank=True,
+        help_text="The application fee (as decimal) for the charge.",
+    )
+    application_fee_amount = StripeDecimalCurrencyAmountField(
+        null=True,
+        blank=True,
+        help_text="The amount (as decimal) of the application fee (if any) "
+        "requested for the charge.",
+    )
     balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
@@ -112,6 +134,19 @@ class Charge(StripeModel):
             "The balance transaction that describes the impact of this charge "
             "on your account balance (not including refunds or disputes)."
         ),
+    )
+    billing_details = JSONField(
+        null=True,
+        help_text="Billing information associated with the PaymentMethod at the "
+        "time of the transaction.",
+    )
+    calculated_statement_descriptor = models.CharField(
+        max_length=22,
+        default="",
+        help_text="The full statement descriptor that is passed to card networks, "
+        "and that is displayed on your customers’ credit card and bank statements. "
+        "Allows you to see what the statement descriptor looks like after the "
+        "static and dynamic portions are combined.",
     )
     captured = models.BooleanField(
         default=False,
@@ -129,22 +164,16 @@ class Charge(StripeModel):
         related_name="charges",
         help_text="The customer associated with this charge.",
     )
-    # XXX: destination
-    # TODO - has this been renamed to on_behalf_of?
-    account = StripeForeignKey(
-        "Account",
-        on_delete=models.CASCADE,
-        null=True,
-        related_name="charges",
-        help_text="The account the charge was made on behalf of. "
-        "Null here indicates that this value was never set.",
-    )
     dispute = StripeForeignKey(
         "Dispute",
         on_delete=models.SET_NULL,
         null=True,
         related_name="charges",
         help_text="Details about the dispute if the charge has been disputed.",
+    )
+    disputed = models.BooleanField(
+        default=False,
+        help_text="Whether the charge has been disputed.",
     )
     failure_code = StripeEnumField(
         enum=enums.ApiErrorCode,
@@ -171,7 +200,15 @@ class Charge(StripeModel):
         related_name="charges",
         help_text="The invoice this charge is for if one exists.",
     )
-    # TODO: on_behalf_of (see account above), order
+    # TODO: order (requires Order model)
+    on_behalf_of = StripeForeignKey(
+        "Account",
+        on_delete=models.CASCADE,
+        null=True,
+        related_name="charges",
+        help_text="The account (if any) the charge was made on behalf of "
+        "without triggering an automatic transfer.",
+    )
     outcome = JSONField(
         help_text="Details about whether or not the payment was accepted, and why.",
         null=True,
@@ -229,7 +266,7 @@ class Charge(StripeModel):
         "If the charge is only partially refunded, "
         "this attribute will still be false.",
     )
-    # TODO: review
+    # TODO: review (requires Review model)
     shipping = JSONField(null=True, help_text="Shipping information for the charge")
     source = PaymentMethodForeignKey(
         on_delete=models.SET_NULL,
@@ -237,17 +274,32 @@ class Charge(StripeModel):
         related_name="charges",
         help_text="The source used for this charge.",
     )
-    # TODO: source_transfer
+    source_transfer = StripeForeignKey(
+        "Transfer",
+        null=True,
+        on_delete=models.CASCADE,
+        help_text="The transfer which created this charge. Only present if the "
+        "charge came from another Stripe account.",
+        related_name="+",
+    )
     statement_descriptor = models.CharField(
         max_length=22,
-        default="",
+        null=True,
         blank=True,
-        help_text="An arbitrary string to be displayed on your customer's "
-        "credit card statement. The statement description may not include <>\"' "
-        "characters, and will appear on your customer's statement in capital letters. "
-        "Non-ASCII characters are automatically stripped. "
-        "While most banks display this information consistently, "
-        "some may display it incorrectly or not at all.",
+        help_text="For card charges, use statement_descriptor_suffix instead. "
+        "Otherwise, you can use this value as the complete description of a "
+        "charge on your customers’ statements. Must contain at least one letter, "
+        "maximum 22 characters.",
+    )
+    statement_descriptor_suffix = models.CharField(
+        max_length=22,
+        null=True,
+        blank=True,
+        help_text="Provides information about the charge that customers see on "
+        "their statements. Concatenated with the prefix (shortened descriptor) "
+        "or statement descriptor that's set on the account to form the "
+        "complete statement descriptor. "
+        "Maximum 22 characters for the concatenated descriptor.",
     )
     status = StripeEnumField(
         enum=enums.ChargeStatus, help_text="The status of the payment."
@@ -256,12 +308,18 @@ class Charge(StripeModel):
         "Transfer",
         null=True,
         on_delete=models.CASCADE,
-        help_text="The transfer to the destination account "
-        "(only applicable if the charge was created using the destination parameter).",
+        help_text="The transfer to the `destination` account (only applicable "
+        "if the charge was created using the `destination` parameter).",
+    )
+    transfer_data = JSONField(
+        null=True,
+        blank=True,
+        help_text="An optional dictionary including the account to automatically "
+        "transfer to as part of a destination charge.",
     )
     transfer_group = models.CharField(
         max_length=255,
-        default="",
+        null=True,
         blank=True,
         help_text="A string that identifies this transaction as part of a group.",
     )
@@ -276,8 +334,13 @@ class Charge(StripeModel):
         return "{amount} ({status})".format(amount=amount, status=status)
 
     @property
-    def disputed(self) -> bool:
-        return self.dispute is not None
+    def account(self):
+        warnings.warn(
+            "Charge.account is deprecated and will be removed in 2.5.0. "
+            "Use .on_behalf_of instead.",
+            DeprecationWarning,
+        )
+        return self.on_behalf_of
 
     @property
     def fee(self):
@@ -1058,7 +1121,7 @@ class Customer(StripeModel):
 
     def is_subscribed_to(self, product: Union[Product, str]) -> bool:
         """
-        Checks to see if this customer has an active subscription to the given product
+        Checks to see if this customer has an active subscription to the given product.
 
         :param product: The product for which to check for an active subscription.
         :type product: Product or string (product ID)
