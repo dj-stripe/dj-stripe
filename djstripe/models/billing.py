@@ -1,3 +1,4 @@
+import warnings
 from copy import deepcopy
 from typing import Optional
 
@@ -1010,6 +1011,16 @@ class InvoiceItem(StripeModel):
 
     def get_stripe_dashboard_url(self):
         return self.invoice.get_stripe_dashboard_url()
+
+    def api_retrieve(self, *args, **kwargs):
+        if "-il_" in self.id:
+            warnings.warn(
+                f"Attempting to retrieve InvoiceItem with id={self.id!r}"
+                " will most likely fail. "
+                "Run manage.py djstripe_update_invoiceitem_ids if this is a problem."
+            )
+
+        return super().api_retrieve(*args, **kwargs)
 
 
 class Plan(StripeModel):
