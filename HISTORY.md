@@ -8,6 +8,14 @@
     dj-stripe 2.4.0, you will have to be in an already-migrated 2.2+
     installation of dj-stripe.
 
+!!! warning
+
+    **Settings changes: Introduction of `DJSTRIPE_FOREIGN_KEY_TO_FIELD`**
+
+    You are required to set this new setting in 2.4.0.
+    For more information, checkout
+    [settings](https://dj-stripe.readthedocs.io/en/latest/reference/settings.html).
+
 -   Support Django 3.1.
 
 -   First-class support for the Price model, replacing Plans.
