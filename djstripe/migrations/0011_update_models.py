@@ -40,17 +40,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="charge",
-            name="application_fee",
-            field=djstripe.fields.StripeDecimalCurrencyAmountField(
-                blank=True,
-                decimal_places=2,
-                help_text="The application fee (as decimal) for the charge.",
-                max_digits=11,
-                null=True,
-            ),
-        ),
-        migrations.AddField(
-            model_name="charge",
             name="application_fee_amount",
             field=djstripe.fields.StripeDecimalCurrencyAmountField(
                 blank=True,

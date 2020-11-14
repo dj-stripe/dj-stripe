@@ -37,8 +37,12 @@ class RefundTest(AssertStripeFksMixin, TestCase):
         self.default_expected_blank_fks = {
             "djstripe.Account.branding_logo",
             "djstripe.Account.branding_icon",
+            "djstripe.Charge.application_fee",
             "djstripe.Charge.dispute",
             "djstripe.Charge.latest_upcominginvoice (related name)",
+            "djstripe.Charge.on_behalf_of",
+            "djstripe.Charge.refund",
+            "djstripe.Charge.source_transfer",
             "djstripe.Charge.transfer",
             "djstripe.Customer.coupon",
             "djstripe.Customer.default_payment_method",

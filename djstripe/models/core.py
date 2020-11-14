@@ -29,7 +29,6 @@ from ..fields import (
 from ..managers import ChargeManager
 from ..signals import WEBHOOK_SIGNALS
 from ..utils import get_friendly_currency_amount
-from .account import Account
 from .base import IdempotencyKey, StripeModel, logger
 
 # Override the default API version used by the Stripe library.
@@ -115,10 +114,13 @@ class Charge(StripeModel):
         blank=True,
         help_text="ID of the Connect application that created the charge.",
     )
-    application_fee = StripeDecimalCurrencyAmountField(
+    application_fee = StripeForeignKey(
+        "ApplicationFee",
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        help_text="The application fee (as decimal) for the charge.",
+        related_name="fee_for_charge",
+        help_text="The application fee (if any) for the charge.",
     )
     application_fee_amount = StripeDecimalCurrencyAmountField(
         null=True,
@@ -429,21 +431,6 @@ class Charge(StripeModel):
 
         captured_charge = self.api_retrieve().capture()
         return self.__class__.sync_from_stripe_data(captured_charge)
-
-    @classmethod
-    def _stripe_object_destination_to_account(cls, target_cls, data):
-        """
-        Search the given manager for the Account matching this Charge object's
-        ``destination`` field.
-
-        :param target_cls: The target class
-        :type target_cls: Account
-        :param data: stripe object
-        :type data: dict
-        """
-
-        if "destination" in data and data["destination"]:
-            return target_cls._get_or_create_from_stripe_object(data, "destination")[0]
 
     def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
         super()._attach_objects_post_save_hook(

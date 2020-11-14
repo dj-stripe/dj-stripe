@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
 
 from djstripe.enums import ChargeStatus, LegacySourceType
-from djstripe.models import Account, Charge, Dispute, DjstripePaymentMethod
+from djstripe.models import Charge, DjstripePaymentMethod
 
 from . import (
     FAKE_ACCOUNT,
@@ -42,8 +42,11 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
         self.account = default_account()
         self.default_expected_blank_fks = {
+            "djstripe.Charge.application_fee",
             "djstripe.Charge.dispute",
             "djstripe.Charge.latest_upcominginvoice (related name)",
+            "djstripe.Charge.on_behalf_of",
+            "djstripe.Charge.source_transfer",
             "djstripe.Charge.transfer",
             "djstripe.Customer.coupon",
             "djstripe.Customer.default_payment_method",
@@ -73,10 +76,10 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(str(charge), "$50.00 USD (Failed)")
         charge.status = ChargeStatus.succeeded
 
-        charge.dispute = Dispute()
+        charge.disputed = True
         self.assertEqual(str(charge), "$50.00 USD (Disputed)")
 
-        charge.dispute = None
+        charge.disputed = False
         charge.refunded = True
         charge.amount_refunded = 50
         self.assertEqual(str(charge), "$50.00 USD (Refunded)")
@@ -197,7 +200,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         default_account_mock.return_value = self.account
 
         fake_charge_copy = deepcopy(FAKE_CHARGE)
-        fake_charge_copy.update({"application_fee": {"amount": 0}})
 
         charge = Charge.sync_from_stripe_data(fake_charge_copy)
 
@@ -775,11 +777,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         )
         self.assertTrue(created)
 
-        self.assertEqual(2, Account.objects.count())
-        account = Account.objects.get(id=FAKE_ACCOUNT["id"])
-
-        self.assertEqual(account, charge.account)
-
         charge_retrieve_mock.assert_not_called()
         balance_transaction_retrieve_mock.assert_called_once_with(
             api_key=STRIPE_SECRET_KEY,
@@ -795,87 +792,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
     @patch(
         target="djstripe.models.payment_methods.DjstripePaymentMethod", autospec=True
     )
-    @patch(target="djstripe.models.core.Account", autospec=True)
-    def test__attach_objects_hook(
-        self, mock_account, mock_payment_method, mock_charge_account, mock_charge_source
-    ):
-        """Test that _attach_objects_hook works as expected."""
-        charge = Charge(
-            amount=50,
-            currency="usd",
-            id="ch_test",
-            status=ChargeStatus.failed,
-            captured=False,
-            paid=False,
-        )
-        mock_cls = create_autospec(spec=Charge, spec_set=True)
-        mock_data = {"source": {"object": "foo"}}
-        mock_payment_method._get_or_create_source.return_value = ("bar", "unused")
-
-        charge._attach_objects_hook(cls=mock_cls, data=mock_data)
-
-        # expect the attributes to be set appropriately
-        self.assertEqual(
-            mock_cls._stripe_object_destination_to_account.return_value, charge.account
-        )
-        self.assertEqual(
-            mock_payment_method._get_or_create_source.return_value[0], charge.source
-        )
-        # expect the appropriate calls to be made
-        mock_cls._stripe_object_destination_to_account.assert_called_once_with(
-            target_cls=mock_account, data=mock_data
-        )
-        mock_payment_method._get_or_create_source.assert_called_once_with(
-            data=mock_data["source"], source_type=mock_data["source"]["object"]
-        )
-
-    @patch.object(target=Charge, attribute="source", autospec=True)
-    @patch.object(target=Charge, attribute="account", autospec=True)
-    @patch(
-        target="djstripe.models.payment_methods.DjstripePaymentMethod", autospec=True
-    )
-    @patch(target="djstripe.models.core.Account", autospec=True)
-    def test__attach_objects_hook_no_destination_account(
-        self, mock_account, mock_payment_method, mock_charge_account, mock_charge_source
-    ):
-        """
-        Test that _attach_objects_hook works as expected when there is no
-         destination account.
-        """
-        charge = Charge(
-            amount=50,
-            currency="usd",
-            id="ch_test",
-            status=ChargeStatus.failed,
-            captured=False,
-            paid=False,
-        )
-        mock_cls = create_autospec(spec=Charge, spec_set=True)
-        mock_cls._stripe_object_destination_to_account.return_value = False
-        mock_data = {"source": {"object": "foo"}}
-        mock_payment_method._get_or_create_source.return_value = ("bar", "unused")
-
-        charge._attach_objects_hook(cls=mock_cls, data=mock_data)
-
-        # expect the attributes to be set appropriately
-        self.assertEqual(mock_account.get_default_account.return_value, charge.account)
-        self.assertEqual(
-            mock_payment_method._get_or_create_source.return_value[0], charge.source
-        )
-        # expect the appropriate calls to be made
-        mock_cls._stripe_object_destination_to_account.assert_called_once_with(
-            target_cls=mock_account, data=mock_data
-        )
-        mock_payment_method._get_or_create_source.assert_called_once_with(
-            data=mock_data["source"], source_type=mock_data["source"]["object"]
-        )
-
-    @patch.object(target=Charge, attribute="source", autospec=True)
-    @patch.object(target=Charge, attribute="account", autospec=True)
-    @patch(
-        target="djstripe.models.payment_methods.DjstripePaymentMethod", autospec=True
-    )
-    @patch(target="djstripe.models.core.Account", autospec=True)
+    @patch(target="djstripe.models.account.Account", autospec=True)
     def test__attach_objects_hook_missing_source_data(
         self, mock_account, mock_payment_method, mock_charge_account, mock_charge_source
     ):
