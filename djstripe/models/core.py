@@ -337,7 +337,7 @@ class Charge(StripeModel):
     def account(self):
         warnings.warn(
             "Charge.account is deprecated and will be removed in 2.5.0. "
-            "Use .on_behalf_of instead.",
+            "Use .on_behalf_of or .djstripe_owner_account instead.",
             DeprecationWarning,
         )
         return self.on_behalf_of
@@ -374,15 +374,6 @@ class Charge(StripeModel):
 
     def _attach_objects_hook(self, cls, data):
         from .payment_methods import DjstripePaymentMethod
-
-        # Set the account on this object.
-        destination_account = cls._stripe_object_destination_to_account(
-            target_cls=Account, data=data
-        )
-        if destination_account:
-            self.account = destination_account
-        else:
-            self.account = Account.get_default_account()
 
         # Source doesn't always appear to be present, so handle the case
         # where it is missing.
