@@ -34,11 +34,15 @@
 
 -   Add support for Reporting categories, TaxIds and the following fields:
     -   `BalanceTransaction.source`
-    -   `Subscription.cancel_at`
     -   `InvoiceItem.unit_amount`
     -   `InvoiceItem.unit_amount_decimal`
+    -   `Subscription.cancel_at`
+    -   `Subscription.billing_thresholds`
+    -   `SubscriptionItem.billing_thresholds`
+    -   `SubscriptionSchedule.billing_thresholds`
     -   `alipay_account` in `DjstripePaymentMethodType`
     and updated the following models:
+    -   `Charge`
     -   `FileUploadPurpose`
     -   `SourceTypes`
 

@@ -1264,6 +1264,12 @@ class Subscription(StripeModel):
             "invoices."
         ),
     )
+    billing_thresholds = JSONField(
+        null=True,
+        blank=True,
+        help_text="Define thresholds at which an invoice will be sent, and the "
+        "subscription advanced to a new billing period.",
+    )
     cancel_at = StripeDateTimeField(
         null=True,
         blank=True,
@@ -1678,7 +1684,12 @@ class SubscriptionItem(StripeModel):
 
     stripe_class = stripe.SubscriptionItem
 
-    # TODO: deprecate plan
+    billing_thresholds = JSONField(
+        null=True,
+        blank=True,
+        help_text="Define thresholds at which an invoice will be sent, and the "
+        "related subscription advanced to a new billing period.",
+    )
     plan = models.ForeignKey(
         "Plan",
         on_delete=models.CASCADE,
@@ -1738,6 +1749,12 @@ class SubscriptionSchedule(StripeModel):
 
     stripe_class = stripe.SubscriptionSchedule
 
+    billing_thresholds = JSONField(
+        null=True,
+        blank=True,
+        help_text="Define thresholds at which an invoice will be sent, and the "
+        "related subscription advanced to a new billing period.",
+    )
     canceled_at = StripeDateTimeField(
         null=True,
         blank=True,
