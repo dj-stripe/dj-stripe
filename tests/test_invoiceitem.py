@@ -119,14 +119,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
             invoiceitem.invoice.get_stripe_dashboard_url(),
         )
 
-        self.assertEqual(str(invoiceitem), FAKE_PRODUCT["name"])
-        invoiceitem.plan = None
-        invoiceitem.price = None
-        self.assertEqual(
-            str(invoiceitem),
-            "<amount=20, date=2015-08-08 11:26:56+00:00, "
-            "id=ii_16XVTY2eZvKYlo2Cxz5n3RaS>",
-        )
+        assert str(invoiceitem) == invoiceitem.description
 
     @patch(
         "djstripe.models.Account.get_default_account",

@@ -1002,11 +1002,7 @@ class InvoiceItem(StripeModel):
         return super().sync_from_stripe_data(data)
 
     def __str__(self):
-        if self.price and self.price.product:
-            return self.price.product.name or str(self.price)
-        if self.plan and self.plan.product:
-            return self.plan.product.name or str(self.plan)
-        return super().__str__()
+        return self.description
 
     @classmethod
     def is_valid_object(cls, data):
@@ -1014,12 +1010,6 @@ class InvoiceItem(StripeModel):
 
     def get_stripe_dashboard_url(self):
         return self.invoice.get_stripe_dashboard_url()
-
-    def str_parts(self):
-        return [
-            "amount={amount}".format(amount=self.amount),
-            "date={date}".format(date=self.date),
-        ] + super().str_parts()
 
 
 class Plan(StripeModel):
