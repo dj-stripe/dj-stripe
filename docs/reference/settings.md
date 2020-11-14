@@ -30,15 +30,6 @@ See also `../api_versions`.
 
 *(Introduced in 2.4.0)*
 
-This new setting allows dj-stripe users to change it to use the "id" field,
-which is the upstream, non-numeric Stripe identifier.
-
-It does not have a default value. In 3.0.0, the default will be "id", and
-we recommend setting it to "id" for new installations. Older installations
-should set it to "djstripe_id".
-
-For more information read the release notes for dj-stripe version 2.4.0.
-
 `DJSTRIPE_FOREIGN_KEY_TO_FIELD` is a setting introduced in dj-stripe version
 2.4.0. You are required to set it in 2.4.0: It does not have a default value.
 In 3.0.0, the default will be "id", and we recommend setting it to "id" for
