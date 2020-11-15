@@ -47,11 +47,27 @@ class APIKey(StripeModel):
 
     id = models.CharField(max_length=255, default=generate_api_key_id, editable=False)
     type = StripeEnumField(enum=APIKeyType)
-    name = models.CharField("Key name", max_length=100, blank=True)
+    name = models.CharField(
+        "Key name",
+        max_length=100,
+        blank=True,
+        help_text="An optional name to identify the key.",
+    )
     secret = models.CharField(
-        max_length=128, validators=[RegexValidator(regex=API_KEY_REGEX)], unique=True
+        max_length=128,
+        validators=[RegexValidator(regex=API_KEY_REGEX)],
+        unique=True,
+        help_text="The value of the key.",
     )
 
+    livemode = models.BooleanField(
+        help_text=(
+            "Whether the key is valid for live or test mode. "
+            "This is automatically detected when saved."
+        ),
+    )
+    description = None
+    metadata = None
     objects = APIKeyManager()
 
     def get_stripe_dashboard_url(self):
@@ -60,13 +76,27 @@ class APIKey(StripeModel):
     def __str__(self):
         return self.name or self.secret_redacted
 
+    def _clean_livemode_and_type(self):
+        if self.livemode is None or self.type is None:
+            self.type, self.livemode = get_api_key_details_by_prefix(self.secret)
+
     def clean(self):
-        if self.type == APIKeyType.secret and not self.djstripe_owner_account:
+        self._clean_livemode_and_type()
+        if not self.djstripe_owner_account:
             self.refresh_account()
         return super().clean()
 
-    def refresh_account(self):
+    def save(self, *args, **kwargs):
+        self._clean_livemode_and_type()
+        if not self.djstripe_owner_account:
+            self.refresh_account(commit=False)
+        return super().save(*args, **kwargs)
+
+    def refresh_account(self, commit=True):
         from .account import Account
+
+        if self.type != APIKeyType.secret:
+            return
 
         account_data = Account.stripe_class.retrieve(api_key=self.secret)
         # NOTE: Do not immediately use _get_or_create_from_stripe_object() here.
@@ -79,7 +109,8 @@ class APIKey(StripeModel):
             # If it's just been created, now we can sync the account.
             Account.sync_from_stripe_data(account_data)
         self.djstripe_owner_account = account
-        self.save()
+        if commit:
+            self.save()
 
     @property
     def secret_redacted(self) -> str:

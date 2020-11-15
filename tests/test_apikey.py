@@ -47,6 +47,29 @@ def test_clean_public_apikey():
     assert not key.djstripe_owner_account
 
 
+@pytest.mark.django_db
+@patch("stripe.Account.retrieve", return_value=deepcopy(FAKE_ACCOUNT))
+@patch("stripe.FileUpload.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD_ICON))
+def test_apikey_detect_livemode_and_type(
+    fileupload_retrieve_mock, account_retrieve_mock
+):
+    keys_and_values = (
+        (PK_TEST, False, APIKeyType.publishable),
+        (RK_TEST, False, APIKeyType.restricted),
+        (SK_TEST, False, APIKeyType.secret),
+        (PK_LIVE, True, APIKeyType.publishable),
+        (RK_LIVE, True, APIKeyType.restricted),
+        (SK_LIVE, True, APIKeyType.secret),
+    )
+    for secret, livemode, type in keys_and_values:
+        key = APIKey.objects.create(secret=secret)
+        assert key.livemode is livemode
+        assert key.type is type
+        key.clean()
+        assert key.livemode is livemode
+        assert key.type is type
+
+
 class APIKeyTest(TestCase):
     def setUp(self):
         self.account = default_account()
