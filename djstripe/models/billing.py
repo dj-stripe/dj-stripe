@@ -1038,7 +1038,7 @@ class Plan(StripeModel):
     stripe_dashboard_item_name = "plans"
 
     active = models.BooleanField(
-        help_text="Whether the plan is currently available for new subscriptions."
+        help_text="Whether the plan can be used for new purchases."
     )
     aggregate_usage = StripeEnumField(
         enum=enums.PlanAggregateUsage,
@@ -1057,6 +1057,16 @@ class Plan(StripeModel):
         null=True,
         blank=True,
         help_text="Amount (as decimal) to be charged on the interval specified.",
+    )
+    amount_decimal = StripeDecimalCurrencyAmountField(
+        null=True,
+        blank=True,
+        max_digits=19,
+        decimal_places=12,
+        help_text=(
+            "The unit amount in cents to be charged, represented as a decimal "
+            "string with at most 12 decimal places."
+        ),
     )
     billing_scheme = StripeEnumField(
         enum=enums.BillingScheme,
@@ -1078,8 +1088,9 @@ class Plan(StripeModel):
         enum=enums.PlanInterval,
         help_text="The frequency with which a subscription should be billed.",
     )
-    interval_count = models.IntegerField(
+    interval_count = models.PositiveIntegerField(
         null=True,
+        blank=True,
         help_text=(
             "The number of intervals (specified in the interval property) "
             "between each subscription billing."
@@ -1095,6 +1106,7 @@ class Plan(StripeModel):
         "Product",
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
         help_text="The product whose pricing this plan determines.",
     )
     tiers = JSONField(
@@ -1126,6 +1138,7 @@ class Plan(StripeModel):
     )
     trial_period_days = models.IntegerField(
         null=True,
+        blank=True,
         help_text=(
             "Number of trial period days granted when subscribing a customer "
             "to this plan. Null if the plan has no trial period."
@@ -1141,25 +1154,6 @@ class Plan(StripeModel):
             "`metered` will aggregate the total usage based on usage records. "
             "Defaults to `licensed`."
         ),
-    )
-
-    # Legacy fields (pre 2017-08-15)
-    name = models.TextField(
-        null=True,
-        blank=True,
-        help_text="Name of the plan, to be displayed on invoices and in "
-        "the web interface.",
-    )
-    statement_descriptor = models.CharField(
-        max_length=22,
-        null=True,
-        blank=True,
-        help_text="An arbitrary string to be displayed on your customer's credit card "
-        "statement. The statement description may not include <>\"' characters, "
-        "and will appear on your customer's statement in capital letters. "
-        "Non-ASCII characters are automatically stripped. "
-        "While most banks display this information consistently, some may display it "
-        "incorrectly or not at all.",
     )
 
     class Meta(object):
@@ -1189,7 +1183,7 @@ class Plan(StripeModel):
         return plan
 
     def __str__(self):
-        return self.name or self.nickname or self.id
+        return self.nickname or self.id
 
     @property
     def amount_in_cents(self):
