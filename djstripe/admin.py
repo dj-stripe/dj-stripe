@@ -232,9 +232,21 @@ class AccountAdmin(StripeModelAdmin):
 
 @admin.register(models.APIKey)
 class APIKeyAdmin(StripeModelAdmin):
-    list_display = ("type",)
+    list_display = ("type", "djstripe_owner_account")
     list_filter = ("type",)
     search_fields = ("name",)
+
+    get_fieldsets = admin.ModelAdmin.get_fieldsets
+
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        fields.remove("id")
+        fields.remove("created")
+        if obj is None:
+            fields.remove("djstripe_owner_account")
+            fields.remove("type")
+            fields.remove("livemode")
+        return fields
 
 
 @admin.register(models.BalanceTransaction)
