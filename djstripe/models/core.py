@@ -783,7 +783,8 @@ class Customer(StripeModel):
 
     def subscribe(self, price=None, plan=None, charge_immediately=True, **kwargs):
         """
-        Subscribes this customer to a plan.
+        Subscribes this customer to a price.
+        NOTE: Only one item is supported at the moment.
 
         :param price: The price to which to subscribe the customer.
         :type price: Price or string (price ID)
@@ -814,7 +815,7 @@ class Customer(StripeModel):
             price = price.id
 
         stripe_subscription = Subscription._api_create(
-            items=[price], customer=self.id, **kwargs
+            items=[{"price": price}], customer=self.id, **kwargs
         )
 
         if charge_immediately:
