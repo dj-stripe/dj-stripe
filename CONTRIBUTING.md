@@ -32,10 +32,14 @@ dj-stripe could always use more documentation, whether as part of the
 official dj-stripe docs, in docstrings, or even on the web in blog
 posts, articles, and such.
 
-If you are adding to dj-stripe's documentation, you can see your changes
-by running `tox -e docs`. The documentation will be generated in the
-`docs/` directory, and you can open `docs/_build/html/index.html` in a
-web browser.
+To see the project's documentation live, run the following command:
+
+    DJANGO_SETTINGS_MODULE=docs.django_settings mkdocs serve
+
+The documentation site will then be served on <http://127.0.0.1:8000>.
+
+If you wish to just generate the documentation, you can replace `serve`
+with `build`, and the docs will be generated into the `site/` folder.
 
 ### Submit Feedback
 
