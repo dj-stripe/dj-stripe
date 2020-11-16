@@ -50,12 +50,11 @@ def subscriber_has_active_subscription(subscriber, price=None, plan=None):
     :type plan: Plan or string (plan ID)
     """
 
-    if plan:
-        warnings.warn(
-            "the plan parameter is deprecated in favor or the price parameter and "
-            "will be removed in a future release",
-            DeprecationWarning,
-        )
+    warnings.warn(
+        "The subscriber_has_active_subscription utility function, and "
+        "SubscriptionPaymentMiddleware, will be removed in dj-stripe 2.5.0.",
+        DeprecationWarning,
+    )
 
     if price and plan:
         raise TypeError("price and plan arguments cannot both be defined.")
