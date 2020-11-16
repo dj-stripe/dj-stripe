@@ -86,7 +86,7 @@ Assuming the tests are run against PostgreSQL:
 
 # Funding this project
 
-[![Stripe Logo](../logos/stripe_blurple.svg)](https://stripe.com)
+[![Stripe Logo](./docs/logos/stripe_blurple.svg)](https://stripe.com)
 
 You can now become a sponsor to dj-stripe with [GitHub Sponsors](https://github.com/sponsors/dj-stripe).
 

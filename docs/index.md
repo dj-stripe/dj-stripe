@@ -39,7 +39,7 @@ img[alt="Stripe Logo"] {
 }
 </style>
 
-[![Stripe Logo](../logos/stripe_blurple.svg)](https://stripe.com)
+[![Stripe Logo](./logos/stripe_blurple.svg)](https://stripe.com)
 
 <!--
 AUTODOC SETUP: Do not remove the piece of code below.
