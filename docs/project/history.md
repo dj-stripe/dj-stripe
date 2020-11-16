@@ -2,36 +2,34 @@
 
 ## 2.4.0 (unreleased)
 
-!!! warning
+!!! attention
 
-    This release fixes rolling back migrations. In order to migrate to
-    dj-stripe 2.4.0, you will have to be in an already-migrated 2.2+
-    installation of dj-stripe.
+    To upgrade to 2.4.0, see our [upgrade guide](../upgrade_guides/2_4_0.md).
+
+!!! note
+
+    A new mandatory setting `DJSTRIPE_FOREIGN_KEY_TO_FIELD` has been added.
+    Set it to `"id"` for new installations, or `"djstripe_id"` if you are upgrading from
+    an older version.
 
 !!! warning
 
     **Settings changes: Introduction of `DJSTRIPE_FOREIGN_KEY_TO_FIELD`**
 
     You are required to set this new setting in 2.4.0.
-    For more information, see
-    [settings](https://dj-stripe.readthedocs.io/en/latest/reference/settings/).
+    For more information, see [Settings](../reference/settings.md).
 
--   Support Django 3.1.
-
+-   Support for Django 3.1 and Python 3.8.
+-   Minimum stripe-python version is now 2.48.0.
+-   Default Stripe API version is now `2020-08-27`.
 -   First-class support for the Price model, replacing Plans.
-
--   Support subscription schedules (\#899).
-
 -   Support multi-item subscriptions.
-
--   Support for API keys in the database.
-    Check [API keys](https://dj-stripe.readthedocs.io/en/latest/api_keys/).
-
--   Support for multiple Stripe accounts.
-
--   Add DJSTRIPE_USE_NATIVE_JSONFIELD setting to use Django 3.1 native
-    JSONField over django-jsonfield.
-
+-   Support for API keys in the database (see [API keys](./api_keys.md)).
+-   Support for syncing objects for multiple, different Stripe accounts.
+-   Use Django 3.1 native JSONField when available.
+-   The field `djstripe_owner_account` has been added to all Stripe models, and is
+    automatically populated with the Account that owns the API key used to retrieve it.
+-   Support for subscription schedules (#899).
 -   Add support for Reporting categories, TaxIds and the following fields:
 
     -   `BalanceTransaction.source`
@@ -47,41 +45,27 @@
     -   `FileUploadPurpose`
     -   `SourceTypes`
 
--   Made `Account.payouts_enabled` nullable (\#1107).
+-   Fixed Account.get_default_account() for Restricted API Keys.
+-   Hundreds of other bugfixes.
 
--   Add an owner account to every StripeModel.
+### Breaking changes
 
 -   Rename PlanBillingScheme to BillingScheme.
-
 -   Remove `Plan.update_name()` and these previously-deprecated fields:
 
     -   `Customer.business_vat_id`
     -   `Subscription.start`
     -   `Subscription.billing`
 
--   Increase minimum stripe-python version to 2.48.0.
-
--   Upgrade default Stripe API version to 2020-03-02.
-
--   Increased max_length of `DjstripePaymentMethod.type`, as first step
-    towards support of <span class="title-ref">alipay_account</span>
-    (\#1120).
-
--   Fixed Account.get_default_account() for Restricted API Keys.
-
--   Fixed Account logo sync failure on test mode (\#830).
-
 ## 2.3.0 (2020-04-19)
+
+-   The minimum version of Django is now 2.1, and Python 3.6.
 
 -   Changed `JSONField` dependency back to
     [jsonfield](https://github.com/rpkilby/jsonfield/) from
     [jsonfield2](https://github.com/rpkilby/jsonfield2/) (see [Warning
     about safe uninstall of jsonfield2 on
     upgrade](#warning-about-safe-uninstall-of-jsonfield2-on-upgrade)).
-
--   Dropped support for Django 2.1 (\#1056).
-
--   Dropped support for python 3.5 (\#1073).
 
 -   Fixed handling of `TaxRate` events (\#1094).
 
@@ -108,9 +92,6 @@
     -   `Subscription.tax_percent` (use `.default_tax_rates` instead)
 
 -   Added `Invoice.status` and `enums.InvoiceStatus` (\#1020).
-
--   Fixed str(Account) crash when settings or business_profile were
-    NULL (\#1104).
 
 -   Added new `Invoice` fields (\#1020, \#1087):
 

@@ -1,16 +1,15 @@
 # Settings
 
-## STRIPE_API_VERSION (='2019-05-16')
+## STRIPE_API_VERSION (='2020-08-27')
 
 The API version used to communicate with the Stripe API is configurable,
 and defaults to the latest version that has been tested as working.
 Using a value other than the default is allowed, as a string in the
 format of YYYY-MM-DD.
 
-For example, you can specify <span class="title-ref">'2017-01-27'</span>
-to use that API version:
+For example, you can specify `"2020-03-02"` to use that API version:
 
-    STRIPE_API_VERSION = '2017-01-27'
+    STRIPE_API_VERSION = "2020-03-02"
 
 However you do so at your own risk, as using a value other than the
 default might result in incompatibilities between Stripe and this
@@ -24,11 +23,11 @@ supported.
 For more information on API versioning, see the [stripe
 documentation](https://stripe.com/docs/upgrades).
 
-See also `../api_versions`.
+See also [API Versions](../api_versions.md).
 
 ## DJSTRIPE_FOREIGN_KEY_TO_FIELD
 
-*(Introduced in 2.4.0)*
+_(Introduced in 2.4.0)_
 
 `DJSTRIPE_FOREIGN_KEY_TO_FIELD` is a setting introduced in dj-stripe version
 2.4.0. You are required to set it in 2.4.0: It does not have a default value.
@@ -96,6 +95,10 @@ plan towards their new plan's amount.
 
 ## DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS (=())
 
+!!! warning
+
+    This functionality is deprecated.
+
 Used by `djstripe.middleware.SubscriptionPaymentMiddleware`
 
 Rules:
@@ -146,24 +149,23 @@ If the AUTH_USER_MODEL doesn't represent the object your application's
 subscription holder, you may define a subscriber model to use here. It
 should be a string in the form of 'app.model'.
 
-Rules:
+!!! note
 
--   DJSTRIPE_SUBSCRIBER_MODEL must have an `email` field. If your
+    DJSTRIPE_SUBSCRIBER_MODEL must have an `email` field. If your
     existing model has no email field, add an email property that
     defines an email address to use.
--   You must also implement
-    `DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK`.
 
 Example Model:
 
-    class Organization(models.Model):
-        name = CharField(max_length=200, unique=True)
-        subdomain = CharField(max_length=63, unique=True, verbose_name="Organization Subdomain")
-        owner = ForeignKey(settings.AUTH_USER_MODEL, related_name="organization_owner", verbose_name="Organization Owner")
+```py
+class Organization(models.Model):
+    name = CharField(max_length=200, unique=True)
+    admin = ForeignKey(settings.AUTH_USER_MODEL, on_delete=CASCADE)
 
-        @property
-        def email(self):
-            return self.owner.email
+    @property
+    def email(self):
+        return self.admin.email
+```
 
 ## DJSTRIPE_SUBSCRIBER_MODEL_MIGRATION_DEPENDENCY (="\_\_first\_\_")
 
@@ -171,48 +173,6 @@ If the model referenced in DJSTRIPE_SUBSCRIBER_MODEL is not created in
 the `__first__` migration of an app you can specify the migration name
 to depend on here. For example:
 "0003_here_the_subscriber_model_was_added"
-
-## DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK (=None)
-
-If you choose to use a custom subscriber model, you'll need a way to
-pull it from `request`. That's where this callback comes in. It must be
-a callable or importable string to a callable that takes a request
-object and returns an instance of DJSTRIPE_SUBSCRIBER_MODEL
-
-Examples:
-
-```py
-# middleware.py
-
-class DynamicOrganizationIDMiddleware(object):
-    """ Adds the current organization's ID based on the subdomain."""
-
-    def process_request(self, request):
-        subdomain = parse_subdomain(request.get_host())
-
-        try:
-            organization = Organization.objects.get(subdomain=subdomain)
-        except Organization.DoesNotExist:
-            return TemplateResponse(request=request, template='404.html', status=404)
-        else:
-            organization_id = organization.id
-
-        request.organization_id = organization_id
-```
-
-```py
-# settings.py
-
-def organization_request_callback(request):
-    """ Gets an organization instance from the id passed through ``request``"""
-
-    from <models_path> import Organization  # Import models here to avoid an ``AppRegistryNotReady`` exception
-    return Organization.objects.get(id=request.organization_id)
-```
-
-!!! note
-
-    This callback only becomes active when `DJSTRIPE_SUBSCRIBER_MODEL` is set.
 
 ## DJSTRIPE_USE_NATIVE_JSONFIELD (=False)
 
@@ -229,7 +189,8 @@ with the ORM.
 
 !!! note
 
-    This is only supported on Postgres databases.
+    For Django 3.0 and under, this is only supported on Postgres databases.
+    We highly recommend using Django 3.1+, with Postgres as backend.
 
 !!! attention
 
@@ -237,7 +198,7 @@ with the ORM.
 
 ## DJSTRIPE_WEBHOOK_URL (=r"^webhook/\$")
 
-This is where you can set _Stripe.com_ to send webhook response. You can
+This is where you can tell Stripe to send webhook responses. You can
 set this to what you want to prevent unnecessary hijinks from unfriendly
 people.
 

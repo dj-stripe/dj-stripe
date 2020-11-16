@@ -1,4 +1,4 @@
-# A note on Stripe Elements JS methods
+# Integrating Stripe Elements (JS SDK)
 
 !!! note
 

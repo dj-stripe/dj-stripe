@@ -1,14 +1,14 @@
-# Webhooks
+# Using Stripe Webhooks
 
 ## Available settings
 
 dj-stripe provides the following settings to tune how your webhooks work:
 
-* [DJSTRIPE_WEBHOOK_URL](../reference/settings.md#djstripe_webhook_url-rwebhook)
-* [DJSTRIPE_WEBHOOK_SECRET](../reference/settings.md#djstripe_webhook_secret)
-* [DJSTRIPE_WEBHOOK_VALIDATION](../reference/settings.md#djstripe_webhook_validation-verify_signature)
-* [DJSTRIPE_WEBHOOK_TOLERANCE](../reference/settings.md#djstripe_webhook_tolerance-300)
-* [DJSTRIPE_WEBHOOK_EVENT_CALLBACK](../reference/settings.md#djstripe_webhook_event_callback-none)
+-   [DJSTRIPE_WEBHOOK_URL](../reference/settings.md#djstripe_webhook_url-rwebhook)
+-   [DJSTRIPE_WEBHOOK_SECRET](../reference/settings.md#djstripe_webhook_secret)
+-   [DJSTRIPE_WEBHOOK_VALIDATION](../reference/settings.md#djstripe_webhook_validation-verify_signature)
+-   [DJSTRIPE_WEBHOOK_TOLERANCE](../reference/settings.md#djstripe_webhook_tolerance-300)
+-   [DJSTRIPE_WEBHOOK_EVENT_CALLBACK](../reference/settings.md#djstripe_webhook_event_callback-none)
 
 ## Using webhooks in dj-stripe
 

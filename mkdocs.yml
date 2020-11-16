@@ -23,14 +23,14 @@ nav:
     - Installation: installation.md
     - Setting your API keys: api_keys.md
     - A note on Stripe API Versions: api_versions.md
-    - A note on Stripe Stripe Elements JS methods: stripe_elements_js.md
+    - Integrating Stripe Elements: stripe_elements_js.md
+    - Upgrading to dj-stripe 2.4.0: upgrade_guides/2_4_0.md
   - Usage:
+    - Using Stripe Webhooks: usage/webhooks.md
     - Subscribing a customer to a plan: usage/subscribing_customers.md
-    - Restricting access to only active subscribers: usage/restricting_access.md
     - Managing subscriptions and payment sources: usage/managing_subscriptions.md
-    - Webhooks: usage/webhooks.md
     - Manually syncing data with Stripe: usage/manually_syncing_with_stripe.md
-    - Cookbook: usage/cookbook.md
+    - Creating individual charges: usage/creating_individual_charges.md
   - Project:
     - Changelog: project/history.md
     - Contributing: project/contributing.md
