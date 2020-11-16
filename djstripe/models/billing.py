@@ -1,6 +1,5 @@
 import warnings
-from copy import deepcopy
-from typing import Optional
+from typing import Optional, Union
 
 import stripe
 from django.db import models
@@ -1452,46 +1451,15 @@ class Subscription(StripeModel):
 
     def update(
         self,
-        plan=None,
-        application_fee_percent=None,
-        billing_cycle_anchor=None,
-        coupon=None,
+        plan: Union[StripeModel, str] = None,
         prorate=djstripe_settings.PRORATION_POLICY,
-        proration_date=None,
-        metadata=None,
-        quantity=None,
-        tax_percent=None,
-        trial_end=None,
+        **kwargs,
     ):
         """
         See `Customer.subscribe() <#djstripe.models.Customer.subscribe>`__
 
         :param plan: The plan to which to subscribe the customer.
         :type plan: Plan or string (plan ID)
-        :param application_fee_percent:
-        :type application_fee_percent:
-        :param billing_cycle_anchor:
-        :type billing_cycle_anchor:
-        :param coupon:
-        :type coupon:
-        :param prorate: Whether or not to prorate when switching plans. Default is True.
-        :type prorate: boolean
-        :param proration_date:
-            If set, the proration will be calculated as though the subscription was
-            updated at the given time. This can be used to apply exactly the same
-            proration that was previewed with upcoming invoice endpoint.
-            It can also be used to implement custom proration logic, such as prorating
-            by day instead of by second, by providing the time that you
-            wish to use for proration calculations.
-        :type proration_date: datetime
-        :param metadata:
-        :type metadata:
-        :param quantity:
-        :type quantity:
-        :param tax_percent:
-        :type tax_percent:
-        :param trial_end:
-        :type trial_end:
 
         .. note:: The default value for ``prorate`` is the DJSTRIPE_PRORATION_POLICY \
             setting.
@@ -1505,10 +1473,7 @@ class Subscription(StripeModel):
         if plan is not None and isinstance(plan, StripeModel):
             plan = plan.id
 
-        kwargs = deepcopy(locals())
-        del kwargs["self"]
-
-        stripe_subscription = self._api_update(**kwargs)
+        stripe_subscription = self._api_update(plan=plan, prorate=prorate, **kwargs)
 
         return Subscription.sync_from_stripe_data(stripe_subscription)
 
