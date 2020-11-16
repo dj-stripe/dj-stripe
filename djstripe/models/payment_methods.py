@@ -507,21 +507,14 @@ class PaymentMethod(StripeModel):
     Stripe documentation: https://stripe.com/docs/api#payment_methods
     """
 
+    stripe_class = stripe.PaymentMethod
+    description = None
+
     billing_details = JSONField(
         help_text=(
             "Billing information associated with the PaymentMethod that may be used or "
             "required by particular types of payment methods."
         )
-    )
-    card = JSONField(
-        help_text="If this is a card PaymentMethod, this hash contains details "
-        "about the card."
-    )
-    card_present = JSONField(
-        null=True,
-        blank=True,
-        help_text="If this is an card_present PaymentMethod, this hash contains "
-        "details about the Card Present payment method.",
     )
     customer = StripeForeignKey(
         "Customer",
@@ -529,18 +522,90 @@ class PaymentMethod(StripeModel):
         null=True,
         blank=True,
         related_name="payment_methods",
-        help_text="Customer to which this PaymentMethod is saved."
-        "This will not be set when the PaymentMethod has not been saved to a Customer.",
+        help_text=(
+            "Customer to which this PaymentMethod is saved. "
+            "This will not be set when the PaymentMethod has not been saved to a Customer."
+        ),
     )
-    type = models.CharField(
-        max_length=255,
+    type = StripeEnumField(
+        enum=enums.PaymentMethodType,
+        help_text="The type of the PaymentMethod.",
+    )
+    alipay = JSONField(
+        null=True,
         blank=True,
-        help_text="The type of the PaymentMethod. An additional hash is included "
-        "on the PaymentMethod with a name matching this value. It contains additional "
-        "information specific to the PaymentMethod type.",
+        help_text="Additional information for payment methods of type `alipay`",
     )
-
-    stripe_class = stripe.PaymentMethod
+    au_becs_debit = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `au_becs_debit`",
+    )
+    bacs_debit = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `bacs_debit`",
+    )
+    bancontact = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `bancontact`",
+    )
+    card = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `card`",
+    )
+    card_present = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `card_present`",
+    )
+    eps = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `eps`",
+    )
+    fpx = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `fpx`",
+    )
+    giropay = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `giropay`",
+    )
+    ideal = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `ideal`",
+    )
+    interac_present = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `interac_present`",
+    )
+    oxxo = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `oxxo`",
+    )
+    p24 = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `p24`",
+    )
+    sepa_debit = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `sepa_debit`",
+    )
+    sofort = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `sofort`",
+    )
 
     def _attach_objects_hook(self, cls, data):
         customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
