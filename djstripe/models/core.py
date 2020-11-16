@@ -825,83 +825,39 @@ class Customer(StripeModel):
 
     def charge(
         self,
-        amount,
-        currency=None,
-        application_fee=None,
-        capture=None,
-        description=None,
-        destination=None,
-        metadata=None,
-        shipping=None,
-        source=None,
-        statement_descriptor=None,
-        idempotency_key=None,
-    ):
+        amount: Decimal,
+        *,
+        application_fee: Decimal = None,
+        source: Union[str, StripeModel] = None,
+        **kwargs
+    ) -> Charge:
         """
         Creates a charge for this customer.
 
-        Parameters not implemented:
-
-        * **receipt_email** - Since this is a charge on a customer, \
-        the customer's email address is used.
-
-
         :param amount: The amount to charge.
         :type amount: Decimal. Precision is 2; anything more will be ignored.
-        :param currency: 3-letter ISO code for currency
-        :type currency: string
-        :param application_fee: A fee that will be applied to the charge and transferred
-            to the platform owner's account.
-        :type application_fee: Decimal. Precision is 2; anything more will be ignored.
-        :param capture: Whether or not to immediately capture the charge.
-            When false, the charge issues an authorization (or pre-authorization),
-            and will need to be captured later. Uncaptured charges expire in 7 days.
-            Default is True
-        :type capture: bool
-        :param description: An arbitrary string.
-        :type description: string
-        :param destination: An account to make the charge on behalf of.
-        :type destination: Account
-        :param metadata: A set of key/value pairs useful for storing
-            additional information.
-        :type metadata: dict
-        :param shipping: Shipping information for the charge.
-        :type shipping: dict
         :param source: The source to use for this charge.
             Must be a source attributed to this customer. If None, the customer's
             default source is used. Can be either the id of the source or
             the source object itself.
         :type source: string, Source
-        :param statement_descriptor: An arbitrary string to be displayed on the
-            customer's credit card statement.
-        :type statement_descriptor: string
         """
 
         if not isinstance(amount, Decimal):
             raise ValueError("You must supply a decimal value representing dollars.")
-
-        # TODO: better default detection (should charge in customer default)
-        currency = currency or "usd"
 
         # Convert Source to id
         if source and isinstance(source, StripeModel):
             source = source.id
 
         stripe_charge = Charge._api_create(
+            customer=self.id,
             amount=int(amount * 100),  # Convert dollars into cents
-            currency=currency,
             application_fee=int(application_fee * 100)
             if application_fee
             else None,  # Convert dollars into cents
-            capture=capture,
-            description=description,
-            destination=destination,
-            metadata=metadata,
-            shipping=shipping,
-            customer=self.id,
             source=source,
-            statement_descriptor=statement_descriptor,
-            idempotency_key=idempotency_key,
+            **kwargs
         )
 
         return Charge.sync_from_stripe_data(stripe_charge)
