@@ -38,9 +38,7 @@ Run the commands:
 
     python manage.py migrate
 
-    python manage.py djstripe_init_customers
-
-    python manage.py djstripe_sync_plans_from_stripe
+    python manage.py djstripe_sync_models
 
 See <https://dj-stripe.readthedocs.io/en/latest/stripe_elements_js.html>
 for notes about usage of the Stripe Elements frontend JS library.
