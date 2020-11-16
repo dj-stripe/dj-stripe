@@ -61,10 +61,9 @@ our Discord channel at <https://discord.gg/UJY8fcc>.
 
 ## Get Started!
 
-Ready to contribute? Here's how to set up <span
-class="title-ref">dj-stripe</span> for local development.
+Ready to contribute? Here's how to set up local development.
 
-1.  Fork the <span class="title-ref">dj-stripe</span> repo on GitHub.
+1.  Fork [dj-stripe on Github](https://github.com/dj-stripe/dj-stripe).
 
 2.  Clone your fork locally:
 
@@ -78,29 +77,22 @@ class="title-ref">dj-stripe</span> for local development.
     can be selected by setting this environment variable:
 
         $ export DJSTRIPE_TEST_DB_VENDOR=sqlite
-
-    or :
-
-        $ export DJSTRIPE_TEST_DB_VENDOR=mysql
+        # or: export DJSTRIPE_TEST_DB_VENDOR=mysql
 
     For postgres and mysql, the database host,port,username and password
     can be set with environment variables, see `tests/settings.py`
 
-4.  Install your local copy into a virtualenv. Assuming you have
-    `virtualenvwrapper` installed, this is how you set up your fork for
-    local development:
+4.  Install [Poetry](https://python-poetry.org/) if you do not have it already.
 
-        $ mkvirtualenv dj-stripe
-        $ cd dj-stripe/
-        $ python setup.py develop
+    You can set up a virtual environment with:
 
-5.  Create a branch for local development:
+        $ poetry install
 
-        $ git checkout -b name-of-your-bugfix-or-feature
+    You can then, at any time, open a shell into that environment with:
 
-    Now you can make your changes locally.
+        $ poetry shell
 
-6.  When you're done making changes, check that your changes pass the
+5.  When you're done making changes, check that your changes pass the
     tests. A quick test run can be done as follows:
 
         $ DJSTRIPE_TEST_DB_VENDOR=sqlite pytest --reuse-db
@@ -113,21 +105,20 @@ class="title-ref">dj-stripe</span> for local development.
         $ pip install tox
         $ tox
 
-7.  If your changes altered the models you may need to generate Django
+6.  If your changes altered the models you may need to generate Django
     migrations:
 
         $ DJSTRIPE_TEST_DB_VENDOR=sqlite poetry run ./manage.py makemigrations
 
-8.  Commit your changes and push your branch to GitHub:
+7.  Commit your changes and push your branch to GitHub:
 
         $ git add .
         $ git commit -m "Your detailed description of your changes."
-        $ git push origin name-of-your-bugfix-or-feature
+        $ git push
 
-9.  Submit a pull request through the GitHub website.
+8.  Submit a pull request through the GitHub website.
 
-10. Congratulations, you're now a dj-stripe contributor! Have some &lt;3
-    from us.
+Congratulations, you're now a dj-stripe contributor! Have some ♥ from us.
 
 ## Preferred Django Model Field Types
 
