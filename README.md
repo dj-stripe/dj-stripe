@@ -86,7 +86,7 @@ Assuming the tests are run against PostgreSQL:
 
 # Changelog
 
-[See changelog on Read the Docs](https://dj-stripe.readthedocs.io/en/latest/project/history/).
+[See release notes on Read the Docs](https://dj-stripe.readthedocs.io/en/latest/history/2_4_0/).
 
 # Funding this project
 
