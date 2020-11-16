@@ -1,24 +1,45 @@
-# Django + Stripe Made Easy
+# dj-stripe - Django + Stripe Made Easy
 
--   Subscription management
--   Designed for easy implementation of post-registration subscription
-    forms
--   Single-unit purchases
--   Works with Django &gt;= 2.2
--   Works with Python &gt;= 3.6
--   Built-in migrations
--   Dead-Easy installation
--   Leverages the best of the 3rd party Django package ecosystem
--   `djstripe` namespace so you can have
-    more than one payments related app
--   Documented
--   100% Tested
+## Introduction
 
-# Constraints
+dj-stripe implements all of the Stripe models, for Django. Set up your
+webhook endpoint and start receiving model updates. You will then have
+a copy of all the Stripe models available in Django models, as soon as
+they are updated!
 
-1.  For stripe.com only
-2.  Only use or support well-maintained third-party libraries
-3.  For modern Python and Django
+The full documentation is available [on Read the Docs](https://dj-stripe.readthedocs.io/).
+
+## Features
+
+-   Stripe Core
+-   Stripe Billing
+-   Stripe Cards (JS v2) and Sources (JS v3)
+-   Payment Methods and Payment Intents (SCA support)
+-   Support for multiple accounts and API keys
+-   Stripe Connect (partial support)
+-   Tested with Stripe API `2020-08-27` (see [API versions](api_versions.md))
+
+## Funding and Support
+
+You can now become a sponsor to dj-stripe with [GitHub Sponsors](https://github.com/sponsors/dj-stripe).
+
+If you use dj-stripe commercially, we would encourage you to invest in its continued
+development by [signing up for a paid plan](https://github.com/sponsors/dj-stripe).
+Corporate sponsors [receive priority support and development time](project/support.md).
+
+All contributions through GitHub sponsors flow into our
+[Open Collective](https://opencollective.com/dj-stripe), which holds our funds and keeps
+an open ledger on how donations are spent.
+
+### Our Gold sponsors
+
+<style>
+img[alt="Stripe Logo"] {
+    max-width: 250px;
+}
+</style>
+
+[![Stripe Logo](../logos/stripe_blurple.svg)](https://stripe.com)
 
 <!--
 AUTODOC SETUP: Do not remove the piece of code below.

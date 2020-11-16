@@ -13,8 +13,8 @@
     **Settings changes: Introduction of `DJSTRIPE_FOREIGN_KEY_TO_FIELD`**
 
     You are required to set this new setting in 2.4.0.
-    For more information, checkout
-    [settings](https://dj-stripe.readthedocs.io/en/latest/reference/settings.html).
+    For more information, see
+    [settings](https://dj-stripe.readthedocs.io/en/latest/reference/settings/).
 
 -   Support Django 3.1.
 
@@ -25,7 +25,7 @@
 -   Support multi-item subscriptions.
 
 -   Support for API keys in the database.
-    Check [API keys](https://dj-stripe.readthedocs.io/en/latest/api_keys.html).
+    Check [API keys](https://dj-stripe.readthedocs.io/en/latest/api_keys/).
 
 -   Support for multiple Stripe accounts.
 
@@ -33,6 +33,7 @@
     JSONField over django-jsonfield.
 
 -   Add support for Reporting categories, TaxIds and the following fields:
+
     -   `BalanceTransaction.source`
     -   `InvoiceItem.unit_amount`
     -   `InvoiceItem.unit_amount_decimal`
@@ -41,7 +42,7 @@
     -   `SubscriptionItem.billing_thresholds`
     -   `SubscriptionSchedule.billing_thresholds`
     -   `alipay_account` in `DjstripePaymentMethodType`
-    and updated the following models:
+        and updated the following models:
     -   `Charge`
     -   `FileUploadPurpose`
     -   `SourceTypes`
@@ -53,9 +54,10 @@
 -   Rename PlanBillingScheme to BillingScheme.
 
 -   Remove `Plan.update_name()` and these previously-deprecated fields:
-    - `Customer.business_vat_id`
-    - `Subscription.start`
-    - `Subscription.billing`
+
+    -   `Customer.business_vat_id`
+    -   `Subscription.start`
+    -   `Subscription.billing`
 
 -   Increase minimum stripe-python version to 2.48.0.
 
@@ -387,10 +389,8 @@ Changes from API 2019-03-14:
 
 ### Squashed dev migrations
 
-As per our [migration
-policy](https://dj-stripe.readthedocs.io/en/latest/project/contributing.html#squash-of-unreleased-migrations-on-master)
-unreleased migrations on the master branch (migration numbers &gt;=0004)
-have been squashed.
+As per our [migration policy](contributing.md), unreleased migrations on the master
+branch have been squashed.
 
 If you have been using the 2.1.0dev branch from master, you'll need to
 run the squashed migrations migrations before upgrading to &gt;=2.1.0.

@@ -40,8 +40,8 @@ Run the commands:
 
     python manage.py djstripe_sync_models
 
-See <https://dj-stripe.readthedocs.io/en/latest/stripe_elements_js.html>
-for notes about usage of the Stripe Elements frontend JS library.
+See [here](stripe_elements_js.md) for notes about usage of the Stripe Elements
+frontend JS library.
 
 ## Running Tests
 
