@@ -21,7 +21,7 @@ nav:
   - Sponsors: project/sponsors.md
   - Getting Started:
     - Installation: installation.md
-    - Setting your API keys: api_keys.md
+    - Managing Stripe API Keys: api_keys.md
     - A note on Stripe API Versions: api_versions.md
     - Integrating Stripe Elements: stripe_elements_js.md
   - Release notes:
