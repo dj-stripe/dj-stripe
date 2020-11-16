@@ -176,25 +176,26 @@ to depend on here. For example:
 
 ## DJSTRIPE_USE_NATIVE_JSONFIELD (=False)
 
-Setting this to `True` will make the various dj-stripe JSON fields use
-`django.contrib.postgres.fields.JSONField` instead of the `jsonfield`
-library (which internally uses `text` fields).
+Setting this to `True` will make the various dj-stripe JSON fields use the native
+Django `JSONField` model instead of the `jsonfield` library.
+
+**On Django 3.0 and older**: The `django.contrib.postgres.fields.JSONField` field will
+always be used. A Postgres backend is required (uses
+[jsonb](https://www.postgresql.org/docs/9.6/static/functions-json.html) internally).
+
+**On Django 3.1 and newer**: `django.models.JSONField` will always be used. This field
+type is compatible with all database backends.
+
+Setting this to True is highly recommended. However, if you have already migrated with
+the old fields, migrating to the native JSONField has to be done manually and is not
+currently supported by dj-stripe.
 
 The native Django JSONField uses the postgres
-[jsonb](https://www.postgresql.org/docs/9.6/static/functions-json.html)
+
 column type, which efficiently stores JSON and can be queried far more
 conveniently. Django also supports [querying
 JSONField](https://docs.djangoproject.com/en/1.11/ref/contrib/postgres/fields/#querying-jsonfield)
 with the ORM.
-
-!!! note
-
-    For Django 3.0 and under, this is only supported on Postgres databases.
-    We highly recommend using Django 3.1+, with Postgres as backend.
-
-!!! attention
-
-    **Migrating between native and non-native must be done manually.**
 
 ## DJSTRIPE_WEBHOOK_URL (=r"^webhook/\$")
 
