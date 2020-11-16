@@ -84,6 +84,10 @@ Assuming the tests are run against PostgreSQL:
     createdb djstripe
     pytest
 
+# Changelog
+
+[See changelog on Read the Docs](https://dj-stripe.readthedocs.io/en/latest/project/history/).
+
 # Funding this project
 
 [![Stripe Logo](./docs/logos/stripe_blurple.svg)](https://stripe.com)
