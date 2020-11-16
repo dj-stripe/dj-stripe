@@ -524,7 +524,8 @@ class PaymentMethod(StripeModel):
         related_name="payment_methods",
         help_text=(
             "Customer to which this PaymentMethod is saved. "
-            "This will not be set when the PaymentMethod has not been saved to a Customer."
+            "This will not be set when the PaymentMethod has "
+            "not been saved to a Customer."
         ),
     )
     type = StripeEnumField(
@@ -584,7 +585,9 @@ class PaymentMethod(StripeModel):
     interac_present = JSONField(
         null=True,
         blank=True,
-        help_text="Additional information for payment methods of type `interac_present`",
+        help_text=(
+            "Additional information for payment methods of type `interac_present`"
+        ),
     )
     oxxo = JSONField(
         null=True,
