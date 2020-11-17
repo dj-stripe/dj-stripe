@@ -188,14 +188,11 @@ type is compatible with all database backends.
 
 Setting this to True is highly recommended. However, if you have already migrated with
 the old fields, migrating to the native JSONField has to be done manually and is not
-currently supported by dj-stripe.
+currently supported by dj-stripe. We will eventaully move to exclusively using the native JSONField.
 
-The native Django JSONField uses the postgres
-
-column type, which efficiently stores JSON and can be queried far more
-conveniently. Django also supports [querying
-JSONField](https://docs.djangoproject.com/en/1.11/ref/contrib/postgres/fields/#querying-jsonfield)
-with the ORM.
+The native Django JSONField uses the postgres `jsonb` column type, which efficiently stores
+JSON and can be queried far moreconveniently. Django also supports
+[querying JSONField](https://docs.djangoproject.com/en/1.11/ref/contrib/postgres/fields/#querying-jsonfield) with the ORM.
 
 ## DJSTRIPE_WEBHOOK_URL (=r"^webhook/\$")
 
