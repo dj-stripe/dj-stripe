@@ -3,8 +3,6 @@
 
     :synopsis: dj-stripe - Permissions to be used with the dj-stripe REST API.
 
-.. moduleauthor:: @kavdev, @pydanny
-
 """
 from rest_framework.permissions import BasePermission
 

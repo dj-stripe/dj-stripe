@@ -2,9 +2,6 @@
 .. module:: dj-stripe.tests.test_contrib.test_serializers
     :synopsis: dj-stripe Serializer Tests.
 
-.. moduleauthor:: Philippe Luickx (@philippeluickx)
-.. moduleauthor:: Alex Kavanaugh (@kavdev)
-
 """
 
 from copy import deepcopy

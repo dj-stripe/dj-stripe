@@ -3,8 +3,6 @@
 
     :synopsis: Views for the dj-stripe REST API.
 
-.. moduleauthor:: Philippe Luickx (@philippeluickx)
-
 """
 
 from rest_framework import status

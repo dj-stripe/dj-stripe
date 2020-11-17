@@ -3,8 +3,6 @@
 
     :synopsis: URL routes for the dj-stripe REST API.
 
-.. moduleauthor:: Philippe Luickx (@philippeluickx)
-
 Wire this into the root URLConf this way::
 
     path(

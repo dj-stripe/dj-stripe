@@ -3,8 +3,6 @@
 
     :synopsis: dj-stripe - Serializers to be used with the dj-stripe REST API.
 
-.. moduleauthor:: Philippe Luickx (@philippeluickx)
-
 """
 
 from rest_framework import serializers
