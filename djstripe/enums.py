@@ -205,15 +205,21 @@ class BalanceTransactionStatus(Enum):
 
 
 class BalanceTransactionType(Enum):
+    # https://stripe.com/docs/reports/balance-transaction-types
     adjustment = _("Adjustment")
     advance = _("Advance")
     advance_funding = _("Advance funding")
+    anticipation_repayment = _("Anticipation loan repayment")
     application_fee = _("Application fee")
     application_fee_refund = _("Application fee refund")
+    balance_transfer_inbound = _("Balance transfer (inbound)")
+    balance_transfer_outbound = _("Balance transfer (outbound)")
     charge = _("Charge")
     connect_collection_transfer = _("Connect collection transfer")
+    contribution = _("Charitable contribution")
     issuing_authorization_hold = _("Issuing authorization hold")
     issuing_authorization_release = _("Issuing authorization release")
+    issuing_dispute = _("Issuing dispute")
     issuing_transaction = _("Issuing transaction")
     network_cost = _("Network cost")
     payment = _("Payment")
@@ -227,12 +233,13 @@ class BalanceTransactionType(Enum):
     reserve_transaction = _("Reserve transaction")
     reserved_funds = _("Reserved funds")
     stripe_fee = _("Stripe fee")
-    stripe_fx_fee = _("Stripe fx fee")
+    stripe_fx_fee = _("Stripe currency conversion fee")
     tax_fee = _("Tax fee")
     topup = _("Topup")
     topup_reversal = _("Topup reversal")
     transfer = _("Transfer")
     transfer_cancel = _("Transfer cancel")
+    transfer_failure = _("Transfer failure")
     transfer_refund = _("Transfer refund")
     validation = _("Validation")
 
