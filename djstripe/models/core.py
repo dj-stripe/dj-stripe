@@ -1,4 +1,3 @@
-import warnings
 from decimal import Decimal
 from typing import Optional, Union
 
@@ -334,15 +333,6 @@ class Charge(StripeModel):
         if not status:
             return amount
         return "{amount} ({status})".format(amount=amount, status=status)
-
-    @property
-    def account(self):
-        warnings.warn(
-            "Charge.account is deprecated and will be removed in 2.5.0. "
-            "Use .on_behalf_of or .djstripe_owner_account instead.",
-            DeprecationWarning,
-        )
-        return self.on_behalf_of
 
     @property
     def fee(self):
@@ -1073,52 +1063,6 @@ class Customer(StripeModel):
                     return True
         return False
 
-    def has_active_subscription(self, plan=None):
-        """
-        Checks to see if this customer has an active subscription to the given plan.
-
-        :param plan: The plan for which to check for an active subscription.
-            If plan is None and there exists only one active subscription,
-            this method will check if that subscription is valid.
-            Calling this method with no plan and multiple valid subscriptions
-            for this customer will throw an exception.
-        :type plan: Plan or string (plan ID)
-
-        :returns: True if there exists an active subscription, False otherwise.
-        :throws: TypeError if ``plan`` is None and more than one active subscription
-            exists for this customer.
-        """
-
-        warnings.warn(
-            "has_active_subscription is deprecated in favor of `is_subscribed_to` "
-            "and will be removed in a future release.",
-            DeprecationWarning,
-        )
-
-        if plan is None:
-            valid_subscriptions = self._get_valid_subscriptions()
-
-            if len(valid_subscriptions) == 0:
-                return False
-            elif len(valid_subscriptions) == 1:
-                return True
-            else:
-                raise TypeError(
-                    "plan cannot be None if more than one valid subscription "
-                    "exists for this customer."
-                )
-        else:
-            # Convert Plan to id
-            if isinstance(plan, StripeModel):
-                plan = plan.id
-
-            return any(
-                [
-                    subscription.is_valid()
-                    for subscription in self.subscriptions.filter(plan__id=plan)
-                ]
-            )
-
     def has_any_active_subscription(self):
         """
         Checks to see if this customer has an active subscription to any plan.
@@ -1339,16 +1283,6 @@ class Customer(StripeModel):
             customer=self.id, status="all", **kwargs
         ):
             Subscription.sync_from_stripe_data(stripe_subscription)
-
-    @property
-    def business_vat_id(self) -> str:
-        warnings.warn(
-            "Customer.business_vat_id is deprecated and will be removed in 2.5.0."
-            "Use TaxId model instead.",
-            DeprecationWarning,
-        )
-
-        return ""
 
 
 class Dispute(StripeModel):

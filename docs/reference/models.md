@@ -23,7 +23,7 @@ djstripe.models.Charge
 
 ::: djstripe.models.Customer
     :docstring:
-    :members: api_list api_retrieve get_stripe_dashboard_url get_or_create legacy_cards credits customer_payment_methods pending_charges subscribe charge add_invoice_item add_card add_payment_method purge has_active_subscription has_any_active_subscription active_subscriptions valid_subscriptions subscription can_charge send_invoice retry_unpaid_invoices has_valid_source add_coupon upcoming_invoice sync_from_stripe_data
+    :members: api_list api_retrieve get_stripe_dashboard_url get_or_create legacy_cards credits customer_payment_methods pending_charges subscribe charge add_invoice_item add_card add_payment_method purge has_any_active_subscription active_subscriptions valid_subscriptions subscription can_charge send_invoice retry_unpaid_invoices has_valid_source add_coupon upcoming_invoice sync_from_stripe_data
 
 ### Dispute
 

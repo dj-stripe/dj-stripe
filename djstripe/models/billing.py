@@ -1421,16 +1421,6 @@ class Subscription(StripeModel):
     status = StripeEnumField(
         enum=enums.SubscriptionStatus, help_text="The status of this subscription."
     )
-
-    # deprecated - will be removed in 2.4 - use .default_tax_rates instead
-    tax_percent = StripePercentField(
-        null=True,
-        blank=True,
-        help_text="A positive decimal (with at most two decimal places) "
-        "between 1 and 100. This represents the percentage of the subscription "
-        "invoice subtotal that will be calculated and added as tax to the final "
-        "amount each billing period.",
-    )
     trial_end = StripeDateTimeField(
         null=True,
         blank=True,

@@ -3,78 +3,11 @@ Utility functions related to the djstripe app.
 """
 
 import datetime
-import warnings
 from typing import Optional
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.core.exceptions import ImproperlyConfigured
 from django.db.models.query import QuerySet
 from django.utils import timezone
-
-ANONYMOUS_USER_ERROR_MSG = (
-    "dj-stripe's payment checking mechanisms require the user "
-    "be authenticated before use. Please use django.contrib.auth's "
-    "login_required decorator or a LoginRequiredMixin. "
-    "Please read the warning at "
-    "http://dj-stripe.readthedocs.org/en/latest/usage.html#ongoing-subscriptions."
-)
-
-
-def subscriber_has_active_subscription(subscriber, price=None, plan=None):
-    """
-    Helper function to check if a subscriber has an active subscription.
-
-    Throws TypeError if both price and plan are defined.
-
-    Throws improperlyConfigured if the subscriber is an instance of AUTH_USER_MODEL
-    and get_user_model().is_anonymous == True.
-
-    Activate subscription rules (or):
-        * customer has active subscription
-
-    If the subscriber is an instance of AUTH_USER_MODEL, active subscription rules (or):
-        * customer has active subscription
-        * user.is_superuser
-        * user.is_staff
-
-    If price and plan are None and there exists only one subscription, this method will
-    check if that subscription is active. Calling this method with no price, no plan and
-    multiple subscriptions will throw an exception.
-
-    :param subscriber: The subscriber for which to check for an active subscription.
-    :type subscriber: dj-stripe subscriber
-    :param price: The price for which to check for an active subscription.
-    :type price: Price or string (price ID)
-    :param plan: The plan for which to check for an active subscription.
-    :type plan: Plan or string (plan ID)
-    """
-
-    warnings.warn(
-        "The subscriber_has_active_subscription utility function, and "
-        "SubscriptionPaymentMiddleware, will be removed in dj-stripe 2.5.0.",
-        DeprecationWarning,
-    )
-
-    if price and plan:
-        raise TypeError("price and plan arguments cannot both be defined.")
-    price = price or plan
-
-    try:
-        if subscriber.is_anonymous:
-            raise ImproperlyConfigured(ANONYMOUS_USER_ERROR_MSG)
-    except AttributeError:
-        pass
-
-    if isinstance(subscriber, get_user_model()):
-        if subscriber.is_superuser or subscriber.is_staff:
-            return True
-    from .models import Customer
-
-    customer, created = Customer.get_or_create(subscriber)
-    if created or not customer.has_active_subscription(price):
-        return False
-    return True
 
 
 def get_supported_currency_choices(api_key):

@@ -10,8 +10,4 @@ def empty_view(request):
 urlpatterns = [
     path("", empty_view, name="test_url_name"),
     path("djstripe/", include("djstripe.urls", namespace="djstripe")),
-    path(
-        "rest_djstripe/",
-        include("djstripe.contrib.rest_framework.urls", namespace="rest_djstripe"),
-    ),
 ]

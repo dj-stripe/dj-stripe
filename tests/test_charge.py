@@ -788,13 +788,12 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         self.assert_fks(charge, expected_blank_fks=self.default_expected_blank_fks)
 
     @patch.object(target=Charge, attribute="source", autospec=True)
-    @patch.object(target=Charge, attribute="account", autospec=True)
     @patch(
         target="djstripe.models.payment_methods.DjstripePaymentMethod", autospec=True
     )
     @patch(target="djstripe.models.account.Account", autospec=True)
     def test__attach_objects_hook_missing_source_data(
-        self, mock_account, mock_payment_method, mock_charge_account, mock_charge_source
+        self, mock_account, mock_payment_method, mock_charge_source
     ):
         """
         Make sure we handle the case where the source data is empty or insufficient.

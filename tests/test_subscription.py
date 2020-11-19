@@ -2,7 +2,6 @@
 dj-stripe Subscription Model Tests.
 """
 from copy import deepcopy
-from decimal import Decimal
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
@@ -124,7 +123,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertTrue(subscription.is_status_temporarily_current())
         self.assertTrue(subscription.is_valid())
         self.assertTrue(subscription in self.customer.active_subscriptions)
-        self.assertTrue(self.customer.has_active_subscription())
         self.assertTrue(self.customer.is_subscribed_to(product))
         self.assertTrue(self.customer.has_any_active_subscription())
 
@@ -151,7 +149,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertFalse(subscription.is_status_temporarily_current())
         self.assertTrue(subscription.is_valid())
         self.assertTrue(subscription in self.customer.active_subscriptions)
-        self.assertTrue(self.customer.has_active_subscription())
         self.assertTrue(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertTrue(self.customer.has_any_active_subscription())
 
@@ -179,7 +176,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertFalse(subscription.is_status_temporarily_current())
         self.assertFalse(subscription.is_valid())
         self.assertFalse(subscription in self.customer.active_subscriptions)
-        self.assertFalse(self.customer.has_active_subscription())
         self.assertFalse(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertFalse(self.customer.has_any_active_subscription())
 
@@ -218,7 +214,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         product = Product.sync_from_stripe_data(deepcopy(FAKE_PRODUCT))
 
         self.assertNotEqual(None, extended_subscription.trial_end)
-        self.assertTrue(self.customer.has_active_subscription())
         self.assertTrue(self.customer.is_subscribed_to(product))
         self.assertTrue(self.customer.has_any_active_subscription())
 
@@ -251,7 +246,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         with self.assertRaises(ValueError):
             subscription.extend(timezone.timedelta(days=-30))
 
-        self.assertFalse(self.customer.has_active_subscription())
         self.assertFalse(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertFalse(self.customer.has_any_active_subscription())
 
@@ -291,7 +285,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(
             new_trial_end.replace(microsecond=0), extended_subscription.trial_end
         )
-        self.assertTrue(self.customer.has_active_subscription())
         self.assertTrue(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertTrue(self.customer.has_any_active_subscription())
 
@@ -326,36 +319,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         new_subscription = subscription.update(quantity=4)
 
         self.assertEqual(4, new_subscription.quantity)
-
-        self.assert_fks(
-            subscription, expected_blank_fks=self.default_expected_blank_fks
-        )
-
-    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch("stripe.Subscription.retrieve", autospec=True)
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    def test_update_set_empty_value(
-        self,
-        customer_retrieve_mock,
-        subscription_retrieve_mock,
-        product_retrieve_mock,
-        plan_retrieve_mock,
-    ):
-        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_fake.update({"tax_percent": Decimal(20.0)})
-        subscription_retrieve_mock.return_value = subscription_fake
-        subscription = Subscription.sync_from_stripe_data(subscription_fake)
-
-        self.assertEqual(Decimal(20.0), subscription.tax_percent)
-
-        new_subscription = subscription.update(tax_percent=Decimal(0.0))
-
-        self.assertEqual(Decimal(0.0), new_subscription.tax_percent)
 
         self.assert_fks(
             subscription, expected_blank_fks=self.default_expected_blank_fks
@@ -425,7 +388,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
             canceled_subscription_fake  # retrieve().delete()
         )
 
-        self.assertTrue(self.customer.has_active_subscription())
         self.assertTrue(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertEqual(self.customer.active_subscriptions.count(), 1)
         self.assertTrue(self.customer.has_any_active_subscription())
@@ -438,7 +400,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertFalse(new_subscription.is_valid())
         self.assertFalse(new_subscription.is_status_temporarily_current())
         self.assertFalse(new_subscription in self.customer.active_subscriptions)
-        self.assertFalse(self.customer.has_active_subscription())
         self.assertFalse(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertFalse(self.customer.has_any_active_subscription())
 
@@ -477,7 +438,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
             canceled_subscription_fake  # retrieve().delete()
         )
 
-        self.assertTrue(self.customer.has_active_subscription())
         self.assertTrue(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertTrue(self.customer.has_any_active_subscription())
         self.assertEqual(self.customer.active_subscriptions.count(), 1)
@@ -493,7 +453,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertNotEqual(new_subscription.canceled_at, new_subscription.ended_at)
         self.assertTrue(new_subscription.is_valid())
         self.assertTrue(new_subscription.is_status_temporarily_current())
-        self.assertTrue(self.customer.has_active_subscription())
         self.assertTrue(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertTrue(self.customer.has_any_active_subscription())
 
@@ -530,7 +489,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
             canceled_subscription_fake  # retrieve().delete()
         )
 
-        self.assertTrue(self.customer.has_active_subscription())
         self.assertTrue(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertTrue(self.customer.has_any_active_subscription())
 
@@ -540,7 +498,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(False, new_subscription.cancel_at_period_end)
         self.assertEqual(new_subscription.canceled_at, new_subscription.ended_at)
         self.assertFalse(new_subscription.is_valid())
-        self.assertFalse(self.customer.has_active_subscription())
         self.assertFalse(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertFalse(self.customer.has_any_active_subscription())
 
@@ -577,7 +534,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         canceled_subscription_fake["canceled_at"] = datetime_to_unix(timezone.now())
         subscription_retrieve_mock.return_value = canceled_subscription_fake
 
-        self.assertTrue(self.customer.has_active_subscription())
         self.assertTrue(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertTrue(self.customer.has_any_active_subscription())
 

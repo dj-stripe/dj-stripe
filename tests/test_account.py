@@ -29,23 +29,6 @@ class TestAccount(AssertStripeFksMixin, TestCase):
         side_effect=[deepcopy(FAKE_FILEUPLOAD_ICON), deepcopy(FAKE_FILEUPLOAD_LOGO)],
         autospec=True,
     )
-    def test_get_connected_account_from_token(
-        self, fileupload_retrieve_mock, account_retrieve_mock
-    ):
-        account_retrieve_mock.return_value = deepcopy(FAKE_ACCOUNT)
-
-        account = Account.get_connected_account_from_token("fake_token")
-
-        account_retrieve_mock.assert_called_once_with(api_key="fake_token")
-
-        self.assert_fks(account, expected_blank_fks={})
-
-    @patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
-    @patch(
-        "stripe.FileUpload.retrieve",
-        side_effect=[deepcopy(FAKE_FILEUPLOAD_ICON), deepcopy(FAKE_FILEUPLOAD_LOGO)],
-        autospec=True,
-    )
     def test_get_default_account(self, fileupload_retrieve_mock, account_retrieve_mock):
         account_retrieve_mock.return_value = deepcopy(FAKE_ACCOUNT)
 

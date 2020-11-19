@@ -307,7 +307,6 @@ class CustomerAdmin(StripeModelAdmin):
         "default_source",
         "coupon",
         "balance",
-        "business_vat_id",
     )
     list_select_related = ("subscriber", "default_source", "coupon")
     list_filter = (CustomerHasSourceListFilter, CustomerSubscriptionStatusListFilter)

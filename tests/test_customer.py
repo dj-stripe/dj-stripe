@@ -1592,44 +1592,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         self.assertEqual(fake_subscriptions[0]["id"], self.customer.subscription.id)
 
-    @patch("stripe.Subscription.create", autospec=True)
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    def test_has_active_subscription_with_unspecified_price_with_multiple_subscriptions(
-        self, product_retrieve_mock, customer_retrieve_mock, subscription_create_mock
-    ):
-        price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
-
-        self.assert_fks(price, expected_blank_fks={})
-
-        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_fake["current_period_end"] = datetime_to_unix(
-            timezone.now() + timezone.timedelta(days=7)
-        )
-
-        subscription_fake_duplicate = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_fake_duplicate["current_period_end"] = datetime_to_unix(
-            timezone.now() + timezone.timedelta(days=7)
-        )
-        subscription_fake_duplicate["id"] = "sub_6lsC8pt7IcF8jd"
-
-        subscription_create_mock.side_effect = [
-            subscription_fake,
-            subscription_fake_duplicate,
-        ]
-
-        self.customer.subscribe(price=price, charge_immediately=False)
-        self.customer.subscribe(price=price, charge_immediately=False)
-
-        self.assertEqual(2, self.customer.subscriptions.count())
-
-        with self.assertRaises(TypeError):
-            self.customer.has_active_subscription()
-
     @patch(
         "djstripe.models.InvoiceItem.sync_from_stripe_data",
         return_value="pancakes",
@@ -1972,90 +1934,6 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
         )
 
         self.assertEqual(fake_subscriptions[0]["id"], self.customer.subscription.id)
-
-    @patch("stripe.Subscription.create", autospec=True)
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    def test_has_active_subscription_with_unspecified_plan_with_multiple_subscriptions(
-        self, product_retrieve_mock, customer_retrieve_mock, subscription_create_mock
-    ):
-        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-
-        self.assert_fks(plan, expected_blank_fks={})
-
-        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_fake["current_period_end"] = datetime_to_unix(
-            timezone.now() + timezone.timedelta(days=7)
-        )
-
-        subscription_fake_duplicate = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_fake_duplicate["current_period_end"] = datetime_to_unix(
-            timezone.now() + timezone.timedelta(days=7)
-        )
-        subscription_fake_duplicate["id"] = "sub_6lsC8pt7IcF8jd"
-
-        subscription_create_mock.side_effect = [
-            subscription_fake,
-            subscription_fake_duplicate,
-        ]
-
-        self.customer.subscribe(plan=plan, charge_immediately=False)
-        self.customer.subscribe(plan=plan, charge_immediately=False)
-
-        self.assertEqual(2, self.customer.subscriptions.count())
-
-        with self.assertRaises(TypeError):
-            self.customer.has_active_subscription()
-
-    @patch("stripe.Subscription.create", autospec=True)
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    def test_has_active_subscription_with_plan(
-        self, product_retrieve_mock, customer_retrieve_mock, subscription_create_mock
-    ):
-        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-
-        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_fake["current_period_end"] = datetime_to_unix(
-            timezone.now() + timezone.timedelta(days=7)
-        )
-
-        subscription_create_mock.return_value = subscription_fake
-
-        self.customer.subscribe(plan=plan, charge_immediately=False)
-
-        self.customer.has_active_subscription(plan=plan)
-
-    @patch("stripe.Subscription.create", autospec=True)
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    def test_has_active_subscription_with_plan_string(
-        self, product_retrieve_mock, customer_retrieve_mock, subscription_create_mock
-    ):
-        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-
-        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_fake["current_period_end"] = datetime_to_unix(
-            timezone.now() + timezone.timedelta(days=7)
-        )
-
-        subscription_create_mock.return_value = subscription_fake
-
-        self.customer.subscribe(plan=plan, charge_immediately=False)
-
-        self.customer.has_active_subscription(plan=plan.id)
 
     @patch(
         "stripe.Plan.retrieve",
