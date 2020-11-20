@@ -171,7 +171,7 @@ djstripe.models.Charge
 
 ::: djstripe.models.Account
     :docstring:
-    :members: api_list api_retrieve get_stripe_dashboard_url get_connected_account_from_token get_default_account sync_from_stripe_data
+    :members: api_list api_retrieve get_stripe_dashboard_url get_default_account sync_from_stripe_data
 
 ### Application Fee
 
