@@ -2,7 +2,6 @@
 dj-stripe Price model tests
 """
 from copy import deepcopy
-from decimal import Decimal
 from unittest.mock import patch
 
 from django.test import TestCase
@@ -141,10 +140,10 @@ class PriceTest(AssertStripeFksMixin, TestCase):
             stripe_account=None,
         )
         price = Price.sync_from_stripe_data(stripe_price)
-        assert price.amount_in_cents == price.unit_amount / 100
-        assert isinstance(price.amount_in_cents, float)
 
         self.assert_fks(price, expected_blank_fks={"djstripe.Customer.coupon"})
+
+        assert price.human_readable_price == "$20.00 USD/month"
 
     @patch("stripe.Price.retrieve", autospec=True)
     def test_stripe_tier_price(self, price_retrieve_mock):
@@ -187,7 +186,7 @@ class HumanReadablePriceTest(TestCase):
         price = Price.objects.create(
             id="price-test-one-time",
             active=True,
-            unit_amount=20,
+            unit_amount=2000,
             currency="usd",
             product=self.stripe_product,
         )
@@ -211,7 +210,7 @@ class HumanReadablePriceTest(TestCase):
         price = Price.objects.create(
             id="price-test-10-usd-weekly",
             active=True,
-            unit_amount=10,
+            unit_amount=1000,
             currency="usd",
             product=self.stripe_product,
             recurring=dict(
@@ -225,7 +224,7 @@ class HumanReadablePriceTest(TestCase):
         price = Price.objects.create(
             id="price-test-10-usd-2w",
             active=True,
-            unit_amount=10,
+            unit_amount=1000,
             currency="usd",
             product=self.stripe_product,
             recurring={
@@ -239,7 +238,7 @@ class HumanReadablePriceTest(TestCase):
         price = Price.objects.create(
             id="price-test-499-usd-monthly",
             active=True,
-            unit_amount=Decimal("4.99"),
+            unit_amount=499,
             currency="usd",
             product=self.stripe_product,
             recurring=dict(
@@ -253,7 +252,7 @@ class HumanReadablePriceTest(TestCase):
         price = Price.objects.create(
             id="price-test-25-usd-6m",
             active=True,
-            unit_amount=25,
+            unit_amount=2500,
             currency="usd",
             product=self.stripe_product,
             recurring=dict(
@@ -267,7 +266,7 @@ class HumanReadablePriceTest(TestCase):
         price = Price.objects.create(
             id="price-test-10-usd-yearly",
             active=True,
-            unit_amount=10,
+            unit_amount=1000,
             currency="usd",
             product=self.stripe_product,
             recurring=dict(
