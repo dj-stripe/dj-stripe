@@ -2096,17 +2096,13 @@ class Price(StripeModel):
 
         return price
 
-    @property
-    def amount_in_cents(self):
-        return float(self.unit_amount / 100)
-
     def __str__(self):
         return self.nickname or self.id
 
     @property
     def human_readable_price(self):
-        amount = get_friendly_currency_amount(self.unit_amount, self.currency)
-        format_args = dict(amount=amount)
+        amount = get_friendly_currency_amount(self.unit_amount / 100, self.currency)
+        format_args = {"amount": amount}
 
         if self.recurring:
             interval_count = self.recurring["interval_count"]
