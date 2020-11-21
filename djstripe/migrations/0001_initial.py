@@ -2709,6 +2709,7 @@ class Migration(migrations.Migration):
             model_name="customer",
             name="default_source",
             field=djstripe.fields.PaymentMethodForeignKey(
+                blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="customers",
