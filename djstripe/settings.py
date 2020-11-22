@@ -9,7 +9,7 @@ from django.utils.module_loading import import_string
 
 from .checks import validate_stripe_api_version
 
-DEFAULT_STRIPE_API_VERSION = "2020-03-02"
+DEFAULT_STRIPE_API_VERSION = "2020-08-27"
 
 
 def get_callback_function(setting_name, default=None):
