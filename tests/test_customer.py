@@ -316,19 +316,22 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         )
 
     @patch("stripe.Customer.retrieve", autospec=True)
-    @patch("stripe.PaymentMethod.retrieve", return_value=deepcopy(FAKE_PAYMENT_METHOD_I))
+    @patch(
+        "stripe.PaymentMethod.retrieve", return_value=deepcopy(FAKE_PAYMENT_METHOD_I)
+    )
     def test_customer_sync_default_payment_method_string(
         self, attach_mock, customer_retrieve_mock
     ):
         Customer.objects.all().delete()
         PaymentMethod.objects.all().delete()
         customer_fake = deepcopy(FAKE_CUSTOMER)
-        customer_fake["invoice_settings"]["default_payment_method"] = FAKE_PAYMENT_METHOD_I["id"]
+        customer_fake["invoice_settings"]["default_payment_method"] = (
+            FAKE_PAYMENT_METHOD_I["id"])
         customer_retrieve_mock.return_value = customer_fake
 
         customer = Customer.sync_from_stripe_data(customer_fake)
         self.assertEqual(customer.default_payment_method.id,
-            customer_fake["invoice_settings"]["default_payment_method"])
+                         customer_fake["invoice_settings"]["default_payment_method"])
         self.assertEqual(customer.payment_methods.count(), 1)
 
         self.assert_fks(
