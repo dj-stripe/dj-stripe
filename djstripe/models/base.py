@@ -647,7 +647,8 @@ class StripeModel(models.Model):
 
         if "customer" in data and data["customer"]:
             return target_cls._get_or_create_from_stripe_object(
-                data, "customer", current_ids=current_ids)[0]
+                data, "customer", current_ids=current_ids
+            )[0]
 
     @classmethod
     def _stripe_object_to_default_tax_rates(cls, target_cls, data):
