@@ -308,7 +308,7 @@ class Charge(StripeModel):
             self.fraud_details and list(self.fraud_details.values())[0] == "fraudulent"
         )
 
-    def _attach_objects_hook(self, cls, data):
+    def _attach_objects_hook(self, cls, data, current_ids=None):
         from .payment_methods import DjstripePaymentMethod
 
         # Set the account on this object.
@@ -1292,7 +1292,7 @@ class Customer(StripeModel):
         if save:
             self.save()
 
-    def _attach_objects_hook(self, cls, data):
+    def _attach_objects_hook(self, cls, data, current_ids=None):
         # When we save a customer to Stripe, we add a reference to its Django PK
         # in the `django_account` key. If we find that, we re-attach that PK.
         subscriber_key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
@@ -1420,7 +1420,7 @@ class Event(StripeModel):
     def str_parts(self):
         return ["type={type}".format(type=self.type)] + super().str_parts()
 
-    def _attach_objects_hook(self, cls, data):
+    def _attach_objects_hook(self, cls, data, current_ids=None):
         if self.api_version is None:
             # as of api version 2017-02-14, the account.application.deauthorized
             # event sends None as api_version.

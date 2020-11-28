@@ -473,8 +473,9 @@ class Source(StripeModel):
         data["source_data"] = data[data["type"]]
         return data
 
-    def _attach_objects_hook(self, cls, data):
-        customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
+    def _attach_objects_hook(self, cls, data, current_ids=None):
+        customer = cls._stripe_object_to_customer(
+            target_cls=Customer, data=data, current_ids=current_ids)
         if customer:
             self.customer = customer
         else:
@@ -542,8 +543,11 @@ class PaymentMethod(StripeModel):
 
     stripe_class = stripe.PaymentMethod
 
-    def _attach_objects_hook(self, cls, data):
-        customer = cls._stripe_object_to_customer(target_cls=Customer, data=data)
+    def _attach_objects_hook(self, cls, data, current_ids=None):
+        customer = None
+        if current_ids is None or data.get("customer") not in current_ids:
+            customer = cls._stripe_object_to_customer(target_cls=Customer, data=data, current_ids=current_ids)
+
         if customer:
             self.customer = customer
         else:
