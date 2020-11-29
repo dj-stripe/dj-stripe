@@ -1974,7 +1974,7 @@ class Price(StripeModel):
     """
 
     stripe_class = stripe.Price
-    # expand_fields = ["tiers"]
+    expand_fields = ["tiers"]
     stripe_dashboard_item_name = "prices"
 
     active = models.BooleanField(
