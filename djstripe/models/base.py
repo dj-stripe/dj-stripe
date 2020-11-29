@@ -429,7 +429,7 @@ class StripeModel(models.Model):
         """
         return "object" in data and data["object"] == cls.stripe_class.OBJECT_NAME
 
-    def _attach_objects_hook(self, cls, data):
+    def _attach_objects_hook(self, cls, data, current_ids=None):
         """
         Gets called by this object's create and sync methods just before save.
         Use this to populate fields before the model is saved.
@@ -437,6 +437,8 @@ class StripeModel(models.Model):
         :param cls: The target class for the instantiated object.
         :param data: The data dictionary received from the Stripe API.
         :type data: dict
+        :param current_ids: stripe ids of objects that are currently being processed
+        :type current_ids: set
         """
 
         pass
@@ -507,7 +509,7 @@ class StripeModel(models.Model):
                 stripe_account=stripe_account,
             )
         )
-        instance._attach_objects_hook(cls, data)
+        instance._attach_objects_hook(cls, data, current_ids=current_ids)
 
         if save:
             instance.save(force_insert=True)
@@ -631,7 +633,7 @@ class StripeModel(models.Model):
             return cls.stripe_objects.get(id=id_), False
 
     @classmethod
-    def _stripe_object_to_customer(cls, target_cls, data):
+    def _stripe_object_to_customer(cls, target_cls, data, current_ids=None):
         """
         Search the given manager for the Customer matching this object's
         ``customer`` field.
@@ -639,10 +641,14 @@ class StripeModel(models.Model):
         :type target_cls: Customer
         :param data: stripe object
         :type data: dict
+        :param current_ids: stripe ids of objects that are currently being processed
+        :type current_ids: set
         """
 
         if "customer" in data and data["customer"]:
-            return target_cls._get_or_create_from_stripe_object(data, "customer")[0]
+            return target_cls._get_or_create_from_stripe_object(
+                data, "customer", current_ids=current_ids
+            )[0]
 
     @classmethod
     def _stripe_object_to_default_tax_rates(cls, target_cls, data):
@@ -854,7 +860,7 @@ class StripeModel(models.Model):
             record_data = cls._stripe_object_to_record(data)
             for attr, value in record_data.items():
                 setattr(instance, attr, value)
-            instance._attach_objects_hook(cls, data)
+            instance._attach_objects_hook(cls, data, current_ids=current_ids)
             instance.save()
             instance._attach_objects_post_save_hook(cls, data)
 
