@@ -268,16 +268,20 @@ class Charge(StripeModel):
         "this attribute will still be false.",
     )
     # TODO: review (requires Review model)
-    shipping = JSONField(null=True, help_text="Shipping information for the charge")
+    shipping = JSONField(
+        null=True, blank=True, help_text="Shipping information for the charge"
+    )
     source = PaymentMethodForeignKey(
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
         related_name="charges",
         help_text="The source used for this charge.",
     )
     source_transfer = StripeForeignKey(
         "Transfer",
         null=True,
+        blank=True,
         on_delete=models.CASCADE,
         help_text="The transfer which created this charge. Only present if the "
         "charge came from another Stripe account.",
@@ -307,10 +311,13 @@ class Charge(StripeModel):
     )
     transfer = StripeForeignKey(
         "Transfer",
-        null=True,
         on_delete=models.CASCADE,
-        help_text="The transfer to the `destination` account (only applicable "
-        "if the charge was created using the `destination` parameter).",
+        null=True,
+        blank=True,
+        help_text=(
+            "The transfer to the `destination` account (only applicable if "
+            "the charge was created using the `destination` parameter)."
+        ),
     )
     transfer_data = JSONField(
         null=True,

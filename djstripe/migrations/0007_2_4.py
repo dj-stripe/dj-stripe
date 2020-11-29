@@ -1074,6 +1074,7 @@ class Migration(migrations.Migration):
             field=djstripe.fields.StripeForeignKey(
                 help_text="The transfer which created this charge. Only present if the charge came from another Stripe account.",
                 null=True,
+                blank=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="+",
                 to="djstripe.transfer",
@@ -1133,6 +1134,7 @@ class Migration(migrations.Migration):
             field=djstripe.fields.StripeForeignKey(
                 help_text="The transfer to the `destination` account (only applicable if the charge was created using the `destination` parameter).",
                 null=True,
+                blank=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 to="djstripe.transfer",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,

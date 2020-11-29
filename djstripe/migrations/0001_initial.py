@@ -526,7 +526,9 @@ class Migration(migrations.Migration):
                 (
                     "shipping",
                     djstripe.fields.JSONField(
-                        help_text="Shipping information for the charge", null=True
+                        help_text="Shipping information for the charge",
+                        null=True,
+                        blank=True,
                     ),
                 ),
                 (
@@ -2769,6 +2771,7 @@ class Migration(migrations.Migration):
             field=djstripe.fields.PaymentMethodForeignKey(
                 help_text="The source used for this charge.",
                 null=True,
+                blank=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="charges",
                 to="djstripe.paymentmethod",
