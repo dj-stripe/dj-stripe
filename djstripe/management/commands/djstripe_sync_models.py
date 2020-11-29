@@ -120,19 +120,25 @@ class Command(BaseCommand):
         :param model:
         :return: Sequence[dict]
         """
+        all_list_kwargs = (
+            [{"expand": [f"data.{k}" for k in model.expand_fields]}]
+            if model.expand_fields
+            else []
+        )
         if model is models.PaymentMethod:
             # special case
-            all_list_kwargs = (
-                {"customer": stripe_customer.id, "type": "card"}
-                for stripe_customer in models.Customer.api_list()
+            all_list_kwargs.extend(
+                (
+                    {"customer": stripe_customer.id, "type": "card"}
+                    for stripe_customer in models.Customer.api_list()
+                )
             )
         elif model is models.SubscriptionItem:
-            all_list_kwargs = (
-                {"subscription": subscription.id}
-                for subscription in models.Subscription.api_list()
+            all_list_kwargs.extend(
+                (
+                    {"subscription": subscription.id}
+                    for subscription in models.Subscription.api_list()
+                )
             )
-        else:
-            # one empty dict so we iterate once
-            all_list_kwargs = [{}]
 
         return all_list_kwargs
