@@ -434,7 +434,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         customer_retrieve_mock.assert_called_with(
             id=self.customer.id,
             api_key=STRIPE_SECRET_KEY,
-            expand=["default_source"],
+            expand=ANY,
             stripe_account=None,
         )
         self.assertEqual(3, customer_retrieve_mock.call_count)
@@ -451,7 +451,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         customer_retrieve_mock.assert_called_once_with(
             id=self.customer.id,
             api_key=STRIPE_SECRET_KEY,
-            expand=["default_source"],
+            expand=ANY,
             stripe_account=None,
         )
 
@@ -651,7 +651,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.customer.add_coupon(FAKE_COUPON["id"])
         customer_retrieve_mock.assert_called_once_with(
             api_key=STRIPE_SECRET_KEY,
-            expand=["default_source"],
+            expand=ANY,
             id=FAKE_CUSTOMER["id"],
             stripe_account=None,
         )
@@ -680,7 +680,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         customer_retrieve_mock.assert_called_once_with(
             api_key=STRIPE_SECRET_KEY,
-            expand=["default_source"],
+            expand=ANY,
             id=FAKE_CUSTOMER["id"],
             stripe_account=None,
         )

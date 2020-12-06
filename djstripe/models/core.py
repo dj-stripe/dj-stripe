@@ -559,7 +559,7 @@ class Customer(StripeModel):
     """
 
     stripe_class = stripe.Customer
-    expand_fields = ["default_source"]
+    expand_fields = ["default_source", "sources"]
     stripe_dashboard_item_name = "customers"
 
     address = JSONField(null=True, blank=True, help_text="The customer's address.")
