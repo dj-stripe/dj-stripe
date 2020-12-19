@@ -1398,6 +1398,14 @@ class Subscription(StripeModel):
         help_text="The plan associated with this subscription. This value will be "
         "`null` for multi-plan subscriptions",
     )
+    proration_behavior = StripeEnumField(
+        enum=enums.SubscriptionProrationBehavior,
+        help_text="Determines how to handle prorations when the billing cycle "
+        "changes (e.g., when switching plans, resetting billing_cycle_anchor=now "
+        ", or starting a trial), or if an item’s quantity changes.",
+        null=True,
+        blank=True,
+    )
     quantity = models.IntegerField(
         null=True,
         blank=True,
@@ -1473,7 +1481,14 @@ class Subscription(StripeModel):
         if plan is not None and isinstance(plan, StripeModel):
             plan = plan.id
 
-        stripe_subscription = self._api_update(plan=plan, prorate=prorate, **kwargs)
+        if djstripe_settings.PRORATION_BEHAVIOR:
+            behavior = djstripe_settings.PRORATION_BEHAVIOR
+        else:
+            behavior = "create_prorations" if prorate else "none"
+
+        stripe_subscription = self._api_update(
+            plan=plan, proration_behavior=behavior, **kwargs
+        )
 
         return Subscription.sync_from_stripe_data(stripe_subscription)
 

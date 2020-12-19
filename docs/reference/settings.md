@@ -70,7 +70,15 @@ The function MUST return a string suitably random for the object_type/action pai
 usable in the Stripe `Idempotency-Key` HTTP header. For more information, see the
 [stripe documentation](https://stripe.com/docs/upgrades).
 
+## DJSTRIPE_PRORATION_BEHAVIOR (=None)
+
+For more information, see the [stripe documentation](https://stripe.com/docs/billing/subscriptions/billing-cycle#prorations)
+
 ## DJSTRIPE_PRORATION_POLICY (=False)
+
+!!! warning
+
+    This setting is deprecated. Use DJSTRIPE_PRORATION_BEHAVIOR instead.
 
 By default, plans are not prorated in dj-stripe. Concretely, this is how this
 translates:

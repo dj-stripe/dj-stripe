@@ -66,6 +66,7 @@ get_idempotency_key = get_callback_function(
 USE_NATIVE_JSONFIELD = getattr(settings, "DJSTRIPE_USE_NATIVE_JSONFIELD", False)
 
 PRORATION_POLICY = getattr(settings, "DJSTRIPE_PRORATION_POLICY", False)
+PRORATION_BEHAVIOR = getattr(settings, "DJSTRIPE_PRORATION_BEHAVIOR", None)
 CANCELLATION_AT_PERIOD_END = not getattr(settings, "DJSTRIPE_PRORATION_POLICY", False)
 
 DJSTRIPE_WEBHOOK_URL = getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
