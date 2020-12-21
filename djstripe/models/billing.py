@@ -1440,7 +1440,7 @@ class Subscription(StripeModel):
     def update(
         self,
         plan: Union[StripeModel, str] = None,
-        prorate=djstripe_settings.PRORATION_POLICY,
+        prorate: bool = None,
         **kwargs,
     ):
         """
@@ -1461,7 +1461,23 @@ class Subscription(StripeModel):
         if plan is not None and isinstance(plan, StripeModel):
             plan = plan.id
 
-        stripe_subscription = self._api_update(plan=plan, prorate=prorate, **kwargs)
+        if "proration_behavior" not in kwargs:
+            if prorate is not None:
+                warnings.warn(
+                    "The `prorate` parameter to Subscription.update() is deprecated "
+                    "by Stripe. Use `proration_behavior` instead.\n"
+                    "Read more: "
+                    "https://stripe.com/docs/billing/subscriptions/prorations"
+                )
+            else:
+                prorate = djstripe_settings.PRORATION_POLICY
+
+            if prorate:
+                kwargs.setdefault("proration_behavior", "create_prorations")
+            else:
+                kwargs.setdefault("proration_behavior", "none")
+
+        stripe_subscription = self._api_update(plan=plan, **kwargs)
 
         return Subscription.sync_from_stripe_data(stripe_subscription)
 
@@ -1483,7 +1499,7 @@ class Subscription(StripeModel):
 
         period_end += delta
 
-        return self.update(prorate=False, trial_end=period_end)
+        return self.update(proration_behavior="none", trial_end=period_end)
 
     def cancel(self, at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END):
         """
