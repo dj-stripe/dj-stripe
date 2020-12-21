@@ -691,6 +691,12 @@ class SubmitTypeStatus(Enum):
     pay = _("pay")
 
 
+class SubscriptionProrationBehavior(Enum):
+    create_prorations = _("Create prorations")
+    always_invoice = _("Always invoice")
+    none = _("None")
+
+
 class SubscriptionScheduleEndBehavior(Enum):
     release = _("Release")
     cancel = _("Cancel")
