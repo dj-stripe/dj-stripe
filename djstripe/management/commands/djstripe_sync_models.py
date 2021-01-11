@@ -118,7 +118,7 @@ class Command(BaseCommand):
         This allows us to sync models that require parameters to api_list
 
         :param model:
-        :return: Sequence[dict]
+        :return: Sequence[Dict[str, List[str]]]
         """
 
         if model.expand_fields:
