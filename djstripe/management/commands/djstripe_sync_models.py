@@ -120,11 +120,16 @@ class Command(BaseCommand):
         :param model:
         :return: Sequence[dict]
         """
-        all_list_kwargs = (
-            [{"expand": [f"data.{k}" for k in model.expand_fields]}]
-            if model.expand_fields
-            else []
-        )
+
+        if model.expand_fields:
+            all_list_kwargs = [
+                {"expand": [f"data.{k}" for k in model.expand_fields]}
+            ]
+        else:
+            # Default to an empty dictionary so that models without fields to expand
+            # are listed
+            all_list_kwargs = [{}]
+
         if model is models.PaymentMethod:
             # special case
             all_list_kwargs.extend(
