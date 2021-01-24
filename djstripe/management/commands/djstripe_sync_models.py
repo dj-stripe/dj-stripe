@@ -140,5 +140,7 @@ class Command(BaseCommand):
                     for subscription in models.Subscription.api_list()
                 )
             )
+        else:
+            all_list_kwargs.append({})
 
         return all_list_kwargs
