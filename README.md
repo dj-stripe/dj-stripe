@@ -30,6 +30,7 @@ The full documentation is available [on Read the Docs](https://dj-stripe.readthe
 -   Python 3.6+
 -   PostgreSQL engine (recommended) 9.5+
 -   MySQL engine: MariaDB 10.2+ or MySQL 5.7+
+-   SQLite: Not recommended in production. Version 3.26+ required.
 
 ## Quickstart
 
