@@ -791,11 +791,6 @@ class Customer(StripeModel):
             the subscription upon creation.
             If False, an invoice will be created at the end of this period.
         :type charge_immediately: boolean
-
-        .. Notes:
-        .. ``charge_immediately`` is only available on ``Customer.subscribe()``
-        .. if you're using ``Customer.subscribe()``
-        .. instead of ``Customer.subscribe()``, ``plan`` can only be a string
         """
         from .billing import Subscription
 
