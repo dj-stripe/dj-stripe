@@ -1,3 +1,4 @@
+import warnings
 from decimal import Decimal
 from typing import Optional, Union
 
@@ -778,7 +779,7 @@ class Customer(StripeModel):
         """
         return max(self.balance, 0)
 
-    def subscribe(self, price=None, plan=None, charge_immediately=True, **kwargs):
+    def subscribe(self, price=None, plan=None, **kwargs):
         """
         Subscribes this customer to a price.
         NOTE: Only one item is supported at the moment.
@@ -787,10 +788,6 @@ class Customer(StripeModel):
         :type price: Price or string (price ID)
         :param plan: The plan to which to subscribe the customer.
         :type plan: Plan or string (plan ID)
-        :param charge_immediately: Whether or not to charge for
-            the subscription upon creation.
-            If False, an invoice will be created at the end of this period.
-        :type charge_immediately: boolean
         """
         from .billing import Subscription
 
@@ -806,12 +803,25 @@ class Customer(StripeModel):
         if isinstance(price, StripeModel):
             price = price.id
 
+        if "charge_immediately" in kwargs:
+            new_value = (
+                "charge_automatically"
+                if kwargs["charge_immediately"]
+                else "send_invoice"
+            )
+            warnings.warn(
+                "The `charge_immediately` parameter to Customer.subscribe()"
+                "does nothing since Stripe API 2019-10-17. dj-stripe 2.5+ "
+                "no longer supports it and it will be removed soon. "
+                f"Set `collection_method={new_value!r} instead`. ",
+                DeprecationWarning,
+            )
+            del kwargs["charge_immediately"]
+            kwargs.setdefault("collection_method", new_value)
+
         stripe_subscription = Subscription._api_create(
             items=[{"price": price}], customer=self.id, **kwargs
         )
-
-        if charge_immediately:
-            self.send_invoice()
 
         return Subscription.sync_from_stripe_data(stripe_subscription)
 
@@ -821,7 +831,7 @@ class Customer(StripeModel):
         *,
         application_fee: Decimal = None,
         source: Union[str, StripeModel] = None,
-        **kwargs
+        **kwargs,
     ) -> Charge:
         """
         Creates a charge for this customer.
@@ -849,7 +859,7 @@ class Customer(StripeModel):
             if application_fee
             else None,  # Convert dollars into cents
             source=source,
-            **kwargs
+            **kwargs,
         )
 
         return Charge.sync_from_stripe_data(stripe_charge)

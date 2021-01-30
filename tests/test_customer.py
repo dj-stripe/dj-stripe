@@ -1473,57 +1473,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.customer._sync_subscriptions()
         self.assertEqual(0, subscription_sync_mock.call_count)
 
-    @patch("djstripe.models.Customer.send_invoice", autospec=True)
-    @patch(
-        "stripe.Subscription.create",
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    def test_subscribe_not_charge_immediately(
-        self,
-        product_retrieve_mock,
-        customer_retrieve_mock,
-        subscription_create_mock,
-        send_invoice_mock,
-    ):
-        price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
-
-        self.customer.subscribe(price=price, charge_immediately=False)
-        self.assertFalse(send_invoice_mock.called)
-
-    @patch("djstripe.models.Customer.send_invoice", autospec=True)
-    @patch(
-        "stripe.Subscription.create",
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    def test_subscribe_charge_immediately(
-        self,
-        product_retrieve_mock,
-        customer_retrieve_mock,
-        subscription_create_mock,
-        send_invoice_mock,
-    ):
-        price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
-
-        self.assert_fks(price, expected_blank_fks={})
-
-        self.customer.subscribe(price=price, charge_immediately=True)
-        self.assertTrue(send_invoice_mock.called)
-
-    @patch("djstripe.models.Customer.send_invoice", autospec=True)
     @patch(
         "stripe.Subscription.create",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
@@ -1540,14 +1489,12 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         product_retrieve_mock,
         customer_retrieve_mock,
         subscription_create_mock,
-        send_invoice_mock,
     ):
         price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
 
         self.assert_fks(price, expected_blank_fks={})
 
-        self.customer.subscribe(price=price.id, charge_immediately=True)
-        self.assertTrue(send_invoice_mock.called)
+        self.customer.subscribe(price=price.id)
 
     @patch("stripe.Subscription.create", autospec=True)
     @patch(
@@ -1571,8 +1518,8 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             subscription_fake_duplicate,
         ]
 
-        self.customer.subscribe(price=price, charge_immediately=False)
-        self.customer.subscribe(price=price, charge_immediately=False)
+        self.customer.subscribe(price=price)
+        self.customer.subscribe(price=price)
 
         self.assertEqual(2, self.customer.subscriptions.count())
         self.assertEqual(2, len(self.customer.valid_subscriptions))
@@ -1612,7 +1559,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 autospec=True,
                 side_effect=[fake_subscription],
             ):
-                self.customer.subscribe(price=price, charge_immediately=False)
+                self.customer.subscribe(price=price)
 
         self.assertEqual(3, self.customer.subscriptions.count())
         self.assertEqual(1, len(self.customer.valid_subscriptions))
@@ -1769,7 +1716,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         subscription_create_mock.return_value = subscription_fake
 
-        self.customer.subscribe(price=price, charge_immediately=False)
+        self.customer.subscribe(price=price)
 
         assert self.customer.is_subscribed_to(product)
 
@@ -1793,7 +1740,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         subscription_create_mock.return_value = subscription_fake
 
-        self.customer.subscribe(price=price, charge_immediately=False)
+        self.customer.subscribe(price=price)
 
         assert self.customer.is_subscribed_to(product.id)
 
@@ -1816,57 +1763,6 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
 
         self.account = default_account()
 
-    @patch("djstripe.models.Customer.send_invoice", autospec=True)
-    @patch(
-        "stripe.Subscription.create",
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    def test_subscribe_not_charge_immediately(
-        self,
-        product_retrieve_mock,
-        customer_retrieve_mock,
-        subscription_create_mock,
-        send_invoice_mock,
-    ):
-        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-
-        self.customer.subscribe(plan=plan, charge_immediately=False)
-        self.assertFalse(send_invoice_mock.called)
-
-    @patch("djstripe.models.Customer.send_invoice", autospec=True)
-    @patch(
-        "stripe.Subscription.create",
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    def test_subscribe_charge_immediately(
-        self,
-        product_retrieve_mock,
-        customer_retrieve_mock,
-        subscription_create_mock,
-        send_invoice_mock,
-    ):
-        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-
-        self.assert_fks(plan, expected_blank_fks={})
-
-        self.customer.subscribe(plan=plan, charge_immediately=True)
-        self.assertTrue(send_invoice_mock.called)
-
-    @patch("djstripe.models.Customer.send_invoice", autospec=True)
     @patch(
         "stripe.Subscription.create",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
@@ -1883,14 +1779,12 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
         product_retrieve_mock,
         customer_retrieve_mock,
         subscription_create_mock,
-        send_invoice_mock,
     ):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
         self.assert_fks(plan, expected_blank_fks={})
 
-        self.customer.subscribe(plan=plan.id, charge_immediately=True)
-        self.assertTrue(send_invoice_mock.called)
+        self.customer.subscribe(plan=plan.id)
 
     @patch("stripe.Subscription.create", autospec=True)
     @patch(
@@ -1914,8 +1808,8 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
             subscription_fake_duplicate,
         ]
 
-        self.customer.subscribe(plan=plan, charge_immediately=False)
-        self.customer.subscribe(plan=plan, charge_immediately=False)
+        self.customer.subscribe(plan=plan)
+        self.customer.subscribe(plan=plan)
 
         self.assertEqual(2, self.customer.subscriptions.count())
         self.assertEqual(2, len(self.customer.valid_subscriptions))
@@ -1955,7 +1849,7 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
                 autospec=True,
                 side_effect=[fake_subscription],
             ):
-                self.customer.subscribe(plan=plan, charge_immediately=False)
+                self.customer.subscribe(plan=plan)
 
         self.assertEqual(3, self.customer.subscriptions.count())
         self.assertEqual(1, len(self.customer.valid_subscriptions))
