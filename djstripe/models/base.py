@@ -867,15 +867,14 @@ class StripeModel(models.Model):
         return instance
 
     @classmethod
-    def _get_or_retrieve(cls, **kwargs):
+    def _get_or_retrieve(cls, id, stripe_account=None, **kwargs):
         try:
-            return cls.objects.get(**kwargs)
+            return cls.objects.get(id=id)
         except cls.DoesNotExist:
             pass
 
-        djstripe_owner_account = kwargs.pop("djstripe_owner_account", None)
-        if djstripe_owner_account:
-            kwargs["stripe_account"] = djstripe_owner_account.id
+        if stripe_account:
+            kwargs["stripe_account"] = stripe_account
 
         # If no API key is specified, use the default one for the specified livemode
         # (or if no livemode is specified, the default one altogether)
@@ -883,7 +882,7 @@ class StripeModel(models.Model):
             "api_key",
             djstripe_settings.get_default_api_key(livemode=kwargs.get("livemode")),
         )
-        data = cls.stripe_class.retrieve(**kwargs)
+        data = cls.stripe_class.retrieve(id=id, **kwargs)
         instance = cls.sync_from_stripe_data(data)
         return instance
 

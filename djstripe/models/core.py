@@ -1436,7 +1436,9 @@ class Event(StripeModel):
 
         if customer_id:
             return Customer._get_or_retrieve(
-                id=customer_id, djstripe_owner_account=self.djstripe_owner_account
+                id=customer_id,
+                stripe_account=self.djstripe_owner_account_id,
+                api_key=self.default_api_key,
             )
 
 
