@@ -588,14 +588,19 @@ class StripeModel(models.Model):
                 try:
                     data = cls_instance.api_retrieve(stripe_account=stripe_account)
                 except InvalidRequestError as e:
-                    # HACK around a Stripe bug.
-                    # When a FileUpload is retrieved from the Account object,
-                    # a mismatch between live and test mode is possible depending
-                    # on whether the file (usually the logo) was uploaded in live
-                    # or test. Reported to Stripe in August 2020.
-                    # Context: https://github.com/dj-stripe/dj-stripe/issues/830
                     if "a similar object exists in" in str(e):
+                        # HACK around a Stripe bug.
+                        # When a FileUpload is retrieved from the Account object,
+                        # a mismatch between live and test mode is possible depending
+                        # on whether the file (usually the logo) was uploaded in live
+                        # or test. Reported to Stripe in August 2020.
+                        # Context: https://github.com/dj-stripe/dj-stripe/issues/830
                         pass
+                    elif "No such PaymentMethod:" in str(e):
+                        # payment methods (card_… etc) can be irretrievably deleted,
+                        # but still present during sync. For example, if a refund is
+                        # issued on a charge whose payment method has been deleted.
+                        return None, False
                     else:
                         raise
                 should_expand = False
