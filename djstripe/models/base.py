@@ -877,6 +877,12 @@ class StripeModel(models.Model):
         if djstripe_owner_account:
             kwargs["stripe_account"] = djstripe_owner_account.id
 
+        # If no API key is specified, use the default one for the specified livemode
+        # (or if no livemode is specified, the default one altogether)
+        kwargs.setdefault(
+            "api_key",
+            djstripe_settings.get_default_api_key(livemode=kwargs.get("livemode")),
+        )
         data = cls.stripe_class.retrieve(**kwargs)
         instance = cls.sync_from_stripe_data(data)
         return instance
