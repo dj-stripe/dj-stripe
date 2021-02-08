@@ -71,8 +71,8 @@ class Command(BaseCommand):
         self.stdout.write("Syncing {}:".format(model_name))
 
         count = 0
-        for list_kwargs in self.get_list_kwargs(model):
-            try:
+        try:
+            for list_kwargs in self.get_list_kwargs(model):
                 if model is models.Account:
                     # special case, since own account isn't returned by Account.api_list
                     stripe_obj = models.Account.stripe_class.retrieve(
@@ -99,8 +99,8 @@ class Command(BaseCommand):
                         )
                     )
 
-            except Exception as e:
-                self.stderr.write(str(e))
+        except Exception as e:
+            self.stderr.write(str(e))
 
         if count == 0:
             self.stdout.write("  (no results)")
