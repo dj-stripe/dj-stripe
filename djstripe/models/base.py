@@ -18,10 +18,19 @@ from ..managers import StripeModelManager
 logger = logging.getLogger(__name__)
 
 
-class StripeModel(models.Model):
+class StripeBaseModel(models.Model):
+    stripe_class: Optional[APIResource] = None
+
+    djstripe_created = models.DateTimeField(auto_now_add=True, editable=False)
+    djstripe_updated = models.DateTimeField(auto_now=True, editable=False)
+
+    class Meta:
+        abstract = True
+
+
+class StripeModel(StripeBaseModel):
     # This must be defined in descendants of this model/mixin
     # e.g. Event, Charge, Customer, etc.
-    stripe_class: Optional[APIResource] = None
     expand_fields: List[str] = []
     stripe_dashboard_item_name = ""
 
@@ -65,9 +74,6 @@ class StripeModel(models.Model):
     description = models.TextField(
         null=True, blank=True, help_text="A description of this object."
     )
-
-    djstripe_created = models.DateTimeField(auto_now_add=True, editable=False)
-    djstripe_updated = models.DateTimeField(auto_now=True, editable=False)
 
     class Meta:
         abstract = True

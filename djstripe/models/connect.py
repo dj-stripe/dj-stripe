@@ -12,7 +12,7 @@ from ..fields import (
     StripeQuantumCurrencyAmountField,
 )
 from ..managers import TransferManager
-from .base import StripeModel
+from .base import StripeBaseModel, StripeModel
 
 
 class ApplicationFee(StripeModel):
@@ -80,7 +80,7 @@ class ApplicationFeeRefund(StripeModel):
     )
 
 
-class CountrySpec(StripeModel):
+class CountrySpec(StripeBaseModel):
     """
     Stripe documentation: https://stripe.com/docs/api#country_specs
     """
@@ -112,16 +112,6 @@ class CountrySpec(StripeModel):
     verification_fields = JSONField(
         help_text="Lists the types of verification data needed to keep an account open."
     )
-
-    # Get rid of core common fields
-    djstripe_id = None
-    created = None
-    description = None
-    livemode = True
-    metadata = None
-
-    class Meta:
-        pass
 
 
 class Transfer(StripeModel):
