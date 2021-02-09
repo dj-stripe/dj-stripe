@@ -1034,19 +1034,6 @@ class Customer(StripeModel):
         self.date_purged = timezone.now()
         self.save()
 
-    # TODO: Override Queryset.delete() with a custom manager,
-    #  since this doesn't get called in bulk deletes
-    #  (or cascades, but that's another matter)
-    def delete(self, using=None, keep_parents=False):
-        """
-        Overriding the delete method to keep the customer in the records.
-        All identifying information is removed via the purge() method.
-
-        The only way to delete a customer is to use SQL.
-        """
-
-        self.purge()
-
     def _get_valid_subscriptions(self):
         """ Get a list of this customer's valid subscriptions."""
 

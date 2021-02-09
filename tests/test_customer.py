@@ -407,17 +407,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         )
 
     @patch("stripe.Customer.retrieve", autospec=True)
-    def test_customer_delete_same_as_purge(self, customer_retrieve_fake):
-        self.customer.delete()
-        customer = Customer.objects.get(id=self.customer.id)
-
-        self.assertTrue(customer.subscriber is None)
-        self.assertTrue(customer.default_source is None)
-        self.assertTrue(not customer.legacy_cards.all())
-        self.assertTrue(not customer.sources.all())
-        self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
-
-    @patch("stripe.Customer.retrieve", autospec=True)
     def test_customer_purge_raises_customer_exception(self, customer_retrieve_mock):
         customer_retrieve_mock.side_effect = InvalidRequestError(
             "No such customer:", "blah"
@@ -635,7 +624,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
     def test_cannot_charge(self, customer_retrieve_fake):
-        self.customer.delete()
+        self.customer.date_purged = timezone.now()
         self.assertFalse(self.customer.can_charge())
 
     def test_charge_accepts_only_decimals(self):
