@@ -1832,6 +1832,8 @@ class TaxId(StripeModel):
         )
 
 
+
+
 class TaxRate(StripeModel):
     """
     Tax rates can be applied to invoices and subscriptions to collect tax.
