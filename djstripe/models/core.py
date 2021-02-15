@@ -1333,6 +1333,11 @@ class Customer(StripeModel):
         for stripe_charge in Charge.api_list(customer=self.id, **kwargs):
             Charge.sync_from_stripe_data(stripe_charge)
 
+    def _sync_tax_ids(self, **kwargs):
+        print("SYNCING TAX IDS")
+        for stripe_tax_id in TaxId.api_list(customer=self.id, **kwargs):
+            TaxId.sync_from_stripe_data(stripe_tax_id)
+
     def _sync_cards(self, **kwargs):
         from .payment_methods import Card
 

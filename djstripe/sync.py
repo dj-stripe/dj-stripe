@@ -15,6 +15,7 @@ def sync_subscriber(subscriber):
         customer._sync_invoices()
         customer._sync_cards()
         customer._sync_charges()
+        customer._sync_tax_ids()
     except InvalidRequestError as e:
         print("ERROR: " + str(e))
     return customer
