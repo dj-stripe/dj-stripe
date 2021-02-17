@@ -569,7 +569,7 @@ class Customer(StripeModel):
     """
 
     stripe_class = stripe.Customer
-    expand_fields = ["default_source", "sources"]
+    expand_fields = ["default_source", "sources", "tax_ids"]
     stripe_dashboard_item_name = "customers"
 
     address = JSONField(null=True, blank=True, help_text="The customer's address.")
@@ -720,6 +720,7 @@ class Customer(StripeModel):
         :param livemode: Whether to get the subscriber in live or test mode.
         :type livemode: bool
         """
+        print("GETTING OR CREATING CUSTOMER")
 
         try:
             return Customer.objects.get(subscriber=subscriber, livemode=livemode), False
@@ -1336,6 +1337,7 @@ class Customer(StripeModel):
     def _sync_tax_ids(self, **kwargs):
         print("SYNCING TAX IDS")
         for stripe_tax_id in TaxId.api_list(customer=self.id, **kwargs):
+            print("stripe tax id:", stripe_tax_id)
             TaxId.sync_from_stripe_data(stripe_tax_id)
 
     def _sync_cards(self, **kwargs):
