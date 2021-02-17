@@ -532,6 +532,7 @@ class StripeModel(models.Model):
         save=True,
         stripe_account=None,
     ):
+        print("in get or create from stripe obj with cls and data: ", cls, data)
         """
 
         :param data:

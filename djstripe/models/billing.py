@@ -799,13 +799,11 @@ class UpcomingInvoice(BaseInvoice):
         total_tax_amounts = []
 
         for tax_amount_data in data.get("total_tax_amounts", []):
-            tax_rate_data = tax_amount_data["tax_rate"]
-            if isinstance(tax_rate_data, str):
-                tax_rate_data = {"tax_rate": tax_rate_data}
+            tax_rate_id = tax_amount_data["tax_rate"]
+            if not isinstance(tax_rate_id, str):
+                tax_rate_id = tax_rate_id["tax_rate"]
 
-            tax_rate, _ = TaxRate._get_or_create_from_stripe_object(
-                tax_rate_data, field_name="tax_rate", refetch=True
-            )
+            tax_rate = TaxRate._get_or_retrieve(id=tax_rate_id)
 
             tax_amount = DjstripeUpcomingInvoiceTotalTaxAmount(
                 invoice=self,
@@ -1421,16 +1419,6 @@ class Subscription(StripeModel):
     status = StripeEnumField(
         enum=enums.SubscriptionStatus, help_text="The status of this subscription."
     )
-
-    # deprecated - will be removed in 2.4 - use .default_tax_rates instead
-    tax_percent = StripePercentField(
-        null=True,
-        blank=True,
-        help_text="A positive decimal (with at most two decimal places) "
-        "between 1 and 100. This represents the percentage of the subscription "
-        "invoice subtotal that will be calculated and added as tax to the final "
-        "amount each billing period.",
-    )
     trial_end = StripeDateTimeField(
         null=True,
         blank=True,
@@ -1814,22 +1802,42 @@ class TaxId(StripeModel):
     class Meta:
         verbose_name = "Tax ID"
         verbose_name_plural = "Tax IDs"
-
-    def api_retrieve(self, api_key=None, stripe_account=None):
+    
+    def get_stripe_account(self, api_key=None, stripe_account=None):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
+        return stripe_account
 
-        customer = self.customer.api_retrieve(
-            api_key=api_key or self.default_api_key,
-            stripe_account=stripe_account,
-        )
+
+    def get_customer(self, api_key, stripe_account):
+        if not customer:
+            customer = self.customer.api_retrieve(
+                api_key=api_key,
+                stripe_account=stripe_account,
+            )
+        return customer
+
+    def api_retrieve(self, api_key=None, stripe_account=None):
+        stripe_acct = get_stripe_account(self, api_key, stripe_account)
+        customer = get_customer(self, api_key, stripe_acct)
+
         return customer.retrieve_tax_id(
             customer.id,
             self.id,
             api_key=api_key or self.default_api_key,
             expand=self.expand_fields,
-            stripe_account=stripe_account,
+            stripe_account=stripe_acct,
         )
+
+    def api_list(self, api_key=None, stripe_account=None):
+    # Overriding the parent method since lists of TaxIds must be fetched 
+    # through the customer.
+        stripe_acct = get_stripe_account(self, api_key, stripe_account)
+        customer = get_customer(self, api_key, stripe_acct)
+        print("in TaxID.api_list", self, api_key, stripe_account)
+
+        return customer.list_tax_ids(customer.id)
+
 
 
 
