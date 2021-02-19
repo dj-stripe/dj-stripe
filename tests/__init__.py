@@ -1165,6 +1165,10 @@ class CustomerDict(dict):
     def sources(self):
         return Sources(card_fakes=self["sources"]["data"])
 
+    @property
+    def tax_ids(self):
+        return self["tax_ids"]
+
     def create_for_user(self, user):
         from djstripe.models import Customer
 
@@ -1435,6 +1439,17 @@ FAKE_TAX_RATE_EXAMPLE_2_SALES = load_fixture(
     "tax_rate_txr_fakefakefakefakefake0002.json"
 )
 
+FAKE_TAX_ID = load_fixture("tax_id_eu_vat.json")
+
+FAKE_CUSTOMER_BEFORE_TAX_ID = CustomerDict(
+    load_fixture("customer_cus_IvVnXlYiO1LL26_before_tax_id.json")
+)
+FAKE_CUSTOMER_WITH_TAX_ID = CustomerDict(
+    load_fixture("customer_cus_IvVnXlYiO1LL26_with_tax_id.json")
+)
+FAKE_CUSTOMER_WITHOUT_TAX_ID = CustomerDict(
+    load_fixture("customer_cus_IvVnXlYiO1is25_without_tax_id.json")
+)
 FAKE_INVOICEITEM = {
     "id": "ii_16XVTY2eZvKYlo2Cxz5n3RaS",
     "object": "invoiceitem",

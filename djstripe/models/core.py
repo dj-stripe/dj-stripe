@@ -720,7 +720,6 @@ class Customer(StripeModel):
         :param livemode: Whether to get the subscriber in live or test mode.
         :type livemode: bool
         """
-        print("GETTING OR CREATING CUSTOMER")
 
         try:
             return Customer.objects.get(subscriber=subscriber, livemode=livemode), False
@@ -762,6 +761,36 @@ class Customer(StripeModel):
         )
 
         return customer
+
+    @classmethod
+    def _get_or_create_from_stripe_object(
+        cls,
+        data,
+        field_name="id",
+        refetch=True,
+        current_ids=None,
+        pending_relations=None,
+        save=True,
+        stripe_account=None,
+    ):
+
+        from .billing import TaxId
+
+        res = super(Customer, cls)._get_or_create_from_stripe_object(
+            data,
+            field_name=field_name,
+            refetch=refetch,
+            current_ids=current_ids,
+            pending_relations=pending_relations,
+            save=save,
+            stripe_account=stripe_account,
+        )
+        if data.get("tax_ids"):
+            tax_id_data = data.get("tax_ids").get("data")
+            for tax_id_obj in tax_id_data:
+                TaxId.sync_from_stripe_data(tax_id_obj)
+
+        return res
 
     @property
     def credits(self):
@@ -1335,9 +1364,9 @@ class Customer(StripeModel):
             Charge.sync_from_stripe_data(stripe_charge)
 
     def _sync_tax_ids(self, **kwargs):
-        print("SYNCING TAX IDS")
-        for stripe_tax_id in TaxId.api_list(customer=self.id, **kwargs):
-            print("stripe tax id:", stripe_tax_id)
+        from .billing import TaxId
+
+        for stripe_tax_id in TaxId.api_list(customer=self, **kwargs):
             TaxId.sync_from_stripe_data(stripe_tax_id)
 
     def _sync_cards(self, **kwargs):

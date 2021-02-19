@@ -41,6 +41,8 @@ from . import (
     FAKE_CUSTOMER_III,
     FAKE_CUSTOMER_IV,
     FAKE_DISCOUNT_CUSTOMER,
+    FAKE_CUSTOMER_BEFORE_TAX_ID,
+    FAKE_CUSTOMER_WITH_TAX_ID,
     FAKE_INVOICE,
     FAKE_INVOICE_III,
     FAKE_INVOICEITEM,
@@ -345,6 +347,24 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 "djstripe.Customer.subscriber",
             },
         )
+
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER_WITH_TAX_ID))
+    def test_customer_sync_create_customer_and_tax_ids(self, customer_retrieve_mock):
+        customer = Customer.sync_from_stripe_data(customer_retrieve_mock.return_value)
+        self.assertEqual(customer.tax_ids.count(), 1)
+        self.assertEqual(customer.tax_ids.last().value, "DE123456789")
+        self.assertEqual(customer.tax_ids.last().type, "eu_vat")
+
+    @patch("stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER_WITH_TAX_ID))
+    def test_customer_sync_add_tax_id_to_existing_customer(
+        self, customer_retrieve_mock
+    ):
+        customer = Customer.sync_from_stripe_data(deepcopy(FAKE_CUSTOMER_BEFORE_TAX_ID))
+        self.assertEqual(customer.tax_ids.count(), 0)
+        Customer.sync_from_stripe_data(deepcopy(FAKE_CUSTOMER_WITH_TAX_ID))
+        self.assertEqual(customer.tax_ids.count(), 1)
+        self.assertEqual(customer.tax_ids.last().value, "DE123456789")
+        self.assertEqual(customer.tax_ids.last().type, "eu_vat")
 
     @patch("stripe.Customer.retrieve", autospec=True)
     def test_customer_purge_leaves_customer_record(self, customer_retrieve_fake):

@@ -1,0 +1,37 @@
+{
+    "address": null,
+    "balance": 0,
+    "created": 1613048414,
+    "currency": null,
+    "default_source": null,
+    "delinquent": false,
+    "description": null,
+    "discount": null,
+    "email": null,
+    "id": "cus_IvVnXlYiO1is25",
+    "invoice_prefix": "62193644",
+    "invoice_settings": {
+      "custom_fields": null,
+      "default_payment_method": null,
+      "footer": null
+    },
+    "livemode": false,
+    "metadata": {
+      "djstripe_subscriber": "31"
+    },
+    "name": null,
+    "object": "customer",
+    "phone": null,
+    "preferred_locales": [],
+    "shipping": null,
+    "sources": {
+      "data": [],
+      "has_more": false,
+      "object": "list",
+      "total_count": 0,
+      "url": "/v1/customers/cus_IvVnXlYiO1is25/sources"
+    },
+    "tax_exempt": "none",
+    "tax_ids": {}
+  }
+  
