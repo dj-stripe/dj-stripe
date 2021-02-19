@@ -87,7 +87,7 @@ class Command(BaseCommand):
                             djstripe_obj=djstripe_obj,
                         )
                     )
-                
+
                 for stripe_obj in model.api_list(**list_kwargs):
                     count += 1
                     djstripe_obj = model.sync_from_stripe_data(stripe_obj)
@@ -98,11 +98,6 @@ class Command(BaseCommand):
                             djstripe_obj=djstripe_obj,
                         )
                     )
-                    if model is models.Customer:
-                        for tax_id_obj in stripe_obj.tax_ids.data:
-                            models.TaxId._get_or_create_from_stripe_object(tax_id_obj)
-
-
 
         except Exception as e:
             self.stderr.write(str(e))

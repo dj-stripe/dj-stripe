@@ -1,0 +1,15 @@
+{
+    "country": "DE",
+    "created": 1613577721,
+    "customer": "cus_IvVnXlYiO1is25",
+    "id": "txi_1ILsTVDO66K2bj4XJf7HThPX",
+    "livemode": false,
+    "object": "tax_id",
+    "type": "eu_vat",
+    "value": "DE123456789",
+    "verification": {
+        "status": "verified",
+        "verified_address": "123 TEST STREET",
+        "verified_name": "TEST"
+    }
+}

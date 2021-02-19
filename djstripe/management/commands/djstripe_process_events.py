@@ -101,7 +101,7 @@ class Command(VerbosityAwareOutputMixin, BaseCommand):
                 self.verbose_output("  Synced Event {id}".format(id=event.id))
             except Exception as exception:
                 self.verbose_output(
-                    "  Failed processing Event with data: {data}".format(data=event_data)
+                    "  Failed processing Event {id}".format(id=event_data["id"])
                 )
                 self.output("  {exception}".format(exception=exception))
                 self.verbose_traceback()

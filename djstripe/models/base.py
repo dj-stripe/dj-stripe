@@ -532,9 +532,7 @@ class StripeModel(models.Model):
         save=True,
         stripe_account=None,
     ):
-        print("in get or create from stripe obj with cls and data: ", cls, data)
         """
-
         :param data:
         :param field_name:
         :param refetch:
@@ -557,7 +555,6 @@ class StripeModel(models.Model):
             pending_relations = []
 
         id_ = cls._id_from_data(field)
-
         if not field:
             # An empty field - We need to return nothing here because there is
             # no way of knowing what needs to be fetched!
