@@ -773,10 +773,9 @@ class Customer(StripeModel):
         save=True,
         stripe_account=None,
     ):
-
         from .billing import TaxId
 
-        res = super(Customer, cls)._get_or_create_from_stripe_object(
+        customer = super()._get_or_create_from_stripe_object(
             data,
             field_name=field_name,
             refetch=refetch,
@@ -786,11 +785,12 @@ class Customer(StripeModel):
             stripe_account=stripe_account,
         )
         if data.get("tax_ids"):
+
             tax_id_data = data.get("tax_ids").get("data")
             for tax_id_obj in tax_id_data:
                 TaxId.sync_from_stripe_data(tax_id_obj)
 
-        return res
+        return customer
 
     @property
     def credits(self):
