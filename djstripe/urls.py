@@ -9,11 +9,11 @@ Wire this into the root URLConf this way::
 
 Call it from reverse()::
 
-    reverse("djstripe:subscribe")
+    reverse("djstripe:webhook")
 
 Call from url tag::
 
-    {% url "djstripe:subscribe" %}
+    {% url "djstripe:webhook" %}
 """
 from django.urls import re_path
 
