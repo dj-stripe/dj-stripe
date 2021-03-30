@@ -45,7 +45,7 @@ You can also handle different events in the same handler:
 
 
 Webhook event creation and processing is now wrapped in a ``transaction.atomic()`` block to better handle webhook errors.
-This will prevent any additional database modifications you may perform in your custom handler from being committed should
+This will prevent any additional database modifications you may perform in your custom handler from being committed if
 something in the webhook processing chain fail. You can also take advantage of Django's ``transaction.on_commit()`` function
 to only perform an action if the transaction successfully commits (meaning the Event processing worked):
 
