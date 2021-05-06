@@ -1648,8 +1648,8 @@ class PaymentIntent(StripeModel):
         :type api_key: string
         """
         api_key = api_key or self.default_api_key
-
-        return self.api_retrieve(api_key=api_key).modify(**kwargs)
+        response = self.api_retrieve(api_key=api_key)
+        return response.modify(response.stripe_id, api_key=api_key, **kwargs)
 
     def _api_cancel(self, api_key=None, **kwargs):
         """
