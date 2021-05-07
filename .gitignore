@@ -16,6 +16,7 @@ site/
 
 # Editor files
 .vscode
+.idea
 
 # Do not commit Poetry lockfiles for libraries
 poetry.lock
