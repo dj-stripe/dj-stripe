@@ -10,6 +10,11 @@ from djstripe.models import Account, Customer, StripeModel
 from djstripe.settings import STRIPE_SECRET_KEY
 
 
+class TestStripeModel(StripeModel):
+    # exists to avoid "Abstract models cannot be instantiated." error
+    pass
+
+
 class StripeModelExceptionsTest(TestCase):
     def test_no_object_value(self):
         # Instantiate a stripeobject model class
@@ -41,7 +46,7 @@ def test__api_delete(
     mock_api_retrieve, stripe_account, api_key, expected_api_key, extra_kwargs
 ):
     """Test that API delete properly uses the passed in parameters."""
-    test_model = StripeModel()
+    test_model = TestStripeModel()
     test_model._api_delete(
         api_key=api_key, stripe_account=stripe_account, **extra_kwargs
     )
@@ -67,7 +72,7 @@ def test_api_retrieve(
     mock_stripe_class, stripe_account, api_key, expected_api_key, expand_fields
 ):
     """Test that API delete properly uses the passed in parameters."""
-    test_model = StripeModel()
+    test_model = TestStripeModel()
     mock_id = "id_fakefakefakefake01"
     test_model.id = mock_id
     test_model.expand_fields = expand_fields
@@ -110,7 +115,7 @@ def test_api_retrieve_reverse_foreign_key_lookup(mock_stripe_class, mock__meta):
     # Make first return the mock account.
     mock_account_reverse_manager.first.return_value = mock_account
 
-    test_model = StripeModel()
+    test_model = TestStripeModel()
     mock_id = "id_fakefakefakefake01"
     test_model.id = mock_id
     # Set mock reverse manager on the model.
