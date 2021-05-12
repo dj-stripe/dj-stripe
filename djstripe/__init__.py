@@ -16,6 +16,7 @@ class DjstripeAppConfig(AppConfig):
     """
 
     name = "djstripe"
+    default_auto_field = "django.db.models.AutoField"
 
     def ready(self):
         import stripe
