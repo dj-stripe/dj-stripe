@@ -92,7 +92,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="invoice",
             name="account_name",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 help_text="The public name of the business associated with this invoice, most often the business creating the invoice.",
                 max_length=5000,
@@ -121,7 +121,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="invoice",
             name="customer_email",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 help_text="The customer’s email. Until the invoice is finalized, this field will equal customer.email. Once the invoice is finalized, this field will no longer be updated.",
                 max_length=5000,
@@ -130,7 +130,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="invoice",
             name="customer_name",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 help_text="The customer’s name. Until the invoice is finalized, this field will equal customer.name. Once the invoice is finalized, this field will no longer be updated.",
                 max_length=5000,
@@ -139,7 +139,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="invoice",
             name="customer_phone",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 help_text="The customer’s phone number. Until the invoice is finalized, this field will equal customer.phone. Once the invoice is finalized, this field will no longer be updated.",
                 max_length=5000,
@@ -180,7 +180,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="invoice",
             name="footer",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 help_text="Footer displayed on the invoice.",
                 max_length=5000,
@@ -429,7 +429,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -446,7 +446,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "account_name",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True,
                         help_text="The public name of the business associated with this invoice, most often the business creating the invoice.",
                         max_length=5000,
@@ -551,7 +551,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "customer_email",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True,
                         help_text="The customer’s email. Until the invoice is finalized, this field will equal customer.email. Once the invoice is finalized, this field will no longer be updated.",
                         max_length=5000,
@@ -559,7 +559,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "customer_name",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True,
                         help_text="The customer’s name. Until the invoice is finalized, this field will equal customer.name. Once the invoice is finalized, this field will no longer be updated.",
                         max_length=5000,
@@ -567,7 +567,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "customer_phone",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True,
                         help_text="The customer’s phone number. Until the invoice is finalized, this field will equal customer.phone. Once the invoice is finalized, this field will no longer be updated.",
                         max_length=5000,
@@ -607,7 +607,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "footer",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True,
                         help_text="Footer displayed on the invoice.",
                         max_length=5000,
@@ -623,7 +623,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "hosted_invoice_url",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True,
                         default="",
                         help_text="The URL for the hosted invoice page, which allows customers to view and pay an invoice. If the invoice has not been frozen yet, this will be null.",
@@ -632,7 +632,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "invoice_pdf",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True,
                         default="",
                         help_text="The link to download the PDF for the invoice. If the invoice has not been frozen yet, this will be null.",
@@ -874,7 +874,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),

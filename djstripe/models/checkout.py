@@ -2,7 +2,7 @@ import stripe
 from django.db import models
 
 from .. import enums
-from ..fields import JSONField, StripeEnumField, StripeForeignKey
+from ..fields import JSONField, StripeEnumField, StripeForeignKey, TextField
 from .base import StripeModel
 
 
@@ -22,7 +22,7 @@ class Session(StripeModel):
             "collected the customer’s billing address."
         ),
     )
-    cancel_url = models.TextField(
+    cancel_url = TextField(
         max_length=5000,
         blank=True,
         help_text=(
@@ -30,7 +30,7 @@ class Session(StripeModel):
             "decide to cancel payment and return to your website."
         ),
     )
-    client_reference_id = models.TextField(
+    client_reference_id = TextField(
         max_length=5000,
         blank=True,
         help_text=(
@@ -93,7 +93,7 @@ class Session(StripeModel):
         on_delete=models.SET_NULL,
         help_text=("Subscription created if one or more plans were provided."),
     )
-    success_url = models.TextField(
+    success_url = TextField(
         max_length=5000,
         blank=True,
         help_text=(

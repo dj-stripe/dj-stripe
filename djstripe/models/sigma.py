@@ -2,7 +2,13 @@ import stripe
 from django.db import models
 
 from .. import enums
-from ..fields import JSONField, StripeDateTimeField, StripeEnumField, StripeForeignKey
+from ..fields import (
+    JSONField,
+    StripeDateTimeField,
+    StripeEnumField,
+    StripeForeignKey,
+    TextField,
+)
 from .base import StripeModel
 
 
@@ -34,8 +40,8 @@ class ScheduledQueryRun(StripeModel):
         help_text="Time at which the result expires and is no longer available "
         "for download."
     )
-    sql = models.TextField(max_length=5000, help_text="SQL for the query.")
+    sql = TextField(max_length=5000, help_text="SQL for the query.")
     status = StripeEnumField(
         enum=enums.ScheduledQueryRunStatus, help_text="The query's execution status."
     )
-    title = models.TextField(max_length=5000, help_text="Title of the query.")
+    title = TextField(max_length=5000, help_text="Title of the query.")

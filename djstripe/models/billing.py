@@ -21,6 +21,7 @@ from ..fields import (
     StripeIdField,
     StripePercentField,
     StripeQuantumCurrencyAmountField,
+    TextField,
 )
 from ..managers import SubscriptionManager
 from ..utils import QuerySetMock, get_friendly_currency_amount
@@ -111,7 +112,7 @@ class Coupon(StripeModel):
         help_text="Maximum number of times this coupon can be redeemed, in total, "
         "before it is no longer valid.",
     )
-    name = models.TextField(
+    name = TextField(
         max_length=5000,
         default="",
         blank=True,
@@ -198,7 +199,7 @@ class BaseInvoice(StripeModel):
         help_text="The country of the business associated with this invoice, "
         "most often the business creating the invoice.",
     )
-    account_name = models.TextField(
+    account_name = TextField(
         max_length=5000,
         blank=True,
         help_text="The public name of the business associated with this invoice, "
@@ -300,21 +301,21 @@ class BaseInvoice(StripeModel):
         "field will equal customer.address. Once the invoice is finalized, this field "
         "will no longer be updated.",
     )
-    customer_email = models.TextField(
+    customer_email = TextField(
         max_length=5000,
         blank=True,
         help_text="The customer’s email. Until the invoice is finalized, this field "
         "will equal customer.email. Once the invoice is finalized, this field will no "
         "longer be updated.",
     )
-    customer_name = models.TextField(
+    customer_name = TextField(
         max_length=5000,
         blank=True,
         help_text="The customer’s name. Until the invoice is finalized, this field "
         "will equal customer.name. Once the invoice is finalized, this field will no "
         "longer be updated.",
     )
-    customer_phone = models.TextField(
+    customer_phone = TextField(
         max_length=5000,
         blank=True,
         help_text="The customer’s phone number. Until the invoice is finalized, "
@@ -368,10 +369,10 @@ class BaseInvoice(StripeModel):
         help_text="Ending customer balance (in cents) after attempting to pay invoice. "
         "If the invoice has not been attempted yet, this will be null.",
     )
-    footer = models.TextField(
+    footer = TextField(
         max_length=5000, blank=True, help_text="Footer displayed on the invoice."
     )
-    hosted_invoice_url = models.TextField(
+    hosted_invoice_url = TextField(
         max_length=799,
         default="",
         blank=True,
@@ -379,7 +380,7 @@ class BaseInvoice(StripeModel):
         "and pay an invoice. If the invoice has not been frozen yet, "
         "this will be null.",
     )
-    invoice_pdf = models.TextField(
+    invoice_pdf = TextField(
         max_length=799,
         default="",
         blank=True,
@@ -1093,7 +1094,7 @@ class Plan(StripeModel):
             "between each subscription billing."
         ),
     )
-    nickname = models.TextField(
+    nickname = TextField(
         max_length=5000,
         default="",
         blank=True,

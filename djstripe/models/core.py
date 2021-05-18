@@ -25,6 +25,7 @@ from ..fields import (
     StripeForeignKey,
     StripeIdField,
     StripeQuantumCurrencyAmountField,
+    TextField
 )
 from ..managers import ChargeManager
 from ..signals import WEBHOOK_SIGNALS
@@ -183,7 +184,7 @@ class Charge(StripeModel):
         blank=True,
         help_text="Error code explaining reason for charge failure if available.",
     )
-    failure_message = models.TextField(
+    failure_message = TextField(
         max_length=5000,
         default="",
         blank=True,
@@ -240,7 +241,7 @@ class Charge(StripeModel):
         null=True,
         blank=True,
     )
-    receipt_email = models.TextField(
+    receipt_email = TextField(
         max_length=800,  # yup, 800.
         default="",
         blank=True,
@@ -253,7 +254,7 @@ class Charge(StripeModel):
         help_text="The transaction number that appears "
         "on email receipts sent for this charge.",
     )
-    receipt_url = models.TextField(
+    receipt_url = TextField(
         max_length=5000,
         default="",
         blank=True,
@@ -449,7 +450,7 @@ class Product(StripeModel):
     stripe_dashboard_item_name = "products"
 
     # Fields applicable to both `good` and `service`
-    name = models.TextField(
+    name = TextField(
         max_length=5000,
         help_text=(
             "The product's name, meant to be displayable to the customer. "
@@ -481,7 +482,7 @@ class Product(StripeModel):
             '(e.g., `["color", "size"]`). Only applicable to products of `type=good`.'
         ),
     )
-    caption = models.TextField(
+    caption = TextField(
         default="",
         blank=True,
         max_length=5000,
@@ -608,7 +609,7 @@ class Customer(StripeModel):
         "the date that the discount will end.",
     )
     # </discount>
-    email = models.TextField(max_length=5000, default="", blank=True)
+    email = TextField(max_length=5000, default="", blank=True)
     invoice_prefix = models.CharField(
         default="",
         blank=True,
@@ -631,13 +632,13 @@ class Customer(StripeModel):
         help_text="default payment method used for subscriptions and invoices "
         "for the customer.",
     )
-    name = models.TextField(
+    name = TextField(
         max_length=5000,
         default="",
         blank=True,
         help_text="The customer's full name or business name.",
     )
-    phone = models.TextField(
+    phone = TextField(
         max_length=5000,
         default="",
         blank=True,
@@ -1346,7 +1347,7 @@ class Event(StripeModel):
         default="",
         blank=True,
     )
-    idempotency_key = models.TextField(default="", blank=True)
+    idempotency_key = TextField(default="", blank=True)
     type = models.CharField(max_length=250, help_text="Stripe's event description code")
 
     def str_parts(self):
@@ -1506,7 +1507,7 @@ class PaymentIntent(StripeModel):
         enum=enums.CaptureMethod,
         help_text="Capture method of this PaymentIntent, one of automatic or manual.",
     )
-    client_secret = models.TextField(
+    client_secret = TextField(
         max_length=5000,
         help_text=(
             "The client secret of this PaymentIntent. "
@@ -1526,7 +1527,7 @@ class PaymentIntent(StripeModel):
         on_delete=models.CASCADE,
         help_text="Customer this PaymentIntent is for if one exists.",
     )
-    description = models.TextField(
+    description = TextField(
         max_length=1000,
         default="",
         blank=True,
@@ -1708,7 +1709,7 @@ class SetupIntent(StripeModel):
             "requested_by_customer, or duplicate"
         ),
     )
-    client_secret = models.TextField(
+    client_secret = TextField(
         max_length=5000,
         blank=True,
         help_text=(
@@ -1837,7 +1838,7 @@ class Payout(StripeModel):
             "See https://stripe.com/docs/api/python#transfer_failures."
         ),
     )
-    failure_message = models.TextField(
+    failure_message = TextField(
         default="",
         blank=True,
         help_text=(

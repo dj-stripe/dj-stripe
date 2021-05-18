@@ -6,8 +6,9 @@ import decimal
 from django.conf import SettingsReference, settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models.fields import NOT_PROVIDED
 
-from .settings import USE_NATIVE_JSONFIELD
+from .settings import USE_NATIVE_JSONFIELD, USE_NATIVE_TEXTFIELD
 from .utils import convert_tstamp
 
 if USE_NATIVE_JSONFIELD:
@@ -168,3 +169,19 @@ class JSONField(BaseJSONField):
     """A field used to define a JSONField value according to djstripe logic."""
 
     pass
+
+
+if USE_NATIVE_TEXTFIELD:
+    from django.db.models import TextField
+else:
+
+    class TextField(models.CharField, models.TextField):
+        """A field used to solve default value issue with MySQL 8"""
+
+        @classmethod
+        def __new__(cls, *args, **kwargs):
+            # If default value was set, use CharField instead
+            if kwargs.get("default", NOT_PROVIDED) != NOT_PROVIDED:
+                kwargs["max_length"] = min(kwargs.get("max_length", 500), 500)
+                return models.CharField(*args, **kwargs)
+            return models.TextField(*args, **kwargs)

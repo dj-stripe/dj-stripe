@@ -12,7 +12,7 @@ from stripe.api_resources.abstract.api_resource import APIResource
 from stripe.error import InvalidRequestError
 
 from .. import settings as djstripe_settings
-from ..fields import JSONField, StripeDateTimeField, StripeForeignKey, StripeIdField
+from ..fields import JSONField, StripeDateTimeField, StripeForeignKey, StripeIdField, TextField
 from ..managers import StripeModelManager
 
 logger = logging.getLogger(__name__)
@@ -71,7 +71,7 @@ class StripeModel(StripeBaseModel):
         "It can be useful for storing additional information about an object in "
         "a structured format.",
     )
-    description = models.TextField(
+    description = TextField(
         null=True, blank=True, help_text="A description of this object."
     )
 
@@ -324,7 +324,7 @@ class StripeModel(StripeBaseModel):
                     field_data = manipulated_data.get(field.name)
 
                 if (
-                    isinstance(field, (models.CharField, models.TextField))
+                    isinstance(field, (models.CharField, TextField))
                     and field_data is None
                 ):
                     # TODO - this applies to StripeEnumField as well, since it

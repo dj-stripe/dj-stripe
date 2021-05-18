@@ -494,7 +494,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="bankaccount",
             name="account_holder_name",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 help_text="The name of the person or business that owns the bank account.",
                 max_length=5000,
@@ -537,7 +537,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -849,7 +849,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),

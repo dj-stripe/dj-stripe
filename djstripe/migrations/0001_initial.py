@@ -81,7 +81,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -308,7 +308,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -429,7 +429,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -476,7 +476,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "failure_message",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         help_text="Message to user further explaining reason for charge failure if available.",
                         null=True,
                     ),
@@ -643,7 +643,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -760,7 +760,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -813,7 +813,7 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                ("email", models.TextField(null=True)),
+                ("email", djstripe.fields.TextField(null=True)),
                 (
                     "shipping",
                     djstripe.fields.JSONField(
@@ -871,7 +871,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -959,7 +959,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -988,7 +988,7 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                ("idempotency_key", models.TextField(blank=True, null=True)),
+                ("idempotency_key", djstripe.fields.TextField(blank=True, null=True)),
                 (
                     "type",
                     models.CharField(
@@ -1035,7 +1035,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -1117,7 +1117,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -1425,7 +1425,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -1463,7 +1463,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "failure_message",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True,
                         help_text="Message to user further explaining reason for payout failure if available.",
                         null=True,
@@ -1550,7 +1550,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -1659,7 +1659,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "name",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True,
                         help_text="Name of the plan, to be displayed on invoices and in the web interface.",
                         null=True,
@@ -1714,7 +1714,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -1850,7 +1850,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -1953,7 +1953,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -2113,7 +2113,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -2302,7 +2302,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -2407,7 +2407,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "failure_message",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True,
                         help_text="Message to user further explaining reason for transfer failure if available.",
                         null=True,
@@ -2452,7 +2452,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("headers", djstripe.fields.JSONField()),
-                ("body", models.TextField(blank=True)),
+                ("body", djstripe.fields.TextField(blank=True)),
                 (
                     "valid",
                     models.BooleanField(
@@ -2470,7 +2470,7 @@ class Migration(migrations.Migration):
                 ("exception", models.CharField(blank=True, max_length=128)),
                 (
                     "traceback",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True,
                         help_text="Traceback if an exception was thrown during processing",
                     ),
@@ -2564,7 +2564,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -2825,7 +2825,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -2833,15 +2833,15 @@ class Migration(migrations.Migration):
                 ("djstripe_updated", models.DateTimeField(auto_now=True)),
                 (
                     "address_city",
-                    models.TextField(help_text="Billing address city.", null=True),
+                    djstripe.fields.TextField(help_text="Billing address city.", null=True),
                 ),
                 (
                     "address_country",
-                    models.TextField(help_text="Billing address country.", null=True),
+                    djstripe.fields.TextField(help_text="Billing address country.", null=True),
                 ),
                 (
                     "address_line1",
-                    models.TextField(help_text="Billing address (Line 1).", null=True),
+                    djstripe.fields.TextField(help_text="Billing address (Line 1).", null=True),
                 ),
                 (
                     "address_line1_check",
@@ -2854,15 +2854,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "address_line2",
-                    models.TextField(help_text="Billing address (Line 2).", null=True),
+                    djstripe.fields.TextField(help_text="Billing address (Line 2).", null=True),
                 ),
                 (
                     "address_state",
-                    models.TextField(help_text="Billing address state.", null=True),
+                    djstripe.fields.TextField(help_text="Billing address state.", null=True),
                 ),
                 (
                     "address_zip",
-                    models.TextField(help_text="Billing address zip code.", null=True),
+                    djstripe.fields.TextField(help_text="Billing address zip code.", null=True),
                 ),
                 (
                     "address_zip_check",
@@ -2910,7 +2910,7 @@ class Migration(migrations.Migration):
                 ("exp_year", models.IntegerField(help_text="Card expiration year.")),
                 (
                     "fingerprint",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True,
                         help_text="Uniquely identifies this particular card number.",
                         null=True,
@@ -2930,7 +2930,7 @@ class Migration(migrations.Migration):
                         help_text="Last four digits of Card number.", max_length=4
                     ),
                 ),
-                ("name", models.TextField(help_text="Cardholder name.", null=True)),
+                ("name", djstripe.fields.TextField(help_text="Cardholder name.", null=True)),
                 (
                     "tokenization_method",
                     djstripe.fields.StripeEnumField(
@@ -3052,7 +3052,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="coupon",
             name="name",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 default="",
                 help_text="Name of the coupon displayed to customers on for instance invoices or receipts.",
@@ -3279,7 +3279,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -3375,7 +3375,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -3403,7 +3403,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "sql",
-                    models.TextField(help_text="SQL for the query.", max_length=5000),
+                    djstripe.fields.TextField(help_text="SQL for the query.", max_length=5000),
                 ),
                 (
                     "status",
@@ -3415,7 +3415,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "title",
-                    models.TextField(help_text="Title of the query.", max_length=5000),
+                    djstripe.fields.TextField(help_text="Title of the query.", max_length=5000),
                 ),
                 (
                     "file",
@@ -3471,7 +3471,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -3545,7 +3545,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -3628,7 +3628,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -3693,7 +3693,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -3969,7 +3969,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="bankaccount",
             name="account_holder_name",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 default="",
                 help_text="The name of the person or business that owns the bank account.",
@@ -3979,7 +3979,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="card",
             name="address_city",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 default="",
                 help_text="City/District/Suburb/Town/Village.",
@@ -3989,7 +3989,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="card",
             name="address_country",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 default="",
                 help_text="Billing address country.",
@@ -3999,7 +3999,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="card",
             name="address_line1",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 default="",
                 help_text="Street address/PO Box/Company name.",
@@ -4020,7 +4020,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="card",
             name="address_line2",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 default="",
                 help_text="Apartment/Suite/Unit/Building.",
@@ -4030,7 +4030,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="card",
             name="address_state",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 default="",
                 help_text="State/County/Province/Region.",
@@ -4040,7 +4040,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="card",
             name="address_zip",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True, default="", help_text="ZIP or postal code.", max_length=5000
             ),
         ),
@@ -4099,7 +4099,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="card",
             name="name",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True, default="", help_text="Cardholder name.", max_length=5000
             ),
         ),
@@ -4128,7 +4128,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="charge",
             name="failure_message",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 default="",
                 help_text="Message to user further explaining reason for charge failure if available.",
@@ -4138,7 +4138,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="charge",
             name="receipt_email",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 default="",
                 help_text="The email address that the receipt for this charge was sent to.",
@@ -4197,12 +4197,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="customer",
             name="email",
-            field=models.TextField(blank=True, default="", max_length=5000),
+            field=djstripe.fields.TextField(blank=True, default="", max_length=5000),
         ),
         migrations.AlterField(
             model_name="event",
             name="idempotency_key",
-            field=models.TextField(blank=True, default=""),
+            field=djstripe.fields.TextField(blank=True, default=""),
         ),
         migrations.AlterField(
             model_name="event",
@@ -4217,7 +4217,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="invoice",
             name="hosted_invoice_url",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 default="",
                 help_text="The URL for the hosted invoice page, which allows customers to view and pay an invoice. If the invoice has not been frozen yet, this will be null.",
@@ -4227,7 +4227,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="invoice",
             name="invoice_pdf",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 default="",
                 help_text="The link to download the PDF for the invoice. If the invoice has not been frozen yet, this will be null.",
@@ -4268,7 +4268,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="payout",
             name="failure_message",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 default="",
                 help_text="Message to user further explaining reason for payout failure if available.",
@@ -4309,7 +4309,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="plan",
             name="nickname",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 default="",
                 help_text="A brief description of the plan, hidden from customers.",
@@ -4319,7 +4319,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="product",
             name="caption",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 default="",
                 help_text="A short one-line description of the product, meant to be displayableto the customer. Only applicable to products of `type=good`.",
@@ -4406,7 +4406,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="product",
             name="name",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 help_text="The product's name, meant to be displayable to the customer. Applicable to both `service` and `good` types.",
                 max_length=5000,
             ),
@@ -4615,7 +4615,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -4715,7 +4715,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -4740,7 +4740,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "client_secret",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True,
                         help_text="The client secret of this SetupIntent. Used for client-side retrieval using a publishable key.",
                         max_length=5000,
@@ -4907,7 +4907,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "client_secret",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         help_text="The client secret of this PaymentIntent. Used for client-side retrieval using a publishable key.",
                         max_length=5000,
                     ),
@@ -4928,7 +4928,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True,
                         default="",
                         help_text="An arbitrary string attached to the object. Often useful for displaying to users.",
@@ -5117,7 +5117,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="customer",
             name="name",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 default="",
                 help_text="The customer's full name or business name.",
@@ -5127,7 +5127,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="customer",
             name="phone",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 default="",
                 help_text="The customer's phone number.",
@@ -5225,7 +5225,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="charge",
             name="receipt_url",
-            field=models.TextField(
+            field=djstripe.fields.TextField(
                 blank=True,
                 default="",
                 help_text="This is the URL to view the receipt for this charge. The receipt is kept up-to-date to the latest state of the charge, including any refunds. If the charge is for an Invoice, the receipt will be stylized as an Invoice receipt.",
@@ -5269,7 +5269,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "description",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
@@ -5286,7 +5286,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "cancel_url",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True,
                         help_text="The URL the customer will be directed to if theydecide to cancel payment and return to your website.",
                         max_length=5000,
@@ -5294,7 +5294,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "client_reference_id",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True,
                         help_text="A unique string to reference the Checkout Session.This can be a customer ID, a cart ID, or similar, andcan be used to reconcile the session with your internal systems.",
                         max_length=5000,
@@ -5341,7 +5341,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "success_url",
-                    models.TextField(
+                    djstripe.fields.TextField(
                         blank=True,
                         help_text="The URL the customer will be directed to after the payment or subscriptioncreation is successful.",
                         max_length=5000,

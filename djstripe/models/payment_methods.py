@@ -13,6 +13,7 @@ from ..fields import (
     StripeDecimalCurrencyAmountField,
     StripeEnumField,
     StripeForeignKey,
+    TextField,
 )
 from .base import StripeModel, logger
 from .core import Customer
@@ -185,7 +186,7 @@ class BankAccount(LegacySourceMixin, StripeModel):
         help_text="The account the charge was made on behalf of. Null here indicates "
         "that this value was never set.",
     )
-    account_holder_name = models.TextField(
+    account_holder_name = TextField(
         max_length=5000,
         blank=True,
         help_text="The name of the person or business that owns the bank account.",
@@ -252,16 +253,16 @@ class Card(LegacySourceMixin, StripeModel):
 
     stripe_class = stripe.Card
 
-    address_city = models.TextField(
+    address_city = TextField(
         max_length=5000,
         blank=True,
         default="",
         help_text="City/District/Suburb/Town/Village.",
     )
-    address_country = models.TextField(
+    address_country = TextField(
         max_length=5000, blank=True, default="", help_text="Billing address country."
     )
-    address_line1 = models.TextField(
+    address_line1 = TextField(
         max_length=5000,
         blank=True,
         default="",
@@ -273,19 +274,19 @@ class Card(LegacySourceMixin, StripeModel):
         default="",
         help_text="If `address_line1` was provided, results of the check.",
     )
-    address_line2 = models.TextField(
+    address_line2 = TextField(
         max_length=5000,
         blank=True,
         default="",
         help_text="Apartment/Suite/Unit/Building.",
     )
-    address_state = models.TextField(
+    address_state = TextField(
         max_length=5000,
         blank=True,
         default="",
         help_text="State/County/Province/Region.",
     )
-    address_zip = models.TextField(
+    address_zip = TextField(
         max_length=5000, blank=True, default="", help_text="ZIP or postal code."
     )
     address_zip_check = StripeEnumField(
@@ -329,7 +330,7 @@ class Card(LegacySourceMixin, StripeModel):
         enum=enums.CardFundingType, help_text="Card funding type."
     )
     last4 = models.CharField(max_length=4, help_text="Last four digits of Card number.")
-    name = models.TextField(
+    name = TextField(
         max_length=5000, default="", blank=True, help_text="Cardholder name."
     )
     tokenization_method = StripeEnumField(

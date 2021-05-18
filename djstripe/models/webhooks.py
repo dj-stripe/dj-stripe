@@ -9,7 +9,7 @@ from django.utils.functional import cached_property
 
 from .. import settings as djstripe_settings
 from ..context_managers import stripe_temporary_api_version
-from ..fields import JSONField, StripeForeignKey
+from ..fields import JSONField, StripeForeignKey, TextField
 from ..signals import webhook_processing_error
 from .base import logger
 from .core import Event
@@ -36,7 +36,7 @@ class WebhookEventTrigger(models.Model):
         help_text="IP address of the request client."
     )
     headers = JSONField()
-    body = models.TextField(blank=True)
+    body = TextField(blank=True)
     valid = models.BooleanField(
         default=False,
         help_text="Whether or not the webhook event has passed validation",
@@ -46,7 +46,7 @@ class WebhookEventTrigger(models.Model):
         help_text="Whether or not the webhook event has been successfully processed",
     )
     exception = models.CharField(max_length=128, blank=True)
-    traceback = models.TextField(
+    traceback = TextField(
         blank=True, help_text="Traceback if an exception was thrown during processing"
     )
     event = StripeForeignKey(
