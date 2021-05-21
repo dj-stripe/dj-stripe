@@ -86,62 +86,6 @@ def test_api_retrieve(
     )
 
 
-# # ! Approach # 1
-# @patch.object(target=StripeModel, attribute="_meta", autospec=True)
-# @patch.object(target=StripeModel, attribute="stripe_class")
-# def test_api_retrieve_reverse_foreign_key_lookup(mock_stripe_class, mock__meta):
-#     """Test that the reverse foreign key lookup finds the correct fields."""
-#     # Set up some mock fields that shouldn't be used for reverse lookups
-#     mock_field_1 = MagicMock()
-#     mock_field_1.is_relation = False
-#     mock_field_2 = MagicMock()
-#     mock_field_2.is_relation = True
-#     mock_field_2.one_to_many = False
-#     # Set up a mock reverse foreign key field
-#     mock_reverse_foreign_key = MagicMock()
-#     mock_reverse_foreign_key.is_relation = True
-#     mock_reverse_foreign_key.one_to_many = True
-#     mock_reverse_foreign_key.related_model = Account
-#     mock_reverse_foreign_key.get_accessor_name.return_value="foo_account_reverse_attr"
-#     # Set the mocked _meta.get_fields to return some mock fields, including the mock
-#     # reverse foreign key above.
-#     mock__meta.get_fields.return_value = (
-#         mock_field_1,
-#         mock_field_2,
-#         mock_reverse_foreign_key,
-#     )
-#     # Set up a mock account for the reverse foreign key query to return.
-#     mock_account = MagicMock()
-#     mock_account_reverse_manager = MagicMock()
-#     # Make first return the mock account.
-#     mock_account_reverse_manager.first.return_value = mock_account
-
-#     test_model = TestStripeModel()
-#     mock_id = "id_fakefakefakefake01"
-#     test_model.id = mock_id
-#     # Set mock reverse manager on the model.
-#     test_model.foo_account_reverse_attr = mock_account_reverse_manager
-
-#     # Set the _meta attrbute to the mocked meta
-#     # Abstract Parent Class' _meta attribute is not inherited by non-abstract child
-#     # classes.
-#     # Non-abstract Child classes inherit their Parent's Meta and use that to create
-#     # a new _meta attr.
-#     test_model._meta = mock__meta
-
-#     # Call the function with API key set because we mocked _meta
-#     mock_api_key = "sk_fakefakefakefake01"
-#     test_model.api_retrieve(api_key=mock_api_key)
-
-#     # Expect the retrieve to be done with the reverse look up of the Account ID.
-#     mock_stripe_class.retrieve.assert_called_once_with(
-#         id=mock_id, api_key=mock_api_key, stripe_account=mock_account.id, expand=[]
-#     )
-#     mock_reverse_foreign_key.get_accessor_name.assert_called_once_with()
-#     mock_account_reverse_manager.first.assert_called_once_with()
-
-
-# ! Approach # 2
 @patch.object(target=StripeModel, attribute="stripe_class")
 def test_api_retrieve_reverse_foreign_key_lookup(mock_stripe_class):
     """Test that the reverse foreign key lookup finds the correct fields."""
