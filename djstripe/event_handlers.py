@@ -319,6 +319,7 @@ def _handle_crud_like_event(
     """
     data = data or event.data
     id = id or data.get("object", {}).get("id", None)
+    stripe_account = getattr(event.djstripe_owner_account, "id", None)
 
     if not id:
         # We require an object when applying CRUD-like events, so if there's
@@ -355,7 +356,7 @@ def _handle_crud_like_event(
         kwargs = {"id": id}
         if hasattr(target_cls, "customer"):
             kwargs["customer"] = customer
-        data = target_cls(**kwargs).api_retrieve()
+        data = target_cls(**kwargs).api_retrieve(stripe_account=stripe_account)
         obj = target_cls.sync_from_stripe_data(data)
 
     return obj, crud_type
