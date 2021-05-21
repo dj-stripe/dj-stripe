@@ -258,7 +258,13 @@ class StripeModel(StripeBaseModel):
 
     @classmethod
     def _find_owner_account(cls, data):
-        api_key = getattr(data, "api_key", "")
+        from .account import Account
+
+        stripe_account = data.get("account")
+        if stripe_account:
+            return Account._get_or_retrieve(id=stripe_account)
+
+        api_key = data.get("api_key", "")
         if api_key:
             from .account import Account
 
@@ -855,6 +861,7 @@ class StripeModel(StripeBaseModel):
         :type data: dict
         :rtype: cls
         """
+
         current_ids = set()
         data_id = data.get("id")
 
@@ -864,7 +871,9 @@ class StripeModel(StripeBaseModel):
             current_ids.add(data_id)
 
         instance, created = cls._get_or_create_from_stripe_object(
-            data, current_ids=current_ids
+            data,
+            current_ids=current_ids,
+            stripe_account=stripe_account,
         )
 
         if not created:
@@ -879,13 +888,17 @@ class StripeModel(StripeBaseModel):
 
     @classmethod
     def _get_or_retrieve(cls, id, stripe_account=None, **kwargs):
+        """
+        Retrieve object from the db, if it exists. If it doesn't, query Stripe to fetch
+        the object and sync with the db.
+        """
         try:
             return cls.objects.get(id=id)
         except cls.DoesNotExist:
             pass
 
         if stripe_account:
-            kwargs["stripe_account"] = stripe_account
+            kwargs["stripe_account"] = str(stripe_account)
 
         # If no API key is specified, use the default one for the specified livemode
         # (or if no livemode is specified, the default one altogether)
