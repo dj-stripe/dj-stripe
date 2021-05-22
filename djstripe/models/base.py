@@ -272,8 +272,6 @@ class StripeModel(StripeBaseModel):
 
         api_key = data.get("api_key", "")
         if api_key:
-            from .account import Account
-
             return Account.get_or_retrieve_for_api_key(api_key)
 
     @classmethod
@@ -867,9 +865,9 @@ class StripeModel(StripeBaseModel):
         :type data: dict
         :rtype: cls
         """
-
         current_ids = set()
         data_id = data.get("id")
+        stripe_account = getattr(data, "stripe_account", None)
 
         if data_id:
             # stop nested objects from trying to retrieve this object before

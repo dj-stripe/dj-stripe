@@ -158,7 +158,6 @@ def test__find_owner_account(
     # if stripe_account exists, assert _get_or_retrieve classmethod
     # gets called
     if stripe_account:
-
         mock__get_or_retrieve.assert_called_once_with(id=stripe_account)
 
     # if api_key exists and stripe_account doesn't, assert get_or_retrieve_for_api_key

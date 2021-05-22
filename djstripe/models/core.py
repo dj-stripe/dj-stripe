@@ -1035,7 +1035,7 @@ class Customer(StripeModel):
         self.save()
 
     def _get_valid_subscriptions(self):
-        """ Get a list of this customer's valid subscriptions."""
+        """Get a list of this customer's valid subscriptions."""
 
         return [
             subscription
@@ -1142,7 +1142,7 @@ class Customer(StripeModel):
             return False  # There was nothing to invoice
 
     def retry_unpaid_invoices(self):
-        """ Attempt to retry collecting payment on the customer's unpaid invoices."""
+        """Attempt to retry collecting payment on the customer's unpaid invoices."""
 
         self._sync_invoices()
         for invoice in self.invoices.filter(auto_advance=True).exclude(status="paid"):
@@ -1153,7 +1153,7 @@ class Customer(StripeModel):
                     raise
 
     def has_valid_source(self):
-        """ Check whether the customer has a valid payment source."""
+        """Check whether the customer has a valid payment source."""
         return self.default_source is not None
 
     def add_coupon(self, coupon, idempotency_key=None):
@@ -1400,17 +1400,17 @@ class Event(StripeModel):
 
     @cached_property
     def parts(self):
-        """ Gets the event category/verb as a list of parts. """
+        """Gets the event category/verb as a list of parts."""
         return str(self.type).split(".")
 
     @cached_property
     def category(self):
-        """ Gets the event category string (e.g. 'customer'). """
+        """Gets the event category string (e.g. 'customer')."""
         return self.parts[0]
 
     @cached_property
     def verb(self):
-        """ Gets the event past-tense verb string (e.g. 'updated'). """
+        """Gets the event past-tense verb string (e.g. 'updated')."""
         return ".".join(self.parts[1:])
 
     @property
@@ -2012,7 +2012,7 @@ class Price(StripeModel):
 
     @classmethod
     def get_or_create(cls, **kwargs):
-        """ Get or create a Price."""
+        """Get or create a Price."""
 
         try:
             return Price.objects.get(id=kwargs["id"]), False
