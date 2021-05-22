@@ -7,10 +7,10 @@ from django.utils import timezone
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 from stripe.error import InvalidRequestError
-from ..exceptions import StripeObjectManipulationException
 
 from .. import enums
 from .. import settings as djstripe_settings
+from ..exceptions import StripeObjectManipulationException
 from ..fields import (
     JSONField,
     PaymentMethodForeignKey,

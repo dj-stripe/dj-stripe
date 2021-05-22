@@ -2,17 +2,17 @@
 dj-stripe TaxId Model Tests.
 """
 from copy import deepcopy
-
-from django.test import TestCase
 from unittest.mock import patch
-import pytest
-from djstripe.exceptions import StripeObjectManipulationException
 
-from djstripe.models import TaxId, Customer
+import pytest
+from django.test import TestCase
+
+from djstripe.exceptions import StripeObjectManipulationException
+from djstripe.models import Customer, TaxId
 from tests import (
-    FAKE_TAX_ID,
     FAKE_CUSTOMER_WITH_TAX_ID,
     FAKE_CUSTOMER_WITHOUT_TAX_ID,
+    FAKE_TAX_ID,
     AssertStripeFksMixin,
 )
 
