@@ -37,7 +37,7 @@ exclude = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.6.2"
 Django = ">=2.2"
 jsonfield = ">=3.0"
 stripe = ">=2.48.0"
