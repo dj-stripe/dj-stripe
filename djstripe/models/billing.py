@@ -633,7 +633,7 @@ class BaseInvoice(StripeModel):
         )
 
     def retry(self):
-        """ Retry payment on this invoice if it isn't paid or uncollectible."""
+        """Retry payment on this invoice if it isn't paid or uncollectible."""
 
         if (
             self.status != enums.InvoiceStatus.paid
@@ -1161,7 +1161,7 @@ class Plan(StripeModel):
 
     @classmethod
     def get_or_create(cls, **kwargs):
-        """ Get or create a Plan."""
+        """Get or create a Plan."""
 
         try:
             return Plan.objects.get(id=kwargs["id"]), False
