@@ -450,6 +450,20 @@ class PaymentMethodAdmin(StripeModelAdmin):
     search_fields = ("customer__id",)
 
 
+@admin.register(models.Card)
+class CardAdmin(StripeModelAdmin):
+    list_display = ("customer", "account")
+    list_select_related = ("customer", "customer__subscriber", "account")
+    search_fields = ("customer__id", "account_id")
+
+
+@admin.register(models.BankAccount)
+class BankAccountAdmin(StripeModelAdmin):
+    list_display = ("customer", "account")
+    list_select_related = ("customer", "customer__subscriber", "account")
+    search_fields = ("customer__id", "account_id")
+
+
 @admin.register(models.Subscription)
 class SubscriptionAdmin(StripeModelAdmin):
     list_display = ("customer", "status")
