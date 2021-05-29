@@ -3,7 +3,7 @@ from typing import List
 from django.apps import apps
 from django.core.management.base import BaseCommand, CommandError
 
-from ... import models, settings
+from ... import enums, models, settings
 
 
 class Command(BaseCommand):
@@ -73,6 +73,7 @@ class Command(BaseCommand):
         count = 0
         try:
             for list_kwargs in self.get_list_kwargs(model):
+
                 if model is models.Account:
                     # special case, since own account isn't returned by Account.api_list
                     stripe_obj = models.Account.stripe_class.retrieve(
@@ -88,6 +89,9 @@ class Command(BaseCommand):
                         )
                     )
 
+                    # syncing BankAccount and Card objects of Stripe Connected Express and Custom Accounts
+                    self.sync_external_account_bank_accounts_and_cards(djstripe_obj)
+
                 for stripe_obj in model.api_list(**list_kwargs):
                     count += 1
                     djstripe_obj = model.sync_from_stripe_data(stripe_obj)
@@ -98,6 +102,8 @@ class Command(BaseCommand):
                             djstripe_obj=djstripe_obj,
                         )
                     )
+                    # syncing BankAccount and Card objects of Stripe Connected Express and Custom Accounts
+                    self.sync_external_account_bank_accounts_and_cards(djstripe_obj)
 
         except Exception as e:
             self.stderr.write(str(e))
@@ -144,3 +150,37 @@ class Command(BaseCommand):
             all_list_kwargs.append({})
 
         return all_list_kwargs
+
+    def sync_external_account_bank_accounts_and_cards(self, instance):
+        type = getattr(instance, "type", None)
+        id = instance.id
+
+        if type in (enums.AccountType.custom, enums.AccountType.express) and isinstance(
+            instance, models.Account
+        ):
+            # fetch all Card and BankAccount objects associated with the instance
+            items = models.Account.stripe_class.list_external_accounts(
+                id,
+                api_key=settings.STRIPE_SECRET_KEY,
+            )
+            bank_count = 0
+            card_count = 0
+            for item in items.auto_paging_iter():
+
+                if item.object == "bank_account":
+                    model = models.BankAccount
+                    bank_count += 1
+                elif item.object == "card":
+                    model = models.Card
+                    card_count += 1
+
+                item_obj = model.sync_from_stripe_data(item)
+
+                self.stdout.write(
+                    f"\tSyncing {model._meta.verbose_name} ({instance}): id={item_obj.id}, pk={item_obj.pk}"
+                )
+
+            if bank_count + card_count > 0:
+                self.stdout.write(
+                    f"\tSynced {bank_count} BankAccounts and {card_count} Cards"
+                )
