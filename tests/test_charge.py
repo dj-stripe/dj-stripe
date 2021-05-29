@@ -12,7 +12,6 @@ from djstripe.enums import ChargeStatus, LegacySourceType
 from djstripe.models import Charge, DjstripePaymentMethod
 
 from . import (
-    FAKE_ACCOUNT,
     FAKE_BALANCE_TRANSACTION,
     FAKE_BALANCE_TRANSACTION_REFUND,
     FAKE_CARD_AS_PAYMENT_METHOD,
@@ -26,21 +25,22 @@ from . import (
     FAKE_PLAN,
     FAKE_PRODUCT,
     FAKE_REFUND,
+    FAKE_STANDARD_ACCOUNT,
     FAKE_SUBSCRIPTION,
     FAKE_TRANSFER,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
-    default_account,
 )
 
 
 class ChargeTest(AssertStripeFksMixin, TestCase):
+    @classmethod
     def setUp(self):
-        self.user = get_user_model().objects.create_user(
-            username="user", email="user@example.com"
+        user = get_user_model().objects.create_user(
+            username="testuser", email="djstripe@example.com"
         )
-        self.customer = FAKE_CUSTOMER.create_for_user(self.user)
-        self.account = default_account()
+        self.customer = FAKE_CUSTOMER.create_for_user(user)
+        self.account = FAKE_STANDARD_ACCOUNT.create()
         self.default_expected_blank_fks = {
             "djstripe.Charge.application_fee",
             "djstripe.Charge.dispute",
@@ -767,10 +767,10 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
     ):
         from djstripe.settings import STRIPE_SECRET_KEY
 
-        account_retrieve_mock.return_value = FAKE_ACCOUNT
+        account_retrieve_mock.return_value = FAKE_STANDARD_ACCOUNT
 
         fake_charge_copy = deepcopy(FAKE_CHARGE)
-        fake_charge_copy.update({"destination": FAKE_ACCOUNT["id"]})
+        fake_charge_copy.update({"destination": FAKE_STANDARD_ACCOUNT["id"]})
 
         charge, created = Charge._get_or_create_from_stripe_object(
             fake_charge_copy, current_ids={fake_charge_copy["id"]}

@@ -49,7 +49,7 @@ class TestAccount(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(account, expected_blank_fks={})
 
-        self.assertEqual(account.business_url, "https://example.com")
+        self.assertEqual(account.business_url, "https://djstripe.com")
         account.business_profile = None
         self.assertEqual(account.business_url, "")
 

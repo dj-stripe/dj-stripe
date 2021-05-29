@@ -11,7 +11,7 @@ from djstripe.enums import APIKeyType
 from djstripe.models import Account, APIKey
 from djstripe.models.api import get_api_key_details_by_prefix
 
-from . import FAKE_ACCOUNT, FAKE_FILEUPLOAD_ICON, default_account
+from . import FAKE_FILEUPLOAD_ICON, FAKE_STANDARD_ACCOUNT
 
 # avoid literal api keys to prevent git secret scanners false-positives
 SK_TEST = "sk_test_" + "XXXXXXXXXXXXXXXXXXXX1234"
@@ -48,7 +48,7 @@ def test_clean_public_apikey():
 
 
 @pytest.mark.django_db
-@patch("stripe.Account.retrieve", return_value=deepcopy(FAKE_ACCOUNT))
+@patch("stripe.Account.retrieve", return_value=deepcopy(FAKE_STANDARD_ACCOUNT))
 @patch("stripe.FileUpload.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD_ICON))
 def test_apikey_detect_livemode_and_type(
     fileupload_retrieve_mock, account_retrieve_mock
@@ -72,7 +72,10 @@ def test_apikey_detect_livemode_and_type(
 
 class APIKeyTest(TestCase):
     def setUp(self):
-        self.account = default_account()
+
+        # create a Standard Stripe Account
+        self.account = FAKE_STANDARD_ACCOUNT.create()
+
         self.apikey_test = APIKey.objects.create(
             type=APIKeyType.secret,
             name="Test Secret Key",
@@ -91,11 +94,11 @@ class APIKeyTest(TestCase):
     def test_get_stripe_dashboard_url(self):
         self.assertEqual(
             self.apikey_test.get_stripe_dashboard_url(),
-            "https://dashboard.stripe.com/acct_TESTXXXXX/test/apikeys",
+            "https://dashboard.stripe.com/acct_1Fg9jUA3kq9o1aTc/test/apikeys",
         )
         self.assertEqual(
             self.apikey_live.get_stripe_dashboard_url(),
-            "https://dashboard.stripe.com/acct_TESTXXXXX/apikeys",
+            "https://dashboard.stripe.com/acct_1Fg9jUA3kq9o1aTc/apikeys",
         )
 
     def test_secret_redacted(self):
@@ -112,11 +115,11 @@ class APIKeyTest(TestCase):
 
     @patch(
         "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_ACCOUNT),
+        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
     )
     @patch("stripe.FileUpload.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD_ICON))
     def test_refresh_account(self, fileupload_retrieve_mock, account_retrieve_mock):
         self.apikey_test.djstripe_owner_account = None
         self.apikey_test.save()
         self.apikey_test.clean()
-        assert self.apikey_test.djstripe_owner_account.id == FAKE_ACCOUNT["id"]
+        assert self.apikey_test.djstripe_owner_account.id == FAKE_STANDARD_ACCOUNT["id"]

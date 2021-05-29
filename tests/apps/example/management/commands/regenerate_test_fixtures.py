@@ -194,7 +194,7 @@ class Command(BaseCommand):
             djstripe.models.Card: [
                 tests.FAKE_CARD,
                 tests.FAKE_CARD_II,
-                tests.FAKE_CARD_V,
+                tests.FAKE_CARD_III,
             ],
             djstripe.models.Source: [tests.FAKE_SOURCE],
             djstripe.models.Plan: [tests.FAKE_PLAN, tests.FAKE_PLAN_II],

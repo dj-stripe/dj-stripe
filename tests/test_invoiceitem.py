@@ -21,17 +21,17 @@ from . import (
     FAKE_PLAN_II,
     FAKE_PRICE_II,
     FAKE_PRODUCT,
+    FAKE_STANDARD_ACCOUNT,
     FAKE_SUBSCRIPTION_III,
     FAKE_TAX_RATE_EXAMPLE_1_VAT,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
-    default_account,
 )
 
 
 class InvoiceItemTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
-        self.account = default_account()
+        self.account = FAKE_STANDARD_ACCOUNT.create()
 
         self.default_expected_blank_fks = {
             "djstripe.Account.branding_logo",

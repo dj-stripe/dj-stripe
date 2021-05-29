@@ -20,10 +20,10 @@ from . import (
 
 class SubscriptionScheduleTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
-        self.user = get_user_model().objects.create_user(
+        user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
-        self.customer = FAKE_CUSTOMER_II.create_for_user(self.user)
+        self.customer = FAKE_CUSTOMER_II.create_for_user(user)
 
         self.default_expected_blank_fks = {
             "djstripe.Customer.coupon",

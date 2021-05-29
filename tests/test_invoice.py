@@ -22,23 +22,23 @@ from . import (
     FAKE_PAYMENT_INTENT_I,
     FAKE_PLAN,
     FAKE_PRODUCT,
+    FAKE_STANDARD_ACCOUNT,
     FAKE_SUBSCRIPTION,
     FAKE_TAX_RATE_EXAMPLE_1_VAT,
     FAKE_TAX_RATE_EXAMPLE_2_SALES,
     FAKE_UPCOMING_INVOICE,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
-    default_account,
 )
 
 
 class InvoiceTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
-        self.account = default_account()
-        self.user = get_user_model().objects.create_user(
+        self.account = FAKE_STANDARD_ACCOUNT.create()
+        user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
-        self.customer = FAKE_CUSTOMER.create_for_user(self.user)
+        self.customer = FAKE_CUSTOMER.create_for_user(user)
 
         self.default_expected_blank_fks = {
             "djstripe.Account.branding_logo",
