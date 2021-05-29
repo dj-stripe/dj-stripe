@@ -1,6 +1,7 @@
 {
     "id": "card_fakefakefakefakefake0001",
     "object": "card",
+    "account": null,
     "address_city": null,
     "address_country": null,
     "address_line1": null,

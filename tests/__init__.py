@@ -219,15 +219,51 @@ class StripeList(dict):
         return len(self.data)
 
 
-def default_account():
-    from djstripe.models import Account
+class ExternalAccounts(object):
+    def __init__(self, external_account_fakes):
+        self.external_account_fakes = external_account_fakes
 
-    return Account.objects.create(
-        id="acct_TESTXXXXX",
-        charges_enabled=True,
-        details_submitted=True,
-        payouts_enabled=True,
-    )
+    def create(self, source, api_key=None):
+        for fake_external_account in self.external_account_fakes:
+            if fake_external_account["id"] == source:
+                return fake_external_account
+
+    def retrieve(self, id, expand=None):  # noqa
+        for fake_external_account in self.external_account_fakes:
+            if fake_external_account["id"] == id:
+                return fake_external_account
+
+    def list(self, **kwargs):
+        return StripeList(data=self.external_account_fakes)
+
+
+class AccountDict(dict):
+    def save(self, idempotency_key=None):
+        return self
+
+    @property
+    def external_accounts(self):
+        return ExternalAccounts(
+            external_account_fakes=self["external_accounts"]["data"]
+        )
+
+    def create(self):
+        from djstripe.models import Account
+
+        return Account.sync_from_stripe_data(self)
+
+
+FAKE_STANDARD_ACCOUNT = AccountDict(
+    load_fixture("account_standard_acct_1Fg9jUA3kq9o1aTc.json")
+)
+
+FAKE_CUSTOM_ACCOUNT = AccountDict(
+    load_fixture("account_custom_acct_1IuHosQveW0ONQsd.json")
+)
+
+FAKE_EXPRESS_ACCOUNT = AccountDict(
+    load_fixture("account_express_acct_1IuHosQveW0ONQsd.json")
+)
 
 
 FAKE_BALANCE_TRANSACTION = load_fixture(
@@ -368,6 +404,9 @@ FAKE_BANK_ACCOUNT_II = {
 FAKE_BANK_ACCOUNT_SOURCE = BankAccountDict(
     load_fixture("bank_account_ba_fakefakefakefakefake0003.json")
 )
+FAKE_BANK_ACCOUNT_IV = BankAccountDict(
+    load_fixture("bank_account_ba_fakefakefakefakefake0004.json")
+)
 
 
 class CardDict(LegacySourceDict):
@@ -378,62 +417,10 @@ FAKE_CARD = CardDict(load_fixture("card_card_fakefakefakefakefake0001.json"))
 
 FAKE_CARD_II = CardDict(load_fixture("card_card_fakefakefakefakefake0002.json"))
 
-FAKE_CARD_III = CardDict(
-    {
-        "id": "card_17PLiR2eZvKYlo2CRwTCUAdZ",
-        "object": "card",
-        "address_city": None,
-        "address_country": None,
-        "address_line1": None,
-        "address_line1_check": None,
-        "address_line2": None,
-        "address_state": None,
-        "address_zip": None,
-        "address_zip_check": None,
-        "brand": "American Express",
-        "country": "US",
-        "customer": None,
-        "cvc_check": "unchecked",
-        "dynamic_last4": None,
-        "exp_month": 7,
-        "exp_year": 2019,
-        "fingerprint": "Xt5EWLLDS7FJjR1c",
-        "funding": "credit",
-        "last4": "1005",
-        "metadata": {"djstripe_test_fake_id": "card_fakefakefakefakefake0003"},
-        "name": None,
-        "tokenization_method": None,
-    }
-)
+FAKE_CARD_III = CardDict(load_fixture("card_card_fakefakefakefakefake0003.json"))
 
-FAKE_CARD_IV = CardDict(
-    {
-        "id": "card_186Qdm2eZvKYlo2CInjNRrRE",
-        "object": "card",
-        "address_city": None,
-        "address_country": None,
-        "address_line1": None,
-        "address_line1_check": None,
-        "address_line2": None,
-        "address_state": None,
-        "address_zip": None,
-        "address_zip_check": None,
-        "brand": "Visa",
-        "country": "US",
-        "customer": None,
-        "cvc_check": "unchecked",
-        "dynamic_last4": None,
-        "exp_month": 6,
-        "exp_year": 2018,
-        "funding": "credit",
-        "last4": "4242",
-        "metadata": {"djstripe_test_fake_id": "card_fakefakefakefakefake0004"},
-        "name": None,
-        "tokenization_method": None,
-    }
-)
-
-FAKE_CARD_V = CardDict(load_fixture("card_card_fakefakefakefakefake0005.json"))
+# Stripe Custom Account Payout Source
+FAKE_CARD_IV = CardDict(load_fixture("card_card_fakefakefakefakefake0004.json"))
 
 
 class SourceDict(dict):
@@ -1602,9 +1589,8 @@ FAKE_ACCOUNT = {
         "name": "dj-stripe",
         "support_email": "djstripe@example.com",
         "support_phone": None,
-        "support_url": "https://example.com/support/",
-        # TODO - change this since stripe validation actually doesn't allow example.com
-        "url": "https://example.com",
+        "support_url": "https://djstripe.com/support/",
+        "url": "https://djstripe.com",
     },
     "settings": {
         "branding": {
@@ -1689,23 +1675,47 @@ FAKE_FILEUPLOAD_ICON = {
 }
 
 
-FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED = {
-    "id": "evt_XXXXXXXXXXXXXXXXXXXXXXXX",
-    "type": "account.application.deauthorized",
-    "pending_webhooks": 0,
-    "livemode": False,
-    "request": None,
-    "api_version": None,
-    "created": 1493823371,
-    "object": "event",
-    "data": {
-        "object": {
-            "id": "ca_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-            "object": "application",
-            "name": "Test Connect Application",
-        }
-    },
-}
+FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED = dict(
+    load_fixture("event_account_application_deauthorized.json")
+)
+
+FAKE_EVENT_ACCOUNT_APPLICATION_AUTHORIZED = dict(
+    load_fixture("event_account_application_authorized.json")
+)
+
+FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_CREATED = dict(
+    load_fixture("event_external_account_bank_account_created.json")
+)
+FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_CARD_CREATED = dict(
+    load_fixture("event_external_account_card_created.json")
+)
+
+FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_DELETED = dict(
+    load_fixture("event_external_account_bank_account_deleted.json")
+)
+FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_CARD_DELETED = dict(
+    load_fixture("event_external_account_card_deleted.json")
+)
+
+FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_UPDATED = dict(
+    load_fixture("event_external_account_bank_account_updated.json")
+)
+FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_CARD_UPDATED = dict(
+    load_fixture("event_external_account_card_updated.json")
+)
+
+FAKE_EVENT_STANDARD_ACCOUNT_UPDATED = dict(
+    load_fixture("event_account_updated_standard.json")
+)
+
+
+FAKE_EVENT_EXPRESS_ACCOUNT_UPDATED = dict(
+    load_fixture("event_account_updated_express.json")
+)
+
+FAKE_EVENT_CUSTOM_ACCOUNT_UPDATED = dict(
+    load_fixture("event_account_updated_custom.json")
+)
 
 # 2017-05-25 api changed request from id to object with id and idempotency_key
 # issue #541
