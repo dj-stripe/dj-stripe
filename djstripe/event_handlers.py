@@ -16,7 +16,7 @@ NOTE:
 import logging
 
 from . import models, webhooks
-from .enums import SourceType
+from .enums import PayoutType, SourceType
 from .utils import convert_tstamp
 
 logger = logging.getLogger(__name__)
@@ -160,6 +160,32 @@ def payment_method_handler(event):
         )
     else:
         _handle_crud_like_event(target_cls=models.PaymentMethod, event=event)
+
+
+@webhooks.handler("account.external_account")
+def account_application_webhook_handler(event):
+    """
+    Handles updates to Connected Accounts External Accounts
+    """
+    source_type = event.data.get("object", {}).get("object")
+    if source_type == PayoutType.card:
+        _handle_crud_like_event(target_cls=models.Card, event=event)
+
+    if source_type == PayoutType.bank_account:
+        _handle_crud_like_event(target_cls=models.BankAccount, event=event)
+
+
+@webhooks.handler("account.updated")
+def account_updated_webhook_handler(event):
+    """
+    Handles updates to Connected Accounts
+        - account: https://stripe.com/docs/api/accounts
+    """
+    _handle_crud_like_event(
+        target_cls=models.Account,
+        event=event,
+        crud_type=CrudType(updated=True),
+    )
 
 
 @webhooks.handler(
@@ -332,6 +358,7 @@ def _handle_crud_like_event(
 
     verb = verb or event.verb
     customer = customer or event.customer
+
     crud_type = crud_type or CrudType.determine(
         event=event, verb=verb, exact=crud_exact
     )
@@ -356,6 +383,10 @@ def _handle_crud_like_event(
         kwargs = {"id": id}
         if hasattr(target_cls, "customer"):
             kwargs["customer"] = customer
+        # For account.external_account.* events
+        if event.parts[:2] == ["account", "external_account"] and stripe_account:
+            kwargs["account"] = models.Account._get_or_retrieve(id=stripe_account)
+
         data = target_cls(**kwargs).api_retrieve(stripe_account=stripe_account)
         obj = target_cls.sync_from_stripe_data(data)
 
