@@ -1,0 +1,56 @@
+{
+    "id": "acct_1Fg9jUA3kq9o1aTc",
+    "object": "account",
+    "metadata": {},
+    "business_profile": {
+        "name": "dj-stripe",
+        "support_email": "djstripe@example.com",
+        "support_phone": null,
+        "support_url": "https://djstripe.com/support/",
+        "url": "https://djstripe.com"
+    },
+    "capabilities": {},
+    "charges_enabled": true,
+    "country": "US",
+    "default_currency": "usd",
+    "details_submitted": true,
+    "payouts_enabled": true,
+    "settings": {
+        "bacs_debit_payments": {},
+        "branding": {
+            "icon":null,
+            "logo":null,
+            "primary_color": null,
+            "secondary_color": null
+        },
+        "card_issuing": {
+            "tos_acceptance": {
+                "date": null,
+                "ip": null
+            }
+        },
+        "card_payments": {
+            "statement_descriptor_prefix": null
+        },
+        "dashboard": {
+            "display_name": "djstripe-standard",
+            "timezone": "America/Los_Angeles"
+        },
+        "payments": {
+            "statement_descriptor": "DJSTRIPE",
+            "statement_descriptor_kana": null,
+            "statement_descriptor_kanji": null
+        },
+        "payouts": {
+            "debit_negative_balances": true,
+            "schedule": {
+                "delay_days": 2,
+                "interval": "daily"
+            },
+            "statement_descriptor": null
+        },
+        "sepa_debit_payments": {}
+    },
+    "type": "standard",
+    "email": "djstripe@example.com"
+}
