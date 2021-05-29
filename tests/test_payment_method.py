@@ -15,19 +15,19 @@ from . import (
     FAKE_CARD_AS_PAYMENT_METHOD,
     FAKE_CUSTOMER,
     FAKE_PAYMENT_METHOD_I,
+    FAKE_STANDARD_ACCOUNT,
     AssertStripeFksMixin,
     PaymentMethodDict,
-    default_account,
 )
 
 
 class PaymentMethodTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
-        self.account = default_account()
-        self.user = get_user_model().objects.create_user(
+        self.account = FAKE_STANDARD_ACCOUNT.create()
+        user = get_user_model().objects.create_user(
             username="testuser", email="djstripe@example.com"
         )
-        self.customer = FAKE_CUSTOMER.create_for_user(self.user)
+        self.customer = FAKE_CUSTOMER.create_for_user(user)
 
     # TODO - these should use autospec=True with stripe.PaymentMethod.attach,
     #  but it's failing for some reason with:

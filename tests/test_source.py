@@ -14,19 +14,19 @@ from . import (
     FAKE_CUSTOMER_III,
     FAKE_SOURCE,
     FAKE_SOURCE_II,
+    FAKE_STANDARD_ACCOUNT,
     AssertStripeFksMixin,
     SourceDict,
-    default_account,
 )
 
 
 class SourceTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
-        self.account = default_account()
-        self.user = get_user_model().objects.create_user(
+        self.account = FAKE_STANDARD_ACCOUNT.create()
+        user = get_user_model().objects.create_user(
             username="testuser", email="djstripe@example.com"
         )
-        self.customer = FAKE_CUSTOMER_III.create_for_user(self.user)
+        self.customer = FAKE_CUSTOMER_III.create_for_user(user)
         self.customer.sources.all().delete()
         self.customer.legacy_cards.all().delete()
 

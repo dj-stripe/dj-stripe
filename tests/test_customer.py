@@ -29,11 +29,10 @@ from djstripe.models import (
 from djstripe.settings import STRIPE_SECRET_KEY
 
 from . import (
-    FAKE_ACCOUNT,
     FAKE_BALANCE_TRANSACTION,
     FAKE_CARD,
     FAKE_CARD_AS_PAYMENT_METHOD,
-    FAKE_CARD_V,
+    FAKE_CARD_III,
     FAKE_CHARGE,
     FAKE_COUPON,
     FAKE_CUSTOMER,
@@ -50,6 +49,7 @@ from . import (
     FAKE_PRICE,
     FAKE_PRODUCT,
     FAKE_SOURCE,
+    FAKE_STANDARD_ACCOUNT,
     FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_II,
     FAKE_UPCOMING_INVOICE,
@@ -57,7 +57,6 @@ from . import (
     AssertStripeFksMixin,
     StripeList,
     datetime_to_unix,
-    default_account,
 )
 
 
@@ -76,7 +75,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.customer.default_source = self.payment_method
         self.customer.save()
 
-        self.account = default_account()
+        self.account = FAKE_STANDARD_ACCOUNT.create()
 
     def test_str(self):
         self.assertEqual(str(self.customer), str(self.user))
@@ -452,17 +451,17 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
     )
     def test_add_card_set_default_true(self, customer_retrieve_mock):
         self.customer.add_card(FAKE_CARD["id"])
-        self.customer.add_card(FAKE_CARD_V["id"])
+        self.customer.add_card(FAKE_CARD_III["id"])
 
         self.assertEqual(2, Card.objects.count())
-        self.assertEqual(FAKE_CARD_V["id"], self.customer.default_source.id)
+        self.assertEqual(FAKE_CARD_III["id"], self.customer.default_source.id)
 
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
     def test_add_card_set_default_false(self, customer_retrieve_mock):
         self.customer.add_card(FAKE_CARD["id"], set_default=False)
-        self.customer.add_card(FAKE_CARD_V["id"], set_default=False)
+        self.customer.add_card(FAKE_CARD_III["id"], set_default=False)
 
         self.assertEqual(2, Card.objects.count())
         self.assertEqual(FAKE_CARD["id"], self.customer.default_source.id)
@@ -1026,12 +1025,12 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.customer.charge(
             amount=decimal.Decimal("10.00"),
             capture=True,
-            destination=FAKE_ACCOUNT["id"],
+            destination=FAKE_STANDARD_ACCOUNT["id"],
         )
 
         _, kwargs = charge_create_mock.call_args
         self.assertEqual(kwargs["capture"], True)
-        self.assertEqual(kwargs["destination"], FAKE_ACCOUNT["id"])
+        self.assertEqual(kwargs["destination"], FAKE_STANDARD_ACCOUNT["id"])
 
     @patch(
         "djstripe.models.Account.get_default_account",
@@ -1750,7 +1749,7 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
         self.customer.default_source = self.payment_method
         self.customer.save()
 
-        self.account = default_account()
+        self.account = FAKE_STANDARD_ACCOUNT.create()
 
     @patch(
         "stripe.Subscription.create",

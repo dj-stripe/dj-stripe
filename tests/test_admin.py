@@ -2,16 +2,10 @@
 dj-stripe Admin Tests.
 """
 from django.contrib import admin
-from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 
 class TestAdminSite(TestCase):
-    def setUp(self):
-        self.user = get_user_model().objects.create_user(
-            username="pydanny", email="pydanny@gmail.com"
-        )
-
     def test_search_fields(self):
         """
         Search for errors like this:

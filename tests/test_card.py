@@ -14,35 +14,99 @@ from djstripe.models import Card
 from . import (
     FAKE_CARD,
     FAKE_CARD_III,
-    FAKE_CARD_V,
+    FAKE_CARD_IV,
+    FAKE_CUSTOM_ACCOUNT,
     FAKE_CUSTOMER,
+    FAKE_STANDARD_ACCOUNT,
     AssertStripeFksMixin,
-    default_account,
 )
 
 
 class CardTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
-        self.account = default_account()
-        self.user = get_user_model().objects.create_user(
+
+        # create a Standard Stripe Account
+        self.account = FAKE_STANDARD_ACCOUNT.create()
+
+        user = get_user_model().objects.create_user(
             username="testuser", email="djstripe@example.com"
         )
         fake_empty_customer = deepcopy(FAKE_CUSTOMER)
         fake_empty_customer["default_source"] = None
         fake_empty_customer["sources"] = []
 
-        self.customer = fake_empty_customer.create_for_user(self.user)
+        self.customer = fake_empty_customer.create_for_user(user)
 
     def test_attach_objects_hook_without_customer(self):
-        card = Card.sync_from_stripe_data(deepcopy(FAKE_CARD_III))
+        FAKE_CARD_DICT = deepcopy(FAKE_CARD)
+        FAKE_CARD_DICT["customer"] = None
+
+        card = Card.sync_from_stripe_data(FAKE_CARD_DICT)
         self.assertEqual(card.customer, None)
 
-    def test_create_card_finds_customer(self):
-        card = Card.sync_from_stripe_data(deepcopy(FAKE_CARD))
+    def test_attach_objects_hook_without_account(self):
+        card = Card.sync_from_stripe_data(FAKE_CARD)
+        self.assertEqual(card.account, None)
+
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
+        autospec=True,
+    )
+    def test_api_retrieve_by_customer_equals_retrieval_by_account(
+        self, account_retrieve_mock, customer_retrieve_mock
+    ):
+        # deepcopy the CardDict object
+        FAKE_CARD_DICT = deepcopy(FAKE_CARD)
+
+        card = Card.sync_from_stripe_data(deepcopy(FAKE_CARD_DICT))
+        card_by_customer = card.api_retrieve()
+
+        # Add account
+        FAKE_CARD_DICT["account"] = self.account.id
+        FAKE_CARD_DICT["customer"] = None
+
+        card = Card.sync_from_stripe_data(FAKE_CARD_DICT)
+        card_by_account = card.api_retrieve()
+
+        # assert the same card object gets retrieved
+        self.assertCountEqual(card_by_customer, card_by_account)
+
+    def test_create_card_finds_customer_with_account_absent(self):
+        card = Card.sync_from_stripe_data(FAKE_CARD)
 
         self.assertEqual(self.customer, card.customer)
         self.assertEqual(
             card.get_stripe_dashboard_url(), self.customer.get_stripe_dashboard_url()
+        )
+
+        self.assert_fks(
+            card,
+            expected_blank_fks={
+                "djstripe.Card.account",
+                "djstripe.BankAccount.account",
+                "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
+                "djstripe.Customer.default_source",
+            },
+        )
+
+    def test_create_card_finds_customer_with_account_present(self):
+        # deepcopy the CardDict object
+        FAKE_CARD_DICT = deepcopy(FAKE_CARD)
+        # Add account
+        FAKE_CARD_DICT["account"] = self.account.id
+
+        card = Card.sync_from_stripe_data(FAKE_CARD_DICT)
+
+        self.assertEqual(self.customer, card.customer)
+        self.assertEqual(self.account, card.account)
+        self.assertEqual(
+            card.get_stripe_dashboard_url(),
+            self.customer.get_stripe_dashboard_url(),
         )
 
         self.assert_fks(
@@ -55,18 +119,43 @@ class CardTest(AssertStripeFksMixin, TestCase):
             },
         )
 
+    def test_create_card_finds_account_with_customer_absent(self):
+        # deepcopy the CardDict object
+        FAKE_CARD_DICT = deepcopy(FAKE_CARD)
+        # Add account and remove customer
+        FAKE_CARD_DICT["account"] = self.account.id
+        FAKE_CARD_DICT["customer"] = None
+
+        card = Card.sync_from_stripe_data(FAKE_CARD_DICT)
+
+        self.assertEqual(self.account, card.account)
+        self.assertEqual(
+            card.get_stripe_dashboard_url(),
+            self.account.get_stripe_dashboard_url(),
+        )
+
+        self.assert_fks(
+            card,
+            expected_blank_fks={
+                "djstripe.Card.customer",
+                "djstripe.BankAccount.account",
+                "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
+                "djstripe.Customer.default_source",
+            },
+        )
+
     def test_str(self):
-        fake_card = deepcopy(FAKE_CARD)
-        card = Card.sync_from_stripe_data(fake_card)
+        card = Card.sync_from_stripe_data(FAKE_CARD)
 
         self.assertEqual(
             "<brand={brand}, last4={last4}, exp_month={exp_month}, "
             "exp_year={exp_year}, id={id}>".format(
-                brand=fake_card["brand"],
-                last4=fake_card["last4"],
-                exp_month=fake_card["exp_month"],
-                exp_year=fake_card["exp_year"],
-                id=fake_card["id"],
+                brand=FAKE_CARD["brand"],
+                last4=FAKE_CARD["last4"],
+                exp_month=FAKE_CARD["exp_month"],
+                exp_year=FAKE_CARD["exp_year"],
+                id=FAKE_CARD["id"],
             ),
             str(card),
         )
@@ -74,6 +163,7 @@ class CardTest(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             card,
             expected_blank_fks={
+                "djstripe.Card.account",
                 "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.default_source",
@@ -87,10 +177,10 @@ class CardTest(AssertStripeFksMixin, TestCase):
 
         token_create_mock.assert_called_with(api_key=ANY, card=card)
 
-    def test_api_call_no_customer(self):
+    def test_api_call_no_customer_and_no_account(self):
         exception_message = (
-            "Cards must be manipulated through a Customer. "
-            "Pass a Customer object into this call."
+            "Cards must be manipulated through either a Stripe Connected Account or a customer. "
+            "Pass a Customer or an Account object into this call."
         )
 
         with self.assertRaisesMessage(
@@ -119,11 +209,57 @@ class CardTest(AssertStripeFksMixin, TestCase):
         ):
             Card.api_list(customer="fish")
 
+    def test_api_call_bad_account(self):
+        exception_message = (
+            "Cards must be manipulated through a Stripe Connected Account. "
+            "Pass an Account object into this call."
+        )
+
+        with self.assertRaisesMessage(
+            StripeObjectManipulationException, exception_message
+        ):
+            Card._api_create(account="fish")
+
+        with self.assertRaisesMessage(
+            StripeObjectManipulationException, exception_message
+        ):
+            Card.api_list(account="fish")
+
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
-    def test_api_create(self, customer_retrieve_mock):
+    def test__api_create_with_account_absent(self, customer_retrieve_mock):
         stripe_card = Card._api_create(customer=self.customer, source=FAKE_CARD["id"])
+
+        self.assertEqual(FAKE_CARD, stripe_card)
+
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
+        autospec=True,
+    )
+    def test__api_create_with_customer_absent(self, account_retrieve_mock):
+        stripe_card = Card._api_create(account=self.account, source=FAKE_CARD_IV["id"])
+
+        self.assertEqual(FAKE_CARD_IV, stripe_card)
+
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
+        autospec=True,
+    )
+    def test__api_create_with_customer_and_account(
+        self, account_retrieve_mock, customer_retrieve_mock
+    ):
+        FAKE_CARD_DICT = deepcopy(FAKE_CARD)
+        FAKE_CARD_DICT["account"] = self.account.id
+
+        stripe_card = Card._api_create(
+            account=self.account, customer=self.customer, source=FAKE_CARD_DICT["id"]
+        )
 
         self.assertEqual(FAKE_CARD, stripe_card)
 
@@ -132,7 +268,9 @@ class CardTest(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
-    def test_remove(self, customer_retrieve_mock, card_retrieve_mock, card_delete_mock):
+    def test_remove_card_by_customer(
+        self, customer_retrieve_mock, card_retrieve_mock, card_delete_mock
+    ):
         stripe_card = Card._api_create(customer=self.customer, source=FAKE_CARD["id"])
         Card.sync_from_stripe_data(stripe_card)
 
@@ -143,6 +281,37 @@ class CardTest(AssertStripeFksMixin, TestCase):
 
         self.assertEqual(0, self.customer.legacy_cards.count())
         self.assertTrue(card_delete_mock.called)
+
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
+        autospec=True,
+    )
+    def test_remove_card_by_account(self, account_retrieve_mock):
+
+        stripe_card = Card._api_create(account=self.account, source=FAKE_CARD_IV["id"])
+        Card.sync_from_stripe_data(stripe_card)
+        # remove card
+        count, _ = Card.objects.filter(id=stripe_card["id"]).delete()
+        self.assertEqual(1, count)
+
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
+        autospec=True,
+    )
+    def test_remove_already_deleted_card_by_account(self, account_retrieve_mock):
+
+        stripe_card = Card._api_create(account=self.account, source=FAKE_CARD_IV["id"])
+        Card.sync_from_stripe_data(stripe_card)
+
+        # remove card
+        count, _ = Card.objects.filter(id=stripe_card["id"]).delete()
+        self.assertEqual(1, count)
+
+        # remove card again
+        count, _ = Card.objects.filter(id=stripe_card["id"]).delete()
+        self.assertEqual(0, count)
 
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
@@ -221,4 +390,4 @@ class CardTest(AssertStripeFksMixin, TestCase):
     def test_api_list(self, customer_retrieve_mock):
         card_list = Card.api_list(customer=self.customer)
 
-        self.assertEqual([FAKE_CARD, FAKE_CARD_V], [i for i in card_list])
+        self.assertCountEqual([FAKE_CARD, FAKE_CARD_III], [i for i in card_list])
