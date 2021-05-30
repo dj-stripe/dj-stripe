@@ -3,14 +3,14 @@ from unittest.mock import ANY, call, patch
 
 import pytest
 
-from djstripe.models import Account, FileUpload
+from djstripe.models import Account, File
 
 from . import FAKE_ACCOUNT, FAKE_FILEUPLOAD_ICON, FAKE_FILEUPLOAD_LOGO
 
 
 @pytest.mark.django_db
 @patch(
-    target="stripe.FileUpload.retrieve",
+    target="stripe.File.retrieve",
     autospec=True,
     return_value=deepcopy(FAKE_FILEUPLOAD_ICON),
 )
@@ -19,12 +19,8 @@ def test_file_upload_api_retrieve(mock_file_upload_retrieve):
     to it to retrieve itself.
     """
     # Create files
-    icon_file = FileUpload._get_or_create_from_stripe_object(data=FAKE_FILEUPLOAD_ICON)[
-        0
-    ]
-    logo_file = FileUpload._get_or_create_from_stripe_object(data=FAKE_FILEUPLOAD_LOGO)[
-        0
-    ]
+    icon_file = File._get_or_create_from_stripe_object(data=FAKE_FILEUPLOAD_ICON)[0]
+    logo_file = File._get_or_create_from_stripe_object(data=FAKE_FILEUPLOAD_LOGO)[0]
     # Create account to associate the files to it
     account = Account._get_or_create_from_stripe_object(data=FAKE_ACCOUNT)[0]
 

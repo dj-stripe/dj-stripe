@@ -1738,7 +1738,7 @@ class TestPaymentIntentEvents(EventTestCase):
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch(
-        "stripe.FileUpload.retrieve",
+        "stripe.File.retrieve",
         side_effect=(deepcopy(FAKE_FILEUPLOAD_ICON), deepcopy(FAKE_FILEUPLOAD_LOGO)),
         autospec=True,
     )

@@ -25,11 +25,11 @@ from . import (
 class TestAccount(AssertStripeFksMixin, TestCase):
     @patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
     @patch(
-        "stripe.FileUpload.retrieve",
+        "stripe.File.retrieve",
         side_effect=[deepcopy(FAKE_FILEUPLOAD_ICON), deepcopy(FAKE_FILEUPLOAD_LOGO)],
         autospec=True,
     )
-    def test_get_default_account(self, fileupload_retrieve_mock, account_retrieve_mock):
+    def test_get_default_account(self, file_retrieve_mock, account_retrieve_mock):
         account_retrieve_mock.return_value = deepcopy(FAKE_ACCOUNT)
 
         account = Account.get_default_account()
@@ -55,7 +55,7 @@ class TestAccount(AssertStripeFksMixin, TestCase):
 
     @patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
     @patch(
-        "stripe.FileUpload.retrieve",
+        "stripe.File.retrieve",
         return_value=deepcopy(FAKE_FILEUPLOAD_LOGO),
         autospec=True,
     )
@@ -92,7 +92,7 @@ class TestAccount(AssertStripeFksMixin, TestCase):
 )
 @patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
 @patch(
-    "stripe.FileUpload.retrieve",
+    "stripe.File.retrieve",
     return_value=deepcopy(FAKE_FILEUPLOAD_LOGO),
     autospec=True,
 )

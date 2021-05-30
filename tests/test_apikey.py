@@ -49,7 +49,7 @@ def test_clean_public_apikey():
 
 @pytest.mark.django_db
 @patch("stripe.Account.retrieve", return_value=deepcopy(FAKE_STANDARD_ACCOUNT))
-@patch("stripe.FileUpload.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD_ICON))
+@patch("stripe.File.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD_ICON))
 def test_apikey_detect_livemode_and_type(
     fileupload_retrieve_mock, account_retrieve_mock
 ):
@@ -117,7 +117,7 @@ class APIKeyTest(TestCase):
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
     )
-    @patch("stripe.FileUpload.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD_ICON))
+    @patch("stripe.File.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD_ICON))
     def test_refresh_account(self, fileupload_retrieve_mock, account_retrieve_mock):
         self.apikey_test.djstripe_owner_account = None
         self.apikey_test.save()
