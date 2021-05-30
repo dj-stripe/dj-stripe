@@ -113,6 +113,35 @@ class CountrySpec(StripeBaseModel):
         help_text="Lists the types of verification data needed to keep an account open."
     )
 
+    @classmethod
+    def sync_from_stripe_data(cls, data) -> "CountrySpec":
+        """
+        Syncs this object from the stripe data provided.
+
+        Foreign keys will also be retrieved and synced recursively.
+
+        :param data: stripe object
+        :type data: dict
+        :rtype: cls
+        """
+        data_id = data["id"]
+
+        supported_fields = (
+            "default_currency",
+            "supported_bank_account_currencies",
+            "supported_payment_currencies",
+            "supported_payment_methods",
+            "supported_transfer_countries",
+            "verification_fields",
+        )
+
+        instance, created = cls.objects.get_or_create(
+            id=data_id,
+            defaults={k: data[k] for k in supported_fields},
+        )
+
+        return instance
+
 
 class Transfer(StripeModel):
     """
