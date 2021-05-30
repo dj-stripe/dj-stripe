@@ -615,6 +615,83 @@ class Migration(migrations.Migration):
             options={"unique_together": {("id", "livemode")}},
         ),
         migrations.CreateModel(
+            name="PaymentMethod",
+            fields=[
+                (
+                    "djstripe_id",
+                    models.BigAutoField(
+                        primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True)),
+                (
+                    "livemode",
+                    models.BooleanField(
+                        blank=True,
+                        default=None,
+                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        null=True,
+                    ),
+                ),
+                (
+                    "created",
+                    djstripe.fields.StripeDateTimeField(
+                        blank=True,
+                        help_text="The datetime this object was created in stripe.",
+                        null=True,
+                    ),
+                ),
+                (
+                    "metadata",
+                    djstripe.fields.JSONField(
+                        blank=True,
+                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
+                        null=True,
+                    ),
+                ),
+                (
+                    "description",
+                    models.TextField(
+                        blank=True, help_text="A description of this object.", null=True
+                    ),
+                ),
+                ("djstripe_created", models.DateTimeField(auto_now_add=True)),
+                ("djstripe_updated", models.DateTimeField(auto_now=True)),
+                (
+                    "billing_details",
+                    djstripe.fields.JSONField(
+                        help_text="Billing information associated with the PaymentMethod that may be used or required by particular types of payment methods."
+                    ),
+                ),
+                (
+                    "card",
+                    djstripe.fields.JSONField(
+                        help_text="If this is a card PaymentMethod, this hash contains details about the card."
+                    ),
+                ),
+                (
+                    "card_present",
+                    djstripe.fields.JSONField(
+                        blank=True,
+                        help_text="If this is an card_present PaymentMethod, this hash contains details about the Card Present payment method.",
+                        null=True,
+                    ),
+                ),
+                (
+                    "type",
+                    models.CharField(
+                        blank=True,
+                        help_text="The type of the PaymentMethod. An additional hash is included on the PaymentMethod with a name matching this value. It contains additional information specific to the PaymentMethod type.",
+                        max_length=255,
+                    ),
+                ),
+            ],
+            options={
+                "get_latest_by": "created",
+                "abstract": False,
+            },
+        ),
+        migrations.CreateModel(
             name="Customer",
             fields=[
                 (
@@ -1722,6 +1799,19 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
+        ),
+        migrations.AddField(
+            model_name="paymentmethod",
+            name="customer",
+            field=djstripe.fields.StripeForeignKey(
+                blank=True,
+                help_text="Customer to which this PaymentMethod is saved.This will not be set when the PaymentMethod has not been saved to a Customer.",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="payment_methods",
+                to="djstripe.customer",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+            ),
         ),
         migrations.AddField(
             model_name="plan",
@@ -3467,95 +3557,6 @@ class Migration(migrations.Migration):
                 help_text="Account options for customizing how the account functions within Stripe.",
                 null=True,
             ),
-        ),
-        migrations.CreateModel(
-            name="PaymentMethod",
-            fields=[
-                (
-                    "djstripe_id",
-                    models.BigAutoField(
-                        primary_key=True, serialize=False, verbose_name="ID"
-                    ),
-                ),
-                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True)),
-                (
-                    "livemode",
-                    models.BooleanField(
-                        blank=True,
-                        default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "description",
-                    models.TextField(
-                        blank=True, help_text="A description of this object.", null=True
-                    ),
-                ),
-                ("djstripe_created", models.DateTimeField(auto_now_add=True)),
-                ("djstripe_updated", models.DateTimeField(auto_now=True)),
-                (
-                    "billing_details",
-                    djstripe.fields.JSONField(
-                        help_text="Billing information associated with the PaymentMethod that may be used or required by particular types of payment methods."
-                    ),
-                ),
-                (
-                    "card",
-                    djstripe.fields.JSONField(
-                        help_text="If this is a card PaymentMethod, this hash contains details about the card."
-                    ),
-                ),
-                (
-                    "card_present",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="If this is an card_present PaymentMethod, this hash contains details about the Card Present payment method.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "type",
-                    models.CharField(
-                        blank=True,
-                        help_text="The type of the PaymentMethod. An additional hash is included on the PaymentMethod with a name matching this value. It contains additional information specific to the PaymentMethod type.",
-                        max_length=255,
-                    ),
-                ),
-                (
-                    "customer",
-                    djstripe.fields.StripeForeignKey(
-                        blank=True,
-                        help_text="Customer to which this PaymentMethod is saved.This will not be set when the PaymentMethod has not been saved to a Customer.",
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        related_name="payment_methods",
-                        to="djstripe.customer",
-                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                    ),
-                ),
-            ],
-            options={
-                "get_latest_by": "created",
-                "abstract": False,
-            },
         ),
         migrations.CreateModel(
             name="SetupIntent",
