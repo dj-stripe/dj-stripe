@@ -183,7 +183,6 @@ djstripe.models.Charge
 
 ::: djstripe.models.CountrySpec
     :docstring:
-    :members: api_list api_retrieve get_stripe_dashboard_url sync_from_stripe_data
 
 ### Transfer
 
