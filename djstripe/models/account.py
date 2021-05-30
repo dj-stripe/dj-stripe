@@ -169,37 +169,35 @@ class Account(StripeModel):
     # "Special" handling of the icon and logo fields
     # Previously available as properties, they moved to
     # settings.branding in Stripe 2019-02-19.
-    # Currently, they return a FileUpload ID
+    # Currently, they return a File ID
     @property
     def branding_icon(self):
-        from ..models.core import FileUpload
+        from ..models.core import File
 
         id = self.settings.get("branding", {}).get("icon")
-        return FileUpload.objects.filter(id=id).first() if id else None
+        return File.objects.filter(id=id).first() if id else None
 
     @property
     def branding_logo(self):
-        from ..models.core import FileUpload
+        from ..models.core import File
 
         id = self.settings.get("branding", {}).get("logo")
-        return FileUpload.objects.filter(id=id).first() if id else None
+        return File.objects.filter(id=id).first() if id else None
 
     def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
-        from ..models.core import FileUpload
+        from ..models.core import File
 
         super()._attach_objects_post_save_hook(
             cls, data, pending_relations=pending_relations
         )
 
-        # Retrieve and save the FileUploads in the settings.branding object.
+        # Retrieve and save the Files in the settings.branding object.
         for field in "icon", "logo":
             file_upload_id = self.settings.get("branding", {}).get(field)
             if file_upload_id:
                 try:
-                    FileUpload.sync_from_stripe_data(
-                        FileUpload(id=file_upload_id).api_retrieve(
-                            stripe_account=self.id
-                        )
+                    File.sync_from_stripe_data(
+                        File(id=file_upload_id).api_retrieve(stripe_account=self.id)
                     )
                 except stripe.error.PermissionError:
                     # No permission to retrieve the data with the key

@@ -327,8 +327,8 @@ class EventAdmin(ReadOnlyMixin, StripeModelAdmin):
     search_fields = ("request_id",)
 
 
-@admin.register(models.FileUpload)
-class FileUploadAdmin(StripeModelAdmin):
+@admin.register(models.File)
+class FileAdmin(StripeModelAdmin):
     list_display = ("purpose", "size", "type")
     list_filter = ("purpose", "type")
     search_fields = ("filename",)

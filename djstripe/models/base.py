@@ -606,7 +606,7 @@ class StripeModel(StripeBaseModel):
                 except InvalidRequestError as e:
                     if "a similar object exists in" in str(e):
                         # HACK around a Stripe bug.
-                        # When a FileUpload is retrieved from the Account object,
+                        # When a File is retrieved from the Account object,
                         # a mismatch between live and test mode is possible depending
                         # on whether the file (usually the logo) was uploaded in live
                         # or test. Reported to Stripe in August 2020.

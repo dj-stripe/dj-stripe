@@ -24,7 +24,7 @@ class ScheduledQueryRun(StripeModel):
         "about the failure.",
     )
     file = StripeForeignKey(
-        "FileUpload",
+        "file",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

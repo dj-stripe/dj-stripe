@@ -1430,12 +1430,12 @@ class Event(StripeModel):
             )
 
 
-class FileUpload(StripeModel):
+class File(StripeModel):
     """
     Stripe documentation: https://stripe.com/docs/api#file_uploads
     """
 
-    stripe_class = stripe.FileUpload
+    stripe_class = stripe.File
 
     filename = models.CharField(
         max_length=255,
@@ -1458,10 +1458,10 @@ class FileUpload(StripeModel):
         return "object" in data and data["object"] in ("file", "file_upload")
 
 
-# Alias for compatability
-# TODO - rename the model and switch this alias the other way around
-#  to match stripe python
-File = FileUpload
+# Alias for compatibility
+# Stripe's SDK has the same alias.
+# Do not remove/deprecate as long as it's present there.
+FileUpload = File
 
 
 class PaymentIntent(StripeModel):

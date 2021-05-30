@@ -38,9 +38,9 @@ djstripe.models.Charge
     :docstring:
     :members: api_list api_retrieve process invoke_webhook_handlers parts category verb customer get_stripe_dashboard_url sync_from_stripe_data
 
-### File Upload
+### File
 
-::: djstripe.models.FileUpload
+::: djstripe.models.File
     :docstring:
     :members: api_list api_retrieve get_stripe_dashboard_url sync_from_stripe_data
 
