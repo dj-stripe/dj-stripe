@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
             model_name="fileupload",
             name="purpose",
             field=djstripe.fields.StripeEnumField(
-                enum=djstripe.enums.FileUploadPurpose,
+                enum=djstripe.enums.FilePurpose,
                 help_text="The purpose of the uploaded file.",
                 max_length=35,
             ),

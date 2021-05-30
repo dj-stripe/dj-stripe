@@ -352,7 +352,7 @@ class DisputeStatus(Enum):
     lost = _("Lost")
 
 
-class FileUploadPurpose(Enum):
+class FilePurpose(Enum):
     account_requirement = _("Account requirement")
     additional_verification = _("Additional verification")
     business_icon = _("Business icon")
@@ -370,7 +370,7 @@ class FileUploadPurpose(Enum):
     tax_document_user_upload = _("Tax document user upload")
 
 
-class FileUploadType(Enum):
+class FileType(Enum):
     pdf = _("PDF")
     jpg = _("JPG")
     png = _("PNG")

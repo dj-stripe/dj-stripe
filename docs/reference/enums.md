@@ -96,14 +96,14 @@
 ::: djstripe.enums.DisputeStatus
     :members:
 
-## FileUploadPurpose
+## FilePurpose
 
-::: djstripe.enums.FileUploadPurpose
+::: djstripe.enums.FilePurpose
     :members:
 
-## FileUploadType
+## FileType
 
-::: djstripe.enums.FileUploadType
+::: djstripe.enums.FileType
     :members:
 
 ## InvoiceCollectionMethod

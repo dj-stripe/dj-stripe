@@ -1051,7 +1051,7 @@ class Migration(migrations.Migration):
                 (
                     "purpose",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.FileUploadPurpose,
+                        enum=djstripe.enums.FilePurpose,
                         help_text="The purpose of the uploaded file.",
                         max_length=24,
                     ),
@@ -1065,7 +1065,7 @@ class Migration(migrations.Migration):
                 (
                     "type",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.FileUploadType,
+                        enum=djstripe.enums.FileType,
                         help_text="The type of the file returned.",
                         max_length=4,
                     ),

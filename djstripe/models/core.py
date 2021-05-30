@@ -1476,11 +1476,11 @@ class File(StripeModel):
         help_text="A filename for the file, suitable for saving to a filesystem.",
     )
     purpose = StripeEnumField(
-        enum=enums.FileUploadPurpose, help_text="The purpose of the uploaded file."
+        enum=enums.FilePurpose, help_text="The purpose of the uploaded file."
     )
     size = models.IntegerField(help_text="The size in bytes of the file upload object.")
     type = StripeEnumField(
-        enum=enums.FileUploadType, help_text="The type of the file returned."
+        enum=enums.FileType, help_text="The type of the file returned."
     )
     url = models.CharField(
         max_length=200,
