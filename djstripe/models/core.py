@@ -1464,6 +1464,18 @@ class File(StripeModel):
 FileUpload = File
 
 
+class FileLink(StripeModel):
+    """
+    Stripe documentation: https://stripe.com/docs/api/file_links
+    """
+
+    stripe_class = stripe.FileLink
+
+    expires_at = StripeDateTimeField(help_text="Time at which the link expires.")
+    file = StripeForeignKey("File", on_delete=models.CASCADE)
+    url = models.URLField(help_text="The publicly accessible URL to download the file.")
+
+
 class PaymentIntent(StripeModel):
     """
     Stripe documentation: https://stripe.com/docs/api#payment_intents
