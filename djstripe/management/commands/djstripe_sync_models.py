@@ -147,6 +147,8 @@ class Command(BaseCommand):
                     for subscription in models.Subscription.api_list()
                 )
             )
+        elif model is models.CountrySpec:
+            all_list_kwargs.extend(({"limit": 50},))
         elif not all_list_kwargs:
             all_list_kwargs.append({})
 
