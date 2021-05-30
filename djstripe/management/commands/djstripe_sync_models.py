@@ -4,6 +4,7 @@ from django.apps import apps
 from django.core.management.base import BaseCommand, CommandError
 
 from ... import enums, models, settings
+from ...models.base import StripeBaseModel
 
 
 class Command(BaseCommand):
@@ -42,7 +43,7 @@ class Command(BaseCommand):
             self.sync_model(model)
 
     def _should_sync_model(self, model):
-        if not issubclass(model, models.StripeModel):
+        if not issubclass(model, StripeBaseModel):
             return False, "not a StripeModel"
 
         if model.stripe_class is None:
@@ -128,7 +129,7 @@ class Command(BaseCommand):
         """
         all_list_kwargs = (
             [{"expand": [f"data.{k}" for k in model.expand_fields]}]
-            if model.expand_fields
+            if getattr(models, "expand_fields", [])
             else []
         )
         if model is models.PaymentMethod:
