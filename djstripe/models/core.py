@@ -438,6 +438,40 @@ class Charge(StripeModel):
         cls._stripe_object_to_refunds(target_cls=Refund, data=data, charge=self)
 
 
+class Mandate(StripeModel):
+    """
+    https://stripe.com/docs/api/mandates
+    """
+
+    stripe_class = stripe.Mandate
+
+    customer_acceptance = JSONField(
+        help_text="Details about the customer’s acceptance of the mandate."
+    )
+    payment_method = StripeForeignKey("paymentmethod", on_delete=models.CASCADE)
+    payment_method_details = JSONField(
+        help_text="Additional mandate information specific to the payment method type."
+    )
+    status = StripeEnumField(
+        enum=enums.MandateStatus,
+        help_text="The status of the mandate, which indicates whether it can be used to initiate a payment.",
+    )
+    type = StripeEnumField(
+        enum=enums.MandateType,
+        help_text="The status of the mandate, which indicates whether it can be used to initiate a payment.",
+    )
+    multi_use = JSONField(
+        null=True,
+        blank=True,
+        help_text="If this is a `multi_use` mandate, this hash contains details about the mandate.",
+    )
+    single_use = JSONField(
+        null=True,
+        blank=True,
+        help_text="If this is a `single_use` mandate, this hash contains details about the mandate.",
+    )
+
+
 class Product(StripeModel):
     """
     Stripe documentation:

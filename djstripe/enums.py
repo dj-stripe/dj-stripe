@@ -423,6 +423,17 @@ class IntentStatus(Enum):
     )
 
 
+class MandateStatus(Enum):
+    active = _("Active")
+    inactive = _("Inactive")
+    pending = _("Pending")
+
+
+class MandateType(Enum):
+    multi_use = _("Multi-use")
+    single_use = _("Single-use")
+
+
 # TODO - maybe refactor Enum so that inheritance works,
 #  then PaymentIntentStatus/SetupIntentStatus can inherit from IntentStatus
 class PaymentIntentStatus(Enum):
