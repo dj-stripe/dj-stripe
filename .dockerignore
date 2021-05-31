@@ -1,0 +1,5 @@
+# Exclude all hidden dirs
+.*
+
+# Exclude pycache directory for pytest
+__pycache__/**

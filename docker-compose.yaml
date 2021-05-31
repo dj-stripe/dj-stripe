@@ -1,0 +1,82 @@
+# Please read the inline comments to know what to comment out and what not to comment out to run
+# various db backends
+
+version: "3.9"
+
+# can be commented out when using sqlite
+volumes:
+    # sqlite doesn't require persistence as it is an in-memory db anyway
+    postgres-data: {}
+    mysql-data: {}
+
+services:
+
+  db:
+
+
+    image: postgres:12
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=random_number
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=random_number
+
+
+    # image: mysql:5.7
+    # # command: --default-authentication-plugin=mysql_native_password
+    # volumes:
+    #   - mysql-data:/var/lib/mysql
+    # environment:
+    #   - MYSQL_DATABASE=random_number
+    #   # - MYSQL_USER=random_number
+    #   # - MYSQL_PASSWORD=random_number
+    #   - MYSQL_ROOT_PASSWORD=random_number
+
+# TODO Perhaps add an entrypoint that doesn't start runserver until a connection cannot be established with the db
+  web:
+    build: .
+    command: poetry run python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+      # 5678 is a common python debugging port (using in manage.py for debugpy)
+      - "5678:5678"
+    # can be commented out when using sqlite
+    depends_on:
+      - db
+    environment:
+    ##############################################
+        # # Stripe specific keys (Do not comment)
+        - STRIPE_PUBLIC_KEY=pk_test_51ItQ7cJSZQVUcJYgoSx1ZdKy5zhybSUiyJXWQno83L24EPUlFHeIe2QVe1RiB7kxvbjJ9SZ0G6R3fnfJTamauH1C00MyCpOqZ8
+        - STRIPE_SECRET_KEY=sk_test_51ItQ7cJSZQVUcJYgHMIKKvkqL6XNUHRI1kQcpoR9yEdOusA5rWpTXpXYnIqHpIvWlu5odQYNBDVwNSYTJN1HmtCC00RvEyLiZW
+        - DJSTRIPE_TEST_WEBHOOK_SECRET=whsec_o8p5hmW6JjYjQGENVLlLi9dlAr55QeKQ
+    ##############################################
+        # # Uncomment to run sqlite db (everything below can be commented out)
+        # - DJSTRIPE_TEST_DB_VENDOR=sqlite
+    ##############################################
+        # # uncomment the following 3 when using postgresql db
+        - DJSTRIPE_TEST_DB_VENDOR=postgres
+        - DJSTRIPE_TEST_DB_PORT=5432
+        - DJSTRIPE_TEST_DB_USER=root
+    ##############################################
+        # # uncomment the following 3 when using mysql db
+        # - DJSTRIPE_TEST_DB_VENDOR=mysql
+        # - DJSTRIPE_TEST_DB_PORT=3306
+        # # - DJSTRIPE_TEST_DB_USER=random_number
+    ##############################################
+        # # do not comment as it is the same for both postgresql and mysql
+        # # can be commented out for sqlite
+        - DJSTRIPE_TEST_DB_NAME=random_number
+        - DJSTRIPE_TEST_DB_PASS=random_number
+        - DJSTRIPE_TEST_DB_HOST=db
+
+  stripe:
+    image: stripe/stripe-cli:v1.6.0
+    command: listen --forward-to http://web:8000/djstripe/webhook/
+    depends_on:
+      - web
+    environment:
+      - STRIPE_API_KEY=sk_test_51ItQ7cJSZQVUcJYgHMIKKvkqL6XNUHRI1kQcpoR9yEdOusA5rWpTXpXYnIqHpIvWlu5odQYNBDVwNSYTJN1HmtCC00RvEyLiZW
+      - STRIPE_DEVICE_NAME=djstripe_imac_docker

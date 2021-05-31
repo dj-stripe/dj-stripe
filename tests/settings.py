@@ -97,8 +97,16 @@ MIDDLEWARE = (
 
 STRIPE_LIVE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_123")
 STRIPE_LIVE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "sk_test_123")
-STRIPE_TEST_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_123")
-STRIPE_TEST_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "sk_test_123")
+STRIPE_TEST_PUBLIC_KEY = os.environ.get(
+    "STRIPE_PUBLIC_KEY",
+    "pk_test_123",
+    # "pk_test_51ItQ7cJSZQVUcJYgoSx1ZdKy5zhybSUiyJXWQno83L24EPUlFHeIe2QVe1RiB7kxvbjJ9SZ0G6R3fnfJTamauH1C00MyCpOqZ8",
+)
+STRIPE_TEST_SECRET_KEY = os.environ.get(
+    "STRIPE_SECRET_KEY",
+    "sk_test_123",
+    # "sk_test_51ItQ7cJSZQVUcJYgHMIKKvkqL6XNUHRI1kQcpoR9yEdOusA5rWpTXpXYnIqHpIvWlu5odQYNBDVwNSYTJN1HmtCC00RvEyLiZW",
+)
 
 DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = (
     "(admin)",
@@ -114,7 +122,11 @@ DJSTRIPE_FOREIGN_KEY_TO_FIELD = (
 
 DJSTRIPE_SUBSCRIPTION_REDIRECT = "test_url_subscribe"
 DJSTRIPE_WEBHOOK_VALIDATION = "verify_signature"
-DJSTRIPE_WEBHOOK_SECRET = os.environ.get("DJSTRIPE_TEST_WEBHOOK_SECRET", "whsec_XXXXX")
+DJSTRIPE_WEBHOOK_SECRET = os.environ.get(
+    "DJSTRIPE_TEST_WEBHOOK_SECRET",
+    "whsec_xxx",
+    # "whsec_o8p5hmW6JjYjQGENVLlLi9dlAr55QeKQ",
+)
 
 STATIC_URL = "/static/"
 
