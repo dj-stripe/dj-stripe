@@ -236,24 +236,15 @@ class LegacySourceMixin:
         api_key = api_key or self.default_api_key
 
         if self.customer:
-            customer = self.customer.api_retrieve(
-                api_key=api_key, stripe_account=stripe_account
+            return stripe.Customer.retrieve_source(
+                self.customer.id,
+                self.id,
+                expand=self.expand_fields,
+                stripe_account=stripe_account,
             )
-
-            # If the customer is deleted, the sources attribute will be absent.
-            # eg. {"id": "cus_XXXXXXXX", "deleted": True}
-            if "sources" not in customer:
-                # We fake a native stripe InvalidRequestError so that it's caught
-                # like an invalid ID error.
-                raise InvalidRequestError(f"No such source: {self.id!r}", "id")
-
-            # This will retrieve the source using the account ID where the customer resides,
-            # so we don't have to pass `stripe_account`.
-            return customer.sources.retrieve(self.id, expand=self.expand_fields)
 
         # try to retrieve by account attribute if retrieval by customer fails.
         if self.account:
-
             account = self.account.api_retrieve(
                 api_key=api_key, stripe_account=stripe_account
             )

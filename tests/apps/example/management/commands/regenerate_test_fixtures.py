@@ -503,11 +503,10 @@ class Command(BaseCommand):
         return True, obj
 
     def get_or_create_stripe_bank_account(self, old_obj, readonly_fields):
-        customer = djstripe.models.Customer(id=old_obj["customer"]).api_retrieve()
-        id_ = old_obj["id"]
+        customer_id = old_obj["customer"]
 
         try:
-            obj = customer.sources.retrieve(id_)
+            obj = stripe.Customer.retrieve_source(customer_id, old_obj["id"])
             created = False
 
             self.stdout.write("    found")
@@ -528,18 +527,17 @@ class Command(BaseCommand):
             ]
             create_obj["object"] = "bank_account"
 
-            obj = customer.sources.create(source=create_obj)
+            obj = stripe.Customer.create_source(customer_id, source=create_obj)
 
             created = True
 
         return created, obj
 
     def get_or_create_stripe_card(self, old_obj, readonly_fields):
-        customer = djstripe.models.Customer(id=old_obj["customer"]).api_retrieve()
-        id_ = old_obj["id"]
+        customer_id = old_obj["customer"]
 
         try:
-            obj = customer.sources.retrieve(id_)
+            obj = stripe.Customer.retrieve_source(customer_id, old_obj["id"])
             created = False
 
             self.stdout.write("    found")
@@ -552,7 +550,7 @@ class Command(BaseCommand):
             for k in readonly_fields:
                 create_obj.pop(k, None)
 
-            obj = customer.sources.create(**{"source": "tok_visa"})
+            obj = stripe.Customer.create_source(**{"source": "tok_visa"})
 
             for k, v in create_obj.items():
                 setattr(obj, k, v)
@@ -563,11 +561,10 @@ class Command(BaseCommand):
         return created, obj
 
     def get_or_create_stripe_source(self, old_obj, readonly_fields):
-        customer = djstripe.models.Customer(id=old_obj["customer"]).api_retrieve()
-        id_ = old_obj["id"]
+        customer_id = old_obj["customer"]
 
         try:
-            obj = customer.sources.retrieve(id_)
+            obj = stripe.Customer.retrieve_source(customer_id, old_obj["id"])
             created = False
 
             self.stdout.write("    found")
@@ -584,7 +581,7 @@ class Command(BaseCommand):
                 **{"token": "tok_visa", "type": "card"}
             )
 
-            obj = customer.sources.create(**{"source": source_obj.id})
+            obj = stripe.Customer.create_source(**{"source": source_obj.id})
 
             for k, v in create_obj.items():
                 setattr(obj, k, v)
