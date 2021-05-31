@@ -261,4 +261,27 @@ class Migration(migrations.Migration):
                 "abstract": False,
             },
         ),
+        migrations.AlterField(
+            model_name="charge",
+            name="source",
+            field=djstripe.fields.PaymentMethodForeignKey(
+                blank=True,
+                help_text="The source used for this charge.",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="charges",
+                to="djstripe.djstripepaymentmethod",
+            ),
+        ),
+        migrations.AlterField(
+            model_name="customer",
+            name="default_source",
+            field=djstripe.fields.PaymentMethodForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="customers",
+                to="djstripe.djstripepaymentmethod",
+            ),
+        ),
     ]
