@@ -35,6 +35,7 @@ from . import (
     FAKE_BALANCE_TRANSACTION,
     FAKE_CARD,
     FAKE_CARD_AS_PAYMENT_METHOD,
+    FAKE_CARD_III,
     FAKE_CHARGE,
     FAKE_CHARGE_II,
     FAKE_COUPON,
@@ -158,7 +159,7 @@ class TestAccountEvents(EventTestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
-        autospec=True,
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch("stripe.Event.retrieve", autospec=True)
     def test_custom_account_external_account_created_bank_account_event(
@@ -187,7 +188,7 @@ class TestAccountEvents(EventTestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
-        autospec=True,
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch("stripe.Event.retrieve", autospec=True)
     def test_custom_account_external_account_deleted_bank_account_event(
@@ -216,7 +217,7 @@ class TestAccountEvents(EventTestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
-        autospec=True,
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch("stripe.Event.retrieve", autospec=True)
     def test_custom_account_external_account_updated_bank_account_event(
@@ -258,7 +259,7 @@ class TestAccountEvents(EventTestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
-        autospec=True,
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch("stripe.Event.retrieve", autospec=True)
     def test_custom_account_external_account_created_card_event(
@@ -285,7 +286,7 @@ class TestAccountEvents(EventTestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
-        autospec=True,
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch("stripe.Event.retrieve", autospec=True)
     def test_custom_account_external_account_deleted_card_event(
@@ -314,7 +315,7 @@ class TestAccountEvents(EventTestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
-        autospec=True,
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch("stripe.Event.retrieve", autospec=True)
     def test_custom_account_external_account_updated_card_event(
@@ -353,7 +354,7 @@ class TestAccountEvents(EventTestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_EXPRESS_ACCOUNT),
-        autospec=True,
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch("stripe.Event.retrieve", autospec=True)
     def test_express_account_external_account_created_bank_account_event(
@@ -382,7 +383,7 @@ class TestAccountEvents(EventTestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_EXPRESS_ACCOUNT),
-        autospec=True,
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch("stripe.Event.retrieve", autospec=True)
     def test_express_account_external_account_deleted_bank_account_event(
@@ -411,7 +412,7 @@ class TestAccountEvents(EventTestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_EXPRESS_ACCOUNT),
-        autospec=True,
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch("stripe.Event.retrieve", autospec=True)
     def test_express_account_external_account_updated_bank_account_event(
@@ -453,7 +454,7 @@ class TestAccountEvents(EventTestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_EXPRESS_ACCOUNT),
-        autospec=True,
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch("stripe.Event.retrieve", autospec=True)
     def test_express_account_external_account_created_card_event(
@@ -480,7 +481,7 @@ class TestAccountEvents(EventTestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_EXPRESS_ACCOUNT),
-        autospec=True,
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch("stripe.Event.retrieve", autospec=True)
     def test_express_account_external_account_deleted_card_event(
@@ -509,7 +510,7 @@ class TestAccountEvents(EventTestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_EXPRESS_ACCOUNT),
-        autospec=True,
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch("stripe.Event.retrieve", autospec=True)
     def test_express_account_external_account_updated_card_event(
@@ -550,7 +551,7 @@ class TestAccountEvents(EventTestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_EVENT_STANDARD_ACCOUNT_UPDATED["data"]["object"]),
-        autospec=True,
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch("stripe.Event.retrieve", autospec=True)
     def test_standard_account_updated_event(
@@ -586,7 +587,7 @@ class TestAccountEvents(EventTestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_EVENT_EXPRESS_ACCOUNT_UPDATED["data"]["object"]),
-        autospec=True,
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch("stripe.Event.retrieve", autospec=True)
     def test_express_account_updated_event(
@@ -622,7 +623,7 @@ class TestAccountEvents(EventTestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_EVENT_CUSTOM_ACCOUNT_UPDATED["data"]["object"]),
-        autospec=True,
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch("stripe.Event.retrieve", autospec=True)
     def test_custom_account_updated_event(
@@ -746,8 +747,16 @@ class TestCustomerEvents(EventTestCase):
             customer.currency, fake_stripe_event["data"]["object"]["currency"]
         )
 
+    @patch(
+        "stripe.Customer.retrieve_source",
+        side_effect=[deepcopy(FAKE_CARD), deepcopy(FAKE_CARD_III)],
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
     @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
-    def test_customer_deleted(self, customer_retrieve_mock):
+    def test_customer_deleted(
+        self, customer_retrieve_source_mock, customer_retrieve_mock
+    ):
+
         FAKE_CUSTOMER.create_for_user(self.user)
         event = self._create_event(FAKE_EVENT_CUSTOMER_CREATED)
         event.invoke_webhook_handlers()
@@ -792,7 +801,14 @@ class TestCustomerEvents(EventTestCase):
 
     @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
     @patch("stripe.Event.retrieve", autospec=True)
-    def test_customer_card_created(self, event_retrieve_mock, customer_retrieve_mock):
+    @patch(
+        "stripe.Customer.retrieve_source",
+        return_value=deepcopy(FAKE_CARD),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
+    def test_customer_card_created(
+        self, customer_retrieve_source_mock, event_retrieve_mock, customer_retrieve_mock
+    ):
         fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_SOURCE_CREATED)
         event_retrieve_mock.return_value = fake_stripe_event
 

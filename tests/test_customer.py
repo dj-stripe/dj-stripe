@@ -346,7 +346,14 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         )
 
     @patch("stripe.Customer.retrieve", autospec=True)
-    def test_customer_purge_leaves_customer_record(self, customer_retrieve_fake):
+    @patch(
+        "stripe.Customer.retrieve_source",
+        side_effect=[deepcopy(FAKE_CARD), deepcopy(FAKE_CARD_III)],
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
+    def test_customer_purge_leaves_customer_record(
+        self, customer_retrieve_source_mock, customer_retrieve_fake
+    ):
         self.customer.purge()
         customer = Customer.objects.get(id=self.customer.id)
 
@@ -405,11 +412,19 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             IdempotencyKey.objects.filter(action=idempotency_key_action).exists()
         )
 
-    @patch("stripe.Customer.retrieve", autospec=True)
-    def test_customer_purge_raises_customer_exception(self, customer_retrieve_mock):
-        customer_retrieve_mock.side_effect = InvalidRequestError(
-            "No such customer:", "blah"
-        )
+    @patch(
+        "stripe.Customer.retrieve",
+        side_effect=InvalidRequestError("No such customer:", "blah"),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Customer.retrieve_source",
+        return_value=deepcopy(FAKE_CARD),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
+    def test_customer_purge_raises_customer_exception(
+        self, customer_retrieve_source_mock, customer_retrieve_mock
+    ):
 
         self.customer.purge()
         customer = Customer.objects.get(id=self.customer.id)
@@ -425,7 +440,9 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             expand=ANY,
             stripe_account=None,
         )
-        self.assertEqual(3, customer_retrieve_mock.call_count)
+        self.assertEqual(1, customer_retrieve_mock.call_count)
+
+        self.assertEqual(2, customer_retrieve_source_mock.call_count)
 
     @patch("stripe.Customer.retrieve", autospec=True)
     def test_customer_delete_raises_unexpected_exception(self, customer_retrieve_mock):
