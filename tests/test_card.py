@@ -56,8 +56,8 @@ class CardTest(AssertStripeFksMixin, TestCase):
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
     @patch(
-        "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
+        "stripe.Account.retrieve_external_account",
+        return_value=deepcopy(FAKE_CARD),
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch(
@@ -68,7 +68,7 @@ class CardTest(AssertStripeFksMixin, TestCase):
     def test_api_retrieve_by_customer_equals_retrieval_by_account(
         self,
         customer_retrieve_source_mock,
-        account_retrieve_mock,
+        account_retrieve_external_account_mock,
         customer_retrieve_mock,
     ):
         # deepcopy the CardDict object
