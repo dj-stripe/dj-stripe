@@ -57,12 +57,12 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch(
-        "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
+        "stripe.Account.retrieve_external_account",
+        return_value=deepcopy(FAKE_BANK_ACCOUNT_IV),
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     def test_api_retrieve_by_customer_equals_retrieval_by_account(
-        self, account_retrieve_mock, customer_retrieve_mock
+        self, account_retrieve_external_account_mock, customer_retrieve_mock
     ):
         # deepcopy the BankAccount object
         FAKE_BANK_ACCOUNT_DICT = deepcopy(FAKE_BANK_ACCOUNT_IV)
