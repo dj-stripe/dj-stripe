@@ -245,17 +245,13 @@ class LegacySourceMixin:
 
         # try to retrieve by account attribute if retrieval by customer fails.
         if self.account:
-            account = self.account.api_retrieve(
-                api_key=api_key, stripe_account=stripe_account
+            return stripe.Account.retrieve_external_account(
+                self.account.id,
+                self.id,
+                expand=self.expand_fields,
+                stripe_account=stripe_account,
+                api_key=api_key,
             )
-
-            # TODO Handle the case the Stripe Connected Account has no External Accounts populated
-            # if "external_accounts" not in account:
-            #     pass
-
-            # This will retrieve the external_accounts using the bank_account ID where the account resides,
-            # so we don't have to pass `stripe_account`.
-            return account.external_accounts.retrieve(self.id)
 
 
 class BankAccount(LegacySourceMixin, StripeModel):
