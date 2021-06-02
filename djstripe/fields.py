@@ -41,8 +41,7 @@ class StripeForeignKey(models.ForeignKey):
         # https://stackoverflow.com/a/14390402/227443
         if isinstance(self.remote_field.model, str):
             return self._get_default()
-        else:
-            return super().get_default()
+        return super().get_default()
 
 
 class PaymentMethodForeignKey(models.ForeignKey):
