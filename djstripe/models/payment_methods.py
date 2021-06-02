@@ -788,7 +788,7 @@ class PaymentMethod(StripeModel):
 
         return changed
 
-    def update(self, api_key=None, billing_details, metadata):
+    def update(self, api_key=None, **kwargs):
         """
         Call the stripe API's modify operation for this model
 
@@ -803,9 +803,6 @@ class PaymentMethod(StripeModel):
         api_key = api_key or self.default_api_key
         response = self.api_retrieve(api_key=api_key)
         stripe_payment_method = response.modify(
-            response.stripe_id,
-            api_key=api_key,
-            billing_details=billing_details,
-            metadata=metadata,
+            response.stripe_id, api_key=api_key, **kwargs
         )
         return self.sync_from_stripe_data(stripe_payment_method)
