@@ -796,8 +796,6 @@ class PaymentMethod(StripeModel):
             Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
 
-        # This method cannot update card details
-        # It can only update billing details and metadata
         # see https://stripe.com/docs/api/payment_methods/update
         """
         api_key = api_key or self.default_api_key
