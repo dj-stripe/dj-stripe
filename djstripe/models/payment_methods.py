@@ -787,3 +787,25 @@ class PaymentMethod(StripeModel):
                 self.refresh_from_db()
 
         return changed
+
+    def update(self, api_key=None, billing_details, metadata):
+        """
+        Call the stripe API's modify operation for this model
+
+        :param api_key: The api key to use for this request.
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+
+        # This method cannot update card details
+        # It can only update billing details and metadata
+        # see https://stripe.com/docs/api/payment_methods/update
+        """
+        api_key = api_key or self.default_api_key
+        response = self.api_retrieve(api_key=api_key)
+        stripe_payment_method = response.modify(
+            response.stripe_id,
+            api_key=api_key,
+            billing_details=billing_details,
+            metadata=metadata,
+        )
+        return self.sync_from_stripe_data(stripe_payment_method)
