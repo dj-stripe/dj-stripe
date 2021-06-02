@@ -63,11 +63,16 @@ Ready to contribute? Here's how to set up local development.
 
 1.  Fork [dj-stripe on Github](https://github.com/dj-stripe/dj-stripe).
 
-2.  Clone your fork locally:
+1.  Clone your fork locally:
 
         $ git clone git@github.com:your_name_here/dj-stripe.git
 
-3.  Set up your test database. If you're running tests using PostgreSQL:
+1. Set up [pre-commit](https://pre-commit.com/):
+
+        $ git init # A git repo is required to install pre-commit
+        $ pre-commit install
+
+1.  Set up your test database. If you're running tests using PostgreSQL:
 
         $ createdb djstripe
 
@@ -80,7 +85,7 @@ Ready to contribute? Here's how to set up local development.
     For postgres and mysql, the database host,port,username and password can be set with
     environment variables, see `tests/settings.py`
 
-4.  Install [Poetry](https://python-poetry.org/) if you do not have it already.
+1.  Install [Poetry](https://python-poetry.org/) if you do not have it already.
 
     You can set up a virtual environment with:
 
@@ -90,7 +95,7 @@ Ready to contribute? Here's how to set up local development.
 
         $ poetry shell
 
-5.  When you're done making changes, check that your changes pass the tests. A quick
+1.  When you're done making changes, check that your changes pass the tests. A quick
     test run can be done as follows:
 
         $ DJSTRIPE_TEST_DB_VENDOR=sqlite pytest --reuse-db
@@ -102,17 +107,17 @@ Ready to contribute? Here's how to set up local development.
         $ pip install tox
         $ tox
 
-6.  If your changes altered the models you may need to generate Django migrations:
+1.  If your changes altered the models you may need to generate Django migrations:
 
         $ DJSTRIPE_TEST_DB_VENDOR=sqlite poetry run ./manage.py makemigrations
 
-7.  Commit your changes and push your branch to GitHub:
+1.  Commit your changes and push your branch to GitHub:
 
         $ git add .
         $ git commit -m "Your detailed description of your changes."
         $ git push
 
-8.  Submit a pull request through the GitHub website.
+1.  Submit a pull request through the GitHub website.
 
 Congratulations, you're now a dj-stripe contributor! Have some ♥ from us.
 
@@ -189,11 +194,11 @@ e.g.:
 Before you submit a pull request, check that it meets these guidelines:
 
 1.  The pull request should include tests.
-2.  The pull request must not drop code coverage below the current level.
-3.  If the pull request adds functionality, the docs should be updated. Put your new
+1.  The pull request must not drop code coverage below the current level.
+1.  If the pull request adds functionality, the docs should be updated. Put your new
     functionality into a function with a docstring.
-4.  If the pull request makes changes to a model, include Django migrations.
-5.  The pull request should work for Python 3.6+. Check [Github
+1.  If the pull request makes changes to a model, include Django migrations.
+1.  The pull request should work for Python 3.6+. Check [Github
     Actions](https://github.com/dj-stripe/dj-stripe/actions) and make sure that the
     tests pass for all supported Python versions.
-6.  Code formatting: Make sure to install `black` and `isort` with `pip install black isort` and run `black .; isort -y` at the dj-stripe root to keep a consistent style.
+1.  Code formatting: Make sure to install `pre-commit` to automatically run it on `staged files` or run manually with `pre-commit run --all-files` at the dj-stripe root to keep a consistent style.
