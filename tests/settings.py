@@ -15,7 +15,7 @@ USE_TZ = True
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
 
-ALLOWED_HOSTS = json.loads(os.environ.get("DJSTRIPE_TEST_ALLOWED_HOSTS_JSON", "[]"))
+ALLOWED_HOSTS = json.loads(os.environ.get("DJSTRIPE_TEST_ALLOWED_HOSTS_JSON", '["*"]'))
 
 if test_db_vendor == "postgres":
     DATABASES = {
