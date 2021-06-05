@@ -232,22 +232,32 @@ def webhook_event_callback(event):
     """ Dispatches the event to celery for processing. """
     from . import tasks
     # Ansychronous hand-off to celery so that we can continue immediately
-    tasks.process_webhook_event.s(event).apply_async()
+    tasks.process_webhook_event.s(event.pk).apply_async()
 ```
 
 ```py
 # tasks.py
+from djstripe.models import WebhookEventTrigger
 from stripe.error import StripeError
 
 @shared_task(bind=True)
-def process_webhook_event(self, event):
+def process_webhook_event(self, pk):
     """ Processes events from Stripe asynchronously. """
-    logger.info("Processing Stripe event: %s", str(event))
+    logger.info(f"Processing Stripe event: {pk}")
     try:
-        event.process(raise_exception=True)
+        # get the event
+        obj = WebhookEventTrigger.objects.get(pk=pk)
+        # process the event.
+        # internally, this creates a Stripe WebhookEvent Object and invokes the respective Webhooks
+        event = obj.process()
     except StripeError as exc:
-        logger.error("Failed to process Stripe event: %s", str(event))
+        logger.error(f"Failed to process Stripe event: {pk}. Retrying in 60 seconds.")
         raise self.retry(exc=exc, countdown=60)  # retry after 60 seconds
+    except WebhookEventTrigger.DoesNotExist as exc:
+        # This can happen in case the celery task got executed before the actual model got saved to the DB
+        raise self.retry(exc=exc, countdown=10)  # retry after 10 seconds
+
+    return event.type or "Stripe Event Processed"
 ```
 
 ```py
