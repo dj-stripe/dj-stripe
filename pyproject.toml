@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dj-stripe"
-version = "2.4.4"
+version = "2.5.0"
 description = "Django + Stripe made easy"
 license = "MIT"
 authors = [
@@ -19,8 +19,8 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Framework :: Django",
     "Framework :: Django :: 2.2",
-    "Framework :: Django :: 3.0",
     "Framework :: Django :: 3.1",
+    "Framework :: Django :: 3.2",
 ]
 
 packages = [
