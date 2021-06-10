@@ -14,6 +14,7 @@ NOTE:
 
 """
 import logging
+from enum import Enum
 
 from . import models, webhooks
 from .enums import PayoutType, SourceType
@@ -37,9 +38,7 @@ def customer_webhook_handler(event):
     if event.customer:
         # As customers are tied to local users, djstripe will not create
         # customers that do not already exist locally.
-        _handle_crud_like_event(
-            target_cls=models.Customer, event=event, crud_exact=True, crud_valid=True
-        )
+        _handle_crud_like_event(target_cls=models.Customer, event=event)
 
 
 @webhooks.handler("customer.discount")
@@ -58,7 +57,11 @@ def customer_discount_webhook_handler(event):
     coupon_data = discount_data.get("coupon", {})
     customer = event.customer
 
-    if crud_type.created or crud_type.updated:
+    if crud_type is CrudType.DELETED:
+        coupon = None
+        coupon_start = None
+        coupon_end = None
+    else:
         coupon, _ = _handle_crud_like_event(
             target_cls=models.Coupon,
             event=event,
@@ -67,10 +70,6 @@ def customer_discount_webhook_handler(event):
         )
         coupon_start = discount_data.get("start")
         coupon_end = discount_data.get("end")
-    else:
-        coupon = None
-        coupon_start = None
-        coupon_end = None
 
     customer.coupon = coupon
     customer.coupon_start = convert_tstamp(coupon_start)
@@ -116,8 +115,8 @@ def customer_subscription_webhook_handler(event):
     # on the stripe side, it updates it to canceled status, so override
     # crud_type to update to match.
     crud_type = CrudType.determine(event=event)
-    if crud_type.deleted:
-        crud_type = CrudType(updated=True)
+    if crud_type is CrudType.DELETED:
+        crud_type = CrudType.UPDATED
     _handle_crud_like_event(
         target_cls=models.Subscription, event=event, crud_type=crud_type
     )
@@ -156,7 +155,7 @@ def payment_method_handler(event):
         _handle_crud_like_event(
             target_cls=models.PaymentMethod,
             event=event,
-            crud_type=CrudType(deleted=True),
+            crud_type=CrudType.DELETED,
         )
     else:
         _handle_crud_like_event(target_cls=models.PaymentMethod, event=event)
@@ -184,7 +183,7 @@ def account_updated_webhook_handler(event):
     _handle_crud_like_event(
         target_cls=models.Account,
         event=event,
-        crud_type=CrudType(updated=True),
+        crud_type=CrudType.UPDATED,
     )
 
 
@@ -254,25 +253,14 @@ def other_object_webhook_handler(event):
 #
 
 
-class CrudType(object):
+class CrudType(Enum):
     """Helper object to determine CRUD-like event state."""
 
-    created = False
-    updated = False
-    deleted = False
-
-    def __init__(self, **kwargs):
-        """Set attributes."""
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
-    @property
-    def valid(self):
-        """Return True if this is a CRUD-like event."""
-        return self.created or self.updated or self.deleted
+    UPDATED = "updated"
+    DELETED = "deleted"
 
     @classmethod
-    def determine(cls, event, verb=None, exact=False):
+    def determine(cls, event, verb=None):
         """
         Determine if the event verb is a crud_type (without the 'R') event.
 
@@ -280,29 +268,17 @@ class CrudType(object):
         :type event: models.Event
         :param verb: The event verb to examine.
         :type verb: str
-        :param exact: If True, match crud_type to event verb string exactly.
-        :type exact: bool
         :returns: The CrudType state object.
         :rtype: CrudType
         """
         verb = verb or event.verb
 
-        def check(crud_type_event):
-            if exact:
-                return verb == crud_type_event
-            else:
-                return verb.endswith(crud_type_event)
+        for enum in CrudType:
+            if verb.endswith(enum.value):
+                return enum
 
-        created = updated = deleted = False
-
-        if check("updated"):
-            updated = True
-        elif check("created"):
-            created = True
-        elif check("deleted"):
-            deleted = True
-
-        return cls(created=created, updated=updated, deleted=deleted)
+        # in case nothing matches
+        return
 
 
 def _handle_crud_like_event(
@@ -313,8 +289,6 @@ def _handle_crud_like_event(
     id=None,
     customer=None,
     crud_type=None,
-    crud_exact=False,
-    crud_valid=False,
 ):
     """
     Helper to process crud_type-like events for objects.
@@ -338,8 +312,6 @@ def _handle_crud_like_event(
     :type id: str
     :param customer: The customer object (defaults to ``event.customer``).
     :param crud_type: The CrudType object (determined by default).
-    :param crud_exact: If True, match verb against CRUD type exactly.
-    :param crud_valid: If True, CRUD type must match valid type.
     :returns: The object (if any) and the event CrudType.
     :rtype: Tuple[models.StripeModel, CrudType]
     """
@@ -359,21 +331,13 @@ def _handle_crud_like_event(
     verb = verb or event.verb
     customer = customer or event.customer
 
-    crud_type = crud_type or CrudType.determine(
-        event=event, verb=verb, exact=crud_exact
-    )
-    obj = None
+    crud_type = crud_type or CrudType.determine(event=event, verb=verb)
 
-    if crud_valid and not crud_type.valid:
-        logger.debug(
-            "Ignoring %r Stripe event without valid CRUD type: %r", event.type, event
-        )
-        return
-
-    if crud_type.deleted:
+    if crud_type is CrudType.DELETED:
         qs = target_cls.objects.filter(id=id)
         if target_cls is models.Customer and qs.exists():
             qs.get().purge()
+            obj = None
         else:
             obj = target_cls.objects.filter(id=id).delete()
     else:
@@ -388,6 +352,7 @@ def _handle_crud_like_event(
             kwargs["account"] = models.Account._get_or_retrieve(id=stripe_account)
 
         data = target_cls(**kwargs).api_retrieve(stripe_account=stripe_account)
+        # create or update the object from the retrieved Stripe Data
         obj = target_cls.sync_from_stripe_data(data)
 
     return obj, crud_type

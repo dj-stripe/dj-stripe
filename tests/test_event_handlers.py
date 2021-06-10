@@ -823,7 +823,10 @@ class TestCustomerEvents(EventTestCase):
         self.assertEqual(card.last4, fake_stripe_event["data"]["object"]["last4"])
 
     @patch("stripe.Event.retrieve", autospec=True)
-    def test_customer_unknown_source_created(self, event_retrieve_mock):
+    @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
+    def test_customer_unknown_source_created(
+        self, customer_retrieve_mock, event_retrieve_mock
+    ):
         fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_SOURCE_CREATED)
         fake_stripe_event["data"]["object"]["object"] = "unknown"
         fake_stripe_event["data"]["object"][
@@ -840,7 +843,8 @@ class TestCustomerEvents(EventTestCase):
             Card.objects.filter(id=fake_stripe_event["data"]["object"]["id"]).exists()
         )
 
-    def test_customer_default_source_deleted(self):
+    @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
+    def test_customer_default_source_deleted(self, customer_retrieve_mock):
         self.customer.default_source = DjstripePaymentMethod.objects.get(
             id=FAKE_CARD["id"]
         )
@@ -851,16 +855,25 @@ class TestCustomerEvents(EventTestCase):
         event = self._create_event(FAKE_EVENT_CUSTOMER_SOURCE_DELETED)
         event.invoke_webhook_handlers()
 
+        # fetch the customer. Doubles up as a check that the customer didn't get
+        # deleted
         customer = Customer.objects.get(id=FAKE_CUSTOMER["id"])
         self.assertIsNone(customer.default_source)
         self.assertFalse(customer.has_valid_source())
 
-    def test_customer_source_double_delete(self):
+    @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
+    def test_customer_source_double_delete(self, customer_retrieve_mock):
         event = self._create_event(FAKE_EVENT_CUSTOMER_SOURCE_DELETED)
         event.invoke_webhook_handlers()
 
         event = self._create_event(FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE)
         event.invoke_webhook_handlers()
+
+        # fetch the customer. Doubles up as a check that the customer didn't get
+        # deleted
+        customer = Customer.objects.get(id=FAKE_CUSTOMER["id"])
+        self.assertIsNone(customer.default_source)
+        self.assertFalse(customer.has_valid_source())
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
@@ -872,8 +885,10 @@ class TestCustomerEvents(EventTestCase):
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     @patch("stripe.Event.retrieve", autospec=True)
+    @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
     def test_customer_subscription_created(
         self,
+        customer_retrieve_mock,
         event_retrieve_mock,
         product_retrieve_mock,
         subscription_retrieve_mock,
