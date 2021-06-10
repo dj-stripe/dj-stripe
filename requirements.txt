@@ -1,3 +1,6 @@
+# # To ensure app dependencies are ported from your virtual environment/host machine into your container, run 'pip freeze > requirements.txt' in the terminal to overwrite this file
+# django==3.1.1
+# gunicorn==20.0.4
 appdirs==1.4.4
 asgiref==3.3.4
 attrs==21.2.0
@@ -16,6 +19,7 @@ dj-stripe==2.4.4
 Django==3.2.3
 django-stubs==1.8.0
 django-stubs-ext==0.2.0
+debugpy==1.3.0
 djangorestframework==3.12.4
 filelock==3.0.12
 flake8==3.9.2
