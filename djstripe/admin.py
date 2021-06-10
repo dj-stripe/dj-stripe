@@ -1,9 +1,37 @@
 """
 Django Administration interface definitions
 """
+import json
+
 from django.contrib import admin
+from django.contrib.admin.utils import display_for_field, display_for_value
+from jsonfield import JSONField
 
 from . import models
+
+
+def custom_display_for_JSONfield(value, field, empty_value_display):
+    """
+    Overriding display_for_field to correctly render JSONField READonly fields
+    in django-admin. Relevant when DJSTRIPE_USE_NATIVE_JSONFIELD is False
+    Note: This does not handle invalid JSON. That should be handled by the JSONField itself
+    """
+    # we manually JSON serialise in case field is from jsonfield module
+    if isinstance(field, JSONField) and value:
+        try:
+            return json.dumps(value)
+        except TypeError:
+            return display_for_value(value, empty_value_display)
+    return display_for_field(value, field, empty_value_display)
+
+
+def admin_display_for_field_override():
+    admin.utils.display_for_field = custom_display_for_JSONfield
+    admin.helpers.display_for_field = custom_display_for_JSONfield
+
+
+# execute override
+admin_display_for_field_override()
 
 
 class ReadOnlyMixin:

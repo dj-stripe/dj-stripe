@@ -3,9 +3,15 @@ dj-stripe Admin Tests.
 """
 from django.contrib import admin
 from django.test import TestCase
+from jsonfield import JSONField
+
+from djstripe.admin import custom_display_for_JSONfield
 
 
 class TestAdminSite(TestCase):
+    def setUp(self):
+        self.empty_value = "-empty-"
+
     def test_search_fields(self):
         """
         Search for errors like this:
@@ -22,4 +28,18 @@ class TestAdminSite(TestCase):
                     "Bad search field <{search_field}> for {model_name} model.".format(
                         search_field=search_field, model_name=model_name
                     ),
+                )
+
+    def test_json_display_for_field(self):
+        json_tests = [
+            ({"a": {"b": None}}, '{"a": {"b": null}}'),
+            (["a", False], '["a", false]'),
+            ("a", '"a"'),
+            ({("a", "b"): "c"}, "{('a', 'b'): 'c'}"),  # Invalid JSON.
+        ]
+        for value, display_value in json_tests:
+            with self.subTest(value=value):
+                self.assertEqual(
+                    custom_display_for_JSONfield(value, JSONField(), self.empty_value),
+                    display_value,
                 )
