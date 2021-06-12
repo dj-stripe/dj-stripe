@@ -74,7 +74,7 @@ services:
         - DJSTRIPE_TEST_DB_HOST=db
 
   stripe:
-    image: stripe/stripe-cli:v1.6.0
+    image: stripe/stripe-cli:v1.7.0
     command: listen --forward-to http://web:8000/djstripe/webhook/
     depends_on:
       - web

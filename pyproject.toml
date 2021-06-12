@@ -55,6 +55,7 @@ isort = "^5.8.0"
 pytest = "^6.2.4"
 pytest-django = "^4.3.0"
 mypy = "^0.812"
+tox = ">3.2.0"
 
 
 [tool.poetry.extras]
