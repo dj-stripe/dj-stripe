@@ -2,16 +2,14 @@
 dj-stripe Account Tests.
 """
 from copy import deepcopy
-from importlib import reload
 from unittest.mock import patch
 
 import pytest
 from django.test.testcases import TestCase
 from django.test.utils import override_settings
 
-from djstripe import settings as djstripe_settings
 from djstripe.models import Account
-from djstripe.settings import STRIPE_SECRET_KEY
+from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_ACCOUNT,
@@ -34,7 +32,9 @@ class TestAccount(AssertStripeFksMixin, TestCase):
 
         account = Account.get_default_account()
 
-        account_retrieve_mock.assert_called_once_with(api_key=STRIPE_SECRET_KEY)
+        account_retrieve_mock.assert_called_once_with(
+            api_key=djstripe_settings.STRIPE_SECRET_KEY
+        )
 
         self.assertGreater(len(account.business_profile), 0)
         self.assertGreater(len(account.settings), 0)
@@ -69,7 +69,9 @@ class TestAccount(AssertStripeFksMixin, TestCase):
 
         account = Account.get_default_account()
 
-        account_retrieve_mock.assert_called_once_with(api_key=STRIPE_SECRET_KEY)
+        account_retrieve_mock.assert_called_once_with(
+            api_key=djstripe_settings.STRIPE_SECRET_KEY
+        )
 
         self.assert_fks(
             account,
@@ -123,16 +125,12 @@ class TestAccountRestrictedKeys(TestCase):
         """
         Test that we do not attempt to retrieve account ID with restricted keys.
         """
-        reload(djstripe_settings)
         assert djstripe_settings.STRIPE_SECRET_KEY == "rk_test_blah"
 
         account = Account.get_default_account()
 
         assert account is None
         account_retrieve_mock.assert_not_called()
-
-    def tearDown(self):
-        reload(djstripe_settings)
 
 
 @pytest.mark.parametrize(

@@ -5,16 +5,15 @@ import json
 import warnings
 from collections import defaultdict
 from copy import deepcopy
-from importlib import reload
 from unittest.mock import Mock, PropertyMock, call, patch
 
 from django.test import TestCase, override_settings
 from django.test.client import Client
 from django.urls import reverse
 
-from djstripe import settings as djstripe_settings
 from djstripe import webhooks
 from djstripe.models import Event, WebhookEventTrigger
+from djstripe.settings import djstripe_settings
 from djstripe.webhooks import TEST_EVENT_ID, call_handlers, handler, handler_all
 
 from . import (
@@ -30,9 +29,6 @@ def mock_webhook_handler(webhook_event_trigger):
 
 
 class TestWebhook(TestCase):
-    def tearDown(self):
-        reload(djstripe_settings)
-
     def _send_event(self, event_data):
         return Client().post(
             reverse("djstripe:webhook"),
@@ -62,7 +58,6 @@ class TestWebhook(TestCase):
     def test_webhook_retrieve_event_fail(
         self, event_retrieve_mock, transfer_retrieve_mock
     ):
-        reload(djstripe_settings)
 
         invalid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         invalid_event["id"] = "evt_invalid"
@@ -85,7 +80,6 @@ class TestWebhook(TestCase):
     def test_webhook_retrieve_event_pass(
         self, event_retrieve_mock, transfer_retrieve_mock
     ):
-        reload(djstripe_settings)
 
         resp = self._send_event(FAKE_EVENT_TRANSFER_CREATED)
 
@@ -110,7 +104,6 @@ class TestWebhook(TestCase):
     def test_webhook_invalid_verify_signature_fail(
         self, event_retrieve_mock, transfer_retrieve_mock
     ):
-        reload(djstripe_settings)
 
         invalid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         invalid_event["id"] = "evt_invalid"
@@ -141,7 +134,6 @@ class TestWebhook(TestCase):
     def test_webhook_verify_signature_pass(
         self, event_retrieve_mock, transfer_retrieve_mock, verify_header_mock
     ):
-        reload(djstripe_settings)
 
         resp = self._send_event(FAKE_EVENT_TRANSFER_CREATED)
 
@@ -168,7 +160,6 @@ class TestWebhook(TestCase):
     def test_webhook_no_validation_pass(
         self, event_retrieve_mock, transfer_retrieve_mock, verify_header_mock
     ):
-        reload(djstripe_settings)
 
         invalid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         invalid_event["id"] = "evt_invalid"
@@ -246,6 +237,7 @@ class TestWebhook(TestCase):
         event_trigger = WebhookEventTrigger.objects.first()
         self.assertEqual(event_trigger.exception, exception_message)
 
+    @override_settings(DJSTRIPE_WEBHOOK_SECRET="")
     @patch.object(
         djstripe_settings, "WEBHOOK_EVENT_CALLBACK", return_value=mock_webhook_handler
     )
@@ -258,13 +250,12 @@ class TestWebhook(TestCase):
     ):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
-
-        djstripe_settings.WEBHOOK_SECRET = ""
         resp = self._send_event(fake_event)
         self.assertEqual(resp.status_code, 200)
         webhook_event_trigger = WebhookEventTrigger.objects.get()
         webhook_event_callback_mock.called_once_with(webhook_event_trigger)
 
+    @override_settings(DJSTRIPE_WEBHOOK_SECRET="")
     @patch(
         "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
     )
@@ -275,7 +266,6 @@ class TestWebhook(TestCase):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
 
-        djstripe_settings.WEBHOOK_SECRET = ""
         resp = self._send_event(fake_event)
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(Event.objects.filter(type="transfer.created").exists())
@@ -286,12 +276,12 @@ class TestWebhook(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(1, Event.objects.filter(type="transfer.created").count())
 
+    @override_settings(DJSTRIPE_WEBHOOK_SECRET="")
     @patch(
         "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
     )
     @patch("stripe.Event.retrieve", autospec=True)
     def test_webhook_good(self, event_retrieve_mock, transfer_retrieve_mock):
-        djstripe_settings.WEBHOOK_SECRET = ""
 
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
@@ -304,6 +294,7 @@ class TestWebhook(TestCase):
         event_trigger = WebhookEventTrigger.objects.first()
         self.assertEqual(event_trigger.is_test_event, False)
 
+    @override_settings(DJSTRIPE_WEBHOOK_SECRET="")
     @patch.object(target=Event, attribute="invoke_webhook_handlers", autospec=True)
     @patch(
         "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
@@ -316,7 +307,6 @@ class TestWebhook(TestCase):
         and do not commit the Event object to the database.
         """
         mock_invoke_webhook_handlers.side_effect = KeyError("Test error")
-        djstripe_settings.WEBHOOK_SECRET = ""
 
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event

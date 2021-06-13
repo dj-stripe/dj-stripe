@@ -7,7 +7,7 @@ from unittest.mock import patch
 from django.test.testcases import TestCase
 
 from djstripe.models import InvoiceItem
-from djstripe.settings import STRIPE_SECRET_KEY
+from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_BALANCE_TRANSACTION,
@@ -190,7 +190,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         self.assert_fks(invoiceitem, expected_blank_fks=expected_blank_fks)
 
         invoice_retrieve_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=[],
             id=FAKE_INVOICE_II["id"],
             stripe_account=None,

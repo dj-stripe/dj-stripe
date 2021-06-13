@@ -6,11 +6,10 @@ from copy import deepcopy
 from unittest.mock import ANY, patch
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 from stripe.error import InvalidRequestError
 
-from djstripe import settings as djstripe_settings
 from djstripe.exceptions import MultipleSubscriptionException
 from djstripe.models import (
     Card,
@@ -26,7 +25,7 @@ from djstripe.models import (
     Product,
     Subscription,
 )
-from djstripe.settings import STRIPE_SECRET_KEY
+from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_BALANCE_TRANSACTION,
@@ -139,6 +138,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assertEqual(customer.subscriber, user)
         self.assertEqual(customer.metadata, {"djstripe_subscriber": "12345"})
 
+    @override_settings(DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY="")
     def test_customer_sync_has_subscriber_metadata_disabled(self):
         user = get_user_model().objects.create(
             username="test_metadata_disabled", id=98765
@@ -147,10 +147,8 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         fake_customer = deepcopy(FAKE_CUSTOMER)
         fake_customer["id"] = "cus_test_metadata_disabled"
         fake_customer["metadata"] = {"djstripe_subscriber": "98765"}
-        with patch(
-            "djstripe.settings.SUBSCRIBER_CUSTOMER_KEY", return_value="", autospec=True
-        ):
-            customer = Customer.sync_from_stripe_data(fake_customer)
+
+        customer = Customer.sync_from_stripe_data(fake_customer)
 
         self.assertNotEqual(customer.subscriber, user)
         self.assertNotEqual(customer.subscriber_id, 98765)
@@ -182,6 +180,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             },
         )
 
+    @override_settings(DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY="")
     @patch("stripe.Customer.create", autospec=True)
     def test_customer_create_metadata_disabled(self, customer_mock):
         user = get_user_model().objects.create_user(
@@ -192,12 +191,10 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         fake_customer["id"] = "cus_test_create_metadata_disabled"
         customer_mock.return_value = fake_customer
 
-        djstripe_settings.SUBSCRIBER_CUSTOMER_KEY = ""
         customer = Customer.create(user)
-        djstripe_settings.SUBSCRIBER_CUSTOMER_KEY = "djstripe_subscriber"
 
         customer_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
             email="",
             idempotency_key=None,
             metadata={},
@@ -436,7 +433,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         customer_retrieve_mock.assert_called_with(
             id=self.customer.id,
-            api_key=STRIPE_SECRET_KEY,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=ANY,
             stripe_account=None,
         )
@@ -455,7 +452,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         customer_retrieve_mock.assert_called_once_with(
             id=self.customer.id,
-            api_key=STRIPE_SECRET_KEY,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=ANY,
             stripe_account=None,
         )
@@ -655,7 +652,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assertEqual(self.customer.coupon, None)
         self.customer.add_coupon(FAKE_COUPON["id"])
         customer_retrieve_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=ANY,
             id=FAKE_CUSTOMER["id"],
             stripe_account=None,
@@ -684,7 +681,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             self.customer.add_coupon(coupon)
 
         customer_retrieve_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=ANY,
             id=FAKE_CUSTOMER["id"],
             stripe_account=None,
@@ -1332,7 +1329,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assertTrue(return_status)
 
         invoice_create_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY, customer=self.customer.id
+            api_key=djstripe_settings.STRIPE_SECRET_KEY, customer=self.customer.id
         )
 
     @patch("stripe.Invoice.create", autospec=True)
@@ -1345,7 +1342,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assertFalse(return_status)
 
         invoice_create_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY, customer=self.customer.id
+            api_key=djstripe_settings.STRIPE_SECRET_KEY, customer=self.customer.id
         )
 
     @patch("stripe.Coupon.retrieve", return_value=deepcopy(FAKE_COUPON), autospec=True)
@@ -1595,7 +1592,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assertEqual("pancakes", invoiceitem)
 
         invoiceitem_create_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
             amount=5000,
             customer=self.customer.id,
             currency="eur",
@@ -1629,7 +1626,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assertEqual("pancakes", invoiceitem)
 
         invoiceitem_create_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
             amount=5000,
             customer=self.customer.id,
             currency="eur",

@@ -2,9 +2,9 @@ import stripe
 from django.db import models, transaction
 
 from .. import enums
-from .. import settings as djstripe_settings
 from ..enums import APIKeyType
 from ..fields import JSONField, StripeCurrencyCodeField, StripeEnumField
+from ..settings import djstripe_settings
 from .api import APIKey
 from .base import StripeModel
 

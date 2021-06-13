@@ -10,7 +10,7 @@ from stripe.error import InvalidRequestError
 
 from djstripe.enums import InvoiceStatus
 from djstripe.models import Invoice, Plan, Subscription, UpcomingInvoice
-from djstripe.settings import STRIPE_SECRET_KEY
+from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_BALANCE_TRANSACTION,
@@ -449,7 +449,10 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         return_value = invoice.retry()
 
         invoice_retrieve_mock.assert_called_once_with(
-            id=invoice.id, api_key=STRIPE_SECRET_KEY, expand=[], stripe_account=None
+            id=invoice.id,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            expand=[],
+            stripe_account=None,
         )
         self.assertTrue(return_value)
 

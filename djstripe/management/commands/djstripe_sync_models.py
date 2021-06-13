@@ -3,8 +3,9 @@ from typing import List
 from django.apps import apps
 from django.core.management.base import BaseCommand, CommandError
 
-from ... import enums, models, settings
+from ... import enums, models
 from ...models.base import StripeBaseModel
+from ...settings import djstripe_settings
 
 
 class Command(BaseCommand):
@@ -55,7 +56,7 @@ class Command(BaseCommand):
         if model is models.UpcomingInvoice:
             return False, "Upcoming Invoices are virtual only"
 
-        if not settings.STRIPE_LIVE_MODE:
+        if not djstripe_settings.STRIPE_LIVE_MODE:
             if model is models.ScheduledQueryRun:
                 return False, "only available in live mode"
 
@@ -78,7 +79,7 @@ class Command(BaseCommand):
                 if model is models.Account:
                     # special case, since own account isn't returned by Account.api_list
                     stripe_obj = models.Account.stripe_class.retrieve(
-                        api_key=settings.STRIPE_SECRET_KEY
+                        api_key=djstripe_settings.STRIPE_SECRET_KEY
                     )
                     count += 1
                     djstripe_obj = model.sync_from_stripe_data(stripe_obj)
@@ -164,7 +165,7 @@ class Command(BaseCommand):
             # fetch all Card and BankAccount objects associated with the instance
             items = models.Account.stripe_class.list_external_accounts(
                 id,
-                api_key=settings.STRIPE_SECRET_KEY,
+                api_key=djstripe_settings.STRIPE_SECRET_KEY,
             )
             bank_count = 0
             card_count = 0
