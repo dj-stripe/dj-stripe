@@ -11,9 +11,9 @@ from django.utils.encoding import smart_str
 from stripe.api_resources.abstract.api_resource import APIResource
 from stripe.error import InvalidRequestError
 
-from .. import settings as djstripe_settings
 from ..fields import JSONField, StripeDateTimeField, StripeForeignKey, StripeIdField
 from ..managers import StripeModelManager
+from ..settings import djstripe_settings
 
 logger = logging.getLogger(__name__)
 
@@ -129,7 +129,7 @@ class StripeModel(StripeBaseModel):
         Call the stripe API's retrieve operation for this model.
 
         :param api_key: The api key to use for this request. \
-            Defaults to settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.
@@ -173,7 +173,7 @@ class StripeModel(StripeBaseModel):
         Call the stripe API's retrieve operation for this model.
 
         :param api_key: The api key to use for this request. \
-            Defaults to settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.

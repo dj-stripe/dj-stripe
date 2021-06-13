@@ -12,7 +12,7 @@ from ..fields import (
     StripeQuantumCurrencyAmountField,
 )
 from ..managers import TransferManager
-from ..settings import get_default_api_key
+from ..settings import djstripe_settings
 from .base import StripeBaseModel, StripeModel
 
 
@@ -145,7 +145,7 @@ class CountrySpec(StripeBaseModel):
 
     def api_retrieve(self, api_key: str = None, stripe_account=None):
         if api_key is None:
-            api_key = get_default_api_key(livemode=None)
+            api_key = djstripe_settings.get_default_api_key(livemode=None)
 
         return self.stripe_class.retrieve(
             id=self.id,

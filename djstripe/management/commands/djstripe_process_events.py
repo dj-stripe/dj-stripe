@@ -1,8 +1,8 @@
 from django.core.management.base import BaseCommand
 
 from ... import models
-from ... import settings as djstripe_settings
 from ...mixins import VerbosityAwareOutputMixin
+from ...settings import djstripe_settings
 
 
 class Command(VerbosityAwareOutputMixin, BaseCommand):

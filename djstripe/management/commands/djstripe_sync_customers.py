@@ -3,7 +3,7 @@ sync_customer command.
 """
 from django.core.management.base import BaseCommand
 
-from ...settings import get_subscriber_model
+from ...settings import djstripe_settings
 from ...sync import sync_subscriber
 
 
@@ -14,7 +14,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """Call sync_subscriber on Subscribers without customers associated to them."""
-        qs = get_subscriber_model().objects.filter(djstripe_customers__isnull=True)
+        qs = djstripe_settings.get_subscriber_model().objects.filter(
+            djstripe_customers__isnull=True
+        )
         count = 0
         total = qs.count()
         for subscriber in qs:

@@ -9,8 +9,8 @@ Wire this into the root URLConf this way::
 """
 from django.urls import re_path
 
-from . import settings as app_settings
 from . import views
+from .settings import djstripe_settings as app_settings
 
 app_name = "djstripe"
 

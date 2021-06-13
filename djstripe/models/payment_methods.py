@@ -5,7 +5,6 @@ from django.db import models, transaction
 from stripe.error import InvalidRequestError
 
 from .. import enums
-from .. import settings as djstripe_settings
 from ..exceptions import StripeObjectManipulationException
 from ..fields import (
     JSONField,
@@ -14,6 +13,7 @@ from ..fields import (
     StripeEnumField,
     StripeForeignKey,
 )
+from ..settings import djstripe_settings
 from .account import Account
 from .base import StripeModel, logger
 from .core import Customer

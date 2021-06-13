@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.views.generic import DetailView, FormView
 
 import djstripe.models
-import djstripe.settings
+from djstripe.settings import djstripe_settings
 
 from . import forms
 
@@ -45,7 +45,7 @@ class PurchaseSubscriptionView(FormView):
                 "(or use the dj-stripe webhooks)"
             )
 
-        ctx["STRIPE_PUBLIC_KEY"] = djstripe.settings.STRIPE_PUBLIC_KEY
+        ctx["STRIPE_PUBLIC_KEY"] = djstripe_settings.STRIPE_PUBLIC_KEY
 
         return ctx
 
@@ -61,7 +61,7 @@ class PurchaseSubscriptionView(FormView):
             user = User.objects.create(username=email, email=email)
 
         # Create the stripe Customer, by default subscriber Model is User,
-        # this can be overridden with settings.DJSTRIPE_SUBSCRIBER_MODEL
+        # this can be overridden with djstripe_settings.DJSTRIPE_SUBSCRIBER_MODEL
         customer, created = djstripe.models.Customer.get_or_create(subscriber=user)
 
         # Add the source as the customer's default card
@@ -116,12 +116,12 @@ def create_payment_intent(request):
                     currency="usd",
                     confirmation_method="manual",
                     confirm=True,
-                    api_key=djstripe.settings.STRIPE_SECRET_KEY,
+                    api_key=djstripe_settings.STRIPE_SECRET_KEY,
                 )
             elif "payment_intent_id" in data:
                 intent = stripe.PaymentIntent.confirm(
                     data["payment_intent_id"],
-                    api_key=djstripe.settings.STRIPE_SECRET_KEY,
+                    api_key=djstripe_settings.STRIPE_SECRET_KEY,
                 )
         except stripe.error.CardError as e:
             # Display error on client
@@ -156,5 +156,5 @@ def create_payment_intent(request):
         )
 
     else:
-        ctx = {"STRIPE_PUBLIC_KEY": djstripe.settings.STRIPE_PUBLIC_KEY}
+        ctx = {"STRIPE_PUBLIC_KEY": djstripe_settings.STRIPE_PUBLIC_KEY}
         return TemplateResponse(request, "payment_intent.html", ctx)

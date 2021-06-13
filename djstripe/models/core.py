@@ -11,9 +11,7 @@ from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 from stripe.error import InvalidRequestError
 
-from .. import enums
-from .. import settings as djstripe_settings
-from .. import webhooks
+from .. import enums, webhooks
 from ..exceptions import MultipleSubscriptionException
 from ..fields import (
     JSONField,
@@ -27,6 +25,7 @@ from ..fields import (
     StripeQuantumCurrencyAmountField,
 )
 from ..managers import ChargeManager
+from ..settings import djstripe_settings
 from ..signals import WEBHOOK_SIGNALS
 from ..utils import get_friendly_currency_amount
 from .base import IdempotencyKey, StripeModel, logger

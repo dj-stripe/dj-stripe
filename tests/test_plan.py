@@ -9,7 +9,7 @@ from django.test import TestCase
 
 from djstripe.enums import PriceUsageType
 from djstripe.models import Plan, Product
-from djstripe.settings import STRIPE_SECRET_KEY
+from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_PLAN,
@@ -42,7 +42,7 @@ class PlanCreateTest(AssertStripeFksMixin, TestCase):
         plan = Plan.create(**fake_plan)
 
         expected_create_kwargs = deepcopy(FAKE_PLAN)
-        expected_create_kwargs["api_key"] = STRIPE_SECRET_KEY
+        expected_create_kwargs["api_key"] = djstripe_settings.STRIPE_SECRET_KEY
 
         plan_create_mock.assert_called_once_with(**expected_create_kwargs)
 
@@ -64,7 +64,7 @@ class PlanCreateTest(AssertStripeFksMixin, TestCase):
         expected_create_kwargs["product"] = self.stripe_product
 
         plan_create_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY, **expected_create_kwargs
+            api_key=djstripe_settings.STRIPE_SECRET_KEY, **expected_create_kwargs
         )
 
         self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
@@ -83,7 +83,9 @@ class PlanCreateTest(AssertStripeFksMixin, TestCase):
 
         plan = Plan.create(**fake_plan)
 
-        plan_create_mock.assert_called_once_with(api_key=STRIPE_SECRET_KEY, **FAKE_PLAN)
+        plan_create_mock.assert_called_once_with(
+            api_key=djstripe_settings.STRIPE_SECRET_KEY, **FAKE_PLAN
+        )
 
         self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
 
@@ -104,7 +106,7 @@ class PlanCreateTest(AssertStripeFksMixin, TestCase):
         expected_create_kwargs["metadata"] = metadata
 
         plan_create_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY, **expected_create_kwargs
+            api_key=djstripe_settings.STRIPE_SECRET_KEY, **expected_create_kwargs
         )
 
         self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
@@ -128,7 +130,7 @@ class PlanTest(AssertStripeFksMixin, TestCase):
         stripe_plan = self.plan.api_retrieve()
         plan_retrieve_mock.assert_called_once_with(
             id=self.plan_data["id"],
-            api_key=STRIPE_SECRET_KEY,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=[],
             stripe_account=None,
         )

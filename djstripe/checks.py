@@ -10,7 +10,7 @@ from django.utils.dateparse import date_re
 @checks.register("djstripe")
 def check_stripe_api_key(app_configs=None, **kwargs):
     """Check the user has configured API live/test keys correctly."""
-    from . import settings as djstripe_settings
+    from .settings import djstripe_settings
 
     messages = []
 
@@ -48,7 +48,7 @@ def validate_stripe_api_version(version):
 @checks.register("djstripe")
 def check_stripe_api_version(app_configs=None, **kwargs):
     """Check the user has configured API version correctly."""
-    from . import settings as djstripe_settings
+    from .settings import djstripe_settings
 
     messages = []
     default_version = djstripe_settings.DEFAULT_STRIPE_API_VERSION
@@ -79,7 +79,7 @@ def check_native_jsonfield_postgres_engine(app_configs=None, **kwargs):
     Check that the DJSTRIPE_USE_NATIVE_JSONFIELD isn't set unless Postgres is in use.
     Only used on Django < 3.1.
     """
-    from . import settings as djstripe_settings
+    from .settings import djstripe_settings
 
     messages = []
     error_msg = (
@@ -176,7 +176,7 @@ def check_webhook_secret(app_configs=None, **kwargs):
     """
     Check that DJSTRIPE_WEBHOOK_SECRET looks correct
     """
-    from . import settings as djstripe_settings
+    from .settings import djstripe_settings
 
     messages = []
 
@@ -198,7 +198,7 @@ def check_webhook_validation(app_configs=None, **kwargs):
     """
     Check that DJSTRIPE_WEBHOOK_VALIDATION is valid
     """
-    from . import settings as djstripe_settings
+    from .settings import djstripe_settings
 
     messages = []
 
@@ -247,7 +247,7 @@ def check_subscriber_key_length(app_configs=None, **kwargs):
 
     Docs: https://stripe.com/docs/api#metadata
     """
-    from . import settings as djstripe_settings
+    from .settings import djstripe_settings
 
     messages = []
 

@@ -7,7 +7,7 @@ import pytest
 from django.test import TestCase
 
 from djstripe.models import Account, Customer, StripeModel
-from djstripe.settings import STRIPE_SECRET_KEY
+from djstripe.settings import djstripe_settings
 
 
 class TestStripeModel(StripeModel):
@@ -38,7 +38,10 @@ class StripeModelExceptionsTest(TestCase):
 @pytest.mark.parametrize("stripe_account", (None, "acct_fakefakefakefake001"))
 @pytest.mark.parametrize(
     "api_key, expected_api_key",
-    ((None, STRIPE_SECRET_KEY), ("sk_fakefakefake01", "sk_fakefakefake01")),
+    (
+        (None, djstripe_settings.STRIPE_SECRET_KEY),
+        ("sk_fakefakefake01", "sk_fakefakefake01"),
+    ),
 )
 @pytest.mark.parametrize("extra_kwargs", ({}, {"foo": "bar"}))
 @patch.object(target=StripeModel, attribute="api_retrieve", autospec=True)
@@ -64,7 +67,10 @@ def test__api_delete(
 @pytest.mark.parametrize("stripe_account", (None, "acct_fakefakefakefake001"))
 @pytest.mark.parametrize(
     "api_key, expected_api_key",
-    ((None, STRIPE_SECRET_KEY), ("sk_fakefakefake01", "sk_fakefakefake01")),
+    (
+        (None, djstripe_settings.STRIPE_SECRET_KEY),
+        ("sk_fakefakefake01", "sk_fakefakefake01"),
+    ),
 )
 @pytest.mark.parametrize("expand_fields", ([], ["foo", "bar"]))
 @patch.object(target=StripeModel, attribute="stripe_class")

@@ -8,7 +8,7 @@ from django.test import TestCase
 
 from djstripe.enums import PriceType, PriceUsageType
 from djstripe.models import Price, Product
-from djstripe.settings import STRIPE_SECRET_KEY
+from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_PRICE,
@@ -41,7 +41,7 @@ class PriceCreateTest(AssertStripeFksMixin, TestCase):
         price = Price.create(**fake_price)
 
         expected_create_kwargs = deepcopy(FAKE_PRICE)
-        expected_create_kwargs["api_key"] = STRIPE_SECRET_KEY
+        expected_create_kwargs["api_key"] = djstripe_settings.STRIPE_SECRET_KEY
 
         price_create_mock.assert_called_once_with(**expected_create_kwargs)
 
@@ -63,7 +63,7 @@ class PriceCreateTest(AssertStripeFksMixin, TestCase):
         expected_create_kwargs["product"] = self.stripe_product
 
         price_create_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY, **expected_create_kwargs
+            api_key=djstripe_settings.STRIPE_SECRET_KEY, **expected_create_kwargs
         )
 
         self.assert_fks(price, expected_blank_fks={"djstripe.Customer.coupon"})
@@ -83,7 +83,7 @@ class PriceCreateTest(AssertStripeFksMixin, TestCase):
         price = Price.create(**fake_price)
 
         price_create_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY, **FAKE_PRICE
+            api_key=djstripe_settings.STRIPE_SECRET_KEY, **FAKE_PRICE
         )
 
         self.assert_fks(price, expected_blank_fks={"djstripe.Customer.coupon"})
@@ -105,7 +105,7 @@ class PriceCreateTest(AssertStripeFksMixin, TestCase):
         expected_create_kwargs["metadata"] = metadata
 
         price_create_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY, **expected_create_kwargs
+            api_key=djstripe_settings.STRIPE_SECRET_KEY, **expected_create_kwargs
         )
 
         self.assert_fks(price, expected_blank_fks={"djstripe.Customer.coupon"})
@@ -135,7 +135,7 @@ class PriceTest(AssertStripeFksMixin, TestCase):
         stripe_price = self.price.api_retrieve()
         price_retrieve_mock.assert_called_once_with(
             id=self.price_data["id"],
-            api_key=STRIPE_SECRET_KEY,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=["tiers"],
             stripe_account=None,
         )

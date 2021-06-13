@@ -9,7 +9,6 @@ from django.utils.translation import gettext_lazy as _
 from stripe.error import InvalidRequestError
 
 from .. import enums
-from .. import settings as djstripe_settings
 from ..fields import (
     JSONField,
     PaymentMethodForeignKey,
@@ -23,6 +22,7 @@ from ..fields import (
     StripeQuantumCurrencyAmountField,
 )
 from ..managers import SubscriptionManager
+from ..settings import djstripe_settings
 from ..utils import QuerySetMock, get_friendly_currency_amount
 from .base import StripeModel
 

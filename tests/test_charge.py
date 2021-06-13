@@ -10,6 +10,7 @@ from django.test.testcases import TestCase
 
 from djstripe.enums import ChargeStatus, LegacySourceType
 from djstripe.models import Charge, DjstripePaymentMethod
+from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_BALANCE_TRANSACTION,
@@ -195,7 +196,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-        from djstripe.settings import STRIPE_SECRET_KEY
 
         default_account_mock.return_value = self.account
 
@@ -219,7 +219,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
         charge_retrieve_mock.assert_not_called()
         balance_transaction_retrieve_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=[],
             id=FAKE_BALANCE_TRANSACTION["id"],
             stripe_account=None,
@@ -270,8 +270,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         # first sync charge (as per test_sync_from_stripe_data)
         # then sync refunded version, to hit the update code-path instead of insert
 
-        from djstripe.settings import STRIPE_SECRET_KEY
-
         default_account_mock.return_value = self.account
 
         fake_charge_copy = deepcopy(FAKE_CHARGE)
@@ -310,7 +308,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
         charge_retrieve_mock.assert_not_called()
         balance_transaction_retrieve_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=[],
             id=FAKE_BALANCE_TRANSACTION_REFUND["id"],
             stripe_account=None,
@@ -383,7 +381,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-        from djstripe.settings import STRIPE_SECRET_KEY
 
         default_account_mock.return_value = self.account
         fake_charge_copy = deepcopy(FAKE_CHARGE_REFUNDED)
@@ -404,13 +401,13 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         balance_transaction_retrieve_mock.assert_has_calls(
             [
                 call(
-                    api_key=STRIPE_SECRET_KEY,
+                    api_key=djstripe_settings.STRIPE_SECRET_KEY,
                     expand=[],
                     id=FAKE_BALANCE_TRANSACTION["id"],
                     stripe_account=None,
                 ),
                 call(
-                    api_key=STRIPE_SECRET_KEY,
+                    api_key=djstripe_settings.STRIPE_SECRET_KEY,
                     expand=[],
                     id=FAKE_BALANCE_TRANSACTION_REFUND["id"],
                     stripe_account=None,
@@ -546,7 +543,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-        from djstripe.settings import STRIPE_SECRET_KEY
 
         default_account_mock.return_value = self.account
 
@@ -561,7 +557,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         charge_retrieve_mock.assert_not_called()
 
         balance_transaction_retrieve_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=[],
             id=FAKE_BALANCE_TRANSACTION["id"],
             stripe_account=None,
@@ -597,7 +593,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-        from djstripe.settings import STRIPE_SECRET_KEY
 
         default_account_mock.return_value = self.account
 
@@ -619,7 +614,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
         charge_retrieve_mock.assert_not_called()
         balance_transaction_retrieve_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=[],
             id=FAKE_BALANCE_TRANSACTION["id"],
             stripe_account=None,
@@ -683,7 +678,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         charge_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
-        from djstripe.settings import STRIPE_SECRET_KEY
 
         default_account_mock.return_value = self.account
 
@@ -705,7 +699,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
         charge_retrieve_mock.assert_not_called()
         balance_transaction_retrieve_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=[],
             id=FAKE_BALANCE_TRANSACTION["id"],
             stripe_account=None,
@@ -765,7 +759,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         account_retrieve_mock,
         charge_retrieve_mock,
     ):
-        from djstripe.settings import STRIPE_SECRET_KEY
 
         account_retrieve_mock.return_value = FAKE_STANDARD_ACCOUNT
 
@@ -779,7 +772,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
         charge_retrieve_mock.assert_not_called()
         balance_transaction_retrieve_mock.assert_called_once_with(
-            api_key=STRIPE_SECRET_KEY,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=[],
             id=FAKE_BALANCE_TRANSACTION["id"],
             stripe_account=None,

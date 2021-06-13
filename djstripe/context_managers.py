@@ -3,6 +3,8 @@ dj-stripe Context Managers
 """
 from contextlib import contextmanager
 
+from .settings import djstripe_settings
+
 
 @contextmanager
 def stripe_temporary_api_version(version, validate=True):
@@ -12,13 +14,12 @@ def stripe_temporary_api_version(version, validate=True):
 
     The original value is restored as soon as context exits.
     """
-    from .settings import get_stripe_api_version, set_stripe_api_version
 
-    old_version = get_stripe_api_version()
+    old_version = djstripe_settings.get_stripe_api_version()
 
     try:
-        set_stripe_api_version(version, validate=validate)
+        djstripe_settings.set_stripe_api_version(version, validate=validate)
         yield
     finally:
         # Validation is bypassed since we're restoring a previous value.
-        set_stripe_api_version(old_version, validate=False)
+        djstripe_settings.set_stripe_api_version(old_version, validate=False)
