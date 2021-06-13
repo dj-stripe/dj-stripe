@@ -45,8 +45,8 @@ sent to you by Stripe with your API version, we re-fetch the data with
 dj-stripe's API version), this is because the API schema needs to match
 dj-stripe's Django model schema.
 
-This is defined by `djstripe.settings.DEFAULT_STRIPE_API_VERSION` and
-`can be overridden <setting_stripe_api_version>`, though see the warning
+This is defined by `djstripe.settings.djstripe_settings.DEFAULT_STRIPE_API_VERSION` and
+can be overridden by the function, `djstripe.settings.djstripe_settings.set_stripe_api_version`, though see the warning
 about doing this.
 
 ## dj-stripe's tested version (as mentioned in README)
