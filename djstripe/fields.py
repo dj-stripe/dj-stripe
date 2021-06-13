@@ -7,17 +7,20 @@ from django.conf import SettingsReference, settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from .settings import USE_NATIVE_JSONFIELD
+from .settings import djstripe_settings
 from .utils import convert_tstamp
 
-if USE_NATIVE_JSONFIELD:
-    try:
-        # Django 3.1
-        from django.db.models import JSONField as BaseJSONField
-    except ImportError:
-        from django.contrib.postgres.fields import JSONField as BaseJSONField
-else:
-    from jsonfield import JSONField as BaseJSONField
+
+def import_jsonfield():
+    if djstripe_settings.USE_NATIVE_JSONFIELD:
+        try:
+            # Django 3.1
+            from django.db.models import JSONField as BaseJSONField
+        except ImportError:
+            from django.contrib.postgres.fields import JSONField as BaseJSONField
+    else:
+        from jsonfield import JSONField as BaseJSONField
+    return BaseJSONField
 
 
 class StripeForeignKey(models.ForeignKey):
@@ -163,7 +166,7 @@ class StripeDateTimeField(models.DateTimeField):
             return convert_tstamp(val)
 
 
-class JSONField(BaseJSONField):
+class JSONField(import_jsonfield()):
     """A field used to define a JSONField value according to djstripe logic."""
 
     pass
