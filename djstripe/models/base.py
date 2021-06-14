@@ -822,6 +822,10 @@ class StripeModel(StripeBaseModel):
             item, _ = target_cls._get_or_create_from_stripe_object(
                 item_data, refetch=False
             )
+
+            # sync the SubscriptionItem
+            target_cls.sync_from_stripe_data(item_data)
+
             pks.append(item.pk)
             subscriptionitems.append(item)
         subscription.items.exclude(pk__in=pks).delete()
