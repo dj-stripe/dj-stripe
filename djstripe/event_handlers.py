@@ -35,7 +35,12 @@ def customer_webhook_handler(event):
     Docs and an example customer webhook response:
     https://stripe.com/docs/api#customer_object
     """
-    if event.customer:
+    # will recieve all events of the type customer.X.Y so
+    # need to ensure the data object is related to Customer Object
+    target_object_type = event.data.get("object", {}).get("object", {})
+
+    if event.customer and target_object_type == "customer":
+
         # As customers are tied to local users, djstripe will not create
         # customers that do not already exist locally.
         _handle_crud_like_event(target_cls=models.Customer, event=event)
@@ -142,23 +147,28 @@ def payment_method_handler(event):
     Docs for:
     - payment_method: https://stripe.com/docs/api/payment_methods
     """
-    id_ = event.data.get("object", {}).get("id", None)
+    # will recieve all events of the type payment_method.X.Y so
+    # need to ensure the data object is related to PaymentMethod Object
+    target_object_type = event.data.get("object", {}).get("object", {})
 
-    if (
-        event.parts == ["payment_method", "detached"]
-        and id_
-        and id_.startswith("card_")
-    ):
-        # Special case to handle a quirk in stripe's wrapping of legacy "card" objects
-        # with payment_methods - card objects are deleted on detach, so treat this as
-        # a delete event
-        _handle_crud_like_event(
-            target_cls=models.PaymentMethod,
-            event=event,
-            crud_type=CrudType.DELETED,
-        )
-    else:
-        _handle_crud_like_event(target_cls=models.PaymentMethod, event=event)
+    if target_object_type == "payment_method":
+        id_ = event.data.get("object", {}).get("id", None)
+
+        if (
+            event.parts == ["payment_method", "detached"]
+            and id_
+            and id_.startswith("card_")
+        ):
+            # Special case to handle a quirk in stripe's wrapping of legacy "card" objects
+            # with payment_methods - card objects are deleted on detach, so treat this as
+            # a delete event
+            _handle_crud_like_event(
+                target_cls=models.PaymentMethod,
+                event=event,
+                crud_type=CrudType.DELETED,
+            )
+        else:
+            _handle_crud_like_event(target_cls=models.PaymentMethod, event=event)
 
 
 @webhooks.handler("account.external_account")
@@ -347,6 +357,7 @@ def _handle_crud_like_event(
         kwargs = {"id": id}
         if hasattr(target_cls, "customer"):
             kwargs["customer"] = customer
+
         # For account.external_account.* events
         if event.parts[:2] == ["account", "external_account"] and stripe_account:
             kwargs["account"] = models.Account._get_or_retrieve(id=stripe_account)
