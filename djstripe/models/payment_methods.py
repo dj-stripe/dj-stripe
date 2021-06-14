@@ -241,6 +241,7 @@ class LegacySourceMixin:
                 self.id,
                 expand=self.expand_fields,
                 stripe_account=stripe_account,
+                api_key=api_key,
             )
 
         # try to retrieve by account attribute if retrieval by customer fails.
