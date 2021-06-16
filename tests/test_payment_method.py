@@ -9,13 +9,14 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from stripe.error import InvalidRequestError
 
-from djstripe.models import PaymentMethod
+from djstripe import models
 
 from . import (
     FAKE_CARD_AS_PAYMENT_METHOD,
     FAKE_CUSTOMER,
     FAKE_PAYMENT_METHOD_I,
     FAKE_STANDARD_ACCOUNT,
+    IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
     PaymentMethodDict,
 )
@@ -29,13 +30,19 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
         )
         self.customer = FAKE_CUSTOMER.create_for_user(user)
 
-    # TODO - these should use autospec=True with stripe.PaymentMethod.attach,
-    #  but it's failing for some reason with:
-    #  TypeError: got an unexpected keyword argument 'customer'
-
-    @patch("stripe.PaymentMethod.attach", return_value=deepcopy(FAKE_PAYMENT_METHOD_I))
+    # stripe modifies attach() at compile time, which is why
+    # another stripe classmethod is decorated.
+    # See Here:
+    # https://github.com/stripe/stripe-python/blob/master/stripe/api_resources/payment_method.py#L10
+    # https://github.com/stripe/stripe-python/blob/master/stripe/api_resources/abstract/custom_method.py#L35
+    @patch(
+        "stripe.PaymentMethod._cls_attach",
+        return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
     def test_attach(self, attach_mock):
-        payment_method = PaymentMethod.attach(
+
+        payment_method = models.PaymentMethod.attach(
             FAKE_PAYMENT_METHOD_I["id"], customer=FAKE_CUSTOMER["id"]
         )
 
@@ -47,11 +54,15 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
             },
         )
 
-    @patch("stripe.PaymentMethod.attach", return_value=deepcopy(FAKE_PAYMENT_METHOD_I))
+    @patch(
+        "stripe.PaymentMethod._cls_attach",
+        return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
     def test_attach_obj(self, attach_mock):
-        pm = PaymentMethod.sync_from_stripe_data(FAKE_PAYMENT_METHOD_I)
+        pm = models.PaymentMethod.sync_from_stripe_data(FAKE_PAYMENT_METHOD_I)
 
-        payment_method = PaymentMethod.attach(pm, customer=self.customer)
+        payment_method = models.PaymentMethod.attach(pm, customer=self.customer)
 
         self.assert_fks(
             payment_method,
@@ -61,18 +72,22 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
             },
         )
 
-    @patch("stripe.PaymentMethod.attach", return_value=deepcopy(FAKE_PAYMENT_METHOD_I))
+    @patch(
+        "stripe.PaymentMethod._cls_attach",
+        return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
     def test_attach_synced(self, attach_mock):
         fake_payment_method = deepcopy(FAKE_PAYMENT_METHOD_I)
         fake_payment_method["customer"] = None
 
-        payment_method = PaymentMethod.sync_from_stripe_data(fake_payment_method)
+        payment_method = models.PaymentMethod.sync_from_stripe_data(fake_payment_method)
 
         self.assert_fks(
             payment_method, expected_blank_fks={"djstripe.PaymentMethod.customer"}
         )
 
-        payment_method = PaymentMethod.attach(
+        payment_method = models.PaymentMethod.attach(
             payment_method.id, customer=FAKE_CUSTOMER["id"]
         )
 
@@ -95,7 +110,7 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
             return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
             autospec=True,
         ):
-            PaymentMethod.sync_from_stripe_data(deepcopy(FAKE_PAYMENT_METHOD_I))
+            models.PaymentMethod.sync_from_stripe_data(deepcopy(FAKE_PAYMENT_METHOD_I))
 
         self.assertEqual(1, self.customer.payment_methods.count())
 
@@ -161,7 +176,9 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
             return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
             autospec=True,
         ):
-            PaymentMethod.sync_from_stripe_data(deepcopy(FAKE_CARD_AS_PAYMENT_METHOD))
+            models.PaymentMethod.sync_from_stripe_data(
+                deepcopy(FAKE_CARD_AS_PAYMENT_METHOD)
+            )
 
         self.assertEqual(1, self.customer.payment_methods.count())
 
@@ -184,7 +201,7 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
         self.assertIsNone(self.customer.default_payment_method)
 
         self.assertEqual(
-            PaymentMethod.objects.filter(id=payment_method.id).count(),
+            models.PaymentMethod.objects.filter(id=payment_method.id).count(),
             0,
             "We expect PaymentMethod id = card_* to be deleted",
         )
@@ -214,7 +231,7 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
             )
 
     def test_sync_null_customer(self):
-        payment_method = PaymentMethod.sync_from_stripe_data(
+        payment_method = models.PaymentMethod.sync_from_stripe_data(
             deepcopy(FAKE_PAYMENT_METHOD_I)
         )
 
@@ -224,7 +241,7 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
         fake_payment_method_no_customer = deepcopy(FAKE_PAYMENT_METHOD_I)
         fake_payment_method_no_customer["customer"] = None
 
-        payment_method = PaymentMethod.sync_from_stripe_data(
+        payment_method = models.PaymentMethod.sync_from_stripe_data(
             fake_payment_method_no_customer
         )
 
