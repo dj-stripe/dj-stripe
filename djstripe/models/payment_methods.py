@@ -309,6 +309,33 @@ class BankAccount(LegacySourceMixin, StripeModel):
     )
     status = StripeEnumField(enum=enums.BankAccountStatus)
 
+    def __str__(self):
+        default = False
+        # prefer to show it by customer format if present
+        if self.customer:
+            default_source = self.customer.default_source
+            default_payment_method = self.customer.default_payment_method
+
+            if (default_payment_method and self.id == default_payment_method.id) or (
+                default_source and self.id == default_source.id
+            ):
+                # current card is the default payment method or source
+                default = True
+
+            customer_template = f"{self.bank_name} {self.routing_number} ({self.human_readable_status}) {'Default' if default else ''} {self.currency}"
+            return customer_template
+
+        elif self.account:
+            default = getattr(self, "default_for_currency", False)
+            account_template = f"{self.bank_name} {self.currency} {'Default' if default else ''} {self.routing_number} {self.last4}"
+            return account_template
+
+    @property
+    def human_readable_status(self):
+        if self.status == "new":
+            return "Pending Verification"
+        return enums.BankAccountStatus.humanize(self.status)
+
     def api_retrieve(self, **kwargs):
         if not self.customer and not self.account:
             raise NotImplementedError(
@@ -435,13 +462,26 @@ class Card(LegacySourceMixin, StripeModel):
         help_text="If the card number is tokenized, this is the method that was used.",
     )
 
-    def str_parts(self):
-        return [
-            "brand={brand}".format(brand=self.brand),
-            "last4={last4}".format(last4=self.last4),
-            "exp_month={exp_month}".format(exp_month=self.exp_month),
-            "exp_year={exp_year}".format(exp_year=self.exp_year),
-        ] + super().str_parts()
+    def __str__(self):
+        default = False
+        # prefer to show it by customer format if present
+        if self.customer:
+            default_source = self.customer.default_source
+            default_payment_method = self.customer.default_payment_method
+
+            if (default_payment_method and self.id == default_payment_method.id) or (
+                default_source and self.id == default_source.id
+            ):
+                # current card is the default payment method or source
+                default = True
+
+            customer_template = f"{enums.CardBrand.humanize(self.brand)} {self.last4} {'Default' if default else ''} Expires {self.exp_month} {self.exp_year}"
+            return customer_template
+
+        elif self.account:
+            default = getattr(self, "default_for_currency", False)
+            account_template = f"{enums.CardBrand.humanize(self.brand)} {self.account.default_currency} {'Default' if default else ''} {self.last4}"
+            return account_template
 
     @classmethod
     def create_token(
@@ -478,6 +518,7 @@ class Card(LegacySourceMixin, StripeModel):
         return stripe.Token.create(api_key=api_key, card=card)
 
 
+#  todo imporve str_parts
 class Source(StripeModel):
     """
     Stripe documentation: https://stripe.com/docs/api#sources
@@ -562,6 +603,14 @@ class Source(StripeModel):
 
     stripe_class = stripe.Source
     stripe_dashboard_item_name = "sources"
+
+    def str_parts(self):
+        return [
+            f"type={self.type}",
+            f"status={self.status}",
+            f"customer={self.customer}",
+            f"usage={self.usage}",
+        ] + super().str_parts()
 
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
@@ -707,6 +756,11 @@ class PaymentMethod(StripeModel):
         blank=True,
         help_text="Additional information for payment methods of type `sofort`",
     )
+
+    def __str__(self):
+        if self.customer:
+            return f"{enums.PaymentMethodType.humanize(self.type)} for {self.customer}"
+        return f"{enums.PaymentMethodType.humanize(self.type)} is not associated with any customer"
 
     def _attach_objects_hook(self, cls, data, current_ids=None):
         customer = None

@@ -71,8 +71,14 @@ class BalanceTransaction(StripeModel):
     status = StripeEnumField(enum=enums.BalanceTransactionStatus)
     type = StripeEnumField(enum=enums.BalanceTransactionType)
 
+    def __str__(self):
+        return f"{self.human_readable_amount} ({enums.BalanceTransactionStatus.humanize(self.status)})"
+
     def get_source_class(self):
-        return apps.get_model("djstripe", self.type)
+        try:
+            return apps.get_model("djstripe", self.type)
+        except LookupError:
+            raise
 
     def get_source_instance(self):
         return self.get_source_class().objects.get(id=self.source)
@@ -165,6 +171,7 @@ class Charge(StripeModel):
         related_name="charges",
         help_text="The customer associated with this charge.",
     )
+    # TODO Shouldn't this be on the Dispute model as charge field? Every dispute will have a Charge object
     dispute = StripeForeignKey(
         "Dispute",
         on_delete=models.SET_NULL,
@@ -337,18 +344,12 @@ class Charge(StripeModel):
     def __str__(self):
         amount = self.human_readable_amount
         status = self.human_readable_status
-        if not status:
-            return amount
         return "{amount} ({status})".format(amount=amount, status=status)
 
     @property
     def fee(self):
         if self.balance_transaction:
             return self.balance_transaction.fee
-
-    @property
-    def human_readable_amount(self) -> str:
-        return get_friendly_currency_amount(self.amount, self.currency)
 
     @property
     def human_readable_status(self) -> str:
@@ -358,12 +359,7 @@ class Charge(StripeModel):
             return "Disputed"
         elif self.refunded:
             return "Refunded"
-        elif self.amount_refunded:
-            return "Partially refunded"
-        elif self.status == enums.ChargeStatus.failed:
-            return "Failed"
-
-        return ""
+        return enums.ChargeStatus.humanize(self.status)
 
     @property
     def fraudulent(self) -> bool:
@@ -437,6 +433,7 @@ class Charge(StripeModel):
         cls._stripe_object_to_refunds(target_cls=Refund, data=data, charge=self)
 
 
+# TODO Add Tests
 class Mandate(StripeModel):
     """
     https://stripe.com/docs/api/mandates
@@ -581,7 +578,13 @@ class Product(StripeModel):
     unit_label = models.CharField(max_length=12, default="", blank=True)
 
     def __str__(self):
-        return self.name
+        # 1 product can have 1 or more than 1 related price
+        price_qs = Price.objects.filter(product__id=self.id)
+
+        if price_qs.count() > 1:
+            return f"{self.name} ({price_qs.count()} prices)"
+        else:
+            return f"{self.name} ({price_qs[0].human_readable_price})"
 
 
 class Customer(StripeModel):
@@ -1317,6 +1320,7 @@ class Customer(StripeModel):
             Subscription.sync_from_stripe_data(stripe_subscription)
 
 
+# TODO Add Tests
 class Dispute(StripeModel):
     """
     Stripe documentation: https://stripe.com/docs/api#disputes
@@ -1345,6 +1349,9 @@ class Dispute(StripeModel):
     )
     reason = StripeEnumField(enum=enums.DisputeReason)
     status = StripeEnumField(enum=enums.DisputeStatus)
+
+    def __str__(self):
+        return f"{self.human_readable_amount} ({enums.DisputeStatus.humanize(self.status)}) "
 
 
 class Event(StripeModel):
@@ -1382,8 +1389,8 @@ class Event(StripeModel):
     idempotency_key = models.TextField(default="", blank=True)
     type = models.CharField(max_length=250, help_text="Stripe's event description code")
 
-    def str_parts(self):
-        return ["type={type}".format(type=self.type)] + super().str_parts()
+    def __str__(self):
+        return f"type={self.type}, id={self.id}"
 
     def _attach_objects_hook(self, cls, data, current_ids=None):
         if self.api_version is None:
@@ -1490,6 +1497,9 @@ class File(StripeModel):
     def is_valid_object(cls, data):
         return "object" in data and data["object"] in ("file", "file_upload")
 
+    def __str__(self):
+        return f"{self.filename}, {enums.FilePurpose.humanize(self.purpose)}"
+
 
 # Alias for compatibility
 # Stripe's SDK has the same alias.
@@ -1504,9 +1514,14 @@ class FileLink(StripeModel):
 
     stripe_class = stripe.FileLink
 
-    expires_at = StripeDateTimeField(help_text="Time at which the link expires.")
+    expires_at = StripeDateTimeField(
+        null=True, blank=True, help_text="Time at which the link expires."
+    )
     file = StripeForeignKey("File", on_delete=models.CASCADE)
     url = models.URLField(help_text="The publicly accessible URL to download the file.")
+
+    def __str__(self):
+        return f"{self.file.filename}, {self.url}"
 
 
 class PaymentIntent(StripeModel):
@@ -1685,6 +1700,24 @@ class PaymentIntent(StripeModel):
         ),
     )
 
+    def __str__(self):
+        account = self.on_behalf_of
+        customer = self.customer
+
+        if account and customer:
+            return (
+                f"{self.human_readable_amount} ({enums.PaymentIntentStatus.humanize(self.status)}) "
+                f"for {account} "
+                f"by {customer}"
+            )
+
+        if account:
+            return f"{self.human_readable_amount} for {account}. {enums.PaymentIntentStatus.humanize(self.status)}"
+        if customer:
+            return f"{self.human_readable_amount} by {customer}. {enums.PaymentIntentStatus.humanize(self.status)}"
+
+        return f"{self.human_readable_amount} ({enums.PaymentIntentStatus.humanize(self.status)})"
+
     def update(self, api_key=None, **kwargs):
         """
         Call the stripe API's modify operation for this model
@@ -1819,7 +1852,27 @@ class SetupIntent(StripeModel):
         ),
     )
 
+    def __str__(self):
+        account = self.on_behalf_of
+        customer = self.customer
 
+        if account and customer:
+            return (
+                f"{self.payment_method} ({enums.SetupIntentStatus.humanize(self.status)}) "
+                f"for {account} "
+                f"by {customer}"
+            )
+
+        if account:
+            return f"{self.payment_method} for {account}. {enums.SetupIntentStatus.humanize(self.status)}"
+        if customer:
+            return f"{self.payment_method} by {customer}. {enums.SetupIntentStatus.humanize(self.status)}"
+        return (
+            f"{self.payment_method} ({enums.SetupIntentStatus.humanize(self.status)})"
+        )
+
+
+# TODO Add Tests
 class Payout(StripeModel):
     """
     A Payout object is created when you receive funds from Stripe, or when you initiate
@@ -1930,6 +1983,10 @@ class Payout(StripeModel):
         ),
     )
     type = StripeEnumField(enum=enums.PayoutType)
+
+    # TODO Write corresponding test
+    def __str__(self):
+        return f"{self.amount} ({enums.PayoutStatus.humanize(self.status)})"
 
 
 class Price(StripeModel):
@@ -2080,11 +2137,34 @@ class Price(StripeModel):
         return price
 
     def __str__(self):
-        return self.nickname or self.id
+        from .billing import Subscription
+
+        subscriptions = Subscription.objects.filter(plan__id=self.id).count()
+        if self.recurring:
+            return f"{self.human_readable_price} for {self.product.name} ({subscriptions} subscriptions)"
+        return f"{self.human_readable_price} for {self.product.name}"
 
     @property
     def human_readable_price(self):
-        amount = get_friendly_currency_amount(self.unit_amount / 100, self.currency)
+        if self.billing_scheme == "per_unit":
+            unit_amount = self.unit_amount / 100
+            amount = get_friendly_currency_amount(unit_amount, self.currency)
+        else:
+            # tiered billing scheme
+            tier_1 = self.tiers[0]
+            flat_amount_tier_1 = tier_1["flat_amount"]
+            formatted_unit_amount_tier_1 = get_friendly_currency_amount(
+                tier_1["unit_amount"] / 100, self.currency
+            )
+            amount = f"Starts at {formatted_unit_amount_tier_1} per unit"
+
+            # stripe shows flat fee even if it is set to 0.00
+            if flat_amount_tier_1 is not None:
+                formatted_flat_amount_tier_1 = get_friendly_currency_amount(
+                    flat_amount_tier_1 / 100, self.currency
+                )
+                amount = f"{amount} + {formatted_flat_amount_tier_1}"
+
         format_args = {"amount": amount}
 
         if self.recurring:
@@ -2105,9 +2185,10 @@ class Price(StripeModel):
                     "month": _("months"),
                     "year": _("years"),
                 }[self.recurring["interval"]]
-                template = _("{amount} every {interval_count} {interval}")
+                template = _("{amount} / every {interval_count} {interval}")
                 format_args["interval"] = interval
                 format_args["interval_count"] = interval_count
+
         else:
             template = _("{amount} (one time)")
 
@@ -2171,3 +2252,8 @@ class Refund(StripeModel):
 
     def get_stripe_dashboard_url(self):
         return self.charge.get_stripe_dashboard_url()
+
+    def __str__(self):
+        return (
+            f"{self.human_readable_amount} ({enums.RefundStatus.humanize(self.status)})"
+        )

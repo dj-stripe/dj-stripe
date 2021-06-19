@@ -11,6 +11,8 @@ from django.utils.encoding import smart_str
 from stripe.api_resources.abstract.api_resource import APIResource
 from stripe.error import InvalidRequestError
 
+from djstripe.utils import get_friendly_currency_amount
+
 from ..fields import JSONField, StripeDateTimeField, StripeForeignKey, StripeIdField
 from ..managers import StripeModelManager
 from ..settings import djstripe_settings
@@ -115,6 +117,10 @@ class StripeModel(StripeBaseModel):
                 item=self.stripe_dashboard_item_name,
                 id=self.id,
             )
+
+    @property
+    def human_readable_amount(self) -> str:
+        return get_friendly_currency_amount(self.amount, self.currency)
 
     @property
     def default_api_key(self) -> str:

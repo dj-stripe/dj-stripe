@@ -6,6 +6,7 @@ from ..fields import JSONField, StripeDateTimeField, StripeEnumField, StripeFore
 from .base import StripeModel
 
 
+# TODO Add Tests
 class ScheduledQueryRun(StripeModel):
     """
     Stripe documentation: https://stripe.com/docs/api#scheduled_queries
@@ -39,3 +40,7 @@ class ScheduledQueryRun(StripeModel):
         enum=enums.ScheduledQueryRunStatus, help_text="The query's execution status."
     )
     title = models.TextField(max_length=5000, help_text="Title of the query.")
+
+    # TODO Write corresponding test
+    def __str__(self):
+        return f"{self.title or self.id} ({self.status})"
