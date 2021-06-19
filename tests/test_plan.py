@@ -2,13 +2,14 @@
 dj-stripe Plan Model Tests.
 """
 from copy import deepcopy
-from decimal import Decimal
 from unittest.mock import patch
 
+import pytest
+import stripe
 from django.test import TestCase
 
 from djstripe.enums import PriceUsageType
-from djstripe.models import Plan, Product
+from djstripe.models import Plan, Product, Subscription
 from djstripe.settings import djstripe_settings
 
 from . import (
@@ -19,6 +20,8 @@ from . import (
     FAKE_TIER_PLAN,
     AssertStripeFksMixin,
 )
+
+pytestmark = pytest.mark.django_db
 
 
 class PlanCreateTest(AssertStripeFksMixin, TestCase):
@@ -122,8 +125,13 @@ class PlanTest(AssertStripeFksMixin, TestCase):
         ):
             self.plan = Plan.sync_from_stripe_data(self.plan_data)
 
-    def test_str(self):
-        self.assertEqual(str(self.plan), self.plan_data["nickname"])
+    def test___str__(self):
+        subscriptions = Subscription.objects.filter(plan__id=self.plan.id).count()
+
+        self.assertEqual(
+            f"{self.plan.human_readable_price} for {FAKE_PRODUCT['name']} ({subscriptions} subscriptions)",
+            str(self.plan),
+        )
 
     @patch("stripe.Plan.retrieve", return_value=FAKE_PLAN, autospec=True)
     def test_stripe_plan(self, plan_retrieve_mock):
@@ -131,7 +139,7 @@ class PlanTest(AssertStripeFksMixin, TestCase):
         plan_retrieve_mock.assert_called_once_with(
             id=self.plan_data["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            expand=[],
+            expand=["tiers"],
             stripe_account=None,
         )
         plan = Plan.sync_from_stripe_data(stripe_plan)
@@ -176,69 +184,61 @@ class PlanTest(AssertStripeFksMixin, TestCase):
         self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
 
 
-class HumanReadablePlanTest(TestCase):
-    def test_human_readable_free_usd_daily(self):
-        plan = Plan.objects.create(
-            id="plan-test-free-usd-daily",
-            active=True,
-            amount=0,
-            currency="usd",
-            interval="day",
-            interval_count=1,
-        )
-        self.assertEqual(plan.human_readable_price, "$0.00 USD/day")
+class TestHumanReadablePlan:
 
-    def test_human_readable_10_usd_weekly(self):
-        plan = Plan.objects.create(
-            id="plan-test-10-usd-weekly",
-            active=True,
-            amount=10,
-            currency="usd",
-            interval="week",
-            interval_count=1,
-        )
-        self.assertEqual(plan.human_readable_price, "$10.00 USD/week")
+    #
+    # Helpers
+    #
+    def get_fake_price_NONE_flat_amount():
+        FAKE_PRICE_TIER_NONE_FLAT_AMOUNT = deepcopy(FAKE_TIER_PLAN)
+        FAKE_PRICE_TIER_NONE_FLAT_AMOUNT["tiers"][0]["flat_amount"] = None
+        FAKE_PRICE_TIER_NONE_FLAT_AMOUNT["tiers"][0]["flat_amount_decimal"] = None
+        return FAKE_PRICE_TIER_NONE_FLAT_AMOUNT
 
-    def test_human_readable_10_usd_2weeks(self):
-        plan = Plan.objects.create(
-            id="plan-test-10-usd-2w",
-            active=True,
-            amount=10,
-            currency="usd",
-            interval="week",
-            interval_count=2,
-        )
-        self.assertEqual(plan.human_readable_price, "$10.00 USD every 2 weeks")
+    def get_fake_price_0_flat_amount():
+        FAKE_PRICE_TIER_0_FLAT_AMOUNT = deepcopy(FAKE_TIER_PLAN)
+        FAKE_PRICE_TIER_0_FLAT_AMOUNT["tiers"][0]["flat_amount"] = 0
+        FAKE_PRICE_TIER_0_FLAT_AMOUNT["tiers"][0]["flat_amount_decimal"] = 0
+        return FAKE_PRICE_TIER_0_FLAT_AMOUNT
 
-    def test_human_readable_499_usd_monthly(self):
-        plan = Plan.objects.create(
-            id="plan-test-499-usd-monthly",
-            active=True,
-            amount=Decimal("4.99"),
-            currency="usd",
-            interval="month",
-            interval_count=1,
-        )
-        self.assertEqual(plan.human_readable_price, "$4.99 USD/month")
+    def get_fake_price_0_amount():
+        FAKE_PRICE_TIER_0_AMOUNT = deepcopy(FAKE_PLAN)
+        FAKE_PRICE_TIER_0_AMOUNT["amount"] = 0
+        FAKE_PRICE_TIER_0_AMOUNT["amount_decimal"] = 0
+        return FAKE_PRICE_TIER_0_AMOUNT
 
-    def test_human_readable_25_usd_6months(self):
-        plan = Plan.objects.create(
-            id="plan-test-25-usd-6m",
-            active=True,
-            amount=25,
-            currency="usd",
-            interval="month",
-            interval_count=6,
-        )
-        self.assertEqual(plan.human_readable_price, "$25.00 USD every 6 months")
+    @pytest.mark.parametrize(
+        "fake_plan_data, expected_str",
+        [
+            (deepcopy(FAKE_PLAN), "$20.00 USD/month"),
+            (get_fake_price_0_amount(), "$0.00 USD/month"),
+            (
+                deepcopy(FAKE_TIER_PLAN),
+                "Starts at $10.00 USD per unit + $49.00 USD/month",
+            ),
+            (
+                get_fake_price_0_flat_amount(),
+                "Starts at $10.00 USD per unit + $0.00 USD/month",
+            ),
+            (
+                get_fake_price_NONE_flat_amount(),
+                "Starts at $10.00 USD per unit/month",
+            ),
+            (deepcopy(FAKE_PLAN_METERED), "$2.00 USD/month"),
+        ],
+    )
+    def test_human_readable(self, fake_plan_data, expected_str, monkeypatch):
+        def mock_product_get(*args, **kwargs):
+            return deepcopy(FAKE_PRODUCT)
 
-    def test_human_readable_10_usd_yearly(self):
-        plan = Plan.objects.create(
-            id="plan-test-10-usd-yearly",
-            active=True,
-            amount=10,
-            currency="usd",
-            interval="year",
-            interval_count=1,
-        )
-        self.assertEqual(plan.human_readable_price, "$10.00 USD/year")
+        def mock_price_get(*args, **kwargs):
+            return fake_plan_data
+
+        # monkeypatch stripe.Product.retrieve and stripe.Plan.retrieve calls to return
+        # the desired json response.
+        monkeypatch.setattr(stripe.Product, "retrieve", mock_product_get)
+        monkeypatch.setattr(stripe.Plan, "retrieve", mock_price_get)
+
+        plan = Plan.sync_from_stripe_data(fake_plan_data)
+
+        assert plan.human_readable_price == expected_str

@@ -7,6 +7,7 @@ from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
 
+from djstripe import enums
 from djstripe.models import Invoice, Refund
 
 from . import (
@@ -110,6 +111,65 @@ class RefundTest(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(refund, expected_blank_fks=self.default_expected_blank_fks)
 
+    @patch(
+        "djstripe.models.Account.get_default_account",
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
+    @patch(
+        "stripe.BalanceTransaction.retrieve",
+        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Subscription.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION),
+        autospec=True,
+    )
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+    @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    def test___str__(
+        self,
+        product_retrieve_mock,
+        payment_intent_retrieve_mock,
+        paymentmethod_card_retrieve_mock,
+        charge_retrieve_mock,
+        subscription_retrieve_mock,
+        balance_transaction_retrieve_mock,
+        default_account_mock,
+    ):
+        default_account_mock.return_value = self.account
+        # TODO - remove invoice sync
+        Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
+
+        fake_refund = deepcopy(FAKE_REFUND)
+        fake_refund["reason"] = enums.RefundReason.requested_by_customer
+
+        balance_transaction_retrieve_mock.return_value = deepcopy(
+            FAKE_BALANCE_TRANSACTION_REFUND
+        )
+
+        refund = Refund.sync_from_stripe_data(fake_refund)
+
+        self.assertEqual(
+            f"{refund.human_readable_amount} ({enums.RefundStatus.humanize(fake_refund['status'])})",
+            str(refund),
+        )
+
+        self.assert_fks(refund, expected_blank_fks=self.default_expected_blank_fks)
+
+    # TODO Move to test_enums module
     @patch(
         "djstripe.models.Account.get_default_account",
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,

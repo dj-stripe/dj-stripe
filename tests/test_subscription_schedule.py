@@ -45,3 +45,16 @@ class SubscriptionScheduleTest(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(schedule, expected_blank_fks=self.default_expected_blank_fks)
         self.assertEqual(datetime_to_unix(schedule.canceled_at), 1624553655)
+
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER_II),
+        autospec=True,
+    )
+    def test___str__(self, customer_retrieve_mock):
+        schedule = SubscriptionSchedule.sync_from_stripe_data(
+            deepcopy(FAKE_SUBSCRIPTION_SCHEDULE)
+        )
+        self.assertEqual(f"<id={FAKE_SUBSCRIPTION_SCHEDULE['id']}>", str(schedule))
+
+        self.assert_fks(schedule, expected_blank_fks=self.default_expected_blank_fks)

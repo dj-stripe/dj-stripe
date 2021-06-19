@@ -76,7 +76,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         self.account = FAKE_STANDARD_ACCOUNT.create()
 
-    def test_str(self):
+    def test___str__(self):
         self.assertEqual(str(self.customer), str(self.user))
         self.customer.subscriber = None
         self.assertEqual(str(self.customer), self.customer.description)

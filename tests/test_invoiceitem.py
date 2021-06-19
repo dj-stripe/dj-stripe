@@ -96,7 +96,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE_II), autospec=True
     )
-    def test_str(
+    def test___str__(
         self,
         invoice_retrieve_mock,
         charge_retrieve_mock,

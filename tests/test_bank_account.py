@@ -1,15 +1,17 @@
 """
 dj-stripe Bank Account Model Tests.
 """
-
 from copy import deepcopy
 from unittest.mock import patch
 
+import pytest
+import stripe
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
+from djstripe import enums
 from djstripe.exceptions import StripeObjectManipulationException
-from djstripe.models import BankAccount
+from djstripe.models import BankAccount, Customer
 
 from . import (
     FAKE_BANK_ACCOUNT_IV,
@@ -20,6 +22,91 @@ from . import (
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
 )
+
+pytestmark = pytest.mark.django_db
+
+
+class TestStrBankAccount:
+    @pytest.mark.parametrize(
+        "fake_stripe_data, has_account, has_customer",
+        [
+            (deepcopy(FAKE_BANK_ACCOUNT_IV), True, False),
+            (deepcopy(FAKE_BANK_ACCOUNT_SOURCE), False, True),
+        ],
+    )
+    def test__str__(self, fake_stripe_data, has_account, has_customer, monkeypatch):
+        def mock_customer_get(*args, **kwargs):
+            data = deepcopy(FAKE_CUSTOMER_IV)
+            data["default_source"] = None
+            data["sources"] = []
+            return data
+
+        def mock_account_get(*args, **kwargs):
+            return deepcopy(FAKE_CUSTOM_ACCOUNT)
+
+        # monkeypatch stripe.Account.retrieve and stripe.Customer.retrieve calls to return
+        # the desired json response.
+        monkeypatch.setattr(stripe.Account, "retrieve", mock_account_get)
+        monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
+
+        bankaccount = BankAccount.sync_from_stripe_data(fake_stripe_data)
+        default = False
+
+        if has_account:
+            default = fake_stripe_data["default_for_currency"]
+            assert (
+                f"{fake_stripe_data['bank_name']} {fake_stripe_data['currency']} {'Default' if default else ''} {fake_stripe_data['routing_number']} {fake_stripe_data['last4']}"
+                == str(bankaccount)
+            )
+        if has_customer:
+            customer = Customer.objects.filter(id=fake_stripe_data["customer"]).first()
+
+            default_source = customer.default_source
+            default_payment_method = customer.default_payment_method
+
+            if (
+                default_payment_method
+                and fake_stripe_data["id"] == default_payment_method.id
+            ) or (default_source and fake_stripe_data["id"] == default_source.id):
+                # current bankaccount is the default payment method or source
+                default = True
+
+            assert (
+                f"{fake_stripe_data['bank_name']} {fake_stripe_data['routing_number']} ({bankaccount.human_readable_status}) {'Default' if default else ''} {fake_stripe_data['currency']}"
+                == str(bankaccount)
+            )
+
+    @pytest.mark.parametrize(
+        "fake_stripe_data",
+        [
+            deepcopy(FAKE_BANK_ACCOUNT_IV),
+            deepcopy(FAKE_BANK_ACCOUNT_SOURCE),
+        ],
+    )
+    def test_human_readable_status(self, fake_stripe_data, monkeypatch):
+        def mock_customer_get(*args, **kwargs):
+            data = deepcopy(FAKE_CUSTOMER_IV)
+            data["default_source"] = None
+            data["sources"] = []
+            return data
+
+        def mock_account_get(*args, **kwargs):
+            return deepcopy(FAKE_CUSTOM_ACCOUNT)
+
+        # monkeypatch stripe.Account.retrieve and stripe.Customer.retrieve calls to return
+        # the desired json response.
+        monkeypatch.setattr(stripe.Account, "retrieve", mock_account_get)
+        monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
+
+        bankaccount = BankAccount.sync_from_stripe_data(fake_stripe_data)
+
+        if fake_stripe_data["status"] == "new":
+            assert bankaccount.human_readable_status == "Pending Verification"
+        else:
+            assert (
+                bankaccount.human_readable_status
+                == enums.BankAccountStatus.humanize(fake_stripe_data["status"])
+            )
 
 
 class BankAccountTest(AssertStripeFksMixin, TestCase):
