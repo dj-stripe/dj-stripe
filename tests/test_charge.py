@@ -62,7 +62,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
             "djstripe.Subscription.schedule",
         }
 
-    def test_str(self):
+    def test___str__(self):
         charge = Charge(
             amount=50,
             currency="usd",
@@ -86,10 +86,11 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(str(charge), "$50.00 USD (Refunded)")
 
         charge.refunded = False
-        self.assertEqual(str(charge), "$50.00 USD (Partially refunded)")
-
         charge.amount_refunded = 0
-        self.assertEqual(str(charge), "$50.00 USD")
+        self.assertEqual(str(charge), "$50.00 USD (Succeeded)")
+
+        charge.status = ChargeStatus.pending
+        self.assertEqual(str(charge), "$50.00 USD (Pending)")
 
     @patch(
         "djstripe.models.Account.get_default_account",

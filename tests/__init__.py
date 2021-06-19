@@ -401,6 +401,7 @@ FAKE_BANK_ACCOUNT_II = {
     "status": "new",
 }
 
+# Stripe Customer Bank Account Payment Source
 FAKE_BANK_ACCOUNT_SOURCE = BankAccountDict(
     load_fixture("bank_account_ba_fakefakefakefakefake0003.json")
 )
@@ -419,7 +420,7 @@ FAKE_CARD_II = CardDict(load_fixture("card_card_fakefakefakefakefake0002.json"))
 
 FAKE_CARD_III = CardDict(load_fixture("card_card_fakefakefakefakefake0003.json"))
 
-# Stripe Custom Account Payout Source
+# Stripe Custom Connected Account Card Payout Source
 FAKE_CARD_IV = CardDict(load_fixture("card_card_fakefakefakefakefake0004.json"))
 
 
@@ -491,6 +492,10 @@ FAKE_PAYMENT_INTENT_I = load_fixture("payment_intent_pi_fakefakefakefakefake0001
 FAKE_PAYMENT_INTENT_II = deepcopy(FAKE_PAYMENT_INTENT_I)
 FAKE_PAYMENT_INTENT_II["customer"] = "cus_4UbFSo9tl62jqj"  # FAKE_CUSTOMER_II
 
+FAKE_PAYMENT_INTENT_DESTINATION_CHARGE = load_fixture(
+    "payment_intent_pi_destination_charge.json"
+)
+
 
 class PaymentMethodDict(dict):
     def detach(self):
@@ -519,7 +524,38 @@ FAKE_SETUP_INTENT_I = {
     "payment_method_types": ["card"],
     "status": "requires_payment_method",
     "usage": "off_session",
+    "payment_method": None,
+    "on_behalf_of": None,
+    "customer": None,
 }
+
+FAKE_SETUP_INTENT_II = {
+    "application": None,
+    "cancellation_reason": None,
+    "client_secret": "seti_1J0g0WJSZQVUcJYgWE2XSi1K_secret_Jdxw2mOaIEHBdE6eTsfJ2IfmamgNJaF",
+    "created": 1623301244,
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "description": None,
+    "id": "seti_1J0g0WJSZQVUcJYgWE2XSi1K",
+    "last_setup_error": None,
+    "latest_attempt": "setatt_1J0g0WJSZQVUcJYgsrFgwxVh",
+    "livemode": False,
+    "mandate": None,
+    "metadata": {},
+    "next_action": None,
+    "object": "setup_intent",
+    "on_behalf_of": None,
+    "payment_method": "pm_fakefakefakefake0001",
+    "payment_method_options": {"card": {"request_three_d_secure": "automatic"}},
+    "payment_method_types": ["card"],
+    "single_use_mandate": None,
+    "status": "succeeded",
+    "usage": "off_session",
+}
+
+FAKE_SETUP_INTENT_DESTINATION_CHARGE = load_fixture(
+    "setup_intent_pi_destination_charge.json"
+)
 
 
 # TODO - add to regenerate_test_fixtures and replace this with a JSON fixture
@@ -819,6 +855,7 @@ FAKE_TIER_PLAN = {
 
 FAKE_PLAN_METERED = {
     "id": "plan_fakemetered",
+    "billing_scheme": "per_unit",
     "object": "plan",
     "active": True,
     "aggregate_usage": "sum",
@@ -1619,7 +1656,7 @@ FAKE_FILEUPLOAD_LOGO = {
             {
                 "created": 1550134074,
                 "expired": False,
-                "expires_at": None,
+                "expires_at": 1850134074,
                 "file": "file_1E3fssKatMEEd6736724HYAXyj",
                 "id": "link_1E3fssKatMEEd673672V0JSH",
                 "livemode": False,
@@ -1651,7 +1688,7 @@ FAKE_FILEUPLOAD_ICON = {
             {
                 "created": 1550134074,
                 "expired": False,
-                "expires_at": None,
+                "expires_at": 1850134074,
                 "file": "file_4hshrsKatMEEd6736724HYAXyj",
                 "id": "link_4jsdgsKatMEEd673672V0JSH",
                 "livemode": False,
@@ -2014,146 +2051,6 @@ FAKE_TOKEN = {
     "used": False,
 }
 
-FAKE_PAYMENT_INTENT_DESTINATION_CHARGE = {
-    "id": "pi_1FG742B7kbjcJ8QqGKF6qIM0",
-    "object": "payment_intent",
-    "amount": 190200,
-    "amount_capturable": 0,
-    "amount_received": 190200,
-    "application": None,
-    "application_fee_amount": None,
-    "canceled_at": None,
-    "cancellation_reason": None,
-    "capture_method": "automatic",
-    "charges": {
-        "object": "list",
-        "data": [
-            {
-                "id": "ch_fakefakefakefakefake0001",
-                "object": "charge",
-                "amount": 190200,
-                "amount_refunded": 0,
-                "application": None,
-                "application_fee": None,
-                "application_fee_amount": None,
-                "balance_transaction": "txn_fake_ch_fakefakefakefakefake0001",
-                "billing_details": {
-                    "address": {
-                        "city": None,
-                        "country": "US",
-                        "line1": None,
-                        "line2": None,
-                        "postal_code": "92082",
-                        "state": None,
-                    },
-                    "email": "kyoung@hotmail.com",
-                    "name": "John Foo",
-                    "phone": None,
-                },
-                "captured": True,
-                "created": 1567874856,
-                "currency": "usd",
-                "customer": "cus_6lsBvm5rJ0zyHc",
-                "description": "Online payment for FOO",
-                "destination": "acct_1032D82eZvKYlo2C",
-                "dispute": None,
-                "failure_code": None,
-                "failure_message": None,
-                "fraud_details": {},
-                "invoice": None,
-                "livemode": False,
-                "metadata": {"foo": "bar"},
-                "on_behalf_of": "acct_1032D82eZvKYlo2C",
-                "order": None,
-                "outcome": {
-                    "network_status": "approved_by_network",
-                    "reason": None,
-                    "risk_level": "normal",
-                    "risk_score": 47,
-                    "seller_message": "Payment complete.",
-                    "type": "authorized",
-                },
-                "paid": True,
-                "payment_intent": "pi_1FG742B7kbjcJ8QqGKF6qIM0",
-                "payment_method": "pm_1FG74VB7kbjcJ8QqXqULdSAV",
-                "payment_method_details": {
-                    "card": {
-                        "brand": "visa",
-                        "checks": {
-                            "address_line1_check": None,
-                            "address_postal_code_check": "pass",
-                            "cvc_check": "pass",
-                        },
-                        "country": "US",
-                        "exp_month": 10,
-                        "exp_year": 2020,
-                        "fingerprint": "sb2OAOijRKy8wYHu",
-                        "funding": "credit",
-                        "last4": "4242",
-                        "three_d_secure": None,
-                        "wallet": None,
-                    },
-                    "type": "card",
-                },
-                "receipt_email": "kyoung@hotmail.com",
-                "receipt_number": None,
-                "receipt_url": (
-                    "https://pay.stripe.com/receipts/acct_1DrGYIB7kbjcJ8Qq/"
-                    "ch_1FG74WB7kbjcJ8Qqx1oIdqfG/rcpt_FleN33oToRTXKCy6sxd5Stnh0ttnxYT"
-                ),
-                "refunded": False,
-                "refunds": {
-                    "object": "list",
-                    "data": [],
-                    "has_more": False,
-                    "total_count": 0,
-                    "url": "/v1/charges/ch_1FG74WB7kbjcJ8Qqx1oIdqfG/refunds",
-                },
-                "review": None,
-                "shipping": None,
-                "source": None,
-                "source_transfer": None,
-                "statement_descriptor": "FOO DESCRIPTOR",
-                "statement_descriptor_suffix": None,
-                "status": "succeeded",
-                "transfer": "tr_16Y9BK2eZvKYlo2CR0ySu1BA",
-                "transfer_data": {
-                    "amount": None,
-                    "destination": "acct_1032D82eZvKYlo2C",
-                },
-                "transfer_group": "group_pi_1FG742B7kbjcJ8QqGKF6qIM0",
-            }
-        ],
-        "has_more": False,
-        "total_count": 1,
-        "url": "/v1/charges?payment_intent=pi_1FG742B7kbjcJ8QqGKF6qIM0",
-    },
-    "client_secret": "pi_1FG742B7kbjcJ8QqGKF6qIM0_secret_yeRoAechksXUy2HdUydIKlGbw",
-    "confirmation_method": "automatic",
-    "created": 1567874826,
-    "currency": "usd",
-    "customer": "cus_6lsBvm5rJ0zyHc",
-    "description": "Online payment for FOO",
-    "invoice": None,
-    "last_payment_error": None,
-    "livemode": False,
-    "metadata": {"foo": "bar"},
-    "next_action": None,
-    "on_behalf_of": "acct_1032D82eZvKYlo2C",
-    "payment_method": "pm_fakefakefakefake0001",
-    "payment_method_options": {"card": {"request_three_d_secure": "automatic"}},
-    "payment_method_types": ["card"],
-    "receipt_email": "kyoung@hotmail.com",
-    "review": None,
-    "setup_future_usage": None,
-    "shipping": None,
-    "source": None,
-    "statement_descriptor": "FOO DESCRIPTOR",
-    "statement_descriptor_suffix": None,
-    "status": "succeeded",
-    "transfer_data": {"destination": "acct_1032D82eZvKYlo2C"},
-    "transfer_group": "group_pi_1FG742B7kbjcJ8QqGKF6qIM0",
-}
 
 FAKE_EVENT_PAYMENT_INTENT_SUCCEEDED_DESTINATION_CHARGE = {
     "id": "evt_1FG74XB7kbjcJ8Qq22i2BPdt",

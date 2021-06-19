@@ -4,10 +4,12 @@ dj-stripe Price model tests
 from copy import deepcopy
 from unittest.mock import patch
 
+import pytest
+import stripe
 from django.test import TestCase
 
 from djstripe.enums import PriceType, PriceUsageType
-from djstripe.models import Price, Product
+from djstripe.models import Price, Product, Subscription
 from djstripe.settings import djstripe_settings
 
 from . import (
@@ -18,6 +20,44 @@ from . import (
     FAKE_PRODUCT,
     AssertStripeFksMixin,
 )
+
+pytestmark = pytest.mark.django_db
+
+
+class TestStrPrice:
+    @pytest.mark.parametrize(
+        "fake_price_data",
+        [
+            deepcopy(FAKE_PRICE),
+            deepcopy(FAKE_PRICE_ONETIME),
+            deepcopy(FAKE_PRICE_TIER),
+            deepcopy(FAKE_PRICE_METERED),
+        ],
+    )
+    def test___str__(self, fake_price_data, monkeypatch):
+        def mock_product_get(*args, **kwargs):
+            return deepcopy(FAKE_PRODUCT)
+
+        def mock_price_get(*args, **kwargs):
+            return fake_price_data
+
+        # monkeypatch stripe.Product.retrieve and stripe.Price.retrieve calls to return
+        # the desired json response.
+        monkeypatch.setattr(stripe.Product, "retrieve", mock_product_get)
+        monkeypatch.setattr(stripe.Price, "retrieve", mock_price_get)
+
+        if not fake_price_data["recurring"]:
+            price = Price.sync_from_stripe_data(fake_price_data)
+            assert (f"{price.human_readable_price} for {FAKE_PRODUCT['name']}") == str(
+                price
+            )
+
+        else:
+            price = Price.sync_from_stripe_data(fake_price_data)
+            subscriptions = Subscription.objects.filter(plan__id=price.id).count()
+            assert (
+                f"{price.human_readable_price} for {FAKE_PRODUCT['name']} ({subscriptions} subscriptions)"
+            ) == str(price)
 
 
 class PriceCreateTest(AssertStripeFksMixin, TestCase):
@@ -121,15 +161,6 @@ class PriceTest(AssertStripeFksMixin, TestCase):
         ):
             self.price = Price.sync_from_stripe_data(self.price_data)
 
-    def test_str(self):
-        assert str(self.price) == self.price_data["nickname"]
-
-    def test_price_name(self):
-        price = Price(id="price_xxxx", nickname="Price Test")
-        assert str(price) == "Price Test"
-        price.nickname = ""
-        assert str(price) == "price_xxxx"
-
     @patch("stripe.Price.retrieve", return_value=FAKE_PRICE, autospec=True)
     def test_stripe_price(self, price_retrieve_mock):
         stripe_price = self.price.api_retrieve()
@@ -177,101 +208,62 @@ class PriceTest(AssertStripeFksMixin, TestCase):
         self.assert_fks(price, expected_blank_fks={"djstripe.Customer.coupon"})
 
 
-class HumanReadablePriceTest(TestCase):
-    def setUp(self):
-        product_data = deepcopy(FAKE_PRODUCT)
-        self.stripe_product = Product.sync_from_stripe_data(product_data)
+class TestHumanReadablePrice:
 
-    def test_human_readable_one_time(self):
-        price = Price.objects.create(
-            id="price-test-one-time",
-            active=True,
-            unit_amount=2000,
-            currency="usd",
-            product=self.stripe_product,
-        )
-        assert price.human_readable_price == "$20.00 USD (one time)"
+    #
+    # Helpers
+    #
+    def get_fake_price_NONE_flat_amount():
+        FAKE_PRICE_TIER_NONE_FLAT_AMOUNT = deepcopy(FAKE_PRICE_TIER)
+        FAKE_PRICE_TIER_NONE_FLAT_AMOUNT["tiers"][0]["flat_amount"] = None
+        FAKE_PRICE_TIER_NONE_FLAT_AMOUNT["tiers"][0]["flat_amount_decimal"] = None
+        return FAKE_PRICE_TIER_NONE_FLAT_AMOUNT
 
-    def test_human_readable_free_usd_daily(self):
-        price = Price.objects.create(
-            id="price-test-free-usd-daily",
-            active=True,
-            unit_amount=0,
-            currency="usd",
-            product=self.stripe_product,
-            recurring=dict(
-                interval="day",
-                interval_count=1,
+    def get_fake_price_0_flat_amount():
+        FAKE_PRICE_TIER_0_FLAT_AMOUNT = deepcopy(FAKE_PRICE_TIER)
+        FAKE_PRICE_TIER_0_FLAT_AMOUNT["tiers"][0]["flat_amount"] = 0
+        FAKE_PRICE_TIER_0_FLAT_AMOUNT["tiers"][0]["flat_amount_decimal"] = 0
+        return FAKE_PRICE_TIER_0_FLAT_AMOUNT
+
+    def get_fake_price_0_amount():
+        FAKE_PRICE_TIER_0_AMOUNT = deepcopy(FAKE_PRICE)
+        FAKE_PRICE_TIER_0_AMOUNT["unit_amount"] = 0
+        FAKE_PRICE_TIER_0_AMOUNT["unit_amount_decimal"] = 0
+        return FAKE_PRICE_TIER_0_AMOUNT
+
+    @pytest.mark.parametrize(
+        "fake_price_data, expected_str",
+        [
+            (deepcopy(FAKE_PRICE), "$20.00 USD/month"),
+            (get_fake_price_0_amount(), "$0.00 USD/month"),
+            (deepcopy(FAKE_PRICE_ONETIME), "$20.00 USD (one time)"),
+            (
+                deepcopy(FAKE_PRICE_TIER),
+                "Starts at $10.00 USD per unit + $49.00 USD/month",
             ),
-        )
-        assert price.human_readable_price == "$0.00 USD/day"
-
-    def test_human_readable_10_usd_weekly(self):
-        price = Price.objects.create(
-            id="price-test-10-usd-weekly",
-            active=True,
-            unit_amount=1000,
-            currency="usd",
-            product=self.stripe_product,
-            recurring=dict(
-                interval="week",
-                interval_count=1,
+            (
+                get_fake_price_0_flat_amount(),
+                "Starts at $10.00 USD per unit + $0.00 USD/month",
             ),
-        )
-        assert price.human_readable_price == "$10.00 USD/week"
-
-    def test_human_readable_10_usd_2weeks(self):
-        price = Price.objects.create(
-            id="price-test-10-usd-2w",
-            active=True,
-            unit_amount=1000,
-            currency="usd",
-            product=self.stripe_product,
-            recurring={
-                "interval": "week",
-                "interval_count": 2,
-            },
-        )
-        assert price.human_readable_price == "$10.00 USD every 2 weeks"
-
-    def test_human_readable_499_usd_monthly(self):
-        price = Price.objects.create(
-            id="price-test-499-usd-monthly",
-            active=True,
-            unit_amount=499,
-            currency="usd",
-            product=self.stripe_product,
-            recurring=dict(
-                interval="month",
-                interval_count=1,
+            (
+                get_fake_price_NONE_flat_amount(),
+                "Starts at $10.00 USD per unit/month",
             ),
-        )
-        assert price.human_readable_price == "$4.99 USD/month"
+            (deepcopy(FAKE_PRICE_METERED), "$2.00 USD/month"),
+        ],
+    )
+    def test_human_readable(self, fake_price_data, expected_str, monkeypatch):
+        def mock_product_get(*args, **kwargs):
+            return deepcopy(FAKE_PRODUCT)
 
-    def test_human_readable_25_usd_6months(self):
-        price = Price.objects.create(
-            id="price-test-25-usd-6m",
-            active=True,
-            unit_amount=2500,
-            currency="usd",
-            product=self.stripe_product,
-            recurring=dict(
-                interval="month",
-                interval_count=6,
-            ),
-        )
-        assert price.human_readable_price == "$25.00 USD every 6 months"
+        def mock_price_get(*args, **kwargs):
+            return fake_price_data
 
-    def test_human_readable_10_usd_yearly(self):
-        price = Price.objects.create(
-            id="price-test-10-usd-yearly",
-            active=True,
-            unit_amount=1000,
-            currency="usd",
-            product=self.stripe_product,
-            recurring=dict(
-                interval="year",
-                interval_count=1,
-            ),
-        )
-        assert price.human_readable_price == "$10.00 USD/year"
+        # monkeypatch stripe.Product.retrieve and stripe.Price.retrieve calls to return
+        # the desired json response.
+        monkeypatch.setattr(stripe.Product, "retrieve", mock_product_get)
+        monkeypatch.setattr(stripe.Price, "retrieve", mock_price_get)
+
+        price = Price.sync_from_stripe_data(fake_price_data)
+
+        assert price.human_readable_price == expected_str

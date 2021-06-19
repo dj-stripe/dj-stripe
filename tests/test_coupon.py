@@ -15,7 +15,7 @@ class TransferTest(TestCase):
 
 
 class HumanReadableCouponTest(TestCase):
-    def test_str_name(self):
+    def test___str__(self):
         coupon = Coupon.objects.create(
             id="coupon-test-amount-off-forever",
             amount_off=10,

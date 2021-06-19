@@ -4,10 +4,96 @@ dj-stripe PaymentIntent Model Tests.
 from copy import deepcopy
 from unittest.mock import patch
 
+import pytest
+import stripe
 from django.test import TestCase
 
-from djstripe.models import PaymentIntent
-from tests import FAKE_CUSTOMER, FAKE_PAYMENT_INTENT_I, AssertStripeFksMixin
+from djstripe.enums import PaymentIntentStatus
+from djstripe.models import Account, Customer, PaymentIntent
+from tests import (
+    FAKE_ACCOUNT,
+    FAKE_CUSTOMER,
+    FAKE_PAYMENT_INTENT_DESTINATION_CHARGE,
+    FAKE_PAYMENT_INTENT_I,
+    FAKE_PAYMENT_METHOD_I,
+    AssertStripeFksMixin,
+)
+
+pytestmark = pytest.mark.django_db
+
+
+class TestStrPaymentIntent:
+
+    #
+    # Helpers
+    #
+    def get_fake_payment_intent_destination_charge_no_customer():
+        FAKE_PAYMENT_INTENT_DESTINATION_CHARGE_NO_CUSTOMER = deepcopy(
+            FAKE_PAYMENT_INTENT_DESTINATION_CHARGE
+        )
+        FAKE_PAYMENT_INTENT_DESTINATION_CHARGE_NO_CUSTOMER["customer"] = None
+        return FAKE_PAYMENT_INTENT_DESTINATION_CHARGE_NO_CUSTOMER
+
+    def get_fake_payment_intent_i_no_customer():
+        FAKE_PAYMENT_INTENT_I_NO_CUSTOMER = deepcopy(FAKE_PAYMENT_INTENT_I)
+        FAKE_PAYMENT_INTENT_I_NO_CUSTOMER["customer"] = None
+        return FAKE_PAYMENT_INTENT_I_NO_CUSTOMER
+
+    @pytest.mark.parametrize(
+        "fake_intent_data, has_account, has_customer",
+        [
+            (FAKE_PAYMENT_INTENT_I, False, True),
+            (FAKE_PAYMENT_INTENT_DESTINATION_CHARGE, True, True),
+            (get_fake_payment_intent_destination_charge_no_customer(), True, False),
+            (get_fake_payment_intent_i_no_customer(), False, False),
+        ],
+    )
+    def test___str__(self, fake_intent_data, has_account, has_customer, monkeypatch):
+        def mock_customer_get(*args, **kwargs):
+            return deepcopy(FAKE_CUSTOMER)
+
+        def mock_account_get(*args, **kwargs):
+            data = deepcopy(FAKE_ACCOUNT)
+            # Otherwise Account.api_retrieve will invoke File.api_retrieve...
+            data["settings"]["branding"] = {}
+            return data
+
+        def mock_payment_method_get(*args, **kwargs):
+            return deepcopy(FAKE_PAYMENT_METHOD_I)
+
+        # monkeypatch stripe.Product.retrieve, stripe.Price.retrieve, and  stripe.PaymentMethod.retrieve calls to return
+        # the desired json response.
+        monkeypatch.setattr(stripe.Account, "retrieve", mock_account_get)
+        monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
+        monkeypatch.setattr(stripe.PaymentMethod, "retrieve", mock_payment_method_get)
+
+        pi = PaymentIntent.sync_from_stripe_data(fake_intent_data)
+        account = Account.objects.filter(id=fake_intent_data["on_behalf_of"]).first()
+        customer = Customer.objects.filter(id=fake_intent_data["customer"]).first()
+
+        if has_account and has_customer:
+
+            assert (
+                f"{pi.human_readable_amount} ({PaymentIntentStatus.humanize(fake_intent_data['status'])}) "
+                f"for {account} "
+                f"by {customer}"
+            ) == str(pi)
+
+        elif has_account and not has_customer:
+
+            assert (
+                f"{pi.human_readable_amount} for {account}. {PaymentIntentStatus.humanize(fake_intent_data['status'])}"
+            ) == str(pi)
+
+        elif has_customer and not has_account:
+
+            assert (
+                f"{pi.human_readable_amount} by {customer}. {PaymentIntentStatus.humanize(fake_intent_data['status'])}"
+            ) == str(pi)
+        elif not has_customer and not has_account:
+            f"{pi.human_readable_amount} ({PaymentIntentStatus.humanize(fake_intent_data['status'])})" == str(
+                pi
+            )
 
 
 class PaymentIntentTest(AssertStripeFksMixin, TestCase):

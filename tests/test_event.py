@@ -25,14 +25,11 @@ class EventTest(TestCase):
         self.addCleanup(patcher.stop)
         self.call_handlers = patcher.start()
 
-    def test_str(self):
+    def test___str__(self):
         event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
 
         self.assertEqual(
-            "<type={type}, id={id}>".format(
-                type=FAKE_EVENT_TRANSFER_CREATED["type"],
-                id=FAKE_EVENT_TRANSFER_CREATED["id"],
-            ),
+            f"type={FAKE_EVENT_TRANSFER_CREATED['type']}, id={FAKE_EVENT_TRANSFER_CREATED['id']}",
             str(event),
         )
 

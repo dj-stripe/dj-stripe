@@ -4,12 +4,17 @@ dj-stripe Card Model Tests.
 from copy import deepcopy
 from unittest.mock import ANY, patch
 
+import pytest
+import stripe
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from stripe.error import InvalidRequestError
 
+from djstripe import enums
 from djstripe.exceptions import StripeObjectManipulationException
 from djstripe.models import Card
+from djstripe.models.account import Account
+from djstripe.models.core import Customer
 
 from . import (
     FAKE_CARD,
@@ -21,6 +26,61 @@ from . import (
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
 )
+
+pytestmark = pytest.mark.django_db
+
+
+class TestStrCard:
+    @pytest.mark.parametrize(
+        "fake_stripe_data, has_account, has_customer",
+        [
+            (deepcopy(FAKE_CARD), False, True),
+            (deepcopy(FAKE_CARD_IV), True, False),
+        ],
+    )
+    def test__str__(self, fake_stripe_data, has_account, has_customer, monkeypatch):
+        def mock_customer_get(*args, **kwargs):
+            data = deepcopy(FAKE_CUSTOMER)
+            data["default_source"] = None
+            data["sources"] = []
+            return data
+
+        def mock_account_get(*args, **kwargs):
+            return deepcopy(FAKE_CUSTOM_ACCOUNT)
+
+        # monkeypatch stripe.Account.retrieve and stripe.Customer.retrieve calls to return
+        # the desired json response.
+        monkeypatch.setattr(stripe.Account, "retrieve", mock_account_get)
+        monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
+
+        card = Card.sync_from_stripe_data(fake_stripe_data)
+        default = False
+
+        if has_account:
+            account = Account.objects.filter(id=fake_stripe_data["account"]).first()
+
+            default = fake_stripe_data["default_for_currency"]
+            assert (
+                f"{enums.CardBrand.humanize(fake_stripe_data['brand'])} {account.default_currency} {'Default' if default else ''} {fake_stripe_data['last4']}"
+                == str(card)
+            )
+        if has_customer:
+            customer = Customer.objects.filter(id=fake_stripe_data["customer"]).first()
+
+            default_source = customer.default_source
+            default_payment_method = customer.default_payment_method
+
+            if (
+                default_payment_method
+                and fake_stripe_data["id"] == default_payment_method.id
+            ) or (default_source and fake_stripe_data["id"] == default_source.id):
+                # current card is the default payment method or source
+                default = True
+
+            assert (
+                f"{enums.CardBrand.humanize(fake_stripe_data['brand'])} {fake_stripe_data['last4']} {'Default' if default else ''} Expires {fake_stripe_data['exp_month']} {fake_stripe_data['exp_year']}"
+                == str(card)
+            )
 
 
 class CardTest(AssertStripeFksMixin, TestCase):
@@ -151,31 +211,6 @@ class CardTest(AssertStripeFksMixin, TestCase):
             expected_blank_fks={
                 "djstripe.Card.customer",
                 "djstripe.BankAccount.account",
-                "djstripe.Customer.coupon",
-                "djstripe.Customer.default_payment_method",
-                "djstripe.Customer.default_source",
-            },
-        )
-
-    def test_str(self):
-        card = Card.sync_from_stripe_data(FAKE_CARD)
-
-        self.assertEqual(
-            "<brand={brand}, last4={last4}, exp_month={exp_month}, "
-            "exp_year={exp_year}, id={id}>".format(
-                brand=FAKE_CARD["brand"],
-                last4=FAKE_CARD["last4"],
-                exp_month=FAKE_CARD["exp_month"],
-                exp_year=FAKE_CARD["exp_year"],
-                id=FAKE_CARD["id"],
-            ),
-            str(card),
-        )
-
-        self.assert_fks(
-            card,
-            expected_blank_fks={
-                "djstripe.Card.account",
                 "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.default_source",

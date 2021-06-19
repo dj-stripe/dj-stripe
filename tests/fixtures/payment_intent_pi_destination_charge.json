@@ -1,0 +1,138 @@
+
+{
+    "id": "pi_1FG742B7kbjcJ8QqGKF6qIM0",
+    "object": "payment_intent",
+    "amount": 190200,
+    "amount_capturable": 0,
+    "amount_received": 190200,
+    "application": null,
+    "application_fee_amount": null,
+    "canceled_at": null,
+    "cancellation_reason": null,
+    "capture_method": "automatic",
+    "charges": {
+        "object": "list",
+        "data": [
+            {
+                "id": "ch_fakefakefakefakefake0001",
+                "object": "charge",
+                "amount": 190200,
+                "amount_refunded": 0,
+                "application": null,
+                "application_fee": null,
+                "application_fee_amount": null,
+                "balance_transaction": "txn_fake_ch_fakefakefakefakefake0001",
+                "billing_details": {
+                    "address": {
+                        "city": null,
+                        "country": "US",
+                        "line1": null,
+                        "line2": null,
+                        "postal_code": "92082",
+                        "state": null
+                    },
+                    "email": "kyoung@hotmail.com",
+                    "name": "John Foo",
+                    "phone": null
+                },
+                "captured": true,
+                "created": 1567874856,
+                "currency": "usd",
+                "customer": "cus_6lsBvm5rJ0zyHc",
+                "description": "Online payment for FOO",
+                "destination": "acct_1032D82eZvKYlo2C",
+                "dispute": null,
+                "failure_code": null,
+                "failure_message": null,
+                "fraud_details": {},
+                "invoice": null,
+                "livemode": false,
+                "metadata": {"foo": "bar"},
+                "on_behalf_of": "acct_1032D82eZvKYlo2C",
+                "order": null,
+                "outcome": {
+                    "network_status": "approved_by_network",
+                    "reason": null,
+                    "risk_level": "normal",
+                    "risk_score": 47,
+                    "seller_message": "Payment complete.",
+                    "type": "authorized"
+                },
+                "paid": true,
+                "payment_intent": "pi_1FG742B7kbjcJ8QqGKF6qIM0",
+                "payment_method": "pm_1FG74VB7kbjcJ8QqXqULdSAV",
+                "payment_method_details": {
+                    "card": {
+                        "brand": "visa",
+                        "checks": {
+                            "address_line1_check": null,
+                            "address_postal_code_check": "pass",
+                            "cvc_check": "pass"
+                        },
+                        "country": "US",
+                        "exp_month": 10,
+                        "exp_year": 2020,
+                        "fingerprint": "sb2OAOijRKy8wYHu",
+                        "funding": "credit",
+                        "last4": "4242",
+                        "three_d_secure": null,
+                        "wallet": null
+                    },
+                    "type": "card"
+                },
+                "receipt_email": "kyoung@hotmail.com",
+                "receipt_number": null,
+                "receipt_url": "https://pay.stripe.com/receipts/acct_1DrGYIB7kbjcJ8Qq/ch_1FG74WB7kbjcJ8Qqx1oIdqfG/rcpt_FleN33oToRTXKCy6sxd5Stnh0ttnxYT",
+                "refunded": false,
+                "refunds": {
+                    "object": "list",
+                    "data": [],
+                    "has_more": false,
+                    "total_count": 0,
+                    "url": "/v1/charges/ch_1FG74WB7kbjcJ8Qqx1oIdqfG/refunds"
+                },
+                "review": null,
+                "shipping": null,
+                "source": null,
+                "source_transfer": null,
+                "statement_descriptor": "FOO DESCRIPTOR",
+                "statement_descriptor_suffix": null,
+                "status": "succeeded",
+                "transfer": "tr_16Y9BK2eZvKYlo2CR0ySu1BA",
+                "transfer_data": {
+                    "amount": null,
+                    "destination": "acct_1032D82eZvKYlo2C"
+                },
+                "transfer_group": "group_pi_1FG742B7kbjcJ8QqGKF6qIM0"
+            }
+        ],
+        "has_more": false,
+        "total_count": 1,
+        "url": "/v1/charges?payment_intent=pi_1FG742B7kbjcJ8QqGKF6qIM0"
+    },
+    "client_secret": "pi_1FG742B7kbjcJ8QqGKF6qIM0_secret_yeRoAechksXUy2HdUydIKlGbw",
+    "confirmation_method": "automatic",
+    "created": 1567874826,
+    "currency": "usd",
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "description": "Online payment for FOO",
+    "invoice": null,
+    "last_payment_error": null,
+    "livemode": false,
+    "metadata": {"foo": "bar"},
+    "next_action": null,
+    "on_behalf_of": "acct_1032D82eZvKYlo2C",
+    "payment_method": "pm_fakefakefakefake0001",
+    "payment_method_options": {"card": {"request_three_d_secure": "automatic"}},
+    "payment_method_types": ["card"],
+    "receipt_email": "kyoung@hotmail.com",
+    "review": null,
+    "setup_future_usage": null,
+    "shipping": null,
+    "source": null,
+    "statement_descriptor": "FOO DESCRIPTOR",
+    "statement_descriptor_suffix": null,
+    "status": "succeeded",
+    "transfer_data": {"destination": "acct_1032D82eZvKYlo2C"},
+    "transfer_group": "group_pi_1FG742B7kbjcJ8QqGKF6qIM0"
+}

@@ -46,6 +46,18 @@ class TestWebhook(TestCase):
         event_trigger = WebhookEventTrigger.objects.first()
         self.assertTrue(event_trigger.is_test_event)
 
+    def test___str__(self):
+        self.assertEqual(WebhookEventTrigger.objects.count(), 0)
+        resp = self._send_event(FAKE_EVENT_TEST_CHARGE_SUCCEEDED)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(WebhookEventTrigger.objects.count(), 1)
+        webhookeventtrigger = WebhookEventTrigger.objects.first()
+
+        self.assertEqual(
+            f"id={webhookeventtrigger.id}, valid={webhookeventtrigger.valid}, processed={webhookeventtrigger.processed}",
+            str(webhookeventtrigger),
+        )
+
     @override_settings(DJSTRIPE_WEBHOOK_VALIDATION="retrieve_event")
     @patch(
         "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True

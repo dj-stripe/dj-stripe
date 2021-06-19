@@ -15,6 +15,16 @@ from tests import (
 
 
 class TaxRateTest(AssertStripeFksMixin, TestCase):
+    def test___str__(self):
+        tax_rate = TaxRate.sync_from_stripe_data(deepcopy(FAKE_TAX_RATE_EXAMPLE_1_VAT))
+        # need to refresh to load percentage as decimal
+        tax_rate.refresh_from_db()
+
+        self.assertEqual(
+            f"{FAKE_TAX_RATE_EXAMPLE_1_VAT['display_name']} – {FAKE_TAX_RATE_EXAMPLE_1_VAT['jurisdiction']} at {FAKE_TAX_RATE_EXAMPLE_1_VAT['percentage']:.2f}%",
+            str(tax_rate),
+        )
+
     def test_sync_from_stripe_data(self):
         tax_rate = TaxRate.sync_from_stripe_data(deepcopy(FAKE_TAX_RATE_EXAMPLE_1_VAT))
         # need to refresh to load percentage as decimal
