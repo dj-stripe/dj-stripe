@@ -16,6 +16,7 @@ from ..settings import djstripe_settings
 from .base import StripeBaseModel, StripeModel
 
 
+# TODO Add Tests
 class ApplicationFee(StripeModel):
     """
     When you collect a transaction fee on top of a charge made for your
@@ -53,6 +54,7 @@ class ApplicationFee(StripeModel):
     )
 
 
+# TODO Add Tests
 class ApplicationFeeRefund(StripeModel):
     """
     ApplicationFeeRefund objects allow you to refund an ApplicationFee that
@@ -222,10 +224,18 @@ class Transfer(StripeModel):
         if self.balance_transaction:
             return self.balance_transaction.fee
 
-    def str_parts(self):
-        return ["amount={amount}".format(amount=self.amount)] + super().str_parts()
+    def __str__(self):
+        if self.reversed:
+            # Complete Reversal
+            return f"{self.human_readable_amount} Reversed"
+        elif self.amount_reversed:
+            # Partial Reversal
+            return f"{self.human_readable_amount} Partially Reversed"
+        # No Reversal
+        return f"{self.human_readable_amount}"
 
 
+# TODO Add Tests
 class TransferReversal(StripeModel):
     """
     Stripe documentation: https://stripe.com/docs/api#transfer_reversals
@@ -250,3 +260,6 @@ class TransferReversal(StripeModel):
         help_text="The transfer that was reversed.",
         related_name="reversals",
     )
+
+    def __str__(self):
+        return str(self.transfer)

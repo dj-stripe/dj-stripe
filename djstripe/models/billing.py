@@ -27,6 +27,7 @@ from ..utils import QuerySetMock, get_friendly_currency_amount
 from .base import StripeModel
 
 
+# TODO Add Tests
 class DjstripeInvoiceTotalTaxAmount(models.Model):
     """
     An internal model that holds the value of elements of Invoice.total_tax_amounts
@@ -55,6 +56,7 @@ class DjstripeInvoiceTotalTaxAmount(models.Model):
         unique_together = ["invoice", "tax_rate"]
 
 
+# TODO Add Tests
 class DjstripeUpcomingInvoiceTotalTaxAmount(models.Model):
     """
     As per DjstripeInvoiceTotalTaxAmount, except for UpcomingInvoice
@@ -1032,6 +1034,7 @@ class Plan(StripeModel):
     """
 
     stripe_class = stripe.Plan
+    expand_fields = ["tiers"]
     stripe_dashboard_item_name = "plans"
 
     active = models.BooleanField(
@@ -1180,7 +1183,10 @@ class Plan(StripeModel):
         return plan
 
     def __str__(self):
-        return self.nickname or self.id
+        from .billing import Subscription
+
+        subscriptions = Subscription.objects.filter(plan__id=self.id).count()
+        return f"{self.human_readable_price} for {self.product.name} ({subscriptions} subscriptions)"
 
     @property
     def amount_in_cents(self):
@@ -1188,9 +1194,28 @@ class Plan(StripeModel):
 
     @property
     def human_readable_price(self):
-        amount = get_friendly_currency_amount(self.amount, self.currency)
-        interval_count = self.interval_count
+        if self.billing_scheme == "per_unit":
+            unit_amount = self.amount
+            amount = get_friendly_currency_amount(unit_amount, self.currency)
+        else:
+            # tiered billing scheme
+            tier_1 = self.tiers[0]
+            flat_amount_tier_1 = tier_1["flat_amount"]
+            formatted_unit_amount_tier_1 = get_friendly_currency_amount(
+                tier_1["unit_amount"] / 100, self.currency
+            )
+            amount = f"Starts at {formatted_unit_amount_tier_1} per unit"
 
+            # stripe shows flat fee even if it is set to 0.00
+            if flat_amount_tier_1 is not None:
+                formatted_flat_amount_tier_1 = get_friendly_currency_amount(
+                    flat_amount_tier_1 / 100, self.currency
+                )
+                amount = f"{amount} + {formatted_flat_amount_tier_1}"
+
+        format_args = {"amount": amount}
+
+        interval_count = self.interval_count
         if interval_count == 1:
             interval = {
                 "day": _("day"),
@@ -1199,6 +1224,7 @@ class Plan(StripeModel):
                 "year": _("year"),
             }[self.interval]
             template = _("{amount}/{interval}")
+            format_args["interval"] = interval
         else:
             interval = {
                 "day": _("days"),
@@ -1206,11 +1232,11 @@ class Plan(StripeModel):
                 "month": _("months"),
                 "year": _("years"),
             }[self.interval]
-            template = _("{amount} every {interval_count} {interval}")
+            template = _("{amount} / every {interval_count} {interval}")
+            format_args["interval"] = interval
+            format_args["interval_count"] = interval_count
 
-        return format_lazy(
-            template, amount=amount, interval=interval, interval_count=interval_count
-        )
+        return format_lazy(template, **format_args)
 
 
 class Subscription(StripeModel):
@@ -1638,6 +1664,7 @@ class Subscription(StripeModel):
         )
 
 
+# TODO Add Tests
 class SubscriptionItem(StripeModel):
     """
     Subscription items allow you to create customer subscriptions
@@ -1778,6 +1805,7 @@ class SubscriptionSchedule(StripeModel):
     )
 
 
+# TODO Add Tests
 class TaxId(StripeModel):
     stripe_class = stripe.TaxId
     description = None
@@ -1859,6 +1887,7 @@ class TaxRate(StripeModel):
         return f"{self.display_name} – {self.jurisdiction} at {self.percentage}%"
 
 
+# TODO Add Tests
 class UsageRecord(StripeModel):
     """
     Usage records allow you to continually report usage and metrics to

@@ -5,11 +5,18 @@ from django.utils.translation import gettext_lazy as _
 
 
 class EnumMetaClass(type):
+    def __init__(cls, name, bases, classdict):
+        def _human_enum_values(enum):
+            return cls.__choices__[enum]
+
+        # add a class attribute
+        cls.humanize = _human_enum_values
+
     @classmethod
-    def __prepare__(self, name, bases):
+    def __prepare__(cls, name, bases):
         return OrderedDict()
 
-    def __new__(self, name, bases, classdict):
+    def __new__(cls, name, bases, classdict):
         members = []
         keys = {}
         choices = OrderedDict()
@@ -41,7 +48,7 @@ class EnumMetaClass(type):
             for k, v in sorted(choices.items(), key=operator.itemgetter(0))
         )
 
-        return type.__new__(self, name, bases, classdict)
+        return type.__new__(cls, name, bases, classdict)
 
 
 class Enum(metaclass=EnumMetaClass):
