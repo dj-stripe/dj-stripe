@@ -771,6 +771,11 @@ class TaxIdType(Enum):
     unknown = _("Unknown")
 
 
+class UsageAction(Enum):
+    increment = _("increment")
+    set = _("set")
+
+
 class DjstripePaymentMethodType(Enum):
     """
     A djstripe-specific enum for the DjStripePaymentMethod model.
