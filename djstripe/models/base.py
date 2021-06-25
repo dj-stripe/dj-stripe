@@ -272,7 +272,7 @@ class StripeModel(StripeBaseModel):
         """
         from .account import Account
 
-        stripe_account = data.get("account")
+        stripe_account = cls._id_from_data(data.get("account"))
         if stripe_account:
             return Account._get_or_retrieve(id=stripe_account)
 
@@ -430,6 +430,13 @@ class StripeModel(StripeBaseModel):
                 skip = True
 
             if not skip:
+
+                # add the id of the current object to the list
+                # of ids being processed.
+                # This will avoid infinite recursive syncs in case a relatedmodel
+                # requests the same object
+                current_ids.add(id_)
+
                 field_data, _ = field.related_model._get_or_create_from_stripe_object(
                     manipulated_data,
                     field_name,
@@ -438,6 +445,11 @@ class StripeModel(StripeBaseModel):
                     pending_relations=pending_relations,
                     stripe_account=stripe_account,
                 )
+
+                # Remove the id of the current object from the list
+                # after it has been created or retrieved
+                current_ids.remove(id_)
+
         else:
             # eg PaymentMethod, handled in hooks
             skip = True
