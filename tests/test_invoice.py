@@ -451,7 +451,14 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         invoice_retrieve_mock.assert_called_once_with(
             id=invoice.id,
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            expand=[],
+            expand=[
+                "charge",
+                "customer",
+                "default_payment_method",
+                "default_source",
+                "payment_intent",
+                "subscription",
+            ],
             stripe_account=None,
         )
         self.assertTrue(return_value)

@@ -10,6 +10,7 @@ from django.test.testcases import TestCase
 
 from djstripe.enums import ChargeStatus, LegacySourceType
 from djstripe.models import Charge, DjstripePaymentMethod
+from djstripe.models.connect import Transfer
 from djstripe.settings import djstripe_settings
 
 from . import (
@@ -635,6 +636,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
             },
         )
 
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
         "stripe.BalanceTransaction.retrieve",
         return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
@@ -678,6 +680,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         invoice_retrieve_mock,
         charge_retrieve_mock,
         balance_transaction_retrieve_mock,
+        transfer__attach_object_post_save_hook_mock,
     ):
 
         default_account_mock.return_value = self.account

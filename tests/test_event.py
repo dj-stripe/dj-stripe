@@ -11,7 +11,13 @@ from stripe.error import StripeError
 from djstripe import webhooks
 from djstripe.models import Event, Transfer
 
-from . import FAKE_CUSTOMER, FAKE_EVENT_TRANSFER_CREATED, FAKE_TRANSFER
+from . import (
+    FAKE_CUSTOMER,
+    FAKE_EVENT_TRANSFER_CREATED,
+    FAKE_STANDARD_ACCOUNT,
+    FAKE_TRANSFER,
+    IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+)
 
 
 class EventTest(TestCase):
@@ -149,10 +155,21 @@ class EventTest(TestCase):
 
 
 class EventRaceConditionTest(TestCase):
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
     @patch(
         "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
     )
-    def test_process_event_race_condition(self, transfer_retrieve_mock):
+    def test_process_event_race_condition(
+        self,
+        transfer_retrieve_mock,
+        account_retrieve_mock,
+        transfer__attach_object_post_save_hook_mock,
+    ):
         transfer = Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER))
         transfer_retrieve_mock.reset_mock()
         event_data = deepcopy(FAKE_EVENT_TRANSFER_CREATED)

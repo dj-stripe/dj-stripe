@@ -13,12 +13,14 @@ from django.urls import reverse
 
 from djstripe import webhooks
 from djstripe.models import Event, WebhookEventTrigger
+from djstripe.models.connect import Transfer
 from djstripe.settings import djstripe_settings
 from djstripe.webhooks import TEST_EVENT_ID, call_handlers, handler, handler_all
 
 from . import (
     FAKE_EVENT_TEST_CHARGE_SUCCEEDED,
     FAKE_EVENT_TRANSFER_CREATED,
+    FAKE_STANDARD_ACCOUNT,
     FAKE_TRANSFER,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 )
@@ -59,6 +61,7 @@ class TestWebhook(TestCase):
         )
 
     @override_settings(DJSTRIPE_WEBHOOK_VALIDATION="retrieve_event")
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
         "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
     )
@@ -68,7 +71,10 @@ class TestWebhook(TestCase):
         autospec=True,
     )
     def test_webhook_retrieve_event_fail(
-        self, event_retrieve_mock, transfer_retrieve_mock
+        self,
+        event_retrieve_mock,
+        transfer_retrieve_mock,
+        transfer__attach_object_post_save_hook_mock,
     ):
 
         invalid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
@@ -81,6 +87,12 @@ class TestWebhook(TestCase):
         self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
 
     @override_settings(DJSTRIPE_WEBHOOK_VALIDATION="retrieve_event")
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
     @patch(
         "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
     )
@@ -90,7 +102,11 @@ class TestWebhook(TestCase):
         autospec=True,
     )
     def test_webhook_retrieve_event_pass(
-        self, event_retrieve_mock, transfer_retrieve_mock
+        self,
+        event_retrieve_mock,
+        transfer_retrieve_mock,
+        account_retrieve_mock,
+        transfer__attach_object_post_save_hook_mock,
     ):
 
         resp = self._send_event(FAKE_EVENT_TRANSFER_CREATED)
@@ -105,6 +121,7 @@ class TestWebhook(TestCase):
         DJSTRIPE_WEBHOOK_VALIDATION="verify_signature",
         DJSTRIPE_WEBHOOK_SECRET="whsec_XXXXX",
     )
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
         "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
     )
@@ -114,7 +131,10 @@ class TestWebhook(TestCase):
         autospec=True,
     )
     def test_webhook_invalid_verify_signature_fail(
-        self, event_retrieve_mock, transfer_retrieve_mock
+        self,
+        event_retrieve_mock,
+        transfer_retrieve_mock,
+        transfer__attach_object_post_save_hook_mock,
     ):
 
         invalid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
@@ -130,9 +150,15 @@ class TestWebhook(TestCase):
         DJSTRIPE_WEBHOOK_VALIDATION="verify_signature",
         DJSTRIPE_WEBHOOK_SECRET="whsec_XXXXX",
     )
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
         "stripe.WebhookSignature.verify_header",
         return_value=True,
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch(
@@ -144,7 +170,12 @@ class TestWebhook(TestCase):
         autospec=True,
     )
     def test_webhook_verify_signature_pass(
-        self, event_retrieve_mock, transfer_retrieve_mock, verify_header_mock
+        self,
+        event_retrieve_mock,
+        transfer_retrieve_mock,
+        account_retrieve_mock,
+        verify_header_mock,
+        transfer__attach_object_post_save_hook_mock,
     ):
 
         resp = self._send_event(FAKE_EVENT_TRANSFER_CREATED)
@@ -160,7 +191,13 @@ class TestWebhook(TestCase):
         event_retrieve_mock.assert_not_called()
 
     @override_settings(DJSTRIPE_WEBHOOK_VALIDATION=None)
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch("stripe.WebhookSignature.verify_header", autospec=True)
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
     @patch(
         "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
     )
@@ -170,7 +207,12 @@ class TestWebhook(TestCase):
         autospec=True,
     )
     def test_webhook_no_validation_pass(
-        self, event_retrieve_mock, transfer_retrieve_mock, verify_header_mock
+        self,
+        event_retrieve_mock,
+        transfer_retrieve_mock,
+        account_retrieve_mock,
+        verify_header_mock,
+        transfer__attach_object_post_save_hook_mock,
     ):
 
         invalid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
@@ -224,12 +266,16 @@ class TestWebhook(TestCase):
         event_trigger = WebhookEventTrigger.objects.first()
         self.assertEqual(event_trigger.remote_ip, "0.0.0.0")
 
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
         "djstripe.models.WebhookEventTrigger.validate", return_value=True, autospec=True
     )
     @patch("djstripe.models.WebhookEventTrigger.process", autospec=True)
     def test_webhook_reraise_exception(
-        self, webhook_event_process_mock, webhook_event_validate_mock
+        self,
+        webhook_event_process_mock,
+        webhook_event_validate_mock,
+        transfer__attach_object_post_save_hook_mock,
     ):
         class ProcessException(Exception):
             pass
@@ -250,15 +296,26 @@ class TestWebhook(TestCase):
         self.assertEqual(event_trigger.exception, exception_message)
 
     @override_settings(DJSTRIPE_WEBHOOK_SECRET="")
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch.object(
         djstripe_settings, "WEBHOOK_EVENT_CALLBACK", return_value=mock_webhook_handler
+    )
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch(
         "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
     )
     @patch("stripe.Event.retrieve", autospec=True)
     def test_webhook_with_custom_callback(
-        self, event_retrieve_mock, transfer_retrieve_mock, webhook_event_callback_mock
+        self,
+        event_retrieve_mock,
+        transfer_retrieve_mock,
+        account_retrieve_mock,
+        webhook_event_callback_mock,
+        transfer__attach_object_post_save_hook_mock,
     ):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
@@ -268,12 +325,22 @@ class TestWebhook(TestCase):
         webhook_event_callback_mock.called_once_with(webhook_event_trigger)
 
     @override_settings(DJSTRIPE_WEBHOOK_SECRET="")
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
     @patch(
         "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
     )
     @patch("stripe.Event.retrieve", autospec=True)
     def test_webhook_with_transfer_event_duplicate(
-        self, event_retrieve_mock, transfer_retrieve_mock
+        self,
+        event_retrieve_mock,
+        transfer_retrieve_mock,
+        account_retrieve_mock,
+        transfer__attach_object_post_save_hook_mock,
     ):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
@@ -289,11 +356,23 @@ class TestWebhook(TestCase):
         self.assertEqual(1, Event.objects.filter(type="transfer.created").count())
 
     @override_settings(DJSTRIPE_WEBHOOK_SECRET="")
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
     @patch(
         "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
     )
     @patch("stripe.Event.retrieve", autospec=True)
-    def test_webhook_good(self, event_retrieve_mock, transfer_retrieve_mock):
+    def test_webhook_good(
+        self,
+        event_retrieve_mock,
+        transfer_retrieve_mock,
+        account_retrieve_mock,
+        transfer__attach_object_post_save_hook_mock,
+    ):
 
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event

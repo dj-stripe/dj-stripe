@@ -966,6 +966,11 @@ class TestCustomerEvents(EventTestCase):
 
 class TestDisputeEvents(EventTestCase):
     @patch(
+        "stripe.File.retrieve",
+        return_value=deepcopy(FAKE_FILEUPLOAD_ICON),
+        autospec=True,
+    )
+    @patch(
         "stripe.Dispute.retrieve", return_value=deepcopy(FAKE_DISPUTE), autospec=True
     )
     @patch(
@@ -973,7 +978,9 @@ class TestDisputeEvents(EventTestCase):
         return_value=deepcopy(FAKE_EVENT_DISPUTE_CREATED),
         autospec=True,
     )
-    def test_dispute_created(self, event_retrieve_mock, dispute_retrieve_mock):
+    def test_dispute_created(
+        self, event_retrieve_mock, dispute_retrieve_mock, file_retrieve_mock
+    ):
         fake_stripe_event = deepcopy(FAKE_EVENT_DISPUTE_CREATED)
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
@@ -1726,9 +1733,21 @@ class TestPaymentMethodEvents(AssertStripeFksMixin, EventTestCase):
 
 
 class TestTransferEvents(EventTestCase):
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
     @patch("stripe.Transfer.retrieve", autospec=True)
     @patch("stripe.Event.retrieve", autospec=True)
-    def test_transfer_created(self, event_retrieve_mock, transfer_retrieve_mock):
+    def test_transfer_created(
+        self,
+        event_retrieve_mock,
+        transfer_retrieve_mock,
+        account_retrieve_mock,
+        transfer__attach_object_post_save_hook_mock,
+    ):
         fake_stripe_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_stripe_event
         transfer_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
@@ -1742,8 +1761,19 @@ class TestTransferEvents(EventTestCase):
             fake_stripe_event["data"]["object"]["amount"] / Decimal("100"),
         )
 
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
     @patch("stripe.Transfer.retrieve", return_value=FAKE_TRANSFER, autospec=True)
-    def test_transfer_deleted(self, transfer_retrieve_mock):
+    def test_transfer_deleted(
+        self,
+        transfer_retrieve_mock,
+        account_retrieve_mock,
+        transfer__attach_object_post_save_hook_mock,
+    ):
         event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
         event.invoke_webhook_handlers()
 

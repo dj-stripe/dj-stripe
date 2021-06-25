@@ -793,7 +793,7 @@ FAKE_DISPUTE = {
         "duplicate_charge_explanation": None,
         "duplicate_charge_id": None,
         "product_description": None,
-        "receipt": "file_XXXXXXXXXXXXXXXXXXXXXXXX",
+        "receipt": "file_4hshrsKatMEEd6736724HYAXyj",
         "refund_policy": None,
         "refund_policy_disclosure": None,
         "refund_refusal_explanation": None,
@@ -1547,7 +1547,7 @@ FAKE_TRANSFER = {
     "created": 1439185846,
     "currency": "usd",
     "description": "Test description - 1439185984",
-    "destination": "acct_16Y9B9Fso9hLaeLu",
+    "destination": FAKE_STANDARD_ACCOUNT["id"],
     "destination_payment": "py_16Y9BKFso9hLaeLueFmWAYUi",
     "livemode": False,
     "metadata": {},
@@ -1564,60 +1564,143 @@ FAKE_TRANSFER = {
     "source_type": "bank_account",
 }
 
-FAKE_TRANSFER_II = {
-    "id": "tr_16hTzv2eZvKYlo2CWuyMmuvV",
+FAKE_TRANSFER_WITH_1_REVERSAL = {
+    "id": "tr_16Y9BK2eZvKYlo2CR0ySu1BA",
     "object": "transfer",
-    "amount": 2000,
+    "amount": 100,
     "amount_reversed": 0,
     "application_fee_amount": None,
-    "balance_transaction": deepcopy(FAKE_BALANCE_TRANSACTION_III),
-    "bank_account": deepcopy(FAKE_BANK_ACCOUNT),
-    "created": 1440420000,
+    "balance_transaction": deepcopy(FAKE_BALANCE_TRANSACTION_II),
+    "created": 1439185846,
     "currency": "usd",
-    "description": None,
-    "destination": "ba_16hTzo2eZvKYlo2CeSjfb0tS",
+    "description": "Test description - 1439185984",
+    "destination": FAKE_STANDARD_ACCOUNT["id"],
+    "destination_payment": "py_16Y9BKFso9hLaeLueFmWAYUi",
     "livemode": False,
-    "metadata": {"foo": "bar"},
-    "recipient": "rp_16hTzu2eZvKYlo2C9A5mgxEj",
+    "metadata": {},
+    "recipient": None,
     "reversals": {
         "object": "list",
-        "total_count": 0,
+        "total_count": 1,
         "has_more": False,
-        "url": "/v1/transfers/tr_16hTzv2eZvKYlo2CWuyMmuvV/reversals",
-        "data": [],
+        "url": "/v1/transfers/tr_16Y9BK2eZvKYlo2CR0ySu1BA/reversals",
+        "data": [
+            {
+                "id": "trr_1J5UlFJSZQVUcJYgb38m1OZO",
+                "object": "transfer_reversal",
+                "amount": 20,
+                "balance_transaction": deepcopy(FAKE_BALANCE_TRANSACTION_II),
+                "created": 1624449653,
+                "currency": "usd",
+                "destination_payment_refund": "pyr_1J5UlFR44xKqawmIBvFa6gW9",
+                "metadata": {},
+                "source_refund": None,
+                "transfer": deepcopy(FAKE_TRANSFER),
+            }
+        ],
     },
     "reversed": False,
     "source_transaction": None,
-    "source_type": "card",
+    "source_type": "bank_account",
 }
 
-FAKE_TRANSFER_III = {
-    "id": "tr_17O4U52eZvKYlo2CmyYbDAEy",
-    "object": "transfer",
-    "amount": 19010,
-    "amount_reversed": 0,
-    "application_fee_amount": None,
-    "balance_transaction": deepcopy(FAKE_BALANCE_TRANSACTION_IV),
-    "bank_account": deepcopy(FAKE_BANK_ACCOUNT_II),
-    "created": 1451560845,
+
+FAKE_CHARGE_APPLICATION_FEE = deepcopy(FAKE_CHARGE)
+FAKE_CHARGE_APPLICATION_FEE["application_fee"] = "fee_1J4knYJSZQVUcJYgEt8Im4w3"
+FAKE_CHARGE_APPLICATION_FEE["application_fee_amount"] = 100
+
+
+FAKE_APPLICATION_FEE = {
+    "id": "fee_1J4knYJSZQVUcJYgEt8Im4w3",
+    "object": "application_fee",
+    "account": deepcopy(FAKE_STANDARD_ACCOUNT),
+    "amount": 100,
+    "amount_refunded": 0,
+    "application": "ca_JiB9XJuIZeOHDpiwd4QGjvHmU0OvrKkc",
+    "balance_transaction": deepcopy(FAKE_BALANCE_TRANSACTION),
+    "charge": deepcopy(FAKE_CHARGE_APPLICATION_FEE),
+    "created": 1624272972,
     "currency": "usd",
-    "date": 1451560845,
-    "description": "Transfer+for+test@example.com",
-    "destination": "ba_17O4Tz2eZvKYlo2CMYsxroV5",
     "livemode": False,
-    "metadata": {"foo2": "bar2"},
-    "recipient": "rp_17O4U42eZvKYlo2CLk4upfDE",
-    "reversals": {
+    "originating_transaction": None,
+    "refunded": False,
+    "refunds": {
         "object": "list",
         "total_count": 0,
-        "has_more": False,
-        "url": "/v1/transfers/tr_17O4U52eZvKYlo2CmyYbDAEy/reversals",
         "data": [],
+        "has_more": False,
+        "url": "/v1/application_fees/fee_1J4knYJSZQVUcJYgEt8Im4w3/refunds",
     },
-    "reversed": False,
-    "source_transaction": None,
-    "source_type": "card",
 }
+
+FAKE_APPLICATION_FEE_WITH_PARTIAL_REFUND = {
+    "id": "fee_1J4knYJSZQVUcJYgEt8Im4w3",
+    "object": "application_fee",
+    "account": deepcopy(FAKE_STANDARD_ACCOUNT),
+    "amount": 100,
+    "amount_refunded": 0,
+    "application": "ca_JiB9XJuIZeOHDpiwd4QGjvHmU0OvrKkc",
+    "balance_transaction": deepcopy(FAKE_BALANCE_TRANSACTION),
+    "charge": deepcopy(FAKE_CHARGE_APPLICATION_FEE),
+    "created": 1624272972,
+    "currency": "usd",
+    "livemode": False,
+    "originating_transaction": None,
+    "refunded": False,
+    "refunds": {
+        "object": "list",
+        "total_count": 0,
+        "data": [
+            {
+                "id": "fr_1J4knYJSZQVUcJYgyImUMPG5",
+                "object": "fee_refund",
+                "amount": 50,
+                "balance_transaction": deepcopy(FAKE_BALANCE_TRANSACTION_REFUND),
+                "created": 1624272972,
+                "currency": "usd",
+                "fee": deepcopy(FAKE_APPLICATION_FEE),
+                "metadata": {},
+            }
+        ],
+        "has_more": False,
+        "url": "/v1/application_fees/fee_1J4knYJSZQVUcJYgEt8Im4w3/refunds",
+    },
+}
+
+FAKE_APPLICATION_FEE_WITH_FULL_REFUND = {
+    "id": "fee_1J4knYJSZQVUcJYgEt8Im4w3",
+    "object": "application_fee",
+    "account": deepcopy(FAKE_STANDARD_ACCOUNT),
+    "amount": 100,
+    "amount_refunded": 0,
+    "application": "ca_JiB9XJuIZeOHDpiwd4QGjvHmU0OvrKkc",
+    "balance_transaction": deepcopy(FAKE_BALANCE_TRANSACTION),
+    "charge": deepcopy(FAKE_CHARGE_APPLICATION_FEE),
+    "created": 1624272972,
+    "currency": "usd",
+    "livemode": False,
+    "originating_transaction": None,
+    "refunded": False,
+    "refunds": {
+        "object": "list",
+        "total_count": 1,
+        "data": [
+            {
+                "id": "fr_1J4knYJSZQVUcJYgyImUMPG5",
+                "object": "fee_refund",
+                "amount": 100,
+                "balance_transaction": deepcopy(FAKE_BALANCE_TRANSACTION_REFUND),
+                "created": 1624272972,
+                "currency": "usd",
+                "fee": deepcopy(FAKE_APPLICATION_FEE),
+                "metadata": {},
+            }
+        ],
+        "has_more": False,
+        "url": "/v1/application_fees/fee_1J4knYJSZQVUcJYgEt8Im4w3/refunds",
+    },
+}
+
 
 FAKE_ACCOUNT = {
     "id": "acct_1032D82eZvKYlo2C",

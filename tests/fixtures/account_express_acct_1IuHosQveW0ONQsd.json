@@ -51,8 +51,8 @@
                 "address_zip": null,
                 "address_zip_check": null,
                 "available_payout_methods": [
-                  "standard",
-                  "instant"
+                    "standard",
+                    "instant"
                 ],
                 "brand": "MasterCard",
                 "country": "US",
@@ -68,7 +68,7 @@
                 "metadata": {},
                 "name": null,
                 "tokenization_method": null
-              }
+            }
         ],
         "has_more": false,
         "object": "list",

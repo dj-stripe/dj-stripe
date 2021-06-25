@@ -167,7 +167,7 @@ class PriceTest(AssertStripeFksMixin, TestCase):
         price_retrieve_mock.assert_called_once_with(
             id=self.price_data["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            expand=["tiers"],
+            expand=["tiers", "product"],
             stripe_account=None,
         )
         price = Price.sync_from_stripe_data(stripe_price)
