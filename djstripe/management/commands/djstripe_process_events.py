@@ -98,19 +98,13 @@ class Command(VerbosityAwareOutputMixin, BaseCommand):
                 total += 1
                 event = models.Event.process(data=event_data)
                 count += 1
-                self.verbose_output("  Synced Event {id}".format(id=event.id))
+                self.verbose_output(f"\tSynced Event {event.id}")
             except Exception as exception:
-                self.verbose_output(
-                    "  Failed processing Event {id}".format(id=event_data["id"])
-                )
-                self.output("  {exception}".format(exception=exception))
+                self.verbose_output(f"\tFailed processing Event {event_data['id']}")
+                self.output(f"\t{exception}")
                 self.verbose_traceback()
 
         if total == 0:
-            self.output("  (no results)")
+            self.output("\t(no results)")
         else:
-            self.output(
-                "  Processed {count} out of {total} Events".format(
-                    count=count, total=total
-                )
-            )
+            self.output(f"\tProcessed {count} out of {total} Events")
