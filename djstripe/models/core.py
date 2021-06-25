@@ -76,7 +76,11 @@ class BalanceTransaction(StripeModel):
 
     def get_source_class(self):
         try:
-            return apps.get_model("djstripe", self.type)
+            model_name = self.type
+            if model_name == "application_fee":
+                model_name = "ApplicationFee"
+            print(model_name)
+            return apps.get_model("djstripe", model_name)
         except LookupError:
             raise
 
@@ -97,7 +101,16 @@ class Charge(StripeModel):
     """
 
     stripe_class = stripe.Charge
-    expand_fields = ["balance_transaction"]
+    expand_fields = [
+        "balance_transaction",
+        "customer",
+        "invoice",
+        "payment_intent",
+        "application_fee",
+        "on_behalf_of",
+        "source_transfer",
+        "transfer",
+    ]
     stripe_dashboard_item_name = "payments"
 
     amount = StripeDecimalCurrencyAmountField(help_text="Amount charged (as decimal).")
@@ -171,7 +184,7 @@ class Charge(StripeModel):
         related_name="charges",
         help_text="The customer associated with this charge.",
     )
-    # TODO Shouldn't this be on the Dispute model as charge field? Every dispute will have a Charge object
+
     dispute = StripeForeignKey(
         "Dispute",
         on_delete=models.SET_NULL,
@@ -596,7 +609,12 @@ class Customer(StripeModel):
     """
 
     stripe_class = stripe.Customer
-    expand_fields = ["default_source", "sources"]
+    expand_fields = [
+        "default_source",
+        "sources",
+        "invoice_settings.default_payment_method",
+    ]
+
     stripe_dashboard_item_name = "customers"
 
     address = JSONField(null=True, blank=True, help_text="The customer's address.")
@@ -1353,6 +1371,35 @@ class Dispute(StripeModel):
     def __str__(self):
         return f"{self.human_readable_amount} ({enums.DisputeStatus.humanize(self.status)}) "
 
+    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+
+        super()._attach_objects_post_save_hook(
+            cls, data, pending_relations=pending_relations
+        )
+
+        # Retrieve and save files from the dispute.evidence object.
+        # todo find a better way of retrieving and syncing File Type fields from Dispute object
+        for field in (
+            "cancellation_policy",
+            "customer_communication",
+            "customer_signature",
+            "duplicate_charge_documentation",
+            "receipt",
+            "refund_policy",
+            "service_documentation",
+            "shipping_documentation",
+            "uncategorized_file",
+        ):
+            file_upload_id = self.evidence.get(field, None)
+            if file_upload_id:
+                try:
+                    File.sync_from_stripe_data(File(id=file_upload_id).api_retrieve())
+                except stripe.error.PermissionError:
+                    # No permission to retrieve the data with the key
+                    pass
+                except stripe.error.InvalidRequestError:
+                    raise
+
 
 class Event(StripeModel):
     """
@@ -1513,7 +1560,7 @@ class FileLink(StripeModel):
     """
 
     stripe_class = stripe.FileLink
-
+    expand_fields = ["file"]
     expires_at = StripeDateTimeField(
         null=True, blank=True, help_text="Time at which the link expires."
     )
@@ -1530,6 +1577,7 @@ class PaymentIntent(StripeModel):
     """
 
     stripe_class = stripe.PaymentIntent
+    expand_fields = ["customer", "payment_method", "on_behalf_of"]
     stripe_dashboard_item_name = "payments"
 
     amount = StripeQuantumCurrencyAmountField(
@@ -1773,6 +1821,7 @@ class SetupIntent(StripeModel):
     """
 
     stripe_class = stripe.SetupIntent
+    expand_fields = ["customer", "payment_method", "on_behalf_of"]
 
     application = models.CharField(
         max_length=255,
@@ -1881,7 +1930,11 @@ class Payout(StripeModel):
     Stripe documentation: https://stripe.com/docs/api#payouts
     """
 
-    expand_fields = ["destination"]
+    expand_fields = [
+        "destination",
+        "balance_transaction",
+        "failure_balance_transaction",
+    ]
     stripe_class = stripe.Payout
     stripe_dashboard_item_name = "payouts"
 
@@ -1984,7 +2037,6 @@ class Payout(StripeModel):
     )
     type = StripeEnumField(enum=enums.PayoutType)
 
-    # TODO Write corresponding test
     def __str__(self):
         return f"{self.amount} ({enums.PayoutStatus.humanize(self.status)})"
 
@@ -2007,7 +2059,7 @@ class Price(StripeModel):
     """
 
     stripe_class = stripe.Price
-    expand_fields = ["tiers"]
+    expand_fields = ["tiers", "product"]
     stripe_dashboard_item_name = "prices"
 
     active = models.BooleanField(
@@ -2201,6 +2253,7 @@ class Refund(StripeModel):
     """
 
     stripe_class = stripe.Refund
+    expand_fields = ["charge", "balance_transaction", "failure_balance_transaction"]
 
     amount = StripeQuantumCurrencyAmountField(help_text="Amount, in cents.")
     balance_transaction = StripeForeignKey(
@@ -2249,6 +2302,7 @@ class Refund(StripeModel):
     status = StripeEnumField(
         blank=True, enum=enums.RefundStatus, help_text="Status of the refund."
     )
+    # todo implement source_transfer_reversal and transfer_reversal
 
     def get_stripe_dashboard_url(self):
         return self.charge.get_stripe_dashboard_url()
