@@ -362,6 +362,12 @@ class FileAdmin(StripeModelAdmin):
     search_fields = ("filename",)
 
 
+@admin.register(models.FileLink)
+class FileLinkAdmin(StripeModelAdmin):
+    list_display = ("url",)
+    list_filter = ("expires_at",)
+
+
 @admin.register(models.PaymentIntent)
 class PaymentIntentAdmin(StripeModelAdmin):
     list_display = (
@@ -519,3 +525,18 @@ class TaxRateAdmin(StripeModelAdmin):
 @admin.register(models.Transfer)
 class TransferAdmin(StripeModelAdmin):
     list_display = ("amount", "description")
+
+
+@admin.register(models.TransferReversal)
+class TransferReversalAdmin(StripeModelAdmin):
+    list_display = ("amount", "transfer")
+
+
+@admin.register(models.ApplicationFee)
+class ApplicationFeeAdmin(StripeModelAdmin):
+    list_display = ("amount", "account")
+
+
+@admin.register(models.ApplicationFeeRefund)
+class ApplicationFeeReversalAdmin(StripeModelAdmin):
+    list_display = ("amount", "fee")
