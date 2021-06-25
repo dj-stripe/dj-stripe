@@ -13,6 +13,7 @@ class Session(StripeModel):
     """
 
     stripe_class = stripe.checkout.Session
+    expand_fields = ["customer", "payment_intent", "subscription"]
 
     billing_address_collection = StripeEnumField(
         enum=enums.SessionBillingAddressCollection,

@@ -41,6 +41,5 @@ class ScheduledQueryRun(StripeModel):
     )
     title = models.TextField(max_length=5000, help_text="Title of the query.")
 
-    # TODO Write corresponding test
     def __str__(self):
         return f"{self.title or self.id} ({self.status})"
