@@ -1,5 +1,5 @@
 import stripe
-from django.db import models
+from django.db import IntegrityError, models
 
 from .. import enums
 from ..fields import (
@@ -13,32 +13,46 @@ from ..fields import (
 )
 from ..managers import TransferManager
 from ..settings import djstripe_settings
+from .account import Account
 from .base import StripeBaseModel, StripeModel
+from .core import BalanceTransaction, Charge
 
 
-# TODO Add Tests
+# TODO Implement Full Webhook event support for ApplicationFee and ApplicationFee Refund Objects
 class ApplicationFee(StripeModel):
     """
     When you collect a transaction fee on top of a charge made for your
     user (using Connect), an ApplicationFee is created in your account.
 
+    Please note the model field charge exists on the Stripe Connected Account
+    while the application_fee modelfield on Charge model exists on the Platform Account!
+
     Stripe documentation: https://stripe.com/docs/api#application_fees
     """
 
-    stripe_class = stripe.ApplicationFee
+    expand_fields = ["account", "charge", "balance_transaction"]
 
+    stripe_class = stripe.ApplicationFee
+    account = StripeForeignKey(
+        "Account",
+        on_delete=models.PROTECT,
+        related_name="application_fees",
+        help_text="ID of the Stripe account this fee was taken from.",
+    )
     amount = StripeQuantumCurrencyAmountField(help_text="Amount earned, in cents.")
     amount_refunded = StripeQuantumCurrencyAmountField(
         help_text="Amount in cents refunded (can be less than the amount attribute "
         "on the fee if a partial refund was issued)"
     )
     # TODO application = ...
+    # balance_transaction exists on the platform account
     balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.CASCADE,
         help_text="Balance transaction that describes the impact on your account"
         " balance.",
     )
+    # charge exists on the Stripe Connected Account and not the Platform Account
     charge = StripeForeignKey(
         "Charge",
         on_delete=models.CASCADE,
@@ -53,8 +67,109 @@ class ApplicationFee(StripeModel):
         )
     )
 
+    @classmethod
+    def _find_owner_account(cls, data):
+        # ApplicationFee always exist on the Platform account
+        return Account.get_or_retrieve_for_api_key(djstripe_settings.STRIPE_SECRET_KEY)
 
-# TODO Add Tests
+    # TODO Test Refunding from charge. Refunding from application fee works fine.
+    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+
+        super()._attach_objects_post_save_hook(
+            cls, data, pending_relations=pending_relations
+        )
+
+        try:
+            # fetch and save the charge field to application_fee
+            # Due to various Webhooks, the charge object may not always exist
+            self.charge = Charge.objects.get(id=cls._id_from_data(data.get("charge")))
+            self.save()
+        except Charge.DoesNotExist:
+            pass
+
+        # Application Fee Refunds exists as a List on ApplicationFee
+        for reversals_data in data.get("refunds").auto_paging_iter():
+            ApplicationFeeRefund.sync_from_stripe_data(reversals_data)
+
+    @classmethod
+    def _get_or_create_from_stripe_object(
+        cls,
+        data,
+        field_name="id",
+        refetch=True,
+        current_ids=None,
+        pending_relations=None,
+        save=True,
+        stripe_account=None,
+    ):
+
+        if data.get("object") == "application_fee" and field_name == "id":
+            # case when ApplicationFee model is trying to be retrieved or created
+
+            stripe_account = None
+
+            # retrieve and sync BalanceTransaction
+            balance_transaction_data = BalanceTransaction.stripe_class.retrieve(
+                id=cls._id_from_data(data.get("balance_transaction")),
+                api_key=djstripe_settings.STRIPE_SECRET_KEY,
+                expand=getattr(BalanceTransaction, "expand_fields", None),
+                stripe_account=stripe_account,
+            )
+
+            try:
+                BalanceTransaction._get_or_create_from_stripe_object(
+                    balance_transaction_data,
+                    current_ids=current_ids,
+                    stripe_account=stripe_account,
+                    save=True,
+                )
+
+            except IntegrityError:
+                pass
+            stripe_account = cls._id_from_data(data.get("account"))
+
+            # retrieve and sync charge
+            charge_data = Charge.stripe_class.retrieve(
+                id=cls._id_from_data(data.get("charge")),
+                api_key=djstripe_settings.STRIPE_SECRET_KEY,
+                expand=getattr(Charge, "expand_fields", None),
+                stripe_account=stripe_account,
+            )
+
+            try:
+                Charge._get_or_create_from_stripe_object(
+                    charge_data,
+                    current_ids=current_ids,
+                    stripe_account=stripe_account,
+                )
+
+            except IntegrityError:
+                pass
+
+        if data.get("object") == "application_fee" and field_name == "charge":
+            # trying to retrieve ApplicationFee.charge
+            # ApplicationFee.charge exists on the Stripe Connected Account
+            return super()._get_or_create_from_stripe_object(
+                data=data,
+                field_name=field_name,
+                refetch=refetch,
+                current_ids=current_ids,
+                pending_relations=pending_relations,
+                save=save,
+                stripe_account=cls._id_from_data(data.get("account")),
+            )
+
+        return super()._get_or_create_from_stripe_object(
+            data=data,
+            field_name=field_name,
+            refetch=refetch,
+            current_ids=current_ids,
+            pending_relations=pending_relations,
+            save=save,
+            stripe_account=None,
+        )
+
+
 class ApplicationFeeRefund(StripeModel):
     """
     ApplicationFeeRefund objects allow you to refund an ApplicationFee that
@@ -65,6 +180,8 @@ class ApplicationFeeRefund(StripeModel):
     Stripe documentation: https://stripe.com/docs/api#fee_refunds
     """
 
+    stripe_class = stripe.ApplicationFeeRefund
+    expand_fields = ["balance_transaction", "fee"]
     description = None
 
     amount = StripeQuantumCurrencyAmountField(help_text="Amount refunded, in cents.")
@@ -82,7 +199,66 @@ class ApplicationFeeRefund(StripeModel):
         help_text="The application fee that was refunded",
     )
 
+    @classmethod
+    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        """
+        Call the stripe API's create operation for this model.
 
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        """
+        if not kwargs.get("id"):
+            raise KeyError("ApplicationFee Object ID is missing")
+
+        try:
+            ApplicationFee.objects.get(id=kwargs["id"])
+        except ApplicationFee.DoesNotExist:
+            raise
+
+        return stripe.ApplicationFee.create_refund(api_key=api_key, **kwargs)
+
+    def api_retrieve(self, api_key=None, stripe_account=None):
+        """
+        Call the stripe API's retrieve operation for this model.
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        :param stripe_account: The optional connected account \
+            for which this request is being made.
+        :type stripe_account: string
+        """
+        nested_id = self.id
+        id = self.fee.id
+
+        # Prefer passed in stripe_account if set.
+        if not stripe_account:
+            stripe_account = self._get_stripe_account_id(api_key)
+
+        return stripe.ApplicationFee.retrieve_refund(
+            id=id,
+            nested_id=nested_id,
+            api_key=api_key or self.default_api_key,
+            expand=self.expand_fields,
+            stripe_account=stripe_account,
+        )
+
+    @classmethod
+    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        """
+        Call the stripe API's list operation for this model.
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        See Stripe documentation for accepted kwargs for each object.
+        :returns: an iterator over all items in the query
+        """
+        return stripe.ApplicationFee.list_refunds(
+            api_key=api_key, **kwargs
+        ).auto_paging_iter()
+
+
+# TODO Add Tests
 class CountrySpec(StripeBaseModel):
     """
     Stripe documentation: https://stripe.com/docs/api#country_specs
@@ -165,6 +341,7 @@ class Transfer(StripeModel):
     """
 
     stripe_class = stripe.Transfer
+    # todo Add to expand_fields as more models get supported
     expand_fields = ["balance_transaction"]
     stripe_dashboard_item_name = "transfers"
 
@@ -186,10 +363,11 @@ class Transfer(StripeModel):
         " balance.",
     )
     currency = StripeCurrencyCodeField()
-    # TODO: Link destination to Card, Account, or Bank Account Models
-    destination = StripeIdField(
-        help_text="ID of the bank account, card, or Stripe account the transfer was "
-        "sent to."
+    destination = StripeForeignKey(
+        "Account",
+        on_delete=models.PROTECT,
+        related_name="transfers",
+        help_text="ID of the Stripe account the transfer was sent to.",
     )
     destination_payment = StripeIdField(
         null=True,
@@ -234,13 +412,30 @@ class Transfer(StripeModel):
         # No Reversal
         return f"{self.human_readable_amount}"
 
+    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+        """
+        Iterate over reversals on the Transfer object to create and/or sync
+        TransferReversal objects
+        """
 
-# TODO Add Tests
+        super()._attach_objects_post_save_hook(
+            cls, data, pending_relations=pending_relations
+        )
+
+        # Transfer Reversals exist as a list on the Transfer Object
+        for reversals_data in data.get("reversals").auto_paging_iter():
+            TransferReversal.sync_from_stripe_data(reversals_data)
+
+
 class TransferReversal(StripeModel):
     """
     Stripe documentation: https://stripe.com/docs/api#transfer_reversals
     """
 
+    expand_fields = ["balance_transaction", "transfer"]
+
+    # TransferReversal classmethods are derived from
+    # and attached to the stripe.Transfer class
     stripe_class = stripe.Transfer
 
     amount = StripeQuantumCurrencyAmountField(help_text="Amount, in cents.")
@@ -263,3 +458,68 @@ class TransferReversal(StripeModel):
 
     def __str__(self):
         return str(self.transfer)
+
+    @classmethod
+    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        """
+        Call the stripe API's create operation for this model.
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        """
+
+        if not kwargs.get("id"):
+            raise KeyError("Transfer Object ID is missing")
+
+        try:
+            Transfer.objects.get(id=kwargs["id"])
+        except Transfer.DoesNotExist:
+            raise
+
+        return stripe.Transfer.create_reversal(api_key=api_key, **kwargs)
+
+    def api_retrieve(self, api_key=None, stripe_account=None):
+        """
+        Call the stripe API's retrieve operation for this model.
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        :param stripe_account: The optional connected account \
+            for which this request is being made.
+        :type stripe_account: string
+        """
+        nested_id = self.id
+        id = self.transfer.id
+
+        # Prefer passed in stripe_account if set.
+        if not stripe_account:
+            stripe_account = self._get_stripe_account_id(api_key)
+
+        return stripe.Transfer.retrieve_reversal(
+            id=id,
+            nested_id=nested_id,
+            api_key=api_key or self.default_api_key,
+            expand=self.expand_fields,
+            stripe_account=stripe_account,
+        )
+
+    @classmethod
+    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        """
+        Call the stripe API's list operation for this model.
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        See Stripe documentation for accepted kwargs for each object.
+        :returns: an iterator over all items in the query
+        """
+        return stripe.Transfer.list_reversals(
+            api_key=api_key, **kwargs
+        ).auto_paging_iter()
+
+    @classmethod
+    def is_valid_object(cls, data):
+        """
+        Returns whether the data is a valid object for the class
+        """
+        return "object" in data and data["object"] == "transfer_reversal"
