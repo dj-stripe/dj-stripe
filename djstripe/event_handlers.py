@@ -197,9 +197,35 @@ def account_updated_webhook_handler(event):
     )
 
 
+@webhooks.handler("charge")
+def charge_webhook_handler(event):
+    """Handle updates to Charge objects
+    - charge: https://stripe.com/docs/api/charges
+    """
+    # will recieve all events of the type charge.X.Y so
+    # need to ensure the data object is related to Charge Object
+    target_object_type = event.data.get("object", {}).get("object", {})
+
+    if target_object_type == "charge":
+        _handle_crud_like_event(target_cls=models.Charge, event=event)
+
+
+@webhooks.handler("charge.dispute")
+def dispute_webhook_handler(event):
+    """Handle updates to Dispute objects
+    - dispute: https://stripe.com/docs/api/disputes
+    """
+    # will recieve all events of the type charge.dispute.Y so
+    # need to ensure the data object is related to Dispute Object
+    target_object_type = event.data.get("object", {}).get("object", {})
+
+    if target_object_type == "dispute":
+        _handle_crud_like_event(target_cls=models.Dispute, event=event)
+
+
 @webhooks.handler(
-    "charge",
     "coupon",
+    "file",
     "invoice",
     "invoiceitem",
     "payment_intent",
@@ -214,13 +240,13 @@ def account_updated_webhook_handler(event):
 )
 def other_object_webhook_handler(event):
     """
-    Handle updates to charge, coupon, invoice, invoiceitem, payment_intent,
+    Handle updates to coupon, file, invoice, invoiceitem, payment_intent,
     plan, product, setup_intent, subscription_schedule, source, tax_rate
     and transfer objects.
 
     Docs for:
-    - charge: https://stripe.com/docs/api/charges
     - coupon: https://stripe.com/docs/api/coupons
+    - file: https://stripe.com/docs/api/files
     - invoice: https://stripe.com/docs/api/invoices
     - invoiceitem: https://stripe.com/docs/api/invoiceitems
     - payment_intent: https://stripe.com/docs/api/payment_intents
@@ -234,26 +260,21 @@ def other_object_webhook_handler(event):
     - transfer: https://stripe.com/docs/api/transfers
     """
 
-    if event.parts[:2] == ["charge", "dispute"]:
-        # Do not attempt to handle charge.dispute.* events.
-        # We do not have a Dispute model yet.
-        target_cls = models.Dispute
-    else:
-        target_cls = {
-            "charge": models.Charge,
-            "coupon": models.Coupon,
-            "invoice": models.Invoice,
-            "invoiceitem": models.InvoiceItem,
-            "payment_intent": models.PaymentIntent,
-            "plan": models.Plan,
-            "price": models.Price,
-            "product": models.Product,
-            "transfer": models.Transfer,
-            "setup_intent": models.SetupIntent,
-            "subscription_schedule": models.SubscriptionSchedule,
-            "source": models.Source,
-            "tax_rate": models.TaxRate,
-        }.get(event.category)
+    target_cls = {
+        "coupon": models.Coupon,
+        "file": models.File,
+        "invoice": models.Invoice,
+        "invoiceitem": models.InvoiceItem,
+        "payment_intent": models.PaymentIntent,
+        "plan": models.Plan,
+        "price": models.Price,
+        "product": models.Product,
+        "transfer": models.Transfer,
+        "setup_intent": models.SetupIntent,
+        "subscription_schedule": models.SubscriptionSchedule,
+        "source": models.Source,
+        "tax_rate": models.TaxRate,
+    }.get(event.category)
 
     _handle_crud_like_event(target_cls=target_cls, event=event)
 
