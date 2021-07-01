@@ -22,7 +22,7 @@ The full documentation is available [on Read the Docs](https://dj-stripe.readthe
 -   Payment Methods and Payment Intents (SCA support)
 -   Support for multiple accounts and API keys
 -   Stripe Connect (partial support)
--   Tested with Stripe API `2020-08-27` (see [API versions](https://dj-stripe.readthedocs.io/en/latest/api_versions.html))
+-   Tested with Stripe API `2020-08-27` (see [API versions](https://dj-stripe.readthedocs.io/en/latest/api_versions/))
 
 ## Requirements
 
@@ -78,7 +78,7 @@ Run the commands:
 
     python manage.py djstripe_sync_models
 
-See <https://dj-stripe.readthedocs.io/en/latest/stripe_elements_js.html>
+See <https://dj-stripe.readthedocs.io/en/latest/stripe_elements_js/>
 for notes about usage of the Stripe Elements frontend JS library.
 
 ## Running the Tests
