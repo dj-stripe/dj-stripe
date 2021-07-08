@@ -1,0 +1,102 @@
+{
+    "id": "dp_1JAyTwJSZQVUcJYgPqasUEn1",
+    "object": "dispute",
+    "amount": 1000,
+    "balance_transaction": "txn_16g5h62eZvKYlo2CQ2AHA89s",
+    "balance_transactions": [
+        {
+            "id": "txn_16g5h62eZvKYlo2CQ2AHA89s",
+            "object": "balance_transaction",
+            "amount": -1000,
+            "available_on": 1626307200,
+            "created": 1625755540,
+            "currency": "usd",
+            "description": "Chargeback withdrawal for ch_fakefakefakefakefake0001",
+            "exchange_rate": null,
+            "fee": 1500,
+            "fee_details": [
+                {
+                    "amount": 1500,
+                    "application": null,
+                    "currency": "usd",
+                    "description": "Dispute fee",
+                    "type": "stripe_fee"
+                }
+            ],
+            "net": -2500,
+            "reporting_category": "dispute",
+            "source": "dp_1JAyTwJSZQVUcJYgPqasUEn1",
+            "status": "pending",
+            "type": "adjustment"
+        },
+        {
+            "id": "txn_1JAyV2JSZQVUcJYgETKXUN9k",
+            "object": "balance_transaction",
+            "amount": 1000,
+            "available_on": 1626307200,
+            "created": 1625755608,
+            "currency": "usd",
+            "description": "Chargeback reversal for ch_fakefakefakefakefake0001",
+            "exchange_rate": null,
+            "fee": -1500,
+            "fee_details": [
+                {
+                    "amount": -1500,
+                    "application": null,
+                    "currency": "usd",
+                    "description": "Dispute fee refund",
+                    "type": "stripe_fee"
+                }
+            ],
+            "net": 2500,
+            "reporting_category": "dispute_reversal",
+            "source": "dp_1JAyTwJSZQVUcJYgPqasUEn1",
+            "status": "pending",
+            "type": "adjustment"
+        }
+    ],
+    "charge": "ch_fakefakefakefakefake0001",
+    "created": 1625755540,
+    "currency": "usd",
+    "evidence": {
+        "access_activity_log": null,
+        "billing_address": null,
+        "cancellation_policy": null,
+        "cancellation_policy_disclosure": null,
+        "cancellation_rebuttal": null,
+        "customer_communication": null,
+        "customer_email_address": "test1@user.com",
+        "customer_name": "Jane Doe Test",
+        "customer_purchase_ip": "223.182.253.19",
+        "customer_signature": null,
+        "duplicate_charge_documentation": null,
+        "duplicate_charge_explanation": null,
+        "duplicate_charge_id": null,
+        "product_description": null,
+        "receipt": null,
+        "refund_policy": null,
+        "refund_policy_disclosure": null,
+        "refund_refusal_explanation": null,
+        "service_date": null,
+        "service_documentation": null,
+        "shipping_address": null,
+        "shipping_carrier": null,
+        "shipping_date": null,
+        "shipping_documentation": null,
+        "shipping_tracking_number": null,
+        "uncategorized_file": null,
+        "uncategorized_text": "winning_evidence"
+    },
+    "evidence_details": {
+        "due_by": 1626566399,
+        "has_evidence": true,
+        "past_due": false,
+        "submission_count": 1
+    },
+    "is_charge_refundable": false,
+    "livemode": false,
+    "metadata": {},
+    "payment_intent": "pi_1JAyTwJSZQVUcJYgBbsz0NuH",
+    "reason": "fraudulent",
+    "status": "under_review"
+}

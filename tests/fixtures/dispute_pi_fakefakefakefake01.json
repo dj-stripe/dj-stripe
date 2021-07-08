@@ -1,0 +1,32 @@
+{
+    "id": "pi_1JAyTwJSZQVUcJYgBbsz0NuH",
+    "object": "payment_intent",
+    "livemode": false,
+    "created": 1557995177,
+    "metadata": {},
+    "amount": 1000,
+    "amount_capturable": 0,
+    "amount_received": 1000,
+    "canceled_at": null,
+    "cancellation_reason": "",
+    "capture_method": "automatic",
+    "client_secret": "pi_1JAyTwJSZQVUcJYgBbsz0NuH_secret_IooFCSw3PeIIqRmJ7SK4yEFVr",
+    "confirmation_method": "automatic",
+    "currency": "usd",
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "description": "",
+    "last_payment_error": "",
+    "next_action": "",
+    "on_behalf_of": null,
+    "payment_method": null,
+    "payment_method_types": [
+        "card"
+    ],
+    "receipt_email": "",
+    "setup_future_usage": "off_session",
+    "shipping": "",
+    "statement_descriptor": "consulting",
+    "status": "succeeded",
+    "transfer_data": "",
+    "transfer_group": ""
+}

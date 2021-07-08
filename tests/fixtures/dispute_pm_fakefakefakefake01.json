@@ -1,0 +1,40 @@
+{
+    "id": "card_fakefakefakefakefake0001",
+    "object": "payment_method",
+    "billing_details": {
+        "address": {
+            "city": null,
+            "country": null,
+            "line1": null,
+            "line2": null,
+            "postal_code": null,
+            "state": null
+        },
+        "email": null,
+        "name": "alex-nesnes@hotmail.fr",
+        "phone": null
+    },
+    "card": {
+        "brand": "visa",
+        "checks": {
+            "address_line1_check": null,
+            "address_postal_code_check": null,
+            "cvc_check": "pass"
+        },
+        "country": "US",
+        "exp_month": 2,
+        "exp_year": 2022,
+        "fingerprint": "Js2Tq8SMwjNsGwEr",
+        "funding": "credit",
+        "installments": null,
+        "last4": "0259",
+        "network": "visa",
+        "three_d_secure": null,
+        "wallet": null
+    },
+    "created": 1567571746,
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "livemode": false,
+    "metadata": {},
+    "type": "card"
+}

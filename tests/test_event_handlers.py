@@ -29,6 +29,7 @@ from djstripe.models import (
 )
 from djstripe.models.account import Account
 from djstripe.models.billing import TaxId
+from djstripe.models.core import File
 from djstripe.models.payment_methods import BankAccount
 
 from . import (
@@ -45,7 +46,17 @@ from . import (
     FAKE_CUSTOM_ACCOUNT,
     FAKE_CUSTOMER,
     FAKE_CUSTOMER_II,
-    FAKE_DISPUTE,
+    FAKE_DISPUTE_BALANCE_TRANSACTION,
+    FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_FULL,
+    FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_PARTIAL,
+    FAKE_DISPUTE_CHARGE,
+    FAKE_DISPUTE_I,
+    FAKE_DISPUTE_II,
+    FAKE_DISPUTE_III,
+    FAKE_DISPUTE_PAYMENT_INTENT,
+    FAKE_DISPUTE_PAYMENT_METHOD,
+    FAKE_DISPUTE_V_FULL,
+    FAKE_DISPUTE_V_PARTIAL,
     FAKE_EVENT_ACCOUNT_APPLICATION_AUTHORIZED,
     FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED,
     FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_CREATED,
@@ -67,8 +78,14 @@ from . import (
     FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE,
     FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED,
     FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED,
+    FAKE_EVENT_DISPUTE_CLOSED,
     FAKE_EVENT_DISPUTE_CREATED,
+    FAKE_EVENT_DISPUTE_FUNDS_REINSTATED_FULL,
+    FAKE_EVENT_DISPUTE_FUNDS_REINSTATED_PARTIAL,
+    FAKE_EVENT_DISPUTE_FUNDS_WITHDRAWN,
+    FAKE_EVENT_DISPUTE_UPDATED,
     FAKE_EVENT_EXPRESS_ACCOUNT_UPDATED,
+    FAKE_EVENT_FILE_CREATED,
     FAKE_EVENT_INVOICE_CREATED,
     FAKE_EVENT_INVOICE_DELETED,
     FAKE_EVENT_INVOICE_UPCOMING,
@@ -971,20 +988,344 @@ class TestCustomerEvents(EventTestCase):
 
 
 class TestDisputeEvents(EventTestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username="fake_customer_1", email=FAKE_CUSTOMER["email"]
+        )
+        self.customer = FAKE_CUSTOMER.create_for_user(self.user)
+
     @patch(
-        "stripe.Dispute.retrieve", return_value=deepcopy(FAKE_DISPUTE), autospec=True
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_PAYMENT_INTENT),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Charge.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_CHARGE),
+        autospec=True,
+    )
+    @patch(
+        "stripe.BalanceTransaction.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_BALANCE_TRANSACTION),
+    )
+    @patch(
+        "stripe.File.retrieve",
+        return_value=deepcopy(FAKE_FILEUPLOAD_ICON),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Dispute.retrieve", return_value=deepcopy(FAKE_DISPUTE_I), autospec=True
     )
     @patch(
         "stripe.Event.retrieve",
         return_value=deepcopy(FAKE_EVENT_DISPUTE_CREATED),
         autospec=True,
     )
-    def test_dispute_created(self, event_retrieve_mock, dispute_retrieve_mock):
+    def test_dispute_created(
+        self,
+        event_retrieve_mock,
+        dispute_retrieve_mock,
+        file_retrieve_mock,
+        balance_transaction_retrieve_mock,
+        charge_retrieve_mock,
+        payment_intent_retrieve_mock,
+        payment_method_retrieve_mock,
+    ):
         fake_stripe_event = deepcopy(FAKE_EVENT_DISPUTE_CREATED)
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
         dispute = Dispute.objects.get()
-        self.assertEqual(dispute.id, FAKE_DISPUTE["id"])
+        self.assertEqual(dispute.id, FAKE_DISPUTE_I["id"])
+
+    # funds get withdrawn from the account as soon as a charge is
+    # disputed so practically there is no difference between
+    # charge.dispute.created and charge.dispute.funds_withdrawn
+    @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_PAYMENT_INTENT),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Charge.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_CHARGE),
+        autospec=True,
+    )
+    @patch(
+        "stripe.BalanceTransaction.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_BALANCE_TRANSACTION),
+    )
+    @patch(
+        "stripe.File.retrieve",
+        return_value=deepcopy(FAKE_FILEUPLOAD_ICON),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Dispute.retrieve", return_value=deepcopy(FAKE_DISPUTE_II), autospec=True
+    )
+    @patch(
+        "stripe.Event.retrieve",
+        return_value=deepcopy(FAKE_EVENT_DISPUTE_FUNDS_WITHDRAWN),
+        autospec=True,
+    )
+    def test_dispute_funds_withdrawn(
+        self,
+        event_retrieve_mock,
+        dispute_retrieve_mock,
+        file_retrieve_mock,
+        balance_transaction_retrieve_mock,
+        charge_retrieve_mock,
+        payment_intent_retrieve_mock,
+        payment_method_retrieve_mock,
+    ):
+
+        fake_stripe_event = deepcopy(FAKE_EVENT_DISPUTE_FUNDS_WITHDRAWN)
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+        dispute = Dispute.objects.get()
+        self.assertEqual(dispute.id, FAKE_DISPUTE_II["id"])
+
+    @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_PAYMENT_INTENT),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Charge.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_CHARGE),
+        autospec=True,
+    )
+    @patch(
+        "stripe.BalanceTransaction.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_BALANCE_TRANSACTION),
+    )
+    @patch(
+        "stripe.File.retrieve",
+        return_value=deepcopy(FAKE_FILEUPLOAD_ICON),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Dispute.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_III),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Event.retrieve",
+        return_value=deepcopy(FAKE_EVENT_DISPUTE_UPDATED),
+        autospec=True,
+    )
+    def test_dispute_updated(
+        self,
+        event_retrieve_mock,
+        dispute_retrieve_mock,
+        file_retrieve_mock,
+        balance_transaction_retrieve_mock,
+        charge_retrieve_mock,
+        payment_intent_retrieve_mock,
+        payment_method_retrieve_mock,
+    ):
+
+        fake_stripe_event = deepcopy(FAKE_EVENT_DISPUTE_UPDATED)
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+        dispute = Dispute.objects.get()
+        self.assertEqual(dispute.id, FAKE_DISPUTE_III["id"])
+
+    @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_PAYMENT_INTENT),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Charge.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_CHARGE),
+        autospec=True,
+    )
+    @patch(
+        "stripe.BalanceTransaction.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_BALANCE_TRANSACTION),
+    )
+    @patch(
+        "stripe.File.retrieve",
+        return_value=deepcopy(FAKE_FILEUPLOAD_ICON),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Dispute.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_III),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Event.retrieve",
+        return_value=deepcopy(FAKE_EVENT_DISPUTE_CLOSED),
+        autospec=True,
+    )
+    def test_dispute_closed(
+        self,
+        event_retrieve_mock,
+        dispute_retrieve_mock,
+        file_retrieve_mock,
+        balance_transaction_retrieve_mock,
+        charge_retrieve_mock,
+        payment_intent_retrieve_mock,
+        payment_method_retrieve_mock,
+    ):
+
+        fake_stripe_event = deepcopy(FAKE_EVENT_DISPUTE_CLOSED)
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+        dispute = Dispute.objects.get()
+        self.assertEqual(dispute.id, FAKE_DISPUTE_III["id"])
+
+    # funds get reinstated after the dispute is closed
+    # includes full fund reinstatements as well as partial refunds
+    @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_PAYMENT_INTENT),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Charge.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_CHARGE),
+        autospec=True,
+    )
+    @patch(
+        "stripe.BalanceTransaction.retrieve",
+        side_effect=[
+            FAKE_DISPUTE_BALANCE_TRANSACTION,
+            FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_FULL,
+        ],
+    )
+    @patch(
+        "stripe.File.retrieve",
+        return_value=deepcopy(FAKE_FILEUPLOAD_ICON),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Dispute.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_V_FULL),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Event.retrieve",
+        return_value=deepcopy(FAKE_EVENT_DISPUTE_FUNDS_REINSTATED_FULL),
+        autospec=True,
+    )
+    def test_dispute_funds_reinstated_full(
+        self,
+        event_retrieve_mock,
+        dispute_retrieve_mock,
+        file_retrieve_mock,
+        balance_transaction_retrieve_mock,
+        charge_retrieve_mock,
+        payment_intent_retrieve_mock,
+        payment_method_retrieve_mock,
+    ):
+
+        fake_stripe_event = deepcopy(FAKE_EVENT_DISPUTE_FUNDS_REINSTATED_FULL)
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+        dispute = Dispute.objects.get()
+        self.assertEqual(dispute.id, FAKE_DISPUTE_V_FULL["id"])
+
+    # funds get reinstated after the dispute is closed
+    # includes full fund reinstatements as well as partial refunds
+    @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_PAYMENT_METHOD),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_PAYMENT_INTENT),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Charge.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_CHARGE),
+        autospec=True,
+    )
+    @patch(
+        "stripe.BalanceTransaction.retrieve",
+        side_effect=[
+            FAKE_DISPUTE_BALANCE_TRANSACTION,
+            FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_PARTIAL,
+        ],
+    )
+    @patch(
+        "stripe.File.retrieve",
+        return_value=deepcopy(FAKE_FILEUPLOAD_ICON),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Dispute.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_V_PARTIAL),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Event.retrieve",
+        return_value=deepcopy(FAKE_EVENT_DISPUTE_FUNDS_REINSTATED_PARTIAL),
+        autospec=True,
+    )
+    def test_dispute_funds_reinstated_partial(
+        self,
+        event_retrieve_mock,
+        dispute_retrieve_mock,
+        file_retrieve_mock,
+        balance_transaction_retrieve_mock,
+        charge_retrieve_mock,
+        payment_intent_retrieve_mock,
+        payment_method_retrieve_mock,
+    ):
+        fake_stripe_event = deepcopy(FAKE_EVENT_DISPUTE_FUNDS_REINSTATED_PARTIAL)
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+        dispute = Dispute.objects.get()
+        self.assertGreaterEqual(len(dispute.balance_transactions), 2)
+        self.assertEqual(dispute.id, FAKE_DISPUTE_V_PARTIAL["id"])
+
+
+class TestFileEvents(EventTestCase):
+    @patch(
+        "stripe.File.retrieve",
+        return_value=deepcopy(FAKE_FILEUPLOAD_ICON),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Event.retrieve",
+        return_value=deepcopy(FAKE_EVENT_FILE_CREATED),
+        autospec=True,
+    )
+    def test_file_created(self, event_retrieve_mock, file_retrieve_mock):
+        fake_stripe_event = deepcopy(FAKE_EVENT_FILE_CREATED)
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+        file = File.objects.get()
+        self.assertEqual(file.id, FAKE_FILEUPLOAD_ICON["id"])
 
 
 class TestInvoiceEvents(EventTestCase):
