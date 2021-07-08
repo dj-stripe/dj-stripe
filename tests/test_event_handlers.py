@@ -28,6 +28,7 @@ from djstripe.models import (
     Transfer,
 )
 from djstripe.models.account import Account
+from djstripe.models.core import File
 from djstripe.models.payment_methods import BankAccount
 
 from . import (
@@ -68,6 +69,7 @@ from . import (
     FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED,
     FAKE_EVENT_DISPUTE_CREATED,
     FAKE_EVENT_EXPRESS_ACCOUNT_UPDATED,
+    FAKE_EVENT_FILE_CREATED,
     FAKE_EVENT_INVOICE_CREATED,
     FAKE_EVENT_INVOICE_DELETED,
     FAKE_EVENT_INVOICE_UPCOMING,
@@ -966,6 +968,11 @@ class TestCustomerEvents(EventTestCase):
 
 class TestDisputeEvents(EventTestCase):
     @patch(
+        "stripe.File.retrieve",
+        return_value=deepcopy(FAKE_FILEUPLOAD_ICON),
+        autospec=True,
+    )
+    @patch(
         "stripe.Dispute.retrieve", return_value=deepcopy(FAKE_DISPUTE), autospec=True
     )
     @patch(
@@ -973,12 +980,33 @@ class TestDisputeEvents(EventTestCase):
         return_value=deepcopy(FAKE_EVENT_DISPUTE_CREATED),
         autospec=True,
     )
-    def test_dispute_created(self, event_retrieve_mock, dispute_retrieve_mock):
+    def test_dispute_created(
+        self, event_retrieve_mock, dispute_retrieve_mock, file_retrieve_mock
+    ):
         fake_stripe_event = deepcopy(FAKE_EVENT_DISPUTE_CREATED)
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
         dispute = Dispute.objects.get()
         self.assertEqual(dispute.id, FAKE_DISPUTE["id"])
+
+
+class TestFileEvents(EventTestCase):
+    @patch(
+        "stripe.File.retrieve",
+        return_value=deepcopy(FAKE_FILEUPLOAD_ICON),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Event.retrieve",
+        return_value=deepcopy(FAKE_EVENT_FILE_CREATED),
+        autospec=True,
+    )
+    def test_file_created(self, event_retrieve_mock, file_retrieve_mock):
+        fake_stripe_event = deepcopy(FAKE_EVENT_FILE_CREATED)
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+        file = File.objects.get()
+        self.assertEqual(file.id, FAKE_FILEUPLOAD_ICON["id"])
 
 
 class TestInvoiceEvents(EventTestCase):

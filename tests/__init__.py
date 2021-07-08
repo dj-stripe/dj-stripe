@@ -793,7 +793,7 @@ FAKE_DISPUTE = {
         "duplicate_charge_explanation": None,
         "duplicate_charge_id": None,
         "product_description": None,
-        "receipt": "file_XXXXXXXXXXXXXXXXXXXXXXXX",
+        "receipt": "file_4hshrsKatMEEd6736724HYAXyj",
         "refund_policy": None,
         "refund_policy_disclosure": None,
         "refund_refusal_explanation": None,
@@ -1709,6 +1709,18 @@ FAKE_FILEUPLOAD_ICON = {
     "size": 6650,
     "type": "png",
     "url": "https://files.stripe.com/files/f_test_BTJFKcS7VDahgkjqw8EVNWlM",
+}
+
+FAKE_EVENT_FILE_CREATED = {
+    "id": "evt_1J5TusR44xKqawmIQVXSrGyf",
+    "object": "event",
+    "api_version": "2020-08-27",
+    "created": 1439229084,
+    "data": {"object": deepcopy(FAKE_FILEUPLOAD_ICON)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_sTSstDDIOpKi2w",
+    "type": "file.created",
 }
 
 
