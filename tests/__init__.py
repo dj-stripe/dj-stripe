@@ -1459,6 +1459,43 @@ FAKE_TAX_RATE_EXAMPLE_2_SALES = load_fixture(
     "tax_rate_txr_fakefakefakefakefake0002.json"
 )
 
+FAKE_TAX_ID = load_fixture("tax_id_txi_fakefakefakefakefake0001.json")
+
+
+FAKE_EVENT_TAX_ID_CREATED = {
+    "id": "evt_16YKQi2eZvKYlo2CT2oe5ff3",
+    "object": "event",
+    "api_version": "2020-08-27",
+    "created": 1439229084,
+    "data": {"object": deepcopy(FAKE_TAX_ID)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_ZoH080M8fny6yR",
+    "type": "customer.tax_id.created",
+}
+
+FAKE_TAX_ID_UPDATED = deepcopy(FAKE_TAX_ID)
+FAKE_TAX_ID_UPDATED["verification"] = {
+    "status": "verified",
+    "verified_address": None,
+    "verified_name": "Test",
+}
+
+FAKE_EVENT_TAX_ID_UPDATED = {
+    "id": "evt_1J6Fy3JSZQVUcJYgnddjnMzx",
+    "object": "event",
+    "api_version": "2020-08-27",
+    "created": 1439229084,
+    "data": {"object": deepcopy(FAKE_TAX_ID_UPDATED)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_ZoH080M8fny6yR",
+    "type": "customer.tax_id.updated",
+}
+
+FAKE_EVENT_TAX_ID_DELETED = deepcopy(FAKE_EVENT_TAX_ID_UPDATED)
+FAKE_EVENT_TAX_ID_DELETED["type"] = "customer.tax_id.deleted"
+
 FAKE_INVOICEITEM = {
     "id": "ii_16XVTY2eZvKYlo2Cxz5n3RaS",
     "object": "invoiceitem",

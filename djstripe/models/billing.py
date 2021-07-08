@@ -1800,7 +1800,6 @@ class SubscriptionSchedule(StripeModel):
     )
 
 
-# TODO Add Tests
 class TaxId(StripeModel):
     """
     Add one or multiple tax IDs to a customer.
