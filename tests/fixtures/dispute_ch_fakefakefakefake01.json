@@ -1,0 +1,83 @@
+{
+    "id": "ch_1JHRCWJSZQVUcJYgOCavbxio",
+    "object": "charge",
+    "livemode": false,
+    "created": 1557995177,
+    "metadata": {},
+    "description": "",
+    "amount": "10.00",
+    "amount_captured": "10.00",
+    "amount_refunded": "0.00",
+    "application": "",
+    "application_fee": null,
+    "application_fee_amount": null,
+    "balance_transaction": "txn_1JHRCWJSZQVUcJYgYwW8XpF4",
+    "billing_details": {
+        "address": {
+            "city": null,
+            "country": null,
+            "line1": null,
+            "line2": null,
+            "postal_code": null,
+            "state": null
+        },
+        "email": null,
+        "name": null,
+        "phone": null
+    },
+    "calculated_statement_descriptor": "CONSULTING",
+    "captured": true,
+    "currency": "usd",
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "dispute": "dp_1JAyTwJSZQVUcJYgPqasUEn1",
+    "disputed": true,
+    "failure_code": "",
+    "failure_message": "",
+    "fraud_details": {},
+    "invoice": null,
+    "on_behalf_of": null,
+    "outcome": {
+        "network_status": "approved_by_network",
+        "reason": null,
+        "risk_level": "normal",
+        "risk_score": 8,
+        "seller_message": "Payment complete.",
+        "type": "authorized"
+    },
+    "paid": true,
+    "payment_intent": "pi_1JAyTwJSZQVUcJYgBbsz0NuH",
+    "payment_method": "card_fakefakefakefakefake0001",
+    "payment_method_details": {
+        "card": {
+            "brand": "visa",
+            "checks": {
+                "address_line1_check": null,
+                "address_postal_code_check": null,
+                "cvc_check": "pass"
+            },
+            "country": "US",
+            "exp_month": 2,
+            "exp_year": 2022,
+            "fingerprint": "Js2Tq8SMwjNsGwEr",
+            "funding": "credit",
+            "installments": null,
+            "last4": "0259",
+            "network": "visa",
+            "three_d_secure": null,
+            "wallet": null
+        },
+        "type": "card"
+    },
+    "receipt_email": "",
+    "receipt_number": "",
+    "receipt_url": "https://pay.stripe.com/receipts/acct_1ItQ7cJSZQVUcJYg/ch_1JHRCWJSZQVUcJYgOCavbxio/rcpt_JvHmTnLVQmraFXrLuQq5RT9oF14tFOL",
+    "refunded": false,
+    "shipping": "",
+    "source_transfer": null,
+    "statement_descriptor": "consulting",
+    "statement_descriptor_suffix": "",
+    "status": "succeeded",
+    "transfer": null,
+    "transfer_data": "",
+    "transfer_group": ""
+}

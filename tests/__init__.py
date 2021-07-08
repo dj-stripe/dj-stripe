@@ -769,56 +769,76 @@ FAKE_COUPON = {
 }
 
 
-FAKE_DISPUTE = {
-    "id": "dp_XXXXXXXXXXXXXXXXXXXXXXXX",
-    "object": "dispute",
-    "amount": 499,
-    "balance_transaction": FAKE_BALANCE_TRANSACTION_III["id"],
-    "balance_transactions": [deepcopy(FAKE_BALANCE_TRANSACTION_III)],
-    "charge": FAKE_CHARGE["id"],
-    "created": 1515012086,
-    "currency": "usd",
-    "evidence": {
-        "access_activity_log": None,
-        "billing_address": None,
-        "cancellation_policy": None,
-        "cancellation_policy_disclosure": None,
-        "cancellation_rebuttal": None,
-        "customer_communication": None,
-        "customer_email_address": "customer@example.com",
-        "customer_name": "customer@example.com",
-        "customer_purchase_ip": "127.0.0.1",
-        "customer_signature": None,
-        "duplicate_charge_documentation": None,
-        "duplicate_charge_explanation": None,
-        "duplicate_charge_id": None,
-        "product_description": None,
-        "receipt": "file_XXXXXXXXXXXXXXXXXXXXXXXX",
-        "refund_policy": None,
-        "refund_policy_disclosure": None,
-        "refund_refusal_explanation": None,
-        "service_date": None,
-        "service_documentation": None,
-        "shipping_address": None,
-        "shipping_carrier": None,
-        "shipping_date": None,
-        "shipping_documentation": None,
-        "shipping_tracking_number": None,
-        "uncategorized_file": None,
-        "uncategorized_text": None,
-    },
-    "evidence_details": {
-        "due_by": 1516406399,
-        "has_evidence": False,
-        "past_due": False,
-        "submission_count": 0,
-    },
-    "is_charge_refundable": False,
-    "livemode": True,
-    "metadata": {},
-    "reason": "subscription_canceled",
-    "status": "needs_response",
-}
+FAKE_DISPUTE_CHARGE = load_fixture("dispute_ch_fakefakefakefake01.json")
+
+FAKE_DISPUTE_BALANCE_TRANSACTION = load_fixture("dispute_txn_fakefakefakefake01.json")
+
+# case when a dispute gets closed and the funds get reinstated (full)
+FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_FULL = deepcopy(
+    FAKE_DISPUTE_BALANCE_TRANSACTION
+)
+FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_FULL["amount"] = (
+    -1 * FAKE_DISPUTE_BALANCE_TRANSACTION["amount"]
+)
+FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_FULL["fee"] = (
+    -1 * FAKE_DISPUTE_BALANCE_TRANSACTION["fee"]
+)
+FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_FULL["net"] = (
+    -1 * FAKE_DISPUTE_BALANCE_TRANSACTION["net"]
+)
+FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_FULL["fee_details"][0]["amount"] = (
+    -1 * FAKE_DISPUTE_BALANCE_TRANSACTION["fee_details"][0]["amount"]
+)
+
+# case when a dispute gets closed and the funds get reinstated (partial)
+FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_PARTIAL = deepcopy(
+    FAKE_DISPUTE_BALANCE_TRANSACTION
+)
+FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_PARTIAL["amount"] = (
+    -0.9 * FAKE_DISPUTE_BALANCE_TRANSACTION["amount"]
+)
+FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_PARTIAL["fee"] = (
+    -0.9 * FAKE_DISPUTE_BALANCE_TRANSACTION["fee"]
+)
+FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_PARTIAL["net"] = (
+    -0.9 * FAKE_DISPUTE_BALANCE_TRANSACTION["net"]
+)
+FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_PARTIAL["fee_details"][0]["amount"] = (
+    -0.9 * FAKE_DISPUTE_BALANCE_TRANSACTION["fee_details"][0]["amount"]
+)
+
+
+FAKE_DISPUTE_PAYMENT_INTENT = load_fixture("dispute_pi_fakefakefakefake01.json")
+
+FAKE_DISPUTE_PAYMENT_METHOD = load_fixture("dispute_pm_fakefakefakefake01.json")
+
+# case when dispute gets created
+FAKE_DISPUTE_I = load_fixture("dispute_dp_fakefakefakefake01.json")
+
+# case when funds get withdrawn from platform account due to dispute
+FAKE_DISPUTE_II = load_fixture("dispute_dp_fakefakefakefake02.json")
+
+# case when dispute gets updated
+FAKE_DISPUTE_III = deepcopy(FAKE_DISPUTE_II)
+FAKE_DISPUTE_III["evidence"]["receipt"] = "file_4hshrsKatMEEd6736724HYAXyj"
+
+# case when dispute gets closed
+FAKE_DISPUTE_IV = deepcopy(FAKE_DISPUTE_II)
+FAKE_DISPUTE_IV["evidence"]["receipt"] = "file_4hshrsKatMEEd6736724HYAXyj"
+FAKE_DISPUTE_IV["status"] = "won"
+
+# case when dispute funds get reinstated (partial)
+FAKE_DISPUTE_V_PARTIAL = load_fixture("dispute_dp_funds_reinstated_full.json")
+FAKE_DISPUTE_V_PARTIAL["balance_transactions"][
+    1
+] = FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_PARTIAL
+
+
+# case when dispute funds get reinstated (full)
+FAKE_DISPUTE_V_FULL = load_fixture("dispute_dp_funds_reinstated_full.json")
+FAKE_DISPUTE_V_FULL["balance_transactions"][
+    1
+] = FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_FULL
 
 
 FAKE_PRODUCT = load_fixture("product_prod_fake1.json")
@@ -1748,6 +1768,18 @@ FAKE_FILEUPLOAD_ICON = {
     "url": "https://files.stripe.com/files/f_test_BTJFKcS7VDahgkjqw8EVNWlM",
 }
 
+FAKE_EVENT_FILE_CREATED = {
+    "id": "evt_1J5TusR44xKqawmIQVXSrGyf",
+    "object": "event",
+    "api_version": "2020-08-27",
+    "created": 1439229084,
+    "data": {"object": deepcopy(FAKE_FILEUPLOAD_ICON)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_sTSstDDIOpKi2w",
+    "type": "file.created",
+}
+
 
 FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED = dict(
     load_fixture("event_account_application_deauthorized.json")
@@ -1905,12 +1937,75 @@ FAKE_EVENT_DISPUTE_CREATED = {
     "object": "event",
     "api_version": "2017-08-15",
     "created": 1439229084,
-    "data": {"object": deepcopy(FAKE_DISPUTE)},
+    "data": {"object": deepcopy(FAKE_DISPUTE_I)},
     "livemode": False,
     "pending_webhooks": 0,
     "request": "req_6lsB7hkicwhaDj",
     "type": "charge.dispute.created",
 }
+
+
+FAKE_EVENT_DISPUTE_FUNDS_WITHDRAWN = {
+    "id": "evt_1JAyTxJSZQVUcJYgNk1Jqu8o",
+    "object": "event",
+    "api_version": "2020-08-27",
+    "created": 1439229084,
+    "data": {"object": deepcopy(FAKE_DISPUTE_II)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_6lsB7hkicwhaDj",
+    "type": "charge.dispute.funds_withdrawn",
+}
+
+
+FAKE_EVENT_DISPUTE_UPDATED = {
+    "id": "evt_1JAyTxJSZQVUcJYgNk1Jqu8o",
+    "object": "event",
+    "api_version": "2020-08-27",
+    "created": 1439229084,
+    "data": {"object": deepcopy(FAKE_DISPUTE_III)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_6lsB7hkicwhaDj",
+    "type": "charge.dispute.funds_withdrawn",
+}
+
+FAKE_EVENT_DISPUTE_CLOSED = {
+    "id": "evt_1JAyTxJSZQVUcJYgNk1Jqu8o",
+    "object": "event",
+    "api_version": "2020-08-27",
+    "created": 1439229084,
+    "data": {"object": deepcopy(FAKE_DISPUTE_IV)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_6lsB7hkicwhaDj",
+    "type": "charge.dispute.closed",
+}
+
+FAKE_EVENT_DISPUTE_FUNDS_REINSTATED_FULL = {
+    "id": "evt_1JAyTxJSZQVUcJYgNk1Jqu8o",
+    "object": "event",
+    "api_version": "2020-08-27",
+    "created": 1439229084,
+    "data": {"object": deepcopy(FAKE_DISPUTE_V_FULL)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_6lsB7hkicwhaDj",
+    "type": "charge.dispute.funds_reinstated",
+}
+
+FAKE_EVENT_DISPUTE_FUNDS_REINSTATED_PARTIAL = {
+    "id": "evt_1JAyTxJSZQVUcJYgNk1Jqu8o",
+    "object": "event",
+    "api_version": "2020-08-27",
+    "created": 1439229084,
+    "data": {"object": deepcopy(FAKE_DISPUTE_V_PARTIAL)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_6lsB7hkicwhaDj",
+    "type": "charge.dispute.funds_reinstated",
+}
+
 
 FAKE_EVENT_INVOICE_CREATED = {
     "id": "evt_187IHD2eZvKYlo2C6YKQi2eZ",
