@@ -996,22 +996,6 @@ class InvoiceItem(StripeModel):
                 cls._stripe_object_to_tax_rates(target_cls=TaxRate, data=data)
             )
 
-    @classmethod
-    def sync_from_stripe_data(cls, data):
-        invoice_data = data.get("invoice")
-
-        if invoice_data:
-            # sync the Invoice first if it doesn't yet exist in our DB
-            # to avoid recursive Charge/Invoice loop
-            invoice_id = cls._id_from_data(invoice_data)
-            if not Invoice.objects.filter(id=invoice_id).exists():
-                if invoice_id == invoice_data:
-                    # we only have the id, fetch the full data
-                    invoice_data = Invoice(id=invoice_id).api_retrieve()
-                Invoice.sync_from_stripe_data(data=invoice_data)
-
-        return super().sync_from_stripe_data(data)
-
     def __str__(self):
         return self.description
 
