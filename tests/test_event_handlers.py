@@ -28,6 +28,7 @@ from djstripe.models import (
     Transfer,
 )
 from djstripe.models.account import Account
+from djstripe.models.billing import TaxId
 from djstripe.models.payment_methods import BankAccount
 
 from . import (
@@ -87,6 +88,9 @@ from . import (
     FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED,
     FAKE_EVENT_SUBSCRIPTION_SCHEDULE_RELEASED,
     FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED,
+    FAKE_EVENT_TAX_ID_CREATED,
+    FAKE_EVENT_TAX_ID_DELETED,
+    FAKE_EVENT_TAX_ID_UPDATED,
     FAKE_EVENT_TRANSFER_CREATED,
     FAKE_EVENT_TRANSFER_DELETED,
     FAKE_EXPRESS_ACCOUNT,
@@ -108,6 +112,8 @@ from . import (
     FAKE_SUBSCRIPTION_CANCELED,
     FAKE_SUBSCRIPTION_III,
     FAKE_SUBSCRIPTION_SCHEDULE,
+    FAKE_TAX_ID,
+    FAKE_TAX_ID_UPDATED,
     FAKE_TRANSFER,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
@@ -1384,169 +1390,6 @@ class TestPlanEvents(EventTestCase):
             Plan.objects.get(id=FAKE_PLAN["id"])
 
 
-class TestSubscriptionScheduleEvents(EventTestCase):
-
-    # TODO: test the following subscription_schedule events:
-    #       * subscription_schedule.aborted
-    #       * subscription_schedule.completed
-    #       * subscription_schedule.expiring
-
-    @patch(
-        "stripe.SubscriptionSchedule.retrieve",
-        return_value=FAKE_SUBSCRIPTION_SCHEDULE,
-        autospec=True,
-    )
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER_II),
-        autospec=True,
-    )
-    def test_subscription_schedule_created(
-        self, customer_retrieve_mock, schedule_retrieve_mock
-    ):
-
-        event = Event.sync_from_stripe_data(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED)
-        event.invoke_webhook_handlers()
-
-        schedule = SubscriptionSchedule.objects.get(
-            id=FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED["data"]["object"]["id"]
-        )
-
-        assert (
-            schedule.id
-            == FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED["data"]["object"]["id"]
-        )
-        assert schedule.status == "not_started"
-
-    @patch("stripe.SubscriptionSchedule.retrieve", autospec=True)
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER_II),
-        autospec=True,
-    )
-    def test_subscription_schedule_canceled(
-        self, customer_retrieve_mock, schedule_retrieve_mock
-    ):
-
-        fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
-        fake_stripe_event["data"]["object"]["canceled_at"] = 1605058030
-        fake_stripe_event["data"]["object"]["status"] = "canceled"
-        fake_stripe_event["data"]["previous_attributes"] = {
-            "canceled_at": None,
-            "status": "not_started",
-        }
-
-        schedule_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
-
-        event = Event.sync_from_stripe_data(fake_stripe_event)
-        event.invoke_webhook_handlers()
-
-        schedule = SubscriptionSchedule.objects.get(
-            id=fake_stripe_event["data"]["object"]["id"]
-        )
-
-        assert schedule.status == "canceled"
-        assert schedule.canceled_at is not None
-
-        schedule_retrieve_mock.return_value = FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED[
-            "data"
-        ]["object"]
-
-        event = Event.sync_from_stripe_data(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED)
-        event.invoke_webhook_handlers()
-
-        schedule.refresh_from_db()
-
-        assert schedule.status == "canceled"
-        assert schedule.canceled_at is not None
-
-    @patch("stripe.SubscriptionSchedule.retrieve", autospec=True)
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER_II),
-        autospec=True,
-    )
-    def test_subscription_schedule_released(
-        self, customer_retrieve_mock, schedule_retrieve_mock
-    ):
-
-        fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
-        fake_stripe_event["data"]["object"]["released_at"] = 1605058030
-        fake_stripe_event["data"]["object"]["status"] = "released"
-        fake_stripe_event["data"]["previous_attributes"] = {
-            "released_at": None,
-            "status": "not_started",
-        }
-
-        schedule_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
-
-        event = Event.sync_from_stripe_data(fake_stripe_event)
-        event.invoke_webhook_handlers()
-
-        schedule = SubscriptionSchedule.objects.get(
-            id=fake_stripe_event["data"]["object"]["id"]
-        )
-
-        assert schedule.status == "released"
-        assert schedule.released_at is not None
-
-        schedule_retrieve_mock.return_value = FAKE_EVENT_SUBSCRIPTION_SCHEDULE_RELEASED[
-            "data"
-        ]["object"]
-
-        event = Event.sync_from_stripe_data(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_RELEASED)
-        event.invoke_webhook_handlers()
-
-        schedule.refresh_from_db()
-
-        assert schedule.status == "released"
-        assert schedule.released_at is not None
-
-    @patch("stripe.SubscriptionSchedule.retrieve", autospec=True)
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER_II),
-        autospec=True,
-    )
-    def test_subscription_schedule_updated(
-        self, customer_retrieve_mock, schedule_retrieve_mock
-    ):
-
-        schedule_retrieve_mock.return_value = FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED[
-            "data"
-        ]["object"]
-
-        event = Event.sync_from_stripe_data(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED)
-        event.invoke_webhook_handlers()
-
-        schedule = SubscriptionSchedule.objects.get(
-            id=FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED["data"]["object"]["id"]
-        )
-
-        assert schedule.status == "not_started"
-        assert schedule.released_at is None
-
-        fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
-        fake_stripe_event["data"]["object"]["released_at"] = 1605058030
-        fake_stripe_event["data"]["object"]["status"] = "released"
-        fake_stripe_event["data"]["previous_attributes"] = {
-            "released_at": None,
-            "status": "not_started",
-        }
-
-        schedule_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
-
-        event = Event.sync_from_stripe_data(fake_stripe_event)
-        event.invoke_webhook_handlers()
-
-        schedule = SubscriptionSchedule.objects.get(
-            id=fake_stripe_event["data"]["object"]["id"]
-        )
-
-        assert schedule.status == "released"
-        assert schedule.released_at is not None
-
-
 class TestPriceEvents(EventTestCase):
     @patch("stripe.Price.retrieve", autospec=True)
     @patch("stripe.Event.retrieve", autospec=True)
@@ -1725,40 +1568,6 @@ class TestPaymentMethodEvents(AssertStripeFksMixin, EventTestCase):
         )
 
 
-class TestTransferEvents(EventTestCase):
-    @patch("stripe.Transfer.retrieve", autospec=True)
-    @patch("stripe.Event.retrieve", autospec=True)
-    def test_transfer_created(self, event_retrieve_mock, transfer_retrieve_mock):
-        fake_stripe_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
-        event_retrieve_mock.return_value = fake_stripe_event
-        transfer_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
-
-        event = Event.sync_from_stripe_data(fake_stripe_event)
-        event.invoke_webhook_handlers()
-
-        transfer = Transfer.objects.get(id=fake_stripe_event["data"]["object"]["id"])
-        self.assertEqual(
-            transfer.amount,
-            fake_stripe_event["data"]["object"]["amount"] / Decimal("100"),
-        )
-
-    @patch("stripe.Transfer.retrieve", return_value=FAKE_TRANSFER, autospec=True)
-    def test_transfer_deleted(self, transfer_retrieve_mock):
-        event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
-        event.invoke_webhook_handlers()
-
-        Transfer.objects.get(id=FAKE_TRANSFER["id"])
-
-        event = self._create_event(FAKE_EVENT_TRANSFER_DELETED)
-        event.invoke_webhook_handlers()
-
-        with self.assertRaises(Transfer.DoesNotExist):
-            Transfer.objects.get(id=FAKE_TRANSFER["id"])
-
-        event = self._create_event(FAKE_EVENT_TRANSFER_DELETED)
-        event.invoke_webhook_handlers()
-
-
 class TestPaymentIntentEvents(EventTestCase):
     """Test case for payment intent event handling."""
 
@@ -1820,3 +1629,286 @@ class TestPaymentIntentEvents(EventTestCase):
                 ),
             )
         )
+
+
+class TestSubscriptionScheduleEvents(EventTestCase):
+
+    # TODO: test the following subscription_schedule events:
+    #       * subscription_schedule.aborted
+    #       * subscription_schedule.completed
+    #       * subscription_schedule.expiring
+
+    @patch(
+        "stripe.SubscriptionSchedule.retrieve",
+        return_value=FAKE_SUBSCRIPTION_SCHEDULE,
+        autospec=True,
+    )
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER_II),
+        autospec=True,
+    )
+    def test_subscription_schedule_created(
+        self, customer_retrieve_mock, schedule_retrieve_mock
+    ):
+
+        event = Event.sync_from_stripe_data(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED)
+        event.invoke_webhook_handlers()
+
+        schedule = SubscriptionSchedule.objects.get(
+            id=FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED["data"]["object"]["id"]
+        )
+
+        assert (
+            schedule.id
+            == FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED["data"]["object"]["id"]
+        )
+        assert schedule.status == "not_started"
+
+    @patch("stripe.SubscriptionSchedule.retrieve", autospec=True)
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER_II),
+        autospec=True,
+    )
+    def test_subscription_schedule_canceled(
+        self, customer_retrieve_mock, schedule_retrieve_mock
+    ):
+
+        fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
+        fake_stripe_event["data"]["object"]["canceled_at"] = 1605058030
+        fake_stripe_event["data"]["object"]["status"] = "canceled"
+        fake_stripe_event["data"]["previous_attributes"] = {
+            "canceled_at": None,
+            "status": "not_started",
+        }
+
+        schedule_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        schedule = SubscriptionSchedule.objects.get(
+            id=fake_stripe_event["data"]["object"]["id"]
+        )
+
+        assert schedule.status == "canceled"
+        assert schedule.canceled_at is not None
+
+        schedule_retrieve_mock.return_value = FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED[
+            "data"
+        ]["object"]
+
+        event = Event.sync_from_stripe_data(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED)
+        event.invoke_webhook_handlers()
+
+        schedule.refresh_from_db()
+
+        assert schedule.status == "canceled"
+        assert schedule.canceled_at is not None
+
+    @patch("stripe.SubscriptionSchedule.retrieve", autospec=True)
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER_II),
+        autospec=True,
+    )
+    def test_subscription_schedule_released(
+        self, customer_retrieve_mock, schedule_retrieve_mock
+    ):
+
+        fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
+        fake_stripe_event["data"]["object"]["released_at"] = 1605058030
+        fake_stripe_event["data"]["object"]["status"] = "released"
+        fake_stripe_event["data"]["previous_attributes"] = {
+            "released_at": None,
+            "status": "not_started",
+        }
+
+        schedule_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        schedule = SubscriptionSchedule.objects.get(
+            id=fake_stripe_event["data"]["object"]["id"]
+        )
+
+        assert schedule.status == "released"
+        assert schedule.released_at is not None
+
+        schedule_retrieve_mock.return_value = FAKE_EVENT_SUBSCRIPTION_SCHEDULE_RELEASED[
+            "data"
+        ]["object"]
+
+        event = Event.sync_from_stripe_data(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_RELEASED)
+        event.invoke_webhook_handlers()
+
+        schedule.refresh_from_db()
+
+        assert schedule.status == "released"
+        assert schedule.released_at is not None
+
+    @patch("stripe.SubscriptionSchedule.retrieve", autospec=True)
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER_II),
+        autospec=True,
+    )
+    def test_subscription_schedule_updated(
+        self, customer_retrieve_mock, schedule_retrieve_mock
+    ):
+
+        schedule_retrieve_mock.return_value = FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED[
+            "data"
+        ]["object"]
+
+        event = Event.sync_from_stripe_data(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED)
+        event.invoke_webhook_handlers()
+
+        schedule = SubscriptionSchedule.objects.get(
+            id=FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED["data"]["object"]["id"]
+        )
+
+        assert schedule.status == "not_started"
+        assert schedule.released_at is None
+
+        fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
+        fake_stripe_event["data"]["object"]["released_at"] = 1605058030
+        fake_stripe_event["data"]["object"]["status"] = "released"
+        fake_stripe_event["data"]["previous_attributes"] = {
+            "released_at": None,
+            "status": "not_started",
+        }
+
+        schedule_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        schedule = SubscriptionSchedule.objects.get(
+            id=fake_stripe_event["data"]["object"]["id"]
+        )
+
+        assert schedule.status == "released"
+        assert schedule.released_at is not None
+
+
+class TestTaxIdEvents(EventTestCase):
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Customer.retrieve_tax_id",
+        return_value=deepcopy(FAKE_TAX_ID),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
+    @patch(
+        "stripe.Event.retrieve",
+        return_value=deepcopy(FAKE_EVENT_TAX_ID_CREATED),
+        autospec=True,
+    )
+    def test_tax_id_created(
+        self, event_retrieve_mock, tax_id_retrieve_mock, customer_retrieve_mock
+    ):
+        event = Event.sync_from_stripe_data(FAKE_EVENT_TAX_ID_CREATED)
+        event.invoke_webhook_handlers()
+        tax_id = TaxId.objects.get()
+        self.assertEqual(tax_id.id, FAKE_TAX_ID["id"])
+
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Customer.retrieve_tax_id",
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
+    @patch(
+        "stripe.Event.retrieve",
+        autospec=True,
+    )
+    def test_tax_id_updated(
+        self, event_retrieve_mock, tax_id_retrieve_mock, customer_retrieve_mock
+    ):
+        tax_id_retrieve_mock.return_value = FAKE_TAX_ID
+
+        fake_stripe_create_event = deepcopy(FAKE_EVENT_TAX_ID_CREATED)
+        event = Event.sync_from_stripe_data(fake_stripe_create_event)
+        event.invoke_webhook_handlers()
+
+        tax_id_retrieve_mock.return_value = FAKE_TAX_ID_UPDATED
+        fake_stripe_update_event = deepcopy(FAKE_EVENT_TAX_ID_UPDATED)
+        event = Event.sync_from_stripe_data(fake_stripe_update_event)
+        event.invoke_webhook_handlers()
+
+        tax_id = TaxId.objects.get()
+        self.assertEqual(tax_id.id, FAKE_TAX_ID["id"])
+        self.assertEqual(tax_id.verification.get("status"), "verified")
+        self.assertEqual(tax_id.verification.get("verified_name"), "Test")
+
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Customer.retrieve_tax_id",
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
+    @patch(
+        "stripe.Event.retrieve",
+        autospec=True,
+    )
+    def test_tax_id_deleted(
+        self, event_retrieve_mock, tax_id_retrieve_mock, customer_retrieve_mock
+    ):
+        tax_id_retrieve_mock.return_value = FAKE_TAX_ID
+
+        fake_stripe_create_event = deepcopy(FAKE_EVENT_TAX_ID_CREATED)
+        event = Event.sync_from_stripe_data(fake_stripe_create_event)
+        event.invoke_webhook_handlers()
+
+        tax_id_retrieve_mock.return_value = FAKE_EVENT_TAX_ID_DELETED
+        fake_stripe_delete_event = deepcopy(FAKE_EVENT_TAX_ID_DELETED)
+        event = Event.sync_from_stripe_data(fake_stripe_delete_event)
+        event.invoke_webhook_handlers()
+
+        self.assertFalse(TaxId.objects.filter(id=FAKE_TAX_ID["id"]).exists())
+
+
+class TestTransferEvents(EventTestCase):
+    @patch("stripe.Transfer.retrieve", autospec=True)
+    @patch("stripe.Event.retrieve", autospec=True)
+    def test_transfer_created(self, event_retrieve_mock, transfer_retrieve_mock):
+        fake_stripe_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+        event_retrieve_mock.return_value = fake_stripe_event
+        transfer_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        transfer = Transfer.objects.get(id=fake_stripe_event["data"]["object"]["id"])
+        self.assertEqual(
+            transfer.amount,
+            fake_stripe_event["data"]["object"]["amount"] / Decimal("100"),
+        )
+
+    @patch("stripe.Transfer.retrieve", return_value=FAKE_TRANSFER, autospec=True)
+    def test_transfer_deleted(self, transfer_retrieve_mock):
+        event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
+        event.invoke_webhook_handlers()
+
+        Transfer.objects.get(id=FAKE_TRANSFER["id"])
+
+        event = self._create_event(FAKE_EVENT_TRANSFER_DELETED)
+        event.invoke_webhook_handlers()
+
+        with self.assertRaises(Transfer.DoesNotExist):
+            Transfer.objects.get(id=FAKE_TRANSFER["id"])
+
+        event = self._create_event(FAKE_EVENT_TRANSFER_DELETED)
+        event.invoke_webhook_handlers()
