@@ -16,29 +16,39 @@ from ..settings import djstripe_settings
 from .base import StripeBaseModel, StripeModel
 
 
-# TODO Add Tests
+# TODO Implement Full Webhook event support for ApplicationFee and ApplicationFee Refund Objects
 class ApplicationFee(StripeModel):
     """
     When you collect a transaction fee on top of a charge made for your
     user (using Connect), an ApplicationFee is created in your account.
 
+    Please note the model field charge exists on the Stripe Connected Account
+    while the application_fee modelfield on Charge model exists on the Platform Account!
+
     Stripe documentation: https://stripe.com/docs/api#application_fees
     """
 
     stripe_class = stripe.ApplicationFee
-
+    account = StripeForeignKey(
+        "Account",
+        on_delete=models.PROTECT,
+        related_name="application_fees",
+        help_text="ID of the Stripe account this fee was taken from.",
+    )
     amount = StripeQuantumCurrencyAmountField(help_text="Amount earned, in cents.")
     amount_refunded = StripeQuantumCurrencyAmountField(
         help_text="Amount in cents refunded (can be less than the amount attribute "
         "on the fee if a partial refund was issued)"
     )
     # TODO application = ...
+    # balance_transaction exists on the platform account
     balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.CASCADE,
         help_text="Balance transaction that describes the impact on your account"
         " balance.",
     )
+    # charge exists on the Stripe Connected Account and not the Platform Account
     charge = StripeForeignKey(
         "Charge",
         on_delete=models.CASCADE,
