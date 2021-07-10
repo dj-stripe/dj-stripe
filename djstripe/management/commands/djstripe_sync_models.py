@@ -51,6 +51,13 @@ class Command(BaseCommand):
             return False, "no stripe_class"
 
         if not hasattr(model.stripe_class, "list"):
+            # todo add UsageRecordSummary
+            if model in (
+                models.ApplicationFeeRefund,
+                models.TransferReversal,
+                models.TaxId,
+            ):
+                return True, ""
             return False, "no stripe_class.list"
 
         if model is models.UpcomingInvoice:
@@ -124,6 +131,9 @@ class Command(BaseCommand):
         except Exception as e:
             self.stderr.write(str(e))
 
+    # todo Handle syncing data for connected accounts as well. # https://stripe.com/docs/api/accounts/list
+    # ! Will need to re-run with different values of stripe_account
+    # todo handle supoorting double + nested fields like data.invoice.subscriptions.customer etc?
     def get_list_kwargs(self, model):
         """
         Returns a sequence of kwargs dicts to pass to model.api_list
@@ -135,26 +145,52 @@ class Command(BaseCommand):
         """
         all_list_kwargs = (
             [{"expand": [f"data.{k}" for k in model.expand_fields]}]
-            if getattr(models, "expand_fields", [])
-            else []
+            if getattr(model, "expand_fields", [])
+            else [{}]
         )
+
         if model is models.PaymentMethod:
             # special case
-            all_list_kwargs.extend(
-                (
-                    {"customer": stripe_customer.id, "type": "card"}
-                    for stripe_customer in models.Customer.api_list()
-                )
-            )
+            all_list_kwargs = [
+                {"customer": stripe_customer.id, "type": "card", **all_list_kwargs[0]}
+                for stripe_customer in models.Customer.api_list()
+            ]
+
         elif model is models.SubscriptionItem:
-            all_list_kwargs.extend(
-                (
-                    {"subscription": subscription.id}
-                    for subscription in models.Subscription.api_list()
-                )
-            )
+            all_list_kwargs = [
+                {"subscription": subscription.id, **all_list_kwargs[0]}
+                for subscription in models.Subscription.api_list()
+            ]
+
         elif model is models.CountrySpec:
             all_list_kwargs.extend(({"limit": 50},))
+
+        elif model is models.TransferReversal:
+            all_list_kwargs = [
+                {"id": transfer.id, **all_list_kwargs[0]}
+                for transfer in models.Transfer.api_list()
+            ]
+
+        elif model is models.ApplicationFeeRefund:
+            all_list_kwargs = [
+                {"id": fee.id, **all_list_kwargs[0]}
+                for fee in models.ApplicationFee.api_list()
+            ]
+        elif model is models.TaxId:
+            all_list_kwargs = [
+                {"id": customer.id, **all_list_kwargs[0]}
+                for customer in models.Customer.api_list()
+            ]
+
+        elif model is models.UsageRecord:
+            all_list_kwargs = [
+                {"id": subscription_item.id, **all_list_kwargs[0]}
+                for subscription in models.Subscription.api_list()
+                for subscription_item in models.SubscriptionItem.api_list(
+                    subscription=subscription.id
+                )
+            ]
+
         elif not all_list_kwargs:
             all_list_kwargs.append({})
 
