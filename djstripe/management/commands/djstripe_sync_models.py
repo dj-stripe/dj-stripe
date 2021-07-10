@@ -67,7 +67,7 @@ class Command(BaseCommand):
 
         should_sync, reason = self._should_sync_model(model)
         if not should_sync:
-            self.stdout.write(f"Skipping {model}: {reason}")
+            self.stderr.write(f"Skipping {model}: {reason}")
             return
 
         self.stdout.write("Syncing {}:".format(model_name))
@@ -92,7 +92,7 @@ class Command(BaseCommand):
                     )
 
                     # syncing BankAccount and Card objects of Stripe Connected Express and Custom Accounts
-                    self.sync_external_account_bank_accounts_and_cards(djstripe_obj)
+                    self.sync_bank_accounts_and_cards(djstripe_obj)
 
                 for stripe_obj in model.api_list(**list_kwargs):
                     count += 1
@@ -105,7 +105,7 @@ class Command(BaseCommand):
                         )
                     )
                     # syncing BankAccount and Card objects of Stripe Connected Express and Custom Accounts
-                    self.sync_external_account_bank_accounts_and_cards(djstripe_obj)
+                    self.sync_bank_accounts_and_cards(djstripe_obj)
 
         except Exception as e:
             self.stderr.write(str(e))
@@ -155,36 +155,52 @@ class Command(BaseCommand):
 
         return all_list_kwargs
 
-    def sync_external_account_bank_accounts_and_cards(self, instance):
+    def sync_bank_accounts_and_cards(self, instance):
+        """
+        Syncs Bank Accounts and Cards for both customers and all external accounts
+        """
         type = getattr(instance, "type", None)
-        id = instance.id
+        kwargs = {
+            "id": instance.id,
+            "api_key": djstripe_settings.STRIPE_SECRET_KEY,
+        }
 
         if type in (enums.AccountType.custom, enums.AccountType.express) and isinstance(
             instance, models.Account
         ):
+
             # fetch all Card and BankAccount objects associated with the instance
-            items = models.Account.stripe_class.list_external_accounts(
-                id,
-                api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            items = models.Account.stripe_class.list_external_accounts(**kwargs)
+
+            self.start_sync(items, instance)
+        elif isinstance(instance, models.Customer):
+            for object in ("card", "bank_account"):
+                kwargs["object"] = object
+
+                # fetch all Card and BankAccount objects associated with the instance
+                items = models.Customer.stripe_class.list_sources(**kwargs)
+
+                self.start_sync(items, instance)
+
+    def start_sync(self, items, instance):
+        bank_count = 0
+        card_count = 0
+        for item in items.auto_paging_iter():
+
+            if item.object == "bank_account":
+                model = models.BankAccount
+                bank_count += 1
+            elif item.object == "card":
+                model = models.Card
+                card_count += 1
+
+            item_obj = model.sync_from_stripe_data(item)
+
+            self.stdout.write(
+                f"\tSyncing {model._meta.verbose_name} ({instance}): id={item_obj.id}, pk={item_obj.pk}"
             )
-            bank_count = 0
-            card_count = 0
-            for item in items.auto_paging_iter():
 
-                if item.object == "bank_account":
-                    model = models.BankAccount
-                    bank_count += 1
-                elif item.object == "card":
-                    model = models.Card
-                    card_count += 1
-
-                item_obj = model.sync_from_stripe_data(item)
-
-                self.stdout.write(
-                    f"\tSyncing {model._meta.verbose_name} ({instance}): id={item_obj.id}, pk={item_obj.pk}"
-                )
-
-            if bank_count + card_count > 0:
-                self.stdout.write(
-                    f"\tSynced {bank_count} BankAccounts and {card_count} Cards"
-                )
+        if bank_count + card_count > 0:
+            self.stdout.write(
+                f"\tSynced {bank_count} BankAccounts and {card_count} Cards"
+            )
