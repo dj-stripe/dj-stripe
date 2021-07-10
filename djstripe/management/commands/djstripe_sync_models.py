@@ -95,29 +95,34 @@ class Command(BaseCommand):
                     self.sync_bank_accounts_and_cards(djstripe_obj)
 
                 for stripe_obj in model.api_list(**list_kwargs):
-                    count += 1
-                    djstripe_obj = model.sync_from_stripe_data(stripe_obj)
-                    self.stdout.write(
-                        "  id={id}, pk={pk} ({djstripe_obj})".format(
-                            id=djstripe_obj.id,
-                            pk=djstripe_obj.pk,
-                            djstripe_obj=djstripe_obj,
+                    # Skip model instances that throw an error
+                    try:
+                        djstripe_obj = model.sync_from_stripe_data(stripe_obj)
+                        self.stdout.write(
+                            "  id={id}, pk={pk} ({djstripe_obj})".format(
+                                id=djstripe_obj.id,
+                                pk=djstripe_obj.pk,
+                                djstripe_obj=djstripe_obj,
+                            )
                         )
+                        # syncing BankAccount and Card objects of Stripe Connected Express and Custom Accounts
+                        self.sync_bank_accounts_and_cards(djstripe_obj)
+                        count += 1
+                    except Exception as e:
+                        self.stderr.write(f"Skipping {stripe_obj.get('id')}: {e}")
+                        continue
+
+            if count == 0:
+                self.stdout.write("  (no results)")
+            else:
+                self.stdout.write(
+                    "  Synced {count} {model_name}".format(
+                        count=count, model_name=model_name
                     )
-                    # syncing BankAccount and Card objects of Stripe Connected Express and Custom Accounts
-                    self.sync_bank_accounts_and_cards(djstripe_obj)
+                )
 
         except Exception as e:
             self.stderr.write(str(e))
-
-        if count == 0:
-            self.stdout.write("  (no results)")
-        else:
-            self.stdout.write(
-                "  Synced {count} {model_name}".format(
-                    count=count, model_name=model_name
-                )
-            )
 
     def get_list_kwargs(self, model):
         """
