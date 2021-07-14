@@ -29,7 +29,7 @@ The full documentation is available [on Read the Docs](https://dj-stripe.readthe
 -   Django 2.2+
 -   Python 3.6+
 -   PostgreSQL engine (recommended) 9.5+
--   MySQL engine: MariaDB 10.2+ or MySQL 5.7+
+-   MySQL engine: MariaDB 10.2+ or MySQL 5.7+ (Django 3.2.5+ required for MySQL 8 support)
 -   SQLite: Not recommended in production. Version 3.26+ required.
 
 ## Quickstart
