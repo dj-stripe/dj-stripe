@@ -157,3 +157,14 @@ class TestSetStripeApiVersion(TestCase):
             version="foobar", validate=False
         )
         self.assertEqual("foobar", stripe.api_version)
+
+
+class TestObjectPatching(TestCase):
+    @patch.object(
+        settings.djstripe_settings,
+        "DJSTRIPE_WEBHOOK_URL",
+        return_value=r"^webhook/sample/$",
+    )
+    def test_object_patching(self, mock):
+        webhook_url = settings.djstripe_settings.DJSTRIPE_WEBHOOK_URL
+        self.assertTrue(webhook_url, r"^webhook/sample/$")

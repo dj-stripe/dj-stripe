@@ -42,10 +42,10 @@ class DjstripeSettings:
 
     # generic setter and deleter methods to ensure object patching works
     def __setattr__(self, name, value):
-        self.__dict__["name"] = value
+        self.__dict__[name] = value
 
     def __delattr__(self, name):
-        del self.__dict__["name"]
+        del self.__dict__[name]
 
     @property
     def SUBSCRIPTION_REDIRECT(self):
