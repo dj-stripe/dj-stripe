@@ -189,7 +189,7 @@ stores JSON and can be queried far moreconveniently. Django also supports [query
 JSONField](https://docs.djangoproject.com/en/3.1/topics/db/queries/#querying-jsonfield)
 with the ORM.
 
-## DJSTRIPE_WEBHOOK_URL (=r"^webhook/\$")
+## DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")
 
 This is where you can tell Stripe to send webhook responses. You can set this to what
 you want to prevent unnecessary hijinks from unfriendly people.
