@@ -752,6 +752,7 @@ class Migration(migrations.Migration):
                 (
                     "currency",
                     djstripe.fields.StripeCurrencyCodeField(
+                        blank=True,
                         default="",
                         help_text="The currency the customer can be charged in for recurring billing purposes",
                         max_length=3,
@@ -813,6 +814,7 @@ class Migration(migrations.Migration):
                 (
                     "subscriber",
                     models.ForeignKey(
+                        blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="djstripe_customers",
