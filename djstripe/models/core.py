@@ -614,6 +614,7 @@ class Customer(StripeModel):
         ),
     )
     currency = StripeCurrencyCodeField(
+        blank=True,
         default="",
         help_text="The currency the customer can be charged in for "
         "recurring billing purposes",
@@ -701,6 +702,7 @@ class Customer(StripeModel):
     # dj-stripe fields
     subscriber = models.ForeignKey(
         djstripe_settings.get_subscriber_model_string(),
+        blank=True,
         null=True,
         on_delete=models.SET_NULL,
         related_name="djstripe_customers",
