@@ -1325,6 +1325,10 @@ class Customer(StripeModel):
 # TODO Add Tests
 class Dispute(StripeModel):
     """
+    A dispute occurs when a customer questions your charge with their
+    card issuer. When this happens, you're given the opportunity to
+    respond to the dispute with evidence that shows that the charge is legitimate
+
     Stripe documentation: https://stripe.com/docs/api#disputes
     """
 
@@ -1339,6 +1343,26 @@ class Dispute(StripeModel):
             "the order is disputed)."
         )
     )
+    balance_transaction = StripeForeignKey(
+        "BalanceTransaction",
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="disputes",
+        help_text="Balance transaction that describes the impact on your "
+        "account balance.",
+    )
+    balance_transactions = JSONField(
+        default="[]",
+        help_text="List of 0, 1 or 2 Balance Transactions that show funds withdrawn and reinstated to your Stripe account as a result of this dispute.",
+    )
+    # charge is nullable to avoid infinite sync as Charge model has a dispute field as well
+    charge = StripeForeignKey(
+        "Charge",
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="disputes",
+        help_text="The charge that was disputed",
+    )
     currency = StripeCurrencyCodeField()
     evidence = JSONField(help_text="Evidence provided to respond to a dispute.")
     evidence_details = JSONField(help_text="Information about the evidence submission.")
@@ -1348,6 +1372,13 @@ class Dispute(StripeModel):
             "Once the payment has been fully refunded, no further funds will "
             "be withdrawn from your Stripe account as a result of this dispute."
         )
+    )
+    payment_intent = StripeForeignKey(
+        "PaymentIntent",
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="disputes",
+        help_text="The PaymentIntent that was disputed",
     )
     reason = StripeEnumField(enum=enums.DisputeReason)
     status = StripeEnumField(enum=enums.DisputeStatus)
