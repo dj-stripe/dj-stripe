@@ -6,7 +6,7 @@ from ..enums import APIKeyType
 from ..fields import JSONField, StripeCurrencyCodeField, StripeEnumField
 from ..settings import djstripe_settings
 from .api import APIKey
-from .base import StripeModel
+from .base import StripeModel, logger
 
 
 class Account(StripeModel):
@@ -201,7 +201,9 @@ class Account(StripeModel):
                     )
                 except stripe.error.PermissionError:
                     # No permission to retrieve the data with the key
-                    pass
+                    logger.warning(
+                        f"Cannot retrieve business branding {field} for acct {self.id} with the key."
+                    )
                 except stripe.error.InvalidRequestError as e:
                     if "a similar object exists in" in str(e):
                         # HACK around a Stripe bug.
