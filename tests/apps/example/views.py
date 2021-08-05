@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.views.generic import DetailView, FormView
+from django.views.generic.base import TemplateView
 
 import djstripe.models
 from djstripe.settings import djstripe_settings
@@ -17,6 +18,76 @@ logger = logging.getLogger(__name__)
 
 
 User = get_user_model()
+stripe.api_key = djstripe_settings.STRIPE_SECRET_KEY
+
+
+class CreateCheckoutSessionView(TemplateView):
+    """
+    Example View to demonstrate how to use dj-stripe to:
+
+     * Create a Stripe Checkout Session (for a new customer)
+     * Fill out Payment Form and Complete Payment
+
+    Redirects the User to Stripe Checkout Session.
+    This does a non-logged in purchase for the user using Stripe Checkout
+    """
+
+    template_name = "checkout.html"
+
+    def get_context_data(self, **kwargs):
+        """
+        Creates and returns a Stripe Checkout Session
+        """
+        # Get Parent Context
+        ctx = super().get_context_data(**kwargs)
+
+        # to initialise Stripe.js on the front end
+        ctx["STRIPE_PUBLIC_KEY"] = djstripe_settings.STRIPE_PUBLIC_KEY
+
+        success_url = self.request.build_absolute_uri(
+            reverse("djstripe_example:success")
+        )
+        cancel_url = self.request.build_absolute_uri(reverse("home"))
+
+        # ! Note that Stripe will always create a new Customer Object if customer id not provided
+        # ! even if customer_email is provided!
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            # payment_method_types=["bacs_debit"],  # for bacs_debit
+            payment_intent_data={
+                "setup_future_usage": "off_session",
+            },
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        # "currency": "gbp",  # for bacs_debit
+                        "unit_amount": 2000,
+                        "product_data": {
+                            "name": "Sample Product Name",
+                            "images": ["https://i.imgur.com/EHyR2nP.png"],
+                            "description": "Sample Description",
+                        },
+                    },
+                    "quantity": 1,
+                },
+            ],
+            mode="payment",
+            success_url=success_url,
+            cancel_url=cancel_url,
+        )
+
+        ctx["CHECKOUT_SESSION_ID"] = session.id
+
+        return ctx
+
+
+class CheckoutSessionSuccessView(TemplateView):
+    """
+    Template View for showing Checkout Payment Success
+    """
+
+    template_name = "checkout_success.html"
 
 
 class PurchaseSubscriptionView(FormView):
