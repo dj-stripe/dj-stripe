@@ -403,6 +403,13 @@ class SetupIntentAdmin(StripeModelAdmin):
     search_fields = ("customer__id", "status")
 
 
+@admin.register(models.Session)
+class SessionAdmin(StripeModelAdmin):
+    list_display = ("customer", "customer_email")
+    list_filter = ("customer", "mode")
+    search_fields = ("customer__id", "customer_email")
+
+
 @admin.register(models.Invoice)
 class InvoiceAdmin(StripeModelAdmin):
     list_display = ("total", "paid", "currency", "number", "customer", "due_date")
