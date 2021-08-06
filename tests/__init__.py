@@ -2006,6 +2006,18 @@ FAKE_EVENT_DISPUTE_FUNDS_REINSTATED_PARTIAL = {
     "type": "charge.dispute.funds_reinstated",
 }
 
+FAKE_EVENT_SESSION_COMPLETED = {
+    "id": "evt_1JAyTxJSZQVUcJYgNk1Jqu8o",
+    "object": "event",
+    "api_version": "2020-08-27",
+    "created": 1439229084,
+    "data": {"object": deepcopy(FAKE_SESSION_I)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_6lsB7hkicwhaDj",
+    "type": "checkout.session.completed",
+}
+
 
 FAKE_EVENT_INVOICE_CREATED = {
     "id": "evt_187IHD2eZvKYlo2C6YKQi2eZ",

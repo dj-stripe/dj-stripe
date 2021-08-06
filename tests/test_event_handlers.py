@@ -29,6 +29,7 @@ from djstripe.models import (
 )
 from djstripe.models.account import Account
 from djstripe.models.billing import TaxId
+from djstripe.models.checkout import Session
 from djstripe.models.core import File
 from djstripe.models.payment_methods import BankAccount
 
@@ -100,6 +101,7 @@ from . import (
     FAKE_EVENT_PRICE_CREATED,
     FAKE_EVENT_PRICE_DELETED,
     FAKE_EVENT_PRICE_UPDATED,
+    FAKE_EVENT_SESSION_COMPLETED,
     FAKE_EVENT_STANDARD_ACCOUNT_UPDATED,
     FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED,
     FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED,
@@ -124,6 +126,7 @@ from . import (
     FAKE_PLAN,
     FAKE_PRICE,
     FAKE_PRODUCT,
+    FAKE_SESSION_I,
     FAKE_STANDARD_ACCOUNT,
     FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_CANCELED,
@@ -746,6 +749,96 @@ class TestChargeEvents(EventTestCase):
             fake_stripe_event["data"]["object"]["amount"] / Decimal("100"),
         )
         self.assertEqual(charge.status, fake_stripe_event["data"]["object"]["status"])
+
+
+class TestCheckoutEvents(EventTestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username="pydanny", email="pydanny@gmail.com"
+        )
+        self.customer = FAKE_CUSTOMER.create_for_user(self.user)
+
+    @patch(
+        "stripe.checkout.Session.retrieve", return_value=FAKE_SESSION_I, autospec=True
+    )
+    @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=FAKE_PAYMENT_INTENT_I,
+        autospec=True,
+    )
+    @patch("stripe.Event.retrieve", autospec=True)
+    def test_checkout_session_completed(
+        self,
+        event_retrieve_mock,
+        payment_intent_retrieve_mock,
+        customer_retrieve_mock,
+        session_retrieve_mock,
+    ):
+        fake_stripe_event = deepcopy(FAKE_EVENT_SESSION_COMPLETED)
+        event_retrieve_mock.return_value = fake_stripe_event
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        session = Session.objects.get(id=fake_stripe_event["data"]["object"]["id"])
+        self.assertEqual(session.customer.id, self.customer.id)
+
+    @patch(
+        "stripe.checkout.Session.retrieve", return_value=FAKE_SESSION_I, autospec=True
+    )
+    @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=FAKE_PAYMENT_INTENT_I,
+        autospec=True,
+    )
+    @patch("stripe.Event.retrieve", autospec=True)
+    def test_checkout_session_async_payment_succeeded(
+        self,
+        event_retrieve_mock,
+        payment_intent_retrieve_mock,
+        customer_retrieve_mock,
+        session_retrieve_mock,
+    ):
+        fake_stripe_event = deepcopy(FAKE_EVENT_SESSION_COMPLETED)
+        fake_stripe_event["type"] = "checkout.session.async_payment_succeeded"
+
+        event_retrieve_mock.return_value = fake_stripe_event
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        session = Session.objects.get(id=fake_stripe_event["data"]["object"]["id"])
+        self.assertEqual(session.customer.id, self.customer.id)
+
+    @patch(
+        "stripe.checkout.Session.retrieve", return_value=FAKE_SESSION_I, autospec=True
+    )
+    @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=FAKE_PAYMENT_INTENT_I,
+        autospec=True,
+    )
+    @patch("stripe.Event.retrieve", autospec=True)
+    def test_checkout_session_async_payment_failed(
+        self,
+        event_retrieve_mock,
+        payment_intent_retrieve_mock,
+        customer_retrieve_mock,
+        session_retrieve_mock,
+    ):
+        fake_stripe_event = deepcopy(FAKE_EVENT_SESSION_COMPLETED)
+        fake_stripe_event["type"] = "checkout.session.async_payment_failed"
+
+        event_retrieve_mock.return_value = fake_stripe_event
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        session = Session.objects.get(id=fake_stripe_event["data"]["object"]["id"])
+        self.assertEqual(session.customer.id, self.customer.id)
 
 
 class TestCustomerEvents(EventTestCase):
