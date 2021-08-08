@@ -16,11 +16,39 @@ NOTE:
 import logging
 from enum import Enum
 
+from django.core.exceptions import ObjectDoesNotExist
+
+from djstripe.settings import djstripe_settings
+
 from . import models, webhooks
 from .enums import PayoutType, SourceType
 from .utils import convert_tstamp
 
 logger = logging.getLogger(__name__)
+
+
+def update_customer_helper(metadata, customer_id, subscriber_key):
+    """
+    A helper function that updates customer's subscriber and metadata fields
+    """
+
+    # only update customer.subscriber if both the customer and subscriber already exist
+    if (
+        subscriber_key not in ("", None)
+        and metadata.get(subscriber_key, "")
+        and customer_id
+    ):
+        try:
+            subscriber = djstripe_settings.get_subscriber_model().objects.get(
+                id=metadata.get(subscriber_key, "")
+            )
+            customer = models.Customer.objects.get(id=customer_id)
+            customer.subscriber = subscriber
+            customer.metadata = metadata
+            customer.save()
+
+        except ObjectDoesNotExist:
+            pass
 
 
 @webhooks.handler("customer")
@@ -32,6 +60,9 @@ def customer_webhook_handler(event):
     As customers are tied to local users, djstripe will not create customers that
     do not already exist locally.
 
+    And updates to the subscriber model and metadata fields of customer if present
+    in checkout.sessions metadata key.
+
     Docs and an example customer webhook response:
     https://stripe.com/docs/api#customer_object
     """
@@ -41,8 +72,13 @@ def customer_webhook_handler(event):
 
     if event.customer and target_object_type == "customer":
 
-        # As customers are tied to local users, djstripe will not create
-        # customers that do not already exist locally.
+        metadata = event.data.get("object", {}).get("metadata", {})
+        customer_id = event.data.get("object", {}).get("id", "")
+        subscriber_key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
+
+        # only update customer.subscriber if both the customer and subscriber already exist
+        update_customer_helper(metadata, customer_id, subscriber_key)
+
         _handle_crud_like_event(target_cls=models.Customer, event=event)
 
 
@@ -223,8 +259,27 @@ def dispute_webhook_handler(event):
         _handle_crud_like_event(target_cls=models.Dispute, event=event)
 
 
+@webhooks.handler("checkout")
+def checkout_webhook_handler(event):
+    """
+    Handle updates to Checkout Session objects
+    And updates to the subscriber model and metadata fields of customer if present
+    in checkout.sessions metadata key.
+
+    Please note djstripe doesn't create new subscriber and customer instances
+    - checkout: https://stripe.com/docs/api/checkout/sessions
+    """
+    metadata = event.data.get("object", {}).get("metadata", {})
+    customer_id = event.data.get("object", {}).get("customer", "")
+    subscriber_key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
+
+    # only update customer.subscriber if both the customer and subscriber already exist
+    update_customer_helper(metadata, customer_id, subscriber_key)
+
+    _handle_crud_like_event(target_cls=models.Session, event=event)
+
+
 @webhooks.handler(
-    "checkout",
     "coupon",
     "file",
     "invoice",
@@ -241,12 +296,11 @@ def dispute_webhook_handler(event):
 )
 def other_object_webhook_handler(event):
     """
-    Handle updates to checkout, coupon, file, invoice, invoiceitem, payment_intent,
+    Handle updates to coupon, file, invoice, invoiceitem, payment_intent,
     plan, product, setup_intent, subscription_schedule, source, tax_rate
     and transfer objects.
 
     Docs for:
-    - checkout: https://stripe.com/docs/api/checkout/sessions
     - coupon: https://stripe.com/docs/api/coupons
     - file: https://stripe.com/docs/api/files
     - invoice: https://stripe.com/docs/api/invoices
@@ -263,7 +317,6 @@ def other_object_webhook_handler(event):
     """
 
     target_cls = {
-        "checkout": models.Session,
         "coupon": models.Coupon,
         "file": models.File,
         "invoice": models.Invoice,
