@@ -79,6 +79,7 @@ from . import (
     FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE,
     FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED,
     FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED,
+    FAKE_EVENT_CUSTOMER_UPDATED,
     FAKE_EVENT_DISPUTE_CLOSED,
     FAKE_EVENT_DISPUTE_CREATED,
     FAKE_EVENT_DISPUTE_FUNDS_REINSTATED_FULL,
@@ -840,6 +841,44 @@ class TestCheckoutEvents(EventTestCase):
         session = Session.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(session.customer.id, self.customer.id)
 
+    @patch(
+        "stripe.checkout.Session.retrieve", return_value=FAKE_SESSION_I, autospec=True
+    )
+    @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=FAKE_PAYMENT_INTENT_I,
+        autospec=True,
+    )
+    @patch("stripe.Event.retrieve", autospec=True)
+    def test_checkout_session_completed_customer_subscriber_added(
+        self,
+        event_retrieve_mock,
+        payment_intent_retrieve_mock,
+        customer_retrieve_mock,
+        session_retrieve_mock,
+    ):
+        # because create_for_user method adds subscriber
+        self.customer.subcriber = None
+        self.customer.save()
+
+        fake_stripe_event = deepcopy(FAKE_EVENT_SESSION_COMPLETED)
+        fake_stripe_event["data"]["object"]["metadata"] = {
+            "djstripe_subscriber": self.user.id
+        }
+        event_retrieve_mock.return_value = fake_stripe_event
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        # refresh self.customer from db
+        self.customer.refresh_from_db()
+
+        session = Session.objects.get(id=fake_stripe_event["data"]["object"]["id"])
+        self.assertEqual(session.customer.id, self.customer.id)
+        self.assertEqual(self.customer.subscriber, self.user)
+        self.assertEqual(self.customer.metadata, {"djstripe_subscriber": self.user.id})
+
 
 class TestCustomerEvents(EventTestCase):
     def setUp(self):
@@ -864,6 +903,64 @@ class TestCustomerEvents(EventTestCase):
         self.assertEqual(
             customer.currency, fake_stripe_event["data"]["object"]["currency"]
         )
+
+    @patch("stripe.Customer.retrieve", autospec=True)
+    @patch("stripe.Event.retrieve", autospec=True)
+    def test_customer_metadata_created(
+        self, event_retrieve_mock, customer_retrieve_mock
+    ):
+
+        fake_customer = deepcopy(FAKE_CUSTOMER)
+        fake_customer["metadata"] = {"djstripe_subscriber": self.user.id}
+
+        fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_CREATED)
+
+        fake_stripe_event["data"]["object"] = fake_customer
+
+        event_retrieve_mock.return_value = fake_stripe_event
+        customer_retrieve_mock.return_value = fake_customer
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        customer = Customer.objects.get(id=fake_stripe_event["data"]["object"]["id"])
+        self.assertEqual(
+            customer.balance, fake_stripe_event["data"]["object"]["balance"]
+        )
+        self.assertEqual(
+            customer.currency, fake_stripe_event["data"]["object"]["currency"]
+        )
+        self.assertEqual(customer.subscriber, self.user)
+        self.assertEqual(customer.metadata, {"djstripe_subscriber": self.user.id})
+
+    @patch("stripe.Customer.retrieve", autospec=True)
+    @patch("stripe.Event.retrieve", autospec=True)
+    def test_customer_metadata_updated(
+        self, event_retrieve_mock, customer_retrieve_mock
+    ):
+
+        fake_customer = deepcopy(FAKE_CUSTOMER)
+        fake_customer["metadata"] = {"djstripe_subscriber": self.user.id}
+
+        fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_UPDATED)
+
+        fake_stripe_event["data"]["object"] = fake_customer
+
+        event_retrieve_mock.return_value = fake_stripe_event
+        customer_retrieve_mock.return_value = fake_customer
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        customer = Customer.objects.get(id=fake_stripe_event["data"]["object"]["id"])
+        self.assertEqual(
+            customer.balance, fake_stripe_event["data"]["object"]["balance"]
+        )
+        self.assertEqual(
+            customer.currency, fake_stripe_event["data"]["object"]["currency"]
+        )
+        self.assertEqual(customer.subscriber, self.user)
+        self.assertEqual(customer.metadata, {"djstripe_subscriber": self.user.id})
 
     @patch(
         "stripe.Customer.retrieve_source",
