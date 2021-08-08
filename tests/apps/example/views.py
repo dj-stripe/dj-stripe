@@ -26,6 +26,7 @@ class CreateCheckoutSessionView(TemplateView):
     Example View to demonstrate how to use dj-stripe to:
 
      * Create a Stripe Checkout Session (for a new customer)
+     * Add SUBSCRIBER_CUSTOMER_KEY to metadata to populate customer.subscriber model field
      * Fill out Payment Form and Complete Payment
 
     Redirects the User to Stripe Checkout Session.
@@ -48,6 +49,20 @@ class CreateCheckoutSessionView(TemplateView):
             reverse("djstripe_example:success")
         )
         cancel_url = self.request.build_absolute_uri(reverse("home"))
+
+        try:
+            id = djstripe_settings.get_subscriber_model().objects.first().id
+
+        except AttributeError:
+            id = (
+                djstripe_settings.get_subscriber_model()
+                .objects.create(username="sample@sample.com", email="sample@sample.com")
+                .id
+            )
+
+        # example of how to insert the SUBSCRIBER_CUSTOMER_KEY: id in the metadata
+        # to add customer.subscriber to the newly created/updated customer.
+        metadata = {f"{djstripe_settings.SUBSCRIBER_CUSTOMER_KEY}": id}
 
         # ! Note that Stripe will always create a new Customer Object if customer id not provided
         # ! even if customer_email is provided!
@@ -75,6 +90,7 @@ class CreateCheckoutSessionView(TemplateView):
             mode="payment",
             success_url=success_url,
             cancel_url=cancel_url,
+            metadata=metadata,
         )
 
         ctx["CHECKOUT_SESSION_ID"] = session.id
