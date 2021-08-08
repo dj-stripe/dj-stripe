@@ -1877,6 +1877,10 @@ FAKE_EVENT_CUSTOMER_CREATED = {
     "type": "customer.created",
 }
 
+FAKE_EVENT_CUSTOMER_UPDATED = deepcopy(FAKE_EVENT_CUSTOMER_CREATED)
+FAKE_EVENT_CUSTOMER_UPDATED["type"] = "customer.updated"
+
+
 FAKE_EVENT_CUSTOMER_DELETED = deepcopy(FAKE_EVENT_CUSTOMER_CREATED)
 FAKE_EVENT_CUSTOMER_DELETED.update(
     {"id": "evt_38DHch3whaDvKYlo2jksfsFFxy", "type": "customer.deleted"}
