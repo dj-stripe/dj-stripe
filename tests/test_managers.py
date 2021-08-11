@@ -16,9 +16,9 @@ from . import (
     FAKE_PLAN,
     FAKE_PLAN_II,
     FAKE_PRODUCT,
+    FAKE_STANDARD_ACCOUNT,
     FAKE_TRANSFER,
-    FAKE_TRANSFER_II,
-    FAKE_TRANSFER_III,
+    IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 )
 
 
@@ -149,10 +149,32 @@ class SubscriptionManagerTest(TestCase):
 
 
 class TransferManagerTest(TestCase):
-    def test_transfer_summary(self):
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
+    def test_transfer_summary(
+        self, account_retrieve_mock, transfer__attach_object_post_save_hook_mock
+    ):
+        def FAKE_TRANSFER_III():
+            data = deepcopy(FAKE_TRANSFER)
+            data["id"] = "tr_17O4U52eZvKYlo2CmyYbDAEy"
+            data["amount"] = 19010
+            data["created"] = 1451560845
+            return data
+
+        def FAKE_TRANSFER_II():
+            data = deepcopy(FAKE_TRANSFER)
+            data["id"] = "tr_16hTzv2eZvKYlo2CWuyMmuvV"
+            data["amount"] = 2000
+            data["created"] = 1440420000
+            return data
+
         Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER))
-        Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER_II))
-        Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER_III))
+        Transfer.sync_from_stripe_data(FAKE_TRANSFER_II())
+        Transfer.sync_from_stripe_data(FAKE_TRANSFER_III())
 
         self.assertEqual(Transfer.objects.during(2015, 8).count(), 2)
 
