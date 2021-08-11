@@ -115,7 +115,7 @@ class Migration(migrations.Migration):
                 (
                     "expires_at",
                     djstripe.fields.StripeDateTimeField(
-                        help_text="Time at which the link expires."
+                        blank=True, help_text="Time at which the link expires.", null=True
                     ),
                 ),
                 (

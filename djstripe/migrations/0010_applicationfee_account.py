@@ -10,7 +10,7 @@ import djstripe.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("djstripe", "0009_alter_filelink_expires_at"),
+        ("djstripe", "0008_2_5"),
     ]
 
     operations = [
