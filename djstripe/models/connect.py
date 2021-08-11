@@ -196,11 +196,16 @@ class Transfer(StripeModel):
         " balance.",
     )
     currency = StripeCurrencyCodeField()
-    # TODO: Link destination to Card, Account, or Bank Account Models
-    destination = StripeIdField(
-        help_text="ID of the bank account, card, or Stripe account the transfer was "
-        "sent to."
+
+    destination = StripeForeignKey(
+        "Account",
+        null=True,
+        on_delete=models.PROTECT,
+        related_name="transfers",
+        help_text="ID of the Stripe account the transfer was sent to.",
     )
+
+    # todo implement payment model (for some reason py ids are showing up in the charge model)
     destination_payment = StripeIdField(
         null=True,
         blank=True,
@@ -244,6 +249,20 @@ class Transfer(StripeModel):
         # No Reversal
         return f"{self.human_readable_amount}"
 
+    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+        """
+        Iterate over reversals on the Transfer object to create and/or sync
+        TransferReversal objects
+        """
+
+        super()._attach_objects_post_save_hook(
+            cls, data, pending_relations=pending_relations
+        )
+
+        # Transfer Reversals exist as a list on the Transfer Object
+        for reversals_data in data.get("reversals").auto_paging_iter():
+            TransferReversal.sync_from_stripe_data(reversals_data)
+
 
 # TODO Add Tests
 class TransferReversal(StripeModel):
@@ -251,6 +270,10 @@ class TransferReversal(StripeModel):
     Stripe documentation: https://stripe.com/docs/api#transfer_reversals
     """
 
+    expand_fields = ["balance_transaction", "transfer"]
+
+    # TransferReversal classmethods are derived from
+    # and attached to the stripe.Transfer class
     stripe_class = stripe.Transfer
 
     amount = StripeQuantumCurrencyAmountField(help_text="Amount, in cents.")
@@ -273,3 +296,68 @@ class TransferReversal(StripeModel):
 
     def __str__(self):
         return str(self.transfer)
+
+    @classmethod
+    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        """
+        Call the stripe API's create operation for this model.
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        """
+
+        if not kwargs.get("id"):
+            raise KeyError("Transfer Object ID is missing")
+
+        try:
+            Transfer.objects.get(id=kwargs["id"])
+        except Transfer.DoesNotExist:
+            raise
+
+        return stripe.Transfer.create_reversal(api_key=api_key, **kwargs)
+
+    def api_retrieve(self, api_key=None, stripe_account=None):
+        """
+        Call the stripe API's retrieve operation for this model.
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        :param stripe_account: The optional connected account \
+            for which this request is being made.
+        :type stripe_account: string
+        """
+        nested_id = self.id
+        id = self.transfer.id
+
+        # Prefer passed in stripe_account if set.
+        if not stripe_account:
+            stripe_account = self._get_stripe_account_id(api_key)
+
+        return stripe.Transfer.retrieve_reversal(
+            id=id,
+            nested_id=nested_id,
+            api_key=api_key or self.default_api_key,
+            expand=self.expand_fields,
+            stripe_account=stripe_account,
+        )
+
+    @classmethod
+    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        """
+        Call the stripe API's list operation for this model.
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        See Stripe documentation for accepted kwargs for each object.
+        :returns: an iterator over all items in the query
+        """
+        return stripe.Transfer.list_reversals(
+            api_key=api_key, **kwargs
+        ).auto_paging_iter()
+
+    @classmethod
+    def is_valid_object(cls, data):
+        """
+        Returns whether the data is a valid object for the class
+        """
+        return "object" in data and data["object"] == "transfer_reversal"
