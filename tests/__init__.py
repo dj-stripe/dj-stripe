@@ -1276,6 +1276,7 @@ class CustomerDict(dict):
 FAKE_CUSTOMER = CustomerDict(load_fixture("customer_cus_6lsBvm5rJ0zyHc.json"))
 
 
+# Customer with multiple subscriptions (all licensed usagetype)
 FAKE_CUSTOMER_II = CustomerDict(load_fixture("customer_cus_4UbFSo9tl62jqj.json"))
 
 
@@ -1437,6 +1438,88 @@ FAKE_INVOICE_III = InvoiceDict(
         "webhooks_delivered_at": 1439426955,
     }
 )
+
+FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE = deepcopy(FAKE_SUBSCRIPTION_METERED)
+FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["customer"] = FAKE_CUSTOMER_II["id"]
+
+
+FAKE_SUBSCRIPTION_ITEM = {
+    "id": "si_JiphMAMFxZKW8s",
+    "object": "subscription_item",
+    "metadata": {},
+    "billing_thresholds": "",
+    "created": 1441907581,
+    "plan": deepcopy(FAKE_PLAN_METERED),
+    "price": deepcopy(FAKE_PRICE_METERED),
+    "quantity": 1,
+    "subscription": FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"],
+    "tax_rates": [],
+}
+
+
+FAKE_INVOICE_METERED_SUBSCRIPTION = InvoiceDict(
+    {
+        "id": "in_1JGGM6JSZQVUcJYgpWqfBOIl",
+        "livemode": False,
+        "created": 1439425915,
+        "metadata": {},
+        "description": "",
+        "amount_due": "1.05",
+        "amount_paid": "1.05",
+        "amount_remaining": "0.00",
+        "application_fee_amount": None,
+        "attempt_count": 1,
+        "attempted": True,
+        "auto_advance": False,
+        "collection_method": "charge_automatically",
+        "currency": "usd",
+        "customer": FAKE_CUSTOMER_II["id"],
+        "object": "invoice",
+        "charge": None,
+        "discount": None,
+        "due_date": None,
+        "ending_balance": 0,
+        "lines": {
+            "data": [
+                {
+                    "amount": 2000,
+                    "id": FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"],
+                    "object": "line_item",
+                    "currency": "usd",
+                    "description": None,
+                    "discountable": True,
+                    "livemode": True,
+                    "metadata": {},
+                    "period": {"start": 1442111228, "end": 1444703228},
+                    "plan": deepcopy(FAKE_PLAN_METERED),
+                    "proration": False,
+                    "quantity": 1,
+                    "subscription": FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"],
+                    "subscription_item": FAKE_SUBSCRIPTION_ITEM["id"],
+                    "type": "subscription",
+                }
+            ],
+            "total_count": 1,
+            "object": "list",
+            "url": "/v1/invoices/in_1JGGM6JSZQVUcJYgpWqfBOIl/lines",
+        },
+        "next_payment_attempt": None,
+        "number": "84DE1540-0004",
+        "paid": True,
+        "period_end": 1439424571,
+        "period_start": 1436746171,
+        "receipt_number": None,
+        "starting_balance": 0,
+        "statement_descriptor": None,
+        "subscription": FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"],
+        "subtotal": "1.00",
+        "tax": None,
+        "tax_percent": None,
+        "total": "1.00",
+        "webhooks_delivered_at": 1439426955,
+    }
+)
+
 
 FAKE_UPCOMING_INVOICE = InvoiceDict(
     {
@@ -1716,33 +1799,28 @@ FAKE_TRANSFER_WITH_1_REVERSAL = {
     "source_type": "bank_account",
 }
 
-# FAKE_TRANSFER_III = {
-#     "id": "tr_17O4U52eZvKYlo2CmyYbDAEy",
-#     "object": "transfer",
-#     "amount": 19010,
-#     "amount_reversed": 0,
-#     "application_fee_amount": None,
-#     "balance_transaction": deepcopy(FAKE_BALANCE_TRANSACTION_IV),
-#     "bank_account": deepcopy(FAKE_BANK_ACCOUNT_II),
-#     "created": 1451560845,
-#     "currency": "usd",
-#     "date": 1451560845,
-#     "description": "Transfer+for+test@example.com",
-#     "destination": "ba_17O4Tz2eZvKYlo2CMYsxroV5",
-#     "livemode": False,
-#     "metadata": {"foo2": "bar2"},
-#     "recipient": "rp_17O4U42eZvKYlo2CLk4upfDE",
-#     "reversals": {
-#         "object": "list",
-#         "total_count": 0,
-#         "has_more": False,
-#         "url": "/v1/transfers/tr_17O4U52eZvKYlo2CmyYbDAEy/reversals",
-#         "data": [],
-#     },
-#     "reversed": False,
-#     "source_transaction": None,
-#     "source_type": "card",
-# }
+
+FAKE_USAGE_RECORD = {
+    "id": "mbur_1JPJz2JSZQVUcJYgK4otTE2V",
+    "livemode": False,
+    "object": "usage_record",
+    "quantity": 100,
+    "subscription_item": FAKE_SUBSCRIPTION_ITEM["id"],
+    "timestamp": 1629174774,
+    "action": "increment",
+}
+
+
+class UsageRecordSummaryDict(StripeItem):
+    def __init__(self, *args, **kwargs):
+        """Match Stripe's behavior: return a stripe iterable on `invoice.lines`."""
+        super().__init__(*args, **kwargs)
+
+
+FAKE_USAGE_RECORD_SUMMARY = UsageRecordSummaryDict(
+    load_fixture("usage_record_summary_sis_fakefakefakefakefake0001.json")
+)
+
 
 FAKE_ACCOUNT = {
     "id": "acct_1032D82eZvKYlo2C",
