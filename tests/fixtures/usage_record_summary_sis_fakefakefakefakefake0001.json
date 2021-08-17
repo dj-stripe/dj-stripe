@@ -1,0 +1,31 @@
+{
+    "data": [
+      {
+        "id": "sis_1JPOIXJSZQVUcJYgoaYmbznL",
+        "invoice": null,
+        "livemode": false,
+        "object": "usage_record_summary",
+        "period": {
+          "end": null,
+          "start": 1627015586
+        },
+        "subscription_item": "si_JiphMAMFxZKW8s",
+        "total_usage": 700
+      },
+      {
+        "id": "sis_1JGGM6JSZQVUcJYgCljH2Mkl",
+        "invoice": "in_1JGGM6JSZQVUcJYgpWqfBOIl",
+        "livemode": false,
+        "object": "usage_record_summary",
+        "period": {
+          "end": 1627015586,
+          "start": 1624423771
+        },
+        "subscription_item": "si_JiphMAMFxZKW8s",
+        "total_usage": 0
+      }
+    ],
+    "has_more": false,
+    "object": "list",
+    "url": "/v1/subscription_items/si_JiphMAMFxZKW8s/usage_record_summaries"
+  }
