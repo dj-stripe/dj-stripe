@@ -51,11 +51,11 @@ class Command(BaseCommand):
             return False, "no stripe_class"
 
         if not hasattr(model.stripe_class, "list"):
-            # todo add UsageRecordSummary
             if model in (
                 models.ApplicationFeeRefund,
                 models.TransferReversal,
                 models.TaxId,
+                models.UsageRecordSummary,
             ):
                 return True, ""
             return False, "no stripe_class.list"
@@ -182,7 +182,7 @@ class Command(BaseCommand):
                 for customer in models.Customer.api_list()
             ]
 
-        elif model is models.UsageRecord:
+        elif model is models.UsageRecordSummary:
             all_list_kwargs = [
                 {"id": subscription_item.id, **all_list_kwargs[0]}
                 for subscription in models.Subscription.api_list()
