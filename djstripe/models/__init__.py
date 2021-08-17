@@ -13,6 +13,7 @@ from .billing import (
     TaxRate,
     UpcomingInvoice,
     UsageRecord,
+    UsageRecordSummary,
 )
 from .checkout import Session
 from .connect import (
@@ -90,5 +91,6 @@ __all__ = [
     "TransferReversal",
     "UpcomingInvoice",
     "UsageRecord",
+    "UsageRecordSummary",
     "WebhookEventTrigger",
 ]

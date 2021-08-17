@@ -547,3 +547,13 @@ class ApplicationFeeAdmin(StripeModelAdmin):
 @admin.register(models.ApplicationFeeRefund)
 class ApplicationFeeReversalAdmin(StripeModelAdmin):
     list_display = ("amount", "fee")
+
+
+@admin.register(models.UsageRecord)
+class UsageRecordAdmin(StripeModelAdmin):
+    list_display = ("quantity", "subscription_item", "timestamp")
+
+
+@admin.register(models.UsageRecordSummary)
+class UsageRecordSummaryAdmin(StripeModelAdmin):
+    list_display = ("invoice", "subscription_item", "total_usage")
