@@ -5,6 +5,7 @@ import decimal
 from copy import deepcopy
 from unittest.mock import ANY, patch
 
+import pytest
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.utils import timezone
@@ -1486,7 +1487,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
-    def test_subscribe_price_string(
+    def test_subscribe_price_string_new_style(
         self,
         product_retrieve_mock,
         customer_retrieve_mock,
@@ -1496,7 +1497,38 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(price, expected_blank_fks={})
 
-        self.customer.subscribe(price=price.id)
+        self.customer.subscribe(items=[{"price": price.id}])
+
+    @patch(
+        "stripe.Subscription.create",
+        return_value=deepcopy(FAKE_SUBSCRIPTION),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    def test_subscribe_price_string_old_style(
+        self,
+        product_retrieve_mock,
+        customer_retrieve_mock,
+        subscription_create_mock,
+    ):
+        price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
+
+        self.assert_fks(price, expected_blank_fks={})
+
+        # ensure DeprecationWarning is triggered
+        with pytest.warns(DeprecationWarning) as recorded_warning:
+            self.customer.subscribe(price=price.id)
+
+        assert len(recorded_warning) == 1
+        assert (
+            "not be accepting price (or price id)"
+            in recorded_warning[0].message.args[0]
+        )
 
     @patch("stripe.Subscription.create", autospec=True)
     @patch(
@@ -1505,7 +1537,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
-    def test_subscription_shortcut_with_multiple_subscriptions(
+    def test_subscription_shortcut_with_multiple_subscriptions_old_style(
         self, product_retrieve_mock, customer_retrieve_mock, subscription_create_mock
     ):
         price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
@@ -1521,7 +1553,45 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         ]
 
         self.customer.subscribe(price=price)
-        self.customer.subscribe(price=price)
+        # ensure DeprecationWarning is triggered
+        with pytest.warns(DeprecationWarning) as recorded_warning:
+            self.customer.subscribe(price=price)
+
+        assert len(recorded_warning) == 1
+        assert (
+            "not be accepting price (or price id)"
+            in recorded_warning[0].message.args[0]
+        )
+
+        self.assertEqual(2, self.customer.subscriptions.count())
+        self.assertEqual(2, len(self.customer.valid_subscriptions))
+
+        with self.assertRaises(MultipleSubscriptionException):
+            self.customer.subscription
+
+    @patch("stripe.Subscription.create", autospec=True)
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    def test_subscription_shortcut_with_multiple_subscriptions_new_style(
+        self, product_retrieve_mock, customer_retrieve_mock, subscription_create_mock
+    ):
+        price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
+
+        self.assert_fks(price, expected_blank_fks={})
+
+        subscription_fake_duplicate = deepcopy(FAKE_SUBSCRIPTION)
+        subscription_fake_duplicate["id"] = "sub_6lsC8pt7IcF8jd"
+
+        subscription_create_mock.side_effect = [
+            deepcopy(FAKE_SUBSCRIPTION),
+            subscription_fake_duplicate,
+        ]
+
+        self.customer.subscribe(items=[{"price": price}, {"price": price}])
 
         self.assertEqual(2, self.customer.subscriptions.count())
         self.assertEqual(2, len(self.customer.valid_subscriptions))
@@ -1561,7 +1631,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 autospec=True,
                 side_effect=[fake_subscription],
             ):
-                self.customer.subscribe(price=price)
+                self.customer.subscribe(items=[{"price": price}])
 
         self.assertEqual(3, self.customer.subscriptions.count())
         self.assertEqual(1, len(self.customer.valid_subscriptions))
@@ -1705,7 +1775,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
-    def test_is_subscribed_to_with_product(
+    def test_is_subscribed_to_with_product_old_style(
         self, product_retrieve_mock, customer_retrieve_mock, subscription_create_mock
     ):
         price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
@@ -1718,7 +1788,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         subscription_create_mock.return_value = subscription_fake
 
-        self.customer.subscribe(price=price)
+        self.customer.subscribe(items=[{"price": price}])
 
         assert self.customer.is_subscribed_to(product)
 
@@ -1729,7 +1799,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
-    def test_is_subscribed_to_with_product_string(
+    def test_is_subscribed_to_with_product_new_style(
         self, product_retrieve_mock, customer_retrieve_mock, subscription_create_mock
     ):
         price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
@@ -1742,7 +1812,63 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         subscription_create_mock.return_value = subscription_fake
 
-        self.customer.subscribe(price=price)
+        self.customer.subscribe(items=[{"price": price}])
+
+        assert self.customer.is_subscribed_to(product)
+
+    @patch("stripe.Subscription.create", autospec=True)
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    def test_is_subscribed_to_with_product_string_new_style(
+        self, product_retrieve_mock, customer_retrieve_mock, subscription_create_mock
+    ):
+        price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
+        product = Product.sync_from_stripe_data(deepcopy(FAKE_PRODUCT))
+
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription_fake["current_period_end"] = datetime_to_unix(
+            timezone.now() + timezone.timedelta(days=7)
+        )
+
+        subscription_create_mock.return_value = subscription_fake
+
+        self.customer.subscribe(items=[{"price": price}])
+
+        assert self.customer.is_subscribed_to(product.id)
+
+    @patch("stripe.Subscription.create", autospec=True)
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    def test_is_subscribed_to_with_product_string_old_style(
+        self, product_retrieve_mock, customer_retrieve_mock, subscription_create_mock
+    ):
+        price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
+        product = Product.sync_from_stripe_data(deepcopy(FAKE_PRODUCT))
+
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription_fake["current_period_end"] = datetime_to_unix(
+            timezone.now() + timezone.timedelta(days=7)
+        )
+
+        subscription_create_mock.return_value = subscription_fake
+
+        # ensure DeprecationWarning is triggered
+        with pytest.warns(DeprecationWarning) as recorded_warning:
+            self.customer.subscribe(price=price)
+
+        assert len(recorded_warning) == 1
+        assert (
+            "not be accepting price (or price id)"
+            in recorded_warning[0].message.args[0]
+        )
 
         assert self.customer.is_subscribed_to(product.id)
 
@@ -1776,7 +1902,7 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
-    def test_subscribe_plan_string(
+    def test_subscribe_plan_string_new_style(
         self,
         product_retrieve_mock,
         customer_retrieve_mock,
@@ -1786,7 +1912,38 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(plan, expected_blank_fks={})
 
-        self.customer.subscribe(plan=plan.id)
+        self.customer.subscribe(items=[{"plan": plan.id}])
+
+    @patch(
+        "stripe.Subscription.create",
+        return_value=deepcopy(FAKE_SUBSCRIPTION),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    def test_subscribe_plan_string_old_style(
+        self,
+        product_retrieve_mock,
+        customer_retrieve_mock,
+        subscription_create_mock,
+    ):
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+
+        self.assert_fks(plan, expected_blank_fks={})
+
+        # ensure DeprecationWarning is triggered
+        with pytest.warns(DeprecationWarning) as recorded_warning:
+            self.customer.subscribe(plan=plan.id)
+
+        assert len(recorded_warning) == 1
+        assert (
+            "not be accepting price (or price id)"
+            in recorded_warning[0].message.args[0]
+        )
 
     @patch("stripe.Subscription.create", autospec=True)
     @patch(
@@ -1810,8 +1967,7 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
             subscription_fake_duplicate,
         ]
 
-        self.customer.subscribe(plan=plan)
-        self.customer.subscribe(plan=plan)
+        self.customer.subscribe(items=[{"plan": plan}, {"plan": plan}])
 
         self.assertEqual(2, self.customer.subscriptions.count())
         self.assertEqual(2, len(self.customer.valid_subscriptions))
@@ -1851,7 +2007,7 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
                 autospec=True,
                 side_effect=[fake_subscription],
             ):
-                self.customer.subscribe(plan=plan)
+                self.customer.subscribe(items=[{"plan": plan}])
 
         self.assertEqual(3, self.customer.subscriptions.count())
         self.assertEqual(1, len(self.customer.valid_subscriptions))
