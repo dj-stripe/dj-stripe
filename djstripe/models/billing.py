@@ -1454,9 +1454,15 @@ class Subscription(StripeModel):
     objects = SubscriptionManager()
 
     def __str__(self):
-        return "{customer} on {plan}".format(
-            customer=str(self.customer), plan=str(self.plan)
-        )
+
+        subscriptions_lst = self.customer._get_valid_subscriptions()
+        products_lst = [
+            subscription.plan.product.name
+            for subscription in subscriptions_lst
+            if subscription and subscription.plan
+        ]
+
+        return f"{self.customer} on {' and '.join(products_lst)}"
 
     def update(
         self,
