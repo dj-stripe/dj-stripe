@@ -2,6 +2,7 @@
 dj-stripe Subscription Model Tests.
 """
 from copy import deepcopy
+from datetime import datetime
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
@@ -22,6 +23,7 @@ from . import (
     FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_CANCELED,
     FAKE_SUBSCRIPTION_II,
+    FAKE_SUBSCRIPTION_III,
     FAKE_SUBSCRIPTION_METERED,
     FAKE_SUBSCRIPTION_MULTI_PLAN,
     FAKE_SUBSCRIPTION_NOT_PERIOD_CURRENT,
@@ -32,6 +34,74 @@ from . import (
 
 # TODO: test with Prices instead of Plans when creating Subscriptions
 # with Prices is fully supported
+
+
+class SubscriptionStrTest(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username="pydanny", email="pydanny@gmail.com"
+        )
+        self.customer = FAKE_CUSTOMER_II.create_for_user(self.user)
+
+    @patch("djstripe.models.billing.Subscription._api_create", autospec=True)
+    @patch(
+        "stripe.Plan.retrieve",
+        side_effect=[deepcopy(FAKE_PLAN), deepcopy(FAKE_PLAN_II)],
+        autospec=True,
+    )
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER_II),
+        autospec=True,
+    )
+    def test___str__(
+        self,
+        customer_retrieve_mock,
+        product_retrieve_mock,
+        plan_retrieve_mock,
+        subscription_creation_mock,
+    ):
+
+        subscription_fake_1 = deepcopy(FAKE_SUBSCRIPTION_III)
+        subscription_fake_1["current_period_end"] += int(
+            datetime.timestamp(timezone.now())
+        )
+        subscription_fake_2 = deepcopy(FAKE_SUBSCRIPTION_II)
+        subscription_fake_2["current_period_end"] += int(
+            datetime.timestamp(timezone.now())
+        )
+        subscription_fake_2["customer"] = self.customer.id
+
+        subscription_creation_mock.side_effect = [
+            subscription_fake_1,
+            subscription_fake_2,
+        ]
+
+        # sync subscriptions (to update the changes just made)
+        Subscription.sync_from_stripe_data(subscription_fake_1)
+        Subscription.sync_from_stripe_data(subscription_fake_2)
+
+        # refresh self.customer from db
+        self.customer.refresh_from_db()
+
+        # subscribe the customer to 2 plans
+        self.customer.subscribe(plan=FAKE_PLAN["id"])
+        self.customer.subscribe(plan=FAKE_PLAN_II["id"])
+
+        subscriptions_lst = self.customer._get_valid_subscriptions()
+        products_lst = [
+            subscription.plan.product.name
+            for subscription in subscriptions_lst
+            if subscription and subscription.plan
+        ]
+
+        self.assertEqual(
+            str(Subscription.objects.get(id=subscription_fake_2["id"])),
+            f"{self.customer} on {' and '.join(products_lst)}",
+        )
 
 
 class SubscriptionTest(AssertStripeFksMixin, TestCase):
@@ -63,8 +133,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription_fake["cancel_at"] = 1624553655
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
-
-        self.assertEqual(str(subscription), f"{self.user} on {subscription.plan}")
 
         self.assertEqual(subscription.default_tax_rates.count(), 1)
         self.assertEqual(
