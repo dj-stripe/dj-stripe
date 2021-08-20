@@ -1100,6 +1100,61 @@ FAKE_SUBSCRIPTION_METERED = SubscriptionDict(
     }
 )
 
+
+FAKE_SUBSCRIPTION_ITEM_METERED = {
+    "id": "si_JiphMAMFxZKW8s",
+    "object": "subscription_item",
+    "metadata": {},
+    "billing_thresholds": "",
+    "created": 1441907581,
+    "plan": deepcopy(FAKE_PLAN_METERED),
+    "price": deepcopy(FAKE_PRICE_METERED),
+    "quantity": 1,
+    "subscription": FAKE_SUBSCRIPTION_METERED["id"],
+    "tax_rates": [],
+}
+
+FAKE_SUBSCRIPTION_ITEM_MULTI_PLAN = {
+    "id": "si_JiphMAMFxZKW8s",
+    "object": "subscription_item",
+    "metadata": {},
+    "billing_thresholds": "",
+    "created": 1441907581,
+    "plan": deepcopy(FAKE_PLAN),
+    "price": deepcopy(FAKE_PRICE),
+    "quantity": 1,
+    "subscription": FAKE_SUBSCRIPTION_MULTI_PLAN["id"],
+    "tax_rates": [],
+}
+
+FAKE_SUBSCRIPTION_ITEM_TAX_RATES = {
+    "id": "si_JiphMAMFxZKW8s",
+    "object": "subscription_item",
+    "metadata": {},
+    "billing_thresholds": "",
+    "created": 1441907581,
+    "plan": deepcopy(FAKE_PLAN_II),
+    "price": deepcopy(FAKE_PRICE_II),
+    "quantity": 1,
+    "subscription": FAKE_SUBSCRIPTION_II["id"],
+    "tax_rates": [
+        {
+            "id": "txr_fakefakefakefakefake0001",
+            "object": "tax_rate",
+            "active": True,
+            "created": 1593225980,
+            "description": None,
+            "display_name": "VAT",
+            "inclusive": True,
+            "jurisdiction": "Example1",
+            "livemode": False,
+            "metadata": {"djstripe_test_fake_id": "txr_fakefakefakefakefake0001"},
+            "percentage": 15.0,
+        }
+    ],
+}
+
+
 FAKE_SUBSCRIPTION_SCHEDULE = {
     "id": "sub_sched_1Hm7q6Fz0jfFqjGs2OxOSCzD",
     "object": "subscription_schedule",
