@@ -1665,7 +1665,6 @@ class Subscription(StripeModel):
         )
 
 
-# TODO Add Tests
 class SubscriptionItem(StripeModel):
     """
     Subscription items allow you to create customer subscriptions
