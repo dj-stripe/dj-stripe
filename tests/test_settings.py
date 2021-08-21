@@ -126,13 +126,14 @@ class TestGetStripeApiVersion(TestCase):
     def test_with_default(self):
         self.assertEqual(
             settings.djstripe_settings.DEFAULT_STRIPE_API_VERSION,
-            settings.djstripe_settings.get_stripe_api_version(),
+            settings.djstripe_settings.STRIPE_API_VERSION,
         )
 
     @override_settings(STRIPE_API_VERSION="2016-03-07")
     def test_with_override(self):
         self.assertEqual(
-            "2016-03-07", settings.djstripe_settings.get_stripe_api_version()
+            "2016-03-07",
+            settings.djstripe_settings.STRIPE_API_VERSION,
         )
 
 
