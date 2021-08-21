@@ -15,7 +15,7 @@ def stripe_temporary_api_version(version, validate=True):
     The original value is restored as soon as context exits.
     """
 
-    old_version = djstripe_settings.get_stripe_api_version()
+    old_version = djstripe_settings.STRIPE_API_VERSION
 
     try:
         djstripe_settings.set_stripe_api_version(version, validate=validate)

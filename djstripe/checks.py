@@ -52,7 +52,7 @@ def check_stripe_api_version(app_configs=None, **kwargs):
 
     messages = []
     default_version = djstripe_settings.DEFAULT_STRIPE_API_VERSION
-    version = djstripe_settings.get_stripe_api_version()
+    version = djstripe_settings.STRIPE_API_VERSION
 
     if not validate_stripe_api_version(version):
         msg = "Invalid Stripe API version: {}".format(version)

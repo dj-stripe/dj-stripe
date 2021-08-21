@@ -147,6 +147,12 @@ class DjstripeSettings:
             STRIPE_PUBLIC_KEY = getattr(settings, "STRIPE_TEST_PUBLIC_KEY", "")
         return STRIPE_PUBLIC_KEY
 
+    @property
+    def STRIPE_API_VERSION(self):
+        """Get the desired API version to use for Stripe requests."""
+        version = getattr(settings, "STRIPE_API_VERSION", stripe.api_version)
+        return version or self.DEFAULT_STRIPE_API_VERSION
+
     def get_callback_function(self, setting_name, default=None):
         """
         Resolve a callback function based on a setting name.
@@ -254,13 +260,6 @@ class DjstripeSettings:
 
         return subscriber_model
 
-    # TODO convert to STRIPE_API_VERSION property
-    def get_stripe_api_version(self):
-        """Get the desired API version to use for Stripe requests."""
-        version = getattr(settings, "STRIPE_API_VERSION", stripe.api_version)
-        return version or self.DEFAULT_STRIPE_API_VERSION
-
-    # TODO convert to setter for STRIPE_API_VERSION property
     def set_stripe_api_version(self, version=None, validate=True):
         """
         Set the desired API version to use for Stripe requests.
@@ -270,7 +269,7 @@ class DjstripeSettings:
         :param validate: If True validate the value for the specified version).
         :type validate: ``bool``
         """
-        version = version or self.get_stripe_api_version()
+        version = version or self.STRIPE_API_VERSION
 
         if validate:
             valid = validate_stripe_api_version(version)
