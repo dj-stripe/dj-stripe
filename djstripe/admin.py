@@ -495,14 +495,14 @@ class PaymentMethodAdmin(StripeModelAdmin):
 class CardAdmin(StripeModelAdmin):
     list_display = ("customer", "account")
     list_select_related = ("customer", "customer__subscriber", "account")
-    search_fields = ("customer__id", "account_id")
+    search_fields = ("customer__id", "account__id")
 
 
 @admin.register(models.BankAccount)
 class BankAccountAdmin(StripeModelAdmin):
     list_display = ("customer", "account")
     list_select_related = ("customer", "customer__subscriber", "account")
-    search_fields = ("customer__id", "account_id")
+    search_fields = ("customer__id", "account__id")
 
 
 @admin.register(models.Subscription)
