@@ -15,7 +15,7 @@ class TestStripeModel(StripeModel):
     pass
 
 
-class StripeModelExceptionsTest(TestCase):
+class TestStripeModelExceptions(TestCase):
     def test_no_object_value(self):
         # Instantiate a stripeobject model class
         class BasicModel(StripeModel):
