@@ -92,6 +92,6 @@ jobs:
         python -m pip install --upgrade pip setuptools wheel
         python -m pip install tox codecov
     - name: Test with tox
-      run: tox -e postgres,postgres-nativejson
+      run: tox
     - name: Check test coverage
       run: codecov
