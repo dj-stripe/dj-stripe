@@ -193,7 +193,9 @@ class Account(StripeModel):
 
         # Retrieve and save the Files in the settings.branding object.
         for field in "icon", "logo":
-            file_upload_id = self.settings.get("branding", {}).get(field)
+            file_upload_id = self.settings and self.settings.get("branding", {}).get(
+                field
+            )
             if file_upload_id:
                 try:
                     File.sync_from_stripe_data(
