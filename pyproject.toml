@@ -38,16 +38,18 @@ exclude = [
 
 [tool.poetry.dependencies]
 python = "^3.6.2"
-Django = ">=2.2"
+django = ">=2.2"
 jsonfield = ">=3.0"
 stripe = ">=2.48.0"
 mkdocs = {version = "^1.1.2", optional = true}
 mkautodoc = {version = "^0.1.0", optional = true}
 
+
 [tool.poetry.dev-dependencies]
 black = "^21.5b1"
 djangorestframework = "^3.11.0"
 psycopg2 = "^2.8.5"
+mysqlclient = ">=1.4.0"
 flake8 = "^3.9.2"
 isort = "^5.8.0"
 pytest = "^6.2.4"
