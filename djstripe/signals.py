@@ -5,13 +5,14 @@ Stripe docs for Webhooks: https://stripe.com/docs/webhooks
 """
 from django.dispatch import Signal
 
-webhook_processing_error = Signal(providing_args=["data", "exception"])
+# providing_args=["data", "exception"]
+webhook_processing_error = Signal()
 
 # A signal for each Event type. See https://stripe.com/docs/api/events/types
 
 WEBHOOK_SIGNALS = dict(
-    [
-        (hook, Signal(providing_args=["event"]))
+    [  # providing_args=["event"]
+        (hook, Signal())
         for hook in [
             # Update this by copy-pasting the "enabled_events" enum values from
             # https://raw.githubusercontent.com/stripe/openapi/master/openapi/spec3.json
