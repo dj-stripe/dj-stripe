@@ -99,7 +99,6 @@ Assuming the tests are run against PostgreSQL:
 
 ## Funding and Support
 
-[![Stripe Logo](./logos/stripe_blurple.svg)](https://stripe.com)
 
 You can now become a sponsor to dj-stripe with [GitHub Sponsors](https://github.com/sponsors/dj-stripe).
 
@@ -126,29 +125,3 @@ img[alt="Stripe Logo"] {
 </style>
 
 [![Stripe Logo](./logos/stripe_blurple.svg)](https://stripe.com)
-
-<!--
-AUTODOC SETUP: Do not remove the piece of code below.
-
-We use mkautodoc (https://github.com/tomchristie/mkautodoc) throughout the documentation.
-It works by importing, at docs build time, various attributes from our codebase and
-inspecting its docstrings, members etc.
-However, throughout our codebase, we call various pieces of Django's machinery. As you
-might know, this requires calling django.setup() beforehand…
-
-Autodoc has no way to run code at initialization time. So, as one of the ugliest
-workarounds ever written, we force import a member of docs.django_settings initializer,
-which runs django.setup() when imported.
-
-We do this in the README.md so that it's done as the very first processed document.
-
-Also see: https://github.com/tomchristie/mkautodoc/issues/16
--->
-
-<style type="text/css">
-/* Hide the hack signature from the index. */
-.autodoc { display: none; }
-</style>
-
-
-::: docs.django_settings.setup
