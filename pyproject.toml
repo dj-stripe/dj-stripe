@@ -47,6 +47,7 @@ mkautodoc = {version = "^0.1.0", optional = true}
 coverage = "^5.5"
 
 
+
 [tool.poetry.dev-dependencies]
 black = "^21.5b1"
 djangorestframework = "^3.11.0"
