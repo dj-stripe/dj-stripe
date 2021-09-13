@@ -17,7 +17,7 @@ markdown_extensions:
   - mkautodoc
 
 nav:
-  - Home: index.md
+  - Home: README.md
   - Sponsors: project/sponsors.md
   - Getting Started:
     - Installation: installation.md

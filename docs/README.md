@@ -1,4 +1,4 @@
-# dj-stripe
+# dj-stripe - Django + Stripe Made Easy
 
 [![Documentation](https://readthedocs.org/projects/dj-stripe/badge/)](https://dj-stripe.readthedocs.io/)
 [![Sponsor dj-stripe](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub)](https://github.com/sponsors/dj-stripe)
@@ -22,7 +22,8 @@ The full documentation is available [on Read the Docs](https://dj-stripe.readthe
 -   Payment Methods and Payment Intents (SCA support)
 -   Support for multiple accounts and API keys
 -   Stripe Connect (partial support)
--   Tested with Stripe API `2020-08-27` (see [API versions](https://dj-stripe.readthedocs.io/en/latest/api_versions/))
+-   Tested with Stripe API `2020-08-27` (see [API versions](api_versions.md))
+
 
 ## Requirements
 
@@ -31,6 +32,8 @@ The full documentation is available [on Read the Docs](https://dj-stripe.readthe
 -   PostgreSQL engine (recommended) 9.5+
 -   MySQL engine: MariaDB 10.2+ or MySQL 5.7+ (Django 3.2.5+ required for MySQL 8 support)
 -   SQLite: Not recommended in production. Version 3.26+ required.
+
+
 
 ## Quickstart
 
@@ -92,9 +95,11 @@ Assuming the tests are run against PostgreSQL:
 
 [See release notes on Read the Docs](https://dj-stripe.readthedocs.io/en/latest/history/2_5_0/).
 
-# Funding this project
 
-[![Stripe Logo](./docs/logos/stripe_blurple.svg)](https://stripe.com)
+
+## Funding and Support
+
+[![Stripe Logo](./logos/stripe_blurple.svg)](https://stripe.com)
 
 You can now become a sponsor to dj-stripe with [GitHub Sponsors](https://github.com/sponsors/dj-stripe).
 
@@ -102,15 +107,48 @@ We've been bringing dj-stripe to the world for over 7 years and are excited to b
 dedicating some real resources to the project.
 
 Your sponsorship helps us keep a team of maintainers actively working to improve dj-stripe and
-ensure it stays up-to-date with the latest Stripe changes. If you're using dj-stripe in a commercial
-capacity and have the ability to start a sponsorship, we'd greatly appreciate the contribution.
+ensure it stays up-to-date with the latest Stripe changes.
 
-All contributions through GitHub sponsors flow into our [Open Collective](https://opencollective.com/dj-stripe),
-which holds our funds and keeps an open ledger on how donations are spent.
+If you use dj-stripe commercially, we would encourage you to invest in its continued
+development by [signing up for a paid plan](https://github.com/sponsors/dj-stripe).
+Corporate sponsors [receive priority support and development time](project/support.md).
 
-## Similar libraries
+All contributions through GitHub sponsors flow into our
+[Open Collective](https://opencollective.com/dj-stripe), which holds our funds and keeps
+an open ledger on how donations are spent.
 
--   [dj-paypal](https://github.com/HearthSim/dj-paypal)
-    ([PayPal](https://www.paypal.com/))
--   [dj-paddle](https://github.com/paddle-python/dj-paddle)
-    ([Paddle](https://paddle.com/))
+### Our Gold sponsors
+
+<style>
+img[alt="Stripe Logo"] {
+    max-width: 250px;
+}
+</style>
+
+[![Stripe Logo](./logos/stripe_blurple.svg)](https://stripe.com)
+
+<!--
+AUTODOC SETUP: Do not remove the piece of code below.
+
+We use mkautodoc (https://github.com/tomchristie/mkautodoc) throughout the documentation.
+It works by importing, at docs build time, various attributes from our codebase and
+inspecting its docstrings, members etc.
+However, throughout our codebase, we call various pieces of Django's machinery. As you
+might know, this requires calling django.setup() beforehand…
+
+Autodoc has no way to run code at initialization time. So, as one of the ugliest
+workarounds ever written, we force import a member of docs.django_settings initializer,
+which runs django.setup() when imported.
+
+We do this in the README.md so that it's done as the very first processed document.
+
+Also see: https://github.com/tomchristie/mkautodoc/issues/16
+-->
+
+<style type="text/css">
+/* Hide the hack signature from the index. */
+.autodoc { display: none; }
+</style>
+
+
+::: docs.django_settings.setup
