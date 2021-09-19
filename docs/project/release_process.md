@@ -108,7 +108,7 @@ trigger the readthedocs build
 ## Configure readthedocs
 
 If this is this is a new stable branch then do the following on
-<https://readthedocs.org/dashboard/dj-stripe/versions/>
+<https://readthedocs.org/projects/dj-stripe/versions/>
 
 -   Find the new `stable/MAJOR.MINOR` branch name and mark it as active
     (and then save).

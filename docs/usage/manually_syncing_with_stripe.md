@@ -6,25 +6,39 @@ circumstances you may want to manually sync Stripe API data as well.
 
 ## Command line
 
-You can sync your database with stripe using the manage command
-`djstripe_sync_models`, e.g. to populate an empty database from an
-existing Stripe account.
+```{eval-rst}
 
-    ./manage.py djstripe_sync_models
+You can sync your database with stripe using the management command :py:mod:`djstripe.management.commands.djstripe_sync_models` ``djstripe_sync_models``, e.g. to populate an empty database from an existing Stripe account.
+
+```
+
+```sh
+
+./manage.py djstripe_sync_models
+
+```
 
 With no arguments this will sync all supported models, or a list of
-models to sync can be provided.
+models to sync can also be provided.
 
-    ./manage.py djstripe_sync_models Invoice Subscription
+```sh
 
+./manage.py djstripe_sync_models Invoice Subscription
+
+```
 Note that this may be redundant since we recursively sync related
 objects.
 
-You can manually reprocess events using the management commands
-`djstripe_process_events`. By default this processes all events, but
+```{eval-rst}
+
+You can manually reprocess events using the management command :py:mod:`djstripe.management.commands.djstripe_process_events`
+``djstripe_process_events``. By default this processes all events, but
 options can be passed to limit the events processed. Note the Stripe API
 documents a limitation where events are only guaranteed to be available
 for 30 days.
+
+```
+
 
 ```sh
     # all events
@@ -45,8 +59,14 @@ To sync in code, for example if you write to the Stripe API and want to
 work with the resulting dj-stripe object without having to wait for the
 webhook trigger.
 
-This can be done using the classmethod `sync_from_stripe_data` that
+
+```{eval-rst}
+
+This can be done using the classmethod :py:func:`djstripe.models.base.StripeModel.sync_from_stripe_data` ``sync_from_stripe_data`` that
 exists on all dj-stripe model classes.
+
+```
+
 
 E.g. creating a product using the Stripe API, and then syncing the API
 return data to Django using dj-stripe:

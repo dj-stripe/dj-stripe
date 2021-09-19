@@ -22,7 +22,7 @@ For this reason it is best to assume that only the default version is supported.
 For more information on API versioning, see the [stripe
 documentation](https://stripe.com/docs/upgrades).
 
-See also [API Versions](../api_versions.md).
+{ref}`API Versions <A note on Stripe API versions>`
 
 ## DJSTRIPE_FOREIGN_KEY_TO_FIELD
 

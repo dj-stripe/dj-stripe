@@ -1,8 +1,15 @@
 # Subscribing a customer to one or more prices (or plans)
 
 For your convenience, dj-stripe provides a
-`djstripe.models.Customer.subscribe` method that will try to charge the
+````{note}
+```{eval-rst}
+
+    :py:func:`djstripe.models.Customer.subscribe` (``subscribe()``)
+```
+method that will try to charge the
 customer immediately unless you specify `charge_immediately=False`
+````
+
 
 ```py
 # Recommended Approach to use items dict with Prices
@@ -42,7 +49,7 @@ customer = Customer.objects.first()
 customer.subscribe(plan=plan_1)
 ```
 
-However in some cases `djstripe.models.Customer.subscribe` might not
+However in some cases ``subscribe()`` might not
 support all the arguments you need for your implementation. When this
 happens you can just call the official `stripe.Customer.subscribe()`.
 
@@ -64,4 +71,11 @@ instead of
 customer.add_card(stripe_source)
 ```
 
-in the above example. See `djstripe.models.Customer.add_payment_method`.
+in the above example.
+
+````{tip}
+```{eval-rst}
+    Also checkout :py:func:`djstripe.models.Customer.add_payment_method`
+    (``add_payment_method()``)
+```
+````

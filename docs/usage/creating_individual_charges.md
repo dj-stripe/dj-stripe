@@ -1,8 +1,13 @@
 # Creating individual charges
 
-On the subscriber's customer object, use the `charge` method to generate a
-Stripe charge. In this example, we're using the user named `admin` as the
+```{eval-rst}
+On the subscriber's customer object, use the :py:func:`djstripe.models.Customer.charge` ``charge`` method to generate a
+Stripe charge. In this example, we're using the user named ``admin`` as the
 subscriber.
+
+```
+
+
 
 ```py
 from decimal import Decimal
