@@ -4536,7 +4536,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         default="",
                         enum=djstripe.enums.PayoutFailureCode,
-                        help_text="Error code explaining reason for transfer failure if available. See https://stripe.com/docs/api/python#transfer_failures.",
+                        help_text="Error code explaining reason for transfer failure if available. See https://stripe.com/docs/api?lang=python#transfer_failures.",
                         max_length=23,
                     ),
                 ),

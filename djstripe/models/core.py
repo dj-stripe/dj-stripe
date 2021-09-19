@@ -93,7 +93,7 @@ class Charge(StripeModel):
     retrieve and refund individual charges as well as list all charges. Charges
     are identified by a unique random ID.
 
-    Stripe documentation: https://stripe.com/docs/api/python#charges
+    Stripe documentation: https://stripe.com/docs/api?lang=python#charges
     """
 
     stripe_class = stripe.Charge
@@ -472,7 +472,6 @@ class Product(StripeModel):
     """
     Stripe documentation:
     - https://stripe.com/docs/api#products
-    - https://stripe.com/docs/api#service_products
     """
 
     stripe_class = stripe.Product
@@ -592,7 +591,7 @@ class Customer(StripeModel):
     Customer objects allow you to perform recurring charges and track multiple
     charges that are associated with the same customer.
 
-    Stripe documentation: https://stripe.com/docs/api/python#customers
+    Stripe documentation: https://stripe.com/docs/api?lang=python#customers
     """
 
     stripe_class = stripe.Customer
@@ -1596,7 +1595,7 @@ class Event(StripeModel):
 
 class File(StripeModel):
     """
-    Stripe documentation: https://stripe.com/docs/api#file_uploads
+    Stripe documentation: https://stripe.com/docs/api/files
     """
 
     stripe_class = stripe.File
@@ -2057,7 +2056,7 @@ class Payout(StripeModel):
         blank=True,
         help_text=(
             "Error code explaining reason for transfer failure if available. "
-            "See https://stripe.com/docs/api/python#transfer_failures."
+            "See https://stripe.com/docs/api?lang=python#transfer_failures."
         ),
     )
     failure_message = models.TextField(

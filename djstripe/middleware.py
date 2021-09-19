@@ -1,5 +1,4 @@
-"""
-dj-stripe middleware
+"""dj-stripe middleware
 """
 from django.utils.deprecation import MiddlewareMixin
 
