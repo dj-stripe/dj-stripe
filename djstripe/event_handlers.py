@@ -122,13 +122,13 @@ def customer_discount_webhook_handler(event):
 def customer_source_webhook_handler(event):
     """Handle updates to customer payment-source objects.
 
-    Docs: https://stripe.com/docs/api#customer_object-sources.
+    Docs: https://stripe.com/docs/api/sources
     """
     customer_data = event.data.get("object", {})
     source_type = customer_data.get("object", {})
 
     # TODO: handle other types of sources
-    #  (https://stripe.com/docs/api#customer_object-sources)
+    #  (https://stripe.com/docs/api/sources)
     if source_type == SourceType.card:
         if event.verb.endswith("deleted") and customer_data:
             # On customer.source.deleted, we do not delete the object,

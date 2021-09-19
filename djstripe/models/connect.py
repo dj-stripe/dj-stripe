@@ -171,7 +171,7 @@ class Transfer(StripeModel):
     When Stripe sends you money or you initiate a transfer to a bank account,
     debit card, or connected Stripe account, a transfer object will be created.
 
-    Stripe documentation: https://stripe.com/docs/api/python#transfers
+    Stripe documentation: https://stripe.com/docs/api?lang=python#transfers
     """
 
     stripe_class = stripe.Transfer

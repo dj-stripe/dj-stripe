@@ -11,7 +11,7 @@ from .base import StripeModel, logger
 
 class Account(StripeModel):
     """
-    Stripe documentation: https://stripe.com/docs/api#account
+    Stripe documentation: https://stripe.com/docs/api/accounts
     """
 
     djstripe_owner_account = None
