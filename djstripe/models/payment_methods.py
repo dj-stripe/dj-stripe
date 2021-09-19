@@ -356,7 +356,7 @@ class Card(LegacySourceMixin, StripeModel):
     A Source object of type "card" is equivalent to a Card object. However, Card
     objects cannot be converted into Source objects by Stripe at this time.
 
-    Stripe documentation: https://stripe.com/docs/api/python#cards
+    Stripe documentation: https://stripe.com/docs/api?lang=python#cards
     """
 
     stripe_class = stripe.Card
@@ -498,7 +498,7 @@ class Card(LegacySourceMixin, StripeModel):
         This token can be used in place of a credit card dictionary with any API method.
         These tokens can only be used once: by creating a new charge object,
         or attaching them to a customer.
-        (Source: https://stripe.com/docs/api/python#create_card_token)
+        (Source: https://stripe.com/docs/api?lang=python#create_card_token)
 
         :param number: The card number without any separators (no spaces)
         :param exp_month: The card's expiration month. (two digits)

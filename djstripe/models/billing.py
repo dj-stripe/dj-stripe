@@ -28,6 +28,7 @@ from .base import StripeModel
 from .core import Customer
 
 
+# TODO Mimic stripe-python decorator pattern to easily add and expose CRUD operations like create, update, delete etc on models
 # TODO Add Tests
 class DjstripeInvoiceTotalTaxAmount(models.Model):
     """
@@ -724,7 +725,7 @@ class Invoice(BaseInvoice):
     does not include unpaid invoices; it only includes balances that need to be
     taken into account when calculating the amount due for the next invoice.
 
-    Stripe documentation: https://stripe.com/docs/api/python#invoices
+    Stripe documentation: https://stripe.com/docs/api?lang=python#invoices
     """
 
     default_source = PaymentMethodForeignKey(
@@ -882,7 +883,7 @@ class InvoiceItem(StripeModel):
     This is useful for combining several charges to minimize per-transaction fees
     or having Stripe tabulate your usage-based billing totals.
 
-    Stripe documentation: https://stripe.com/docs/api/python#invoiceitems
+    Stripe documentation: https://stripe.com/docs/api?lang=python#invoiceitems
     """
 
     stripe_class = stripe.InvoiceItem
@@ -1255,7 +1256,7 @@ class Subscription(StripeModel):
     After receiving updated card details from a customer, you may choose to reopen and
     pay their closed invoices.
 
-    Stripe documentation: https://stripe.com/docs/api/python#subscriptions
+    Stripe documentation: https://stripe.com/docs/api?lang=python#subscriptions
     """
 
     stripe_class = stripe.Subscription
@@ -1590,7 +1591,7 @@ class Subscription(StripeModel):
         If a customer's subscription is canceled with ``at_period_end`` set to True and
         it has not yet reached the end of the billing period, it can be reactivated.
         Subscriptions canceled immediately cannot be reactivated.
-        (Source: https://stripe.com/docs/subscriptions/canceling-pausing)
+        (Source: https://stripe.com/docs/billing/subscriptions/cancel)
 
         .. warning:: Reactivating a fully canceled Subscription will fail silently. \
         Be sure to check the returned Subscription's status.

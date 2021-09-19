@@ -11,6 +11,12 @@ from .checks import validate_stripe_api_version
 
 
 class DjstripeSettings:
+    """Container for Dj-stripe settings
+
+    :return: Initialised settings for Dj-stripe.
+    :rtype: object
+
+    """
 
     DEFAULT_STRIPE_API_VERSION = "2020-08-27"
 
@@ -149,7 +155,9 @@ class DjstripeSettings:
 
     @property
     def STRIPE_API_VERSION(self):
-        """Get the desired API version to use for Stripe requests."""
+        """
+        Get the desired API version to use for Stripe requests.
+        """
         version = getattr(settings, "STRIPE_API_VERSION", stripe.api_version)
         return version or self.DEFAULT_STRIPE_API_VERSION
 
