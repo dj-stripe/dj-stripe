@@ -16,7 +16,7 @@ from .core import Event
 
 
 def _get_version():
-    from .. import __version__
+    from ..apps import __version__
 
     return __version__
 
