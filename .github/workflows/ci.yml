@@ -7,8 +7,6 @@ on:
     branches: [master]
 
 jobs:
-
-
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -24,6 +22,9 @@ jobs:
         run: python manage.py makemigrations --check --dry-run
         env:
           DJSTRIPE_TEST_DB_VENDOR: sqlite
+
+#  todo remove lint job and manage everything in tox.ini
+#  todo remove docs job and manage everything in tox.ini
 
   docs:
     runs-on: ubuntu-latest
@@ -48,12 +49,6 @@ jobs:
       fail-fast: true
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
-        env:
-          - TOXENV: django22-postgres,django22-postgres-nativejson,django22-sqlite,django22-mysql
-          - TOXENV: django31-postgres,django31-postgres-nativejson
-          - TOXENV: django32-sqlite,django32-sqlite-nativejson
-          - TOXENV: django32-mysql,django32-mysql-nativejson
-          - TOXENV: django32-postgres,django32-postgres-nativejson
 
     services:
       postgres:
@@ -83,15 +78,25 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip setuptools wheel
-        python -m pip install tox codecov
-    - name: Test with tox
-      run: tox -e postgres,postgres-nativejson
-    - name: Check test coverage
-      run: codecov
+        python -m pip install coverage[toml] tox tox-gh-actions codecov
+
+    - name: Test with tox for ${{ matrix.python-version }}
+      run: python -m tox
+    
+    - name: Convert coverage
+      run: python -m coverage xml
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        fail_ci_if_error: true
+        files: ./coverage.xml
