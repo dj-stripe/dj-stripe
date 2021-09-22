@@ -817,17 +817,11 @@ class Customer(StripeModel):
         """
         return max(self.balance, 0)
 
-    def subscribe(self, price=None, plan=None, **kwargs):
+    @staticmethod
+    def _sanitise_price(price=None, plan=None, **kwargs):
         """
-        Subscribes this customer to a price.
-        NOTE: Only one item is supported at the moment.
-
-        :param price: The price to which to subscribe the customer.
-        :type price: Price or string (price ID)
-        :param plan: The plan to which to subscribe the customer.
-        :type plan: Plan or string (plan ID)
+        Helper for Customer.subscribe()
         """
-        from .billing import Subscription
 
         if price and plan:
             raise TypeError("price and plan arguments cannot both be defined.")
@@ -857,11 +851,72 @@ class Customer(StripeModel):
             del kwargs["charge_immediately"]
             kwargs.setdefault("collection_method", new_value)
 
-        stripe_subscription = Subscription._api_create(
-            items=[{"price": price}], customer=self.id, **kwargs
-        )
+        return price, kwargs
 
-        return Subscription.sync_from_stripe_data(stripe_subscription)
+    def subscribe(self, *, items=None, price=None, plan=None, **kwargs):
+        """
+        Subscribes this customer to all the prices or plans in the items dict (Recommended).
+
+        :param items: A list of up to 20 subscription items, each with an attached price
+        :type list:
+            :param items: A dictionary of Plan (or Plan ID) or Price (or Price ID)
+            :type dict:  The price or plan to which to subscribe the customer.
+
+        :param price: The price to which to subscribe the customer.
+        :type price: Price or string (price ID)
+
+        :param plan: The plan to which to subscribe the customer.
+        :type plan: Plan or string (plan ID)
+        """
+        from .billing import Subscription
+
+        products_lst = []
+
+        if (items and price) or (items and plan) or (price and plan):
+            raise TypeError("Please define only one of items, price or plan arguments.")
+
+        if items:
+            for item in items:
+                price = item.get("price", "")
+                plan = item.get("plan", "")
+
+                price, kwargs = self._sanitise_price(price, plan, **kwargs)
+
+                # todo override Subscription.sync_from_stripe_data to attach all subscriptions to the customer using bulk updates
+                stripe_subscription = Subscription._api_create(
+                    items=[item], customer=self.id, **kwargs
+                )
+
+                Subscription.sync_from_stripe_data(stripe_subscription)
+
+                # get associated product
+                product_name = Price.objects.get(id=price).product.name
+                # keep count of products subscribed to
+                products_lst.append(product_name)
+
+        else:
+            warnings.warn(
+                "The Customer.subscribe() method will not be accepting price (or price id)"
+                " or plan (or plan id) arguments and support will be removed in dj-stripe 2.5+."
+                " Please default to using the items dictionary which will allow you to subscribe"
+                " the given customer to one or more than one plan in one go.",
+                DeprecationWarning,
+            )
+
+            price, kwargs = self._sanitise_price(price, plan, **kwargs)
+
+            stripe_subscription = Subscription._api_create(
+                items=[{"price": price}], customer=self.id, **kwargs
+            )
+
+            Subscription.sync_from_stripe_data(stripe_subscription)
+
+            # get associated product
+            product_name = Price.objects.get(id=price).product.name
+            # keep count of products subscribed to
+            products_lst.append(product_name)
+
+        return f"Subscribed {self} to {' and '.join(products_lst)}"
 
     def charge(
         self,
