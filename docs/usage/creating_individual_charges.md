@@ -1,10 +1,10 @@
 # Creating individual charges
 
-On the subscriber's customer object, use the `charge` method to generate a
+On the subscriber's customer object, use the [`charge`][djstripe.models.Customer.charge] method to generate a
 Stripe charge. In this example, we're using the user named `admin` as the
 subscriber.
 
-```py
+```python
 from decimal import Decimal
 from django.contrib.auth import get_user_model
 from djstripe.models import Customer
