@@ -32,61 +32,9 @@ The full documentation is available [on Read the Docs](https://dj-stripe.readthe
 -   MySQL engine: MariaDB 10.2+ or MySQL 5.7+ (Django 3.2.5+ required for MySQL 8 support)
 -   SQLite: Not recommended in production. Version 3.26+ required.
 
-## Quickstart
 
-Install dj-stripe with pip:
+--8<-- "docs/installation.md"
 
-    pip install dj-stripe
-
-Or with [Poetry](https://python-poetry.org/) (recommended):
-
-    poetry add dj-stripe
-
-Add `djstripe` to your `INSTALLED_APPS`:
-
-    INSTALLED_APPS =(
-        ...
-        "djstripe",
-        ...
-    )
-
-Add to urls.py:
-
-    path("stripe/", include("djstripe.urls", namespace="djstripe")),
-
-Tell Stripe about the webhook (Stripe webhook docs can be found
-[here](https://stripe.com/docs/webhooks)) using the full URL of your
-endpoint from the urls.py step above (e.g.
-`https://example.com/stripe/webhook`).
-
-Add your Stripe keys and other settings:
-
-```py
-STRIPE_LIVE_SECRET_KEY = os.environ.get("STRIPE_LIVE_SECRET_KEY", "<live secret key>")
-STRIPE_TEST_SECRET_KEY = os.environ.get("STRIPE_TEST_SECRET_KEY", "<test secret key>")
-STRIPE_LIVE_MODE = False  # Change to True in production
-DJSTRIPE_WEBHOOK_SECRET = "whsec_xxx"  # Get it from the section in the Stripe dashboard where you added the webhook endpoint
-DJSTRIPE_USE_NATIVE_JSONFIELD = True  # We recommend setting to True for new installations
-DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"  # Set to `"id"` for all new 2.4+ installations
-```
-
-Add some payment plans via the Stripe.com dashboard.
-
-Run the commands:
-
-    python manage.py migrate
-
-    python manage.py djstripe_sync_models
-
-See <https://dj-stripe.readthedocs.io/en/latest/stripe_elements_js/>
-for notes about usage of the Stripe Elements frontend JS library.
-
-## Running the Tests
-
-Assuming the tests are run against PostgreSQL:
-
-    createdb djstripe
-    pytest
 
 ## Changelog
 
