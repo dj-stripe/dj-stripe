@@ -33,7 +33,7 @@ docs, in docstrings, or even on the web in blog posts, articles, and such.
 
 To see the project's documentation live, run the following command:
 
-    DJANGO_SETTINGS_MODULE=docs.django_settings mkdocs serve
+    mkdocs serve
 
 The documentation site will then be served on <http://127.0.0.1:8000>.
 
