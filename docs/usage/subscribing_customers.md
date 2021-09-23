@@ -1,10 +1,11 @@
 # Subscribing a customer to one or more prices (or plans)
 
 For your convenience, dj-stripe provides a
-`djstripe.models.Customer.subscribe` method that will try to charge the
+[`djstripe.models.Customer.subscribe`][djstripe.models.Customer.subscribe] method that will try to charge the
 customer immediately unless you specify `charge_immediately=False`
 
-```py
+## Recommended Approach
+```python
 # Recommended Approach to use items dict with Prices
 ## This will subscribe <customer> to both <price_1> and <price_2>
 price_1 = Price.objects.get(nickname="one_price")
@@ -17,7 +18,10 @@ price_1 = Price.objects.get(nickname="one_price")
 customer = Customer.objects.first()
 customer.subscribe(items=[{"price": price_1}])
 
+```
 
+## Alternate Approach 1 (with legacy Plans)
+```python
 ## (Alternate Approach) This will subscribe <customer> to <price_1>
 price_1 = Price.objects.get(nickname="one_price")
 customer = Customer.objects.first()
@@ -34,7 +38,11 @@ customer.subscribe(items=[{"plan": plan_1}, {"plan": plan_2}])
 plan_1 = Plan.objects.get(nickname="one_plan")
 customer = Customer.objects.first()
 customer.subscribe(items=[{"plan": plan_1}])
+```
 
+## Alternate Approach 2
+
+```python
 
 ## (Alternate Approach) This will subscribe <customer> to <plan_1>
 plan_1 = Plan.objects.get(nickname="one_plan")
@@ -42,26 +50,27 @@ customer = Customer.objects.first()
 customer.subscribe(plan=plan_1)
 ```
 
-However in some cases `djstripe.models.Customer.subscribe` might not
+However in some cases ``subscribe()`` might not
 support all the arguments you need for your implementation. When this
 happens you can just call the official `stripe.Customer.subscribe()`.
 
-See [this](../../tests/apps/example/views.py) example from
-`tests.apps.example.views.PurchaseSubscriptionView.form_valid`.
 
-Note that PaymentMethods can be used instead of Cards/Source by
-substituting
+!!! tip
+     Checkout [`this example`][tests.apps.example.views.PurchaseSubscriptionView.form_valid] and [`this`][djstripe.models.Customer.add_payment_method].
 
-```py
-# Add the payment method customer's default
-customer.add_payment_method(payment_method)
-```
+    Note that PaymentMethods can be used instead of Cards/Source by
+    substituting
 
-instead of
+    ```py
+    # Add the payment method customer's default
+    customer.add_payment_method(payment_method)
+    ```
 
-```py
-# Add the source as the customer's default card
-customer.add_card(stripe_source)
-```
+    instead of
 
-in the above example. See `djstripe.models.Customer.add_payment_method`.
+    ```py
+    # Add the source as the customer's default card
+    customer.add_card(stripe_source)
+    ```
+    in the above example. 
+

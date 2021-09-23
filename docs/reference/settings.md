@@ -1,5 +1,6 @@
 # Settings
 
+
 ## STRIPE_API_VERSION (='2020-08-27')
 
 The API version used to communicate with the Stripe API is configurable, and defaults to
@@ -22,7 +23,7 @@ For this reason it is best to assume that only the default version is supported.
 For more information on API versioning, see the [stripe
 documentation](https://stripe.com/docs/upgrades).
 
-See also [API Versions](../api_versions.md).
+See also [API Versions](../api_versions.md#a_note_on_stripe_api_versions).
 
 ## DJSTRIPE_FOREIGN_KEY_TO_FIELD
 
@@ -272,3 +273,11 @@ example, `"http://localhost:12111"` if you are running
 [stripe-mock](https://github.com/stripe/stripe-mock).
 
 If this is set in production (DEBUG=False), a warning will be raised on `manage.py check`.
+
+
+## Source Code 
+::: djstripe.settings
+    selection:
+        filters: 
+            - "!^_[^_]"
+

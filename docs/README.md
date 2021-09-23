@@ -22,7 +22,7 @@ The full documentation is available [on Read the Docs](https://dj-stripe.readthe
 -   Payment Methods and Payment Intents (SCA support)
 -   Support for multiple accounts and API keys
 -   Stripe Connect (partial support)
--   Tested with Stripe API `2020-08-27` (see [API versions](api_versions.md))
+-   Tested with Stripe API `2020-08-27` (see [API versions](api_versions.md#dj-stripe_latest_tested_version))
 
 ## Requirements
 

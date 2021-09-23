@@ -4,11 +4,11 @@
 
 dj-stripe provides the following settings to tune how your webhooks work:
 
--   [DJSTRIPE_WEBHOOK_URL](../reference/settings.md#djstripe_webhook_url-rwebhook)
--   [DJSTRIPE_WEBHOOK_SECRET](../reference/settings.md#djstripe_webhook_secret)
--   [DJSTRIPE_WEBHOOK_VALIDATION](../reference/settings.md#djstripe_webhook_validation-verify_signature)
--   [DJSTRIPE_WEBHOOK_TOLERANCE](../reference/settings.md#djstripe_webhook_tolerance-300)
--   [DJSTRIPE_WEBHOOK_EVENT_CALLBACK](../reference/settings.md#djstripe_webhook_event_callback-none)
+-   [`DJSTRIPE_WEBHOOK_URL`][djstripe.settings.DjstripeSettings.DJSTRIPE_WEBHOOK_URL]
+-   [`DJSTRIPE_WEBHOOK_SECRET`][djstripe.settings.DjstripeSettings.WEBHOOK_SECRET]
+-   [`DJSTRIPE_WEBHOOK_VALIDATION`][djstripe.settings.DjstripeSettings.WEBHOOK_VALIDATION]
+-   [`DJSTRIPE_WEBHOOK_TOLERANCE`][djstripe.settings.DjstripeSettings.WEBHOOK_TOLERANCE]
+-   [`DJSTRIPE_WEBHOOK_EVENT_CALLBACK`][djstripe.settings.DjstripeSettings.WEBHOOK_EVENT_CALLBACK]
 
 ## Using webhooks in dj-stripe
 
@@ -16,12 +16,12 @@ dj-stripe comes with native support for webhooks as event listeners.
 
 Events allow you to do things like [sending an email to a customer when
 his payment has
-[failed](https://stripe.com/docs/recipes/sending-emails-for-failed-payments)
+[failed](https://stripe.com/docs/receipts#failed-payment-alerts)
 or trial period is ending.
 
 This is how you use them:
 
-```py
+```python
     from djstripe import webhooks
 
     @webhooks.handler("customer.subscription.trial_will_end")

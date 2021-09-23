@@ -61,7 +61,7 @@ Run the commands:
     python manage.py djstripe_sync_models
 ```
 
-See [here](stripe_elements_js.md) for notes about usage of the Stripe Elements
+See [here](stripe_elements_js.md#integrating_stripe_elements-js_sdk) for notes about usage of the Stripe Elements
 frontend JS library.
 
 ### Running Tests
