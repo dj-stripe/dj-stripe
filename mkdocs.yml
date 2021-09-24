@@ -7,17 +7,46 @@ repo_url: https://github.com/dj-stripe/dj-stripe/
 
 theme:
   name: readthedocs
-  highlightjs: true
-  hljs_languages:
-    - yaml
-    - django
+  features:
+    - search.suggest
+    - search.highligh
+
 
 markdown_extensions:
   - admonition
-  - mkautodoc
+  - codehilite
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.snippets
+
+
+
+plugins:
+  - autorefs
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            # show_root_heading: true
+            show_object_full_path: true
+            show_category_heading: true
+            show_if_no_docstring: true
+          setup_commands:
+            - import os
+            - import sys
+            - import django
+            - sys.path.insert(0, os.path.abspath("."))
+            - os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tests.settings")
+            - django.setup()
+      watch:
+        - .
+      enable_inventory: true
 
 nav:
-  - Home: index.md
+  - Home: README.md
   - Sponsors: project/sponsors.md
   - Getting Started:
     - Installation: installation.md
@@ -37,6 +66,8 @@ nav:
     - Managing subscriptions and payment sources: usage/managing_subscriptions.md
     - Manually syncing data with Stripe: usage/manually_syncing_with_stripe.md
     - Creating individual charges: usage/creating_individual_charges.md
+    - Creating Usage Records: usage/creating_usage_record.md
+    - Using Stripe Checkout: usage/using_stripe_checkout.md
   - Project:
     - Contributing: project/contributing.md
     - Test Fixtures: project/test_fixtures.md
