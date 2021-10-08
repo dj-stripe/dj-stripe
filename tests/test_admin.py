@@ -136,7 +136,13 @@ class TestAdminRegisteredModels(TestCase):
                         all(
                             [
                                 1
-                                for i in ["__str__", "id", "created", "livemode"]
+                                for i in [
+                                    "__str__",
+                                    "id",
+                                    "djstripe_owner_account",
+                                    "created",
+                                    "livemode",
+                                ]
                                 if i in list_display
                             ]
                         )
@@ -219,7 +225,13 @@ class TestAdminRegisteredModels(TestCase):
                 # for models inheriting from StripeModelAdmin verify:
                 if model.__name__ not in self.ignore_models:
                     self.assertTrue(
-                        all([1 for i in ["created", "id"] if i in readonly_fields])
+                        all(
+                            [
+                                1
+                                for i in ["created", "djstripe_owner_account", "id"]
+                                if i in readonly_fields
+                            ]
+                        )
                     )
 
     def test_get_list_select_related(self):
@@ -298,7 +310,16 @@ class TestAdminRegisteredModels(TestCase):
                 if model.__name__ not in self.ignore_models:
                     self.assertTrue(
                         all(
-                            [1 for i in ["created", "livemode", "id"] if i in fieldsets]
+                            [
+                                1
+                                for i in [
+                                    "created",
+                                    "livemode",
+                                    "djstripe_owner_account",
+                                    "id",
+                                ]
+                                if i in fieldsets
+                            ]
                         )
                     )
 

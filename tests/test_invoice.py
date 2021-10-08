@@ -21,8 +21,8 @@ from . import (
     FAKE_INVOICEITEM_II,
     FAKE_PAYMENT_INTENT_I,
     FAKE_PLAN,
+    FAKE_PLATFORM_ACCOUNT,
     FAKE_PRODUCT,
-    FAKE_STANDARD_ACCOUNT,
     FAKE_SUBSCRIPTION,
     FAKE_TAX_RATE_EXAMPLE_1_VAT,
     FAKE_TAX_RATE_EXAMPLE_2_SALES,
@@ -34,7 +34,9 @@ from . import (
 
 class InvoiceTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
-        self.account = FAKE_STANDARD_ACCOUNT.create()
+        # create a Stripe Platform Account
+        self.account = FAKE_PLATFORM_ACCOUNT.create()
+
         user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )

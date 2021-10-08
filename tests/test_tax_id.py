@@ -8,8 +8,7 @@ import pytest
 from django.test.testcases import TestCase
 
 from djstripe import enums
-from djstripe.models.billing import TaxId
-from djstripe.models.core import Customer
+from djstripe.models import Customer, TaxId
 from djstripe.settings import djstripe_settings
 
 from . import (
@@ -22,7 +21,7 @@ from . import (
 pytestmark = pytest.mark.django_db
 
 
-class TestTaxIdStr:
+class TestTaxIdStr(TestCase):
     @patch(
         "stripe.Customer.retrieve",
         return_value=deepcopy(FAKE_CUSTOMER),
@@ -40,9 +39,9 @@ class TestTaxIdStr:
     ):
 
         tax_id = TaxId.sync_from_stripe_data(FAKE_TAX_ID)
-        assert (
-            str(tax_id)
-            == f"{enums.TaxIdType.humanize(FAKE_TAX_ID['type'])} {FAKE_TAX_ID['value']} ({FAKE_TAX_ID['verification']['status']})"
+        self.assertEqual(
+            str(tax_id),
+            f"{enums.TaxIdType.humanize(FAKE_TAX_ID['type'])} {FAKE_TAX_ID['value']} ({FAKE_TAX_ID['verification']['status']})",
         )
 
 

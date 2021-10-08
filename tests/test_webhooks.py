@@ -12,8 +12,7 @@ from django.test.client import Client
 from django.urls import reverse
 
 from djstripe import webhooks
-from djstripe.models import Event, WebhookEventTrigger
-from djstripe.models.connect import Transfer
+from djstripe.models import Event, Transfer, WebhookEventTrigger
 from djstripe.settings import djstripe_settings
 from djstripe.webhooks import TEST_EVENT_ID, call_handlers, handler, handler_all
 

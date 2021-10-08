@@ -19,9 +19,9 @@ from . import (
     FAKE_PAYMENT_INTENT_II,
     FAKE_PAYMENT_METHOD_II,
     FAKE_PLAN_II,
+    FAKE_PLATFORM_ACCOUNT,
     FAKE_PRICE_II,
     FAKE_PRODUCT,
-    FAKE_STANDARD_ACCOUNT,
     FAKE_SUBSCRIPTION_III,
     FAKE_TAX_RATE_EXAMPLE_1_VAT,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
@@ -31,7 +31,8 @@ from . import (
 
 class InvoiceItemTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
-        self.account = FAKE_STANDARD_ACCOUNT.create()
+        # create a Stripe Platform Account
+        self.account = FAKE_PLATFORM_ACCOUNT.create()
 
         self.default_expected_blank_fks = {
             "djstripe.Account.branding_logo",

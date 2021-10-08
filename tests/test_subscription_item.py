@@ -7,7 +7,7 @@ from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from djstripe.models.billing import SubscriptionItem
+from djstripe.models import SubscriptionItem
 
 from . import (
     FAKE_CUSTOMER,

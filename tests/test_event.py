@@ -14,7 +14,7 @@ from djstripe.models import Event, Transfer
 from . import (
     FAKE_CUSTOMER,
     FAKE_EVENT_TRANSFER_CREATED,
-    FAKE_STANDARD_ACCOUNT,
+    FAKE_PLATFORM_ACCOUNT,
     FAKE_TRANSFER,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 )
@@ -22,6 +22,7 @@ from . import (
 
 class EventTest(TestCase):
     def setUp(self):
+
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
@@ -158,7 +159,7 @@ class EventRaceConditionTest(TestCase):
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
         "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch(

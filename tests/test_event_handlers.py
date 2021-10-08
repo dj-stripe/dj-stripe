@@ -125,6 +125,7 @@ from . import (
     FAKE_PAYMENT_METHOD_I,
     FAKE_PAYMENT_METHOD_II,
     FAKE_PLAN,
+    FAKE_PLATFORM_ACCOUNT,
     FAKE_PRICE,
     FAKE_PRODUCT,
     FAKE_SESSION_I,
@@ -688,6 +689,9 @@ class TestAccountEvents(EventTestCase):
 
 class TestChargeEvents(EventTestCase):
     def setUp(self):
+        # create a Stripe Platform Account
+        self.account = FAKE_PLATFORM_ACCOUNT.create()
+
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
@@ -739,7 +743,7 @@ class TestChargeEvents(EventTestCase):
         fake_stripe_event = deepcopy(FAKE_EVENT_CHARGE_SUCCEEDED)
         event_retrieve_mock.return_value = fake_stripe_event
         charge_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
-        account_mock.return_value = FAKE_STANDARD_ACCOUNT.create()
+        account_mock.return_value = self.account
 
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
@@ -754,6 +758,7 @@ class TestChargeEvents(EventTestCase):
 
 class TestCheckoutEvents(EventTestCase):
     def setUp(self):
+
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
@@ -882,6 +887,7 @@ class TestCheckoutEvents(EventTestCase):
 
 class TestCustomerEvents(EventTestCase):
     def setUp(self):
+
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
@@ -1179,6 +1185,7 @@ class TestCustomerEvents(EventTestCase):
 
 class TestDisputeEvents(EventTestCase):
     def setUp(self):
+
         self.user = get_user_model().objects.create_user(
             username="fake_customer_1", email=FAKE_CUSTOMER["email"]
         )
@@ -1500,6 +1507,13 @@ class TestDisputeEvents(EventTestCase):
 
 
 class TestFileEvents(EventTestCase):
+    def setUp(self):
+
+        self.user = get_user_model().objects.create_user(
+            username="pydanny", email="pydanny@gmail.com"
+        )
+        self.customer = FAKE_CUSTOMER.create_for_user(self.user)
+
     @patch(
         "stripe.File.retrieve",
         return_value=deepcopy(FAKE_FILEUPLOAD_ICON),
@@ -1519,8 +1533,15 @@ class TestFileEvents(EventTestCase):
 
 
 class TestInvoiceEvents(EventTestCase):
+    def setUp(self):
+
+        self.user = get_user_model().objects.create_user(
+            username="pydanny", email="pydanny@gmail.com"
+        )
+
     @patch(
         "djstripe.models.Account.get_default_account",
+        return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch(
@@ -1567,7 +1588,6 @@ class TestInvoiceEvents(EventTestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-        default_account_mock.return_value = FAKE_STANDARD_ACCOUNT.create()
 
         fake_stripe_event = deepcopy(FAKE_EVENT_INVOICE_CREATED)
         event_retrieve_mock.return_value = fake_stripe_event
@@ -1583,6 +1603,7 @@ class TestInvoiceEvents(EventTestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
+        return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch(
@@ -1627,12 +1648,8 @@ class TestInvoiceEvents(EventTestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-        default_account_mock.return_value = FAKE_STANDARD_ACCOUNT.create()
 
-        user = get_user_model().objects.create_user(
-            username="pydanny", email="pydanny@gmail.com"
-        )
-        FAKE_CUSTOMER.create_for_user(user)
+        FAKE_CUSTOMER.create_for_user(self.user)
 
         fake_stripe_event = deepcopy(FAKE_EVENT_INVOICE_CREATED)
         event_retrieve_mock.return_value = fake_stripe_event
@@ -1651,6 +1668,7 @@ class TestInvoiceEvents(EventTestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
+        return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch(
@@ -1691,12 +1709,8 @@ class TestInvoiceEvents(EventTestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-        default_account_mock.return_value = FAKE_STANDARD_ACCOUNT.create()
 
-        user = get_user_model().objects.create_user(
-            username="pydanny", email="pydanny@gmail.com"
-        )
-        FAKE_CUSTOMER.create_for_user(user)
+        FAKE_CUSTOMER.create_for_user(self.user)
 
         event = self._create_event(FAKE_EVENT_INVOICE_CREATED)
         event.invoke_webhook_handlers()
@@ -1717,8 +1731,15 @@ class TestInvoiceEvents(EventTestCase):
 
 
 class TestInvoiceItemEvents(EventTestCase):
+    def setUp(self):
+
+        self.user = get_user_model().objects.create_user(
+            username="pydanny", email="pydanny@gmail.com"
+        )
+
     @patch(
         "djstripe.models.Account.get_default_account",
+        return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch(
@@ -1765,12 +1786,8 @@ class TestInvoiceItemEvents(EventTestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-        default_account_mock.return_value = FAKE_STANDARD_ACCOUNT.create()
 
-        user = get_user_model().objects.create_user(
-            username="pydanny", email="pydanny@gmail.com"
-        )
-        FAKE_CUSTOMER_II.create_for_user(user)
+        FAKE_CUSTOMER_II.create_for_user(self.user)
 
         fake_stripe_event = deepcopy(FAKE_EVENT_INVOICEITEM_CREATED)
         event_retrieve_mock.return_value = fake_stripe_event
@@ -1790,6 +1807,7 @@ class TestInvoiceItemEvents(EventTestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
+        return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch(
@@ -1838,12 +1856,7 @@ class TestInvoiceItemEvents(EventTestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-        default_account_mock.return_value = FAKE_STANDARD_ACCOUNT.create()
-
-        user = get_user_model().objects.create_user(
-            username="pydanny", email="pydanny@gmail.com"
-        )
-        FAKE_CUSTOMER_II.create_for_user(user)
+        FAKE_CUSTOMER_II.create_for_user(self.user)
 
         event = self._create_event(FAKE_EVENT_INVOICEITEM_CREATED)
         event.invoke_webhook_handlers()
@@ -1987,6 +2000,7 @@ class TestPriceEvents(EventTestCase):
 
 class TestPaymentMethodEvents(AssertStripeFksMixin, EventTestCase):
     def setUp(self):
+
         self.user = get_user_model().objects.create_user(
             username="fake_customer_1", email=FAKE_CUSTOMER["email"]
         )
@@ -2415,7 +2429,7 @@ class TestTransferEvents(EventTestCase):
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
         "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch("stripe.Transfer.retrieve", autospec=True)
@@ -2443,7 +2457,7 @@ class TestTransferEvents(EventTestCase):
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
         "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch("stripe.Transfer.retrieve", return_value=FAKE_TRANSFER, autospec=True)
