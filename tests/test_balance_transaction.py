@@ -27,43 +27,45 @@ from . import (
 pytestmark = pytest.mark.django_db
 
 
-@pytest.mark.parametrize("transaction_status", BalanceTransactionStatus.__members__)
-def test___str__(transaction_status):
-    modified_balance_transaction = deepcopy(FAKE_BALANCE_TRANSACTION)
-    modified_balance_transaction["status"] = transaction_status
+class TestBalanceTransactionStr:
+    @pytest.mark.parametrize("transaction_status", BalanceTransactionStatus.__members__)
+    def test___str__(self, transaction_status):
+        modified_balance_transaction = deepcopy(FAKE_BALANCE_TRANSACTION)
+        modified_balance_transaction["status"] = transaction_status
 
-    balance_transaction = models.BalanceTransaction.sync_from_stripe_data(
-        modified_balance_transaction
-    )
-    assert (
-        f"{get_friendly_currency_amount(modified_balance_transaction['amount'], modified_balance_transaction['currency'])}"
-        f" ({BalanceTransactionStatus.humanize(modified_balance_transaction['status'])})"
-    ) == str(balance_transaction)
-
-
-@pytest.mark.parametrize("transaction_type", ["card", "payout", "refund"])
-def test_get_source_class_success(transaction_type):
-    modified_balance_transaction = deepcopy(FAKE_BALANCE_TRANSACTION)
-    modified_balance_transaction["type"] = transaction_type
-
-    balance_transaction = models.BalanceTransaction.sync_from_stripe_data(
-        modified_balance_transaction
-    )
-    assert balance_transaction.get_source_class() is getattr(
-        models, transaction_type.capitalize(), None
-    )
+        balance_transaction = models.BalanceTransaction.sync_from_stripe_data(
+            modified_balance_transaction
+        )
+        assert (
+            f"{get_friendly_currency_amount(modified_balance_transaction['amount'], modified_balance_transaction['currency'])}"
+            f" ({BalanceTransactionStatus.humanize(modified_balance_transaction['status'])})"
+        ) == str(balance_transaction)
 
 
-@pytest.mark.parametrize("transaction_type", ["network_cost", "payment_refund"])
-def test_get_source_class_failure(transaction_type):
-    modified_balance_transaction = deepcopy(FAKE_BALANCE_TRANSACTION)
-    modified_balance_transaction["type"] = transaction_type
+class TestBalanceTransactionSourceClass:
+    @pytest.mark.parametrize("transaction_type", ["card", "payout", "refund"])
+    def test_get_source_class_success(self, transaction_type):
+        modified_balance_transaction = deepcopy(FAKE_BALANCE_TRANSACTION)
+        modified_balance_transaction["type"] = transaction_type
 
-    balance_transaction = models.BalanceTransaction.sync_from_stripe_data(
-        modified_balance_transaction
-    )
-    with pytest.raises(LookupError):
-        balance_transaction.get_source_class()
+        balance_transaction = models.BalanceTransaction.sync_from_stripe_data(
+            modified_balance_transaction
+        )
+        assert balance_transaction.get_source_class() is getattr(
+            models, transaction_type.capitalize(), None
+        )
+
+    @pytest.mark.parametrize("transaction_type", ["network_cost", "payment_refund"])
+    def test_get_source_class_failure(self, transaction_type):
+
+        modified_balance_transaction = deepcopy(FAKE_BALANCE_TRANSACTION)
+        modified_balance_transaction["type"] = transaction_type
+
+        balance_transaction = models.BalanceTransaction.sync_from_stripe_data(
+            modified_balance_transaction
+        )
+        with pytest.raises(LookupError):
+            balance_transaction.get_source_class()
 
 
 class TestBalanceTransaction(TestCase):

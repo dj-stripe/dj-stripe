@@ -15,8 +15,8 @@ from djstripe.models import Charge, Customer, Plan, Subscription, Transfer
 from . import (
     FAKE_PLAN,
     FAKE_PLAN_II,
+    FAKE_PLATFORM_ACCOUNT,
     FAKE_PRODUCT,
-    FAKE_STANDARD_ACCOUNT,
     FAKE_TRANSFER,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 )
@@ -24,6 +24,7 @@ from . import (
 
 class SubscriptionManagerTest(TestCase):
     def setUp(self):
+
         # create customers and current subscription records
         period_start = datetime.datetime(2013, 4, 1, tzinfo=timezone.utc)
         period_end = datetime.datetime(2013, 4, 30, tzinfo=timezone.utc)
@@ -152,7 +153,7 @@ class TransferManagerTest(TestCase):
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
         "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     def test_transfer_summary(
@@ -184,6 +185,7 @@ class TransferManagerTest(TestCase):
 
 class ChargeManagerTest(TestCase):
     def setUp(self):
+
         customer = Customer.objects.create(
             id="cus_XXXXXXX", livemode=False, balance=0, delinquent=False
         )

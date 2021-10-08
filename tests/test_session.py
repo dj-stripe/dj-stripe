@@ -7,12 +7,8 @@ from unittest.mock import patch
 from django.test import TestCase
 
 from djstripe.models import Session
-from tests import (
-    FAKE_CUSTOMER,
-    FAKE_PAYMENT_INTENT_I,
-    FAKE_SESSION_I,
-    AssertStripeFksMixin,
-)
+
+from . import FAKE_CUSTOMER, FAKE_PAYMENT_INTENT_I, FAKE_SESSION_I, AssertStripeFksMixin
 
 
 class SessionTest(AssertStripeFksMixin, TestCase):

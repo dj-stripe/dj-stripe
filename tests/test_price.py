@@ -24,44 +24,9 @@ from . import (
 pytestmark = pytest.mark.django_db
 
 
-class TestStrPrice:
-    @pytest.mark.parametrize(
-        "fake_price_data",
-        [
-            deepcopy(FAKE_PRICE),
-            deepcopy(FAKE_PRICE_ONETIME),
-            deepcopy(FAKE_PRICE_TIER),
-            deepcopy(FAKE_PRICE_METERED),
-        ],
-    )
-    def test___str__(self, fake_price_data, monkeypatch):
-        def mock_product_get(*args, **kwargs):
-            return deepcopy(FAKE_PRODUCT)
-
-        def mock_price_get(*args, **kwargs):
-            return fake_price_data
-
-        # monkeypatch stripe.Product.retrieve and stripe.Price.retrieve calls to return
-        # the desired json response.
-        monkeypatch.setattr(stripe.Product, "retrieve", mock_product_get)
-        monkeypatch.setattr(stripe.Price, "retrieve", mock_price_get)
-
-        if not fake_price_data["recurring"]:
-            price = Price.sync_from_stripe_data(fake_price_data)
-            assert (f"{price.human_readable_price} for {FAKE_PRODUCT['name']}") == str(
-                price
-            )
-
-        else:
-            price = Price.sync_from_stripe_data(fake_price_data)
-            subscriptions = Subscription.objects.filter(plan__id=price.id).count()
-            assert (
-                f"{price.human_readable_price} for {FAKE_PRODUCT['name']} ({subscriptions} subscriptions)"
-            ) == str(price)
-
-
 class PriceCreateTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
+
         with patch(
             "stripe.Product.retrieve",
             return_value=deepcopy(FAKE_PRODUCT),
@@ -153,6 +118,7 @@ class PriceCreateTest(AssertStripeFksMixin, TestCase):
 
 class PriceTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
+
         self.price_data = deepcopy(FAKE_PRICE)
         with patch(
             "stripe.Product.retrieve",
@@ -206,6 +172,42 @@ class PriceTest(AssertStripeFksMixin, TestCase):
         assert price.type == PriceType.one_time
 
         self.assert_fks(price, expected_blank_fks={"djstripe.Customer.coupon"})
+
+
+class TestStrPrice:
+    @pytest.mark.parametrize(
+        "fake_price_data",
+        [
+            deepcopy(FAKE_PRICE),
+            deepcopy(FAKE_PRICE_ONETIME),
+            deepcopy(FAKE_PRICE_TIER),
+            deepcopy(FAKE_PRICE_METERED),
+        ],
+    )
+    def test___str__(self, fake_price_data, monkeypatch):
+        def mock_product_get(*args, **kwargs):
+            return deepcopy(FAKE_PRODUCT)
+
+        def mock_price_get(*args, **kwargs):
+            return fake_price_data
+
+        # monkeypatch stripe.Product.retrieve and stripe.Price.retrieve calls to return
+        # the desired json response.
+        monkeypatch.setattr(stripe.Product, "retrieve", mock_product_get)
+        monkeypatch.setattr(stripe.Price, "retrieve", mock_price_get)
+
+        if not fake_price_data["recurring"]:
+            price = Price.sync_from_stripe_data(fake_price_data)
+            assert (f"{price.human_readable_price} for {FAKE_PRODUCT['name']}") == str(
+                price
+            )
+
+        else:
+            price = Price.sync_from_stripe_data(fake_price_data)
+            subscriptions = Subscription.objects.filter(plan__id=price.id).count()
+            assert (
+                f"{price.human_readable_price} for {FAKE_PRODUCT['name']} ({subscriptions} subscriptions)"
+            ) == str(price)
 
 
 class TestHumanReadablePrice:

@@ -18,9 +18,9 @@ from . import (
     FAKE_CUSTOMER,
     FAKE_INVOICE,
     FAKE_PAYMENT_INTENT_I,
+    FAKE_PLATFORM_ACCOUNT,
     FAKE_PRODUCT,
     FAKE_REFUND,
-    FAKE_STANDARD_ACCOUNT,
     FAKE_SUBSCRIPTION,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
@@ -29,7 +29,9 @@ from . import (
 
 class RefundTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
-        self.account = FAKE_STANDARD_ACCOUNT.create()
+        # create a Stripe Platform Account
+        self.account = FAKE_PLATFORM_ACCOUNT.create()
+
         user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )

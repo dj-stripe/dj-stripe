@@ -17,7 +17,6 @@ from . import (
     FAKE_CARD_AS_PAYMENT_METHOD,
     FAKE_CUSTOMER,
     FAKE_PAYMENT_METHOD_I,
-    FAKE_STANDARD_ACCOUNT,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
     PaymentMethodDict,
@@ -26,35 +25,44 @@ from . import (
 pytestmark = pytest.mark.django_db
 
 
-@pytest.mark.parametrize("customer_exists", [True, False])
-def test___str__(customer_exists, monkeypatch):
+class TestPaymentMethodStr:
+
+    #
+    # Helper Methods for monkeypatching
+    #
+
     def mock_customer_get(*args, **kwargs):
         return deepcopy(FAKE_CUSTOMER)
 
-    # monkeypatch stripe.Customer.retrieve call to return
-    # the desired json response.
-    monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
+    @pytest.mark.parametrize("customer_exists", [True, False])
+    def test___str__(self, monkeypatch, customer_exists):
 
-    fake_payment_method_data = deepcopy(FAKE_PAYMENT_METHOD_I)
-    if not customer_exists:
-        fake_payment_method_data["customer"] = None
-        pm = models.PaymentMethod.sync_from_stripe_data(fake_payment_method_data)
-        customer = None
-        assert (
-            f"{enums.PaymentMethodType.humanize(fake_payment_method_data['type'])} is not associated with any customer"
-        ) == str(pm)
+        # monkeypatch stripe.Customer.retrieve call to return
+        # the desired json response.
+        monkeypatch.setattr(stripe.Customer, "retrieve", self.mock_customer_get)
 
-    else:
-        pm = models.PaymentMethod.sync_from_stripe_data(fake_payment_method_data)
-        customer = models.Customer.objects.get(id=fake_payment_method_data["customer"])
-        assert (
-            f"{enums.PaymentMethodType.humanize(fake_payment_method_data['type'])} for {customer}"
-        ) == str(pm)
+        fake_payment_method_data = deepcopy(FAKE_PAYMENT_METHOD_I)
+        if not customer_exists:
+            fake_payment_method_data["customer"] = None
+            pm = models.PaymentMethod.sync_from_stripe_data(fake_payment_method_data)
+            customer = None
+            assert (
+                f"{enums.PaymentMethodType.humanize(fake_payment_method_data['type'])} is not associated with any customer"
+            ) == str(pm)
+
+        else:
+            pm = models.PaymentMethod.sync_from_stripe_data(fake_payment_method_data)
+            customer = models.Customer.objects.get(
+                id=fake_payment_method_data["customer"]
+            )
+            assert (
+                f"{enums.PaymentMethodType.humanize(fake_payment_method_data['type'])} for {customer}"
+            ) == str(pm)
 
 
 class PaymentMethodTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
-        self.account = FAKE_STANDARD_ACCOUNT.create()
+
         user = get_user_model().objects.create_user(
             username="testuser", email="djstripe@example.com"
         )

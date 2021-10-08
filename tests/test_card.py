@@ -12,9 +12,7 @@ from stripe.error import InvalidRequestError
 
 from djstripe import enums
 from djstripe.exceptions import StripeObjectManipulationException
-from djstripe.models import Card
-from djstripe.models.account import Account
-from djstripe.models.core import Customer
+from djstripe.models import Account, Card, Customer
 
 from . import (
     FAKE_CARD,

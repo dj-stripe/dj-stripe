@@ -101,6 +101,7 @@ class HumanReadableCouponTest(TestCase):
         self.assertEqual(str(coupon), coupon.human_readable)
 
 
-def test_blank_coupon_str():
-    coupon = Coupon()
-    assert str(coupon).strip() == "(invalid amount) off"
+class TestCouponStr(TestCase):
+    def test_blank_coupon_str(self):
+        coupon = Coupon()
+        self.assertEqual(str(coupon).strip(), "(invalid amount) off")

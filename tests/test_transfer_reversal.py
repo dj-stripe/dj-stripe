@@ -7,13 +7,12 @@ from unittest.mock import PropertyMock, patch
 import pytest
 from django.test.testcases import TestCase
 
-from djstripe.models import TransferReversal
-from djstripe.models.connect import Transfer
+from djstripe.models import Transfer, TransferReversal
 from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_BALANCE_TRANSACTION_II,
-    FAKE_STANDARD_ACCOUNT,
+    FAKE_PLATFORM_ACCOUNT,
     FAKE_TRANSFER,
     FAKE_TRANSFER_WITH_1_REVERSAL,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
@@ -23,11 +22,11 @@ from . import (
 pytestmark = pytest.mark.django_db
 
 
-class TestTransferReversalStr:
+class TestTransferReversalStr(TestCase):
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
         "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch(
@@ -51,14 +50,14 @@ class TestTransferReversalStr:
         transfer_reversal = TransferReversal.sync_from_stripe_data(
             deepcopy(FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0])
         )
-        assert str(f"{transfer_reversal.transfer}") == str(transfer_reversal)
+        self.assertEqual(str(f"{transfer_reversal.transfer}"), str(transfer_reversal))
 
 
 class TestTransfer(AssertStripeFksMixin, TestCase):
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
         "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch(
@@ -100,7 +99,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
         "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch(

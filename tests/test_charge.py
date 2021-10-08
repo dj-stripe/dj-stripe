@@ -9,8 +9,7 @@ from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
 
 from djstripe.enums import ChargeStatus, LegacySourceType
-from djstripe.models import Charge, DjstripePaymentMethod
-from djstripe.models.connect import Transfer
+from djstripe.models import Charge, DjstripePaymentMethod, Transfer
 from djstripe.settings import djstripe_settings
 
 from . import (
@@ -25,6 +24,7 @@ from . import (
     FAKE_INVOICE,
     FAKE_PAYMENT_INTENT_I,
     FAKE_PLAN,
+    FAKE_PLATFORM_ACCOUNT,
     FAKE_PRODUCT,
     FAKE_REFUND,
     FAKE_STANDARD_ACCOUNT,
@@ -38,11 +38,14 @@ from . import (
 class ChargeTest(AssertStripeFksMixin, TestCase):
     @classmethod
     def setUp(self):
+        # create a Stripe Platform Account
+        self.account = FAKE_PLATFORM_ACCOUNT.create()
+
         user = get_user_model().objects.create_user(
             username="testuser", email="djstripe@example.com"
         )
         self.customer = FAKE_CUSTOMER.create_for_user(user)
-        self.account = FAKE_STANDARD_ACCOUNT.create()
+
         self.default_expected_blank_fks = {
             "djstripe.Charge.application_fee",
             "djstripe.Charge.dispute",

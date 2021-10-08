@@ -14,7 +14,6 @@ from . import (
     FAKE_CUSTOMER_III,
     FAKE_SOURCE,
     FAKE_SOURCE_II,
-    FAKE_STANDARD_ACCOUNT,
     AssertStripeFksMixin,
     SourceDict,
 )
@@ -22,7 +21,7 @@ from . import (
 
 class SourceTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
-        self.account = FAKE_STANDARD_ACCOUNT.create()
+
         user = get_user_model().objects.create_user(
             username="testuser", email="djstripe@example.com"
         )

@@ -10,7 +10,8 @@ from django.test import TestCase
 
 from djstripe.enums import PaymentIntentStatus
 from djstripe.models import Account, Customer, PaymentIntent
-from tests import (
+
+from . import (
     FAKE_ACCOUNT,
     FAKE_CUSTOMER,
     FAKE_PAYMENT_INTENT_DESTINATION_CHARGE,
