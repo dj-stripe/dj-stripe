@@ -182,19 +182,23 @@ class StripeModelAdmin(admin.ModelAdmin):
         self.raw_id_fields = get_forward_relation_fields_for_model(self.model)
 
     def get_list_display(self, request):
-        return ("__str__", "id") + self.list_display + ("created", "livemode")
+        return (
+            ("__str__", "id", "djstripe_owner_account")
+            + self.list_display
+            + ("created", "livemode")
+        )
 
     def get_list_filter(self, request):
         return self.list_filter + ("created", "livemode")
 
     def get_readonly_fields(self, request, obj=None):
-        return self.readonly_fields + ("id", "created")
+        return self.readonly_fields + ("id", "djstripe_owner_account", "created")
 
     def get_search_fields(self, request):
         return self.search_fields + ("id",)
 
     def get_fieldsets(self, request, obj=None):
-        common_fields = ("livemode", "id", "created")
+        common_fields = ("livemode", "id", "djstripe_owner_account", "created")
         # Have to remove the fields from the common set,
         # otherwise they'll show up twice.
         fields = [f for f in self.get_fields(request, obj) if f not in common_fields]
@@ -209,7 +213,7 @@ class SubscriptionInline(admin.StackedInline):
 
     model = models.Subscription
     extra = 0
-    readonly_fields = ("id", "created")
+    readonly_fields = ("id", "created", "djstripe_owner_account")
     raw_id_fields = get_forward_relation_fields_for_model(model)
     show_change_link = True
 
@@ -236,7 +240,7 @@ class SubscriptionItemInline(admin.StackedInline):
 
     model = models.SubscriptionItem
     extra = 0
-    readonly_fields = ("id", "created")
+    readonly_fields = ("id", "created", "djstripe_owner_account")
     raw_id_fields = get_forward_relation_fields_for_model(model)
     show_change_link = True
 
@@ -246,7 +250,7 @@ class InvoiceItemInline(admin.StackedInline):
 
     model = models.InvoiceItem
     extra = 0
-    readonly_fields = ("id", "created")
+    readonly_fields = ("id", "created", "djstripe_owner_account")
     raw_id_fields = get_forward_relation_fields_for_model(model)
     show_change_link = True
 
@@ -258,9 +262,10 @@ class AccountAdmin(StripeModelAdmin):
     search_fields = ("settings", "business_profile")
 
 
+# todo perhaps make the djstripe_owner_account modelfield updateable for pub and webhook secret since we cannot query stripe for that info?
 @admin.register(models.APIKey)
 class APIKeyAdmin(StripeModelAdmin):
-    list_display = ("type", "djstripe_owner_account")
+    list_display = ("type",)
     list_filter = ("type",)
     search_fields = ("name",)
 
@@ -271,7 +276,6 @@ class APIKeyAdmin(StripeModelAdmin):
         fields.remove("id")
         fields.remove("created")
         if obj is None:
-            fields.remove("djstripe_owner_account")
             fields.remove("type")
             fields.remove("livemode")
         return fields
