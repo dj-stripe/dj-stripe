@@ -263,7 +263,7 @@ class StripeModel(StripeBaseModel):
         return data
 
     @classmethod
-    def _find_owner_account(cls, data):
+    def _find_owner_account(cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY):
         """
         Fetches the Stripe Account (djstripe_owner_account model field)
         linked to the class, cls.
@@ -272,13 +272,13 @@ class StripeModel(StripeBaseModel):
         """
         from .account import Account
 
+        # try to fetch by stripe_account. Also takes care of Stripe Connected Accounts
         stripe_account = cls._id_from_data(data.get("account"))
         if stripe_account:
             return Account._get_or_retrieve(id=stripe_account)
 
-        api_key = data.get("api_key", "")
-        if api_key:
-            return Account.get_or_retrieve_for_api_key(api_key)
+        # try to fetch by the given api_key.
+        return Account.get_or_retrieve_for_api_key(api_key)
 
     @classmethod
     def _stripe_object_to_record(
