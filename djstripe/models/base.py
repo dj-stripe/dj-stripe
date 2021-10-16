@@ -260,6 +260,12 @@ class StripeModel(StripeBaseModel):
         conversion.
         Use this to populate custom fields in a StripeModel from stripe data.
         """
+        # Account, BalanceTransaction, File, SubscriptionItem, BankAccount, and Card
+        # models do not return livemode key
+        if not data.get("livemode"):
+            # add livemode key if not returned by Stripe
+            data["livemode"] = djstripe_settings.STRIPE_LIVE_MODE
+
         return data
 
     @classmethod
