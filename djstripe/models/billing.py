@@ -980,6 +980,9 @@ class InvoiceItem(StripeModel):
 
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
+        # call the parent's _manipulate_stripe_object_hook() classmethod
+        data = super()._manipulate_stripe_object_hook(data)
+
         data["period_start"] = data["period"]["start"]
         data["period_end"] = data["period"]["end"]
 
@@ -2068,6 +2071,9 @@ class UsageRecordSummary(StripeModel):
 
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
+        # call the parent's _manipulate_stripe_object_hook() classmethod
+        data = super()._manipulate_stripe_object_hook(data)
+
         data["period_start"] = data["period"]["start"]
         data["period_end"] = data["period"]["end"]
 
