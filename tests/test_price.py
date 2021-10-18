@@ -168,7 +168,7 @@ class PriceTest(AssertStripeFksMixin, TestCase):
             id=self.price_data["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=["tiers"],
-            stripe_account=None,
+            stripe_account=self.price.djstripe_owner_account.id,
         )
         price = Price.sync_from_stripe_data(stripe_price)
 

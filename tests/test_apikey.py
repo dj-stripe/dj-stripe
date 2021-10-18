@@ -21,6 +21,8 @@ RK_LIVE = "rk_live_" + "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX5432"
 PK_TEST = "pk_test_" + "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXAAAA"
 PK_LIVE = "pk_live_" + "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXBBBB"
 
+pytestmark = pytest.mark.django_db
+
 
 def test_get_api_key_details_by_prefix():
     assert get_api_key_details_by_prefix(SK_TEST) == (APIKeyType.secret, False)

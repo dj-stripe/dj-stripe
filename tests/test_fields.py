@@ -10,6 +10,8 @@ from django.test.utils import override_settings
 
 from djstripe.fields import StripeDateTimeField, StripeDecimalCurrencyAmountField
 
+pytestmark = pytest.mark.django_db
+
 
 class TestStripeDecimalCurrencyAmountField:
     noval = StripeDecimalCurrencyAmountField(name="noval")

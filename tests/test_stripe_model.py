@@ -9,6 +9,8 @@ from django.test import TestCase
 from djstripe.models import Account, Customer, StripeModel
 from djstripe.settings import djstripe_settings
 
+pytestmark = pytest.mark.django_db
+
 
 class TestStripeModel(StripeModel):
     # exists to avoid "Abstract models cannot be instantiated." error
@@ -142,7 +144,7 @@ def test_api_retrieve_reverse_foreign_key_lookup(mock_stripe_class):
 
 
 @pytest.mark.parametrize("stripe_account", (None, "acct_fakefakefakefake001"))
-@pytest.mark.parametrize("api_key", ("", "sk_fakefakefake01"))
+@pytest.mark.parametrize("api_key", (None, "sk_fakefakefake01"))
 @patch.object(target=Account, attribute="get_or_retrieve_for_api_key")
 @patch.object(target=Account, attribute="_get_or_retrieve")
 def test__find_owner_account(
@@ -158,10 +160,14 @@ def test__find_owner_account(
         "livemode": False,
         "object": "customer",
         "account": stripe_account,
-        "api_key": api_key,
     }
 
-    StripeModel._find_owner_account(fake_data)
+    if api_key is None:
+        # invoke _find_owner_account without the api_key parameter
+        StripeModel._find_owner_account(fake_data)
+    else:
+        # invoke _find_owner_account with the api_key parameter
+        StripeModel._find_owner_account(fake_data, api_key=api_key)
 
     # if stripe_account exists, assert _get_or_retrieve classmethod
     # gets called

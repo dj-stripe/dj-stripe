@@ -16,6 +16,8 @@ from jsonfield import JSONField
 from djstripe import admin as djstripe_admin
 from djstripe import models
 
+pytestmark = pytest.mark.django_db
+
 
 @pytest.mark.parametrize(
     "output,input",

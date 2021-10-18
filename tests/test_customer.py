@@ -97,15 +97,11 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assertEqual(self.customer.pending_charges, 0)
 
     def test_customer_dashboard_url(self):
-        expected_url = "https://dashboard.stripe.com/test/customers/{}".format(
-            self.customer.id
-        )
+        expected_url = f"https://dashboard.stripe.com/{self.customer.djstripe_owner_account.id}/test/customers/{self.customer.id}"
         self.assertEqual(self.customer.get_stripe_dashboard_url(), expected_url)
 
         self.customer.livemode = True
-        expected_url = "https://dashboard.stripe.com/customers/{}".format(
-            self.customer.id
-        )
+        expected_url = f"https://dashboard.stripe.com/{self.customer.djstripe_owner_account.id}/customers/{self.customer.id}"
         self.assertEqual(self.customer.get_stripe_dashboard_url(), expected_url)
 
         unsaved_customer = Customer()
@@ -436,7 +432,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             id=self.customer.id,
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=ANY,
-            stripe_account=None,
+            stripe_account=self.customer.djstripe_owner_account.id,
         )
         self.assertEqual(1, customer_retrieve_mock.call_count)
 
@@ -455,7 +451,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             id=self.customer.id,
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=ANY,
-            stripe_account=None,
+            stripe_account=self.customer.djstripe_owner_account.id,
         )
 
     def test_can_charge(self):
@@ -656,7 +652,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=ANY,
             id=FAKE_CUSTOMER["id"],
-            stripe_account=None,
+            stripe_account=self.customer.djstripe_owner_account.id,
         )
 
     @patch("stripe.Coupon.retrieve", return_value=deepcopy(FAKE_COUPON), autospec=True)
@@ -685,7 +681,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=ANY,
             id=FAKE_CUSTOMER["id"],
-            stripe_account=None,
+            stripe_account=self.customer.djstripe_owner_account.id,
         )
 
         self.customer.refresh_from_db()
