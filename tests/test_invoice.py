@@ -452,7 +452,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
             id=invoice.id,
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=[],
-            stripe_account=None,
+            stripe_account=invoice.djstripe_owner_account.id,
         )
         self.assertTrue(return_value)
 

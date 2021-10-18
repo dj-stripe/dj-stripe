@@ -131,7 +131,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
             nested_id=FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0]["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=["balance_transaction", "transfer"],
-            stripe_account=None,
+            stripe_account=transfer_reversal.djstripe_owner_account.id,
         )
 
     @patch.object(Transfer, "_attach_objects_post_save_hook")

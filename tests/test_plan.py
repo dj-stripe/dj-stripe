@@ -140,7 +140,7 @@ class PlanTest(AssertStripeFksMixin, TestCase):
             id=self.plan_data["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=["tiers"],
-            stripe_account=None,
+            stripe_account=self.plan.djstripe_owner_account.id,
         )
         plan = Plan.sync_from_stripe_data(stripe_plan)
         assert plan.amount_in_cents == plan.amount * 100

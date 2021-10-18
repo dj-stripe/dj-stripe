@@ -1,10 +1,13 @@
 from copy import deepcopy
 
+import pytest
 from django.test.testcases import TestCase
 
 from djstripe.models import Coupon
 
 from . import FAKE_COUPON
+
+pytestmark = pytest.mark.django_db
 
 
 class TransferTest(TestCase):

@@ -167,7 +167,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
             id=FAKE_CUSTOMER["id"],
             nested_id=FAKE_TAX_ID["id"],
             expand=[],
-            stripe_account=None,
+            stripe_account=tax_id.djstripe_owner_account.id,
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
         )
 
