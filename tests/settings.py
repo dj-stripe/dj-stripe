@@ -95,10 +95,20 @@ MIDDLEWARE = (
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 )
 
-STRIPE_LIVE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_123")
-STRIPE_LIVE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "sk_test_123")
-STRIPE_TEST_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_123")
-STRIPE_TEST_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "sk_test_123")
+STRIPE_LIVE_PUBLIC_KEY = os.environ.get(
+    "STRIPE_PUBLIC_KEY", "pk_live_XXXXXXXXXXXXXXXXXXXXXXXXX"
+)
+STRIPE_LIVE_SECRET_KEY = os.environ.get(
+    "STRIPE_SECRET_KEY", "sk_live_XXXXXXXXXXXXXXXXXXXXXXXXX"
+)
+STRIPE_TEST_PUBLIC_KEY = os.environ.get(
+    "STRIPE_PUBLIC_KEY",
+    "pk_test_XXXXXXXXXXXXXXXXXXXXXXXXX",
+)
+STRIPE_TEST_SECRET_KEY = os.environ.get(
+    "STRIPE_SECRET_KEY",
+    "sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX",
+)
 
 DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = (
     "(admin)",
