@@ -9,7 +9,7 @@ from stripe.error import InvalidRequestError
 
 import djstripe.models
 import tests
-from djstripe.settings import djstripe_settings
+from djstripe import settings as djstripe_settings
 
 """
 Key used to store fake ids in the real stripe object's metadata dict
@@ -682,7 +682,7 @@ class Command(BaseCommand):
             stripe.PaymentMethod.attach(
                 obj["id"],
                 customer=customer_id,
-                api_key=djstripe_settings.STRIPE_SECRET_KEY,
+                api_key=djstripe_settings.djstripe_settings.STRIPE_SECRET_KEY,
             )
 
             for k in writable_fields:

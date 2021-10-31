@@ -10,7 +10,7 @@ from django.views.generic import DetailView, FormView
 from django.views.generic.base import TemplateView
 
 import djstripe.models
-from djstripe.settings import djstripe_settings
+from djstripe import settings as djstripe_settings
 
 from . import forms
 
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 User = get_user_model()
-stripe.api_key = djstripe_settings.STRIPE_SECRET_KEY
+stripe.api_key = djstripe_settings.djstripe_settings.STRIPE_SECRET_KEY
 
 
 class CreateCheckoutSessionView(TemplateView):
@@ -43,7 +43,7 @@ class CreateCheckoutSessionView(TemplateView):
         ctx = super().get_context_data(**kwargs)
 
         # to initialise Stripe.js on the front end
-        ctx["STRIPE_PUBLIC_KEY"] = djstripe_settings.STRIPE_PUBLIC_KEY
+        ctx["STRIPE_PUBLIC_KEY"] = djstripe_settings.djstripe_settings.STRIPE_PUBLIC_KEY
 
         success_url = self.request.build_absolute_uri(
             reverse("djstripe_example:success")
@@ -51,18 +51,24 @@ class CreateCheckoutSessionView(TemplateView):
         cancel_url = self.request.build_absolute_uri(reverse("home"))
 
         try:
-            id = djstripe_settings.get_subscriber_model().objects.first().id
+            id = (
+                djstripe_settings.djstripe_settings.get_subscriber_model()
+                .objects.first()
+                .id
+            )
 
         except AttributeError:
             id = (
-                djstripe_settings.get_subscriber_model()
+                djstripe_settings.djstripe_settings.get_subscriber_model()
                 .objects.create(username="sample@sample.com", email="sample@sample.com")
                 .id
             )
 
         # example of how to insert the SUBSCRIBER_CUSTOMER_KEY: id in the metadata
         # to add customer.subscriber to the newly created/updated customer.
-        metadata = {f"{djstripe_settings.SUBSCRIBER_CUSTOMER_KEY}": id}
+        metadata = {
+            f"{djstripe_settings.djstripe_settings.SUBSCRIBER_CUSTOMER_KEY}": id
+        }
 
         # ! Note that Stripe will always create a new Customer Object if customer id not provided
         # ! even if customer_email is provided!
@@ -132,7 +138,7 @@ class PurchaseSubscriptionView(FormView):
                 "(or use the dj-stripe webhooks)"
             )
 
-        ctx["STRIPE_PUBLIC_KEY"] = djstripe_settings.STRIPE_PUBLIC_KEY
+        ctx["STRIPE_PUBLIC_KEY"] = djstripe_settings.djstripe_settings.STRIPE_PUBLIC_KEY
 
         return ctx
 
@@ -148,7 +154,7 @@ class PurchaseSubscriptionView(FormView):
             user = User.objects.create(username=email, email=email)
 
         # Create the stripe Customer, by default subscriber Model is User,
-        # this can be overridden with djstripe_settings.DJSTRIPE_SUBSCRIBER_MODEL
+        # this can be overridden with djstripe_settings.djstripe_settings.DJSTRIPE_SUBSCRIBER_MODEL
         customer, created = djstripe.models.Customer.get_or_create(subscriber=user)
 
         # Add the source as the customer's default card
@@ -203,12 +209,12 @@ def create_payment_intent(request):
                     currency="usd",
                     confirmation_method="manual",
                     confirm=True,
-                    api_key=djstripe_settings.STRIPE_SECRET_KEY,
+                    api_key=djstripe_settings.djstripe_settings.STRIPE_SECRET_KEY,
                 )
             elif "payment_intent_id" in data:
                 intent = stripe.PaymentIntent.confirm(
                     data["payment_intent_id"],
-                    api_key=djstripe_settings.STRIPE_SECRET_KEY,
+                    api_key=djstripe_settings.djstripe_settings.STRIPE_SECRET_KEY,
                 )
         except stripe.error.CardError as e:
             # Display error on client
@@ -243,5 +249,7 @@ def create_payment_intent(request):
         )
 
     else:
-        ctx = {"STRIPE_PUBLIC_KEY": djstripe_settings.STRIPE_PUBLIC_KEY}
+        ctx = {
+            "STRIPE_PUBLIC_KEY": djstripe_settings.djstripe_settings.STRIPE_PUBLIC_KEY
+        }
         return TemplateResponse(request, "payment_intent.html", ctx)
