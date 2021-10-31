@@ -3,13 +3,14 @@ import logging
 
 import stripe
 from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.views.generic import DetailView, FormView
 from django.views.generic.base import TemplateView
 
-import djstripe.models
+from djstripe import models
 from djstripe import settings as djstripe_settings
 
 from . import forms
@@ -21,16 +22,16 @@ User = get_user_model()
 stripe.api_key = djstripe_settings.djstripe_settings.STRIPE_SECRET_KEY
 
 
-class CreateCheckoutSessionView(TemplateView):
+class CreateCheckoutSessionView(LoginRequiredMixin, TemplateView):
     """
     Example View to demonstrate how to use dj-stripe to:
 
-     * Create a Stripe Checkout Session (for a new customer)
+     * Create a Stripe Checkout Session (for a new and a returning customer)
      * Add SUBSCRIBER_CUSTOMER_KEY to metadata to populate customer.subscriber model field
      * Fill out Payment Form and Complete Payment
 
     Redirects the User to Stripe Checkout Session.
-    This does a non-logged in purchase for the user using Stripe Checkout
+    This does a logged in purchase for a new and a returning customer using Stripe Checkout
     """
 
     template_name = "checkout.html"
@@ -40,29 +41,22 @@ class CreateCheckoutSessionView(TemplateView):
         Creates and returns a Stripe Checkout Session
         """
         # Get Parent Context
-        ctx = super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         # to initialise Stripe.js on the front end
-        ctx["STRIPE_PUBLIC_KEY"] = djstripe_settings.djstripe_settings.STRIPE_PUBLIC_KEY
+        context[
+            "STRIPE_PUBLIC_KEY"
+        ] = djstripe_settings.djstripe_settings.STRIPE_PUBLIC_KEY
 
         success_url = self.request.build_absolute_uri(
             reverse("djstripe_example:success")
         )
         cancel_url = self.request.build_absolute_uri(reverse("home"))
 
-        try:
-            id = (
-                djstripe_settings.djstripe_settings.get_subscriber_model()
-                .objects.first()
-                .id
-            )
-
-        except AttributeError:
-            id = (
-                djstripe_settings.djstripe_settings.get_subscriber_model()
-                .objects.create(username="sample@sample.com", email="sample@sample.com")
-                .id
-            )
+        # get the id of the Model instance of djstripe_settings.djstripe_settings.get_subscriber_model()
+        # here we have assumed it is the Django User model. It could be a Team, Company model too.
+        # note that it needs to have an email field.
+        id = self.request.user.id
 
         # example of how to insert the SUBSCRIBER_CUSTOMER_KEY: id in the metadata
         # to add customer.subscriber to the newly created/updated customer.
@@ -70,38 +64,79 @@ class CreateCheckoutSessionView(TemplateView):
             f"{djstripe_settings.djstripe_settings.SUBSCRIBER_CUSTOMER_KEY}": id
         }
 
-        # ! Note that Stripe will always create a new Customer Object if customer id not provided
-        # ! even if customer_email is provided!
-        session = stripe.checkout.Session.create(
-            payment_method_types=["card"],
-            # payment_method_types=["bacs_debit"],  # for bacs_debit
-            payment_intent_data={
-                "setup_future_usage": "off_session",
-            },
-            line_items=[
-                {
-                    "price_data": {
-                        "currency": "usd",
-                        # "currency": "gbp",  # for bacs_debit
-                        "unit_amount": 2000,
-                        "product_data": {
-                            "name": "Sample Product Name",
-                            "images": ["https://i.imgur.com/EHyR2nP.png"],
-                            "description": "Sample Description",
-                        },
-                    },
-                    "quantity": 1,
+        try:
+            # retreive the Stripe Customer.
+            customer = models.Customer.objects.get(subscriber=self.request.user)
+
+            print("Customer Object in DB.")
+
+            # ! Note that Stripe will always create a new Customer Object if customer id not provided
+            # ! even if customer_email is provided!
+            session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                customer=customer.id,
+                # payment_method_types=["bacs_debit"],  # for bacs_debit
+                payment_intent_data={
+                    "setup_future_usage": "off_session",
+                    # so that the metadata gets copied to the associated Payment Intent and Charge Objects
+                    "metadata": metadata,
                 },
-            ],
-            mode="payment",
-            success_url=success_url,
-            cancel_url=cancel_url,
-            metadata=metadata,
-        )
+                line_items=[
+                    {
+                        "price_data": {
+                            "currency": "usd",
+                            # "currency": "gbp",  # for bacs_debit
+                            "unit_amount": 2000,
+                            "product_data": {
+                                "name": "Sample Product Name",
+                                "images": ["https://i.imgur.com/EHyR2nP.png"],
+                                "description": "Sample Description",
+                            },
+                        },
+                        "quantity": 1,
+                    },
+                ],
+                mode="payment",
+                success_url=success_url,
+                cancel_url=cancel_url,
+                metadata=metadata,
+            )
 
-        ctx["CHECKOUT_SESSION_ID"] = session.id
+        except models.Customer.DoesNotExist:
+            print("Customer Object not in DB.")
 
-        return ctx
+            session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                # payment_method_types=["bacs_debit"],  # for bacs_debit
+                payment_intent_data={
+                    "setup_future_usage": "off_session",
+                    # so that the metadata gets copied to the associated Payment Intent and Charge Objects
+                    "metadata": metadata,
+                },
+                line_items=[
+                    {
+                        "price_data": {
+                            "currency": "usd",
+                            # "currency": "gbp",  # for bacs_debit
+                            "unit_amount": 2000,
+                            "product_data": {
+                                "name": "Sample Product Name",
+                                "images": ["https://i.imgur.com/EHyR2nP.png"],
+                                "description": "Sample Description",
+                            },
+                        },
+                        "quantity": 1,
+                    },
+                ],
+                mode="payment",
+                success_url=success_url,
+                cancel_url=cancel_url,
+                metadata=metadata,
+            )
+
+        context["CHECKOUT_SESSION_ID"] = session.id
+
+        return context
 
 
 class CheckoutSessionSuccessView(TemplateView):
@@ -128,9 +163,9 @@ class PurchaseSubscriptionView(FormView):
     form_class = forms.PurchaseSubscriptionForm
 
     def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
-        if djstripe.models.Plan.objects.count() == 0:
+        if models.Plan.objects.count() == 0:
             raise Exception(
                 "No Product Plans in the dj-stripe database - create some in your "
                 "stripe account and then "
@@ -138,9 +173,11 @@ class PurchaseSubscriptionView(FormView):
                 "(or use the dj-stripe webhooks)"
             )
 
-        ctx["STRIPE_PUBLIC_KEY"] = djstripe_settings.djstripe_settings.STRIPE_PUBLIC_KEY
+        context[
+            "STRIPE_PUBLIC_KEY"
+        ] = djstripe_settings.djstripe_settings.STRIPE_PUBLIC_KEY
 
-        return ctx
+        return context
 
     def form_valid(self, form):
         stripe_source = form.cleaned_data["stripe_source"]
@@ -155,7 +192,7 @@ class PurchaseSubscriptionView(FormView):
 
         # Create the stripe Customer, by default subscriber Model is User,
         # this can be overridden with djstripe_settings.djstripe_settings.DJSTRIPE_SUBSCRIBER_MODEL
-        customer, created = djstripe.models.Customer.get_or_create(subscriber=user)
+        customer, created = models.Customer.get_or_create(subscriber=user)
 
         # Add the source as the customer's default card
         customer.add_card(stripe_source)
@@ -167,14 +204,12 @@ class PurchaseSubscriptionView(FormView):
             items=[{"plan": plan.id}],
             collection_method="charge_automatically",
             # tax_percent=15,
-            api_key=djstripe.settings.STRIPE_SECRET_KEY,
+            api_key=djstripe_settings.djstripe_settings.STRIPE_SECRET_KEY,
         )
 
         # Sync the Stripe API return data to the database,
         # this way we don't need to wait for a webhook-triggered sync
-        subscription = djstripe.models.Subscription.sync_from_stripe_data(
-            stripe_subscription
-        )
+        subscription = models.Subscription.sync_from_stripe_data(stripe_subscription)
 
         self.request.subscription = subscription
 
@@ -190,7 +225,7 @@ class PurchaseSubscriptionView(FormView):
 class PurchaseSubscriptionSuccessView(DetailView):
     template_name = "purchase_subscription_success.html"
 
-    queryset = djstripe.models.Subscription.objects.all()
+    queryset = models.Subscription.objects.all()
     slug_field = "id"
     slug_url_kwarg = "id"
     context_object_name = "subscription"
@@ -249,7 +284,7 @@ def create_payment_intent(request):
         )
 
     else:
-        ctx = {
+        context = {
             "STRIPE_PUBLIC_KEY": djstripe_settings.djstripe_settings.STRIPE_PUBLIC_KEY
         }
-        return TemplateResponse(request, "payment_intent.html", ctx)
+        return TemplateResponse(request, "payment_intent.html", context)
