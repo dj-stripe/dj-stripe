@@ -37,6 +37,16 @@ To see the project's documentation live, run the following command:
 
 The documentation site will then be served on <http://127.0.0.1:8000>.
 
+!!! attention "In case of any installation error"
+
+    In case you get the error that some plugin is not installed, please run:
+        ``` bash
+
+        poetry install -E docs
+        ```
+
+
+
 If you wish to just generate the documentation, you can replace `serve` with `build`,
 and the docs will be generated into the `site/` folder.
 
