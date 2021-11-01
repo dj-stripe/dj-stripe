@@ -1,7 +1,7 @@
 # dj-stripe - Django + Stripe Made Easy
 
-[![Documentation](https://readthedocs.org/projects/dj-stripe/badge/)](https://dj-stripe.readthedocs.io/)
-[![Sponsor dj-stripe](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub)](https://github.com/sponsors/dj-stripe)
+[![Documentation](https://img.shields.io/static/v1?label=Docs&message=READ&color=informational&style=plastic)](https://dj-stripe.github.io/dj-stripe/)
+[![Sponsor dj-stripe](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=red&style=plastic)](https://github.com/sponsors/dj-stripe)
 
 Stripe Models for Django.
 
@@ -12,7 +12,7 @@ webhook endpoint and start receiving model updates. You will then have
 a copy of all the Stripe models available in Django models, as soon as
 they are updated!
 
-The full documentation is available [on Read the Docs](https://dj-stripe.readthedocs.io/).
+The full documentation is available [on Read the Docs](https://dj-stripe.github.io/dj-stripe/).
 
 ## Features
 
@@ -38,7 +38,7 @@ The full documentation is available [on Read the Docs](https://dj-stripe.readthe
 
 ## Changelog
 
-[See release notes on Read the Docs](https://dj-stripe.readthedocs.io/en/latest/history/2_5_0/).
+[See release notes on Read the Docs](https://dj-stripe.github.io/dj-stripe/history/2_5_0/).
 
 ## Funding and Support
 
