@@ -593,6 +593,7 @@ FAKE_SESSION_I = {
     "submit_type": None,
     "subscription": None,
     "success_url": "https://example.com/success",
+    "metadata": {},
 }
 
 

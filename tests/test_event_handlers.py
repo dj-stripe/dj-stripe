@@ -846,10 +846,12 @@ class TestCheckoutEvents(EventTestCase):
         session = Session.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(session.customer.id, self.customer.id)
 
+    @patch("stripe.checkout.Session.retrieve", autospec=True)
     @patch(
-        "stripe.checkout.Session.retrieve", return_value=FAKE_SESSION_I, autospec=True
+        "stripe.Customer.modify",
+        return_value=deepcopy(FAKE_CUSTOMER),
+        autospec=True,
     )
-    @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
     @patch(
         "stripe.PaymentIntent.retrieve",
         return_value=FAKE_PAYMENT_INTENT_I,
@@ -860,18 +862,24 @@ class TestCheckoutEvents(EventTestCase):
         self,
         event_retrieve_mock,
         payment_intent_retrieve_mock,
-        customer_retrieve_mock,
+        customer_modify_mock,
         session_retrieve_mock,
     ):
         # because create_for_user method adds subscriber
         self.customer.subcriber = None
         self.customer.save()
 
+        # update metadata in deepcopied FAKE_SEESION_1 Object
         fake_stripe_event = deepcopy(FAKE_EVENT_SESSION_COMPLETED)
         fake_stripe_event["data"]["object"]["metadata"] = {
             "djstripe_subscriber": self.user.id
         }
         event_retrieve_mock.return_value = fake_stripe_event
+
+        # update metadata in FAKE_SEESION_1 Object
+        fake_stripe_session = deepcopy(FAKE_SESSION_I)
+        fake_stripe_session["metadata"] = {"djstripe_subscriber": self.user.id}
+        session_retrieve_mock.return_value = fake_stripe_session
 
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
