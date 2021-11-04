@@ -259,27 +259,8 @@ def dispute_webhook_handler(event):
         _handle_crud_like_event(target_cls=models.Dispute, event=event)
 
 
-@webhooks.handler("checkout")
-def checkout_webhook_handler(event):
-    """
-    Handle updates to Checkout Session objects
-    And updates to the subscriber model and metadata fields of customer if present
-    in checkout.sessions metadata key.
-
-    Please note djstripe doesn't create new subscriber and customer instances
-    - checkout: https://stripe.com/docs/api/checkout/sessions
-    """
-    metadata = event.data.get("object", {}).get("metadata", {})
-    customer_id = event.data.get("object", {}).get("customer", "")
-    subscriber_key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
-
-    # only update customer.subscriber if both the customer and subscriber already exist
-    update_customer_helper(metadata, customer_id, subscriber_key)
-
-    _handle_crud_like_event(target_cls=models.Session, event=event)
-
-
 @webhooks.handler(
+    "checkout",
     "coupon",
     "file",
     "invoice",
@@ -296,11 +277,12 @@ def checkout_webhook_handler(event):
 )
 def other_object_webhook_handler(event):
     """
-    Handle updates to coupon, file, invoice, invoiceitem, payment_intent,
+    Handle updates to checkout, coupon, file, invoice, invoiceitem, payment_intent,
     plan, product, setup_intent, subscription_schedule, source, tax_rate
     and transfer objects.
 
     Docs for:
+    - checkout: https://stripe.com/docs/api/checkout/sessions
     - coupon: https://stripe.com/docs/api/coupons
     - file: https://stripe.com/docs/api/files
     - invoice: https://stripe.com/docs/api/invoices
@@ -317,6 +299,7 @@ def other_object_webhook_handler(event):
     """
 
     target_cls = {
+        "checkout": models.Session,
         "coupon": models.Coupon,
         "file": models.File,
         "invoice": models.Invoice,
