@@ -1,6 +1,8 @@
 import stripe
 from django.db import models
 
+from djstripe.settings import djstripe_settings
+
 from .. import enums
 from ..fields import JSONField, StripeEnumField, StripeForeignKey
 from .base import StripeModel
@@ -101,3 +103,30 @@ class Session(StripeModel):
             "creation is successful."
         ),
     )
+
+    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+        from ..event_handlers import update_customer_helper
+
+        super()._attach_objects_post_save_hook(
+            cls, data, pending_relations=pending_relations
+        )
+
+        # only update if customer and metadata exist
+        if self.customer and self.metadata:
+
+            key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
+            current_value = self.metadata.get(key)
+
+            # only update if metadata has the SUBSCRIBER_CUSTOMER_KEY
+            if current_value:
+                metadata = {key: current_value}
+
+                # Update the customer with ONLY the customer specific metadata
+                update_customer_helper(
+                    metadata,
+                    self.customer.id,
+                    key,
+                )
+
+                # Update metadata in the Upstream Customer Object on Stripe
+                self.customer._api_update(metadata=metadata)
