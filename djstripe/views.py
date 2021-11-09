@@ -30,16 +30,18 @@ class ProcessWebhookView(View):
         if "HTTP_STRIPE_SIGNATURE" not in request.META:
             # Do not even attempt to process/store the event if there is
             # no signature in the headers so we avoid overfilling the db.
+            logger.error("HTTP_STRIPE_SIGNATURE is missing")
             return HttpResponseBadRequest()
 
         trigger = WebhookEventTrigger.from_request(request)
 
         if trigger.is_test_event:
             # Since we don't do signature verification, we have to skip trigger.valid
-            return HttpResponse("Test webhook successfully received!")
+            return HttpResponse("Test webhook successfully received and discarded!")
 
         if not trigger.valid:
             # Webhook Event did not validate, return 400
+            logger.error("Trigger object did not validate")
             return HttpResponseBadRequest()
 
         return HttpResponse(str(trigger.id))
