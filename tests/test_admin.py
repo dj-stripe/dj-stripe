@@ -22,7 +22,7 @@ pytestmark = pytest.mark.django_db
 @pytest.mark.parametrize(
     "output,input",
     [
-        (["event"], models.WebhookEventTrigger),
+        (["event", "stripe_trigger_account"], models.WebhookEventTrigger),
         (
             [
                 "djstripe_owner_account",
