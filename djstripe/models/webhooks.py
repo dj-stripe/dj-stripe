@@ -167,14 +167,18 @@ class WebhookEventTrigger(models.Model):
 
         local_data = self.json_body
         if "id" not in local_data or "livemode" not in local_data:
+            logger.error(
+                '"id" not in json body or "livemode" not in json body(%s)', local_data
+            )
             return False
 
         if self.is_test_event:
-            logger.info("Test webhook received: {}".format(local_data))
+            logger.info("Test webhook received and discarded: {}".format(local_data))
             return False
 
         if djstripe_settings.WEBHOOK_VALIDATION is None:
             # validation disabled
+            warnings.warn("WEBHOOK VALIDATION is disabled.")
             return True
         elif (
             djstripe_settings.WEBHOOK_VALIDATION == "verify_signature"
@@ -190,6 +194,7 @@ class WebhookEventTrigger(models.Model):
                     djstripe_settings.WEBHOOK_TOLERANCE,
                 )
             except stripe.error.SignatureVerificationError:
+                logger.exception("Failed to verify header")
                 return False
             else:
                 return True
