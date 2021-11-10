@@ -255,6 +255,10 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
+    @patch(
+        "stripe.Subscription.modify",
+        autospec=True,
+    )
     @patch("stripe.Subscription.retrieve", autospec=True)
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
@@ -263,21 +267,27 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self,
         customer_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_modify_mock,
         product_retrieve_mock,
         plan_retrieve_mock,
     ):
+        current_period_end = timezone.now() - timezone.timedelta(days=20)
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_fake["current_period_end"] = datetime_to_unix(
-            timezone.now() - timezone.timedelta(days=20)
-        )
-
+        subscription_fake["current_period_end"] = int(current_period_end.timestamp())
         subscription_retrieve_mock.return_value = subscription_fake
 
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
         self.assertFalse(subscription in self.customer.active_subscriptions)
         self.assertEqual(self.customer.active_subscriptions.count(), 0)
 
+        # Extend the Subscription by 30 days
         delta = timezone.timedelta(days=30)
+        subscription_updated = deepcopy(subscription_fake)
+        subscription_updated["trial_end"] = int(
+            (current_period_end + delta).timestamp()
+        )
+        subscription_modify_mock.return_value = subscription_updated
+
         extended_subscription = subscription.extend(delta)
         product = Product.sync_from_stripe_data(deepcopy(FAKE_PRODUCT))
 
@@ -326,6 +336,10 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     @patch(
+        "stripe.Subscription.modify",
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -337,19 +351,25 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self,
         customer_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_modify_mock,
         product_retrieve_mock,
         plan_retrieve_mock,
     ):
+        trial_end = timezone.now() + timezone.timedelta(days=5)
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
-        subscription.trial_end = timezone.now() + timezone.timedelta(days=5)
+        subscription.trial_end = trial_end
         subscription.save()
 
+        # Extend the Subscription by 30 days
         delta = timezone.timedelta(days=30)
-        new_trial_end = subscription.trial_end + delta
+        subscription_updated = deepcopy(subscription_fake)
+        subscription_updated["trial_end"] = int((trial_end + delta).timestamp())
+        subscription_modify_mock.return_value = subscription_updated
 
         extended_subscription = subscription.extend(delta)
 
+        new_trial_end = subscription.trial_end + delta
         self.assertEqual(
             new_trial_end.replace(microsecond=0), extended_subscription.trial_end
         )
@@ -365,6 +385,10 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     @patch(
+        "stripe.Subscription.modify",
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -376,6 +400,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self,
         customer_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_modify_mock,
         product_retrieve_mock,
         plan_retrieve_mock,
     ):
@@ -383,6 +408,11 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
 
         self.assertEqual(1, subscription.quantity)
+
+        # Update the quantity of the Subscription
+        subscription_updated = deepcopy(FAKE_SUBSCRIPTION)
+        subscription_updated["quantity"] = 4
+        subscription_modify_mock.return_value = subscription_updated
 
         new_subscription = subscription.update(quantity=4)
 
@@ -397,6 +427,10 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     @patch(
+        "stripe.Subscription.modify",
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -408,6 +442,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self,
         customer_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_modify_mock,
         product_retrieve_mock,
         plan_retrieve_mock,
     ):
@@ -416,6 +451,11 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         new_plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN_II))
 
         self.assertEqual(FAKE_PLAN["id"], subscription.plan.id)
+
+        # Update the Subscription's plan
+        subscription_updated = deepcopy(FAKE_SUBSCRIPTION)
+        subscription_updated["plan"] = deepcopy(FAKE_PLAN_II)
+        subscription_modify_mock.return_value = subscription_updated
 
         new_subscription = subscription.update(plan=new_plan)
 
@@ -479,6 +519,10 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
+    @patch(
+        "stripe.Subscription.modify",
+        autospec=True,
+    )
     @patch("stripe.Subscription.retrieve", autospec=True)
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
@@ -487,6 +531,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self,
         customer_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_modify_mock,
         product_retrieve_mock,
         plan_retrieve_mock,
     ):
@@ -510,6 +555,11 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self.assertTrue(self.customer.has_any_active_subscription())
         self.assertEqual(self.customer.active_subscriptions.count(), 1)
         self.assertTrue(subscription in self.customer.active_subscriptions)
+
+        # Update the Subscription by cancelling it at the end of the period
+        subscription_updated = deepcopy(canceled_subscription_fake)
+        subscription_updated["cancel_at_period_end"] = True
+        subscription_modify_mock.return_value = subscription_updated
 
         new_subscription = subscription.cancel(at_period_end=True)
 
@@ -577,6 +627,10 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
+    @patch(
+        "stripe.Subscription.modify",
+        autospec=True,
+    )
     @patch("stripe.Subscription.retrieve", autospec=True)
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
@@ -585,6 +639,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         self,
         customer_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_modify_mock,
         product_retrieve_mock,
         plan_retrieve_mock,
     ):
@@ -604,6 +659,11 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
 
         self.assertTrue(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertTrue(self.customer.has_any_active_subscription())
+
+        # Update the Subscription by cancelling it at the end of the period
+        subscription_updated = deepcopy(canceled_subscription_fake)
+        subscription_updated["cancel_at_period_end"] = True
+        subscription_modify_mock.return_value = subscription_updated
 
         new_subscription = subscription.cancel(at_period_end=True)
         self.assertEqual(new_subscription.cancel_at_period_end, True)

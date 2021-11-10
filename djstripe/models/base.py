@@ -244,8 +244,9 @@ class StripeModel(StripeBaseModel):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        instance = self.api_retrieve(api_key=api_key, stripe_account=stripe_account)
-        return instance.request("post", instance.instance_url(), params=kwargs)
+        return self.stripe_class.modify(
+            self.id, stripe_account=stripe_account, **kwargs
+        )
 
     def str_parts(self) -> List[str]:
         """
