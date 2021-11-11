@@ -18,7 +18,7 @@ webhook endpoint and start receiving model updates. You will then have
 a copy of all the Stripe models available in Django models, as soon as
 they are updated!
 
-The full documentation is available [on Read the Docs](https://dj-stripe.readthedocs.io/).
+The full documentation is available [on Read the Docs](https://dj-stripe.github.io/dj-stripe/).
 
 ## Features
 
@@ -44,7 +44,7 @@ The full documentation is available [on Read the Docs](https://dj-stripe.readthe
 
 ## Changelog
 
-[See release notes on Read the Docs](https://dj-stripe.readthedocs.io/en/latest/history/2_5_0/).
+[See release notes on Read the Docs](https://dj-stripe.github.io/dj-stripe/history/2_5_0/).
 
 ## Funding and Support
 
