@@ -2,11 +2,12 @@
 Module for creating re-usable fixtures to be used across the test suite
 """
 import pytest
+from django.contrib.auth import get_user_model
 
 from djstripe.enums import APIKeyType
 from djstripe.models import APIKey
 
-from . import FAKE_PLATFORM_ACCOUNT
+from . import FAKE_CUSTOMER, FAKE_PLATFORM_ACCOUNT
 
 pytestmark = pytest.mark.django_db
 
@@ -27,3 +28,17 @@ def create_account_and_stripe_apikeys(settings):
         livemode=False,
         djstripe_owner_account=djstripe_platform_account,
     )
+
+
+@pytest.fixture
+def fake_user():
+    user = get_user_model().objects.create_user(
+        username="arnav", email="arnav13@gmail.com"
+    )
+    return user
+
+
+@pytest.fixture
+def fake_customer(fake_user):
+    customer = FAKE_CUSTOMER.create_for_user(fake_user)
+    return customer
