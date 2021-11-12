@@ -60,7 +60,7 @@ pytest-django = "^4.3.0"
 mypy = "^0.812"
 
 [tool.poetry.extras]
-docs = ["mkdocs", "mkdocstrings", "mkdocs-material", "mkdocs-autorefs"]
+docs = ["mkdocs", "mkdocstrings", "mkdocs-material", "mkdocs-autorefs", "psycopg2"]
 
 [tool.isort]
 profile = "black"
