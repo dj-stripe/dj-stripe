@@ -17,6 +17,7 @@ from djstripe.settings import djstripe_settings
 from djstripe.webhooks import TEST_EVENT_ID, call_handlers, handler, handler_all
 
 from . import (
+    FAKE_CUSTOM_ACCOUNT,
     FAKE_EVENT_TEST_CHARGE_SUCCEEDED,
     FAKE_EVENT_TRANSFER_CREATED,
     FAKE_STANDARD_ACCOUNT,
@@ -29,7 +30,9 @@ def mock_webhook_handler(webhook_event_trigger):
     webhook_event_trigger.process()
 
 
-class TestWebhook(TestCase):
+class TestWebhookEventTrigger(TestCase):
+    """Test class to test WebhookEventTrigger model and its methods"""
+
     def _send_event(self, event_data):
         return Client().post(
             reverse("djstripe:webhook"),
@@ -365,7 +368,7 @@ class TestWebhook(TestCase):
         "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
     )
     @patch("stripe.Event.retrieve", autospec=True)
-    def test_webhook_good(
+    def test_webhook_good_platform_account(
         self,
         event_retrieve_mock,
         transfer_retrieve_mock,
@@ -382,6 +385,42 @@ class TestWebhook(TestCase):
 
         event_trigger = WebhookEventTrigger.objects.first()
         self.assertEqual(event_trigger.is_test_event, False)
+        self.assertEqual(
+            event_trigger.stripe_trigger_account.id, FAKE_STANDARD_ACCOUNT["id"]
+        )
+
+    @override_settings(DJSTRIPE_WEBHOOK_SECRET="")
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
+    @patch(
+        "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
+    )
+    @patch("stripe.Event.retrieve", autospec=True)
+    def test_webhook_good_connect_account(
+        self,
+        event_retrieve_mock,
+        transfer_retrieve_mock,
+        account_retrieve_mock,
+        transfer__attach_object_post_save_hook_mock,
+    ):
+        fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+        fake_event["account"] = FAKE_CUSTOM_ACCOUNT["id"]
+        event_retrieve_mock.return_value = fake_event
+        resp = self._send_event(fake_event)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(Event.objects.count(), 1)
+        self.assertEqual(WebhookEventTrigger.objects.count(), 1)
+
+        event_trigger = WebhookEventTrigger.objects.first()
+        self.assertEqual(event_trigger.is_test_event, False)
+        self.assertEqual(
+            event_trigger.stripe_trigger_account.id, FAKE_CUSTOM_ACCOUNT["id"]
+        )
 
     @override_settings(DJSTRIPE_WEBHOOK_SECRET="")
     @patch.object(target=Event, attribute="invoke_webhook_handlers", autospec=True)

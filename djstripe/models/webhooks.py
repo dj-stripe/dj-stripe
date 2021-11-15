@@ -1,3 +1,7 @@
+"""
+Module for dj-stripe Webhook models
+"""
+
 import json
 import warnings
 from traceback import format_exc
@@ -11,7 +15,7 @@ from ..context_managers import stripe_temporary_api_version
 from ..fields import JSONField, StripeForeignKey
 from ..settings import djstripe_settings
 from ..signals import webhook_processing_error
-from .base import logger
+from .base import StripeModel, logger
 from .core import Event
 
 
@@ -63,6 +67,14 @@ class WebhookEventTrigger(models.Model):
     )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    stripe_trigger_account = StripeForeignKey(
+        "djstripe.Account",
+        on_delete=models.CASCADE,
+        to_field="id",
+        null=True,
+        blank=True,
+        help_text="The Stripe Account this object belongs to.",
+    )
 
     def __str__(self):
         return f"id={self.id}, valid={self.valid}, processed={self.processed}"
@@ -91,7 +103,18 @@ class WebhookEventTrigger(models.Model):
                 "This is likely an issue with your wsgi/server setup."
             )
             ip = "0.0.0.0"
-        obj = cls.objects.create(headers=dict(request.headers), body=body, remote_ip=ip)
+
+        try:
+            data = json.loads(body)
+        except ValueError:
+            data = {}
+
+        obj = cls.objects.create(
+            headers=dict(request.headers),
+            body=body,
+            remote_ip=ip,
+            stripe_trigger_account=StripeModel._find_owner_account(data=data),
+        )
 
         try:
             obj.valid = obj.validate()
