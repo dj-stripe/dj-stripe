@@ -2,9 +2,25 @@ name: CI tests
 
 on:
   push:
+    paths-ignore:
+      - 'docs/**'
+      - 'pyproject.toml'
+      - 'mkdocs.yml'
+      - 'codecov.yml'
+      - '.readthedocs.yml'
+      - '.github/workflows/docs.yaml'
+
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [master]
+    paths-ignore:
+      - 'docs/**'
+      - 'pyproject.toml'
+      - 'mkdocs.yml'
+      - 'codecov.yml'
+      - '.readthedocs.yml'
+      - '.github/workflows/docs.yaml'
+
 
 jobs:
 
