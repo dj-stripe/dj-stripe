@@ -316,6 +316,18 @@ class ChargeAdmin(StripeModelAdmin):
     list_filter = ("status", "paid", "refunded", "captured")
 
 
+@admin.register(models.CountrySpec)
+class CountrySpecAdmin(ReadOnlyMixin, admin.ModelAdmin):
+    list_display = ("id", "default_currency", "supported_payment_methods")
+    list_filter = ("default_currency", "supported_payment_methods")
+    search_fields = (
+        "default_currency",
+        "supported_payment_methods",
+        "supported_payment_currencies",
+        "supported_transfer_countries",
+    )
+
+
 @admin.register(models.Coupon)
 class CouponAdmin(StripeModelAdmin):
     list_display = (
