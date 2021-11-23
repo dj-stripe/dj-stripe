@@ -52,7 +52,9 @@ def test_get_forward_relation_fields_for_model(output, input):
     assert output == djstripe_admin.get_forward_relation_fields_for_model(input)
 
 
-class TestAdminRegisteredModels(TestCase):
+class TestStripeModelAdminRegisteredModels(TestCase):
+    """Test class for all admin classes that inherit from StripeModelAdmin"""
+
     def setUp(self):
         self.admin = get_user_model().objects.create_superuser(
             username="admin", email="admin@djstripe.com", password="xxx"
@@ -60,7 +62,7 @@ class TestAdminRegisteredModels(TestCase):
         self.factory = RequestFactory()
         # the 2 models that do not inherit from StripeModel and hence
         # do not inherit from StripeModelAdmin
-        self.ignore_models = ["WebhookEventTrigger", "IdempotencyKey"]
+        self.ignore_models = ["WebhookEventTrigger", "IdempotencyKey", "CountrySpec"]
 
     def test_get_list_display_links(self):
         app_label = "djstripe"
@@ -413,6 +415,8 @@ class TestAdminRegisteredModels(TestCase):
 
 
 class TestAdminInlineModels(TestCase):
+    """Test class for all admin classes that inherit from admin.StackedInline or admin.TabularInline"""
+
     def test_readonly_fields_exist(self):
         """
         Ensure all fields in BaseModelAdmin.readonly_fields exist on the model
@@ -430,6 +434,8 @@ class TestAdminInlineModels(TestCase):
 
 
 class TestAdminSite(TestCase):
+    """Test class for all admin model classes"""
+
     def setUp(self):
         self.empty_value = "-empty-"
 
