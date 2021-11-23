@@ -273,11 +273,21 @@ class StripeModel(StripeBaseModel):
         """
         from .account import Account
 
-        if data and data.get("account"):
-            # try to fetch by stripe_account. Also takes care of Stripe Connected Accounts
-            stripe_account = cls._id_from_data(data.get("account"))
-            if stripe_account:
-                return Account._get_or_retrieve(id=stripe_account)
+        # try to fetch by stripe_account. Also takes care of Stripe Connected Accounts
+        if data:
+            # case of Webhook Event Trigger
+            if data.get("object") == "event":
+                # if account key exists and has a not null value
+                if data.get("account"):
+                    stripe_account = cls._id_from_data(data.get("account"))
+                    if stripe_account:
+                        return Account._get_or_retrieve(id=stripe_account)
+
+            else:
+                if getattr(data, "stripe_account", ""):
+                    stripe_account = cls._id_from_data(data.stripe_account)
+                    if stripe_account:
+                        return Account._get_or_retrieve(id=stripe_account)
 
         # try to fetch by the given api_key.
         return Account.get_or_retrieve_for_api_key(api_key)
