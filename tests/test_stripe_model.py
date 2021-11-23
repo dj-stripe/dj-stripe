@@ -142,24 +142,18 @@ def test_api_retrieve_reverse_foreign_key_lookup(mock_stripe_class):
     mock_account_reverse_manager.first.assert_called_once_with()
 
 
-@pytest.mark.parametrize("stripe_account", (None, "acct_fakefakefakefake001"))
 @pytest.mark.parametrize("api_key", (None, "sk_fakefakefake01"))
 @patch.object(target=Account, attribute="get_or_retrieve_for_api_key")
-@patch.object(target=Account, attribute="_get_or_retrieve")
-def test__find_owner_account(
-    mock__get_or_retrieve, mock_get_or_retrieve_for_api_key, stripe_account, api_key
+def test__find_owner_account_for_empty_data(
+    mock_get_or_retrieve_for_api_key,
+    api_key,
 ):
     """
     Test that the correct classmethod is invoked with the correct arguments
     to get the owner account
     """
-    # fake_data used to invoke _find_owner_account classmethod
-    fake_data = {
-        "id": "test_XXXXXXXX",
-        "livemode": False,
-        "object": "customer",
-        "account": stripe_account,
-    }
+
+    fake_data = {}
 
     if api_key is None:
         # invoke _find_owner_account without the api_key parameter
@@ -168,12 +162,113 @@ def test__find_owner_account(
         # invoke _find_owner_account with the api_key parameter
         StripeModel._find_owner_account(fake_data, api_key=api_key)
 
-    # if stripe_account exists, assert _get_or_retrieve classmethod
-    # gets called
-    if stripe_account:
+    if api_key:
+        mock_get_or_retrieve_for_api_key.assert_called_once_with(api_key)
+    else:
+        mock_get_or_retrieve_for_api_key.assert_called_once_with(
+            djstripe_settings.STRIPE_SECRET_KEY
+        )
+
+
+@pytest.mark.parametrize(
+    "has_stripe_account_attr,stripe_account",
+    ((False, None), (True, ""), (True, "acct_fakefakefakefake001")),
+)
+@pytest.mark.parametrize("api_key", (None, "sk_fakefakefake01"))
+@patch.object(target=Account, attribute="get_or_retrieve_for_api_key")
+@patch.object(target=Account, attribute="_get_or_retrieve")
+def test__find_owner_account(
+    mock__get_or_retrieve,
+    mock_get_or_retrieve_for_api_key,
+    api_key,
+    stripe_account,
+    has_stripe_account_attr,
+    monkeypatch,
+):
+    """
+    Test that the correct classmethod is invoked with the correct arguments
+    to get the owner account
+    """
+    # fake_data_class used to invoke _find_owner_account classmethod
+    class fake_data_class:
+        @property
+        def stripe_account(self):
+            return stripe_account
+
+        def get(*args, **kwargs):
+            return "customer"
+
+    fake_data = fake_data_class()
+
+    if api_key is None:
+        # invoke _find_owner_account without the api_key parameter
+        StripeModel._find_owner_account(fake_data)
+    else:
+        # invoke _find_owner_account with the api_key parameter
+        StripeModel._find_owner_account(fake_data, api_key=api_key)
+
+    if has_stripe_account_attr and stripe_account:
         mock__get_or_retrieve.assert_called_once_with(id=stripe_account)
 
-    # if api_key exists and stripe_account doesn't, assert get_or_retrieve_for_api_key
-    # classmethod gets called
-    if api_key and not stripe_account:
-        mock_get_or_retrieve_for_api_key.assert_called_once_with(api_key)
+    else:
+        if api_key:
+            mock_get_or_retrieve_for_api_key.assert_called_once_with(api_key)
+        else:
+            mock_get_or_retrieve_for_api_key.assert_called_once_with(
+                djstripe_settings.STRIPE_SECRET_KEY
+            )
+
+
+@pytest.mark.parametrize(
+    "has_account_key,stripe_account",
+    ((False, None), (True, ""), (True, "acct_fakefakefakefake001")),
+)
+@pytest.mark.parametrize("api_key", (None, "sk_fakefakefake01"))
+@patch.object(target=Account, attribute="get_or_retrieve_for_api_key")
+@patch.object(target=Account, attribute="_get_or_retrieve")
+def test__find_owner_account_for_webhook_event_trigger(
+    mock__get_or_retrieve,
+    mock_get_or_retrieve_for_api_key,
+    api_key,
+    stripe_account,
+    has_account_key,
+):
+    """
+    Test that the correct classmethod is invoked with the correct arguments
+    to get the owner account
+    """
+
+    # should fake_data have the account key
+    if has_account_key:
+        # fake_data used to invoke _find_owner_account classmethod
+        fake_data = {
+            "id": "test_XXXXXXXX",
+            "livemode": False,
+            "object": "event",
+            "account": stripe_account,
+        }
+    else:
+        # fake_data used to invoke _find_owner_account classmethod
+        fake_data = {
+            "id": "test_XXXXXXXX",
+            "livemode": False,
+            "object": "event",
+        }
+
+    if api_key is None:
+        # invoke _find_owner_account without the api_key parameter
+        StripeModel._find_owner_account(fake_data)
+    else:
+        # invoke _find_owner_account with the api_key parameter
+        StripeModel._find_owner_account(fake_data, api_key=api_key)
+
+    if has_account_key and stripe_account:
+        mock__get_or_retrieve.assert_called_once_with(id=stripe_account)
+
+    else:
+        if api_key:
+            mock_get_or_retrieve_for_api_key.assert_called_once_with(api_key)
+        else:
+            mock_get_or_retrieve_for_api_key.assert_called_once_with(
+                djstripe_settings.STRIPE_SECRET_KEY
+            )
