@@ -26,7 +26,7 @@ class DjstripePaymentMethod(models.Model):
 
     Contains two fields: `id` and `type`:
     - `id` is the id of the Stripe object.
-    - `type` can be `card`, `bank_account` or `source`.
+    - `type` can be `card`, `bank_account` `account` or `source`.
     """
 
     id = models.CharField(max_length=255, primary_key=True)
@@ -65,6 +65,8 @@ class DjstripePaymentMethod(models.Model):
             return Source
         elif type == "bank_account":
             return BankAccount
+        elif type == "account":
+            return Account
 
         raise ValueError("Unknown source type: {}".format(type))
 
