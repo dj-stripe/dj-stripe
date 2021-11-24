@@ -64,7 +64,19 @@ class Command(BaseCommand):
             help="Specify the api_keys you would like to perform this sync for.",
         )
 
-    def handle(self, *args, api_keys: typing.List[str], **options):
+    def handle(self, *args, api_keys, **options):  # noqa: C901
+        import debugpy
+
+        # ? Attach a python debuger on 0.0.0.0:5679. Can be used directly in VScode Debugger
+        try:
+            # each gunicorn worker will try to attach to the same host and port
+            # and that will throw an error as 1 process can be attached to a port
+            debugpy.listen(address=("0.0.0.0", 5679))
+            print("Django: Attached remote debugger")
+        except RuntimeError as error:
+            # do nothing
+            print(f"Multiple workers trying to attach the remote debugger. {error}")
+
         app_label = "djstripe"
         app_config = apps.get_app_config(app_label)
         model_list: typing.List[models.StripeModel] = []
@@ -133,7 +145,7 @@ class Command(BaseCommand):
 
         return True, ""
 
-    def sync_model(self, model, api_key: str):
+    def sync_model(self, model, api_key: str):  # noqa: C901
         model_name = model.__name__
 
         should_sync, reason = self._should_sync_model(model)
