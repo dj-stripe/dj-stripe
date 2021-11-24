@@ -579,11 +579,14 @@ class Product(StripeModel):
     def __str__(self):
         # 1 product can have 1 or more than 1 related price
         price_qs = Price.objects.filter(product__id=self.id)
+        price_count = price_qs.count()
 
-        if price_qs.count() > 1:
-            return f"{self.name} ({price_qs.count()} prices)"
-        else:
+        if price_count > 1:
+            return f"{self.name} ({price_count} prices)"
+        elif price_count == 1:
             return f"{self.name} ({price_qs[0].human_readable_price})"
+        else:
+            return self.name
 
 
 class Customer(StripeModel):
