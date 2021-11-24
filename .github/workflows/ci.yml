@@ -21,6 +21,9 @@ on:
       - '.readthedocs.yml'
       - '.github/workflows/docs.yaml'
 
+env:
+  POETRY_VERSION: 1.1.11
+
 
 jobs:
 
@@ -64,17 +67,39 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+
+    - name: Get full Python version
+      id: full-python-version
+      run: echo ::set-output name=version::$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))")
+
+    - name: Install poetry (${{ env.POETRY_VERSION }}) binary on runner
+      run: |
+        curl -sL https://install.python-poetry.org | python - --version ${{ env.POETRY_VERSION }}
     
+    - name: Configure poetry
+      run: poetry config virtualenvs.in-project true
+
+    - name: Set up cache
+      uses: actions/cache@v2
+      id: cache
+      with:
+        path: .venv
+        key: venv-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('**/poetry.lock') }}
+
+    - name: Ensure cache is healthy
+      if: steps.cache.outputs.cache-hit == 'true'
+      run: timeout 10s poetry run pip --version || rm -rf .venv
+
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip setuptools wheel
-        python -m pip install coverage[toml] tox tox-gh-actions codecov
+        poetry run python -m pip install --upgrade pip setuptools wheel
+        poetry run python -m pip install coverage[toml] tox tox-gh-actions codecov
 
     - name: Test with tox for ${{ matrix.python-version }}
-      run: python -m tox
+      run: poetry run python -m tox
     
     - name: Convert coverage
-      run: python -m coverage xml
+      run: poetry run python -m coverage xml
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
