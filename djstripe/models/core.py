@@ -739,6 +739,17 @@ class Customer(StripeModel):
 
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
+
+        # stripe adds a deleted attribute if the Customer has been deleted upstream
+        if data.get("deleted"):
+            logger.warning(
+                f"This customer ({data.get('id')}) has been deleted upstream, in Stripe"
+            )
+
+        else:
+            # set "deleted" key to False (default)
+            data["deleted"] = False
+
         discount = data.get("discount")
         if discount:
             data["coupon_start"] = discount["start"]
@@ -1115,6 +1126,8 @@ class Customer(StripeModel):
         return payment_method
 
     def purge(self):
+        """Customers are soft deleted as deleted customers are still accessible by the
+        Stripe API and sync for all RelatedModels would fail"""
         try:
             self._api_delete()
         except InvalidRequestError as exc:
@@ -1125,6 +1138,10 @@ class Customer(StripeModel):
             else:
                 # The exception was raised for another reason, re-raise it
                 raise
+
+        # toggle the deleted flag on Customer to indicate it has been
+        # deleted upstream in Stripe
+        self.deleted = True
 
         if self.subscriber:
             # Delete the idempotency key used by Customer.create()
