@@ -245,7 +245,7 @@ class StripeModel(StripeBaseModel):
             stripe_account = self._get_stripe_account_id(api_key)
 
         return self.stripe_class.modify(
-            self.id, stripe_account=stripe_account, **kwargs
+            self.id, api_key=api_key, stripe_account=stripe_account, **kwargs
         )
 
     def str_parts(self) -> List[str]:
