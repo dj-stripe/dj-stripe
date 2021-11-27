@@ -334,6 +334,7 @@ class CouponAdmin(StripeModelAdmin):
 @admin.register(models.Customer)
 class CustomerAdmin(StripeModelAdmin):
     list_display = (
+        "deleted",
         "subscriber",
         "email",
         "currency",
@@ -342,8 +343,12 @@ class CustomerAdmin(StripeModelAdmin):
         "balance",
     )
     list_select_related = ("subscriber", "default_source", "coupon")
-    list_filter = (CustomerHasSourceListFilter, CustomerSubscriptionStatusListFilter)
-    search_fields = ("email", "description")
+    list_filter = (
+        CustomerHasSourceListFilter,
+        CustomerSubscriptionStatusListFilter,
+        "deleted",
+    )
+    search_fields = ("email", "description", "deleted")
     inlines = (SubscriptionInline, TaxIdInline)
 
 
