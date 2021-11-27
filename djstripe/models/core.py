@@ -604,6 +604,8 @@ class Customer(StripeModel):
 
     address = JSONField(null=True, blank=True, help_text="The customer's address.")
     balance = StripeQuantumCurrencyAmountField(
+        null=True,
+        blank=True,
         default=0,
         help_text=(
             "Current balance (in cents), if any, being stored on the customer's "
@@ -626,9 +628,23 @@ class Customer(StripeModel):
         on_delete=models.SET_NULL, null=True, blank=True, related_name="customers"
     )
     delinquent = models.BooleanField(
+        null=True,
+        blank=True,
         default=False,
         help_text="Whether or not the latest charge for the customer's "
         "latest invoice has failed.",
+    )
+    # Stripe API returns deleted customers like so:
+    # {
+    #   "id": "cus_KX439W5dKrpi22",
+    #   "object": "customer",
+    #   "deleted": true,
+    # }
+    deleted = models.BooleanField(
+        default=False,
+        null=True,
+        blank=True,
+        help_text="Whether the Customer instance has been deleted upstream in Stripe or not.",
     )
     # <discount>
     coupon = models.ForeignKey(

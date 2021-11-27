@@ -267,6 +267,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         )
         customer = fake_customer.create_for_user(user)
 
+        self.assertEqual(customer.deleted, False)
         self.assertEqual(customer.sources.count(), 0)
         self.assertEqual(customer.legacy_cards.count(), 0)
         self.assertEqual(customer.bank_account.count(), 1)
@@ -387,6 +388,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         self.assertTrue(customer.subscriber is None)
         self.assertTrue(customer.default_source is None)
+        self.assertTrue(customer.deleted is True)
         self.assertTrue(not customer.legacy_cards.all())
         self.assertTrue(not customer.sources.all())
         self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
