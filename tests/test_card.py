@@ -312,7 +312,10 @@ class CardTest(AssertStripeFksMixin, TestCase):
 
         self.assertEqual(FAKE_CARD, stripe_card)
 
-    @patch("tests.CardDict.delete", autospec=True)
+    @patch(
+        "stripe.Customer.delete_source",
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
     @patch("stripe.Card.retrieve", return_value=deepcopy(FAKE_CARD), autospec=True)
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
@@ -334,47 +337,91 @@ class CardTest(AssertStripeFksMixin, TestCase):
 
         self.assertEqual(1, self.customer.legacy_cards.count())
 
+        # remove card
         card = self.customer.legacy_cards.all()[0]
         card.remove()
 
         self.assertEqual(0, self.customer.legacy_cards.count())
-        self.assertTrue(card_delete_mock.called)
+        api_key = card.default_api_key
+        stripe_account = card._get_stripe_account_id(api_key)
 
+        card_delete_mock.assert_called_once_with(
+            self.customer.id, card.id, api_key=api_key, stripe_account=stripe_account
+        )
+
+    @patch(
+        "stripe.Account.delete_external_account",
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
-    def test_remove_card_by_account(self, account_retrieve_mock):
+    def test_remove_card_by_account(self, account_retrieve_mock, card_delete_mock):
 
         stripe_card = Card._api_create(
             account=self.custom_account, source=FAKE_CARD_IV["id"]
         )
-        Card.sync_from_stripe_data(stripe_card)
-        # remove card
-        count, _ = Card.objects.filter(id=stripe_card["id"]).delete()
-        self.assertEqual(1, count)
+        card = Card.sync_from_stripe_data(stripe_card)
+        self.assertEqual(1, Card.objects.filter(id=stripe_card["id"]).count())
 
+        # remove card
+        card.remove()
+
+        self.assertEqual(0, Card.objects.filter(id=stripe_card["id"]).count())
+
+        api_key = card.default_api_key
+        stripe_account = card._get_stripe_account_id(api_key)
+
+        card_delete_mock.assert_called_once_with(
+            self.custom_account.id,
+            card.id,
+            api_key=api_key,
+            stripe_account=stripe_account,
+        )
+
+    @patch(
+        "stripe.Account.delete_external_account",
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
-    def test_remove_already_deleted_card_by_account(self, account_retrieve_mock):
+    def test_remove_already_deleted_card_by_account(
+        self, account_retrieve_mock, card_delete_mock
+    ):
 
         stripe_card = Card._api_create(
             account=self.custom_account, source=FAKE_CARD_IV["id"]
         )
-        Card.sync_from_stripe_data(stripe_card)
+        card = Card.sync_from_stripe_data(stripe_card)
+        self.assertEqual(1, Card.objects.filter(id=stripe_card["id"]).count())
 
         # remove card
-        count, _ = Card.objects.filter(id=stripe_card["id"]).delete()
-        self.assertEqual(1, count)
+        card.remove()
+        self.assertEqual(0, Card.objects.filter(id=stripe_card["id"]).count())
 
         # remove card again
         count, _ = Card.objects.filter(id=stripe_card["id"]).delete()
         self.assertEqual(0, count)
 
+        api_key = card.default_api_key
+        stripe_account = card._get_stripe_account_id(api_key)
+
+        card_delete_mock.assert_called_once_with(
+            self.custom_account.id,
+            card.id,
+            api_key=api_key,
+            stripe_account=stripe_account,
+        )
+
+    @patch(
+        "stripe.Customer.delete_source",
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
@@ -384,7 +431,10 @@ class CardTest(AssertStripeFksMixin, TestCase):
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     def test_remove_already_deleted_card(
-        self, customer_retrieve_source_mock, customer_retrieve_mock
+        self,
+        customer_retrieve_source_mock,
+        customer_retrieve_mock,
+        card_delete_mock,
     ):
         stripe_card = Card._api_create(customer=self.customer, source=FAKE_CARD["id"])
         Card.sync_from_stripe_data(stripe_card)

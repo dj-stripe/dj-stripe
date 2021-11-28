@@ -1,7 +1,7 @@
 """
 dj-stripe StripeModel Model Tests.
 """
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from django.test import TestCase
@@ -46,23 +46,22 @@ class TestStripeModelExceptions(TestCase):
     ),
 )
 @pytest.mark.parametrize("extra_kwargs", ({}, {"foo": "bar"}))
-@patch.object(target=StripeModel, attribute="api_retrieve", autospec=True)
+@patch.object(target=StripeModel, attribute="stripe_class")
 def test__api_delete(
-    mock_api_retrieve, stripe_account, api_key, expected_api_key, extra_kwargs
+    mock_stripe_class, stripe_account, api_key, expected_api_key, extra_kwargs
 ):
     """Test that API delete properly uses the passed in parameters."""
     test_model = TestStripeModel()
+    mock_id = "id_fakefakefakefake01"
+    test_model.id = mock_id
+
+    # invoke _api_delete()
     test_model._api_delete(
         api_key=api_key, stripe_account=stripe_account, **extra_kwargs
     )
 
-    # Assert the chained calls happened as expected, since it should
-    # call api_retrieve() followed by delete()
-    assert (
-        mock_api_retrieve.mock_calls
-        == call(test_model, api_key=expected_api_key, stripe_account=stripe_account)
-        .delete(**extra_kwargs)
-        .call_list()
+    mock_stripe_class.delete.assert_called_once_with(
+        mock_id, api_key=expected_api_key, stripe_account=stripe_account, **extra_kwargs
     )
 
 

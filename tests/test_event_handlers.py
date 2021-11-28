@@ -969,13 +969,22 @@ class TestCustomerEvents(EventTestCase):
         self.assertEqual(customer.metadata, {"djstripe_subscriber": self.user.id})
 
     @patch(
+        "stripe.Customer.delete_source",
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    )
+    @patch("stripe.Customer.delete", autospec=True)
+    @patch(
         "stripe.Customer.retrieve_source",
         side_effect=[deepcopy(FAKE_CARD), deepcopy(FAKE_CARD_III)],
         autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     )
     @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
     def test_customer_deleted(
-        self, customer_retrieve_source_mock, customer_retrieve_mock
+        self,
+        customer_retrieve_mock,
+        customer_retrieve_source_mock,
+        customer_delete_mock,
+        customer_source_delete_mock,
     ):
 
         FAKE_CUSTOMER.create_for_user(self.user)
