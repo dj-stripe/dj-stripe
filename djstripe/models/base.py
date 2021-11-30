@@ -224,8 +224,8 @@ class StripeModel(StripeBaseModel):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        return self.api_retrieve(api_key=api_key, stripe_account=stripe_account).delete(
-            **kwargs
+        return self.stripe_class.delete(
+            self.id, api_key=api_key, stripe_account=stripe_account, **kwargs
         )
 
     def _api_update(self, api_key=None, stripe_account=None, **kwargs):

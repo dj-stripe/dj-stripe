@@ -256,6 +256,33 @@ class LegacySourceMixin:
                 api_key=api_key,
             )
 
+    def _api_delete(self, api_key=None, stripe_account=None, **kwargs):
+        # OVERRIDING the parent version of this function
+        # Cards & Banks Accounts must be manipulated through a customer or account.
+
+        api_key = api_key or self.default_api_key
+        # Prefer passed in stripe_account if set.
+        if not stripe_account:
+            stripe_account = self._get_stripe_account_id(api_key)
+
+        if self.customer:
+            return stripe.Customer.delete_source(
+                self.customer.id,
+                self.id,
+                api_key=api_key,
+                stripe_account=stripe_account,
+                **kwargs,
+            )
+
+        if self.account:
+            return stripe.Account.delete_external_account(
+                self.account.id,
+                self.id,
+                api_key=api_key,
+                stripe_account=stripe_account,
+                **kwargs,
+            )
+
 
 class BankAccount(LegacySourceMixin, StripeModel):
     stripe_class = stripe.BankAccount
