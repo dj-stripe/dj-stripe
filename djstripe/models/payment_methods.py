@@ -760,6 +760,16 @@ class PaymentMethod(StripeModel):
         enum=enums.PaymentMethodType,
         help_text="The type of the PaymentMethod.",
     )
+    acss_debit = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `acss_debit`",
+    )
+    afterpay_clearpay = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `afterpay_clearpay`",
+    )
     alipay = JSONField(
         null=True,
         blank=True,
@@ -779,6 +789,11 @@ class PaymentMethod(StripeModel):
         null=True,
         blank=True,
         help_text="Additional information for payment methods of type `bancontact`",
+    )
+    boleto = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `boleto`",
     )
     card = JSONField(
         null=True,
@@ -804,6 +819,11 @@ class PaymentMethod(StripeModel):
         null=True,
         blank=True,
         help_text="Additional information for payment methods of type `giropay`",
+    )
+    grabpay = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `grabpay`",
     )
     ideal = JSONField(
         null=True,
@@ -836,6 +856,11 @@ class PaymentMethod(StripeModel):
         null=True,
         blank=True,
         help_text="Additional information for payment methods of type `sofort`",
+    )
+    wechat_pay = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `wechat_pay`",
     )
 
     def __str__(self):
