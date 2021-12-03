@@ -478,21 +478,27 @@ class SetupIntentStatus(Enum):
 
 
 class PaymentMethodType(Enum):
+    acss_debit = _("Acss Dbit")
+    afterpay_clearpay = _("Afterpay Clearpay")
     alipay = _("Alipay")
     au_becs_debit = _("BECS Debit (Australia)")
     bacs_debit = _("Bacs Direct Debit")
     bancontact = _("Bancontact")
+    boleto = _("Boleto")
     card = _("Card")
     card_present = _("Card present")
     eps = _("EPS")
     fpx = _("FPX")
     giropay = _("Giropay")
+    grabpay = _("Grabpay")
     ideal = _("iDEAL")
+    klarna = _("Klarna")
     interac_present = _("Interac (card present)")
     oxxo = _("OXXO")
     p24 = _("Przelewy24")
     sepa_debit = _("SEPA Direct Debit")
     sofort = _("SOFORT")
+    wechat_pay = _("Wechat Pay")
 
 
 class PayoutFailureCode(Enum):
