@@ -17,6 +17,8 @@ from ... import enums, models
 from ...models.base import StripeBaseModel
 from ...settings import djstripe_settings
 
+# TODO Improve performance using multiprocessing
+
 
 class Command(BaseCommand):
     """Sync models from stripe."""
@@ -91,6 +93,7 @@ class Command(BaseCommand):
 
         count = 0
         try:
+            # todo convert get_list_kwargs into a generator to make the code memory effecient.
             for list_kwargs in self.get_list_kwargs(model):
                 stripe_account = list_kwargs.get("stripe_account", "")
 
@@ -189,14 +192,18 @@ class Command(BaseCommand):
         all Stripe Accounts"""
 
         all_list_kwargs = []
+        payment_method_types = enums.PaymentMethodType.__members__
+
         for def_kwarg in default_list_kwargs:
             stripe_account = def_kwarg.get("stripe_account")
             for stripe_customer in models.Customer.api_list(
                 stripe_account=stripe_account
             ):
-                all_list_kwargs.append(
-                    {"customer": stripe_customer.id, "type": "card", **def_kwarg}
-                )
+                for type in payment_method_types:
+                    all_list_kwargs.append(
+                        {"customer": stripe_customer.id, "type": type, **def_kwarg}
+                    )
+
         return all_list_kwargs
 
     @staticmethod
