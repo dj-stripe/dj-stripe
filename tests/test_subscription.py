@@ -3,8 +3,11 @@ dj-stripe Subscription Model Tests.
 """
 from copy import deepcopy
 from datetime import datetime
+from decimal import Decimal
 from unittest.mock import patch
 
+import pytest
+import stripe
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
@@ -42,6 +45,8 @@ from . import (
     AssertStripeFksMixin,
     datetime_to_unix,
 )
+
+pytestmark = pytest.mark.django_db
 
 # TODO: test with Prices instead of Plans when creating Subscriptions
 # with Prices is fully supported
@@ -1094,3 +1099,76 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
                 | {"djstripe.Subscription.latest_invoice"}
             ),
         )
+
+
+class TestSubscriptionDecimal:
+    @pytest.mark.parametrize(
+        "inputted,expected",
+        [
+            (Decimal("1"), Decimal("1.00")),
+            (Decimal("1.5234567"), Decimal("1.52")),
+            (Decimal("0"), Decimal("0.00")),
+            (Decimal("23.2345678"), Decimal("23.23")),
+            ("1", Decimal("1.00")),
+            ("1.5234567", Decimal("1.52")),
+            ("0", Decimal("0.00")),
+            ("23.2345678", Decimal("23.23")),
+            (1, Decimal("1.00")),
+            (1.5234567, Decimal("1.52")),
+            (0, Decimal("0.00")),
+            (23.2345678, Decimal("23.24")),
+        ],
+    )
+    def test_decimal_application_fee_percent(self, inputted, expected, monkeypatch):
+        fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
+        fake_subscription["application_fee_percent"] = inputted
+
+        def mock_invoice_get(*args, **kwargs):
+            return FAKE_INVOICE
+
+        def mock_customer_get(*args, **kwargs):
+            return FAKE_CUSTOMER
+
+        def mock_charge_get(*args, **kwargs):
+            return FAKE_CHARGE
+
+        def mock_payment_method_get(*args, **kwargs):
+            return FAKE_CARD_AS_PAYMENT_METHOD
+
+        def mock_payment_intent_get(*args, **kwargs):
+            return FAKE_PAYMENT_INTENT_I
+
+        def mock_subscription_get(*args, **kwargs):
+            return fake_subscription
+
+        def mock_balance_transaction_get(*args, **kwargs):
+            return FAKE_BALANCE_TRANSACTION
+
+        def mock_product_get(*args, **kwargs):
+            return FAKE_PRODUCT
+
+        def mock_plan_get(*args, **kwargs):
+            return FAKE_PLAN
+
+        # monkeypatch stripe retrieve calls to return
+        # the desired json response.
+        monkeypatch.setattr(stripe.Invoice, "retrieve", mock_invoice_get)
+        monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
+        monkeypatch.setattr(
+            stripe.BalanceTransaction, "retrieve", mock_balance_transaction_get
+        )
+        monkeypatch.setattr(stripe.Subscription, "retrieve", mock_subscription_get)
+        monkeypatch.setattr(stripe.Charge, "retrieve", mock_charge_get)
+        monkeypatch.setattr(stripe.PaymentMethod, "retrieve", mock_payment_method_get)
+        monkeypatch.setattr(stripe.PaymentIntent, "retrieve", mock_payment_intent_get)
+        monkeypatch.setattr(stripe.Product, "retrieve", mock_product_get)
+        monkeypatch.setattr(stripe.Plan, "retrieve", mock_plan_get)
+
+        # Create Latest Invoice
+        Invoice.sync_from_stripe_data(FAKE_INVOICE)
+
+        subscription = Subscription.sync_from_stripe_data(fake_subscription)
+        field_data = subscription.application_fee_percent
+
+        assert isinstance(field_data, Decimal)
+        assert field_data == expected

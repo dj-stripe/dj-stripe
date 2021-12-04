@@ -1,4 +1,5 @@
 from copy import deepcopy
+from decimal import Decimal
 
 import pytest
 from django.test.testcases import TestCase
@@ -105,3 +106,32 @@ class TestCouponStr(TestCase):
     def test_blank_coupon_str(self):
         coupon = Coupon()
         self.assertEqual(str(coupon).strip(), "(invalid amount) off")
+
+
+class TestCouponDecimal:
+    @pytest.mark.parametrize(
+        "inputted,expected",
+        [
+            (Decimal("1"), Decimal("1.00")),
+            (Decimal("1.5234567"), Decimal("1.52")),
+            (Decimal("0"), Decimal("0.00")),
+            (Decimal("23.2345678"), Decimal("23.23")),
+            ("1", Decimal("1.00")),
+            ("1.5234567", Decimal("1.52")),
+            ("0", Decimal("0.00")),
+            ("23.2345678", Decimal("23.23")),
+            (1, Decimal("1.00")),
+            (1.5234567, Decimal("1.52")),
+            (0, Decimal("0.00")),
+            (23.2345678, Decimal("23.24")),
+        ],
+    )
+    def test_decimal_percent_off_coupon(self, inputted, expected):
+        fake_coupon = deepcopy(FAKE_COUPON)
+        fake_coupon["percent_off"] = inputted
+
+        coupon = Coupon.sync_from_stripe_data(fake_coupon)
+        field_data = coupon.percent_off
+
+        assert isinstance(field_data, Decimal)
+        assert field_data == expected

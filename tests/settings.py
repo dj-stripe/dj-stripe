@@ -81,6 +81,8 @@ INSTALLED_APPS = [
     "jsonfield",
     "djstripe",
     "tests",
+    # to load custom models defined to test fields.py
+    "tests.fields",
     "tests.apps.testapp",
     "tests.apps.example",
 ]
