@@ -1336,6 +1336,7 @@ class Subscription(StripeModel):
         "subscription. This value will be `null` for subscriptions where "
         "`billing=charge_automatically`.",
     )
+    # todo not in record_data.items() --> Expected to sync. Need to test
     default_payment_method = StripeForeignKey(
         "PaymentMethod",
         null=True,
@@ -1357,6 +1358,7 @@ class Subscription(StripeModel):
         "and be in a chargeable state. If not set, defaults to the customer’s "
         "default source.",
     )
+    # todo not in record_data.items() --> Expected to sync. Need to test
     default_tax_rates = models.ManyToManyField(
         "TaxRate",
         # explicitly specify the joining table name as though the joining model
@@ -1392,6 +1394,7 @@ class Subscription(StripeModel):
         "pending invoice items. It is analogous to calling Create an invoice "
         "for the given subscription at the specified interval.",
     )
+    # todo not in record_data.items() --> Expected to sync. Need to test
     pending_setup_intent = StripeForeignKey(
         "SetupIntent",
         null=True,
@@ -1424,6 +1427,7 @@ class Subscription(StripeModel):
         help_text="The quantity applied to this subscription. This value will be "
         "`null` for multi-plan subscriptions",
     )
+    # todo not in record_data.items() --> Expected to sync. Need to test
     schedule = models.ForeignKey(
         "SubscriptionSchedule",
         null=True,

@@ -414,13 +414,17 @@ class StripeModel(StripeBaseModel):
         :type stripe_account: string
         :return:
         """
+        from djstripe.models import DjstripePaymentMethod
+
         field_data = None
         field_name = field.name
         raw_field_data = manipulated_data.get(field_name)
         refetch = False
         skip = False
 
-        if issubclass(field.related_model, StripeModel):
+        if issubclass(field.related_model, StripeModel) or issubclass(
+            field.related_model, DjstripePaymentMethod
+        ):
             id_ = cls._id_from_data(raw_field_data)
 
             if not raw_field_data:
