@@ -556,7 +556,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
         charge = Charge.sync_from_stripe_data(fake_charge_copy)
         self.assertEqual("test_id", charge.source_id)
-        self.assertEqual("unsupported", charge.source.type)
+        self.assertEqual("UNSUPPORTED_test_id", charge.source.type)
         self.assertEqual(charge.source, DjstripePaymentMethod.objects.get(id="test_id"))
 
         charge_retrieve_mock.assert_not_called()

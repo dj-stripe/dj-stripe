@@ -25,6 +25,13 @@ class SourceTest(AssertStripeFksMixin, TestCase):
         user = get_user_model().objects.create_user(
             username="testuser", email="djstripe@example.com"
         )
+
+        # create a source object so that FAKE_CUSTOMER_III with a default source
+        # can be created correctly.
+        fake_source_data = deepcopy(FAKE_SOURCE)
+        fake_source_data["customer"] = None
+        self.source = Source.sync_from_stripe_data(fake_source_data)
+
         self.customer = FAKE_CUSTOMER_III.create_for_user(user)
         self.customer.sources.all().delete()
         self.customer.legacy_cards.all().delete()

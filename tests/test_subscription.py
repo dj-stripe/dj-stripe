@@ -14,6 +14,7 @@ from djstripe.enums import SubscriptionStatus
 from djstripe.models import Plan, Product, Subscription
 
 from . import (
+    FAKE_CARD,
     FAKE_CUSTOMER,
     FAKE_CUSTOMER_II,
     FAKE_PLAN,
@@ -143,6 +144,27 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
             subscription, expected_blank_fks=self.default_expected_blank_fks
         )
         self.assertEqual(datetime_to_unix(subscription.cancel_at), 1624553655)
+
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    def test_sync_from_stripe_data_default_source_string(
+        self, customer_retrieve_mock, product_retrieve_mock, plan_retrieve_mock
+    ):
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription_fake["default_source"] = FAKE_CARD["id"]
+
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
+        self.assertEqual(subscription.default_source.id, FAKE_CARD["id"])
+
+        # pop out "djstripe.Subscription.default_source" from self.assert_fks
+        expected_blank_fks = deepcopy(self.default_expected_blank_fks)
+        expected_blank_fks.remove("djstripe.Subscription.default_source")
+        self.assert_fks(subscription, expected_blank_fks=expected_blank_fks)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN_II), autospec=True)
     @patch(
