@@ -46,7 +46,12 @@ class DjstripePaymentMethod(models.Model):
         return instance
 
     @classmethod
-    def _get_or_create_source(cls, data, source_type):
+    def _get_or_create_source(cls, data, source_type=None):
+
+        # prefer passed in source_type
+        if not source_type:
+            source_type = data["object"]
+
         try:
             model = cls._model_for_type(source_type)
             model._get_or_create_from_stripe_object(data)
@@ -76,6 +81,54 @@ class DjstripePaymentMethod(models.Model):
 
     def resolve(self):
         return self.object_model.objects.get(id=self.id)
+
+    @classmethod
+    def _get_or_create_from_stripe_object(
+        cls,
+        data,
+        field_name="id",
+        refetch=True,
+        current_ids=None,
+        pending_relations=None,
+        save=True,
+        stripe_account=None,
+    ):
+
+        raw_field_data = data.get(field_name)
+        id_ = StripeModel._id_from_data(raw_field_data)
+
+        if id_.startswith("card"):
+            source_cls = Card
+            source_type = "card"
+        elif id_.startswith("src"):
+            source_cls = Source
+            source_type = "source"
+        elif id_.startswith("ba"):
+            source_cls = BankAccount
+            source_type = "bank_account"
+        elif id_.startswith("acct"):
+            source_cls = Account
+            source_type = "account"
+        else:
+            # This may happen if we have source types we don't know about.
+            # Let's not make dj-stripe entirely unusable if that happens.
+            logger.warning(f"Unknown Object. Could not sync source with id: {id_}")
+            return cls.objects.get_or_create(
+                id=id_, defaults={"type": f"UNSUPPORTED_{id_}"}
+            )
+
+        # call model's _get_or_create_from_stripe_object to ensure
+        # that object exists before getting or creating its source object
+        source_cls._get_or_create_from_stripe_object(
+            data,
+            field_name,
+            refetch=refetch,
+            current_ids=current_ids,
+            pending_relations=pending_relations,
+            stripe_account=stripe_account,
+        )
+
+        return cls.objects.get_or_create(id=id_, defaults={"type": source_type})
 
 
 class LegacySourceMixin:

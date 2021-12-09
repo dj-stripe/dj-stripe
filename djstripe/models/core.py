@@ -367,6 +367,7 @@ class Charge(StripeModel):
             self.fraud_details and list(self.fraud_details.values())[0] == "fraudulent"
         )
 
+    # todo may be unnecessary after this PR
     def _attach_objects_hook(self, cls, data, current_ids=None):
         from .payment_methods import DjstripePaymentMethod
 
@@ -1290,6 +1291,8 @@ class Customer(StripeModel):
 
         save = False
 
+        # todo check all "reverse" PaymentMethod FKs model's attach and attach post swave hooks for sources syncs.
+        # todo should be unnecessary after this pr
         customer_sources = data.get("sources")
         sources = {}
         if customer_sources:
