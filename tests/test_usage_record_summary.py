@@ -77,6 +77,7 @@ class TestUsageRecordSummary(AssertStripeFksMixin, TestCase):
                 "djstripe.Subscription.default_source",
                 "djstripe.Subscription.pending_setup_intent",
                 "djstripe.Subscription.schedule",
+                "djstripe.Subscription.latest_invoice",
                 "djstripe.UsageRecordSummary.invoice",
             },
         )
@@ -138,6 +139,7 @@ class TestUsageRecordSummary(AssertStripeFksMixin, TestCase):
                 "djstripe.Subscription.default_source",
                 "djstripe.Subscription.pending_setup_intent",
                 "djstripe.Subscription.schedule",
+                "djstripe.Subscription.latest_invoice",
                 "djstripe.Invoice.default_payment_method",
                 "djstripe.Invoice.default_source",
                 "djstripe.Invoice.payment_intent",

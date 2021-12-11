@@ -29,6 +29,7 @@ pytestmark = pytest.mark.django_db
                 "customer",
                 "default_payment_method",
                 "default_source",
+                "latest_invoice",
                 "pending_setup_intent",
                 "plan",
                 "schedule",

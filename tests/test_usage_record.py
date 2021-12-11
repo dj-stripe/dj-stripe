@@ -73,6 +73,7 @@ class TestUsageRecord(AssertStripeFksMixin, TestCase):
                 "djstripe.Subscription.default_source",
                 "djstripe.Subscription.pending_setup_intent",
                 "djstripe.Subscription.schedule",
+                "djstripe.Subscription.latest_invoice",
             },
         )
 
