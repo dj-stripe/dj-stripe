@@ -39,6 +39,7 @@ from . import (
     FAKE_BANK_ACCOUNT_IV,
     FAKE_CARD,
     FAKE_CARD_AS_PAYMENT_METHOD,
+    FAKE_CARD_II,
     FAKE_CARD_III,
     FAKE_CARD_IV,
     FAKE_CHARGE,
@@ -1112,11 +1113,7 @@ class TestCustomerEvents(EventTestCase):
         self.assertFalse(customer.has_valid_source())
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
-    @patch(
-        "stripe.Subscription.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-        autospec=True,
-    )
+    @patch("stripe.Subscription.retrieve", autospec=True)
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
@@ -1133,6 +1130,11 @@ class TestCustomerEvents(EventTestCase):
         fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED)
         event_retrieve_mock.return_value = fake_stripe_event
 
+        fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
+        # latest_invoice has to be None for a Subscription that has not been created yet.
+        fake_subscription["latest_invoice"] = None
+        subscription_retrieve_mock.return_value = fake_subscription
+
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
 
@@ -1147,6 +1149,25 @@ class TestCustomerEvents(EventTestCase):
             subscription.quantity, fake_stripe_event["data"]["object"]["quantity"]
         )
 
+    @patch(
+        "stripe.BalanceTransaction.retrieve",
+        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        autospec=True,
+    )
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+    @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
+    )
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
         "stripe.Subscription.retrieve",
@@ -1165,12 +1186,28 @@ class TestCustomerEvents(EventTestCase):
         product_retrieve_mock,
         subscription_retrieve_mock,
         plan_retrieve_mock,
+        invoice_retrieve_mock,
+        payment_intent_retrieve_mock,
+        paymentmethod_card_retrieve_mock,
+        charge_retrieve_mock,
+        balance_transaction_retrieve_mock,
     ):
-        event = self._create_event(FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED)
+        fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
+        # A just created Subscription cannot have latest_invoice
+        fake_subscription["latest_invoice"] = None
+        subscription_retrieve_mock.return_value = fake_subscription
+
+        fake_event = deepcopy(FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED)
+        fake_event["data"]["object"] = fake_subscription
+
+        event = self._create_event(fake_event)
         event.invoke_webhook_handlers()
 
-        sub = Subscription.objects.get(id=FAKE_SUBSCRIPTION["id"])
+        sub = Subscription.objects.get(id=fake_subscription["id"])
         self.assertEqual(sub.status, SubscriptionStatus.active)
+
+        # create invoice for latest_invoice in subscription to work.
+        Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
 
         subscription_retrieve_mock.return_value = deepcopy(FAKE_SUBSCRIPTION_CANCELED)
 
@@ -1766,7 +1803,6 @@ class TestInvoiceItemEvents(EventTestCase):
     )
     @patch(
         "stripe.Subscription.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION_III),
         autospec=True,
     )
     @patch(
@@ -1790,8 +1826,14 @@ class TestInvoiceItemEvents(EventTestCase):
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER_II),
+        autospec=True,
+    )
     def test_invoiceitem_created(
         self,
+        customer_retrieve_mock,
         product_retrieve_mock,
         event_retrieve_mock,
         invoiceitem_retrieve_mock,
@@ -1803,6 +1845,18 @@ class TestInvoiceItemEvents(EventTestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
+
+        fake_subscription = deepcopy(FAKE_SUBSCRIPTION_III)
+        fake_subscription["latest_invoice"] = FAKE_INVOICE_II["id"]
+        subscription_retrieve_mock.return_value = fake_subscription
+
+        fake_card = deepcopy(FAKE_CARD_II)
+        fake_card["customer"] = None
+        # create Card for FAKE_CUSTOMER_III
+        Card.sync_from_stripe_data(fake_card)
+
+        # create invoice
+        Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE_II))
 
         FAKE_CUSTOMER_II.create_for_user(self.user)
 
@@ -1834,7 +1888,6 @@ class TestInvoiceItemEvents(EventTestCase):
     )
     @patch(
         "stripe.Subscription.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION_III),
         autospec=True,
     )
     @patch(
@@ -1861,8 +1914,14 @@ class TestInvoiceItemEvents(EventTestCase):
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER_II),
+        autospec=True,
+    )
     def test_invoiceitem_deleted(
         self,
+        customer_retrieve_mock,
         product_retrieve_mock,
         invoiceitem_retrieve_mock,
         invoice_retrieve_mock,
@@ -1873,6 +1932,18 @@ class TestInvoiceItemEvents(EventTestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
+        fake_subscription = deepcopy(FAKE_SUBSCRIPTION_III)
+        fake_subscription["latest_invoice"] = FAKE_INVOICE_II["id"]
+        subscription_retrieve_mock.return_value = fake_subscription
+
+        fake_card = deepcopy(FAKE_CARD_II)
+        fake_card["customer"] = None
+        # create Card for FAKE_CUSTOMER_III
+        Card.sync_from_stripe_data(fake_card)
+
+        # create invoice
+        Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE_II))
+
         FAKE_CUSTOMER_II.create_for_user(self.user)
 
         event = self._create_event(FAKE_EVENT_INVOICEITEM_CREATED)
