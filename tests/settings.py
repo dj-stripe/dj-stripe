@@ -112,8 +112,13 @@ STRIPE_TEST_SECRET_KEY = os.environ.get(
 )
 
 DJSTRIPE_WEBHOOK_VALIDATION = "verify_signature"
-DJSTRIPE_WEBHOOK_SECRET = os.environ.get("DJSTRIPE_TEST_WEBHOOK_SECRET", "whsec_XXXXX")
+DJSTRIPE_WEBHOOK_SECRET = os.environ.get(
+    "DJSTRIPE_TEST_WEBHOOK_SECRET",
+    "whsec_xxx",
+    # "whsec_o8p5hmW6JjYjQGENVLlLi9dlAr55QeKQ",
+)
 
 STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+STRIPE_API_VERSION = "2020-08-27"  # "2020-08-27; orders_beta=v4"

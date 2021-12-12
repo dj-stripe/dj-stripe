@@ -65,3 +65,49 @@ services:
 !!! note
 
     In case the `Stripe CLI` is used to perform local webhook testing, set `x-djstripe-webhook-secret` Custom Header in Stripe `listen` to the `Webhook Signing Secret` output of `Stripe CLI`. That is what Stripe expects and uses to create the `stripe-signature` header.
+
+
+
+
+import stripe
+from djstripe.models import SourceTransaction, Source
+
+stripe.api_key = "sk_test_51ItQ7cJSZQVUcJYgHMIKKvkqL6XNUHRI1kQcpoR9yEdOusA5rWpTXpXYnIqHpIvWlu5odQYNBDVwNSYTJN1HmtCC00RvEyLiZW"
+
+payment_intent = stripe.PaymentIntent.create(
+            amount=1000,
+            currency="usd",
+            customer="cus_Kytpb1VwgVMqHT",
+            payment_method="card_1KIw1iJSZQVUcJYgQAOk0WZg",
+            capture_method="manual"
+        )
+
+# Create an ACH Type Source
+ach = stripe.Source.create(
+  type="ach_credit_transfer",
+  currency="usd",
+  owner={"email": "amount_4242@example.com"},
+)
+
+# Attach the just created source to the customer "cus_Kytpb1VwgVMqHT"
+src = stripe.Customer.create_source(
+  'cus_Kytpb1VwgVMqHT',
+  source=ach.id
+)
+
+# Try to retrieve the just created source
+retrv = stripe.Customer.retrieve_source(
+            'cus_Kytpb1VwgVMqHT',
+            ach.id,
+        )
+
+retrv = stripe.Customer.retrieve_source('cus_Kytpb1VwgVMqHT', "src_1Kx8byJSZQVUcJYg4umpfb9V")
+source = Source.sync_from_stripe_data(retrv)
+
+stx_retv = source.api_retrieve()
+
+source_retv = Source.sync_from_stripe_data(stx_retv)
+
+
+source_transaction  = SourceTransaction.objects.first()
+source_transaction.api_retrieve()
