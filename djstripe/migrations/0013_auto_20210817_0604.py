@@ -139,4 +139,100 @@ class Migration(migrations.Migration):
                 "abstract": False,
             },
         ),
+        migrations.AddField(
+            model_name="webhookeventtrigger",
+            name="stripe_trigger_account",
+            field=djstripe.fields.StripeForeignKey(
+                blank=True,
+                help_text="The Stripe Account this object belongs to.",
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="djstripe.account",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+            ),
+        ),
+        migrations.AddField(
+            model_name="customer",
+            name="deleted",
+            field=models.BooleanField(
+                blank=True,
+                default=False,
+                help_text="Whether the Customer instance has been deleted upstream in Stripe or not.",
+                null=True,
+            ),
+        ),
+        migrations.AlterField(
+            model_name="customer",
+            name="balance",
+            field=djstripe.fields.StripeQuantumCurrencyAmountField(
+                blank=True,
+                default=0,
+                help_text="Current balance (in cents), if any, being stored on the customer's account. If negative, the customer has credit to apply to the next invoice. If positive, the customer has an amount owed that will be added to the next invoice. The balance does not refer to any unpaid invoices; it solely takes into account amounts that have yet to be successfully applied to any invoice. This balance is only taken into account for recurring billing purposes (i.e., subscriptions, invoices, invoice items).",
+                null=True,
+            ),
+        ),
+        migrations.AlterField(
+            model_name="customer",
+            name="delinquent",
+            field=models.BooleanField(
+                blank=True,
+                default=False,
+                help_text="Whether or not the latest charge for the customer's latest invoice has failed.",
+                null=True,
+            ),
+        ),
+        migrations.AlterField(
+            model_name="paymentmethod",
+            name="type",
+            field=djstripe.fields.StripeEnumField(
+                enum=djstripe.enums.PaymentMethodType,
+                help_text="The type of the PaymentMethod.",
+                max_length=17,
+            ),
+        ),
+        migrations.AddField(
+            model_name="paymentmethod",
+            name="acss_debit",
+            field=djstripe.fields.JSONField(
+                blank=True,
+                help_text="Additional information for payment methods of type `acss_debit`",
+                null=True,
+            ),
+        ),
+        migrations.AddField(
+            model_name="paymentmethod",
+            name="afterpay_clearpay",
+            field=djstripe.fields.JSONField(
+                blank=True,
+                help_text="Additional information for payment methods of type `afterpay_clearpay`",
+                null=True,
+            ),
+        ),
+        migrations.AddField(
+            model_name="paymentmethod",
+            name="boleto",
+            field=djstripe.fields.JSONField(
+                blank=True,
+                help_text="Additional information for payment methods of type `boleto`",
+                null=True,
+            ),
+        ),
+        migrations.AddField(
+            model_name="paymentmethod",
+            name="grabpay",
+            field=djstripe.fields.JSONField(
+                blank=True,
+                help_text="Additional information for payment methods of type `grabpay`",
+                null=True,
+            ),
+        ),
+        migrations.AddField(
+            model_name="paymentmethod",
+            name="wechat_pay",
+            field=djstripe.fields.JSONField(
+                blank=True,
+                help_text="Additional information for payment methods of type `wechat_pay`",
+                null=True,
+            ),
+        ),
     ]
