@@ -1182,7 +1182,9 @@ class Plan(StripeModel):
         from .billing import Subscription
 
         subscriptions = Subscription.objects.filter(plan__id=self.id).count()
-        return f"{self.human_readable_price} for {self.product.name} ({subscriptions} subscriptions)"
+        if self.product and self.product.name:
+            return f"{self.human_readable_price} for {self.product.name} ({subscriptions} subscriptions)"
+        return f"{self.human_readable_price} ({subscriptions} subscriptions)"
 
     @property
     def amount_in_cents(self):
