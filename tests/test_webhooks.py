@@ -7,12 +7,14 @@ from collections import defaultdict
 from copy import deepcopy
 from unittest.mock import Mock, PropertyMock, call, patch
 
+import pytest
 from django.test import TestCase, override_settings
 from django.test.client import Client
 from django.urls import reverse
 
 from djstripe import webhooks
 from djstripe.models import Event, Transfer, WebhookEventTrigger
+from djstripe.models.webhooks import get_remote_ip
 from djstripe.settings import djstripe_settings
 from djstripe.webhooks import TEST_EVENT_ID, call_handlers, handler, handler_all
 
@@ -24,6 +26,8 @@ from . import (
     FAKE_TRANSFER,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 )
+
+pytestmark = pytest.mark.django_db
 
 
 def mock_webhook_handler(webhook_event_trigger):
@@ -533,3 +537,54 @@ class TestWebhookHandlers(TestCase):
         type(event).verb = PropertyMock(return_value=verb)
         call_handlers(event=event)
         return event
+
+
+class TestGetRemoteIp:
+    class RequestClass:
+        def __init__(self, data):
+            self.data = data
+
+        @property
+        def META(self):
+            return self.data
+
+    @pytest.mark.parametrize(
+        "data",
+        [
+            {"HTTP_X_FORWARDED_FOR": "127.0.0.1,345.5.5.3,451.1.1.2"},
+            {
+                "REMOTE_ADDR": "422.0.0.1",
+                "HTTP_X_FORWARDED_FOR": "127.0.0.1,345.5.5.3,451.1.1.2",
+            },
+            {
+                "REMOTE_ADDR": "127.0.0.1",
+            },
+        ],
+    )
+    def test_get_remote_ip(self, data):
+        request = self.RequestClass(data)
+        assert get_remote_ip(request) == "127.0.0.1"
+
+    @pytest.mark.parametrize(
+        "data",
+        [
+            {
+                "REMOTE_ADDR": "",
+            },
+            {
+                "pqwwe": "127.0.0.1",
+            },
+        ],
+    )
+    def test_get_remote_ip_remote_addr_is_none(self, data):
+        request = self.RequestClass(data)
+
+        # ensure warning is raised
+        with pytest.warns(None) as recorded_warning:
+            assert get_remote_ip(request) == "0.0.0.0"
+
+        assert len(recorded_warning) == 1
+        assert (
+            "Could not determine remote IP (missing REMOTE_ADDR)."
+            in recorded_warning[0].message.args[0]
+        )
