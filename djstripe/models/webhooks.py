@@ -12,11 +12,37 @@ from django.utils.datastructures import CaseInsensitiveMapping
 from django.utils.functional import cached_property
 
 from ..context_managers import stripe_temporary_api_version
-from ..fields import JSONField, StripeForeignKey
+from ..enums import WebhookEndpointStatus
+from ..fields import JSONField, StripeEnumField, StripeForeignKey
 from ..settings import djstripe_settings
 from ..signals import webhook_processing_error
 from .base import StripeModel, logger
 from .core import Event
+
+
+class WebhookEndpoint(StripeModel):
+    stripe_class = stripe.WebhookEndpoint
+
+    api_version = models.CharField(
+        max_length=10,
+        blank=True,
+        help_text="The API version events are rendered as for this webhook endpoint.",
+    )
+    secret = models.CharField(
+        max_length=256,
+        blank=True,
+        help_text="The endpoint's secret, used to generate webhook signatures.",
+    )
+    status = StripeEnumField(
+        enum=WebhookEndpointStatus,
+        help_text="The status of the webhook. It can be enabled or disabled.",
+    )
+    url = models.URLField(help_text="The URL of the webhook endpoint.", max_length=2048)
+    application = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="The ID of the associated Connect application.",
+    )
 
 
 def _get_version():

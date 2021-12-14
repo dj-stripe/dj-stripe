@@ -235,4 +235,17 @@ class Migration(migrations.Migration):
                 null=True,
             ),
         ),
+        migrations.AddField(
+            model_name="subscription",
+            name="latest_invoice",
+            field=djstripe.fields.StripeForeignKey(
+                blank=True,
+                help_text="The most recent invoice this subscription has generated.",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to="djstripe.invoice",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+            ),
+        ),
     ]

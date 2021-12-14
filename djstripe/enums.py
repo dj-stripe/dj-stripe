@@ -782,6 +782,11 @@ class UsageAction(Enum):
     set = _("set")
 
 
+class WebhookEndpointStatus(Enum):
+    enabled = _("enabled")
+    disabled = _("disabled")
+
+
 class DjstripePaymentMethodType(Enum):
     """
     A djstripe-specific enum for the DjStripePaymentMethod model.
