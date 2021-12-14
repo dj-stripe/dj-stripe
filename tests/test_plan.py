@@ -133,6 +133,20 @@ class PlanTest(AssertStripeFksMixin, TestCase):
             str(self.plan),
         )
 
+    def test___str__null_product(self):
+        plan_data = deepcopy(FAKE_PLAN_II)
+        del plan_data["product"]
+        plan = Plan.sync_from_stripe_data(plan_data)
+
+        self.assertIsNone(plan.product)
+
+        subscriptions = Subscription.objects.filter(plan__id=plan.id).count()
+
+        self.assertEqual(
+            f"{plan.human_readable_price} ({subscriptions} subscriptions)",
+            str(plan),
+        )
+
     @patch("stripe.Plan.retrieve", return_value=FAKE_PLAN, autospec=True)
     def test_stripe_plan(self, plan_retrieve_mock):
         stripe_plan = self.plan.api_retrieve()
@@ -148,8 +162,7 @@ class PlanTest(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
 
-    @patch("stripe.Product.retrieve", autospec=True)
-    def test_stripe_plan_null_product(self, product_retrieve_mock):
+    def test_stripe_plan_null_product(self):
         """
         assert that plan.Product can be null for backwards compatibility
         though note that it is a Stripe required field
@@ -163,23 +176,22 @@ class PlanTest(AssertStripeFksMixin, TestCase):
             expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"},
         )
 
-    @patch("stripe.Plan.retrieve", autospec=True)
-    def test_stripe_tier_plan(self, plan_retrieve_mock):
+    def test_stripe_tier_plan(self):
         tier_plan_data = deepcopy(FAKE_TIER_PLAN)
         plan = Plan.sync_from_stripe_data(tier_plan_data)
+
         self.assertEqual(plan.id, tier_plan_data["id"])
         self.assertIsNone(plan.amount)
-        self.assertIsNotNone(plan.tiers)
+        self.assertIsNotNone(plan.tiers, plan.product)
 
         self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
 
-    @patch("stripe.Plan.retrieve", autospec=True)
-    def test_stripe_metered_plan(self, plan_retrieve_mock):
+    def test_stripe_metered_plan(self):
         plan_data = deepcopy(FAKE_PLAN_METERED)
         plan = Plan.sync_from_stripe_data(plan_data)
         self.assertEqual(plan.id, plan_data["id"])
         self.assertEqual(plan.usage_type, PriceUsageType.metered)
-        self.assertIsNotNone(plan.amount)
+        self.assertIsNotNone(plan.amount, plan.product)
 
         self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
 
