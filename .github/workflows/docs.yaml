@@ -3,11 +3,12 @@ name: Build and deploy docs
 on:
   push:
     branches: [master]
-  
+
   workflow_dispatch: # to trigger manually
 
 env:
-  POETRY_VERSION: 1.1.11
+  POETRY_VERSION: "1.1.11"
+  POETRY_VIRTUALENVS_IN_PROJECT: "1"
 
 jobs:
 
@@ -33,9 +34,6 @@ jobs:
     - name: Install poetry (${{ env.POETRY_VERSION }}) binary on runner
       run: |
         curl -sL https://install.python-poetry.org | python - --version ${{ env.POETRY_VERSION }}
-
-    - name: Configure poetry
-      run: poetry config virtualenvs.in-project true
 
     - name: Set up cache
       uses: actions/cache@v2
