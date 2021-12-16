@@ -522,7 +522,8 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
     def test_add_card_set_default_false(self, customer_retrieve_mock):
-        self.customer.add_card(FAKE_CARD["id"], set_default=False)
+
+        # self.customer already has FAKE_CARD as its default payment method
         self.customer.add_card(FAKE_CARD_III["id"], set_default=False)
 
         self.assertEqual(2, Card.objects.count())
@@ -534,9 +535,19 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
     def test_add_card_set_default_false_with_single_card_still_becomes_default(
         self, customer_retrieve_mock
     ):
+        # delete all already added cards to self.customer
+        Card.objects.all().delete()
+
+        # assert self.customer has no cards
+        self.assertEqual(0, self.customer.legacy_cards.count())
+        self.assertEqual(0, self.customer.sources.count())
+
         self.customer.add_card(FAKE_CARD["id"], set_default=False)
 
-        self.assertEqual(2, Card.objects.count())
+        # assert new card got added to self.customer
+        self.assertEqual(1, Card.objects.count())
+
+        # self.customer already has FAKE_CARD as its default payment method
         self.assertEqual(FAKE_CARD["id"], self.customer.default_source.id)
 
     @patch(
