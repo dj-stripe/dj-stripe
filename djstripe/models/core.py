@@ -367,24 +367,6 @@ class Charge(StripeModel):
             self.fraud_details and list(self.fraud_details.values())[0] == "fraudulent"
         )
 
-    # todo may be unnecessary after this PR
-    def _attach_objects_hook(self, cls, data, current_ids=None):
-        from .payment_methods import DjstripePaymentMethod
-
-        # Source doesn't always appear to be present, so handle the case
-        # where it is missing.
-        source_data = data.get("source")
-        if not source_data:
-            return
-
-        source_type = source_data.get("object")
-        if not source_type:
-            return
-
-        self.source, _ = DjstripePaymentMethod._get_or_create_source(
-            data=source_data, source_type=source_type
-        )
-
     def _calculate_refund_amount(self, amount: Optional[Decimal]) -> int:
         """
         Returns the amount that can be refunded (in cents)
@@ -1324,8 +1306,6 @@ class Customer(StripeModel):
 
         save = False
 
-        # todo check all "reverse" PaymentMethod FKs model's attach and attach post swave hooks for sources syncs.
-        # todo should be unnecessary after this pr
         customer_sources = data.get("sources")
         sources = {}
         if customer_sources:
@@ -1337,18 +1317,6 @@ class Customer(StripeModel):
                     source, source["object"]
                 )
                 sources[source["id"]] = obj
-
-        default_source = data.get("default_source")
-        if default_source:
-            if isinstance(default_source, str):
-                default_source_id = default_source
-            else:
-                default_source_id = default_source["id"]
-
-            if default_source_id in sources:
-                source = sources[default_source_id]
-                save = self.default_source != source
-                self.default_source = source
 
         discount = data.get("discount")
         if discount:
