@@ -48,7 +48,7 @@ from .payment_methods import (
     Source,
 )
 from .sigma import ScheduledQueryRun
-from .webhooks import WebhookEventTrigger
+from .webhooks import WebhookEndpoint, WebhookEventTrigger
 
 __all__ = [
     "Account",
@@ -94,5 +94,6 @@ __all__ = [
     "UpcomingInvoice",
     "UsageRecord",
     "UsageRecordSummary",
+    "WebhookEndpoint",
     "WebhookEventTrigger",
 ]
