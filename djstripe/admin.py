@@ -567,3 +567,8 @@ class UsageRecordAdmin(StripeModelAdmin):
 @admin.register(models.UsageRecordSummary)
 class UsageRecordSummaryAdmin(StripeModelAdmin):
     list_display = ("invoice", "subscription_item", "total_usage")
+
+
+@admin.register(models.WebhookEndpoint)
+class WebhookEndpointAdmin(StripeModelAdmin):
+    readonly_fields = ("api_version", "enabled_events", "url")
