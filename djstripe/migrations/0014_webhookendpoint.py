@@ -74,6 +74,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         help_text="The endpoint's secret, used to generate webhook signatures.",
                         max_length=256,
+                        editable=False,
                     ),
                 ),
                 (

@@ -32,6 +32,7 @@ class WebhookEndpoint(StripeModel):
     secret = models.CharField(
         max_length=256,
         blank=True,
+        editable=False,
         help_text="The endpoint's secret, used to generate webhook signatures.",
     )
     status = StripeEnumField(
