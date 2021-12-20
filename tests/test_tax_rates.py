@@ -4,14 +4,13 @@ dj-stripe SetupIntent Model Tests.
 from copy import deepcopy
 from decimal import Decimal
 
+import pytest
 from django.test import TestCase
 
 from djstripe.models import TaxRate
-from tests import (
-    FAKE_TAX_RATE_EXAMPLE_1_VAT,
-    FAKE_TAX_RATE_EXAMPLE_2_SALES,
-    AssertStripeFksMixin,
-)
+from tests import FAKE_TAX_RATE_EXAMPLE_1_VAT, AssertStripeFksMixin
+
+pytestmark = pytest.mark.django_db
 
 
 class TaxRateTest(AssertStripeFksMixin, TestCase):
@@ -25,21 +24,31 @@ class TaxRateTest(AssertStripeFksMixin, TestCase):
             str(tax_rate),
         )
 
-    def test_sync_from_stripe_data(self):
-        tax_rate = TaxRate.sync_from_stripe_data(deepcopy(FAKE_TAX_RATE_EXAMPLE_1_VAT))
-        # need to refresh to load percentage as decimal
-        tax_rate.refresh_from_db()
 
-        self.assertIsInstance(tax_rate.percentage, Decimal)
-        self.assertEqual(tax_rate.percentage, Decimal("15.0"))
+class TestTaxRateDecimal:
+    @pytest.mark.parametrize(
+        "inputted,expected",
+        [
+            (Decimal("1"), Decimal("1.00")),
+            (Decimal("1.5234567"), Decimal("1.52")),
+            (Decimal("0"), Decimal("0.00")),
+            (Decimal("23.2345678"), Decimal("23.23")),
+            ("1", Decimal("1.00")),
+            ("1.5234567", Decimal("1.52")),
+            ("0", Decimal("0.00")),
+            ("23.2345678", Decimal("23.23")),
+            (1, Decimal("1.00")),
+            (1.5234567, Decimal("1.52")),
+            (0, Decimal("0.00")),
+            (23.2345678, Decimal("23.24")),
+        ],
+    )
+    def test_decimal_tax_percent(self, inputted, expected):
+        fake_tax_rate = deepcopy(FAKE_TAX_RATE_EXAMPLE_1_VAT)
+        fake_tax_rate["percentage"] = inputted
 
-    def test_sync_from_stripe_data_non_integer(self):
-        # an example non-integer taxrate
-        tax_rate = TaxRate.sync_from_stripe_data(
-            deepcopy(FAKE_TAX_RATE_EXAMPLE_2_SALES)
-        )
-        # need to refresh to load percentage as decimal
-        tax_rate.refresh_from_db()
+        tax_rate = TaxRate.sync_from_stripe_data(fake_tax_rate)
+        field_data = tax_rate.percentage
 
-        self.assertIsInstance(tax_rate.percentage, Decimal)
-        self.assertEqual(tax_rate.percentage, Decimal("4.25"))
+        assert isinstance(field_data, Decimal)
+        assert field_data == expected

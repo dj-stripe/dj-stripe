@@ -13,7 +13,13 @@ from stripe.error import InvalidRequestError
 
 from djstripe.utils import get_friendly_currency_amount
 
-from ..fields import JSONField, StripeDateTimeField, StripeForeignKey, StripeIdField
+from ..fields import (
+    JSONField,
+    StripeDateTimeField,
+    StripeForeignKey,
+    StripeIdField,
+    StripePercentField,
+)
 from ..managers import StripeModelManager
 from ..settings import djstripe_settings
 
@@ -940,6 +946,11 @@ class StripeModel(StripeBaseModel):
             instance._attach_objects_hook(cls, data, current_ids=current_ids)
             instance.save()
             instance._attach_objects_post_save_hook(cls, data)
+
+        for field in instance._meta.concrete_fields:
+            if isinstance(field, StripePercentField):
+                # get rid of cached values
+                delattr(instance, field.name)
 
         return instance
 

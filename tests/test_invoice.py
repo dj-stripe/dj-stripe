@@ -2,8 +2,11 @@
 dj-stripe Invoice Model Tests.
 """
 from copy import deepcopy
+from decimal import Decimal
 from unittest.mock import ANY, patch
 
+import pytest
+import stripe
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
 from stripe.error import InvalidRequestError
@@ -30,6 +33,8 @@ from . import (
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
 )
+
+pytestmark = pytest.mark.django_db
 
 
 class InvoiceTest(AssertStripeFksMixin, TestCase):
@@ -1350,3 +1355,69 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
     def test_upcoming_invoice_error(self, invoice_upcoming_mock):
         with self.assertRaises(InvalidRequestError):
             Invoice.upcoming()
+
+
+class TestInvoiceDecimal:
+    @pytest.mark.parametrize(
+        "inputted,expected",
+        [
+            (Decimal("1"), Decimal("1.00")),
+            (Decimal("1.5234567"), Decimal("1.52")),
+            (Decimal("0"), Decimal("0.00")),
+            (Decimal("23.2345678"), Decimal("23.23")),
+            ("1", Decimal("1.00")),
+            ("1.5234567", Decimal("1.52")),
+            ("0", Decimal("0.00")),
+            ("23.2345678", Decimal("23.23")),
+            (1, Decimal("1.00")),
+            (1.5234567, Decimal("1.52")),
+            (0, Decimal("0.00")),
+            (23.2345678, Decimal("23.24")),
+        ],
+    )
+    def test_decimal_tax_percent(self, inputted, expected, monkeypatch):
+        fake_invoice = deepcopy(FAKE_INVOICE)
+        fake_invoice["tax_percent"] = inputted
+
+        def mock_invoice_get(*args, **kwargs):
+            return fake_invoice
+
+        def mock_customer_get(*args, **kwargs):
+            return FAKE_CUSTOMER
+
+        def mock_charge_get(*args, **kwargs):
+            return FAKE_CHARGE
+
+        def mock_payment_method_get(*args, **kwargs):
+            return FAKE_CARD_AS_PAYMENT_METHOD
+
+        def mock_payment_intent_get(*args, **kwargs):
+            return FAKE_PAYMENT_INTENT_I
+
+        def mock_subscription_get(*args, **kwargs):
+            return FAKE_SUBSCRIPTION
+
+        def mock_balance_transaction_get(*args, **kwargs):
+            return FAKE_BALANCE_TRANSACTION
+
+        def mock_product_get(*args, **kwargs):
+            return FAKE_PRODUCT
+
+        # monkeypatch stripe retrieve calls to return
+        # the desired json response.
+        monkeypatch.setattr(stripe.Invoice, "retrieve", mock_invoice_get)
+        monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
+        monkeypatch.setattr(
+            stripe.BalanceTransaction, "retrieve", mock_balance_transaction_get
+        )
+        monkeypatch.setattr(stripe.Subscription, "retrieve", mock_subscription_get)
+        monkeypatch.setattr(stripe.Charge, "retrieve", mock_charge_get)
+        monkeypatch.setattr(stripe.PaymentMethod, "retrieve", mock_payment_method_get)
+        monkeypatch.setattr(stripe.PaymentIntent, "retrieve", mock_payment_intent_get)
+        monkeypatch.setattr(stripe.Product, "retrieve", mock_product_get)
+
+        invoice = Invoice.sync_from_stripe_data(fake_invoice)
+        field_data = invoice.tax_percent
+
+        assert isinstance(field_data, Decimal)
+        assert field_data == expected
