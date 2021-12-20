@@ -52,6 +52,9 @@ class WebhookEndpoint(StripeModel):
         help_text="A UUID specific to dj-stripe generated for the endpoint",
     )
 
+    def __str__(self):
+        return self.url or str(self.djstripe_uuid)
+
 
 def _get_version():
     from ..apps import __version__
