@@ -5,6 +5,7 @@ Module for dj-stripe Webhook models
 import json
 import warnings
 from traceback import format_exc
+from uuid import uuid4
 
 import stripe
 from django.db import models
@@ -42,6 +43,11 @@ class WebhookEndpoint(StripeModel):
         max_length=255,
         blank=True,
         help_text="The ID of the associated Connect application.",
+    )
+
+    djstripe_uuid = models.UUIDField(
+        default=uuid4,
+        help_text="A UUID specific to dj-stripe generated for the endpoint",
     )
 
 
