@@ -56,7 +56,7 @@ flake8 = "^3.9.2"
 isort = "^5.8.0"
 pytest = "^6.2.4"
 pytest-django = "^4.3.0"
-mypy = "^0.812"
+mypy = "^0.920"
 
 [tool.poetry.extras]
 docs = ["mkdocs", "mkdocstrings", "mkdocs-material", "mkdocs-autorefs", "psycopg2"]
