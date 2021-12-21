@@ -783,8 +783,22 @@ class UsageAction(Enum):
 
 
 class WebhookEndpointStatus(Enum):
+    """
+    WebhookEndpoint status type
+    """
+
     enabled = _("enabled")
     disabled = _("disabled")
+
+
+class WebhookValidationType(Enum):
+    """
+    Webhook Validation Type Options
+    """
+
+    verify_signature = _("verify_signature")
+    retrieve_event = _("retrieve_event")
+    none = _("None")
 
 
 class DjstripePaymentMethodType(Enum):
