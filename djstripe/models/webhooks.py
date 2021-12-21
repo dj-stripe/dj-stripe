@@ -8,17 +8,21 @@ from traceback import format_exc
 from uuid import uuid4
 
 import stripe
+from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.datastructures import CaseInsensitiveMapping
 from django.utils.functional import cached_property
 
 from ..context_managers import stripe_temporary_api_version
-from ..enums import WebhookEndpointStatus
+from ..enums import WebhookEndpointStatus, WebhookValidationType
 from ..fields import JSONField, StripeEnumField, StripeForeignKey
 from ..settings import djstripe_settings
 from ..signals import webhook_processing_error
 from .base import StripeModel, logger
 from .core import Event
+
+# A regex to validate WebhookEndpoint Secret format
+WEBHOOK_ENDPOINT_SECRET_REGEX = r"^whsec_([a-zA-Z0-9]{32,122})"
 
 
 class WebhookEndpoint(StripeModel):
@@ -29,26 +33,78 @@ class WebhookEndpoint(StripeModel):
         blank=True,
         help_text="The API version events are rendered as for this webhook endpoint.",
     )
+    application = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="The ID of the associated Connect application.",
+    )
+    enabled_events = JSONField(
+        null=True,
+        blank=True,
+        help_text=(
+            "The list of events to enable for this endpoint. [’*’] indicates that all events"
+            " are enabled, except those that require explicit selection."
+        ),
+    )
+    # ! secret will need to be set manually
     secret = models.CharField(
         max_length=256,
+        unique=True,
+        null=True,
         blank=True,
+        validators=[RegexValidator(regex=WEBHOOK_ENDPOINT_SECRET_REGEX)],
         help_text="The endpoint's secret, used to generate webhook signatures.",
     )
     status = StripeEnumField(
         enum=WebhookEndpointStatus,
         help_text="The status of the webhook. It can be enabled or disabled.",
     )
-    url = models.URLField(help_text="The URL of the webhook endpoint.", max_length=2048)
-    application = models.CharField(
-        max_length=255,
-        blank=True,
-        help_text="The ID of the associated Connect application.",
+    url = models.URLField(
+        help_text="The URL of the webhook endpoint.",
+        max_length=2048,
     )
 
     djstripe_uuid = models.UUIDField(
         default=uuid4,
-        help_text="A UUID specific to dj-stripe generated for the endpoint",
+        unique=True,
+        help_text="A UUID specific to dj-stripe generated for the endpoint used to match the webhook url with Stripe Account using the provided keys",
     )
+    # stripe has no check for tolerance being Integral or non-negative
+    djstripe_tolerance_ms = models.FloatField(
+        default=stripe.Webhook.DEFAULT_TOLERANCE,
+        help_text="The webhook tolerance in ms",
+    )
+    djstripe_validation_type = StripeEnumField(
+        enum=WebhookValidationType,
+        help_text="Type of Validation to be performed on webhhook",
+        default=WebhookValidationType.verify_signature,
+    )
+
+    def get_stripe_dashboard_url(self):
+        return f"{self._get_base_stripe_dashboard_url()}webhooks/{self.id}"
+
+    def __str__(self):
+        return f"{self.url}\n{self.description}"
+
+    def _attach_objects_hook(self, cls, data, current_ids=None):
+        """
+        Gets called by this object's create and sync methods just before save.
+        Use this to populate fields before the model is saved.
+        """
+        super()._attach_objects_hook(cls, data, current_ids=current_ids)
+
+        # by default set secret to whatever data dict returns
+        # to get around secret key not getting returned by the API and still storing it as null and unique
+        self.secret = data.get("secret")
+
+        try:
+            obj = cls.objects.get(id=self.id)
+
+            if obj.secret:
+                self.secret = obj.secret
+
+        except cls.DoesNotExist:
+            pass
 
 
 def _get_version():

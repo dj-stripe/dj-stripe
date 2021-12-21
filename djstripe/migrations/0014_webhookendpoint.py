@@ -2,6 +2,7 @@
 
 import uuid
 
+import django.core.validators
 import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
@@ -72,8 +73,11 @@ class Migration(migrations.Migration):
                     "secret",
                     models.CharField(
                         blank=True,
+                        null=True,
+                        unique=True,
                         help_text="The endpoint's secret, used to generate webhook signatures.",
                         max_length=256,
+                        validators=[django.core.validators.RegexValidator(regex='^whsec_([a-zA-Z0-9]{32,122})')]
                     ),
                 ),
                 (
@@ -113,7 +117,32 @@ class Migration(migrations.Migration):
                     "djstripe_uuid",
                     models.UUIDField(
                         default=uuid.uuid4,
-                        help_text="A UUID specific to dj-stripe generated for the endpoint",
+                        unique=True,
+                        help_text='A UUID specific to dj-stripe generated for the endpoint used to match the webhook url with Stripe Account using the provided keys',
+                    ),
+                ),
+                (
+                    'enabled_events',
+                    djstripe.fields.JSONField(
+                        blank=True,
+                        help_text='The list of events to enable for this endpoint. [’*’] indicates that all events are enabled, except those that require explicit selection.',
+                        null=True,
+                    ),
+                ),
+                (
+                    'djstripe_tolerance_ms',
+                    models.FloatField(
+                        default=300,
+                        help_text='The webhook tolerance in ms',
+                    ),
+                ),
+                (
+                    'djstripe_validation_type',
+                    djstripe.fields.StripeEnumField(
+                        default='verify_signature',
+                        enum=djstripe.enums.WebhookValidationType,
+                        help_text='Type of Validation to be performed on webhhook',
+                        max_length=16,
                     ),
                 ),
             ],

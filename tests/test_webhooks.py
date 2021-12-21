@@ -6,6 +6,7 @@ import warnings
 from collections import defaultdict
 from copy import deepcopy
 from unittest.mock import Mock, PropertyMock, call, patch
+from uuid import UUID
 
 import pytest
 from django.test import TestCase, override_settings
@@ -14,7 +15,7 @@ from django.urls import reverse
 
 from djstripe import webhooks
 from djstripe.models import Event, Transfer, WebhookEventTrigger
-from djstripe.models.webhooks import get_remote_ip
+from djstripe.models.webhooks import WebhookEndpoint, get_remote_ip
 from djstripe.settings import djstripe_settings
 from djstripe.webhooks import TEST_EVENT_ID, call_handlers, handler, handler_all
 
@@ -24,6 +25,7 @@ from . import (
     FAKE_EVENT_TRANSFER_CREATED,
     FAKE_STANDARD_ACCOUNT,
     FAKE_TRANSFER,
+    FAKE_WEBHOOK_ENDPOINT_1,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 )
 
@@ -587,4 +589,126 @@ class TestGetRemoteIp:
         assert (
             "Could not determine remote IP (missing REMOTE_ADDR)."
             in recorded_warning[0].message.args[0]
+        )
+
+
+class TestWebhookEndpoint:
+    """Test Class to test WebhookEndpoint and its methods"""
+
+    def test_sync_from_stripe_data_non_existent_webhook_endpoint(self):
+        fake_webhook = deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
+        webhook_endpoint = WebhookEndpoint.sync_from_stripe_data(fake_webhook)
+
+        assert webhook_endpoint.id == fake_webhook["id"]
+        assert isinstance(webhook_endpoint.djstripe_uuid, UUID)
+
+        # assert WebHookEndpoint's secret does not exist for a new sync
+        assert not webhook_endpoint.secret
+
+    def test_sync_from_stripe_data_existent_webhook_endpoint(self):
+        fake_webhook = deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
+        webhook_endpoint = WebhookEndpoint.sync_from_stripe_data(fake_webhook)
+        assert webhook_endpoint.id == fake_webhook["id"]
+        djstripe_uuid = webhook_endpoint.djstripe_uuid
+
+        assert isinstance(djstripe_uuid, UUID)
+
+        # assert WebHookEndpoint's secret does not exist for a new sync
+        assert not webhook_endpoint.secret
+
+        # add a secret to the webhook_endpoint
+        webhook_endpoint.secret = "whsec_rguCE5LMINfRKjmIkxDJM1lOPXkAOQp3"
+        webhook_endpoint.save()
+
+        # re-sync the WebhookEndpoint instance
+        WebhookEndpoint.sync_from_stripe_data(fake_webhook)
+
+        webhook_endpoint.refresh_from_db()
+        assert webhook_endpoint.id == fake_webhook["id"]
+        # assert secret persisted
+        assert webhook_endpoint.secret == "whsec_rguCE5LMINfRKjmIkxDJM1lOPXkAOQp3"
+
+        # assert UUID didn't get regenerated
+        assert webhook_endpoint.djstripe_uuid == djstripe_uuid
+
+    @pytest.mark.parametrize(
+        "data_secret_key",
+        [
+            None,
+            "",
+            "whsec_rguCE5LMINfRKjmIkxDJM1lOPXkAOQp3",
+        ],
+    )
+    @pytest.mark.parametrize(
+        "object_secret_key",
+        [
+            "",
+            "whsec_rguCE5LMINfRKjmIkxDJM1lOPXkAOQp3",
+        ],
+    )
+    def test__attach_objects_hook_object_exists_in_db(
+        self, data_secret_key, object_secret_key
+    ):
+        fake_obj_webhook = deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
+        fake_webhook = deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
+        # override the secret key
+        fake_obj_webhook["secret"] = object_secret_key
+
+        # create the WebHookEndpoint instance
+        webhook_endpoint = WebhookEndpoint.sync_from_stripe_data(fake_obj_webhook)
+
+        # override the secret key
+        fake_webhook["secret"] = data_secret_key
+        webhook_endpoint._attach_objects_hook(WebhookEndpoint, fake_webhook)
+
+        webhook_endpoint.save()
+
+        if object_secret_key:
+            assert webhook_endpoint.secret == object_secret_key
+        else:
+            assert webhook_endpoint.secret == data_secret_key
+
+    @pytest.mark.parametrize(
+        "data_secret_key",
+        [
+            None,
+            "",
+            "whsec_rguCE5LMINfRKjmIkxDJM1lOPXkAOQp3",
+        ],
+    )
+    def test__attach_objects_hook_object_does_not_exist_in_db(self, data_secret_key):
+        fake_webhook = deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
+        # override the secret key
+        fake_webhook["secret"] = data_secret_key
+
+        # create the WebHookEndpoint instance
+        webhook_endpoint = WebhookEndpoint.sync_from_stripe_data(fake_webhook)
+
+        webhook_endpoint._attach_objects_hook(WebhookEndpoint, fake_webhook)
+
+        webhook_endpoint.save()
+        assert webhook_endpoint.secret == data_secret_key
+
+    def test___str__(self):
+        fake_webhook = deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
+        webhook_endpoint = WebhookEndpoint.sync_from_stripe_data(fake_webhook)
+        assert (
+            str(webhook_endpoint)
+            == f"{webhook_endpoint.url}\n{webhook_endpoint.description}"
+        )
+        assert (
+            str(webhook_endpoint)
+            == "https://dev-example.com/stripe/webhook/1\nThis is the first webhook of a different website example.com"
+        )
+
+    def test_get_stripe_dashboard_url(self):
+        fake_webhook = deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
+        webhook_endpoint = WebhookEndpoint.sync_from_stripe_data(fake_webhook)
+        assert (
+            webhook_endpoint.get_stripe_dashboard_url()
+            == f"{webhook_endpoint._get_base_stripe_dashboard_url()}webhooks/{webhook_endpoint.id}"
+        )
+        assert (
+            webhook_endpoint.get_stripe_dashboard_url()
+            == f"https://dashboard.stripe.com/{webhook_endpoint.djstripe_owner_account.id}/test/webhooks/{webhook_endpoint.id}"
         )
