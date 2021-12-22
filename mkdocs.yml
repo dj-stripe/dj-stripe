@@ -44,6 +44,7 @@ plugins:
       watch:
         - .
       enable_inventory: true
+  - mike:
 
 nav:
   - Home: README.md
