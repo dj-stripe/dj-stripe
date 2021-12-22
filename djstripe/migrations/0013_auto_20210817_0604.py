@@ -172,16 +172,6 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AlterField(
-            model_name="customer",
-            name="delinquent",
-            field=models.BooleanField(
-                blank=True,
-                default=False,
-                help_text="Whether or not the latest charge for the customer's latest invoice has failed.",
-                null=True,
-            ),
-        ),
-        migrations.AlterField(
             model_name="paymentmethod",
             name="type",
             field=djstripe.fields.StripeEnumField(
