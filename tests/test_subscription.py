@@ -979,7 +979,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
     )
     @patch(
         "stripe.PaymentIntent.retrieve",
-        return_value=deepcopy(FAKE_PAYMENT_INTENT_II),
         autospec=True,
     )
     @patch(
@@ -1012,6 +1011,10 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
     ):
         # delete pydanny customer as that causes issues with Invoice and Latest_invoice FKs
         self.customer.delete()
+
+        fake_payment_intent = deepcopy(FAKE_PAYMENT_INTENT_II)
+        fake_payment_intent["invoice"] = FAKE_INVOICE_II["id"]
+        paymentintent_retrieve_mock.return_value = fake_payment_intent
 
         fake_subscription = deepcopy(FAKE_SUBSCRIPTION_MULTI_PLAN)
         fake_subscription["latest_invoice"] = FAKE_INVOICE_II["id"]
@@ -1048,8 +1051,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
             | {
                 "djstripe.Customer.subscriber",
                 "djstripe.Subscription.plan",
-                "djstripe.PaymentIntent.invoice (related name)",
-                "djstripe.Invoice.payment_intent",
             },
         )
 

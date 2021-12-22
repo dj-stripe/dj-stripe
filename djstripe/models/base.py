@@ -338,10 +338,28 @@ class StripeModel(StripeBaseModel):
         # Iterate over all the fields that we know are related to Stripe,
         # let each field work its own magic
         ignore_fields = ["date_purged", "subscriber"]  # XXX: Customer hack
-        for field in cls._meta.fields:
+
+        # get all forward and reverse relations for given cls
+        for field in cls._meta.get_fields():
             if field.name.startswith("djstripe_") or field.name in ignore_fields:
                 continue
-            if isinstance(field, models.ForeignKey):
+
+            # todo add support reverse ManyToManyField sync
+            if isinstance(
+                field, (models.ManyToManyRel, models.ManyToOneRel)
+            ) and not isinstance(field, models.OneToOneRel):
+                # We don't currently support syncing from
+                # reverse side of Many relationship
+                continue
+
+            # todo for ManyToManyField one would also need to handle the case of an intermediate model being used
+            # todo add support ManyToManyField sync
+            if field.many_to_many:
+                # We don't currently support syncing ManyToManyField
+                continue
+
+            # will work for Forward FK and OneToOneField relations and reverse OneToOneField relations
+            if isinstance(field, (models.ForeignKey, models.OneToOneRel)):
                 field_data, skip, is_nulled = cls._stripe_object_field_to_foreign_key(
                     field=field,
                     manipulated_data=manipulated_data,
@@ -533,12 +551,18 @@ class StripeModel(StripeBaseModel):
                     # the target instance now exists
                     target = field.model.objects.get(id=object_id)
                     setattr(target, field.name, self)
-                    target.save()
+                    if isinstance(field, models.OneToOneRel):
+                        # this is a reverse relationship, so the relation exists on self
+                        self.save()
+                    else:
+                        # this is a forward relation on the target,
+                        # so we need to save it
+                        target.save()
 
-                    # reload so that indirect relations back to this object
-                    # eg self.charge.invoice = self are set
-                    # TODO - reverse the field reference here to avoid hitting the DB?
-                    self.refresh_from_db()
+                        # reload so that indirect relations back to this object
+                        # eg self.charge.invoice = self are set
+                        # TODO - reverse the field reference here to avoid hitting the DB?
+                        self.refresh_from_db()
                 else:
                     unprocessed_pending_relations.append(post_save_relation)
 
@@ -572,6 +596,7 @@ class StripeModel(StripeBaseModel):
         :type stripe_account: string
         :returns: The instantiated object.
         """
+        # TODO dictionary unpacking will not work if cls has any ManyToManyField
         instance = cls(
             **cls._stripe_object_to_record(
                 data,
