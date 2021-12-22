@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Dj-Stripe Team">
+  <link rel="canonical" href="https://dj-stripe.github.io/dj-stripe/master/usage/webhooks/">
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Using Stripe Webhooks - Dj-Stripe</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+  <link href="../../css/version-select.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Using Stripe Webhooks";
+    var mkdocs_page_input_path = "usage/webhooks.md";
+    var mkdocs_page_url = "/dj-stripe/master/usage/webhooks/";
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> Dj-Stripe</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/sponsors/">Sponsors</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Getting Started</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../api_keys/">Managing Stripe API Keys</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../api_versions/">A note on Stripe API Versions</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../stripe_elements_js/">Integrating Stripe Elements</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Release notes</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_5_0/">dj-stripe 2.5 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_4_x/">dj-stripe 2.4.1 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_4_0/">dj-stripe 2.4 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_x/">dj-stripe 2.0 ~ 2.3 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/1_x/">dj-stripe 1.x release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/0_x/">dj-stripe 0.x release notes</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Usage</span></p>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Using Stripe Webhooks</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#available-settings">Available settings</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#using-webhooks-in-dj-stripe">Using webhooks in dj-stripe</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#official-documentation">Official documentation</a>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../subscribing_customers/">Subscribing a customer to a plan</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../managing_subscriptions/">Managing subscriptions and payment sources</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../manually_syncing_with_stripe/">Manually syncing data with Stripe</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../creating_individual_charges/">Creating individual charges</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../creating_usage_record/">Creating Usage Records</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../using_stripe_checkout/">Using Stripe Checkout</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../using_with_docker/">Using with Docker</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Project</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/contributing/">Contributing</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/test_fixtures/">Test Fixtures</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/authors/">Credits</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/support/">Support</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/release_process/">Release Process</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Reference</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/context_managers/">Context Managers</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/enums/">Enumerations</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/managers/">Managers</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/models/">Models</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/settings/">Settings</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/utils/">Utilities</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">Dj-Stripe</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Usage &raquo;</li>
+        
+      
+    
+    <li>Using Stripe Webhooks</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/dj-stripe/dj-stripe/edit/master/docs/usage/webhooks.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="using-stripe-webhooks">Using Stripe Webhooks</h1>
+<h2 id="available-settings">Available settings</h2>
+<p>dj-stripe provides the following settings to tune how your webhooks work:</p>
+<ul>
+<li><a href="../../reference/settings/#djstripe.settings.DjstripeSettings.DJSTRIPE_WEBHOOK_URL"><code>DJSTRIPE_WEBHOOK_URL</code></a></li>
+<li><a href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_SECRET"><code>DJSTRIPE_WEBHOOK_SECRET</code></a></li>
+<li><a href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_VALIDATION"><code>DJSTRIPE_WEBHOOK_VALIDATION</code></a></li>
+<li><a href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_TOLERANCE"><code>DJSTRIPE_WEBHOOK_TOLERANCE</code></a></li>
+<li><a href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_EVENT_CALLBACK"><code>DJSTRIPE_WEBHOOK_EVENT_CALLBACK</code></a></li>
+</ul>
+<h2 id="using-webhooks-in-dj-stripe">Using webhooks in dj-stripe</h2>
+<p>dj-stripe comes with native support for webhooks as event listeners.</p>
+<p>Events allow you to do things like [sending an email to a customer when
+his payment has
+<a href="https://stripe.com/docs/receipts#failed-payment-alerts">failed</a>
+or trial period is ending.</p>
+<p>This is how you use them:</p>
+<div class="highlight"><pre><span></span><code>    <span class="kn">from</span> <span class="nn">djstripe</span> <span class="kn">import</span> <span class="n">webhooks</span>
+
+    <span class="nd">@webhooks</span><span class="o">.</span><span class="n">handler</span><span class="p">(</span><span class="s2">&quot;customer.subscription.trial_will_end&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">my_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;We should probably notify the user at this point&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>You can handle all events related to customers like this:</p>
+<div class="highlight"><pre><span></span><code>    <span class="kn">from</span> <span class="nn">djstripe</span> <span class="kn">import</span> <span class="n">webhooks</span>
+
+    <span class="nd">@webhooks</span><span class="o">.</span><span class="n">handler</span><span class="p">(</span><span class="s2">&quot;customer&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">my_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;We should probably notify the user at this point&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>You can also handle different events in the same handler:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">djstripe</span> <span class="kn">import</span> <span class="n">webhooks</span>
+
+<span class="nd">@webhooks</span><span class="o">.</span><span class="n">handler</span><span class="p">(</span><span class="s2">&quot;price&quot;</span><span class="p">,</span> <span class="s2">&quot;product&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">my_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Triggered webhook &quot;</span> <span class="o">+</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>In order to get registrations picked up, you need to put them in a
+module that is imported like models.py or make sure you import it manually.</p>
+</div>
+<p>Webhook event creation and processing is now wrapped in a
+<code>transaction.atomic()</code> block to better handle webhook errors. This will
+prevent any additional database modifications you may perform in your
+custom handler from being committed should something in the webhook
+processing chain fail. You can also take advantage of Django's
+<code>transaction.on_commit()</code> function to only perform an action if the
+transaction successfully commits (meaning the Event processing worked):</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">transaction</span>
+<span class="kn">from</span> <span class="nn">djstripe</span> <span class="kn">import</span> <span class="n">webhooks</span>
+
+<span class="k">def</span> <span class="nf">do_something</span><span class="p">():</span>
+    <span class="k">pass</span>  <span class="c1"># send a mail, invalidate a cache, fire off a Celery task, etc.</span>
+
+<span class="nd">@webhooks</span><span class="o">.</span><span class="n">handler</span><span class="p">(</span><span class="s2">&quot;price&quot;</span><span class="p">,</span> <span class="s2">&quot;product&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">my_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">transaction</span><span class="o">.</span><span class="n">on_commit</span><span class="p">(</span><span class="n">do_something</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="official-documentation">Official documentation</h2>
+<p>Stripe docs for types of Events:
+<a href="https://stripe.com/docs/api/events/types">https://stripe.com/docs/api/events/types</a></p>
+<p>Stripe docs for Webhooks: <a href="https://stripe.com/docs/webhooks">https://stripe.com/docs/webhooks</a></p>
+<p>Django docs for transactions:
+<a href="https://docs.djangoproject.com/en/dev/topics/db/transactions/#performing-actions-after-commit">https://docs.djangoproject.com/en/dev/topics/db/transactions/#performing-actions-after-commit</a></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../subscribing_customers/" class="btn btn-neutral float-right" title="Subscribing a customer to a plan">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../../history/0_x/" class="btn btn-neutral" title="dj-stripe 0.x release notes"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/dj-stripe/dj-stripe/" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../../history/0_x/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../subscribing_customers/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+      <script src="../../js/version-select.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
