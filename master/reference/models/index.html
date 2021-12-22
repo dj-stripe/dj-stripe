@@ -1692,8 +1692,6 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.webhooks.WebhookEndpoint.djstripe_uuid">djstripe_uuid</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.webhooks.WebhookEndpoint.enabled_events">enabled_events</a>
-    </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.webhooks.WebhookEndpoint.secret">secret</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.webhooks.WebhookEndpoint.status">status</a>
@@ -1705,8 +1703,6 @@
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.webhooks.WebhookEndpoint.MultipleObjectsReturned">MultipleObjectsReturned</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.webhooks.WebhookEndpoint.stripe_class">stripe_class</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.webhooks.WebhookEndpoint.__str__">__str__()</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.webhooks.WebhookEndpoint.get_next_by_djstripe_created">get_next_by_djstripe_created()</a>
     </li>
@@ -31328,7 +31324,7 @@ djstripe.models.webhooks.WebhookEndpoint        </code>
 
     <div class="doc doc-contents ">
 
-      <p>WebhookEndpoint(djstripe_created, djstripe_updated, djstripe_id, id, djstripe_owner_account, livemode, created, metadata, description, api_version, enabled_events, secret, status, url, application, djstripe_uuid)</p>
+      <p>WebhookEndpoint(djstripe_created, djstripe_updated, djstripe_id, id, djstripe_owner_account, livemode, created, metadata, description, api_version, secret, status, url, application, djstripe_uuid)</p>
 
 
 
@@ -31400,24 +31396,6 @@ djstripe.models.webhooks.WebhookEndpoint        </code>
 
 <h5 id="djstripe.models.webhooks.WebhookEndpoint.djstripe_uuid" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEndpoint</span><span class="o">.</span><span class="n">djstripe_uuid</span></code>
-
-
-</h5>
-
-    <div class="doc doc-contents ">
-
-    </div>
-
-  </div>
-
-
-
-  <div class="doc doc-object doc-attribute">
-
-
-
-<h5 id="djstripe.models.webhooks.WebhookEndpoint.enabled_events" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEndpoint</span><span class="o">.</span><span class="n">enabled_events</span></code>
 
 
 </h5>
@@ -31553,34 +31531,6 @@ djstripe.models.webhooks.WebhookEndpoint.stripe_class        </code>
   </div>
 
 
-
-
-
-  <div class="doc doc-object doc-method">
-
-
-
-<h5 id="djstripe.models.webhooks.WebhookEndpoint.__str__" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEndpoint</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
-
-  <span class="doc doc-properties">
-      <small class="doc doc-property doc-property-special"><code>special</code></small>
-  </span>
-
-</h5>
-
-    <div class="doc doc-contents ">
-
-
-        <details class="quote">
-          <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">djstripe_uuid</span><span class="p">)</span>
-</code></pre></div>
-        </details>
-    </div>
-
-  </div>
 
 
 
