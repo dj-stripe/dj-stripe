@@ -32027,8 +32027,30 @@ djstripe.models.webhooks.WebhookEventTrigger.MultipleObjectsReturned        </co
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">, valid=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">valid</span><span class="si">}</span><span class="s2">, processed=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">processed</span><span class="si">}</span><span class="s2">&quot;</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_remote_ip</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Given the HTTPRequest object return the IP Address of the client</span>
+
+<span class="sd">    :param request: client request</span>
+<span class="sd">    :type request: HTTPRequest</span>
+
+<span class="sd">    :Returns: the client ip address</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># HTTP_X_FORWARDED_FOR is relevant for django running behind a proxy</span>
+    <span class="n">x_forwarded_for</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;HTTP_X_FORWARDED_FOR&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">x_forwarded_for</span><span class="p">:</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">x_forwarded_for</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;REMOTE_ADDR&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ip</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;Could not determine remote IP (missing REMOTE_ADDR). &quot;</span>
+            <span class="s2">&quot;This is likely an issue with your wsgi/server setup.&quot;</span>
+        <span class="p">)</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="s2">&quot;0.0.0.0&quot;</span>
+
+    <span class="k">return</span> <span class="n">ip</span>
 </code></pre></div>
         </details>
     </div>
@@ -32061,64 +32083,30 @@ request object.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span> <span class="nf">from_request</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Create, validate and process a WebhookEventTrigger given a Django</span>
-<span class="sd">    request object.</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_remote_ip</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Given the HTTPRequest object return the IP Address of the client</span>
 
-<span class="sd">    The process is three-fold:</span>
-<span class="sd">    1. Create a WebhookEventTrigger object from a Django request.</span>
-<span class="sd">    2. Validate the WebhookEventTrigger as a Stripe event using the API.</span>
-<span class="sd">    3. If valid, process it into an Event object (and child resource).</span>
+<span class="sd">    :param request: client request</span>
+<span class="sd">    :type request: HTTPRequest</span>
+
+<span class="sd">    :Returns: the client ip address</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">body</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">body</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">encoding</span> <span class="ow">or</span> <span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-        <span class="n">body</span> <span class="o">=</span> <span class="s2">&quot;(error decoding body)&quot;</span>
+    <span class="c1"># HTTP_X_FORWARDED_FOR is relevant for django running behind a proxy</span>
+    <span class="n">x_forwarded_for</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;HTTP_X_FORWARDED_FOR&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">x_forwarded_for</span><span class="p">:</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">x_forwarded_for</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;REMOTE_ADDR&quot;</span><span class="p">)</span>
 
-    <span class="n">ip</span> <span class="o">=</span> <span class="n">get_remote_ip</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
-
-    <span class="n">obj</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-        <span class="n">headers</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">),</span>
-        <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span>
-        <span class="n">remote_ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span>
-        <span class="n">stripe_trigger_account</span><span class="o">=</span><span class="n">StripeModel</span><span class="o">.</span><span class="n">_find_owner_account</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">),</span>
-    <span class="p">)</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">valid</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">valid</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_EVENT_CALLBACK</span><span class="p">:</span>
-                <span class="c1"># If WEBHOOK_EVENT_CALLBACK, pass it for processing</span>
-                <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_EVENT_CALLBACK</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># Process the item (do not save it, it&#39;ll get saved below)</span>
-                <span class="n">obj</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">max_length</span> <span class="o">=</span> <span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="s2">&quot;exception&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max_length</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)[:</span><span class="n">max_length</span><span class="p">]</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">traceback</span> <span class="o">=</span> <span class="n">format_exc</span><span class="p">()</span>
-
-        <span class="c1"># Send the exception as the webhook_processing_error signal</span>
-        <span class="n">webhook_processing_error</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
-            <span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span>
-            <span class="n">exception</span><span class="o">=</span><span class="n">e</span><span class="p">,</span>
-            <span class="n">data</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="s2">&quot;http_body&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ip</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;Could not determine remote IP (missing REMOTE_ADDR). &quot;</span>
+            <span class="s2">&quot;This is likely an issue with your wsgi/server setup.&quot;</span>
         <span class="p">)</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="s2">&quot;0.0.0.0&quot;</span>
 
-        <span class="c1"># re-raise the exception so Django sees it</span>
-        <span class="k">raise</span> <span class="n">e</span>
-    <span class="k">finally</span><span class="p">:</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-
-    <span class="k">return</span> <span class="n">obj</span>
+    <span class="k">return</span> <span class="n">ip</span>
 </code></pre></div>
         </details>
     </div>
@@ -32246,44 +32234,6 @@ request object.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="c1"># Reset traceback and exception in case of reprocessing</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">traceback</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-
-    <span class="bp">self</span><span class="o">.</span><span class="n">event</span> <span class="o">=</span> <span class="n">Event</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">json_body</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">processed</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">event</span>
-</code></pre></div>
-        </details>
-    </div>
-
-  </div>
-
-
-
-  <div class="doc doc-object doc-method">
-
-
-
-<h5 id="djstripe.models.webhooks.WebhookEventTrigger.validate" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
-
-
-</h5>
-
-    <div class="doc doc-contents ">
-
-      <p>The original contents of the Event message must be confirmed by
-refetching it and comparing the fetched data with the original data.</p>
-<p>This function makes an API call to Stripe to redownload the Event data
-and returns whether or not it matches the WebhookEventTrigger data.</p>
-
-        <details class="quote">
-          <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The original contents of the Event message must be confirmed by</span>
@@ -32345,6 +32295,38 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
 
 
 
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.webhooks.WebhookEventTrigger.validate" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+      <p>The original contents of the Event message must be confirmed by
+refetching it and comparing the fetched data with the original data.</p>
+<p>This function makes an API call to Stripe to redownload the Event data
+and returns whether or not it matches the WebhookEventTrigger data.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">json_body</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
 
 
   </div>
@@ -32375,30 +32357,68 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_remote_ip</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Given the HTTPRequest object return the IP Address of the client</span>
+          <div class="highlight"><pre><span></span><code><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module for dj-stripe Webhook models</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">    :param request: client request</span>
-<span class="sd">    :type request: HTTPRequest</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">traceback</span> <span class="kn">import</span> <span class="n">format_exc</span>
+<span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
 
-<span class="sd">    :Returns: the client ip address</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">stripe</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.utils.datastructures</span> <span class="kn">import</span> <span class="n">CaseInsensitiveMapping</span>
+<span class="kn">from</span> <span class="nn">django.utils.functional</span> <span class="kn">import</span> <span class="n">cached_property</span>
 
-    <span class="c1"># HTTP_X_FORWARDED_FOR is relevant for django running behind a proxy</span>
-    <span class="n">x_forwarded_for</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;HTTP_X_FORWARDED_FOR&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">x_forwarded_for</span><span class="p">:</span>
-        <span class="n">ip</span> <span class="o">=</span> <span class="n">x_forwarded_for</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">ip</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;REMOTE_ADDR&quot;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..context_managers</span> <span class="kn">import</span> <span class="n">stripe_temporary_api_version</span>
+<span class="kn">from</span> <span class="nn">..enums</span> <span class="kn">import</span> <span class="n">WebhookEndpointStatus</span>
+<span class="kn">from</span> <span class="nn">..fields</span> <span class="kn">import</span> <span class="n">JSONField</span><span class="p">,</span> <span class="n">StripeEnumField</span><span class="p">,</span> <span class="n">StripeForeignKey</span>
+<span class="kn">from</span> <span class="nn">..settings</span> <span class="kn">import</span> <span class="n">djstripe_settings</span>
+<span class="kn">from</span> <span class="nn">..signals</span> <span class="kn">import</span> <span class="n">webhook_processing_error</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">StripeModel</span><span class="p">,</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">.core</span> <span class="kn">import</span> <span class="n">Event</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">ip</span><span class="p">:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="s2">&quot;Could not determine remote IP (missing REMOTE_ADDR). &quot;</span>
-            <span class="s2">&quot;This is likely an issue with your wsgi/server setup.&quot;</span>
+
+<span class="k">class</span> <span class="nc">WebhookEndpoint</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+    <span class="n">stripe_class</span> <span class="o">=</span> <span class="n">stripe</span><span class="o">.</span><span class="n">WebhookEndpoint</span>
+
+    <span class="n">api_version</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;The API version events are rendered as for this webhook endpoint.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">enabled_events</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="p">(</span>
+            <span class="s2">&quot;The list of events to enable for this endpoint. &quot;</span>
+            <span class="s2">&quot;[&#39;*&#39;] indicates that all events are enabled, except those that require explicit selection.&quot;</span>
         <span class="p">)</span>
-        <span class="n">ip</span> <span class="o">=</span> <span class="s2">&quot;0.0.0.0&quot;</span>
+    <span class="p">)</span>
+    <span class="n">secret</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">editable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;The endpoint&#39;s secret, used to generate webhook signatures.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="n">StripeEnumField</span><span class="p">(</span>
+        <span class="n">enum</span><span class="o">=</span><span class="n">WebhookEndpointStatus</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;The status of the webhook. It can be enabled or disabled.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">URLField</span><span class="p">(</span><span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;The URL of the webhook endpoint.&quot;</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">2048</span><span class="p">)</span>
+    <span class="n">application</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;The ID of the associated Connect application.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">ip</span>
+    <span class="n">djstripe_uuid</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">UUIDField</span><span class="p">(</span>
+        <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">uuid4</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;A UUID specific to dj-stripe generated for the endpoint&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">djstripe_uuid</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
