@@ -3,6 +3,7 @@ Django Administration interface definitions
 """
 import json
 
+from django import forms
 from django.contrib import admin
 from django.contrib.admin.utils import display_for_field, display_for_value
 from jsonfield import JSONField
@@ -569,6 +570,75 @@ class UsageRecordSummaryAdmin(StripeModelAdmin):
     list_display = ("invoice", "subscription_item", "total_usage")
 
 
+class WebhookEndpointAdminForm(forms.ModelForm):
+    base_url = forms.URLField(
+        required=False,
+        help_text=(
+            "You may override the base URL of the site for the endpoint. "
+            "If left blank, the current site will be used for the endpoint's URL. "
+            "MUST be publicly-accessible."
+        ),
+    )
+
+    class Meta:
+        model = models.WebhookEndpoint
+        exclude = ("application",)
+
+
 @admin.register(models.WebhookEndpoint)
 class WebhookEndpointAdmin(StripeModelAdmin):
     readonly_fields = ("api_version", "enabled_events", "url")
+    form = WebhookEndpointAdminForm
+
+    def get_fieldsets(self, request, obj=None):
+        common_fields = ("livemode", "id", "djstripe_owner_account", "created")
+        advanced_fields = (
+            "base_url",
+            "api_version",
+            "enabled_events",
+            "djstripe_uuid",
+            "metadata",
+        )
+        # Have to remove the fields from the other sets,
+        # otherwise they'll show up twice.
+        fields = [
+            f
+            for f in self.get_fields(request, obj)
+            if f not in common_fields and f not in advanced_fields
+        ]
+        return (
+            (None, {"fields": common_fields}),
+            (self.model.__name__, {"fields": fields}),
+            ("Advanced options", {"fields": advanced_fields, "classes": ("collapse",)}),
+        )
+
+    def save_model(self, request, obj, form, change):
+        from urllib.parse import urljoin
+
+        import stripe
+        from django.urls import reverse
+
+        if obj.djstripe_created is None:
+            # We are creating a new endpoint
+            url_path = reverse(
+                "djstripe:djstripe_webhook_by_uuid", kwargs={"uuid": obj.djstripe_uuid}
+            )
+            if form.data["base_url"]:
+                base_url = form.data["base_url"]
+                url = urljoin(base_url, url_path, allow_fragments=False)
+            else:
+                url = request.build_absolute_uri(url_path)
+
+            stripe_we = stripe.WebhookEndpoint.create(
+                url=url,
+                api_version=obj.api_version or None,
+                enabled_events=["*"],
+                metadata={"djstripe_uuid": str(obj.djstripe_uuid)}
+                # status=obj.status,
+            )
+
+            new_obj = obj.__class__.sync_from_stripe_data(stripe_we)
+            obj.id = new_obj.id
+
+        else:
+            super().save_model(request, obj, form, change)
