@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Dj-Stripe Team">
+  <link rel="canonical" href="https://dj-stripe.github.io/dj-stripe/2.5/CONTRIBUTING/">
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Contributing - Dj-Stripe</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+  <link href="../css/version-select.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Contributing";
+    var mkdocs_page_input_path = "CONTRIBUTING.md";
+    var mkdocs_page_url = "/dj-stripe/2.5/CONTRIBUTING/";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Dj-Stripe</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../project/sponsors/">Sponsors</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Getting Started</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../api_keys/">Managing Stripe API Keys</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../api_versions/">A note on Stripe API Versions</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../stripe_elements_js/">Integrating Stripe Elements</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Release notes</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../history/2_5_0/">dj-stripe 2.5 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../history/2_4_x/">dj-stripe 2.4.1 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../history/2_4_0/">dj-stripe 2.4 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../history/2_x/">dj-stripe 2.0 ~ 2.3 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../history/1_x/">dj-stripe 1.x release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../history/0_x/">dj-stripe 0.x release notes</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Usage</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../usage/webhooks/">Using Stripe Webhooks</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../usage/subscribing_customers/">Subscribing a customer to a plan</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../usage/managing_subscriptions/">Managing subscriptions and payment sources</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../usage/manually_syncing_with_stripe/">Manually syncing data with Stripe</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../usage/creating_individual_charges/">Creating individual charges</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../usage/creating_usage_record/">Creating Usage Records</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../usage/using_stripe_checkout/">Using Stripe Checkout</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../usage/using_with_docker/">Using with Docker</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Project</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../project/contributing/">Contributing</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../project/test_fixtures/">Test Fixtures</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../project/authors/">Credits</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../project/support/">Support</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../project/release_process/">Release Process</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Reference</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/context_managers/">Context Managers</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/enums/">Enumerations</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/managers/">Managers</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/models/">Models</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/settings/">Settings</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/utils/">Utilities</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Dj-Stripe</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Contributing</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/dj-stripe/dj-stripe/edit/master/docs/CONTRIBUTING.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="contributing">Contributing</h1>
+<p>Contributions are welcome, and they are greatly appreciated! Every little bit helps, and
+credit will always be given.</p>
+<p>You can contribute in many ways:</p>
+<h2 id="types-of-contributions">Types of Contributions</h2>
+<h3 id="report-bugs">Report Bugs</h3>
+<p>Report bugs at <a href="https://github.com/dj-stripe/dj-stripe/issues">https://github.com/dj-stripe/dj-stripe/issues</a>.</p>
+<p>If you are reporting a bug, please include:</p>
+<ul>
+<li>The version of python and Django you're running</li>
+<li>Detailed steps to reproduce the bug.</li>
+</ul>
+<h3 id="fix-bugs">Fix Bugs</h3>
+<p>Look through the GitHub issues for bugs. Anything tagged with "bug" is open to whoever
+wants to implement it.</p>
+<h3 id="implement-features">Implement Features</h3>
+<p>Look through the GitHub issues for features. Anything tagged with "feature" is open to
+whoever wants to implement it.</p>
+<h3 id="write-documentation">Write Documentation</h3>
+<p>dj-stripe could always use more documentation, whether as part of the official dj-stripe
+docs, in docstrings, or even on the web in blog posts, articles, and such.</p>
+<p>To see the project's documentation live, run the following command:</p>
+<div class="codehilite"><pre><span></span><code>mkdocs serve
+</code></pre></div>
+
+<p>The documentation site will then be served on <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>.</p>
+<div class="admonition attention">
+<p class="admonition-title">In case of any installation error</p>
+<p>In case you get the error that some plugin is not installed, please run:
+    <div class="highlight"><pre><span></span><code>poetry install -E docs
+</code></pre></div></p>
+</div>
+<p>If you wish to just generate the documentation, you can replace <code>serve</code> with <code>build</code>,
+and the docs will be generated into the <code>site/</code> folder.</p>
+<h3 id="submit-feedback">Submit Feedback</h3>
+<p>The best way to send feedback is to file an issue at
+<a href="https://github.com/dj-stripe/dj-stripe/issues">https://github.com/dj-stripe/dj-stripe/issues</a>.</p>
+<p>If you are proposing a feature:</p>
+<ul>
+<li>Explain in detail how it would work.</li>
+<li>Keep the scope as narrow as possible, to make it easier to implement.</li>
+<li>Remember that this is a volunteer-driven project, and that contributions are welcome
+    :)</li>
+</ul>
+<h3 id="contributor-discussion">Contributor Discussion</h3>
+<p>For questions regarding contributions to dj-stripe, another avenue is our Discord
+channel at <a href="https://discord.gg/UJY8fcc">https://discord.gg/UJY8fcc</a>.</p>
+<h2 id="get-started">Get Started!</h2>
+<p>Ready to contribute? Here's how to set up local development.</p>
+<ol>
+<li>
+<p>Fork <a href="https://github.com/dj-stripe/dj-stripe">dj-stripe on Github</a>.</p>
+</li>
+<li>
+<p>Clone your fork locally:</p>
+<div class="codehilite"><pre><span></span><code>$ git clone git@github.com:your_name_here/dj-stripe.git
+</code></pre></div>
+
+</li>
+<li>
+<p>Set up <a href="https://pre-commit.com/">pre-commit</a>:</p>
+<div class="codehilite"><pre><span></span><code>$ git init <span class="c1"># A git repo is required to install pre-commit</span>
+$ pre-commit install
+</code></pre></div>
+
+</li>
+<li>
+<p>Set up your test database. If you're running tests using PostgreSQL:</p>
+<div class="codehilite"><pre><span></span><code>$ createdb djstripe
+</code></pre></div>
+
+<p>or if you want to test vs sqlite (for convenience) or MySQL, they can be selected by
+setting this environment variable:</p>
+<div class="codehilite"><pre><span></span><code>$ <span class="nb">export</span> <span class="nv">DJSTRIPE_TEST_DB_VENDOR</span><span class="o">=</span>sqlite
+<span class="c1"># or: export DJSTRIPE_TEST_DB_VENDOR=mysql</span>
+</code></pre></div>
+
+<p>For postgres and mysql, the database host,port,username and password can be set with
+environment variables, see <code>tests/settings.py</code></p>
+</li>
+<li>
+<p>Install <a href="https://python-poetry.org/">Poetry</a> if you do not have it already.</p>
+<p>You can set up a virtual environment with:</p>
+<div class="codehilite"><pre><span></span><code>$ poetry install
+</code></pre></div>
+
+<p>You can then, at any time, open a shell into that environment with:</p>
+<div class="codehilite"><pre><span></span><code>$ poetry shell
+</code></pre></div>
+
+</li>
+<li>
+<p>When you're done making changes, check that your changes pass the tests. A quick
+    test run can be done as follows:</p>
+<div class="codehilite"><pre><span></span><code>$ <span class="nv">DJSTRIPE_TEST_DB_VENDOR</span><span class="o">=</span>sqlite pytest --reuse-db
+</code></pre></div>
+
+<p>You should also check that the tests pass with other python and Django versions with
+tox. pytest will output both command line and html coverage statistics and will warn
+you if your changes caused code coverage to drop.:</p>
+<div class="codehilite"><pre><span></span><code>$ pip install tox
+$ tox
+</code></pre></div>
+
+</li>
+<li>
+<p>If your changes altered the models you may need to generate Django migrations:</p>
+<div class="codehilite"><pre><span></span><code>$ <span class="nv">DJSTRIPE_TEST_DB_VENDOR</span><span class="o">=</span>sqlite poetry run ./manage.py makemigrations
+</code></pre></div>
+
+</li>
+<li>
+<p>Commit your changes and push your branch to GitHub:</p>
+<div class="codehilite"><pre><span></span><code>$ git add .
+$ git commit -m <span class="s2">&quot;Your detailed description of your changes.&quot;</span>
+$ git push
+</code></pre></div>
+
+</li>
+<li>
+<p>Submit a pull request through the GitHub website.</p>
+</li>
+</ol>
+<p>Congratulations, you're now a dj-stripe contributor! Have some ♥ from us.</p>
+<h2 id="preferred-django-model-field-types">Preferred Django Model Field Types</h2>
+<p>When mapping from Stripe API field types to Django model fields, we try to follow Django
+best practises where practical.</p>
+<p>The following types should be preferred for fields that map to the Stripe API (which is
+almost all fields in our models).</p>
+<h3 id="strings">Strings</h3>
+<ul>
+<li>Stripe API string fields have a <a href="https://github.com/stripe/openapi/issues/26#issuecomment-392957633">default maximum length of 5,000
+    characters</a>.</li>
+<li>In some cases a maximum length (<code>maxLength</code>) is specified in the <a href="https://github.com/stripe/openapi/tree/master/openapi">Stripe OpenAPI
+    schema</a>.</li>
+<li>We follow <a href="https://docs.djangoproject.com/en/dev/ref/models/fields/#null">Django's
+    recommendation</a> and
+    avoid using null on string fields (which means we store <code>""</code> for string fields that
+    are <code>null</code> in stripe). Note that is enforced in the sync logic in
+    <a href="https://github.com/dj-stripe/dj-stripe/blob/master/djstripe/models/base.py">StripeModel._stripe_object_to_record</a>.</li>
+<li>For long string fields (eg above 255 characters) we prefer <code>TextField</code> over
+    <code>Charfield</code>.</li>
+</ul>
+<p>Therefore the default type for string fields that don't have a maxLength specified in
+the <a href="https://github.com/stripe/openapi/tree/master/openapi">Stripe OpenAPI schema</a>
+should usually be:</p>
+<div class="codehilite"><pre><span></span><code>str_field = TextField(max_length=5000, default=&quot;, blank=True, help_text=&quot;...&quot;)
+</code></pre></div>
+
+<h3 id="enumerations">Enumerations</h3>
+<p>Fields that have a defined set of values can be implemented using <code>StripeEnumField</code>.</p>
+<h3 id="hash-dictionaries">Hash (dictionaries)</h3>
+<p>Use the <code>JSONField</code> in <code>djstripe.fields</code>, see also the <code>DJSTRIPE_USE_NATIVE_JSONFIELD</code>
+setting.</p>
+<h3 id="currency-amounts">Currency amounts</h3>
+<p>Stripe handles all currency amounts as integer cents, we currently have a mixture of
+fields as integer cents and decimal (eg dollar, euro etc) values, but we are aiming to
+standardise on cents (see <a href="https://github.com/dj-stripe/dj-stripe/issues/955">https://github.com/dj-stripe/dj-stripe/issues/955</a>).</p>
+<p>All new currency amount fields should use <code>StripeQuantumCurrencyAmountField</code>.</p>
+<h3 id="dates-and-datetimes">Dates and Datetimes</h3>
+<p>The Stripe API uses an integer timestamp (seconds since the Unix epoch) for dates and
+datetimes. We store this as a datetime field, using <code>StripeDateTimeField</code>.</p>
+<h2 id="django-migration-policy">Django Migration Policy</h2>
+<p>Migrations are considered a breaking change, so it's not usually not acceptable to add a
+migration to a stable branch, it will be a new <code>MAJOR.MINOR.0</code> release.</p>
+<p>A workaround to this in the case that the Stripe API data isn't compatible with out
+model (eg Stripe is sending <code>null</code> to a non-null field) is to implement the
+<code>_manipulate_stripe_object_hook</code> classmethod on the model.</p>
+<h3 id="avoid-new-migrations-with-non-schema-changes">Avoid new migrations with non-schema changes</h3>
+<p>If a code change produces a migration that doesn't alter the database schema (eg
+changing <code>help_text</code>) then instead of adding a new migration you can edit the most
+recent migration that affects the field in question.</p>
+<p>e.g.:
+<a href="https://github.com/dj-stripe/dj-stripe/commit/e2762c38918a90f00c42ecf21187a920bd3a2087">https://github.com/dj-stripe/dj-stripe/commit/e2762c38918a90f00c42ecf21187a920bd3a2087</a></p>
+<h2 id="pull-request-guidelines">Pull Request Guidelines</h2>
+<p>Before you submit a pull request, check that it meets these guidelines:</p>
+<ol>
+<li>The pull request should include tests.</li>
+<li>The pull request must not drop code coverage below the current level.</li>
+<li>If the pull request adds functionality, the docs should be updated. Put your new
+    functionality into a function with a docstring.</li>
+<li>If the pull request makes changes to a model, include Django migrations.</li>
+<li>The pull request should work for Python 3.6+. Check <a href="https://github.com/dj-stripe/dj-stripe/actions">Github
+    Actions</a> and make sure that the
+    tests pass for all supported Python versions.</li>
+<li>Code formatting: Make sure to install <code>pre-commit</code> to automatically run it on <code>staged files</code> or run manually with <code>pre-commit run --all-files</code> at the dj-stripe root to keep a consistent style.</li>
+</ol>
+              
+            </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/dj-stripe/dj-stripe/" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+      <script src="../js/version-select.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

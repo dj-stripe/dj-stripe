@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Dj-Stripe Team">
+  <link rel="canonical" href="https://dj-stripe.github.io/dj-stripe/2.5/project/release_process/">
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Release Process - Dj-Stripe</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+  <link href="../../css/version-select.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Release Process";
+    var mkdocs_page_input_path = "project/release_process.md";
+    var mkdocs_page_url = "/dj-stripe/2.5/project/release_process/";
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> Dj-Stripe</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../sponsors/">Sponsors</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Getting Started</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../api_keys/">Managing Stripe API Keys</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../api_versions/">A note on Stripe API Versions</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../stripe_elements_js/">Integrating Stripe Elements</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Release notes</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_5_0/">dj-stripe 2.5 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_4_x/">dj-stripe 2.4.1 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_4_0/">dj-stripe 2.4 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_x/">dj-stripe 2.0 ~ 2.3 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/1_x/">dj-stripe 1.x release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/0_x/">dj-stripe 0.x release notes</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Usage</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/webhooks/">Using Stripe Webhooks</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/subscribing_customers/">Subscribing a customer to a plan</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/managing_subscriptions/">Managing subscriptions and payment sources</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/manually_syncing_with_stripe/">Manually syncing data with Stripe</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/creating_individual_charges/">Creating individual charges</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/creating_usage_record/">Creating Usage Records</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/using_stripe_checkout/">Using Stripe Checkout</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/using_with_docker/">Using with Docker</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Project</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../contributing/">Contributing</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../test_fixtures/">Test Fixtures</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../authors/">Credits</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../support/">Support</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Release Process</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#squash-migrations">Squash migrations</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#tag-package-squashed-migrations-as-rc-package-optional">Tag + package squashed migrations as rc package (optional)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#prepare-changes-for-the-release-commit">Prepare changes for the release commit</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#create-signed-release-commit-tag">Create signed release commit tag</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#updatecreate-stable-branch">Update/create stable branch</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#release-on-pypi">Release on pypi</a>
+    </li>
+    </ul>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Reference</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/context_managers/">Context Managers</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/enums/">Enumerations</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/managers/">Managers</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/models/">Models</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/settings/">Settings</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/utils/">Utilities</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">Dj-Stripe</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Project &raquo;</li>
+        
+      
+    
+    <li>Release Process</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/dj-stripe/dj-stripe/edit/master/docs/project/release_process.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="release-process">Release Process</h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Before <code>MAJOR</code> or <code>MINOR</code> releases:</p>
+<ul>
+<li>Review deprecation notes (eg search for "deprecated") and remove
+    deprecated features as appropriate</li>
+<li>Squash migrations (ONLY on unreleased migrations) - see below</li>
+</ul>
+</div>
+<h2 id="squash-migrations">Squash migrations</h2>
+<p>If there's more than one unreleased migration on master consider
+squashing them with <code>squashmigrations</code>, immediately before tagging the
+new release:</p>
+<ul>
+<li>
+<p>Create a new squashed migration with <code>./manage.py squashmigrations</code>
+    (only squash migrations that have never been in a tagged release)</p>
+</li>
+<li>
+<p>Commit the squashed migration on master with a commit message like
+    "Squash x.y.0dev migrations" (this will allow users who running
+    master to safely upgrade, see note below about rc package)</p>
+</li>
+<li>
+<p>Then transition the squashed migration to a normal migration as per Django:</p>
+<ul>
+<li>Delete all the migration files it replaces</li>
+<li>Update all migrations that depend on the deleted migrations to
+    depend on the squashed migration instead</li>
+<li>Remove the <code>replaces</code> attribute in the Migration class of the
+    squashed migration (this is how Django tells that it is a
+    squashed migration)</li>
+</ul>
+</li>
+<li>
+<p>Commit these changes to master with a message like "Transition
+    squashed migration to normal migration"</p>
+</li>
+<li>
+<p>Then do the normal release process - bump version as another commit
+    and tag the release</p>
+</li>
+</ul>
+<p>See
+<a href="https://docs.djangoproject.com/en/dev/topics/migrations/#migration-squashing">https://docs.djangoproject.com/en/dev/topics/migrations/#migration-squashing</a></p>
+<h2 id="tag-package-squashed-migrations-as-rc-package-optional">Tag + package squashed migrations as rc package (optional)</h2>
+<p>As a convenience to users who are running master, an rc version can be
+created to package the squashed migration.</p>
+<p>To do this, immediately after the "Squash x.y.0dev migrations" commit,
+follow the steps below but with a x.y.0rc0 version to tag and package a
+rc version.</p>
+<p>Users who have been using the x.y.0dev code from master can then run the
+squashed migrations migrations before upgrading to &gt;=x.y.0.</p>
+<p>The simplest way to do this is to <code>pip install dj-stripe==x.y.0rc0</code> and
+migrate, or alternatively check out the <code>x.y.0rc0</code> git tag and migrate.</p>
+<h2 id="prepare-changes-for-the-release-commit">Prepare changes for the release commit</h2>
+<ul>
+<li>
+<p>Choose your version number (using <a href="https://semver.org/">https://semver.org/</a> )</p>
+<ul>
+<li>if there's a new migration, it should be a <code>MAJOR.0.0</code> or
+    <code>MAJOR.MINOR.0</code> version.</li>
+</ul>
+</li>
+<li>
+<p>Review and update <code>HISTORY.md</code></p>
+<ul>
+<li>Add a section for this release version</li>
+<li>Set date on this release version</li>
+<li>Check that summary of feature/fixes is since the last release is
+    up to date</li>
+</ul>
+</li>
+<li>
+<p>Update package version number in <code>setup.cfg</code></p>
+</li>
+<li>
+<p>Review and update supported API version in <code>README.md</code>
+    (this is the most recent Stripe account version tested against, not
+    <code>DEFAULT_STRIPE_API_VERSION</code>)</p>
+</li>
+<li>
+<p><code>git add</code> to stage these changes</p>
+</li>
+</ul>
+<h2 id="create-signed-release-commit-tag">Create signed release commit tag</h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Before doing this you should have a GPG key set up on github</p>
+<p>If you don't have a GPG key already, one method is via
+<a href="https://keybase.io/">https://keybase.io/</a> , and then add it to your github profile.</p>
+</div>
+<ul>
+<li>Create a release tag with the above staged changes (where <code>$VERSION</code>
+    is the version number to be released:<div class="codehilite"><pre><span></span><code>$ git commit -m <span class="s2">&quot;Release </span><span class="nv">$VERSION</span><span class="s2">&quot;</span>
+$ git tag -fsm <span class="s2">&quot;Release </span><span class="nv">$VERSION</span><span class="s2">&quot;</span> <span class="nv">$VERSION</span>
+</code></pre></div>
+
+</li>
+</ul>
+<p>This can be expressed as a bash function as follows:</p>
+<div class="codehilite"><pre><span></span><code>git_release() { git commit -m &quot;Release $1&quot; &amp;&amp; git tag -fsm &quot;Release $1&quot; $1; }
+</code></pre></div>
+
+<ul>
+<li>Push the commit and tag:<div class="codehilite"><pre><span></span><code>$ git push --follow-tags
+</code></pre></div>
+
+</li>
+</ul>
+<h2 id="updatecreate-stable-branch">Update/create stable branch</h2>
+<p>Push these changes to the appropriate <code>stable/MAJOR.MINOR</code> version
+branch (eg <code>stable/2.0</code>) if they're not already - note that this will
+trigger the readthedocs build</p>
+<h2 id="release-on-pypi">Release on pypi</h2>
+<p>See
+<a href="https://packaging.python.org/tutorials/packaging-projects/#generating-distribution-archives">https://packaging.python.org/tutorials/packaging-projects/#generating-distribution-archives</a></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../../reference/context_managers/" class="btn btn-neutral float-right" title="Context Managers">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../support/" class="btn btn-neutral" title="Support"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/dj-stripe/dj-stripe/" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../support/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../reference/context_managers/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+      <script src="../../js/version-select.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
