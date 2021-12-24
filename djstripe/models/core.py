@@ -214,6 +214,7 @@ class Charge(StripeModel):
         "Account",
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
         related_name="charges",
         help_text="The account (if any) the charge was made on behalf of "
         "without triggering an automatic transfer.",
