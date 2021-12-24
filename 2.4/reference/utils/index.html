@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Dj-Stripe Team">
+  <link rel="canonical" href="https://dj-stripe.github.io/dj-stripe/2.4/reference/utils/">
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Utilities - Dj-Stripe</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+  <link href="../../css/version-select.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Utilities";
+    var mkdocs_page_input_path = "reference/utils.md";
+    var mkdocs_page_url = "/dj-stripe/2.4/reference/utils/";
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> Dj-Stripe</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/sponsors/">Sponsors</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Getting Started</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../api_keys/">Managing Stripe API Keys</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../api_versions/">A note on Stripe API Versions</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../stripe_elements_js/">Integrating Stripe Elements</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Release notes</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_4_x/">dj-stripe 2.4.1 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_4_0/">dj-stripe 2.4 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_x/">dj-stripe 2.0 ~ 2.3 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/1_x/">dj-stripe 1.x release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/0_x/">dj-stripe 0.x release notes</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Usage</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/webhooks/">Using Stripe Webhooks</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/subscribing_customers/">Subscribing a customer to a plan</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/managing_subscriptions/">Managing subscriptions and payment sources</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/manually_syncing_with_stripe/">Manually syncing data with Stripe</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/creating_individual_charges/">Creating individual charges</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Project</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/contributing/">Contributing</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/test_fixtures/">Test Fixtures</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/authors/">Credits</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/support/">Support</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/release_process/">Release Process</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Reference</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../context_managers/">Context Managers</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../decorators/">Decorators</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../enums/">Enumerations</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../managers/">Managers</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../middleware/">Middleware</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../models/">Models</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../settings/">Settings</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Utilities</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#djstripe.utils">djstripe.utils</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.ANONYMOUS_USER_ERROR_MSG">ANONYMOUS_USER_ERROR_MSG</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.CURRENCY_SIGILS">CURRENCY_SIGILS</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#djstripe.utils-classes">Classes</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.QuerySetMock">QuerySetMock</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.utils.QuerySetMock-methods">Methods</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#djstripe.utils-functions">Functions</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.clear_expired_idempotency_keys">clear_expired_idempotency_keys()</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.convert_tstamp">convert_tstamp()</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.get_friendly_currency_amount">get_friendly_currency_amount()</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.get_supported_currency_choices">get_supported_currency_choices()</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.subscriber_has_active_subscription">subscriber_has_active_subscription()</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">Dj-Stripe</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Reference &raquo;</li>
+        
+      
+    
+    <li>Utilities</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/dj-stripe/dj-stripe/edit/master/docs/reference/utils.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="utilities">Utilities</h1>
+
+
+  <div class="doc doc-object doc-module">
+
+<a id="djstripe.utils"></a>
+    <div class="doc doc-contents first">
+
+      <p>Utility functions related to the djstripe app.</p>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="djstripe.utils.ANONYMOUS_USER_ERROR_MSG" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">ANONYMOUS_USER_ERROR_MSG</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="djstripe.utils.CURRENCY_SIGILS" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">CURRENCY_SIGILS</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+<h2 id="djstripe.utils-classes">Classes</h2>
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h3 id="djstripe.utils.QuerySetMock" class="doc doc-heading">
+        <code>
+djstripe.utils.QuerySetMock        </code>
+
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>A mocked QuerySet class that does not handle updates.
+Used by UpcomingInvoice.invoiceitems.</p>
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<h4 id="djstripe.utils.QuerySetMock-methods">Methods</h4>
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.utils.QuerySetMock.delete" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">QuerySetMock</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+      <p>Delete the records in the current QuerySet.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/utils.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">0</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.utils.QuerySetMock.from_iterable" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">QuerySetMock</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">iterable</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/utils.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">from_iterable</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">iterable</span><span class="p">):</span>
+    <span class="n">instance</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">instance</span><span class="o">.</span><span class="n">_result_cache</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">iterable</span><span class="p">)</span>
+    <span class="n">instance</span><span class="o">.</span><span class="n">_prefetch_done</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">instance</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.utils.QuerySetMock.update" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">QuerySetMock</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+      <p>Update all elements in the current QuerySet, setting all the given
+fields to the appropriate values.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/utils.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">0</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+<h2 id="djstripe.utils-functions">Functions</h2>
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h3 id="djstripe.utils.clear_expired_idempotency_keys" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">clear_expired_idempotency_keys</span><span class="p">()</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/utils.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">clear_expired_idempotency_keys</span><span class="p">():</span>
+    <span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">IdempotencyKey</span>
+
+    <span class="n">threshold</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+    <span class="n">IdempotencyKey</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">created__lt</span><span class="o">=</span><span class="n">threshold</span><span class="p">)</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h3 id="djstripe.utils.convert_tstamp" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">convert_tstamp</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Convert a Stripe API timestamp response (unix epoch) to a native datetime.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/utils.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">convert_tstamp</span><span class="p">(</span><span class="n">response</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a Stripe API timestamp response (unix epoch) to a native datetime.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">response</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Allow passing None to convert_tstamp()</span>
+        <span class="k">return</span> <span class="n">response</span>
+
+    <span class="c1"># Overrides the set timezone to UTC - I think...</span>
+    <span class="n">tz</span> <span class="o">=</span> <span class="n">timezone</span><span class="o">.</span><span class="n">utc</span> <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">USE_TZ</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">tz</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h3 id="djstripe.utils.get_friendly_currency_amount" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_friendly_currency_amount</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">currency</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/utils.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_friendly_currency_amount</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">currency</span> <span class="o">=</span> <span class="n">currency</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">sigil</span> <span class="o">=</span> <span class="n">CURRENCY_SIGILS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">currency</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{sigil}{amount:.2f}</span><span class="s2"> </span><span class="si">{currency}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">sigil</span><span class="o">=</span><span class="n">sigil</span><span class="p">,</span> <span class="n">amount</span><span class="o">=</span><span class="n">amount</span><span class="p">,</span> <span class="n">currency</span><span class="o">=</span><span class="n">currency</span>
+    <span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h3 id="djstripe.utils.get_supported_currency_choices" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_supported_currency_choices</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Pull a stripe account's supported currencies and returns a choices tuple of those
+supported currencies.</p>
+<p>:param api_key: The api key associated with the account from which to pull data.
+:type api_key: str</p>
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/utils.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_supported_currency_choices</span><span class="p">(</span><span class="n">api_key</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Pull a stripe account&#39;s supported currencies and returns a choices tuple of those</span>
+<span class="sd">    supported currencies.</span>
+
+<span class="sd">    :param api_key: The api key associated with the account from which to pull data.</span>
+<span class="sd">    :type api_key: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">stripe</span>
+
+    <span class="n">stripe</span><span class="o">.</span><span class="n">api_key</span> <span class="o">=</span> <span class="n">api_key</span>
+
+    <span class="n">account</span> <span class="o">=</span> <span class="n">stripe</span><span class="o">.</span><span class="n">Account</span><span class="o">.</span><span class="n">retrieve</span><span class="p">()</span>
+    <span class="n">supported_payment_currencies</span> <span class="o">=</span> <span class="n">stripe</span><span class="o">.</span><span class="n">CountrySpec</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">account</span><span class="p">[</span><span class="s2">&quot;country&quot;</span><span class="p">])[</span>
+        <span class="s2">&quot;supported_payment_currencies&quot;</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">[(</span><span class="n">currency</span><span class="p">,</span> <span class="n">currency</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span> <span class="k">for</span> <span class="n">currency</span> <span class="ow">in</span> <span class="n">supported_payment_currencies</span><span class="p">]</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h3 id="djstripe.utils.subscriber_has_active_subscription" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">subscriber_has_active_subscription</span><span class="p">(</span><span class="n">subscriber</span><span class="p">,</span> <span class="n">price</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plan</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Helper function to check if a subscriber has an active subscription.</p>
+<p>Throws TypeError if both price and plan are defined.</p>
+<p>Throws improperlyConfigured if the subscriber is an instance of AUTH_USER_MODEL
+and get_user_model().is_anonymous == True.</p>
+<p>Activate subscription rules (or):
+    * customer has active subscription</p>
+<p>If the subscriber is an instance of AUTH_USER_MODEL, active subscription rules (or):
+    * customer has active subscription
+    * user.is_superuser
+    * user.is_staff</p>
+<p>If price and plan are None and there exists only one subscription, this method will
+check if that subscription is active. Calling this method with no price, no plan and
+multiple subscriptions will throw an exception.</p>
+<p>:param subscriber: The subscriber for which to check for an active subscription.
+:type subscriber: dj-stripe subscriber
+:param price: The price for which to check for an active subscription.
+:type price: Price or string (price ID)
+:param plan: The plan for which to check for an active subscription.
+:type plan: Plan or string (plan ID)</p>
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/utils.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">subscriber_has_active_subscription</span><span class="p">(</span><span class="n">subscriber</span><span class="p">,</span> <span class="n">price</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plan</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper function to check if a subscriber has an active subscription.</span>
+
+<span class="sd">    Throws TypeError if both price and plan are defined.</span>
+
+<span class="sd">    Throws improperlyConfigured if the subscriber is an instance of AUTH_USER_MODEL</span>
+<span class="sd">    and get_user_model().is_anonymous == True.</span>
+
+<span class="sd">    Activate subscription rules (or):</span>
+<span class="sd">        * customer has active subscription</span>
+
+<span class="sd">    If the subscriber is an instance of AUTH_USER_MODEL, active subscription rules (or):</span>
+<span class="sd">        * customer has active subscription</span>
+<span class="sd">        * user.is_superuser</span>
+<span class="sd">        * user.is_staff</span>
+
+<span class="sd">    If price and plan are None and there exists only one subscription, this method will</span>
+<span class="sd">    check if that subscription is active. Calling this method with no price, no plan and</span>
+<span class="sd">    multiple subscriptions will throw an exception.</span>
+
+<span class="sd">    :param subscriber: The subscriber for which to check for an active subscription.</span>
+<span class="sd">    :type subscriber: dj-stripe subscriber</span>
+<span class="sd">    :param price: The price for which to check for an active subscription.</span>
+<span class="sd">    :type price: Price or string (price ID)</span>
+<span class="sd">    :param plan: The plan for which to check for an active subscription.</span>
+<span class="sd">    :type plan: Plan or string (plan ID)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+        <span class="s2">&quot;The subscriber_has_active_subscription utility function, and &quot;</span>
+        <span class="s2">&quot;SubscriptionPaymentMiddleware, will be removed in dj-stripe 2.5.0.&quot;</span><span class="p">,</span>
+        <span class="ne">DeprecationWarning</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">price</span> <span class="ow">and</span> <span class="n">plan</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;price and plan arguments cannot both be defined.&quot;</span><span class="p">)</span>
+    <span class="n">price</span> <span class="o">=</span> <span class="n">price</span> <span class="ow">or</span> <span class="n">plan</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">subscriber</span><span class="o">.</span><span class="n">is_anonymous</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span><span class="n">ANONYMOUS_USER_ERROR_MSG</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">subscriber</span><span class="p">,</span> <span class="n">get_user_model</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">subscriber</span><span class="o">.</span><span class="n">is_superuser</span> <span class="ow">or</span> <span class="n">subscriber</span><span class="o">.</span><span class="n">is_staff</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">Customer</span>
+
+    <span class="n">customer</span><span class="p">,</span> <span class="n">created</span> <span class="o">=</span> <span class="n">Customer</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span><span class="n">subscriber</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">created</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">customer</span><span class="o">.</span><span class="n">has_active_subscription</span><span class="p">(</span><span class="n">price</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../settings/" class="btn btn-neutral" title="Settings"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/dj-stripe/dj-stripe/" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../settings/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+      <script src="../../js/version-select.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

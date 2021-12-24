@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Dj-Stripe Team">
+  <link rel="canonical" href="https://dj-stripe.github.io/dj-stripe/2.4/history/2_x/">
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>dj-stripe 2.0 ~ 2.3 release notes - Dj-Stripe</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+  <link href="../../css/version-select.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "dj-stripe 2.0 ~ 2.3 release notes";
+    var mkdocs_page_input_path = "history/2_x.md";
+    var mkdocs_page_url = "/dj-stripe/2.4/history/2_x/";
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> Dj-Stripe</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/sponsors/">Sponsors</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Getting Started</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../api_keys/">Managing Stripe API Keys</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../api_versions/">A note on Stripe API Versions</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../stripe_elements_js/">Integrating Stripe Elements</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Release notes</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../2_4_x/">dj-stripe 2.4.1 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../2_4_0/">dj-stripe 2.4 release notes</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">dj-stripe 2.0 ~ 2.3 release notes</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#230-2020-04-19">2.3.0 (2020-04-19)</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#warning-about-safe-uninstall-of-jsonfield2-on-upgrade">Warning about safe uninstall of jsonfield2 on upgrade</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#222-2020-01-20">2.2.2 (2020-01-20)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#221-2020-01-14">2.2.1 (2020-01-14)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#220-2020-01-13">2.2.0 (2020-01-13)</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#warning-about-safe-uninstall-of-jsonfield-on-upgrade">Warning about safe uninstall of jsonfield on upgrade</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#note-on-usage-of-stripe-elements-js">Note on usage of Stripe Elements JS</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#211-2019-10-01">2.1.1 (2019-10-01)</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#upcoming-migration-of-currency-fields-storage-as-cents-instead-of-dollars">Upcoming migration of currency fields (storage as cents instead of dollars)</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#210-2019-09-12">2.1.0 (2019-09-12)</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#squashed-dev-migrations">Squashed dev migrations</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#205-2019-09-12">2.0.5 (2019-09-12)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#204-2019-09-09">2.0.4 (2019-09-09)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#203-2019-06-11">2.0.3 (2019-06-11)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#202-2019-06-09">2.0.2 (2019-06-09)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#201-2019-04-29">2.0.1 (2019-04-29)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#200-2019-03-01">2.0.0 (2019-03-01)</a>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../1_x/">dj-stripe 1.x release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../0_x/">dj-stripe 0.x release notes</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Usage</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/webhooks/">Using Stripe Webhooks</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/subscribing_customers/">Subscribing a customer to a plan</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/managing_subscriptions/">Managing subscriptions and payment sources</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/manually_syncing_with_stripe/">Manually syncing data with Stripe</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/creating_individual_charges/">Creating individual charges</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Project</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/contributing/">Contributing</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/test_fixtures/">Test Fixtures</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/authors/">Credits</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/support/">Support</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/release_process/">Release Process</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Reference</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/context_managers/">Context Managers</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/decorators/">Decorators</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/enums/">Enumerations</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/managers/">Managers</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/middleware/">Middleware</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/models/">Models</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/settings/">Settings</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/utils/">Utilities</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">Dj-Stripe</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Release notes &raquo;</li>
+        
+      
+    
+    <li>dj-stripe 2.0 ~ 2.3 release notes</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/dj-stripe/dj-stripe/edit/master/docs/history/2_x.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="dj-stripe-20-23-release-notes">dj-stripe 2.0 ~ 2.3 release notes</h1>
+<h2 id="230-2020-04-19">2.3.0 (2020-04-19)</h2>
+<ul>
+<li>The minimum version of Django is now 2.1, and Python 3.6.</li>
+<li>Changed <code>JSONField</code> dependency back to
+    <a href="https://github.com/rpkilby/jsonfield/">jsonfield</a> from
+    <a href="https://github.com/rpkilby/jsonfield2/">jsonfield2</a> (see <a href="#warning-about-safe-uninstall-of-jsonfield2-on-upgrade">Warning
+    about safe uninstall of jsonfield2 on
+    upgrade</a>).</li>
+<li>Fixed handling of <code>TaxRate</code> events (#1094).</li>
+<li>Fixed pagination issue in <code>Invoice.sync_from_stripe_data</code> (#1052).</li>
+<li>Fixed pagination issues in <code>Subscription</code> &amp; <code>Charge</code>
+    <code>.sync_from_stripe_data</code> (#1054).</li>
+<li>Tidyup <code>_stripe_object_set_total_tax_amounts</code> unique handling (#1139).</li>
+<li>Dropped previously-deprecated <code>Invoice</code> fields (see <a href="https://stripe.com/docs/upgrades#2018-11-08">https://stripe.com/docs/upgrades#2018-11-08</a> ):<ul>
+<li><code>.closed</code></li>
+<li><code>.forgiven</code></li>
+<li><code>.billing</code> (renamed to <code>.collection_method</code>)</li>
+</ul>
+</li>
+<li>Dropped previously-deprecated <code>enums.InvoiceStatus</code> (#1020).</li>
+<li>Deprecated the following fields - will be removed in 2.4 (#1087):<ul>
+<li><code>Subscription.billing</code> (use <code>.collection_method</code> instead)</li>
+<li><code>Subscription.start</code> (use <code>.start_date</code> instead)</li>
+<li><code>Subscription.tax_percent</code> (use <code>.default_tax_rates</code> instead)</li>
+</ul>
+</li>
+<li>Added <code>Invoice.status</code> and <code>enums.InvoiceStatus</code> (#1020).</li>
+<li>Added new <code>Invoice</code> fields (#1020, #1087):<ul>
+<li><code>.discount</code></li>
+<li><code>.default_source</code></li>
+<li><code>.status</code></li>
+</ul>
+</li>
+<li>Added new <code>Subscription</code> fields (#1087):<ul>
+<li><code>.default_payment_method</code></li>
+<li><code>.default_source</code></li>
+<li><code>.next_pending_invoice_item_invoice</code></li>
+<li><code>.pending_invoice_item_interval</code></li>
+<li><code>.pending_update</code></li>
+<li><code>.start_date</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="warning-about-safe-uninstall-of-jsonfield2-on-upgrade">Warning about safe uninstall of jsonfield2 on upgrade</h3>
+<p>Both <strong>jsonfield</strong> and <strong>jsonfield2</strong> use the same import path, so if
+upgrading from dj-stripe\~=2.2.0 in an existing virtualenv, be sure to
+uninstall jsonfield2 first. eg:
+<div class="highlight"><pre><span></span><code>    <span class="c1"># ensure jsonfield is uninstalled before we install jsonfield2</span>
+    pip uninstall jsonfield2 -y <span class="o">&amp;&amp;</span> pip install <span class="s2">&quot;dj-stripe&gt;=2.3.0dev&quot;</span>
+</code></pre></div></p>
+<p>Otherwise, <code>pip uninstall jsonfield2</code> will remove jsonfield's
+<code>jsonfield</code> module from <code>site-packages</code>, which would cause errors like
+<code>ImportError: cannot import name 'JSONField' from 'jsonfield' (unknown location)</code></p>
+<p>If you have hit this ImportError already after upgrading, running this
+should resolve it:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># remove both jsonfield packages before reinstall to fix ImportError:</span>
+pip uninstall jsonfield jsonfield2 -y <span class="o">&amp;&amp;</span> pip install <span class="s2">&quot;dj-stripe&gt;=2.3.0&quot;</span>
+</code></pre></div>
+<p>Note that this is only necessary if upgrading from dj-stripe 2.2.x,
+which temporarily depended on jsonfield2. This process is not necessary
+if upgrading from an earlier version of dj-stripe.</p>
+<h2 id="222-2020-01-20">2.2.2 (2020-01-20)</h2>
+<p>This is a bugfix-only version:</p>
+<ul>
+<li>Fixed handling of <code>TaxRate</code> events (#1094).</li>
+</ul>
+<h2 id="221-2020-01-14">2.2.1 (2020-01-14)</h2>
+<p>This is a bugfix-only version:</p>
+<ul>
+<li>Fixed bad package build.</li>
+</ul>
+<h2 id="220-2020-01-13">2.2.0 (2020-01-13)</h2>
+<ul>
+<li>Changed <code>JSONField</code> dependency package from
+    <a href="https://github.com/rpkilby/jsonfield/">jsonfield</a> to
+    <a href="https://github.com/rpkilby/jsonfield2/">jsonfield2</a>, for Django 3
+    compatibility (see <a href="#warning-about-safe-uninstall-of-jsonfield-on-upgrade">Warning about safe uninstall of jsonfield on
+    upgrade</a>).
+    Note that Django 2.1 requires jsonfield&lt;3.1.</li>
+<li>Added support for Django 3.0 (requires jsonfield2&gt;=3.0.3).</li>
+<li>Added support for python 3.8.</li>
+<li>Refactored <code>UpcomingInvoice</code>, so it's no longer a subclass of
+    <code>Invoice</code> (to allow <code>Invoice</code> to use <code>ManyToManyFields</code>).</li>
+<li>Dropped previously-deprecated <code>Account</code> fields (see <a href="https://stripe.com/docs/upgrades#2019-02-19">https://stripe.com/docs/upgrades#2019-02-19</a> ):<ul>
+<li><code>.business_name</code></li>
+<li><code>.business_primary_color</code></li>
+<li><code>.business_url</code> (changed to a property)</li>
+<li><code>.debit_negative_balances</code></li>
+<li><code>.decline_charge_on</code></li>
+<li><code>.display_name</code></li>
+<li><code>.legal_entity</code></li>
+<li><code>.payout_schedule</code></li>
+<li><code>.payout_statement_descriptor</code></li>
+<li><code>.statement_descriptor</code></li>
+<li><code>.support_email</code></li>
+<li><code>.support_phone</code></li>
+<li><code>.support_url</code></li>
+<li><code>.timezone</code></li>
+<li><code>.verification</code></li>
+</ul>
+</li>
+<li>Dropped previously-deprecated <code>Account.business_logo</code> property
+    (renamed to <code>.branding_icon</code>)</li>
+<li>Dropped previously-deprecated <code>Customer.account_balance</code> property
+    (renamed to <code>.balance</code>)</li>
+<li>Dropped previously-deprecated properties <code>Invoice.application_fee</code>,
+    <code>Invoice.date</code></li>
+<li>Dropped previously-deprecated enum <code>PaymentMethodType</code> (use
+    <code>DjstripePaymentMethodType</code> instead)</li>
+<li>Renamed <code>Invoice.billing</code> to <code>.collection_method</code> (added deprecated
+    property for the old name).</li>
+<li>Updated <code>Invoice</code> model to add missing fields.</li>
+<li>Added <code>TaxRate</code> model, and <code>Invoice.default_tax_rates</code>,
+    <code>InvoiceItem.tax_rates</code>, <code>Invoice.total_tax_amounts</code>,
+    <code>Subscription.default_tax_rates</code>, <code>SubscriptionItem.tax_rates</code>
+    (#1027).</li>
+<li>Change urls.py to use the new style urls.</li>
+<li>Update forward relation fields in the admin to be raw id fields.</li>
+<li>Updated <code>StripeQuantumCurrencyAmountField</code> and
+    <code>StripeDecimalCurrencyAmountField</code> to support Stripe Large Charges
+    (#1045).</li>
+<li>Update event handling so <code>customer.subscription.deleted</code> updates
+    subscriptions to <code>status="canceled"</code> instead of deleting it from our
+    database, to match Stripe's behaviour (#599).</li>
+<li>Added missing <code>Refund.reason</code> value, increases field width (#1075).</li>
+<li>Fixed <code>Refund.status</code> definition, reduces field width (#1076).</li>
+<li>Deprecated non-standard <code>Invoice.status</code> (renamed to
+    <code>Invoice.legacy_status</code>) to make way for the Stripe field
+    (preparation for #1020).</li>
+</ul>
+<h3 id="warning-about-safe-uninstall-of-jsonfield-on-upgrade">Warning about safe uninstall of jsonfield on upgrade</h3>
+<p>Both <strong>jsonfield</strong> and <strong>jsonfield2</strong> use the same import path, so if
+upgrading to dj-stripe&gt;=2.2 in an existing virtualenv, be sure to
+uninstall jsonfield first. eg:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># ensure jsonfield is uninstalled before we install jsonfield2</span>
+pip uninstall jsonfield -y <span class="o">&amp;&amp;</span> pip install <span class="s2">&quot;dj-stripe&gt;=2.2.0&quot;</span>
+</code></pre></div>
+<p>Otherwise, <code>pip uninstall jsonfield</code> will remove jsonfield2’s
+<code>jsonfield</code> module from <code>site-packages</code>, which would cause errors like
+<code>ImportError: cannot import name 'JSONField' from 'jsonfield' (unknown location)</code></p>
+<p>If you have hit this ImportError already after upgrading, running this
+should resolve it:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># remove both jsonfield packages before reinstall to fix ImportError:</span>
+pip uninstall jsonfield jsonfield2 -y <span class="o">&amp;&amp;</span> pip install <span class="s2">&quot;dj-stripe&gt;=2.2.0&quot;</span>
+</code></pre></div>
+<h3 id="note-on-usage-of-stripe-elements-js">Note on usage of Stripe Elements JS</h3>
+<p>See <a href="https://dj-stripe.github.io/dj-stripe/en/master/stripe_elements_js/">Integrating Stripe Elements</a>
+for notes about usage of the Stripe Elements frontend JS library.</p>
+<p>In summary: If you haven't yet migrated to PaymentIntents, prefer
+<code>stripe.createSource()</code> to <code>stripe.createToken()</code>.</p>
+<h2 id="211-2019-10-01">2.1.1 (2019-10-01)</h2>
+<p>This is a bugfix-only release:</p>
+<ul>
+<li>Updated webhook signals list (#1000).</li>
+<li>Fixed issue syncing PaymentIntent with destination charge (#960).</li>
+<li>Fixed <code>Customer.subscription</code> and <code>.valid_subscriptions()</code> to ignore
+    <code>status=incomplete_expired</code> (#1006).</li>
+<li>Fixed error on <code>paymentmethod.detached</code> event with <code>card_xxx</code>
+    payment methods (#967).</li>
+<li>Added <code>PaymentMethod.detach()</code> (#943).</li>
+<li>Updated <code>help_text</code> on all currency fields to make it clear if
+    they're holding integer cents (<code>StripeQuantumCurrencyAmountField</code>)
+    or decimal dollar (or euro, pound etc)
+    (<code>StripeDecimalCurrencyAmountField</code>) (#999)</li>
+<li>Documented our preferred Django model field types (#986)</li>
+</ul>
+<h3 id="upcoming-migration-of-currency-fields-storage-as-cents-instead-of-dollars">Upcoming migration of currency fields (storage as cents instead of dollars)</h3>
+<p>Please be aware that we're looking at standardising our currency storage
+fields as integer quanta (cents) instead of Decimal (dollar) values, to
+match stripe.</p>
+<p>This is intended to be part of the 3.0 release, since it will involve
+some breaking changes. See #955 for details and discussion.</p>
+<h2 id="210-2019-09-12">2.1.0 (2019-09-12)</h2>
+<ul>
+<li>Dropped Django 2.0 support</li>
+<li>The Python stripe library minimum version is now <code>2.32.0</code>, also
+    <code>2.36.0</code> is excluded due to a regression (#991).</li>
+<li>Dropped previously-deprecated <code>Charge.fee_details</code> property.</li>
+<li>Dropped previously-deprecated <code>Transfer.fee_details</code> property.</li>
+<li>Dropped previously-deprecated <code>field_name</code> parameter to
+    <code>sync_from_stripe_data</code></li>
+<li>Dropped previously-deprecated alias <code>StripeObject</code> of <code>StripeModel</code></li>
+<li>Dropped previously-deprecated alias <code>PaymentMethod</code> of <code>DjstripePaymentMethod</code></li>
+<li>Dropped previously-deprecated properties <code>Charge.source_type</code> and
+    <code>Charge.source_stripe_id</code></li>
+<li><code>enums.PaymentMethodType</code> has been deprecated, use <code>enums.DjstripePaymentMethodType</code></li>
+<li>Made <code>SubscriptionItem.quantity</code> nullable as per Plans with
+    <code>usage_type="metered"</code> (follow-up to #865)</li>
+<li>Added manage commands <code>djstripe_sync_models</code> and
+    <code>djstripe_process_events</code> (#727, #89)</li>
+<li>Fixed issue with re-creating a customer after <code>Customer.purge()</code> (#916)</li>
+<li>Fixed sync of Customer Bank Accounts (#829)</li>
+<li>Fixed <code>Subscription.is_status_temporarily_current()</code> (#852)</li>
+<li>New models<ul>
+<li>Payment Intent</li>
+<li>Setup Intent</li>
+<li>Payment Method</li>
+<li>Session</li>
+</ul>
+</li>
+<li>Added fields to <code>Customer</code> model: <code>address</code>, <code>invoice_prefix</code>,
+    <code>invoice_settings</code>, <code>phone</code>, <code>preferred_locales</code>, <code>tax_exempt</code></li>
+</ul>
+<p>Changes from API 2018-11-08:</p>
+<ul>
+<li>Added <code>Invoice.auto_advance</code>, deprecated <code>Invoice.closed</code> and
+    <code>Invoice.forgiven</code>, see
+    <a href="https://stripe.com/docs/billing/migration/invoice-states#upgrade-checklist">https://stripe.com/docs/billing/migration/invoice-states#upgrade-checklist</a></li>
+</ul>
+<p>Changes from API 2019-02-19:</p>
+<ul>
+<li>
+<p>Major changes to Account fields, see
+    <a href="https://stripe.com/docs/upgrades#2019-02-19">https://stripe.com/docs/upgrades#2019-02-19</a> , updated Account
+    fields to match API 2019-02-19:</p>
+</li>
+<li>
+<p>Added <code>Account.business_profile</code>, <code>.business_type</code>, <code>.company</code>,
+    <code>.individual</code>, <code>.requirements</code>, <code>.settings</code></p>
+</li>
+<li>Deprecated the existing fields, to be removed in 2.2</li>
+<li>Special handling of the icon and logo fields:
+    &gt; -   Renamed <code>Account.business_logo</code> to <code>Account.branding_icon</code>
+    &gt;     (note that in Stripe's API <code>Account.business_logo</code> was renamed
+    &gt;     to <code>Account.settings.branding_icon</code>, and
+    &gt;     <code>Account.business_logo_large</code> (which we didn't have a field
+    &gt;     for) was renamed to <code>Account.settings.branding_logo</code>)
+    &gt; -   Added deprecated property for <code>Account.business_logo</code>
+    &gt; -   Added <code>Account.branding_logo</code> as a ForeignKey
+    &gt; -   Populate <code>Account.branding_icon</code> and <code>.branding_logo</code> from the
+    &gt;     new <code>Account.settings.branding.icon</code> and <code>.logo</code></li>
+</ul>
+<p>Changes from API 2019-03-14:</p>
+<ul>
+<li>Renamed <code>Invoice.application_fee</code> to
+    <code>Invoice.application_fee_amount</code> (added deprecated property for the
+    old name)</li>
+<li>Removed <code>Invoice.date</code>, in place of <code>Invoice.created</code> (added
+    deprecated property for the old name)</li>
+<li>Added <code>Invoice.status_transitions</code></li>
+<li>Renamed <code>Customer.account_balance</code> to <code>Customer.balance</code> (added
+    deprecated property for the old name)</li>
+<li>Renamed <code>Customer.payment_methods</code> to
+    <code>Customer.customer_payment_methods</code></li>
+<li>Added new <code>SubscriptionStatus.incomplete</code> and
+    <code>SubscriptionStatus.incomplete_expired</code> statuses (#974)</li>
+<li>Added new <code>BalanceTransactionType</code> values (#983)</li>
+</ul>
+<h3 id="squashed-dev-migrations">Squashed dev migrations</h3>
+<p>As per our <a href="../../project/contributing/#django_migration_policy">migration policy</a>, unreleased migrations on the master
+branch have been squashed.</p>
+<p>If you have been using the 2.1.0dev branch from master, you'll need to
+run the squashed migrations migrations before upgrading to &gt;=2.1.0.</p>
+<p>The simplest way to do this is to <code>pip install dj-stripe==2.1.0rc0</code> and
+migrate, alternatively check out the <code>2.1.0rc0</code> git tag.</p>
+<h2 id="205-2019-09-12">2.0.5 (2019-09-12)</h2>
+<p>This is a bugfix-only version:</p>
+<ul>
+<li>Avoid stripe==2.36.0 due to regression (#991)</li>
+</ul>
+<h2 id="204-2019-09-09">2.0.4 (2019-09-09)</h2>
+<p>This is a bugfix-only version:</p>
+<ul>
+<li>Fixed irreversible migration (#909)</li>
+</ul>
+<h2 id="203-2019-06-11">2.0.3 (2019-06-11)</h2>
+<p>This is a bugfix-only version:</p>
+<ul>
+<li>In <code>_get_or_create_from_stripe_object</code>, wrap create <code>_create_from_stripe_object</code> in
+    transaction, fixes <code>TransactionManagementError</code> on race condition in webhook
+    processing (#877, #903).</li>
+</ul>
+<h2 id="202-2019-06-09">2.0.2 (2019-06-09)</h2>
+<p>This is a bugfix-only version:</p>
+<ul>
+<li>Don't save event objects if the webhook processing fails (#832).</li>
+<li>Fixed IntegrityError when <code>REMOTE_ADDR</code> is an empty string.</li>
+<li>Deprecated <code>field_name</code> parameter to <code>sync_from_stripe_data</code></li>
+</ul>
+<h2 id="201-2019-04-29">2.0.1 (2019-04-29)</h2>
+<p>This is a bugfix-only version:</p>
+<ul>
+<li>Fixed an error on <code>invoiceitem.updated</code> (#848).</li>
+<li>Handle test webhook properly in recent versions of Stripe API
+    (#779). At some point 2018 Stripe silently changed the ID used for
+    test events and <code>evt_00000000000000</code> is not used anymore.</li>
+<li>Fixed OperationalError seen in migration 0003 on postgres (#850).</li>
+<li>Fixed issue with migration 0003 not being unapplied correctly (#882).</li>
+<li>Fixed missing <code>SubscriptionItem.quantity</code> on metered Plans (#865).</li>
+<li>Fixed <code>Plan.create()</code> (#870).</li>
+</ul>
+<h2 id="200-2019-03-01">2.0.0 (2019-03-01)</h2>
+<ul>
+<li>The Python stripe library minimum version is now <code>2.3.0</code>.</li>
+<li><code>PaymentMethod</code> has been renamed to <code>DjstripePaymentMethod</code> (#841). An alias remains
+    but will be removed in the next version.</li>
+<li>Dropped support for Django&lt;2.0, Python&lt;3.4.</li>
+<li>Dropped previously-deprecated <code>stripe_objects</code> module.</li>
+<li>Dropped previously-deprecated <code>stripe_timestamp</code> field.</li>
+<li>Dropped previously-deprecated <code>Charge.receipt_number</code> field.</li>
+<li>Dropped previously-deprecated <code>StripeSource</code> alias for <code>Card</code></li>
+<li>Dropped previously-deprecated <code>SubscriptionView</code>, <code>CancelSubscriptionView</code> and
+    <code>CancelSubscriptionForm</code>.</li>
+<li>Removed the default value from <code>DJSTRIPE_SUBSCRIPTION_REDIRECT</code>.</li>
+<li>All <code>stripe_id</code> fields have been renamed <code>id</code>.</li>
+<li><code>Charge.source_type</code> has been deprecated. Use <code>Charge.source.type</code>.</li>
+<li><code>Charge.source_stripe_id</code> has been deprecated. Use <code>Charge.source.id</code>.</li>
+<li>All deprecated Transfer fields (Stripe API 2017-04-06 and older), have been dropped.
+    This includes <code>date</code>, <code>destination_type</code> (<code>type</code>), <code>failure_code</code>,
+    <code>failure_message</code>, <code>statement_descriptor</code> and <code>status</code>.</li>
+<li>Fixed IntegrityError when <code>REMOTE_ADDR</code> is missing (#640).</li>
+<li>New models:<ul>
+<li><code>ApplicationFee</code></li>
+<li><code>ApplicationFeeRefund</code></li>
+<li><code>BalanceTransaction</code></li>
+<li><code>CountrySpec</code></li>
+<li><code>ScheduledQuery</code></li>
+<li><code>SubscriptionItem</code></li>
+<li><code>TransferReversal</code></li>
+<li><code>UsageRecord</code></li>
+</ul>
+</li>
+<li>The <code>fee</code> and <code>fee_details</code> attributes of both the <code>Charge</code> and <code>Transfer</code> objects
+    are no longer stored in the database. Instead, they access their respective new
+    <code>balance_transaction</code> foreign key. Note that <code>fee_details</code> has been deprecated on
+    both models.</li>
+<li>The <code>fraudulent</code> attribute on <code>Charge</code> is now a property that checks the
+    <code>fraud_details</code> field.</li>
+<li>Object key validity is now always enforced (#503).</li>
+<li><code>Customer.sources</code> no longer refers to a Card queryset, but to a Source queryset. In
+    order to correctly transition, you should change all your references to
+    <code>customer.sources</code> to <code>customer.legacy_cards</code> instead. The <code>legacy_cards</code> attribute
+    already exists in 1.2.0.</li>
+<li><code>Customer.sources_v3</code> is now named <code>Customer.sources</code>.</li>
+<li>A new property <code>Customer.payment_methods</code> is now available, which allows you to
+    iterate over all of a customer's payment methods (sources then cards).</li>
+<li><code>Card.customer</code> is now nullable and cards are no longer deleted when their
+    corresponding customer is deleted (#654).</li>
+<li>Webhook signature verification is now available and is preferred. Set the
+    <code>DJSTRIPE_WEBHOOK_SECRET</code> setting to your secret to start using it.</li>
+<li><code>StripeObject</code> has been renamed <code>StripeModel</code>. An alias remains but will be removed
+    in the next version.</li>
+<li>The metadata key used in the <code>Customer</code> object can now be configured by changing the
+    <code>DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY</code> setting. Setting this to None or an empty string
+    now also disables the behaviour altogether.</li>
+<li>Text-type fields in dj-stripe will no longer ever be None. Instead, any falsy text
+    field will return an empty string.</li>
+<li>Switched test runner to pytest-django</li>
+<li><code>StripeModel.sync_from_stripe_data()</code> will now automatically retrieve related
+    objects and populate foreign keys (#681)</li>
+<li>Added <code>Coupon.name</code></li>
+<li>Added <code>Transfer.balance_transaction</code></li>
+<li>Exceptions in webhooks are now re-raised as well as saved in the database (#833)</li>
+</ul>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../1_x/" class="btn btn-neutral float-right" title="dj-stripe 1.x release notes">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../2_4_0/" class="btn btn-neutral" title="dj-stripe 2.4 release notes"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/dj-stripe/dj-stripe/" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../2_4_0/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../1_x/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+      <script src="../../js/version-select.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

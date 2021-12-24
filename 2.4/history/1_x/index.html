@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Dj-Stripe Team">
+  <link rel="canonical" href="https://dj-stripe.github.io/dj-stripe/2.4/history/1_x/">
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>dj-stripe 1.x release notes - Dj-Stripe</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+  <link href="../../css/version-select.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "dj-stripe 1.x release notes";
+    var mkdocs_page_input_path = "history/1_x.md";
+    var mkdocs_page_url = "/dj-stripe/2.4/history/1_x/";
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> Dj-Stripe</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/sponsors/">Sponsors</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Getting Started</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../api_keys/">Managing Stripe API Keys</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../api_versions/">A note on Stripe API Versions</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../stripe_elements_js/">Integrating Stripe Elements</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Release notes</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../2_4_x/">dj-stripe 2.4.1 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../2_4_0/">dj-stripe 2.4 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../2_x/">dj-stripe 2.0 ~ 2.3 release notes</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">dj-stripe 1.x release notes</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#124-2019-02-27">1.2.4 (2019-02-27)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#123-2018-10-13">1.2.3 (2018-10-13)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#122-2018-08-11">1.2.2 (2018-08-11)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#121-2018-07-18">1.2.1 (2018-07-18)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#120-2018-06-11">1.2.0 (2018-06-11)</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#110-2018-06-11">1.1.0 (2018-06-11)</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#migration-reset">Migration reset</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#python-27-end-of-life">Python 2.7 end-of-life</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#backwards-incompatible-changes-and-deprecations">Backwards-incompatible changes and deprecations</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#removal-of-polymorphic-models">Removal of polymorphic models</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#full-support-for-stripe-sources-support-for-v3-stripejs">Full support for Stripe Sources (Support for v3 stripe.js)</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#core-fields-renamed">Core fields renamed</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#100-2017-08-12">1.0.0 (2017-08-12)</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#a-few-things-to-get-excited-for">A few things to get excited for</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#what-still-needs-to-be-done-in-v110">What still needs to be done (in v1.1.0)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#significant-changes-mostly-backwards-incompatible">Significant changes (mostly backwards-incompatible)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#settings">SETTINGS</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#syncing">SYNCING</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#utilities">UTILITIES</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#mixins">MIXINS</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#middleware">MIDDLEWARE</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#signals">SIGNALS</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#webhook-events">WEBHOOK EVENTS</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#exceptions">EXCEPTIONS</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#models">MODELS</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#migrations">MIGRATIONS</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#big-huge-note-dont-overlook-this">BIG HUGE NOTE - DON'T OVERLOOK THIS</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#other-changes">Other changes</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../0_x/">dj-stripe 0.x release notes</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Usage</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/webhooks/">Using Stripe Webhooks</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/subscribing_customers/">Subscribing a customer to a plan</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/managing_subscriptions/">Managing subscriptions and payment sources</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/manually_syncing_with_stripe/">Manually syncing data with Stripe</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/creating_individual_charges/">Creating individual charges</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Project</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/contributing/">Contributing</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/test_fixtures/">Test Fixtures</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/authors/">Credits</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/support/">Support</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/release_process/">Release Process</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Reference</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/context_managers/">Context Managers</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/decorators/">Decorators</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/enums/">Enumerations</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/managers/">Managers</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/middleware/">Middleware</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/models/">Models</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/settings/">Settings</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/utils/">Utilities</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">Dj-Stripe</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Release notes &raquo;</li>
+        
+      
+    
+    <li>dj-stripe 1.x release notes</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/dj-stripe/dj-stripe/edit/master/docs/history/1_x.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="dj-stripe-1x-release-notes">dj-stripe 1.x release notes</h1>
+<h2 id="124-2019-02-27">1.2.4 (2019-02-27)</h2>
+<p>This is a bugfix-only version:</p>
+<ul>
+<li>Allow billing_cycle_anchor argument when creating a subscription
+    (#814)</li>
+<li>Fixup plan amount null with tier plans (#781)</li>
+<li>Update Cancel subscription view tests to match backport in f64af57</li>
+<li>Implement Invoice._manipulate_stripe_object_hook for
+    compatability with API 2018-11-08 (#771)</li>
+<li>Fix product webhook for type="good" (#724)</li>
+<li>Add trial_from_plan, trial_period_days args to
+    Customer.subscribe() (#709)</li>
+</ul>
+<h2 id="123-2018-10-13">1.2.3 (2018-10-13)</h2>
+<p>This is a bugfix-only version:</p>
+<ul>
+<li>Updated Subscription.cancel() for compatibility with Stripe
+    2018-08-23 (#723)</li>
+</ul>
+<h2 id="122-2018-08-11">1.2.2 (2018-08-11)</h2>
+<p>This is a bugfix-only version:</p>
+<ul>
+<li>Fixed an error with request.urlconf in some setups (#562)</li>
+<li>Always save text-type fields as empty strings in db instead of null
+    (#713)</li>
+<li>Fix support for DJSTRIPE_SUBSCRIBER_MODEL_MIGRATION_DEPENDENCY
+    (#707)</li>
+<li>Fix reactivate() with Stripe API 2018-02-28 and above</li>
+</ul>
+<h2 id="121-2018-07-18">1.2.1 (2018-07-18)</h2>
+<p>This is a bugfix-only version:</p>
+<ul>
+<li>Fixed various Python 2.7 compatibility issues</li>
+<li>Fixed issues with max_length of receipt_number</li>
+<li>Fixed various fields incorrectly marked as required</li>
+<li>Handle product webhook calls</li>
+<li>Fix compatibility with stripe-python 2.0.0</li>
+</ul>
+<h2 id="120-2018-06-11">1.2.0 (2018-06-11)</h2>
+<p>The dj-stripe 1.2.0 release resets all migrations.</p>
+<p><strong>Do not upgrade to 1.2.0 directly from 1.0.1 or below. You must upgrade
+to 1.1.0 first.</strong></p>
+<p>Please read the 1.1.0 release notes below for more information.</p>
+<h2 id="110-2018-06-11">1.1.0 (2018-06-11)</h2>
+<p>In dj-stripe 1.1.0, we made a <em>lot</em> of changes to models in order to
+bring the dj-stripe model state much closer to the upstream API objects.
+If you are a current user of dj-stripe, you will most likely have to
+make changes in order to upgrade. Please read the full changelog below.
+If you are having trouble upgrading, you may ask for help <a href="https://github.com/dj-stripe/dj-stripe/issues">by filing an
+issue on GitHub</a>.</p>
+<h3 id="migration-reset">Migration reset</h3>
+<p>The next version of dj-stripe, <strong>1.2.0</strong>, will reset all the migrations
+to <code>0001_initial</code>. Migrations are currently in an unmaintainable state.</p>
+<p><strong>What this means is you will not be able to upgrade directly to
+dj-stripe 1.2.0. You must go through 1.1.0 first, run ``manage.py
+migrate djstripe``, then upgrade to 1.2.0.</strong></p>
+<h3 id="python-27-end-of-life">Python 2.7 end-of-life</h3>
+<p>dj-stripe 1.1.0 drops support for Django 1.10 and adds support for
+Django 2.0. Django 1.11+ and Python 2.7+ or 3.4+ are required.</p>
+<p>Support for Python versions older than 3.5, and Django versions older
+than 2.0, will be dropped in dj-stripe 2.0.0.</p>
+<h3 id="backwards-incompatible-changes-and-deprecations">Backwards-incompatible changes and deprecations</h3>
+<h4 id="removal-of-polymorphic-models">Removal of polymorphic models</h4>
+<p>The model architecture of dj-stripe has been simplified. Polymorphic
+models have been dropped and the old base StripeCustomer, StripeCharge,
+StripeInvoice, etc models have all been merged into the top-level
+Customer, Charge, Invoice, etc models.</p>
+<p>Importing those legacy models from <code>djstripe.stripe_objects</code> will yield
+the new ones. This is deprecated and support for this will be dropped in
+dj-stripe 2.0.0.</p>
+<h4 id="full-support-for-stripe-sources-support-for-v3-stripejs">Full support for Stripe Sources (Support for v3 stripe.js)</h4>
+<p>Stripe sources (<code>src_XXXX</code>) are objects that can arbitrarily reference
+any of the payment method types that Stripe supports. However, the
+legacy <code>Card</code> object (with object IDs like <code>card_XXXX</code> or <code>cc_XXXX</code>) is
+not a Source object, and cannot be turned into a Source object at this
+time.</p>
+<p>In order to support both Card and Source objects in ForeignKeys, a new
+model <code>PaymentMethod</code> has been devised (renamed to
+<code>DjstripePaymentMethod</code> in 2.0). That model can resolve into a Card, a
+Source, or a BankAccount object.</p>
+<ul>
+<li><strong>The ``default_source`` attribute on ``Customer`` now
+    refers to a ``PaymentMethod`` object</strong>. You will need to call
+    <code>.resolve()</code> on it to get the Card or Source in question.</li>
+<li>References to <code>Customer.sources</code> expecting a queryset of Card
+    objects should be updated to <code>Customer.legacy_cards</code>.</li>
+<li>The legacy <code>StripeSource</code> name refers to the <code>Card</code> model. This will
+    be removed in dj-stripe 2.0.0. Update your references to either
+    <code>Card</code> or <code>Source</code>.</li>
+<li><code>enums.SourceType</code> has been renamed to <code>enums.LegacySourceType</code>.
+    <code>enums.SourceType</code> now refers to the actual Stripe Source types
+    enum.</li>
+</ul>
+<h4 id="core-fields-renamed">Core fields renamed</h4>
+<ul>
+<li>The numeric <code>id</code> field has been renamed to <code>djstripe_id</code>. This
+    avoids a clash with the upstream stripe id. Accessing <code>.id</code> is
+    deprecated and **will reference the upstream <code>stripe_id</code> in
+    dj-stripe 2.0.0</li>
+</ul>
+<h2 id="100-2017-08-12">1.0.0 (2017-08-12)</h2>
+<p>It's finally here! We've made significant changes to the codebase and
+are now compliant with stripe API version <strong>2017-06-05</strong>.</p>
+<p>I want to give a huge thanks to all of our contributors for their help
+in making this happen, especially Bill Huneke (@wahuneke) for his
+impressive design work and @jleclanche for really pushing this release
+along.</p>
+<p>I also want to welcome onboard two more maintainers, @jleclanche and
+@lskillen. They've stepped up and have graciously dedicated their
+resources to making dj-stripe such an amazing package.</p>
+<p>Almost all methods now mimic the parameters of those same methods in the
+stripe API. Note that some methods do not have some parameters
+implemented. This is intentional. That being said, expect all method
+signatures to be different than those in previous versions of dj-stripe.</p>
+<p>Finally, please note that there is still a bit of work ahead of us. Not
+everything in the Stripe API is currently supported by dj-stripe --
+we're working on it. That said, v1.0.0 has been thoroughly tested and is
+verified stable in production applications.</p>
+<h3 id="a-few-things-to-get-excited-for">A few things to get excited for</h3>
+<ul>
+<li>Multiple subscription support (finally)</li>
+<li>Multiple sources support (currently limited to Cards)</li>
+<li>Idempotency support (See #455, #460 for discussion -- big thanks
+    to @jleclanche)</li>
+<li>Full model documentation</li>
+<li>Objects that come through webhooks are now tied to the API version
+    set in dj-stripe. No more errors if dj-stripe falls behind the
+    newest stripe API version.</li>
+<li>Any create/update action on an object automatically syncs the
+    object.</li>
+<li>Concurrent LIVE and TEST mode support (Thanks to @jleclanche). Note
+    that you'll run into issues if <code>livemode</code> isn't set on your existing
+    customer objects.</li>
+<li>All choices are now enum-based (Thanks @jleclanche, See #520).
+    Access them from the new <code>djstripe.enums</code> module. The ability to
+    check against model property based choices will be deprecated in 1.1</li>
+<li>Support for the Coupon model, and coupons on Customer objects.</li>
+<li>Support for the <a href="https://stripe.com/docs/transfer-payout-split">Payout/Transfer
+    split</a> from api
+    version <code>2017-04-06</code>.</li>
+</ul>
+<h3 id="what-still-needs-to-be-done-in-v110">What still needs to be done (in v1.1.0)</h3>
+<ul>
+<li>
+<p><strong>Documentation</strong>. Our original documentation was not very helpful,
+    but it covered the important bits. It will be very out of date after
+    this update and will need to be rewritten. If you feel like helping,
+    we could use all the help we can get to get this pushed out asap.</p>
+</li>
+<li>
+<p><strong>Master sync re-write</strong>. This sounds scary, but really isn't. The
+    current management methods run sync methods on Customer that aren't
+    very helpful and are due for removal. My plan is to write something
+    that first updates local data (via <code>api_retrieve</code> and
+    <code>sync_from_stripe_data</code>) and then pulls all objects from Stripe and
+    populates the local database with any records that don't already
+    exist there.</p>
+<p>You might be wondering, "Why are they releasing this if there are
+only a few things left?" Well, that thinking turned this into a two
+year release... Trust me, this is a good thing.</p>
+</li>
+</ul>
+<h3 id="significant-changes-mostly-backwards-incompatible">Significant changes (mostly backwards-incompatible)</h3>
+<ul>
+<li><strong>Idempotency</strong>. #460 introduces idempotency keys and implements
+    idempotency for <code>Customer.get_or_create()</code>. Idempotency will be
+    enabled for all calls that need it.</li>
+<li><strong>Improved Admin Interface</strong>. This is almost complete. See #451 and
+    #452.</li>
+<li><strong>Drop non-trivial endpoint views</strong>. We're dropping everything
+    except the webhook endpoint and the subscription cancel endpoint.
+    See #428.</li>
+<li><strong>Drop support for sending receipts</strong>. Stripe now handles this for
+    you. See #478.</li>
+<li><strong>Drop support for plans as settings</strong>, including custom plan
+    hierarchy (if you want this, write something custom) and the dynamic
+    trial callback. We've decided to gut having plans as settings.
+    Stripe should be your source of truth; create your plans there and
+    sync them down manually. If you need to create plans locally for
+    testing, etc., simply use the ORM to create Plan models. The sync
+    rewrite will make this drop less annoying.</li>
+<li><strong>Orphan Customer Sync</strong>. We will now sync Customer objects from
+    Stripe even if they aren't linked to local subscriber objects. You
+    can link up subscribers to those Customers manually.</li>
+<li><strong>Concurrent Live and Test Mode</strong>. dj-stripe now supports test-mode
+    and live-mode Customer objects concurrently. As a result, the
+    User.customer One-to-One reverse-relationship is now the
+    User.djstripe_customers RelatedManager. (Thanks @jleclanche) #440.
+    You'll run into some dj-stripe check issues if you don't update your
+    KEY settings accordingly. Check our GitHub issue tracker for help on
+    this.</li>
+</ul>
+<h3 id="settings">SETTINGS</h3>
+<ul>
+<li>The <code>PLAN_CHOICES</code>, <code>PLAN_LIST</code>, and <code>PAYMENT_PLANS</code> objects are
+    removed. Use Plan.objects.all() instead.</li>
+<li>The <code>plan_from_stripe_id</code> function is removed. Use
+    Plan.objects.get(stripe_id=)</li>
+</ul>
+<h3 id="syncing">SYNCING</h3>
+<ul>
+<li>sync_plans no longer takes an api_key</li>
+<li>sync methods no longer take a <code>cu</code> parameter</li>
+<li>All sync methods are now private. We're in the process of building a
+    better syncing mechanism.</li>
+</ul>
+<h3 id="utilities">UTILITIES</h3>
+<ul>
+<li>dj-stripe decorators now take a plan argument. If you're passing in
+    a custom test function to <code>subscriber_passes_pay_test</code>, be sure to
+    account for this new argument.</li>
+</ul>
+<h3 id="mixins">MIXINS</h3>
+<ul>
+<li>The context provided by dj-stripe's mixins has changed.
+    <code>PaymentsContextMixin</code> now provides <code>STRIPE_PUBLIC_KEY</code> and <code>plans</code>
+    (changed to <code>Plan.objects.all()</code>). <code>SubscriptionMixin</code> now provides
+    <code>customer</code> and <code>is_plans_plural</code>.</li>
+<li>We've removed the SubscriptionPaymentRequiredMixin. Use
+    <code>@method_decorator("dispatch",</code><a href="https://github.com/kavdev/dj-stripe/blob/1.0.0/djstripe/decorators.py#L39">subscription_payment_required</a><code>)</code>
+    instead.</li>
+</ul>
+<h3 id="middleware">MIDDLEWARE</h3>
+<ul>
+<li>dj-stripe middleware doesn't support multiple subscriptions.</li>
+</ul>
+<h3 id="signals">SIGNALS</h3>
+<ul>
+<li>Local custom signals are deprecated in favor of Stripe webhooks:</li>
+<li><code>cancelled</code> -&gt;
+    WEBHOOK_SIGNALS["customer.subscription.deleted"]</li>
+<li><code>card_changed</code> -&gt; WEBHOOK_SIGNALS["customer.source.updated"]</li>
+<li><code>subscription_made</code> -&gt;
+    WEBHOOK_SIGNALS["customer.subscription.created"]</li>
+</ul>
+<h3 id="webhook-events">WEBHOOK EVENTS</h3>
+<ul>
+<li>The Event Handlers designed by @wahuneke are the new way to handle
+    events that come through webhooks. Definitely take a look at
+    <code>event_handlers.py</code> and <code>webhooks.py</code>.</li>
+</ul>
+<h3 id="exceptions">EXCEPTIONS</h3>
+<ul>
+<li><code>SubscriptionUpdateFailure</code> and <code>SubscriptionCancellationFailure</code>
+    exceptions are removed. There should no longer be a case where they
+    would have been useful. Catch native stripe errors in their place
+    instead.</li>
+</ul>
+<h3 id="models">MODELS</h3>
+<blockquote>
+<p><strong>CHARGE</strong></p>
+</blockquote>
+<ul>
+<li>
+<p><code>Charge.charge_created</code> -&gt; <code>Charge.stripe_timestamp</code></p>
+</li>
+<li>
+<p><code>Charge.card_last_4</code> and <code>Charge.card_kind</code> are removed. Use
+    <code>Charge.source.last4</code> and <code>Charge.source.brand</code> (if the source is a
+    Card)</p>
+</li>
+<li>
+<p><code>Charge.invoice</code> is no longer a foreign key to the Invoice model.
+    <code>Invoice</code> now has a OneToOne relationship with <code>Charge</code>.
+    (<code>Charge.invoice</code> will still work, but will no longer be represented
+    in the database).</p>
+<p><strong>CUSTOMER</strong></p>
+</li>
+<li>
+<p>dj-stripe now supports test mode and live mode Customer objects
+    concurrently (See #440). As a result, the
+    <code>&lt;subscriber_model&gt;.customer</code> OneToOne reverse relationship is no
+    longer a thing. You should now instead add a <code>customer</code> property to
+    your subscriber model that checks whether you're in live or test
+    mode (see djstripe.settings.STRIPE_LIVE_MODE as an example) and
+    grabs the customer from <code>&lt;subscriber_model&gt;.djstripe_customers</code> with
+    a simple <code>livemode=</code> filter.</p>
+</li>
+<li>
+<p>Customer no longer has a <code>current_subscription</code> property. We've
+    added a <code>subscription</code> property that should suit your needs.</p>
+</li>
+<li>
+<p>With the advent of multiple subscriptions, the behavior of
+    <code>Customer.subscribe()</code> has changed. Before, <code>calling subscribe()</code>
+    when a customer was already subscribed to a plan would switch the
+    customer to the new plan with an option to prorate. Now calling
+    <code>subscribe()</code> simply subscribes that customer to a new plan in
+    addition to it's current subsription. Use <code>Subscription.update()</code> to
+    change a subscription's plan instead.</p>
+</li>
+<li>
+<p><code>Customer.cancel_subscription()</code> is removed. Use
+    <code>Subscription.cancel()</code> instead.</p>
+</li>
+<li>
+<p>The <code>Customer.update_plan_quantity()</code> method is removed. Use
+    <code>Subscription.update()</code> instead.</p>
+</li>
+<li>
+<p><code>CustomerManager</code> is now <code>SubscriptionManager</code> and works on the
+    <code>Subscription</code> model instead of the <code>Customer</code> model.</p>
+</li>
+<li>
+<p><code>Customer.has_valid_card()</code> is now <code>Customer.has_valid_source()</code>.</p>
+</li>
+<li>
+<p><code>Customer.update_card()</code> now takes an id. If the id is not supplied,
+    the default source is updated.</p>
+</li>
+<li>
+<p><code>Customer.stripe_customer</code> property is removed. Use
+    <code>Customer.api_retrieve()</code> instead.</p>
+</li>
+<li>
+<p>The <code>at_period_end</code> parameter of <code>Customer.cancel_subscription()</code>
+    now actually follows the
+    <a href="../../reference/settings/#djstripe_proration_policy-false">DJSTRIPE_PRORATION_POLICY</a>
+    setting.</p>
+</li>
+<li>
+<p><code>Customer.card_fingerprint</code>, <code>Customer.card_last_4</code>,
+    <code>Customer.card_kind</code>, <code>Customer.card_exp_month</code>,
+    <code>Customer.card_exp_year</code> are all removed. Check
+    <code>Customer.default_source</code> (if it's a Card) or one of the sources in
+    <code>Customer.sources</code> (again, if it's a Card) instead.</p>
+</li>
+<li>
+<p>The <code>invoice_id</code> parameter of <code>Customer.add_invoice_item</code> is now
+    named <code>invoice</code> and can be either an Invoice object or the
+    stripe_id of an Invoice.</p>
+<p><strong>EVENT</strong></p>
+</li>
+<li>
+<p><code>Event.kind</code> -&gt; <code>Event.type</code></p>
+</li>
+<li>
+<p>Removed <code>Event.validated_message</code>. Just check if the event is valid</p>
+<ul>
+<li>no need to double check (we do that for you)</li>
+</ul>
+<p><strong>TRANSFER</strong></p>
+</li>
+<li>
+<p>Removed <code>Transfer.update_status()</code></p>
+</li>
+<li>
+<p>Removed <code>Transfer.event</code></p>
+</li>
+<li>
+<p><code>TransferChargeFee</code> is removed. It hasn't been used in a while due
+    to a broken API version. Use <code>Transfer.fee_details</code> instead.</p>
+</li>
+<li>
+<p>Any fields that were in <code>Transfer.summary</code> no longer exist and are
+    therefore deprecated (unused but not removed from the database).
+    Because of this, <code>TransferManager</code> now only aggregates <code>total_sum</code></p>
+<p><strong>INVOICE</strong></p>
+</li>
+<li>
+<p><code>Invoice.attempts</code> -&gt; <code>Invoice.attempt_count</code></p>
+</li>
+<li>
+<p>InvoiceItems are no longer created when Invoices are synced. You
+    must now sync InvoiceItems directly.</p>
+<p><strong>INVOICEITEM</strong></p>
+</li>
+<li>
+<p>Removed <code>InvoiceItem.line_type</code></p>
+<p><strong>PLAN</strong></p>
+</li>
+<li>
+<p>Plan no longer has a <code>stripe_plan</code> property. Use <code>api_retrieve()</code>
+    instead.</p>
+</li>
+<li>
+<p><code>Plan.currency</code> no longer uses choices. Use the
+    <code>get_supported_currency_choices()</code> utility and create your own
+    custom choices list instead.</p>
+</li>
+<li>
+<p>Plan interval choices are now in <code>Plan.INTERVAL_TYPE_CHOICES</code></p>
+<p><strong>SUBSCRIPTION</strong></p>
+</li>
+<li>
+<p><code>Subscription.is_period_current()</code> now checks for a current trial
+    end if the current period has ended. This change means subscriptions
+    extended with <code>Subscription.extend()</code> will now be seen as valid.</p>
+</li>
+</ul>
+<h3 id="migrations">MIGRATIONS</h3>
+<p>We'll sync your current records with Stripe in a migration. It will take
+a while, but it's the only way we can ensure data integrity. There were
+some fields for which we needed to temporarily add placeholder defaults,
+so just make sure you have a customer with ID 1 and a plan with ID 1 and
+you shouldn't run into any issues (create dummy values for these if need
+be and delete them after the migration).</p>
+<h3 id="big-huge-note-dont-overlook-this">BIG HUGE NOTE - DON'T OVERLOOK THIS</h3>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Subscription and InvoiceItem migration is not possible because old
+records don't have Stripe IDs (so we can't sync them). Our approach is
+to delete all local subscription and invoiceitem objects and re-sync
+them from Stripe.</p>
+<p>We 100% recommend you create a backup of your database before performing
+this upgrade.</p>
+</div>
+<h3 id="other-changes">Other changes</h3>
+<ul>
+<li>Postgres users now have access to the
+    <code>DJSTRIPE_USE_NATIVE_JSONFIELD</code> setting. (Thanks @jleclanche) #517,
+    #523</li>
+<li>Charge receipts now take <code>DJSTRIPE_SEND_INVOICE_RECEIPT_EMAILS</code> into
+    account (Thanks @r0fls)</li>
+<li>Clarified/modified installation documentation (Thanks @pydanny)</li>
+<li>Corrected and revised ANONYMOUS_USER_ERROR_MSG (Thanks @pydanny)</li>
+<li>Added fnmatching to <code>SubscriptionPaymentMiddleware</code>
+    (Thanks @pydanny)</li>
+<li><code>SubscriptionPaymentMiddleware.process_request()</code> functionality
+    broken up into multiple methods, making local customizations easier
+    (Thanks @pydanny)</li>
+<li>Fully qualified events are now supported by event handlers as
+    strings e.g. 'customer.subscription.deleted' (Thanks @lskillen)
+    #316</li>
+<li>runtests now accepts positional arguments for declaring which tests
+    to run (Thanks @lskillen) #317</li>
+<li>It is now possible to reprocess events in both code and the admin
+    interface (Thanks @lskillen) #318</li>
+<li>The confirm page now checks that a valid card exists.
+    (Thanks @scream4ik) #325</li>
+<li>Added support for viewing upcoming invoices (Thanks @lskillen) #320</li>
+<li>Event handler improvements and bugfixes (Thanks @lskillen) #321</li>
+<li>API list() method bugfixes (Thanks @lskillen) #322</li>
+<li>Added support for a custom webhook event handler (Thanks @lskillen)
+    #323</li>
+<li>Django REST Framework contrib package improvements
+    (Thanks @aleccool213) #334</li>
+<li>Added <code>tax_percent</code> to CreateSubscriptionSerializer
+    (Thanks @aleccool213) #349</li>
+<li>Fixed incorrectly assigned <code>application_fee</code> in Charge calls
+    (Thanks @kronok) #382</li>
+<li>Fixed bug caused by API change (Thanks @jessamynsmith) #353</li>
+<li>Added inline documentation to pretty much everything and enforced
+    docsytle via flake8 (Thanks @aleccool213)</li>
+<li>Fixed outdated method call in template (Thanks @kandoio) #391</li>
+<li>Customer is correctly purged when subscriber is deleted, regardless
+    of how the deletion happened (Thanks @lskillen) #396</li>
+<li>Test webhooks are now properly captured and logged. No more bounced
+    requests to Stripe! (Thanks @jameshiew) #408</li>
+<li>CancelSubscriptionView redirect is now more flexible
+    (Thanks @jleclanche) #418</li>
+<li>Customer.sync_cards() (Thanks @jleclanche) #438</li>
+<li>Many stability fixes, bugfixes, and code cleanup
+    (Thanks @jleclanche)</li>
+<li>Support syncing canceled subscriptions (Thanks @jleclanche) #443</li>
+<li>Improved admin interface (Thanks @jleclanche with @jameshiew) #451</li>
+<li>Support concurrent TEST + LIVE API keys (Fix webhook event
+    processing for both modes) (Thanks @jleclanche) #461</li>
+<li>Added Stripe Dashboard link to admin change panel
+    (Thanks @jleclanche) #465</li>
+<li>Implemented <code>Plan.amount_in_cents</code> (Thanks @jleclanche) #466</li>
+<li>Implemented <code>Subscription.reactivate()</code> (Thanks @jleclanche) #470</li>
+<li>Added <code>Plan.human_readable_price</code> (Thanks @jleclanche) #498</li>
+<li>(Re)attach the Subscriber when we find it's id attached to a
+    customer on Customer sync (Thanks @jleclanche) #500</li>
+<li>Made API version configurable (with dj-stripe recommended default)
+    (Thanks @lskillen) #504</li>
+</ul>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../0_x/" class="btn btn-neutral float-right" title="dj-stripe 0.x release notes">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../2_x/" class="btn btn-neutral" title="dj-stripe 2.0 ~ 2.3 release notes"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/dj-stripe/dj-stripe/" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../2_x/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../0_x/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+      <script src="../../js/version-select.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

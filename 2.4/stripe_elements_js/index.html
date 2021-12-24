@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Dj-Stripe Team">
+  <link rel="canonical" href="https://dj-stripe.github.io/dj-stripe/2.4/stripe_elements_js/">
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Integrating Stripe Elements - Dj-Stripe</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  <link href="../assets/_mkdocstrings.css" rel="stylesheet" />
+  <link href="../css/version-select.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Integrating Stripe Elements";
+    var mkdocs_page_input_path = "stripe_elements_js.md";
+    var mkdocs_page_url = "/dj-stripe/2.4/stripe_elements_js/";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> Dj-Stripe</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../project/sponsors/">Sponsors</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Getting Started</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../api_keys/">Managing Stripe API Keys</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../api_versions/">A note on Stripe API Versions</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Integrating Stripe Elements</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#in-descending-order-of-preference-these-are">In descending order of preference these are:</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#payment-intents-sca-compliant">Payment Intents (SCA compliant)</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#charges-using-stripecreatesource">Charges using stripe.createSource()</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#charges-using-stripecreatetoken">Charges using stripe.createToken()</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Release notes</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../history/2_4_x/">dj-stripe 2.4.1 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../history/2_4_0/">dj-stripe 2.4 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../history/2_x/">dj-stripe 2.0 ~ 2.3 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../history/1_x/">dj-stripe 1.x release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../history/0_x/">dj-stripe 0.x release notes</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Usage</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../usage/webhooks/">Using Stripe Webhooks</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../usage/subscribing_customers/">Subscribing a customer to a plan</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../usage/managing_subscriptions/">Managing subscriptions and payment sources</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../usage/manually_syncing_with_stripe/">Manually syncing data with Stripe</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../usage/creating_individual_charges/">Creating individual charges</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Project</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../project/contributing/">Contributing</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../project/test_fixtures/">Test Fixtures</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../project/authors/">Credits</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../project/support/">Support</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../project/release_process/">Release Process</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Reference</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/context_managers/">Context Managers</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/decorators/">Decorators</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/enums/">Enumerations</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/managers/">Managers</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/middleware/">Middleware</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/models/">Models</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/settings/">Settings</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../reference/utils/">Utilities</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">Dj-Stripe</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Getting Started &raquo;</li>
+        
+      
+    
+    <li>Integrating Stripe Elements</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/dj-stripe/dj-stripe/edit/master/docs/stripe_elements_js.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="integrating-stripe-elements-js-sdk">Integrating Stripe Elements (JS SDK)</h1>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>TLDR: If you haven't yet migrated to PaymentIntents, prefer
+<code>stripe.createSource()</code> over <code>stripe.createToken()</code> for better
+compatibility with PaymentMethods.</p>
+</div>
+<div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>A point that can cause confusion when integrating Stripe on the web is
+that there are multiple generations of frontend JS APIs that use Stripe
+Elements with stripe js v3.</p>
+</div>
+<h2 id="in-descending-order-of-preference-these-are">In descending order of preference these are:</h2>
+<h3 id="payment-intents-sca-compliant"><a href="https://stripe.com/docs/payments/payment-intents">Payment Intents</a> (SCA compliant)</h3>
+<p>The newest and preferred way of handling payments, which supports SCA
+compliance (3D secure etc).</p>
+<h3 id="charges-using-stripecreatesource"><a href="https://stripe.com/docs/js/tokens_sources/create_source">Charges using stripe.createSource()</a></h3>
+<p>This creates Source objects within Stripe, and can be used for various different methods of payment (including, but not limited to cards), but isn't SCA compliant.</p>
+<p>The <a href="https://stripe.com/docs/payments/accept-a-payment-charges?platform=web">Card Elements Quickstart JS</a> example can be used, except use <code>stripe.createSource</code> instead of <code>stripe.createToken</code> and the <code>result.source</code> instead of <code>result.token</code>. [<code>Checkout a working example of this</code>][tests.apps.example.views.PurchaseSubscriptionView]</p>
+<h3 id="charges-using-stripecreatetoken">Charges using stripe.createToken()</h3>
+<p>This predates <code>stripe.createSource</code>, and creates legacy Card objects within Stripe, which have some compatibility issues with Payment Methods.</p>
+<p>If you're using <code>stripe.createToken</code>, see if you can upgrade to
+<code>stripe.createSource</code> or ideally to Payment Intents .</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+</div>
+<p>Checkout <a href="https://stripe.com/docs/payments/accept-a-payment-charges?platform=web">Card Elements Quickstart JS</a></p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../history/2_4_x/" class="btn btn-neutral float-right" title="dj-stripe 2.4.1 release notes">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../api_versions/" class="btn btn-neutral" title="A note on Stripe API Versions"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/dj-stripe/dj-stripe/" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../api_versions/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../history/2_4_x/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+      <script src="../js/version-select.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

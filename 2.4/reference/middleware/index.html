@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="author" content="Dj-Stripe Team">
+  <link rel="canonical" href="https://dj-stripe.github.io/dj-stripe/2.4/reference/middleware/">
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Middleware - Dj-Stripe</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+  <link href="../../css/version-select.css" rel="stylesheet" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Middleware";
+    var mkdocs_page_input_path = "reference/middleware.md";
+    var mkdocs_page_url = "/dj-stripe/2.4/reference/middleware/";
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> Dj-Stripe</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/sponsors/">Sponsors</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Getting Started</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../api_keys/">Managing Stripe API Keys</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../api_versions/">A note on Stripe API Versions</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../stripe_elements_js/">Integrating Stripe Elements</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Release notes</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_4_x/">dj-stripe 2.4.1 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_4_0/">dj-stripe 2.4 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_x/">dj-stripe 2.0 ~ 2.3 release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/1_x/">dj-stripe 1.x release notes</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/0_x/">dj-stripe 0.x release notes</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Usage</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/webhooks/">Using Stripe Webhooks</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/subscribing_customers/">Subscribing a customer to a plan</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/managing_subscriptions/">Managing subscriptions and payment sources</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/manually_syncing_with_stripe/">Manually syncing data with Stripe</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../usage/creating_individual_charges/">Creating individual charges</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Project</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/contributing/">Contributing</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/test_fixtures/">Test Fixtures</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/authors/">Credits</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/support/">Support</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../project/release_process/">Release Process</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Reference</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../context_managers/">Context Managers</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../decorators/">Decorators</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../enums/">Enumerations</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../managers/">Managers</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Middleware</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#subscriptionpaymentmiddleware">SubscriptionPaymentMiddleware</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#djstripe.middleware.SubscriptionPaymentMiddleware">djstripe.middleware.SubscriptionPaymentMiddleware</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#djstripe.middleware.SubscriptionPaymentMiddleware-methods">Methods</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.middleware.SubscriptionPaymentMiddleware.check_subscription">check_subscription()</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.middleware.SubscriptionPaymentMiddleware.is_matching_rule">is_matching_rule()</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.middleware.SubscriptionPaymentMiddleware.process_request">process_request()</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../models/">Models</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../settings/">Settings</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../utils/">Utilities</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">Dj-Stripe</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Reference &raquo;</li>
+        
+      
+    
+    <li>Middleware</li>
+    <li class="wy-breadcrumbs-aside">
+      
+        <a href="https://github.com/dj-stripe/dj-stripe/edit/master/docs/reference/middleware.md"
+          class="icon icon-github"> Edit on GitHub</a>
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="middleware">Middleware</h1>
+<h2 id="subscriptionpaymentmiddleware">SubscriptionPaymentMiddleware</h2>
+
+
+  <div class="doc doc-object doc-class">
+
+<a id="djstripe.middleware.SubscriptionPaymentMiddleware"></a>
+    <div class="doc doc-contents first">
+
+      <p>Used to redirect users from subcription-locked request destinations.</p>
+<p>Rules:</p>
+<ul>
+<li>"(app_name)" means everything from this app is exempt</li>
+<li>"[namespace]" means everything with this name is exempt</li>
+<li>"namespace:name" means this namespaced URL is exempt</li>
+<li>"name" means this URL is exempt</li>
+<li>The entire djstripe namespace is exempt</li>
+<li>If settings.DEBUG is True, then django-debug-toolbar is exempt</li>
+<li>A 'fn:' prefix means the rest of the URL is fnmatch'd.</li>
+</ul>
+
+<p><strong>Examples:</strong></p>
+    
+      <div class="highlight"><pre><span></span><code><span class="n">DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">&quot;[blogs]&quot;</span><span class="p">,</span>  <span class="c1"># Anything in the blogs namespace</span>
+    <span class="s2">&quot;products:detail&quot;</span><span class="p">,</span>  <span class="c1"># A ProductDetail view you want shown to non-payers</span>
+    <span class="s2">&quot;home&quot;</span><span class="p">,</span>  <span class="c1"># Site homepage</span>
+    <span class="s2">&quot;fn:/accounts*&quot;</span><span class="p">,</span>  <span class="c1"># anything in the accounts/ URL path</span>
+<span class="p">)</span>
+</code></pre></div>
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+<h2 id="djstripe.middleware.SubscriptionPaymentMiddleware-methods">Methods</h2>
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="djstripe.middleware.SubscriptionPaymentMiddleware.check_subscription" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">middleware</span><span class="o">.</span><span class="n">SubscriptionPaymentMiddleware</span><span class="o">.</span><span class="n">check_subscription</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Redirect to the subscribe page if the user lacks an active subscription.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/middleware.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">check_subscription</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Redirect to the subscribe page if the user lacks an active subscription.&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">.settings</span> <span class="kn">import</span> <span class="n">SUBSCRIPTION_REDIRECT</span><span class="p">,</span> <span class="n">subscriber_request_callback</span>
+
+    <span class="n">subscriber</span> <span class="o">=</span> <span class="n">subscriber_request_callback</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">subscriber_has_active_subscription</span><span class="p">(</span><span class="n">subscriber</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">SUBSCRIPTION_REDIRECT</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span><span class="s2">&quot;DJSTRIPE_SUBSCRIPTION_REDIRECT is not set.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">SUBSCRIPTION_REDIRECT</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="djstripe.middleware.SubscriptionPaymentMiddleware.is_matching_rule" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">middleware</span><span class="o">.</span><span class="n">SubscriptionPaymentMiddleware</span><span class="o">.</span><span class="n">is_matching_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Check according to the rules defined in the class docstring.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/middleware.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">is_matching_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check according to the rules defined in the class docstring.&quot;&quot;&quot;</span>
+    <span class="c1"># First, if in DEBUG mode and with django-debug-toolbar, we skip</span>
+    <span class="c1">#   this entire process.</span>
+    <span class="kn">from</span> <span class="nn">.settings</span> <span class="kn">import</span> <span class="n">SUBSCRIPTION_REQUIRED_EXCEPTION_URLS</span>
+
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">DEBUG</span> <span class="ow">and</span> <span class="n">request</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;/__debug__&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="n">exempt_urls</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">SUBSCRIPTION_REQUIRED_EXCEPTION_URLS</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;[djstripe]&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Second we check against matches</span>
+    <span class="n">match</span> <span class="o">=</span> <span class="n">resolve</span><span class="p">(</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">&quot;urlconf&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">ROOT_URLCONF</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="s2">&quot;(</span><span class="si">{0}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">app_name</span><span class="p">)</span> <span class="ow">in</span> <span class="n">exempt_urls</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="s2">&quot;[</span><span class="si">{0}</span><span class="s2">]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">namespace</span><span class="p">)</span> <span class="ow">in</span> <span class="n">exempt_urls</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">:</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">namespace</span><span class="p">,</span> <span class="n">match</span><span class="o">.</span><span class="n">url_name</span><span class="p">)</span> <span class="ow">in</span> <span class="n">exempt_urls</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">match</span><span class="o">.</span><span class="n">url_name</span> <span class="ow">in</span> <span class="n">exempt_urls</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># Third, we check wildcards:</span>
+    <span class="k">for</span> <span class="n">exempt</span> <span class="ow">in</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">exempt_urls</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;fn:&quot;</span><span class="p">)]:</span>
+        <span class="n">exempt</span> <span class="o">=</span> <span class="n">exempt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;fn:&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">exempt</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="kc">False</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="djstripe.middleware.SubscriptionPaymentMiddleware.process_request" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">middleware</span><span class="o">.</span><span class="n">SubscriptionPaymentMiddleware</span><span class="o">.</span><span class="n">process_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Check the subscriber's subscription status.</p>
+<p>Returns early if request does not outlined in this middleware's docstring.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/middleware.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">process_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check the subscriber&#39;s subscription status.</span>
+
+<span class="sd">    Returns early if request does not outlined in this middleware&#39;s docstring.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_matching_rule</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+        <span class="k">return</span>
+
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_subscription</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../models/" class="btn btn-neutral float-right" title="Models">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../managers/" class="btn btn-neutral" title="Managers"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/dj-stripe/dj-stripe/" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../managers/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../models/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+      <script src="../../js/version-select.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
