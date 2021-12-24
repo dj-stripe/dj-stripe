@@ -1156,6 +1156,7 @@ class Migration(migrations.Migration):
             field=djstripe.fields.StripeForeignKey(
                 help_text="The account (if any) the charge was made on behalf of without triggering an automatic transfer.",
                 null=True,
+                blank=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="charges",
                 to="djstripe.account",
