@@ -2188,6 +2188,7 @@ class Migration(migrations.Migration):
             field=djstripe.fields.StripeForeignKey(
                 help_text="Details about the dispute if the charge has been disputed.",
                 null=True,
+                blank=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="charges",
                 to="djstripe.dispute",

@@ -176,6 +176,7 @@ class Charge(StripeModel):
         "Dispute",
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
         related_name="charges",
         help_text="Details about the dispute if the charge has been disputed.",
     )
