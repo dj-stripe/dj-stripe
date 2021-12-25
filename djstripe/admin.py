@@ -570,7 +570,12 @@ class UsageRecordSummaryAdmin(StripeModelAdmin):
     list_display = ("invoice", "subscription_item", "total_usage")
 
 
-class WebhookEndpointAdminForm(forms.ModelForm):
+class WebhookEndpointAdminCreateForm(forms.ModelForm):
+    livemode = forms.BooleanField(
+        label="Live mode",
+        required=False,
+        help_text="Whether to create this endpoint in live mode or test mode",
+    )
     base_url = forms.URLField(
         required=False,
         help_text=(
@@ -582,35 +587,77 @@ class WebhookEndpointAdminForm(forms.ModelForm):
 
     class Meta:
         model = models.WebhookEndpoint
-        exclude = ("application",)
+        fields = (
+            "livemode",
+            "djstripe_owner_account",
+            "description",
+            "base_url",
+            "api_version",
+            "metadata",
+        )
+
+
+class WebhookEndpointAdminEditForm(forms.ModelForm):
+    class Meta:
+        model = models.WebhookEndpoint
+        fields = (
+            "description",
+            "url",
+            "enabled_events",
+            "status",
+            "metadata",
+        )
+        advanced_fields = ("metadata",)
 
 
 @admin.register(models.WebhookEndpoint)
-class WebhookEndpointAdmin(StripeModelAdmin):
-    readonly_fields = ("api_version", "enabled_events", "url")
-    form = WebhookEndpointAdminForm
+class WebhookEndpointAdmin(admin.ModelAdmin):
+    change_form_template = "djstripe/admin/change_form.html"
+
+    def get_form(self, request, obj=None, **kwargs):
+        if obj:
+            return WebhookEndpointAdminEditForm
+        return WebhookEndpointAdminCreateForm
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return (
+                "id",
+                "livemode",
+                "api_version",
+                "created",
+                "djstripe_owner_account",
+                "djstripe_uuid",
+            )
+        return super().get_readonly_fields(request, obj=obj)
 
     def get_fieldsets(self, request, obj=None):
-        common_fields = ("livemode", "id", "djstripe_owner_account", "created")
-        advanced_fields = (
-            "base_url",
-            "api_version",
-            "enabled_events",
-            "djstripe_uuid",
-            "metadata",
-        )
-        # Have to remove the fields from the other sets,
-        # otherwise they'll show up twice.
-        fields = [
-            f
-            for f in self.get_fields(request, obj)
-            if f not in common_fields and f not in advanced_fields
+        if obj:
+            header_fields = [
+                "id",
+                "livemode",
+                "djstripe_owner_account",
+                "djstripe_uuid",
+                "api_version",
+            ]
+            core_fields = ["description", "url", "status"]
+            advanced_fields = ["enabled_events", "metadata"]
+        else:
+            header_fields = ["djstripe_owner_account", "livemode"]
+            core_fields = ["description", "base_url"]
+            advanced_fields = ["metadata", "api_version"]
+
+        return [
+            (None, {"fields": header_fields}),
+            (self.model.__name__, {"fields": core_fields}),
+            (
+                "Advanced options",
+                {
+                    "fields": advanced_fields,
+                    "classes": ["collapse"],
+                },
+            ),
         ]
-        return (
-            (None, {"fields": common_fields}),
-            (self.model.__name__, {"fields": fields}),
-            ("Advanced options", {"fields": advanced_fields, "classes": ("collapse",)}),
-        )
 
     def save_model(self, request, obj, form, change):
         from urllib.parse import urljoin
