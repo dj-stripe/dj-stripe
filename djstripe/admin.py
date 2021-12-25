@@ -6,6 +6,7 @@ import json
 from django import forms
 from django.contrib import admin
 from django.contrib.admin.utils import display_for_field, display_for_value
+from django.urls import reverse
 from jsonfield import JSONField
 
 from . import models
@@ -598,21 +599,39 @@ class WebhookEndpointAdminCreateForm(forms.ModelForm):
 
 
 class WebhookEndpointAdminEditForm(forms.ModelForm):
+    base_url = forms.URLField(
+        required=False,
+        help_text=(
+            "You may override the base URL of the site for the endpoint. "
+            "If left blank, the current site will be used for the endpoint's URL. "
+            "MUST be publicly-accessible."
+        ),
+    )
+
+    def get_initial_for_field(self, field, field_name):
+        if field_name == "base_url":
+            endpoint_path = reverse(
+                "djstripe:djstripe_webhook_by_uuid",
+                kwargs={"uuid": self.instance.metadata["djstripe_uuid"]},
+            )
+            return self.instance.url.replace(endpoint_path, "")
+        return super().get_initial_for_field(field, field_name)
+
     class Meta:
         model = models.WebhookEndpoint
         fields = (
             "description",
-            "url",
+            "base_url",
             "enabled_events",
             "status",
             "metadata",
         )
-        advanced_fields = ("metadata",)
 
 
 @admin.register(models.WebhookEndpoint)
 class WebhookEndpointAdmin(admin.ModelAdmin):
     change_form_template = "djstripe/admin/change_form.html"
+    readonly_fields = ("url",)
 
     def get_form(self, request, obj=None, **kwargs):
         if obj:
@@ -625,6 +644,7 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
                 "id",
                 "livemode",
                 "api_version",
+                "url",
                 "created",
                 "djstripe_owner_account",
                 "djstripe_uuid",
@@ -639,8 +659,9 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
                 "djstripe_owner_account",
                 "djstripe_uuid",
                 "api_version",
+                "url",
             ]
-            core_fields = ["description", "url", "status"]
+            core_fields = ["description", "base_url", "status"]
             advanced_fields = ["enabled_events", "metadata"]
         else:
             header_fields = ["djstripe_owner_account", "livemode"]
@@ -659,19 +680,33 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
             ),
         ]
 
-    def save_model(self, request, obj, form, change):
+    def save_model(self, request, obj: "models.WebhookEndpoint", form, change):
         from urllib.parse import urljoin
 
         import stripe
-        from django.urls import reverse
 
-        if obj.djstripe_created is None:
-            # We are creating a new endpoint
-            url_path = reverse(
-                "djstripe:djstripe_webhook_by_uuid", kwargs={"uuid": obj.djstripe_uuid}
+        url_path = reverse(
+            "djstripe:djstripe_webhook_by_uuid", kwargs={"uuid": obj.djstripe_uuid}
+        )
+        base_url = form.data["base_url"]
+
+        if obj.djstripe_created:
+            # We are editing an existing endpoint
+            if base_url:
+                url = urljoin(base_url, url_path, allow_fragments=False)
+            else:
+                url = obj.url
+
+            stripe_we = obj._api_update(
+                url=url,
+                description=obj.description,
+                enabled_events=obj.enabled_events,
+                metadata=obj.metadata,
             )
-            if form.data["base_url"]:
-                base_url = form.data["base_url"]
+            obj.__class__.sync_from_stripe_data(stripe_we)
+        else:
+            # We are creating a new endpoint
+            if base_url:
                 url = urljoin(base_url, url_path, allow_fragments=False)
             else:
                 url = request.build_absolute_uri(url_path)
@@ -689,6 +724,3 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
 
             new_obj = obj.__class__.sync_from_stripe_data(stripe_we)
             obj.id = new_obj.id
-
-        else:
-            super().save_model(request, obj, form, change)
