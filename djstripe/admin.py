@@ -629,13 +629,15 @@ class WebhookEndpointAdmin(StripeModelAdmin):
             else:
                 url = request.build_absolute_uri(url_path)
 
+            metadata = obj.metadata or {}
+            metadata["djstripe_uuid"] = str(obj.djstripe_uuid)
+
             stripe_we = stripe.WebhookEndpoint.create(
                 url=url,
                 api_version=obj.api_version or None,
                 description=obj.description,
                 enabled_events=["*"],
-                metadata={"djstripe_uuid": str(obj.djstripe_uuid)}
-                # status=obj.status,
+                metadata=metadata,
             )
 
             new_obj = obj.__class__.sync_from_stripe_data(stripe_we)
