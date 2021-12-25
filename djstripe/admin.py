@@ -632,6 +632,7 @@ class WebhookEndpointAdmin(StripeModelAdmin):
             stripe_we = stripe.WebhookEndpoint.create(
                 url=url,
                 api_version=obj.api_version or None,
+                description=obj.description,
                 enabled_events=["*"],
                 metadata={"djstripe_uuid": str(obj.djstripe_uuid)}
                 # status=obj.status,
