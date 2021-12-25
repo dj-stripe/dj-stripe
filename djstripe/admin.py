@@ -607,6 +607,11 @@ class WebhookEndpointAdminEditForm(forms.ModelForm):
             "MUST be publicly-accessible."
         ),
     )
+    enabled = forms.BooleanField(
+        initial=True,
+        required=False,
+        help_text="When disabled, the endpoint will not receive events.",
+    )
 
     def get_initial_for_field(self, field, field_name):
         if field_name == "base_url":
@@ -623,7 +628,6 @@ class WebhookEndpointAdminEditForm(forms.ModelForm):
             "description",
             "base_url",
             "enabled_events",
-            "status",
             "metadata",
         )
 
@@ -661,7 +665,7 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
                 "api_version",
                 "url",
             ]
-            core_fields = ["description", "base_url", "status"]
+            core_fields = ["description", "base_url", "enabled"]
             advanced_fields = ["enabled_events", "metadata"]
         else:
             header_fields = ["djstripe_owner_account", "livemode"]
@@ -702,6 +706,7 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
                 description=obj.description,
                 enabled_events=obj.enabled_events,
                 metadata=obj.metadata,
+                disabled=form.data.get("enabled") != "on",
             )
             obj.__class__.sync_from_stripe_data(stripe_we)
         else:
