@@ -177,7 +177,7 @@ automatically synced from Stripe to the Django database, but in some
 circumstances you may want to manually sync Stripe API data as well.</p>
 <h2 id="command-line">Command line</h2>
 <p>You can sync your database with stripe using the manage command
-[<code>djstripe_sync_models</code>][djstripe.management.commands.djstripe_sync_models], e.g. to populate an empty database from an
+<a href="../../reference/project/#djstripe.management.commands.djstripe_sync_models"><code>djstripe_sync_models</code></a>, e.g. to populate an empty database from an
 existing Stripe account.
 <div class="highlight"><pre><span></span><code>    ./manage.py djstripe_sync_models
 </code></pre></div>
@@ -188,7 +188,7 @@ models to sync can be provided.
 Note that this may be redundant since we recursively sync related
 objects.</p>
 <p>You can manually reprocess events using the management commands
-[<code>djstripe_process_events</code>][djstripe.management.commands.djstripe_process_events]. By default this processes all events, but
+<a href="../../reference/project/#djstripe.management.commands.djstripe_process_events"><code>djstripe_process_events</code></a>. By default this processes all events, but
 options can be passed to limit the events processed. Note the Stripe API
 documents a limitation where events are only guaranteed to be available
 for 30 days.</p>
@@ -207,7 +207,7 @@ for 30 days.</p>
 <p>To sync in code, for example if you write to the Stripe API and want to
 work with the resulting dj-stripe object without having to wait for the
 webhook trigger.</p>
-<p>This can be done using the classmethod [<code>sync_from_stripe_data</code>][djstripe.models.base.StripeModel.sync_from_stripe_data] that
+<p>This can be done using the classmethod <a href="../../reference/project/#djstripe.models.base.StripeModel.sync_from_stripe_data"><code>sync_from_stripe_data</code></a> that
 exists on all dj-stripe model classes.</p>
 <p>E.g. creating a product using the Stripe API, and then syncing the API
 return data to Django using dj-stripe:</p>

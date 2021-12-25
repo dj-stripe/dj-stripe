@@ -175,7 +175,7 @@
               
                 <h1 id="subscribing-a-customer-to-a-price-or-plan">Subscribing a customer to a price (or plan)</h1>
 <p>For your convenience, dj-stripe provides a
-<a href="../../reference/models/#djstripe.models.core.Customer.subscribe"><code>djstripe.models.Customer.subscribe</code></a> method that will try to charge the
+<a href="../../reference/project/#djstripe.models.core.Customer.subscribe"><code>djstripe.models.Customer.subscribe</code></a> method that will try to charge the
 customer immediately unless you specify <code>charge_immediately=False</code></p>
 <h2 id="recommended-approach">Recommended Approach</h2>
 <div class="highlight"><pre><span></span><code><span class="c1"># Recommended Approach to use items dict with Prices</span>
@@ -219,7 +219,7 @@ support all the arguments you need for your implementation. When this
 happens you can just call the official <code>stripe.Customer.subscribe()</code>.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>Checkout <a href="../../reference/project/#tests.apps.example.views.PurchaseSubscriptionView.form_valid"><code>this example</code></a> and <a href="../../reference/models/#djstripe.models.core.Customer.add_payment_method"><code>this</code></a>.</p>
+<p>Checkout <a href="../../reference/project/#tests.apps.example.views.PurchaseSubscriptionView.form_valid"><code>this example</code></a> and <a href="../../reference/project/#djstripe.models.core.Customer.add_payment_method"><code>this</code></a>.</p>
 <p>Note that PaymentMethods can be used instead of Cards/Source by
 substituting</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Add the payment method customer&#39;s default</span>
