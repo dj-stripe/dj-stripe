@@ -108,7 +108,7 @@ Ready to contribute? Here's how to set up local development.
 1.  When you're done making changes, check that your changes pass the tests. A quick
     test run can be done as follows:
 
-        $ DJSTRIPE_TEST_DB_VENDOR=sqlite pytest --reuse-db
+        $ DJSTRIPE_TEST_DB_VENDOR=sqlite poetry run pytest --reuse-db
 
     You should also check that the tests pass with other python and Django versions with
     tox. pytest will output both command line and html coverage statistics and will warn
