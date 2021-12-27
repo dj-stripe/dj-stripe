@@ -20,7 +20,7 @@ class TaxRateTest(AssertStripeFksMixin, TestCase):
         tax_rate.refresh_from_db()
 
         self.assertEqual(
-            f"{FAKE_TAX_RATE_EXAMPLE_1_VAT['display_name']} – {FAKE_TAX_RATE_EXAMPLE_1_VAT['jurisdiction']} at {FAKE_TAX_RATE_EXAMPLE_1_VAT['percentage']:.2f}%",
+            f"{FAKE_TAX_RATE_EXAMPLE_1_VAT['display_name']} – {FAKE_TAX_RATE_EXAMPLE_1_VAT['jurisdiction']} at {FAKE_TAX_RATE_EXAMPLE_1_VAT['percentage']:.4f}%",
             str(tax_rate),
         )
 
@@ -29,18 +29,18 @@ class TestTaxRateDecimal:
     @pytest.mark.parametrize(
         "inputted,expected",
         [
-            (Decimal("1"), Decimal("1.00")),
-            (Decimal("1.5234567"), Decimal("1.52")),
-            (Decimal("0"), Decimal("0.00")),
-            (Decimal("23.2345678"), Decimal("23.23")),
-            ("1", Decimal("1.00")),
-            ("1.5234567", Decimal("1.52")),
-            ("0", Decimal("0.00")),
-            ("23.2345678", Decimal("23.23")),
-            (1, Decimal("1.00")),
-            (1.5234567, Decimal("1.52")),
-            (0, Decimal("0.00")),
-            (23.2345678, Decimal("23.24")),
+            (Decimal("1"), Decimal("1.0000")),
+            (Decimal("1.5234567"), Decimal("1.5235")),
+            (Decimal("0"), Decimal("0.0000")),
+            (Decimal("23.2345678"), Decimal("23.2346")),
+            ("1", Decimal("1.0000")),
+            ("1.5234567", Decimal("1.5235")),
+            ("0", Decimal("0.0000")),
+            ("23.2345678", Decimal("23.2346")),
+            (1, Decimal("1.0000")),
+            (1.5234567, Decimal("1.5235")),
+            (0, Decimal("0.0000")),
+            (23.2345678, Decimal("23.2346")),
         ],
     )
     def test_decimal_tax_percent(self, inputted, expected):
