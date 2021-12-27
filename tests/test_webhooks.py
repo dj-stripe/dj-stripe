@@ -580,11 +580,7 @@ class TestGetRemoteIp:
         request = self.RequestClass(data)
 
         # ensure warning is raised
-        with pytest.warns(None) as recorded_warning:
+        with pytest.warns(
+            None, match=r"Could not determine remote IP \(missing REMOTE_ADDR\)\."
+        ):
             assert get_remote_ip(request) == "0.0.0.0"
-
-        assert len(recorded_warning) == 1
-        assert (
-            "Could not determine remote IP (missing REMOTE_ADDR)."
-            in recorded_warning[0].message.args[0]
-        )
