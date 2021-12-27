@@ -1653,14 +1653,10 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assert_fks(price, expected_blank_fks={})
 
         # ensure DeprecationWarning is triggered
-        with pytest.warns(DeprecationWarning) as recorded_warning:
+        with pytest.warns(
+            DeprecationWarning, match=r"not be accepting price \(or price id\)"
+        ):
             self.customer.subscribe(price=price.id)
-
-        assert len(recorded_warning) == 1
-        assert (
-            "not be accepting price (or price id)"
-            in recorded_warning[0].message.args[0]
-        )
 
     @patch("stripe.Subscription.create", autospec=True)
     @patch(
@@ -1694,14 +1690,10 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         self.customer.subscribe(price=price)
         # ensure DeprecationWarning is triggered
-        with pytest.warns(DeprecationWarning) as recorded_warning:
+        with pytest.warns(
+            DeprecationWarning, match=r"not be accepting price \(or price id\)"
+        ):
             self.customer.subscribe(price=price)
-
-        assert len(recorded_warning) == 1
-        assert (
-            "not be accepting price (or price id)"
-            in recorded_warning[0].message.args[0]
-        )
 
         self.assertEqual(2, self.customer.subscriptions.count())
         self.assertEqual(2, len(self.customer.valid_subscriptions))
@@ -2056,14 +2048,10 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         subscription_create_mock.return_value = subscription_fake
 
         # ensure DeprecationWarning is triggered
-        with pytest.warns(DeprecationWarning) as recorded_warning:
+        with pytest.warns(
+            DeprecationWarning, match=r"not be accepting price \(or price id\)"
+        ):
             self.customer.subscribe(price=price)
-
-        assert len(recorded_warning) == 1
-        assert (
-            "not be accepting price (or price id)"
-            in recorded_warning[0].message.args[0]
-        )
 
         assert self.customer.is_subscribed_to(product.id)
 
@@ -2142,14 +2130,10 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
         subscription_create_mock.return_value = fake_subscription
 
         # ensure DeprecationWarning is triggered
-        with pytest.warns(DeprecationWarning) as recorded_warning:
+        with pytest.warns(
+            DeprecationWarning, match=r"not be accepting price \(or price id\)"
+        ):
             self.customer.subscribe(plan=plan.id)
-
-        assert len(recorded_warning) == 1
-        assert (
-            "not be accepting price (or price id)"
-            in recorded_warning[0].message.args[0]
-        )
 
     @patch("stripe.Subscription.create", autospec=True)
     @patch(
