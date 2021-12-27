@@ -119,7 +119,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         user = get_user_model().objects.create_user(
             username="test_user_sync_unsupported_source"
         )
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             ValueError,
             "Trying to fit a 'fish' into 'Card'. Aborting.",
             fake_customer.create_for_user,
