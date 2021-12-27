@@ -1939,7 +1939,9 @@ class TaxRate(StripeModel):
         help_text="The jurisdiction for the tax rate.",
     )
     percentage = StripePercentField(
-        help_text="This represents the tax rate percent out of 100."
+        decimal_places=4,
+        max_digits=7,
+        help_text="This represents the tax rate percent out of 100.",
     )
 
     def __str__(self):
