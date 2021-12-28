@@ -4,11 +4,12 @@ dj-stripe - Views related to the djstripe app.
 import logging
 
 from django.http import HttpResponse, HttpResponseBadRequest
+from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 
-from .models import WebhookEventTrigger
+from .models import WebhookEndpoint, WebhookEventTrigger
 
 logger = logging.getLogger(__name__)
 
@@ -26,14 +27,25 @@ class ProcessWebhookView(View):
     If an exception happens during processing, returns HTTP 500.
     """
 
-    def post(self, request):
+    def post(self, request, uuid=None):
         if "HTTP_STRIPE_SIGNATURE" not in request.META:
             # Do not even attempt to process/store the event if there is
             # no signature in the headers so we avoid overfilling the db.
             logger.error("HTTP_STRIPE_SIGNATURE is missing")
             return HttpResponseBadRequest()
 
-        trigger = WebhookEventTrigger.from_request(request)
+        # uuid is passed for new-style webhook views only.
+        # old-style defaults to no account.
+        if uuid:
+            # If the UUID is invalid (does not exist), this will throw a 404.
+            # Note that this happens after the HTTP_STRIPE_SIGNATURE check on purpose.
+            stripe_account = get_object_or_404(WebhookEndpoint, djstripe_uuid=uuid)
+        else:
+            stripe_account = None
+
+        trigger = WebhookEventTrigger.from_request(
+            request, stripe_account=stripe_account
+        )
 
         if trigger.is_test_event:
             # Since we don't do signature verification, we have to skip trigger.valid
