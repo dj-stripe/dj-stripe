@@ -100,7 +100,7 @@ def customer_discount_webhook_handler(event):
         coupon_start = None
         coupon_end = None
     else:
-        coupon, _ = _handle_crud_like_event(
+        coupon = _handle_crud_like_event(
             target_cls=models.Coupon,
             event=event,
             data=coupon_data,
@@ -349,13 +349,7 @@ class CrudType(Enum):
 
 
 def _handle_crud_like_event(
-    target_cls,
-    event,
-    data=None,
-    verb=None,
-    id=None,
-    customer=None,
-    crud_type=None,
+    target_cls, event: "models.Event", data=None, id: str = None, crud_type=None
 ):
     """
     Helper to process crud_type-like events for objects.
@@ -371,13 +365,8 @@ def _handle_crud_like_event(
     :param target_cls: The djstripe model being handled.
     :type target_cls: Type[models.StripeModel]
     :param event: The event object
-    :type event: models.Event
     :param data: The event object data (defaults to ``event.data``).
-    :param verb: The event verb (defaults to ``event.verb``).
-    :type verb: str
     :param id: The object Stripe ID (defaults to ``object.id``).
-    :type id: str
-    :param customer: The customer object (defaults to ``event.customer``).
     :param crud_type: The CrudType object (determined by default).
     :returns: The object (if any) and the event CrudType.
     :rtype: Tuple[models.StripeModel, CrudType]
@@ -390,15 +379,10 @@ def _handle_crud_like_event(
         # We require an object when applying CRUD-like events, so if there's
         # no ID the event is ignored/dropped. This happens in events such as
         # invoice.upcoming, which refer to a future (non-existant) invoice.
-        logger.debug(
-            "Ignoring %r Stripe event without object ID: %r", event.type, event
-        )
+        logger.debug("Ignoring Stripe event %r without object ID", event.id)
         return
 
-    verb = verb or event.verb
-    customer = customer or event.customer
-
-    crud_type = crud_type or CrudType.determine(event=event, verb=verb)
+    crud_type = crud_type or CrudType.determine(event=event, verb=event.verb)
 
     if crud_type is CrudType.DELETED:
         qs = target_cls.objects.filter(id=id)
@@ -413,7 +397,7 @@ def _handle_crud_like_event(
         # as invoice.payment_failed.
         kwargs = {"id": id}
         if hasattr(target_cls, "customer"):
-            kwargs["customer"] = customer
+            kwargs["customer"] = event.customer
 
         # For account.external_account.* events
         if event.parts[:2] == ["account", "external_account"] and stripe_account:
@@ -423,4 +407,4 @@ def _handle_crud_like_event(
         # create or update the object from the retrieved Stripe Data
         obj = target_cls.sync_from_stripe_data(data)
 
-    return obj, crud_type
+    return obj
