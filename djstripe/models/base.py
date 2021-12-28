@@ -285,15 +285,16 @@ class StripeModel(StripeBaseModel):
             if data.get("object") == "event":
                 # if account key exists and has a not null value
                 if data.get("account"):
-                    stripe_account = cls._id_from_data(data.get("account"))
-                    if stripe_account:
-                        return Account._get_or_retrieve(id=stripe_account)
+                    stripe_account_id = cls._id_from_data(data.get("account"))
+                    if stripe_account_id:
+                        return Account._get_or_retrieve(id=stripe_account_id)
 
             else:
-                if getattr(data, "stripe_account", ""):
-                    stripe_account = cls._id_from_data(data.stripe_account)
-                    if stripe_account:
-                        return Account._get_or_retrieve(id=stripe_account)
+                stripe_account = getattr(data, "stripe_account", None)
+                if stripe_account:
+                    stripe_account_id = cls._id_from_data(stripe_account)
+                    if stripe_account_id:
+                        return Account._get_or_retrieve(id=stripe_account_id)
 
         # try to fetch by the given api_key.
         return Account.get_or_retrieve_for_api_key(api_key)
