@@ -14,6 +14,7 @@ from ..fields import (
     StripeForeignKey,
 )
 from ..settings import djstripe_settings
+from ..utils import get_id_from_stripe_data
 from .account import Account
 from .base import StripeModel, logger
 from .core import Customer
@@ -95,7 +96,7 @@ class DjstripePaymentMethod(models.Model):
     ):
 
         raw_field_data = data.get(field_name)
-        id_ = StripeModel._id_from_data(raw_field_data)
+        id_ = get_id_from_stripe_data(raw_field_data)
 
         if id_.startswith("card"):
             source_cls = Card
@@ -702,7 +703,7 @@ class Source(StripeModel):
     def _attach_objects_hook(self, cls, data, current_ids=None):
         customer = None
         # "customer" key could be like "cus_6lsBvm5rJ0zyHc" or {"id": "cus_6lsBvm5rJ0zyHc"}
-        customer_id = cls._id_from_data(data.get("customer"))
+        customer_id = get_id_from_stripe_data(data.get("customer"))
 
         if current_ids is None or customer_id not in current_ids:
             customer = cls._stripe_object_to_customer(
@@ -877,7 +878,7 @@ class PaymentMethod(StripeModel):
     def _attach_objects_hook(self, cls, data, current_ids=None):
         customer = None
         # "customer" key could be like "cus_6lsBvm5rJ0zyHc" or {"id": "cus_6lsBvm5rJ0zyHc"}
-        customer_id = cls._id_from_data(data.get("customer"))
+        customer_id = get_id_from_stripe_data(data.get("customer"))
 
         if current_ids is None or customer_id not in current_ids:
             customer = cls._stripe_object_to_customer(

@@ -84,3 +84,18 @@ class QuerySetMock(QuerySet):
 
     def delete(self):
         return 0
+
+
+def get_id_from_stripe_data(data):
+    """
+    Extract stripe id from stripe field data
+    """
+
+    if isinstance(data, str):
+        # data like "sub_6lsC8pt7IcFpjA"
+        return data
+    elif data:
+        # data like {"id": sub_6lsC8pt7IcFpjA", ...}
+        return data.get("id")
+    else:
+        return None

@@ -3,15 +3,12 @@ import uuid
 from datetime import timedelta
 from typing import List, Optional
 
-import stripe
 from django.apps import apps
 from django.db import IntegrityError, models, transaction
 from django.utils import dateformat, timezone
 from django.utils.encoding import smart_str
 from stripe.api_resources.abstract.api_resource import APIResource
 from stripe.error import InvalidRequestError
-
-from djstripe.utils import get_friendly_currency_amount
 
 from ..fields import (
     JSONField,
@@ -22,6 +19,7 @@ from ..fields import (
 )
 from ..managers import StripeModelManager
 from ..settings import djstripe_settings
+from ..utils import get_friendly_currency_amount, get_id_from_stripe_data
 
 logger = logging.getLogger(__name__)
 
@@ -285,14 +283,14 @@ class StripeModel(StripeBaseModel):
             if data.get("object") == "event":
                 # if account key exists and has a not null value
                 if data.get("account"):
-                    stripe_account_id = cls._id_from_data(data.get("account"))
+                    stripe_account_id = get_id_from_stripe_data(data.get("account"))
                     if stripe_account_id:
                         return Account._get_or_retrieve(id=stripe_account_id)
 
             else:
                 stripe_account = getattr(data, "stripe_account", None)
                 if stripe_account:
-                    stripe_account_id = cls._id_from_data(stripe_account)
+                    stripe_account_id = get_id_from_stripe_data(stripe_account)
                     if stripe_account_id:
                         return Account._get_or_retrieve(id=stripe_account_id)
 
@@ -378,25 +376,6 @@ class StripeModel(StripeBaseModel):
         return result
 
     @classmethod
-    def _id_from_data(cls, data):
-        """
-        Extract stripe id from stripe field data
-        :param data:
-        :return:
-        """
-
-        if isinstance(data, str):
-            # data like "sub_6lsC8pt7IcFpjA"
-            id_ = data
-        elif data:
-            # data like {"id": sub_6lsC8pt7IcFpjA", ...}
-            id_ = data.get("id")
-        else:
-            id_ = None
-
-        return id_
-
-    @classmethod
     def _stripe_object_field_to_foreign_key(
         cls,
         field,
@@ -449,7 +428,7 @@ class StripeModel(StripeBaseModel):
                 skip = True
                 raw_field_data = None
 
-            id_ = cls._id_from_data(raw_field_data)
+            id_ = get_id_from_stripe_data(raw_field_data)
 
             if id_ == raw_field_data:
                 # A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}
@@ -627,7 +606,7 @@ class StripeModel(StripeBaseModel):
         if pending_relations is None:
             pending_relations = []
 
-        id_ = cls._id_from_data(field)
+        id_ = get_id_from_stripe_data(field)
 
         if not field:
             # An empty field - We need to return nothing here because there is

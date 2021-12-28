@@ -10,6 +10,7 @@ from stripe.error import InvalidRequestError
 import djstripe.models
 import tests
 from djstripe import settings as djstripe_settings
+from djstripe.utils import get_id_from_stripe_data
 
 """
 Key used to store fake ids in the real stripe object's metadata dict
@@ -703,9 +704,7 @@ class Command(BaseCommand):
 
         if source.startswith("ch_"):
             charge = djstripe.models.Charge(id=source).api_retrieve()
-            id_ = djstripe.models.StripeModel._id_from_data(
-                charge["balance_transaction"]
-            )
+            id_ = get_id_from_stripe_data(charge["balance_transaction"])
 
         try:
             obj = djstripe.models.BalanceTransaction(id=id_).api_retrieve()
@@ -757,14 +756,11 @@ class Command(BaseCommand):
                     if k in subscription_item_create_fields
                 }
 
-                create_item["plan"] = djstripe.models.StripeModel._id_from_data(
-                    create_item["plan"]
-                )
+                create_item["plan"] = get_id_from_stripe_data(create_item["plan"])
 
                 if create_item.get("tax_rates", []):
                     create_item["tax_rates"] = [
-                        djstripe.models.StripeModel._id_from_data(t)
-                        for t in create_item["tax_rates"]
+                        get_id_from_stripe_data(t) for t in create_item["tax_rates"]
                     ]
 
                 create_items.append(create_item)
@@ -773,14 +769,11 @@ class Command(BaseCommand):
         else:
             # don't try and send empty items list
             create_obj.pop("items", None)
-            create_obj["plan"] = djstripe.models.StripeModel._id_from_data(
-                create_obj["plan"]
-            )
+            create_obj["plan"] = get_id_from_stripe_data(create_obj["plan"])
 
         if create_obj.get("default_tax_rates", []):
             create_obj["default_tax_rates"] = [
-                djstripe.models.StripeModel._id_from_data(t)
-                for t in create_obj["default_tax_rates"]
+                get_id_from_stripe_data(t) for t in create_obj["default_tax_rates"]
             ]
 
             # don't send both default_tax_rates and tax_percent
