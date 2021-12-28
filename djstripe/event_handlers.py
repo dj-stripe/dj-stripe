@@ -33,22 +33,19 @@ def update_customer_helper(metadata, customer_id, subscriber_key):
     """
 
     # only update customer.subscriber if both the customer and subscriber already exist
-    if (
-        subscriber_key not in ("", None)
-        and metadata.get(subscriber_key, "")
-        and customer_id
-    ):
+    subscriber_id = metadata.get(subscriber_key, "")
+    if subscriber_key not in ("", None) and subscriber_id and customer_id:
+        subscriber_model = djstripe_settings.get_subscriber_model()
+
         try:
-            subscriber = djstripe_settings.get_subscriber_model().objects.get(
-                id=metadata.get(subscriber_key, "")
-            )
+            subscriber = subscriber_model.objects.get(id=subscriber_id)
             customer = models.Customer.objects.get(id=customer_id)
+        except ObjectDoesNotExist:
+            pass
+        else:
             customer.subscriber = subscriber
             customer.metadata = metadata
             customer.save()
-
-        except ObjectDoesNotExist:
-            pass
 
 
 @webhooks.handler("customer")
