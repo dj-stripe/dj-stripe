@@ -305,7 +305,7 @@ environment variables, see <code>tests/settings.py</code></p>
 <li>
 <p>When you're done making changes, check that your changes pass the tests. A quick
     test run can be done as follows:</p>
-<div class="codehilite"><pre><span></span><code>$ <span class="nv">DJSTRIPE_TEST_DB_VENDOR</span><span class="o">=</span>sqlite pytest --reuse-db
+<div class="codehilite"><pre><span></span><code>$ <span class="nv">DJSTRIPE_TEST_DB_VENDOR</span><span class="o">=</span>sqlite poetry run pytest --reuse-db
 </code></pre></div>
 
 <p>You should also check that the tests pass with other python and Django versions with
