@@ -4,8 +4,9 @@ Django Administration interface definitions
 import json
 
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.admin.utils import display_for_field, display_for_value
+from django.http.response import HttpResponseRedirect
 from django.urls import reverse
 from jsonfield import JSONField
 
@@ -703,6 +704,7 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
             else:
                 url = obj.url
 
+            try:
                 stripe_we = obj._api_update(
                     url=url,
                     description=obj.description,
@@ -712,6 +714,10 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
                     stripe_account=obj.djstripe_owner_account.id,
                 )
                 obj.__class__.sync_from_stripe_data(stripe_we)
+            except stripe.error.InvalidRequestError as error:
+                # todo figure out how to  send the form context back to be redisplayed
+                form.add_error(None, error)
+                raise
         else:
             # We are creating a new endpoint
             if base_url:
@@ -722,6 +728,7 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
             metadata = obj.metadata or {}
             metadata["djstripe_uuid"] = str(obj.djstripe_uuid)
 
+            try:
                 stripe_we = stripe.WebhookEndpoint.create(
                     url=url,
                     api_version=obj.api_version or None,
@@ -733,3 +740,18 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
 
                 new_obj = obj.__class__.sync_from_stripe_data(stripe_we)
                 obj.id = new_obj.id
+
+            except stripe.error.InvalidRequestError as error:
+                # todo figure out how to  send the form context back to be redisplayed
+                form.add_error(None, error)
+                raise
+
+    def _changeform_view(
+        self, request, object_id=None, form_url="", extra_context=None
+    ):
+
+        try:
+            return super()._changeform_view(request, object_id, form_url, extra_context)
+        except Exception as error:
+            self.message_user(request, error, level=messages.ERROR)
+            return HttpResponseRedirect(request.path)
