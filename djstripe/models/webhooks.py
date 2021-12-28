@@ -62,6 +62,15 @@ class WebhookEndpoint(StripeModel):
     def __str__(self):
         return self.url or str(self.djstripe_uuid)
 
+    def _attach_objects_hook(self, cls, data, current_ids=None):
+        """
+        Gets called by this object's create and sync methods just before save.
+        Use this to populate fields before the model is saved.
+        """
+        super()._attach_objects_hook(cls, data, current_ids=current_ids)
+
+        self.djstripe_uuid = data.get("metadata", {}).get("djstripe_uuid")
+
 
 def _get_version():
     from ..apps import __version__
