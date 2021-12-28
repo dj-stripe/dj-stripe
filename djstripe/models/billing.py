@@ -260,7 +260,7 @@ class BaseInvoice(StripeModel):
     auto_advance = models.BooleanField(
         null=True,
         help_text="Controls whether Stripe will perform automatic collection of the "
-        "invoice. When false, the invoice’s state will not automatically "
+        "invoice. When false, the invoice's state will not automatically "
         "advance without an explicit action.",
     )
     billing_reason = StripeEnumField(
@@ -310,42 +310,42 @@ class BaseInvoice(StripeModel):
     customer_address = JSONField(
         null=True,
         blank=True,
-        help_text="The customer’s address. Until the invoice is finalized, this "
+        help_text="The customer's address. Until the invoice is finalized, this "
         "field will equal customer.address. Once the invoice is finalized, this field "
         "will no longer be updated.",
     )
     customer_email = models.TextField(
         max_length=5000,
         blank=True,
-        help_text="The customer’s email. Until the invoice is finalized, this field "
+        help_text="The customer's email. Until the invoice is finalized, this field "
         "will equal customer.email. Once the invoice is finalized, this field will no "
         "longer be updated.",
     )
     customer_name = models.TextField(
         max_length=5000,
         blank=True,
-        help_text="The customer’s name. Until the invoice is finalized, this field "
+        help_text="The customer's name. Until the invoice is finalized, this field "
         "will equal customer.name. Once the invoice is finalized, this field will no "
         "longer be updated.",
     )
     customer_phone = models.TextField(
         max_length=5000,
         blank=True,
-        help_text="The customer’s phone number. Until the invoice is finalized, "
+        help_text="The customer's phone number. Until the invoice is finalized, "
         "this field will equal customer.phone. Once the invoice is finalized, "
         "this field will no longer be updated.",
     )
     customer_shipping = JSONField(
         null=True,
         blank=True,
-        help_text="The customer’s shipping information. Until the invoice is "
+        help_text="The customer's shipping information. Until the invoice is "
         "finalized, this field will equal customer.shipping. Once the invoice is "
         "finalized, this field will no longer be updated.",
     )
     customer_tax_exempt = StripeEnumField(
         enum=enums.CustomerTaxExempt,
         default="",
-        help_text="The customer’s tax exempt status. Until the invoice is finalized, "
+        help_text="The customer's tax exempt status. Until the invoice is finalized, "
         "this field will equal customer.tax_exempt. Once the invoice is "
         "finalized, this field will no longer be updated.",
     )
@@ -357,8 +357,8 @@ class BaseInvoice(StripeModel):
         related_name="+",
         help_text="Default payment method for the invoice. It must belong to the "
         "customer associated with the invoice. If not set, defaults to the "
-        "subscription’s default payment method, if any, or to the default payment "
-        "method in the customer’s invoice settings.",
+        "subscription's default payment method, if any, or to the default payment "
+        "method in the customer's invoice settings.",
     )
     # Note: default_tax_rates is handled in the subclasses since it's a
     # ManyToManyField, otherwise reverse accessors clash
@@ -415,7 +415,7 @@ class BaseInvoice(StripeModel):
         help_text=(
             "A unique, identifying string that appears on emails sent to the customer "
             "for this invoice. "
-            "This starts with the customer’s unique invoice_prefix if it is specified."
+            "This starts with the customer's unique invoice_prefix if it is specified."
         ),
     )
     paid = models.BooleanField(
@@ -423,7 +423,7 @@ class BaseInvoice(StripeModel):
         help_text=(
             "Whether payment was successfully collected for this invoice. An invoice "
             "can be paid (most commonly) with a charge or with credit from the "
-            "customer’s account balance."
+            "customer's account balance."
         ),
     )
     payment_intent = models.OneToOneField(
@@ -735,8 +735,8 @@ class Invoice(BaseInvoice):
         related_name="invoices",
         help_text="The default payment source for the invoice. "
         "It must belong to the customer associated with the invoice and be "
-        "in a chargeable state. If not set, defaults to the subscription’s "
-        "default source, if any, or to the customer’s default source.",
+        "in a chargeable state. If not set, defaults to the subscription's "
+        "default source, if any, or to the customer's default source.",
     )
 
     # Note:
@@ -782,8 +782,8 @@ class UpcomingInvoice(BaseInvoice):
         related_name="upcoming_invoices",
         help_text="The default payment source for the invoice. "
         "It must belong to the customer associated with the invoice and be "
-        "in a chargeable state. If not set, defaults to the subscription’s "
-        "default source, if any, or to the customer’s default source.",
+        "in a chargeable state. If not set, defaults to the subscription's "
+        "default source, if any, or to the customer's default source.",
     )
 
     def __init__(self, *args, **kwargs):
@@ -1347,7 +1347,7 @@ class Subscription(StripeModel):
         help_text="The default payment method for the subscription. "
         "It must belong to the customer associated with the subscription. "
         "If not set, invoices will use the default payment method in the "
-        "customer’s invoice settings.",
+        "customer's invoice settings.",
     )
     default_source = PaymentMethodForeignKey(
         on_delete=models.SET_NULL,
@@ -1356,7 +1356,7 @@ class Subscription(StripeModel):
         related_name="subscriptions",
         help_text="The default payment source for the subscription. "
         "It must belong to the customer associated with the subscription "
-        "and be in a chargeable state. If not set, defaults to the customer’s "
+        "and be in a chargeable state. If not set, defaults to the customer's "
         "default source.",
     )
     default_tax_rates = models.ManyToManyField(
@@ -1408,7 +1408,7 @@ class Subscription(StripeModel):
         related_name="setup_intents",
         help_text="We can use this SetupIntent to collect user authentication "
         "when creating a subscription without immediate payment or updating a "
-        "subscription’s payment method, allowing you to "
+        "subscription's payment method, allowing you to "
         "optimize for off-session payments.",
     )
     pending_update = JSONField(
@@ -1780,7 +1780,7 @@ class SubscriptionSchedule(StripeModel):
     default_settings = JSONField(
         null=True,
         blank=True,
-        help_text="Object representing the subscription schedule’s default settings.",
+        help_text="Object representing the subscription schedule's default settings.",
     )
     end_behavior = StripeEnumField(
         enum=enums.SubscriptionScheduleEndBehavior,
@@ -1790,7 +1790,7 @@ class SubscriptionSchedule(StripeModel):
     phases = JSONField(
         null=True,
         blank=True,
-        help_text="Configuration for the subscription schedule’s phases.",
+        help_text="Configuration for the subscription schedule's phases.",
     )
     released_at = StripeDateTimeField(
         null=True,
@@ -2026,10 +2026,10 @@ class UsageRecord(StripeModel):
 
 class UsageRecordSummary(StripeModel):
     """
-    Usage record summaries provides usage information that’s been summarized
+    Usage record summaries provides usage information that's been summarized
     from multiple usage records and over a subscription billing period
     (e.g., 15 usage records in the month of September).
-    Since new usage records can still be added, the returned summary information for the subscription item’s ID
+    Since new usage records can still be added, the returned summary information for the subscription item's ID
     should be seen as unstable until the subscription billing period ends.
 
     Stripe documentation: https://stripe.com/docs/api/usage_records/subscription_item_summary_list

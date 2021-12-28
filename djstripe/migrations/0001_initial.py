@@ -162,7 +162,7 @@ class Migration(migrations.Migration):
                 (
                     "email",
                     models.CharField(
-                        help_text="The primary user’s email address.", max_length=255
+                        help_text="The primary user's email address.", max_length=255
                     ),
                 ),
                 (
@@ -201,7 +201,7 @@ class Migration(migrations.Migration):
                     "product_description",
                     models.CharField(
                         blank=True,
-                        help_text="Internal-only description of the product sold or service provided by the business. It’s used by Stripe for risk and underwriting purposes.",
+                        help_text="Internal-only description of the product sold or service provided by the business. It's used by Stripe for risk and underwriting purposes.",
                         max_length=255,
                         null=True,
                     ),
@@ -1995,7 +1995,7 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="A unique, identifying string that appears on emails sent to the customer for this invoice. This starts with the customer’s unique invoice_prefix if it is specified.",
+                        help_text="A unique, identifying string that appears on emails sent to the customer for this invoice. This starts with the customer's unique invoice_prefix if it is specified.",
                         max_length=64,
                     ),
                 ),
@@ -2003,7 +2003,7 @@ class Migration(migrations.Migration):
                     "paid",
                     models.BooleanField(
                         default=False,
-                        help_text="Whether payment was successfully collected for this invoice. An invoice can be paid (most commonly) with a charge or with credit from the customer’s account balance.",
+                        help_text="Whether payment was successfully collected for this invoice. An invoice can be paid (most commonly) with a charge or with credit from the customer's account balance.",
                     ),
                 ),
                 (
@@ -2131,7 +2131,7 @@ class Migration(migrations.Migration):
                 (
                     "auto_advance",
                     models.BooleanField(
-                        help_text="Controls whether Stripe will perform automatic collection of the invoice. When false, the invoice’s state will not automatically advance without an explicit action.",
+                        help_text="Controls whether Stripe will perform automatic collection of the invoice. When false, the invoice's state will not automatically advance without an explicit action.",
                         null=True,
                     ),
                 ),
@@ -3132,7 +3132,7 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 blank=True,
                 default="",
-                help_text="Internal-only description of the product sold or service provided by the business. It’s used by Stripe for risk and underwriting purposes.",
+                help_text="Internal-only description of the product sold or service provided by the business. It's used by Stripe for risk and underwriting purposes.",
                 max_length=255,
             ),
         ),
@@ -3497,7 +3497,7 @@ class Migration(migrations.Migration):
             model_name="account",
             name="branding_logo",
             field=djstripe.fields.StripeForeignKey(
-                help_text="A logo for the account that will be used in Checkout instead of the icon and without the account’s name next to it if provided. Must be at least 128px x 128px.",
+                help_text="A logo for the account that will be used in Checkout instead of the icon and without the account's name next to it if provided. Must be at least 128px x 128px.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="logo_account",
@@ -3853,7 +3853,7 @@ class Migration(migrations.Migration):
                     djstripe.fields.StripeEnumField(
                         blank=True,
                         enum=djstripe.enums.IntentUsage,
-                        help_text="Indicates that you intend to make future payments with this PaymentIntent’s payment method. If present, the payment method used with this PaymentIntent can be attached to a Customer, even after the transaction completes. Use `on_session` if you intend to only reuse the payment method when your customer is present in your checkout flow. Use `off_session` if your customer may or may not be in your checkout flow. Stripe uses `setup_future_usage` to dynamically optimize your payment flow and comply with regional legislation and network rules. For example, if your customer is impacted by SCA, using `off_session` will ensure that they are authenticated while processing this PaymentIntent. You will then be able to make later off-session payments for this customer.",
+                        help_text="Indicates that you intend to make future payments with this PaymentIntent's payment method. If present, the payment method used with this PaymentIntent can be attached to a Customer, even after the transaction completes. Use `on_session` if you intend to only reuse the payment method when your customer is present in your checkout flow. Use `off_session` if your customer may or may not be in your checkout flow. Stripe uses `setup_future_usage` to dynamically optimize your payment flow and comply with regional legislation and network rules. For example, if your customer is impacted by SCA, using `off_session` will ensure that they are authenticated while processing this PaymentIntent. You will then be able to make later off-session payments for this customer.",
                         max_length=11,
                         null=True,
                     ),
@@ -3870,7 +3870,7 @@ class Migration(migrations.Migration):
                     "statement_descriptor",
                     models.CharField(
                         blank=True,
-                        help_text="For non-card charges, you can use this value as the complete description that appears on your customers’ statements. Must contain at least one letter, maximum 22 characters.",
+                        help_text="For non-card charges, you can use this value as the complete description that appears on your customers' statements. Must contain at least one letter, maximum 22 characters.",
                         max_length=22,
                     ),
                 ),
@@ -3963,7 +3963,7 @@ class Migration(migrations.Migration):
             name="pending_setup_intent",
             field=djstripe.fields.StripeForeignKey(
                 blank=True,
-                help_text="We can use this SetupIntent to collect user authentication when creating a subscription without immediate payment or updating a subscription’s payment method, allowing you to optimize for off-session payments.",
+                help_text="We can use this SetupIntent to collect user authentication when creating a subscription without immediate payment or updating a subscription's payment method, allowing you to optimize for off-session payments.",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="setup_intents",
@@ -4078,7 +4078,7 @@ class Migration(migrations.Migration):
                     djstripe.fields.StripeEnumField(
                         blank=True,
                         enum=djstripe.enums.SessionBillingAddressCollection,
-                        help_text="The value (auto or required) for whether Checkoutcollected the customer’s billing address.",
+                        help_text="The value (auto or required) for whether Checkoutcollected the customer's billing address.",
                         max_length=8,
                     ),
                 ),
@@ -4118,7 +4118,7 @@ class Migration(migrations.Migration):
                     "locale",
                     models.CharField(
                         blank=True,
-                        help_text="The IETF language tag of the locale Checkout is displayed in.If blank or auto, the browser’s locale is used.",
+                        help_text="The IETF language tag of the locale Checkout is displayed in.If blank or auto, the browser's locale is used.",
                         max_length=255,
                     ),
                 ),
@@ -4282,7 +4282,7 @@ class Migration(migrations.Migration):
             name="customer_address",
             field=djstripe.fields.JSONField(
                 blank=True,
-                help_text="The customer’s address. Until the invoice is finalized, this field will equal customer.address. Once the invoice is finalized, this field will no longer be updated.",
+                help_text="The customer's address. Until the invoice is finalized, this field will equal customer.address. Once the invoice is finalized, this field will no longer be updated.",
                 null=True,
             ),
         ),
@@ -4291,7 +4291,7 @@ class Migration(migrations.Migration):
             name="customer_email",
             field=models.TextField(
                 blank=True,
-                help_text="The customer’s email. Until the invoice is finalized, this field will equal customer.email. Once the invoice is finalized, this field will no longer be updated.",
+                help_text="The customer's email. Until the invoice is finalized, this field will equal customer.email. Once the invoice is finalized, this field will no longer be updated.",
                 max_length=5000,
             ),
         ),
@@ -4300,7 +4300,7 @@ class Migration(migrations.Migration):
             name="customer_name",
             field=models.TextField(
                 blank=True,
-                help_text="The customer’s name. Until the invoice is finalized, this field will equal customer.name. Once the invoice is finalized, this field will no longer be updated.",
+                help_text="The customer's name. Until the invoice is finalized, this field will equal customer.name. Once the invoice is finalized, this field will no longer be updated.",
                 max_length=5000,
             ),
         ),
@@ -4309,7 +4309,7 @@ class Migration(migrations.Migration):
             name="customer_phone",
             field=models.TextField(
                 blank=True,
-                help_text="The customer’s phone number. Until the invoice is finalized, this field will equal customer.phone. Once the invoice is finalized, this field will no longer be updated.",
+                help_text="The customer's phone number. Until the invoice is finalized, this field will equal customer.phone. Once the invoice is finalized, this field will no longer be updated.",
                 max_length=5000,
             ),
         ),
@@ -4318,7 +4318,7 @@ class Migration(migrations.Migration):
             name="customer_shipping",
             field=djstripe.fields.JSONField(
                 blank=True,
-                help_text="The customer’s shipping information. Until the invoice is finalized, this field will equal customer.shipping. Once the invoice is finalized, this field will no longer be updated.",
+                help_text="The customer's shipping information. Until the invoice is finalized, this field will equal customer.shipping. Once the invoice is finalized, this field will no longer be updated.",
                 null=True,
             ),
         ),
@@ -4328,7 +4328,7 @@ class Migration(migrations.Migration):
             field=djstripe.fields.StripeEnumField(
                 default="",
                 enum=djstripe.enums.CustomerTaxExempt,
-                help_text="The customer’s tax exempt status. Until the invoice is finalized, this field will equal customer.tax_exempt. Once the invoice is finalized, this field will no longer be updated.",
+                help_text="The customer's tax exempt status. Until the invoice is finalized, this field will equal customer.tax_exempt. Once the invoice is finalized, this field will no longer be updated.",
                 max_length=7,
             ),
         ),
@@ -4337,7 +4337,7 @@ class Migration(migrations.Migration):
             name="default_payment_method",
             field=djstripe.fields.StripeForeignKey(
                 blank=True,
-                help_text="Default payment method for the invoice. It must belong to the customer associated with the invoice. If not set, defaults to the subscription’s default payment method, if any, or to the default payment method in the customer’s invoice settings.",
+                help_text="Default payment method for the invoice. It must belong to the customer associated with the invoice. If not set, defaults to the subscription's default payment method, if any, or to the default payment method in the customer's invoice settings.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="+",
@@ -5051,7 +5051,7 @@ class Migration(migrations.Migration):
                 (
                     "auto_advance",
                     models.BooleanField(
-                        help_text="Controls whether Stripe will perform automatic collection of the invoice. When false, the invoice’s state will not automatically advance without an explicit action.",
+                        help_text="Controls whether Stripe will perform automatic collection of the invoice. When false, the invoice's state will not automatically advance without an explicit action.",
                         null=True,
                     ),
                 ),
@@ -5092,7 +5092,7 @@ class Migration(migrations.Migration):
                     "customer_address",
                     djstripe.fields.JSONField(
                         blank=True,
-                        help_text="The customer’s address. Until the invoice is finalized, this field will equal customer.address. Once the invoice is finalized, this field will no longer be updated.",
+                        help_text="The customer's address. Until the invoice is finalized, this field will equal customer.address. Once the invoice is finalized, this field will no longer be updated.",
                         null=True,
                     ),
                 ),
@@ -5100,7 +5100,7 @@ class Migration(migrations.Migration):
                     "customer_email",
                     models.TextField(
                         blank=True,
-                        help_text="The customer’s email. Until the invoice is finalized, this field will equal customer.email. Once the invoice is finalized, this field will no longer be updated.",
+                        help_text="The customer's email. Until the invoice is finalized, this field will equal customer.email. Once the invoice is finalized, this field will no longer be updated.",
                         max_length=5000,
                     ),
                 ),
@@ -5108,7 +5108,7 @@ class Migration(migrations.Migration):
                     "customer_name",
                     models.TextField(
                         blank=True,
-                        help_text="The customer’s name. Until the invoice is finalized, this field will equal customer.name. Once the invoice is finalized, this field will no longer be updated.",
+                        help_text="The customer's name. Until the invoice is finalized, this field will equal customer.name. Once the invoice is finalized, this field will no longer be updated.",
                         max_length=5000,
                     ),
                 ),
@@ -5116,7 +5116,7 @@ class Migration(migrations.Migration):
                     "customer_phone",
                     models.TextField(
                         blank=True,
-                        help_text="The customer’s phone number. Until the invoice is finalized, this field will equal customer.phone. Once the invoice is finalized, this field will no longer be updated.",
+                        help_text="The customer's phone number. Until the invoice is finalized, this field will equal customer.phone. Once the invoice is finalized, this field will no longer be updated.",
                         max_length=5000,
                     ),
                 ),
@@ -5124,7 +5124,7 @@ class Migration(migrations.Migration):
                     "customer_shipping",
                     djstripe.fields.JSONField(
                         blank=True,
-                        help_text="The customer’s shipping information. Until the invoice is finalized, this field will equal customer.shipping. Once the invoice is finalized, this field will no longer be updated.",
+                        help_text="The customer's shipping information. Until the invoice is finalized, this field will equal customer.shipping. Once the invoice is finalized, this field will no longer be updated.",
                         null=True,
                     ),
                 ),
@@ -5133,7 +5133,7 @@ class Migration(migrations.Migration):
                     djstripe.fields.StripeEnumField(
                         default="",
                         enum=djstripe.enums.CustomerTaxExempt,
-                        help_text="The customer’s tax exempt status. Until the invoice is finalized, this field will equal customer.tax_exempt. Once the invoice is finalized, this field will no longer be updated.",
+                        help_text="The customer's tax exempt status. Until the invoice is finalized, this field will equal customer.tax_exempt. Once the invoice is finalized, this field will no longer be updated.",
                         max_length=7,
                     ),
                 ),
@@ -5199,7 +5199,7 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="A unique, identifying string that appears on emails sent to the customer for this invoice. This starts with the customer’s unique invoice_prefix if it is specified.",
+                        help_text="A unique, identifying string that appears on emails sent to the customer for this invoice. This starts with the customer's unique invoice_prefix if it is specified.",
                         max_length=64,
                     ),
                 ),
@@ -5207,7 +5207,7 @@ class Migration(migrations.Migration):
                     "paid",
                     models.BooleanField(
                         default=False,
-                        help_text="Whether payment was successfully collected for this invoice. An invoice can be paid (most commonly) with a charge or with credit from the customer’s account balance.",
+                        help_text="Whether payment was successfully collected for this invoice. An invoice can be paid (most commonly) with a charge or with credit from the customer's account balance.",
                     ),
                 ),
                 (
@@ -5353,7 +5353,7 @@ class Migration(migrations.Migration):
                     "default_payment_method",
                     djstripe.fields.StripeForeignKey(
                         blank=True,
-                        help_text="Default payment method for the invoice. It must belong to the customer associated with the invoice. If not set, defaults to the subscription’s default payment method, if any, or to the default payment method in the customer’s invoice settings.",
+                        help_text="Default payment method for the invoice. It must belong to the customer associated with the invoice. If not set, defaults to the subscription's default payment method, if any, or to the default payment method in the customer's invoice settings.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="+",

@@ -197,7 +197,7 @@ class Migration(migrations.Migration):
                 (
                     "customer_acceptance",
                     djstripe.fields.JSONField(
-                        help_text="Details about the customer’s acceptance of the mandate."
+                        help_text="Details about the customer's acceptance of the mandate."
                     ),
                 ),
                 (

@@ -21,7 +21,7 @@ class Session(StripeModel):
         blank=True,
         help_text=(
             "The value (auto or required) for whether Checkout"
-            "collected the customer’s billing address."
+            "collected the customer's billing address."
         ),
     )
     cancel_url = models.TextField(
@@ -64,7 +64,7 @@ class Session(StripeModel):
         blank=True,
         help_text=(
             "The IETF language tag of the locale Checkout is displayed in."
-            "If blank or auto, the browser’s locale is used."
+            "If blank or auto, the browser's locale is used."
         ),
     )
     mode = StripeEnumField(

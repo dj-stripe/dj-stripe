@@ -151,7 +151,7 @@ class Charge(StripeModel):
         max_length=22,
         default="",
         help_text="The full statement descriptor that is passed to card networks, "
-        "and that is displayed on your customers’ credit card and bank statements. "
+        "and that is displayed on your customers' credit card and bank statements. "
         "Allows you to see what the statement descriptor looks like after the "
         "static and dynamic portions are combined.",
     )
@@ -302,7 +302,7 @@ class Charge(StripeModel):
         blank=True,
         help_text="For card charges, use statement_descriptor_suffix instead. "
         "Otherwise, you can use this value as the complete description of a "
-        "charge on your customers’ statements. Must contain at least one letter, "
+        "charge on your customers' statements. Must contain at least one letter, "
         "maximum 22 characters.",
     )
     statement_descriptor_suffix = models.CharField(
@@ -427,7 +427,7 @@ class Mandate(StripeModel):
     stripe_class = stripe.Mandate
 
     customer_acceptance = JSONField(
-        help_text="Details about the customer’s acceptance of the mandate."
+        help_text="Details about the customer's acceptance of the mandate."
     )
     payment_method = StripeForeignKey("paymentmethod", on_delete=models.CASCADE)
     payment_method_details = JSONField(
@@ -1779,7 +1779,7 @@ class PaymentIntent(StripeModel):
         blank=True,
         help_text=(
             "Indicates that you intend to make future payments with this "
-            "PaymentIntent’s payment method. "
+            "PaymentIntent's payment method. "
             "If present, the payment method used with this PaymentIntent can "
             "be attached to a Customer, even after the transaction completes. "
             "Use `on_session` if you intend to only reuse the payment method "
@@ -1801,7 +1801,7 @@ class PaymentIntent(StripeModel):
         blank=True,
         help_text=(
             "For non-card charges, you can use this value as the complete description "
-            "that appears on your customers’ statements. Must contain at least one "
+            "that appears on your customers' statements. Must contain at least one "
             "letter, maximum 22 characters."
         ),
     )

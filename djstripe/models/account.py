@@ -45,7 +45,7 @@ class Account(StripeModel):
         )
     )
     email = models.CharField(
-        max_length=255, help_text="The primary user’s email address."
+        max_length=255, help_text="The primary user's email address."
     )
     # TODO external_accounts = ...
     individual = JSONField(
@@ -64,7 +64,7 @@ class Account(StripeModel):
         default="",
         blank=True,
         help_text="Internal-only description of the product sold or service provided "
-        "by the business. It’s used by Stripe for risk and underwriting purposes.",
+        "by the business. It's used by Stripe for risk and underwriting purposes.",
     )
     requirements = JSONField(
         null=True,
@@ -101,7 +101,7 @@ class Account(StripeModel):
     @property
     def business_url(self) -> str:
         """
-        The business’s publicly available website.
+        The business's publicly available website.
         """
         if self.business_profile:
             return self.business_profile.get("url", "")
