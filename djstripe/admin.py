@@ -9,6 +9,8 @@ from django.contrib.admin.utils import display_for_field, display_for_value
 from django.urls import reverse
 from jsonfield import JSONField
 
+from djstripe.models.account import Account
+
 from . import models
 
 
@@ -701,14 +703,15 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
             else:
                 url = obj.url
 
-            stripe_we = obj._api_update(
-                url=url,
-                description=obj.description,
-                enabled_events=obj.enabled_events,
-                metadata=obj.metadata,
-                disabled=form.data.get("enabled") != "on",
-            )
-            obj.__class__.sync_from_stripe_data(stripe_we)
+                stripe_we = obj._api_update(
+                    url=url,
+                    description=obj.description,
+                    enabled_events=obj.enabled_events,
+                    metadata=obj.metadata,
+                    disabled=form.data.get("enabled") != "on",
+                    stripe_account=obj.djstripe_owner_account.id,
+                )
+                obj.__class__.sync_from_stripe_data(stripe_we)
         else:
             # We are creating a new endpoint
             if base_url:
@@ -719,13 +722,14 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
             metadata = obj.metadata or {}
             metadata["djstripe_uuid"] = str(obj.djstripe_uuid)
 
-            stripe_we = stripe.WebhookEndpoint.create(
-                url=url,
-                api_version=obj.api_version or None,
-                description=obj.description,
-                enabled_events=["*"],
-                metadata=metadata,
-            )
+                stripe_we = stripe.WebhookEndpoint.create(
+                    url=url,
+                    api_version=obj.api_version or None,
+                    description=obj.description,
+                    enabled_events=["*"],
+                    metadata=metadata,
+                    stripe_account=Account.get_default_account().id,
+                )
 
-            new_obj = obj.__class__.sync_from_stripe_data(stripe_we)
-            obj.id = new_obj.id
+                new_obj = obj.__class__.sync_from_stripe_data(stripe_we)
+                obj.id = new_obj.id
