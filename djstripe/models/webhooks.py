@@ -149,7 +149,7 @@ class WebhookEventTrigger(models.Model):
         return f"id={self.id}, valid={self.valid}, processed={self.processed}"
 
     @classmethod
-    def from_request(cls, request):
+    def from_request(cls, request, stripe_account=None):
         """
         Create, validate and process a WebhookEventTrigger given a Django
         request object.
@@ -172,11 +172,14 @@ class WebhookEventTrigger(models.Model):
         except ValueError:
             data = {}
 
+        if stripe_account is None:
+            stripe_account = StripeModel._find_owner_account(data=data)
+
         obj = cls.objects.create(
             headers=dict(request.headers),
             body=body,
             remote_ip=ip,
-            stripe_trigger_account=StripeModel._find_owner_account(data=data),
+            stripe_trigger_account=stripe_account,
         )
 
         try:
