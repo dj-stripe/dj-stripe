@@ -73,246 +73,35 @@ def test_get_forward_relation_fields_for_model(output, input):
     assert output == djstripe_admin.get_forward_relation_fields_for_model(input)
 
 
-class TestAdminCustomActions(TestCase):
-    kwargs_called_with = {}
+class TestAdminCustomActions:
+    @pytest.mark.parametrize("fake_selected_pks", [None, [1, 2]])
+    def test__resync_all_usage_record_summaries(self, admin_client, fake_selected_pks):
 
-    # to get around Session/MessageMiddleware Deprecation Warnings
-    def dummy_get_response(self, request):
-        return None
-
-    @patch(
-        "stripe.BalanceTransaction.retrieve",
-        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Subscription.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-        autospec=True,
-    )
-    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
-    @patch(
-        "stripe.PaymentMethod.retrieve",
-        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
-        autospec=True,
-    )
-    @patch(
-        "stripe.PaymentIntent.retrieve",
-        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.Invoice.retrieve", autospec=True, return_value=deepcopy(FAKE_INVOICE)
-    )
-    def setUp(
-        self,
-        invoice_retrieve_mock,
-        product_retrieve_mock,
-        payment_intent_retrieve_mock,
-        paymentmethod_card_retrieve_mock,
-        charge_retrieve_mock,
-        subscription_retrieve_mock,
-        balance_transaction_retrieve_mock,
-    ):
-        self.admin = get_user_model().objects.create_superuser(
-            username="admin", email="admin@djstripe.com", password="xxx"
-        )
-        self.factory = RequestFactory()
-
-        self.customer = FAKE_CUSTOMER.create_for_user(self.admin)
-
-        # create latest invoice
-        models.Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
-
-    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    def test__cancel_subcriptions(
-        self,
-        customer_retrieve_mock,
-        product_retrieve_mock,
-        plan_retrieve_mock,
-    ):
-
-        # create instance to be used in the Django Admin Action
-        subscription = models.Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
-
-        model = models.Subscription
-        model_admin = site._registry.get(model)
-
-        data = {
-            "action": "_cancel",
-            helpers.ACTION_CHECKBOX_NAME: [subscription.pk],
-        }
+        model = models.UsageRecordSummary
 
         # get the standard changelist_view url
         change_url = reverse(
             f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
         )
 
-        # add the admin user to the mocked request and disable CSRF checks
-        request = self.factory.post(change_url, data=data, follow=True)
-        request.user = self.admin
-        request._dont_enforce_csrf_checks = True
+        data = {"action": "_resync_all_usage_record_summaries"}
 
-        # Add the session/message middleware to the request
-        SessionMiddleware(self.dummy_get_response).process_request(request)
-        MessageMiddleware(self.dummy_get_response).process_request(request)
+        if fake_selected_pks is not None:
+            data[helpers.ACTION_CHECKBOX_NAME] = fake_selected_pks
 
-        # get the _cancel custom Django Admin Action
-        action_fn = model_admin.get_actions(request)[data.get("action")][0]
+        response = admin_client.post(change_url, data, follow=True)
+        assert response.status_code == 200
 
-        with patch.object(
-            subscription, "_api_delete", return_value=FAKE_SUBSCRIPTION
-        ) as patched__api_delete:
-            # invoke the _cancel action
-            action_fn(model_admin, request, [subscription])
-
-            messages_sent_dictionary = {
-                m.message: m.level_tag for m in messages.get_messages(request)
-            }
-
-            # assert correct success message was emmitted
-            assert (
-                messages_sent_dictionary.get(f"Successfully Canceled: {subscription}")
-                == "success"
-            )
-
-        patched__api_delete.assert_called_once_with()
-
-    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    def test__cancel_subcriptions_handled_invalid_stripe_request_error_raised(
-        self,
-        customer_retrieve_mock,
-        product_retrieve_mock,
-        plan_retrieve_mock,
-    ):
-
-        # create instance to be used in the Django Admin Action
-        subscription = models.Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
-
-        model = models.Subscription
-        model_admin = site._registry.get(model)
-
-        data = {
-            "action": "_cancel",
-            helpers.ACTION_CHECKBOX_NAME: [subscription.pk],
+        # assert correct Success messages are emmitted
+        messages_sent_dictionary = {
+            m.message: m.level_tag for m in messages.get_messages(response.wsgi_request)
         }
 
-        # monkeypatch instance.api_retrieve
-        def mock_instance_api_retrieve(*args, **kwargs):
-            raise InvalidRequestError("No such subscription:", {})
-
-        # get the standard changelist_view url
-        change_url = reverse(
-            f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
+        # assert correct success message was emmitted
+        assert (
+            messages_sent_dictionary.get("Successfully Synced ALL Instances")
+            == "success"
         )
-
-        # add the admin user to the mocked request and disable CSRF checks
-        request = self.factory.post(change_url, data=data, follow=True)
-        request.user = self.admin
-        request._dont_enforce_csrf_checks = True
-
-        # Add the session/message middleware to the request
-        SessionMiddleware(self.dummy_get_response).process_request(request)
-        MessageMiddleware(self.dummy_get_response).process_request(request)
-
-        # get the _cancel custom Django Admin Action
-        action_fn = model_admin.get_actions(request)[data.get("action")][0]
-
-        with patch.object(
-            subscription, "api_retrieve", return_value=FAKE_SUBSCRIPTION
-        ) as patched_api_retrieve:
-            with patch.object(
-                subscription, "_api_delete", side_effect=mock_instance_api_retrieve
-            ) as patched__api_delete:
-
-                # invoke the _cancel action
-                action_fn(model_admin, request, [subscription])
-
-                messages_sent_dictionary = {
-                    m.message: m.level_tag for m in messages.get_messages(request)
-                }
-
-                # assert correct success message was emmitted
-                assert (
-                    messages_sent_dictionary.get(
-                        f"Successfully Canceled: {subscription}"
-                    )
-                    == "success"
-                )
-
-            patched__api_delete.assert_called_once_with()
-        patched_api_retrieve.assert_called_once_with()
-
-    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    def test__cancel_subcriptions_unhandled_invalid_stripe_request_error_raised(
-        self,
-        customer_retrieve_mock,
-        product_retrieve_mock,
-        plan_retrieve_mock,
-    ):
-
-        # create instance to be used in the Django Admin Action
-        subscription = models.Subscription.sync_from_stripe_data(FAKE_SUBSCRIPTION)
-
-        model = models.Subscription
-        model_admin = site._registry.get(model)
-
-        data = {
-            "action": "_cancel",
-            helpers.ACTION_CHECKBOX_NAME: [subscription.pk],
-        }
-
-        # monkeypatch instance.api_retrieve
-        def mock_instance_api_retrieve(*args, **kwargs):
-            raise InvalidRequestError("some random error message:", {})
-
-        # get the standard changelist_view url
-        change_url = reverse(
-            f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
-        )
-
-        # add the admin user to the mocked request and disable CSRF checks
-        request = self.factory.post(change_url, data=data, follow=True)
-        request.user = self.admin
-        request._dont_enforce_csrf_checks = True
-
-        # Add the session/message middleware to the request
-        SessionMiddleware(self.dummy_get_response).process_request(request)
-        MessageMiddleware(self.dummy_get_response).process_request(request)
-
-        # get the _cancel custom Django Admin Action
-        action_fn = model_admin.get_actions(request)[data.get("action")][0]
-
-        with patch.object(
-            subscription, "_api_delete", side_effect=mock_instance_api_retrieve
-        ) as patched__api_delete:
-            # invoke the _cancel action
-            action_fn(model_admin, request, [subscription])
-
-        patched__api_delete.assert_called_once_with()
-
-
 class TestAdminRegisteredModels(TestCase):
     def setUp(self):
         self.admin = get_user_model().objects.create_superuser(
@@ -767,3 +556,36 @@ class TestAdminSite(TestCase):
                     ),
                     display_value,
                 )
+
+
+class TestUsageRecordSummaryAdmin:
+    @pytest.mark.parametrize("fake_selected_pks", [None, [1, 2]])
+    def test_changelist_view(self, admin_client, admin_user, fake_selected_pks):
+
+        model = models.UsageRecordSummary
+
+        # get the standard changelist_view url
+        change_url = reverse(
+            f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
+        )
+
+        data = {"action": "_resync_all_usage_record_summaries"}
+
+        if fake_selected_pks is not None:
+            # add key helpers.ACTION_CHECKBOX_NAME when it is not None
+            data[helpers.ACTION_CHECKBOX_NAME] = fake_selected_pks
+
+        # get the response. This will invoke the changelist_view
+        response = admin_client.post(change_url, data=data, follow=True)
+
+        assert response.status_code == 200
+
+        # assert correct Success messages are emmitted
+        messages_sent_dictionary = {
+            m.message: m.level_tag for m in messages.get_messages(response.wsgi_request)
+        }
+        # assert correct success message was emmitted
+        assert (
+            messages_sent_dictionary.get("Successfully Synced ALL Instances")
+            == "success"
+        )

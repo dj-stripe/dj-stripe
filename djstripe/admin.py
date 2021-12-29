@@ -7,7 +7,9 @@ from urllib.parse import urljoin
 
 from django import forms
 from django.contrib import admin, messages
+from django.contrib.admin import helpers
 from django.contrib.admin.utils import display_for_field, display_for_value
+from django.core.management import call_command
 from django.urls import reverse
 from jsonfield import JSONField
 from stripe.error import AuthenticationError, InvalidRequestError
@@ -37,6 +39,15 @@ def admin_display_for_field_override():
 
 # execute override
 admin_display_for_field_override()
+
+
+@admin.action(description="Re-Sync ALL Usage Record Summaries")
+def _resync_all_usage_record_summaries(modeladmin, request, queryset):
+    """Admin Action to sync all UsageRecordSummary Objects because they can't be retrieved individually"""
+    call_command("djstripe_sync_models", "UsageRecordSummary")
+    modeladmin.message_user(
+        request, "Successfully Synced ALL Instances", level=messages.SUCCESS
+    )
 
 
 class ReadOnlyMixin:
@@ -625,6 +636,20 @@ class UsageRecordAdmin(StripeModelAdmin):
 @admin.register(models.UsageRecordSummary)
 class UsageRecordSummaryAdmin(StripeModelAdmin):
     list_display = ("invoice", "subscription_item", "total_usage")
+    actions = (_resync_all_usage_record_summaries,)
+
+    def changelist_view(self, request, extra_context=None):
+        # we fool it into thinking we have selected some query
+        # since we need to sync all UsageRecordSummary instances since Stripe
+        # does not allow retrieving one by one
+        post = request.POST.copy()
+        if (
+            helpers.ACTION_CHECKBOX_NAME not in post
+            and post.get("action") == "_resync_all_usage_record_summaries"
+        ):
+            post[helpers.ACTION_CHECKBOX_NAME] = None
+            request._set_post(post)
+        return super().changelist_view(request, extra_context)
 
 
 class WebhookEndpointAdminBaseForm(forms.ModelForm):
@@ -794,6 +819,7 @@ class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
         return super()._post_clean()
 
 
+# todo add _resync_instances or similar admin action to webhookendpoint as well
 @admin.register(models.WebhookEndpoint)
 class WebhookEndpointAdmin(admin.ModelAdmin):
     change_form_template = "djstripe/admin/change_form.html"
