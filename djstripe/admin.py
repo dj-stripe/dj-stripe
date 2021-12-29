@@ -639,6 +639,16 @@ class WebhookEndpointAdminCreateForm(forms.ModelForm):
             "MUST be publicly-accessible."
         ),
     )
+    connect = forms.BooleanField(
+        label="Listen to events on Connected accounts",
+        initial=False,
+        required=False,
+        help_text=(
+            "Clients can make requests as connected accounts using the special "
+            "header `Stripe-Account` which should contain a Stripe account ID "
+            "(usually starting with the prefix `acct_`)."
+        ),
+    )
 
     class Meta:
         model = models.WebhookEndpoint
@@ -647,6 +657,7 @@ class WebhookEndpointAdminCreateForm(forms.ModelForm):
             "djstripe_owner_account",
             "description",
             "base_url",
+            "connect",
             "api_version",
             "metadata",
         )
@@ -723,7 +734,7 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
             advanced_fields = ["enabled_events", "metadata"]
         else:
             header_fields = ["djstripe_owner_account", "livemode"]
-            core_fields = ["description", "base_url"]
+            core_fields = ["description", "base_url", "connect"]
             advanced_fields = ["metadata", "api_version"]
 
         return [
@@ -779,6 +790,7 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
                 description=obj.description,
                 enabled_events=["*"],
                 metadata=metadata,
+                connect=form.data.get("connect") == "on",
             )
 
             new_obj = obj.__class__.sync_from_stripe_data(stripe_we)
