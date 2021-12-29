@@ -122,6 +122,7 @@ class Migration(migrations.Migration):
                 (
                     "djstripe_uuid",
                     models.UUIDField(
+                        null=True,
                         unique=True,
                         default=uuid.uuid4,
                         help_text="A UUID specific to dj-stripe generated for the endpoint",
