@@ -639,6 +639,38 @@ class TestAdminRegisteredModels(TestCase):
                 if model.__name__ not in self.ignore_models:
                     self.assertTrue("id" in search_fields)
 
+    def test_get_actions(self):
+
+        app_label = "djstripe"
+        app_config = apps.get_app_config(app_label)
+        all_models_lst = app_config.get_models()
+
+        for model in all_models_lst:
+            if model in site._registry.keys():
+                model_admin = site._registry.get(model)
+
+                # get the standard changelist_view url
+                url = reverse(
+                    f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
+                )
+
+                # add the admin user to the mocked request
+                request = self.factory.get(url)
+                request.user = self.admin
+
+                actions = model_admin.get_actions(request)
+                models_to_ignore = self.ignore_models + ["APIKey"]
+
+                if model.__name__ not in models_to_ignore:
+                    if model.__name__ == "UsageRecordSummary":
+                        assert "_resync_instances" not in actions
+                        assert "_resync_all_usage_record_summaries" in actions
+
+                    else:
+                        assert "_resync_instances" in actions
+                else:
+                    assert "_resync_instances" not in actions
+
 
 class TestAdminInlineModels(TestCase):
     def test_readonly_fields_exist(self):

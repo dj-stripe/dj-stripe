@@ -622,7 +622,7 @@ class SubscriptionAdmin(StripeModelAdmin):
 
     _cancel.short_description = "Cancel selected subscriptions"  # type: ignore # noqa
 
-    actions = (_cancel,)
+    actions = (_cancel, _resync_instances)
 
 
 @admin.register(models.TaxRate)
@@ -842,7 +842,6 @@ class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
         return super()._post_clean()
 
 
-# todo add _resync_instances or similar admin action to webhookendpoint as well
 @admin.register(models.WebhookEndpoint)
 class WebhookEndpointAdmin(admin.ModelAdmin):
     change_form_template = "djstripe/admin/change_form.html"
