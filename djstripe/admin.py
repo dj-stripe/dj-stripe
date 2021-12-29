@@ -5,6 +5,7 @@ import json
 from typing import Dict, Optional
 from urllib.parse import urljoin
 
+import stripe
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import helpers
@@ -39,6 +40,27 @@ def admin_display_for_field_override():
 
 # execute override
 admin_display_for_field_override()
+
+
+@admin.action(description="Re-Sync Selected Instances")
+def _resync_instances(modeladmin, request, queryset):
+    """Admin Action to resync selected instances"""
+    for instance in queryset:
+        try:
+            if instance.djstripe_owner_account:
+                stripe_data = instance.api_retrieve(
+                    stripe_account=instance.djstripe_owner_account.id
+                )
+            else:
+                stripe_data = instance.api_retrieve()
+            instance.__class__.sync_from_stripe_data(stripe_data)
+            modeladmin.message_user(
+                request, f"Successfully Synced: {instance}", level=messages.SUCCESS
+            )
+        except stripe.error.PermissionError as error:
+            modeladmin.message_user(request, error, level=messages.WARNING)
+        except stripe.error.InvalidRequestError:
+            raise
 
 
 @admin.action(description="Re-Sync ALL Usage Record Summaries")
@@ -192,6 +214,7 @@ class StripeModelAdmin(admin.ModelAdmin):
     """Base class for all StripeModel-based model admins"""
 
     change_form_template = "djstripe/admin/change_form.html"
+    actions = (_resync_instances,)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
