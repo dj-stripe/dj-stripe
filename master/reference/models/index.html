@@ -16088,7 +16088,7 @@ Use this to populate fields before the model is saved.</p>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">customer</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># &quot;customer&quot; key could be like &quot;cus_6lsBvm5rJ0zyHc&quot; or {&quot;id&quot;: &quot;cus_6lsBvm5rJ0zyHc&quot;}</span>
-    <span class="n">customer_id</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_id_from_data</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;customer&quot;</span><span class="p">))</span>
+    <span class="n">customer_id</span> <span class="o">=</span> <span class="n">get_id_from_stripe_data</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;customer&quot;</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">current_ids</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">customer_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">current_ids</span><span class="p">:</span>
         <span class="n">customer</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_stripe_object_to_customer</span><span class="p">(</span>
@@ -16996,7 +16996,7 @@ Use this to populate fields before the model is saved.</p>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">customer</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># &quot;customer&quot; key could be like &quot;cus_6lsBvm5rJ0zyHc&quot; or {&quot;id&quot;: &quot;cus_6lsBvm5rJ0zyHc&quot;}</span>
-    <span class="n">customer_id</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_id_from_data</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;customer&quot;</span><span class="p">))</span>
+    <span class="n">customer_id</span> <span class="o">=</span> <span class="n">get_id_from_stripe_data</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;customer&quot;</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">current_ids</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">customer_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">current_ids</span><span class="p">:</span>
         <span class="n">customer</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_stripe_object_to_customer</span><span class="p">(</span>
@@ -25441,10 +25441,10 @@ djstripe.models.billing.UsageRecordSummary        </code>
 
     <div class="doc doc-contents ">
 
-      <p>Usage record summaries provides usage information that’s been summarized
+      <p>Usage record summaries provides usage information that's been summarized
 from multiple usage records and over a subscription billing period
 (e.g., 15 usage records in the month of September).
-Since new usage records can still be added, the returned summary information for the subscription item’s ID
+Since new usage records can still be added, the returned summary information for the subscription item's ID
 should be seen as unstable until the subscription billing period ends.</p>
 <p>Stripe documentation: https://stripe.com/docs/api/usage_records/subscription_item_summary_list</p>
 
@@ -26076,7 +26076,7 @@ djstripe.models.account.Account        </code>
 
     <div class="doc doc-contents ">
 
-      <p>The business’s publicly available website.</p>
+      <p>The business's publicly available website.</p>
     </div>
 
   </div>
@@ -32092,7 +32092,7 @@ djstripe.models.webhooks.WebhookEventTrigger.MultipleObjectsReturned        </co
 
 
 <h5 id="djstripe.models.webhooks.WebhookEventTrigger.from_request" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">from_request</span><span class="p">(</span><span class="n">request</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">from_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
@@ -32112,7 +32112,7 @@ request object.</p>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span> <span class="nf">from_request</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">from_request</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create, validate and process a WebhookEventTrigger given a Django</span>
 <span class="sd">    request object.</span>
@@ -32135,11 +32135,14 @@ request object.</p>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
 
+    <span class="k">if</span> <span class="n">stripe_account</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">stripe_account</span> <span class="o">=</span> <span class="n">StripeModel</span><span class="o">.</span><span class="n">_find_owner_account</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+
     <span class="n">obj</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
         <span class="n">headers</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">),</span>
         <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span>
         <span class="n">remote_ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span>
-        <span class="n">stripe_trigger_account</span><span class="o">=</span><span class="n">StripeModel</span><span class="o">.</span><span class="n">_find_owner_account</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">),</span>
+        <span class="n">stripe_trigger_account</span><span class="o">=</span><span class="n">stripe_account</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>

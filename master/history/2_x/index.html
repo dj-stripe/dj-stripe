@@ -260,10 +260,10 @@
 <h3 id="warning-about-safe-uninstall-of-jsonfield2-on-upgrade">Warning about safe uninstall of jsonfield2 on upgrade</h3>
 <p>Both <strong>jsonfield</strong> and <strong>jsonfield2</strong> use the same import path, so if
 upgrading from dj-stripe\~=2.2.0 in an existing virtualenv, be sure to
-uninstall jsonfield2 first. eg:
+uninstall jsonfield2 first. eg:</p>
 <div class="highlight"><pre><span></span><code>    <span class="c1"># ensure jsonfield is uninstalled before we install jsonfield2</span>
     pip uninstall jsonfield2 -y <span class="o">&amp;&amp;</span> pip install <span class="s2">&quot;dj-stripe&gt;=2.3.0dev&quot;</span>
-</code></pre></div></p>
+</code></pre></div>
 <p>Otherwise, <code>pip uninstall jsonfield2</code> will remove jsonfield's
 <code>jsonfield</code> module from <code>site-packages</code>, which would cause errors like
 <code>ImportError: cannot import name 'JSONField' from 'jsonfield' (unknown location)</code></p>
@@ -351,7 +351,7 @@ uninstall jsonfield first. eg:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># ensure jsonfield is uninstalled before we install jsonfield2</span>
 pip uninstall jsonfield -y <span class="o">&amp;&amp;</span> pip install <span class="s2">&quot;dj-stripe&gt;=2.2.0&quot;</span>
 </code></pre></div>
-<p>Otherwise, <code>pip uninstall jsonfield</code> will remove jsonfield2’s
+<p>Otherwise, <code>pip uninstall jsonfield</code> will remove jsonfield2's
 <code>jsonfield</code> module from <code>site-packages</code>, which would cause errors like
 <code>ImportError: cannot import name 'JSONField' from 'jsonfield' (unknown location)</code></p>
 <p>If you have hit this ImportError already after upgrading, running this

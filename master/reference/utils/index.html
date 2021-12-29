@@ -152,6 +152,8 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.get_friendly_currency_amount">get_friendly_currency_amount()</a>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.get_id_from_stripe_data">get_id_from_stripe_data()</a>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.get_supported_currency_choices">get_supported_currency_choices()</a>
     </li>
         </ul>
@@ -448,6 +450,43 @@ fields to the appropriate values.</p>
     <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{sigil}{amount:.2f}</span><span class="s2"> </span><span class="si">{currency}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
         <span class="n">sigil</span><span class="o">=</span><span class="n">sigil</span><span class="p">,</span> <span class="n">amount</span><span class="o">=</span><span class="n">amount</span><span class="p">,</span> <span class="n">currency</span><span class="o">=</span><span class="n">currency</span>
     <span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-function">
+
+
+
+<h3 id="djstripe.utils.get_id_from_stripe_data" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_id_from_stripe_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></code>
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Extract stripe id from stripe field data</p>
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/utils.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_id_from_stripe_data</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract stripe id from stripe field data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># data like &quot;sub_6lsC8pt7IcFpjA&quot;</span>
+        <span class="k">return</span> <span class="n">data</span>
+    <span class="k">elif</span> <span class="n">data</span><span class="p">:</span>
+        <span class="c1"># data like {&quot;id&quot;: sub_6lsC8pt7IcFpjA&quot;, ...}</span>
+        <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div>
         </details>
     </div>
