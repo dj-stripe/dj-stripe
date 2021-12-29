@@ -680,11 +680,13 @@ class WebhookEndpointAdminEditForm(forms.ModelForm):
 
     def get_initial_for_field(self, field, field_name):
         if field_name == "base_url":
-            endpoint_path = reverse(
-                "djstripe:djstripe_webhook_by_uuid",
-                kwargs={"uuid": self.instance.metadata["djstripe_uuid"]},
-            )
-            return self.instance.url.replace(endpoint_path, "")
+            djstripe_uuid = self.instance.metadata.get("djstripe_uuid")
+            if djstripe_uuid:
+                # if a djstripe_uuid is set (for dj-stripe endpoints), set the base_url
+                endpoint_path = reverse(
+                    "djstripe:djstripe_webhook_by_uuid", kwargs={"uuid": djstripe_uuid}
+                )
+                return self.instance.url.replace(endpoint_path, "")
         return super().get_initial_for_field(field, field_name)
 
     class Meta:
@@ -722,6 +724,7 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
 
     def get_fieldsets(self, request, obj=None):
         if obj:
+            # if djstripe_uuid is null, this is not a dj-stripe webhook
             header_fields = [
                 "id",
                 "livemode",
@@ -730,8 +733,11 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
                 "api_version",
                 "url",
             ]
-            core_fields = ["description", "base_url", "enabled"]
             advanced_fields = ["enabled_events", "metadata"]
+            if obj.djstripe_uuid:
+                core_fields = ["description", "base_url", "enabled"]
+            else:
+                core_fields = ["description", "enabled"]
         else:
             header_fields = ["djstripe_owner_account", "livemode"]
             core_fields = ["description", "base_url", "connect"]
@@ -754,14 +760,15 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
 
         import stripe
 
-        url_path = reverse(
-            "djstripe:djstripe_webhook_by_uuid", kwargs={"uuid": obj.djstripe_uuid}
-        )
-        base_url = form.data["base_url"]
+        base_url = form.data.get("base_url", "")
 
         if obj.djstripe_created:
             # We are editing an existing endpoint
-            if base_url:
+            if base_url and obj.djstripe_uuid:
+                url_path = reverse(
+                    "djstripe:djstripe_webhook_by_uuid",
+                    kwargs={"uuid": obj.djstripe_uuid},
+                )
                 url = urljoin(base_url, url_path, allow_fragments=False)
             else:
                 url = obj.url
@@ -776,6 +783,10 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
             obj.__class__.sync_from_stripe_data(stripe_we)
         else:
             # We are creating a new endpoint
+            assert obj.djstripe_uuid
+            url_path = reverse(
+                "djstripe:djstripe_webhook_by_uuid", kwargs={"uuid": obj.djstripe_uuid}
+            )
             if base_url:
                 url = urljoin(base_url, url_path, allow_fragments=False)
             else:
