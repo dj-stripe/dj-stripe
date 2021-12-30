@@ -707,6 +707,11 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
     )
     readonly_fields = ("url",)
 
+    # Disable the mass-delete action for webhook endpoints.
+    # We don't want to enable deleting multiple endpoints on Stripe at once.
+    def get_actions(self, request):
+        return {}
+
     def get_form(self, request, obj=None, **kwargs):
         if obj:
             return WebhookEndpointAdminEditForm
