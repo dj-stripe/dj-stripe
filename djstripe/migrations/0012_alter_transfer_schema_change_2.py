@@ -3,8 +3,6 @@
 import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations
-from django.db.migrations.operations import fields
-from django.db.models.indexes import Index
 
 import djstripe.fields
 
