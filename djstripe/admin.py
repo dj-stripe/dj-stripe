@@ -806,3 +806,8 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
 
             new_obj = obj.__class__.sync_from_stripe_data(stripe_we)
             obj.id = new_obj.id
+
+    def delete_model(self, request, obj):
+        obj._api_delete()
+
+        return super().delete_model(request, obj)
