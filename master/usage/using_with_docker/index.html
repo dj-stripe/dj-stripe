@@ -174,58 +174,58 @@
                 <h1 id="using-with-docker">Using with Docker</h1>
 <p>A <a href="https://hub.docker.com/r/stripe/stripe-cli">Docker image</a> allows you to run the Stripe CLI in a container.</p>
 <p>Here is a sample <code>docker-compose.yaml</code> file that sets up all the services to use <code>Stripe CLI</code> in a <code>dockerised django container (with djstripe)</code></p>
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span> <span class="s">&quot;3.9&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3.9&quot;</span><span class="w"></span>
 
 
-<span class="nt">volumes</span><span class="p">:</span>
-    <span class="nt">postgres-data</span><span class="p">:</span> <span class="p p-Indicator">{}</span>
+<span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">postgres-data</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{}</span><span class="w"></span>
 
 
-<span class="nt">services</span><span class="p">:</span>
+<span class="nt">services</span><span class="p">:</span><span class="w"></span>
 
-  <span class="nt">db</span><span class="p">:</span>
-    <span class="nt">image</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">postgres:12</span>
-    <span class="nt">volumes</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">postgres-data:/var/lib/postgresql/data</span>
-    <span class="nt">environment</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">POSTGRES_DB=random_number</span>
-      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">POSTGRES_USER=root</span>
-      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">POSTGRES_PASSWORD=random_number</span>
+<span class="w">  </span><span class="nt">db</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">postgres:12</span><span class="w"></span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">postgres-data:/var/lib/postgresql/data</span><span class="w"></span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">POSTGRES_DB=random_number</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">POSTGRES_USER=root</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">POSTGRES_PASSWORD=random_number</span><span class="w"></span>
 
 
-  <span class="nt">web</span><span class="p">:</span>
-    <span class="nt">build</span><span class="p">:</span>
-      <span class="nt">context</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">.</span>
-      <span class="nt">dockerfile</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">&lt;PATH_TO_DOCKERFILE&gt;</span>
-    <span class="nt">command</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">python manage.py runserver 0.0.0.0:8000</span>
-    <span class="nt">volumes</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">.:/app</span>
-    <span class="nt">ports</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="s">&quot;8000:8000&quot;</span>
-    <span class="nt">depends_on</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">db</span>
-    <span class="nt">environment</span><span class="p">:</span>
-        <span class="c1"># Stripe specific keys</span>
-        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">STRIPE_PUBLIC_KEY=pk_test_******</span>
-        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">STRIPE_SECRET_KEY=sk_test_******</span>
-        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">DJSTRIPE_TEST_WEBHOOK_SECRET=whsec_******</span>
+<span class="w">  </span><span class="nt">web</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">build</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.</span><span class="w"></span>
+<span class="w">      </span><span class="nt">dockerfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;PATH_TO_DOCKERFILE&gt;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python manage.py runserver 0.0.0.0:8000</span><span class="w"></span>
+<span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.:/app</span><span class="w"></span>
+<span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;8000:8000&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">db</span><span class="w"></span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="c1"># Stripe specific keys</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">STRIPE_PUBLIC_KEY=pk_test_******</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">STRIPE_SECRET_KEY=sk_test_******</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DJSTRIPE_TEST_WEBHOOK_SECRET=whsec_******</span><span class="w"></span>
 
-        <span class="c1"># Database Specific Settings</span>
-        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">DJSTRIPE_TEST_DB_VENDOR=postgres</span>
-        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">DJSTRIPE_TEST_DB_PORT=5432</span>
-        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">DJSTRIPE_TEST_DB_USER=root</span>
-        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">DJSTRIPE_TEST_DB_NAME=random_number</span>
-        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">DJSTRIPE_TEST_DB_PASS=random_number</span>
-        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">DJSTRIPE_TEST_DB_HOST=db</span>
+<span class="w">        </span><span class="c1"># Database Specific Settings</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DJSTRIPE_TEST_DB_VENDOR=postgres</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DJSTRIPE_TEST_DB_PORT=5432</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DJSTRIPE_TEST_DB_USER=root</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DJSTRIPE_TEST_DB_NAME=random_number</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DJSTRIPE_TEST_DB_PASS=random_number</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DJSTRIPE_TEST_DB_HOST=db</span><span class="w"></span>
 
-  <span class="nt">stripe</span><span class="p">:</span>
-    <span class="nt">image</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">stripe/stripe-cli:v1.7.4</span>
-    <span class="nt">command</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">listen --forward-to http://web:8000/djstripe/webhook/</span>
-    <span class="nt">depends_on</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">web</span>
-    <span class="nt">environment</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">STRIPE_API_KEY=sk_test_******</span>
-      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">STRIPE_DEVICE_NAME=djstripe_docker</span>
+<span class="w">  </span><span class="nt">stripe</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stripe/stripe-cli:v1.7.4</span><span class="w"></span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">listen --forward-to http://web:8000/djstripe/webhook/</span><span class="w"></span>
+<span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web</span><span class="w"></span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">STRIPE_API_KEY=sk_test_******</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">STRIPE_DEVICE_NAME=djstripe_docker</span><span class="w"></span>
 </code></pre></div>
               
             </div>
