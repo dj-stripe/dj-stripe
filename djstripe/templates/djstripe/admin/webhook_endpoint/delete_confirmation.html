@@ -1,0 +1,15 @@
+{% extends "admin/delete_confirmation.html" %} {% block content %}
+
+<style>
+    .stripe-confirmation-warning {
+        padding: 1rem;
+        background: var(--message-warning-bg) url(../img/icon-alert.svg) 40px 14px
+            no-repeat;
+    }
+</style>
+
+<p class="stripe-confirmation-warning">
+    <strong>Warning:</strong> This {{ object_name }} will also be deleted from Stripe.
+</p>
+
+{{ block.super }} {% endblock %}
