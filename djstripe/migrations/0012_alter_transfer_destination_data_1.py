@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             """,
             reverse_sql="""
                 UPDATE djstripe_transfer
-                SET old_destination_field=(SELECT id FROM djstripe_account WHERE CAST(djstripe_id AS CHAR)=djstripe_transfer.old_destination_field)
+                SET old_destination_field=(SELECT id FROM djstripe_account WHERE CAST(djstripe_id AS VARCHAR)=djstripe_transfer.old_destination_field)
                 ;
             """,
         ),
