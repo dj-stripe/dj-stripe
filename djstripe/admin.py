@@ -702,6 +702,9 @@ class WebhookEndpointAdminEditForm(forms.ModelForm):
 @admin.register(models.WebhookEndpoint)
 class WebhookEndpointAdmin(admin.ModelAdmin):
     change_form_template = "djstripe/admin/change_form.html"
+    delete_confirmation_template = (
+        "djstripe/admin/webhook_endpoint/delete_confirmation.html"
+    )
     readonly_fields = ("url",)
 
     def get_form(self, request, obj=None, **kwargs):
