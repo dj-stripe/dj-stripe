@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from django.core.validators import RegexValidator
 from django.db import models
+from django.forms import ValidationError
 
 from ..enums import APIKeyType
 from ..exceptions import InvalidStripeAPIKey
@@ -79,7 +80,10 @@ class APIKey(StripeModel):
 
     def _clean_livemode_and_type(self):
         if self.livemode is None or self.type is None:
-            self.type, self.livemode = get_api_key_details_by_prefix(self.secret)
+            try:
+                self.type, self.livemode = get_api_key_details_by_prefix(self.secret)
+            except InvalidStripeAPIKey as e:
+                raise ValidationError(str(e))
 
     def clean(self):
         self._clean_livemode_and_type()
