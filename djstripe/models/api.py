@@ -82,8 +82,6 @@ class APIKey(StripeModel):
 
     def clean(self):
         self._clean_livemode_and_type()
-        if not self.djstripe_owner_account:
-            self.refresh_account()
         return super().clean()
 
     def save(self, *args, **kwargs):
