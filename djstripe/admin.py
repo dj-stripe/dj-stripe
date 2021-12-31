@@ -7,6 +7,7 @@ from django import forms
 from django.contrib import admin
 from django.contrib.admin.utils import display_for_field, display_for_value
 from jsonfield import JSONField
+from stripe.error import AuthenticationError
 
 from . import enums, models
 
@@ -275,7 +276,10 @@ class APIKeyAdminCreateForm(forms.ModelForm):
             self.instance.type == enums.APIKeyType.secret
             and self.instance.djstripe_owner_account is None
         ):
-            self.instance.refresh_account()
+            try:
+                self.instance.refresh_account()
+            except AuthenticationError as e:
+                self.add_error("secret", str(e))
 
 
 @admin.register(models.APIKey)
