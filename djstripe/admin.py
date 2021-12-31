@@ -3,11 +3,12 @@ Django Administration interface definitions
 """
 import json
 
+from django import forms
 from django.contrib import admin
 from django.contrib.admin.utils import display_for_field, display_for_value
 from jsonfield import JSONField
 
-from . import models
+from . import enums, models
 
 
 def custom_display_for_JSONfield(value, field, empty_value_display):
@@ -263,7 +264,20 @@ class AccountAdmin(StripeModelAdmin):
     search_fields = ("settings", "business_profile")
 
 
-# todo perhaps make the djstripe_owner_account modelfield updateable for pub and webhook secret since we cannot query stripe for that info?
+class APIKeyAdminCreateForm(forms.ModelForm):
+    class Meta:
+        model = models.APIKey
+        fields = ["name", "secret"]
+
+    def _post_clean(self):
+        super()._post_clean()
+        if (
+            self.instance.type == enums.APIKeyType.secret
+            and self.instance.djstripe_owner_account is None
+        ):
+            self.instance.refresh_account()
+
+
 @admin.register(models.APIKey)
 class APIKeyAdmin(StripeModelAdmin):
     list_display = ("type",)
@@ -273,13 +287,17 @@ class APIKeyAdmin(StripeModelAdmin):
     get_fieldsets = admin.ModelAdmin.get_fieldsets
 
     def get_fields(self, request, obj=None):
+        if obj is None:
+            return APIKeyAdminCreateForm.Meta.fields
         fields = super().get_fields(request, obj)
         fields.remove("id")
         fields.remove("created")
-        if obj is None:
-            fields.remove("type")
-            fields.remove("livemode")
         return fields
+
+    def get_form(self, request, obj=None, **kwargs):
+        if obj is None:
+            return APIKeyAdminCreateForm
+        return super().get_form(request, obj, **kwargs)
 
 
 @admin.register(models.BalanceTransaction)

@@ -78,22 +78,12 @@ class APIKey(StripeModel):
     def __str__(self):
         return self.name or self.secret_redacted
 
-    def _clean_livemode_and_type(self):
+    def clean(self):
         if self.livemode is None or self.type is None:
             try:
                 self.type, self.livemode = get_api_key_details_by_prefix(self.secret)
             except InvalidStripeAPIKey as e:
                 raise ValidationError(str(e))
-
-    def clean(self):
-        self._clean_livemode_and_type()
-        return super().clean()
-
-    def save(self, *args, **kwargs):
-        self._clean_livemode_and_type()
-        if not self.djstripe_owner_account:
-            self.refresh_account(commit=False)
-        return super().save(*args, **kwargs)
 
     def refresh_account(self, commit=True):
         from .account import Account
