@@ -1244,7 +1244,7 @@ class Migration(migrations.Migration):
                 (
                     "livemode",
                     models.BooleanField(
-                        help_text="Whether the key is valid for live or test mode. This is automatically detected when saved."
+                        help_text="Whether the key is valid for live or test mode."
                     ),
                 ),
                 (
