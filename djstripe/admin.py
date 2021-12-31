@@ -626,7 +626,11 @@ class UsageRecordSummaryAdmin(StripeModelAdmin):
     list_display = ("invoice", "subscription_item", "total_usage")
 
 
-class WebhookEndpointAdminCreateForm(forms.ModelForm):
+class WebhookEndpointAdminBaseForm(forms.ModelForm):
+    pass
+
+
+class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
     livemode = forms.BooleanField(
         label="Live mode",
         required=False,
@@ -663,7 +667,7 @@ class WebhookEndpointAdminCreateForm(forms.ModelForm):
         )
 
 
-class WebhookEndpointAdminEditForm(forms.ModelForm):
+class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
     base_url = forms.URLField(
         required=False,
         help_text=(
@@ -700,6 +704,13 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
         "djstripe/admin/webhook_endpoint/delete_confirmation.html"
     )
     readonly_fields = ("url",)
+    list_display = (
+        "__str__",
+        "djstripe_owner_account",
+        "livemode",
+        "created",
+        "api_version",
+    )
 
     # Disable the mass-delete action for webhook endpoints.
     # We don't want to enable deleting multiple endpoints on Stripe at once.
@@ -727,19 +738,17 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
     def get_fieldsets(self, request, obj=None):
         if obj:
             # if djstripe_uuid is null, this is not a dj-stripe webhook
-            header_fields = [
-                "id",
-                "livemode",
-                "djstripe_owner_account",
-                "djstripe_uuid",
+            header_fields = ["id", "livemode", "djstripe_owner_account", "url"]
+            advanced_fields = [
+                "enabled_events",
+                "metadata",
                 "api_version",
-                "url",
+                "djstripe_uuid",
             ]
-            advanced_fields = ["enabled_events", "metadata"]
             if obj.djstripe_uuid:
-                core_fields = ["description", "base_url", "enabled"]
+                core_fields = ["enabled", "base_url", "description"]
             else:
-                core_fields = ["description", "enabled"]
+                core_fields = ["enabled", "description"]
         else:
             header_fields = ["djstripe_owner_account", "livemode"]
             core_fields = ["description", "base_url", "connect"]
@@ -747,9 +756,9 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
 
         return [
             (None, {"fields": header_fields}),
-            (self.model.__name__, {"fields": core_fields}),
+            ("Endpoint configuration", {"fields": core_fields}),
             (
-                "Advanced options",
+                "Advanced",
                 {"fields": advanced_fields, "classes": ["collapse"]},
             ),
         ]
