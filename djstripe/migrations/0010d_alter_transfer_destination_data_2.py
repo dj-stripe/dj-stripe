@@ -5,7 +5,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("djstripe", "0012_alter_transfer_schema_change_2"),
+        ("djstripe", "0010c_alter_transfer_schema_change_2"),
     ]
 
     operations = [
