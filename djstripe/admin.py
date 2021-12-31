@@ -666,6 +666,29 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
             "metadata",
         )
 
+    def save(self, commit: bool = False):
+        base_url = self.cleaned_data["base_url"]
+        url_path = reverse(
+            "djstripe:djstripe_webhook_by_uuid",
+            kwargs={"uuid": self.instance.djstripe_uuid},
+        )
+        url = urljoin(base_url, url_path, allow_fragments=False)
+
+        metadata = self.instance.metadata or {}
+        metadata["djstripe_uuid"] = str(self.instance.djstripe_uuid)
+
+        stripe_data = models.WebhookEndpoint.stripe_class.create(
+            url=url,
+            api_version=self.cleaned_data["api_version"] or None,
+            description=self.cleaned_data["description"],
+            enabled_events=["*"],
+            metadata=metadata,
+            connect=self.cleaned_data["connect"],
+        )
+        self.instance = models.WebhookEndpoint.sync_from_stripe_data(stripe_data)
+
+        return super().save(commit=commit)
+
 
 class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
     base_url = forms.URLField(
@@ -695,6 +718,28 @@ class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
                 )
                 return self.instance.url.replace(endpoint_path, "")
         return super().get_initial_for_field(field, field_name)
+
+    def save(self, commit: bool = False):
+        base_url = self.cleaned_data.get("base_url", "")
+        if base_url and self.instance.djstripe_uuid:
+            url_path = reverse(
+                "djstripe:djstripe_webhook_by_uuid",
+                kwargs={"uuid": self.instance.djstripe_uuid},
+            )
+            url = urljoin(base_url, url_path, allow_fragments=False)
+        else:
+            url = self.instance.url
+
+        stripe_data = self.instance._api_update(
+            url=url,
+            description=self.cleaned_data.get("description"),
+            enabled_events=self.cleaned_data.get("enabled_events"),
+            metadata=self.cleaned_data.get("metadata"),
+            disabled=self.cleaned_data.get("enabled") != "on",
+        )
+        models.WebhookEndpoint.sync_from_stripe_data(stripe_data)
+
+        return super().save(commit=commit)
 
 
 @admin.register(models.WebhookEndpoint)
@@ -768,45 +813,6 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
         base_url = f"{request.scheme}://{request.get_host()}"
         ret.setdefault("base_url", base_url)
         return ret
-
-    def save_model(self, request, obj: "models.WebhookEndpoint", form, change):
-        base_url = form.data.get("base_url", "")
-
-        if base_url and obj.djstripe_uuid:
-            url_path = reverse(
-                "djstripe:djstripe_webhook_by_uuid", kwargs={"uuid": obj.djstripe_uuid}
-            )
-            url = urljoin(base_url, url_path, allow_fragments=False)
-        else:
-            url = obj.url
-
-        if obj.djstripe_created:
-            # We are editing an existing endpoint
-            stripe_we = obj._api_update(
-                url=url,
-                description=obj.description,
-                enabled_events=obj.enabled_events,
-                metadata=obj.metadata,
-                disabled=form.data.get("enabled") != "on",
-            )
-            obj.__class__.sync_from_stripe_data(stripe_we)
-        else:
-            # We are creating a new endpoint
-
-            metadata = obj.metadata or {}
-            metadata["djstripe_uuid"] = str(obj.djstripe_uuid)
-
-            stripe_we = models.WebhookEndpoint.stripe_class.create(
-                url=url,
-                api_version=obj.api_version or None,
-                description=obj.description,
-                enabled_events=["*"],
-                metadata=metadata,
-                connect=form.data.get("connect") == "on",
-            )
-
-            new_obj = obj.__class__.sync_from_stripe_data(stripe_we)
-            obj.id = new_obj.id
 
     def delete_model(self, request, obj):
         obj._api_delete()
