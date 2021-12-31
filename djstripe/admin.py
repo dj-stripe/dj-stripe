@@ -283,20 +283,15 @@ class APIKeyAdminCreateForm(forms.ModelForm):
 
 
 @admin.register(models.APIKey)
-class APIKeyAdmin(StripeModelAdmin):
-    list_display = ("type",)
-    list_filter = ("type",)
+class APIKeyAdmin(admin.ModelAdmin):
+    list_display = ("__str__", "type", "djstripe_owner_account", "livemode")
+    readonly_fields = ("djstripe_owner_account", "livemode", "type", "secret")
     search_fields = ("name",)
-
-    get_fieldsets = admin.ModelAdmin.get_fieldsets
 
     def get_fields(self, request, obj=None):
         if obj is None:
             return APIKeyAdminCreateForm.Meta.fields
-        fields = super().get_fields(request, obj)
-        fields.remove("id")
-        fields.remove("created")
-        return fields
+        return ["type", "djstripe_owner_account", "livemode", "name", "secret"]
 
     def get_form(self, request, obj=None, **kwargs):
         if obj is None:
