@@ -8,6 +8,7 @@ import pytest
 from django.test import TestCase
 
 from djstripe.enums import APIKeyType
+from djstripe.exceptions import InvalidStripeAPIKey
 from djstripe.models import Account, APIKey
 from djstripe.models.api import get_api_key_details_by_prefix
 
@@ -39,11 +40,11 @@ def test_get_api_key_details_by_prefix():
 
 
 def test_get_api_key_details_by_prefix_bad_values():
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidStripeAPIKey):
         get_api_key_details_by_prefix("pk_a")
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidStripeAPIKey):
         get_api_key_details_by_prefix("sk_a")
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidStripeAPIKey):
         get_api_key_details_by_prefix("rk_nope_1234")
 
 

@@ -16,3 +16,11 @@ class StripeObjectManipulationException(Exception):
     """
 
     pass
+
+
+class InvalidStripeAPIKey(ValueError):
+    """
+    Raised when a clearly-invalid Stripe API key is used.
+    """
+
+    pass

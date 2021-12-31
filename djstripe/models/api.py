@@ -6,6 +6,7 @@ from django.core.validators import RegexValidator
 from django.db import models
 
 from ..enums import APIKeyType
+from ..exceptions import InvalidStripeAPIKey
 from ..fields import StripeEnumField
 from .base import StripeModel
 
@@ -22,7 +23,7 @@ def generate_api_key_id() -> str:
 def get_api_key_details_by_prefix(api_key: str):
     sre = re.match(API_KEY_REGEX, api_key)
     if not sre:
-        raise ValueError(f"Invalid API key: {api_key!r}")
+        raise InvalidStripeAPIKey(f"Invalid API key: {api_key!r}")
 
     key_type = {
         "pk": APIKeyType.publishable,
