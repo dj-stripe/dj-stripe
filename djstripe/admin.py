@@ -627,7 +627,17 @@ class UsageRecordSummaryAdmin(StripeModelAdmin):
 
 
 class WebhookEndpointAdminBaseForm(forms.ModelForm):
-    pass
+    def _get_field_name(self, stripe_field: str) -> str:
+        if stripe_field == "url":
+            return "base_url"
+        else:
+            return stripe_field.partition("[")[0]
+
+    def save(self, commit: bool = False):
+        # If we do the following in _post_clean(), the data doesn't save properly.
+        assert self._stripe_data
+        self.instance = models.WebhookEndpoint.sync_from_stripe_data(self._stripe_data)
+        return super().save(commit=commit)
 
 
 class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
@@ -666,7 +676,10 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
             "metadata",
         )
 
-    def save(self, commit: bool = False):
+    # Hook into _post_clean() instead of save().
+    # This is used by Django for ModelForm logic. It's internal, but exactly
+    # what we need to add errors after the data has been validated locally.
+    def _post_clean(self):
         base_url = self.cleaned_data["base_url"]
         url_path = reverse(
             "djstripe:djstripe_webhook_by_uuid",
@@ -677,17 +690,20 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
         metadata = self.instance.metadata or {}
         metadata["djstripe_uuid"] = str(self.instance.djstripe_uuid)
 
-        stripe_data = models.WebhookEndpoint.stripe_class.create(
-            url=url,
-            api_version=self.cleaned_data["api_version"] or None,
-            description=self.cleaned_data["description"],
-            enabled_events=["*"],
-            metadata=metadata,
-            connect=self.cleaned_data["connect"],
-        )
-        self.instance = models.WebhookEndpoint.sync_from_stripe_data(stripe_data)
+        try:
+            self._stripe_data = models.WebhookEndpoint.stripe_class.create(
+                url=url,
+                api_version=self.cleaned_data["api_version"] or None,
+                description=self.cleaned_data["description"],
+                enabled_events=["*"],
+                metadata=metadata,
+                connect=self.cleaned_data["connect"],
+            )
+        except InvalidRequestError as e:
+            field_name = self._get_field_name(e.param)
+            self.add_error(field_name, e.user_message)
 
-        return super().save(commit=commit)
+        return super()._post_clean()
 
 
 class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
@@ -710,7 +726,8 @@ class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
 
     def get_initial_for_field(self, field, field_name):
         if field_name == "base_url":
-            djstripe_uuid = self.instance.metadata.get("djstripe_uuid")
+            metadata = self.instance.metadata or {}
+            djstripe_uuid = metadata.get("djstripe_uuid")
             if djstripe_uuid:
                 # if a djstripe_uuid is set (for dj-stripe endpoints), set the base_url
                 endpoint_path = reverse(
@@ -719,7 +736,7 @@ class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
                 return self.instance.url.replace(endpoint_path, "")
         return super().get_initial_for_field(field, field_name)
 
-    def save(self, commit: bool = False):
+    def _post_clean(self):
         base_url = self.cleaned_data.get("base_url", "")
         if base_url and self.instance.djstripe_uuid:
             url_path = reverse(
@@ -730,16 +747,19 @@ class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
         else:
             url = self.instance.url
 
-        stripe_data = self.instance._api_update(
-            url=url,
-            description=self.cleaned_data.get("description"),
-            enabled_events=self.cleaned_data.get("enabled_events"),
-            metadata=self.cleaned_data.get("metadata"),
-            disabled=self.cleaned_data.get("enabled") != "on",
-        )
-        models.WebhookEndpoint.sync_from_stripe_data(stripe_data)
+        try:
+            self._stripe_data = self.instance._api_update(
+                url=url,
+                description=self.cleaned_data.get("description"),
+                enabled_events=self.cleaned_data.get("enabled_events"),
+                metadata=self.cleaned_data.get("metadata"),
+                disabled=self.cleaned_data.get("enabled") != "on",
+            )
+        except InvalidRequestError as e:
+            field_name = self._get_field_name(e.param)
+            self.add_error(field_name, e.user_message)
 
-        return super().save(commit=commit)
+        return super()._post_clean()
 
 
 @admin.register(models.WebhookEndpoint)
