@@ -14,7 +14,7 @@ dj-stripe provides the following settings to tune how your webhooks work:
 
 dj-stripe comes with native support for webhooks as event listeners.
 
-Events allow you to do things like [sending an email to a customer when
+Events allow you to do things like sending an email to a customer when
 his payment has
 [failed](https://stripe.com/docs/receipts#failed-payment-alerts)
 or trial period is ending.
