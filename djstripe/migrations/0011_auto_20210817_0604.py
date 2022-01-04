@@ -11,7 +11,7 @@ import djstripe.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("djstripe", "0010e_alter_transfer_schema_change_3"),
+        ("djstripe", "0009_2_6"),
     ]
 
     operations = [

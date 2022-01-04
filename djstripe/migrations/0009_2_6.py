@@ -306,6 +306,15 @@ class Migration(migrations.Migration):
                 ],
             ),
         ),
+        migrations.AlterField(
+            model_name="transfer",
+            name="destination",
+            field=djstripe.fields.StripeIdField(
+                help_text="ID of the bank account, card, or Stripe account the transfer was sent to.",
+                max_length=255,
+                null=True,
+            ),
+        ),
         migrations.AddField(
             model_name="usagerecord",
             name="action",

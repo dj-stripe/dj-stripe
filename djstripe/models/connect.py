@@ -197,12 +197,10 @@ class Transfer(StripeModel):
     )
     currency = StripeCurrencyCodeField()
 
-    destination = StripeForeignKey(
-        "Account",
+    destination = StripeIdField(
+        max_length=255,
         null=True,
-        on_delete=models.PROTECT,
-        related_name="transfers",
-        help_text="ID of the Stripe account the transfer was sent to.",
+        help_text="ID of the bank account, card, or Stripe account the transfer was sent to.",
     )
 
     # todo implement payment model (for some reason py ids are showing up in the charge model)
