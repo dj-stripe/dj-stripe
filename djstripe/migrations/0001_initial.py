@@ -11,9 +11,9 @@ import djstripe.enums
 import djstripe.fields
 import djstripe.models.webhooks
 
-DJSTRIPE_SUBSCRIBER_MODEL = getattr(
+DJSTRIPE_SUBSCRIBER_MODEL: str = getattr(
     settings, "DJSTRIPE_SUBSCRIBER_MODEL", settings.AUTH_USER_MODEL
-)
+)  # type: ignore
 
 # Needed here for external apps that have added the DJSTRIPE_SUBSCRIBER_MODEL
 # *not* in the '__first__' migration of the app, which results in:
