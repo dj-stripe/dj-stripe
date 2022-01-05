@@ -460,6 +460,14 @@ class InvoiceAdmin(StripeModelAdmin):
     inlines = (InvoiceItemInline,)
 
 
+@admin.register(models.Mandate)
+class MandateAdmin(StripeModelAdmin):
+    list_display = ("status", "type", "payment_method")
+    list_filter = ("multi_use", "single_use")
+    list_select_related = ("payment_method",)
+    search_fields = ("payment_method__id",)
+
+
 @admin.register(models.Plan)
 class PlanAdmin(StripeModelAdmin):
     radio_fields = {"interval": admin.HORIZONTAL}
