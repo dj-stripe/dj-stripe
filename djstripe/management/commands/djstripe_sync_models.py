@@ -129,7 +129,7 @@ class Command(BaseCommand):
         """
         all_list_kwargs = (
             [{"expand": [f"data.{k}" for k in model.expand_fields]}]
-            if getattr(models, "expand_fields", [])
+            if getattr(model, "expand_fields", [])
             else []
         )
         if model is models.PaymentMethod:
