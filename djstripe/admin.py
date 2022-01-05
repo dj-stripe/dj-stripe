@@ -288,6 +288,11 @@ class APIKeyAdmin(admin.ModelAdmin):
     readonly_fields = ("djstripe_owner_account", "livemode", "type", "secret")
     search_fields = ("name",)
 
+    def get_readonly_fields(self, request, obj=None):
+        if obj is None:
+            return ["djstripe_owner_account", "livemode", "type"]
+        return super().get_readonly_fields(request, obj=obj)
+
     def get_fields(self, request, obj=None):
         if obj is None:
             return APIKeyAdminCreateForm.Meta.fields
