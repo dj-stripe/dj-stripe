@@ -1435,6 +1435,11 @@ class Subscription(StripeModel):
         "invoice items will be billed according to the schedule provided at "
         "pending_invoice_item_interval.",
     )
+    pause_collection = JSONField(
+        null=True,
+        blank=True,
+        help_text="If specified, payment collection for this subscription will be paused.",
+    )
     pending_invoice_item_interval = JSONField(
         null=True,
         blank=True,
