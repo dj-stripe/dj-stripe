@@ -203,6 +203,10 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         plan_retrieve_mock,
     ):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription_fake["pause_collection"] = {
+            "behavior": "keep_as_draft",
+            "resumes_at": 1624553615,
+        }
         subscription_fake["cancel_at"] = 1624553655
 
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
@@ -216,6 +220,10 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
             subscription, expected_blank_fks=self.default_expected_blank_fks
         )
         self.assertEqual(datetime_to_unix(subscription.cancel_at), 1624553655)
+        self.assertEqual(
+            subscription.pause_collection,
+            subscription_fake["pause_collection"],
+        )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(

@@ -1086,6 +1086,7 @@ FAKE_SUBSCRIPTION_METERED = SubscriptionDict(
                 }
             ]
         },
+        "pause_collection": None,
         "plan": deepcopy(FAKE_PLAN_METERED),
         "quantity": 1,
         "start": 1439229181,
