@@ -26,10 +26,7 @@ class Migration(migrations.Migration):
             model_name="customer",
             name="balance",
             field=djstripe.fields.StripeQuantumCurrencyAmountField(
-                blank=True,
-                default=0,
-                help_text="Current balance (in cents), if any, being stored on the customer's account. If negative, the customer has credit to apply to the next invoice. If positive, the customer has an amount owed that will be added to the next invoice. The balance does not refer to any unpaid invoices; it solely takes into account amounts that have yet to be successfully applied to any invoice. This balance is only taken into account for recurring billing purposes (i.e., subscriptions, invoices, invoice items).",
-                null=True,
+                blank=True, default=0, null=True
             ),
         ),
     ]

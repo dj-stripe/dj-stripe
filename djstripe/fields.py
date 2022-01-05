@@ -37,6 +37,8 @@ class StripeForeignKey(models.ForeignKey):
         kwargs["to_field"] = SettingsReference(
             getattr(settings, self.setting_name, "id"), self.setting_name
         )
+        if "help_text" in kwargs:
+            del kwargs["help_text"]
         return name, path, args, kwargs
 
     def get_default(self):
@@ -52,6 +54,12 @@ class PaymentMethodForeignKey(models.ForeignKey):
         kwargs.setdefault("to", "DjstripePaymentMethod")
         super().__init__(**kwargs)
 
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        if "help_text" in kwargs:
+            del kwargs["help_text"]
+        return name, path, args, kwargs
+
 
 class StripePercentField(models.DecimalField):
     """A field used to define a percent according to djstripe logic."""
@@ -66,6 +74,12 @@ class StripePercentField(models.DecimalField):
         defaults.update(kwargs)
         super().__init__(*args, **defaults)
 
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        if "help_text" in kwargs:
+            del kwargs["help_text"]
+        return name, path, args, kwargs
+
 
 class StripeCurrencyCodeField(models.CharField):
     """
@@ -77,6 +91,12 @@ class StripeCurrencyCodeField(models.CharField):
         defaults.update(kwargs)
         super().__init__(*args, **defaults)
 
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        if "help_text" in kwargs:
+            del kwargs["help_text"]
+        return name, path, args, kwargs
+
 
 class StripeQuantumCurrencyAmountField(models.BigIntegerField):
     """
@@ -85,7 +105,11 @@ class StripeQuantumCurrencyAmountField(models.BigIntegerField):
     digits, hence the use of BigIntegerField instead of IntegerField
     """
 
-    pass
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        if "help_text" in kwargs:
+            del kwargs["help_text"]
+        return name, path, args, kwargs
 
 
 class StripeDecimalCurrencyAmountField(models.DecimalField):
@@ -107,6 +131,12 @@ class StripeDecimalCurrencyAmountField(models.DecimalField):
         defaults = {"decimal_places": 2, "max_digits": 11}
         defaults.update(kwargs)
         super().__init__(*args, **defaults)
+
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        if "help_text" in kwargs:
+            del kwargs["help_text"]
+        return name, path, args, kwargs
 
     def stripe_to_db(self, data):
         """Convert the raw value to decimal representation."""
@@ -134,6 +164,8 @@ class StripeEnumField(models.CharField):
         kwargs["enum"] = self.enum
         if "choices" in kwargs:
             del kwargs["choices"]
+        if "help_text" in kwargs:
+            del kwargs["help_text"]
         return name, path, args, kwargs
 
 
@@ -153,9 +185,21 @@ class StripeIdField(models.CharField):
         defaults.update(kwargs)
         super().__init__(*args, **defaults)
 
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        if "help_text" in kwargs:
+            del kwargs["help_text"]
+        return name, path, args, kwargs
+
 
 class StripeDateTimeField(models.DateTimeField):
     """A field used to define a DateTimeField value according to djstripe logic."""
+
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        if "help_text" in kwargs:
+            del kwargs["help_text"]
+        return name, path, args, kwargs
 
     def stripe_to_db(self, data):
         """Convert the raw timestamp value to a DateTime representation."""
@@ -169,4 +213,8 @@ class StripeDateTimeField(models.DateTimeField):
 class JSONField(import_jsonfield()):
     """A field used to define a JSONField value according to djstripe logic."""
 
-    pass
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        if "help_text" in kwargs:
+            del kwargs["help_text"]
+        return name, path, args, kwargs

@@ -63,22 +63,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -87,21 +73,13 @@ class Migration(migrations.Migration):
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True)),
                 ("djstripe_updated", models.DateTimeField(auto_now=True)),
-                (
-                    "business_profile",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Optional information related to the business.",
-                        null=True,
-                    ),
-                ),
+                ("business_profile", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "business_type",
                     djstripe.fields.StripeEnumField(
                         blank=True,
                         default="",
                         enum=djstripe.enums.BusinessType,
-                        help_text="The business type.",
                         max_length=10,
                     ),
                 ),
@@ -117,20 +95,10 @@ class Migration(migrations.Migration):
                         help_text="The country of the account", max_length=2
                     ),
                 ),
-                (
-                    "company",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Information about the company or business. This field is null unless business_type is set to company.",
-                        null=True,
-                    ),
-                ),
+                ("company", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "default_currency",
-                    djstripe.fields.StripeCurrencyCodeField(
-                        help_text="The currency this account has chosen to use as the default",
-                        max_length=3,
-                    ),
+                    djstripe.fields.StripeCurrencyCodeField(max_length=3),
                 ),
                 (
                     "details_submitted",
@@ -144,14 +112,7 @@ class Migration(migrations.Migration):
                         help_text="The primary user's email address.", max_length=255
                     ),
                 ),
-                (
-                    "individual",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Information about the person represented by the account. This field is null unless business_type is set to individual.",
-                        null=True,
-                    ),
-                ),
+                ("individual", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "payouts_enabled",
                     models.BooleanField(
@@ -167,38 +128,15 @@ class Migration(migrations.Migration):
                         max_length=255,
                     ),
                 ),
-                (
-                    "requirements",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Information about the requirements for the account, including what information needs to be collected, and by when.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "settings",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Account options for customizing how the account functions within Stripe.",
-                        null=True,
-                    ),
-                ),
+                ("requirements", djstripe.fields.JSONField(blank=True, null=True)),
+                ("settings", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "type",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.AccountType,
-                        help_text="The Stripe account type.",
-                        max_length=8,
+                        enum=djstripe.enums.AccountType, max_length=8
                     ),
                 ),
-                (
-                    "tos_acceptance",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Details on the acceptance of the Stripe Services Agreement",
-                        null=True,
-                    ),
-                ),
+                ("tos_acceptance", djstripe.fields.JSONField(blank=True, null=True)),
             ],
             options={"abstract": False, "get_latest_by": "created"},
         ),
@@ -221,22 +159,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -248,17 +172,13 @@ class Migration(migrations.Migration):
                 (
                     "amount",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        decimal_places=2,
-                        help_text="Amount charged (as decimal).",
-                        max_digits=11,
+                        decimal_places=2, max_digits=11
                     ),
                 ),
                 (
                     "amount_refunded",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        decimal_places=2,
-                        help_text="Amount (as decimal) refunded (can be less than the amount attribute on the charge if a partial refund was issued).",
-                        max_digits=11,
+                        decimal_places=2, max_digits=11
                     ),
                 ),
                 (
@@ -268,20 +188,13 @@ class Migration(migrations.Migration):
                         help_text="If the charge was created without capturing, this boolean represents whether or not it is still uncaptured or has since been captured.",
                     ),
                 ),
-                (
-                    "currency",
-                    djstripe.fields.StripeCurrencyCodeField(
-                        help_text="The currency in which the charge was made.",
-                        max_length=3,
-                    ),
-                ),
+                ("currency", djstripe.fields.StripeCurrencyCodeField(max_length=3)),
                 (
                     "failure_code",
                     djstripe.fields.StripeEnumField(
                         blank=True,
                         default="",
                         enum=djstripe.enums.ApiErrorCode,
-                        help_text="Error code explaining reason for charge failure if available.",
                         max_length=42,
                     ),
                 ),
@@ -294,22 +207,8 @@ class Migration(migrations.Migration):
                         max_length=5000,
                     ),
                 ),
-                (
-                    "fraud_details",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Hash with information on fraud assessments for the charge.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "outcome",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Details about whether or not the payment was accepted, and why.",
-                        null=True,
-                    ),
-                ),
+                ("fraud_details", djstripe.fields.JSONField(blank=True, null=True)),
+                ("outcome", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "paid",
                     models.BooleanField(
@@ -319,11 +218,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "payment_method_details",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Details about the payment method at the time of the transaction.",
-                        null=True,
-                    ),
+                    djstripe.fields.JSONField(blank=True, null=True),
                 ),
                 (
                     "receipt_email",
@@ -359,14 +254,7 @@ class Migration(migrations.Migration):
                         help_text="Whether or not the charge has been fully refunded. If the charge is only partially refunded, this attribute will still be false.",
                     ),
                 ),
-                (
-                    "shipping",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Shipping information for the charge",
-                        null=True,
-                    ),
-                ),
+                ("shipping", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "statement_descriptor",
                     models.CharField(
@@ -379,9 +267,7 @@ class Migration(migrations.Migration):
                 (
                     "status",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.ChargeStatus,
-                        help_text="The status of the payment.",
-                        max_length=9,
+                        enum=djstripe.enums.ChargeStatus, max_length=9
                     ),
                 ),
                 (
@@ -396,7 +282,6 @@ class Migration(migrations.Migration):
                 (
                     "account",
                     djstripe.fields.StripeForeignKey(
-                        help_text="The account the charge was made on behalf of. Null here indicates that this value was never set.",
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="charges",
@@ -425,22 +310,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -453,28 +324,19 @@ class Migration(migrations.Migration):
                 (
                     "amount_off",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        blank=True,
-                        decimal_places=2,
-                        help_text="Amount (as decimal) that will be taken off the subtotal of any invoices for this customer.",
-                        max_digits=11,
-                        null=True,
+                        blank=True, decimal_places=2, max_digits=11, null=True
                     ),
                 ),
                 (
                     "currency",
                     djstripe.fields.StripeCurrencyCodeField(
-                        blank=True,
-                        help_text="Three-letter ISO currency code",
-                        max_length=3,
-                        null=True,
+                        blank=True, max_length=3, null=True
                     ),
                 ),
                 (
                     "duration",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.CouponDuration,
-                        help_text="Describes how long a customer who applies this coupon will get the discount.",
-                        max_length=9,
+                        enum=djstripe.enums.CouponDuration, max_length=9
                     ),
                 ),
                 (
@@ -498,7 +360,6 @@ class Migration(migrations.Migration):
                     djstripe.fields.StripePercentField(
                         blank=True,
                         decimal_places=2,
-                        help_text="Percent that will be taken off the subtotal of any invoices for this customer for the duration of the coupon. For example, a coupon with percent_off of 50 will make a $100 invoice $50 instead.",
                         max_digits=5,
                         null=True,
                         validators=[
@@ -509,11 +370,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "redeem_by",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="Date after which the coupon can no longer be redeemed. Max 5 years in the future.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(blank=True, null=True),
                 ),
                 (
                     "times_redeemed",
@@ -554,22 +411,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -578,26 +421,9 @@ class Migration(migrations.Migration):
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True)),
                 ("djstripe_updated", models.DateTimeField(auto_now=True)),
-                (
-                    "billing_details",
-                    djstripe.fields.JSONField(
-                        help_text="Billing information associated with the PaymentMethod that may be used or required by particular types of payment methods."
-                    ),
-                ),
-                (
-                    "card",
-                    djstripe.fields.JSONField(
-                        help_text="If this is a card PaymentMethod, this hash contains details about the card."
-                    ),
-                ),
-                (
-                    "card_present",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="If this is an card_present PaymentMethod, this hash contains details about the Card Present payment method.",
-                        null=True,
-                    ),
-                ),
+                ("billing_details", djstripe.fields.JSONField()),
+                ("card", djstripe.fields.JSONField()),
+                ("card_present", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "type",
                     models.CharField(
@@ -628,22 +454,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -652,12 +464,7 @@ class Migration(migrations.Migration):
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True)),
                 ("djstripe_updated", models.DateTimeField(auto_now=True)),
-                (
-                    "balance",
-                    djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Current balance (in cents), if any, being stored on the customer's account. If negative, the customer has credit to apply to the next invoice. If positive, the customer has an amount owed that will be added to the next invoice. The balance does not refer to any unpaid invoices; it solely takes into account amounts that have yet to be successfully applied to any invoice. This balance is only taken into account for recurring billing purposes (i.e., subscriptions, invoices, invoice items)."
-                    ),
-                ),
+                ("balance", djstripe.fields.StripeQuantumCurrencyAmountField()),
                 (
                     "business_vat_id",
                     models.CharField(
@@ -670,45 +477,24 @@ class Migration(migrations.Migration):
                 (
                     "currency",
                     djstripe.fields.StripeCurrencyCodeField(
-                        blank=True,
-                        default="",
-                        help_text="The currency the customer can be charged in for recurring billing purposes",
-                        max_length=3,
+                        blank=True, default="", max_length=3
                     ),
                 ),
-                (
-                    "delinquent",
-                    models.BooleanField(
-                        help_text="Whether or not the latest charge for the customer's latest invoice has failed."
-                    ),
-                ),
+                ("delinquent", models.BooleanField()),
                 (
                     "coupon_start",
                     djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        editable=False,
-                        help_text="If a coupon is present, the date at which it was applied.",
-                        null=True,
+                        blank=True, editable=False, null=True
                     ),
                 ),
                 (
                     "coupon_end",
                     djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        editable=False,
-                        help_text="If a coupon is present and has a limited duration, the date that the discount will end.",
-                        null=True,
+                        blank=True, editable=False, null=True
                     ),
                 ),
                 ("email", models.TextField(blank=True, default="", max_length=5000)),
-                (
-                    "shipping",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Shipping information associated with the customer.",
-                        null=True,
-                    ),
-                ),
+                ("shipping", djstripe.fields.JSONField(blank=True, null=True)),
                 ("date_purged", models.DateTimeField(editable=False, null=True)),
                 (
                     "coupon",
@@ -739,12 +525,7 @@ class Migration(migrations.Migration):
                         to=DJSTRIPE_SUBSCRIBER_MODEL,
                     ),
                 ),
-                (
-                    "address",
-                    djstripe.fields.JSONField(
-                        blank=True, help_text="The customer's address.", null=True
-                    ),
-                ),
+                ("address", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "invoice_prefix",
                     models.CharField(
@@ -754,14 +535,7 @@ class Migration(migrations.Migration):
                         max_length=255,
                     ),
                 ),
-                (
-                    "invoice_settings",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="The customer's default invoice settings.",
-                        null=True,
-                    ),
-                ),
+                ("invoice_settings", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "name",
                     models.TextField(
@@ -780,28 +554,17 @@ class Migration(migrations.Migration):
                         max_length=5000,
                     ),
                 ),
-                (
-                    "preferred_locales",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="The customer's preferred locales (languages), ordered by preference.",
-                        null=True,
-                    ),
-                ),
+                ("preferred_locales", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "tax_exempt",
                     djstripe.fields.StripeEnumField(
-                        default="",
-                        enum=djstripe.enums.CustomerTaxExempt,
-                        help_text='Describes the customer\'s tax exemption status. When set to reverse, invoice and receipt PDFs include the text "Reverse charge".',
-                        max_length=7,
+                        default="", enum=djstripe.enums.CustomerTaxExempt, max_length=7
                     ),
                 ),
                 (
                     "default_payment_method",
                     djstripe.fields.StripeForeignKey(
                         blank=True,
-                        help_text="default payment method used for subscriptions and invoices for the customer.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="+",
@@ -831,22 +594,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -855,30 +604,10 @@ class Migration(migrations.Migration):
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True)),
                 ("djstripe_updated", models.DateTimeField(auto_now=True)),
-                (
-                    "amount",
-                    djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Disputed amount (in cents). Usually the amount of the charge, but can differ (usually because of currency fluctuation or because only part of the order is disputed)."
-                    ),
-                ),
-                (
-                    "currency",
-                    djstripe.fields.StripeCurrencyCodeField(
-                        help_text="Three-letter ISO currency code", max_length=3
-                    ),
-                ),
-                (
-                    "evidence",
-                    djstripe.fields.JSONField(
-                        help_text="Evidence provided to respond to a dispute."
-                    ),
-                ),
-                (
-                    "evidence_details",
-                    djstripe.fields.JSONField(
-                        help_text="Information about the evidence submission."
-                    ),
-                ),
+                ("amount", djstripe.fields.StripeQuantumCurrencyAmountField()),
+                ("currency", djstripe.fields.StripeCurrencyCodeField()),
+                ("evidence", djstripe.fields.JSONField()),
+                ("evidence_details", djstripe.fields.JSONField()),
                 (
                     "is_charge_refundable",
                     models.BooleanField(
@@ -919,22 +648,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -951,12 +666,7 @@ class Migration(migrations.Migration):
                         max_length=15,
                     ),
                 ),
-                (
-                    "data",
-                    djstripe.fields.JSONField(
-                        help_text="data received at webhook. data should be considered to be garbage until validity check is run and valid flag is set"
-                    ),
-                ),
+                ("data", djstripe.fields.JSONField()),
                 (
                     "request_id",
                     models.CharField(
@@ -995,22 +705,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -1029,9 +725,7 @@ class Migration(migrations.Migration):
                 (
                     "purpose",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.FilePurpose,
-                        help_text="The purpose of the uploaded file.",
-                        max_length=24,
+                        enum=djstripe.enums.FilePurpose, max_length=24
                     ),
                 ),
                 (
@@ -1043,9 +737,7 @@ class Migration(migrations.Migration):
                 (
                     "type",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.FileType,
-                        help_text="The type of the file returned.",
-                        max_length=4,
+                        enum=djstripe.enums.FileType, max_length=4
                     ),
                 ),
                 (
@@ -1087,22 +779,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -1114,7 +792,7 @@ class Migration(migrations.Migration):
                 (
                     "active",
                     models.BooleanField(
-                        help_text="Whether the plan is currently available for new subscriptions.",
+                        help_text="Whether the plan is currently available for new subscriptions."
                     ),
                 ),
                 (
@@ -1123,18 +801,13 @@ class Migration(migrations.Migration):
                         blank=True,
                         default="",
                         enum=djstripe.enums.PlanAggregateUsage,
-                        help_text="Specifies a usage aggregation strategy for plans of usage_type=metered. Allowed values are `sum` for summing up all usage during a period, `last_during_period` for picking the last usage record reported within a period, `last_ever` for picking the last usage record ever (across period bounds) or max which picks the usage record with the maximum reported usage during a period. Defaults to `sum`.",
                         max_length=18,
                     ),
                 ),
                 (
                     "amount",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        blank=True,
-                        decimal_places=2,
-                        help_text="Amount (as decimal) to be charged on the interval specified.",
-                        max_digits=11,
-                        null=True,
+                        blank=True, decimal_places=2, max_digits=11, null=True
                     ),
                 ),
                 (
@@ -1143,22 +816,14 @@ class Migration(migrations.Migration):
                         blank=True,
                         default="",
                         enum=djstripe.enums.BillingScheme,
-                        help_text="Describes how to compute the price per period. Either `per_unit` or `tiered`. `per_unit` indicates that the fixed amount (specified in amount) will be charged per unit in quantity (for plans with `usage_type=licensed`), or per unit of total usage (for plans with `usage_type=metered`). `tiered` indicates that the unit pricing will be computed using a tiering strategy as defined using the tiers and tiers_mode attributes.",
                         max_length=8,
                     ),
                 ),
-                (
-                    "currency",
-                    djstripe.fields.StripeCurrencyCodeField(
-                        help_text="Three-letter ISO currency code", max_length=3
-                    ),
-                ),
+                ("currency", djstripe.fields.StripeCurrencyCodeField(max_length=3)),
                 (
                     "interval",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.PlanInterval,
-                        help_text="The frequency with which a subscription should be billed.",
-                        max_length=5,
+                        enum=djstripe.enums.PlanInterval, max_length=5
                     ),
                 ),
                 (
@@ -1177,32 +842,17 @@ class Migration(migrations.Migration):
                         max_length=5000,
                     ),
                 ),
-                (
-                    "tiers",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Each element represents a pricing tier. This parameter requires `billing_scheme` to be set to `tiered`.",
-                        null=True,
-                    ),
-                ),
+                ("tiers", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "tiers_mode",
                     djstripe.fields.StripeEnumField(
                         blank=True,
                         enum=djstripe.enums.PriceTiersMode,
-                        help_text="Defines if the tiering price should be `graduated` or `volume` based. In `volume`-based tiering, the maximum quantity within a period determines the per unit price, in `graduated` tiering pricing can successively change as the quantity grows.",
                         max_length=9,
                         null=True,
                     ),
                 ),
-                (
-                    "transform_usage",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Apply a transformation to the reported usage or set quantity before computing the billed price. Cannot be combined with `tiers`.",
-                        null=True,
-                    ),
-                ),
+                ("transform_usage", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "trial_period_days",
                     models.IntegerField(
@@ -1215,7 +865,6 @@ class Migration(migrations.Migration):
                     djstripe.fields.StripeEnumField(
                         default="licensed",
                         enum=djstripe.enums.PriceUsageType,
-                        help_text="Configures how the quantity per period should be determined, can be either `metered` or `licensed`. `licensed` will automatically bill the `quantity` set for a plan when adding it to a subscription, `metered` will aggregate the total usage based on usage records. Defaults to `licensed`.",
                         max_length=8,
                     ),
                 ),
@@ -1258,22 +907,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -1292,9 +927,7 @@ class Migration(migrations.Migration):
                 (
                     "type",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.ProductType,
-                        help_text="The type of the product. The product is either of type `good`, which is eligible for use with Orders and SKUs, or `service`, which is eligible for use with Subscriptions and Plans.",
-                        max_length=7,
+                        enum=djstripe.enums.ProductType, max_length=7
                     ),
                 ),
                 (
@@ -1304,14 +937,7 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "attributes",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text='A list of up to 5 attributes that each SKU can provide values for (e.g., `["color", "size"]`). Only applicable to products of `type=good`.',
-                        null=True,
-                    ),
-                ),
+                ("attributes", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "caption",
                     models.TextField(
@@ -1321,29 +947,11 @@ class Migration(migrations.Migration):
                         max_length=5000,
                     ),
                 ),
-                (
-                    "deactivate_on",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="An array of connect application identifiers that cannot purchase this product. Only applicable to products of `type=good`.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "images",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A list of up to 8 URLs of images for this product, meant to be displayable to the customer. Only applicable to products of `type=good`.",
-                        null=True,
-                    ),
-                ),
+                ("deactivate_on", djstripe.fields.JSONField(blank=True, null=True)),
+                ("images", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "package_dimensions",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="The dimensions of this product for shipping purposes. A SKU associated with this product can override this value by having its own `package_dimensions`. Only applicable to products of `type=good`.",
-                        null=True,
-                    ),
+                    djstripe.fields.JSONField(blank=True, null=True),
                 ),
                 (
                     "shippable",
@@ -1394,22 +1002,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -1423,7 +1017,6 @@ class Migration(migrations.Migration):
                     djstripe.fields.StripePercentField(
                         blank=True,
                         decimal_places=2,
-                        help_text="A positive decimal that represents the fee percentage of the subscription invoice amount that will be transferred to the application owner's Stripe account each billing period.",
                         max_digits=5,
                         null=True,
                         validators=[
@@ -1435,18 +1028,12 @@ class Migration(migrations.Migration):
                 (
                     "collection_method",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.InvoiceCollectionMethod,
-                        help_text="Either `charge_automatically`, or `send_invoice`. When charging automatically, Stripe will attempt to pay this subscription at the end of the cycle using the default source attached to the customer. When sending an invoice, Stripe will email your customer an invoice with payment instructions.",
-                        max_length=20,
+                        enum=djstripe.enums.InvoiceCollectionMethod, max_length=20
                     ),
                 ),
                 (
                     "billing_cycle_anchor",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="Determines the date of the first full invoice, and, for plans with `month` or `year` intervals, the day of the month for subsequent invoices.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(blank=True, null=True),
                 ),
                 (
                     "cancel_at_period_end",
@@ -1457,24 +1044,10 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "canceled_at",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="If the subscription has been canceled, the date of that cancellation. If the subscription was canceled with ``cancel_at_period_end``, canceled_at will still reflect the date of the initial cancellation request, not the end of the subscription period when the subscription is automatically moved to a canceled state.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(blank=True, null=True),
                 ),
-                (
-                    "current_period_end",
-                    djstripe.fields.StripeDateTimeField(
-                        help_text="End of the current period for which the subscription has been invoiced. At the end of this period, a new invoice will be created."
-                    ),
-                ),
-                (
-                    "current_period_start",
-                    djstripe.fields.StripeDateTimeField(
-                        help_text="Start of the current period for which the subscription has been invoiced."
-                    ),
-                ),
+                ("current_period_end", djstripe.fields.StripeDateTimeField()),
+                ("current_period_start", djstripe.fields.StripeDateTimeField()),
                 (
                     "days_until_due",
                     models.IntegerField(
@@ -1483,42 +1056,20 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "discount",
-                    djstripe.fields.JSONField(blank=True, null=True),
-                ),
+                ("discount", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "ended_at",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="If the subscription has ended (either because it was canceled or because the customer was switched to a subscription to a new plan), the date the subscription ended.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(blank=True, null=True),
                 ),
                 (
                     "next_pending_invoice_item_invoice",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="Specifies the approximate timestamp on which any pending invoice items will be billed according to the schedule provided at pending_invoice_item_interval.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(blank=True, null=True),
                 ),
                 (
                     "pending_invoice_item_interval",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Specifies an interval for how often to bill for any pending invoice items. It is analogous to calling Create an invoice for the given subscription at the specified interval.",
-                        null=True,
-                    ),
+                    djstripe.fields.JSONField(blank=True, null=True),
                 ),
-                (
-                    "pending_update",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="If specified, pending updates that will be applied to the subscription once the latest_invoice has been paid.",
-                        null=True,
-                    ),
-                ),
+                ("pending_update", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "quantity",
                     models.IntegerField(
@@ -1527,27 +1078,15 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "start",
-                    djstripe.fields.StripeDateTimeField(
-                        help_text="Date of the last substantial change to this subscription. For example, a change to the items array, or a change of status, will reset this timestamp.",
-                        null=True,
-                    ),
-                ),
+                ("start", djstripe.fields.StripeDateTimeField(null=True)),
                 (
                     "start_date",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="Date when the subscription was first created. The date might differ from the created date due to backdating.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(blank=True, null=True),
                 ),
                 (
                     "status",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.SubscriptionStatus,
-                        help_text="The status of this subscription.",
-                        max_length=18,
+                        enum=djstripe.enums.SubscriptionStatus, max_length=18
                     ),
                 ),
                 (
@@ -1555,7 +1094,6 @@ class Migration(migrations.Migration):
                     djstripe.fields.StripePercentField(
                         blank=True,
                         decimal_places=2,
-                        help_text="A positive decimal (with at most two decimal places) between 1 and 100. This represents the percentage of the subscription invoice subtotal that will be calculated and added as tax to the final amount each billing period.",
                         max_digits=5,
                         null=True,
                         validators=[
@@ -1566,24 +1104,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "trial_end",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="If the subscription has a trial, the end of that trial.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(blank=True, null=True),
                 ),
                 (
                     "trial_start",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="If the subscription has a trial, the beginning of that trial.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(blank=True, null=True),
                 ),
                 (
                     "customer",
                     djstripe.fields.StripeForeignKey(
-                        help_text="The customer associated with this subscription.",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="subscriptions",
                         to="djstripe.customer",
@@ -1623,22 +1152,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -1650,41 +1165,21 @@ class Migration(migrations.Migration):
                 (
                     "amount",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        decimal_places=2,
-                        help_text="The amount transferred",
-                        max_digits=11,
+                        decimal_places=2, max_digits=11
                     ),
                 ),
                 (
                     "amount_reversed",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        blank=True,
-                        decimal_places=2,
-                        help_text="The amount (as decimal) reversed (can be less than the amount attribute on the transfer if a partial reversal was issued).",
-                        max_digits=11,
-                        null=True,
+                        blank=True, decimal_places=2, max_digits=11, null=True
                     ),
                 ),
-                (
-                    "currency",
-                    djstripe.fields.StripeCurrencyCodeField(
-                        help_text="Three-letter ISO currency code", max_length=3
-                    ),
-                ),
-                (
-                    "destination",
-                    djstripe.fields.StripeIdField(
-                        help_text="ID of the bank account, card, or Stripe account the transfer was sent to.",
-                        max_length=255,
-                    ),
-                ),
+                ("currency", djstripe.fields.StripeCurrencyCodeField(max_length=3)),
+                ("destination", djstripe.fields.StripeIdField(max_length=255)),
                 (
                     "destination_payment",
                     djstripe.fields.StripeIdField(
-                        blank=True,
-                        help_text="If the destination is a Stripe account, this will be the ID of the payment that the destination account received for the transfer.",
-                        max_length=255,
-                        null=True,
+                        blank=True, max_length=255, null=True
                     ),
                 ),
                 (
@@ -1696,18 +1191,12 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "source_transaction",
-                    djstripe.fields.StripeIdField(
-                        help_text="ID of the charge (or other transaction) that was used to fund the transfer. If null, the transfer was funded from the available balance.",
-                        max_length=255,
-                        null=True,
-                    ),
+                    djstripe.fields.StripeIdField(max_length=255, null=True),
                 ),
                 (
                     "source_type",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.LegacySourceType,
-                        help_text="The source balance from which this transfer came.",
-                        max_length=16,
+                        enum=djstripe.enums.LegacySourceType, max_length=16
                     ),
                 ),
                 (
@@ -1784,7 +1273,6 @@ class Migration(migrations.Migration):
             name="customer",
             field=djstripe.fields.StripeForeignKey(
                 blank=True,
-                help_text="Customer to which this PaymentMethod is saved.This will not be set when the PaymentMethod has not been saved to a Customer.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="payment_methods",
@@ -1796,7 +1284,6 @@ class Migration(migrations.Migration):
             model_name="plan",
             name="product",
             field=djstripe.fields.StripeForeignKey(
-                help_text="The product whose pricing this plan determines.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 to="djstripe.product",
@@ -1822,22 +1309,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -1849,37 +1322,25 @@ class Migration(migrations.Migration):
                 (
                     "amount_due",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        decimal_places=2,
-                        help_text="Final amount due (as decimal) at this time for this invoice. If the invoice's total is smaller than the minimum charge amount, for example, or if there is account credit that can be applied to the invoice, the amount_due may be 0. If there is a positive starting_balance for the invoice (the customer owes money), the amount_due will also take that into account. The charge that gets generated for the invoice will be for the amount specified in amount_due.",
-                        max_digits=11,
+                        decimal_places=2, max_digits=11
                     ),
                 ),
                 (
                     "amount_paid",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        decimal_places=2,
-                        help_text="The amount, (as decimal), that was paid.",
-                        max_digits=11,
-                        null=True,
+                        decimal_places=2, max_digits=11, null=True
                     ),
                 ),
                 (
                     "amount_remaining",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        decimal_places=2,
-                        help_text="The amount remaining, (as decimal), that is due.",
-                        max_digits=11,
-                        null=True,
+                        decimal_places=2, max_digits=11, null=True
                     ),
                 ),
                 (
                     "application_fee_amount",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        blank=True,
-                        decimal_places=2,
-                        help_text="The fee (as decimal) that will be applied to the invoice and transferred to the application owner's Stripe account when the invoice is paid.",
-                        max_digits=11,
-                        null=True,
+                        blank=True, decimal_places=2, max_digits=11, null=True
                     ),
                 ),
                 (
@@ -1899,31 +1360,18 @@ class Migration(migrations.Migration):
                     "collection_method",
                     djstripe.fields.StripeEnumField(
                         enum=djstripe.enums.InvoiceCollectionMethod,
-                        help_text="When charging automatically, Stripe will attempt to pay this invoice using the default source attached to the customer. When sending an invoice, Stripe will email this invoice to the customer with payment instructions.",
                         max_length=20,
                         null=True,
                     ),
                 ),
-                (
-                    "currency",
-                    djstripe.fields.StripeCurrencyCodeField(
-                        help_text="Three-letter ISO currency code", max_length=3
-                    ),
-                ),
+                ("currency", djstripe.fields.StripeCurrencyCodeField(max_length=3)),
                 (
                     "due_date",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The date on which payment for this invoice is due. This value will be null for invoices where billing=charge_automatically.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(blank=True, null=True),
                 ),
                 (
                     "ending_balance",
-                    djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Ending customer balance (in cents) after attempting to pay invoice. If the invoice has not been attempted yet, this will be null.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeQuantumCurrencyAmountField(null=True),
                 ),
                 (
                     "hosted_invoice_url",
@@ -1945,11 +1393,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "next_payment_attempt",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The time at which payment will next be attempted.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(blank=True, null=True),
                 ),
                 (
                     "number",
@@ -1967,18 +1411,8 @@ class Migration(migrations.Migration):
                         help_text="Whether payment was successfully collected for this invoice. An invoice can be paid (most commonly) with a charge or with credit from the customer's account balance.",
                     ),
                 ),
-                (
-                    "period_end",
-                    djstripe.fields.StripeDateTimeField(
-                        help_text="End of the usage period during which invoice items were added to this invoice."
-                    ),
-                ),
-                (
-                    "period_start",
-                    djstripe.fields.StripeDateTimeField(
-                        help_text="Start of the usage period during which invoice items were added to this invoice."
-                    ),
-                ),
+                ("period_end", djstripe.fields.StripeDateTimeField()),
+                ("period_start", djstripe.fields.StripeDateTimeField()),
                 (
                     "receipt_number",
                     models.CharField(
@@ -1990,9 +1424,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "starting_balance",
-                    djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Starting customer balance (in cents) before attempting to pay invoice. If the invoice has not been attempted yet, this will be the current customer balance."
-                    ),
+                    djstripe.fields.StripeQuantumCurrencyAmountField(),
                 ),
                 (
                     "statement_descriptor",
@@ -2005,28 +1437,18 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "subscription_proration_date",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="Only set for upcoming invoices that preview prorations. The time used to calculate prorations.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(blank=True, null=True),
                 ),
                 (
                     "subtotal",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        decimal_places=2,
-                        help_text="Total (as decimal) of all subscriptions, invoice items, and prorations on the invoice before any discount or tax is applied.",
-                        max_digits=11,
+                        decimal_places=2, max_digits=11
                     ),
                 ),
                 (
                     "tax",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        blank=True,
-                        decimal_places=2,
-                        help_text="The amount (as decimal) of tax included in the total, calculated from ``tax_percent`` and the subtotal. If no ``tax_percent`` is defined, this value will be null.",
-                        max_digits=11,
-                        null=True,
+                        blank=True, decimal_places=2, max_digits=11, null=True
                     ),
                 ),
                 (
@@ -2034,7 +1456,6 @@ class Migration(migrations.Migration):
                     djstripe.fields.StripePercentField(
                         blank=True,
                         decimal_places=2,
-                        help_text="This percentage of the subtotal has been added to the total amount of the invoice, including invoice line items and discounts. This field is inherited from the subscription's ``tax_percent`` field, but can be changed before the invoice is paid. This field defaults to null.",
                         max_digits=5,
                         null=True,
                         validators=[
@@ -2053,10 +1474,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "webhooks_delivered_at",
-                    djstripe.fields.StripeDateTimeField(
-                        help_text="The time at which webhooks for this invoice were successfully delivered (if the invoice had no webhooks to deliver, this will match `date`). Invoice payment is delayed until webhooks are delivered, or until all webhook delivery attempts have been exhausted.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(null=True),
                 ),
                 (
                     "charge",
@@ -2071,7 +1489,6 @@ class Migration(migrations.Migration):
                 (
                     "customer",
                     djstripe.fields.StripeForeignKey(
-                        help_text="The customer associated with this invoice.",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="invoices",
                         to="djstripe.customer",
@@ -2081,7 +1498,6 @@ class Migration(migrations.Migration):
                 (
                     "subscription",
                     djstripe.fields.StripeForeignKey(
-                        help_text="The subscription that this invoice was prepared for, if any.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="invoices",
@@ -2131,7 +1547,6 @@ class Migration(migrations.Migration):
             name="customer",
             field=djstripe.fields.StripeForeignKey(
                 blank=True,
-                help_text="The customer associated with this charge.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="charges",
@@ -2144,7 +1559,6 @@ class Migration(migrations.Migration):
             name="dispute",
             field=djstripe.fields.StripeForeignKey(
                 blank=True,
-                help_text="Details about the dispute if the charge has been disputed.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="charges",
@@ -2156,7 +1570,6 @@ class Migration(migrations.Migration):
             model_name="charge",
             name="invoice",
             field=djstripe.fields.StripeForeignKey(
-                help_text="The invoice this charge is for if one exists.",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="charges",
@@ -2169,7 +1582,6 @@ class Migration(migrations.Migration):
             name="source",
             field=djstripe.fields.PaymentMethodForeignKey(
                 blank=True,
-                help_text="The source used for this charge.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="charges",
@@ -2180,7 +1592,6 @@ class Migration(migrations.Migration):
             model_name="charge",
             name="transfer",
             field=djstripe.fields.StripeForeignKey(
-                help_text="The transfer to the destination account (only applicable if the charge was created using the destination parameter).",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 to="djstripe.transfer",
@@ -2191,7 +1602,6 @@ class Migration(migrations.Migration):
             model_name="account",
             name="branding_icon",
             field=djstripe.fields.StripeForeignKey(
-                help_text="An icon for the account. Must be square and at least 128px x 128px.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="icon_account",
@@ -2218,22 +1628,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -2254,9 +1650,7 @@ class Migration(migrations.Migration):
                 (
                     "account_holder_type",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.BankAccountHolderType,
-                        help_text="The type of entity that holds the account.",
-                        max_length=10,
+                        enum=djstripe.enums.BankAccountHolderType, max_length=10
                     ),
                 ),
                 (
@@ -2273,12 +1667,7 @@ class Migration(migrations.Migration):
                         max_length=2,
                     ),
                 ),
-                (
-                    "currency",
-                    djstripe.fields.StripeCurrencyCodeField(
-                        help_text="Three-letter ISO currency code", max_length=3
-                    ),
-                ),
+                ("currency", djstripe.fields.StripeCurrencyCodeField(max_length=3)),
                 (
                     "default_for_currency",
                     models.BooleanField(
@@ -2311,7 +1700,6 @@ class Migration(migrations.Migration):
                     "account",
                     djstripe.fields.StripeForeignKey(
                         blank=True,
-                        help_text="The account the charge was made on behalf of. Null here indicates that this value was never set.",
                         null=True,
                         on_delete=django.db.models.deletion.PROTECT,
                         related_name="bank_account",
@@ -2343,45 +1731,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "default_currency",
-                    djstripe.fields.StripeCurrencyCodeField(
-                        help_text="The default currency for this country. This applies to both payment methods and bank accounts.",
-                        max_length=3,
-                    ),
+                    djstripe.fields.StripeCurrencyCodeField(max_length=3),
                 ),
-                (
-                    "supported_bank_account_currencies",
-                    djstripe.fields.JSONField(
-                        help_text="Currencies that can be accepted in the specific country (for transfers)."
-                    ),
-                ),
-                (
-                    "supported_payment_currencies",
-                    djstripe.fields.JSONField(
-                        help_text="Currencies that can be accepted in the specified country (for payments)."
-                    ),
-                ),
-                (
-                    "supported_payment_methods",
-                    djstripe.fields.JSONField(
-                        help_text="Payment methods available in the specified country."
-                    ),
-                ),
-                (
-                    "supported_transfer_countries",
-                    djstripe.fields.JSONField(
-                        help_text="Countries that can accept transfers from the specified country."
-                    ),
-                ),
-                (
-                    "verification_fields",
-                    djstripe.fields.JSONField(
-                        help_text="Lists the types of verification data needed to keep an account open."
-                    ),
-                ),
+                ("supported_bank_account_currencies", djstripe.fields.JSONField()),
+                ("supported_payment_currencies", djstripe.fields.JSONField()),
+                ("supported_payment_methods", djstripe.fields.JSONField()),
+                ("supported_transfer_countries", djstripe.fields.JSONField()),
+                ("verification_fields", djstripe.fields.JSONField()),
             ],
-            options={
-                "abstract": False,
-            },
+            options={"abstract": False},
         ),
         migrations.CreateModel(
             name="BalanceTransaction",
@@ -2402,22 +1760,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -2438,29 +1782,14 @@ class Migration(migrations.Migration):
                         help_text="The date the transaction's net funds will become available in the Stripe balance."
                     ),
                 ),
-                (
-                    "currency",
-                    djstripe.fields.StripeCurrencyCodeField(
-                        help_text="Three-letter ISO currency code", max_length=3
-                    ),
-                ),
+                ("currency", djstripe.fields.StripeCurrencyCodeField(max_length=3)),
                 (
                     "exchange_rate",
                     models.DecimalField(decimal_places=6, max_digits=8, null=True),
                 ),
-                (
-                    "fee",
-                    djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Fee (in cents) paid for this transaction."
-                    ),
-                ),
+                ("fee", djstripe.fields.StripeQuantumCurrencyAmountField()),
                 ("fee_details", djstripe.fields.JSONField()),
-                (
-                    "net",
-                    djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Net amount of the transaction, in cents."
-                    ),
-                ),
+                ("net", djstripe.fields.StripeQuantumCurrencyAmountField()),
                 (
                     "status",
                     djstripe.fields.StripeEnumField(
@@ -2495,22 +1824,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -2519,26 +1834,9 @@ class Migration(migrations.Migration):
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True)),
                 ("djstripe_updated", models.DateTimeField(auto_now=True)),
-                (
-                    "data_load_time",
-                    djstripe.fields.StripeDateTimeField(
-                        help_text="When the query was run, Sigma contained a snapshot of your Stripe data at this time."
-                    ),
-                ),
-                (
-                    "error",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="If the query run was not succeesful, contains information about the failure.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "result_available_until",
-                    djstripe.fields.StripeDateTimeField(
-                        help_text="Time at which the result expires and is no longer available for download."
-                    ),
-                ),
+                ("data_load_time", djstripe.fields.StripeDateTimeField()),
+                ("error", djstripe.fields.JSONField(blank=True, null=True)),
+                ("result_available_until", djstripe.fields.StripeDateTimeField()),
                 (
                     "sql",
                     models.TextField(help_text="SQL for the query.", max_length=5000),
@@ -2546,9 +1844,7 @@ class Migration(migrations.Migration):
                 (
                     "status",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.ScheduledQueryRunStatus,
-                        help_text="The query's execution status.",
-                        max_length=9,
+                        enum=djstripe.enums.ScheduledQueryRunStatus, max_length=9
                     ),
                 ),
                 (
@@ -2559,7 +1855,6 @@ class Migration(migrations.Migration):
                     "file",
                     djstripe.fields.StripeForeignKey(
                         blank=True,
-                        help_text="The file object representing the results of the query.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.fileupload",
@@ -2588,22 +1883,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -2632,7 +1913,6 @@ class Migration(migrations.Migration):
                 (
                     "subscription",
                     djstripe.fields.StripeForeignKey(
-                        help_text="The subscription this subscription item belongs to.",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="items",
                         to="djstripe.subscription",
@@ -2661,22 +1941,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -2685,23 +1951,12 @@ class Migration(migrations.Migration):
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True)),
                 ("djstripe_updated", models.DateTimeField(auto_now=True)),
-                (
-                    "amount",
-                    djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Amount, in cents."
-                    ),
-                ),
-                (
-                    "currency",
-                    djstripe.fields.StripeCurrencyCodeField(
-                        help_text="Three-letter ISO currency code", max_length=3
-                    ),
-                ),
+                ("amount", djstripe.fields.StripeQuantumCurrencyAmountField()),
+                ("currency", djstripe.fields.StripeCurrencyCodeField(max_length=3)),
                 (
                     "balance_transaction",
                     djstripe.fields.StripeForeignKey(
                         blank=True,
-                        help_text="Balance transaction that describes the impact on your account balance.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="transfer_reversals",
@@ -2712,7 +1967,6 @@ class Migration(migrations.Migration):
                 (
                     "transfer",
                     djstripe.fields.StripeForeignKey(
-                        help_text="The transfer that was reversed.",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="reversals",
                         to="djstripe.transfer",
@@ -2741,22 +1995,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -2774,7 +2014,6 @@ class Migration(migrations.Migration):
                 (
                     "subscription_item",
                     djstripe.fields.StripeForeignKey(
-                        help_text="The subscription item this usage record contains data for.",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="usage_records",
                         to="djstripe.subscriptionitem",
@@ -2803,22 +2042,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -2827,24 +2052,9 @@ class Migration(migrations.Migration):
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True)),
                 ("djstripe_updated", models.DateTimeField(auto_now=True)),
-                (
-                    "amount",
-                    djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Amount earned, in cents."
-                    ),
-                ),
-                (
-                    "amount_refunded",
-                    djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Amount in cents refunded (can be less than the amount attribute on the fee if a partial refund was issued)"
-                    ),
-                ),
-                (
-                    "currency",
-                    djstripe.fields.StripeCurrencyCodeField(
-                        help_text="Three-letter ISO currency code", max_length=3
-                    ),
-                ),
+                ("amount", djstripe.fields.StripeQuantumCurrencyAmountField()),
+                ("amount_refunded", djstripe.fields.StripeQuantumCurrencyAmountField()),
+                ("currency", djstripe.fields.StripeCurrencyCodeField(max_length=3)),
                 (
                     "refunded",
                     models.BooleanField(
@@ -2854,7 +2064,6 @@ class Migration(migrations.Migration):
                 (
                     "balance_transaction",
                     djstripe.fields.StripeForeignKey(
-                        help_text="Balance transaction that describes the impact on your account balance.",
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.balancetransaction",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
@@ -2863,7 +2072,6 @@ class Migration(migrations.Migration):
                 (
                     "charge",
                     djstripe.fields.StripeForeignKey(
-                        help_text="The charge that the application fee was taken from.",
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.charge",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
@@ -2891,40 +2099,15 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True)),
                 ("djstripe_updated", models.DateTimeField(auto_now=True)),
-                (
-                    "amount",
-                    djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Amount refunded, in cents."
-                    ),
-                ),
-                (
-                    "currency",
-                    djstripe.fields.StripeCurrencyCodeField(
-                        help_text="Three-letter ISO currency code", max_length=3
-                    ),
-                ),
+                ("amount", djstripe.fields.StripeQuantumCurrencyAmountField()),
+                ("currency", djstripe.fields.StripeCurrencyCodeField(max_length=3)),
                 (
                     "balance_transaction",
                     djstripe.fields.StripeForeignKey(
-                        help_text="Balance transaction that describes the impact on your account balance.",
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.balancetransaction",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
@@ -2933,7 +2116,6 @@ class Migration(migrations.Migration):
                 (
                     "fee",
                     djstripe.fields.StripeForeignKey(
-                        help_text="The application fee that was refunded",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="refunds",
                         to="djstripe.applicationfee",
@@ -2947,7 +2129,6 @@ class Migration(migrations.Migration):
             model_name="charge",
             name="balance_transaction",
             field=djstripe.fields.StripeForeignKey(
-                help_text="The balance transaction that describes the impact of this charge on your account balance (not including refunds or disputes).",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 to="djstripe.balancetransaction",
@@ -2959,7 +2140,6 @@ class Migration(migrations.Migration):
             name="balance_transaction",
             field=djstripe.fields.StripeForeignKey(
                 blank=True,
-                help_text="Balance transaction that describes the impact on your account balance.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 to="djstripe.balancetransaction",
@@ -2985,22 +2165,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -3042,7 +2208,6 @@ class Migration(migrations.Migration):
                         blank=True,
                         default="",
                         enum=djstripe.enums.CardCheckResult,
-                        help_text="If `address_line1` was provided, results of the check.",
                         max_length=11,
                     ),
                 ),
@@ -3079,16 +2244,13 @@ class Migration(migrations.Migration):
                         blank=True,
                         default="",
                         enum=djstripe.enums.CardCheckResult,
-                        help_text="If `address_zip` was provided, results of the check.",
                         max_length=11,
                     ),
                 ),
                 (
                     "brand",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.CardBrand,
-                        help_text="Card brand.",
-                        max_length=16,
+                        enum=djstripe.enums.CardBrand, max_length=16
                     ),
                 ),
                 (
@@ -3106,7 +2268,6 @@ class Migration(migrations.Migration):
                         blank=True,
                         default="",
                         enum=djstripe.enums.CardCheckResult,
-                        help_text="If a CVC was provided, results of the check.",
                         max_length=11,
                     ),
                 ),
@@ -3133,9 +2294,7 @@ class Migration(migrations.Migration):
                 (
                     "funding",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.CardFundingType,
-                        help_text="Card funding type.",
-                        max_length=7,
+                        enum=djstripe.enums.CardFundingType, max_length=7
                     ),
                 ),
                 (
@@ -3159,7 +2318,6 @@ class Migration(migrations.Migration):
                         blank=True,
                         default="",
                         enum=djstripe.enums.CardTokenizationMethod,
-                        help_text="If the card number is tokenized, this is the method that was used.",
                         max_length=11,
                     ),
                 ),
@@ -3180,7 +2338,6 @@ class Migration(migrations.Migration):
             model_name="account",
             name="branding_logo",
             field=djstripe.fields.StripeForeignKey(
-                help_text="A logo for the account that will be used in Checkout instead of the icon and without the account's name next to it if provided. Must be at least 128px x 128px.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="logo_account",
@@ -3207,22 +2364,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -3244,7 +2387,6 @@ class Migration(migrations.Migration):
                     djstripe.fields.StripeEnumField(
                         blank=True,
                         enum=djstripe.enums.SetupIntentCancellationReason,
-                        help_text="Reason for cancellation of this SetupIntent, one of abandoned, requested_by_customer, or duplicate",
                         max_length=21,
                     ),
                 ),
@@ -3256,34 +2398,13 @@ class Migration(migrations.Migration):
                         max_length=5000,
                     ),
                 ),
-                (
-                    "last_setup_error",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="The error encountered in the previous SetupIntent confirmation.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "next_action",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="If present, this property tells you what actions you need to take inorder for your customer to continue payment setup.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "payment_method_types",
-                    djstripe.fields.JSONField(
-                        help_text="The list of payment method types (e.g. card) that this PaymentIntent is allowed to use."
-                    ),
-                ),
+                ("last_setup_error", djstripe.fields.JSONField(blank=True, null=True)),
+                ("next_action", djstripe.fields.JSONField(blank=True, null=True)),
+                ("payment_method_types", djstripe.fields.JSONField()),
                 (
                     "status",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.SetupIntentStatus,
-                        help_text="Status of this SetupIntent, one of requires_payment_method, requires_confirmation, requires_action, processing, canceled, or succeeded.",
-                        max_length=23,
+                        enum=djstripe.enums.SetupIntentStatus, max_length=23
                     ),
                 ),
                 (
@@ -3291,7 +2412,6 @@ class Migration(migrations.Migration):
                     djstripe.fields.StripeEnumField(
                         default="off_session",
                         enum=djstripe.enums.IntentUsage,
-                        help_text="Indicates how the payment method is intended to be used in the future.",
                         max_length=11,
                     ),
                 ),
@@ -3299,7 +2419,6 @@ class Migration(migrations.Migration):
                     "customer",
                     djstripe.fields.StripeForeignKey(
                         blank=True,
-                        help_text="Customer this SetupIntent belongs to, if one exists.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.customer",
@@ -3310,7 +2429,6 @@ class Migration(migrations.Migration):
                     "on_behalf_of",
                     djstripe.fields.StripeForeignKey(
                         blank=True,
-                        help_text="The account (if any) for which the setup is intended.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.account",
@@ -3321,7 +2439,6 @@ class Migration(migrations.Migration):
                     "payment_method",
                     djstripe.fields.StripeForeignKey(
                         blank=True,
-                        help_text="Payment method used in this PaymentIntent.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.paymentmethod",
@@ -3350,49 +2467,20 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True)),
                 ("djstripe_updated", models.DateTimeField(auto_now=True)),
-                (
-                    "amount",
-                    djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Amount (in cents) intended to be collected by this PaymentIntent."
-                    ),
-                ),
+                ("amount", djstripe.fields.StripeQuantumCurrencyAmountField()),
                 (
                     "amount_capturable",
-                    djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Amount (in cents) that can be captured from this PaymentIntent."
-                    ),
+                    djstripe.fields.StripeQuantumCurrencyAmountField(),
                 ),
-                (
-                    "amount_received",
-                    djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Amount (in cents) that was collected by this PaymentIntent."
-                    ),
-                ),
+                ("amount_received", djstripe.fields.StripeQuantumCurrencyAmountField()),
                 (
                     "canceled_at",
                     djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        default=None,
-                        help_text="Populated when status is canceled, this is the time at which the PaymentIntent was canceled. Measured in seconds since the Unix epoch.",
-                        null=True,
+                        blank=True, default=None, null=True
                     ),
                 ),
                 (
@@ -3400,16 +2488,13 @@ class Migration(migrations.Migration):
                     djstripe.fields.StripeEnumField(
                         blank=True,
                         enum=djstripe.enums.PaymentIntentCancellationReason,
-                        help_text="Reason for cancellation of this PaymentIntent, either user-provided (duplicate, fraudulent, requested_by_customer, or abandoned) or generated by Stripe internally (failed_invoice, void_invoice, or automatic).",
                         max_length=21,
                     ),
                 ),
                 (
                     "capture_method",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.CaptureMethod,
-                        help_text="Capture method of this PaymentIntent, one of automatic or manual.",
-                        max_length=9,
+                        enum=djstripe.enums.CaptureMethod, max_length=9
                     ),
                 ),
                 (
@@ -3422,17 +2507,10 @@ class Migration(migrations.Migration):
                 (
                     "confirmation_method",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.ConfirmationMethod,
-                        help_text="Confirmation method of this PaymentIntent, one of manual or automatic.",
-                        max_length=9,
+                        enum=djstripe.enums.ConfirmationMethod, max_length=9
                     ),
                 ),
-                (
-                    "currency",
-                    djstripe.fields.StripeCurrencyCodeField(
-                        help_text="Three-letter ISO currency code", max_length=3
-                    ),
-                ),
+                ("currency", djstripe.fields.StripeCurrencyCodeField(max_length=3)),
                 (
                     "description",
                     models.TextField(
@@ -3444,25 +2522,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "last_payment_error",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="The payment error encountered in the previous PaymentIntent confirmation.",
-                        null=True,
-                    ),
+                    djstripe.fields.JSONField(blank=True, null=True),
                 ),
                 (
                     "next_action",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="If present, this property tells you what actions you need to take in order for your customer to fulfill a payment using the provided source.",
-                        null=True,
-                    ),
+                    djstripe.fields.JSONField(blank=True, null=True),
                 ),
                 (
                     "payment_method_types",
-                    djstripe.fields.JSONField(
-                        help_text="The list of payment method types (e.g. card) that this PaymentIntent is allowed to use."
-                    ),
+                    djstripe.fields.JSONField(),
                 ),
                 (
                     "receipt_email",
@@ -3477,19 +2545,11 @@ class Migration(migrations.Migration):
                     djstripe.fields.StripeEnumField(
                         blank=True,
                         enum=djstripe.enums.IntentUsage,
-                        help_text="Indicates that you intend to make future payments with this PaymentIntent's payment method. If present, the payment method used with this PaymentIntent can be attached to a Customer, even after the transaction completes. Use `on_session` if you intend to only reuse the payment method when your customer is present in your checkout flow. Use `off_session` if your customer may or may not be in your checkout flow. Stripe uses `setup_future_usage` to dynamically optimize your payment flow and comply with regional legislation and network rules. For example, if your customer is impacted by SCA, using `off_session` will ensure that they are authenticated while processing this PaymentIntent. You will then be able to make later off-session payments for this customer.",
                         max_length=11,
                         null=True,
                     ),
                 ),
-                (
-                    "shipping",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Shipping information for this PaymentIntent.",
-                        null=True,
-                    ),
-                ),
+                ("shipping", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "statement_descriptor",
                     models.CharField(
@@ -3501,19 +2561,10 @@ class Migration(migrations.Migration):
                 (
                     "status",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.PaymentIntentStatus,
-                        help_text="Status of this PaymentIntent, one of requires_payment_method, requires_confirmation, requires_action, processing, requires_capture, canceled, or succeeded. You can read more about PaymentIntent statuses here.",
-                        max_length=23,
+                        enum=djstripe.enums.PaymentIntentStatus, max_length=23
                     ),
                 ),
-                (
-                    "transfer_data",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="The data with which to automatically create a Transfer when the payment is finalized. See the PaymentIntents Connect usage guide for details.",
-                        null=True,
-                    ),
-                ),
+                ("transfer_data", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "transfer_group",
                     models.CharField(
@@ -3525,7 +2576,6 @@ class Migration(migrations.Migration):
                 (
                     "customer",
                     djstripe.fields.StripeForeignKey(
-                        help_text="Customer this PaymentIntent is for if one exists.",
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.customer",
@@ -3536,7 +2586,6 @@ class Migration(migrations.Migration):
                     "on_behalf_of",
                     djstripe.fields.StripeForeignKey(
                         blank=True,
-                        help_text="The account (if any) for which the funds of the PaymentIntent are intended.",
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.account",
@@ -3547,7 +2596,6 @@ class Migration(migrations.Migration):
                     "payment_method",
                     djstripe.fields.StripeForeignKey(
                         blank=True,
-                        help_text="Payment method used in this PaymentIntent.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.paymentmethod",
@@ -3561,7 +2609,6 @@ class Migration(migrations.Migration):
             model_name="charge",
             name="payment_intent",
             field=djstripe.fields.StripeForeignKey(
-                help_text="PaymentIntent associated with this charge, if one exists.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="charges",
@@ -3584,7 +2631,6 @@ class Migration(migrations.Migration):
             name="pending_setup_intent",
             field=djstripe.fields.StripeForeignKey(
                 blank=True,
-                help_text="We can use this SetupIntent to collect user authentication when creating a subscription without immediate payment or updating a subscription's payment method, allowing you to optimize for off-session payments.",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="setup_intents",
@@ -3611,22 +2657,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -3640,7 +2672,6 @@ class Migration(migrations.Migration):
                     djstripe.fields.StripeEnumField(
                         blank=True,
                         enum=djstripe.enums.SessionBillingAddressCollection,
-                        help_text="The value (auto or required) for whether Checkoutcollected the customer's billing address.",
                         max_length=8,
                     ),
                 ),
@@ -3668,14 +2699,7 @@ class Migration(migrations.Migration):
                         max_length=255,
                     ),
                 ),
-                (
-                    "display_items",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="The line items, plans, or SKUs purchased by the customer.",
-                        null=True,
-                    ),
-                ),
+                ("display_items", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "locale",
                     models.CharField(
@@ -3684,19 +2708,11 @@ class Migration(migrations.Migration):
                         max_length=255,
                     ),
                 ),
-                (
-                    "payment_method_types",
-                    djstripe.fields.JSONField(
-                        help_text="The list of payment method types (e.g. card) that this Checkout Session is allowed to accept."
-                    ),
-                ),
+                ("payment_method_types", djstripe.fields.JSONField()),
                 (
                     "submit_type",
                     djstripe.fields.StripeEnumField(
-                        blank=True,
-                        enum=djstripe.enums.SubmitTypeStatus,
-                        help_text="Describes the type of transaction being performed by Checkoutin order to customize relevant text on the page, such as the submit button.",
-                        max_length=6,
+                        blank=True, enum=djstripe.enums.SubmitTypeStatus, max_length=6
                     ),
                 ),
                 (
@@ -3710,7 +2726,6 @@ class Migration(migrations.Migration):
                 (
                     "customer",
                     djstripe.fields.StripeForeignKey(
-                        help_text="Customer this Checkout is for if one exists.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.customer",
@@ -3720,7 +2735,6 @@ class Migration(migrations.Migration):
                 (
                     "payment_intent",
                     djstripe.fields.StripeForeignKey(
-                        help_text="PaymentIntent created if SKUs or line items were provided.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.paymentintent",
@@ -3730,7 +2744,6 @@ class Migration(migrations.Migration):
                 (
                     "subscription",
                     djstripe.fields.StripeForeignKey(
-                        help_text="Subscription created if one or more plans were provided.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.subscription",
@@ -3740,10 +2753,7 @@ class Migration(migrations.Migration):
                 (
                     "mode",
                     djstripe.fields.StripeEnumField(
-                        blank=True,
-                        enum=djstripe.enums.SessionMode,
-                        help_text="The mode of the Checkout Session, one of payment, setup, or subscription.",
-                        max_length=12,
+                        blank=True, enum=djstripe.enums.SessionMode, max_length=12
                     ),
                 ),
             ],
@@ -3753,7 +2763,6 @@ class Migration(migrations.Migration):
             model_name="charge",
             name="payment_method",
             field=djstripe.fields.StripeForeignKey(
-                help_text="PaymentMethod used in this charge.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="charges",
@@ -3787,18 +2796,13 @@ class Migration(migrations.Migration):
                 blank=True,
                 default="",
                 enum=djstripe.enums.InvoiceBillingReason,
-                help_text="Indicates the reason why the invoice was created. subscription_cycle indicates an invoice created by a subscription advancing into a new period. subscription_create indicates an invoice created due to creating a subscription. subscription_update indicates an invoice created due to updating a subscription. subscription is set for all old invoices to indicate either a change to a subscription or a period advancement. manual is set for all invoices unrelated to a subscription (for example: created via the invoice editor). The upcoming value is reserved for simulated invoices per the upcoming invoice endpoint. subscription_threshold indicates an invoice created due to a billing threshold being reached.",
                 max_length=22,
             ),
         ),
         migrations.AddField(
             model_name="invoice",
             name="customer_address",
-            field=djstripe.fields.JSONField(
-                blank=True,
-                help_text="The customer's address. Until the invoice is finalized, this field will equal customer.address. Once the invoice is finalized, this field will no longer be updated.",
-                null=True,
-            ),
+            field=djstripe.fields.JSONField(blank=True, null=True),
         ),
         migrations.AddField(
             model_name="invoice",
@@ -3830,20 +2834,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="invoice",
             name="customer_shipping",
-            field=djstripe.fields.JSONField(
-                blank=True,
-                help_text="The customer's shipping information. Until the invoice is finalized, this field will equal customer.shipping. Once the invoice is finalized, this field will no longer be updated.",
-                null=True,
-            ),
+            field=djstripe.fields.JSONField(blank=True, null=True),
         ),
         migrations.AddField(
             model_name="invoice",
             name="customer_tax_exempt",
             field=djstripe.fields.StripeEnumField(
-                default="",
-                enum=djstripe.enums.CustomerTaxExempt,
-                help_text="The customer's tax exempt status. Until the invoice is finalized, this field will equal customer.tax_exempt. Once the invoice is finalized, this field will no longer be updated.",
-                max_length=7,
+                default="", enum=djstripe.enums.CustomerTaxExempt, max_length=7
             ),
         ),
         migrations.AddField(
@@ -3851,7 +2848,6 @@ class Migration(migrations.Migration):
             name="default_payment_method",
             field=djstripe.fields.StripeForeignKey(
                 blank=True,
-                help_text="Default payment method for the invoice. It must belong to the customer associated with the invoice. If not set, defaults to the subscription's default payment method, if any, or to the default payment method in the customer's invoice settings.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="+",
@@ -3872,48 +2868,32 @@ class Migration(migrations.Migration):
             model_name="invoice",
             name="post_payment_credit_notes_amount",
             field=djstripe.fields.StripeQuantumCurrencyAmountField(
-                blank=True,
-                help_text="Total amount (in cents) of all post-payment credit notes issued for this invoice.",
-                null=True,
+                blank=True, null=True
             ),
         ),
         migrations.AddField(
             model_name="invoice",
             name="pre_payment_credit_notes_amount",
             field=djstripe.fields.StripeQuantumCurrencyAmountField(
-                blank=True,
-                help_text="Total amount (in cents) of all pre-payment credit notes issued for this invoice.",
-                null=True,
+                blank=True, null=True
             ),
         ),
         migrations.AddField(
             model_name="invoice",
             name="threshold_reason",
-            field=djstripe.fields.JSONField(
-                blank=True,
-                help_text="If billing_reason is set to subscription_threshold this returns more information on which threshold rules triggered the invoice.",
-                null=True,
-            ),
+            field=djstripe.fields.JSONField(blank=True, null=True),
         ),
         migrations.AddField(
             model_name="invoice",
             name="status",
             field=djstripe.fields.StripeEnumField(
-                blank=True,
-                default="",
-                enum=djstripe.enums.InvoiceStatus,
-                help_text="The status of the invoice, one of draft, open, paid, uncollectible, or void.",
-                max_length=13,
+                blank=True, default="", enum=djstripe.enums.InvoiceStatus, max_length=13
             ),
         ),
         migrations.AddField(
             model_name="invoice",
             name="discount",
-            field=djstripe.fields.JSONField(
-                blank=True,
-                help_text="Describes the current discount applied to this subscription, if there is one. When billing, a discount applied to a subscription overrides a discount applied on a customer-wide basis.",
-                null=True,
-            ),
+            field=djstripe.fields.JSONField(blank=True, null=True),
         ),
         migrations.CreateModel(
             name="Payout",
@@ -3934,22 +2914,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -3961,30 +2927,17 @@ class Migration(migrations.Migration):
                 (
                     "amount",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        decimal_places=2,
-                        help_text="Amount (as decimal) to be transferred to your bank account or debit card.",
-                        max_digits=11,
+                        decimal_places=2, max_digits=11
                     ),
                 ),
-                (
-                    "arrival_date",
-                    djstripe.fields.StripeDateTimeField(
-                        help_text="Date the payout is expected to arrive in the bank. This factors in delays like weekends or bank holidays."
-                    ),
-                ),
-                (
-                    "currency",
-                    djstripe.fields.StripeCurrencyCodeField(
-                        help_text="Three-letter ISO currency code", max_length=3
-                    ),
-                ),
+                ("arrival_date", djstripe.fields.StripeDateTimeField()),
+                ("currency", djstripe.fields.StripeCurrencyCodeField(max_length=3)),
                 (
                     "failure_code",
                     djstripe.fields.StripeEnumField(
                         blank=True,
                         default="",
                         enum=djstripe.enums.PayoutFailureCode,
-                        help_text="Error code explaining reason for transfer failure if available. See https://stripe.com/docs/api?lang=python#transfer_failures.",
                         max_length=23,
                     ),
                 ),
@@ -3999,9 +2952,7 @@ class Migration(migrations.Migration):
                 (
                     "method",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.PayoutMethod,
-                        help_text="The method used to send this payout. `instant` is only supported for payouts to debit cards.",
-                        max_length=8,
+                        enum=djstripe.enums.PayoutMethod, max_length=8
                     ),
                 ),
                 (
@@ -4016,9 +2967,7 @@ class Migration(migrations.Migration):
                 (
                     "status",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.PayoutStatus,
-                        help_text="Current status of the payout. A payout will be `pending` until it is submitted to the bank, at which point it becomes `in_transit`. It will then change to paid if the transaction goes through. If it does not go through successfully, its status will change to `failed` or `canceled`.",
-                        max_length=10,
+                        enum=djstripe.enums.PayoutStatus, max_length=10
                     ),
                 ),
                 (
@@ -4030,7 +2979,6 @@ class Migration(migrations.Migration):
                 (
                     "destination",
                     djstripe.fields.StripeForeignKey(
-                        help_text="Bank account or card the payout was sent to.",
                         null=True,
                         on_delete=django.db.models.deletion.PROTECT,
                         to="djstripe.bankaccount",
@@ -4040,7 +2988,6 @@ class Migration(migrations.Migration):
                 (
                     "balance_transaction",
                     djstripe.fields.StripeForeignKey(
-                        help_text="Balance transaction that describes the impact on your account balance.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.balancetransaction",
@@ -4050,7 +2997,6 @@ class Migration(migrations.Migration):
                 (
                     "failure_balance_transaction",
                     djstripe.fields.StripeForeignKey(
-                        help_text="If the payout failed or was canceled, this will be the balance transaction that reversed the initial balance transaction, and puts the funds from the failed payout back in your balance.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="failure_payouts",
@@ -4080,22 +3026,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -4107,11 +3039,7 @@ class Migration(migrations.Migration):
                 (
                     "amount",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        blank=True,
-                        decimal_places=2,
-                        help_text="Amount (as decimal) associated with the source. This is the amount for which the source will be chargeable once ready. Required for `single_use` sources.",
-                        max_digits=11,
-                        null=True,
+                        blank=True, decimal_places=2, max_digits=11, null=True
                     ),
                 ),
                 (
@@ -4124,26 +3052,16 @@ class Migration(migrations.Migration):
                 (
                     "currency",
                     djstripe.fields.StripeCurrencyCodeField(
-                        blank=True,
-                        default="",
-                        help_text="Three-letter ISO currency code",
-                        max_length=3,
+                        blank=True, default="", max_length=3
                     ),
                 ),
                 (
                     "flow",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.SourceFlow,
-                        help_text="The authentication flow of the source.",
-                        max_length=17,
+                        enum=djstripe.enums.SourceFlow, max_length=17
                     ),
                 ),
-                (
-                    "owner",
-                    djstripe.fields.JSONField(
-                        help_text="Information about the owner of the payment instrument that may be used or required by particular source types."
-                    ),
-                ),
+                ("owner", djstripe.fields.JSONField()),
                 (
                     "statement_descriptor",
                     models.CharField(
@@ -4156,57 +3074,25 @@ class Migration(migrations.Migration):
                 (
                     "status",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.SourceStatus,
-                        help_text="The status of the source. Only `chargeable` sources can be used to create a charge.",
-                        max_length=10,
+                        enum=djstripe.enums.SourceStatus, max_length=10
                     ),
                 ),
                 (
                     "type",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.SourceType,
-                        help_text="The type of the source.",
-                        max_length=20,
+                        enum=djstripe.enums.SourceType, max_length=20
                     ),
                 ),
                 (
                     "usage",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.SourceUsage,
-                        help_text="Whether this source should be reusable or not. Some source types may or may not be reusable by construction, while other may leave the option at creation.",
-                        max_length=10,
+                        enum=djstripe.enums.SourceUsage, max_length=10
                     ),
                 ),
-                (
-                    "code_verification",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Information related to the code verification flow. Present if the source is authenticated by a verification code (`flow` is `code_verification`).",
-                        null=True,
-                    ),
-                ),
-                (
-                    "receiver",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Information related to the receiver flow. Present if the source is a receiver (`flow` is `receiver`).",
-                        null=True,
-                    ),
-                ),
-                (
-                    "redirect",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Information related to the redirect flow. Present if the source is authenticated by a redirect (`flow` is `redirect`).",
-                        null=True,
-                    ),
-                ),
-                (
-                    "source_data",
-                    djstripe.fields.JSONField(
-                        help_text="The data corresponding to the source type."
-                    ),
-                ),
+                ("code_verification", djstripe.fields.JSONField(blank=True, null=True)),
+                ("receiver", djstripe.fields.JSONField(blank=True, null=True)),
+                ("redirect", djstripe.fields.JSONField(blank=True, null=True)),
+                ("source_data", djstripe.fields.JSONField()),
                 (
                     "customer",
                     djstripe.fields.StripeForeignKey(
@@ -4240,22 +3126,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -4264,25 +3136,14 @@ class Migration(migrations.Migration):
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True)),
                 ("djstripe_updated", models.DateTimeField(auto_now=True)),
-                (
-                    "amount",
-                    djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Amount, in cents."
-                    ),
-                ),
-                (
-                    "currency",
-                    djstripe.fields.StripeCurrencyCodeField(
-                        help_text="Three-letter ISO currency code", max_length=3
-                    ),
-                ),
+                ("amount", djstripe.fields.StripeQuantumCurrencyAmountField()),
+                ("currency", djstripe.fields.StripeCurrencyCodeField(max_length=3)),
                 (
                     "failure_reason",
                     djstripe.fields.StripeEnumField(
                         blank=True,
                         default="",
                         enum=djstripe.enums.RefundFailureReason,
-                        help_text="If the refund failed, the reason for refund failure if known.",
                         max_length=24,
                     ),
                 ),
@@ -4292,7 +3153,6 @@ class Migration(migrations.Migration):
                         blank=True,
                         default="",
                         enum=djstripe.enums.RefundReason,
-                        help_text="Reason for the refund.",
                         max_length=25,
                     ),
                 ),
@@ -4308,16 +3168,12 @@ class Migration(migrations.Migration):
                 (
                     "status",
                     djstripe.fields.StripeEnumField(
-                        blank=True,
-                        enum=djstripe.enums.RefundStatus,
-                        help_text="Status of the refund.",
-                        max_length=9,
+                        blank=True, enum=djstripe.enums.RefundStatus, max_length=9
                     ),
                 ),
                 (
                     "charge",
                     djstripe.fields.StripeForeignKey(
-                        help_text="The charge that was refunded",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="refunds",
                         to="djstripe.charge",
@@ -4327,7 +3183,6 @@ class Migration(migrations.Migration):
                 (
                     "balance_transaction",
                     djstripe.fields.StripeForeignKey(
-                        help_text="Balance transaction that describes the impact on your account balance.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.balancetransaction",
@@ -4338,7 +3193,6 @@ class Migration(migrations.Migration):
                     "failure_balance_transaction",
                     djstripe.fields.StripeForeignKey(
                         blank=True,
-                        help_text="If the refund failed, this balance transaction describes the adjustment made on your account balance that reverses the initial balance transaction.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="failure_refunds",
@@ -4367,22 +3221,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -4411,37 +3251,25 @@ class Migration(migrations.Migration):
                 (
                     "amount_due",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        decimal_places=2,
-                        help_text="Final amount due (as decimal) at this time for this invoice. If the invoice's total is smaller than the minimum charge amount, for example, or if there is account credit that can be applied to the invoice, the amount_due may be 0. If there is a positive starting_balance for the invoice (the customer owes money), the amount_due will also take that into account. The charge that gets generated for the invoice will be for the amount specified in amount_due.",
-                        max_digits=11,
+                        decimal_places=2, max_digits=11
                     ),
                 ),
                 (
                     "amount_paid",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        decimal_places=2,
-                        help_text="The amount, (as decimal), that was paid.",
-                        max_digits=11,
-                        null=True,
+                        decimal_places=2, max_digits=11, null=True
                     ),
                 ),
                 (
                     "amount_remaining",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        decimal_places=2,
-                        help_text="The amount remaining, (as decimal), that is due.",
-                        max_digits=11,
-                        null=True,
+                        decimal_places=2, max_digits=11, null=True
                     ),
                 ),
                 (
                     "application_fee_amount",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        blank=True,
-                        decimal_places=2,
-                        help_text="The fee (as decimal) that will be applied to the invoice and transferred to the application owner's Stripe account when the invoice is paid.",
-                        max_digits=11,
-                        null=True,
+                        blank=True, decimal_places=2, max_digits=11, null=True
                     ),
                 ),
                 (
@@ -4470,7 +3298,6 @@ class Migration(migrations.Migration):
                         blank=True,
                         default="",
                         enum=djstripe.enums.InvoiceBillingReason,
-                        help_text="Indicates the reason why the invoice was created. subscription_cycle indicates an invoice created by a subscription advancing into a new period. subscription_create indicates an invoice created due to creating a subscription. subscription_update indicates an invoice created due to updating a subscription. subscription is set for all old invoices to indicate either a change to a subscription or a period advancement. manual is set for all invoices unrelated to a subscription (for example: created via the invoice editor). The upcoming value is reserved for simulated invoices per the upcoming invoice endpoint. subscription_threshold indicates an invoice created due to a billing threshold being reached.",
                         max_length=22,
                     ),
                 ),
@@ -4478,25 +3305,12 @@ class Migration(migrations.Migration):
                     "collection_method",
                     djstripe.fields.StripeEnumField(
                         enum=djstripe.enums.InvoiceCollectionMethod,
-                        help_text="When charging automatically, Stripe will attempt to pay this invoice using the default source attached to the customer. When sending an invoice, Stripe will email this invoice to the customer with payment instructions.",
                         max_length=20,
                         null=True,
                     ),
                 ),
-                (
-                    "currency",
-                    djstripe.fields.StripeCurrencyCodeField(
-                        help_text="Three-letter ISO currency code", max_length=3
-                    ),
-                ),
-                (
-                    "customer_address",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="The customer's address. Until the invoice is finalized, this field will equal customer.address. Once the invoice is finalized, this field will no longer be updated.",
-                        null=True,
-                    ),
-                ),
+                ("currency", djstripe.fields.StripeCurrencyCodeField(max_length=3)),
+                ("customer_address", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "customer_email",
                     models.TextField(
@@ -4521,37 +3335,20 @@ class Migration(migrations.Migration):
                         max_length=5000,
                     ),
                 ),
-                (
-                    "customer_shipping",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="The customer's shipping information. Until the invoice is finalized, this field will equal customer.shipping. Once the invoice is finalized, this field will no longer be updated.",
-                        null=True,
-                    ),
-                ),
+                ("customer_shipping", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "customer_tax_exempt",
                     djstripe.fields.StripeEnumField(
-                        default="",
-                        enum=djstripe.enums.CustomerTaxExempt,
-                        help_text="The customer's tax exempt status. Until the invoice is finalized, this field will equal customer.tax_exempt. Once the invoice is finalized, this field will no longer be updated.",
-                        max_length=7,
+                        default="", enum=djstripe.enums.CustomerTaxExempt, max_length=7
                     ),
                 ),
                 (
                     "due_date",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The date on which payment for this invoice is due. This value will be null for invoices where billing=charge_automatically.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(blank=True, null=True),
                 ),
                 (
                     "ending_balance",
-                    djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Ending customer balance (in cents) after attempting to pay invoice. If the invoice has not been attempted yet, this will be null.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeQuantumCurrencyAmountField(null=True),
                 ),
                 (
                     "footer",
@@ -4581,11 +3378,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "next_payment_attempt",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The time at which payment will next be attempted.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(blank=True, null=True),
                 ),
                 (
                     "number",
@@ -4603,32 +3396,18 @@ class Migration(migrations.Migration):
                         help_text="Whether payment was successfully collected for this invoice. An invoice can be paid (most commonly) with a charge or with credit from the customer's account balance.",
                     ),
                 ),
-                (
-                    "period_end",
-                    djstripe.fields.StripeDateTimeField(
-                        help_text="End of the usage period during which invoice items were added to this invoice."
-                    ),
-                ),
-                (
-                    "period_start",
-                    djstripe.fields.StripeDateTimeField(
-                        help_text="Start of the usage period during which invoice items were added to this invoice."
-                    ),
-                ),
+                ("period_end", djstripe.fields.StripeDateTimeField()),
+                ("period_start", djstripe.fields.StripeDateTimeField()),
                 (
                     "post_payment_credit_notes_amount",
                     djstripe.fields.StripeQuantumCurrencyAmountField(
-                        blank=True,
-                        help_text="Total amount (in cents) of all post-payment credit notes issued for this invoice.",
-                        null=True,
+                        blank=True, null=True
                     ),
                 ),
                 (
                     "pre_payment_credit_notes_amount",
                     djstripe.fields.StripeQuantumCurrencyAmountField(
-                        blank=True,
-                        help_text="Total amount (in cents) of all pre-payment credit notes issued for this invoice.",
-                        null=True,
+                        blank=True, null=True
                     ),
                 ),
                 (
@@ -4642,9 +3421,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "starting_balance",
-                    djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="Starting customer balance (in cents) before attempting to pay invoice. If the invoice has not been attempted yet, this will be the current customer balance."
-                    ),
+                    djstripe.fields.StripeQuantumCurrencyAmountField(),
                 ),
                 (
                     "statement_descriptor",
@@ -4661,28 +3438,18 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "subscription_proration_date",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="Only set for upcoming invoices that preview prorations. The time used to calculate prorations.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(blank=True, null=True),
                 ),
                 (
                     "subtotal",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        decimal_places=2,
-                        help_text="Total (as decimal) of all subscriptions, invoice items, and prorations on the invoice before any discount or tax is applied.",
-                        max_digits=11,
+                        decimal_places=2, max_digits=11
                     ),
                 ),
                 (
                     "tax",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        blank=True,
-                        decimal_places=2,
-                        help_text="The amount (as decimal) of tax included in the total, calculated from ``tax_percent`` and the subtotal. If no ``tax_percent`` is defined, this value will be null.",
-                        max_digits=11,
-                        null=True,
+                        blank=True, decimal_places=2, max_digits=11, null=True
                     ),
                 ),
                 (
@@ -4690,7 +3457,6 @@ class Migration(migrations.Migration):
                     djstripe.fields.StripePercentField(
                         blank=True,
                         decimal_places=2,
-                        help_text="This percentage of the subtotal has been added to the total amount of the invoice, including invoice line items and discounts. This field is inherited from the subscription's ``tax_percent`` field, but can be changed before the invoice is paid. This field defaults to null.",
                         max_digits=5,
                         null=True,
                         validators=[
@@ -4699,14 +3465,7 @@ class Migration(migrations.Migration):
                         ],
                     ),
                 ),
-                (
-                    "threshold_reason",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="If billing_reason is set to subscription_threshold this returns more information on which threshold rules triggered the invoice.",
-                        null=True,
-                    ),
-                ),
+                ("threshold_reason", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "total",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
@@ -4717,10 +3476,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "webhooks_delivered_at",
-                    djstripe.fields.StripeDateTimeField(
-                        help_text="The time at which webhooks for this invoice were successfully delivered (if the invoice had no webhooks to deliver, this will match `date`). Invoice payment is delayed until webhooks are delivered, or until all webhook delivery attempts have been exhausted.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(null=True),
                 ),
                 (
                     "charge",
@@ -4735,7 +3491,6 @@ class Migration(migrations.Migration):
                 (
                     "customer",
                     djstripe.fields.StripeForeignKey(
-                        help_text="The customer associated with this invoice.",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="upcominginvoices",
                         to="djstripe.customer",
@@ -4746,7 +3501,6 @@ class Migration(migrations.Migration):
                     "default_payment_method",
                     djstripe.fields.StripeForeignKey(
                         blank=True,
-                        help_text="Default payment method for the invoice. It must belong to the customer associated with the invoice. If not set, defaults to the subscription's default payment method, if any, or to the default payment method in the customer's invoice settings.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="+",
@@ -4766,7 +3520,6 @@ class Migration(migrations.Migration):
                 (
                     "subscription",
                     djstripe.fields.StripeForeignKey(
-                        help_text="The subscription that this invoice was prepared for, if any.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="upcominginvoices",
@@ -4780,28 +3533,19 @@ class Migration(migrations.Migration):
                         blank=True,
                         default="",
                         enum=djstripe.enums.InvoiceStatus,
-                        help_text="The status of the invoice, one of draft, open, paid, uncollectible, or void.",
                         max_length=13,
                     ),
                 ),
                 (
                     "default_source",
                     djstripe.fields.PaymentMethodForeignKey(
-                        help_text="The default payment source for the invoice. It must belong to the customer associated with the invoice and be in a chargeable state. If not set, defaults to the subscription's default source, if any, or to the customer's default source.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="upcoming_invoices",
                         to="djstripe.djstripepaymentmethod",
                     ),
                 ),
-                (
-                    "discount",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Describes the current discount applied to this subscription, if there is one. When billing, a discount applied to a subscription overrides a discount applied on a customer-wide basis.",
-                        null=True,
-                    ),
-                ),
+                ("discount", djstripe.fields.JSONField(blank=True, null=True)),
             ],
             options={"abstract": False, "ordering": ["-created"]},
         ),
@@ -4824,22 +3568,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -4883,7 +3613,6 @@ class Migration(migrations.Migration):
                     "percentage",
                     djstripe.fields.StripePercentField(
                         decimal_places=2,
-                        help_text="This represents the tax rate percent out of 100.",
                         max_digits=5,
                         validators=[
                             django.core.validators.MinValueValidator(1),
@@ -4924,22 +3653,8 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                (
-                    "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
-                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "description",
                     models.TextField(
@@ -4951,23 +3666,11 @@ class Migration(migrations.Migration):
                 (
                     "amount",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
-                        decimal_places=2,
-                        help_text="Amount invoiced (as decimal).",
-                        max_digits=11,
+                        decimal_places=2, max_digits=11
                     ),
                 ),
-                (
-                    "currency",
-                    djstripe.fields.StripeCurrencyCodeField(
-                        help_text="Three-letter ISO currency code", max_length=3
-                    ),
-                ),
-                (
-                    "date",
-                    djstripe.fields.StripeDateTimeField(
-                        help_text="The date on the invoiceitem."
-                    ),
-                ),
+                ("currency", djstripe.fields.StripeCurrencyCodeField(max_length=3)),
+                ("date", djstripe.fields.StripeDateTimeField()),
                 (
                     "discountable",
                     models.BooleanField(
@@ -4976,18 +3679,8 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("period", djstripe.fields.JSONField()),
-                (
-                    "period_end",
-                    djstripe.fields.StripeDateTimeField(
-                        help_text="Might be the date when this invoiceitem's invoice was sent."
-                    ),
-                ),
-                (
-                    "period_start",
-                    djstripe.fields.StripeDateTimeField(
-                        help_text="Might be the date when this invoiceitem was added to the invoice"
-                    ),
-                ),
+                ("period_end", djstripe.fields.StripeDateTimeField()),
+                ("period_start", djstripe.fields.StripeDateTimeField()),
                 (
                     "proration",
                     models.BooleanField(
@@ -5006,7 +3699,6 @@ class Migration(migrations.Migration):
                 (
                     "customer",
                     djstripe.fields.StripeForeignKey(
-                        help_text="The customer associated with this invoiceitem.",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="invoiceitems",
                         to="djstripe.customer",
@@ -5016,7 +3708,6 @@ class Migration(migrations.Migration):
                 (
                     "invoice",
                     djstripe.fields.StripeForeignKey(
-                        help_text="The invoice to which this invoiceitem is attached.",
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="invoiceitems",
@@ -5037,7 +3728,6 @@ class Migration(migrations.Migration):
                 (
                     "subscription",
                     djstripe.fields.StripeForeignKey(
-                        help_text="The subscription that this invoice item has been created for, if any.",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="invoiceitems",
@@ -5092,12 +3782,7 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                (
-                    "amount",
-                    djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="The amount, in cents, of the tax."
-                    ),
-                ),
+                ("amount", djstripe.fields.StripeQuantumCurrencyAmountField()),
                 (
                     "inclusive",
                     models.BooleanField(
@@ -5115,7 +3800,6 @@ class Migration(migrations.Migration):
                 (
                     "tax_rate",
                     djstripe.fields.StripeForeignKey(
-                        help_text="The tax rate that was applied to get this tax amount.",
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.taxrate",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
@@ -5136,12 +3820,7 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                (
-                    "amount",
-                    djstripe.fields.StripeQuantumCurrencyAmountField(
-                        help_text="The amount, in cents, of the tax."
-                    ),
-                ),
+                ("amount", djstripe.fields.StripeQuantumCurrencyAmountField()),
                 (
                     "inclusive",
                     models.BooleanField(
@@ -5160,7 +3839,6 @@ class Migration(migrations.Migration):
                 (
                     "tax_rate",
                     djstripe.fields.StripeForeignKey(
-                        help_text="The tax rate that was applied to get this tax amount.",
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.taxrate",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
@@ -5174,7 +3852,6 @@ class Migration(migrations.Migration):
             name="default_payment_method",
             field=djstripe.fields.StripeForeignKey(
                 blank=True,
-                help_text="The default payment method for the subscription. It must belong to the customer associated with the subscription. If not set, invoices will use the default payment method in the customer's invoice settings.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="+",
@@ -5187,7 +3864,6 @@ class Migration(migrations.Migration):
             name="default_source",
             field=djstripe.fields.PaymentMethodForeignKey(
                 blank=True,
-                help_text="The default payment source for the invoice. It must belong to the customer associated with the invoice and be in a chargeable state. If not set, defaults to the subscription's default source, if any, or to the customer's default source.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="invoices",
@@ -5199,7 +3875,6 @@ class Migration(migrations.Migration):
             name="default_source",
             field=djstripe.fields.PaymentMethodForeignKey(
                 blank=True,
-                help_text="The default payment source for the subscription. It must belong to the customer associated with the subscription and be in a chargeable state. If not set, defaults to the customer's default source.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="subscriptions",

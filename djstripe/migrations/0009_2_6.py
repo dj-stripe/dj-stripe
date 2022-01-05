@@ -41,19 +41,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(blank=True, null=True),
                 ),
                 (
                     "metadata",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
-                        null=True,
-                    ),
+                    djstripe.fields.JSONField(blank=True, null=True),
                 ),
                 (
                     "description",
@@ -71,12 +63,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "enabled_events",
-                    djstripe.fields.JSONField(
-                        help_text=(
-                            "The list of events to enable for this endpoint. "
-                            "['*'] indicates that all events are enabled, except those that require explicit selection."
-                        )
-                    ),
+                    djstripe.fields.JSONField(),
                 ),
                 (
                     "secret",
@@ -90,9 +77,7 @@ class Migration(migrations.Migration):
                 (
                     "status",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.WebhookEndpointStatus,
-                        help_text="The status of the webhook. It can be enabled or disabled.",
-                        max_length=8,
+                        enum=djstripe.enums.WebhookEndpointStatus, max_length=8
                     ),
                 ),
                 (
@@ -113,7 +98,6 @@ class Migration(migrations.Migration):
                     "djstripe_owner_account",
                     djstripe.fields.StripeForeignKey(
                         blank=True,
-                        help_text="The Stripe Account this object belongs to.",
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.account",
@@ -155,35 +139,19 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "created",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="The datetime this object was created in stripe.",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(blank=True, null=True),
                 ),
                 (
                     "period",
-                    djstripe.fields.JSONField(
-                        blank=True,
-                        help_text="Subscription Billing period for the SubscriptionItem",
-                        null=True,
-                    ),
+                    djstripe.fields.JSONField(blank=True, null=True),
                 ),
                 (
                     "period_end",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="End of the Subscription Billing period for the SubscriptionItem",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(blank=True, null=True),
                 ),
                 (
                     "period_start",
-                    djstripe.fields.StripeDateTimeField(
-                        blank=True,
-                        help_text="Start of the Subscription Billing period for the SubscriptionItem",
-                        null=True,
-                    ),
+                    djstripe.fields.StripeDateTimeField(blank=True, null=True),
                 ),
                 (
                     "total_usage",
@@ -195,7 +163,6 @@ class Migration(migrations.Migration):
                     "djstripe_owner_account",
                     djstripe.fields.StripeForeignKey(
                         blank=True,
-                        help_text="The Stripe Account this object belongs to.",
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.account",
@@ -216,7 +183,6 @@ class Migration(migrations.Migration):
                 (
                     "subscription_item",
                     djstripe.fields.StripeForeignKey(
-                        help_text="The subscription item this usage record contains data for.",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="usage_record_summaries",
                         to="djstripe.subscriptionitem",
@@ -231,7 +197,6 @@ class Migration(migrations.Migration):
             name="account",
             field=djstripe.fields.StripeForeignKey(
                 default=1,
-                help_text="ID of the Stripe account this fee was taken from.",
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="application_fees",
                 to="djstripe.account",
@@ -253,7 +218,6 @@ class Migration(migrations.Migration):
             model_name="dispute",
             name="balance_transaction",
             field=djstripe.fields.StripeForeignKey(
-                help_text="Balance transaction that describes the impact on your account balance.",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="disputes",
@@ -265,7 +229,6 @@ class Migration(migrations.Migration):
             model_name="dispute",
             name="charge",
             field=djstripe.fields.StripeForeignKey(
-                help_text="The charge that was disputed",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="disputes",
@@ -277,7 +240,6 @@ class Migration(migrations.Migration):
             model_name="dispute",
             name="payment_intent",
             field=djstripe.fields.StripeForeignKey(
-                help_text="The PaymentIntent that was disputed",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="disputes",
@@ -290,7 +252,6 @@ class Migration(migrations.Migration):
             name="balance_transactions",
             field=djstripe.fields.JSONField(
                 default="[]",
-                help_text="List of 0, 1 or 2 Balance Transactions that show funds withdrawn and reinstated to your Stripe account as a result of this dispute.",
             ),
         ),
         migrations.AlterField(
@@ -298,7 +259,6 @@ class Migration(migrations.Migration):
             name="percentage",
             field=djstripe.fields.StripePercentField(
                 decimal_places=4,
-                help_text="This represents the tax rate percent out of 100.",
                 max_digits=7,
                 validators=[
                     django.core.validators.MinValueValidator(1),
@@ -310,7 +270,6 @@ class Migration(migrations.Migration):
             model_name="transfer",
             name="destination",
             field=djstripe.fields.StripeIdField(
-                help_text="ID of the bank account, card, or Stripe account the transfer was sent to.",
                 max_length=255,
                 null=True,
             ),
@@ -321,7 +280,6 @@ class Migration(migrations.Migration):
             field=djstripe.fields.StripeEnumField(
                 default="increment",
                 enum=djstripe.enums.UsageAction,
-                help_text="When using increment the specified quantity will be added to the usage at the specified timestamp. The set action will overwrite the usage quantity at that timestamp. If the subscription has billing thresholds, increment is the only allowed value.",
                 max_length=9,
             ),
         ),
@@ -330,7 +288,6 @@ class Migration(migrations.Migration):
             name="timestamp",
             field=djstripe.fields.StripeDateTimeField(
                 blank=True,
-                help_text="The timestamp for the usage event. This timestamp must be within the current billing period of the subscription of the provided subscription_item.",
                 null=True,
             ),
         ),
@@ -339,7 +296,6 @@ class Migration(migrations.Migration):
             name="stripe_trigger_account",
             field=djstripe.fields.StripeForeignKey(
                 blank=True,
-                help_text="The Stripe Account this object belongs to.",
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 to="djstripe.account",

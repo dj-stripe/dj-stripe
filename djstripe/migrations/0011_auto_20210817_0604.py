@@ -19,62 +19,39 @@ class Migration(migrations.Migration):
             model_name="paymentmethod",
             name="type",
             field=djstripe.fields.StripeEnumField(
-                enum=djstripe.enums.PaymentMethodType,
-                help_text="The type of the PaymentMethod.",
-                max_length=17,
+                enum=djstripe.enums.PaymentMethodType, max_length=17
             ),
         ),
         migrations.AddField(
             model_name="paymentmethod",
             name="acss_debit",
-            field=djstripe.fields.JSONField(
-                blank=True,
-                help_text="Additional information for payment methods of type `acss_debit`",
-                null=True,
-            ),
+            field=djstripe.fields.JSONField(blank=True, null=True),
         ),
         migrations.AddField(
             model_name="paymentmethod",
             name="afterpay_clearpay",
-            field=djstripe.fields.JSONField(
-                blank=True,
-                help_text="Additional information for payment methods of type `afterpay_clearpay`",
-                null=True,
-            ),
+            field=djstripe.fields.JSONField(blank=True, null=True),
         ),
         migrations.AddField(
             model_name="paymentmethod",
             name="boleto",
-            field=djstripe.fields.JSONField(
-                blank=True,
-                help_text="Additional information for payment methods of type `boleto`",
-                null=True,
-            ),
+            field=djstripe.fields.JSONField(blank=True, null=True),
         ),
         migrations.AddField(
             model_name="paymentmethod",
             name="grabpay",
-            field=djstripe.fields.JSONField(
-                blank=True,
-                help_text="Additional information for payment methods of type `grabpay`",
-                null=True,
-            ),
+            field=djstripe.fields.JSONField(blank=True, null=True),
         ),
         migrations.AddField(
             model_name="paymentmethod",
             name="wechat_pay",
-            field=djstripe.fields.JSONField(
-                blank=True,
-                help_text="Additional information for payment methods of type `wechat_pay`",
-                null=True,
-            ),
+            field=djstripe.fields.JSONField(blank=True, null=True),
         ),
         migrations.AddField(
             model_name="subscription",
             name="latest_invoice",
             field=djstripe.fields.StripeForeignKey(
                 blank=True,
-                help_text="The most recent invoice this subscription has generated.",
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="+",
