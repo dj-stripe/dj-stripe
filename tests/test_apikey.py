@@ -7,6 +7,7 @@ from unittest.mock import patch
 import pytest
 from django.test import TestCase
 
+from djstripe.admin import APIKeyAdminCreateForm
 from djstripe.enums import APIKeyType
 from djstripe.exceptions import InvalidStripeAPIKey
 from djstripe.models import Account, APIKey
@@ -55,7 +56,6 @@ def test_clean_public_apikey():
     assert not key.djstripe_owner_account
 
 
-
 @patch("stripe.Account.retrieve", return_value=deepcopy(FAKE_PLATFORM_ACCOUNT))
 @patch("stripe.File.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD_ICON))
 def test_apikey_detect_livemode_and_type(
@@ -70,10 +70,14 @@ def test_apikey_detect_livemode_and_type(
         (SK_LIVE, True, APIKeyType.secret),
     )
     for secret, livemode, type in keys_and_values:
-        key = APIKey.objects.create(secret=secret)
-        assert key.livemode is livemode
-        assert key.type is type
-        key.clean()
+        # need to use ModelAdmin Form to create the APIKey instance
+        form = APIKeyAdminCreateForm(
+            data={"secret": secret},
+        )
+        form.save()
+
+        key = form.instance
+
         assert key.livemode is livemode
         assert key.type is type
 
