@@ -132,7 +132,10 @@ class APIKeyTest(TestCase):
         autospec=True,
     )
     def test_refresh_account(self, fileupload_retrieve_mock, account_retrieve_mock):
+        # remove djstripe_owner_account field
         self.apikey_test.djstripe_owner_account = None
         self.apikey_test.save()
-        self.apikey_test.clean()
+
+        # invoke refresh_Account()
+        self.apikey_test.refresh_account()
         assert self.apikey_test.djstripe_owner_account.id == FAKE_PLATFORM_ACCOUNT["id"]
