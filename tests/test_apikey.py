@@ -55,7 +55,7 @@ def test_clean_public_apikey():
     assert not key.djstripe_owner_account
 
 
-@pytest.mark.django_db
+
 @patch("stripe.Account.retrieve", return_value=deepcopy(FAKE_PLATFORM_ACCOUNT))
 @patch("stripe.File.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD_ICON))
 def test_apikey_detect_livemode_and_type(
