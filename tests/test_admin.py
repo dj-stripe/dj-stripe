@@ -61,7 +61,7 @@ class TestAdminRegisteredModels(TestCase):
         self.factory = RequestFactory()
         # the 2 models that do not inherit from StripeModel and hence
         # do not inherit from StripeModelAdmin
-        self.ignore_models = ["WebhookEventTrigger", "IdempotencyKey"]
+        self.ignore_models = ["WebhookEventTrigger", "IdempotencyKey", "APIKey"]
 
     def test_get_list_display_links(self):
         app_label = "djstripe"
