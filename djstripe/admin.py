@@ -272,14 +272,16 @@ class APIKeyAdminCreateForm(forms.ModelForm):
 
     def _post_clean(self):
         super()._post_clean()
-        if (
-            self.instance.type == enums.APIKeyType.secret
-            and self.instance.djstripe_owner_account is None
-        ):
-            try:
-                self.instance.refresh_account()
-            except AuthenticationError as e:
-                self.add_error("secret", str(e))
+
+        if not self.errors:
+            if (
+                self.instance.type == enums.APIKeyType.secret
+                and self.instance.djstripe_owner_account is None
+            ):
+                try:
+                    self.instance.refresh_account()
+                except AuthenticationError as e:
+                    self.add_error("secret", str(e))
 
 
 @admin.register(models.APIKey)
