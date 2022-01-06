@@ -7,6 +7,8 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.module_loading import import_string
 
+from .utils import _get_remote_ip
+
 
 class DjstripeSettings:
     """Container for Dj-stripe settings
@@ -61,6 +63,20 @@ class DjstripeSettings:
         return self.get_callback_function(
             "DJSTRIPE_IDEMPOTENCY_KEY_CALLBACK", self._get_idempotency_key
         )
+
+    @property
+    def GET_REMOTE_IP(self):
+        return self.get_callback_function(
+            "DJSTRIPE_GET_REMOTE_IP", default=_get_remote_ip
+        )
+
+    @property
+    def USE_NATIVE_JSONFIELD(self):
+        return getattr(settings, "DJSTRIPE_USE_NATIVE_JSONFIELD", True)
+
+    @property
+    def PRORATION_POLICY(self):
+        return getattr(settings, "DJSTRIPE_PRORATION_POLICY", None)
 
     @property
     def DJSTRIPE_WEBHOOK_URL(self):
