@@ -753,6 +753,12 @@ class SubscriptionStatus(Enum):
     unpaid = _("Unpaid")
 
 
+class SubscriptionProrationBehavior(Enum):
+    create_prorations = _("Create prorations")
+    always_invoice = _("Always invoice")
+    none = _("None")
+
+
 class TaxIdType(Enum):
     ae_trn = _("AE TRN")
     au_abn = _("AU ABN")
