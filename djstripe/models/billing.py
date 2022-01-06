@@ -1778,6 +1778,17 @@ class SubscriptionItem(StripeModel):
         related_name="subscription_items",
         help_text="The price the customer is subscribed to.",
     )
+    proration_behavior = StripeEnumField(
+        enum=enums.SubscriptionProrationBehavior,
+        help_text="Determines how to handle prorations when the billing cycle changes (e.g., when switching plans, resetting billing_cycle_anchor=now, or starting a trial), or if an item’s quantity changes",
+        default=enums.SubscriptionProrationBehavior.create_prorations,
+        blank=True,
+    )
+    proration_date = StripeDateTimeField(
+        null=True,
+        blank=True,
+        help_text="If set, the proration will be calculated as though the subscription was updated at the given time. This can be used to apply exactly the same proration that was previewed with upcoming invoice endpoint. It can also be used to implement custom proration logic, such as prorating by day instead of by second, by providing the time that you wish to use for proration calculations",
+    )
     quantity = models.PositiveIntegerField(
         null=True,
         blank=True,
