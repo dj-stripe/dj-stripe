@@ -51,6 +51,25 @@ switch an older installation to "id", the easiest way is to wipe the djstripe db
 sync again from scratch. This is obviously not ideal, and we will design a proper
 migration path before 3.0.
 
+## DJSTRIPE_GET_REMOTE_IP (=djstripe.settings.djstripe_settings.GET_REMOTE_IP)
+
+_(Introduced in 2.6.0)_
+
+`DJSTRIPE_GET_REMOTE_IP` is a setting introduced in dj-stripe version 2.6.0. You are `not` required to set it unless you require more advanced strategies and/or filters to record the `client remote ip`. The [`default function`][djstripe.utils._get_remote_ip] can handle common django setups behind a proxy and relies on the HTTP header `HTTP_X_FORWARDED_FOR`. 
+
+`DJSTRIPE_GET_REMOTE_IP` should return a function with the following signature:
+
+```py
+def GET_REMOTE_IP(request: HTTPRequest):
+    # do your magic
+    return "<IP_ADDRESS>"
+```
+
+The function MUST return a string suitably random for the object_type/action pair, and
+usable in the Stripe `Idempotency-Key` HTTP header. For more information, see the
+[stripe documentation](https://stripe.com/docs/upgrades).
+
+
 ## DJSTRIPE_IDEMPOTENCY_KEY_CALLBACK (=djstripe.settings.djstripe_settings.\_get_idempotency_key)
 
 A function which will return an idempotency key for a particular object_type and action
