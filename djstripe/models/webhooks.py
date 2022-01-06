@@ -91,32 +91,6 @@ def _get_version():
     return __version__
 
 
-def get_remote_ip(request):
-    """Given the HTTPRequest object return the IP Address of the client
-
-    :param request: client request
-    :type request: HTTPRequest
-
-    :Returns: the client ip address
-    """
-
-    # x-forwarded-for is relevant for django running behind a proxy
-    x_forwarded_for = request.headers.get("x-forwarded-for")
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(",")[0]
-    else:
-        ip = request.META.get("REMOTE_ADDR")
-
-    if not ip:
-        warnings.warn(
-            "Could not determine remote IP (missing REMOTE_ADDR). "
-            "This is likely an issue with your wsgi/server setup."
-        )
-        ip = "0.0.0.0"
-
-    return ip
-
-
 class WebhookEventTrigger(models.Model):
     """
     An instance of a request that reached the server endpoint for Stripe webhooks.

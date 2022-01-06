@@ -2,6 +2,7 @@
 Utility functions related to the djstripe app.
 """
 import datetime
+import warnings
 from typing import Optional
 
 import stripe
@@ -122,3 +123,28 @@ def get_timezone_utc():
         return datetime.timezone.utc
     except AttributeError:
         return timezone.utc
+
+def _get_remote_ip(request):
+    """Given the HTTPRequest object return the IP Address of the client
+
+    :param request: client request
+    :type request: HTTPRequest
+
+    :Returns: the client ip address
+    """
+
+    # HTTP_X_FORWARDED_FOR is relevant for django running behind a proxy
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(",")[0]
+    else:
+        ip = request.META.get("REMOTE_ADDR")
+
+    if not ip:
+        warnings.warn(
+            "Could not determine remote IP (missing REMOTE_ADDR). "
+            "This is likely an issue with your wsgi/server setup."
+        )
+        ip = "0.0.0.0"
+
+    return ip
