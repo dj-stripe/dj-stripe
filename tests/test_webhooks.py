@@ -15,9 +15,9 @@ from django.test.client import Client
 from django.urls import reverse
 
 from djstripe import webhooks
-from djstripe.models import Event, Transfer, WebhookEventTrigger
-from djstripe.models.webhooks import WebhookEndpoint, get_remote_ip
+from djstripe.models import Event, Transfer, WebhookEndpoint, WebhookEventTrigger
 from djstripe.settings import djstripe_settings
+from djstripe.utils import _get_remote_ip
 from djstripe.webhooks import TEST_EVENT_ID, call_handlers, handler, handler_all
 
 from . import (
@@ -653,9 +653,9 @@ class TestGetRemoteIp:
             },
         ],
     )
-    def test_get_remote_ip(self, data):
+    def test__get_remote_ip(self, data):
         request = self.RequestClass(data)
-        assert get_remote_ip(request) == "127.0.0.1"
+        assert _get_remote_ip(request) == "127.0.0.1"
 
     @pytest.mark.parametrize(
         "data",
@@ -668,14 +668,14 @@ class TestGetRemoteIp:
             },
         ],
     )
-    def test_get_remote_ip_remote_addr_is_none(self, data):
+    def test__get_remote_ip_remote_addr_is_none(self, data):
         request = self.RequestClass(data)
 
         # ensure warning is raised
         with pytest.warns(
             None, match=r"Could not determine remote IP \(missing REMOTE_ADDR\)\."
         ):
-            assert get_remote_ip(request) == "0.0.0.0"
+            assert _get_remote_ip(request) == "0.0.0.0"
 
 
 class TestWebhookEndpoint(CreateAccountMixin):

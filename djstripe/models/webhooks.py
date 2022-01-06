@@ -169,7 +169,7 @@ class WebhookEventTrigger(models.Model):
         except Exception:
             body = "(error decoding body)"
 
-        ip = get_remote_ip(request)
+        ip = djstripe_settings.GET_REMOTE_IP(request)
 
         try:
             data = json.loads(body)
