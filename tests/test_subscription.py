@@ -544,6 +544,43 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
+    def test_update_deprecation_warnings_raised(
+        self,
+        customer_retrieve_mock,
+        subscription_retrieve_mock,
+        subscription_modify_mock,
+        product_retrieve_mock,
+        plan_retrieve_mock,
+    ):
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
+
+        self.assertEqual(1, subscription.quantity)
+
+        # prorate the Subscription
+        subscription_updated = deepcopy(FAKE_SUBSCRIPTION)
+        subscription_updated["prorate"] = True
+        subscription_modify_mock.return_value = subscription_updated
+
+        with pytest.warns(DeprecationWarning, match=r"The `prorate` parameter to"):
+            subscription.update(prorate=True)
+
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.Subscription.modify",
+        autospec=True,
+    )
+    @patch(
+        "stripe.Subscription.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
     def test_update_with_plan_model(
         self,
         customer_retrieve_mock,
