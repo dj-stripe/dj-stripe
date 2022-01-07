@@ -959,7 +959,7 @@ class StripeModel(StripeBaseModel):
         return instance
 
     def __str__(self):
-        return smart_str("<{list}>".format(list=", ".join(self.str_parts())))
+        return f"<id={self.id}>"
 
 
 class IdempotencyKey(models.Model):
