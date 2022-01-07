@@ -1,5 +1,5 @@
 """
-dj-stripe Card Model Tests.
+dj-stripe Source Model Tests.
 """
 import sys
 from copy import deepcopy
@@ -48,7 +48,7 @@ class SourceTest(AssertStripeFksMixin, TestCase):
             },
         )
 
-    def test_sync_source_finds_customer(self):
+    def test_sync_from_stripe_data(self):
         source = Source.sync_from_stripe_data(deepcopy(FAKE_SOURCE))
 
         self.assertEqual(self.customer, source.customer)
