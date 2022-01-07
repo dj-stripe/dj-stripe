@@ -268,6 +268,19 @@ def source_webhook_handler(event):
         _handle_crud_like_event(target_cls=models.Source, event=event)
 
 
+@webhooks.handler("source.transaction")
+def source_transaction_webhook_handler(event):
+    """Handle updates to Source objects
+    - charge: https://stripe.com/docs/api/charges
+    """
+    # will recieve all events of the type source.transaction.Y so
+    # need to ensure the data object is related to SourceTransaction Object
+    target_object_type = event.data.get("object", {}).get("object", {})
+
+    if target_object_type == "source_transaction":
+        _handle_crud_like_event(target_cls=models.SourceTransaction, event=event)
+
+
 @webhooks.handler(
     "checkout",
     "coupon",
