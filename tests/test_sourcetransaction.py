@@ -48,3 +48,13 @@ class SourceTransactionTest(AssertStripeFksMixin, TestCase):
                 "djstripe.Customer.default_payment_method",
             },
         )
+
+    def test___str__(self):
+        # create the SourceTransaction object
+        sourcetransaction = SourceTransaction.sync_from_stripe_data(
+            deepcopy(FAKE_SOURCE_TRANSACTION)
+        )
+        self.assertEqual(
+            f"Source Transaction status={sourcetransaction.status}, source={sourcetransaction.source.id}",
+            str(sourcetransaction),
+        )
