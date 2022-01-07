@@ -841,6 +841,18 @@ class SourceTransaction(StripeModel):
     def __str__(self):
         return f"Source Transaction status={self.status}, source={self.source.id}"
 
+    def get_stripe_dashboard_url(self) -> str:
+        """Get the stripe dashboard url for this object."""
+        if (
+            not self.stripe_dashboard_item_name
+            or not self.id
+            or not self.source
+            or not self.source.id
+        ):
+            return ""
+        else:
+            return f"{self._get_base_stripe_dashboard_url()}sources/{self.source.id}"
+
 
 class PaymentMethod(StripeModel):
     """
