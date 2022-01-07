@@ -255,6 +255,19 @@ def dispute_webhook_handler(event):
         _handle_crud_like_event(target_cls=models.Dispute, event=event)
 
 
+@webhooks.handler("source")
+def source_webhook_handler(event):
+    """Handle updates to Source objects
+    - charge: https://stripe.com/docs/api/charges
+    """
+    # will recieve all events of the type source.X.Y so
+    # need to ensure the data object is related to Source Object
+    target_object_type = event.data.get("object", {}).get("object", {})
+
+    if target_object_type == "source":
+        _handle_crud_like_event(target_cls=models.Source, event=event)
+
+
 @webhooks.handler(
     "checkout",
     "coupon",
@@ -269,14 +282,13 @@ def dispute_webhook_handler(event):
     "product",
     "setup_intent",
     "subscription_schedule",
-    "source",
     "tax_rate",
     "transfer",
 )
 def other_object_webhook_handler(event):
     """
     Handle updates to checkout, coupon, file, invoice, invoiceitem, payment_intent,
-    plan, product, setup_intent, subscription_schedule, source, tax_rate
+    plan, product, setup_intent, subscription_schedule, tax_rate
     and transfer objects.
 
     Docs for:
@@ -293,7 +305,6 @@ def other_object_webhook_handler(event):
     - product: https://stripe.com/docs/api/products
     - setup_intent: https://stripe.com/docs/api/setup_intents
     - subscription_schedule: https://stripe.com/docs/api/subscription_schedules
-    - source: https://stripe.com/docs/api/sources
     - tax_rate: https://stripe.com/docs/api/tax_rates/
     - transfer: https://stripe.com/docs/api/transfers
     """
@@ -313,7 +324,6 @@ def other_object_webhook_handler(event):
         "transfer": models.Transfer,
         "setup_intent": models.SetupIntent,
         "subscription_schedule": models.SubscriptionSchedule,
-        "source": models.Source,
         "tax_rate": models.TaxRate,
     }.get(event.category)
 
