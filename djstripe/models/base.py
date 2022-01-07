@@ -252,12 +252,6 @@ class StripeModel(StripeBaseModel):
             self.id, api_key=api_key, stripe_account=stripe_account, **kwargs
         )
 
-    def str_parts(self) -> List[str]:
-        """
-        Extend this to add information to the string representation of the object
-        """
-        return ["id={id}".format(id=self.id)]
-
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
         """
