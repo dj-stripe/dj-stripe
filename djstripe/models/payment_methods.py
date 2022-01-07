@@ -794,6 +794,51 @@ class Source(StripeModel):
         ).auto_paging_iter()
 
 
+class SourceTransaction(StripeModel):
+    """
+    Stripe documentation: https://stripe.com/docs/sources/ach-credit-transfer#source-transactions
+    """
+
+    stripe_class = stripe.SourceTransaction
+    stripe_dashboard_item_name = "source_transactions"
+
+    description = None
+    metadata = None
+    type = enums.SourceType.ach_credit_transfer
+
+    ach_credit_transfer = JSONField(
+        help_text="The data corresponding to the ach_credit_transfer type."
+    )
+    amount = StripeDecimalCurrencyAmountField(
+        null=True,
+        blank=True,
+        help_text=(
+            "Amount (as decimal) associated with the ACH Credit Transfer. "
+            "This is the amount your customer has sent for which the source will be chargeable once ready. "
+        ),
+    )
+    currency = StripeCurrencyCodeField()
+
+    # did not use CharField because no idea about possible max-length
+    customer_data = JSONField(
+        null=True,
+        blank=True,
+        help_text="Customer defined string used to initiate the ACH Credit Transfer.",
+    )
+    # source cannot be null but we are allowing this because the order of webhooks is not deterministic
+    source = StripeForeignKey(
+        "Source",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    status = StripeEnumField(
+        enum=enums.SourceTransactionStatus,
+        help_text="The status of the ACH Credit Transfer. Only `chargeable` sources can be used "
+        "to create a charge.",
+    )
+
+
 class PaymentMethod(StripeModel):
     """
     PaymentMethod objects represent your customer's payment instruments.

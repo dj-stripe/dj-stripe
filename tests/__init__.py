@@ -483,6 +483,10 @@ FAKE_SOURCE_II = SourceDict(
 )
 
 
+FAKE_SOURCE_TRANSACTION = load_fixture(
+    "sourcetransaction_srctxn_fakefakefakefakefake0001.json"
+)
+
 FAKE_PAYMENT_INTENT_I = load_fixture("payment_intent_pi_fakefakefakefakefake0001.json")
 
 FAKE_PAYMENT_INTENT_II = deepcopy(FAKE_PAYMENT_INTENT_I)
