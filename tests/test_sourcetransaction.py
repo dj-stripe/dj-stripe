@@ -58,3 +58,21 @@ class SourceTransactionTest(AssertStripeFksMixin, TestCase):
             f"Source Transaction status={sourcetransaction.status}, source={sourcetransaction.source.id}",
             str(sourcetransaction),
         )
+
+    def test_get_stripe_dashboard_url(self):
+        # create the SourceTransaction object
+        sourcetransaction_1 = SourceTransaction.sync_from_stripe_data(
+            deepcopy(FAKE_SOURCE_TRANSACTION)
+        )
+        self.assertEqual(
+            f"{sourcetransaction_1._get_base_stripe_dashboard_url()}sources/{sourcetransaction_1.source.id}",
+            sourcetransaction_1.get_stripe_dashboard_url(),
+        ),
+
+        # create the SourceTransaction object
+        fake_source_transaction = deepcopy(FAKE_SOURCE_TRANSACTION)
+        fake_source_transaction["source"] = None
+        sourcetransaction_2 = SourceTransaction.sync_from_stripe_data(
+            fake_source_transaction
+        )
+        self.assertEqual("", sourcetransaction_2.get_stripe_dashboard_url()),
