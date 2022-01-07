@@ -8,7 +8,7 @@ from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from djstripe.models import Customer, Source
+from djstripe.models import Source
 
 from . import (
     FAKE_CUSTOMER_III,
@@ -64,14 +64,9 @@ class SourceTest(AssertStripeFksMixin, TestCase):
     def test___str__(self):
         fake_source = deepcopy(FAKE_SOURCE)
         source = Source.sync_from_stripe_data(fake_source)
-        customer = Customer.objects.get(id=fake_source["customer"])
 
         self.assertEqual(
-            f"<type={fake_source['type']}, "
-            f"status={fake_source['status']}, "
-            f"customer={customer}, "
-            f"usage={fake_source['usage']}, "
-            f"id={fake_source['id']}>",
+            f"{fake_source['type']} {fake_source['id']}",
             str(source),
         )
 
