@@ -686,13 +686,8 @@ class Source(StripeModel):
     stripe_class = stripe.Source
     stripe_dashboard_item_name = "sources"
 
-    def str_parts(self):
-        return [
-            f"type={self.type}",
-            f"status={self.status}",
-            f"customer={self.customer}",
-            f"usage={self.usage}",
-        ] + super().str_parts()
+    def __str__(self):
+        return f"{self.type} {self.id}"
 
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
