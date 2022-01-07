@@ -431,8 +431,10 @@ def _handle_crud_like_event(
         if event.parts[:2] == ["account", "external_account"] and stripe_account:
             kwargs["account"] = models.Account._get_or_retrieve(id=stripe_account)
 
-        # Stripe doesn't allow retrieval of Discount Objects
-        if target_cls not in (models.Discount,):
+        # Stripe doesn't allow direct retrieval of Discount and SourceTransaction Objects
+        # indirect retrieval via Source will not work as SourceTransaction will not have a source attached in
+        # source.transaction.created event
+        if target_cls not in (models.Discount, models.SourceTransaction):
             data = target_cls(**kwargs).api_retrieve(
                 stripe_account=stripe_account, api_key=event.default_api_key
             )
