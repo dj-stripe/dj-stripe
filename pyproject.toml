@@ -18,8 +18,8 @@ classifiers = [
     "Topic :: Office/Business :: Financial",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Framework :: Django",
-    "Framework :: Django :: 2.2",
     "Framework :: Django :: 3.2",
+    "Framework :: Django :: 4.0",
 ]
 
 packages = [
@@ -37,7 +37,7 @@ exclude = [
 
 [tool.poetry.dependencies]
 python = "^3.7.12"
-django = ">=2.2"
+django = ">=3.2.5"
 jsonfield = ">=3.0"
 stripe = ">=2.48.0"
 pre-commit = {version = "^2.15.0", optional = true}
