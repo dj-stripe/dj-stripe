@@ -304,4 +304,65 @@ class Migration(migrations.Migration):
         ),
         migrations.RemoveField(model_name="usagerecord", name="description"),
         migrations.RemoveField(model_name="usagerecord", name="metadata"),
+        migrations.AlterField(
+            model_name="paymentmethod",
+            name="type",
+            field=djstripe.fields.StripeEnumField(
+                enum=djstripe.enums.PaymentMethodType, max_length=17
+            ),
+        ),
+        migrations.AddField(
+            model_name="paymentmethod",
+            name="acss_debit",
+            field=djstripe.fields.JSONField(blank=True, null=True),
+        ),
+        migrations.AddField(
+            model_name="paymentmethod",
+            name="afterpay_clearpay",
+            field=djstripe.fields.JSONField(blank=True, null=True),
+        ),
+        migrations.AddField(
+            model_name="paymentmethod",
+            name="boleto",
+            field=djstripe.fields.JSONField(blank=True, null=True),
+        ),
+        migrations.AddField(
+            model_name="paymentmethod",
+            name="grabpay",
+            field=djstripe.fields.JSONField(blank=True, null=True),
+        ),
+        migrations.AddField(
+            model_name="paymentmethod",
+            name="wechat_pay",
+            field=djstripe.fields.JSONField(blank=True, null=True),
+        ),
+        migrations.AddField(
+            model_name="subscription",
+            name="latest_invoice",
+            field=djstripe.fields.StripeForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="+",
+                to="djstripe.invoice",
+                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+            ),
+        ),
+        migrations.AlterField(
+            model_name="customer",
+            name="delinquent",
+            field=models.BooleanField(
+                blank=True,
+                default=False,
+                help_text="Whether or not the latest charge for the customer's latest invoice has failed.",
+                null=True,
+            ),
+        ),
+        migrations.AlterField(
+            model_name="customer",
+            name="balance",
+            field=djstripe.fields.StripeQuantumCurrencyAmountField(
+                blank=True, default=0, null=True
+            ),
+        ),
     ]
