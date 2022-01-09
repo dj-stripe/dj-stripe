@@ -55,6 +55,7 @@ nav:
     - A note on Stripe API Versions: api_versions.md
     - Integrating Stripe Elements: stripe_elements_js.md
   - Release notes:
+    - dj-stripe 2.6 release notes: history/2_6_0.md
     - dj-stripe 2.5 release notes: history/2_5_0.md
     - dj-stripe 2.4.1 release notes: history/2_4_x.md
     - dj-stripe 2.4 release notes: history/2_4_0.md
