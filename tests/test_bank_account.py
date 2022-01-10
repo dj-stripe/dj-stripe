@@ -32,6 +32,7 @@ class TestStrBankAccount:
         [
             (deepcopy(FAKE_BANK_ACCOUNT_IV), True, False),
             (deepcopy(FAKE_BANK_ACCOUNT_SOURCE), False, True),
+            (deepcopy(FAKE_BANK_ACCOUNT_IV), False, False),
         ],
     )
     def test__str__(self, fake_stripe_data, has_account, has_customer, monkeypatch):
@@ -73,6 +74,18 @@ class TestStrBankAccount:
 
             assert (
                 f"{fake_stripe_data['bank_name']} {fake_stripe_data['routing_number']} ({bankaccount.human_readable_status}) {'Default' if default else ''} {fake_stripe_data['currency']}"
+                == str(bankaccount)
+            )
+        if not has_account and not has_customer:
+            # ensure account and customer do not exist
+            fake_stripe_data_2 = deepcopy(fake_stripe_data)
+            fake_stripe_data_2["account"] = None
+            fake_stripe_data_2["customer"] = None
+
+            bankaccount = BankAccount.sync_from_stripe_data(fake_stripe_data_2)
+            default = fake_stripe_data_2["default_for_currency"]
+            assert (
+                f"{fake_stripe_data_2['bank_name']} {fake_stripe_data_2['currency']} {'Default' if default else ''} {fake_stripe_data_2['routing_number']} {fake_stripe_data_2['last4']}"
                 == str(bankaccount)
             )
 

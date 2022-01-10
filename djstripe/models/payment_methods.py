@@ -408,10 +408,9 @@ class BankAccount(LegacySourceMixin, StripeModel):
             customer_template = f"{self.bank_name} {self.routing_number} ({self.human_readable_status}) {'Default' if default else ''} {self.currency}"
             return customer_template
 
-        elif self.account:
-            default = getattr(self, "default_for_currency", False)
-            account_template = f"{self.bank_name} {self.currency} {'Default' if default else ''} {self.routing_number} {self.last4}"
-            return account_template
+        default = getattr(self, "default_for_currency", False)
+        account_template = f"{self.bank_name} {self.currency} {'Default' if default else ''} {self.routing_number} {self.last4}"
+        return account_template
 
     @property
     def human_readable_status(self):
