@@ -1816,9 +1816,7 @@ FAKE_USAGE_RECORD = {
 
 
 class UsageRecordSummaryDict(StripeItem):
-    def __init__(self, *args, **kwargs):
-        """Match Stripe's behavior: return a stripe iterable on `invoice.lines`."""
-        super().__init__(*args, **kwargs)
+    pass
 
 
 FAKE_USAGE_RECORD_SUMMARY = UsageRecordSummaryDict(
