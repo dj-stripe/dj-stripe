@@ -51,20 +51,6 @@ def _sanitise_price(price=None, plan=None, **kwargs):
     if isinstance(price, StripeModel):
         price = price.id
 
-    if "charge_immediately" in kwargs:
-        new_value = (
-            "charge_automatically" if kwargs["charge_immediately"] else "send_invoice"
-        )
-        warnings.warn(
-            "The `charge_immediately` parameter to Customer.subscribe()"
-            "does nothing since Stripe API 2019-10-17. dj-stripe 2.5+ "
-            "no longer supports it and it will be removed soon. "
-            f"Set `collection_method={new_value!r} instead`. ",
-            DeprecationWarning,
-        )
-        del kwargs["charge_immediately"]
-        kwargs.setdefault("collection_method", new_value)
-
     return price, kwargs
 
 

@@ -1,10 +1,7 @@
 # Subscribing a customer to one or more prices (or plans)
 
-For your convenience, dj-stripe provides a
-[`djstripe.models.Customer.subscribe`][djstripe.models.Customer.subscribe] method that will try to charge the
-customer immediately unless you specify `charge_immediately=False`
-
 ## Recommended Approach
+
 ```python
 # Recommended Approach to use items dict with Prices
 ## This will subscribe <customer> to both <price_1> and <price_2>
@@ -21,6 +18,7 @@ customer.subscribe(items=[{"price": price_1}])
 ```
 
 ## Alternate Approach 1 (with legacy Plans)
+
 ```python
 ## (Alternate Approach) This will subscribe <customer> to <price_1>
 price_1 = Price.objects.get(nickname="one_price")
@@ -50,13 +48,12 @@ customer = Customer.objects.first()
 customer.subscribe(plan=plan_1)
 ```
 
-However in some cases ``subscribe()`` might not
+However in some cases `subscribe()` might not
 support all the arguments you need for your implementation. When this
 happens you can just call the official `stripe.Customer.subscribe()`.
 
-
 !!! tip
-     Checkout [`this example`][tests.apps.example.views.PurchaseSubscriptionView.form_valid] and [`this`][djstripe.models.Customer.add_payment_method].
+Checkout [`this example`][tests.apps.example.views.purchasesubscriptionview.form_valid] and [`this`][djstripe.models.customer.add_payment_method].
 
     Note that PaymentMethods can be used instead of Cards/Source by
     substituting
@@ -72,5 +69,4 @@ happens you can just call the official `stripe.Customer.subscribe()`.
     # Add the source as the customer's default card
     customer.add_card(stripe_source)
     ```
-    in the above example. 
-
+    in the above example.
