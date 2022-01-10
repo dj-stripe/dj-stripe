@@ -119,7 +119,7 @@ DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = (
     "fn:/test_fnmatch*",
 )
 
-DJSTRIPE_USE_NATIVE_JSONFIELD = os.environ.get("USE_NATIVE_JSONFIELD", "") == "1"
+DJSTRIPE_USE_NATIVE_JSONFIELD = os.environ.get("USE_NATIVE_JSONFIELD", "1") == "1"
 DJSTRIPE_FOREIGN_KEY_TO_FIELD = (
     "id" if os.environ.get("USE_NATIVE_STRIPE_ID", "") == "1" else "djstripe_id"
 )

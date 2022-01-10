@@ -168,7 +168,7 @@ If the model referenced in DJSTRIPE_SUBSCRIBER_MODEL is not created in the `__fi
 migration of an app you can specify the migration name to depend on here. For example:
 "0003_here_the_subscriber_model_was_added"
 
-## DJSTRIPE_USE_NATIVE_JSONFIELD (=False)
+## DJSTRIPE_USE_NATIVE_JSONFIELD (=True)
 
 Setting this to `True` will make the various dj-stripe JSON fields use the native Django
 `JSONField` model instead of the `jsonfield` library.
