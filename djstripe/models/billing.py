@@ -1537,7 +1537,7 @@ class Subscription(StripeModel):
 
         return self.update(proration_behavior="none", trial_end=period_end)
 
-    def cancel(self, at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END):
+    def cancel(self, at_period_end: bool = False):
         """
         Cancels this subscription. If you set the at_period_end parameter to true,
         the subscription will remain active until the end of the period, at which point

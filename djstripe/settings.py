@@ -80,11 +80,7 @@ class DjstripeSettings:
 
     @property
     def PRORATION_POLICY(self):
-        return getattr(settings, "DJSTRIPE_PRORATION_POLICY", False)
-
-    @property
-    def CANCELLATION_AT_PERIOD_END(self):
-        return not getattr(settings, "DJSTRIPE_PRORATION_POLICY", False)
+        return getattr(settings, "DJSTRIPE_PRORATION_POLICY", None)
 
     @property
     def DJSTRIPE_WEBHOOK_URL(self):
