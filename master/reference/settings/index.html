@@ -69,6 +69,8 @@
                 </ul>
                 <p class="caption"><span class="caption-text">Release notes</span></p>
                 <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_6_0/">dj-stripe 2.6 release notes</a>
+                    </li>
                     <li class="toctree-l1"><a class="reference internal" href="../../history/2_5_0/">dj-stripe 2.5 release notes</a>
                     </li>
                     <li class="toctree-l1"><a class="reference internal" href="../../history/2_4_x/">dj-stripe 2.4.1 release notes</a>
@@ -142,7 +144,7 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#djstripe_subscriber_model_migration_dependency-__first__">DJSTRIPE_SUBSCRIBER_MODEL_MIGRATION_DEPENDENCY (="__first__")</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#djstripe_use_native_jsonfield-false">DJSTRIPE_USE_NATIVE_JSONFIELD (=False)</a>
+    <li class="toctree-l2"><a class="reference internal" href="#djstripe_use_native_jsonfield-true">DJSTRIPE_USE_NATIVE_JSONFIELD (=True)</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#djstripe_webhook_url-rwebhook">DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")</a>
     </li>
@@ -347,7 +349,7 @@ defines an email address to use.</p>
 <p>If the model referenced in DJSTRIPE_SUBSCRIBER_MODEL is not created in the <code>__first__</code>
 migration of an app you can specify the migration name to depend on here. For example:
 "0003_here_the_subscriber_model_was_added"</p>
-<h2 id="djstripe_use_native_jsonfield-false">DJSTRIPE_USE_NATIVE_JSONFIELD (=False)</h2>
+<h2 id="djstripe_use_native_jsonfield-true">DJSTRIPE_USE_NATIVE_JSONFIELD (=True)</h2>
 <p>Setting this to <code>True</code> will make the various dj-stripe JSON fields use the native Django
 <code>JSONField</code> model instead of the <code>jsonfield</code> library.</p>
 <p><strong>On Django 3.0 and older</strong>: The <code>django.contrib.postgres.fields.JSONField</code> field will
