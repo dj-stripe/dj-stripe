@@ -34,6 +34,40 @@ from .base import IdempotencyKey, StripeModel, logger
 djstripe_settings.set_stripe_api_version()
 
 
+def _sanitise_price(price=None, plan=None, **kwargs):
+    """
+    Helper for Customer.subscribe()
+    """
+
+    if price and plan:
+        raise TypeError("price and plan arguments cannot both be defined.")
+
+    price = price or plan
+
+    if not price:
+        raise TypeError("you need to set either price or plan")
+
+    # Convert Price to id
+    if isinstance(price, StripeModel):
+        price = price.id
+
+    if "charge_immediately" in kwargs:
+        new_value = (
+            "charge_automatically" if kwargs["charge_immediately"] else "send_invoice"
+        )
+        warnings.warn(
+            "The `charge_immediately` parameter to Customer.subscribe()"
+            "does nothing since Stripe API 2019-10-17. dj-stripe 2.5+ "
+            "no longer supports it and it will be removed soon. "
+            f"Set `collection_method={new_value!r} instead`. ",
+            DeprecationWarning,
+        )
+        del kwargs["charge_immediately"]
+        kwargs.setdefault("collection_method", new_value)
+
+    return price, kwargs
+
+
 class BalanceTransaction(StripeModel):
     """
     A single transaction that updates the Stripe balance.
@@ -831,42 +865,6 @@ class Customer(StripeModel):
         """
         return max(self.balance, 0)
 
-    @staticmethod
-    def _sanitise_price(price=None, plan=None, **kwargs):
-        """
-        Helper for Customer.subscribe()
-        """
-
-        if price and plan:
-            raise TypeError("price and plan arguments cannot both be defined.")
-
-        price = price or plan
-
-        if not price:
-            raise TypeError("you need to set either price or plan")
-
-        # Convert Price to id
-        if isinstance(price, StripeModel):
-            price = price.id
-
-        if "charge_immediately" in kwargs:
-            new_value = (
-                "charge_automatically"
-                if kwargs["charge_immediately"]
-                else "send_invoice"
-            )
-            warnings.warn(
-                "The `charge_immediately` parameter to Customer.subscribe()"
-                "does nothing since Stripe API 2019-10-17. dj-stripe 2.5+ "
-                "no longer supports it and it will be removed soon. "
-                f"Set `collection_method={new_value!r} instead`. ",
-                DeprecationWarning,
-            )
-            del kwargs["charge_immediately"]
-            kwargs.setdefault("collection_method", new_value)
-
-        return price, kwargs
-
     def subscribe(self, *, items=None, price=None, plan=None, **kwargs):
         """
         Subscribes this customer to all the prices or plans in the items dict (Recommended).
@@ -894,7 +892,7 @@ class Customer(StripeModel):
                 price = item.get("price", "")
                 plan = item.get("plan", "")
 
-                price, kwargs = self._sanitise_price(price, plan, **kwargs)
+                price, kwargs = _sanitise_price(price, plan, **kwargs)
 
                 # todo override Subscription.sync_from_stripe_data to attach all subscriptions to the customer using bulk updates
                 stripe_subscription = Subscription._api_create(
@@ -917,7 +915,7 @@ class Customer(StripeModel):
                 DeprecationWarning,
             )
 
-            price, kwargs = self._sanitise_price(price, plan, **kwargs)
+            price, kwargs = _sanitise_price(price, plan, **kwargs)
 
             stripe_subscription = Subscription._api_create(
                 items=[{"price": price}], customer=self.id, **kwargs
