@@ -143,7 +143,6 @@ class DjstripeSettings:
 
     @property
     def STRIPE_PUBLIC_KEY(self):
-
         # Default public key
         if hasattr(settings, "STRIPE_PUBLIC_KEY"):
             STRIPE_PUBLIC_KEY = settings.STRIPE_PUBLIC_KEY
@@ -154,7 +153,7 @@ class DjstripeSettings:
         return STRIPE_PUBLIC_KEY
 
     @property
-    def STRIPE_API_VERSION(self):
+    def STRIPE_API_VERSION(self) -> str:
         """
         Get the desired API version to use for Stripe requests.
         """
@@ -194,7 +193,7 @@ class DjstripeSettings:
 
         return func
 
-    def _get_idempotency_key(self, object_type, action, livemode):
+    def _get_idempotency_key(self, object_type, action, livemode) -> str:
         from .models import IdempotencyKey
 
         action = "{}:{}".format(object_type, action)
@@ -203,7 +202,7 @@ class DjstripeSettings:
         )
         return str(idempotency_key.uuid)
 
-    def get_default_api_key(self, livemode):
+    def get_default_api_key(self, livemode) -> str:
         """
         Returns the default API key for a value of `livemode`.
         """
@@ -217,9 +216,9 @@ class DjstripeSettings:
             # Livemode is false, use the test secret key
             return self.TEST_API_KEY or self.STRIPE_SECRET_KEY
 
-    def get_subscriber_model_string(self):
+    def get_subscriber_model_string(self) -> str:
         """Get the configured subscriber model as a module path string."""
-        return getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", settings.AUTH_USER_MODEL)
+        return getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", settings.AUTH_USER_MODEL)  # type: ignore
 
     def get_subscriber_model(self):
         """
