@@ -1,6 +1,5 @@
 # Settings
 
-
 ## STRIPE_API_VERSION (='2020-08-27')
 
 The API version used to communicate with the Stripe API is configurable, and defaults to
@@ -72,6 +71,10 @@ usable in the Stripe `Idempotency-Key` HTTP header. For more information, see th
 [stripe documentation](https://stripe.com/docs/upgrades).
 
 ## DJSTRIPE_PRORATION_POLICY (=False)
+
+!!! warning
+
+    This setting is deprecated and will be removed in dj-stripe 2.8.
 
 By default, plans are not prorated in dj-stripe. Concretely, this is how this
 translates:
@@ -274,8 +277,8 @@ example, `"http://localhost:12111"` if you are running
 
 If this is set in production (DEBUG=False), a warning will be raised on `manage.py check`.
 
+## Source Code
 
-## Source Code 
 ::: djstripe.settings
     selection:
         filters: 
