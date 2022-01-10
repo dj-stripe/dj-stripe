@@ -195,6 +195,7 @@ To upgrade from an older version, first upgrade to <code>dj-stripe 2.3.0</code>.
 <li>Fixed <code>Infinite</code> recursive fetch/update loop errors.</li>
 <li>Storing <code>Stripe API keys</code> by adding them to the Admin is now supported.
     This allows for use of multiple Stripe API keys (<code>multiple Stripe accounts</code>).</li>
+<li>Support for syncing Connect accounts via <code>djstripe_sync_models</code>.</li>
 </ul>
 <h2 id="deprecated-features">Deprecated features</h2>
 <ul>
@@ -207,34 +208,15 @@ To upgrade from an older version, first upgrade to <code>dj-stripe 2.3.0</code>.
 <ul>
 <li>Python 3.6 is no longer supported. The new minimum version of Python is 3.7.12.</li>
 <li>Django 2.2 and 3.1 are no longer supported.</li>
-<li>
-<p><code>DJSTRIPE_USE_NATIVE_JSONFIELD</code> now defaults to <code>True</code>. If you previously had it set
+<li><code>DJSTRIPE_USE_NATIVE_JSONFIELD</code> now defaults to <code>True</code>. If you previously had it set
     to <code>False</code>, or did not have it set, you may want to explicitly set it to <code>False</code> in
     order to support a pre-existing database. A migration path will later be provided
-    for this use case.</p>
-</li>
-<li>
-<p><code>Settings</code> would need to be referenced as <code>import djstripe.settings.djstripe_settings.DEFAULT_STRIPE_API_VERSION</code> as opposed to <code>djstripe.settings.DEFAULT_STRIPE_API_VERSION</code></p>
-</li>
-<li>
-<p>Setting <code>get_stripe_api_version()</code> has been replaced by <code>djstripe_settings.STRIPE_API_VERSION</code>.</p>
-</li>
-<li>
-<p><code>Customer.subscribe()</code> method now accepts <strong>only keyword arguments</strong> like <code>items</code>, <code>price</code>, and <code>plan</code>. See <a href="https://dj-stripe.github.io/dj-stripe/usage/subscribing_customers/">this example</a> for more information.</p>
-</li>
-<li>
-<p>It is no longer possible to directly import the djstripe <code>settings</code> module and reference the settings like so:</p>
-</li>
+    for this use case.</li>
+<li>The undocumented <code>get_stripe_api_version()</code> helper function has been removed.</li>
+<li>Settings for dj-stripe are now in <code>djstripe.settings.djstripe_settings</code> (as opposed
+    to top-level in <code>djstripe.settings</code>)</li>
+<li><code>Customer.subscribe()</code> method no longer accepts positional arguments, only keywords.</li>
 </ul>
-<div class="highlight"><pre><span></span><code><span class="c1"># INCORRECT</span>
-<span class="kn">from</span> <span class="nn">djstripe</span> <span class="kn">import</span> <span class="n">settings</span>
-<span class="n">STRIPE_API_VERSION</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">STRIPE_API_VERSION</span>
-</code></pre></div>
-<p>Instead they would need to be referenced from the <code>djstripe_settings</code> settings container like so:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># CORRECT</span>
-<span class="kn">from</span> <span class="nn">djstripe.settings</span> <span class="kn">import</span> <span class="n">djstripe_settings</span>
-<span class="n">STRIPE_API_VERSION</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_API_VERSION</span>
-</code></pre></div>
 <h2 id="other-changes">Other changes</h2>
 <ul>
 <li>The Stripe Account that triggered an Event is now available on the field
@@ -242,11 +224,7 @@ To upgrade from an older version, first upgrade to <code>dj-stripe 2.3.0</code>.
 <li>Migrations have been optimized and should be faster.</li>
 <li>dj-stripe now checks the apparent validity of API keys used and will raise
     <code>InvalidStripeAPIKey</code> if the API key looks completely incorrect.</li>
-<li>Various improvements to <code>manage.py djstripe_sync_models</code>.<ul>
-<li>Data for <code>Connected Accounts</code> will get synced too.</li>
-</ul>
-</li>
-<li><code>Customers</code> can now be subscribed to <code>multiple plans</code>.</li>
+<li><code>Customers</code> can now be subscribed to multiple plans.</li>
 </ul>
               
             </div>
