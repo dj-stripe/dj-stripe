@@ -1415,7 +1415,7 @@ class Dispute(StripeModel):
         "account balance.",
     )
     balance_transactions = JSONField(
-        default="[]",
+        default=list,
         help_text="List of 0, 1 or 2 Balance Transactions that show funds withdrawn and reinstated to your Stripe account as a result of this dispute.",
     )
     # charge is nullable to avoid infinite sync as Charge model has a dispute field as well

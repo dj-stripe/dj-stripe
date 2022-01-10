@@ -251,7 +251,7 @@ class Migration(migrations.Migration):
             model_name="dispute",
             name="balance_transactions",
             field=djstripe.fields.JSONField(
-                default="[]",
+                default=list,
             ),
         ),
         migrations.AlterField(
