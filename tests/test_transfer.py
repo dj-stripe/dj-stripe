@@ -109,7 +109,8 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
             transfer.balance_transaction.id
             == FAKE_TRANSFER["balance_transaction"]["id"]
         )
-        assert transfer.destination.id == FAKE_TRANSFER["destination"]
+        # assert transfer.destination.id == FAKE_TRANSFER["destination"]
+        assert transfer.destination == FAKE_TRANSFER["destination"]
 
         self.assert_fks(transfer, expected_blank_fks="")
 
