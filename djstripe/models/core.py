@@ -868,8 +868,6 @@ class Customer(StripeModel):
         """
         from .billing import Subscription
 
-        products_lst = []
-
         if (items and price) or (items and plan) or (price and plan):
             raise TypeError("Please define only one of items, price or plan arguments.")
 
@@ -887,11 +885,6 @@ class Customer(StripeModel):
 
                 Subscription.sync_from_stripe_data(stripe_subscription)
 
-                # get associated product
-                product_name = Price.objects.get(id=price).product.name
-                # keep count of products subscribed to
-                products_lst.append(product_name)
-
         else:
             warnings.warn(
                 "The Customer.subscribe() method will not be accepting price (or price id)"
@@ -908,13 +901,6 @@ class Customer(StripeModel):
             )
 
             Subscription.sync_from_stripe_data(stripe_subscription)
-
-            # get associated product
-            product_name = Price.objects.get(id=price).product.name
-            # keep count of products subscribed to
-            products_lst.append(product_name)
-
-        return f"Subscribed {self} to {' and '.join(products_lst)}"
 
     def charge(
         self,
