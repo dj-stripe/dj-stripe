@@ -1,12 +1,11 @@
-# Run pre-commit autoupdate every day at midnight
+# Run pre-commit autoupdate every 1st of the month
 # and create PRs for any updates
-
 
 name: Pre-commit auto-update
 
 on:
   schedule:
-  - cron: "0 0 * * *"
+  - cron: "0 0 1 * *"
   workflow_dispatch: # to trigger manually
 
 jobs:
