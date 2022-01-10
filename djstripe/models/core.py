@@ -871,36 +871,21 @@ class Customer(StripeModel):
         if (items and price) or (items and plan) or (price and plan):
             raise TypeError("Please define only one of items, price or plan arguments.")
 
-        if items:
+        if items is None:
+            items = [{"price": price}]
+        else:
+            _items = []
             for item in items:
                 price = item.get("price", "")
                 plan = item.get("plan", "")
-
                 price, kwargs = _sanitise_price(price, plan, **kwargs)
+                _items.append(item)
 
-                # todo override Subscription.sync_from_stripe_data to attach all subscriptions to the customer using bulk updates
-                stripe_subscription = Subscription._api_create(
-                    items=[item], customer=self.id, **kwargs
-                )
+        stripe_subscription = Subscription._api_create(
+            items=items, customer=self.id, **kwargs
+        )
 
-                Subscription.sync_from_stripe_data(stripe_subscription)
-
-        else:
-            warnings.warn(
-                "The Customer.subscribe() method will not be accepting price (or price id)"
-                " or plan (or plan id) arguments and support will be removed in dj-stripe 2.5+."
-                " Please default to using the items dictionary which will allow you to subscribe"
-                " the given customer to one or more than one plan in one go.",
-                DeprecationWarning,
-            )
-
-            price, kwargs = _sanitise_price(price, plan, **kwargs)
-
-            stripe_subscription = Subscription._api_create(
-                items=[{"price": price}], customer=self.id, **kwargs
-            )
-
-            Subscription.sync_from_stripe_data(stripe_subscription)
+        Subscription.sync_from_stripe_data(stripe_subscription)
 
     def charge(
         self,
