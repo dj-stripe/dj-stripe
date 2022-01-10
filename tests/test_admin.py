@@ -176,11 +176,10 @@ class TestAdminRegisteredModels(TestCase):
                     list(list_filter),
                 )
 
-                # ensure all the fields in list_filter are valid
-                for field in model_admin.get_list_filter(request):
-                    model_admin.get_changelist_instance(request).get_ordering_field(
-                        field
-                    )
+                # ensure all the filters get formed correctly
+                chl = model_admin.get_changelist_instance(request)
+                chl.get_filters(request)
+                chl.get_queryset(request)
 
                 # for models inheriting from StripeModelAdmin verify:
                 if model.__name__ not in self.ignore_models:
@@ -219,6 +218,7 @@ class TestAdminRegisteredModels(TestCase):
 
                 # ensure all the fields in readonly_fields are valid
                 for field in model_admin.get_readonly_fields(request):
+                    # ensure the given field is on model, or model_admin or modelform
                     model_admin.get_changelist_instance(request).get_ordering_field(
                         field
                     )

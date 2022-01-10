@@ -417,6 +417,21 @@ class PaymentIntentAdmin(StripeModelAdmin):
     search_fields = ("customer__id", "invoice__id")
 
 
+@admin.register(models.Payout)
+class PayoutAdmin(StripeModelAdmin):
+    list_display = (
+        "destination",
+        "amount",
+        "arrival_date",
+        "method",
+        "status",
+        "type",
+    )
+    list_select_related = ("balance_transaction", "destination")
+    list_filter = ("destination__id",)
+    search_fields = ("destination__id", "balance_transaction__id")
+
+
 @admin.register(models.SetupIntent)
 class SetupIntentAdmin(StripeModelAdmin):
     list_display = (
