@@ -72,6 +72,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 ("business_profile", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "business_type",
@@ -167,6 +168,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "amount",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
@@ -317,6 +319,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 ("id", djstripe.fields.StripeIdField(max_length=500)),
                 (
                     "amount_off",
@@ -417,6 +420,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 ("billing_details", djstripe.fields.JSONField()),
                 ("card", djstripe.fields.JSONField()),
                 ("card_present", djstripe.fields.JSONField(blank=True, null=True)),
@@ -459,6 +463,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 ("balance", djstripe.fields.StripeQuantumCurrencyAmountField()),
                 (
                     "business_vat_id",
@@ -598,6 +603,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 ("amount", djstripe.fields.StripeQuantumCurrencyAmountField()),
                 ("currency", djstripe.fields.StripeCurrencyCodeField()),
                 ("evidence", djstripe.fields.JSONField()),
@@ -651,6 +657,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "api_version",
                     models.CharField(
@@ -707,6 +714,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "filename",
                     models.CharField(
@@ -780,6 +788,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "active",
                     models.BooleanField(
@@ -907,6 +916,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "name",
                     models.TextField(
@@ -1001,6 +1011,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "application_fee_percent",
                     djstripe.fields.StripePercentField(
@@ -1150,6 +1161,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "amount",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
@@ -1306,6 +1318,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "amount_due",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
@@ -1624,6 +1637,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "account_holder_name",
                     models.TextField(
@@ -1710,6 +1724,7 @@ class Migration(migrations.Migration):
             name="CountrySpec",
             fields=[
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "id",
                     models.CharField(max_length=2, primary_key=True, serialize=False),
@@ -1754,6 +1769,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "amount",
                     djstripe.fields.StripeQuantumCurrencyAmountField(
@@ -1817,6 +1833,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 ("data_load_time", djstripe.fields.StripeDateTimeField()),
                 ("error", djstripe.fields.JSONField(blank=True, null=True)),
                 ("result_available_until", djstripe.fields.StripeDateTimeField()),
@@ -1875,6 +1892,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "quantity",
                     models.PositiveIntegerField(
@@ -1932,6 +1950,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 ("amount", djstripe.fields.StripeQuantumCurrencyAmountField()),
                 ("currency", djstripe.fields.StripeCurrencyCodeField(max_length=3)),
                 (
@@ -1985,6 +2004,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "quantity",
                     models.PositiveIntegerField(
@@ -2031,6 +2051,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 ("amount", djstripe.fields.StripeQuantumCurrencyAmountField()),
                 ("amount_refunded", djstripe.fields.StripeQuantumCurrencyAmountField()),
                 ("currency", djstripe.fields.StripeCurrencyCodeField(max_length=3)),
@@ -2081,6 +2102,7 @@ class Migration(migrations.Migration):
                 ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
                 ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 ("amount", djstripe.fields.StripeQuantumCurrencyAmountField()),
                 ("currency", djstripe.fields.StripeCurrencyCodeField(max_length=3)),
                 (
@@ -2152,6 +2174,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "address_city",
                     models.TextField(
@@ -2350,6 +2373,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "application",
                     models.CharField(
@@ -2446,6 +2470,7 @@ class Migration(migrations.Migration):
                 ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
                 ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 ("amount", djstripe.fields.StripeQuantumCurrencyAmountField()),
                 (
                     "amount_capturable",
@@ -2641,6 +2666,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "billing_address_collection",
                     djstripe.fields.StripeEnumField(
@@ -2897,6 +2923,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "amount",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
@@ -3008,6 +3035,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "amount",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
@@ -3107,6 +3135,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 ("amount", djstripe.fields.StripeQuantumCurrencyAmountField()),
                 ("currency", djstripe.fields.StripeCurrencyCodeField(max_length=3)),
                 (
@@ -3201,6 +3230,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "account_country",
                     models.CharField(
@@ -3547,6 +3577,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "active",
                     models.BooleanField(
@@ -3631,6 +3662,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "amount",
                     djstripe.fields.StripeDecimalCurrencyAmountField(

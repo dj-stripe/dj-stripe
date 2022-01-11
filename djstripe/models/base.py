@@ -32,6 +32,11 @@ class StripeBaseModel(models.Model):
         editable=False,
         help_text="The datetime this object was created in the local database.",
     )
+    djstripe_updated = models.DateTimeField(
+        auto_now=True,
+        editable=False,
+        help_text="The datetime this object was updated/modified in the local database.",
+    )
 
     class Meta:
         abstract = True

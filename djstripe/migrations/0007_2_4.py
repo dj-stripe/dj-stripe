@@ -542,6 +542,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "active",
                     models.BooleanField(
@@ -714,6 +715,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "country",
                     models.CharField(
@@ -852,6 +854,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "canceled_at",
                     djstripe.fields.StripeDateTimeField(
@@ -1253,6 +1256,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "id",
                     models.CharField(

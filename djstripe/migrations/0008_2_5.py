@@ -73,6 +73,7 @@ class Migration(migrations.Migration):
             name="FileLink",
             fields=[
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "djstripe_id",
                     models.BigAutoField(
@@ -154,6 +155,7 @@ class Migration(migrations.Migration):
             name="Mandate",
             fields=[
                 ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
+                ("djstripe_updated", models.DateTimeField(auto_now=True, help_text="The datetime this object was updated/modified in the local database.")),
                 (
                     "djstripe_id",
                     models.BigAutoField(
