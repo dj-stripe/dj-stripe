@@ -227,7 +227,9 @@ class TestWebhookEventTrigger(TestCase):
         invalid_event["id"] = "evt_invalid"
         invalid_event["data"]["valid"] = "not really"
 
-        resp = self._send_event(invalid_event)
+        # ensure warning is raised
+        with pytest.warns(None, match=r"WEBHOOK VALIDATION is disabled."):
+            resp = self._send_event(invalid_event)
 
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(Event.objects.filter(id="evt_invalid").exists())
