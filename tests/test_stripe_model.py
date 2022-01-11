@@ -12,7 +12,7 @@ from djstripe.settings import djstripe_settings
 pytestmark = pytest.mark.django_db
 
 
-class TestStripeModel(StripeModel):
+class ExampleStripeModel(StripeModel):
     # exists to avoid "Abstract models cannot be instantiated." error
     pass
 
@@ -51,7 +51,7 @@ def test__api_delete(
     mock_stripe_class, stripe_account, api_key, expected_api_key, extra_kwargs
 ):
     """Test that API delete properly uses the passed in parameters."""
-    test_model = TestStripeModel()
+    test_model = ExampleStripeModel()
     mock_id = "id_fakefakefakefake01"
     test_model.id = mock_id
 
@@ -79,7 +79,7 @@ def test_api_retrieve(
     mock_stripe_class, stripe_account, api_key, expected_api_key, expand_fields
 ):
     """Test that API delete properly uses the passed in parameters."""
-    test_model = TestStripeModel()
+    test_model = ExampleStripeModel()
     mock_id = "id_fakefakefakefake01"
     test_model.id = mock_id
     test_model.expand_fields = expand_fields
@@ -115,7 +115,7 @@ def test_api_retrieve_reverse_foreign_key_lookup(mock_stripe_class):
     # Make first return the mock account.
     mock_account_reverse_manager.first.return_value = mock_account
 
-    test_model = TestStripeModel()
+    test_model = ExampleStripeModel()
     mock_id = "id_fakefakefakefake01"
     test_model.id = mock_id
     # Set mock reverse manager on the model.

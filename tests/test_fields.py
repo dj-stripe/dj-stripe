@@ -9,7 +9,7 @@ from django.test.testcases import TestCase
 from django.test.utils import override_settings
 
 from djstripe.fields import StripeDateTimeField, StripeDecimalCurrencyAmountField
-from tests.fields.models import TestDecimalModel
+from tests.fields.models import ExampleDecimalModel
 
 pytestmark = pytest.mark.django_db
 
@@ -66,11 +66,11 @@ class TestStripePercentField:
     )
     def test_stripe_percent_field(self, inputted, expected):
         # create a model with the StripePercentField
-        model_field = TestDecimalModel(noval=inputted)
+        model_field = ExampleDecimalModel(noval=inputted)
         model_field.save()
 
         # get the field data
-        field_data = TestDecimalModel.objects.get(pk=model_field.pk).noval
+        field_data = ExampleDecimalModel.objects.get(pk=model_field.pk).noval
 
         assert isinstance(field_data, Decimal)
         assert field_data == expected

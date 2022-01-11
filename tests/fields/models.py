@@ -5,5 +5,5 @@ from django.db import models
 from djstripe.fields import StripePercentField
 
 
-class TestDecimalModel(models.Model):
+class ExampleDecimalModel(models.Model):
     noval = StripePercentField()
