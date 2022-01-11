@@ -53,7 +53,10 @@ support all the arguments you need for your implementation. When this
 happens you can just call the official `stripe.Customer.subscribe()`.
 
 !!! tip
-Checkout [`this example`][tests.apps.example.views.purchasesubscriptionview.form_valid] and [`this`][djstripe.models.customer.add_payment_method].
+Check out the following examples:
+
+-   [form_valid view example](https://github.com/dj-stripe/dj-stripe/blob/6574b9c66d45dabb846ff9bb279d0cb941a51b71/tests/apps/example/views.py#L182)
+-   [djstripe.models.customer.add_payment_method](https://github.com/dj-stripe/dj-stripe/blob/6574b9c66d45dabb846ff9bb279d0cb941a51b71/djstripe/models/core.py#L1037)
 
     Note that PaymentMethods can be used instead of Cards/Source by
     substituting
@@ -69,4 +72,5 @@ Checkout [`this example`][tests.apps.example.views.purchasesubscriptionview.form
     # Add the source as the customer's default card
     customer.add_card(stripe_source)
     ```
+
     in the above example.
