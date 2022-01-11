@@ -1757,6 +1757,8 @@ class SubscriptionItem(StripeModel):
         )
 
 
+# TODO Add missing fields and then add to SubscriptionAdmin (as inline)
+# https://stripe.com/docs/api/subscription_schedules/object?lang=python
 class SubscriptionSchedule(StripeModel):
     """
     Subscription schedules allow you to create and manage the lifecycle
