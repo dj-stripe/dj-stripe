@@ -202,7 +202,7 @@ Elements with stripe js v3.</p>
 compliance (3D secure etc).</p>
 <h3 id="charges-using-stripecreatesource"><a href="https://stripe.com/docs/js/tokens_sources/create_source">Charges using stripe.createSource()</a></h3>
 <p>This creates Source objects within Stripe, and can be used for various different methods of payment (including, but not limited to cards), but isn't SCA compliant.</p>
-<p>The <a href="https://stripe.com/docs/payments/accept-a-payment-charges?platform=web">Card Elements Quickstart JS</a> example can be used, except use <code>stripe.createSource</code> instead of <code>stripe.createToken</code> and the <code>result.source</code> instead of <code>result.token</code>. <a href="../reference/project/#tests.apps.example.views.PurchaseSubscriptionView"><code>Checkout a working example of this</code></a></p>
+<p>The <a href="https://stripe.com/docs/payments/accept-a-payment-charges?platform=web">Card Elements Quickstart JS</a> example can be used, except use <code>stripe.createSource</code> instead of <code>stripe.createToken</code> and the <code>result.source</code> instead of <code>result.token</code>. [<code>Checkout a working example of this</code>][tests.apps.example.views.PurchaseSubscriptionView]</p>
 <h3 id="charges-using-stripecreatetoken">Charges using stripe.createToken()</h3>
 <p>This predates <code>stripe.createSource</code>, and creates legacy Card objects within Stripe, which have some compatibility issues with Payment Methods.</p>
 <p>If you're using <code>stripe.createToken</code>, see if you can upgrade to

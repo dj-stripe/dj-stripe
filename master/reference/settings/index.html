@@ -273,6 +273,10 @@ get.</p>
 usable in the Stripe <code>Idempotency-Key</code> HTTP header. For more information, see the
 <a href="https://stripe.com/docs/upgrades">stripe documentation</a>.</p>
 <h2 id="djstripe_proration_policy-false">DJSTRIPE_PRORATION_POLICY (=False)</h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This setting is deprecated and will be removed in dj-stripe 2.8.</p>
+</div>
 <p>By default, plans are not prorated in dj-stripe. Concretely, this is how this
 translates:</p>
 <ol>
@@ -496,28 +500,6 @@ djstripe.settings.DjstripeSettings        </code>
 
 
 
-<h5 id="djstripe.settings.DjstripeSettings.CANCELLATION_AT_PERIOD_END" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">DjstripeSettings</span><span class="o">.</span><span class="n">CANCELLATION_AT_PERIOD_END</span></code>
-
-  <span class="doc doc-properties">
-      <small class="doc doc-property doc-property-property"><code>property</code></small>
-      <small class="doc doc-property doc-property-readonly"><code>readonly</code></small>
-  </span>
-
-</h5>
-
-    <div class="doc doc-contents ">
-
-    </div>
-
-  </div>
-
-
-
-  <div class="doc doc-object doc-attribute">
-
-
-
 <h5 id="djstripe.settings.DjstripeSettings.DEFAULT_STRIPE_API_VERSION" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">DjstripeSettings</span><span class="o">.</span><span class="n">DEFAULT_STRIPE_API_VERSION</span></code>
 
@@ -603,7 +585,7 @@ djstripe.settings.DjstripeSettings        </code>
 
 
 <h5 id="djstripe.settings.DjstripeSettings.STRIPE_API_VERSION" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">DjstripeSettings</span><span class="o">.</span><span class="n">STRIPE_API_VERSION</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">DjstripeSettings</span><span class="o">.</span><span class="n">STRIPE_API_VERSION</span><span class="p">:</span> <span class="nb">str</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-property"><code>property</code></small>
@@ -1119,7 +1101,7 @@ a failed import causing ImportError to be raised.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/settings.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_default_api_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">livemode</span><span class="p">):</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_default_api_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">livemode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the default API key for a value of `livemode`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1230,9 +1212,9 @@ DJSTRIPE_SUBSCRIBER_MODEL setting.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/settings.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_subscriber_model_string</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_subscriber_model_string</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Get the configured subscriber model as a module path string.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;DJSTRIPE_SUBSCRIBER_MODEL&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_USER_MODEL</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;DJSTRIPE_SUBSCRIBER_MODEL&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_USER_MODEL</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 </code></pre></div>
         </details>
     </div>

@@ -6245,53 +6245,24 @@ Stripe API and sync for all RelatedModels would fail</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">.billing</span> <span class="kn">import</span> <span class="n">Subscription</span>
 
-    <span class="n">products_lst</span> <span class="o">=</span> <span class="p">[]</span>
-
     <span class="k">if</span> <span class="p">(</span><span class="n">items</span> <span class="ow">and</span> <span class="n">price</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">items</span> <span class="ow">and</span> <span class="n">plan</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">price</span> <span class="ow">and</span> <span class="n">plan</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Please define only one of items, price or plan arguments.&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">items</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;price&quot;</span><span class="p">:</span> <span class="n">price</span><span class="p">}]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_items</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
             <span class="n">price</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;price&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
             <span class="n">plan</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;plan&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">price</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="n">_sanitise_price</span><span class="p">(</span><span class="n">price</span><span class="p">,</span> <span class="n">plan</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
-            <span class="n">price</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sanitise_price</span><span class="p">(</span><span class="n">price</span><span class="p">,</span> <span class="n">plan</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">stripe_subscription</span> <span class="o">=</span> <span class="n">Subscription</span><span class="o">.</span><span class="n">_api_create</span><span class="p">(</span>
+        <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="n">customer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
 
-            <span class="c1"># todo override Subscription.sync_from_stripe_data to attach all subscriptions to the customer using bulk updates</span>
-            <span class="n">stripe_subscription</span> <span class="o">=</span> <span class="n">Subscription</span><span class="o">.</span><span class="n">_api_create</span><span class="p">(</span>
-                <span class="n">items</span><span class="o">=</span><span class="p">[</span><span class="n">item</span><span class="p">],</span> <span class="n">customer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-            <span class="p">)</span>
-
-            <span class="n">Subscription</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_subscription</span><span class="p">)</span>
-
-            <span class="c1"># get associated product</span>
-            <span class="n">product_name</span> <span class="o">=</span> <span class="n">Price</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">price</span><span class="p">)</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">name</span>
-            <span class="c1"># keep count of products subscribed to</span>
-            <span class="n">products_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">product_name</span><span class="p">)</span>
-
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="s2">&quot;The Customer.subscribe() method will not be accepting price (or price id)&quot;</span>
-            <span class="s2">&quot; or plan (or plan id) arguments and support will be removed in dj-stripe 2.5+.&quot;</span>
-            <span class="s2">&quot; Please default to using the items dictionary which will allow you to subscribe&quot;</span>
-            <span class="s2">&quot; the given customer to one or more than one plan in one go.&quot;</span><span class="p">,</span>
-            <span class="ne">DeprecationWarning</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="n">price</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sanitise_price</span><span class="p">(</span><span class="n">price</span><span class="p">,</span> <span class="n">plan</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-        <span class="n">stripe_subscription</span> <span class="o">=</span> <span class="n">Subscription</span><span class="o">.</span><span class="n">_api_create</span><span class="p">(</span>
-            <span class="n">items</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;price&quot;</span><span class="p">:</span> <span class="n">price</span><span class="p">}],</span> <span class="n">customer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-        <span class="p">)</span>
-
-        <span class="n">Subscription</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_subscription</span><span class="p">)</span>
-
-        <span class="c1"># get associated product</span>
-        <span class="n">product_name</span> <span class="o">=</span> <span class="n">Price</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">price</span><span class="p">)</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">name</span>
-        <span class="c1"># keep count of products subscribed to</span>
-        <span class="n">products_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">product_name</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Subscribed </span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="s1">&#39; and &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">products_lst</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">Subscription</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_subscription</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -21059,7 +21030,7 @@ Use this to populate fields after the model is saved.</p>
 
 
 <h5 id="djstripe.models.billing.Subscription.cancel" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Subscription</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">at_period_end</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Subscription</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">at_period_end</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
 
 </h5>
@@ -21089,7 +21060,7 @@ subscription at all.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">at_period_end</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">CANCELLATION_AT_PERIOD_END</span><span class="p">):</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">at_period_end</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cancels this subscription. If you set the at_period_end parameter to true,</span>
 <span class="sd">    the subscription will remain active until the end of the period, at which point</span>
@@ -21668,7 +21639,6 @@ Subscriptions canceled immediately cannot be reactivated.
       <p>See <code>Customer.subscribe() &lt;#djstripe.models.Customer.subscribe&gt;</code>__</p>
 <p>:param plan: The plan to which to subscribe the customer.
 :type plan: Plan or string (plan ID)</p>
-<p>.. note:: The default value for <code>prorate</code> is the DJSTRIPE_PRORATION_POLICY             setting.</p>
 <p>.. important:: Updating a subscription by changing the plan or quantity             creates a new <code>Subscription</code> in             Stripe (and dj-stripe).</p>
 
         <details class="quote">
@@ -21685,9 +21655,6 @@ Subscriptions canceled immediately cannot be reactivated.
 <span class="sd">    :param plan: The plan to which to subscribe the customer.</span>
 <span class="sd">    :type plan: Plan or string (plan ID)</span>
 
-<span class="sd">    .. note:: The default value for ``prorate`` is the DJSTRIPE_PRORATION_POLICY \</span>
-<span class="sd">        setting.</span>
-
 <span class="sd">    .. important:: Updating a subscription by changing the plan or quantity \</span>
 <span class="sd">        creates a new ``Subscription`` in \</span>
 <span class="sd">        Stripe (and dj-stripe).</span>
@@ -21697,6 +21664,15 @@ Subscriptions canceled immediately cannot be reactivated.
     <span class="k">if</span> <span class="n">plan</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">plan</span><span class="p">,</span> <span class="n">StripeModel</span><span class="p">):</span>
         <span class="n">plan</span> <span class="o">=</span> <span class="n">plan</span><span class="o">.</span><span class="n">id</span>
 
+    <span class="c1"># In short: We used to have a `prorate` argument which defaulted to</span>
+    <span class="c1"># a DJSTRIPE_PRORATION_POLICY setting.</span>
+    <span class="c1"># This is overly complex and specific, so we are dropping support for this.</span>
+    <span class="c1"># To override it, you can pass `proration_behavior`.</span>
+    <span class="c1"># If instead you pass `prorate`, we will transform it until dj-stripe 2.8.</span>
+    <span class="c1"># If you have DJSTRIPE_PRORATION_POLICY set, we will default to it for now.</span>
+    <span class="c1"># In 2.8, we will ignore both of those and let Stripe figure it out.</span>
+    <span class="c1"># Stripe&#39;s default proration policy is specified here:</span>
+    <span class="c1"># https://stripe.com/docs/billing/subscriptions/prorations</span>
     <span class="k">if</span> <span class="s2">&quot;proration_behavior&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">prorate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
@@ -21707,11 +21683,23 @@ Subscriptions canceled immediately cannot be reactivated.
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">prorate</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">PRORATION_POLICY</span>
+            <span class="k">if</span> <span class="n">prorate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s2">&quot;The `DJSTRIPE_PRORATION_POLICY` setting is deprecated and will &quot;</span>
+                    <span class="s2">&quot;be ignored in dj-stripe 2.8. &quot;</span>
+                    <span class="s2">&quot;Specify `proration_behavior` instead.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">prorate</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">if</span> <span class="n">prorate</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;proration_behavior&quot;</span><span class="p">,</span> <span class="s2">&quot;create_prorations&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;proration_behavior&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">prorate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">&quot;`prorate` argument must not be set when `proration_behavior` is specified&quot;</span>
+        <span class="p">)</span>
 
     <span class="n">stripe_subscription</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api_update</span><span class="p">(</span><span class="n">plan</span><span class="o">=</span><span class="n">plan</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 

@@ -180,9 +180,6 @@
             <div class="section">
               
                 <h1 id="subscribing-a-customer-to-one-or-more-prices-or-plans">Subscribing a customer to one or more prices (or plans)</h1>
-<p>For your convenience, dj-stripe provides a
-[<code>djstripe.models.Customer.subscribe</code>][djstripe.models.Customer.subscribe] method that will try to charge the
-customer immediately unless you specify <code>charge_immediately=False</code></p>
 <h2 id="recommended-approach">Recommended Approach</h2>
 <div class="highlight"><pre><span></span><code><span class="c1"># Recommended Approach to use items dict with Prices</span>
 <span class="c1">## This will subscribe &lt;customer&gt; to both &lt;price_1&gt; and &lt;price_2&gt;</span>
@@ -225,18 +222,24 @@ support all the arguments you need for your implementation. When this
 happens you can just call the official <code>stripe.Customer.subscribe()</code>.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>Checkout <a href="../../reference/project/#tests.apps.example.views.PurchaseSubscriptionView.form_valid"><code>this example</code></a> and [<code>this</code>][djstripe.models.Customer.add_payment_method].</p>
+</div>
+<p>Check out the following examples:</p>
+<ul>
+<li><a href="https://github.com/dj-stripe/dj-stripe/blob/6574b9c66d45dabb846ff9bb279d0cb941a51b71/tests/apps/example/views.py#L182">form_valid view example</a></li>
+<li>
+<p><a href="https://github.com/dj-stripe/dj-stripe/blob/6574b9c66d45dabb846ff9bb279d0cb941a51b71/djstripe/models/core.py#L1037">djstripe.models.customer.add_payment_method</a></p>
 <p>Note that PaymentMethods can be used instead of Cards/Source by
 substituting</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Add the payment method customer&#39;s default</span>
 <span class="n">customer</span><span class="o">.</span><span class="n">add_payment_method</span><span class="p">(</span><span class="n">payment_method</span><span class="p">)</span>
 </code></pre></div>
 <p>instead of</p>
-<p><div class="highlight"><pre><span></span><code><span class="c1"># Add the source as the customer&#39;s default card</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Add the source as the customer&#39;s default card</span>
 <span class="n">customer</span><span class="o">.</span><span class="n">add_card</span><span class="p">(</span><span class="n">stripe_source</span><span class="p">)</span>
 </code></pre></div>
-in the above example. </p>
-</div>
+<p>in the above example.</p>
+</li>
+</ul>
               
             </div>
           </div>

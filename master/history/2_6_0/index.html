@@ -203,6 +203,8 @@ To upgrade from an older version, first upgrade to <code>dj-stripe 2.3.0</code>.
     will be dropped in dj-stripe 2.8.0. <code>django.models.JSONField</code> is available since
     Django 3.1.0. To switch to the newer JSONFields, set <code>DJSTRIPE_USE_NATIVE_JSONFIELD</code>
     to <code>True</code>. A manual migration is necessary to convert existing databases.</li>
+<li>The <code>DJSTRIPE_PRORATION_POLICY</code> setting is deprecated and will be ignored in 2.8.
+    Specify <code>proration_policy</code> in the <code>Subscription.update()</code> method explicitly instead.</li>
 </ul>
 <h2 id="breaking-changes">Breaking changes</h2>
 <ul>
@@ -216,6 +218,10 @@ To upgrade from an older version, first upgrade to <code>dj-stripe 2.3.0</code>.
 <li>Settings for dj-stripe are now in <code>djstripe.settings.djstripe_settings</code> (as opposed
     to top-level in <code>djstripe.settings</code>)</li>
 <li><code>Customer.subscribe()</code> method no longer accepts positional arguments, only keywords.</li>
+<li><code>charge_immediately</code> support in Customer.subscribe() has been removed (deprecated
+    in 2.4). Set <code>collection_method</code> instead.</li>
+<li>The <code>at_period_end</code> argument to <code>Subscription.cancel()</code> now defaults to <code>False</code>,
+    instead of the value of <code>DJSTRIPE_PRORATION_POLICY</code>.</li>
 </ul>
 <h2 id="other-changes">Other changes</h2>
 <ul>
@@ -224,7 +230,8 @@ To upgrade from an older version, first upgrade to <code>dj-stripe 2.3.0</code>.
 <li>Migrations have been optimized and should be faster.</li>
 <li>dj-stripe now checks the apparent validity of API keys used and will raise
     <code>InvalidStripeAPIKey</code> if the API key looks completely incorrect.</li>
-<li><code>Customers</code> can now be subscribed to multiple plans.</li>
+<li><code>Customers</code> can now be subscribed to multiple prices by passing the <code>items</code> argument
+    to <code>Customer.subscribe()</code>.</li>
 </ul>
               
             </div>
