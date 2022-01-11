@@ -202,7 +202,8 @@ To upgrade from an older version, first upgrade to <code>dj-stripe 2.3.0</code>.
 <li>The use of the old <code>jsonfield</code>-based <code>JSONField</code> is deprecated and support for it
     will be dropped in dj-stripe 2.8.0. <code>django.models.JSONField</code> is available since
     Django 3.1.0. To switch to the newer JSONFields, set <code>DJSTRIPE_USE_NATIVE_JSONFIELD</code>
-    to <code>True</code>. A manual migration is necessary to convert existing databases.</li>
+    to <code>True</code>. Set it to <code>False</code> to remain on the <code>jsonfield</code>-powered text-based fields.
+    A manual migration is necessary to convert existing databases from text to json.</li>
 <li>The <code>DJSTRIPE_PRORATION_POLICY</code> setting is deprecated and will be ignored in 2.8.
     Specify <code>proration_policy</code> in the <code>Subscription.update()</code> method explicitly instead.</li>
 </ul>

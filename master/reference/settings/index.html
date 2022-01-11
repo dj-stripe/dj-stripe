@@ -354,17 +354,14 @@ defines an email address to use.</p>
 migration of an app you can specify the migration name to depend on here. For example:
 "0003_here_the_subscriber_model_was_added"</p>
 <h2 id="djstripe_use_native_jsonfield-true">DJSTRIPE_USE_NATIVE_JSONFIELD (=True)</h2>
-<p>Setting this to <code>True</code> will make the various dj-stripe JSON fields use the native Django
-<code>JSONField</code> model instead of the <code>jsonfield</code> library.</p>
-<p><strong>On Django 3.0 and older</strong>: The <code>django.contrib.postgres.fields.JSONField</code> field will
-always be used. A Postgres backend is required (uses
-<a href="https://www.postgresql.org/docs/9.6/static/functions-json.html">jsonb</a> internally).</p>
-<p><strong>On Django 3.1 and newer</strong>: <code>django.models.JSONField</code> will always be used. This field
-type is compatible with all database backends.</p>
-<p>Setting this to True is highly recommended. However, if you have already migrated with
-the old fields, migrating to the native JSONField has to be done manually and is not
-currently supported by dj-stripe. We will eventaully move to exclusively using the
-native JSONField.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This setting is deprecated and will be removed in dj-stripe 2.8.</p>
+</div>
+<p>When set to <code>False</code>, forces dj-stripe to use the <code>jsonfield</code> library for <code>JSONField</code>.</p>
+<p>Leaving this set to True is highly recommended. However, if you have already migrated
+with the old fields, migrating to the native JSONField has to be done manually and is not
+currently natively supported by dj-stripe.</p>
 <p>The native Django JSONField uses the postgres <code>jsonb</code> column type, which efficiently
 stores JSON and can be queried far moreconveniently. Django also supports <a href="https://docs.djangoproject.com/en/3.1/topics/db/queries/#querying-jsonfield">querying
 JSONField</a>
@@ -1287,6 +1284,9 @@ DJSTRIPE_SUBSCRIBER_MODEL setting.</p>
     </div>
 
   </div>
+
+<p>selection:
+filters: - "!^<em>[^</em>]"</p>
               
             </div>
           </div>
