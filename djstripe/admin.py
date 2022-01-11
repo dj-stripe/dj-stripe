@@ -188,14 +188,19 @@ class StripeModelAdmin(admin.ModelAdmin):
         return (
             ("__str__", "id", "djstripe_owner_account")
             + self.list_display
-            + ("created", "livemode")
+            + ("created", "livemode", "djstripe_updated")
         )
 
     def get_list_filter(self, request):
-        return self.list_filter + ("created", "livemode")
+        return self.list_filter + ("created", "livemode", "djstripe_updated")
 
     def get_readonly_fields(self, request, obj=None):
-        return self.readonly_fields + ("id", "djstripe_owner_account", "created")
+        return self.readonly_fields + (
+            "id",
+            "djstripe_owner_account",
+            "created",
+            "djstripe_updated",
+        )
 
     def get_search_fields(self, request):
         return self.search_fields + ("id",)
@@ -216,7 +221,7 @@ class SubscriptionInline(admin.StackedInline):
 
     model = models.Subscription
     extra = 0
-    readonly_fields = ("id", "created", "djstripe_owner_account")
+    readonly_fields = ("id", "created", "djstripe_owner_account", "djstripe_updated")
     raw_id_fields = get_forward_relation_fields_for_model(model)
     show_change_link = True
 
@@ -234,6 +239,7 @@ class TaxIdInline(admin.TabularInline):
         "livemode",
         "country",
         "djstripe_owner_account",
+        "djstripe_updated",
     )
     show_change_link = True
 
@@ -243,7 +249,7 @@ class SubscriptionItemInline(admin.StackedInline):
 
     model = models.SubscriptionItem
     extra = 0
-    readonly_fields = ("id", "created", "djstripe_owner_account")
+    readonly_fields = ("id", "created", "djstripe_owner_account", "djstripe_updated")
     raw_id_fields = get_forward_relation_fields_for_model(model)
     show_change_link = True
 
@@ -253,7 +259,7 @@ class InvoiceItemInline(admin.StackedInline):
 
     model = models.InvoiceItem
     extra = 0
-    readonly_fields = ("id", "created", "djstripe_owner_account")
+    readonly_fields = ("id", "created", "djstripe_owner_account", "djstripe_updated")
     raw_id_fields = get_forward_relation_fields_for_model(model)
     show_change_link = True
 
@@ -286,8 +292,20 @@ class APIKeyAdminCreateForm(forms.ModelForm):
 
 @admin.register(models.APIKey)
 class APIKeyAdmin(admin.ModelAdmin):
-    list_display = ("__str__", "type", "djstripe_owner_account", "livemode")
-    readonly_fields = ("djstripe_owner_account", "livemode", "type", "secret")
+    list_display = (
+        "__str__",
+        "type",
+        "djstripe_owner_account",
+        "livemode",
+        "djstripe_updated",
+    )
+    readonly_fields = (
+        "djstripe_owner_account",
+        "livemode",
+        "type",
+        "secret",
+        "djstripe_updated",
+    )
     search_fields = ("name",)
 
     def get_readonly_fields(self, request, obj=None):
