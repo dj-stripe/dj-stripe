@@ -45,8 +45,6 @@ The documentation site will then be served on <http://127.0.0.1:8000>.
         poetry install -E docs
         ```
 
-
-
 If you wish to just generate the documentation, you can replace `serve` with `build`,
 and the docs will be generated into the `site/` folder.
 
@@ -77,7 +75,7 @@ Ready to contribute? Here's how to set up local development.
 
         $ git clone git@github.com:your_name_here/dj-stripe.git
 
-1. Set up [pre-commit](https://pre-commit.com/):
+1.  Set up [pre-commit](https://pre-commit.com/):
 
         $ git init # A git repo is required to install pre-commit
         $ pre-commit install
@@ -165,8 +163,7 @@ Fields that have a defined set of values can be implemented using `StripeEnumFie
 
 ### Hash (dictionaries)
 
-Use the `JSONField` in `djstripe.fields`, see also the `DJSTRIPE_USE_NATIVE_JSONFIELD`
-setting.
+Use the `JSONField` in `djstripe.fields`.
 
 ### Currency amounts
 

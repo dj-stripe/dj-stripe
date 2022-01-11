@@ -173,20 +173,15 @@ migration of an app you can specify the migration name to depend on here. For ex
 
 ## DJSTRIPE_USE_NATIVE_JSONFIELD (=True)
 
-Setting this to `True` will make the various dj-stripe JSON fields use the native Django
-`JSONField` model instead of the `jsonfield` library.
+!!! warning
 
-**On Django 3.0 and older**: The `django.contrib.postgres.fields.JSONField` field will
-always be used. A Postgres backend is required (uses
-[jsonb](https://www.postgresql.org/docs/9.6/static/functions-json.html) internally).
+    This setting is deprecated and will be removed in dj-stripe 2.8.
 
-**On Django 3.1 and newer**: `django.models.JSONField` will always be used. This field
-type is compatible with all database backends.
+When set to `False`, forces dj-stripe to use the `jsonfield` library for `JSONField`.
 
-Setting this to True is highly recommended. However, if you have already migrated with
-the old fields, migrating to the native JSONField has to be done manually and is not
-currently supported by dj-stripe. We will eventaully move to exclusively using the
-native JSONField.
+Leaving this set to True is highly recommended. However, if you have already migrated
+with the old fields, migrating to the native JSONField has to be done manually and is not
+currently natively supported by dj-stripe.
 
 The native Django JSONField uses the postgres `jsonb` column type, which efficiently
 stores JSON and can be queried far moreconveniently. Django also supports [querying
@@ -280,7 +275,5 @@ If this is set in production (DEBUG=False), a warning will be raised on `manage.
 ## Source Code
 
 ::: djstripe.settings
-    selection:
-        filters: 
-            - "!^_[^_]"
-
+selection:
+filters: - "!^_[^_]"

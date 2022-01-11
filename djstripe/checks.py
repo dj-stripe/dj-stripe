@@ -1,8 +1,6 @@
 """
 dj-stripe System Checks
 """
-import django
-from django.conf import settings
 from django.core import checks
 from django.utils.dateparse import date_re
 
@@ -69,82 +67,6 @@ def check_stripe_api_version(app_configs=None, **kwargs):
             default_version
         )
         messages.append(checks.Warning(msg, hint=hint, id="djstripe.W001"))
-
-    return messages
-
-
-@checks.register("djstripe")
-def check_native_jsonfield_postgres_engine(app_configs=None, **kwargs):
-    """
-    Check that the DJSTRIPE_USE_NATIVE_JSONFIELD isn't set unless Postgres is in use.
-    Only used on Django < 3.1.
-    """
-    from .settings import djstripe_settings
-
-    messages = []
-    error_msg = (
-        "DJSTRIPE_USE_NATIVE_JSONFIELD is not compatible with engine {engine} "
-        "for database {name}"
-    )
-
-    # This error check is skipped on Django 3.1+, because the native JSONField
-    # will be used, which is compatible with mysql and sqlite.
-    # https://docs.djangoproject.com/en/dev/releases/3.1/#postgresql-jsonfield
-    if django.VERSION >= (3, 1):
-        return messages
-
-    if djstripe_settings.USE_NATIVE_JSONFIELD:
-        for db_name, db_config in settings.DATABASES.items():
-            # Hi there.
-            # You may be reading this because you are using Postgres, but
-            # dj-stripe is not detecting that correctly. For example, maybe you
-            # are using multiple databases with different engines, or you have
-            # your own backend. As long as you are certain you can support jsonb,
-            # you can use the SILENCED_SYSTEM_CHECKS setting to ignore this check.
-            engine = db_config.get("ENGINE", "")
-            if "postgresql" not in engine and "postgis" not in engine:
-                messages.append(
-                    checks.Critical(
-                        error_msg.format(name=repr(db_name), engine=repr(engine)),
-                        hint="Switch to Postgres, or unset "
-                        "DJSTRIPE_USE_NATIVE_JSONFIELD",
-                        id="djstripe.C005",
-                    )
-                )
-
-    return messages
-
-
-@checks.register("djstripe")
-def check_native_jsonfield_set_on_recent_django_versions(app_configs=None, **kwargs):
-    """
-    Check that DJSTRIPE_USE_NATIVE_JSONFIELD is set on Django > 3.1.
-
-    This is only a suggestion, as existing installations need a migration path.
-    """
-
-    messages = []
-
-    # This error check is skipped on Django < 3.1+, because the native JSONField
-    # was not available outside of Postgres engines then.
-    if django.VERSION < (3, 1):
-        return messages
-
-    # NOTE: Not using app_settings.USE_NATIVE_JSONFIELD.
-    # Only display this warning if the setting is unset.
-    if not hasattr(settings, "DJSTRIPE_USE_NATIVE_JSONFIELD"):
-        # TODO: Give more details on the migration path
-        messages.append(
-            checks.Warning(
-                "DJSTRIPE_USE_NATIVE_JSONFIELD is not set.",
-                hint=(
-                    "On Django 3.1+, setting DJSTRIPE_USE_NATIVE_JSONFIELD = True is "
-                    "recommended.\nPre-existing dj-stripe installations may require a "
-                    "migration, in which case you may want to set it to False."
-                ),
-                id="djstripe.W005",
-            )
-        )
 
     return messages
 

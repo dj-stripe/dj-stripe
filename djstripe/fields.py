@@ -13,11 +13,7 @@ from .utils import convert_tstamp
 
 def import_jsonfield():
     if djstripe_settings.USE_NATIVE_JSONFIELD:
-        try:
-            # Django 3.1
-            from django.db.models import JSONField as BaseJSONField
-        except ImportError:
-            from django.contrib.postgres.fields import JSONField as BaseJSONField
+        from django.db.models import JSONField as BaseJSONField
     else:
         from jsonfield import JSONField as BaseJSONField
     return BaseJSONField
