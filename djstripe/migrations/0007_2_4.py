@@ -541,8 +541,7 @@ class Migration(migrations.Migration):
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
-                ("djstripe_created", models.DateTimeField(auto_now_add=True)),
-                ("djstripe_updated", models.DateTimeField(auto_now=True)),
+                ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
                 (
                     "active",
                     models.BooleanField(
@@ -714,8 +713,7 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                ("djstripe_created", models.DateTimeField(auto_now_add=True)),
-                ("djstripe_updated", models.DateTimeField(auto_now=True)),
+                ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
                 (
                     "country",
                     models.CharField(
@@ -853,8 +851,7 @@ class Migration(migrations.Migration):
                         blank=True, help_text="A description of this object.", null=True
                     ),
                 ),
-                ("djstripe_created", models.DateTimeField(auto_now_add=True)),
-                ("djstripe_updated", models.DateTimeField(auto_now=True)),
+                ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
                 (
                     "canceled_at",
                     djstripe.fields.StripeDateTimeField(
@@ -1255,8 +1252,7 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                ("djstripe_created", models.DateTimeField(auto_now_add=True)),
-                ("djstripe_updated", models.DateTimeField(auto_now=True)),
+                ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
                 (
                     "id",
                     models.CharField(

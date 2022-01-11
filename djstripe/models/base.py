@@ -27,8 +27,11 @@ logger = logging.getLogger(__name__)
 class StripeBaseModel(models.Model):
     stripe_class: Optional[APIResource] = None
 
-    djstripe_created = models.DateTimeField(auto_now_add=True, editable=False)
-    djstripe_updated = models.DateTimeField(auto_now=True, editable=False)
+    djstripe_created = models.DateTimeField(
+        auto_now_add=True,
+        editable=False,
+        help_text="The datetime this object was created in the local database.",
+    )
 
     class Meta:
         abstract = True

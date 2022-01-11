@@ -21,8 +21,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="WebhookEndpoint",
             fields=[
-                ("djstripe_created", models.DateTimeField(auto_now_add=True)),
-                ("djstripe_updated", models.DateTimeField(auto_now=True)),
+                ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
                 (
                     "djstripe_id",
                     models.BigAutoField(
@@ -119,8 +118,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="UsageRecordSummary",
             fields=[
-                ("djstripe_created", models.DateTimeField(auto_now_add=True)),
-                ("djstripe_updated", models.DateTimeField(auto_now=True)),
+                ("djstripe_created", models.DateTimeField(auto_now_add=True, help_text="The datetime this object was created in the local database.")),
                 (
                     "djstripe_id",
                     models.BigAutoField(
