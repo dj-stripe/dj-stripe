@@ -205,6 +205,11 @@ To upgrade from an older version, first upgrade to <code>dj-stripe 2.3.0</code>.
     A manual migration is necessary to convert existing databases from text to json.</li>
 <li>The <code>DJSTRIPE_PRORATION_POLICY</code> setting is deprecated and will be ignored in 2.8.
     Specify <code>proration_policy</code> in the <code>Subscription.update()</code> method explicitly instead.</li>
+<li><code>Customer.can_charge()</code> is now deprecated. This was a very misleading method which
+    resulted in incorrect behaviour when Customers had multiple payment methods. It will
+    be removed in dj-stripe 2.8.0. You can use <code>Customer.payment_methods.all()</code> instead.</li>
+<li>For similar reasons, <code>Customer.has_valid_source()</code> is deprecated and will be removed
+    in dj-stripe 2.8.0. You can use <code>Customer.sources.all()</code> instead.</li>
 </ul>
 <h2 id="breaking-changes">Breaking changes</h2>
 <ul>

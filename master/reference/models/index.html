@@ -5636,6 +5636,12 @@ invoice. This is extremely useful when adding surcharges to subscriptions.</p>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">can_charge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Determines if this customer is able to be charged.&quot;&quot;&quot;</span>
 
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+        <span class="s2">&quot;Customer.can_charge() is misleading and deprecated, will be removed in dj-stripe 2.8. &quot;</span>
+        <span class="s2">&quot;Look at Customer.payment_methods.all() instead.&quot;</span><span class="p">,</span>
+        <span class="ne">DeprecationWarning</span><span class="p">,</span>
+    <span class="p">)</span>
+
     <span class="k">return</span> <span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">has_valid_source</span><span class="p">()</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_payment_method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">date_purged</span> <span class="ow">is</span> <span class="kc">None</span>
@@ -6012,6 +6018,11 @@ invoice. This is extremely useful when adding surcharges to subscriptions.</p>
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">has_valid_source</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Check whether the customer has a valid payment source.&quot;&quot;&quot;</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+        <span class="s2">&quot;Customer.has_valid_source() is deprecated and will be removed in dj-stripe 2.8. &quot;</span>
+        <span class="s2">&quot;Use `Customer.default_source is not None` instead.&quot;</span><span class="p">,</span>
+        <span class="ne">DeprecationWarning</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 </code></pre></div>
         </details>
