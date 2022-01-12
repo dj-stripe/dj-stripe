@@ -629,7 +629,23 @@ class SubscriptionScheduleAdmin(StripeModelAdmin):
                 self.message_user(request, error, level=messages.WARNING)
 
     _cancel.short_description = "Cancel selected subscription_schedules"  # type: ignore # noqa
-    actions = (_cancel,)
+
+    def _release(self, request, queryset):
+        """Release a SubscriptionSchedule."""
+        for subscription_schedule in queryset:
+            try:
+                instance = subscription_schedule.release()
+                self.message_user(
+                    request,
+                    f"Successfully Released: {instance}",
+                    level=messages.SUCCESS,
+                )
+            except InvalidRequestError as error:
+                self.message_user(request, error, level=messages.WARNING)
+
+    _release.short_description = "Release selected subscription_schedules"  # type: ignore # noqa
+
+    actions = (_cancel, _release)
 
 
 @admin.register(models.TaxRate)
