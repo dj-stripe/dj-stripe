@@ -833,7 +833,7 @@ class SubscriptionAdmin(StripeModelAdmin):
     list_display = ("customer", "status", "get_default_tax_rates")
     list_filter = ("status", "cancel_at_period_end")
 
-    inlines = (SubscriptionItemInline,)
+    inlines = (SubscriptionItemInline, SubscriptionScheduleInline)
 
     def get_actions(self, request):
         # get all actions
