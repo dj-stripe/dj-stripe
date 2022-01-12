@@ -6,6 +6,7 @@ from typing import Sequence
 from unittest.mock import patch
 
 import pytest
+import stripe
 from django.apps import apps
 from django.contrib import messages
 from django.contrib.admin import helpers, site
@@ -21,6 +22,7 @@ from stripe.error import InvalidRequestError
 
 from djstripe import admin as djstripe_admin
 from djstripe import models
+from djstripe.settings import djstripe_settings
 from tests import (
     FAKE_BALANCE_TRANSACTION,
     FAKE_CARD_AS_PAYMENT_METHOD,
@@ -31,6 +33,7 @@ from tests import (
     FAKE_PLAN,
     FAKE_PRODUCT,
     FAKE_SUBSCRIPTION,
+    FAKE_SUBSCRIPTION_SCHEDULE,
 )
 
 pytestmark = pytest.mark.django_db
@@ -311,6 +314,148 @@ class TestAdminCustomActions(TestCase):
             action_fn(model_admin, request, [subscription])
 
         patched__api_delete.assert_called_once_with()
+
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    def test__cancel_subcription_schedules(
+        self,
+        customer_retrieve_mock,
+        product_retrieve_mock,
+        plan_retrieve_mock,
+    ):
+
+        # create instance to be used in the Django Admin Action
+        subscription_schedule = models.SubscriptionSchedule.sync_from_stripe_data(
+            FAKE_SUBSCRIPTION_SCHEDULE
+        )
+
+        model = models.SubscriptionSchedule
+        model_admin = site._registry.get(model)
+
+        data = {
+            "action": "_cancel",
+            helpers.ACTION_CHECKBOX_NAME: [subscription_schedule.pk],
+        }
+
+        # get the standard changelist_view url
+        change_url = reverse(
+            f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
+        )
+
+        # add the admin user to the mocked request and disable CSRF checks
+        request = self.factory.post(change_url, data=data, follow=True)
+        request.user = self.admin
+        request._dont_enforce_csrf_checks = True
+
+        # Add the session/message middleware to the request
+        SessionMiddleware(self.dummy_get_response).process_request(request)
+        MessageMiddleware(self.dummy_get_response).process_request(request)
+
+        # get the _cancel custom Django Admin Action
+        action_fn = model_admin.get_actions(request)[data.get("action")][0]
+
+        with patch.object(
+            stripe.SubscriptionSchedule,
+            "cancel",
+            return_value=FAKE_SUBSCRIPTION_SCHEDULE,
+        ) as patched_stripe_cancel:
+
+            # invoke the _cancel action
+            action_fn(model_admin, request, [subscription_schedule])
+
+            messages_sent_dictionary = {
+                m.message: m.level_tag for m in messages.get_messages(request)
+            }
+
+            # assert correct success message was emmitted
+            assert (
+                messages_sent_dictionary.get(
+                    f"Successfully Canceled: {subscription_schedule}"
+                )
+                == "success"
+            )
+
+        patched_stripe_cancel.assert_called_once_with(
+            FAKE_SUBSCRIPTION_SCHEDULE["id"],
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_account=subscription_schedule.djstripe_owner_account.id,
+        )
+
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    def test__cancel_subcription_schedules_unhandled_invalid_stripe_request_error_raised(
+        self,
+        customer_retrieve_mock,
+        product_retrieve_mock,
+        plan_retrieve_mock,
+    ):
+
+        # create instance to be used in the Django Admin Action
+        subscription_schedule = models.SubscriptionSchedule.sync_from_stripe_data(
+            FAKE_SUBSCRIPTION_SCHEDULE
+        )
+
+        model = models.SubscriptionSchedule
+        model_admin = site._registry.get(model)
+
+        data = {
+            "action": "_cancel",
+            helpers.ACTION_CHECKBOX_NAME: [subscription_schedule.pk],
+        }
+
+        def mock_stripe_invalid_req_err(*args, **kwargs):
+            raise InvalidRequestError("some random error message:", {})
+
+        # get the standard changelist_view url
+        change_url = reverse(
+            f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
+        )
+
+        # add the admin user to the mocked request and disable CSRF checks
+        request = self.factory.post(change_url, data=data, follow=True)
+        request.user = self.admin
+        request._dont_enforce_csrf_checks = True
+
+        # Add the session/message middleware to the request
+        SessionMiddleware(self.dummy_get_response).process_request(request)
+        MessageMiddleware(self.dummy_get_response).process_request(request)
+
+        # get the _cancel custom Django Admin Action
+        action_fn = model_admin.get_actions(request)[data.get("action")][0]
+
+        with patch.object(
+            stripe.SubscriptionSchedule,
+            "cancel",
+            side_effect=mock_stripe_invalid_req_err,
+        ) as patched_stripe_cancel:
+
+            # invoke the _cancel action
+            action_fn(model_admin, request, [subscription_schedule])
+
+            messages_sent_dictionary = {
+                m.message._message: m.level_tag for m in messages.get_messages(request)
+            }
+
+            # assert correct message was emmitted
+            assert (
+                messages_sent_dictionary.get("some random error message:") == "warning"
+            )
+
+        patched_stripe_cancel.assert_called_once_with(
+            FAKE_SUBSCRIPTION_SCHEDULE["id"],
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_account=subscription_schedule.djstripe_owner_account.id,
+        )
 
 
 class TestAdminRegisteredModels(TestCase):

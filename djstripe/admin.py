@@ -615,6 +615,22 @@ class SubscriptionScheduleAdmin(StripeModelAdmin):
     list_filter = ("status", "subscription", "customer")
     list_select_related = ("customer", "customer__subscriber", "subscription")
 
+    def _cancel(self, request, queryset):
+        """Cancel a SubscriptionSchedule."""
+        for subscription_schedule in queryset:
+            try:
+                instance = subscription_schedule.cancel()
+                self.message_user(
+                    request,
+                    f"Successfully Canceled: {instance}",
+                    level=messages.SUCCESS,
+                )
+            except InvalidRequestError as error:
+                self.message_user(request, error, level=messages.WARNING)
+
+    _cancel.short_description = "Cancel selected subscription_schedules"  # type: ignore # noqa
+    actions = (_cancel,)
+
 
 @admin.register(models.TaxRate)
 class TaxRateAdmin(StripeModelAdmin):
