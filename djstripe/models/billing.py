@@ -1767,12 +1767,6 @@ class SubscriptionSchedule(StripeModel):
 
     stripe_class = stripe.SubscriptionSchedule
 
-    billing_thresholds = JSONField(
-        null=True,
-        blank=True,
-        help_text="Define thresholds at which an invoice will be sent, and the "
-        "related subscription advanced to a new billing period.",
-    )
     canceled_at = StripeDateTimeField(
         null=True,
         blank=True,
