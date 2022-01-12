@@ -314,4 +314,5 @@ def test_account__create_from_stripe_object(
         pending_relations=None,
         save=True,
         stripe_account=expected_stripe_account,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
     )

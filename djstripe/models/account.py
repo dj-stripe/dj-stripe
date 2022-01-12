@@ -146,6 +146,7 @@ class Account(StripeModel):
         pending_relations=None,
         save=True,
         stripe_account=None,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
     ):
         """
         Set the stripe_account to the id of the Account instance being created.
@@ -159,6 +160,7 @@ class Account(StripeModel):
             pending_relations=pending_relations,
             save=save,
             stripe_account=data["id"] if not stripe_account else stripe_account,
+            api_key=api_key,
         )
 
     @classmethod
