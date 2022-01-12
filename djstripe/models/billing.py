@@ -1833,6 +1833,23 @@ class SubscriptionSchedule(StripeModel):
         help_text="ID of the subscription managed by the subscription schedule.",
     )
 
+    def update(self, api_key=None, stripe_account=None, **kwargs):
+        """
+        Updates an existing subscription schedule
+        and returns the updated SubscriptionSchedule.
+
+        :param api_key: The api key to use for this request.
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        :param stripe_account: The optional connected account \
+            for which this request is being made.
+        :type stripe_account: string
+        """
+        stripe_subscription_schedule = self._api_update(
+            api_key=api_key, stripe_account=stripe_account, **kwargs
+        )
+        return SubscriptionSchedule.sync_from_stripe_data(stripe_subscription_schedule)
+
 
 class TaxId(StripeModel):
     """
