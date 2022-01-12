@@ -127,7 +127,9 @@ class CountrySpec(StripeBaseModel):
     )
 
     @classmethod
-    def sync_from_stripe_data(cls, data) -> "CountrySpec":
+    def sync_from_stripe_data(
+        cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY
+    ) -> "CountrySpec":
         """
         Syncs this object from the stripe data provided.
 

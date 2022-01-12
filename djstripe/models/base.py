@@ -298,6 +298,7 @@ class StripeModel(StripeBaseModel):
         current_ids=None,
         pending_relations: list = None,
         stripe_account: str = None,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
     ) -> dict:
         """
         This takes an object, as it is formatted in Stripe's current API for our object
@@ -381,7 +382,7 @@ class StripeModel(StripeBaseModel):
 
         # For all objects other than the account object itself, get the API key
         # attached to the request, and get the matching Account for that key.
-        owner_account = cls._find_owner_account(data)
+        owner_account = cls._find_owner_account(data, api_key=api_key)
         if owner_account:
             result["djstripe_owner_account"] = owner_account
 
@@ -552,6 +553,7 @@ class StripeModel(StripeBaseModel):
         pending_relations=None,
         save=True,
         stripe_account=None,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
     ):
         """
         Instantiates a model instance using the provided data object received
@@ -577,6 +579,7 @@ class StripeModel(StripeBaseModel):
                 current_ids=current_ids,
                 pending_relations=pending_relations,
                 stripe_account=stripe_account,
+                api_key=api_key,
             )
         )
         instance._attach_objects_hook(cls, data, current_ids=current_ids)
@@ -601,6 +604,7 @@ class StripeModel(StripeBaseModel):
         pending_relations=None,
         save=True,
         stripe_account=None,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
     ):
         """
 
@@ -696,6 +700,7 @@ class StripeModel(StripeBaseModel):
                         pending_relations=pending_relations,
                         save=save,
                         stripe_account=stripe_account,
+                        api_key=api_key,
                     ),
                     True,
                 )
@@ -913,7 +918,7 @@ class StripeModel(StripeBaseModel):
         return refund_objs
 
     @classmethod
-    def sync_from_stripe_data(cls, data):
+    def sync_from_stripe_data(cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY):
         """
         Syncs this object from the stripe data provided.
 
@@ -936,10 +941,11 @@ class StripeModel(StripeBaseModel):
             data,
             current_ids=current_ids,
             stripe_account=stripe_account,
+            api_key=api_key,
         )
 
         if not created:
-            record_data = cls._stripe_object_to_record(data)
+            record_data = cls._stripe_object_to_record(data, api_key=api_key)
             for attr, value in record_data.items():
                 setattr(instance, attr, value)
             instance._attach_objects_hook(cls, data, current_ids=current_ids)
