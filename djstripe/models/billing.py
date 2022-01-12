@@ -1823,6 +1823,7 @@ class SubscriptionSchedule(StripeModel):
     """
 
     stripe_class = stripe.SubscriptionSchedule
+    stripe_dashboard_item_name = "subscription_schedules"
 
     canceled_at = StripeDateTimeField(
         null=True,
