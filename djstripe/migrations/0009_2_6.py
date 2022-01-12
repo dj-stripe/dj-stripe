@@ -358,11 +358,4 @@ class Migration(migrations.Migration):
                 null=True,
             ),
         ),
-        migrations.AlterField(
-            model_name="customer",
-            name="balance",
-            field=djstripe.fields.StripeQuantumCurrencyAmountField(
-                blank=True, default=0, null=True
-            ),
-        ),
     ]
