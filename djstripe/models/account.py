@@ -162,7 +162,7 @@ class Account(StripeModel):
         )
 
     @classmethod
-    def _find_owner_account(cls, data):
+    def _find_owner_account(cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY):
         # Account model never has an owner account (it's always itself)
         return None
 
