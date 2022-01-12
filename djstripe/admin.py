@@ -609,6 +609,13 @@ class SubscriptionAdmin(StripeModelAdmin):
     actions = (_cancel,)
 
 
+@admin.register(models.SubscriptionSchedule)
+class SubscriptionScheduleAdmin(StripeModelAdmin):
+    list_display = ("status", "subscription", "current_phase", "customer")
+    list_filter = ("status", "subscription", "customer")
+    list_select_related = ("customer", "customer__subscriber", "subscription")
+
+
 @admin.register(models.TaxRate)
 class TaxRateAdmin(StripeModelAdmin):
     list_display = ("active", "display_name", "inclusive", "jurisdiction", "percentage")
