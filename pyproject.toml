@@ -39,7 +39,6 @@ python = "^3.7.12"
 django = ">=3.2.5"
 jsonfield = ">=3.0"
 stripe = ">=2.48.0"
-pre-commit = {version = "^2.15.0", optional = true}
 mkdocs = {version = "^1.1.2", optional = true}
 mkdocstrings = {version = "^0.16.0", optional = true}
 mkdocs-material = {version = "^7.2.8", optional = true}
@@ -53,6 +52,7 @@ psycopg2 = "^2.8.5"
 mysqlclient = ">=1.4.0"
 flake8 = "^3.9.2"
 isort = "^5.8.0"
+pre-commit = "^2.15.0"
 pytest = "^6.2.4"
 pytest-django = "^4.3.0"
 mypy = "^0.920"
