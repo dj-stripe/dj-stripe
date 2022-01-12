@@ -589,7 +589,7 @@ class SubscriptionAdmin(StripeModelAdmin):
     list_filter = ("status", "cancel_at_period_end")
     list_select_related = ("customer", "customer__subscriber")
 
-    inlines = (SubscriptionItemInline,)
+    inlines = (SubscriptionItemInline, SubscriptionScheduleInline)
 
     def _cancel(self, request, queryset):
         """Cancel a subscription."""
