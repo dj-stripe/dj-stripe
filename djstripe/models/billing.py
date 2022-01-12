@@ -1824,6 +1824,14 @@ class SubscriptionSchedule(StripeModel):
         "values are `not_started`, `active`, `completed`, `released`, and "
         "`canceled`.",
     )
+    subscription = models.ForeignKey(
+        "Subscription",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="subscriptions",
+        help_text="ID of the subscription managed by the subscription schedule.",
+    )
 
 
 class TaxId(StripeModel):
