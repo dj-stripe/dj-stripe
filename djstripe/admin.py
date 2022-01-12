@@ -394,7 +394,7 @@ class CustomerAdmin(StripeModelAdmin):
         "deleted",
     )
     search_fields = ("email", "description", "deleted")
-    inlines = (SubscriptionInline, TaxIdInline)
+    inlines = (SubscriptionInline, SubscriptionScheduleInline, TaxIdInline)
 
 
 @admin.register(models.Dispute)
