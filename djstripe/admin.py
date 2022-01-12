@@ -4,10 +4,10 @@ Django Administration interface definitions
 import json
 
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.admin.utils import display_for_field, display_for_value
 from jsonfield import JSONField
-from stripe.error import AuthenticationError
+from stripe.error import AuthenticationError, InvalidRequestError
 
 from . import enums, models
 
@@ -573,7 +573,15 @@ class SubscriptionAdmin(StripeModelAdmin):
     def _cancel(self, request, queryset):
         """Cancel a subscription."""
         for subscription in queryset:
-            subscription.cancel()
+            try:
+                instance = subscription.cancel()
+                self.message_user(
+                    request,
+                    f"Successfully Canceled: {instance}",
+                    level=messages.SUCCESS,
+                )
+            except InvalidRequestError as error:
+                self.message_user(request, error, level=messages.WARNING)
 
     _cancel.short_description = "Cancel selected subscriptions"  # type: ignore # noqa
 
