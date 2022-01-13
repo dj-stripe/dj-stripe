@@ -837,7 +837,14 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
         ret.setdefault("base_url", base_url)
         return ret
 
-    def delete_model(self, request, obj):
-        obj._api_delete()
+    def delete_model(self, request, obj: models.WebhookEndpoint):
+        try:
+            obj._api_delete()
+        except InvalidRequestError as e:
+            if e.user_message.startswith("No such webhook endpoint: "):
+                # Webhook was already deleted in Stripe
+                pass
+            else:
+                raise
 
         return super().delete_model(request, obj)
