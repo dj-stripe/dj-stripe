@@ -639,7 +639,17 @@ class WebhookEndpointAdminBaseForm(forms.ModelForm):
     def save(self, commit: bool = False):
         # If we do the following in _post_clean(), the data doesn't save properly.
         assert self._stripe_data
-        self.instance = models.WebhookEndpoint.sync_from_stripe_data(self._stripe_data)
+
+        # Retrieve the api key that was used to create the endpoint
+        api_key = getattr(self, "_stripe_api_key", None)
+        if api_key:
+            self.instance = models.WebhookEndpoint.sync_from_stripe_data(
+                self._stripe_data, api_key=api_key
+            )
+        else:
+            self.instance = models.WebhookEndpoint.sync_from_stripe_data(
+                self._stripe_data
+            )
         return super().save(commit=commit)
 
 
@@ -693,14 +703,23 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
         metadata = self.instance.metadata or {}
         metadata["djstripe_uuid"] = str(self.instance.djstripe_uuid)
 
+        _api_key = {}
+        account = self.cleaned_data["djstripe_owner_account"]
+        livemode = self.cleaned_data["livemode"]
+        if account:
+            self._stripe_api_key = _api_key["api_key"] = account.get_default_api_key(
+                livemode=livemode
+            )
+
         try:
-            self._stripe_data = models.WebhookEndpoint.stripe_class.create(
+            self._stripe_data = models.WebhookEndpoint._api_create(
                 url=url,
                 api_version=self.cleaned_data["api_version"] or None,
                 description=self.cleaned_data["description"],
                 enabled_events=["*"],
                 metadata=metadata,
                 connect=self.cleaned_data["connect"],
+                **_api_key,
             )
         except InvalidRequestError as e:
             field_name = self._get_field_name(e.param)
