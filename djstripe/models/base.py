@@ -131,7 +131,7 @@ class StripeModel(StripeBaseModel):
         # If the class is abstract (StripeModel), fall back to default key.
         if not self._meta.abstract:
             if self.djstripe_owner_account:
-                return self.djstripe_owner_account.get_default_api_key()
+                return self.djstripe_owner_account.get_default_api_key(self.livemode)
         return djstripe_settings.get_default_api_key(self.livemode)
 
     def _get_stripe_account_id(self, api_key=None) -> Optional[str]:
