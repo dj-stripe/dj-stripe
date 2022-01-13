@@ -266,7 +266,8 @@ class SubscriptionItemTest(AssertStripeFksMixin, TestCase):
             FAKE_SUBSCRIPTION_ITEM_MULTI_PLAN["subscription"],
         )
 
-        # delete pydanny customer as that causes issues with Invoice and Latest_invoice FKs
+        # delete pydanny customer as that causes issues with Invoice
+        # and Latest_invoice FKs
         self.customer.delete()
 
         self.assert_fks(

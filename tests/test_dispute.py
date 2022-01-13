@@ -74,7 +74,8 @@ class TestDispute(TestCase):
         dispute = Dispute.sync_from_stripe_data(FAKE_DISPUTE_I)
         self.assertEqual(
             str(dispute),
-            f"{dispute.human_readable_amount} ({enums.DisputeStatus.humanize(FAKE_DISPUTE_I['status'])}) ",
+            f"{dispute.human_readable_amount} "
+            f"({enums.DisputeStatus.humanize(FAKE_DISPUTE_I['status'])}) ",
         )
 
     @patch(

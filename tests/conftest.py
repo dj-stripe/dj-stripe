@@ -15,7 +15,8 @@ pytestmark = pytest.mark.django_db
 @pytest.fixture(autouse=True)
 def create_account_and_stripe_apikeys(settings):
     """
-    Fixture to automatically create and assign the default testing keys to the Platform Account
+    Fixture to automatically create and assign the default testing keys
+    to the Platform Account
     """
     # create a Stripe Platform Account
     djstripe_platform_account = FAKE_PLATFORM_ACCOUNT.create()

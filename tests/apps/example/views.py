@@ -27,11 +27,13 @@ class CreateCheckoutSessionView(LoginRequiredMixin, TemplateView):
     Example View to demonstrate how to use dj-stripe to:
 
      * Create a Stripe Checkout Session (for a new and a returning customer)
-     * Add SUBSCRIBER_CUSTOMER_KEY to metadata to populate customer.subscriber model field
+     * Add SUBSCRIBER_CUSTOMER_KEY to metadata
+        * to populate customer.subscriber model field
      * Fill out Payment Form and Complete Payment
 
     Redirects the User to Stripe Checkout Session.
-    This does a logged in purchase for a new and a returning customer using Stripe Checkout
+    This does a logged in purchase for a new and a
+    returning customer using Stripe Checkout
     """
 
     template_name = "checkout.html"
@@ -53,8 +55,10 @@ class CreateCheckoutSessionView(LoginRequiredMixin, TemplateView):
         )
         cancel_url = self.request.build_absolute_uri(reverse("home"))
 
-        # get the id of the Model instance of djstripe_settings.djstripe_settings.get_subscriber_model()
-        # here we have assumed it is the Django User model. It could be a Team, Company model too.
+        # get the id of the Model instance of
+        # djstripe_settings.djstripe_settings.get_subscriber_model()
+        # here we have assumed it is the Django User model.
+        # It could be a Team, Company model too.
         # note that it needs to have an email field.
         id = self.request.user.id
 
@@ -70,7 +74,8 @@ class CreateCheckoutSessionView(LoginRequiredMixin, TemplateView):
 
             print("Customer Object in DB.")
 
-            # ! Note that Stripe will always create a new Customer Object if customer id not provided
+            # ! Note that Stripe will always create a new Customer Object
+            # ! if customer id not provided
             # ! even if customer_email is provided!
             session = stripe.checkout.Session.create(
                 payment_method_types=["card"],
@@ -78,7 +83,8 @@ class CreateCheckoutSessionView(LoginRequiredMixin, TemplateView):
                 # payment_method_types=["bacs_debit"],  # for bacs_debit
                 payment_intent_data={
                     "setup_future_usage": "off_session",
-                    # so that the metadata gets copied to the associated Payment Intent and Charge Objects
+                    # so that the metadata gets copied to the
+                    # associated Payment Intent and Charge Objects
                     "metadata": metadata,
                 },
                 line_items=[
@@ -110,7 +116,8 @@ class CreateCheckoutSessionView(LoginRequiredMixin, TemplateView):
                 # payment_method_types=["bacs_debit"],  # for bacs_debit
                 payment_intent_data={
                     "setup_future_usage": "off_session",
-                    # so that the metadata gets copied to the associated Payment Intent and Charge Objects
+                    # so that the metadata gets copied to the
+                    # associated Payment Intent and Charge Objects
                     "metadata": metadata,
                 },
                 line_items=[
@@ -191,7 +198,8 @@ class PurchaseSubscriptionView(FormView):
             user = User.objects.create(username=email, email=email)
 
         # Create the stripe Customer, by default subscriber Model is User,
-        # this can be overridden with djstripe_settings.djstripe_settings.DJSTRIPE_SUBSCRIBER_MODEL
+        # this can be overridden with
+        # djstripe_settings.djstripe_settings.DJSTRIPE_SUBSCRIBER_MODEL
         customer, created = models.Customer.get_or_create(subscriber=user)
 
         # Add the source as the customer's default card

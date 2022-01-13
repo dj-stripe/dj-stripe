@@ -92,7 +92,10 @@ class BalanceTransaction(StripeModel):
     type = StripeEnumField(enum=enums.BalanceTransactionType)
 
     def __str__(self):
-        return f"{self.human_readable_amount} ({enums.BalanceTransactionStatus.humanize(self.status)})"
+        return (
+            f"{self.human_readable_amount} "
+            f"({enums.BalanceTransactionStatus.humanize(self.status)})"
+        )
 
     def get_source_class(self):
         try:
@@ -150,8 +153,10 @@ class Charge(StripeModel):
     application_fee_amount = StripeDecimalCurrencyAmountField(
         null=True,
         blank=True,
-        help_text="The amount (as decimal) of the application fee (if any) "
-        "requested for the charge.",
+        help_text=(
+            "The amount (as decimal) of the application fee (if any) "
+            "requested for the charge."
+        ),
     )
     balance_transaction = StripeForeignKey(
         "BalanceTransaction",
@@ -164,21 +169,27 @@ class Charge(StripeModel):
     )
     billing_details = JSONField(
         null=True,
-        help_text="Billing information associated with the PaymentMethod at the "
-        "time of the transaction.",
+        help_text=(
+            "Billing information associated with the PaymentMethod at the "
+            "time of the transaction."
+        ),
     )
     calculated_statement_descriptor = models.CharField(
         max_length=22,
         default="",
-        help_text="The full statement descriptor that is passed to card networks, "
-        "and that is displayed on your customers' credit card and bank statements. "
-        "Allows you to see what the statement descriptor looks like after the "
-        "static and dynamic portions are combined.",
+        help_text=(
+            "The full statement descriptor that is passed to card networks, "
+            "and that is displayed on your customers' credit card and bank statements. "
+            "Allows you to see what the statement descriptor looks like after the "
+            "static and dynamic portions are combined."
+        ),
     )
     captured = models.BooleanField(
         default=False,
-        help_text="If the charge was created without capturing, this boolean "
-        "represents whether or not it is still uncaptured or has since been captured.",
+        help_text=(
+            "If the charge was created without capturing, this boolean represents"
+            " whether or not it is still uncaptured or has since been captured."
+        ),
     )
     currency = StripeCurrencyCodeField(
         help_text="The currency in which the charge was made."
@@ -214,8 +225,9 @@ class Charge(StripeModel):
         max_length=5000,
         default="",
         blank=True,
-        help_text="Message to user further explaining reason "
-        "for charge failure if available.",
+        help_text=(
+            "Message to user further explaining reason for charge failure if available."
+        ),
     )
     fraud_details = JSONField(
         help_text="Hash with information on fraud assessments for the charge.",
@@ -236,8 +248,10 @@ class Charge(StripeModel):
         null=True,
         blank=True,
         related_name="charges",
-        help_text="The account (if any) the charge was made on behalf of "
-        "without triggering an automatic transfer.",
+        help_text=(
+            "The account (if any) the charge was made on behalf of "
+            "without triggering an automatic transfer."
+        ),
     )
     outcome = JSONField(
         help_text="Details about whether or not the payment was accepted, and why.",
@@ -246,8 +260,10 @@ class Charge(StripeModel):
     )
     paid = models.BooleanField(
         default=False,
-        help_text="True if the charge succeeded, "
-        "or was successfully authorized for later capture, False otherwise.",
+        help_text=(
+            "True if the charge succeeded, "
+            "or was successfully authorized for later capture, False otherwise."
+        ),
     )
     payment_intent = StripeForeignKey(
         "PaymentIntent",
@@ -278,23 +294,29 @@ class Charge(StripeModel):
         max_length=14,
         default="",
         blank=True,
-        help_text="The transaction number that appears "
-        "on email receipts sent for this charge.",
+        help_text=(
+            "The transaction number that appears "
+            "on email receipts sent for this charge."
+        ),
     )
     receipt_url = models.TextField(
         max_length=5000,
         default="",
         blank=True,
-        help_text="This is the URL to view the receipt for this charge. "
-        "The receipt is kept up-to-date to the latest state of the charge, "
-        "including any refunds. If the charge is for an Invoice, "
-        "the receipt will be stylized as an Invoice receipt.",
+        help_text=(
+            "This is the URL to view the receipt for this charge. "
+            "The receipt is kept up-to-date to the latest state of the charge, "
+            "including any refunds. If the charge is for an Invoice, "
+            "the receipt will be stylized as an Invoice receipt."
+        ),
     )
     refunded = models.BooleanField(
         default=False,
-        help_text="Whether or not the charge has been fully refunded. "
-        "If the charge is only partially refunded, "
-        "this attribute will still be false.",
+        help_text=(
+            "Whether or not the charge has been fully refunded. "
+            "If the charge is only partially refunded, "
+            "this attribute will still be false."
+        ),
     )
     # TODO: review (requires Review model)
     shipping = JSONField(
@@ -312,28 +334,34 @@ class Charge(StripeModel):
         null=True,
         blank=True,
         on_delete=models.CASCADE,
-        help_text="The transfer which created this charge. Only present if the "
-        "charge came from another Stripe account.",
+        help_text=(
+            "The transfer which created this charge. Only present if the "
+            "charge came from another Stripe account."
+        ),
         related_name="+",
     )
     statement_descriptor = models.CharField(
         max_length=22,
         null=True,
         blank=True,
-        help_text="For card charges, use statement_descriptor_suffix instead. "
-        "Otherwise, you can use this value as the complete description of a "
-        "charge on your customers' statements. Must contain at least one letter, "
-        "maximum 22 characters.",
+        help_text=(
+            "For card charges, use statement_descriptor_suffix instead. "
+            "Otherwise, you can use this value as the complete description of a "
+            "charge on your customers' statements. Must contain at least one letter, "
+            "maximum 22 characters."
+        ),
     )
     statement_descriptor_suffix = models.CharField(
         max_length=22,
         null=True,
         blank=True,
-        help_text="Provides information about the charge that customers see on "
-        "their statements. Concatenated with the prefix (shortened descriptor) "
-        "or statement descriptor that's set on the account to form the "
-        "complete statement descriptor. "
-        "Maximum 22 characters for the concatenated descriptor.",
+        help_text=(
+            "Provides information about the charge that customers see on "
+            "their statements. Concatenated with the prefix (shortened descriptor) "
+            "or statement descriptor that's set on the account to form the "
+            "complete statement descriptor. "
+            "Maximum 22 characters for the concatenated descriptor."
+        ),
     )
     status = StripeEnumField(
         enum=enums.ChargeStatus, help_text="The status of the payment."
@@ -351,8 +379,10 @@ class Charge(StripeModel):
     transfer_data = JSONField(
         null=True,
         blank=True,
-        help_text="An optional dictionary including the account to automatically "
-        "transfer to as part of a destination charge.",
+        help_text=(
+            "An optional dictionary including the account to automatically "
+            "transfer to as part of a destination charge."
+        ),
     )
     transfer_group = models.CharField(
         max_length=255,
@@ -455,21 +485,33 @@ class Mandate(StripeModel):
     )
     status = StripeEnumField(
         enum=enums.MandateStatus,
-        help_text="The status of the mandate, which indicates whether it can be used to initiate a payment.",
+        help_text=(
+            "The status of the mandate, which indicates whether it can be used to"
+            " initiate a payment."
+        ),
     )
     type = StripeEnumField(
         enum=enums.MandateType,
-        help_text="The status of the mandate, which indicates whether it can be used to initiate a payment.",
+        help_text=(
+            "The status of the mandate, which indicates whether it can be used to"
+            " initiate a payment."
+        ),
     )
     multi_use = JSONField(
         null=True,
         blank=True,
-        help_text="If this is a `multi_use` mandate, this hash contains details about the mandate.",
+        help_text=(
+            "If this is a `multi_use` mandate, this hash contains details about the"
+            " mandate."
+        ),
     )
     single_use = JSONField(
         null=True,
         blank=True,
-        help_text="If this is a `single_use` mandate, this hash contains details about the mandate.",
+        help_text=(
+            "If this is a `single_use` mandate, this hash contains details about the"
+            " mandate."
+        ),
     )
 
 
@@ -625,8 +667,9 @@ class Customer(StripeModel):
     currency = StripeCurrencyCodeField(
         blank=True,
         default="",
-        help_text="The currency the customer can be charged in for "
-        "recurring billing purposes",
+        help_text=(
+            "The currency the customer can be charged in for recurring billing purposes"
+        ),
     )
     default_source = PaymentMethodForeignKey(
         on_delete=models.SET_NULL, null=True, blank=True, related_name="customers"
@@ -635,8 +678,10 @@ class Customer(StripeModel):
         null=True,
         blank=True,
         default=False,
-        help_text="Whether or not the latest charge for the customer's "
-        "latest invoice has failed.",
+        help_text=(
+            "Whether or not the latest charge for the customer's "
+            "latest invoice has failed."
+        ),
     )
     # Stripe API returns deleted customers like so:
     # {
@@ -648,7 +693,9 @@ class Customer(StripeModel):
         default=False,
         null=True,
         blank=True,
-        help_text="Whether the Customer instance has been deleted upstream in Stripe or not.",
+        help_text=(
+            "Whether the Customer instance has been deleted upstream in Stripe or not."
+        ),
     )
     # <discount>
     coupon = models.ForeignKey(
@@ -664,8 +711,10 @@ class Customer(StripeModel):
         null=True,
         blank=True,
         editable=False,
-        help_text="If a coupon is present and has a limited duration, "
-        "the date that the discount will end.",
+        help_text=(
+            "If a coupon is present and has a limited duration, "
+            "the date that the discount will end."
+        ),
     )
     # </discount>
     email = models.TextField(max_length=5000, default="", blank=True)
@@ -688,8 +737,10 @@ class Customer(StripeModel):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="+",
-        help_text="default payment method used for subscriptions and invoices "
-        "for the customer.",
+        help_text=(
+            "default payment method used for subscriptions and invoices "
+            "for the customer."
+        ),
     )
     name = models.TextField(
         max_length=5000,
@@ -718,8 +769,10 @@ class Customer(StripeModel):
     tax_exempt = StripeEnumField(
         enum=enums.CustomerTaxExempt,
         default="",
-        help_text="Describes the customer's tax exemption status. When set to reverse, "
-        'invoice and receipt PDFs include the text "Reverse charge".',
+        help_text=(
+            "Describes the customer's tax exemption status. When set to reverse, "
+            'invoice and receipt PDFs include the text "Reverse charge".'
+        ),
     )
 
     # dj-stripe fields
@@ -853,7 +906,8 @@ class Customer(StripeModel):
 
     def subscribe(self, *, items=None, price=None, plan=None, **kwargs):
         """
-        Subscribes this customer to all the prices or plans in the items dict (Recommended).
+        Subscribes this customer to all the prices or plans in the items
+        dict (Recommended).
 
         :param items: A list of up to 20 subscription items, each with an attached price
         :type list:
@@ -1189,8 +1243,8 @@ class Customer(StripeModel):
         """Determines if this customer is able to be charged."""
 
         warnings.warn(
-            "Customer.can_charge() is misleading and deprecated, will be removed in dj-stripe 2.8. "
-            "Look at Customer.payment_methods.all() instead.",
+            "Customer.can_charge() is misleading and deprecated, will be removed in"
+            " dj-stripe 2.8. Look at Customer.payment_methods.all() instead.",
             DeprecationWarning,
         )
 
@@ -1229,8 +1283,8 @@ class Customer(StripeModel):
     def has_valid_source(self):
         """Check whether the customer has a valid payment source."""
         warnings.warn(
-            "Customer.has_valid_source() is deprecated and will be removed in dj-stripe 2.8. "
-            "Use `Customer.default_source is not None` instead.",
+            "Customer.has_valid_source() is deprecated and will be removed in dj-stripe"
+            " 2.8. Use `Customer.default_source is not None` instead.",
             DeprecationWarning,
         )
         return self.default_source is not None
@@ -1377,14 +1431,19 @@ class Dispute(StripeModel):
         null=True,
         on_delete=models.CASCADE,
         related_name="disputes",
-        help_text="Balance transaction that describes the impact on your "
-        "account balance.",
+        help_text=(
+            "Balance transaction that describes the impact on your account balance."
+        ),
     )
     balance_transactions = JSONField(
         default=list,
-        help_text="List of 0, 1 or 2 Balance Transactions that show funds withdrawn and reinstated to your Stripe account as a result of this dispute.",
+        help_text=(
+            "List of 0, 1 or 2 Balance Transactions that show funds withdrawn and"
+            " reinstated to your Stripe account as a result of this dispute."
+        ),
     )
-    # charge is nullable to avoid infinite sync as Charge model has a dispute field as well
+    # charge is nullable to avoid infinite sync as Charge model
+    # has a dispute field as well
     charge = StripeForeignKey(
         "Charge",
         null=True,
@@ -1413,7 +1472,10 @@ class Dispute(StripeModel):
     status = StripeEnumField(enum=enums.DisputeStatus)
 
     def __str__(self):
-        return f"{self.human_readable_amount} ({enums.DisputeStatus.humanize(self.status)}) "
+        return (
+            f"{self.human_readable_amount} "
+            f"({enums.DisputeStatus.humanize(self.status)}) "
+        )
 
     def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
 
@@ -1422,7 +1484,8 @@ class Dispute(StripeModel):
         )
 
         # Retrieve and save files from the dispute.evidence object.
-        # todo find a better way of retrieving and syncing File Type fields from Dispute object
+        # TODO find a better way of retrieving and syncing File Type
+        # TODO fields from Dispute object
         for field in (
             "cancellation_policy",
             "customer_communication",
@@ -1468,19 +1531,25 @@ class Event(StripeModel):
     api_version = models.CharField(
         max_length=15,
         blank=True,
-        help_text="the API version at which the event data was "
-        "rendered. Blank for old entries only, all new entries will have this value",
+        help_text=(
+            "the API version at which the event data was "
+            "rendered. Blank for old entries only, all new entries will have this value"
+        ),
     )
     data = JSONField(
-        help_text="data received at webhook. data should be considered to be garbage "
-        "until validity check is run and valid flag is set"
+        help_text=(
+            "data received at webhook. data should be considered to be garbage "
+            "until validity check is run and valid flag is set"
+        )
     )
     request_id = models.CharField(
         max_length=50,
-        help_text="Information about the request that triggered this event, "
-        "for traceability purposes. If empty string then this is an old entry "
-        "without that data. If Null then this is not an old entry, but a Stripe "
-        "'automated' event with no associated request.",
+        help_text=(
+            "Information about the request that triggered this event, "
+            "for traceability purposes. If empty string then this is an old entry "
+            "without that data. If Null then this is not an old entry, but a Stripe "
+            "'automated' event with no associated request."
+        ),
         default="",
         blank=True,
     )
@@ -1714,8 +1783,10 @@ class PaymentIntent(StripeModel):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        help_text="The account (if any) for which the funds of the "
-        "PaymentIntent are intended.",
+        help_text=(
+            "The account (if any) for which the funds of the "
+            "PaymentIntent are intended."
+        ),
         related_name="payment_intents",
     )
     payment_method = StripeForeignKey(
@@ -1804,17 +1875,26 @@ class PaymentIntent(StripeModel):
 
         if account and customer:
             return (
-                f"{self.human_readable_amount} ({enums.PaymentIntentStatus.humanize(self.status)}) "
-                f"for {account} "
-                f"by {customer}"
+                f"{self.human_readable_amount} "
+                f"({enums.PaymentIntentStatus.humanize(self.status)})"
+                f" for {account} by {customer}"
             )
 
         if account:
-            return f"{self.human_readable_amount} for {account}. {enums.PaymentIntentStatus.humanize(self.status)}"
+            return (
+                f"{self.human_readable_amount} for {account}."
+                f" {enums.PaymentIntentStatus.humanize(self.status)}"
+            )
         if customer:
-            return f"{self.human_readable_amount} by {customer}. {enums.PaymentIntentStatus.humanize(self.status)}"
+            return (
+                f"{self.human_readable_amount} by {customer}."
+                f" {enums.PaymentIntentStatus.humanize(self.status)}"
+            )
 
-        return f"{self.human_readable_amount} ({enums.PaymentIntentStatus.humanize(self.status)})"
+        return (
+            f"{self.human_readable_amount} "
+            f"({enums.PaymentIntentStatus.humanize(self.status)})"
+        )
 
     def update(self, api_key=None, **kwargs):
         """
@@ -1956,15 +2036,21 @@ class SetupIntent(StripeModel):
 
         if account and customer:
             return (
-                f"{self.payment_method} ({enums.SetupIntentStatus.humanize(self.status)}) "
-                f"for {account} "
-                f"by {customer}"
+                f"{self.payment_method} "
+                f"({enums.SetupIntentStatus.humanize(self.status)})"
+                f" for {account} by {customer}"
             )
 
         if account:
-            return f"{self.payment_method} for {account}. {enums.SetupIntentStatus.humanize(self.status)}"
+            return (
+                f"{self.payment_method} for {account}."
+                f" {enums.SetupIntentStatus.humanize(self.status)}"
+            )
         if customer:
-            return f"{self.payment_method} by {customer}. {enums.SetupIntentStatus.humanize(self.status)}"
+            return (
+                f"{self.payment_method} by {customer}."
+                f" {enums.SetupIntentStatus.humanize(self.status)}"
+            )
         return (
             f"{self.payment_method} ({enums.SetupIntentStatus.humanize(self.status)})"
         )
@@ -1984,8 +2070,9 @@ class Payout(StripeModel):
     stripe_dashboard_item_name = "payouts"
 
     amount = StripeDecimalCurrencyAmountField(
-        help_text="Amount (as decimal) to be transferred to your bank account or "
-        "debit card."
+        help_text=(
+            "Amount (as decimal) to be transferred to your bank account or debit card."
+        )
     )
     arrival_date = StripeDateTimeField(
         help_text=(
@@ -2003,8 +2090,9 @@ class Payout(StripeModel):
         "BalanceTransaction",
         on_delete=models.SET_NULL,
         null=True,
-        help_text="Balance transaction that describes the impact on your "
-        "account balance.",
+        help_text=(
+            "Balance transaction that describes the impact on your account balance."
+        ),
     )
     currency = StripeCurrencyCodeField()
     destination = StripeForeignKey(
@@ -2038,8 +2126,7 @@ class Payout(StripeModel):
         default="",
         blank=True,
         help_text=(
-            "Message to user further explaining reason for "
-            "payout failure if available."
+            "Message to user further explaining reason for payout failure if available."
         ),
     )
     method = StripeEnumField(
@@ -2066,8 +2153,10 @@ class Payout(StripeModel):
         max_length=255,
         default="",
         blank=True,
-        help_text="Extra information about a payout to be displayed "
-        "on the user's bank statement.",
+        help_text=(
+            "Extra information about a payout to be displayed "
+            "on the user's bank statement."
+        ),
     )
     status = StripeEnumField(
         enum=enums.PayoutStatus,
@@ -2176,8 +2265,9 @@ class Price(StripeModel):
         max_length=250,
         null=True,
         blank=True,
-        help_text="A lookup key used to retrieve prices dynamically from a "
-        "static string.",
+        help_text=(
+            "A lookup key used to retrieve prices dynamically from a static string."
+        ),
     )
     tiers = JSONField(
         null=True,
@@ -2238,7 +2328,10 @@ class Price(StripeModel):
 
         subscriptions = Subscription.objects.filter(plan__id=self.id).count()
         if self.recurring:
-            return f"{self.human_readable_price} for {self.product.name} ({subscriptions} subscriptions)"
+            return (
+                f"{self.human_readable_price} for"
+                f" {self.product.name} ({subscriptions} subscriptions)"
+            )
         return f"{self.human_readable_price} for {self.product.name}"
 
     @property
@@ -2304,8 +2397,9 @@ class Refund(StripeModel):
         "BalanceTransaction",
         on_delete=models.SET_NULL,
         null=True,
-        help_text="Balance transaction that describes the impact on your account "
-        "balance.",
+        help_text=(
+            "Balance transaction that describes the impact on your account balance."
+        ),
     )
     charge = StripeForeignKey(
         "Charge",
@@ -2320,9 +2414,11 @@ class Refund(StripeModel):
         related_name="failure_refunds",
         null=True,
         blank=True,
-        help_text="If the refund failed, this balance transaction describes the "
-        "adjustment made on your account balance that reverses the initial "
-        "balance transaction.",
+        help_text=(
+            "If the refund failed, this balance transaction describes the "
+            "adjustment made on your account balance that reverses the initial "
+            "balance transaction."
+        ),
     )
     failure_reason = StripeEnumField(
         enum=enums.RefundFailureReason,
@@ -2340,8 +2436,10 @@ class Refund(StripeModel):
         max_length=9,
         default="",
         blank=True,
-        help_text="The transaction number that appears on email receipts sent "
-        "for this charge.",
+        help_text=(
+            "The transaction number that appears on email receipts sent "
+            "for this charge."
+        ),
     )
     status = StripeEnumField(
         blank=True, enum=enums.RefundStatus, help_text="Status of the refund."

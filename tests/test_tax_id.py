@@ -41,7 +41,8 @@ class TestTaxIdStr(TestCase):
         tax_id = TaxId.sync_from_stripe_data(FAKE_TAX_ID)
         self.assertEqual(
             str(tax_id),
-            f"{enums.TaxIdType.humanize(FAKE_TAX_ID['type'])} {FAKE_TAX_ID['value']} ({FAKE_TAX_ID['verification']['status']})",
+            f"{enums.TaxIdType.humanize(FAKE_TAX_ID['type'])} "
+            f"{FAKE_TAX_ID['value']} ({FAKE_TAX_ID['verification']['status']})",
         )
 
 
@@ -74,7 +75,8 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
             },
         )
 
-    # we are returning any value for the Customer.objects.get as we only need to avoid the Customer.DoesNotExist error
+    # we are returning any value for the Customer.objects.get
+    # as we only need to avoid the Customer.DoesNotExist error
     @patch(
         "djstripe.models.core.Customer.objects.get",
         return_value=deepcopy(FAKE_CUSTOMER),
@@ -103,7 +105,8 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
         )
 
-    # we are returning any value for the Customer.objects.get as we only need to avoid the Customer.DoesNotExist error
+    # we are returning any value for the Customer.objects.get
+    # as we only need to avoid the Customer.DoesNotExist error
     @patch(
         "djstripe.models.core.Customer.objects.get",
         return_value=deepcopy(FAKE_CUSTOMER),

@@ -99,11 +99,19 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assertEqual(self.customer.pending_charges, 0)
 
     def test_customer_dashboard_url(self):
-        expected_url = f"https://dashboard.stripe.com/{self.customer.djstripe_owner_account.id}/test/customers/{self.customer.id}"
+        expected_url = (
+            "https://dashboard.stripe.com/"
+            f"{self.customer.djstripe_owner_account.id}"
+            f"/test/customers/{self.customer.id}"
+        )
         self.assertEqual(self.customer.get_stripe_dashboard_url(), expected_url)
 
         self.customer.livemode = True
-        expected_url = f"https://dashboard.stripe.com/{self.customer.djstripe_owner_account.id}/customers/{self.customer.id}"
+        expected_url = (
+            "https://dashboard.stripe.com/"
+            f"{self.customer.djstripe_owner_account.id}"
+            f"/customers/{self.customer.id}"
+        )
         self.assertEqual(self.customer.get_stripe_dashboard_url(), expected_url)
 
         unsaved_customer = Customer()

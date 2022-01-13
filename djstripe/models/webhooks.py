@@ -31,8 +31,8 @@ class WebhookEndpoint(StripeModel):
     )
     enabled_events = JSONField(
         help_text=(
-            "The list of events to enable for this endpoint. "
-            "['*'] indicates that all events are enabled, except those that require explicit selection."
+            "The list of events to enable for this endpoint. ['*'] indicates that all"
+            " events are enabled, except those that require explicit selection."
         )
     )
     secret = models.CharField(

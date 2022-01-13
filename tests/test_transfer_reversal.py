@@ -134,7 +134,8 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         )
 
     @patch.object(Transfer, "_attach_objects_post_save_hook")
-    # we are returning any value for the Transfer.objects.get as we only need to avoid the Transfer.DoesNotExist error
+    # we are returning any value for the Transfer.objects.get as
+    # we only need to avoid the Transfer.DoesNotExist error
     @patch(
         "djstripe.models.connect.Transfer.objects.get",
         return_value=deepcopy(FAKE_TRANSFER),

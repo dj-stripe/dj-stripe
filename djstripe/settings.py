@@ -214,7 +214,8 @@ class DjstripeSettings:
 
     def get_subscriber_model_string(self) -> str:
         """Get the configured subscriber model as a module path string."""
-        return getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", settings.AUTH_USER_MODEL)  # type: ignore
+        # type: ignore
+        return getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", settings.AUTH_USER_MODEL)
 
     def get_subscriber_model(self):
         """
@@ -223,7 +224,8 @@ class DjstripeSettings:
         Users have the option of specifying a custom subscriber model via the
         DJSTRIPE_SUBSCRIBER_MODEL setting.
 
-        This methods falls back to AUTH_USER_MODEL if DJSTRIPE_SUBSCRIBER_MODEL is not set.
+        This methods falls back to AUTH_USER_MODEL if DJSTRIPE_SUBSCRIBER_MODEL
+        is not set.
 
         Returns the subscriber model that is active in this project.
         """

@@ -865,7 +865,8 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         items = subscription.items.all()
         self.assertEqual(2, len(items))
 
-        # delete pydanny customer as that causes issues with Invoice and Latest_invoice FKs
+        # delete pydanny customer as that causes issues with Invoice
+        # and Latest_invoice FKs
         self.customer.delete()
 
         self.assert_fks(
@@ -934,7 +935,8 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         items = subscription.items.all()
         self.assertEqual(1, len(items))
 
-        # delete pydanny customer as that causes issues with Invoice and Latest_invoice FKs
+        # delete pydanny customer as that causes issues with Invoice
+        # and Latest_invoice FKs
         self.customer.delete()
 
         self.assert_fks(
@@ -1009,7 +1011,8 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         charge_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
-        # delete pydanny customer as that causes issues with Invoice and Latest_invoice FKs
+        # delete pydanny customer as that causes issues with Invoice
+        # and Latest_invoice FKs
         self.customer.delete()
 
         fake_payment_intent = deepcopy(FAKE_PAYMENT_INTENT_II)

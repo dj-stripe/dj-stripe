@@ -30,8 +30,10 @@ class Command(BaseCommand):
             "args",
             metavar="ModelName",
             nargs="*",
-            help="restricts sync to these model names (default is to sync all "
-            "supported models)",
+            help=(
+                "restricts sync to these model names (default is to sync all "
+                "supported models)"
+            ),
         )
 
     def handle(self, *args, **options):
@@ -93,7 +95,8 @@ class Command(BaseCommand):
 
         count = 0
         try:
-            # todo convert get_list_kwargs into a generator to make the code memory effecient.
+            # todo convert get_list_kwargs into a generator to
+            # todo make the code memory effecient.
             for list_kwargs in self.get_list_kwargs(model):
                 stripe_account = list_kwargs.get("stripe_account", "")
 
@@ -108,10 +111,12 @@ class Command(BaseCommand):
 
                     djstripe_obj = model.sync_from_stripe_data(stripe_obj)
                     self.stdout.write(
-                        f"  id={djstripe_obj.id}, pk={djstripe_obj.pk} ({djstripe_obj} on {stripe_account})"
+                        f"  id={djstripe_obj.id},"
+                        f" pk={djstripe_obj.pk} ({djstripe_obj} on {stripe_account})"
                     )
 
-                    # syncing BankAccount and Card objects of Stripe Connected Express and Custom Accounts
+                    # syncing BankAccount and Card objects of Stripe Connected Express
+                    # and Custom Accounts
                     self.sync_bank_accounts_and_cards(
                         djstripe_obj, stripe_account=stripe_account
                     )
@@ -123,9 +128,12 @@ class Command(BaseCommand):
                         try:
                             djstripe_obj = model.sync_from_stripe_data(stripe_obj)
                             self.stdout.write(
-                                f"  id={djstripe_obj.id}, pk={djstripe_obj.pk} ({djstripe_obj} on {stripe_account})"
+                                f"  id={djstripe_obj.id},"
+                                f" pk={djstripe_obj.pk} ({djstripe_obj} on"
+                                f" {stripe_account})"
                             )
-                            # syncing BankAccount and Card objects of Stripe Connected Express and Custom Accounts
+                            # syncing BankAccount and Card objects of Stripe
+                            # Connected Express and Custom Accounts
                             self.sync_bank_accounts_and_cards(
                                 djstripe_obj, stripe_account=stripe_account
                             )
@@ -284,7 +292,8 @@ class Command(BaseCommand):
 
         return all_list_kwargs
 
-    # todo handle supoorting double + nested fields like data.invoice.subscriptions.customer etc?
+    # todo handle supoorting double + nested fields like
+    # todo data.invoice.subscriptions.customer etc?
     def get_list_kwargs(self, model):
         """
         Returns a sequence of kwargs dicts to pass to model.api_list
@@ -306,7 +315,8 @@ class Command(BaseCommand):
         }
 
         # get all Stripe Accounts for the given platform account.
-        # note that we need to fetch from Stripe as we have no way of knowing that the ones in the local db are up to date
+        # note that we need to fetch from Stripe as we have no way
+        # of knowing that the ones in the local db are up to date
         # as this can also be the first time the user runs sync.
         accs_set = self.get_stripe_account()
 
@@ -365,7 +375,8 @@ class Command(BaseCommand):
             item_obj = model.sync_from_stripe_data(item)
 
             self.stdout.write(
-                f"\tSyncing {model._meta.verbose_name} ({instance}): id={item_obj.id}, pk={item_obj.pk}"
+                f"\tSyncing {model._meta.verbose_name} ({instance}): id={item_obj.id},"
+                f" pk={item_obj.pk}"
             )
 
         if bank_count + card_count > 0:

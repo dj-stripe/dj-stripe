@@ -15,14 +15,18 @@ class ScheduledQueryRun(StripeModel):
     stripe_class = stripe.sigma.ScheduledQueryRun
 
     data_load_time = StripeDateTimeField(
-        help_text="When the query was run, Sigma contained a snapshot of your "
-        "Stripe data at this time."
+        help_text=(
+            "When the query was run, Sigma contained a snapshot of your "
+            "Stripe data at this time."
+        )
     )
     error = JSONField(
         null=True,
         blank=True,
-        help_text="If the query run was not succeesful, contains information "
-        "about the failure.",
+        help_text=(
+            "If the query run was not succeesful, contains information "
+            "about the failure."
+        ),
     )
     file = StripeForeignKey(
         "file",
@@ -32,8 +36,9 @@ class ScheduledQueryRun(StripeModel):
         help_text="The file object representing the results of the query.",
     )
     result_available_until = StripeDateTimeField(
-        help_text="Time at which the result expires and is no longer available "
-        "for download."
+        help_text=(
+            "Time at which the result expires and is no longer available for download."
+        )
     )
     sql = models.TextField(max_length=5000, help_text="SQL for the query.")
     status = StripeEnumField(

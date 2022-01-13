@@ -54,7 +54,8 @@ class TestStrSetupIntent:
         def mock_payment_method_get(*args, **kwargs):
             return deepcopy(FAKE_PAYMENT_METHOD_I)
 
-        # monkeypatch stripe.Account.retrieve, stripe.Customer.retrieve, and  stripe.PaymentMethod.retrieve calls to return
+        # monkeypatch stripe.Account.retrieve, stripe.Customer.retrieve,
+        # and stripe.PaymentMethod.retrieve calls to return
         # the desired json response.
         monkeypatch.setattr(stripe.Account, "retrieve", mock_account_get)
         monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
@@ -70,17 +71,22 @@ class TestStrSetupIntent:
                 f"{pm} ({SetupIntentStatus.humanize(fake_intent_data['status'])}) "
                 f"for {account} "
                 f"by {customer}"
-            ) == str(si)
+                == str(si)
+            )
 
         elif has_account and not has_customer:
             assert (
-                f"{pm} for {account}. {SetupIntentStatus.humanize(fake_intent_data['status'])}"
-            ) == str(si)
+                f"{pm} for {account}."
+                f" {SetupIntentStatus.humanize(fake_intent_data['status'])}"
+                == str(si)
+            )
 
         elif has_customer and not has_account:
             assert (
-                f"{pm} by {customer}. {SetupIntentStatus.humanize(fake_intent_data['status'])}"
-            ) == str(si)
+                f"{pm} by {customer}."
+                f" {SetupIntentStatus.humanize(fake_intent_data['status'])}"
+                == str(si)
+            )
 
         elif not has_customer and not has_account:
             f"{pm} ({SetupIntentStatus.humanize(fake_intent_data['status'])})" == str(

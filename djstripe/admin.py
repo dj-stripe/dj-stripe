@@ -16,7 +16,8 @@ def custom_display_for_JSONfield(value, field, empty_value_display):
     """
     Overriding display_for_field to correctly render JSONField READonly fields
     in django-admin. Relevant when DJSTRIPE_USE_NATIVE_JSONFIELD is False
-    Note: This does not handle invalid JSON. That should be handled by the JSONField itself
+    Note: This does not handle invalid JSON. That should be handled by
+    the JSONField itself
     """
     # we manually JSON serialise in case field is from jsonfield module
     if isinstance(field, JSONField) and value:

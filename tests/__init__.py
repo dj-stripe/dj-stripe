@@ -535,7 +535,9 @@ FAKE_SETUP_INTENT_I = {
 FAKE_SETUP_INTENT_II = {
     "application": None,
     "cancellation_reason": None,
-    "client_secret": "seti_1J0g0WJSZQVUcJYgWE2XSi1K_secret_Jdxw2mOaIEHBdE6eTsfJ2IfmamgNJaF",
+    "client_secret": (
+        "seti_1J0g0WJSZQVUcJYgWE2XSi1K_secret_Jdxw2mOaIEHBdE6eTsfJ2IfmamgNJaF"
+    ),
     "created": 1623301244,
     "customer": "cus_6lsBvm5rJ0zyHc",
     "description": None,

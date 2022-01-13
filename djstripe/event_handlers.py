@@ -76,7 +76,8 @@ def customer_webhook_handler(event):
         customer_id = event.data.get("object", {}).get("id", "")
         subscriber_key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
 
-        # only update customer.subscriber if both the customer and subscriber already exist
+        # only update customer.subscriber if both the customer and
+        #  subscriber already exist
         update_customer_helper(metadata, customer_id, subscriber_key)
 
         _handle_crud_like_event(target_cls=models.Customer, event=event)
@@ -195,8 +196,9 @@ def payment_method_handler(event):
             and id_
             and id_.startswith("card_")
         ):
-            # Special case to handle a quirk in stripe's wrapping of legacy "card" objects
-            # with payment_methods - card objects are deleted on detach, so treat this as
+            # Special case to handle a quirk in stripe's wrapping of legacy
+            # "card" objects with payment_methods - card objects are
+            # deleted on detach, so treat this as
             # a delete event
             _handle_crud_like_event(
                 target_cls=models.PaymentMethod,

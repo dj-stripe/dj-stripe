@@ -198,7 +198,7 @@ class TestStrPrice:
 
         if not fake_price_data["recurring"]:
             price = Price.sync_from_stripe_data(fake_price_data)
-            assert (f"{price.human_readable_price} for {FAKE_PRODUCT['name']}") == str(
+            assert f"{price.human_readable_price} for {FAKE_PRODUCT['name']}" == str(
                 price
             )
 
@@ -206,8 +206,10 @@ class TestStrPrice:
             price = Price.sync_from_stripe_data(fake_price_data)
             subscriptions = Subscription.objects.filter(plan__id=price.id).count()
             assert (
-                f"{price.human_readable_price} for {FAKE_PRODUCT['name']} ({subscriptions} subscriptions)"
-            ) == str(price)
+                f"{price.human_readable_price} for"
+                f" {FAKE_PRODUCT['name']} ({subscriptions} subscriptions)"
+                == str(price)
+            )
 
 
 class TestHumanReadablePrice:

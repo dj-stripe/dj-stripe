@@ -45,7 +45,7 @@ class Session(StripeModel):
         "Customer",
         null=True,
         on_delete=models.SET_NULL,
-        help_text=("Customer this Checkout is for if one exists."),
+        help_text="Customer this Checkout is for if one exists.",
     )
     customer_email = models.CharField(
         max_length=255,
@@ -57,7 +57,7 @@ class Session(StripeModel):
     display_items = JSONField(
         null=True,
         blank=True,
-        help_text=("The line items, plans, or SKUs purchased by the customer."),
+        help_text="The line items, plans, or SKUs purchased by the customer.",
     )
     locale = models.CharField(
         max_length=255,
@@ -70,30 +70,35 @@ class Session(StripeModel):
     mode = StripeEnumField(
         enum=enums.SessionMode,
         blank=True,
-        help_text="The mode of the Checkout Session, "
-        "one of payment, setup, or subscription.",
+        help_text=(
+            "The mode of the Checkout Session, one of payment, setup, or subscription."
+        ),
     )
     payment_intent = StripeForeignKey(
         "PaymentIntent",
         null=True,
         on_delete=models.SET_NULL,
-        help_text=("PaymentIntent created if SKUs or line items were provided."),
+        help_text="PaymentIntent created if SKUs or line items were provided.",
     )
     payment_method_types = JSONField(
-        help_text="The list of payment method types (e.g. card) that this "
-        "Checkout Session is allowed to accept."
+        help_text=(
+            "The list of payment method types (e.g. card) that this "
+            "Checkout Session is allowed to accept."
+        )
     )
     submit_type = StripeEnumField(
         enum=enums.SubmitTypeStatus,
         blank=True,
-        help_text="Describes the type of transaction being performed by Checkout"
-        "in order to customize relevant text on the page, such as the submit button.",
+        help_text=(
+            "Describes the type of transaction being performed by Checkoutin order to"
+            " customize relevant text on the page, such as the submit button."
+        ),
     )
     subscription = StripeForeignKey(
         "Subscription",
         null=True,
         on_delete=models.SET_NULL,
-        help_text=("Subscription created if one or more plans were provided."),
+        help_text="Subscription created if one or more plans were provided.",
     )
     success_url = models.TextField(
         max_length=5000,

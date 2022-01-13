@@ -165,7 +165,8 @@ class RefundTest(AssertStripeFksMixin, TestCase):
         refund = Refund.sync_from_stripe_data(fake_refund)
 
         self.assertEqual(
-            f"{refund.human_readable_amount} ({enums.RefundStatus.humanize(fake_refund['status'])})",
+            f"{refund.human_readable_amount} "
+            f"({enums.RefundStatus.humanize(fake_refund['status'])})",
             str(refund),
         )
 

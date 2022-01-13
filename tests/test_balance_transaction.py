@@ -37,9 +37,10 @@ class TestBalanceTransactionStr:
             modified_balance_transaction
         )
         assert (
-            f"{get_friendly_currency_amount(modified_balance_transaction['amount'], modified_balance_transaction['currency'])}"
-            f" ({BalanceTransactionStatus.humanize(modified_balance_transaction['status'])})"
-        ) == str(balance_transaction)
+            f"{get_friendly_currency_amount(modified_balance_transaction['amount'], modified_balance_transaction['currency'])}"  # noqa: E501
+            f" ({BalanceTransactionStatus.humanize(modified_balance_transaction['status'])})"  # noqa: E501
+            == str(balance_transaction)
+        )
 
 
 class TestBalanceTransactionSourceClass:

@@ -129,7 +129,8 @@ class PlanTest(AssertStripeFksMixin, TestCase):
         subscriptions = Subscription.objects.filter(plan__id=self.plan.id).count()
 
         self.assertEqual(
-            f"{self.plan.human_readable_price} for {FAKE_PRODUCT['name']} ({subscriptions} subscriptions)",
+            f"{self.plan.human_readable_price} for"
+            f" {FAKE_PRODUCT['name']} ({subscriptions} subscriptions)",
             str(self.plan),
         )
 

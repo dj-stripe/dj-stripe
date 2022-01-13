@@ -1249,7 +1249,8 @@ class TestCustomerEvents(EventTestCase):
         event_retrieve_mock.return_value = fake_stripe_event
 
         fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
-        # latest_invoice has to be None for a Subscription that has not been created yet.
+        # latest_invoice has to be None for a Subscription
+        # that has not been created yet.
         fake_subscription["latest_invoice"] = None
         subscription_retrieve_mock.return_value = fake_subscription
 

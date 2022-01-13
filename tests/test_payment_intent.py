@@ -118,22 +118,26 @@ class TestStrPaymentIntent:
         if has_account and has_customer:
 
             assert (
-                f"{pi.human_readable_amount} ({PaymentIntentStatus.humanize(fake_intent_data['status'])}) "
-                f"for {account} "
-                f"by {customer}"
-            ) == str(pi)
+                f"{pi.human_readable_amount} ({PaymentIntentStatus.humanize(fake_intent_data['status'])})"
+                f" for {account} by {customer}"
+                == str(pi)
+            )
 
         elif has_account and not has_customer:
 
             assert (
-                f"{pi.human_readable_amount} for {account}. {PaymentIntentStatus.humanize(fake_intent_data['status'])}"
-            ) == str(pi)
+                f"{pi.human_readable_amount} for {account}."
+                f" {PaymentIntentStatus.humanize(fake_intent_data['status'])}"
+                == str(pi)
+            )
 
         elif has_customer and not has_account:
 
             assert (
-                f"{pi.human_readable_amount} by {customer}. {PaymentIntentStatus.humanize(fake_intent_data['status'])}"
-            ) == str(pi)
+                f"{pi.human_readable_amount} by {customer}."
+                f" {PaymentIntentStatus.humanize(fake_intent_data['status'])}"
+                == str(pi)
+            )
         elif not has_customer and not has_account:
             f"{pi.human_readable_amount} ({PaymentIntentStatus.humanize(fake_intent_data['status'])})" == str(
                 pi

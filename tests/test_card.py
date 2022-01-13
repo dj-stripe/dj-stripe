@@ -46,8 +46,8 @@ class TestStrCard:
         def mock_account_get(*args, **kwargs):
             return deepcopy(FAKE_CUSTOM_ACCOUNT)
 
-        # monkeypatch stripe.Account.retrieve and stripe.Customer.retrieve calls to return
-        # the desired json response.
+        # monkeypatch stripe.Account.retrieve and stripe.Customer.retrieve
+        # calls to return the desired json response.
         monkeypatch.setattr(stripe.Account, "retrieve", mock_account_get)
         monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
 
@@ -59,7 +59,9 @@ class TestStrCard:
 
             default = fake_stripe_data["default_for_currency"]
             assert (
-                f"{enums.CardBrand.humanize(fake_stripe_data['brand'])} {account.default_currency} {'Default' if default else ''} {fake_stripe_data['last4']}"
+                f"{enums.CardBrand.humanize(fake_stripe_data['brand'])} "
+                f"{account.default_currency} {'Default' if default else ''} "
+                f"{fake_stripe_data['last4']}"
                 == str(card)
             )
         if has_customer:
@@ -76,7 +78,9 @@ class TestStrCard:
                 default = True
 
             assert (
-                f"{enums.CardBrand.humanize(fake_stripe_data['brand'])} {fake_stripe_data['last4']} {'Default' if default else ''} Expires {fake_stripe_data['exp_month']} {fake_stripe_data['exp_year']}"
+                f"{enums.CardBrand.humanize(fake_stripe_data['brand'])} "
+                f"{fake_stripe_data['last4']} {'Default' if default else ''} Expires"
+                f" {fake_stripe_data['exp_month']} {fake_stripe_data['exp_year']}"
                 == str(card)
             )
 
@@ -224,8 +228,8 @@ class CardTest(AssertStripeFksMixin, TestCase):
 
     def test_api_call_no_customer_and_no_account(self):
         exception_message = (
-            "Cards must be manipulated through either a Stripe Connected Account or a customer. "
-            "Pass a Customer or an Account object into this call."
+            "Cards must be manipulated through either a Stripe Connected Account or a"
+            " customer. Pass a Customer or an Account object into this call."
         )
 
         with self.assertRaisesMessage(

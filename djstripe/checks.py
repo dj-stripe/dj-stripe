@@ -143,8 +143,10 @@ def check_webhook_validation(app_configs=None, **kwargs):
                 checks.Critical(
                     "DJSTRIPE_WEBHOOK_VALIDATION='verify_signature' "
                     "but DJSTRIPE_WEBHOOK_SECRET is not set",
-                    hint="Set DJSTRIPE_WEBHOOK_SECRET or set "
-                    "DJSTRIPE_WEBHOOK_VALIDATION='retrieve_event'",
+                    hint=(
+                        "Set DJSTRIPE_WEBHOOK_SECRET or set "
+                        "DJSTRIPE_WEBHOOK_VALIDATION='retrieve_event'"
+                    ),
                     id="djstripe.C006",
                 )
             )
@@ -198,7 +200,7 @@ def check_djstripe_settings_foreign_key_to_field(app_configs=None, **kwargs):
     setting_name = "DJSTRIPE_FOREIGN_KEY_TO_FIELD"
     hint = (
         f'Set {setting_name} to "id" if this is a new installation, '
-        f'otherwise set it to "djstripe_id".'
+        'otherwise set it to "djstripe_id".'
     )
     messages = []
 

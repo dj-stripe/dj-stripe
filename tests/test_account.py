@@ -252,7 +252,9 @@ class TestAccountStr:
         fileupload_retrieve_mock,
         account_retrieve_mock,
     ):
-        """Test that __str__ doesn't crash when settings and business_profile are NULL."""
+        """
+        Test that __str__ doesn't crash when settings and business_profile are NULL.
+        """
         fake_account = deepcopy(FAKE_ACCOUNT)
         fake_account["settings"] = None
         fake_account["business_profile"] = None

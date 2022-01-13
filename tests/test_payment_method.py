@@ -47,8 +47,10 @@ class TestPaymentMethodStr:
             pm = models.PaymentMethod.sync_from_stripe_data(fake_payment_method_data)
             customer = None
             assert (
-                f"{enums.PaymentMethodType.humanize(fake_payment_method_data['type'])} is not associated with any customer"
-            ) == str(pm)
+                f"{enums.PaymentMethodType.humanize(fake_payment_method_data['type'])} "
+                "is not associated with any customer"
+                == str(pm)
+            )
 
         else:
             pm = models.PaymentMethod.sync_from_stripe_data(fake_payment_method_data)
@@ -56,8 +58,10 @@ class TestPaymentMethodStr:
                 id=fake_payment_method_data["customer"]
             )
             assert (
-                f"{enums.PaymentMethodType.humanize(fake_payment_method_data['type'])} for {customer}"
-            ) == str(pm)
+                f"{enums.PaymentMethodType.humanize(fake_payment_method_data['type'])} "
+                f"for {customer}"
+                == str(pm)
+            )
 
 
 class PaymentMethodTest(AssertStripeFksMixin, TestCase):
@@ -180,8 +184,10 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
         with patch(
             "tests.PaymentMethodDict.detach",
             side_effect=InvalidRequestError(
-                message="A source must be attached to a customer to be used "
-                "as a `payment_method`",
+                message=(
+                    "A source must be attached to a customer to be used "
+                    "as a `payment_method`"
+                ),
                 param="payment_method",
             ),
             autospec=True,
@@ -252,8 +258,10 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
         with patch(
             "tests.PaymentMethodDict.detach",
             side_effect=InvalidRequestError(
-                message="A source must be attached to a customer to be used "
-                "as a `payment_method`",
+                message=(
+                    "A source must be attached to a customer to be used "
+                    "as a `payment_method`"
+                ),
                 param="payment_method",
             ),
             autospec=True,
