@@ -581,7 +581,7 @@ class SubscriptionAdmin(StripeModelAdmin):
                     level=messages.SUCCESS,
                 )
             except InvalidRequestError as error:
-                self.message_user(request, error, level=messages.WARNING)
+                self.message_user(request, str(error), level=messages.WARNING)
 
     _cancel.short_description = "Cancel selected subscriptions"  # type: ignore # noqa
 
