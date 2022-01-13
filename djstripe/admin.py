@@ -2,6 +2,7 @@
 Django Administration interface definitions
 """
 import json
+from typing import Optional
 from urllib.parse import urljoin
 
 from django import forms
@@ -627,7 +628,9 @@ class UsageRecordSummaryAdmin(StripeModelAdmin):
 
 
 class WebhookEndpointAdminBaseForm(forms.ModelForm):
-    def _get_field_name(self, stripe_field: str) -> str:
+    def _get_field_name(self, stripe_field: Optional[str]) -> Optional[str]:
+        if stripe_field is None:
+            return None
         if stripe_field == "url":
             return "base_url"
         else:
