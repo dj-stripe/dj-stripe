@@ -63,6 +63,11 @@ docs = ["mkdocs", "mkdocstrings", "mkdocs-material", "mkdocs-autorefs", "psycopg
 [tool.isort]
 profile = "black"
 
+[tool.black]
+line-length = 88
+experimental-string-processing = true
+
+
 [build-system]
 requires = ["poetry_core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
