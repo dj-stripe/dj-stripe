@@ -77,7 +77,6 @@ def test_get_forward_relation_fields_for_model(output, input):
 
 
 class TestAdminCustomActions(TestCase):
-    kwargs_called_with = {}
 
     # to get around Session/MessageMiddleware Deprecation Warnings
     def dummy_get_response(self, request):
@@ -215,8 +214,7 @@ class TestAdminCustomActions(TestCase):
             helpers.ACTION_CHECKBOX_NAME: [subscription.pk],
         }
 
-        # monkeypatch instance.api_retrieve
-        def mock_instance_api_retrieve(*args, **kwargs):
+        def mock_stripe_invalid_req_err(*args, **kwargs):
             raise InvalidRequestError("No such subscription:", {})
 
         # get the standard changelist_view url
@@ -240,7 +238,7 @@ class TestAdminCustomActions(TestCase):
             subscription, "api_retrieve", return_value=FAKE_SUBSCRIPTION
         ) as patched_api_retrieve:
             with patch.object(
-                subscription, "_api_delete", side_effect=mock_instance_api_retrieve
+                subscription, "_api_delete", side_effect=mock_stripe_invalid_req_err
             ) as patched__api_delete:
 
                 # invoke the _cancel action
@@ -286,8 +284,7 @@ class TestAdminCustomActions(TestCase):
             helpers.ACTION_CHECKBOX_NAME: [subscription.pk],
         }
 
-        # monkeypatch instance.api_retrieve
-        def mock_instance_api_retrieve(*args, **kwargs):
+        def mock_stripe_invalid_req_err(*args, **kwargs):
             raise InvalidRequestError("some random error message:", {})
 
         # get the standard changelist_view url
@@ -308,7 +305,7 @@ class TestAdminCustomActions(TestCase):
         action_fn = model_admin.get_actions(request)[data.get("action")][0]
 
         with patch.object(
-            subscription, "_api_delete", side_effect=mock_instance_api_retrieve
+            subscription, "_api_delete", side_effect=mock_stripe_invalid_req_err
         ) as patched__api_delete:
             # invoke the _cancel action
             action_fn(model_admin, request, [subscription])
@@ -635,7 +632,8 @@ class TestAdminRegisteredModels(TestCase):
                 response = model_admin.changelist_view(request)
                 list_display = model_admin.get_changelist_instance(request).list_display
 
-                # get_changelist_instance to get an instance of the ChangelistView for logged in admin user
+                # get_changelist_instance to get an instance of the ChangelistView
+                # for logged in admin user
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(
                     list(response.context_data["cl"].list_display_links),
@@ -669,7 +667,8 @@ class TestAdminRegisteredModels(TestCase):
 
                 response = model_admin.changelist_view(request)
 
-                # get_changelist_instance to get an instance of the ChangelistView for logged in admin user
+                # get_changelist_instance to get an instance of the ChangelistView
+                # for logged in admin user
                 list_display = model_admin.get_changelist_instance(request).list_display
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(
@@ -720,7 +719,8 @@ class TestAdminRegisteredModels(TestCase):
 
                 response = model_admin.changelist_view(request)
 
-                # get_changelist_instance to get an instance of the ChangelistView for logged in admin user
+                # get_changelist_instance to get an instance of the ChangelistView
+                # for logged in admin user
                 list_filter = model_admin.get_changelist_instance(request).list_filter
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(
@@ -758,7 +758,8 @@ class TestAdminRegisteredModels(TestCase):
 
                 response = model_admin.changelist_view(request)
 
-                # get_changelist_instance to get an instance of the ChangelistView for logged in admin user
+                # get_changelist_instance to get an instance of the ChangelistView
+                # for logged in admin user
                 readonly_fields = model_admin.get_changelist_instance(
                     request
                 ).model_admin.readonly_fields
@@ -806,7 +807,8 @@ class TestAdminRegisteredModels(TestCase):
 
                 response = model_admin.changelist_view(request)
 
-                # get_changelist_instance to get an instance of the ChangelistView for logged in admin user
+                # get_changelist_instance to get an instance of the ChangelistView
+                # for logged in admin user
                 list_select_related = model_admin.get_changelist_instance(
                     request
                 ).list_select_related
@@ -926,7 +928,8 @@ class TestAdminRegisteredModels(TestCase):
 
     def test_get_search_fields(self):
         """
-        Ensure all fields in model_admin.get_search_fields exist on the model or the related model
+        Ensure all fields in model_admin.get_search_fields exist on the model
+        or the related model
         """
 
         app_label = "djstripe"
@@ -936,10 +939,12 @@ class TestAdminRegisteredModels(TestCase):
         for model in all_models_lst:
             if model in site._registry.keys():
                 model_admin = site._registry.get(model)
-                # get the standard changelist_view url and make a sample query to trigger search
+                # get the standard changelist_view url
+                # and make a sample query to trigger search
                 url = (
                     reverse(
-                        f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
+                        f"admin:{model._meta.app_label}"
+                        f"_{model.__name__.lower()}_changelist"
                     )
                     + "?q=bar"
                 )
@@ -1013,7 +1018,8 @@ class TestAdminSite(TestCase):
 
     def test_search_fields_exist(self):
         """
-        Ensure all fields in model_admin.search_fields exist on the model or the related model
+        Ensure all fields in model_admin.search_fields exist on the model
+        or the related model
         """
 
         for model, model_admin in site._registry.items():
@@ -1027,7 +1033,8 @@ class TestAdminSite(TestCase):
 
     def test_list_select_related_fields_exist(self):
         """
-        Ensure all fields in model_admin.list_select_related exist on the model or the related model
+        Ensure all fields in model_admin.list_select_related exist on the model
+        or the related model
         """
 
         for model, model_admin in site._registry.items():
