@@ -90,13 +90,20 @@ class Account(StripeModel):
     def default_api_key(self) -> str:
         return self.get_default_api_key()
 
-    def get_default_api_key(self) -> str:
-        api_key = APIKey.objects.filter(
-            djstripe_owner_account=self, type=APIKeyType.secret
-        ).first()
+    def get_default_api_key(self, livemode: bool = None) -> str:
+        if livemode is None:
+            livemode = self.livemode
+            api_key = APIKey.objects.filter(
+                djstripe_owner_account=self, type=APIKeyType.secret
+            ).first()
+        else:
+            api_key = APIKey.objects.filter(
+                djstripe_owner_account=self, type=APIKeyType.secret, livemode=livemode
+            ).first()
+
         if api_key:
             return api_key.secret
-        return djstripe_settings.get_default_api_key(self.livemode)
+        return djstripe_settings.get_default_api_key(livemode)
 
     @property
     def business_url(self) -> str:
