@@ -1,5 +1,6 @@
 import stripe
 from django.db import models, transaction
+from stripe.error import InvalidRequestError
 
 from .. import enums
 from ..enums import APIKeyType
@@ -90,7 +91,7 @@ class Account(StripeModel):
     def default_api_key(self) -> str:
         return self.get_default_api_key()
 
-    def get_default_api_key(self, livemode: bool = None) -> str:
+    def get_default_api_key(self, livemode: bool = None, strict: bool = False) -> str:
         if livemode is None:
             livemode = self.livemode
             api_key = APIKey.objects.filter(
@@ -103,7 +104,15 @@ class Account(StripeModel):
 
         if api_key:
             return api_key.secret
-        return djstripe_settings.get_default_api_key(livemode)
+
+        if not strict:
+            return djstripe_settings.get_default_api_key(livemode)
+
+        # this means that the account's key we are trying to fetch is not in the DB!
+        raise InvalidRequestError(
+            param="djstripe_owner_account",
+            message=f"Cannot find Secret Key of Stripe Account {self}. Please add it using the APIkey Admin Page.",
+        )
 
     @property
     def business_url(self) -> str:
