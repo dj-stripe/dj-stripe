@@ -879,7 +879,10 @@ class Customer(StripeModel):
                 price = item.get("price", "")
                 plan = item.get("plan", "")
                 price, kwargs = _sanitise_price(price, plan, **kwargs)
-                _items.append(item)
+                if "price" in item:
+                    _items.append({"price": price})
+                if "plan" in item:
+                    _items.append({"plan": price})
 
         stripe_subscription = Subscription._api_create(
             items=_items, customer=self.id, **kwargs
