@@ -1692,6 +1692,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         with self.assertRaises(MultipleSubscriptionException):
             self.customer.subscription
 
+    @patch.object(Subscription, "_api_create", autospec=True)
     @patch("stripe.Subscription.create", autospec=True)
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
@@ -1699,11 +1700,14 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
-    def test_subscription_shortcut_with_multiple_subscriptions_new_style(
-        self, product_retrieve_mock, customer_retrieve_mock, subscription_create_mock
+    def test_subscription_shortcut_with_multiple_subscriptions_new_style_by_price(
+        self,
+        product_retrieve_mock,
+        customer_retrieve_mock,
+        subscription_create_mock,
+        subscription_api_create_mock,
     ):
         price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
-
         self.assert_fks(price, expected_blank_fks={})
 
         subscription_fake_duplicate = deepcopy(FAKE_SUBSCRIPTION)
@@ -1722,10 +1726,69 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             subscription_fake_duplicate,
         ]
 
+        subscription_api_create_mock.side_effect = [
+            fake_subscription,
+            subscription_fake_duplicate,
+        ]
+
         self.customer.subscribe(items=[{"price": price}, {"price": price}])
 
         self.assertEqual(1, self.customer.subscriptions.count())
         self.assertEqual(1, len(self.customer.valid_subscriptions))
+
+        subscription_api_create_mock.assert_called_once_with(
+            items=[{"price": price.id}, {"price": price.id}], customer=self.customer.id
+        )
+
+    @patch.object(Subscription, "_api_create", autospec=True)
+    @patch("stripe.Subscription.create", autospec=True)
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    def test_subscription_shortcut_with_multiple_subscriptions_new_style_by_price_and_plan(
+        self,
+        product_retrieve_mock,
+        customer_retrieve_mock,
+        subscription_create_mock,
+        subscription_api_create_mock,
+    ):
+        price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
+        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
+        self.assert_fks(price, expected_blank_fks={})
+        self.assert_fks(plan, expected_blank_fks={})
+
+        subscription_fake_duplicate = deepcopy(FAKE_SUBSCRIPTION)
+        subscription_fake_duplicate["id"] = "sub_6lsC8pt7IcF8jd"
+        # latest_invoice has to be None for an invoice that doesn't exist yet
+        # and hence cannot have been billed yet
+        subscription_fake_duplicate["latest_invoice"] = None
+
+        fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
+        # latest_invoice has to be None for an invoice that doesn't exist yet
+        # and hence cannot have been billed yet
+        fake_subscription["latest_invoice"] = None
+
+        subscription_create_mock.side_effect = [
+            fake_subscription,
+            subscription_fake_duplicate,
+        ]
+
+        subscription_api_create_mock.side_effect = [
+            fake_subscription,
+            subscription_fake_duplicate,
+        ]
+
+        self.customer.subscribe(items=[{"price": price}, {"plan": plan}])
+
+        self.assertEqual(1, self.customer.subscriptions.count())
+        self.assertEqual(1, len(self.customer.valid_subscriptions))
+
+        subscription_api_create_mock.assert_called_once_with(
+            items=[{"price": price.id}, {"plan": plan.id}], customer=self.customer.id
+        )
 
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
@@ -2115,6 +2178,7 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
 
         self.customer.subscribe(plan=plan.id)
 
+    @patch.object(Subscription, "_api_create", autospec=True)
     @patch("stripe.Subscription.create", autospec=True)
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
@@ -2122,11 +2186,14 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
-    def test_subscription_shortcut_with_multiple_subscriptions(
-        self, product_retrieve_mock, customer_retrieve_mock, subscription_create_mock
+    def test_subscription_shortcut_with_multiple_subscriptions_new_style_by_plan(
+        self,
+        product_retrieve_mock,
+        customer_retrieve_mock,
+        subscription_create_mock,
+        subscription_api_create_mock,
     ):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-
         self.assert_fks(plan, expected_blank_fks={})
 
         subscription_fake_duplicate = deepcopy(FAKE_SUBSCRIPTION)
@@ -2145,10 +2212,19 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
             subscription_fake_duplicate,
         ]
 
+        subscription_api_create_mock.side_effect = [
+            fake_subscription,
+            subscription_fake_duplicate,
+        ]
+
         self.customer.subscribe(items=[{"plan": plan}, {"plan": plan}])
 
         self.assertEqual(1, self.customer.subscriptions.count())
         self.assertEqual(1, len(self.customer.valid_subscriptions))
+
+        subscription_api_create_mock.assert_called_once_with(
+            items=[{"plan": plan.id}, {"plan": plan.id}], customer=self.customer.id
+        )
 
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
