@@ -5,6 +5,7 @@ import decimal
 from copy import deepcopy
 from unittest.mock import ANY, patch
 
+import pytest
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.utils import timezone
@@ -565,7 +566,11 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         )
 
     def test_can_charge(self):
-        self.assertTrue(self.customer.can_charge())
+        with pytest.warns(DeprecationWarning) as record:
+            self.assertTrue(self.customer.can_charge())
+
+        # check that the message matches
+        assert "Customer.can_charge() is misleading" in record[0].message.args[0]
 
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
