@@ -572,6 +572,15 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         # check that the message matches
         assert "Customer.can_charge() is misleading" in record[0].message.args[0]
 
+    def test_has_valid_source(self):
+
+        assert self.customer.default_source
+        with pytest.warns(DeprecationWarning) as record:
+            self.assertTrue(self.customer.has_valid_source())
+
+        # check that the message matches
+        assert "Customer.has_valid_source() is deprecated" in record[0].message.args[0]
+
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
