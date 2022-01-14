@@ -872,7 +872,7 @@ class Customer(StripeModel):
             raise TypeError("Please define only one of items, price or plan arguments.")
 
         if items is None:
-            items = [{"price": price}]
+            _items = [{"price": price}]
         else:
             _items = []
             for item in items:
@@ -882,7 +882,7 @@ class Customer(StripeModel):
                 _items.append(item)
 
         stripe_subscription = Subscription._api_create(
-            items=items, customer=self.id, **kwargs
+            items=_items, customer=self.id, **kwargs
         )
 
         Subscription.sync_from_stripe_data(stripe_subscription)
