@@ -775,7 +775,7 @@ class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
                 description=self.cleaned_data.get("description"),
                 enabled_events=self.cleaned_data.get("enabled_events"),
                 metadata=self.cleaned_data.get("metadata"),
-                disabled=self.cleaned_data.get("enabled") != "on",
+                disabled=(not self.cleaned_data.get("enabled")),
             )
         except InvalidRequestError as e:
             field_name = self._get_field_name(e.param)
