@@ -706,12 +706,15 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
         _api_key = {}
         account = self.cleaned_data["djstripe_owner_account"]
         livemode = self.cleaned_data["livemode"]
-        if account:
-            self._stripe_api_key = _api_key["api_key"] = account.get_default_api_key(
-                livemode=livemode
-            )
 
         try:
+            if account:
+                self._stripe_api_key = _api_key[
+                    "api_key"
+                ] = account.get_default_api_key(livemode=livemode, strict=True)
+
+            # note that the user has to activate connect on their dashboard
+            # without that connect=True would simply be ignored by Stripe
             self._stripe_data = models.WebhookEndpoint._api_create(
                 url=url,
                 api_version=self.cleaned_data["api_version"] or None,
