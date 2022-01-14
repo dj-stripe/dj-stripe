@@ -6260,17 +6260,20 @@ Stripe API and sync for all RelatedModels would fail</p>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Please define only one of items, price or plan arguments.&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">items</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;price&quot;</span><span class="p">:</span> <span class="n">price</span><span class="p">}]</span>
+        <span class="n">_items</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;price&quot;</span><span class="p">:</span> <span class="n">price</span><span class="p">}]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">_items</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
             <span class="n">price</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;price&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
             <span class="n">plan</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;plan&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
             <span class="n">price</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="n">_sanitise_price</span><span class="p">(</span><span class="n">price</span><span class="p">,</span> <span class="n">plan</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="n">_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;price&quot;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+                <span class="n">_items</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;price&quot;</span><span class="p">:</span> <span class="n">price</span><span class="p">})</span>
+            <span class="k">if</span> <span class="s2">&quot;plan&quot;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+                <span class="n">_items</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;plan&quot;</span><span class="p">:</span> <span class="n">price</span><span class="p">})</span>
 
     <span class="n">stripe_subscription</span> <span class="o">=</span> <span class="n">Subscription</span><span class="o">.</span><span class="n">_api_create</span><span class="p">(</span>
-        <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="n">customer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="n">items</span><span class="o">=</span><span class="n">_items</span><span class="p">,</span> <span class="n">customer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span>
 
     <span class="n">Subscription</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_subscription</span><span class="p">)</span>

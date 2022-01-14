@@ -236,7 +236,7 @@ To upgrade from an older version, first upgrade to <code>dj-stripe 2.3.0</code>.
 <li>Migrations have been optimized and should be faster.</li>
 <li>dj-stripe now checks the apparent validity of API keys used and will raise
     <code>InvalidStripeAPIKey</code> if the API key looks completely incorrect.</li>
-<li><code>Customers</code> can now be subscribed to multiple prices by passing the <code>items</code> argument
+<li><code>Customers</code> can now be subscribed to multiple prices and/or plans by passing the <code>items</code> argument
     to <code>Customer.subscribe()</code>.</li>
 <li>Checkout Session metadata can be used to create/link a Stripe <code>Customer</code> to the
     <code>Customer</code> instance specified by the <code>djstripe_settings.SUBSCRIBER_CUSTOMER_KEY</code>.</li>
