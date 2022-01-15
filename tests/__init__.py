@@ -2383,6 +2383,14 @@ FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED = {
     },
     "type": "subscription_schedule.created",
 }
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED["data"]["object"]["status"] = "active"
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED["data"]["object"]["current_phase"][
+    "start_data"
+] = 1602464974
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED["data"]["object"]["current_phase"][
+    "end_data"
+] = 1605056974
+
 
 FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED = deepcopy(
     FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED
