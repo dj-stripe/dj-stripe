@@ -2418,3 +2418,15 @@ FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED["data"]["previous_attributes"] = {
     "released_at": None,
     "status": "not_started",
 }
+
+
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_COMPLETED = deepcopy(
+    FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED
+)
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_COMPLETED["id"] = "evt_1Hm80YFz0jfFqjGs7kKvT7RE"
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_COMPLETED["type"] = "subscription_schedule.completed"
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_COMPLETED["data"]["object"][
+    "completed_at"
+] = 1605057622
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_COMPLETED["data"]["object"]["status"] = "completed"
+
