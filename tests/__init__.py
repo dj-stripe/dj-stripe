@@ -1165,8 +1165,8 @@ FAKE_SUBSCRIPTION_SCHEDULE = {
     "canceled_at": None,
     "completed_at": None,
     "created": 1605056974,
-    "current_phase": None,
-    "customer": "cus_4UbFSo9tl62jqj",  # FAKE_CUSTOMER_II
+    "current_phase": {},
+    "customer": "cus_6lsBvm5rJ0zyHc",  # FAKE_CUSTOMER
     "default_settings": {
         "billing_cycle_anchor": "automatic",
         "billing_thresholds": None,
@@ -2389,12 +2389,7 @@ FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED = deepcopy(
 )
 FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED["id"] = "sub_sched_1Hm86MFz0jfFqjGsc5iEdZee"
 FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED["type"] = "subscription_schedule.updated"
-# FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED["data"]["object"]["released_at"] = 1605058030
-# FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED["data"]["object"]["status"] = "released"
-# FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED["data"]["previous_attributes"] = {
-#     "released_at": None,
-#     "status": "not_started",
-# }
+
 
 FAKE_EVENT_SUBSCRIPTION_SCHEDULE_RELEASED = deepcopy(
     FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED
