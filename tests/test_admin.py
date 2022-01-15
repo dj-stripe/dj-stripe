@@ -304,18 +304,8 @@ class TestAdminCustomActions(TestCase):
         with patch.object(
             subscription, "_api_delete", side_effect=mock_instance_api_retrieve
         ) as patched__api_delete:
-
             # invoke the _cancel action
             action_fn(model_admin, request, [subscription])
-
-            messages_sent_dictionary = {
-                m.message._message: m.level_tag for m in messages.get_messages(request)
-            }
-
-            # assert correct message was emmitted
-            assert (
-                messages_sent_dictionary.get("some random error message:") == "warning"
-            )
 
         patched__api_delete.assert_called_once_with()
 
