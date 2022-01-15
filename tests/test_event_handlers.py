@@ -108,6 +108,7 @@ from . import (
     FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED,
     FAKE_EVENT_SUBSCRIPTION_SCHEDULE_COMPLETED,
     FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED,
+    FAKE_EVENT_SUBSCRIPTION_SCHEDULE_EXPIRING,
     FAKE_EVENT_SUBSCRIPTION_SCHEDULE_RELEASED,
     FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED,
     FAKE_EVENT_TAX_ID_CREATED,
@@ -2506,6 +2507,47 @@ class TestSubscriptionScheduleEvents(EventTestCase):
 
         assert schedule.status == "completed"
         assert schedule.completed_at is not None
+
+    @patch("stripe.SubscriptionSchedule.retrieve", autospec=True)
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER),
+        autospec=True,
+    )
+    def test_subscription_schedule_expiring(
+        self, customer_retrieve_mock, schedule_retrieve_mock
+    ):
+
+        fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
+        fake_stripe_event["data"]["object"]["subscription"] = None
+
+        fake_subscription_schedule = deepcopy(FAKE_SUBSCRIPTION_SCHEDULE)
+        fake_subscription_schedule["subscription"] = None
+        fake_subscription_schedule["status"] = "active"
+        schedule_retrieve_mock.return_value = fake_subscription_schedule
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        schedule = SubscriptionSchedule.objects.get(
+            id=fake_stripe_event["data"]["object"]["id"]
+        )
+
+        assert schedule.status == "active"
+        assert schedule.completed_at is None
+
+        fake_stripe_event_2 = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_EXPIRING)
+        fake_stripe_event_2["data"]["object"]["subscription"] = None
+
+        schedule_retrieve_mock.return_value = fake_stripe_event_2["data"]["object"]
+
+        event = Event.sync_from_stripe_data(fake_stripe_event_2)
+        event.invoke_webhook_handlers()
+
+        schedule.refresh_from_db()
+
+        assert schedule.status == "active"
+        assert schedule.completed_at is None
 
     @patch("stripe.SubscriptionSchedule.retrieve", autospec=True)
     @patch(
