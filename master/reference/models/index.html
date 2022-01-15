@@ -27516,7 +27516,7 @@ djstripe.models.account.Account.stripe_class        </code>
 
 
 <h5 id="djstripe.models.account.Account.get_default_api_key" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">Account</span><span class="o">.</span><span class="n">get_default_api_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">Account</span><span class="o">.</span><span class="n">get_default_api_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">livemode</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 
 </h5>
@@ -27526,13 +27526,20 @@ djstripe.models.account.Account.stripe_class        </code>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/account.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_default_api_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="n">api_key</span> <span class="o">=</span> <span class="n">APIKey</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
-        <span class="n">djstripe_owner_account</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">APIKeyType</span><span class="o">.</span><span class="n">secret</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_default_api_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">livemode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">livemode</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">livemode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">livemode</span>
+        <span class="n">api_key</span> <span class="o">=</span> <span class="n">APIKey</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">djstripe_owner_account</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">APIKeyType</span><span class="o">.</span><span class="n">secret</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">api_key</span> <span class="o">=</span> <span class="n">APIKey</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">djstripe_owner_account</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">APIKeyType</span><span class="o">.</span><span class="n">secret</span><span class="p">,</span> <span class="n">livemode</span><span class="o">=</span><span class="n">livemode</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+
     <span class="k">if</span> <span class="n">api_key</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">api_key</span><span class="o">.</span><span class="n">secret</span>
-    <span class="k">return</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">get_default_api_key</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">livemode</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">get_default_api_key</span><span class="p">(</span><span class="n">livemode</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -29033,7 +29040,7 @@ djstripe.models.connect.CountrySpec.stripe_class        </code>
 
 
 <h5 id="djstripe.models.connect.CountrySpec.sync_from_stripe_data" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">connect</span><span class="o">.</span><span class="n">CountrySpec</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">connect</span><span class="o">.</span><span class="n">CountrySpec</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s1">&#39;sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX&#39;</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
@@ -29052,7 +29059,9 @@ djstripe.models.connect.CountrySpec.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/connect.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span> <span class="nf">sync_from_stripe_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;CountrySpec&quot;</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">sync_from_stripe_data</span><span class="p">(</span>
+    <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;CountrySpec&quot;</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Syncs this object from the stripe data provided.</span>
 
