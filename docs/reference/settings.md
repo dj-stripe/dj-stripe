@@ -91,46 +91,6 @@ cancellation) by making a cancellation effective right away and refunding the un
 balance to the customer, and affects the functioning of item 3 (plan change) by
 prorating the previous customer's plan towards their new plan's amount.
 
-## DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS (=())
-
-!!! warning
-
-    This functionality is deprecated.
-
-Used by `djstripe.middleware.SubscriptionPaymentMiddleware`
-
-Rules:
-
--   "(app_name)" means everything from this app is exempt
--   "\[namespace\]" means everything with this name is exempt
--   "namespace:name" means this namespaced URL is exempt
--   "name" means this URL is exempt
--   The entire djstripe namespace is exempt
--   If settings.DEBUG is True, then django-debug-toolbar is exempt
-
-Example:
-
-```py
-DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = (
-    "(allauth)",  # anything in the django-allauth URLConf
-    "[blogs]",  # Anything in the blogs namespace
-    "products:detail",  # A ProductDetail view you want shown to non-payers
-    "home",  # Site homepage
-)
-```
-
-!!! note
-
-    Adding app_names to applications.
-
-    To make the `(allauth)` work, you may need to define an app_name in the
-    `include()` function in the URLConf. For example:
-
-    ```py
-        # in urls.py
-        url(r'^accounts/', include('allauth.urls',  app_name="allauth")),
-    ```
-
 ## DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY (="djstripe_subscriber")
 
 Every Customer object created in Stripe is tagged with

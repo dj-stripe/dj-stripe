@@ -24,6 +24,4 @@ urlpatterns = [
     path("testapp_content/", include("tests.apps.testapp_content.urls")),
     # For testing fnmatches
     path("test_fnmatch/extra_text/", empty_view, name="test_fnmatch"),
-    # Default for DJSTRIPE_SUBSCRIPTION_REDIRECT
-    path("subscribe/", empty_view, name="test_url_subscribe"),
 ]

@@ -112,19 +112,11 @@ STRIPE_TEST_SECRET_KEY = os.environ.get(
     "sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX",
 )
 
-DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = (
-    "(admin)",
-    "test_url_name",
-    "testapp_namespaced:test_url_namespaced",
-    "fn:/test_fnmatch*",
-)
-
 DJSTRIPE_USE_NATIVE_JSONFIELD = os.environ.get("USE_NATIVE_JSONFIELD", "1") == "1"
 DJSTRIPE_FOREIGN_KEY_TO_FIELD = (
     "id" if os.environ.get("USE_NATIVE_STRIPE_ID", "") == "1" else "djstripe_id"
 )
 
-DJSTRIPE_SUBSCRIPTION_REDIRECT = "test_url_subscribe"
 DJSTRIPE_WEBHOOK_VALIDATION = "verify_signature"
 DJSTRIPE_WEBHOOK_SECRET = os.environ.get("DJSTRIPE_TEST_WEBHOOK_SECRET", "whsec_XXXXX")
 

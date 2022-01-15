@@ -54,14 +54,6 @@ class DjstripeSettings:
         del self.__dict__[name]
 
     @property
-    def SUBSCRIPTION_REDIRECT(self):
-        return getattr(settings, "DJSTRIPE_SUBSCRIPTION_REDIRECT", "")
-
-    @property
-    def SUBSCRIPTION_REQUIRED_EXCEPTION_URLS(self):
-        return getattr(settings, "DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS", ())
-
-    @property
     def subscriber_request_callback(self):
         return self.get_callback_function(
             "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK",
