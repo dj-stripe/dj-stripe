@@ -261,9 +261,9 @@ class Migration(migrations.Migration):
                     "statement_descriptor",
                     models.CharField(
                         blank=True,
-                        default="",
-                        help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement description may not include <>\"' characters, and will appear on your customer's statement in capital letters. Non-ASCII characters are automatically stripped. While most banks display this information consistently, some may display it incorrectly or not at all.",
+                        help_text="For card charges, use statement_descriptor_suffix instead. Otherwise, you can use this value as the complete description of a charge on your customers' statements. Must contain at least one letter, maximum 22 characters.",
                         max_length=22,
+                        null=True,
                     ),
                 ),
                 (
@@ -276,20 +276,72 @@ class Migration(migrations.Migration):
                     "transfer_group",
                     models.CharField(
                         blank=True,
-                        default="",
                         help_text="A string that identifies this transaction as part of a group.",
                         max_length=255,
+                        null=True,
                     ),
                 ),
                 (
-                    "account",
+                    "on_behalf_of",
                     djstripe.fields.StripeForeignKey(
+                        blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="charges",
                         to="djstripe.account",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
+                ),
+                (
+                    "amount_captured",
+                    djstripe.fields.StripeDecimalCurrencyAmountField(
+                        decimal_places=2, max_digits=11, null=True
+                    ),
+                ),
+                (
+                    "application",
+                    models.CharField(
+                        blank=True,
+                        help_text="ID of the Connect application that created the charge.",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "application_fee_amount",
+                    djstripe.fields.StripeDecimalCurrencyAmountField(
+                        blank=True, decimal_places=2, max_digits=11, null=True
+                    ),
+                ),
+                (
+                    "billing_details",
+                    djstripe.fields.JSONField(null=True),
+                ),
+                (
+                    "calculated_statement_descriptor",
+                    models.CharField(
+                        default="",
+                        help_text="The full statement descriptor that is passed to card networks, and that is displayed on your customers' credit card and bank statements. Allows you to see what the statement descriptor looks like after the static and dynamic portions are combined.",
+                        max_length=22,
+                    ),
+                ),
+                (
+                    "disputed",
+                    models.BooleanField(
+                        default=False, help_text="Whether the charge has been disputed."
+                    ),
+                ),
+                (
+                    "statement_descriptor_suffix",
+                    models.CharField(
+                        blank=True,
+                        help_text="Provides information about the charge that customers see on their statements. Concatenated with the prefix (shortened descriptor) or statement descriptor that's set on the account to form the complete statement descriptor. Maximum 22 characters for the concatenated descriptor.",
+                        max_length=22,
+                        null=True,
+                    ),
+                ),
+                (
+                    "transfer_data",
+                    djstripe.fields.JSONField(blank=True, null=True),
                 ),
             ],
             options={"abstract": False, "get_latest_by": "created"},
@@ -425,25 +477,30 @@ class Migration(migrations.Migration):
                 ),
                 ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
                 ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
-                (
-                    "description",
-                    models.TextField(
-                        blank=True, help_text="A description of this object.", null=True
-                    ),
-                ),
                 ("djstripe_created", models.DateTimeField(auto_now_add=True)),
                 ("djstripe_updated", models.DateTimeField(auto_now=True)),
                 ("billing_details", djstripe.fields.JSONField()),
-                ("card", djstripe.fields.JSONField()),
+                ("card", djstripe.fields.JSONField(blank=True, null=True)),
                 ("card_present", djstripe.fields.JSONField(blank=True, null=True)),
                 (
                     "type",
-                    models.CharField(
-                        blank=True,
-                        help_text="The type of the PaymentMethod. An additional hash is included on the PaymentMethod with a name matching this value. It contains additional information specific to the PaymentMethod type.",
-                        max_length=255,
+                    djstripe.fields.StripeEnumField(
+                        enum=djstripe.enums.PaymentMethodType, max_length=15
                     ),
                 ),
+                ("alipay", djstripe.fields.JSONField(blank=True, null=True)),
+                ("au_becs_debit", djstripe.fields.JSONField(blank=True, null=True)),
+                ("bacs_debit", djstripe.fields.JSONField(blank=True, null=True)),
+                ("bancontact", djstripe.fields.JSONField(blank=True, null=True)),
+                ("eps", djstripe.fields.JSONField(blank=True, null=True)),
+                ("fpx", djstripe.fields.JSONField(blank=True, null=True)),
+                ("giropay", djstripe.fields.JSONField(blank=True, null=True)),
+                ("ideal", djstripe.fields.JSONField(blank=True, null=True)),
+                ("interac_present", djstripe.fields.JSONField(blank=True, null=True)),
+                ("oxxo", djstripe.fields.JSONField(blank=True, null=True)),
+                ("p24", djstripe.fields.JSONField(blank=True, null=True)),
+                ("sepa_debit", djstripe.fields.JSONField(blank=True, null=True)),
+                ("sofort", djstripe.fields.JSONField(blank=True, null=True)),
             ],
             options={"abstract": False, "get_latest_by": "created"},
         ),
@@ -848,7 +905,7 @@ class Migration(migrations.Migration):
                 (
                     "active",
                     models.BooleanField(
-                        help_text="Whether the plan is currently available for new subscriptions."
+                        help_text="Whether the plan can be used for new purchases."
                     ),
                 ),
                 (
@@ -864,6 +921,12 @@ class Migration(migrations.Migration):
                     "amount",
                     djstripe.fields.StripeDecimalCurrencyAmountField(
                         blank=True, decimal_places=2, max_digits=11, null=True
+                    ),
+                ),
+                (
+                    "amount_decimal",
+                    djstripe.fields.StripeDecimalCurrencyAmountField(
+                        blank=True, decimal_places=12, max_digits=19, null=True
                     ),
                 ),
                 (
@@ -884,7 +947,8 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "interval_count",
-                    models.IntegerField(
+                    models.PositiveIntegerField(
+                        blank=True,
                         help_text="The number of intervals (specified in the interval property) between each subscription billing.",
                         null=True,
                     ),
@@ -912,6 +976,7 @@ class Migration(migrations.Migration):
                 (
                     "trial_period_days",
                     models.IntegerField(
+                        blank=True,
                         help_text="Number of trial period days granted when subscribing a customer to this plan. Null if the plan has no trial period.",
                         null=True,
                     ),
@@ -922,23 +987,6 @@ class Migration(migrations.Migration):
                         default="licensed",
                         enum=djstripe.enums.PriceUsageType,
                         max_length=8,
-                    ),
-                ),
-                (
-                    "name",
-                    models.TextField(
-                        blank=True,
-                        help_text="Name of the plan, to be displayed on invoices and in the web interface.",
-                        null=True,
-                    ),
-                ),
-                (
-                    "statement_descriptor",
-                    models.CharField(
-                        blank=True,
-                        help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement description may not include <>\"' characters, and will appear on your customer's statement in capital letters. Non-ASCII characters are automatically stripped. While most banks display this information consistently, some may display it incorrectly or not at all.",
-                        max_length=22,
-                        null=True,
                     ),
                 ),
             ],
@@ -1144,7 +1192,6 @@ class Migration(migrations.Migration):
                         null=True,
                     ),
                 ),
-                ("start", djstripe.fields.StripeDateTimeField(null=True)),
                 (
                     "start_date",
                     djstripe.fields.StripeDateTimeField(blank=True, null=True),
@@ -1195,6 +1242,14 @@ class Migration(migrations.Migration):
                         related_name="subscriptions",
                         to="djstripe.plan",
                     ),
+                ),
+                (
+                    "billing_thresholds",
+                    djstripe.fields.JSONField(blank=True, null=True),
+                ),
+                (
+                    "cancel_at",
+                    djstripe.fields.StripeDateTimeField(blank=True, null=True),
                 ),
             ],
             options={"abstract": False, "get_latest_by": "created"},
@@ -1582,6 +1637,107 @@ class Migration(migrations.Migration):
                     "status_transitions",
                     djstripe.fields.JSONField(blank=True, null=True),
                 ),
+                (
+                    "account_country",
+                    models.CharField(
+                        blank=True,
+                        default="",
+                        help_text="The country of the business associated with this invoice, most often the business creating the invoice.",
+                        max_length=2,
+                    ),
+                ),
+                (
+                    "account_name",
+                    models.TextField(
+                        blank=True,
+                        help_text="The public name of the business associated with this invoice, most often the business creating the invoice.",
+                        max_length=5000,
+                    ),
+                ),
+                (
+                    "billing_reason",
+                    djstripe.fields.StripeEnumField(
+                        blank=True,
+                        default="",
+                        enum=djstripe.enums.InvoiceBillingReason,
+                        max_length=22,
+                    ),
+                ),
+                (
+                    "customer_address",
+                    djstripe.fields.JSONField(blank=True, null=True),
+                ),
+                (
+                    "customer_email",
+                    models.TextField(
+                        blank=True,
+                        help_text="The customer's email. Until the invoice is finalized, this field will equal customer.email. Once the invoice is finalized, this field will no longer be updated.",
+                        max_length=5000,
+                    ),
+                ),
+                (
+                    "customer_name",
+                    models.TextField(
+                        blank=True,
+                        help_text="The customer's name. Until the invoice is finalized, this field will equal customer.name. Once the invoice is finalized, this field will no longer be updated.",
+                        max_length=5000,
+                    ),
+                ),
+                (
+                    "customer_phone",
+                    models.TextField(
+                        blank=True,
+                        help_text="The customer's phone number. Until the invoice is finalized, this field will equal customer.phone. Once the invoice is finalized, this field will no longer be updated.",
+                        max_length=5000,
+                    ),
+                ),
+                (
+                    "customer_shipping",
+                    djstripe.fields.JSONField(blank=True, null=True),
+                ),
+                (
+                    "customer_tax_exempt",
+                    djstripe.fields.StripeEnumField(
+                        default="", enum=djstripe.enums.CustomerTaxExempt, max_length=7
+                    ),
+                ),
+                (
+                    "footer",
+                    models.TextField(
+                        blank=True,
+                        help_text="Footer displayed on the invoice.",
+                        max_length=5000,
+                    ),
+                ),
+                (
+                    "post_payment_credit_notes_amount",
+                    djstripe.fields.StripeQuantumCurrencyAmountField(
+                        blank=True, null=True
+                    ),
+                ),
+                (
+                    "pre_payment_credit_notes_amount",
+                    djstripe.fields.StripeQuantumCurrencyAmountField(
+                        blank=True, null=True
+                    ),
+                ),
+                (
+                    "threshold_reason",
+                    djstripe.fields.JSONField(blank=True, null=True),
+                ),
+                (
+                    "status",
+                    djstripe.fields.StripeEnumField(
+                        blank=True,
+                        default="",
+                        enum=djstripe.enums.InvoiceStatus,
+                        max_length=13,
+                    ),
+                ),
+                (
+                    "discount",
+                    djstripe.fields.JSONField(blank=True, null=True),
+                ),
             ],
             options={"ordering": ["-created"]},
         ),
@@ -1839,12 +1995,11 @@ class Migration(migrations.Migration):
                 (
                     "reporting_category",
                     djstripe.fields.StripeEnumField(
-                        default="",
                         enum=djstripe.enums.BalanceTransactionReportingCategory,
                         max_length=29,
                     ),
                 ),
-                ("source", djstripe.fields.StripeIdField(default="", max_length=255)),
+                ("source", djstripe.fields.StripeIdField(max_length=255)),
                 (
                     "djstripe_owner_account",
                     djstripe.fields.StripeForeignKey(
@@ -2268,79 +2423,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="invoice",
-            name="account_country",
-            field=models.CharField(
-                blank=True,
-                default="",
-                help_text="The country of the business associated with this invoice, most often the business creating the invoice.",
-                max_length=2,
-            ),
-        ),
-        migrations.AddField(
-            model_name="invoice",
-            name="account_name",
-            field=models.TextField(
-                blank=True,
-                help_text="The public name of the business associated with this invoice, most often the business creating the invoice.",
-                max_length=5000,
-            ),
-        ),
-        migrations.AddField(
-            model_name="invoice",
-            name="billing_reason",
-            field=djstripe.fields.StripeEnumField(
-                blank=True,
-                default="",
-                enum=djstripe.enums.InvoiceBillingReason,
-                max_length=22,
-            ),
-        ),
-        migrations.AddField(
-            model_name="invoice",
-            name="customer_address",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name="invoice",
-            name="customer_email",
-            field=models.TextField(
-                blank=True,
-                help_text="The customer's email. Until the invoice is finalized, this field will equal customer.email. Once the invoice is finalized, this field will no longer be updated.",
-                max_length=5000,
-            ),
-        ),
-        migrations.AddField(
-            model_name="invoice",
-            name="customer_name",
-            field=models.TextField(
-                blank=True,
-                help_text="The customer's name. Until the invoice is finalized, this field will equal customer.name. Once the invoice is finalized, this field will no longer be updated.",
-                max_length=5000,
-            ),
-        ),
-        migrations.AddField(
-            model_name="invoice",
-            name="customer_phone",
-            field=models.TextField(
-                blank=True,
-                help_text="The customer's phone number. Until the invoice is finalized, this field will equal customer.phone. Once the invoice is finalized, this field will no longer be updated.",
-                max_length=5000,
-            ),
-        ),
-        migrations.AddField(
-            model_name="invoice",
-            name="customer_shipping",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name="invoice",
-            name="customer_tax_exempt",
-            field=djstripe.fields.StripeEnumField(
-                default="", enum=djstripe.enums.CustomerTaxExempt, max_length=7
-            ),
-        ),
-        migrations.AddField(
-            model_name="invoice",
             name="default_payment_method",
             field=djstripe.fields.StripeForeignKey(
                 blank=True,
@@ -2350,46 +2432,6 @@ class Migration(migrations.Migration):
                 to="djstripe.paymentmethod",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
             ),
-        ),
-        migrations.AddField(
-            model_name="invoice",
-            name="footer",
-            field=models.TextField(
-                blank=True,
-                help_text="Footer displayed on the invoice.",
-                max_length=5000,
-            ),
-        ),
-        migrations.AddField(
-            model_name="invoice",
-            name="post_payment_credit_notes_amount",
-            field=djstripe.fields.StripeQuantumCurrencyAmountField(
-                blank=True, null=True
-            ),
-        ),
-        migrations.AddField(
-            model_name="invoice",
-            name="pre_payment_credit_notes_amount",
-            field=djstripe.fields.StripeQuantumCurrencyAmountField(
-                blank=True, null=True
-            ),
-        ),
-        migrations.AddField(
-            model_name="invoice",
-            name="threshold_reason",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name="invoice",
-            name="status",
-            field=djstripe.fields.StripeEnumField(
-                blank=True, default="", enum=djstripe.enums.InvoiceStatus, max_length=13
-            ),
-        ),
-        migrations.AddField(
-            model_name="invoice",
-            name="discount",
-            field=djstripe.fields.JSONField(blank=True, null=True),
         ),
         migrations.CreateModel(
             name="UpcomingInvoice",
@@ -3794,6 +3836,10 @@ class Migration(migrations.Migration):
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
                 ),
+                (
+                    "billing_thresholds",
+                    djstripe.fields.JSONField(blank=True, null=True),
+                ),
             ],
             options={"abstract": False, "get_latest_by": "created"},
         ),
@@ -3928,12 +3974,6 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={"abstract": False, "get_latest_by": "created"},
-        ),
-        migrations.RemoveField(model_name="subscription", name="start"),
-        migrations.AddField(
-            model_name="subscription",
-            name="cancel_at",
-            field=djstripe.fields.StripeDateTimeField(blank=True, null=True),
         ),
         migrations.CreateModel(
             name="Price",
@@ -4500,67 +4540,18 @@ class Migration(migrations.Migration):
                 (
                     "automatic",
                     models.BooleanField(
-                        default=False,
                         help_text="`true` if the payout was created by an automated payout schedule, and `false` if it was requested manually.",
                     ),
                 ),
                 (
                     "source_type",
                     djstripe.fields.StripeEnumField(
-                        default="bank_account",
                         enum=djstripe.enums.PayoutSourceType,
                         max_length=12,
                     ),
                 ),
             ],
             options={"abstract": False, "get_latest_by": "created"},
-        ),
-        migrations.RenameField(
-            model_name="charge", old_name="account", new_name="on_behalf_of"
-        ),
-        migrations.AddField(
-            model_name="charge",
-            name="amount_captured",
-            field=djstripe.fields.StripeDecimalCurrencyAmountField(
-                decimal_places=2, max_digits=11, null=True
-            ),
-        ),
-        migrations.AddField(
-            model_name="charge",
-            name="application",
-            field=models.CharField(
-                blank=True,
-                help_text="ID of the Connect application that created the charge.",
-                max_length=255,
-            ),
-        ),
-        migrations.AddField(
-            model_name="charge",
-            name="application_fee_amount",
-            field=djstripe.fields.StripeDecimalCurrencyAmountField(
-                blank=True, decimal_places=2, max_digits=11, null=True
-            ),
-        ),
-        migrations.AddField(
-            model_name="charge",
-            name="billing_details",
-            field=djstripe.fields.JSONField(null=True),
-        ),
-        migrations.AddField(
-            model_name="charge",
-            name="calculated_statement_descriptor",
-            field=models.CharField(
-                default="",
-                help_text="The full statement descriptor that is passed to card networks, and that is displayed on your customers' credit card and bank statements. Allows you to see what the statement descriptor looks like after the static and dynamic portions are combined.",
-                max_length=22,
-            ),
-        ),
-        migrations.AddField(
-            model_name="charge",
-            name="disputed",
-            field=models.BooleanField(
-                default=False, help_text="Whether the charge has been disputed."
-            ),
         ),
         migrations.AddField(
             model_name="charge",
@@ -4576,63 +4567,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="charge",
-            name="statement_descriptor_suffix",
-            field=models.CharField(
-                blank=True,
-                help_text="Provides information about the charge that customers see on their statements. Concatenated with the prefix (shortened descriptor) or statement descriptor that's set on the account to form the complete statement descriptor. Maximum 22 characters for the concatenated descriptor.",
-                max_length=22,
-                null=True,
-            ),
-        ),
-        migrations.AddField(
-            model_name="charge",
-            name="transfer_data",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name="subscription",
-            name="billing_thresholds",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name="subscriptionitem",
-            name="billing_thresholds",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AlterField(
-            model_name="charge",
-            name="statement_descriptor",
-            field=models.CharField(
-                blank=True,
-                help_text="For card charges, use statement_descriptor_suffix instead. Otherwise, you can use this value as the complete description of a charge on your customers' statements. Must contain at least one letter, maximum 22 characters.",
-                max_length=22,
-                null=True,
-            ),
-        ),
-        migrations.AlterField(
-            model_name="charge",
-            name="transfer_group",
-            field=models.CharField(
-                blank=True,
-                help_text="A string that identifies this transaction as part of a group.",
-                max_length=255,
-                null=True,
-            ),
-        ),
-        migrations.AlterField(
-            model_name="charge",
-            name="on_behalf_of",
-            field=djstripe.fields.StripeForeignKey(
-                blank=True,
-                null=True,
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="charges",
-                to="djstripe.account",
-                to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-            ),
-        ),
-        migrations.AddField(
-            model_name="charge",
             name="application_fee",
             field=djstripe.fields.StripeForeignKey(
                 blank=True,
@@ -4641,40 +4575,6 @@ class Migration(migrations.Migration):
                 related_name="fee_for_charge",
                 to="djstripe.applicationfee",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-            ),
-        ),
-        migrations.RemoveField(model_name="plan", name="name"),
-        migrations.RemoveField(model_name="plan", name="statement_descriptor"),
-        migrations.AddField(
-            model_name="plan",
-            name="amount_decimal",
-            field=djstripe.fields.StripeDecimalCurrencyAmountField(
-                blank=True, decimal_places=12, max_digits=19, null=True
-            ),
-        ),
-        migrations.AlterField(
-            model_name="plan",
-            name="active",
-            field=models.BooleanField(
-                help_text="Whether the plan can be used for new purchases."
-            ),
-        ),
-        migrations.AlterField(
-            model_name="plan",
-            name="interval_count",
-            field=models.PositiveIntegerField(
-                blank=True,
-                help_text="The number of intervals (specified in the interval property) between each subscription billing.",
-                null=True,
-            ),
-        ),
-        migrations.AlterField(
-            model_name="plan",
-            name="trial_period_days",
-            field=models.IntegerField(
-                blank=True,
-                help_text="Number of trial period days granted when subscribing a customer to this plan. Null if the plan has no trial period.",
-                null=True,
             ),
         ),
         migrations.CreateModel(
@@ -4743,88 +4643,5 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={"get_latest_by": "created", "abstract": False},
-        ),
-        migrations.RemoveField(model_name="paymentmethod", name="description"),
-        migrations.AddField(
-            model_name="paymentmethod",
-            name="alipay",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name="paymentmethod",
-            name="au_becs_debit",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name="paymentmethod",
-            name="bacs_debit",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name="paymentmethod",
-            name="bancontact",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name="paymentmethod",
-            name="eps",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name="paymentmethod",
-            name="fpx",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name="paymentmethod",
-            name="giropay",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name="paymentmethod",
-            name="ideal",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name="paymentmethod",
-            name="interac_present",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name="paymentmethod",
-            name="oxxo",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name="paymentmethod",
-            name="p24",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name="paymentmethod",
-            name="sepa_debit",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AddField(
-            model_name="paymentmethod",
-            name="sofort",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AlterField(
-            model_name="paymentmethod",
-            name="card",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AlterField(
-            model_name="paymentmethod",
-            name="card_present",
-            field=djstripe.fields.JSONField(blank=True, null=True),
-        ),
-        migrations.AlterField(
-            model_name="paymentmethod",
-            name="type",
-            field=djstripe.fields.StripeEnumField(
-                enum=djstripe.enums.PaymentMethodType, max_length=15
-            ),
         ),
     ]
