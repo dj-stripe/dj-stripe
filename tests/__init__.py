@@ -1165,8 +1165,8 @@ FAKE_SUBSCRIPTION_SCHEDULE = {
     "canceled_at": None,
     "completed_at": None,
     "created": 1605056974,
-    "current_phase": None,
-    "customer": "cus_4UbFSo9tl62jqj",  # FAKE_CUSTOMER_II
+    "current_phase": {},
+    "customer": "cus_6lsBvm5rJ0zyHc",  # FAKE_CUSTOMER
     "default_settings": {
         "billing_cycle_anchor": "automatic",
         "billing_thresholds": None,
@@ -2383,18 +2383,21 @@ FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED = {
     },
     "type": "subscription_schedule.created",
 }
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED["data"]["object"]["status"] = "active"
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED["data"]["object"]["current_phase"][
+    "start_data"
+] = 1602464974
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED["data"]["object"]["current_phase"][
+    "end_data"
+] = 1605056974
+
 
 FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED = deepcopy(
     FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED
 )
 FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED["id"] = "sub_sched_1Hm86MFz0jfFqjGsc5iEdZee"
 FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED["type"] = "subscription_schedule.updated"
-# FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED["data"]["object"]["released_at"] = 1605058030
-# FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED["data"]["object"]["status"] = "released"
-# FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED["data"]["previous_attributes"] = {
-#     "released_at": None,
-#     "status": "not_started",
-# }
+
 
 FAKE_EVENT_SUBSCRIPTION_SCHEDULE_RELEASED = deepcopy(
     FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED
@@ -2412,6 +2415,39 @@ FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED["type"] = "subscription_schedule.cance
 FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED["data"]["object"]["canceled_at"] = 1605057622
 FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED["data"]["object"]["status"] = "canceled"
 FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED["data"]["previous_attributes"] = {
+    "released_at": None,
+    "status": "not_started",
+}
+
+
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_COMPLETED = deepcopy(
+    FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED
+)
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_COMPLETED["id"] = "evt_1Hm80YFz0jfFqjGs7kKvT7RE"
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_COMPLETED["type"] = "subscription_schedule.completed"
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_COMPLETED["data"]["object"][
+    "completed_at"
+] = 1605057622
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_COMPLETED["data"]["object"]["status"] = "completed"
+
+
+# would get emmited 7 days before the scheduled end_date
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_EXPIRING = deepcopy(
+    FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED
+)
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_EXPIRING["id"] = "evt_1Hm80YFz0jfFqjGs7kKvT7RE"
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_EXPIRING["type"] = "subscription_schedule.expiring"
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_EXPIRING["created"] = 1602464900
+
+
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_ABORTED = deepcopy(
+    FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED
+)
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_ABORTED["id"] = "evt_1Hm80YFz0jfFqjGs7kKvT7RE"
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_ABORTED["type"] = "subscription_schedule.aborted"
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_ABORTED["data"]["object"]["canceled_at"] = 1605057622
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_ABORTED["data"]["object"]["status"] = "canceled"
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_ABORTED["data"]["previous_attributes"] = {
     "released_at": None,
     "status": "not_started",
 }
