@@ -136,8 +136,6 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#djstripe_proration_policy-false">DJSTRIPE_PRORATION_POLICY (=False)</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#djstripe_subscription_required_exception_urls">DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS (=())</a>
-    </li>
     <li class="toctree-l2"><a class="reference internal" href="#djstripe_subscriber_customer_key-djstripe_subscriber">DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY (="djstripe_subscriber")</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#djstripe_subscriber_model-settingsauth_user_model">DJSTRIPE_SUBSCRIBER_MODEL (=settings.AUTH_USER_MODEL)</a>
@@ -291,38 +289,6 @@ translates:</p>
 cancellation) by making a cancellation effective right away and refunding the unused
 balance to the customer, and affects the functioning of item 3 (plan change) by
 prorating the previous customer's plan towards their new plan's amount.</p>
-<h2 id="djstripe_subscription_required_exception_urls">DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS (=())</h2>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>This functionality is deprecated.</p>
-</div>
-<p>Used by <code>djstripe.middleware.SubscriptionPaymentMiddleware</code></p>
-<p>Rules:</p>
-<ul>
-<li>"(app_name)" means everything from this app is exempt</li>
-<li>"[namespace]" means everything with this name is exempt</li>
-<li>"namespace:name" means this namespaced URL is exempt</li>
-<li>"name" means this URL is exempt</li>
-<li>The entire djstripe namespace is exempt</li>
-<li>If settings.DEBUG is True, then django-debug-toolbar is exempt</li>
-</ul>
-<p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="n">DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s2">&quot;(allauth)&quot;</span><span class="p">,</span>  <span class="c1"># anything in the django-allauth URLConf</span>
-    <span class="s2">&quot;[blogs]&quot;</span><span class="p">,</span>  <span class="c1"># Anything in the blogs namespace</span>
-    <span class="s2">&quot;products:detail&quot;</span><span class="p">,</span>  <span class="c1"># A ProductDetail view you want shown to non-payers</span>
-    <span class="s2">&quot;home&quot;</span><span class="p">,</span>  <span class="c1"># Site homepage</span>
-<span class="p">)</span>
-</code></pre></div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Adding app_names to applications.</p>
-<p>To make the <code>(allauth)</code> work, you may need to define an app_name in the
-<code>include()</code> function in the URLConf. For example:</p>
-<div class="highlight"><pre><span></span><code>    <span class="c1"># in urls.py</span>
-    <span class="n">url</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^accounts/&#39;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="s1">&#39;allauth.urls&#39;</span><span class="p">,</span>  <span class="n">app_name</span><span class="o">=</span><span class="s2">&quot;allauth&quot;</span><span class="p">)),</span>
-</code></pre></div>
-</div>
 <h2 id="djstripe_subscriber_customer_key-djstripe_subscriber">DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY (="djstripe_subscriber")</h2>
 <p>Every Customer object created in Stripe is tagged with
 <a href="https://stripe.com/docs/api#metadata">metadata</a> This setting controls what the name of
@@ -672,50 +638,6 @@ djstripe.settings.DjstripeSettings        </code>
 
 <h5 id="djstripe.settings.DjstripeSettings.SUBSCRIBER_CUSTOMER_KEY" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">DjstripeSettings</span><span class="o">.</span><span class="n">SUBSCRIBER_CUSTOMER_KEY</span></code>
-
-  <span class="doc doc-properties">
-      <small class="doc doc-property doc-property-property"><code>property</code></small>
-      <small class="doc doc-property doc-property-readonly"><code>readonly</code></small>
-  </span>
-
-</h5>
-
-    <div class="doc doc-contents ">
-
-    </div>
-
-  </div>
-
-
-
-  <div class="doc doc-object doc-attribute">
-
-
-
-<h5 id="djstripe.settings.DjstripeSettings.SUBSCRIPTION_REDIRECT" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">DjstripeSettings</span><span class="o">.</span><span class="n">SUBSCRIPTION_REDIRECT</span></code>
-
-  <span class="doc doc-properties">
-      <small class="doc doc-property doc-property-property"><code>property</code></small>
-      <small class="doc doc-property doc-property-readonly"><code>readonly</code></small>
-  </span>
-
-</h5>
-
-    <div class="doc doc-contents ">
-
-    </div>
-
-  </div>
-
-
-
-  <div class="doc doc-object doc-attribute">
-
-
-
-<h5 id="djstripe.settings.DjstripeSettings.SUBSCRIPTION_REQUIRED_EXCEPTION_URLS" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">DjstripeSettings</span><span class="o">.</span><span class="n">SUBSCRIPTION_REQUIRED_EXCEPTION_URLS</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-property"><code>property</code></small>
