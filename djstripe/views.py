@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 
 from .models import WebhookEndpoint, WebhookEventTrigger
+from .settings import djstripe_settings
 
 logger = logging.getLogger(__name__)
 
@@ -39,12 +40,15 @@ class ProcessWebhookView(View):
         if uuid:
             # If the UUID is invalid (does not exist), this will throw a 404.
             # Note that this happens after the HTTP_STRIPE_SIGNATURE check on purpose.
-            stripe_account = get_object_or_404(WebhookEndpoint, djstripe_uuid=uuid)
+            webhook_endpoint = get_object_or_404(WebhookEndpoint, djstripe_uuid=uuid)
+            stripe_account = webhook_endpoint.djstripe_owner_account
+            secret = webhook_endpoint.secret
         else:
             stripe_account = None
+            secret = djstripe_settings.WEBHOOK_SECRET
 
         trigger = WebhookEventTrigger.from_request(
-            request, stripe_account=stripe_account
+            request, stripe_account=stripe_account, secret=secret
         )
 
         if trigger.is_test_event:

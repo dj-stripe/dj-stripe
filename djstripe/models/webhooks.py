@@ -159,7 +159,7 @@ class WebhookEventTrigger(models.Model):
         return f"id={self.id}, valid={self.valid}, processed={self.processed}"
 
     @classmethod
-    def from_request(cls, request, stripe_account=None):
+    def from_request(cls, request, secret: str, stripe_account=None):
         """
         Create, validate and process a WebhookEventTrigger given a Django
         request object.
@@ -193,7 +193,7 @@ class WebhookEventTrigger(models.Model):
         )
 
         try:
-            obj.valid = obj.validate()
+            obj.valid = obj.validate(secret=secret)
             if obj.valid:
                 if djstripe_settings.WEBHOOK_EVENT_CALLBACK:
                     # If WEBHOOK_EVENT_CALLBACK, pass it for processing
