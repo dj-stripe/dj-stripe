@@ -23,10 +23,9 @@ by brute-force.
 
 ## Legacy setup
 
-It is possible to set up a global webhook endpoint in Stripe using these two settings:
-
--   [`DJSTRIPE_WEBHOOK_URL`][djstripe.settings.djstripesettings.djstripe_webhook_url]
--   [`DJSTRIPE_WEBHOOK_SECRET`][djstripe.settings.djstripesettings.webhook_secret]
+Before dj-stripe 2.7.0, dj-stripe included a global webhook endpoint URL, which uses the
+setting [`DJSTRIPE_WEBHOOK_SECRET`][djstripe.settings.djstripesettings.webhook_secret]
+to validate incoming webhooks.
 
 This is not recommended as it makes the URL guessable, and may be removed in the future.
 

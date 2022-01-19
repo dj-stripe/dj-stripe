@@ -150,6 +150,10 @@ with the ORM.
 
 ## DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")
 
+!!! warning
+
+    This setting is deprecated and will be removed in dj-stripe 2.9.
+
 This is where you can tell Stripe to send webhook responses. You can set this to what
 you want to prevent unnecessary hijinks from unfriendly people.
 
