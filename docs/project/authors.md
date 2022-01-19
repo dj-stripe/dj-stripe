@@ -1,11 +1,12 @@
 # Credits
 
-## Maintainers
+## Core contributors
 
--   [Alexander Kavanaugh](https://github.com/kavdev)
--   [Jerome Leclanche](https://github.com/jleclanche)
+-   [Alexander Kavanaugh](https://github.com/kavdev) (Co-maintainer)
+-   [Jerome Leclanche](https://github.com/jleclanche) (Co-maintainer)
+-   [Arnav Choudhury](https://github.com/arnav13081994)
 
-## Major Contributors
+## Former core contributors
 
 -   [John Carter](https://github.com/therefromhere)
 -   [Pablo Castellano](https://github.com/PabloCastellano)
