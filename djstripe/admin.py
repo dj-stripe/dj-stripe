@@ -633,6 +633,7 @@ class WebhookEndpointAdminBaseForm(forms.ModelForm):
         self.fields["djstripe_owner_account"].label = "Stripe account"
         self.fields["djstripe_owner_account"].help_text = ""
         self.fields["description"].help_text = ""
+        self.fields["description"].widget.attrs["rows"] = 3
 
     def _get_field_name(self, stripe_field: Optional[str]) -> Optional[str]:
         if stripe_field is None:
