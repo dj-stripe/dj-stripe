@@ -232,7 +232,18 @@ class WebhookEventTrigger(models.Model):
         event_id = self.json_body.get("id")
         return event_id and event_id.endswith("_00000000000000")
 
-    def validate(self, api_key=None):
+    def verify_signature(
+        self, secret: str, tolerance: int = djstripe_settings.WEBHOOK_TOLERANCE
+    ):
+        pass
+
+    def validate(
+        self,
+        api_key: str = None,
+        secret: str = djstripe_settings.WEBHOOK_SECRET,
+        tolerance: int = djstripe_settings.WEBHOOK_TOLERANCE,
+        validation_method=djstripe_settings.WEBHOOK_VALIDATION,
+    ):
         """
         The original contents of the Event message must be confirmed by
         refetching it and comparing the fetched data with the original data.
@@ -252,22 +263,19 @@ class WebhookEventTrigger(models.Model):
             logger.info("Test webhook received and discarded: {}".format(local_data))
             return False
 
-        if djstripe_settings.WEBHOOK_VALIDATION is None:
+        if validation_method is None:
             # validation disabled
             warnings.warn("WEBHOOK VALIDATION is disabled.")
             return True
-        elif (
-            djstripe_settings.WEBHOOK_VALIDATION == "verify_signature"
-            and djstripe_settings.WEBHOOK_SECRET
-        ):
+        elif validation_method == "verify_signature":
+            if not secret:
+                raise ValueError("Cannot verify event signature without a secret")
             # HTTP headers are case-insensitive, but we store them as a dict.
             headers = CaseInsensitiveMapping(self.headers)
+            signature = headers.get("stripe-signature")
             try:
                 stripe.WebhookSignature.verify_header(
-                    self.body,
-                    headers.get("stripe-signature"),
-                    djstripe_settings.WEBHOOK_SECRET,
-                    djstripe_settings.WEBHOOK_TOLERANCE,
+                    self.body, signature, secret, tolerance
                 )
             except stripe.error.SignatureVerificationError:
                 logger.exception("Failed to verify header")
