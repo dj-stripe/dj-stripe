@@ -19,7 +19,7 @@ Generating the fixtures via Stripe gives the big advantage that Stripe
 schema changes are automatically represented in the fixtures, which
 should allow us to upgrade dj-stripe's schema to match Stripe much more
 easily. This would be done by updating dj-stripe's targeted API version
-(<span class="title-ref">DEFAULT_STRIPE_API_VERSION</span>),
+(`DEFAULT_STRIPE_API_VERSION`),
 regenerating the fixtures, and updating the model to match the fixture
 changes. The down side is it's tricky to regenerate fixture files
 without introducing big changes (eg to object ids) - the script does
@@ -52,8 +52,7 @@ API fields from Stripe), do the following:
         $ ./manage.py regenerate_test_fixtures
 
 The command tries to avoid inconsequential changes to the fixtures (e.g
-the <span class="title-ref">created</span> timestamp) by restoring a
+the `created` timestamp) by restoring a
 whitelist of values from the existing fixtures.
 
-This functionality can be disabled by passing the parameter <span
-class="title-ref">--update-sideeffect-fields</span>.
+This functionality can be disabled by passing `--update-sideeffect-fields`.
