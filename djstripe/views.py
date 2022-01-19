@@ -42,13 +42,12 @@ class ProcessWebhookView(View):
             # Note that this happens after the HTTP_STRIPE_SIGNATURE check on purpose.
             webhook_endpoint = get_object_or_404(WebhookEndpoint, djstripe_uuid=uuid)
             stripe_account = webhook_endpoint.djstripe_owner_account
-            secret = webhook_endpoint.secret
         else:
+            webhook_endpoint = None
             stripe_account = None
-            secret = djstripe_settings.WEBHOOK_SECRET
 
         trigger = WebhookEventTrigger.from_request(
-            request, stripe_account=stripe_account, secret=secret
+            request, stripe_account=stripe_account, webhook_endpoint=webhook_endpoint
         )
 
         if trigger.is_test_event:

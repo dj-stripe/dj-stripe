@@ -154,12 +154,19 @@ class WebhookEventTrigger(models.Model):
         blank=True,
         help_text="The Stripe Account this object belongs to.",
     )
+    webhook_endpoint = StripeForeignKey(
+        "WebhookEndpoint",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="The endpoint this webhook was received on",
+    )
 
     def __str__(self):
         return f"id={self.id}, valid={self.valid}, processed={self.processed}"
 
     @classmethod
-    def from_request(cls, request, secret: str, stripe_account=None):
+    def from_request(cls, request, *, webhook_endpoint):
         """
         Create, validate and process a WebhookEventTrigger given a Django
         request object.
@@ -182,14 +189,19 @@ class WebhookEventTrigger(models.Model):
         except ValueError:
             data = {}
 
-        if stripe_account is None:
+        if webhook_endpoint is None:
             stripe_account = StripeModel._find_owner_account(data=data)
+            secret = djstripe_settings.WEBHOOK_SECRET
+        else:
+            stripe_account = webhook_endpoint.djstripe_owner_account
+            secret = webhook_endpoint.secret
 
         obj = cls.objects.create(
             headers=dict(request.headers),
             body=body,
             remote_ip=ip,
             stripe_trigger_account=stripe_account,
+            webhook_endpoint=webhook_endpoint,
         )
 
         try:
