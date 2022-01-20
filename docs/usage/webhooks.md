@@ -24,7 +24,7 @@ by brute-force.
 ## Legacy setup
 
 Before dj-stripe 2.7.0, dj-stripe included a global webhook endpoint URL, which uses the
-setting [`DJSTRIPE_WEBHOOK_SECRET`][djstripe.settings.djstripesettings.webhook_secret]
+setting [`DJSTRIPE_WEBHOOK_SECRET`][djstripe.settings.DjstripeSettings.webhook_secret]
 to validate incoming webhooks.
 
 This is not recommended as it makes the URL guessable, and may be removed in the future.
@@ -33,9 +33,9 @@ This is not recommended as it makes the URL guessable, and may be removed in the
 
 dj-stripe provides the following settings to tune how your webhooks work:
 
--   [`DJSTRIPE_WEBHOOK_VALIDATION`][djstripe.settings.djstripesettings.webhook_validation]
--   [`DJSTRIPE_WEBHOOK_TOLERANCE`][djstripe.settings.djstripesettings.webhook_tolerance]
--   [`DJSTRIPE_WEBHOOK_EVENT_CALLBACK`][djstripe.settings.djstripesettings.webhook_event_callback]
+-   [`DJSTRIPE_WEBHOOK_VALIDATION`][djstripe.settings.DjstripeSettings.webhook_validation]
+-   [`DJSTRIPE_WEBHOOK_TOLERANCE`][djstripe.settings.DjstripeSettings.webhook_tolerance]
+-   [`DJSTRIPE_WEBHOOK_EVENT_CALLBACK`][djstripe.settings.DjstripeSettings.webhook_event_callback]
 
 ## Advanced usage
 
