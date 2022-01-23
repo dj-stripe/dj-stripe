@@ -630,8 +630,6 @@ class UsageRecordSummaryAdmin(StripeModelAdmin):
 class WebhookEndpointAdminBaseForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["djstripe_owner_account"].label = "Stripe account"
-        self.fields["djstripe_owner_account"].help_text = ""
         self.fields["description"].help_text = ""
         self.fields["description"].widget.attrs["rows"] = 3
 
@@ -661,6 +659,11 @@ class WebhookEndpointAdminBaseForm(forms.ModelForm):
 
 
 class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["djstripe_owner_account"].label = "Stripe account"
+        self.fields["djstripe_owner_account"].help_text = ""
+
     livemode = forms.BooleanField(
         label="Live mode",
         required=False,
