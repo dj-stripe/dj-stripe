@@ -23,6 +23,7 @@ from .core import Event
 
 class WebhookEndpoint(StripeModel):
     stripe_class = stripe.WebhookEndpoint
+    stripe_dashboard_item_name = "webhooks"
 
     api_version = models.CharField(
         max_length=10,
