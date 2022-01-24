@@ -167,7 +167,7 @@ class WebhookEventTrigger(models.Model):
         return f"id={self.id}, valid={self.valid}, processed={self.processed}"
 
     @classmethod
-    def from_request(cls, request, *, webhook_endpoint):
+    def from_request(cls, request, *, webhook_endpoint: WebhookEndpoint = None):
         """
         Create, validate and process a WebhookEventTrigger given a Django
         request object.
