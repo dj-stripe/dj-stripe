@@ -167,7 +167,7 @@ class WebhookEventTrigger(models.Model):
         return f"id={self.id}, valid={self.valid}, processed={self.processed}"
 
     @classmethod
-    def from_request(cls, request, *, webhook_endpoint):
+    def from_request(cls, request, *, stripe_account, webhook_endpoint):  # noqa: C901
         """
         Create, validate and process a WebhookEventTrigger given a Django
         request object.
@@ -193,8 +193,10 @@ class WebhookEventTrigger(models.Model):
         if webhook_endpoint is None:
             stripe_account = StripeModel._find_owner_account(data=data)
             secret = djstripe_settings.WEBHOOK_SECRET
-        else:
+        elif webhook_endpoint is not None and stripe_account is None:
             stripe_account = webhook_endpoint.djstripe_owner_account
+            secret = webhook_endpoint.secret
+        else:
             secret = webhook_endpoint.secret
 
         obj = cls.objects.create(
