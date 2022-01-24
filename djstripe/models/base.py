@@ -1,7 +1,7 @@
 import logging
 import uuid
 from datetime import timedelta
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from django.apps import apps
 from django.db import IntegrityError, models, transaction
@@ -299,7 +299,7 @@ class StripeModel(StripeBaseModel):
         pending_relations: list = None,
         stripe_account: str = None,
         api_key=djstripe_settings.STRIPE_SECRET_KEY,
-    ) -> dict:
+    ) -> Dict:
         """
         This takes an object, as it is formatted in Stripe's current API for our object
         type. In return, it provides a dict. The dict can be used to create a record or
