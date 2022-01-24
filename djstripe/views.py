@@ -10,7 +10,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 
 from .models import WebhookEndpoint, WebhookEventTrigger
-from .settings import djstripe_settings
 
 logger = logging.getLogger(__name__)
 
