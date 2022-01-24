@@ -13,7 +13,7 @@ import sys
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
@@ -143,7 +143,7 @@ class StripeItem(dict):
         base = self.class_url()
         return "%s/%s" % (base, id)
 
-    def request(self, method, url, params) -> dict:
+    def request(self, method, url, params) -> Dict:
         """Superficial mock that emulates request method."""
         assert method == "post"
         for key, value in params.items():
