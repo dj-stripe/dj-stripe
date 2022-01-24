@@ -222,7 +222,7 @@ class Account(StripeModel):
                         pass
                     else:
                         raise
-                except stripe.error.AuthenticationError as e:
+                except stripe.error.AuthenticationError:
                     # This may happen if saving an account that has a logo, using
                     # a different API key to the default.
                     # OK, concretely, there is a chicken-and-egg problem here.
