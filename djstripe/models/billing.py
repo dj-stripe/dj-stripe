@@ -167,7 +167,11 @@ class Coupon(StripeModel):
         default=0,
         help_text="Number of times this coupon has been applied to a customer.",
     )
-    # valid = models.BooleanField(editable=False)
+    valid = models.BooleanField(
+        help_text="Taking account of the above properties, whether this coupon can still be applied to a customer.",
+        null=True,
+        blank=True,
+    )
 
     class Meta(StripeModel.Meta):
         unique_together = ("id", "livemode")
