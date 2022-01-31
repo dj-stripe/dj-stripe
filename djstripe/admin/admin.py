@@ -212,9 +212,11 @@ class CouponAdmin(StripeModelAdmin):
         "redeem_by",
         "max_redemptions",
         "times_redeemed",
+        "valid",
     )
     list_filter = ("duration", "redeem_by")
     radio_fields = {"duration": admin.HORIZONTAL}
+    readonly_fields = ("valid",)
 
 
 @admin.register(models.Customer)
