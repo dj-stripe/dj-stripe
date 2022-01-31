@@ -94,7 +94,11 @@ class TestWebhookEventTrigger(TestCase):
         self.assertEqual(resp.status_code, 400)
         self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
 
-    @override_settings(DJSTRIPE_WEBHOOK_VALIDATION="retrieve_event")
+    @patch.object(
+        WebhookEventTrigger.validate,
+        "__defaults__",
+        (None, "whsec_XXXXX", 300, "retrieve_event"),
+    )
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
         "stripe.Account.retrieve",
@@ -198,7 +202,9 @@ class TestWebhookEventTrigger(TestCase):
         )
         event_retrieve_mock.assert_not_called()
 
-    @override_settings(DJSTRIPE_WEBHOOK_VALIDATION=None)
+    @patch.object(
+        WebhookEventTrigger.validate, "__defaults__", (None, "whsec_XXXXX", 300, None)
+    )
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch("stripe.WebhookSignature.verify_header", autospec=True)
     @patch(
@@ -305,7 +311,9 @@ class TestWebhookEventTrigger(TestCase):
         event_trigger = WebhookEventTrigger.objects.first()
         self.assertEqual(event_trigger.exception, exception_message)
 
-    @override_settings(DJSTRIPE_WEBHOOK_SECRET="")
+    @patch.object(
+        WebhookEventTrigger.validate, "__defaults__", (None, "whsec_XXXXX", 300, None)
+    )
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch.object(
         djstripe_settings, "WEBHOOK_EVENT_CALLBACK", return_value=mock_webhook_handler
@@ -334,7 +342,9 @@ class TestWebhookEventTrigger(TestCase):
         webhook_event_trigger = WebhookEventTrigger.objects.get()
         webhook_event_callback_mock.called_once_with(webhook_event_trigger)
 
-    @override_settings(DJSTRIPE_WEBHOOK_SECRET="")
+    @patch.object(
+        WebhookEventTrigger.validate, "__defaults__", (None, "whsec_XXXXX", 300, None)
+    )
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
         "stripe.Account.retrieve",
@@ -365,7 +375,9 @@ class TestWebhookEventTrigger(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(1, Event.objects.filter(type="transfer.created").count())
 
-    @override_settings(DJSTRIPE_WEBHOOK_SECRET="")
+    @patch.object(
+        WebhookEventTrigger.validate, "__defaults__", (None, "whsec_XXXXX", 300, None)
+    )
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
         "stripe.Account.retrieve",
@@ -397,7 +409,9 @@ class TestWebhookEventTrigger(TestCase):
             event_trigger.stripe_trigger_account.id, FAKE_STANDARD_ACCOUNT["id"]
         )
 
-    @override_settings(DJSTRIPE_WEBHOOK_SECRET="")
+    @patch.object(
+        WebhookEventTrigger.validate, "__defaults__", (None, "whsec_XXXXX", 300, None)
+    )
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
         "stripe.Account.retrieve",
@@ -430,14 +444,19 @@ class TestWebhookEventTrigger(TestCase):
             event_trigger.stripe_trigger_account.id, FAKE_CUSTOM_ACCOUNT["id"]
         )
 
-    @override_settings(DJSTRIPE_WEBHOOK_SECRET="")
+    @patch.object(
+        WebhookEventTrigger.validate, "__defaults__", (None, "whsec_XXXXX", 300, None)
+    )
     @patch.object(target=Event, attribute="invoke_webhook_handlers", autospec=True)
     @patch(
         "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
     )
     @patch("stripe.Event.retrieve", autospec=True)
     def test_webhook_error(
-        self, event_retrieve_mock, transfer_retrieve_mock, mock_invoke_webhook_handlers
+        self,
+        event_retrieve_mock,
+        transfer_retrieve_mock,
+        mock_invoke_webhook_handlers,
     ):
         """Test the case where webhook processing fails to ensure we rollback
         and do not commit the Event object to the database.
@@ -635,4 +654,7 @@ class TestWebhookEndpoint:
         fake_webhook = deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
         webhook_endpoint = WebhookEndpoint.sync_from_stripe_data(fake_webhook)
         assert str(webhook_endpoint) == webhook_endpoint.url
-        assert str(webhook_endpoint) == "https://dev.example.com/stripe/webhook/1"
+        assert (
+            str(webhook_endpoint)
+            == "https://dev.example.com/stripe/webhook/f6f9aa0e-cb6c-4e0f-b5ee-5e2b9e0716d8"
+        )
