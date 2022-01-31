@@ -282,6 +282,16 @@ class Discount(StripeModel):
         """
         return "object" in data and data["object"] == "discount"
 
+    def is_valid(self, api_key=None, stripe_account=None):
+        """Checks and returns whether the coupon is valid"""
+
+        stripe_data = self.api_retrieve(api_key=api_key, stripe_account=stripe_account)
+
+        # sync and update the coupon
+        coupon = Coupon.sync_from_stripe_data(stripe_data)
+
+        return coupon.valid
+
 
 class BaseInvoice(StripeModel):
     """

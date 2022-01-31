@@ -1,5 +1,6 @@
 from copy import deepcopy
 from decimal import Decimal
+from unittest.mock import patch
 
 import pytest
 import stripe
@@ -106,6 +107,13 @@ class CouponTest(TestCase):
         )
         self.assertEqual(coupon.human_readable, "10% off forever")
         self.assertEqual(str(coupon), coupon.human_readable)
+
+    @patch("stripe.Coupon.retrieve", autospec=True, return_value=deepcopy(FAKE_COUPON))
+    def test_is_valid(self, coupon_retrieve_mock):
+        coupon_data = deepcopy(FAKE_COUPON)
+        coupon = Coupon.sync_from_stripe_data(coupon_data)
+        # check if the coupon is valid
+        self.assertEqual(coupon.is_valid(), FAKE_COUPON["valid"])
 
 
 class TestCouponDecimal(CreateAccountMixin):
