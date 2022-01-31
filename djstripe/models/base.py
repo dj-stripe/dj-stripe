@@ -553,7 +553,7 @@ class StripeModel(StripeBaseModel):
         pending_relations=None,
         save=True,
         stripe_account=None,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key: str = None,
     ):
         """
         Instantiates a model instance using the provided data object received
@@ -572,6 +572,8 @@ class StripeModel(StripeBaseModel):
         :type stripe_account: string
         :returns: The instantiated object.
         """
+        if api_key is None:
+            api_key = djstripe_settings.STRIPE_SECRET_KEY
         # TODO dictionary unpacking will not work if cls has any ManyToManyField
         instance = cls(
             **cls._stripe_object_to_record(

@@ -214,7 +214,7 @@ class WebhookEventTrigger(models.Model):
                     djstripe_settings.WEBHOOK_EVENT_CALLBACK(obj)
                 else:
                     # Process the item (do not save it, it'll get saved below)
-                    obj.process(save=False)
+                    obj.process(save=False, api_key=stripe_account.default_api_key)
         except Exception as e:
             max_length = WebhookEventTrigger._meta.get_field("exception").max_length
             obj.exception = str(e)[:max_length]
@@ -308,12 +308,12 @@ class WebhookEventTrigger(models.Model):
 
         return local_data["data"] == remote_data["data"]
 
-    def process(self, save=True):
+    def process(self, save=True, api_key: str = None):
         # Reset traceback and exception in case of reprocessing
         self.exception = ""
         self.traceback = ""
 
-        self.event = Event.process(self.json_body)
+        self.event = Event.process(self.json_body, api_key=api_key)
         self.processed = True
         if save:
             self.save()
