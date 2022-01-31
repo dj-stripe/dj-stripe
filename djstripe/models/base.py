@@ -953,7 +953,7 @@ class StripeModel(StripeBaseModel):
             instance._attach_objects_post_save_hook(cls, data)
 
         for field in instance._meta.concrete_fields:
-            if isinstance(field, StripePercentField):
+            if isinstance(field, (StripePercentField, models.UUIDField)):
                 # get rid of cached values
                 delattr(instance, field.name)
 
