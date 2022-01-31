@@ -312,7 +312,7 @@ class WebhookEventTrigger(models.Model):
         self.exception = ""
         self.traceback = ""
 
-        self.event = Event.process(self.json_body)
+        self.event = Event.process(self.json_body, api_key=self.stripe_trigger_account.default_api_key)
         self.processed = True
         if save:
             self.save()
