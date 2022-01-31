@@ -97,8 +97,15 @@ class Coupon(StripeModel):
     """
 
     stripe_class = stripe.Coupon
+    expand_fields = ["applies_to"]
+    stripe_dashboard_item_name = "coupons"
 
     id = StripeIdField(max_length=500)
+    applies_to = JSONField(
+        null=True,
+        blank=True,
+        help_text="Contains information about what this coupon applies to.",
+    )
     amount_off = StripeDecimalCurrencyAmountField(
         null=True,
         blank=True,

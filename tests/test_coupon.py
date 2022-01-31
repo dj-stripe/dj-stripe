@@ -18,7 +18,11 @@ class TransferTest(TestCase):
         self.assertEqual(coupon.id, FAKE_COUPON["id"])
 
 
-class HumanReadableCouponTest(TestCase):
+class CouponTest(TestCase):
+    def test_blank_coupon_str(self):
+        coupon = Coupon()
+        self.assertEqual(str(coupon).strip(), "(invalid amount) off")
+
     def test___str__(self):
         coupon = Coupon.objects.create(
             id="coupon-test-amount-off-forever",
@@ -100,12 +104,6 @@ class HumanReadableCouponTest(TestCase):
         )
         self.assertEqual(coupon.human_readable, "10% off forever")
         self.assertEqual(str(coupon), coupon.human_readable)
-
-
-class TestCouponStr(TestCase):
-    def test_blank_coupon_str(self):
-        coupon = Coupon()
-        self.assertEqual(str(coupon).strip(), "(invalid amount) off")
 
 
 class TestCouponDecimal:
