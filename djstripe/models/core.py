@@ -1521,7 +1521,7 @@ class Event(StripeModel):
         # next time the webhook fires.
         with transaction.atomic():
             # process the event and create an Event Object
-            ret = cls._create_from_stripe_object(data, api_key)
+            ret = cls._create_from_stripe_object(data, api_key=api_key)
             ret.invoke_webhook_handlers()
             return ret
 
