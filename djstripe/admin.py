@@ -2,7 +2,7 @@
 Django Administration interface definitions
 """
 import json
-from typing import Optional
+from typing import Dict, Optional
 from urllib.parse import urljoin
 
 from django import forms
@@ -860,7 +860,7 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
             ),
         ]
 
-    def get_changeform_initial_data(self, request) -> dict[str, str]:
+    def get_changeform_initial_data(self, request) -> Dict[str, str]:
         ret = super().get_changeform_initial_data(request)
         base_url = f"{request.scheme}://{request.get_host()}"
         ret.setdefault("base_url", base_url)
