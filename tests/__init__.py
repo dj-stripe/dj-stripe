@@ -259,6 +259,7 @@ FAKE_STANDARD_ACCOUNT = AccountDict(
 
 # Stripe Platform Account to which the STRIPE_SECRET_KEY belongs to
 FAKE_PLATFORM_ACCOUNT = deepcopy(FAKE_STANDARD_ACCOUNT)
+FAKE_PLATFORM_ACCOUNT["settings"]["dashboard"]["display_name"] = "djstripe-platform"
 
 FAKE_CUSTOM_ACCOUNT = AccountDict(
     load_fixture("account_custom_acct_1IuHosQveW0ONQsd.json")
