@@ -33,7 +33,7 @@ from djstripe.models.checkout import Session
 from djstripe.models.core import File
 from djstripe.models.payment_methods import BankAccount
 
-from . import (
+from . import (  # FAKE_EVENT_SUBSCRIPTION_SCHEDULE_ABORTED,
     FAKE_ACCOUNT,
     FAKE_BALANCE_TRANSACTION,
     FAKE_BANK_ACCOUNT_IV,
@@ -105,7 +105,6 @@ from . import (
     FAKE_EVENT_PRICE_UPDATED,
     FAKE_EVENT_SESSION_COMPLETED,
     FAKE_EVENT_STANDARD_ACCOUNT_UPDATED,
-    FAKE_EVENT_SUBSCRIPTION_SCHEDULE_ABORTED,
     FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CANCELED,
     FAKE_EVENT_SUBSCRIPTION_SCHEDULE_COMPLETED,
     FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED,
@@ -2399,7 +2398,7 @@ class TestSubscriptionScheduleEvents(EventTestCase):
     )
     @patch(
         "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER_II),
+        return_value=deepcopy(FAKE_CUSTOMER),
         autospec=True,
     )
     def test_subscription_schedule_created(
@@ -2422,7 +2421,7 @@ class TestSubscriptionScheduleEvents(EventTestCase):
     @patch("stripe.SubscriptionSchedule.retrieve", autospec=True)
     @patch(
         "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER_II),
+        return_value=deepcopy(FAKE_CUSTOMER),
         autospec=True,
     )
     def test_subscription_schedule_canceled(
@@ -2464,7 +2463,7 @@ class TestSubscriptionScheduleEvents(EventTestCase):
     @patch("stripe.SubscriptionSchedule.retrieve", autospec=True)
     @patch(
         "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER_II),
+        return_value=deepcopy(FAKE_CUSTOMER),
         autospec=True,
     )
     def test_subscription_schedule_completed(
@@ -2589,7 +2588,7 @@ class TestSubscriptionScheduleEvents(EventTestCase):
     @patch("stripe.SubscriptionSchedule.retrieve", autospec=True)
     @patch(
         "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER_II),
+        return_value=deepcopy(FAKE_CUSTOMER),
         autospec=True,
     )
     def test_subscription_schedule_updated(
@@ -2607,28 +2606,28 @@ class TestSubscriptionScheduleEvents(EventTestCase):
             id=FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED["data"]["object"]["id"]
         )
 
-        assert schedule.status == "not_started"
+        assert schedule.status == "active"
         assert schedule.released_at is None
+        # ! todo uncomment after PR (#1550) adding Subscription field gets merged
+        # fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
+        # fake_stripe_event["data"]["object"]["released_at"] = 1605058030
+        # fake_stripe_event["data"]["object"]["status"] = "released"
+        # fake_stripe_event["data"]["previous_attributes"] = {
+        #     "released_at": None,
+        #     "status": "not_started",
+        # }
 
-        fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
-        fake_stripe_event["data"]["object"]["released_at"] = 1605058030
-        fake_stripe_event["data"]["object"]["status"] = "released"
-        fake_stripe_event["data"]["previous_attributes"] = {
-            "released_at": None,
-            "status": "not_started",
-        }
+        # schedule_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
 
-        schedule_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
+        # event = Event.sync_from_stripe_data(fake_stripe_event)
+        # event.invoke_webhook_handlers()
 
-        event = Event.sync_from_stripe_data(fake_stripe_event)
-        event.invoke_webhook_handlers()
+        # schedule = SubscriptionSchedule.objects.get(
+        #     id=fake_stripe_event["data"]["object"]["id"]
+        # )
 
-        schedule = SubscriptionSchedule.objects.get(
-            id=fake_stripe_event["data"]["object"]["id"]
-        )
-
-        assert schedule.status == "released"
-        assert schedule.released_at is not None
+        # assert schedule.status == "released"
+        # assert schedule.released_at is not None
 
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -2695,24 +2694,25 @@ class TestSubscriptionScheduleEvents(EventTestCase):
             schedule.id
             == FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED["data"]["object"]["id"]
         )
-        assert schedule.subscription.id == FAKE_SUBSCRIPTION["id"]
-        assert schedule.subscription.status == "active"
+        # ! todo uncomment after PR (#1550) adding Subscription field gets merged
+        # assert schedule.subscription.id == FAKE_SUBSCRIPTION["id"]
+        # assert schedule.subscription.status == "active"
 
-        # cancel the subscription
-        fake_subscription["status"] = "canceled"
-        Subscription.sync_from_stripe_data(fake_subscription)
+        # # cancel the subscription
+        # fake_subscription["status"] = "canceled"
+        # Subscription.sync_from_stripe_data(fake_subscription)
 
-        fake_stripe_event_2 = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_ABORTED)
-        schedule_retrieve_mock.return_value = fake_stripe_event_2["data"]["object"]
+        # fake_stripe_event_2 = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_ABORTED)
+        # schedule_retrieve_mock.return_value = fake_stripe_event_2["data"]["object"]
 
-        event = Event.sync_from_stripe_data(fake_stripe_event_2)
-        event.invoke_webhook_handlers()
+        # event = Event.sync_from_stripe_data(fake_stripe_event_2)
+        # event.invoke_webhook_handlers()
 
-        schedule.refresh_from_db()
+        # schedule.refresh_from_db()
 
-        assert schedule.status == "canceled"
-        assert schedule.subscription.status == "canceled"
-        assert schedule.canceled_at is not None
+        # assert schedule.status == "canceled"
+        # assert schedule.subscription.status == "canceled"
+        # assert schedule.canceled_at is not None
 
 
 class TestTaxIdEvents(EventTestCase):

@@ -1213,7 +1213,7 @@ FAKE_SUBSCRIPTION_SCHEDULE = {
     "released_subscription": None,
     "renewal_interval": None,
     "status": "not_started",
-    "subscription": None,
+    "subscription": FAKE_SUBSCRIPTION["id"],
 }
 
 

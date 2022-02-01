@@ -11,7 +11,7 @@ from djstripe.enums import SubscriptionScheduleStatus
 from djstripe.models import SubscriptionSchedule
 
 from . import (
-    FAKE_CUSTOMER_II,
+    FAKE_CUSTOMER,
     FAKE_SUBSCRIPTION_SCHEDULE,
     AssertStripeFksMixin,
     datetime_to_unix,
@@ -23,7 +23,7 @@ class SubscriptionScheduleTest(AssertStripeFksMixin, TestCase):
         user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
-        self.customer = FAKE_CUSTOMER_II.create_for_user(user)
+        self.customer = FAKE_CUSTOMER.create_for_user(user)
 
         self.default_expected_blank_fks = {
             "djstripe.Customer.coupon",
@@ -33,7 +33,7 @@ class SubscriptionScheduleTest(AssertStripeFksMixin, TestCase):
 
     @patch(
         "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER_II),
+        return_value=deepcopy(FAKE_CUSTOMER),
         autospec=True,
     )
     def test_sync_from_stripe_data(self, customer_retrieve_mock):
@@ -48,7 +48,7 @@ class SubscriptionScheduleTest(AssertStripeFksMixin, TestCase):
 
     @patch(
         "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER_II),
+        return_value=deepcopy(FAKE_CUSTOMER),
         autospec=True,
     )
     def test___str__(self, customer_retrieve_mock):
