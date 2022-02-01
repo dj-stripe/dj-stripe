@@ -570,23 +570,34 @@ class StripeModel(StripeBaseModel):
         :type stripe_account: string
         :returns: The instantiated object.
         """
-        # TODO dictionary unpacking will not work if cls has any ManyToManyField
-        instance = cls(
-            **cls._stripe_object_to_record(
-                data,
-                current_ids=current_ids,
-                pending_relations=pending_relations,
-                stripe_account=stripe_account,
+
+        stripe_data = cls._stripe_object_to_record(
+            data,
+            current_ids=current_ids,
+            pending_relations=pending_relations,
+            stripe_account=stripe_account,
+        )
+        try:
+            id_ = get_id_from_stripe_data(stripe_data)
+            if id_ is not None:
+                instance = cls.stripe_objects.get(id=id_)
+            else:
+                # Raise error on purpose to resume the _create_from_stripe_object flow
+                raise cls.DoesNotExist
+
+        except cls.DoesNotExist:
+            # try to create iff instance doesn't already exist in the DB
+            # TODO dictionary unpacking will not work if cls has any ManyToManyField
+            instance = cls(**stripe_data)
+
+            instance._attach_objects_hook(cls, data, current_ids=current_ids)
+
+            if save:
+                instance.save(force_insert=True)
+
+            instance._attach_objects_post_save_hook(
+                cls, data, pending_relations=pending_relations
             )
-        )
-        instance._attach_objects_hook(cls, data, current_ids=current_ids)
-
-        if save:
-            instance.save(force_insert=True)
-
-        instance._attach_objects_post_save_hook(
-            cls, data, pending_relations=pending_relations
-        )
 
         return instance
 
