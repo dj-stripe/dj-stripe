@@ -307,7 +307,7 @@ class WebhookEventTrigger(models.Model):
 
         return local_data["data"] == remote_data["data"]
 
-    def process(self, save=True, api_key):
+    def process(self, save=True, api_key=api_key):
         # Reset traceback and exception in case of reprocessing
         self.exception = ""
         self.traceback = ""
