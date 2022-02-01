@@ -39,7 +39,10 @@ pytestmark = pytest.mark.django_db
 @pytest.mark.parametrize(
     "output,input",
     [
-        (["event", "stripe_trigger_account"], models.WebhookEventTrigger),
+        (
+            ["event", "stripe_trigger_account", "webhook_endpoint"],
+            models.WebhookEventTrigger,
+        ),
         (
             [
                 "djstripe_owner_account",
@@ -318,7 +321,12 @@ class TestAdminRegisteredModels(TestCase):
         self.factory = RequestFactory()
         # the 2 models that do not inherit from StripeModel and hence
         # do not inherit from StripeModelAdmin
-        self.ignore_models = ["WebhookEventTrigger", "IdempotencyKey", "APIKey"]
+        self.ignore_models = [
+            "WebhookEventTrigger",
+            "WebhookEndpoint",
+            "IdempotencyKey",
+            "APIKey",
+        ]
 
     def test_get_list_display_links(self):
         app_label = "djstripe"
@@ -616,8 +624,15 @@ class TestAdminRegisteredModels(TestCase):
                     list(fields),
                 )
 
-                # ensure all the fields in fields are valid
+                # ensure all the fields in model_admin are valid
                 for field in model_admin.get_fields(request):
+                    # as these fields are form field and not modelform fields
+                    if model_admin.model is models.WebhookEndpoint and field in (
+                        "base_url",
+                        "enabled",
+                        "connect",
+                    ):
+                        continue
                     model_admin.get_changelist_instance(request).get_ordering_field(
                         field
                     )
