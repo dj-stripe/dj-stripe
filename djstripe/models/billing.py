@@ -2041,7 +2041,7 @@ class TaxRate(StripeModel):
     )
 
     def __str__(self):
-        return f"{self.display_name} – {self.jurisdiction} at {self.percentage}%"
+        return f"{self.display_name} at {self.percentage}%"
 
 
 class UsageRecord(StripeModel):
