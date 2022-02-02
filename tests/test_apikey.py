@@ -113,6 +113,16 @@ class APIKeyTest(TestCase):
             "https://dashboard.stripe.com/acct_1Fg9jUA3kq9o1aTc/apikeys",
         )
 
+    def test___str__(self):
+        assert str(self.apikey_live) == "Live Secret Key"
+        assert str(self.apikey_test) == "Test Secret Key"
+
+        # update name of apikey_live to ""
+        self.apikey_live.name = ""
+        self.apikey_live.save()
+
+        assert str(self.apikey_live) == "sk_live_...5678"
+
     def test_secret_redacted(self):
         self.assertEqual(self.apikey_test.secret_redacted, "sk_test_...1234")
         self.assertEqual(self.apikey_live.secret_redacted, "sk_live_...5678")
