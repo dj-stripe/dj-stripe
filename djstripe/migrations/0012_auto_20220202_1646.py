@@ -40,4 +40,8 @@ class Migration(migrations.Migration):
                 max_length=50,
             ),
         ),
+        migrations.AlterModelOptions(
+            name="taxrate",
+            options={"verbose_name": "Tax Rates", "verbose_name_plural": "Tax Rates"},
+        ),
     ]
