@@ -593,7 +593,7 @@ class StripeModel(StripeBaseModel):
             instance._attach_objects_hook(cls, data, current_ids=current_ids)
 
             if save:
-                instance.save(force_insert=True)
+                instance.save()
 
             instance._attach_objects_post_save_hook(
                 cls, data, pending_relations=pending_relations
