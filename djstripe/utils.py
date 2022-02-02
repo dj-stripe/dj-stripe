@@ -2,12 +2,14 @@
 Utility functions related to the djstripe app.
 """
 import datetime
+import sys
 from typing import Optional
 
 import stripe
 from django.apps import apps
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import intcomma
+from django.contrib import admin
 from django.db.models.query import QuerySet
 from django.utils import timezone
 
@@ -122,3 +124,16 @@ def get_timezone_utc():
         return datetime.timezone.utc
     except AttributeError:
         return timezone.utc
+def warn_about_unregistered_in_admin_models():
+    """
+    A utility function that lets the user know what all models
+    have not been registered in admin yet.
+    """
+
+    app_label = "djstripe"
+    app_config = apps.get_app_config(app_label)
+
+    all_models_lst = app_config.get_models()
+    for model in all_models_lst:
+        if model not in admin.site._registry.keys():
+            sys.stderr.write("\033[93m" + f"{model} is not registered in Admin yet. \n")

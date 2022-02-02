@@ -26,7 +26,25 @@ from .forms import (
     WebhookEndpointAdminCreateForm,
     WebhookEndpointAdminEditForm,
 )
+<<<<<<< HEAD
 from .utils import ReadOnlyMixin, get_forward_relation_fields_for_model
+=======
+from .utils import (
+    ReadOnlyMixin,
+    custom_display_for_JSONfield,
+    get_forward_relation_fields_for_model,
+    warn_about_unregistered_in_admin_models
+)
+
+
+def admin_display_for_field_override():
+    admin.utils.display_for_field = custom_display_for_JSONfield
+    admin.helpers.display_for_field = custom_display_for_JSONfield
+
+
+# execute override
+admin_display_for_field_override()
+>>>>>>> 6219da47 (Added warning about unregistered admin models)
 
 
 @admin.register(models.IdempotencyKey)
@@ -798,3 +816,6 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("djstripe_owner_account")
+
+# run warnings after all models have been registered
+warn_about_unregistered_in_admin_models()
