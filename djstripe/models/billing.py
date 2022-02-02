@@ -1999,6 +1999,12 @@ class TaxRate(StripeModel):
         "applied to objects in the API, but will still be applied to subscriptions "
         "and invoices that already have it set.",
     )
+    country = models.CharField(
+        max_length=2,
+        default="",
+        blank=True,
+        help_text="Two-letter country code.",
+    )
     display_name = models.CharField(
         max_length=50,
         default="",
@@ -2019,6 +2025,18 @@ class TaxRate(StripeModel):
         decimal_places=4,
         max_digits=7,
         help_text="This represents the tax rate percent out of 100.",
+    )
+    state = models.CharField(
+        max_length=2,
+        default="",
+        blank=True,
+        help_text="ISO 3166-2 subdivision code, without country prefix.",
+    )
+    tax_type = models.CharField(
+        default="",
+        blank=True,
+        max_length=50,
+        help_text="The high-level tax type, such as vat, gst, sales_tax or custom.",
     )
 
     def __str__(self):
