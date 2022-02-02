@@ -1992,6 +1992,7 @@ class TaxRate(StripeModel):
     """
 
     stripe_class = stripe.TaxRate
+    stripe_dashboard_item_name = "tax-rates"
 
     active = models.BooleanField(
         default=True,
