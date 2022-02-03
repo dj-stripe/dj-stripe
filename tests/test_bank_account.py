@@ -231,7 +231,7 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(self.standard_account, bank_account.account)
         self.assertEqual(
             bank_account.get_stripe_dashboard_url(),
-            self.standard_account.get_stripe_dashboard_url(),
+            f"https://dashboard.stripe.com/{bank_account.account.id}/settings/payouts",
         )
 
         self.assert_fks(
