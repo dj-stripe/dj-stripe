@@ -79,6 +79,20 @@ class TestPaymentMethod:
             )
             assert pm.get_stripe_dashboard_url() == customer.get_stripe_dashboard_url()
 
+    @pytest.mark.parametrize("customer_exists", [True, False])
+    def test_sync_from_stripe_data(self, monkeypatch, customer_exists):
+
+        # monkeypatch stripe.Customer.retrieve call to return
+        # the desired json response.
+        monkeypatch.setattr(stripe.Customer, "retrieve", self.mock_customer_get)
+
+        fake_payment_method_data = deepcopy(FAKE_PAYMENT_METHOD_I)
+        if not customer_exists:
+            fake_payment_method_data["customer"] = None
+
+        pm = models.PaymentMethod.sync_from_stripe_data(fake_payment_method_data)
+        assert pm.id == fake_payment_method_data["id"]
+
 
 class PaymentMethodTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
