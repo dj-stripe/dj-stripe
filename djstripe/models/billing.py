@@ -661,9 +661,6 @@ class BaseInvoice(StripeModel):
             return True
         return False
 
-    def get_stripe_dashboard_url(self):
-        return self.customer.get_stripe_dashboard_url()
-
     def _attach_objects_post_save_hook(
         self,
         cls,
