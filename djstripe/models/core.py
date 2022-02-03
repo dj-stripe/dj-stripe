@@ -1368,7 +1368,6 @@ class Customer(StripeModel):
             Subscription.sync_from_stripe_data(stripe_subscription)
 
 
-# TODO Add Tests
 class Dispute(StripeModel):
     """
     A dispute occurs when a customer questions your charge with their
@@ -1379,7 +1378,7 @@ class Dispute(StripeModel):
     """
 
     stripe_class = stripe.Dispute
-    stripe_dashboard_item_name = "disputes"
+    stripe_dashboard_item_name = "payments"
 
     amount = StripeQuantumCurrencyAmountField(
         help_text=(
@@ -1431,6 +1430,13 @@ class Dispute(StripeModel):
 
     def __str__(self):
         return f"{self.human_readable_amount} ({enums.DisputeStatus.humanize(self.status)}) "
+
+    def get_stripe_dashboard_url(self) -> str:
+        """Get the stripe dashboard url for this object."""
+        return (
+            f"{self._get_base_stripe_dashboard_url()}"
+            f"{self.stripe_dashboard_item_name}/{self.payment_intent.id}"
+        )
 
     def _attach_objects_post_save_hook(
         self,

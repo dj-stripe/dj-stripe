@@ -176,3 +176,48 @@ class TestDispute(TestCase):
             expand=[],
             stripe_account=None,
         )
+
+    @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_PAYMENT_INTENT),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Charge.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_CHARGE),
+        autospec=True,
+    )
+    @patch(
+        "stripe.BalanceTransaction.retrieve",
+        return_value=deepcopy(FAKE_DISPUTE_BALANCE_TRANSACTION),
+        autospec=True,
+    )
+    @patch(
+        "stripe.File.retrieve",
+        return_value=deepcopy(FAKE_FILEUPLOAD_ICON),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Dispute.retrieve", return_value=deepcopy(FAKE_DISPUTE_I), autospec=True
+    )
+    def test_get_stripe_dashboard_url(
+        self,
+        dispute_retrieve_mock,
+        file_retrieve_mock,
+        balance_transaction_retrieve_mock,
+        charge_retrieve_mock,
+        payment_intent_retrieve_mock,
+        payment_method_retrieve_mock,
+    ):
+
+        dispute = Dispute.sync_from_stripe_data(FAKE_DISPUTE_I)
+        self.assertEqual(
+            dispute.get_stripe_dashboard_url(),
+            f"{dispute._get_base_stripe_dashboard_url()}"
+            f"{dispute.stripe_dashboard_item_name}/{dispute.payment_intent.id}",
+        )
