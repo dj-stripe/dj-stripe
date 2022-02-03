@@ -208,7 +208,14 @@ def test__find_owner_account(
         StripeModel._find_owner_account(fake_data, api_key=api_key)
 
     if has_stripe_account_attr and stripe_account:
-        mock__get_or_retrieve.assert_called_once_with(id=stripe_account)
+        if api_key:
+            mock__get_or_retrieve.assert_called_once_with(
+                id=stripe_account, api_key=api_key
+            )
+        else:
+            mock__get_or_retrieve.assert_called_once_with(
+                id=stripe_account, api_key=djstripe_settings.STRIPE_SECRET_KEY
+            )
 
     else:
         if api_key:
@@ -263,7 +270,14 @@ def test__find_owner_account_for_webhook_event_trigger(
         StripeModel._find_owner_account(fake_data, api_key=api_key)
 
     if has_account_key and stripe_account:
-        mock__get_or_retrieve.assert_called_once_with(id=stripe_account)
+        if api_key:
+            mock__get_or_retrieve.assert_called_once_with(
+                id=stripe_account, api_key=api_key
+            )
+        else:
+            mock__get_or_retrieve.assert_called_once_with(
+                id=stripe_account, api_key=djstripe_settings.STRIPE_SECRET_KEY
+            )
 
     else:
         if api_key:
