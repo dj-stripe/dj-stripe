@@ -15,6 +15,7 @@ from . import (
     FAKE_ACCOUNT,
     FAKE_FILEUPLOAD_ICON,
     FAKE_FILEUPLOAD_LOGO,
+    FAKE_PLATFORM_ACCOUNT,
     IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
 )
@@ -99,7 +100,7 @@ class TestAccount(AssertStripeFksMixin, TestCase):
     def test__find_owner_account(self, fileupload_retrieve_mock, account_retrieve_mock):
         fake_account = deepcopy(FAKE_ACCOUNT)
         account = Account.sync_from_stripe_data(fake_account)
-        self.assertEqual(None, Account._find_owner_account(account))
+        self.assertEqual(account.djstripe_owner_account.id, FAKE_PLATFORM_ACCOUNT["id"])
 
     @patch(
         "stripe.Account.retrieve",
