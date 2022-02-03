@@ -277,6 +277,7 @@ class TransferReversal(StripeModel):
     """
 
     expand_fields = ["balance_transaction", "transfer"]
+    stripe_dashboard_item_name = "transfer_reversals"
 
     # TransferReversal classmethods are derived from
     # and attached to the stripe.Transfer class
