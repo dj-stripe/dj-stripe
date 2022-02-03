@@ -880,6 +880,12 @@ class PaymentMethod(StripeModel):
             return f"{enums.PaymentMethodType.humanize(self.type)} for {self.customer}"
         return f"{enums.PaymentMethodType.humanize(self.type)} is not associated with any customer"
 
+
+    def get_stripe_dashboard_url(self) -> str:
+        if self.customer:
+            return self.customer.get_stripe_dashboard_url()
+        return ""
+
     def _attach_objects_hook(
         self, cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY, current_ids=None
     ):
