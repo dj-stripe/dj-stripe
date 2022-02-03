@@ -25,7 +25,7 @@ from . import (
 pytestmark = pytest.mark.django_db
 
 
-class TestPaymentMethodStr:
+class TestPaymentMethod:
 
     #
     # Helper Methods for monkeypatching
@@ -58,6 +58,26 @@ class TestPaymentMethodStr:
             assert (
                 f"{enums.PaymentMethodType.humanize(fake_payment_method_data['type'])} for {customer}"
             ) == str(pm)
+
+    @pytest.mark.parametrize("customer_exists", [True, False])
+    def test_get_stripe_dashboard_url(self, monkeypatch, customer_exists):
+
+        # monkeypatch stripe.Customer.retrieve call to return
+        # the desired json response.
+        monkeypatch.setattr(stripe.Customer, "retrieve", self.mock_customer_get)
+
+        fake_payment_method_data = deepcopy(FAKE_PAYMENT_METHOD_I)
+        if not customer_exists:
+            fake_payment_method_data["customer"] = None
+            pm = models.PaymentMethod.sync_from_stripe_data(fake_payment_method_data)
+            assert pm.get_stripe_dashboard_url() == ""
+
+        else:
+            pm = models.PaymentMethod.sync_from_stripe_data(fake_payment_method_data)
+            customer = models.Customer.objects.get(
+                id=fake_payment_method_data["customer"]
+            )
+            assert pm.get_stripe_dashboard_url() == customer.get_stripe_dashboard_url()
 
 
 class PaymentMethodTest(AssertStripeFksMixin, TestCase):
