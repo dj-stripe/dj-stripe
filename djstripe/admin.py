@@ -289,6 +289,8 @@ class APIKeyAdminCreateForm(forms.ModelForm):
 
 @admin.register(models.APIKey)
 class APIKeyAdmin(admin.ModelAdmin):
+    change_form_template = "djstripe/admin/change_form.html"
+
     list_display = ("__str__", "type", "djstripe_owner_account", "livemode")
     readonly_fields = ("djstripe_owner_account", "livemode", "type", "secret")
     search_fields = ("name",)
