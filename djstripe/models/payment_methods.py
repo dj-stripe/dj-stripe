@@ -264,7 +264,7 @@ class LegacySourceMixin:
         if self.customer:
             return self.customer.get_stripe_dashboard_url()
         elif self.account:
-            return self.account.get_stripe_dashboard_url()
+            return f"https://dashboard.stripe.com/{self.account.id}/settings/payouts"
         else:
             return ""
 

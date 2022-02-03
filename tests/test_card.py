@@ -201,7 +201,7 @@ class CardTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(self.standard_account, card.account)
         self.assertEqual(
             card.get_stripe_dashboard_url(),
-            self.standard_account.get_stripe_dashboard_url(),
+            f"https://dashboard.stripe.com/{card.account.id}/settings/payouts",
         )
 
         self.assert_fks(
