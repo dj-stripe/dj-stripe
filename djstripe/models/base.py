@@ -276,17 +276,19 @@ class StripeModel(StripeBaseModel):
             # case of Webhook Event Trigger
             if data.get("object") == "event":
                 # if account key exists and has a not null value
-                if data.get("account"):
-                    stripe_account_id = get_id_from_stripe_data(data.get("account"))
-                    if stripe_account_id:
-                        return Account._get_or_retrieve(id=stripe_account_id)
+                stripe_account_id = get_id_from_stripe_data(data.get("account"))
+                if stripe_account_id:
+                    return Account._get_or_retrieve(
+                        id=stripe_account_id, api_key=api_key
+                    )
 
             else:
                 stripe_account = getattr(data, "stripe_account", None)
-                if stripe_account:
-                    stripe_account_id = get_id_from_stripe_data(stripe_account)
-                    if stripe_account_id:
-                        return Account._get_or_retrieve(id=stripe_account_id)
+                stripe_account_id = get_id_from_stripe_data(stripe_account)
+                if stripe_account_id:
+                    return Account._get_or_retrieve(
+                        id=stripe_account_id, api_key=api_key
+                    )
 
         # try to fetch by the given api_key.
         return Account.get_or_retrieve_for_api_key(api_key)
