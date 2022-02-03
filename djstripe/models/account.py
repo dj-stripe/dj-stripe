@@ -84,6 +84,13 @@ class Account(StripeModel):
         help_text="Details on the acceptance of the Stripe Services Agreement",
     )
 
+    def get_stripe_dashboard_url(self) -> str:
+        """Get the stripe dashboard url for this object."""
+        return (
+            f"https://dashboard.stripe.com/{self.id}/"
+            f"{'test/' if not self.livemode else ''}dashboard"
+        )
+
     @property
     def default_api_key(self) -> str:
         return self.get_default_api_key()
