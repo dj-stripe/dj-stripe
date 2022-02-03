@@ -269,6 +269,12 @@ class Transfer(StripeModel):
         for reversals_data in data.get("reversals").auto_paging_iter():
             TransferReversal.sync_from_stripe_data(reversals_data, api_key=api_key)
 
+    def get_stripe_dashboard_url(self) -> str:
+        return (
+            f"{self._get_base_stripe_dashboard_url()}"
+            f"connect/{self.stripe_dashboard_item_name}/{self.id}"
+        )
+
 
 # TODO Add Tests
 class TransferReversal(StripeModel):
