@@ -200,6 +200,28 @@ class TestAccount(AssertStripeFksMixin, TestCase):
             },
         )
 
+    @patch(
+        "stripe.Account.retrieve",
+        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        return_value=deepcopy(FAKE_ACCOUNT),
+    )
+    @patch(
+        "stripe.File.retrieve",
+        side_effect=[deepcopy(FAKE_FILEUPLOAD_ICON), deepcopy(FAKE_FILEUPLOAD_LOGO)],
+        autospec=True,
+    )
+    def test_get_stripe_dashboard_url(
+        self, fileupload_retrieve_mock, account_retrieve_mock
+    ):
+        fake_account = deepcopy(FAKE_ACCOUNT)
+        account = Account.sync_from_stripe_data(fake_account)
+
+        self.assertEqual(
+            account.get_stripe_dashboard_url(),
+            f"https://dashboard.stripe.com/{account.id}/"
+            f"{'test/' if not account.livemode else ''}dashboard",
+        )
+
 
 class TestAccountStr:
     @pytest.mark.parametrize(
