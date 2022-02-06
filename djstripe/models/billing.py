@@ -1501,7 +1501,7 @@ class Subscription(StripeModel):
 
         return self.update(proration_behavior="none", trial_end=period_end)
 
-    def cancel(self, at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END):
+    def cancel(self, at_period_end=djstripe_settings.CANCELLATION_AT_PERIOD_END, **kwargs):
         """
         Cancels this subscription. If you set the at_period_end parameter to true,
         the subscription will remain active until the end of the period, at which point
@@ -1529,6 +1529,8 @@ class Subscription(StripeModel):
         .. important:: If a subscription is canceled during a trial period, \
         the ``at_period_end`` flag will be overridden to False so that the trial ends \
         immediately and the customer's card isn't charged.
+
+        kwargs: invoice_now (bool), prorate (bool)
         """
 
         # If plan has trial days and customer cancels before
@@ -1541,7 +1543,7 @@ class Subscription(StripeModel):
             stripe_subscription = self._api_update(cancel_at_period_end=True)
         else:
             try:
-                stripe_subscription = self._api_delete()
+                stripe_subscription = self._api_delete(**kwargs)
             except InvalidRequestError as exc:
                 if "No such subscription:" in str(exc):
                     # cancel() works by deleting the subscription. The object still
