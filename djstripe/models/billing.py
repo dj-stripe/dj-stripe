@@ -776,7 +776,10 @@ class Invoice(BaseInvoice):
         )
 
         cls._stripe_object_set_total_tax_amounts(
-            target_cls=DjstripeInvoiceTotalTaxAmount, data=data, instance=self
+            target_cls=DjstripeInvoiceTotalTaxAmount,
+            data=data,
+            instance=self,
+            api_key=api_key,
         )
 
 
