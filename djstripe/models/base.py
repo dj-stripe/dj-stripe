@@ -509,7 +509,13 @@ class StripeModel(StripeBaseModel):
 
         pass
 
-    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+    def _attach_objects_post_save_hook(
+        self,
+        cls,
+        data,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        pending_relations=None,
+    ):
         """
         Gets called by this object's create and sync methods just after save.
         Use this to populate fields after the model is saved.
@@ -605,7 +611,7 @@ class StripeModel(StripeBaseModel):
                 instance.save()
 
             instance._attach_objects_post_save_hook(
-                cls, data, pending_relations=pending_relations
+                cls, data, api_key=api_key, pending_relations=pending_relations
             )
 
         return instance
@@ -969,7 +975,7 @@ class StripeModel(StripeBaseModel):
                 cls, data, api_key=api_key, current_ids=current_ids
             )
             instance.save()
-            instance._attach_objects_post_save_hook(cls, data)
+            instance._attach_objects_post_save_hook(cls, data, api_key=api_key)
 
         for field in instance._meta.concrete_fields:
             if isinstance(field, (StripePercentField, models.UUIDField)):
