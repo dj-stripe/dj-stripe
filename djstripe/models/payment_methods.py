@@ -47,7 +47,9 @@ class DjstripePaymentMethod(models.Model):
         return instance
 
     @classmethod
-    def _get_or_create_source(cls, data, source_type=None):
+    def _get_or_create_source(
+        cls, data, source_type=None, api_key=djstripe_settings.STRIPE_SECRET_KEY
+    ):
 
         # prefer passed in source_type
         if not source_type:
@@ -55,7 +57,7 @@ class DjstripePaymentMethod(models.Model):
 
         try:
             model = cls._model_for_type(source_type)
-            model._get_or_create_from_stripe_object(data)
+            model._get_or_create_from_stripe_object(data, api_key=api_key)
         except ValueError as e:
             # This may happen if we have source types we don't know about.
             # Let's not make dj-stripe entirely unusable if that happens.
@@ -93,6 +95,7 @@ class DjstripePaymentMethod(models.Model):
         pending_relations=None,
         save=True,
         stripe_account=None,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
     ):
 
         raw_field_data = data.get(field_name)
@@ -127,6 +130,7 @@ class DjstripePaymentMethod(models.Model):
             current_ids=current_ids,
             pending_relations=pending_relations,
             stripe_account=stripe_account,
+            api_key=api_key,
         )
 
         return cls.objects.get_or_create(id=id_, defaults={"type": source_type})

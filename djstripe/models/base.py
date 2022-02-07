@@ -360,6 +360,7 @@ class StripeModel(StripeBaseModel):
                     current_ids=current_ids,
                     pending_relations=pending_relations,
                     stripe_account=stripe_account,
+                    api_key=api_key,
                 )
 
                 if skip and not is_nulled:
@@ -396,6 +397,7 @@ class StripeModel(StripeBaseModel):
         current_ids=None,
         pending_relations=None,
         stripe_account=None,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
     ):
         """
         This converts a stripe API field to the dj stripe object it references,
@@ -474,6 +476,7 @@ class StripeModel(StripeBaseModel):
                     current_ids=current_ids,
                     pending_relations=pending_relations,
                     stripe_account=stripe_account,
+                    api_key=api_key,
                 )
 
                 # Remove the id of the current object from the list
@@ -561,7 +564,7 @@ class StripeModel(StripeBaseModel):
         pending_relations=None,
         save=True,
         stripe_account=None,
-        api_key: str = None,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
     ):
         """
         Instantiates a model instance using the provided data object received
@@ -580,9 +583,6 @@ class StripeModel(StripeBaseModel):
         :type stripe_account: string
         :returns: The instantiated object.
         """
-        if api_key is None:
-            api_key = djstripe_settings.STRIPE_SECRET_KEY
-
         stripe_data = cls._stripe_object_to_record(
             data,
             current_ids=current_ids,
@@ -1007,7 +1007,7 @@ class StripeModel(StripeBaseModel):
             djstripe_settings.get_default_api_key(livemode=kwargs.get("livemode")),
         )
         data = cls.stripe_class.retrieve(id=id, **kwargs)
-        instance = cls.sync_from_stripe_data(data)
+        instance = cls.sync_from_stripe_data(data, api_key=kwargs.get("api_key"))
         return instance
 
     def __str__(self):
