@@ -10,6 +10,7 @@ from stripe.error import StripeError
 
 from djstripe import webhooks
 from djstripe.models import Event, Transfer
+from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_CUSTOMER,
@@ -76,7 +77,9 @@ class EventTest(TestCase):
         mock_objects.filter.assert_called_once_with(id=mock_data["id"])
         mock_objects.filter.return_value.exists.assert_called_once_with()
         mock_atomic.return_value.__enter__.assert_called_once_with()
-        mock__create_from_stripe_object.assert_called_once_with(mock_data, api_key=None)
+        mock__create_from_stripe_object.assert_called_once_with(
+            mock_data, api_key=djstripe_settings.STRIPE_SECRET_KEY
+        )
         (
             mock__create_from_stripe_object.return_value.invoke_webhook_handlers
         ).assert_called_once_with()
@@ -138,7 +141,9 @@ class EventTest(TestCase):
         ) as create_from_stripe_object_mock:
             Event.process(data=event_data)
 
-        create_from_stripe_object_mock.assert_called_once_with(event_data, api_key=None)
+        create_from_stripe_object_mock.assert_called_once_with(
+            event_data, api_key=djstripe_settings.STRIPE_SECRET_KEY
+        )
         self.assertFalse(
             Event.objects.filter(id=FAKE_EVENT_TRANSFER_CREATED["id"]).exists()
         )

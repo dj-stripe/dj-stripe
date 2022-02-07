@@ -1295,7 +1295,7 @@ class Customer(StripeModel):
             # by id when we look at the default_source (we need the source type).
             for source in customer_sources["data"]:
                 obj, _ = DjstripePaymentMethod._get_or_create_source(
-                    source, source["object"]
+                    source, source["object"], api_key=api_key
                 )
                 sources[source["id"]] = obj
 
@@ -1531,7 +1531,7 @@ class Event(StripeModel):
             self.request_id = request_obj or ""
 
     @classmethod
-    def process(cls, data, api_key: str = None):
+    def process(cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY):
         qs = cls.objects.filter(id=data["id"])
         if qs.exists():
             return qs.first()

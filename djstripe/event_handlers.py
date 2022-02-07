@@ -407,6 +407,6 @@ def _handle_crud_like_event(
             stripe_account=stripe_account, api_key=event.default_api_key
         )
         # create or update the object from the retrieved Stripe Data
-        obj = target_cls.sync_from_stripe_data(data)
+        obj = target_cls.sync_from_stripe_data(data, api_key=event.default_api_key)
 
     return obj
