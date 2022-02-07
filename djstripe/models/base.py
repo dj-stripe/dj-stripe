@@ -683,7 +683,9 @@ class StripeModel(StripeBaseModel):
                 # If field_name="default_source", we get_or_create the card instead.
                 cls_instance = cls(id=id_)
                 try:
-                    data = cls_instance.api_retrieve(stripe_account=stripe_account)
+                    data = cls_instance.api_retrieve(
+                        stripe_account=stripe_account, api_key=api_key
+                    )
                 except InvalidRequestError as e:
                     if "a similar object exists in" in str(e):
                         # HACK around a Stripe bug.
