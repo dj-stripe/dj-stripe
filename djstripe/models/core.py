@@ -1460,7 +1460,10 @@ class Dispute(StripeModel):
             file_upload_id = self.evidence.get(field, None)
             if file_upload_id:
                 try:
-                    File.sync_from_stripe_data(File(id=file_upload_id).api_retrieve())
+                    File.sync_from_stripe_data(
+                        File(id=file_upload_id).api_retrieve(api_key=api_key),
+                        api_key=api_key,
+                    )
                 except stripe.error.PermissionError:
                     # No permission to retrieve the data with the key
                     # Log a warning message
@@ -1472,7 +1475,9 @@ class Dispute(StripeModel):
 
         # iterate and sync every balance transaction
         for stripe_balance_transaction in self.balance_transactions:
-            BalanceTransaction.sync_from_stripe_data(stripe_balance_transaction)
+            BalanceTransaction.sync_from_stripe_data(
+                stripe_balance_transaction, api_key=api_key
+            )
 
 
 class Event(StripeModel):

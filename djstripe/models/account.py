@@ -214,7 +214,10 @@ class Account(StripeModel):
             if file_upload_id:
                 try:
                     File.sync_from_stripe_data(
-                        File(id=file_upload_id).api_retrieve(stripe_account=self.id)
+                        File(id=file_upload_id).api_retrieve(
+                            stripe_account=self.id, api_key=api_key
+                        ),
+                        api_key=api_key,
                     )
                 except stripe.error.PermissionError:
                     # No permission to retrieve the data with the key

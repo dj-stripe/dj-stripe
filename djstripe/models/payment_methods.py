@@ -722,18 +722,23 @@ class Source(StripeModel):
 
         # First, wipe default source on all customers that use this.
         Customer.objects.filter(default_source=self.id).update(default_source=None)
-
+        api_key = self.default_api_key
         try:
             # TODO - we could use the return value of sync_from_stripe_data
             #  or call its internals - self._sync/_attach_objects_hook etc here
             #  to update `self` at this point?
-            self.sync_from_stripe_data(self.api_retrieve().detach())
+            self.sync_from_stripe_data(
+                self.api_retrieve(api_key=api_key).detach(), api_key=api_key
+            )
             return True
         except (InvalidRequestError, NotImplementedError):
             # The source was already detached. Resyncing.
             # NotImplementedError is an artifact of stripe-python<2.0
             # https://github.com/stripe/stripe-python/issues/376
-            self.sync_from_stripe_data(self.api_retrieve())
+            self.sync_from_stripe_data(
+                self.api_retrieve(api_key=self.default_api_key),
+                api_key=self.default_api_key,
+            )
             return False
 
 
