@@ -844,7 +844,7 @@ class UpcomingInvoice(BaseInvoice):
             if not isinstance(tax_rate_id, str):
                 tax_rate_id = tax_rate_id["tax_rate"]
 
-            tax_rate = TaxRate._get_or_retrieve(id=tax_rate_id)
+            tax_rate = TaxRate._get_or_retrieve(id=tax_rate_id, api_key=api_key)
 
             tax_amount = DjstripeUpcomingInvoiceTotalTaxAmount(
                 invoice=self,
