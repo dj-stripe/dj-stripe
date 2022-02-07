@@ -1304,7 +1304,9 @@ class Customer(StripeModel):
         if save:
             self.save()
 
-    def _attach_objects_hook(self, cls, data, current_ids=None):
+    def _attach_objects_hook(
+        self, cls, data, current_ids=None, api_key=djstripe_settings.STRIPE_SECRET_KEY
+    ):
         # When we save a customer to Stripe, we add a reference to its Django PK
         # in the `django_account` key. If we find that, we re-attach that PK.
         subscriber_key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
@@ -1493,7 +1495,9 @@ class Event(StripeModel):
     def __str__(self):
         return f"type={self.type}, id={self.id}"
 
-    def _attach_objects_hook(self, cls, data, current_ids=None):
+    def _attach_objects_hook(
+        self, cls, data, current_ids=None, api_key=djstripe_settings.STRIPE_SECRET_KEY
+    ):
         if self.api_version is None:
             # as of api version 2017-02-14, the account.application.deauthorized
             # event sends None as api_version.

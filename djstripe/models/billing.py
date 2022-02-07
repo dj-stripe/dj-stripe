@@ -795,8 +795,12 @@ class UpcomingInvoice(BaseInvoice):
     def get_stripe_dashboard_url(self):
         return ""
 
-    def _attach_objects_hook(self, cls, data, current_ids=None):
-        super()._attach_objects_hook(cls, data, current_ids=current_ids)
+    def _attach_objects_hook(
+        self, cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY, current_ids=None
+    ):
+        super()._attach_objects_hook(
+            cls, data, api_key=api_key, current_ids=current_ids
+        )
         self._invoiceitems = cls._stripe_object_to_invoice_items(
             target_cls=InvoiceItem, data=data, invoice=self
         )
