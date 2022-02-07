@@ -1530,7 +1530,7 @@ class Subscription(StripeModel):
         the ``at_period_end`` flag will be overridden to False so that the trial ends \
         immediately and the customer's card isn't charged.
 
-        kwargs: invoice_now (bool), prorate (bool)
+        when cancelling immediately: kwargs: invoice_now (bool), prorate (bool)
         """
 
         # If plan has trial days and customer cancels before
