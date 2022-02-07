@@ -738,7 +738,13 @@ class StripeModel(StripeBaseModel):
             return cls.stripe_objects.get(id=id_), False
 
     @classmethod
-    def _stripe_object_to_customer(cls, target_cls, data, current_ids=None):
+    def _stripe_object_to_customer(
+        cls,
+        target_cls,
+        data,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        current_ids=None,
+    ):
         """
         Search the given manager for the Customer matching this object's
         ``customer`` field.
@@ -752,7 +758,7 @@ class StripeModel(StripeBaseModel):
 
         if "customer" in data and data["customer"]:
             return target_cls._get_or_create_from_stripe_object(
-                data, "customer", current_ids=current_ids
+                data, "customer", current_ids=current_ids, api_key=api_key
             )[0]
 
     @classmethod

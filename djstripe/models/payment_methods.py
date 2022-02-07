@@ -707,7 +707,7 @@ class Source(StripeModel):
 
         if current_ids is None or customer_id not in current_ids:
             customer = cls._stripe_object_to_customer(
-                target_cls=Customer, data=data, current_ids=current_ids
+                target_cls=Customer, data=data, current_ids=current_ids, api_key=api_key
             )
 
         if customer:
@@ -884,7 +884,7 @@ class PaymentMethod(StripeModel):
 
         if current_ids is None or customer_id not in current_ids:
             customer = cls._stripe_object_to_customer(
-                target_cls=Customer, data=data, current_ids=current_ids
+                target_cls=Customer, data=data, current_ids=current_ids, api_key=api_key
             )
 
         if customer:
