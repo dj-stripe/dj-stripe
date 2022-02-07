@@ -678,7 +678,7 @@ class BaseInvoice(StripeModel):
         # InvoiceItems need a saved invoice because they're associated via a
         # RelatedManager, so this must be done as part of the post save hook.
         cls._stripe_object_to_invoice_items(
-            target_cls=InvoiceItem, data=data, invoice=self
+            target_cls=InvoiceItem, data=data, invoice=self, api_key=api_key
         )
 
     @property
@@ -819,7 +819,7 @@ class UpcomingInvoice(BaseInvoice):
             cls, data, api_key=api_key, current_ids=current_ids
         )
         self._invoiceitems = cls._stripe_object_to_invoice_items(
-            target_cls=InvoiceItem, data=data, invoice=self
+            target_cls=InvoiceItem, data=data, invoice=self, api_key=api_key
         )
 
     def _attach_objects_post_save_hook(

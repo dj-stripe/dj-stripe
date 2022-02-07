@@ -844,7 +844,9 @@ class StripeModel(StripeBaseModel):
         instance.total_tax_amounts.exclude(pk__in=pks).delete()
 
     @classmethod
-    def _stripe_object_to_invoice_items(cls, target_cls, data, invoice):
+    def _stripe_object_to_invoice_items(
+        cls, target_cls, data, invoice, api_key=djstripe_settings.STRIPE_SECRET_KEY
+    ):
         """
         Retrieves InvoiceItems for an invoice.
 
@@ -889,7 +891,7 @@ class StripeModel(StripeBaseModel):
             line.setdefault("date", int(dateformat.format(invoice.created, "U")))
 
             item, _ = target_cls._get_or_create_from_stripe_object(
-                line, refetch=False, save=save
+                line, refetch=False, save=save, api_key=api_key
             )
             invoiceitems.append(item)
 
