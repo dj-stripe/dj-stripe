@@ -936,7 +936,9 @@ class StripeModel(StripeBaseModel):
         return subscriptionitems
 
     @classmethod
-    def _stripe_object_to_refunds(cls, target_cls, data, charge):
+    def _stripe_object_to_refunds(
+        cls, target_cls, data, charge, api_key=djstripe_settings.STRIPE_SECRET_KEY
+    ):
         """
         Retrieves Refunds for a charge
         :param target_cls: The target class to instantiate per refund
@@ -955,7 +957,9 @@ class StripeModel(StripeBaseModel):
         refund_objs = []
         for refund_data in refunds.auto_paging_iter():
             item, _ = target_cls._get_or_create_from_stripe_object(
-                refund_data, refetch=False
+                refund_data,
+                refetch=False,
+                api_key=api_key,
             )
             refund_objs.append(item)
 
