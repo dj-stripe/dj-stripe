@@ -694,7 +694,9 @@ class Source(StripeModel):
         data["source_data"] = data[data["type"]]
         return data
 
-    def _attach_objects_hook(self, cls, data, current_ids=None):
+    def _attach_objects_hook(
+        self, cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY, current_ids=None
+    ):
         customer = None
         # "customer" key could be like "cus_6lsBvm5rJ0zyHc" or {"id": "cus_6lsBvm5rJ0zyHc"}
         customer_id = get_id_from_stripe_data(data.get("customer"))
@@ -869,7 +871,9 @@ class PaymentMethod(StripeModel):
             return f"{enums.PaymentMethodType.humanize(self.type)} for {self.customer}"
         return f"{enums.PaymentMethodType.humanize(self.type)} is not associated with any customer"
 
-    def _attach_objects_hook(self, cls, data, current_ids=None):
+    def _attach_objects_hook(
+        self, cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY, current_ids=None
+    ):
         customer = None
         # "customer" key could be like "cus_6lsBvm5rJ0zyHc" or {"id": "cus_6lsBvm5rJ0zyHc"}
         customer_id = get_id_from_stripe_data(data.get("customer"))

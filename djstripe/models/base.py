@@ -493,7 +493,9 @@ class StripeModel(StripeBaseModel):
         """
         return "object" in data and data["object"] == cls.stripe_class.OBJECT_NAME
 
-    def _attach_objects_hook(self, cls, data, current_ids=None):
+    def _attach_objects_hook(
+        self, cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY, current_ids=None
+    ):
         """
         Gets called by this object's create and sync methods just before save.
         Use this to populate fields before the model is saved.
@@ -595,7 +597,9 @@ class StripeModel(StripeBaseModel):
             # TODO dictionary unpacking will not work if cls has any ManyToManyField
             instance = cls(**stripe_data)
 
-            instance._attach_objects_hook(cls, data, current_ids=current_ids)
+            instance._attach_objects_hook(
+                cls, data, api_key=api_key, current_ids=current_ids
+            )
 
             if save:
                 instance.save()
@@ -961,7 +965,9 @@ class StripeModel(StripeBaseModel):
             record_data = cls._stripe_object_to_record(data, api_key=api_key)
             for attr, value in record_data.items():
                 setattr(instance, attr, value)
-            instance._attach_objects_hook(cls, data, current_ids=current_ids)
+            instance._attach_objects_hook(
+                cls, data, api_key=api_key, current_ids=current_ids
+            )
             instance.save()
             instance._attach_objects_post_save_hook(cls, data)
 
