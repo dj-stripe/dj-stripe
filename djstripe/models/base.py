@@ -784,7 +784,9 @@ class StripeModel(StripeBaseModel):
         return tax_rates
 
     @classmethod
-    def _stripe_object_to_tax_rates(cls, target_cls, data):
+    def _stripe_object_to_tax_rates(
+        cls, target_cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY
+    ):
         """
         Retrieves TaxRates for a SubscriptionItem or InvoiceItem
         :param target_cls:
@@ -795,7 +797,7 @@ class StripeModel(StripeBaseModel):
 
         for tax_rate_data in data.get("tax_rates", []):
             tax_rate, _ = target_cls._get_or_create_from_stripe_object(
-                tax_rate_data, refetch=False
+                tax_rate_data, refetch=False, api_key=api_key
             )
             tax_rates.append(tax_rate)
 

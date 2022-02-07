@@ -1024,7 +1024,9 @@ class InvoiceItem(StripeModel):
         if self.pk:
             # only call .set() on saved instance (ie don't on items of UpcomingInvoice)
             self.tax_rates.set(
-                cls._stripe_object_to_tax_rates(target_cls=TaxRate, data=data)
+                cls._stripe_object_to_tax_rates(
+                    target_cls=TaxRate, data=data, api_key=api_key
+                )
             )
 
     def __str__(self):
@@ -1797,7 +1799,9 @@ class SubscriptionItem(StripeModel):
         )
 
         self.tax_rates.set(
-            cls._stripe_object_to_tax_rates(target_cls=TaxRate, data=data)
+            cls._stripe_object_to_tax_rates(
+                target_cls=TaxRate, data=data, api_key=api_key
+            )
         )
 
 
