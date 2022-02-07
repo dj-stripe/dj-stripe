@@ -193,11 +193,17 @@ class Account(StripeModel):
         id = self.settings.get("branding", {}).get("logo")
         return File.objects.filter(id=id).first() if id else None
 
-    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+    def _attach_objects_post_save_hook(
+        self,
+        cls,
+        data,
+        pending_relations=None,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+    ):
         from ..models.core import File
 
         super()._attach_objects_post_save_hook(
-            cls, data, pending_relations=pending_relations
+            cls, data, pending_relations=pending_relations, api_key=api_key
         )
 
         # Retrieve and save the Files in the settings.branding object.

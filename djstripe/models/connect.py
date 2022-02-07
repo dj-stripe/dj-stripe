@@ -249,14 +249,20 @@ class Transfer(StripeModel):
         # No Reversal
         return f"{self.human_readable_amount}"
 
-    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+    def _attach_objects_post_save_hook(
+        self,
+        cls,
+        data,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        pending_relations=None,
+    ):
         """
         Iterate over reversals on the Transfer object to create and/or sync
         TransferReversal objects
         """
 
         super()._attach_objects_post_save_hook(
-            cls, data, pending_relations=pending_relations
+            cls, data, api_key=api_key, pending_relations=pending_relations
         )
 
         # Transfer Reversals exist as a list on the Transfer Object

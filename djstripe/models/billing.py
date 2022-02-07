@@ -664,9 +664,15 @@ class BaseInvoice(StripeModel):
     def get_stripe_dashboard_url(self):
         return self.customer.get_stripe_dashboard_url()
 
-    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+    def _attach_objects_post_save_hook(
+        self,
+        cls,
+        data,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        pending_relations=None,
+    ):
         super()._attach_objects_post_save_hook(
-            cls, data, pending_relations=pending_relations
+            cls, data, api_key=api_key, pending_relations=pending_relations
         )
 
         # InvoiceItems need a saved invoice because they're associated via a
@@ -752,9 +758,15 @@ class Invoice(BaseInvoice):
         help_text="The tax rates applied to this invoice, if any.",
     )
 
-    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+    def _attach_objects_post_save_hook(
+        self,
+        cls,
+        data,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        pending_relations=None,
+    ):
         super()._attach_objects_post_save_hook(
-            cls, data, pending_relations=pending_relations
+            cls, data, api_key=api_key, pending_relations=pending_relations
         )
 
         self.default_tax_rates.set(
@@ -805,9 +817,15 @@ class UpcomingInvoice(BaseInvoice):
             target_cls=InvoiceItem, data=data, invoice=self
         )
 
-    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+    def _attach_objects_post_save_hook(
+        self,
+        cls,
+        data,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        pending_relations=None,
+    ):
         super()._attach_objects_post_save_hook(
-            cls, data, pending_relations=pending_relations
+            cls, data, api_key=api_key, pending_relations=pending_relations
         )
 
         self._default_tax_rates = cls._stripe_object_to_default_tax_rates(
@@ -990,9 +1008,15 @@ class InvoiceItem(StripeModel):
 
         return data
 
-    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+    def _attach_objects_post_save_hook(
+        self,
+        cls,
+        data,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        pending_relations=None,
+    ):
         super()._attach_objects_post_save_hook(
-            cls, data, pending_relations=pending_relations
+            cls, data, api_key=api_key, pending_relations=pending_relations
         )
 
         if self.pk:
@@ -1682,9 +1706,15 @@ class Subscription(StripeModel):
 
         return True
 
-    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+    def _attach_objects_post_save_hook(
+        self,
+        cls,
+        data,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        pending_relations=None,
+    ):
         super()._attach_objects_post_save_hook(
-            cls, data, pending_relations=pending_relations
+            cls, data, api_key=api_key, pending_relations=pending_relations
         )
 
         cls._stripe_object_to_subscription_items(
@@ -1751,9 +1781,15 @@ class SubscriptionItem(StripeModel):
         "subscription_item.",
     )
 
-    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+    def _attach_objects_post_save_hook(
+        self,
+        cls,
+        data,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        pending_relations=None,
+    ):
         super()._attach_objects_post_save_hook(
-            cls, data, pending_relations=pending_relations
+            cls, data, api_key=api_key, pending_relations=pending_relations
         )
 
         self.tax_rates.set(
