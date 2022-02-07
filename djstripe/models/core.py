@@ -441,7 +441,9 @@ class Charge(StripeModel):
             cls, data, pending_relations=pending_relations, api_key=api_key
         )
 
-        cls._stripe_object_to_refunds(target_cls=Refund, data=data, charge=self)
+        cls._stripe_object_to_refunds(
+            target_cls=Refund, data=data, charge=self, api_key=api_key
+        )
 
 
 # TODO Add Tests
