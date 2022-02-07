@@ -770,7 +770,9 @@ class Invoice(BaseInvoice):
         )
 
         self.default_tax_rates.set(
-            cls._stripe_object_to_default_tax_rates(target_cls=TaxRate, data=data)
+            cls._stripe_object_to_default_tax_rates(
+                target_cls=TaxRate, data=data, api_key=api_key
+            )
         )
 
         cls._stripe_object_set_total_tax_amounts(
@@ -829,7 +831,7 @@ class UpcomingInvoice(BaseInvoice):
         )
 
         self._default_tax_rates = cls._stripe_object_to_default_tax_rates(
-            target_cls=TaxRate, data=data
+            target_cls=TaxRate, data=data, api_key=api_key
         )
 
         total_tax_amounts = []
@@ -1722,7 +1724,9 @@ class Subscription(StripeModel):
         )
 
         self.default_tax_rates.set(
-            cls._stripe_object_to_default_tax_rates(target_cls=TaxRate, data=data)
+            cls._stripe_object_to_default_tax_rates(
+                target_cls=TaxRate, data=data, api_key=api_key
+            )
         )
 
 
