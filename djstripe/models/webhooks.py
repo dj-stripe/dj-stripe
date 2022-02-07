@@ -209,16 +209,20 @@ class WebhookEventTrigger(models.Model):
             stripe_trigger_account=stripe_account,
             webhook_endpoint=webhook_endpoint,
         )
+        api_key = (
+            stripe_account.default_api_key
+            or djstripe_settings.get_default_api_key(obj.livemode)
+        )
 
         try:
-            obj.valid = obj.validate(secret=secret)
+            obj.valid = obj.validate(secret=secret, api_key=api_key)
             if obj.valid:
                 if djstripe_settings.WEBHOOK_EVENT_CALLBACK:
                     # If WEBHOOK_EVENT_CALLBACK, pass it for processing
                     djstripe_settings.WEBHOOK_EVENT_CALLBACK(obj)
                 else:
                     # Process the item (do not save it, it'll get saved below)
-                    obj.process(save=False, api_key=stripe_account.default_api_key)
+                    obj.process(save=False, api_key=api_key)
         except Exception as e:
             max_length = WebhookEventTrigger._meta.get_field("exception").max_length
             obj.exception = str(e)[:max_length]
