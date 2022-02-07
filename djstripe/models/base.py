@@ -804,7 +804,9 @@ class StripeModel(StripeBaseModel):
         return tax_rates
 
     @classmethod
-    def _stripe_object_set_total_tax_amounts(cls, target_cls, data, instance):
+    def _stripe_object_set_total_tax_amounts(
+        cls, target_cls, data, instance, api_key=djstripe_settings.STRIPE_SECRET_KEY
+    ):
         """
         Set total tax amounts on Invoice instance
         :param target_cls:
@@ -823,7 +825,10 @@ class StripeModel(StripeBaseModel):
                 tax_rate_data = {"tax_rate": tax_rate_data}
 
             tax_rate, _ = TaxRate._get_or_create_from_stripe_object(
-                tax_rate_data, field_name="tax_rate", refetch=True
+                tax_rate_data,
+                field_name="tax_rate",
+                refetch=True,
+                api_key=api_key,
             )
             tax_amount, _ = target_cls.objects.update_or_create(
                 invoice=instance,
