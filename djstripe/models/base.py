@@ -898,7 +898,9 @@ class StripeModel(StripeBaseModel):
         return invoiceitems
 
     @classmethod
-    def _stripe_object_to_subscription_items(cls, target_cls, data, subscription):
+    def _stripe_object_to_subscription_items(
+        cls, target_cls, data, subscription, api_key=djstripe_settings.STRIPE_SECRET_KEY
+    ):
         """
         Retrieves SubscriptionItems for a subscription.
 
@@ -921,7 +923,7 @@ class StripeModel(StripeBaseModel):
         subscriptionitems = []
         for item_data in items.auto_paging_iter():
             item, _ = target_cls._get_or_create_from_stripe_object(
-                item_data, refetch=False
+                item_data, refetch=False, api_key=api_key
             )
 
             # sync the SubscriptionItem
