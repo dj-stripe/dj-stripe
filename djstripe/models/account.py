@@ -115,17 +115,15 @@ class Account(StripeModel):
         return ""
 
     @classmethod
-    def get_default_account(cls):
+    def get_default_account(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY):
         # As of API version 2020-03-02, there is no permission that can allow
         # restricted keys to call GET /v1/account
         if djstripe_settings.STRIPE_SECRET_KEY.startswith("rk_"):
             return None
 
-        account_data = cls.stripe_class.retrieve(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY
-        )
+        account_data = cls.stripe_class.retrieve(api_key=api_key)
 
-        return cls._get_or_create_from_stripe_object(account_data)[0]
+        return cls._get_or_create_from_stripe_object(account_data, api_key=api_key)[0]
 
     @classmethod
     def get_or_retrieve_for_api_key(cls, api_key: str):
