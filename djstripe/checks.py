@@ -221,3 +221,33 @@ def check_djstripe_settings_foreign_key_to_field(app_configs=None, **kwargs):
         )
 
     return messages
+
+
+@checks.register("djstripe")
+def check_webhook_event_callback_accepts_api_key(app_configs=None, **kwargs):
+    """
+    Checks if the custom callback accepts atleast 2 mandatory positional arguments
+    """
+    from inspect import signature
+
+    from .settings import djstripe_settings
+
+    messages = []
+
+    # callable can have exactly 2 arguments or
+    # if more than two, the rest need to be optional.
+    callable = djstripe_settings.WEBHOOK_EVENT_CALLBACK
+
+    if callable:
+        sig = signature(callable)
+
+        if len(sig.parameters.keys()) < 2:
+            messages.append(
+                checks.Error(
+                    f"{callable} accepts {len(sig.parameters.keys())} arguments.",
+                    hint="You may have forgotten to add api_key parameter to your custom callback.",
+                    id="djstripe.E004",
+                )
+            )
+
+    return messages
