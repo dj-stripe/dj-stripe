@@ -191,7 +191,7 @@ Examples:
 
 ```py
 # callbacks.py
-def webhook_event_callback(event):
+def webhook_event_callback(event, api_key):
     """ Dispatches the event to celery for processing. """
     from . import tasks
     # Ansychronous hand-off to celery so that we can continue immediately
