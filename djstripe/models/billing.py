@@ -642,7 +642,9 @@ class BaseInvoice(StripeModel):
         upcoming_stripe_invoice["id"] = "upcoming"
 
         return UpcomingInvoice._create_from_stripe_object(
-            upcoming_stripe_invoice, save=False
+            upcoming_stripe_invoice,
+            save=False,
+            api_key=api_key,
         )
 
     def retry(self):
