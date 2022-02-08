@@ -81,7 +81,7 @@ class Command(BaseCommand):
 
         return True, ""
 
-    def sync_model(self, model):  # noqa: C901
+    def sync_model(self, model, api_key: str):  # noqa: C901
         model_name = model.__name__
 
         should_sync, reason = self._should_sync_model(model)
@@ -89,31 +89,36 @@ class Command(BaseCommand):
             self.stderr.write(f"Skipping {model}: {reason}")
             return
 
-        self.stdout.write("Syncing {}:".format(model_name))
+        self.stdout.write(f"Syncing {model_name} for key {api_key}:")
 
         count = 0
         try:
             # todo convert get_list_kwargs into a generator to make the code memory effecient.
-            for list_kwargs in self.get_list_kwargs(model):
+            for list_kwargs in self.get_list_kwargs(model, api_key=api_key.secret):
                 stripe_account = list_kwargs.get("stripe_account", "")
 
                 if (
                     model is models.Account
-                    and stripe_account == models.Account.get_default_account().id
+                    and stripe_account
+                    == models.Account.get_default_account(api_key=api_key.secret).id
                 ):
                     # special case, since own account isn't returned by Account.api_list
                     stripe_obj = models.Account.stripe_class.retrieve(
-                        api_key=djstripe_settings.STRIPE_SECRET_KEY
+                        api_key=api_key.secret
                     )
 
-                    djstripe_obj = model.sync_from_stripe_data(stripe_obj)
+                    djstripe_obj = model.sync_from_stripe_data(
+                        stripe_obj, api_key=api_key.secret
+                    )
                     self.stdout.write(
-                        f"  id={djstripe_obj.id}, pk={djstripe_obj.pk} ({djstripe_obj} on {stripe_account})"
+                        f"  id={djstripe_obj.id}, pk={djstripe_obj.pk} ({djstripe_obj} on {stripe_account} for {api_key})"
                     )
 
                     # syncing BankAccount and Card objects of Stripe Connected Express and Custom Accounts
                     self.sync_bank_accounts_and_cards(
-                        djstripe_obj, stripe_account=stripe_account
+                        djstripe_obj,
+                        stripe_account=stripe_account,
+                        api_key=api_key.secret,
                     )
                     count += 1
 
@@ -121,13 +126,17 @@ class Command(BaseCommand):
                     for stripe_obj in model.api_list(**list_kwargs):
                         # Skip model instances that throw an error
                         try:
-                            djstripe_obj = model.sync_from_stripe_data(stripe_obj)
+                            djstripe_obj = model.sync_from_stripe_data(
+                                stripe_obj, api_key=api_key.secret
+                            )
                             self.stdout.write(
-                                f"  id={djstripe_obj.id}, pk={djstripe_obj.pk} ({djstripe_obj} on {stripe_account})"
+                                f"  id={djstripe_obj.id}, pk={djstripe_obj.pk} ({djstripe_obj} on {stripe_account} for {api_key})"
                             )
                             # syncing BankAccount and Card objects of Stripe Connected Express and Custom Accounts
                             self.sync_bank_accounts_and_cards(
-                                djstripe_obj, stripe_account=stripe_account
+                                djstripe_obj,
+                                stripe_account=stripe_account,
+                                api_key=api_key.secret,
                             )
                             count += 1
                         except Exception as e:
@@ -140,33 +149,27 @@ class Command(BaseCommand):
             if count == 0:
                 self.stdout.write("  (no results)")
             else:
-                self.stdout.write(
-                    "  Synced {count} {model_name}".format(
-                        count=count, model_name=model_name
-                    )
-                )
+                self.stdout.write(f"  Synced {count} {model_name} for {api_key}")
 
         except Exception as e:
             self.stderr.write(str(e))
 
     @classmethod
-    def get_stripe_account(cls, *args, **kwargs):
+    def get_stripe_account(cls, api_key: str, *args, **kwargs):
         """Get set of all stripe account ids including the Platform Acccount"""
         accs_set = set()
 
         # special case, since own account isn't returned by Account.api_list
-        stripe_platform_obj = models.Account.stripe_class.retrieve(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY
-        )
+        stripe_platform_obj = models.Account.stripe_class.retrieve(api_key=api_key)
         accs_set.add(stripe_platform_obj.id)
 
-        for stripe_connected_obj in models.Account.api_list(**kwargs):
+        for stripe_connected_obj in models.Account.api_list(api_key=api_key, **kwargs):
             accs_set.add(stripe_connected_obj.id)
 
         return accs_set
 
     @staticmethod
-    def get_default_list_kwargs(model, accounts_set):
+    def get_default_list_kwargs(model, accounts_set, api_key: str):
         """Returns default sequence of kwargs to sync
         all Stripe Accounts"""
 
@@ -175,13 +178,18 @@ class Command(BaseCommand):
                 {
                     "expand": [f"data.{k}" for k in model.expand_fields],
                     "stripe_account": account,
+                    "api_key": api_key,
                 }
                 for account in accounts_set
             ]
 
         else:
             default_list_kwargs = [
-                {"stripe_account": account} for account in accounts_set
+                {
+                    "stripe_account": account,
+                    "api_key": api_key,
+                }
+                for account in accounts_set
             ]
 
         return default_list_kwargs
@@ -196,8 +204,9 @@ class Command(BaseCommand):
 
         for def_kwarg in default_list_kwargs:
             stripe_account = def_kwarg.get("stripe_account")
+            api_key = def_kwarg.get("api_key")
             for stripe_customer in models.Customer.api_list(
-                stripe_account=stripe_account
+                stripe_account=stripe_account, api_key=api_key
             ):
                 for type in payment_method_types:
                     all_list_kwargs.append(
@@ -214,8 +223,9 @@ class Command(BaseCommand):
         all_list_kwargs = []
         for def_kwarg in default_list_kwargs:
             stripe_account = def_kwarg.get("stripe_account")
+            api_key = def_kwarg.get("api_key")
             for subscription in models.Subscription.api_list(
-                stripe_account=stripe_account
+                stripe_account=stripe_account, api_key=api_key
             ):
                 all_list_kwargs.append({"subscription": subscription.id, **def_kwarg})
         return all_list_kwargs
@@ -238,7 +248,10 @@ class Command(BaseCommand):
         all_list_kwargs = []
         for def_kwarg in default_list_kwargs:
             stripe_account = def_kwarg.get("stripe_account")
-            for transfer in models.Transfer.api_list(stripe_account=stripe_account):
+            api_key = def_kwarg.get("api_key")
+            for transfer in models.Transfer.api_list(
+                stripe_account=stripe_account, api_key=api_key
+            ):
                 all_list_kwargs.append({"id": transfer.id, **def_kwarg})
 
         return all_list_kwargs
@@ -250,7 +263,10 @@ class Command(BaseCommand):
         all_list_kwargs = []
         for def_kwarg in default_list_kwargs:
             stripe_account = def_kwarg.get("stripe_account")
-            for fee in models.ApplicationFee.api_list(stripe_account=stripe_account):
+            api_key = def_kwarg.get("api_key")
+            for fee in models.ApplicationFee.api_list(
+                stripe_account=stripe_account, api_key=api_key
+            ):
                 all_list_kwargs.append({"id": fee.id, **def_kwarg})
 
         return all_list_kwargs
@@ -262,7 +278,10 @@ class Command(BaseCommand):
         all_list_kwargs = []
         for def_kwarg in default_list_kwargs:
             stripe_account = def_kwarg.get("stripe_account")
-            for customer in models.Customer.api_list(stripe_account=stripe_account):
+            api_key = def_kwarg.get("api_key")
+            for customer in models.Customer.api_list(
+                stripe_account=stripe_account, api_key=api_key
+            ):
                 all_list_kwargs.append({"id": customer.id, **def_kwarg})
 
         return all_list_kwargs
@@ -274,18 +293,21 @@ class Command(BaseCommand):
         all_list_kwargs = []
         for def_kwarg in default_list_kwargs:
             stripe_account = def_kwarg.get("stripe_account")
+            api_key = def_kwarg.get("api_key")
             for subscription in models.Subscription.api_list(
-                stripe_account=stripe_account
+                stripe_account=stripe_account, api_key=api_key
             ):
                 for subscription_item in models.SubscriptionItem.api_list(
-                    subscription=subscription.id, stripe_account=stripe_account
+                    subscription=subscription.id,
+                    stripe_account=stripe_account,
+                    api_key=api_key,
                 ):
                     all_list_kwargs.append({"id": subscription_item.id, **def_kwarg})
 
         return all_list_kwargs
 
     # todo handle supoorting double + nested fields like data.invoice.subscriptions.customer etc?
-    def get_list_kwargs(self, model):
+    def get_list_kwargs(self, model, api_key: str):
         """
         Returns a sequence of kwargs dicts to pass to model.api_list
 
@@ -308,9 +330,11 @@ class Command(BaseCommand):
         # get all Stripe Accounts for the given platform account.
         # note that we need to fetch from Stripe as we have no way of knowing that the ones in the local db are up to date
         # as this can also be the first time the user runs sync.
-        accs_set = self.get_stripe_account()
+        accs_set = self.get_stripe_account(api_key=api_key)
 
-        default_list_kwargs = self.get_default_list_kwargs(model, accs_set)
+        default_list_kwargs = self.get_default_list_kwargs(
+            model, accs_set, api_key=api_key
+        )
 
         handler = list_kwarg_handlers_dict.get(
             model.__name__, lambda _: default_list_kwargs
@@ -318,14 +342,14 @@ class Command(BaseCommand):
 
         return handler(default_list_kwargs)
 
-    def sync_bank_accounts_and_cards(self, instance, *, stripe_account):
+    def sync_bank_accounts_and_cards(self, instance, *, stripe_account, api_key):
         """
         Syncs Bank Accounts and Cards for both customers and all external accounts
         """
         type = getattr(instance, "type", None)
         kwargs = {
             "id": instance.id,
-            "api_key": djstripe_settings.STRIPE_SECRET_KEY,
+            "api_key": api_key,
             "stripe_account": stripe_account,
         }
 
@@ -338,7 +362,7 @@ class Command(BaseCommand):
                 **kwargs
             ).auto_paging_iter()
 
-            self.start_sync(items, instance)
+            self.start_sync(items, instance, api_key=api_key)
         elif isinstance(instance, models.Customer):
             for object in ("card", "bank_account"):
                 kwargs["object"] = object
@@ -348,9 +372,9 @@ class Command(BaseCommand):
                     **kwargs
                 ).auto_paging_iter()
 
-                self.start_sync(items, instance)
+                self.start_sync(items, instance, api_key=api_key)
 
-    def start_sync(self, items, instance):
+    def start_sync(self, items, instance, api_key: str):
         bank_count = 0
         card_count = 0
         for item in items:
@@ -362,7 +386,7 @@ class Command(BaseCommand):
                 model = models.Card
                 card_count += 1
 
-            item_obj = model.sync_from_stripe_data(item)
+            item_obj = model.sync_from_stripe_data(item, api_key=api_key)
 
             self.stdout.write(
                 f"\tSyncing {model._meta.verbose_name} ({instance}): id={item_obj.id}, pk={item_obj.pk}"
