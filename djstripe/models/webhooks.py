@@ -219,7 +219,7 @@ class WebhookEventTrigger(models.Model):
             if obj.valid:
                 if djstripe_settings.WEBHOOK_EVENT_CALLBACK:
                     # If WEBHOOK_EVENT_CALLBACK, pass it for processing
-                    djstripe_settings.WEBHOOK_EVENT_CALLBACK(obj)
+                    djstripe_settings.WEBHOOK_EVENT_CALLBACK(obj, api_key=api_key)
                 else:
                     # Process the item (do not save it, it'll get saved below)
                     obj.process(save=False, api_key=api_key)
