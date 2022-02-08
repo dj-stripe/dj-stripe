@@ -52,8 +52,11 @@ class Command(BaseCommand):
         else:
             model_list = app_config.get_models()
 
+        # get all APIKey objects in the db
+        api_qs = models.APIKey.objects.all()
         for model in model_list:
-            self.sync_model(model)
+            for api_key in api_qs:
+                self.sync_model(model, api_key=api_key)
 
     def _should_sync_model(self, model):
         if not issubclass(model, StripeBaseModel):
