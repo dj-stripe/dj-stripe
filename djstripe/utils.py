@@ -1,10 +1,10 @@
 """
 Utility functions related to the djstripe app.
 """
-
 import datetime
 from typing import Optional
 
+import stripe
 from django.conf import settings
 from django.db.models.query import QuerySet
 from django.utils import timezone
@@ -18,14 +18,10 @@ def get_supported_currency_choices(api_key):
     :param api_key: The api key associated with the account from which to pull data.
     :type api_key: str
     """
-    import stripe
-
-    stripe.api_key = api_key
-
-    account = stripe.Account.retrieve()
-    supported_payment_currencies = stripe.CountrySpec.retrieve(account["country"])[
-        "supported_payment_currencies"
-    ]
+    account = stripe.Account.retrieve(api_key=api_key)
+    supported_payment_currencies = stripe.CountrySpec.retrieve(
+        account["country"], api_key=api_key
+    )["supported_payment_currencies"]
 
     return [(currency, currency.upper()) for currency in supported_payment_currencies]
 

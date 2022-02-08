@@ -53,8 +53,8 @@ class TestGetSupportedCurrencyChoices(TestCase):
         # Simple test to test sure that at least one currency choice tuple is returned.
 
         currency_choices = get_supported_currency_choices(None)
-        stripe_account_retrieve_mock.assert_called_once_with()
-        stripe_countryspec_retrieve_mock.assert_called_once_with("US")
+        stripe_account_retrieve_mock.assert_called_once_with(api_key=None)
+        stripe_countryspec_retrieve_mock.assert_called_once_with("US", api_key=None)
         self.assertGreaterEqual(
             len(currency_choices), 1, "Currency choices pull returned an empty list."
         )
