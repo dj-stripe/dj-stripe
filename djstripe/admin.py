@@ -857,11 +857,15 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
         "created",
         "api_version",
     )
+    actions = (_resync_instances,)
 
-    # Disable the mass-delete action for webhook endpoints.
-    # We don't want to enable deleting multiple endpoints on Stripe at once.
     def get_actions(self, request):
-        return {}
+        actions = super().get_actions(request)
+        # Disable the mass-delete action for webhook endpoints.
+        # We don't want to enable deleting multiple endpoints on Stripe at once.
+        if "delete_selected" in actions:
+            del actions["delete_selected"]
+        return actions
 
     def get_form(self, request, obj=None, **kwargs):
         if obj:

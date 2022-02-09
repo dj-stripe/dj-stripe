@@ -660,17 +660,19 @@ class TestAdminRegisteredModels(TestCase):
                 request.user = self.admin
 
                 actions = model_admin.get_actions(request)
-                models_to_ignore = self.ignore_models + ["APIKey"]
 
-                if model.__name__ not in models_to_ignore:
+                if model.__name__ not in self.ignore_models:
                     if model.__name__ == "UsageRecordSummary":
                         assert "_resync_instances" not in actions
                         assert "_resync_all_usage_record_summaries" in actions
-
                     else:
                         assert "_resync_instances" in actions
                 else:
-                    assert "_resync_instances" not in actions
+                    if model.__name__ == "WebhookEndpoint":
+                        assert "delete_selected" not in actions
+                        assert "_resync_instances" in actions
+                    else:
+                        assert "_resync_instances" not in actions
 
 
 class TestAdminInlineModels(TestCase):
