@@ -46,14 +46,15 @@ admin_display_for_field_override()
 def _resync_instances(modeladmin, request, queryset):
     """Admin Action to resync selected instances"""
     for instance in queryset:
+        api_key = instance.default_api_key
         try:
             if instance.djstripe_owner_account:
                 stripe_data = instance.api_retrieve(
-                    stripe_account=instance.djstripe_owner_account.id
+                    stripe_account=instance.djstripe_owner_account.id, api_key=api_key
                 )
             else:
                 stripe_data = instance.api_retrieve()
-            instance.__class__.sync_from_stripe_data(stripe_data)
+            instance.__class__.sync_from_stripe_data(stripe_data, api_key=api_key)
             modeladmin.message_user(
                 request, f"Successfully Synced: {instance}", level=messages.SUCCESS
             )
