@@ -97,7 +97,7 @@ class APIKey(StripeModel):
         )
         if created:
             # If it's just been created, now we can sync the account.
-            Account.sync_from_stripe_data(account_data)
+            Account.sync_from_stripe_data(account_data, api_key=self.secret)
         self.djstripe_owner_account = account
         if commit:
             self.save()

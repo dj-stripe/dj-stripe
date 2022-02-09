@@ -657,7 +657,9 @@ class BaseInvoice(StripeModel):
             updated_stripe_invoice = (
                 stripe_invoice.pay()
             )  # pay() throws an exception if the charge is not successful.
-            type(self).sync_from_stripe_data(updated_stripe_invoice)
+            type(self).sync_from_stripe_data(
+                updated_stripe_invoice, api_key=self.default_api_key
+            )
             return True
         return False
 
@@ -1206,7 +1208,8 @@ class Plan(StripeModel):
             api_kwargs["product"] = api_kwargs["product"].id
 
         stripe_plan = cls._api_create(**api_kwargs)
-        plan = cls.sync_from_stripe_data(stripe_plan)
+        api_key = api_kwargs.get("api_key") or djstripe_settings.STRIPE_SECRET_KEY
+        plan = cls.sync_from_stripe_data(stripe_plan, api_key=api_key)
 
         return plan
 
@@ -1565,7 +1568,8 @@ class Subscription(StripeModel):
 
         stripe_subscription = self._api_update(plan=plan, **kwargs)
 
-        return Subscription.sync_from_stripe_data(stripe_subscription)
+        api_key = kwargs.get("api_key") or self.default_api_key
+        return Subscription.sync_from_stripe_data(stripe_subscription, api_key=api_key)
 
     def extend(self, delta):
         """
@@ -1643,7 +1647,9 @@ class Subscription(StripeModel):
                 else:
                     raise
 
-        return Subscription.sync_from_stripe_data(stripe_subscription)
+        return Subscription.sync_from_stripe_data(
+            stripe_subscription, api_key=self.default_api_key
+        )
 
     def reactivate(self):
         """
@@ -2081,7 +2087,7 @@ class UsageRecord(StripeModel):
 
         # ! Hack: there is no way to retrieve a UsageRecord object from Stripe,
         # ! which is why we create and sync it right here
-        cls.sync_from_stripe_data(usage_stripe_data)
+        cls.sync_from_stripe_data(usage_stripe_data, api_key=api_key)
 
         return usage_stripe_data
 

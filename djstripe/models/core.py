@@ -416,7 +416,9 @@ class Charge(StripeModel):
         charge_obj = self.api_retrieve().refund(
             amount=self._calculate_refund_amount(amount=amount), reason=reason
         )
-        return self.__class__.sync_from_stripe_data(charge_obj)
+        return self.__class__.sync_from_stripe_data(
+            charge_obj, api_key=self.default_api_key
+        )
 
     def capture(self, **kwargs) -> "Charge":
         """
@@ -428,7 +430,9 @@ class Charge(StripeModel):
         """
 
         captured_charge = self.api_retrieve().capture(**kwargs)
-        return self.__class__.sync_from_stripe_data(captured_charge)
+        return self.__class__.sync_from_stripe_data(
+            captured_charge, api_key=self.default_api_key
+        )
 
     def _attach_objects_post_save_hook(
         self,
@@ -896,7 +900,8 @@ class Customer(StripeModel):
             items=_items, customer=self.id, **kwargs
         )
 
-        Subscription.sync_from_stripe_data(stripe_subscription)
+        api_key = kwargs.get("api_key") or self.default_api_key
+        Subscription.sync_from_stripe_data(stripe_subscription, api_key=api_key)
 
     def charge(
         self,
@@ -935,7 +940,8 @@ class Customer(StripeModel):
             **kwargs,
         )
 
-        return Charge.sync_from_stripe_data(stripe_charge)
+        api_key = kwargs.get("api_key") or self.default_api_key
+        return Charge.sync_from_stripe_data(stripe_charge, api_key=api_key)
 
     def add_invoice_item(
         self,
@@ -1010,7 +1016,9 @@ class Customer(StripeModel):
             subscription=subscription,
         )
 
-        return InvoiceItem.sync_from_stripe_data(stripe_invoiceitem)
+        return InvoiceItem.sync_from_stripe_data(
+            stripe_invoiceitem, api_key=self.default_api_key
+        )
 
     def add_card(self, source, set_default=True):
         """
@@ -1070,7 +1078,7 @@ class Customer(StripeModel):
             # 1) sets self.default_payment_method (we rely on logic in
             # Customer._manipulate_stripe_object_hook to do this)
             # 2) updates self.invoice_settings.default_payment_methods
-            self.sync_from_stripe_data(stripe_customer)
+            self.sync_from_stripe_data(stripe_customer, api_key=self.default_api_key)
             self.refresh_from_db()
 
         return payment_method
@@ -1258,7 +1266,9 @@ class Customer(StripeModel):
         stripe_customer = self.api_retrieve()
         stripe_customer["coupon"] = coupon
         stripe_customer.save(idempotency_key=idempotency_key)
-        return self.__class__.sync_from_stripe_data(stripe_customer)
+        return self.__class__.sync_from_stripe_data(
+            stripe_customer, api_key=self.default_api_key
+        )
 
     def upcoming_invoice(self, **kwargs):
         """Gets the upcoming preview invoice (singular) for this customer.
@@ -1346,26 +1356,30 @@ class Customer(StripeModel):
     def _sync_invoices(self, **kwargs):
         from .billing import Invoice
 
+        api_key = kwargs.get("api_key") or self.default_api_key
         for stripe_invoice in Invoice.api_list(customer=self.id, **kwargs):
-            Invoice.sync_from_stripe_data(stripe_invoice)
+            Invoice.sync_from_stripe_data(stripe_invoice, api_key=api_key)
 
     def _sync_charges(self, **kwargs):
+        api_key = kwargs.get("api_key") or self.default_api_key
         for stripe_charge in Charge.api_list(customer=self.id, **kwargs):
-            Charge.sync_from_stripe_data(stripe_charge)
+            Charge.sync_from_stripe_data(stripe_charge, api_key=api_key)
 
     def _sync_cards(self, **kwargs):
         from .payment_methods import Card
 
+        api_key = kwargs.get("api_key") or self.default_api_key
         for stripe_card in Card.api_list(customer=self, **kwargs):
-            Card.sync_from_stripe_data(stripe_card)
+            Card.sync_from_stripe_data(stripe_card, api_key=api_key)
 
     def _sync_subscriptions(self, **kwargs):
         from .billing import Subscription
 
+        api_key = kwargs.get("api_key") or self.default_api_key
         for stripe_subscription in Subscription.api_list(
             customer=self.id, status="all", **kwargs
         ):
-            Subscription.sync_from_stripe_data(stripe_subscription)
+            Subscription.sync_from_stripe_data(stripe_subscription, api_key=api_key)
 
 
 class Dispute(StripeModel):
@@ -2265,7 +2279,9 @@ class Price(StripeModel):
             api_kwargs["product"] = api_kwargs["product"].id
 
         stripe_price = cls._api_create(**api_kwargs)
-        price = cls.sync_from_stripe_data(stripe_price)
+
+        api_key = api_kwargs.get("api_key") or djstripe_settings.STRIPE_SECRET_KEY
+        price = cls.sync_from_stripe_data(stripe_price, api_key=api_key)
 
         return price
 
