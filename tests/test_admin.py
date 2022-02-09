@@ -170,7 +170,8 @@ class TestAdminCustomActions:
         if djstripe_owner_account_exists:
             # assert in case djstripe_owner_account exists that kwargs are not empty
             assert self.kwargs_called_with == {
-                "stripe_account": instance.djstripe_owner_account.id
+                "stripe_account": instance.djstripe_owner_account.id,
+                "api_key": instance.default_api_key,
             }
         else:
             # assert in case djstripe_owner_account does not exist that kwargs are empty
