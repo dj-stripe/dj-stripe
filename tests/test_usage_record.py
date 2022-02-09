@@ -171,4 +171,6 @@ class TestUsageRecord(AssertStripeFksMixin, TestCase):
         )
 
         # assert usage_record_creation_mock was called as expected
-        sync_from_stripe_data_mock.assert_called_once_with(fake_usage_data)
+        sync_from_stripe_data_mock.assert_called_once_with(
+            fake_usage_data, api_key=djstripe_settings.STRIPE_SECRET_KEY
+        )

@@ -924,7 +924,7 @@ class PaymentMethod(StripeModel):
         stripe_payment_method = stripe.PaymentMethod.attach(
             payment_method, customer=customer, **extra_kwargs
         )
-        return cls.sync_from_stripe_data(stripe_payment_method)
+        return cls.sync_from_stripe_data(stripe_payment_method, api_key=api_key)
 
     def detach(self):
         """

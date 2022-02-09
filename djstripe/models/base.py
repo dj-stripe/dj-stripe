@@ -927,7 +927,7 @@ class StripeModel(StripeBaseModel):
             )
 
             # sync the SubscriptionItem
-            target_cls.sync_from_stripe_data(item_data)
+            target_cls.sync_from_stripe_data(item_data, api_key=api_key)
 
             pks.append(item.pk)
             subscriptionitems.append(item)
