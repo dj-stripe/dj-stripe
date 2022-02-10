@@ -1590,18 +1590,21 @@ class Subscription(StripeModel):
 
         return self.update(proration_behavior="none", trial_end=period_end)
 
-    def cancel(self, at_period_end: bool = False):
+    def cancel(self, at_period_end: bool = False, **kwargs):
         """
         Cancels this subscription. If you set the at_period_end parameter to true,
         the subscription will remain active until the end of the period, at which point
         it will be canceled and not renewed. By default, the subscription is terminated
         immediately. In either case, the customer will not be charged again for
-        the subscription. Note, however, that any pending invoice items that you've
-        created will still be charged for at the end of the period unless manually
-        deleted. If you've set the subscription to cancel at period end,
-        any pending prorations will also be left in place and collected at the end of
-        the period, but if the subscription is set to cancel immediately,
-        pending prorations will be removed.
+        the subscription. Note, however, that any pending invoice items or metered
+        usage will still be charged at the end of the period unless manually
+        deleted.
+
+        Depending on how `proration_behavior` is set, any pending prorations will
+        also be left in place and collected at the end of the period.
+        However, if the subscription is set to cancel immediately, you can pass the
+        `prorate` and `invoice_now` flags in `kwargs` to configure how the pending
+        metered usage is invoiced and how proration must work.
 
         By default, all unpaid invoices for the customer will be closed upon
         subscription cancellation. We do this in order to prevent unexpected payment
@@ -1630,7 +1633,7 @@ class Subscription(StripeModel):
             stripe_subscription = self._api_update(cancel_at_period_end=True)
         else:
             try:
-                stripe_subscription = self._api_delete()
+                stripe_subscription = self._api_delete(**kwargs)
             except InvalidRequestError as exc:
                 if "No such subscription:" in str(exc):
                     # cancel() works by deleting the subscription. The object still
