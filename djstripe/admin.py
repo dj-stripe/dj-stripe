@@ -2,7 +2,7 @@
 Django Administration interface definitions
 """
 import json
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 from urllib.parse import urljoin
 
 import stripe
@@ -11,6 +11,7 @@ from django.contrib import admin, messages
 from django.contrib.admin import helpers
 from django.contrib.admin.utils import display_for_field, display_for_value
 from django.core.management import call_command
+from django.db import IntegrityError, transaction
 from django.urls import reverse
 from jsonfield import JSONField
 from stripe.error import AuthenticationError, InvalidRequestError
@@ -345,6 +346,17 @@ class APIKeyAdmin(admin.ModelAdmin):
         if obj is None:
             return APIKeyAdminCreateForm
         return super().get_form(request, obj, **kwargs)
+
+    def save_model(self, request: Any, obj, form: Any, change: Any) -> None:
+        try:
+            # for non-existent Platform Accounts, because of Account._find_owner_account()
+            # it will try to retrieve by api_key, Account.get_or_retrieve_for_api_key().
+            # Account.get_or_retrieve_for_api_key will create this APIKey! This would cause
+            # an IntegrityError as the APIKey gets created before this form gets saved
+            with transaction.atomic():
+                obj.save()
+        except IntegrityError:
+            pass
 
 
 @admin.register(models.BalanceTransaction)
