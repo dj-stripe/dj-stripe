@@ -26,9 +26,7 @@ from .forms import (
     WebhookEndpointAdminCreateForm,
     WebhookEndpointAdminEditForm,
 )
-<<<<<<< HEAD
 from .utils import ReadOnlyMixin, get_forward_relation_fields_for_model
-=======
 from .utils import (
     ReadOnlyMixin,
     custom_display_for_JSONfield,
@@ -44,7 +42,6 @@ def admin_display_for_field_override():
 
 # execute override
 admin_display_for_field_override()
->>>>>>> 6219da47 (Added warning about unregistered admin models)
 
 
 @admin.register(models.IdempotencyKey)
