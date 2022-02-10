@@ -5,7 +5,7 @@ from .. import enums
 from ..enums import APIKeyType
 from ..fields import JSONField, StripeCurrencyCodeField, StripeEnumField
 from ..settings import djstripe_settings
-from .api import APIKey
+from .api import APIKey, get_api_key_details_by_prefix
 from .base import StripeModel, logger
 
 
@@ -203,6 +203,19 @@ class Account(StripeModel):
         super()._attach_objects_post_save_hook(
             cls, data, pending_relations=pending_relations, api_key=api_key
         )
+
+        # set the livemode if not returned by data
+        if "livemode" not in data.keys() and self.djstripe_owner_account is not None:
+
+            # Platform Account
+            if self == self.djstripe_owner_account:
+                self.livemode = None
+            else:
+                # Connected Account
+                _, self.livemode = get_api_key_details_by_prefix(api_key)
+
+        # save the updates
+        self.save()
 
         # Retrieve and save the Files in the settings.branding object.
         for field in "icon", "logo":
