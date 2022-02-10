@@ -3,7 +3,7 @@ from base64 import b64encode
 from uuid import uuid4
 
 from django.core.validators import RegexValidator
-from django.db import models
+from django.db import IntegrityError, models, transaction
 from django.forms import ValidationError
 
 from ..enums import APIKeyType
@@ -100,7 +100,14 @@ class APIKey(StripeModel):
             Account.sync_from_stripe_data(account_data, api_key=self.secret)
         self.djstripe_owner_account = account
         if commit:
-            self.save()
+            try:
+                # for non-existent accounts, due to djstripe_owner_account search for the
+                # accounts themselves, trigerred by this method, the APIKey gets created before this method
+                # can "commit". This results in an Integrity Error
+                with transaction.atomic():
+                    self.save()
+            except IntegrityError:
+                pass
 
     @property
     def secret_redacted(self) -> str:
