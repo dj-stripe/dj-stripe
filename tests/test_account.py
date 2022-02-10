@@ -13,6 +13,8 @@ from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_ACCOUNT,
+    FAKE_CUSTOM_ACCOUNT,
+    FAKE_EXPRESS_ACCOUNT,
     FAKE_FILEUPLOAD_ICON,
     FAKE_FILEUPLOAD_LOGO,
     FAKE_PLATFORM_ACCOUNT,
@@ -164,7 +166,8 @@ class TestAccount(AssertStripeFksMixin, TestCase):
         fake_account["settings"]["branding"]["icon"] = None
         account_retrieve_mock.return_value = fake_account
 
-        Account.sync_from_stripe_data(fake_account)
+        account = Account.sync_from_stripe_data(fake_account)
+        assert account.livemode is False
 
         fileupload_retrieve_mock.assert_called_with(
             id=fake_account["settings"]["branding"]["logo"],
@@ -224,7 +227,7 @@ class TestAccount(AssertStripeFksMixin, TestCase):
         )
 
 
-class TestAccountStr:
+class TestAccountMethods:
     @pytest.mark.parametrize(
         (
             "business_profile_update",
@@ -283,6 +286,102 @@ class TestAccountStr:
 
         account = Account.sync_from_stripe_data(fake_account)
         assert str(account) == "<id=acct_1032D82eZvKYlo2C>"
+
+    @override_settings(
+        STRIPE_SECRET_KEY="sk_live_XXXXXXXXXXXXXXXXXXXX5678",
+        STRIPE_LIVE_MODE=True,
+    )
+    @pytest.mark.parametrize(
+        "_account,is_platform",
+        [
+            (deepcopy(FAKE_ACCOUNT), False),
+            (deepcopy(FAKE_CUSTOM_ACCOUNT), False),
+            (deepcopy(FAKE_EXPRESS_ACCOUNT), False),
+            (deepcopy(FAKE_PLATFORM_ACCOUNT), True),
+        ],
+    )
+    @patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
+    @patch(
+        "stripe.File.retrieve",
+        return_value=deepcopy(FAKE_FILEUPLOAD_LOGO),
+        autospec=True,
+    )
+    def test_livemode_populates_correctly_for_livemode(
+        self,
+        fileupload_retrieve_mock,
+        account_retrieve_mock,
+        _account,
+        is_platform,
+    ):
+        fake_account = _account
+        fake_account["settings"]["branding"]["icon"] = None
+        account_retrieve_mock.return_value = fake_account
+
+        platform_account = FAKE_PLATFORM_ACCOUNT.create()
+
+        # Account.get_or_retrieve_for_api_key is called and since the passed in api_key doesn't have an owner acount,
+        # key is refreshed and the current mocked _account is assigned as the owner account.
+        # This essentially turns all these cases into Platform Account cases.
+        # And that is why Account.get_or_retrieve_for_api_key is patched
+        with patch.object(
+            Account, "get_or_retrieve_for_api_key", return_value=platform_account
+        ):
+
+            account = Account.sync_from_stripe_data(
+                fake_account, api_key=djstripe_settings.STRIPE_SECRET_KEY
+            )
+            assert account.djstripe_owner_account == platform_account
+
+            if is_platform is True:
+                assert account.livemode is None
+            else:
+                assert account.livemode is True
+
+    @override_settings(
+        STRIPE_SECRET_KEY="sk_test_XXXXXXXXXXXXXXXXXXXX5678",
+        STRIPE_LIVE_MODE=False,
+    )
+    @pytest.mark.parametrize(
+        "_account,is_platform",
+        [
+            (deepcopy(FAKE_ACCOUNT), False),
+            (deepcopy(FAKE_CUSTOM_ACCOUNT), False),
+            (deepcopy(FAKE_EXPRESS_ACCOUNT), False),
+            (deepcopy(FAKE_PLATFORM_ACCOUNT), True),
+        ],
+    )
+    @patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
+    @patch(
+        "stripe.File.retrieve",
+        return_value=deepcopy(FAKE_FILEUPLOAD_LOGO),
+        autospec=True,
+    )
+    def test_livemode_populates_correctly_for_testmode(
+        self, fileupload_retrieve_mock, account_retrieve_mock, _account, is_platform
+    ):
+        fake_account = _account
+        fake_account["settings"]["branding"]["icon"] = None
+        account_retrieve_mock.return_value = fake_account
+
+        platform_account = FAKE_PLATFORM_ACCOUNT.create()
+
+        # Account.get_or_retrieve_for_api_key is called and since the passed in api_key doesn't have an owner acount,
+        # key is refreshed and the current mocked _account is assigned as the owner account.
+        # This essentially turns all these cases into Platform Account cases.
+        # And that is why Account.get_or_retrieve_for_api_key is patched
+        with patch.object(
+            Account, "get_or_retrieve_for_api_key", return_value=platform_account
+        ):
+
+            account = Account.sync_from_stripe_data(
+                fake_account, api_key=djstripe_settings.STRIPE_SECRET_KEY
+            )
+            assert account.djstripe_owner_account == platform_account
+
+            if is_platform is True:
+                assert account.livemode is None
+            else:
+                assert account.livemode is False
 
 
 class TestAccountRestrictedKeys(TestCase):
