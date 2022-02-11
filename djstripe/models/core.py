@@ -2419,3 +2419,7 @@ class Refund(StripeModel):
         return (
             f"{self.human_readable_amount} ({enums.RefundStatus.humanize(self.status)})"
         )
+
+    @property
+    def human_readable_amount(self) -> str:
+        return get_friendly_currency_amount(self.amount / 100, self.currency)
