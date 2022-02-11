@@ -1906,6 +1906,10 @@ class PaymentIntent(StripeModel):
 
         return self.api_retrieve(api_key=api_key).confirm(**kwargs)
 
+    @property
+    def human_readable_amount(self) -> str:
+        return get_friendly_currency_amount(self.amount / 100, self.currency)
+
 
 class SetupIntent(StripeModel):
     """

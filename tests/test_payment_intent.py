@@ -10,6 +10,7 @@ from django.test import TestCase
 
 from djstripe.enums import PaymentIntentStatus
 from djstripe.models import Account, Customer, PaymentIntent
+from djstripe.utils import get_friendly_currency_amount
 
 from . import (
     FAKE_ACCOUNT,
@@ -112,32 +113,27 @@ class TestStrPaymentIntent:
         if fake_intent_data.get("invoice"):
             assert pi.invoice is not None
 
-        account = Account.objects.filter(id=fake_intent_data["on_behalf_of"]).first()
-        customer = Customer.objects.filter(id=fake_intent_data["customer"]).first()
-
         if has_account and has_customer:
 
             assert (
-                f"{pi.human_readable_amount} ({PaymentIntentStatus.humanize(fake_intent_data['status'])}) "
-                f"for {account} "
-                f"by {customer}"
-            ) == str(pi)
+                str(pi)
+                == "$1902.00 USD (The funds are in your account.) for dj-stripe by Michael Smith"
+            )
 
         elif has_account and not has_customer:
 
             assert (
-                f"{pi.human_readable_amount} for {account}. {PaymentIntentStatus.humanize(fake_intent_data['status'])}"
-            ) == str(pi)
+                str(pi)
+            ) == "$1902.00 USD for dj-stripe. The funds are in your account."
 
         elif has_customer and not has_account:
 
             assert (
-                f"{pi.human_readable_amount} by {customer}. {PaymentIntentStatus.humanize(fake_intent_data['status'])}"
-            ) == str(pi)
+                str(pi)
+            ) == "$20.00 USD by Michael Smith. The funds are in your account."
         elif not has_customer and not has_account:
-            f"{pi.human_readable_amount} ({PaymentIntentStatus.humanize(fake_intent_data['status'])})" == str(
-                pi
-            )
+
+            assert str(pi) == "$20.00 USD (The funds are in your account.)"
 
 
 class PaymentIntentTest(AssertStripeFksMixin, TestCase):
