@@ -66,15 +66,13 @@ class TestTransferStr:
         transfer = Transfer.sync_from_stripe_data(fake_transfer_data)
 
         if fake_transfer_data["reversed"]:
-            assert f"{transfer.human_readable_amount} Reversed" == str(transfer)
+            assert "$0.01 USD Reversed" == str(transfer)
 
         elif fake_transfer_data["amount_reversed"]:
-            assert f"{transfer.human_readable_amount} Partially Reversed" == str(
-                transfer
-            )
+            assert "$0.01 USD Partially Reversed" == str(transfer)
 
         else:
-            assert f"{transfer.human_readable_amount}" == str(transfer)
+            assert "$0.01 USD" == str(transfer)
 
 
 class TestTransfer(AssertStripeFksMixin, TestCase):
