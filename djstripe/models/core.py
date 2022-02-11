@@ -1503,6 +1503,10 @@ class Dispute(StripeModel):
                 stripe_balance_transaction, api_key=api_key
             )
 
+    @property
+    def human_readable_amount(self) -> str:
+        return get_friendly_currency_amount(self.amount / 100, self.currency)
+
 
 class Event(StripeModel):
     """
