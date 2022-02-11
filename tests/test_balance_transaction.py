@@ -9,7 +9,6 @@ from django.test.testcases import TestCase
 
 from djstripe import models
 from djstripe.enums import BalanceTransactionStatus
-from djstripe.utils import get_friendly_currency_amount
 
 from . import (
     FAKE_BALANCE_TRANSACTION,
@@ -37,9 +36,9 @@ class TestBalanceTransactionStr:
             modified_balance_transaction
         )
         assert (
-            f"{get_friendly_currency_amount(modified_balance_transaction['amount'], modified_balance_transaction['currency'])}"
-            f" ({BalanceTransactionStatus.humanize(modified_balance_transaction['status'])})"
-        ) == str(balance_transaction)
+            str(balance_transaction)
+            == f"$20.00 USD ({BalanceTransactionStatus.humanize(modified_balance_transaction['status'])})"
+        )
 
 
 class TestBalanceTransactionSourceClass:
