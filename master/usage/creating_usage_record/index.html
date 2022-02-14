@@ -179,7 +179,7 @@
               
                 <h1 id="create-a-stripe-usage-record">Create a Stripe Usage Record</h1>
 <p>Usage records allow you to report customer usage and metrics to Stripe for metered billing of subscription prices</p>
-<p>Usage records created using Djstripe's [<code>UsageRecord.create()</code>][djstripe.models.UsageRecord.create] method will both create and sync the created <code>UsageRecord</code> object with your db.</p>
+<p>Usage records created using Djstripe's <a href="../../reference/project/#djstripe.models.billing.UsageRecord.create"><code>UsageRecord.create()</code></a> method will both create and sync the created <code>UsageRecord</code> object with your db.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>UsageRecord objects created directly will not sync because Stripe does not expose a way to retrieve UsageRecord objects directly. They can thus only be synced at creation time.</p>
