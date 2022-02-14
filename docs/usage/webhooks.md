@@ -35,6 +35,7 @@ dj-stripe provides the following settings to tune how your webhooks work:
 
 -   [`DJSTRIPE_WEBHOOK_VALIDATION`][djstripe.settings.DjstripeSettings.WEBHOOK_VALIDATION]
 -   [`DJSTRIPE_WEBHOOK_TOLERANCE`][djstripe.settings.DjstripeSettings.WEBHOOK_TOLERANCE]
+-   [`DJSTRIPE_WEBHOOK_EVENT_CALLBACK`][djstripe.settings.DjstripeSettings.WEBHOOK_EVENT_CALLBACK]
 
 ## Advanced usage
 
