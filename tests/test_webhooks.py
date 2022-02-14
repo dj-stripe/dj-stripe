@@ -337,7 +337,8 @@ class TestWebhookEventTrigger(TestCase):
     ):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
-        resp = self._send_event(fake_event)
+        with pytest.warns(None):
+            resp = self._send_event(fake_event)
         self.assertEqual(resp.status_code, 200)
         webhook_event_trigger = WebhookEventTrigger.objects.get()
         webhook_event_callback_mock.called_once_with(webhook_event_trigger)
@@ -364,14 +365,16 @@ class TestWebhookEventTrigger(TestCase):
     ):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
+        with pytest.warns(None):
+            resp = self._send_event(fake_event)
 
-        resp = self._send_event(fake_event)
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(Event.objects.filter(type="transfer.created").exists())
         self.assertEqual(1, Event.objects.filter(type="transfer.created").count())
 
         # Duplication
-        resp = self._send_event(fake_event)
+        with pytest.warns(None):
+            resp = self._send_event(fake_event)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(1, Event.objects.filter(type="transfer.created").count())
 
@@ -397,7 +400,8 @@ class TestWebhookEventTrigger(TestCase):
     ):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
-        resp = self._send_event(fake_event)
+        with pytest.warns(None):
+            resp = self._send_event(fake_event)
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(Event.objects.count(), 1)
@@ -432,7 +436,8 @@ class TestWebhookEventTrigger(TestCase):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         fake_event["account"] = FAKE_CUSTOM_ACCOUNT["id"]
         event_retrieve_mock.return_value = fake_event
-        resp = self._send_event(fake_event)
+        with pytest.warns(None):
+            resp = self._send_event(fake_event)
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(Event.objects.count(), 1)
@@ -466,7 +471,8 @@ class TestWebhookEventTrigger(TestCase):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
         with self.assertRaises(KeyError):
-            self._send_event(fake_event)
+            with pytest.warns(None):
+                self._send_event(fake_event)
 
         self.assertEqual(Event.objects.count(), 0)
         self.assertEqual(WebhookEventTrigger.objects.count(), 1)
