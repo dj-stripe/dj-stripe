@@ -33,9 +33,7 @@ This is not recommended as it makes the URL guessable, and may be removed in the
 
 dj-stripe provides the following settings to tune how your webhooks work:
 
--   [`DJSTRIPE_WEBHOOK_VALIDATION`][djstripe.settings.DjstripeSettings.webhook_validation]
--   [`DJSTRIPE_WEBHOOK_TOLERANCE`][djstripe.settings.DjstripeSettings.webhook_tolerance]
--   [`DJSTRIPE_WEBHOOK_EVENT_CALLBACK`][djstripe.settings.DjstripeSettings.webhook_event_callback]
+-   [`DJSTRIPE_WEBHOOK_VALIDATION`][djstripe.settings.DjstripeSettings.WEBHOOK_VALIDATION]
 
 ## Advanced usage
 
