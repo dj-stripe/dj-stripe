@@ -2,7 +2,7 @@
 
 Usage records allow you to report customer usage and metrics to Stripe for metered billing of subscription prices
 
-Usage records created using Djstripe's [`UsageRecord.create()`][djstripe.models.UsageRecord.create] method will both create and sync the created `UsageRecord` object with your db.
+Usage records created using Djstripe's [`UsageRecord.create()`][djstripe.models.billing.UsageRecord.create] method will both create and sync the created `UsageRecord` object with your db.
 
 
 !!! note

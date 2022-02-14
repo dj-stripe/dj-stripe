@@ -1,6 +1,6 @@
 # Creating individual charges
 
-On the subscriber's customer object, use the [`charge`][djstripe.models.Customer.charge] method to generate a
+On the subscriber's customer object, use the [`charge`][djstripe.models.core.Customer.charge] method to generate a
 Stripe charge. In this example, we're using the user named `admin` as the
 subscriber.
 

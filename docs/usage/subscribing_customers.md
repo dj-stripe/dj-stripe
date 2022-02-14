@@ -55,8 +55,9 @@ happens you can just call the official `stripe.Customer.subscribe()`.
 !!! tip
 Check out the following examples:
 
--   [form_valid view example](https://github.com/dj-stripe/dj-stripe/blob/6574b9c66d45dabb846ff9bb279d0cb941a51b71/tests/apps/example/views.py#L182)
--   [djstripe.models.customer.add_payment_method](https://github.com/dj-stripe/dj-stripe/blob/6574b9c66d45dabb846ff9bb279d0cb941a51b71/djstripe/models/core.py#L1037)
+-   [`form_valid view example`][tests.apps.example.views.PurchaseSubscriptionView.form_valid]
+-   [`djstripe.models.Customer.add_payment_method`][djstripe.models.core.Customer.add_payment_method]
+
 
     Note that PaymentMethods can be used instead of Cards/Source by
     substituting
