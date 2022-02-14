@@ -69,6 +69,8 @@
                 </ul>
                 <p class="caption"><span class="caption-text">Release notes</span></p>
                 <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_7_0/">dj-stripe 2.7 release notes</a>
+                    </li>
                     <li class="toctree-l1"><a class="reference internal" href="../../history/2_6_0/">dj-stripe 2.6 release notes</a>
                     </li>
                     <li class="toctree-l1"><a class="reference internal" href="../../history/2_5_0/">dj-stripe 2.5 release notes</a>
@@ -192,7 +194,7 @@ painstaking manual process.</p>
 schema changes are automatically represented in the fixtures, which
 should allow us to upgrade dj-stripe's schema to match Stripe much more
 easily. This would be done by updating dj-stripe's targeted API version
-(<span class="title-ref">DEFAULT_STRIPE_API_VERSION</span>),
+(<code>DEFAULT_STRIPE_API_VERSION</code>),
 regenerating the fixtures, and updating the model to match the fixture
 changes. The down side is it's tricky to regenerate fixture files
 without introducing big changes (eg to object ids) - the script does
@@ -230,10 +232,9 @@ API fields from Stripe), do the following:</p>
 </li>
 </ol>
 <p>The command tries to avoid inconsequential changes to the fixtures (e.g
-the <span class="title-ref">created</span> timestamp) by restoring a
+the <code>created</code> timestamp) by restoring a
 whitelist of values from the existing fixtures.</p>
-<p>This functionality can be disabled by passing the parameter <span
-class="title-ref">--update-sideeffect-fields</span>.</p>
+<p>This functionality can be disabled by passing <code>--update-sideeffect-fields</code>.</p>
               
             </div>
           </div>

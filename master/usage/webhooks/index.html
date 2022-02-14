@@ -69,6 +69,8 @@
                 </ul>
                 <p class="caption"><span class="caption-text">Release notes</span></p>
                 <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_7_0/">dj-stripe 2.7 release notes</a>
+                    </li>
                     <li class="toctree-l1"><a class="reference internal" href="../../history/2_6_0/">dj-stripe 2.6 release notes</a>
                     </li>
                     <li class="toctree-l1"><a class="reference internal" href="../../history/2_5_0/">dj-stripe 2.5 release notes</a>
@@ -88,9 +90,13 @@
                 <ul class="current">
                     <li class="toctree-l1 current"><a class="reference internal current" href="./">Using Stripe Webhooks</a>
     <ul class="current">
-    <li class="toctree-l2"><a class="reference internal" href="#available-settings">Available settings</a>
+    <li class="toctree-l2"><a class="reference internal" href="#setting-up-a-new-webhook-endpoint-in-dj-stripe">Setting up a new webhook endpoint in dj-stripe</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#using-webhooks-in-dj-stripe">Using webhooks in dj-stripe</a>
+    <li class="toctree-l2"><a class="reference internal" href="#legacy-setup">Legacy setup</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#extra-configuration">Extra configuration</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#advanced-usage">Advanced usage</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#official-documentation">Official documentation</a>
     </li>
@@ -180,16 +186,34 @@
             <div class="section">
               
                 <h1 id="using-stripe-webhooks">Using Stripe Webhooks</h1>
-<h2 id="available-settings">Available settings</h2>
+<h2 id="setting-up-a-new-webhook-endpoint-in-dj-stripe">Setting up a new webhook endpoint in dj-stripe</h2>
+<p>As of dj-stripe 2.7.0, dj-stripe can create its own webhook endpoints on Stripe from the
+Django administration.</p>
+<p>Create a new webhook endpoint from the Django administration by going to dj-stripe
+-&gt; Webhook endpoints -&gt; Add webhook endpoint (or <code>/admin/djstripe/webhookendpoint/add/</code>).</p>
+<p>From there, you can choose an account to create the endpoint for.
+If no account is chosen, the default Stripe API key will be used to create the endpoint.
+You can also choose to create the endpoint in test mode or live mode.</p>
+<p>You may want to change the base URL of the endpoint. This field will be prefilled with
+the current site. If you're running on the local development server, you may see
+<code>http://localhost:8000</code> or similar in there. Stripe won't let you save webhook endpoints
+with such a value, so you will want to change it to a real website URL.</p>
+<p>When saved from the admin, the endpoint will be created in Stripe with a dj-stripe
+specific UUID which will be part of the URL, making it impossible to guess externally
+by brute-force.</p>
+<h2 id="legacy-setup">Legacy setup</h2>
+<p>Before dj-stripe 2.7.0, dj-stripe included a global webhook endpoint URL, which uses the
+setting <a href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_SECRET"><code>DJSTRIPE_WEBHOOK_SECRET</code></a>
+to validate incoming webhooks.</p>
+<p>This is not recommended as it makes the URL guessable, and may be removed in the future.</p>
+<h2 id="extra-configuration">Extra configuration</h2>
 <p>dj-stripe provides the following settings to tune how your webhooks work:</p>
 <ul>
-<li><a href="../../reference/settings/#djstripe.settings.DjstripeSettings.DJSTRIPE_WEBHOOK_URL"><code>DJSTRIPE_WEBHOOK_URL</code></a></li>
-<li><a href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_SECRET"><code>DJSTRIPE_WEBHOOK_SECRET</code></a></li>
 <li><a href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_VALIDATION"><code>DJSTRIPE_WEBHOOK_VALIDATION</code></a></li>
 <li><a href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_TOLERANCE"><code>DJSTRIPE_WEBHOOK_TOLERANCE</code></a></li>
 <li><a href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_EVENT_CALLBACK"><code>DJSTRIPE_WEBHOOK_EVENT_CALLBACK</code></a></li>
 </ul>
-<h2 id="using-webhooks-in-dj-stripe">Using webhooks in dj-stripe</h2>
+<h2 id="advanced-usage">Advanced usage</h2>
 <p>dj-stripe comes with native support for webhooks as event listeners.</p>
 <p>Events allow you to do things like sending an email to a customer when
 his payment has

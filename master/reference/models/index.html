@@ -69,6 +69,8 @@
                 </ul>
                 <p class="caption"><span class="caption-text">Release notes</span></p>
                 <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_7_0/">dj-stripe 2.7 release notes</a>
+                    </li>
                     <li class="toctree-l1"><a class="reference internal" href="../../history/2_6_0/">dj-stripe 2.6 release notes</a>
                     </li>
                     <li class="toctree-l1"><a class="reference internal" href="../../history/2_5_0/">dj-stripe 2.5 release notes</a>
@@ -310,19 +312,7 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.core.Dispute.stripe_class">stripe_class</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.core.Dispute.__str__">__str__()</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.core.Dispute.get_next_by_djstripe_created">get_next_by_djstripe_created()</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.core.Dispute.get_next_by_djstripe_updated">get_next_by_djstripe_updated()</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.core.Dispute.get_previous_by_djstripe_created">get_previous_by_djstripe_created()</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.core.Dispute.get_previous_by_djstripe_updated">get_previous_by_djstripe_updated()</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.core.Dispute.get_reason_display">get_reason_display()</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.core.Dispute.get_status_display">get_status_display()</a>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.core.Dispute-methods">Methods</a>
     </li>
         </ul>
     </li>
@@ -1442,6 +1432,8 @@
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.account.Account-attributes">Attributes</a>
     </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.account.Account-methods">Methods</a>
+    </li>
         </ul>
     </li>
         </ul>
@@ -1576,17 +1568,7 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.connect.Transfer.stripe_class">stripe_class</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.connect.Transfer.__str__">__str__()</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.connect.Transfer.get_next_by_djstripe_created">get_next_by_djstripe_created()</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.connect.Transfer.get_next_by_djstripe_updated">get_next_by_djstripe_updated()</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.connect.Transfer.get_previous_by_djstripe_created">get_previous_by_djstripe_created()</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.connect.Transfer.get_previous_by_djstripe_updated">get_previous_by_djstripe_updated()</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.connect.Transfer.get_source_type_display">get_source_type_display()</a>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.connect.Transfer-methods">Methods</a>
     </li>
         </ul>
     </li>
@@ -1601,6 +1583,8 @@
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.connect.TransferReversal.djstripe_owner_account">djstripe_owner_account</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.connect.TransferReversal.expand_fields">expand_fields</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.connect.TransferReversal.stripe_dashboard_item_name">stripe_dashboard_item_name</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.connect.TransferReversal.transfer">transfer</a>
     </li>
@@ -1700,6 +1684,8 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.webhooks.WebhookEndpoint.status">status</a>
     </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.webhooks.WebhookEndpoint.stripe_dashboard_item_name">stripe_dashboard_item_name</a>
+    </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.webhooks.WebhookEndpoint.url">url</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.webhooks.WebhookEndpoint.DoesNotExist">DoesNotExist</a>
@@ -1751,6 +1737,8 @@
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.webhooks.WebhookEventTrigger.updated">updated</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.webhooks.WebhookEventTrigger.valid">valid</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.webhooks.WebhookEventTrigger.webhook_endpoint">webhook_endpoint</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.webhooks.WebhookEventTrigger.DoesNotExist">DoesNotExist</a>
     </li>
@@ -3684,7 +3672,9 @@ created a charge with the capture option set to False.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">captured_charge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_retrieve</span><span class="p">()</span><span class="o">.</span><span class="n">capture</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">captured_charge</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span>
+        <span class="n">captured_charge</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span>
+    <span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -3889,7 +3879,9 @@ created a charge with the capture option set to False.</p>
     <span class="n">charge_obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_retrieve</span><span class="p">()</span><span class="o">.</span><span class="n">refund</span><span class="p">(</span>
         <span class="n">amount</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_calculate_refund_amount</span><span class="p">(</span><span class="n">amount</span><span class="o">=</span><span class="n">amount</span><span class="p">),</span> <span class="n">reason</span><span class="o">=</span><span class="n">reason</span>
     <span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">charge_obj</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span>
+        <span class="n">charge_obj</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span>
+    <span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -5426,7 +5418,9 @@ djstripe.models.core.Customer.stripe_class        </code>
     <span class="n">stripe_customer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_retrieve</span><span class="p">()</span>
     <span class="n">stripe_customer</span><span class="p">[</span><span class="s2">&quot;coupon&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">coupon</span>
     <span class="n">stripe_customer</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">idempotency_key</span><span class="o">=</span><span class="n">idempotency_key</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_customer</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span>
+        <span class="n">stripe_customer</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span>
+    <span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -5550,7 +5544,9 @@ invoice. This is extremely useful when adding surcharges to subscriptions.</p>
         <span class="n">subscription</span><span class="o">=</span><span class="n">subscription</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">InvoiceItem</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_invoiceitem</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">InvoiceItem</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span>
+        <span class="n">stripe_invoiceitem</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span>
+    <span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -5605,7 +5601,7 @@ invoice. This is extremely useful when adding surcharges to subscriptions.</p>
         <span class="c1"># 1) sets self.default_payment_method (we rely on logic in</span>
         <span class="c1"># Customer._manipulate_stripe_object_hook to do this)</span>
         <span class="c1"># 2) updates self.invoice_settings.default_payment_methods</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_customer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_customer</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from_db</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">payment_method</span>
@@ -5713,7 +5709,8 @@ invoice. This is extremely useful when adding surcharges to subscriptions.</p>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">Charge</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_charge</span><span class="p">)</span>
+    <span class="n">api_key</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;api_key&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span>
+    <span class="k">return</span> <span class="n">Charge</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_charge</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -6276,7 +6273,8 @@ Stripe API and sync for all RelatedModels would fail</p>
         <span class="n">items</span><span class="o">=</span><span class="n">_items</span><span class="p">,</span> <span class="n">customer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span>
 
-    <span class="n">Subscription</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_subscription</span><span class="p">)</span>
+    <span class="n">api_key</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;api_key&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span>
+    <span class="n">Subscription</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_subscription</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -6728,7 +6726,7 @@ djstripe.models.core.Dispute.stripe_class        </code>
 
 
 
-
+<h4 id="djstripe.models.core.Dispute-methods">Methods</h4>
 
   <div class="doc doc-object doc-method">
 
@@ -6906,6 +6904,36 @@ djstripe.models.core.Dispute.stripe_class        </code>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_method</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
     <span class="n">keywords</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">}</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.core.Dispute.get_stripe_dashboard_url" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Dispute</span><span class="o">.</span><span class="n">get_stripe_dashboard_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+      <p>Get the stripe dashboard url for this object.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_stripe_dashboard_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Get the stripe dashboard url for this object.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_base_stripe_dashboard_url</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stripe_dashboard_item_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">payment_intent</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -7352,7 +7380,7 @@ based on event type or event sub-type.</p>
 
 
 <h5 id="djstripe.models.core.Event.process" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Event</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Event</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s1">&#39;sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX&#39;</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
@@ -7366,7 +7394,7 @@ based on event type or event sub-type.</p>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">):</span>
     <span class="n">qs</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">qs</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
         <span class="k">return</span> <span class="n">qs</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
@@ -7376,7 +7404,7 @@ based on event type or event sub-type.</p>
     <span class="c1"># next time the webhook fires.</span>
     <span class="k">with</span> <span class="n">transaction</span><span class="o">.</span><span class="n">atomic</span><span class="p">():</span>
         <span class="c1"># process the event and create an Event Object</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_create_from_stripe_object</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_create_from_stripe_object</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">invoke_webhook_handlers</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">ret</span>
 </code></pre></div>
@@ -11508,7 +11536,9 @@ djstripe.models.core.Price.stripe_class        </code>
         <span class="n">api_kwargs</span><span class="p">[</span><span class="s2">&quot;product&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">api_kwargs</span><span class="p">[</span><span class="s2">&quot;product&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">id</span>
 
     <span class="n">stripe_price</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_api_create</span><span class="p">(</span><span class="o">**</span><span class="n">api_kwargs</span><span class="p">)</span>
-    <span class="n">price</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_price</span><span class="p">)</span>
+
+    <span class="n">api_key</span> <span class="o">=</span> <span class="n">api_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;api_key&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span>
+    <span class="n">price</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_price</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">price</span>
 </code></pre></div>
@@ -16051,7 +16081,7 @@ djstripe.models.payment_methods.PaymentMethod.stripe_class        </code>
 
 
 <h5 id="djstripe.models.payment_methods.PaymentMethod._attach_objects_hook" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">_attach_objects_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">_attach_objects_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s1">&#39;sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX&#39;</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-private"><code>private</code></small>
@@ -16071,14 +16101,16 @@ Use this to populate fields before the model is saved.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_hook</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
     <span class="n">customer</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># &quot;customer&quot; key could be like &quot;cus_6lsBvm5rJ0zyHc&quot; or {&quot;id&quot;: &quot;cus_6lsBvm5rJ0zyHc&quot;}</span>
     <span class="n">customer_id</span> <span class="o">=</span> <span class="n">get_id_from_stripe_data</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;customer&quot;</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">current_ids</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">customer_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">current_ids</span><span class="p">:</span>
         <span class="n">customer</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_stripe_object_to_customer</span><span class="p">(</span>
-            <span class="n">target_cls</span><span class="o">=</span><span class="n">Customer</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="n">current_ids</span>
+            <span class="n">target_cls</span><span class="o">=</span><span class="n">Customer</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="n">current_ids</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">customer</span><span class="p">:</span>
@@ -16139,7 +16171,7 @@ Use this to populate fields before the model is saved.</p>
     <span class="n">stripe_payment_method</span> <span class="o">=</span> <span class="n">stripe</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span>
         <span class="n">payment_method</span><span class="p">,</span> <span class="n">customer</span><span class="o">=</span><span class="n">customer</span><span class="p">,</span> <span class="o">**</span><span class="n">extra_kwargs</span>
     <span class="p">)</span>
-    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_payment_method</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_payment_method</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -16309,6 +16341,34 @@ Use this to populate fields before the model is saved.</p>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_method</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
     <span class="n">keywords</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">}</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.payment_methods.PaymentMethod.get_stripe_dashboard_url" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">get_stripe_dashboard_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+      <p>Get the stripe dashboard url for this object.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_stripe_dashboard_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">customer</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">customer</span><span class="o">.</span><span class="n">get_stripe_dashboard_url</span><span class="p">()</span>
+    <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 </code></pre></div>
         </details>
     </div>
@@ -16987,7 +17047,7 @@ djstripe.models.payment_methods.Source.stripe_class        </code>
 
 
 <h5 id="djstripe.models.payment_methods.Source._attach_objects_hook" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">Source</span><span class="o">.</span><span class="n">_attach_objects_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">Source</span><span class="o">.</span><span class="n">_attach_objects_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s1">&#39;sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX&#39;</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-private"><code>private</code></small>
@@ -17007,14 +17067,16 @@ Use this to populate fields before the model is saved.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_hook</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
     <span class="n">customer</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># &quot;customer&quot; key could be like &quot;cus_6lsBvm5rJ0zyHc&quot; or {&quot;id&quot;: &quot;cus_6lsBvm5rJ0zyHc&quot;}</span>
     <span class="n">customer_id</span> <span class="o">=</span> <span class="n">get_id_from_stripe_data</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;customer&quot;</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">current_ids</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">customer_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">current_ids</span><span class="p">:</span>
         <span class="n">customer</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_stripe_object_to_customer</span><span class="p">(</span>
-            <span class="n">target_cls</span><span class="o">=</span><span class="n">Customer</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="n">current_ids</span>
+            <span class="n">target_cls</span><span class="o">=</span><span class="n">Customer</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="n">current_ids</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">customer</span><span class="p">:</span>
@@ -17087,18 +17149,23 @@ Use this to populate custom fields in a StripeModel from stripe data.</p>
 
     <span class="c1"># First, wipe default source on all customers that use this.</span>
     <span class="n">Customer</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">default_source</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">default_source</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-
+    <span class="n">api_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># TODO - we could use the return value of sync_from_stripe_data</span>
         <span class="c1">#  or call its internals - self._sync/_attach_objects_hook etc here</span>
         <span class="c1">#  to update `self` at this point?</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api_retrieve</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api_retrieve</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">except</span> <span class="p">(</span><span class="n">InvalidRequestError</span><span class="p">,</span> <span class="ne">NotImplementedError</span><span class="p">):</span>
         <span class="c1"># The source was already detached. Resyncing.</span>
         <span class="c1"># NotImplementedError is an artifact of stripe-python&lt;2.0</span>
         <span class="c1"># https://github.com/stripe/stripe-python/issues/376</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api_retrieve</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api_retrieve</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span><span class="p">),</span>
+            <span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span>
 </code></pre></div>
         </details>
@@ -18109,7 +18176,7 @@ djstripe.models.billing.Invoice.MultipleObjectsReturned        </code>
 
 
 <h5 id="djstripe.models.billing.Invoice._attach_objects_post_save_hook" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Invoice</span><span class="o">.</span><span class="n">_attach_objects_post_save_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Invoice</span><span class="o">.</span><span class="n">_attach_objects_post_save_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s1">&#39;sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX&#39;</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-private"><code>private</code></small>
@@ -18127,17 +18194,28 @@ Use this to populate fields after the model is saved.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_post_save_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_post_save_hook</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="bp">cls</span><span class="p">,</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span>
+    <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_attach_objects_post_save_hook</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="n">pending_relations</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="n">pending_relations</span>
     <span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">default_tax_rates</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">_stripe_object_to_default_tax_rates</span><span class="p">(</span><span class="n">target_cls</span><span class="o">=</span><span class="n">TaxRate</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_stripe_object_to_default_tax_rates</span><span class="p">(</span>
+            <span class="n">target_cls</span><span class="o">=</span><span class="n">TaxRate</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span>
+        <span class="p">)</span>
     <span class="p">)</span>
 
     <span class="bp">cls</span><span class="o">.</span><span class="n">_stripe_object_set_total_tax_amounts</span><span class="p">(</span>
-        <span class="n">target_cls</span><span class="o">=</span><span class="n">DjstripeInvoiceTotalTaxAmount</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="bp">self</span>
+        <span class="n">target_cls</span><span class="o">=</span><span class="n">DjstripeInvoiceTotalTaxAmount</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+        <span class="n">instance</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+        <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div>
         </details>
@@ -18928,7 +19006,7 @@ djstripe.models.billing.InvoiceItem.stripe_class        </code>
 
 
 <h5 id="djstripe.models.billing.InvoiceItem._attach_objects_post_save_hook" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">InvoiceItem</span><span class="o">.</span><span class="n">_attach_objects_post_save_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">InvoiceItem</span><span class="o">.</span><span class="n">_attach_objects_post_save_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s1">&#39;sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX&#39;</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-private"><code>private</code></small>
@@ -18946,15 +19024,23 @@ Use this to populate fields after the model is saved.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_post_save_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_post_save_hook</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="bp">cls</span><span class="p">,</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span>
+    <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_attach_objects_post_save_hook</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="n">pending_relations</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="n">pending_relations</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pk</span><span class="p">:</span>
         <span class="c1"># only call .set() on saved instance (ie don&#39;t on items of UpcomingInvoice)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tax_rates</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">_stripe_object_to_tax_rates</span><span class="p">(</span><span class="n">target_cls</span><span class="o">=</span><span class="n">TaxRate</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_stripe_object_to_tax_rates</span><span class="p">(</span>
+                <span class="n">target_cls</span><span class="o">=</span><span class="n">TaxRate</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span>
+            <span class="p">)</span>
         <span class="p">)</span>
 </code></pre></div>
         </details>
@@ -19894,7 +19980,8 @@ djstripe.models.billing.Plan.stripe_class        </code>
         <span class="n">api_kwargs</span><span class="p">[</span><span class="s2">&quot;product&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">api_kwargs</span><span class="p">[</span><span class="s2">&quot;product&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">id</span>
 
     <span class="n">stripe_plan</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_api_create</span><span class="p">(</span><span class="o">**</span><span class="n">api_kwargs</span><span class="p">)</span>
-    <span class="n">plan</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_plan</span><span class="p">)</span>
+    <span class="n">api_key</span> <span class="o">=</span> <span class="n">api_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;api_key&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span>
+    <span class="n">plan</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_plan</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">plan</span>
 </code></pre></div>
@@ -21001,7 +21088,7 @@ djstripe.models.billing.Subscription.stripe_class        </code>
 
 
 <h5 id="djstripe.models.billing.Subscription._attach_objects_post_save_hook" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Subscription</span><span class="o">.</span><span class="n">_attach_objects_post_save_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Subscription</span><span class="o">.</span><span class="n">_attach_objects_post_save_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s1">&#39;sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX&#39;</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-private"><code>private</code></small>
@@ -21019,17 +21106,25 @@ Use this to populate fields after the model is saved.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_post_save_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_post_save_hook</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="bp">cls</span><span class="p">,</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span>
+    <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_attach_objects_post_save_hook</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="n">pending_relations</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="n">pending_relations</span>
     <span class="p">)</span>
 
     <span class="bp">cls</span><span class="o">.</span><span class="n">_stripe_object_to_subscription_items</span><span class="p">(</span>
-        <span class="n">target_cls</span><span class="o">=</span><span class="n">SubscriptionItem</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">subscription</span><span class="o">=</span><span class="bp">self</span>
+        <span class="n">target_cls</span><span class="o">=</span><span class="n">SubscriptionItem</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">subscription</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span>
     <span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">default_tax_rates</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">_stripe_object_to_default_tax_rates</span><span class="p">(</span><span class="n">target_cls</span><span class="o">=</span><span class="n">TaxRate</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_stripe_object_to_default_tax_rates</span><span class="p">(</span>
+            <span class="n">target_cls</span><span class="o">=</span><span class="n">TaxRate</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span>
+        <span class="p">)</span>
     <span class="p">)</span>
 </code></pre></div>
         </details>
@@ -21044,7 +21139,7 @@ Use this to populate fields after the model is saved.</p>
 
 
 <h5 id="djstripe.models.billing.Subscription.cancel" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Subscription</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">at_period_end</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Subscription</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">at_period_end</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 
 </h5>
@@ -21055,12 +21150,14 @@ Use this to populate fields after the model is saved.</p>
 the subscription will remain active until the end of the period, at which point
 it will be canceled and not renewed. By default, the subscription is terminated
 immediately. In either case, the customer will not be charged again for
-the subscription. Note, however, that any pending invoice items that you've
-created will still be charged for at the end of the period unless manually
-deleted. If you've set the subscription to cancel at period end,
-any pending prorations will also be left in place and collected at the end of
-the period, but if the subscription is set to cancel immediately,
-pending prorations will be removed.</p>
+the subscription. Note, however, that any pending invoice items or metered
+usage will still be charged at the end of the period unless manually
+deleted.</p>
+<p>Depending on how <code>proration_behavior</code> is set, any pending prorations will
+also be left in place and collected at the end of the period.
+However, if the subscription is set to cancel immediately, you can pass the
+<code>prorate</code> and <code>invoice_now</code> flags in <code>kwargs</code> to configure how the pending
+metered usage is invoiced and how proration must work.</p>
 <p>By default, all unpaid invoices for the customer will be closed upon
 subscription cancellation. We do this in order to prevent unexpected payment
 retries once the customer has canceled a subscription. However, you can
@@ -21074,18 +21171,21 @@ subscription at all.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">at_period_end</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">at_period_end</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cancels this subscription. If you set the at_period_end parameter to true,</span>
 <span class="sd">    the subscription will remain active until the end of the period, at which point</span>
 <span class="sd">    it will be canceled and not renewed. By default, the subscription is terminated</span>
 <span class="sd">    immediately. In either case, the customer will not be charged again for</span>
-<span class="sd">    the subscription. Note, however, that any pending invoice items that you&#39;ve</span>
-<span class="sd">    created will still be charged for at the end of the period unless manually</span>
-<span class="sd">    deleted. If you&#39;ve set the subscription to cancel at period end,</span>
-<span class="sd">    any pending prorations will also be left in place and collected at the end of</span>
-<span class="sd">    the period, but if the subscription is set to cancel immediately,</span>
-<span class="sd">    pending prorations will be removed.</span>
+<span class="sd">    the subscription. Note, however, that any pending invoice items or metered</span>
+<span class="sd">    usage will still be charged at the end of the period unless manually</span>
+<span class="sd">    deleted.</span>
+
+<span class="sd">    Depending on how `proration_behavior` is set, any pending prorations will</span>
+<span class="sd">    also be left in place and collected at the end of the period.</span>
+<span class="sd">    However, if the subscription is set to cancel immediately, you can pass the</span>
+<span class="sd">    `prorate` and `invoice_now` flags in `kwargs` to configure how the pending</span>
+<span class="sd">    metered usage is invoiced and how proration must work.</span>
 
 <span class="sd">    By default, all unpaid invoices for the customer will be closed upon</span>
 <span class="sd">    subscription cancellation. We do this in order to prevent unexpected payment</span>
@@ -21114,7 +21214,7 @@ subscription at all.</p>
         <span class="n">stripe_subscription</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api_update</span><span class="p">(</span><span class="n">cancel_at_period_end</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">stripe_subscription</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api_delete</span><span class="p">()</span>
+            <span class="n">stripe_subscription</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api_delete</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">InvalidRequestError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="k">if</span> <span class="s2">&quot;No such subscription:&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">):</span>
                 <span class="c1"># cancel() works by deleting the subscription. The object still</span>
@@ -21127,7 +21227,9 @@ subscription at all.</p>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span>
 
-    <span class="k">return</span> <span class="n">Subscription</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_subscription</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Subscription</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span>
+        <span class="n">stripe_subscription</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span>
+    <span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -21717,7 +21819,8 @@ Subscriptions canceled immediately cannot be reactivated.
 
     <span class="n">stripe_subscription</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api_update</span><span class="p">(</span><span class="n">plan</span><span class="o">=</span><span class="n">plan</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">Subscription</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_subscription</span><span class="p">)</span>
+    <span class="n">api_key</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;api_key&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span>
+    <span class="k">return</span> <span class="n">Subscription</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_subscription</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -22249,7 +22352,7 @@ djstripe.models.billing.SubscriptionItem.stripe_class        </code>
 
 
 <h5 id="djstripe.models.billing.SubscriptionItem._attach_objects_post_save_hook" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">SubscriptionItem</span><span class="o">.</span><span class="n">_attach_objects_post_save_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">SubscriptionItem</span><span class="o">.</span><span class="n">_attach_objects_post_save_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s1">&#39;sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX&#39;</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-private"><code>private</code></small>
@@ -22267,13 +22370,21 @@ Use this to populate fields after the model is saved.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_post_save_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_post_save_hook</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="bp">cls</span><span class="p">,</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span>
+    <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_attach_objects_post_save_hook</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="n">pending_relations</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="n">pending_relations</span>
     <span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">tax_rates</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">_stripe_object_to_tax_rates</span><span class="p">(</span><span class="n">target_cls</span><span class="o">=</span><span class="n">TaxRate</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_stripe_object_to_tax_rates</span><span class="p">(</span>
+            <span class="n">target_cls</span><span class="o">=</span><span class="n">TaxRate</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span>
+        <span class="p">)</span>
     <span class="p">)</span>
 </code></pre></div>
         </details>
@@ -24390,7 +24501,7 @@ djstripe.models.billing.UpcomingInvoice.MultipleObjectsReturned        </code>
 
 
 <h5 id="djstripe.models.billing.UpcomingInvoice._attach_objects_hook" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">_attach_objects_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">_attach_objects_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s1">&#39;sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX&#39;</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-private"><code>private</code></small>
@@ -24410,10 +24521,14 @@ Use this to populate fields before the model is saved.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_attach_objects_hook</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="n">current_ids</span><span class="p">)</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_hook</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_attach_objects_hook</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="n">current_ids</span>
+    <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_invoiceitems</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_stripe_object_to_invoice_items</span><span class="p">(</span>
-        <span class="n">target_cls</span><span class="o">=</span><span class="n">InvoiceItem</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">invoice</span><span class="o">=</span><span class="bp">self</span>
+        <span class="n">target_cls</span><span class="o">=</span><span class="n">InvoiceItem</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">invoice</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span>
     <span class="p">)</span>
 </code></pre></div>
         </details>
@@ -24428,7 +24543,7 @@ Use this to populate fields before the model is saved.</p>
 
 
 <h5 id="djstripe.models.billing.UpcomingInvoice._attach_objects_post_save_hook" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">_attach_objects_post_save_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">_attach_objects_post_save_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s1">&#39;sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX&#39;</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-private"><code>private</code></small>
@@ -24446,13 +24561,19 @@ Use this to populate fields after the model is saved.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_post_save_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_post_save_hook</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="bp">cls</span><span class="p">,</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span>
+    <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_attach_objects_post_save_hook</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="n">pending_relations</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="n">pending_relations</span>
     <span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_default_tax_rates</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_stripe_object_to_default_tax_rates</span><span class="p">(</span>
-        <span class="n">target_cls</span><span class="o">=</span><span class="n">TaxRate</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span>
+        <span class="n">target_cls</span><span class="o">=</span><span class="n">TaxRate</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span>
     <span class="p">)</span>
 
     <span class="n">total_tax_amounts</span> <span class="o">=</span> <span class="p">[]</span>
@@ -24462,7 +24583,7 @@ Use this to populate fields after the model is saved.</p>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tax_rate_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">tax_rate_id</span> <span class="o">=</span> <span class="n">tax_rate_id</span><span class="p">[</span><span class="s2">&quot;tax_rate&quot;</span><span class="p">]</span>
 
-        <span class="n">tax_rate</span> <span class="o">=</span> <span class="n">TaxRate</span><span class="o">.</span><span class="n">_get_or_retrieve</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">tax_rate_id</span><span class="p">)</span>
+        <span class="n">tax_rate</span> <span class="o">=</span> <span class="n">TaxRate</span><span class="o">.</span><span class="n">_get_or_retrieve</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">tax_rate_id</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
 
         <span class="n">tax_amount</span> <span class="o">=</span> <span class="n">DjstripeUpcomingInvoiceTotalTaxAmount</span><span class="p">(</span>
             <span class="n">invoice</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
@@ -25243,7 +25364,7 @@ djstripe.models.billing.UsageRecord.stripe_class        </code>
 
     <span class="c1"># ! Hack: there is no way to retrieve a UsageRecord object from Stripe,</span>
     <span class="c1"># ! which is why we create and sync it right here</span>
-    <span class="bp">cls</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">usage_stripe_data</span><span class="p">)</span>
+    <span class="bp">cls</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">usage_stripe_data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">usage_stripe_data</span>
 </code></pre></div>
@@ -27411,7 +27532,7 @@ djstripe.models.account.Account.stripe_class        </code>
 
 
 
-
+<h4 id="djstripe.models.account.Account-methods">Methods</h4>
 
   <div class="doc doc-object doc-method">
 
@@ -27478,7 +27599,7 @@ djstripe.models.account.Account.stripe_class        </code>
 
 
 <h5 id="djstripe.models.account.Account.get_default_account" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">Account</span><span class="o">.</span><span class="n">get_default_account</span><span class="p">()</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">Account</span><span class="o">.</span><span class="n">get_default_account</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="s1">&#39;sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX&#39;</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
@@ -27492,17 +27613,15 @@ djstripe.models.account.Account.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/account.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span> <span class="nf">get_default_account</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">get_default_account</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">):</span>
     <span class="c1"># As of API version 2020-03-02, there is no permission that can allow</span>
     <span class="c1"># restricted keys to call GET /v1/account</span>
     <span class="k">if</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;rk_&quot;</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="n">account_data</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span>
-        <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span>
-    <span class="p">)</span>
+    <span class="n">account_data</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_or_create_from_stripe_object</span><span class="p">(</span><span class="n">account_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_or_create_from_stripe_object</span><span class="p">(</span><span class="n">account_data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 </code></pre></div>
         </details>
     </div>
@@ -27678,6 +27797,36 @@ djstripe.models.account.Account.stripe_class        </code>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_method</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
     <span class="n">keywords</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">}</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.account.Account.get_stripe_dashboard_url" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">Account</span><span class="o">.</span><span class="n">get_stripe_dashboard_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+      <p>Get the stripe dashboard url for this object.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/account.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_stripe_dashboard_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Get the stripe dashboard url for this object.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;https://dashboard.stripe.com/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">/&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;test/&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">livemode</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="si">}</span><span class="s2">dashboard&quot;</span>
+    <span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -29742,7 +29891,7 @@ djstripe.models.connect.Transfer.stripe_class        </code>
 
 
 
-
+<h4 id="djstripe.models.connect.Transfer-methods">Methods</h4>
 
   <div class="doc doc-object doc-method">
 
@@ -29909,6 +30058,35 @@ djstripe.models.connect.Transfer.stripe_class        </code>
 
 
 
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.connect.Transfer.get_stripe_dashboard_url" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">connect</span><span class="o">.</span><span class="n">Transfer</span><span class="o">.</span><span class="n">get_stripe_dashboard_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+      <p>Get the stripe dashboard url for this object.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/connect.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_stripe_dashboard_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_base_stripe_dashboard_url</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;connect/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stripe_dashboard_item_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
 
 
   </div>
@@ -30023,6 +30201,24 @@ djstripe.models.connect.TransferReversal        </code>
 
 <h5 id="djstripe.models.connect.TransferReversal.expand_fields" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">connect</span><span class="o">.</span><span class="n">TransferReversal</span><span class="o">.</span><span class="n">expand_fields</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.connect.TransferReversal.stripe_dashboard_item_name" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">connect</span><span class="o">.</span><span class="n">TransferReversal</span><span class="o">.</span><span class="n">stripe_dashboard_item_name</span></code>
 
 
 </h5>
@@ -31479,6 +31675,24 @@ djstripe.models.webhooks.WebhookEndpoint        </code>
 
 
 
+<h5 id="djstripe.models.webhooks.WebhookEndpoint.stripe_dashboard_item_name" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEndpoint</span><span class="o">.</span><span class="n">stripe_dashboard_item_name</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.webhooks.WebhookEndpoint.url" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEndpoint</span><span class="o">.</span><span class="n">url</span></code>
 
@@ -32019,6 +32233,24 @@ The 'valid' flag in this model monitors this.</p>
 
 
 
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.webhooks.WebhookEventTrigger.webhook_endpoint" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">webhook_endpoint</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
 
   <div class="doc doc-object doc-class">
 
@@ -32101,7 +32333,7 @@ djstripe.models.webhooks.WebhookEventTrigger.MultipleObjectsReturned        </co
 
 
 <h5 id="djstripe.models.webhooks.WebhookEventTrigger.from_request" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">from_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">from_request</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">webhook_endpoint</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
@@ -32121,7 +32353,7 @@ request object.</p>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span> <span class="nf">from_request</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">from_request</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">webhook_endpoint</span><span class="p">:</span> <span class="n">WebhookEndpoint</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create, validate and process a WebhookEventTrigger given a Django</span>
 <span class="sd">    request object.</span>
@@ -32144,25 +32376,34 @@ request object.</p>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">if</span> <span class="n">stripe_account</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">webhook_endpoint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">stripe_account</span> <span class="o">=</span> <span class="n">StripeModel</span><span class="o">.</span><span class="n">_find_owner_account</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">secret</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_SECRET</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">stripe_account</span> <span class="o">=</span> <span class="n">webhook_endpoint</span><span class="o">.</span><span class="n">djstripe_owner_account</span>
+        <span class="n">secret</span> <span class="o">=</span> <span class="n">webhook_endpoint</span><span class="o">.</span><span class="n">secret</span>
 
     <span class="n">obj</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
         <span class="n">headers</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">),</span>
         <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">,</span>
         <span class="n">remote_ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span>
         <span class="n">stripe_trigger_account</span><span class="o">=</span><span class="n">stripe_account</span><span class="p">,</span>
+        <span class="n">webhook_endpoint</span><span class="o">=</span><span class="n">webhook_endpoint</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">api_key</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">stripe_account</span><span class="o">.</span><span class="n">default_api_key</span>
+        <span class="ow">or</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">get_default_api_key</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">livemode</span><span class="p">)</span>
     <span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">valid</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">valid</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">secret</span><span class="o">=</span><span class="n">secret</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">valid</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_EVENT_CALLBACK</span><span class="p">:</span>
                 <span class="c1"># If WEBHOOK_EVENT_CALLBACK, pass it for processing</span>
-                <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_EVENT_CALLBACK</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_EVENT_CALLBACK</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Process the item (do not save it, it&#39;ll get saved below)</span>
-                <span class="n">obj</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">max_length</span> <span class="o">=</span> <span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="s2">&quot;exception&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max_length</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)[:</span><span class="n">max_length</span><span class="p">]</span>
@@ -32298,7 +32539,7 @@ request object.</p>
 
 
 <h5 id="djstripe.models.webhooks.WebhookEventTrigger.process" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 
 </h5>
@@ -32308,12 +32549,12 @@ request object.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     <span class="c1"># Reset traceback and exception in case of reprocessing</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">traceback</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">event</span> <span class="o">=</span> <span class="n">Event</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">json_body</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">event</span> <span class="o">=</span> <span class="n">Event</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">json_body</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">processed</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
@@ -32332,7 +32573,7 @@ request object.</p>
 
 
 <h5 id="djstripe.models.webhooks.WebhookEventTrigger.validate" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">secret</span><span class="o">=</span><span class="s1">&#39;whsec_XXXXX&#39;</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">validation_method</span><span class="o">=</span><span class="s1">&#39;verify_signature&#39;</span><span class="p">)</span></code>
 
 
 </h5>
@@ -32346,7 +32587,13 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">validate</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">secret</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_SECRET</span><span class="p">,</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_TOLERANCE</span><span class="p">,</span>
+    <span class="n">validation_method</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_VALIDATION</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The original contents of the Event message must be confirmed by</span>
 <span class="sd">    refetching it and comparing the fetched data with the original data.</span>
@@ -32366,22 +32613,19 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Test webhook received and discarded: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">local_data</span><span class="p">))</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">if</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_VALIDATION</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">validation_method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># validation disabled</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;WEBHOOK VALIDATION is disabled.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>
-    <span class="k">elif</span> <span class="p">(</span>
-        <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_VALIDATION</span> <span class="o">==</span> <span class="s2">&quot;verify_signature&quot;</span>
-        <span class="ow">and</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_SECRET</span>
-    <span class="p">):</span>
+    <span class="k">elif</span> <span class="n">validation_method</span> <span class="o">==</span> <span class="s2">&quot;verify_signature&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">secret</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot verify event signature without a secret&quot;</span><span class="p">)</span>
         <span class="c1"># HTTP headers are case-insensitive, but we store them as a dict.</span>
         <span class="n">headers</span> <span class="o">=</span> <span class="n">CaseInsensitiveMapping</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
+        <span class="n">signature</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stripe-signature&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">stripe</span><span class="o">.</span><span class="n">WebhookSignature</span><span class="o">.</span><span class="n">verify_header</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">,</span>
-                <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stripe-signature&quot;</span><span class="p">),</span>
-                <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_SECRET</span><span class="p">,</span>
-                <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_TOLERANCE</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="n">secret</span><span class="p">,</span> <span class="n">tolerance</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="n">stripe</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">SignatureVerificationError</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Failed to verify header&quot;</span><span class="p">)</span>
@@ -32399,6 +32643,33 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">local_data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">remote_data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.webhooks.WebhookEventTrigger.verify_signature" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">verify_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">secret</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">verify_signature</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">secret</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_TOLERANCE</span>
+<span class="p">):</span>
+    <span class="k">pass</span>
 </code></pre></div>
         </details>
     </div>

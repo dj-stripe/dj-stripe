@@ -9,7 +9,7 @@
   <meta name="author" content="Dj-Stripe Team">
   <link rel="canonical" href="https://dj-stripe.github.io/dj-stripe/master/history/2_7_0/">
   <link rel="shortcut icon" href="../../img/favicon.ico">
-  <title>dj-stripe 2.7.0 (2022-XX-XX) - Dj-Stripe</title>
+  <title>dj-stripe 2.7 release notes - Dj-Stripe</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
 
   <link rel="stylesheet" href="../../css/theme.css" />
@@ -20,7 +20,7 @@
   
   <script>
     // Current page data
-    var mkdocs_page_name = "dj-stripe 2.7.0 (2022-XX-XX)";
+    var mkdocs_page_name = "dj-stripe 2.7 release notes";
     var mkdocs_page_input_path = "history/2_7_0.md";
     var mkdocs_page_url = "/dj-stripe/master/history/2_7_0/";
   </script>
@@ -68,7 +68,19 @@
                     </li>
                 </ul>
                 <p class="caption"><span class="caption-text">Release notes</span></p>
-                <ul>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">dj-stripe 2.7 release notes</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#release-highlights">Release highlights</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#deprecated-features">Deprecated features</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#breaking-changes">Breaking changes</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#other-changes">Other changes</a>
+    </li>
+    </ul>
+                    </li>
                     <li class="toctree-l1"><a class="reference internal" href="../2_6_0/">dj-stripe 2.6 release notes</a>
                     </li>
                     <li class="toctree-l1"><a class="reference internal" href="../2_5_0/">dj-stripe 2.5 release notes</a>
@@ -151,8 +163,12 @@
     <li><a href="../..">Docs</a> &raquo;</li>
     
       
+        
+          <li>Release notes &raquo;</li>
+        
+      
     
-    <li>dj-stripe 2.7.0 (2022-XX-XX)</li>
+    <li>dj-stripe 2.7 release notes</li>
     <li class="wy-breadcrumbs-aside">
       
         <a href="https://github.com/dj-stripe/dj-stripe/edit/master/docs/history/2_7_0.md"
@@ -173,13 +189,18 @@
 <p>It is not possible to upgrade to dj-stripe 2.7.0 from versions older than 2.4.0.
 To upgrade from an older version, first upgrade to dj-stripe 2.4.0.</p>
 </div>
+<p>This release focuses on Webhook Endpoints. For more information on the reasoning behind
+the changes, please see the discussion on Github:</p>
+<p><a href="https://github.com/dj-stripe/dj-stripe/discussions/1437">https://github.com/dj-stripe/dj-stripe/discussions/1437</a></p>
 <h2 id="release-highlights">Release highlights</h2>
 <ul>
-<li>...</li>
+<li>Webhook Endpoints are now configured via the Django administration.</li>
 </ul>
 <h2 id="deprecated-features">Deprecated features</h2>
 <ul>
-<li>...</li>
+<li>The <code>DJSTRIPE_WEBHOOK_URL</code> setting is deprecated. It will be removed in dj-stripe
+    2.9. It was added to give a way of "hiding" the webhook endpoint URL, but that is no
+    longer necessary with the new webhook endpoint system.</li>
 </ul>
 <h2 id="breaking-changes">Breaking changes</h2>
 <ul>
@@ -194,6 +215,15 @@ To upgrade from an older version, first upgrade to dj-stripe 2.4.0.</p>
             </div>
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../2_6_0/" class="btn btn-neutral float-right" title="dj-stripe 2.6 release notes">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../../stripe_elements_js/" class="btn btn-neutral" title="Integrating Stripe Elements"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
@@ -221,6 +251,10 @@ To upgrade from an older version, first upgrade to dj-stripe 2.4.0.</p>
         </span>
     
     
+      <span><a href="../../stripe_elements_js/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../2_6_0/" style="color: #fcfcfc">Next &raquo;</a></span>
     
   </span>
 </div>
