@@ -2722,7 +2722,7 @@ class Migration(migrations.Migration):
                     "customer",
                     djstripe.fields.StripeForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="upcominginvoices",
+                        related_name="%(class)ss",
                         to="djstripe.customer",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
                     ),
