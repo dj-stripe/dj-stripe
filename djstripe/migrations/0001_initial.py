@@ -2880,7 +2880,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 db_table="djstripe_djstripeinvoicedefaulttaxrate",
                 help_text="The tax rates applied to this invoice, if any.",
-                related_name="_invoice_default_tax_rates_+",
+                related_name="+",
                 to="djstripe.TaxRate",
             ),
         ),
