@@ -4272,7 +4272,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         db_table="djstripe_djstripeinvoiceitemtaxrate",
                         help_text="The tax rates which apply to this invoice item. When set, the default_tax_rates on the invoice do not apply to this invoice item.",
-                        related_name="_invoiceitem_tax_rates_+",
+                        related_name="+",
                         to="djstripe.TaxRate",
                     ),
                 ),
