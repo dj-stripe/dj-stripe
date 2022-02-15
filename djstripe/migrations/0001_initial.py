@@ -3822,7 +3822,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         db_table="djstripe_djstripesubscriptionitemtaxrate",
                         help_text="The tax rates which apply to this subscription_item. When set, the default_tax_rates on the subscription do not apply to this subscription_item.",
-                        related_name="_subscriptionitem_tax_rates_+",
+                        related_name="+",
                         to="djstripe.TaxRate",
                     ),
                 ),
