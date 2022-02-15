@@ -2714,7 +2714,7 @@ class Migration(migrations.Migration):
                         help_text="The latest charge generated for this invoice, if any.",
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="latest_upcominginvoice",
+                        related_name="latest_%(class)s",
                         to="djstripe.charge",
                     ),
                 ),
