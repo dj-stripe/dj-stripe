@@ -2891,7 +2891,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 db_table="djstripe_djstripesubscriptiondefaulttaxrate",
                 help_text="The tax rates that will apply to any subscription item that does not have tax_rates set. Invoices created will have their default_tax_rates populated from the subscription.",
-                related_name="_subscription_default_tax_rates_+",
+                related_name="+",
                 to="djstripe.TaxRate",
             ),
         ),
