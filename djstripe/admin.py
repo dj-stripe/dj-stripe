@@ -781,6 +781,13 @@ class SubscriptionAdmin(StripeModelAdmin):
 
     inlines = (SubscriptionItemInline,)
 
+    def get_actions(self, request):
+        # get all actions
+        actions = super().get_actions(request)
+        actions["_cancel"] = self.get_action("_cancel")
+        return actions
+
+    @admin.action(description="Cancel selected subscriptions")
     def _cancel(self, request, queryset):
         """Cancel a subscription."""
         for subscription in queryset:
@@ -794,9 +801,6 @@ class SubscriptionAdmin(StripeModelAdmin):
             except InvalidRequestError as error:
                 self.message_user(request, str(error), level=messages.WARNING)
 
-    _cancel.short_description = "Cancel selected subscriptions"  # type: ignore # noqa
-
-    actions = (_cancel, "_resync_instances")
 
     def get_queryset(self, request):
         return (
