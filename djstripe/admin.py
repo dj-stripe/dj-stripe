@@ -43,35 +43,48 @@ def admin_display_for_field_override():
 admin_display_for_field_override()
 
 
-@admin.action(description="Re-Sync Selected Instances")
-def _resync_instances(modeladmin, request, queryset):
-    """Admin Action to resync selected instances"""
-    for instance in queryset:
-        api_key = instance.default_api_key
-        try:
-            if instance.djstripe_owner_account:
-                stripe_data = instance.api_retrieve(
-                    stripe_account=instance.djstripe_owner_account.id, api_key=api_key
+class CustomActionMixin:
+    @admin.action(description="Re-Sync Selected Instances")
+    def _resync_instances(self, request, queryset):
+        """Admin Action to resync selected instances"""
+        for instance in queryset:
+            api_key = instance.default_api_key
+            try:
+                if instance.djstripe_owner_account:
+                    stripe_data = instance.api_retrieve(
+                        stripe_account=instance.djstripe_owner_account.id,
+                        api_key=api_key,
+                    )
+                else:
+                    stripe_data = instance.api_retrieve()
+                instance.__class__.sync_from_stripe_data(stripe_data, api_key=api_key)
+                self.message_user(
+                    request, f"Successfully Synced: {instance}", level=messages.SUCCESS
                 )
-            else:
-                stripe_data = instance.api_retrieve()
-            instance.__class__.sync_from_stripe_data(stripe_data, api_key=api_key)
-            modeladmin.message_user(
-                request, f"Successfully Synced: {instance}", level=messages.SUCCESS
-            )
-        except stripe.error.PermissionError as error:
-            modeladmin.message_user(request, error, level=messages.WARNING)
-        except stripe.error.InvalidRequestError:
-            raise
+            except stripe.error.PermissionError as error:
+                self.message_user(request, error, level=messages.WARNING)
+            except stripe.error.InvalidRequestError:
+                raise
 
+    @admin.action(description="Sync All Instances for all API Keys")
+    def _sync_all_instances(self, request, queryset):
+        """Admin Action to Sync All Instances"""
+        call_command("djstripe_sync_models", self.model.__name__)
+        self.message_user(
+            request, "Successfully Synced All Instances", level=messages.SUCCESS
+        )
 
-@admin.action(description="Re-Sync ALL Usage Record Summaries")
-def _resync_all_usage_record_summaries(modeladmin, request, queryset):
-    """Admin Action to sync all UsageRecordSummary Objects because they can't be retrieved individually"""
-    call_command("djstripe_sync_models", "UsageRecordSummary")
-    modeladmin.message_user(
-        request, "Successfully Synced ALL Instances", level=messages.SUCCESS
-    )
+    def changelist_view(self, request, extra_context=None):
+        # we fool it into thinking we have selected some query
+        # since we need to sync all instances
+        post = request.POST.copy()
+        if (
+            helpers.ACTION_CHECKBOX_NAME not in post
+            and post.get("action") == "_sync_all_instances"
+        ):
+            post[helpers.ACTION_CHECKBOX_NAME] = None
+            request._set_post(post)
+        return super().changelist_view(request, extra_context)
 
 
 class ReadOnlyMixin:
@@ -212,11 +225,11 @@ class WebhookEventTriggerAdmin(ReadOnlyMixin, admin.ModelAdmin):
             trigger.process()
 
 
-class StripeModelAdmin(admin.ModelAdmin):
+class StripeModelAdmin(CustomActionMixin, admin.ModelAdmin):
     """Base class for all StripeModel-based model admins"""
 
     change_form_template = "djstripe/admin/change_form.html"
-    actions = (_resync_instances,)
+    actions = ("_resync_instances", "_sync_all_instances")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -622,7 +635,9 @@ class SubscriptionAdmin(StripeModelAdmin):
     list_select_related = ("customer", "customer__subscriber")
 
     inlines = (SubscriptionItemInline,)
+    actions = ("_cancel", "_resync_instances", "_sync_all_instances")
 
+    @admin.action(description="Cancel selected subscriptions")
     def _cancel(self, request, queryset):
         """Cancel a subscription."""
         for subscription in queryset:
@@ -635,10 +650,6 @@ class SubscriptionAdmin(StripeModelAdmin):
                 )
             except InvalidRequestError as error:
                 self.message_user(request, str(error), level=messages.WARNING)
-
-    _cancel.short_description = "Cancel selected subscriptions"  # type: ignore # noqa
-
-    actions = (_cancel, _resync_instances)
 
 
 @admin.register(models.TaxRate)
@@ -675,20 +686,12 @@ class UsageRecordAdmin(StripeModelAdmin):
 @admin.register(models.UsageRecordSummary)
 class UsageRecordSummaryAdmin(StripeModelAdmin):
     list_display = ("invoice", "subscription_item", "total_usage")
-    actions = (_resync_all_usage_record_summaries,)
 
-    def changelist_view(self, request, extra_context=None):
-        # we fool it into thinking we have selected some query
-        # since we need to sync all UsageRecordSummary instances since Stripe
-        # does not allow retrieving one by one
-        post = request.POST.copy()
-        if (
-            helpers.ACTION_CHECKBOX_NAME not in post
-            and post.get("action") == "_resync_all_usage_record_summaries"
-        ):
-            post[helpers.ACTION_CHECKBOX_NAME] = None
-            request._set_post(post)
-        return super().changelist_view(request, extra_context)
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if "_resync_instances" in actions:
+            del actions["_resync_instances"]
+        return actions
 
 
 class WebhookEndpointAdminBaseForm(forms.ModelForm):
@@ -859,7 +862,7 @@ class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
 
 
 @admin.register(models.WebhookEndpoint)
-class WebhookEndpointAdmin(admin.ModelAdmin):
+class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
     change_form_template = "djstripe/admin/change_form.html"
     delete_confirmation_template = (
         "djstripe/admin/webhook_endpoint/delete_confirmation.html"
@@ -872,7 +875,7 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
         "created",
         "api_version",
     )
-    actions = (_resync_instances,)
+    actions = ("_resync_instances", "_sync_all_instances")
 
     def get_actions(self, request):
         actions = super().get_actions(request)

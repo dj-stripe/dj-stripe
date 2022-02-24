@@ -64,6 +64,14 @@ def test_get_forward_relation_fields_for_model(output, input):
 
 
 class TestAdminCustomActions:
+    # the 4 models that do not inherit from StripeModel and hence
+    # do not inherit from StripeModelAdmin
+    ignore_models = [
+        "WebhookEventTrigger",
+        "WebhookEndpoint",
+        "IdempotencyKey",
+        "APIKey",
+    ]
     kwargs_called_with = {}
 
     # to get around Session/MessageMiddleware Deprecation Warnings
@@ -71,33 +79,41 @@ class TestAdminCustomActions:
         return None
 
     @pytest.mark.parametrize("fake_selected_pks", [None, [1, 2]])
-    def test__resync_all_usage_record_summaries(self, admin_client, fake_selected_pks):
+    def test__sync_all_instances(self, admin_client, fake_selected_pks):
+        app_label = "djstripe"
+        app_config = apps.get_app_config(app_label)
+        all_models_lst = app_config.get_models()
 
-        model = models.UsageRecordSummary
+        for model in all_models_lst:
+            if model in site._registry.keys() and (
+                model.__name__ == "WebhookEndpoint"
+                or model.__name__ not in self.ignore_models
+            ):
 
-        # get the standard changelist_view url
-        change_url = reverse(
-            f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
-        )
+                # get the standard changelist_view url
+                change_url = reverse(
+                    f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
+                )
 
-        data = {"action": "_resync_all_usage_record_summaries"}
+                data = {"action": "_sync_all_instances"}
 
-        if fake_selected_pks is not None:
-            data[helpers.ACTION_CHECKBOX_NAME] = fake_selected_pks
+                if fake_selected_pks is not None:
+                    data[helpers.ACTION_CHECKBOX_NAME] = fake_selected_pks
 
-        response = admin_client.post(change_url, data, follow=True)
-        assert response.status_code == 200
+                response = admin_client.post(change_url, data, follow=True)
+                assert response.status_code == 200
 
-        # assert correct Success messages are emmitted
-        messages_sent_dictionary = {
-            m.message: m.level_tag for m in messages.get_messages(response.wsgi_request)
-        }
+                # assert correct Success messages are emmitted
+                messages_sent_dictionary = {
+                    m.message: m.level_tag
+                    for m in messages.get_messages(response.wsgi_request)
+                }
 
-        # assert correct success message was emmitted
-        assert (
-            messages_sent_dictionary.get("Successfully Synced ALL Instances")
-            == "success"
-        )
+                # assert correct success message was emmitted
+                assert (
+                    messages_sent_dictionary.get("Successfully Synced All Instances")
+                    == "success"
+                )
 
     @pytest.mark.parametrize("djstripe_owner_account_exists", [False, True])
     def test__resync_instances(
@@ -661,18 +677,28 @@ class TestAdminRegisteredModelsChildrenOfStripeModel(TestCase):
 
                 actions = model_admin.get_actions(request)
 
+                # sub-classes of StripeModel
                 if model.__name__ not in self.ignore_models:
                     if model.__name__ == "UsageRecordSummary":
                         assert "_resync_instances" not in actions
-                        assert "_resync_all_usage_record_summaries" in actions
+                        assert "_sync_all_instances" in actions
+                    elif model.__name__ == "Subscription":
+                        assert "_resync_instances" in actions
+                        assert "_sync_all_instances" in actions
+                        assert "_cancel" in actions
                     else:
                         assert "_resync_instances" in actions
+                        assert "_sync_all_instances" in actions
+
+                # not sub-classes of StripeModel
                 else:
                     if model.__name__ == "WebhookEndpoint":
                         assert "delete_selected" not in actions
                         assert "_resync_instances" in actions
+                        assert "_sync_all_instances" in actions
                     else:
                         assert "_resync_instances" not in actions
+                        assert "_sync_all_instances" not in actions
 
 
 class TestAdminRegisteredModelsNotChildrenOfStripeModel(TestCase):
@@ -1111,34 +1137,52 @@ class TestAdminSite(TestCase):
                 )
 
 
-class TestUsageRecordSummaryAdmin:
+class TestCustomActionMixin:
+    # the 4 models that do not inherit from StripeModel and hence
+    # do not inherit from StripeModelAdmin
+    ignore_models = [
+        "WebhookEventTrigger",
+        "WebhookEndpoint",
+        "IdempotencyKey",
+        "APIKey",
+    ]
+
     @pytest.mark.parametrize("fake_selected_pks", [None, [1, 2]])
     def test_changelist_view(self, admin_client, admin_user, fake_selected_pks):
 
-        model = models.UsageRecordSummary
+        app_label = "djstripe"
+        app_config = apps.get_app_config(app_label)
+        all_models_lst = app_config.get_models()
 
-        # get the standard changelist_view url
-        change_url = reverse(
-            f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
-        )
+        for model in all_models_lst:
+            if model in site._registry.keys() and (
+                model.__name__ == "WebhookEndpoint"
+                or model.__name__ not in self.ignore_models
+            ):
 
-        data = {"action": "_resync_all_usage_record_summaries"}
+                # get the standard changelist_view url
+                change_url = reverse(
+                    f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
+                )
 
-        if fake_selected_pks is not None:
-            # add key helpers.ACTION_CHECKBOX_NAME when it is not None
-            data[helpers.ACTION_CHECKBOX_NAME] = fake_selected_pks
+                data = {"action": "_sync_all_instances"}
 
-        # get the response. This will invoke the changelist_view
-        response = admin_client.post(change_url, data=data, follow=True)
+                if fake_selected_pks is not None:
+                    # add key helpers.ACTION_CHECKBOX_NAME when it is not None
+                    data[helpers.ACTION_CHECKBOX_NAME] = fake_selected_pks
 
-        assert response.status_code == 200
+                # get the response. This will invoke the changelist_view
+                response = admin_client.post(change_url, data=data, follow=True)
 
-        # assert correct Success messages are emmitted
-        messages_sent_dictionary = {
-            m.message: m.level_tag for m in messages.get_messages(response.wsgi_request)
-        }
-        # assert correct success message was emmitted
-        assert (
-            messages_sent_dictionary.get("Successfully Synced ALL Instances")
-            == "success"
-        )
+                assert response.status_code == 200
+
+                # assert correct Success messages are emmitted
+                messages_sent_dictionary = {
+                    m.message: m.level_tag
+                    for m in messages.get_messages(response.wsgi_request)
+                }
+                # assert correct success message was emmitted
+                assert (
+                    messages_sent_dictionary.get("Successfully Synced All Instances")
+                    == "success"
+                )
