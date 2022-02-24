@@ -67,15 +67,6 @@ class CustomActionMixin:
                 raise
 
 
-@admin.action(description="Re-Sync ALL Usage Record Summaries")
-def _resync_all_usage_record_summaries(modeladmin, request, queryset):
-    """Admin Action to sync all UsageRecordSummary Objects because they can't be retrieved individually"""
-    call_command("djstripe_sync_models", "UsageRecordSummary")
-    modeladmin.message_user(
-        request, "Successfully Synced ALL Instances", level=messages.SUCCESS
-    )
-
-
 class ReadOnlyMixin:
     def has_add_permission(self, request):
         return False
@@ -677,20 +668,12 @@ class UsageRecordAdmin(StripeModelAdmin):
 @admin.register(models.UsageRecordSummary)
 class UsageRecordSummaryAdmin(StripeModelAdmin):
     list_display = ("invoice", "subscription_item", "total_usage")
-    actions = (_resync_all_usage_record_summaries,)
 
-    def changelist_view(self, request, extra_context=None):
-        # we fool it into thinking we have selected some query
-        # since we need to sync all UsageRecordSummary instances since Stripe
-        # does not allow retrieving one by one
-        post = request.POST.copy()
-        if (
-            helpers.ACTION_CHECKBOX_NAME not in post
-            and post.get("action") == "_resync_all_usage_record_summaries"
-        ):
-            post[helpers.ACTION_CHECKBOX_NAME] = None
-            request._set_post(post)
-        return super().changelist_view(request, extra_context)
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if "_resync_instances" in actions:
+            del actions["_resync_instances"]
+        return actions
 
 
 class WebhookEndpointAdminBaseForm(forms.ModelForm):
