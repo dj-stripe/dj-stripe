@@ -661,12 +661,17 @@ class TestAdminRegisteredModelsChildrenOfStripeModel(TestCase):
 
                 actions = model_admin.get_actions(request)
 
+                # sub-classes of StripeModel
                 if model.__name__ not in self.ignore_models:
                     if model.__name__ == "UsageRecordSummary":
                         assert "_resync_instances" not in actions
-                        assert "_resync_all_usage_record_summaries" in actions
+                    elif model.__name__ == "Subscription":
+                        assert "_resync_instances" in actions
+                        assert "_cancel" in actions
                     else:
                         assert "_resync_instances" in actions
+
+                # not sub-classes of StripeModel
                 else:
                     if model.__name__ == "WebhookEndpoint":
                         assert "delete_selected" not in actions
