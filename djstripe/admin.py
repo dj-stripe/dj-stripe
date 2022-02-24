@@ -43,26 +43,28 @@ def admin_display_for_field_override():
 admin_display_for_field_override()
 
 
-@admin.action(description="Re-Sync Selected Instances")
-def _resync_instances(modeladmin, request, queryset):
-    """Admin Action to resync selected instances"""
-    for instance in queryset:
-        api_key = instance.default_api_key
-        try:
-            if instance.djstripe_owner_account:
-                stripe_data = instance.api_retrieve(
-                    stripe_account=instance.djstripe_owner_account.id, api_key=api_key
+class CustomActionMixin:
+    @admin.action(description="Re-Sync Selected Instances")
+    def _resync_instances(self, request, queryset):
+        """Admin Action to resync selected instances"""
+        for instance in queryset:
+            api_key = instance.default_api_key
+            try:
+                if instance.djstripe_owner_account:
+                    stripe_data = instance.api_retrieve(
+                        stripe_account=instance.djstripe_owner_account.id,
+                        api_key=api_key,
+                    )
+                else:
+                    stripe_data = instance.api_retrieve()
+                instance.__class__.sync_from_stripe_data(stripe_data, api_key=api_key)
+                self.message_user(
+                    request, f"Successfully Synced: {instance}", level=messages.SUCCESS
                 )
-            else:
-                stripe_data = instance.api_retrieve()
-            instance.__class__.sync_from_stripe_data(stripe_data, api_key=api_key)
-            modeladmin.message_user(
-                request, f"Successfully Synced: {instance}", level=messages.SUCCESS
-            )
-        except stripe.error.PermissionError as error:
-            modeladmin.message_user(request, error, level=messages.WARNING)
-        except stripe.error.InvalidRequestError:
-            raise
+            except stripe.error.PermissionError as error:
+                self.message_user(request, error, level=messages.WARNING)
+            except stripe.error.InvalidRequestError:
+                raise
 
 
 @admin.action(description="Re-Sync ALL Usage Record Summaries")
@@ -212,11 +214,11 @@ class WebhookEventTriggerAdmin(ReadOnlyMixin, admin.ModelAdmin):
             trigger.process()
 
 
-class StripeModelAdmin(admin.ModelAdmin):
+class StripeModelAdmin(CustomActionMixin, admin.ModelAdmin):
     """Base class for all StripeModel-based model admins"""
 
     change_form_template = "djstripe/admin/change_form.html"
-    actions = (_resync_instances,)
+    actions = ("_resync_instances",)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -638,7 +640,7 @@ class SubscriptionAdmin(StripeModelAdmin):
 
     _cancel.short_description = "Cancel selected subscriptions"  # type: ignore # noqa
 
-    actions = (_cancel, _resync_instances)
+    actions = (_cancel, "_resync_instances")
 
 
 @admin.register(models.TaxRate)
@@ -859,7 +861,7 @@ class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
 
 
 @admin.register(models.WebhookEndpoint)
-class WebhookEndpointAdmin(admin.ModelAdmin):
+class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
     change_form_template = "djstripe/admin/change_form.html"
     delete_confirmation_template = (
         "djstripe/admin/webhook_endpoint/delete_confirmation.html"
@@ -872,7 +874,7 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
         "created",
         "api_version",
     )
-    actions = (_resync_instances,)
+    actions = ("_resync_instances",)
 
     def get_actions(self, request):
         actions = super().get_actions(request)
