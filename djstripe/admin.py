@@ -66,6 +66,26 @@ class CustomActionMixin:
             except stripe.error.InvalidRequestError:
                 raise
 
+    @admin.action(description="Sync All Instances for all API Keys")
+    def _sync_all_instances(self, request, queryset):
+        """Admin Action to Sync All Instances"""
+        call_command("djstripe_sync_models", self.model.__name__)
+        self.message_user(
+            request, "Successfully Synced All Instances", level=messages.SUCCESS
+        )
+
+    def changelist_view(self, request, extra_context=None):
+        # we fool it into thinking we have selected some query
+        # since we need to sync all instances
+        post = request.POST.copy()
+        if (
+            helpers.ACTION_CHECKBOX_NAME not in post
+            and post.get("action") == "_sync_all_instances"
+        ):
+            post[helpers.ACTION_CHECKBOX_NAME] = None
+            request._set_post(post)
+        return super().changelist_view(request, extra_context)
+
 
 class ReadOnlyMixin:
     def has_add_permission(self, request):
@@ -209,7 +229,7 @@ class StripeModelAdmin(CustomActionMixin, admin.ModelAdmin):
     """Base class for all StripeModel-based model admins"""
 
     change_form_template = "djstripe/admin/change_form.html"
-    actions = ("_resync_instances",)
+    actions = ("_resync_instances", "_sync_all_instances")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -857,7 +877,7 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
         "created",
         "api_version",
     )
-    actions = ("_resync_instances",)
+    actions = ("_resync_instances", "_sync_all_instances")
 
     def get_actions(self, request):
         actions = super().get_actions(request)
