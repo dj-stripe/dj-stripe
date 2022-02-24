@@ -635,7 +635,9 @@ class SubscriptionAdmin(StripeModelAdmin):
     list_select_related = ("customer", "customer__subscriber")
 
     inlines = (SubscriptionItemInline,)
+    actions = ("_cancel", "_resync_instances", "_sync_all_instances")
 
+    @admin.action(description="Cancel selected subscriptions")
     def _cancel(self, request, queryset):
         """Cancel a subscription."""
         for subscription in queryset:
@@ -648,10 +650,6 @@ class SubscriptionAdmin(StripeModelAdmin):
                 )
             except InvalidRequestError as error:
                 self.message_user(request, str(error), level=messages.WARNING)
-
-    _cancel.short_description = "Cancel selected subscriptions"  # type: ignore # noqa
-
-    actions = (_cancel, "_resync_instances")
 
 
 @admin.register(models.TaxRate)
