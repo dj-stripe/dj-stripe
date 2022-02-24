@@ -3,9 +3,17 @@ dj-stripe - Views related to the djstripe app.
 """
 import logging
 
-from django.http import HttpResponse, HttpResponseBadRequest
-from django.shortcuts import get_object_or_404
+import stripe
+from django.apps import apps
+from django.contrib import messages
+from django.contrib.admin.utils import quote
+from django.core.management import call_command
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.utils.html import format_html
+from django.utils.text import capfirst
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 
@@ -57,3 +65,95 @@ class ProcessWebhookView(View):
             return HttpResponseBadRequest()
 
         return HttpResponse(str(trigger.id))
+
+
+class ConfirmCustomAction(View):
+    template_name = "djstripe/admin/confirm_action.html"
+    app_label = "djstripe"
+    app_config = apps.get_app_config(app_label)
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+
+        model_name = self.kwargs.get("model_name")
+        model = self.app_config.get_model(model_name)
+        qs = self.get_queryset()
+
+        # process the request
+        handler = getattr(self, self.kwargs.get("action_name"))
+        handler(request, qs)
+
+        return HttpResponseRedirect(
+            reverse(
+                f"admin:{model._meta.app_label}_{model._meta.model_name}_changelist"
+            )
+        )
+
+    def get_queryset(self):
+        model_name = self.kwargs.get("model_name")
+        model_pks = self.kwargs.get("model_pks").split(",")
+        model = self.app_config.get_model(model_name)
+        if model_pks == ["all"]:
+            return model.objects.all()
+        return model.objects.filter(pk__in=model_pks)
+
+    def get_context_data(self, **kwargs):
+        context = {}
+
+        # add action_name
+        context["action_name"] = self.kwargs.get("action_name")
+
+        qs = self.get_queryset()
+
+        context["info"] = []
+        for obj in qs:
+            admin_url = reverse(
+                f"admin:{obj._meta.app_label}_{obj._meta.model_name}_change",
+                None,
+                (quote(obj.pk),),
+            )
+            context["info"].append(
+                format_html(
+                    '{}: <a href="{}">{}</a>',
+                    capfirst(obj._meta.verbose_name),
+                    admin_url,
+                    obj,
+                )
+            )
+
+        return context
+
+    def _resync_instances(self, request, queryset):
+        for instance in queryset:
+            api_key = instance.default_api_key
+            try:
+                if instance.djstripe_owner_account:
+                    stripe_data = instance.api_retrieve(
+                        stripe_account=instance.djstripe_owner_account.id,
+                        api_key=api_key,
+                    )
+                else:
+                    stripe_data = instance.api_retrieve()
+                instance.__class__.sync_from_stripe_data(stripe_data, api_key=api_key)
+                messages.success(request, f"Successfully Synced: {instance}")
+            except stripe.error.PermissionError as error:
+                messages.warning(request, error)
+            except stripe.error.InvalidRequestError:
+                raise
+
+    def _sync_all_instances(self, request, queryset):
+        """Admin Action to Sync All Instances"""
+        call_command("djstripe_sync_models", queryset.model.__name__)
+        messages.success(request, "Successfully Synced All Instances")
+
+    def _cancel(self, request, queryset):
+        """Cancel a subscription."""
+        for subscription in queryset:
+            try:
+                instance = subscription.cancel()
+                messages.success(request, f"Successfully Canceled: {instance}")
+            except stripe.error.InvalidRequestError as error:
+                messages.warning(request, error)

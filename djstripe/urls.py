@@ -26,4 +26,9 @@ urlpatterns = [
         views.ProcessWebhookView.as_view(),
         name="djstripe_webhook_by_uuid",
     ),
+    path(
+        "action/<str:action_name>/<str:model_name>/<str:model_pks>",
+        views.ConfirmCustomAction.as_view(),
+        name="djstripe_custom_action",
+    ),
 ]
