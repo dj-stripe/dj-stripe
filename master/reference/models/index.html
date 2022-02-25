@@ -9902,6 +9902,34 @@ djstripe.models.core.PaymentIntent.stripe_class        </code>
 
 
 
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.core.PaymentIntent.stripe_class.verify_microdeposits" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">PaymentIntent</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">verify_microdeposits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">verify_microdeposits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/verify_microdeposits&quot;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
+    <span class="k">return</span> <span class="bp">self</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
 
 
   </div>
@@ -13216,6 +13244,34 @@ djstripe.models.core.SetupIntent.stripe_class        </code>
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
     <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/confirm&quot;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
+    <span class="k">return</span> <span class="bp">self</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.core.SetupIntent.stripe_class.verify_microdeposits" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">SetupIntent</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">verify_microdeposits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">verify_microdeposits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/verify_microdeposits&quot;</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
