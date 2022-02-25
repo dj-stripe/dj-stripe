@@ -5,6 +5,7 @@ from copy import deepcopy
 from decimal import Decimal
 from unittest.mock import ANY, call, patch
 
+import pytest
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from stripe.error import InvalidRequestError
@@ -1207,7 +1208,8 @@ class TestCustomerEvents(EventTestCase):
         )
         self.customer.save()
         self.assertIsNotNone(self.customer.default_source)
-        self.assertTrue(self.customer.has_valid_source())
+        with pytest.warns(DeprecationWarning):
+            self.assertTrue(self.customer.has_valid_source())
 
         event = self._create_event(FAKE_EVENT_CUSTOMER_SOURCE_DELETED)
         event.invoke_webhook_handlers()
@@ -1216,7 +1218,8 @@ class TestCustomerEvents(EventTestCase):
         # deleted
         customer = Customer.objects.get(id=FAKE_CUSTOMER["id"])
         self.assertIsNone(customer.default_source)
-        self.assertFalse(customer.has_valid_source())
+        with pytest.warns(DeprecationWarning):
+            self.assertFalse(customer.has_valid_source())
 
     @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
     def test_customer_source_double_delete(self, customer_retrieve_mock):
@@ -1230,7 +1233,8 @@ class TestCustomerEvents(EventTestCase):
         # deleted
         customer = Customer.objects.get(id=FAKE_CUSTOMER["id"])
         self.assertIsNone(customer.default_source)
-        self.assertFalse(customer.has_valid_source())
+        with pytest.warns(DeprecationWarning):
+            self.assertFalse(customer.has_valid_source())
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch("stripe.Subscription.retrieve", autospec=True)

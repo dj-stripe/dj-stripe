@@ -704,10 +704,11 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             self.customer.invoice_settings["default_payment_method"],
         )
 
-        self.assertTrue(
-            self.customer.can_charge(),
-            "Expect to be able to charge since we've set a default_payment_method",
-        )
+        with pytest.warns(DeprecationWarning):
+            self.assertTrue(
+                self.customer.can_charge(),
+                "Expect to be able to charge since we've set a default_payment_method",
+            )
 
         self.assert_fks(
             self.customer,
@@ -749,12 +750,12 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             ).count(),
             1,
         )
-
-        self.assertFalse(
-            self.customer.can_charge(),
-            "Expect not to be able to charge since we've not set a "
-            "default_payment_method",
-        )
+        with pytest.warns(DeprecationWarning):
+            self.assertFalse(
+                self.customer.can_charge(),
+                "Expect not to be able to charge since we've not set a "
+                "default_payment_method",
+            )
 
         self.assert_fks(
             self.customer,
@@ -770,7 +771,8 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
     )
     def test_cannot_charge(self, customer_retrieve_fake):
         self.customer.date_purged = timezone.now()
-        self.assertFalse(self.customer.can_charge())
+        with pytest.warns(DeprecationWarning):
+            self.assertFalse(self.customer.can_charge())
 
     def test_charge_accepts_only_decimals(self):
         with self.assertRaises(ValueError):
