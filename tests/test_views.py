@@ -4,8 +4,9 @@ dj-stripe Views Tests.
 
 import pytest
 import stripe
+from django.apps import apps
 from django.contrib import messages
-from django.contrib.admin import helpers
+from django.contrib.admin import helpers, site
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.messages.middleware import MessageMiddleware
 from django.contrib.sessions.middleware import SessionMiddleware
@@ -239,6 +240,63 @@ class TestConfirmCustomActionView:
             '<ul class="messagelist">\n              <li class="error">* This field is required.</li>\n            </ul>',
             html=True,
         )
+
+    @pytest.mark.parametrize("fake_selected_pks", [None, [1, 2]])
+    def test__sync_all_instances(self, fake_selected_pks, monkeypatch):
+        app_label = "djstripe"
+        app_config = apps.get_app_config(app_label)
+        all_models_lst = app_config.get_models()
+
+        for model in all_models_lst:
+            if model in site._registry.keys() and (
+                model.__name__ == "WebhookEndpoint"
+                or model.__name__ not in self.ignore_models
+            ):
+
+                # monkeypatch utils.get_model
+                def mock_get_model(*args, **kwargs):
+                    return model
+
+                monkeypatch.setattr(utils, "get_model", mock_get_model)
+
+                data = {"action": "_sync_all_instances"}
+
+                if fake_selected_pks is not None:
+                    data[helpers.ACTION_CHECKBOX_NAME] = fake_selected_pks
+
+                kwargs = {
+                    "action_name": "_sync_all_instances",
+                    "model_name": model.__name__.lower(),
+                }
+
+                # get the custom action POST url
+                change_url = reverse(
+                    "djstripe:djstripe_custom_action",
+                    kwargs=kwargs,
+                )
+
+                request = RequestFactory().post(change_url, data=data, follow=True)
+
+                # Add the session/message middleware to the request
+                SessionMiddleware(self.dummy_get_response).process_request(request)
+                MessageMiddleware(self.dummy_get_response).process_request(request)
+
+                view = ConfirmCustomAction()
+                view.setup(request, **kwargs)
+
+                # Invoke the Custom Actions
+                view._sync_all_instances(request, model.objects.none())
+
+                # assert correct Success messages are emmitted
+                messages_sent_dictionary = {
+                    m.message: m.level_tag for m in messages.get_messages(request)
+                }
+
+                # assert correct success message was emmitted
+                assert (
+                    messages_sent_dictionary.get("Successfully Synced All Instances")
+                    == "success"
+                )
 
     @pytest.mark.parametrize("djstripe_owner_account_exists", [False, True])
     def test__resync_instances(self, djstripe_owner_account_exists, monkeypatch):
