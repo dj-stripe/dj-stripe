@@ -5,18 +5,22 @@ import json
 from typing import Any, Dict, Optional
 from urllib.parse import urljoin
 
-import stripe
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import helpers
 from django.contrib.admin.utils import display_for_field, display_for_value, quote
+from django.contrib.contenttypes.models import ContentType
 from django.core.management import call_command
 from django.db import IntegrityError, transaction
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.text import capfirst
 from jsonfield import JSONField
 from stripe.error import AuthenticationError, InvalidRequestError
+
+from djstripe.forms import CustomActionForm
 
 from . import enums, models
 
@@ -98,24 +102,10 @@ class CustomActionMixin:
     @admin.action(description="Re-Sync Selected Instances")
     def _resync_instances(self, request, queryset):
         """Admin Action to resync selected instances"""
-        for instance in queryset:
-            api_key = instance.default_api_key
-            try:
-                if instance.djstripe_owner_account:
-                    stripe_data = instance.api_retrieve(
-                        stripe_account=instance.djstripe_owner_account.id,
-                        api_key=api_key,
-                    )
-                else:
-                    stripe_data = instance.api_retrieve()
-                instance.__class__.sync_from_stripe_data(stripe_data, api_key=api_key)
-                self.message_user(
-                    request, f"Successfully Synced: {instance}", level=messages.SUCCESS
-                )
-            except stripe.error.PermissionError as error:
-                self.message_user(request, error, level=messages.WARNING)
-            except stripe.error.InvalidRequestError:
-                raise
+        context = self.get_admin_action_context(
+            queryset, "_resync_instances", CustomActionForm
+        )
+        return render(request, "djstripe/admin/confirm_action.html", context)
 
     @admin.action(description="Sync All Instances for all API Keys")
     def _sync_all_instances(self, request, queryset):
