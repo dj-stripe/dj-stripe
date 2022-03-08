@@ -1,6 +1,7 @@
 """
 dj-stripe Views Tests.
 """
+from copy import deepcopy
 
 import pytest
 import stripe
@@ -16,6 +17,17 @@ from pytest_django.asserts import assertContains
 
 from djstripe import models, utils
 from djstripe.views import ConfirmCustomAction
+from tests import (
+    FAKE_BALANCE_TRANSACTION,
+    FAKE_CARD_AS_PAYMENT_METHOD,
+    FAKE_CHARGE,
+    FAKE_CUSTOMER,
+    FAKE_INVOICE,
+    FAKE_PAYMENT_INTENT_I,
+    FAKE_PLAN,
+    FAKE_PRODUCT,
+    FAKE_SUBSCRIPTION,
+)
 
 from .fields.models import TestCustomActionModel
 
@@ -23,6 +35,14 @@ pytestmark = pytest.mark.django_db
 
 
 class TestConfirmCustomActionView:
+    # the 4 models that do not inherit from StripeModel and hence
+    # do not inherit from StripeModelAdmin
+    ignore_models = [
+        "WebhookEventTrigger",
+        "WebhookEndpoint",
+        "IdempotencyKey",
+        "APIKey",
+    ]
     kwargs_called_with = {}
 
     # to get around Session/MessageMiddleware Deprecation Warnings
@@ -469,3 +489,177 @@ class TestConfirmCustomActionView:
             view._resync_instances(request, [instance])
 
         assert str(exc_info.value.param) == "some random error message"
+
+    def test__cancel_subscription_instances(  # noqa: C901
+        self,
+        monkeypatch,
+    ):
+        def mock_invoice_get(*args, **kwargs):
+            return FAKE_INVOICE
+
+        def mock_customer_get(*args, **kwargs):
+            return FAKE_CUSTOMER
+
+        def mock_charge_get(*args, **kwargs):
+            return FAKE_CHARGE
+
+        def mock_payment_method_get(*args, **kwargs):
+            return FAKE_CARD_AS_PAYMENT_METHOD
+
+        def mock_payment_intent_get(*args, **kwargs):
+            return FAKE_PAYMENT_INTENT_I
+
+        def mock_subscription_get(*args, **kwargs):
+            return FAKE_SUBSCRIPTION
+
+        def mock_balance_transaction_get(*args, **kwargs):
+            return FAKE_BALANCE_TRANSACTION
+
+        def mock_product_get(*args, **kwargs):
+            return FAKE_PRODUCT
+
+        def mock_plan_get(*args, **kwargs):
+            return FAKE_PLAN
+
+        # monkeypatch stripe retrieve calls to return
+        # the desired json response.
+        monkeypatch.setattr(stripe.Invoice, "retrieve", mock_invoice_get)
+        monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
+        monkeypatch.setattr(
+            stripe.BalanceTransaction, "retrieve", mock_balance_transaction_get
+        )
+        monkeypatch.setattr(stripe.Subscription, "retrieve", mock_subscription_get)
+        monkeypatch.setattr(stripe.Charge, "retrieve", mock_charge_get)
+        monkeypatch.setattr(stripe.PaymentMethod, "retrieve", mock_payment_method_get)
+        monkeypatch.setattr(stripe.PaymentIntent, "retrieve", mock_payment_intent_get)
+        monkeypatch.setattr(stripe.Product, "retrieve", mock_product_get)
+        monkeypatch.setattr(stripe.Plan, "retrieve", mock_plan_get)
+
+        model = models.Subscription
+
+        # Create Latest Invoice
+        models.Invoice.sync_from_stripe_data(FAKE_INVOICE)
+
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        instance = model.sync_from_stripe_data(subscription_fake)
+
+        # monkeypatch subscription.cancel()
+        def mock_subscription_cancel(*args, **keywargs):
+            return instance
+
+        monkeypatch.setattr(instance, "cancel", mock_subscription_cancel)
+
+        data = {"action": "_cancel", helpers.ACTION_CHECKBOX_NAME: [instance.pk]}
+
+        kwargs = {
+            "action_name": "_cancel",
+            "model_name": model.__name__.lower(),
+        }
+
+        # get the custom action POST url
+        change_url = reverse("djstripe:djstripe_custom_action", kwargs=kwargs)
+
+        request = RequestFactory().post(change_url, data=data, follow=True)
+
+        # Add the session/message middleware to the request
+        SessionMiddleware(self.dummy_get_response).process_request(request)
+        MessageMiddleware(self.dummy_get_response).process_request(request)
+
+        view = ConfirmCustomAction()
+        view.setup(request, **kwargs)
+
+        # Invoke the Custom Actions
+        view._cancel(request, [instance])
+
+        # assert correct Success messages are emmitted
+        messages_sent_dictionary = {
+            m.message: m.level_tag for m in messages.get_messages(request)
+        }
+
+        # assert correct success message was emmitted
+        assert (
+            messages_sent_dictionary.get(f"Successfully Canceled: {instance}")
+            == "success"
+        )
+
+    def test__cancel_subscription_instances_stripe_invalid_request_error(  # noqa: C901
+        self,
+        monkeypatch,
+    ):
+        def mock_invoice_get(*args, **kwargs):
+            return FAKE_INVOICE
+
+        def mock_customer_get(*args, **kwargs):
+            return FAKE_CUSTOMER
+
+        def mock_charge_get(*args, **kwargs):
+            return FAKE_CHARGE
+
+        def mock_payment_method_get(*args, **kwargs):
+            return FAKE_CARD_AS_PAYMENT_METHOD
+
+        def mock_payment_intent_get(*args, **kwargs):
+            return FAKE_PAYMENT_INTENT_I
+
+        def mock_subscription_get(*args, **kwargs):
+            return FAKE_SUBSCRIPTION
+
+        def mock_balance_transaction_get(*args, **kwargs):
+            return FAKE_BALANCE_TRANSACTION
+
+        def mock_product_get(*args, **kwargs):
+            return FAKE_PRODUCT
+
+        def mock_plan_get(*args, **kwargs):
+            return FAKE_PLAN
+
+        # monkeypatch stripe retrieve calls to return
+        # the desired json response.
+        monkeypatch.setattr(stripe.Invoice, "retrieve", mock_invoice_get)
+        monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
+        monkeypatch.setattr(
+            stripe.BalanceTransaction, "retrieve", mock_balance_transaction_get
+        )
+        monkeypatch.setattr(stripe.Subscription, "retrieve", mock_subscription_get)
+        monkeypatch.setattr(stripe.Charge, "retrieve", mock_charge_get)
+        monkeypatch.setattr(stripe.PaymentMethod, "retrieve", mock_payment_method_get)
+        monkeypatch.setattr(stripe.PaymentIntent, "retrieve", mock_payment_intent_get)
+        monkeypatch.setattr(stripe.Product, "retrieve", mock_product_get)
+        monkeypatch.setattr(stripe.Plan, "retrieve", mock_plan_get)
+
+        model = models.Subscription
+
+        # Create Latest Invoice
+        models.Invoice.sync_from_stripe_data(FAKE_INVOICE)
+
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        instance = model.sync_from_stripe_data(subscription_fake)
+
+        # monkeypatch subscription.cancel()
+        def mock_subscription_cancel(*args, **keywargs):
+            raise stripe.error.InvalidRequestError({}, "some random error message")
+
+        monkeypatch.setattr(instance, "cancel", mock_subscription_cancel)
+
+        data = {"action": "_cancel", helpers.ACTION_CHECKBOX_NAME: [instance.pk]}
+
+        kwargs = {
+            "action_name": "_cancel",
+            "model_name": model.__name__.lower(),
+        }
+
+        # get the custom action POST url
+        change_url = reverse("djstripe:djstripe_custom_action", kwargs=kwargs)
+
+        request = RequestFactory().post(change_url, data=data, follow=True)
+
+        # Add the session/message middleware to the request
+        SessionMiddleware(self.dummy_get_response).process_request(request)
+        MessageMiddleware(self.dummy_get_response).process_request(request)
+
+        view = ConfirmCustomAction()
+        view.setup(request, **kwargs)
+
+        with pytest.warns(None, match=r"some random error message"):
+            # Invoke the Custom Actions
+            view._cancel(request, [instance])

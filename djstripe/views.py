@@ -152,3 +152,12 @@ class ConfirmCustomAction(FormView):
         """Admin Action to Sync All Instances"""
         call_command("djstripe_sync_models", queryset.model.__name__)
         messages.success(request, "Successfully Synced All Instances")
+
+    def _cancel(self, request, queryset):
+        """Cancel a subscription."""
+        for subscription in queryset:
+            try:
+                instance = subscription.cancel()
+                messages.success(request, f"Successfully Canceled: {instance}")
+            except stripe.error.InvalidRequestError as error:
+                messages.warning(request, error)
