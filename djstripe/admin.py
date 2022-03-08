@@ -6,12 +6,10 @@ from typing import Any, Dict, Optional
 from urllib.parse import urljoin
 
 from django import forms
-from django.contrib import admin, messages
+from django.contrib import admin
 from django.contrib.admin import helpers
 from django.contrib.admin.utils import display_for_field, display_for_value, quote
-from django.contrib.contenttypes.models import ContentType
 from django.db import IntegrityError, transaction
-from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.html import format_html
@@ -828,16 +826,8 @@ class SubscriptionAdmin(StripeModelAdmin):
     @admin.action(description="Cancel selected subscriptions")
     def _cancel(self, request, queryset):
         """Cancel a subscription."""
-        for subscription in queryset:
-            try:
-                instance = subscription.cancel()
-                self.message_user(
-                    request,
-                    f"Successfully Canceled: {instance}",
-                    level=messages.SUCCESS,
-                )
-            except InvalidRequestError as error:
-                self.message_user(request, str(error), level=messages.WARNING)
+        context = self.get_admin_action_context(queryset, "_cancel", CustomActionForm)
+        return render(request, "djstripe/admin/confirm_action.html", context)
 
     def get_queryset(self, request):
         return (
