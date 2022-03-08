@@ -4,13 +4,10 @@ dj-stripe Admin Tests.
 from typing import Sequence
 
 import pytest
-import stripe
 from django.apps import apps
 from django.contrib import messages
 from django.contrib.admin import helpers, site
 from django.contrib.auth import get_user_model
-from django.contrib.messages.middleware import MessageMiddleware
-from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.exceptions import FieldError
 from django.test import TestCase
 from django.test.client import RequestFactory
@@ -116,175 +113,6 @@ class TestAdminCustomActions:
                     messages_sent_dictionary.get("Successfully Synced All Instances")
                     == "success"
                 )
-
-    @pytest.mark.parametrize("djstripe_owner_account_exists", [False, True])
-    def test__resync_instances(
-        self, admin_user, djstripe_owner_account_exists, monkeypatch
-    ):
-
-        # create instance to be used in the Django Admin Action
-        instance = TestCustomActionModel.objects.create(id="test")
-
-        if djstripe_owner_account_exists:
-            account_instance = Account.objects.first()
-            instance.djstripe_owner_account = account_instance
-            instance.save()
-
-        model = TestCustomActionModel
-        model_admin = site._registry.get(model)
-
-        data = {
-            "action": "_resync_instances",
-            helpers.ACTION_CHECKBOX_NAME: [instance.pk],
-        }
-
-        # monkeypatch instance.api_retrieve and instance.__class__.sync_from_stripe_data
-        def mock_instance_api_retrieve(*args, **kwargs):
-            self.kwargs_called_with = kwargs
-
-        def mock_instance_sync_from_stripe_data(*args, **kwargs):
-            pass
-
-        monkeypatch.setattr(instance, "api_retrieve", mock_instance_api_retrieve)
-
-        monkeypatch.setattr(
-            TestCustomActionModel,
-            "sync_from_stripe_data",
-            mock_instance_sync_from_stripe_data,
-        )
-
-        # get the standard changelist_view url
-        change_url = reverse(
-            f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
-        )
-
-        # add the admin user to the mocked request and disable CSRF checks
-        factory = RequestFactory()
-        request = factory.post(change_url, data=data, follow=True)
-        request.user = admin_user
-        request._dont_enforce_csrf_checks = True
-
-        # Add the session/message middleware to the request
-        SessionMiddleware(self.dummy_get_response).process_request(request)
-        MessageMiddleware(self.dummy_get_response).process_request(request)
-
-        # get the _resync_instances custom Django Admin Action
-        action_fn = model_admin.get_actions(request)[data.get("action")][0]
-
-        # invoke the _resync_instances action
-        action_fn(model_admin, request, [instance])
-
-        # assert correct Success messages are emmitted
-        messages_sent_dictionary = {
-            m.message: m.level_tag for m in messages.get_messages(request)
-        }
-
-        # assert correct success message was emmitted
-        assert (
-            messages_sent_dictionary.get(f"Successfully Synced: {instance}")
-            == "success"
-        )
-
-        if djstripe_owner_account_exists:
-            # assert in case djstripe_owner_account exists that kwargs are not empty
-            assert self.kwargs_called_with == {
-                "stripe_account": instance.djstripe_owner_account.id,
-                "api_key": instance.default_api_key,
-            }
-        else:
-            # assert in case djstripe_owner_account does not exist that kwargs are empty
-            assert self.kwargs_called_with == {}
-
-    def test__resync_instances_stripe_permission_error(self, admin_user, monkeypatch):
-        # create instance to be used in the Django Admin Action
-        instance = TestCustomActionModel.objects.create(id="test")
-
-        model = TestCustomActionModel
-        model_admin = site._registry.get(model)
-
-        data = {
-            "action": "_resync_instances",
-            helpers.ACTION_CHECKBOX_NAME: [instance.pk],
-        }
-
-        # monkeypatch instance.api_retrieve
-        def mock_instance_api_retrieve(*args, **kwargs):
-            raise stripe.error.PermissionError("some random error message")
-
-        monkeypatch.setattr(instance, "api_retrieve", mock_instance_api_retrieve)
-
-        # get the standard changelist_view url
-        change_url = reverse(
-            f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
-        )
-
-        # add the admin user to the mocked request and disable CSRF checks
-        factory = RequestFactory()
-        request = factory.post(change_url, data=data, follow=True)
-        request.user = admin_user
-        request._dont_enforce_csrf_checks = True
-
-        # Add the session/message middleware to the request
-        SessionMiddleware(self.dummy_get_response).process_request(request)
-        MessageMiddleware(self.dummy_get_response).process_request(request)
-
-        # get the _resync_instances custom Django Admin Action
-        action_fn = model_admin.get_actions(request)[data.get("action")][0]
-
-        # invoke the _resync_instances action
-        action_fn(model_admin, request, [instance])
-
-        # assert correct Success messages are emmitted
-        messages_sent_dictionary = {
-            m.message.user_message: m.level_tag for m in messages.get_messages(request)
-        }
-
-        # assert correct success message was emmitted
-        assert messages_sent_dictionary.get("some random error message") == "warning"
-
-    def test__resync_instances_stripe_invalid_request_error(
-        self, admin_user, monkeypatch
-    ):
-        # create instance to be used in the Django Admin Action
-        instance = TestCustomActionModel.objects.create(id="test")
-
-        model = TestCustomActionModel
-        model_admin = site._registry.get(model)
-
-        data = {
-            "action": "_resync_instances",
-            helpers.ACTION_CHECKBOX_NAME: [instance.pk],
-        }
-
-        # monkeypatch instance.api_retrieve
-        def mock_instance_api_retrieve(*args, **kwargs):
-            raise stripe.error.InvalidRequestError({}, "some random error message")
-
-        monkeypatch.setattr(instance, "api_retrieve", mock_instance_api_retrieve)
-
-        # get the standard changelist_view url
-        change_url = reverse(
-            f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
-        )
-
-        # add the admin user to the mocked request and disable CSRF checks
-        factory = RequestFactory()
-        request = factory.post(change_url, data=data, follow=True)
-        request.user = admin_user
-        request._dont_enforce_csrf_checks = True
-
-        # Add the session/message middleware to the request
-        SessionMiddleware(self.dummy_get_response).process_request(request)
-        MessageMiddleware(self.dummy_get_response).process_request(request)
-
-        # get the _resync_instances custom Django Admin Action
-        action_fn = model_admin.get_actions(request)[data.get("action")][0]
-
-        with pytest.raises(stripe.error.InvalidRequestError) as exc_info:
-            # invoke the _resync_instances action
-            action_fn(model_admin, request, [instance])
-
-        assert str(exc_info.value.param) == "some random error message"
 
 
 class TestAdminRegisteredModelsChildrenOfStripeModel(TestCase):
@@ -1241,13 +1069,48 @@ class TestCustomActionMixin:
 
                 assert response.status_code == 200
 
-                # assert correct Success messages are emmitted
-                messages_sent_dictionary = {
-                    m.message: m.level_tag
-                    for m in messages.get_messages(response.wsgi_request)
-                }
-                # assert correct success message was emmitted
-                assert (
-                    messages_sent_dictionary.get("Successfully Synced All Instances")
-                    == "success"
-                )
+    @pytest.mark.parametrize("djstripe_owner_account_exists", [False, True])
+    def test__resync_instances(
+        self, djstripe_owner_account_exists, admin_client, monkeypatch
+    ):
+        model = TestCustomActionModel
+        model_admin = site._registry.get(model)
+
+        # monkeypatch utils.get_model
+        def mock_get_model(*args, **kwargs):
+            return model
+
+        # monkeypatch modeladmin.get_admin_action_context
+        def mock_get_admin_action_context(*args, **kwargs):
+            return {
+                "action_name": "_resync_instances",
+                "model_name": "testcustomactionmodel",
+            }
+
+        monkeypatch.setattr(
+            model_admin, "get_admin_action_context", mock_get_admin_action_context
+        )
+        monkeypatch.setattr(utils, "get_model", mock_get_model)
+
+        # create instance to be used in the Django Admin Action
+        instance = model.objects.create(id="test")
+
+        if djstripe_owner_account_exists:
+            account_instance = Account.objects.first()
+            instance.djstripe_owner_account = account_instance
+            instance.save()
+
+        data = {
+            "action": "_resync_instances",
+            helpers.ACTION_CHECKBOX_NAME: [instance.pk],
+        }
+
+        # get the standard changelist_view url
+        change_url = reverse(
+            f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
+        )
+
+        response = admin_client.post(change_url, data)
+
+        # assert user got 200 status code
+        assert response.status_code == 200
