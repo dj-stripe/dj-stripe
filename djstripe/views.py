@@ -12,6 +12,7 @@ from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedire
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.utils.encoding import iri_to_uri
 from django.utils.html import format_html
 from django.utils.text import capfirst
 from django.views.decorators.csrf import csrf_exempt
@@ -72,12 +73,18 @@ class ConfirmCustomAction(View):
     app_label = "djstripe"
     app_config = apps.get_app_config(app_label)
 
+    def dispatch(self, request, *args, **kwargs):
+        if not (request.user.is_authenticated and request.user.is_staff):
+            return HttpResponseRedirect(
+                reverse("admin:login") + f"?next={iri_to_uri(request.path_info)}"
+            )
+        return super().dispatch(request, *args, **kwargs)
+
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
-
         model_name = self.kwargs.get("model_name")
         model = self.app_config.get_model(model_name)
         qs = self.get_queryset()

@@ -1,16 +1,14 @@
 """
 dj-stripe Admin Tests.
 """
+from copy import deepcopy
 from typing import Sequence
 
 import pytest
 import stripe
 from django.apps import apps
-from django.contrib import messages
 from django.contrib.admin import helpers, site
 from django.contrib.auth import get_user_model
-from django.contrib.messages.middleware import MessageMiddleware
-from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.exceptions import FieldError
 from django.test import TestCase
 from django.test.client import RequestFactory
@@ -20,6 +18,17 @@ from jsonfield import JSONField
 from djstripe import admin as djstripe_admin
 from djstripe import models
 from djstripe.models.account import Account
+from tests import (
+    FAKE_BALANCE_TRANSACTION,
+    FAKE_CARD_AS_PAYMENT_METHOD,
+    FAKE_CHARGE,
+    FAKE_CUSTOMER,
+    FAKE_INVOICE,
+    FAKE_PAYMENT_INTENT_I,
+    FAKE_PLAN,
+    FAKE_PRODUCT,
+    FAKE_SUBSCRIPTION,
+)
 
 from .fields.models import TestCustomActionModel
 
@@ -61,228 +70,6 @@ pytestmark = pytest.mark.django_db
 )
 def test_get_forward_relation_fields_for_model(output, input):
     assert output == djstripe_admin.get_forward_relation_fields_for_model(input)
-
-
-class TestAdminCustomActions:
-    # the 4 models that do not inherit from StripeModel and hence
-    # do not inherit from StripeModelAdmin
-    ignore_models = [
-        "WebhookEventTrigger",
-        "WebhookEndpoint",
-        "IdempotencyKey",
-        "APIKey",
-    ]
-    kwargs_called_with = {}
-
-    # to get around Session/MessageMiddleware Deprecation Warnings
-    def dummy_get_response(self, request):
-        return None
-
-    @pytest.mark.parametrize("fake_selected_pks", [None, [1, 2]])
-    def test__sync_all_instances(self, admin_client, fake_selected_pks):
-        app_label = "djstripe"
-        app_config = apps.get_app_config(app_label)
-        all_models_lst = app_config.get_models()
-
-        for model in all_models_lst:
-            if model in site._registry.keys() and (
-                model.__name__ == "WebhookEndpoint"
-                or model.__name__ not in self.ignore_models
-            ):
-
-                # get the standard changelist_view url
-                change_url = reverse(
-                    f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
-                )
-
-                data = {"action": "_sync_all_instances"}
-
-                if fake_selected_pks is not None:
-                    data[helpers.ACTION_CHECKBOX_NAME] = fake_selected_pks
-
-                response = admin_client.post(change_url, data, follow=True)
-                assert response.status_code == 200
-
-                # assert correct Success messages are emmitted
-                messages_sent_dictionary = {
-                    m.message: m.level_tag
-                    for m in messages.get_messages(response.wsgi_request)
-                }
-
-                # assert correct success message was emmitted
-                assert (
-                    messages_sent_dictionary.get("Successfully Synced All Instances")
-                    == "success"
-                )
-
-    @pytest.mark.parametrize("djstripe_owner_account_exists", [False, True])
-    def test__resync_instances(
-        self, admin_user, djstripe_owner_account_exists, monkeypatch
-    ):
-
-        # create instance to be used in the Django Admin Action
-        instance = TestCustomActionModel.objects.create(id="test")
-
-        if djstripe_owner_account_exists:
-            account_instance = Account.objects.first()
-            instance.djstripe_owner_account = account_instance
-            instance.save()
-
-        model = TestCustomActionModel
-        model_admin = site._registry.get(model)
-
-        data = {
-            "action": "_resync_instances",
-            helpers.ACTION_CHECKBOX_NAME: [instance.pk],
-        }
-
-        # monkeypatch instance.api_retrieve and instance.__class__.sync_from_stripe_data
-        def mock_instance_api_retrieve(*args, **kwargs):
-            self.kwargs_called_with = kwargs
-
-        def mock_instance_sync_from_stripe_data(*args, **kwargs):
-            pass
-
-        monkeypatch.setattr(instance, "api_retrieve", mock_instance_api_retrieve)
-
-        monkeypatch.setattr(
-            TestCustomActionModel,
-            "sync_from_stripe_data",
-            mock_instance_sync_from_stripe_data,
-        )
-
-        # get the standard changelist_view url
-        change_url = reverse(
-            f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
-        )
-
-        # add the admin user to the mocked request and disable CSRF checks
-        factory = RequestFactory()
-        request = factory.post(change_url, data=data, follow=True)
-        request.user = admin_user
-        request._dont_enforce_csrf_checks = True
-
-        # Add the session/message middleware to the request
-        SessionMiddleware(self.dummy_get_response).process_request(request)
-        MessageMiddleware(self.dummy_get_response).process_request(request)
-
-        # get the _resync_instances custom Django Admin Action
-        action_fn = model_admin.get_actions(request)[data.get("action")][0]
-
-        # invoke the _resync_instances action
-        action_fn(model_admin, request, [instance])
-
-        # assert correct Success messages are emmitted
-        messages_sent_dictionary = {
-            m.message: m.level_tag for m in messages.get_messages(request)
-        }
-
-        # assert correct success message was emmitted
-        assert (
-            messages_sent_dictionary.get(f"Successfully Synced: {instance}")
-            == "success"
-        )
-
-        if djstripe_owner_account_exists:
-            # assert in case djstripe_owner_account exists that kwargs are not empty
-            assert self.kwargs_called_with == {
-                "stripe_account": instance.djstripe_owner_account.id,
-                "api_key": instance.default_api_key,
-            }
-        else:
-            # assert in case djstripe_owner_account does not exist that kwargs are empty
-            assert self.kwargs_called_with == {}
-
-    def test__resync_instances_stripe_permission_error(self, admin_user, monkeypatch):
-        # create instance to be used in the Django Admin Action
-        instance = TestCustomActionModel.objects.create(id="test")
-
-        model = TestCustomActionModel
-        model_admin = site._registry.get(model)
-
-        data = {
-            "action": "_resync_instances",
-            helpers.ACTION_CHECKBOX_NAME: [instance.pk],
-        }
-
-        # monkeypatch instance.api_retrieve
-        def mock_instance_api_retrieve(*args, **kwargs):
-            raise stripe.error.PermissionError("some random error message")
-
-        monkeypatch.setattr(instance, "api_retrieve", mock_instance_api_retrieve)
-
-        # get the standard changelist_view url
-        change_url = reverse(
-            f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
-        )
-
-        # add the admin user to the mocked request and disable CSRF checks
-        factory = RequestFactory()
-        request = factory.post(change_url, data=data, follow=True)
-        request.user = admin_user
-        request._dont_enforce_csrf_checks = True
-
-        # Add the session/message middleware to the request
-        SessionMiddleware(self.dummy_get_response).process_request(request)
-        MessageMiddleware(self.dummy_get_response).process_request(request)
-
-        # get the _resync_instances custom Django Admin Action
-        action_fn = model_admin.get_actions(request)[data.get("action")][0]
-
-        # invoke the _resync_instances action
-        action_fn(model_admin, request, [instance])
-
-        # assert correct Success messages are emmitted
-        messages_sent_dictionary = {
-            m.message.user_message: m.level_tag for m in messages.get_messages(request)
-        }
-
-        # assert correct success message was emmitted
-        assert messages_sent_dictionary.get("some random error message") == "warning"
-
-    def test__resync_instances_stripe_invalid_request_error(
-        self, admin_user, monkeypatch
-    ):
-        # create instance to be used in the Django Admin Action
-        instance = TestCustomActionModel.objects.create(id="test")
-
-        model = TestCustomActionModel
-        model_admin = site._registry.get(model)
-
-        data = {
-            "action": "_resync_instances",
-            helpers.ACTION_CHECKBOX_NAME: [instance.pk],
-        }
-
-        # monkeypatch instance.api_retrieve
-        def mock_instance_api_retrieve(*args, **kwargs):
-            raise stripe.error.InvalidRequestError({}, "some random error message")
-
-        monkeypatch.setattr(instance, "api_retrieve", mock_instance_api_retrieve)
-
-        # get the standard changelist_view url
-        change_url = reverse(
-            f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
-        )
-
-        # add the admin user to the mocked request and disable CSRF checks
-        factory = RequestFactory()
-        request = factory.post(change_url, data=data, follow=True)
-        request.user = admin_user
-        request._dont_enforce_csrf_checks = True
-
-        # Add the session/message middleware to the request
-        SessionMiddleware(self.dummy_get_response).process_request(request)
-        MessageMiddleware(self.dummy_get_response).process_request(request)
-
-        # get the _resync_instances custom Django Admin Action
-        action_fn = model_admin.get_actions(request)[data.get("action")][0]
-
-        with pytest.raises(stripe.error.InvalidRequestError) as exc_info:
-            # invoke the _resync_instances action
-            action_fn(model_admin, request, [instance])
-
-        assert str(exc_info.value.param) == "some random error message"
 
 
 class TestAdminRegisteredModelsChildrenOfStripeModel(TestCase):
@@ -1148,7 +935,7 @@ class TestCustomActionMixin:
     ]
 
     @pytest.mark.parametrize("fake_selected_pks", [None, [1, 2]])
-    def test_changelist_view(self, admin_client, admin_user, fake_selected_pks):
+    def test_changelist_view(self, admin_client, fake_selected_pks):
 
         app_label = "djstripe"
         app_config = apps.get_app_config(app_label)
@@ -1176,13 +963,148 @@ class TestCustomActionMixin:
 
                 assert response.status_code == 200
 
-                # assert correct Success messages are emmitted
-                messages_sent_dictionary = {
-                    m.message: m.level_tag
-                    for m in messages.get_messages(response.wsgi_request)
-                }
-                # assert correct success message was emmitted
-                assert (
-                    messages_sent_dictionary.get("Successfully Synced All Instances")
-                    == "success"
+    @pytest.mark.parametrize("djstripe_owner_account_exists", [False, True])
+    def test__resync_instances(self, djstripe_owner_account_exists, admin_client):
+
+        # create instance to be used in the Django Admin Action
+        instance = TestCustomActionModel.objects.create(id="test")
+
+        if djstripe_owner_account_exists:
+            account_instance = Account.objects.first()
+            instance.djstripe_owner_account = account_instance
+            instance.save()
+
+        model = TestCustomActionModel
+
+        data = {
+            "action": "_resync_instances",
+            helpers.ACTION_CHECKBOX_NAME: [instance.pk],
+        }
+
+        # get the standard changelist_view url
+        change_url = reverse(
+            f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
+        )
+
+        response = admin_client.post(change_url, data)
+
+        # assert user redirected to the correct url
+        assert response.status_code == 302
+        assert response.url == reverse(
+            "djstripe:djstripe_custom_action",
+            kwargs={
+                "action_name": "_resync_instances",
+                "model_name": model.__name__.lower(),
+                "model_pks": instance.pk,
+            },
+        )
+
+    @pytest.mark.parametrize("fake_selected_pks", [None, [1, 2]])
+    def test__sync_all_instances(self, admin_client, fake_selected_pks):
+        app_label = "djstripe"
+        app_config = apps.get_app_config(app_label)
+        all_models_lst = app_config.get_models()
+
+        for model in all_models_lst:
+            if model in site._registry.keys() and (
+                model.__name__ == "WebhookEndpoint"
+                or model.__name__ not in self.ignore_models
+            ):
+
+                # get the standard changelist_view url
+                change_url = reverse(
+                    f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
                 )
+
+                data = {"action": "_sync_all_instances"}
+
+                if fake_selected_pks is not None:
+                    data[helpers.ACTION_CHECKBOX_NAME] = fake_selected_pks
+
+                response = admin_client.post(change_url, data)
+
+                # assert user redirected to the correct url
+                assert response.status_code == 302
+                assert response.url == reverse(
+                    "djstripe:djstripe_custom_action",
+                    kwargs={
+                        "action_name": "_sync_all_instances",
+                        "model_name": model.__name__.lower(),
+                        "model_pks": "all",
+                    },
+                )
+
+
+class TestSubscriptionAdminCustomAction:
+    def test__cancel_subscription_instances(
+        self,
+        admin_client,
+        monkeypatch,
+    ):
+        def mock_invoice_get(*args, **kwargs):
+            return FAKE_INVOICE
+
+        def mock_customer_get(*args, **kwargs):
+            return FAKE_CUSTOMER
+
+        def mock_charge_get(*args, **kwargs):
+            return FAKE_CHARGE
+
+        def mock_payment_method_get(*args, **kwargs):
+            return FAKE_CARD_AS_PAYMENT_METHOD
+
+        def mock_payment_intent_get(*args, **kwargs):
+            return FAKE_PAYMENT_INTENT_I
+
+        def mock_subscription_get(*args, **kwargs):
+            return FAKE_SUBSCRIPTION
+
+        def mock_balance_transaction_get(*args, **kwargs):
+            return FAKE_BALANCE_TRANSACTION
+
+        def mock_product_get(*args, **kwargs):
+            return FAKE_PRODUCT
+
+        def mock_plan_get(*args, **kwargs):
+            return FAKE_PLAN
+
+        # monkeypatch stripe retrieve calls to return
+        # the desired json response.
+        monkeypatch.setattr(stripe.Invoice, "retrieve", mock_invoice_get)
+        monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
+        monkeypatch.setattr(
+            stripe.BalanceTransaction, "retrieve", mock_balance_transaction_get
+        )
+        monkeypatch.setattr(stripe.Subscription, "retrieve", mock_subscription_get)
+        monkeypatch.setattr(stripe.Charge, "retrieve", mock_charge_get)
+        monkeypatch.setattr(stripe.PaymentMethod, "retrieve", mock_payment_method_get)
+        monkeypatch.setattr(stripe.PaymentIntent, "retrieve", mock_payment_intent_get)
+        monkeypatch.setattr(stripe.Product, "retrieve", mock_product_get)
+        monkeypatch.setattr(stripe.Plan, "retrieve", mock_plan_get)
+
+        # Create Latest Invoice
+        models.Invoice.sync_from_stripe_data(FAKE_INVOICE)
+
+        model = models.Subscription
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        instance = model.sync_from_stripe_data(subscription_fake)
+
+        # get the standard changelist_view url
+        change_url = reverse(
+            f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
+        )
+
+        data = {"action": "_cancel", helpers.ACTION_CHECKBOX_NAME: [instance.pk]}
+
+        response = admin_client.post(change_url, data)
+
+        # assert user redirected to the correct url
+        assert response.status_code == 302
+        assert response.url == reverse(
+            "djstripe:djstripe_custom_action",
+            kwargs={
+                "action_name": "_cancel",
+                "model_name": model.__name__.lower(),
+                "model_pks": instance.pk,
+            },
+        )
