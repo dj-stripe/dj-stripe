@@ -44,6 +44,11 @@ admin_display_for_field_override()
 
 
 class CustomActionMixin:
+
+    # So that actions get shown even if there are 0 instances
+    # https://docs.djangoproject.com/en/dev/ref/contrib/admin/#django.contrib.admin.ModelAdmin.show_full_result_count
+    show_full_result_count = False
+
     @admin.action(description="Re-Sync Selected Instances")
     def _resync_instances(self, request, queryset):
         """Admin Action to resync selected instances"""
