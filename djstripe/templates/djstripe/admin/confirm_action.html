@@ -5,6 +5,9 @@
 {% block extrahead %}
     {{ block.super }}
     {{ media.js }}
+    {% comment %} Load Jquery shipped with Django {% endcomment %}
+    <script src="{% static 'admin/js/vendor/jquery/jquery.min.js' %}" ></script>
+    <script src="{% static 'admin/js/jquery.init.js' %}" ></script>
 
     <script src="{% static 'admin/js/cancel.js' %}" async></script>
 {% endblock %}
@@ -25,6 +28,15 @@
 
 {% block content %}
     {{ block.super }}
+
+    {% comment %} Page Loader Icon {% endcomment %}
+    <div id="div_spinner" style="display: none;">
+        <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+            <div id="spinner" role="status">
+                    <span>Loading...</span>
+            </div>
+        </div>
+    </div>
 
 
     <div id="main_content">
