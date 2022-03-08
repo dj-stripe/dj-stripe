@@ -10,7 +10,6 @@ from django.contrib import admin, messages
 from django.contrib.admin import helpers
 from django.contrib.admin.utils import display_for_field, display_for_value, quote
 from django.contrib.contenttypes.models import ContentType
-from django.core.management import call_command
 from django.db import IntegrityError, transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -110,10 +109,10 @@ class CustomActionMixin:
     @admin.action(description="Sync All Instances for all API Keys")
     def _sync_all_instances(self, request, queryset):
         """Admin Action to Sync All Instances"""
-        call_command("djstripe_sync_models", self.model.__name__)
-        self.message_user(
-            request, "Successfully Synced All Instances", level=messages.SUCCESS
+        context = self.get_admin_action_context(
+            queryset, "_sync_all_instances", CustomActionForm
         )
+        return render(request, "djstripe/admin/confirm_action.html", context)
 
     def changelist_view(self, request, extra_context=None):
         # we fool it into thinking we have selected some query
