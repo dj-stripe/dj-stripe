@@ -32,7 +32,7 @@ The full documentation is available [on Read the Docs](https://dj-stripe.github.
 
 ## Requirements
 
--   Django 3.2.5+
+-   Django 3.2.5+. *dj-stripe is not tested with the `main` branch of `Django` and hence compatibility cannot be guaranteed.*
 -   Python 3.7+
 -   PostgreSQL engine (recommended) 9.6+
 -   MySQL engine: MariaDB 10.2+ or MySQL 5.7+
