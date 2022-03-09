@@ -702,8 +702,14 @@ class SourceAdmin(StripeModelAdmin):
 class PaymentMethodAdmin(StripeModelAdmin):
     list_display = ("customer", "type", "billing_details")
     list_filter = ("type",)
-    list_select_related = ("customer", "customer__subscriber")
     search_fields = ("customer__id",)
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("customer", "customer__subscriber")
+        )
 
 
 @admin.register(models.Card)
