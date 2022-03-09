@@ -496,8 +496,10 @@ class FileLinkAdmin(StripeModelAdmin):
 @admin.register(models.PaymentIntent)
 class PaymentIntentAdmin(StripeModelAdmin):
     list_display = (
+        "on_behalf_of",
         "customer",
         "amount",
+        "payment_method",
         "currency",
         "description",
         "amount_capturable",
