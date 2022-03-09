@@ -693,6 +693,9 @@ class ProductAdmin(StripeModelAdmin):
     list_filter = ("type", "active", "shippable")
     search_fields = ("name", "statement_descriptor")
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related("prices")
+
 
 @admin.register(models.Refund)
 class RefundAdmin(StripeModelAdmin):
