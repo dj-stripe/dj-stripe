@@ -193,6 +193,7 @@ class WebhookEventTriggerAdmin(ReadOnlyMixin, admin.ModelAdmin):
         "created",
         "event",
         "stripe_trigger_account",
+        "webhook_endpoint",
         "remote_ip",
         "processed",
         "valid",
