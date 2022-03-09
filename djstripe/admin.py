@@ -392,6 +392,8 @@ class ChargeAdmin(StripeModelAdmin):
     list_display = (
         "customer",
         "amount",
+        "invoice",
+        "payment_method",
         "description",
         "paid",
         "disputed",
