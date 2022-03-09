@@ -49,6 +49,7 @@ pytest = ">=7.3.1"
 pytest-django = ">=4.5.2"
 mypy = ">=1.2.0"
 debugpy = "^1.5.1"
+django-debug-toolbar = "^3.2.4"
 
 # flake8 = ">=5.0.4"
 # Why is flake8 commented out?

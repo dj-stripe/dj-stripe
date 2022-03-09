@@ -1,5 +1,6 @@
 import json
 import os
+import socket
 
 test_db_vendor = os.environ.get("DJSTRIPE_TEST_DB_VENDOR", "postgres")
 test_db_name = os.environ.get("DJSTRIPE_TEST_DB_NAME", "djstripe")
@@ -86,7 +87,7 @@ INSTALLED_APPS = [
     "tests.apps.example",
 ]
 
-MIDDLEWARE = (
+MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -94,7 +95,7 @@ MIDDLEWARE = (
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-)
+]
 
 STRIPE_LIVE_PUBLIC_KEY = os.environ.get(
     "STRIPE_PUBLIC_KEY", "pk_live_XXXXXXXXXXXXXXXXXXXXXXXXX"
@@ -122,3 +123,14 @@ STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 STRIPE_API_VERSION = "2020-08-27"  # "2020-08-27; orders_beta=v4"
+
+
+# django-debug-toolbar
+# ------------------------------------------------------------------------------
+# https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#prerequisites
+INSTALLED_APPS += ["debug_toolbar"]  # noqa F405
+# https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#middleware
+MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]  # noqa F405
+# https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#internal-ips
+hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+INTERNAL_IPS = [ip[:-1] + "1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]

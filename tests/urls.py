@@ -23,4 +23,6 @@ urlpatterns = [
     path("testapp_content/", include("tests.apps.testapp_content.urls")),
     # For testing fnmatches
     path("test_fnmatch/extra_text/", empty_view, name="test_fnmatch"),
+    # django-debug-toolbar urls
+    path("__debug__/", include("debug_toolbar.urls")),
 ]
