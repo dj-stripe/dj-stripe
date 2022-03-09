@@ -643,6 +643,14 @@ class PlanAdmin(StripeModelAdmin):
 
         return readonly_fields
 
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("product")
+            .prefetch_related("subscriptions")
+        )
+
 
 @admin.register(models.Price)
 class PriceAdmin(StripeModelAdmin):
