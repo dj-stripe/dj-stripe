@@ -752,7 +752,6 @@ class BankAccountAdmin(StripeModelAdmin):
 class SubscriptionAdmin(StripeModelAdmin):
     list_display = ("customer", "status", "get_default_tax_rates")
     list_filter = ("status", "cancel_at_period_end")
-    list_select_related = ("customer", "customer__subscriber")
 
     inlines = (SubscriptionItemInline,)
 
@@ -772,6 +771,21 @@ class SubscriptionAdmin(StripeModelAdmin):
     _cancel.short_description = "Cancel selected subscriptions"  # type: ignore # noqa
 
     actions = (_cancel, _resync_instances)
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "customer",
+            )
+            .prefetch_related(
+                "customer__subscriptions",
+                "customer__subscriptions__plan",
+                "customer__subscriptions__plan__product",
+                "default_tax_rates",
+            )
+        )
 
     @admin.display(description="Default Tax Rates")
     def get_default_tax_rates(self, obj):
