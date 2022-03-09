@@ -212,6 +212,13 @@ class WebhookEventTriggerAdmin(ReadOnlyMixin, admin.ModelAdmin):
 
             trigger.process()
 
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("stripe_trigger_account", "event", "webhook_endpoint")
+        )
+
 
 class StripeModelAdmin(admin.ModelAdmin):
     """Base class for all StripeModel-based model admins"""
