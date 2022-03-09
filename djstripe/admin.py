@@ -506,8 +506,16 @@ class PaymentIntentAdmin(StripeModelAdmin):
         "amount_received",
         "receipt_email",
     )
-    list_select_related = ("customer", "customer__subscriber")
     search_fields = ("customer__id", "invoice__id")
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "customer", "payment_method", "payment_method__customer", "on_behalf_of"
+            )
+        )
 
 
 @admin.register(models.Payout)
