@@ -569,7 +569,7 @@ class SetupIntentAdmin(StripeModelAdmin):
 
 @admin.register(models.Session)
 class SessionAdmin(StripeModelAdmin):
-    list_display = ("customer", "customer_email")
+    list_display = ("customer", "customer_email", "subscription")
     list_filter = ("customer", "mode")
     search_fields = ("customer__id", "customer_email")
 
