@@ -579,7 +579,15 @@ class SessionAdmin(StripeModelAdmin):
 
 @admin.register(models.Invoice)
 class InvoiceAdmin(StripeModelAdmin):
-    list_display = ("total", "paid", "currency", "number", "customer", "due_date")
+    list_display = (
+        "total",
+        "get_default_tax_rates",
+        "paid",
+        "currency",
+        "number",
+        "customer",
+        "due_date",
+    )
     list_filter = (
         "paid",
         "attempted",
@@ -591,6 +599,12 @@ class InvoiceAdmin(StripeModelAdmin):
     list_select_related = ("customer", "customer__subscriber")
     search_fields = ("customer__id", "number", "receipt_number")
     inlines = (InvoiceItemInline,)
+
+    @admin.display(description="Default Tax Rates")
+    def get_default_tax_rates(self, obj):
+        result = [str(tax_rate) for tax_rate in obj.default_tax_rates.all()]
+        if result:
+            return ", ".join(result)
 
 
 @admin.register(models.Mandate)
