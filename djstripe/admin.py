@@ -441,6 +441,7 @@ class CustomerAdmin(StripeModelAdmin):
         "email",
         "currency",
         "default_source",
+        "default_payment_method",
         "coupon",
         "balance",
     )
