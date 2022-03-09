@@ -400,13 +400,22 @@ class ChargeAdmin(StripeModelAdmin):
         "refunded",
         "fee",
     )
-    list_select_related = (
-        "customer",
-        "customer__subscriber",
-        "balance_transaction",
-    )
+
     search_fields = ("customer__id", "invoice__id")
     list_filter = ("status", "paid", "refunded", "captured")
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "balance_transaction",
+                "customer",
+                "invoice",
+                "payment_method",
+                "payment_method__customer",
+            )
+        )
 
 
 @admin.register(models.Coupon)
