@@ -257,6 +257,9 @@ class StripeModelAdmin(admin.ModelAdmin):
             (self.model.__name__, {"fields": fields}),
         )
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("djstripe_owner_account")
+
 
 class SubscriptionInline(admin.StackedInline):
     """A TabularInline for use models.Subscription."""
@@ -354,6 +357,9 @@ class APIKeyAdmin(admin.ModelAdmin):
         if obj is None:
             return APIKeyAdminCreateForm
         return super().get_form(request, obj, **kwargs)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("djstripe_owner_account")
 
     def save_model(self, request: Any, obj, form: Any, change: Any) -> None:
         try:
@@ -462,6 +468,9 @@ class FileLinkAdmin(StripeModelAdmin):
     list_display = ("url",)
     list_filter = ("expires_at",)
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("file")
+
 
 @admin.register(models.PaymentIntent)
 class PaymentIntentAdmin(StripeModelAdmin):
@@ -488,9 +497,15 @@ class PayoutAdmin(StripeModelAdmin):
         "status",
         "type",
     )
-    list_select_related = ("balance_transaction", "destination")
     list_filter = ("destination__id",)
     search_fields = ("destination__id", "balance_transaction__id")
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("balance_transaction", "destination")
+        )
 
 
 @admin.register(models.SetupIntent)
@@ -505,12 +520,20 @@ class SetupIntentAdmin(StripeModelAdmin):
         "status",
     )
     list_filter = ("status",)
-    list_select_related = (
-        "customer",
-        "customer__subscriber",
-        "payment_method",
-    )
     search_fields = ("customer__id", "status")
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "on_behalf_of",
+                "customer",
+                "customer__subscriber",
+                "payment_method",
+                "payment_method__customer",
+            )
+        )
 
 
 @admin.register(models.Session)
@@ -540,8 +563,10 @@ class InvoiceAdmin(StripeModelAdmin):
 class MandateAdmin(StripeModelAdmin):
     list_display = ("status", "type", "payment_method")
     list_filter = ("multi_use", "single_use")
-    list_select_related = ("payment_method",)
     search_fields = ("payment_method__id",)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("payment_method")
 
 
 @admin.register(models.Plan)
@@ -572,6 +597,14 @@ class PriceAdmin(StripeModelAdmin):
     search_fields = ("nickname",)
     radio_fields = {"type": admin.HORIZONTAL}
 
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("product")
+            .prefetch_related("product__prices")
+        )
+
 
 @admin.register(models.Product)
 class ProductAdmin(StripeModelAdmin):
@@ -593,12 +626,21 @@ class RefundAdmin(StripeModelAdmin):
     list_filter = ("reason", "status")
     search_fields = ("receipt_number",)
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("charge")
+
 
 @admin.register(models.Source)
 class SourceAdmin(StripeModelAdmin):
     list_display = ("customer", "type", "status", "amount", "currency", "usage", "flow")
     list_filter = ("type", "status", "usage", "flow")
-    list_select_related = ("customer", "customer__subscriber")
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("customer", "customer__subscriber")
+        )
 
 
 @admin.register(models.PaymentMethod)
@@ -612,15 +654,37 @@ class PaymentMethodAdmin(StripeModelAdmin):
 @admin.register(models.Card)
 class CardAdmin(StripeModelAdmin):
     list_display = ("customer", "account")
-    list_select_related = ("customer", "customer__subscriber", "account")
     search_fields = ("customer__id", "account__id")
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "customer",
+                "customer__default_source",
+                "customer__default_payment_method",
+                "account",
+            )
+        )
 
 
 @admin.register(models.BankAccount)
 class BankAccountAdmin(StripeModelAdmin):
     list_display = ("customer", "account")
-    list_select_related = ("customer", "customer__subscriber", "account")
     search_fields = ("customer__id", "account__id")
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "customer",
+                "customer__default_source",
+                "customer__default_payment_method",
+                "account",
+            )
+        )
 
 
 @admin.register(models.Subscription)
@@ -679,6 +743,9 @@ class ApplicationFeeReversalAdmin(StripeModelAdmin):
 class UsageRecordAdmin(StripeModelAdmin):
     list_display = ("quantity", "subscription_item", "timestamp")
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("subscription_item")
+
 
 @admin.register(models.UsageRecordSummary)
 class UsageRecordSummaryAdmin(StripeModelAdmin):
@@ -697,6 +764,11 @@ class UsageRecordSummaryAdmin(StripeModelAdmin):
             post[helpers.ACTION_CHECKBOX_NAME] = None
             request._set_post(post)
         return super().changelist_view(request, extra_context)
+
+    def get_queryset(self, request):
+        return (
+            super().get_queryset(request).select_related("invoice", "subscription_item")
+        )
 
 
 class WebhookEndpointAdminBaseForm(forms.ModelForm):
@@ -953,3 +1025,6 @@ class WebhookEndpointAdmin(admin.ModelAdmin):
                 raise
 
         return super().delete_model(request, obj)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("djstripe_owner_account")
