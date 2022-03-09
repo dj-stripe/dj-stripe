@@ -596,7 +596,6 @@ class InvoiceAdmin(StripeModelAdmin):
         "period_start",
         "period_end",
     )
-    list_select_related = ("customer", "customer__subscriber")
     search_fields = ("customer__id", "number", "receipt_number")
     inlines = (InvoiceItemInline,)
 
@@ -605,6 +604,14 @@ class InvoiceAdmin(StripeModelAdmin):
         result = [str(tax_rate) for tax_rate in obj.default_tax_rates.all()]
         if result:
             return ", ".join(result)
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("customer")
+            .prefetch_related("default_tax_rates")
+        )
 
 
 @admin.register(models.Mandate)
