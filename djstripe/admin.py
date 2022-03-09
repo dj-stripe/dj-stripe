@@ -445,7 +445,7 @@ class CustomerAdmin(StripeModelAdmin):
         "coupon",
         "balance",
     )
-    list_select_related = ("subscriber", "default_source", "coupon")
+
     list_filter = (
         CustomerHasSourceListFilter,
         CustomerSubscriptionStatusListFilter,
@@ -453,6 +453,15 @@ class CustomerAdmin(StripeModelAdmin):
     )
     search_fields = ("email", "description", "deleted")
     inlines = (SubscriptionInline, TaxIdInline)
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "subscriber", "default_source", "default_payment_method", "coupon"
+            )
+        )
 
 
 @admin.register(models.Dispute)
