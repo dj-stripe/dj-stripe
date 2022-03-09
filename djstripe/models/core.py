@@ -599,7 +599,7 @@ class Product(StripeModel):
 
     def __str__(self):
         # 1 product can have 1 or more than 1 related price
-        price_qs = Price.objects.filter(product__id=self.id)
+        price_qs = self.prices.all()
         price_count = price_qs.count()
 
         if price_count > 1:
