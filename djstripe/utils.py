@@ -5,6 +5,7 @@ import datetime
 from typing import Optional
 
 import stripe
+from django.apps import apps
 from django.conf import settings
 from django.db.models.query import QuerySet
 from django.utils import timezone
@@ -95,3 +96,10 @@ def get_id_from_stripe_data(data):
         return data.get("id")
     else:
         return None
+
+
+def get_model(model_name):
+    app_label = "djstripe"
+    app_config = apps.get_app_config(app_label)
+    model = app_config.get_model(model_name)
+    return model
