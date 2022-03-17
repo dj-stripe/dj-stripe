@@ -12251,7 +12251,7 @@ djstripe.models.core.Product.stripe_class        </code>
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="c1"># 1 product can have 1 or more than 1 related price</span>
-    <span class="n">price_qs</span> <span class="o">=</span> <span class="n">Price</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">product__id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="n">price_qs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prices</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
     <span class="n">price_count</span> <span class="o">=</span> <span class="n">price_qs</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">price_count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
