@@ -103,3 +103,8 @@ def get_model(model_name):
     app_config = apps.get_app_config(app_label)
     model = app_config.get_model(model_name)
     return model
+
+
+def get_queryset(pks, model_name):
+    model = get_model(model_name)
+    return model.objects.filter(pk__in=pks)
