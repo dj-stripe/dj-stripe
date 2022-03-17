@@ -16,9 +16,11 @@ from django.test import TestCase
 from django.test.client import RequestFactory
 from django.urls import reverse
 from jsonfield import JSONField
+from pytest_django.asserts import assertQuerysetEqual
 
 from djstripe import admin as djstripe_admin
-from djstripe import models
+from djstripe import models, utils
+from djstripe.forms import CustomActionForm
 from djstripe.models.account import Account
 
 from .fields.models import TestCustomActionModel
@@ -1146,6 +1148,69 @@ class TestCustomActionMixin:
         "IdempotencyKey",
         "APIKey",
     ]
+
+    @pytest.mark.parametrize(
+        "action_name", ["_sync_all_instances", "_resync_instances"]
+    )
+    @pytest.mark.parametrize("djstripe_owner_account_exists", [False, True])
+    def test_get_admin_action_context(
+        self, djstripe_owner_account_exists, action_name, monkeypatch
+    ):
+        # monkeypatch utils.get_model
+        def mock_get_model(*args, **kwargs):
+            return model
+
+        monkeypatch.setattr(utils, "get_model", mock_get_model)
+
+        model = TestCustomActionModel
+
+        # create instance to be used in the Django Admin Action
+        instance = model.objects.create(id="test")
+
+        if djstripe_owner_account_exists:
+            account_instance = Account.objects.first()
+            instance.djstripe_owner_account = account_instance
+            instance.save()
+
+        queryset = model.objects.all()
+        model_admin = site._registry.get(model)
+
+        context = model_admin.get_admin_action_context(
+            queryset, action_name, CustomActionForm
+        )
+
+        assert context.get("queryset") == queryset
+        assert context.get("action_name") == action_name
+        assert context.get("model_name") == "testcustomactionmodel"
+        assert context.get("changelist_url") == "/admin/fields/testcustomactionmodel/"
+        assert context.get("ACTION_CHECKBOX_NAME") == helpers.ACTION_CHECKBOX_NAME
+
+        if action_name == "_sync_all_instances":
+            assert context.get("info") == []
+            assertQuerysetEqual(
+                context.get("form").initial.get(helpers.ACTION_CHECKBOX_NAME),
+                ["_sync_all_instances"],
+            )
+            assert context.get("form").fields.get(
+                helpers.ACTION_CHECKBOX_NAME
+            ).choices == [("_sync_all_instances", "_sync_all_instances")]
+        else:
+            assert context.get("info") == [
+                f'Test custom action model: <a href="/admin/fields/testcustomactionmodel/{instance.pk}/change/">&lt;id=test&gt;</a>'
+            ]
+
+            assertQuerysetEqual(
+                context.get("form").initial.get(helpers.ACTION_CHECKBOX_NAME),
+                queryset.values_list("pk", flat=True),
+            )
+            assert context.get("form").fields.get(
+                helpers.ACTION_CHECKBOX_NAME
+            ).choices == list(
+                zip(
+                    queryset.values_list("pk", flat=True),
+                    queryset.values_list("pk", flat=True),
+                )
+            )
 
     @pytest.mark.parametrize("fake_selected_pks", [None, [1, 2]])
     def test_changelist_view(self, admin_client, admin_user, fake_selected_pks):
