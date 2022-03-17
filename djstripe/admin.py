@@ -9,10 +9,12 @@ import stripe
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.admin import helpers
-from django.contrib.admin.utils import display_for_field, display_for_value
+from django.contrib.admin.utils import display_for_field, display_for_value, quote
 from django.core.management import call_command
 from django.db import IntegrityError, transaction
 from django.urls import reverse
+from django.utils.html import format_html
+from django.utils.text import capfirst
 from jsonfield import JSONField
 from stripe.error import AuthenticationError, InvalidRequestError
 
@@ -48,6 +50,50 @@ class CustomActionMixin:
     # So that actions get shown even if there are 0 instances
     # https://docs.djangoproject.com/en/dev/ref/contrib/admin/#django.contrib.admin.ModelAdmin.show_full_result_count
     show_full_result_count = False
+
+    def get_admin_action_context(self, queryset, action_name, form_class):
+
+        context = {
+            "action_name": action_name,
+            "model_name": self.model._meta.model_name,
+            "info": [],
+            "queryset": queryset,
+            "changelist_url": reverse(
+                f"admin:{self.model._meta.app_label}_{self.model._meta.model_name}_changelist"
+            ),
+            "ACTION_CHECKBOX_NAME": helpers.ACTION_CHECKBOX_NAME,
+            "form": form_class(
+                initial={
+                    helpers.ACTION_CHECKBOX_NAME: queryset.values_list("pk", flat=True)
+                },
+                model_name=self.model._meta.model_name,
+                action_name=action_name,
+            ),
+        }
+
+        if action_name == "_sync_all_instances":
+            context["form"] = form_class(
+                initial={helpers.ACTION_CHECKBOX_NAME: [action_name]},
+                model_name=self.model._meta.model_name,
+                action_name=action_name,
+            )
+
+        else:
+            for obj in queryset:
+                admin_url = reverse(
+                    f"admin:{obj._meta.app_label}_{obj._meta.model_name}_change",
+                    None,
+                    (quote(obj.pk),),
+                )
+                context["info"].append(
+                    format_html(
+                        '{}: <a href="{}">{}</a>',
+                        capfirst(obj._meta.verbose_name),
+                        admin_url,
+                        obj,
+                    )
+                )
+        return context
 
     @admin.action(description="Re-Sync Selected Instances")
     def _resync_instances(self, request, queryset):
@@ -803,7 +849,6 @@ class SubscriptionAdmin(StripeModelAdmin):
                 )
             except InvalidRequestError as error:
                 self.message_user(request, str(error), level=messages.WARNING)
-
 
     def get_queryset(self, request):
         return (
