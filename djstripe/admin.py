@@ -727,6 +727,26 @@ class SourceAdmin(StripeModelAdmin):
         )
 
 
+@admin.register(models.SourceTransaction)
+class SourceTransactionAdmin(StripeModelAdmin):
+    list_display = ("status", "amount", "currency")
+    list_filter = (
+        "status",
+        "source__id",
+        "source__customer",
+        "source__customer__subscriber",
+    )
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if "_resync_instances" in actions:
+            del actions["_resync_instances"]
+        return actions
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("source")
+
+
 @admin.register(models.PaymentMethod)
 class PaymentMethodAdmin(StripeModelAdmin):
     list_display = ("customer", "type", "billing_details")
@@ -803,7 +823,6 @@ class SubscriptionAdmin(StripeModelAdmin):
                 )
             except InvalidRequestError as error:
                 self.message_user(request, str(error), level=messages.WARNING)
-
 
     def get_queryset(self, request):
         return (
