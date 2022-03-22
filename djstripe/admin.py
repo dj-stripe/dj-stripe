@@ -919,6 +919,11 @@ class WebhookEndpointAdminBaseForm(forms.ModelForm):
         # If we do the following in _post_clean(), the data doesn't save properly.
         assert self._stripe_data
 
+        # Update scenario
+        # Add back secret if endpoint already exists
+        if self.instance.pk and not self._stripe_data.get("secret"):
+            self._stripe_data["secret"] = self.instance.secret
+
         # Retrieve the api key that was used to create the endpoint
         api_key = getattr(self, "_stripe_api_key", None)
         if api_key:
