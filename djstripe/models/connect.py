@@ -78,6 +78,7 @@ class ApplicationFeeRefund(StripeModel):
     """
 
     description = None
+    stripe_class = stripe.ApplicationFeeRefund
 
     amount = StripeQuantumCurrencyAmountField(help_text="Amount refunded, in cents.")
     balance_transaction = StripeForeignKey(
