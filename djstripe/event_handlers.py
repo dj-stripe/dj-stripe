@@ -263,6 +263,7 @@ def dispute_webhook_handler(event):
     "invoice",
     "invoiceitem",
     "payment_intent",
+    "payout",
     "plan",
     "price",
     "product",
@@ -285,6 +286,7 @@ def other_object_webhook_handler(event):
     - invoice: https://stripe.com/docs/api/invoices
     - invoiceitem: https://stripe.com/docs/api/invoiceitems
     - payment_intent: https://stripe.com/docs/api/payment_intents
+    - payout: https://stripe.com/docs/api/payouts
     - plan: https://stripe.com/docs/api/plans
     - price: https://stripe.com/docs/api/prices
     - product: https://stripe.com/docs/api/products
@@ -302,6 +304,7 @@ def other_object_webhook_handler(event):
         "invoice": models.Invoice,
         "invoiceitem": models.InvoiceItem,
         "payment_intent": models.PaymentIntent,
+        "payout": models.Payout,
         "plan": models.Plan,
         "price": models.Price,
         "product": models.Product,
