@@ -96,6 +96,20 @@ class CustomActionMixin:
                 )
         return context
 
+    def get_actions(self, request):
+        """
+        Returns _resync_instances only for
+        models with a defined model.stripe_class.retrieve
+        """
+        actions = super().get_actions(request)
+
+        # ensure we return "_resync_instances" ONLY for
+        # models that have a GET method
+        if not getattr(self.model.stripe_class, "retrieve", None):
+            actions.pop("_resync_instances", None)
+
+        return actions
+
     @admin.action(description="Re-Sync Selected Instances")
     def _resync_instances(self, request, queryset):
         """Admin Action to resync selected instances"""
@@ -888,12 +902,6 @@ class UsageRecordAdmin(StripeModelAdmin):
 @admin.register(models.UsageRecordSummary)
 class UsageRecordSummaryAdmin(StripeModelAdmin):
     list_display = ("invoice", "subscription_item", "total_usage")
-
-    def get_actions(self, request):
-        actions = super().get_actions(request)
-        if "_resync_instances" in actions:
-            del actions["_resync_instances"]
-        return actions
 
     def get_queryset(self, request):
         return (
