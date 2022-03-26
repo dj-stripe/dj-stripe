@@ -1000,6 +1000,36 @@ class TestCustomActionMixin:
                 )
             )
 
+    def test_get_actions(self, admin_user):
+        app_label = "djstripe"
+        app_config = apps.get_app_config(app_label)
+        all_models_lst = app_config.get_models()
+
+        for model in all_models_lst:
+            if model in site._registry.keys():
+                model_admin = site._registry.get(model)
+
+                # get the standard changelist_view url
+                url = reverse(
+                    f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
+                )
+
+                # add the admin user to the mocked request
+                request = RequestFactory().get(url)
+                request.user = admin_user
+
+                actions = model_admin.get_actions(request)
+
+                # sub-classes of StripeModel
+                if model.__name__ not in self.ignore_models:
+
+                    if getattr(model.stripe_class, "retrieve", None):
+                        # assert "_resync_instances" action is present
+                        assert "_resync_instances" in actions
+                    else:
+                        # assert "_resync_instances" action is not present
+                        assert "_resync_instances" not in actions
+
     @pytest.mark.parametrize("fake_selected_pks", [None, [1, 2]])
     def test_changelist_view(self, admin_client, fake_selected_pks):
 
