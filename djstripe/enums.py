@@ -514,8 +514,20 @@ class PayoutFailureCode(Enum):
     bank_ownership_changed = _("Destination bank account has changed ownership.")
     could_not_process = _("Bank could not process payout.")
     debit_not_authorized = _("Debit transactions not approved on the bank account.")
+    declined = _(
+        "The bank has declined this transfer. Please contact the bank before retrying."
+    )
     insufficient_funds = _("Stripe account has insufficient funds.")
     invalid_account_number = _("Invalid account number")
+    incorrect_account_holder_name = _(
+        "Your bank notified us that the bank account holder name on file is incorrect."
+    )
+    incorrect_account_holder_address = _(
+        "Your bank notified us that the bank account holder address on file is incorrect."
+    )
+    incorrect_account_holder_tax_id = _(
+        "Your bank notified us that the bank account holder tax ID on file is incorrect."
+    )
     invalid_currency = _("Bank account does not support currency.")
     no_account = _("Bank account could not be located.")
     unsupported_card = _("Card no longer supported.")
