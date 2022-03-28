@@ -2140,6 +2140,17 @@ class Payout(StripeModel):
     def __str__(self):
         return f"{self.amount} ({enums.PayoutStatus.humanize(self.status)})"
 
+    def cancel(self, api_key=None, stripe_account=None, **kwargs):
+        api_key = api_key or self.default_api_key
+        # Prefer passed in stripe_account if set.
+        if not stripe_account:
+            stripe_account = self._get_stripe_account_id(api_key)
+
+        stripe_payout = self.stripe_class.cancel(
+            self.id, api_key=api_key, stripe_account=stripe_account, **kwargs
+        )
+        return Payout.sync_from_stripe_data(stripe_payout)
+
 
 class Price(StripeModel):
     """

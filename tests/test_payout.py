@@ -92,3 +92,23 @@ class TestPayout(AssertStripeFksMixin, TestCase):
         payout = Payout.sync_from_stripe_data(fake_payout_express)
 
         self.assertEqual(str(payout), "10.00 (Paid)")
+
+    @patch(
+        "stripe.BalanceTransaction.retrieve",
+        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        autospec=True,
+    )
+    @patch.object(Payout, "cancel", autospec=True)
+    def test_cancel(self, payout_cancel_mock, balance_transaction_retrieve_mock):
+        fake_payout_custom = deepcopy(FAKE_PAYOUT_CUSTOM_BANK_ACCOUNT)
+        fake_payout_custom_cancelled = deepcopy(FAKE_PAYOUT_CUSTOM_BANK_ACCOUNT)
+        payout = Payout.sync_from_stripe_data(fake_payout_custom)
+
+        fake_payout_custom_cancelled["status"] = "Canceled"
+        payout_cancel_mock.return_value = fake_payout_custom_cancelled
+
+        # Invoke Payout.cancel()
+        cancelled_payout = payout.cancel()
+
+        self.assertEqual(cancelled_payout.status, "Canceled")
+        payout_cancel_mock.assert_called_once_with(payout)
