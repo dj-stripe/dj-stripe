@@ -122,3 +122,12 @@ class ConfirmCustomAction(FormView):
                 messages.success(request, f"Successfully Canceled: {instance}")
             except stripe.error.InvalidRequestError as error:
                 messages.warning(request, error)
+
+    def _cancel_payout(self, request, queryset):
+        """Cancel a Payout."""
+        for payout in queryset:
+            try:
+                instance = payout.cancel()
+                messages.success(request, f"Successfully Canceled: {instance}")
+            except stripe.error.InvalidRequestError as error:
+                messages.warning(request, error)

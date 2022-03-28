@@ -336,6 +336,20 @@ class PayoutAdmin(StripeModelAdmin):
             .select_related("balance_transaction", "destination")
         )
 
+    @admin.display(description="Cancel selected Payouts")
+    def _cancel_payout(self, request, queryset):
+        """Cancel a Payout."""
+        context = self.get_admin_action_context(
+            queryset, "_cancel_payout", CustomActionForm
+        )
+        return render(request, "djstripe/admin/confirm_action.html", context)
+
+    def get_actions(self, request):
+        # get all actions
+        actions = super().get_actions(request)
+        actions["_cancel_payout"] = self.get_action("_cancel_payout")
+        return actions
+
 
 @admin.register(models.SetupIntent)
 class SetupIntentAdmin(StripeModelAdmin):

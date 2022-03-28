@@ -19,14 +19,17 @@ from djstripe import models, utils
 from djstripe.admin import admin as djstripe_admin
 from djstripe.admin.forms import CustomActionForm
 from djstripe.models.account import Account
+from djstripe.models.payment_methods import BankAccount
 from tests import (
     FAKE_BALANCE_TRANSACTION,
+    FAKE_BANK_ACCOUNT,
     FAKE_CARD_AS_PAYMENT_METHOD,
     FAKE_CHARGE,
     FAKE_CUSTOMER,
     FAKE_INVOICE,
     FAKE_INVOICEITEM,
     FAKE_PAYMENT_INTENT_I,
+    FAKE_PAYOUT_CUSTOM_BANK_ACCOUNT,
     FAKE_PLAN,
     FAKE_PRODUCT,
     FAKE_SUBSCRIPTION,
@@ -1356,6 +1359,46 @@ class TestSubscriptionScheduleAdminCustomAction:
             "action": "_cancel_subscription_schedule",
             helpers.ACTION_CHECKBOX_NAME: [instance.pk],
         }
+
+        response = admin_client.post(change_url, data)
+
+        # assert user got 200 status code
+        assert response.status_code == 200
+
+
+class TestPayoutAdminCustomAction:
+    def test__cancel_payout(
+        self,
+        admin_client,
+        monkeypatch,
+    ):
+        def mock_balance_transaction_get(*args, **kwargs):
+            return FAKE_BALANCE_TRANSACTION
+
+        def mock_customer_get(*args, **kwargs):
+            return FAKE_CUSTOMER
+
+        def mock_bank_account_get(*args, **kwargs):
+            return FAKE_BANK_ACCOUNT
+
+        # monkeypatch stripe retrieve calls to return
+        # the desired json response.
+        monkeypatch.setattr(
+            stripe.BalanceTransaction, "retrieve", mock_balance_transaction_get
+        )
+        monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
+        monkeypatch.setattr(BankAccount, "api_retrieve", mock_bank_account_get)
+
+        model = models.Payout
+        payout_fake = deepcopy(FAKE_PAYOUT_CUSTOM_BANK_ACCOUNT)
+        instance = model.sync_from_stripe_data(payout_fake)
+
+        # get the standard changelist_view url
+        change_url = reverse(
+            f"admin:{model._meta.app_label}_{model.__name__.lower()}_changelist"
+        )
+
+        data = {"action": "_cancel_payout", helpers.ACTION_CHECKBOX_NAME: [instance.pk]}
 
         response = admin_client.post(change_url, data)
 
