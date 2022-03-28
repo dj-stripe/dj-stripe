@@ -1915,6 +1915,16 @@ FAKE_WEBHOOK_ENDPOINT_1 = WebhookEndpointDict(
 )
 
 
+class PayoutDict(StripeItem):
+    pass
+
+
+FAKE_PAYOUT_CUSTOM_BANK_ACCOUNT = PayoutDict(
+    load_fixture("payout_custom_bank_account.json")
+)
+FAKE_PAYOUT_CUSTOM_CARD = PayoutDict(load_fixture("payout_custom_card.json"))
+
+
 FAKE_ACCOUNT = {
     "id": "acct_1032D82eZvKYlo2C",
     "object": "account",
