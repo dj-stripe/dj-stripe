@@ -350,14 +350,20 @@ class PayoutAdmin(StripeModelAdmin):
         "status",
         "type",
     )
-    list_filter = ("destination__id",)
+    list_filter = ("destination__id", "original_payout")
     search_fields = ("destination__id", "balance_transaction__id")
 
     def get_queryset(self, request):
         return (
             super()
             .get_queryset(request)
-            .select_related("balance_transaction", "destination")
+            .select_related(
+                "balance_transaction",
+                "destination",
+                "failure_balance_transaction",
+                "original_payout",
+                "reversed_by",
+            )
         )
 
 
