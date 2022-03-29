@@ -21,4 +21,16 @@ class Migration(migrations.Migration):
                 to="djstripe.payout",
             ),
         ),
+        migrations.AddField(
+            model_name="payout",
+            name="reversed_by",
+            field=models.OneToOneField(
+                blank=True,
+                help_text="If this payout was reversed, this is the ID of the payout that reverses this payout.",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="reversed_payout",
+                to="djstripe.payout",
+            ),
+        ),
     ]

@@ -2132,6 +2132,14 @@ class Payout(StripeModel):
         blank=True,
         help_text="If this payout reverses another, this is the ID of the original payout.",
     )
+    reversed_by = models.OneToOneField(
+        "Payout",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="If this payout was reversed, this is the ID of the payout that reverses this payout.",
+        related_name="reversed_payout",
+    )
     source_type = StripeEnumField(
         enum=enums.PayoutSourceType,
         help_text="The source balance this payout came from.",
