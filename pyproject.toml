@@ -36,7 +36,7 @@ exclude = [
 
 [tool.poetry.dependencies]
 python = "^3.7.12"
-django = ">=3.2.5"
+django = ">=3.2, <4.1"
 jsonfield = ">=3.0"
 stripe = ">=2.48.0"
 mkdocs = {version = "^1.1.2", optional = true}
