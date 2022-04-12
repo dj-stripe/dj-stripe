@@ -17,7 +17,6 @@ from . import (
     FAKE_PRODUCT,
     FAKE_SUBSCRIPTION_ITEM,
     FAKE_USAGE_RECORD,
-    IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
 )
 
@@ -117,7 +116,7 @@ class TestUsageRecord(AssertStripeFksMixin, TestCase):
 
     @patch(
         "stripe.SubscriptionItem.create_usage_record",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
         return_value=deepcopy(FAKE_USAGE_RECORD),
     )
     @patch(

@@ -55,7 +55,6 @@ from . import (
     FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_II,
     FAKE_UPCOMING_INVOICE,
-    IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
     StripeList,
     datetime_to_unix,
@@ -427,14 +426,14 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "stripe.Customer.delete_source",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch("stripe.Customer.delete", autospec=True)
     @patch("stripe.Customer.retrieve", autospec=True)
     @patch(
         "stripe.Customer.retrieve_source",
         side_effect=[deepcopy(FAKE_CARD), deepcopy(FAKE_CARD_III)],
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_customer_purge_leaves_customer_record(
         self,
@@ -507,7 +506,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "stripe.Customer.delete_source",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch("stripe.Customer.delete", autospec=True)
     @patch(
@@ -543,7 +542,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve_source",
         return_value=deepcopy(FAKE_CARD),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_customer_delete_raises_unexpected_exception(
         self,
@@ -830,7 +829,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -925,7 +924,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -1030,7 +1029,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -1074,7 +1073,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -1133,7 +1132,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -1182,7 +1181,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -1223,7 +1222,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -1264,7 +1263,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -1323,7 +1322,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -1379,7 +1378,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.Subscription.retrieve",
@@ -1425,7 +1424,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.Subscription.retrieve",
@@ -1523,7 +1522,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Invoice.sync_from_stripe_data",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.Invoice.list",
@@ -1542,7 +1541,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Invoice.sync_from_stripe_data",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch("stripe.Invoice.list", return_value=StripeList(data=[]), autospec=True)
     @patch(
@@ -1556,7 +1555,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Charge.sync_from_stripe_data",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.Charge.list",
@@ -1574,7 +1573,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Charge.sync_from_stripe_data",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch("stripe.Charge.list", return_value=StripeList(data=[]), autospec=True)
     @patch(
@@ -1588,7 +1587,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Subscription.sync_from_stripe_data",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.Subscription.list",
@@ -1607,7 +1606,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Subscription.sync_from_stripe_data",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch("stripe.Subscription.list", return_value=StripeList(data=[]), autospec=True)
     @patch(
@@ -1869,7 +1868,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
     @patch(
         "djstripe.models.InvoiceItem.sync_from_stripe_data",
         return_value="pancakes",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.InvoiceItem.create",
@@ -1901,7 +1900,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
     @patch(
         "djstripe.models.InvoiceItem.sync_from_stripe_data",
         return_value="pancakes",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.InvoiceItem.create",
@@ -1975,7 +1974,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Invoice.upcoming",
         return_value=deepcopy(FAKE_UPCOMING_INVOICE),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_upcoming_invoice_plan(
         self,
@@ -2351,7 +2350,7 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Invoice.upcoming",
         return_value=deepcopy(FAKE_UPCOMING_INVOICE),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_upcoming_invoice(
         self,

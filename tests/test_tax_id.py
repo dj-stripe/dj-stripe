@@ -11,12 +11,7 @@ from djstripe import enums
 from djstripe.models import Customer, TaxId
 from djstripe.settings import djstripe_settings
 
-from . import (
-    FAKE_CUSTOMER,
-    FAKE_TAX_ID,
-    IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
-    AssertStripeFksMixin,
-)
+from . import FAKE_CUSTOMER, FAKE_TAX_ID, AssertStripeFksMixin
 
 pytestmark = pytest.mark.django_db
 
@@ -30,7 +25,7 @@ class TestTaxIdStr(TestCase):
     @patch(
         "stripe.Customer.retrieve_tax_id",
         return_value=deepcopy(FAKE_TAX_ID),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test___str__(
         self,
@@ -54,7 +49,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve_tax_id",
         return_value=deepcopy(FAKE_TAX_ID),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_sync_from_stripe_data(
         self,
@@ -83,7 +78,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.create_tax_id",
         return_value=deepcopy(FAKE_TAX_ID),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test__api_create(
         self,
@@ -112,7 +107,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.create_tax_id",
         return_value=deepcopy(FAKE_TAX_ID),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test__api_create_no_id_kwarg(
         self,
@@ -130,7 +125,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.create_tax_id",
         return_value=deepcopy(FAKE_TAX_ID),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test__api_create_no_customer(
         self,
@@ -151,7 +146,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve_tax_id",
         return_value=deepcopy(FAKE_TAX_ID),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_api_retrieve(
         self,
@@ -172,7 +167,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
 
     @patch(
         "stripe.Customer.list_tax_ids",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_api_list(
         self,

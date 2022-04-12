@@ -20,7 +20,6 @@ from . import (
     FAKE_PLAN,
     FAKE_PRODUCT,
     FAKE_SUBSCRIPTION,
-    IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 )
 
 pytestmark = pytest.mark.django_db
@@ -95,7 +94,7 @@ class TestBalanceTransaction(TestCase):
     )
     @patch(
         "stripe.Charge.retrieve",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
         return_value=deepcopy(FAKE_CHARGE),
     )
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
@@ -157,7 +156,7 @@ class TestBalanceTransaction(TestCase):
     )
     @patch(
         "stripe.Charge.retrieve",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
         return_value=deepcopy(FAKE_CHARGE),
     )
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
@@ -215,7 +214,7 @@ class TestBalanceTransaction(TestCase):
     )
     @patch(
         "stripe.Charge.retrieve",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
         return_value=deepcopy(FAKE_CHARGE),
     )
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)

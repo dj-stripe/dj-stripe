@@ -17,7 +17,6 @@ from . import (
     FAKE_CARD_AS_PAYMENT_METHOD,
     FAKE_CUSTOMER,
     FAKE_PAYMENT_METHOD_I,
-    IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
     PaymentMethodDict,
 )
@@ -110,7 +109,7 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.PaymentMethod._cls_attach",
         return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_attach(self, attach_mock):
 
@@ -129,7 +128,7 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.PaymentMethod._cls_attach",
         return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_attach_obj(self, attach_mock):
         pm = models.PaymentMethod.sync_from_stripe_data(FAKE_PAYMENT_METHOD_I)
@@ -147,7 +146,7 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.PaymentMethod._cls_attach",
         return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_attach_synced(self, attach_mock):
         fake_payment_method = deepcopy(FAKE_PAYMENT_METHOD_I)

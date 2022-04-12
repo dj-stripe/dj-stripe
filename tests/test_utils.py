@@ -17,8 +17,6 @@ from djstripe.utils import (
     get_supported_currency_choices,
 )
 
-from . import IS_STATICMETHOD_AUTOSPEC_SUPPORTED
-
 TZ_IS_UTC = time.tzname == ("UTC", "UTC")
 
 
@@ -45,7 +43,7 @@ class TestGetSupportedCurrencyChoices(TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value={"country": "US"},
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_get_choices(
         self, stripe_account_retrieve_mock, stripe_countryspec_retrieve_mock

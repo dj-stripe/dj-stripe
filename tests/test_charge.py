@@ -30,7 +30,6 @@ from . import (
     FAKE_STANDARD_ACCOUNT,
     FAKE_SUBSCRIPTION,
     FAKE_TRANSFER,
-    IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
 )
 
@@ -98,7 +97,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch("stripe.Charge.retrieve", autospec=True)
     @patch(
@@ -156,17 +155,13 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
             },
         )
 
-    @patch(
-        "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED
-        and IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
-    )
+    @patch("djstripe.models.Account.get_default_account", autospec=True)
     @patch(
         "stripe.BalanceTransaction.retrieve",
         return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
         autospec=True,
     )
-    @patch("stripe.Charge.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Charge.retrieve", autospec=True)
     @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
     )
@@ -238,7 +233,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch("stripe.Charge.retrieve", autospec=True)
     @patch(
@@ -344,7 +339,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -470,7 +465,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
     )
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_sync_from_stripe_data_max_amount(
         self,
@@ -508,7 +503,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -576,7 +571,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -670,7 +665,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
     )
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_sync_from_stripe_data_with_transfer(
         self,
@@ -722,7 +717,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         )
 
     @patch("stripe.Charge.retrieve", autospec=True)
-    @patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Account.retrieve", autospec=True)
     @patch(
         "stripe.BalanceTransaction.retrieve",
         return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
@@ -827,13 +822,9 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         self.assertEqual(starting_source, charge.source)
         mock_payment_method._get_or_create_source.assert_not_called()
 
-    @patch(
-        "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED
-        and IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
-    )
+    @patch("djstripe.models.Account.get_default_account", autospec=True)
     @patch("stripe.BalanceTransaction.retrieve", autospec=True)
-    @patch("stripe.Charge.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Charge.retrieve", autospec=True)
     @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
     )

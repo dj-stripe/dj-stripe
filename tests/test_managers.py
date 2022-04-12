@@ -18,7 +18,6 @@ from . import (
     FAKE_PLATFORM_ACCOUNT,
     FAKE_PRODUCT,
     FAKE_TRANSFER,
-    IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 )
 
 
@@ -154,7 +153,7 @@ class TransferManagerTest(TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_transfer_summary(
         self, account_retrieve_mock, transfer__attach_object_post_save_hook_mock
