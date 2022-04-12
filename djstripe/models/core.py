@@ -905,7 +905,7 @@ class Customer(StripeModel):
         )
 
         api_key = kwargs.get("api_key") or self.default_api_key
-        Subscription.sync_from_stripe_data(stripe_subscription, api_key=api_key)
+        return Subscription.sync_from_stripe_data(stripe_subscription, api_key=api_key)
 
     def charge(
         self,
