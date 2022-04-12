@@ -1638,11 +1638,18 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         fake_subscription["latest_invoice"] = None
         subscription_create_mock.return_value = fake_subscription
 
+        current_subscriptions = self.customer.subscriptions.count()
+
         price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
 
         self.assert_fks(price, expected_blank_fks={})
 
         self.customer.subscribe(items=[{"price": price.id}])
+
+        updated_subscriptions = self.customer.subscriptions.count()
+
+        # assert 1 new subscription got created
+        assert updated_subscriptions == current_subscriptions + 1
 
     @patch("stripe.Subscription.create", autospec=True)
     @patch(
@@ -1663,11 +1670,17 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         fake_subscription["latest_invoice"] = None
         subscription_create_mock.return_value = fake_subscription
 
+        current_subscriptions = self.customer.subscriptions.count()
         price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
 
         self.assert_fks(price, expected_blank_fks={})
 
         self.customer.subscribe(price=price.id)
+
+        updated_subscriptions = self.customer.subscriptions.count()
+
+        # assert 1 new subscription got created
+        assert updated_subscriptions == current_subscriptions + 1
 
     @patch("stripe.Subscription.create", autospec=True)
     @patch(
@@ -2164,7 +2177,13 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
         fake_subscription["latest_invoice"] = None
         subscription_create_mock.return_value = fake_subscription
 
+        current_subscriptions = self.customer.subscriptions.count()
         self.customer.subscribe(items=[{"plan": plan.id}])
+
+        updated_subscriptions = self.customer.subscriptions.count()
+
+        # assert 1 new subscription got created
+        assert updated_subscriptions == current_subscriptions + 1
 
     @patch(
         "stripe.Subscription.create",
@@ -2192,7 +2211,13 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
         fake_subscription["latest_invoice"] = None
         subscription_create_mock.return_value = fake_subscription
 
+        current_subscriptions = self.customer.subscriptions.count()
         self.customer.subscribe(plan=plan.id)
+
+        updated_subscriptions = self.customer.subscriptions.count()
+
+        # assert 1 new subscription got created
+        assert updated_subscriptions == current_subscriptions + 1
 
     @patch.object(Subscription, "_api_create", autospec=True)
     @patch("stripe.Subscription.create", autospec=True)
