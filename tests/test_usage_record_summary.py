@@ -18,7 +18,6 @@ from . import (
     FAKE_PRODUCT,
     FAKE_SUBSCRIPTION_ITEM,
     FAKE_USAGE_RECORD_SUMMARY,
-    IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
 )
 
@@ -203,7 +202,7 @@ class TestUsageRecordSummary(AssertStripeFksMixin, TestCase):
 
     @patch(
         "stripe.SubscriptionItem.list_usage_record_summaries",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "djstripe.models.billing.SubscriptionItem.objects.get",

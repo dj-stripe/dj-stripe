@@ -33,7 +33,6 @@ from . import (
     FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_III,
     FAKE_TAX_RATE_EXAMPLE_1_VAT,
-    IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
 )
 
@@ -70,7 +69,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -162,7 +161,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -261,7 +260,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -355,7 +354,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -453,7 +452,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch("stripe.Price.retrieve", return_value=deepcopy(FAKE_PRICE_II), autospec=True)
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN_II), autospec=True)
@@ -509,7 +508,7 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
 
     @patch(
         "djstripe.models.Account.get_default_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",

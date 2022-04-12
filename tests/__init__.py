@@ -9,7 +9,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import json
 import logging
 import os
-import sys
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
@@ -27,14 +26,6 @@ logger = logging.getLogger(__name__)
 FUTURE_DATE = datetime(2100, 4, 30, tzinfo=timezone.utc)
 
 FIXTURE_DIR_PATH = Path(__file__).parent.joinpath("fixtures")
-
-
-# Flags for various bugs with mock autospec
-# These can be removed once we drop support for the affected python versions
-
-# Don't try and use autospec=True on staticmethods on <py3.7
-# see https://bugs.python.org/issue23078
-IS_STATICMETHOD_AUTOSPEC_SUPPORTED = sys.version_info >= (3, 7, 4)
 
 
 class AssertStripeFksMixin:

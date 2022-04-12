@@ -21,7 +21,6 @@ from . import (
     FAKE_CUSTOM_ACCOUNT,
     FAKE_CUSTOMER,
     FAKE_STANDARD_ACCOUNT,
-    IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
 )
 
@@ -116,12 +115,12 @@ class CardTest(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Account.retrieve_external_account",
         return_value=deepcopy(FAKE_CARD),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.Customer.retrieve_source",
         return_value=deepcopy(FAKE_CARD),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_api_retrieve_by_customer_equals_retrieval_by_account(
         self,
@@ -281,7 +280,7 @@ class CardTest(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test__api_create_with_customer_absent(self, account_retrieve_mock):
         stripe_card = Card._api_create(
@@ -296,7 +295,7 @@ class CardTest(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test__api_create_with_customer_and_account(
         self, account_retrieve_mock, customer_retrieve_mock
@@ -314,7 +313,7 @@ class CardTest(AssertStripeFksMixin, TestCase):
 
     @patch(
         "stripe.Customer.delete_source",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch("stripe.Card.retrieve", return_value=deepcopy(FAKE_CARD), autospec=True)
     @patch(
@@ -323,7 +322,7 @@ class CardTest(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve_source",
         return_value=deepcopy(FAKE_CARD),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_remove_card_by_customer(
         self,
@@ -351,12 +350,12 @@ class CardTest(AssertStripeFksMixin, TestCase):
 
     @patch(
         "stripe.Account.delete_external_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_remove_card_by_account(self, account_retrieve_mock, card_delete_mock):
 
@@ -383,12 +382,12 @@ class CardTest(AssertStripeFksMixin, TestCase):
 
     @patch(
         "stripe.Account.delete_external_account",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_remove_already_deleted_card_by_account(
         self, account_retrieve_mock, card_delete_mock
@@ -420,7 +419,7 @@ class CardTest(AssertStripeFksMixin, TestCase):
 
     @patch(
         "stripe.Customer.delete_source",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
@@ -428,7 +427,7 @@ class CardTest(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve_source",
         return_value=deepcopy(FAKE_CARD),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     def test_remove_already_deleted_card(
         self,

@@ -17,7 +17,6 @@ from . import (
     FAKE_EVENT_TRANSFER_CREATED,
     FAKE_PLATFORM_ACCOUNT,
     FAKE_TRANSFER,
-    IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
 )
 
 
@@ -165,7 +164,7 @@ class EventRaceConditionTest(TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True

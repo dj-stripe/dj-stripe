@@ -18,7 +18,6 @@ from . import (
     FAKE_FILEUPLOAD_ICON,
     FAKE_FILEUPLOAD_LOGO,
     FAKE_PLATFORM_ACCOUNT,
-    IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
 )
 
@@ -26,7 +25,7 @@ pytestmark = pytest.mark.django_db
 
 
 class TestAccount(AssertStripeFksMixin, TestCase):
-    @patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Account.retrieve", autospec=True)
     @patch(
         "stripe.File.retrieve",
         side_effect=[deepcopy(FAKE_FILEUPLOAD_ICON), deepcopy(FAKE_FILEUPLOAD_LOGO)],
@@ -60,7 +59,7 @@ class TestAccount(AssertStripeFksMixin, TestCase):
 
     @patch(
         "stripe.Account.retrieve",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
         return_value=deepcopy(FAKE_ACCOUNT),
     )
     @patch(
@@ -91,7 +90,7 @@ class TestAccount(AssertStripeFksMixin, TestCase):
 
     @patch(
         "stripe.Account.retrieve",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
         return_value=deepcopy(FAKE_ACCOUNT),
     )
     @patch(
@@ -106,7 +105,7 @@ class TestAccount(AssertStripeFksMixin, TestCase):
 
     @patch(
         "stripe.Account.retrieve",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
         return_value=deepcopy(FAKE_ACCOUNT),
     )
     @patch(
@@ -121,7 +120,7 @@ class TestAccount(AssertStripeFksMixin, TestCase):
 
     @patch(
         "stripe.Account.retrieve",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
         return_value=deepcopy(FAKE_ACCOUNT),
     )
     @patch(
@@ -138,7 +137,7 @@ class TestAccount(AssertStripeFksMixin, TestCase):
 
     @patch(
         "stripe.Account.retrieve",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
         return_value=deepcopy(FAKE_ACCOUNT),
     )
     @patch(
@@ -153,7 +152,7 @@ class TestAccount(AssertStripeFksMixin, TestCase):
             fake_account["settings"]["branding"]["icon"], account.branding_icon.id
         )
 
-    @patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Account.retrieve", autospec=True)
     @patch(
         "stripe.File.retrieve",
         return_value=deepcopy(FAKE_FILEUPLOAD_LOGO),
@@ -176,7 +175,7 @@ class TestAccount(AssertStripeFksMixin, TestCase):
             stripe_account=fake_account["id"],
         )
 
-    @patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Account.retrieve", autospec=True)
     @patch(
         "stripe.File.retrieve",
         return_value=deepcopy(FAKE_FILEUPLOAD_LOGO),
@@ -206,7 +205,7 @@ class TestAccount(AssertStripeFksMixin, TestCase):
 
     @patch(
         "stripe.Account.retrieve",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
         return_value=deepcopy(FAKE_ACCOUNT),
     )
     @patch(
@@ -245,7 +244,7 @@ class TestAccountMethods:
             ({"name": ""}, {"display_name": ""}, "<id=acct_1032D82eZvKYlo2C>"),
         ),
     )
-    @patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Account.retrieve", autospec=True)
     @patch(
         "stripe.File.retrieve",
         return_value=deepcopy(FAKE_FILEUPLOAD_LOGO),
@@ -267,7 +266,7 @@ class TestAccountMethods:
 
         assert str(account) == expected_account_str
 
-    @patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Account.retrieve", autospec=True)
     @patch(
         "stripe.File.retrieve",
         return_value=deepcopy(FAKE_FILEUPLOAD_LOGO),
@@ -300,7 +299,7 @@ class TestAccountMethods:
             (deepcopy(FAKE_PLATFORM_ACCOUNT), True),
         ],
     )
-    @patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Account.retrieve", autospec=True)
     @patch(
         "stripe.File.retrieve",
         return_value=deepcopy(FAKE_FILEUPLOAD_LOGO),
@@ -350,7 +349,7 @@ class TestAccountMethods:
             (deepcopy(FAKE_PLATFORM_ACCOUNT), True),
         ],
     )
-    @patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Account.retrieve", autospec=True)
     @patch(
         "stripe.File.retrieve",
         return_value=deepcopy(FAKE_FILEUPLOAD_LOGO),
@@ -390,7 +389,7 @@ class TestAccountRestrictedKeys(TestCase):
         STRIPE_TEST_PUBLIC_KEY="pk_test_foo",
         STRIPE_LIVE_MODE=False,
     )
-    @patch("stripe.Account.retrieve", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED)
+    @patch("stripe.Account.retrieve", autospec=True)
     def test_account_str_restricted_key(self, account_retrieve_mock):
         """
         Test that we do not attempt to retrieve account ID with restricted keys.
@@ -416,7 +415,7 @@ class TestAccountRestrictedKeys(TestCase):
 )
 @patch(
     target="djstripe.models.connect.StripeModel._create_from_stripe_object",
-    autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+    autospec=True,
 )
 def test_account__create_from_stripe_object(
     mock_super__create_from_stripe_object,

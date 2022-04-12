@@ -13,12 +13,7 @@ from djstripe.exceptions import InvalidStripeAPIKey
 from djstripe.models import Account, APIKey
 from djstripe.models.api import get_api_key_details_by_prefix
 
-from . import (
-    FAKE_FILEUPLOAD_ICON,
-    FAKE_FILEUPLOAD_LOGO,
-    FAKE_PLATFORM_ACCOUNT,
-    IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
-)
+from . import FAKE_FILEUPLOAD_ICON, FAKE_FILEUPLOAD_LOGO, FAKE_PLATFORM_ACCOUNT
 
 # avoid literal api keys to prevent git secret scanners false-positives
 SK_TEST = "sk_test_" + "XXXXXXXXXXXXXXXXXXXX1234"
@@ -138,7 +133,7 @@ class APIKeyTest(TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.File.retrieve",

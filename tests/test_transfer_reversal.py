@@ -15,7 +15,6 @@ from . import (
     FAKE_PLATFORM_ACCOUNT,
     FAKE_TRANSFER,
     FAKE_TRANSFER_WITH_1_REVERSAL,
-    IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
     AssertStripeFksMixin,
 )
 
@@ -27,7 +26,7 @@ class TestTransferReversalStr(TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -58,7 +57,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -100,7 +99,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -109,7 +108,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     )
     @patch(
         "stripe.Transfer.retrieve_reversal",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
         return_value=deepcopy(FAKE_TRANSFER_WITH_1_REVERSAL),
     )
     def test_api_retrieve(
@@ -141,7 +140,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     )
     @patch(
         "stripe.Transfer.create_reversal",
-        autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED,
+        autospec=True,
         return_value=deepcopy(FAKE_TRANSFER_WITH_1_REVERSAL),
     )
     def test__api_create(
@@ -160,9 +159,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
         )
 
-    @patch(
-        "stripe.Transfer.list_reversals", autospec=IS_STATICMETHOD_AUTOSPEC_SUPPORTED
-    )
+    @patch("stripe.Transfer.list_reversals", autospec=True)
     def test_api_list(self, transfer_reversal_list_mock):
         p = PropertyMock(return_value=deepcopy(FAKE_TRANSFER_WITH_1_REVERSAL))
         type(transfer_reversal_list_mock).auto_paging_iter = p
