@@ -98,14 +98,14 @@ class CardTest(AssertStripeFksMixin, TestCase):
 
         self.customer = fake_empty_customer.create_for_user(user)
 
-    def test_attach_objects_hook_without_customer(self):
+    def test_attach_objects_pre_save_hook_without_customer(self):
         FAKE_CARD_DICT = deepcopy(FAKE_CARD)
         FAKE_CARD_DICT["customer"] = None
 
         card = Card.sync_from_stripe_data(FAKE_CARD_DICT)
         self.assertEqual(card.customer, None)
 
-    def test_attach_objects_hook_without_account(self):
+    def test_attach_objects_pre_save_hook_without_account(self):
         card = Card.sync_from_stripe_data(FAKE_CARD)
         self.assertEqual(card.account, None)
 

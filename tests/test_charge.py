@@ -787,7 +787,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         target="djstripe.models.payment_methods.DjstripePaymentMethod", autospec=True
     )
     @patch(target="djstripe.models.account.Account", autospec=True)
-    def test__attach_objects_hook_missing_source_data(
+    def test__attach_objects_pre_save_hook_missing_source_data(
         self, mock_account, mock_payment_method, mock_charge_source
     ):
         """
@@ -807,7 +807,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         mock_data = {}
         starting_source = charge.source
 
-        charge._attach_objects_hook(cls=mock_cls, data=mock_data)
+        charge._attach_objects_pre_save_hook(cls=mock_cls, data=mock_data)
 
         # source shouldn't be touched
         self.assertEqual(starting_source, charge.source)
@@ -816,7 +816,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         # try again with a source key, but no object sub key.
         mock_data = {"source": {"foo": "bar"}}
 
-        charge._attach_objects_hook(cls=mock_cls, data=mock_data)
+        charge._attach_objects_pre_save_hook(cls=mock_cls, data=mock_data)
 
         # source shouldn't be touched
         self.assertEqual(starting_source, charge.source)

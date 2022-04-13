@@ -698,7 +698,7 @@ class Source(StripeModel):
         data["source_data"] = data[data["type"]]
         return data
 
-    def _attach_objects_hook(
+    def _attach_objects_pre_save_hook(
         self, cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY, current_ids=None
     ):
         customer = None
@@ -725,7 +725,7 @@ class Source(StripeModel):
         api_key = self.default_api_key
         try:
             # TODO - we could use the return value of sync_from_stripe_data
-            #  or call its internals - self._sync/_attach_objects_hook etc here
+            #  or call its internals - self._sync/_attach_objects_pre_save_hook etc here
             #  to update `self` at this point?
             self.sync_from_stripe_data(
                 self.api_retrieve(api_key=api_key).detach(), api_key=api_key
@@ -885,7 +885,7 @@ class PaymentMethod(StripeModel):
             return self.customer.get_stripe_dashboard_url()
         return ""
 
-    def _attach_objects_hook(
+    def _attach_objects_pre_save_hook(
         self, cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY, current_ids=None
     ):
         customer = None

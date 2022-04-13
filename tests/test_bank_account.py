@@ -139,14 +139,14 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
 
         self.customer = fake_empty_customer.create_for_user(user)
 
-    def test_attach_objects_hook_without_customer(self):
+    def test_attach_objects_pre_save_hook_without_customer(self):
         FAKE_BANK_ACCOUNT_DICT = deepcopy(FAKE_BANK_ACCOUNT_SOURCE)
         FAKE_BANK_ACCOUNT_DICT["customer"] = None
 
         bank_account = BankAccount.sync_from_stripe_data(FAKE_BANK_ACCOUNT_DICT)
         self.assertEqual(bank_account.customer, None)
 
-    def test_attach_objects_hook_without_account(self):
+    def test_attach_objects_pre_save_hook_without_account(self):
         bank_account = BankAccount.sync_from_stripe_data(FAKE_BANK_ACCOUNT_SOURCE)
         self.assertEqual(bank_account.account, None)
 

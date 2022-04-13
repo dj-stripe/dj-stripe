@@ -1330,7 +1330,7 @@ class Customer(StripeModel):
         if save:
             self.save()
 
-    def _attach_objects_hook(
+    def _attach_objects_pre_save_hook(
         self, cls, data, current_ids=None, api_key=djstripe_settings.STRIPE_SECRET_KEY
     ):
         # When we save a customer to Stripe, we add a reference to its Django PK
@@ -1546,7 +1546,7 @@ class Event(StripeModel):
     def __str__(self):
         return f"type={self.type}, id={self.id}"
 
-    def _attach_objects_hook(
+    def _attach_objects_pre_save_hook(
         self, cls, data, current_ids=None, api_key=djstripe_settings.STRIPE_SECRET_KEY
     ):
         if self.api_version is None:

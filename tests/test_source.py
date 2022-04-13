@@ -36,7 +36,7 @@ class SourceTest(AssertStripeFksMixin, TestCase):
         self.customer.sources.all().delete()
         self.customer.legacy_cards.all().delete()
 
-    def test_attach_objects_hook_without_customer(self):
+    def test_attach_objects_pre_save_hook_without_customer(self):
         source = Source.sync_from_stripe_data(deepcopy(FAKE_SOURCE_II))
         self.assertEqual(source.customer, None)
 
