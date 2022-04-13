@@ -1,5 +1,6 @@
 import logging
 import uuid
+import warnings
 from datetime import timedelta
 from typing import Dict, List, Optional
 
@@ -518,8 +519,12 @@ class StripeModel(StripeBaseModel):
         :param current_ids: stripe ids of objects that are currently being processed
         :type current_ids: set
         """
-        pass
 
+        warnings.DeprecationWarning(
+            "_attach_objects_hook() is deprecated, will be removed in dj-stripe 2.9. "
+            "Look at _attach_objects_pre_save_hook instead.",
+            DeprecationWarning,
+        )
 
     def _attach_objects_pre_save_hook(
         self, cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY, current_ids=None
