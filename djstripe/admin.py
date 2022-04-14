@@ -877,11 +877,22 @@ class SubscriptionScheduleAdmin(StripeModelAdmin):
         )
         return render(request, "djstripe/admin/confirm_action.html", context)
 
+    @admin.display(description="Cancel Selected Subscription Schedules")
+    def _cancel_subscription_schedule(self, request, queryset):
+        """Cancel a SubscriptionSchedule."""
+        context = self.get_admin_action_context(
+            queryset, "_cancel_subscription_schedule", CustomActionForm
+        )
+        return render(request, "djstripe/admin/confirm_action.html", context)
+
     def get_actions(self, request):
         # get all actions
         actions = super().get_actions(request)
         actions["_release_subscription_schedule"] = self.get_action(
             "_release_subscription_schedule"
+        )
+        actions["_cancel_subscription_schedule"] = self.get_action(
+            "_cancel_subscription_schedule"
         )
         return actions
 
