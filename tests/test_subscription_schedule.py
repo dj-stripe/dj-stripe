@@ -138,7 +138,6 @@ class SubscriptionScheduleTest(AssertStripeFksMixin, TestCase):
 
         self.assert_fks(schedule, expected_blank_fks=self.default_expected_blank_fks)
 
-
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
@@ -167,7 +166,6 @@ class SubscriptionScheduleTest(AssertStripeFksMixin, TestCase):
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_account=schedule.djstripe_owner_account.id,
         )
-
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(

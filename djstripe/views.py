@@ -170,3 +170,12 @@ class ConfirmCustomAction(FormView):
                 messages.success(request, f"Successfully Released: {instance}")
             except stripe.error.InvalidRequestError as error:
                 messages.warning(request, error)
+
+    def _cancel_subscription_schedule(self, request, queryset):
+        """Cancel a SubscriptionSchedule."""
+        for subscription_schedule in queryset:
+            try:
+                instance = subscription_schedule.cancel()
+                messages.success(request, f"Successfully Canceled: {instance}")
+            except stripe.error.InvalidRequestError as error:
+                messages.warning(request, error)
