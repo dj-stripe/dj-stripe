@@ -9,15 +9,20 @@ from .models import TestCustomActionModel
 
 @admin.register(TestCustomActionModel)
 class TestCustomActionModelAdmin(StripeModelAdmin):
-
-    # For Subscription model's custom action, _cancel
-    # For SubscriptionSchedule's custom action, _release_subscription_schedule
     def get_actions(self, request):
         # get all actions
         actions = super().get_actions(request)
+
+        # For Subscription model's custom action, _cancel
         actions["_cancel"] = self.get_action("_cancel")
+
+        # For SubscriptionSchedule's custom action, _release_subscription_schedule
         actions["_release_subscription_schedule"] = self.get_action(
             "_release_subscription_schedule"
+        )
+        # For SubscriptionSchedule's custom action, _cancel_subscription_schedule
+        actions["_cancel_subscription_schedule"] = self.get_action(
+            "_cancel_subscription_schedule"
         )
         return actions
 
@@ -32,5 +37,12 @@ class TestCustomActionModelAdmin(StripeModelAdmin):
         """Release a SubscriptionSchedule."""
         context = self.get_admin_action_context(
             queryset, "_release_subscription_schedule", CustomActionForm
+        )
+        return render(request, "djstripe/admin/confirm_action.html", context)
+
+    def _cancel_subscription_schedule(self, request, queryset):
+        """Cancel a SubscriptionSchedule."""
+        context = self.get_admin_action_context(
+            queryset, "_cancel_subscription_schedule", CustomActionForm
         )
         return render(request, "djstripe/admin/confirm_action.html", context)
