@@ -33,8 +33,18 @@ class Command(BaseCommand):
             help="restricts sync to these model names (default is to sync all "
             "supported models)",
         )
+        # Named (optional) arguments
+        parser.add_argument(
+            "--api-keys",
+            metavar="ApiKeys",
+            nargs="*",
+            type=str,
+            # todo uncomment this once support for python 3.7 is dropped.
+            # action="extend",
+            help="Specify the api_keys you would like to perform this sync for.",
+        )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, api_keys, **options):
         app_label = "djstripe"
         app_config = apps.get_app_config(app_label)
         model_list = []  # type: List[models.StripeModel]
