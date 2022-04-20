@@ -295,7 +295,14 @@ class WebhookEventTrigger(models.Model):
             # HTTP headers are case-insensitive, but we store them as a dict.
             headers = CaseInsensitiveMapping(self.headers)
             signature = headers.get("stripe-signature")
+            local_cli_signing_secret = headers.get("x-djstripe-webhook-secret")
             try:
+                # check if the x-djstripe-webhook-secret Custom Header exists
+                if local_cli_signing_secret:
+                    # Set Endpoint Signing Secret to the output of Stripe CLI
+                    # for signature verification
+                    secret = local_cli_signing_secret
+
                 stripe.WebhookSignature.verify_header(
                     self.body, signature, secret, tolerance
                 )
