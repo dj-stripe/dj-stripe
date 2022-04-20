@@ -52,7 +52,8 @@ services:
 
   stripe:
     image: stripe/stripe-cli:v1.7.4
-    command: listen --forward-to http://web:8000/djstripe/webhook/
+    # In case Stripe CLI is used to perform local webhook testing, set x-djstripe-webhook-secret custom header to output of Stripe CLI.
+    command: ["listen", "-H", "x-djstripe-webhook-secret: whsec_******", "--forward-to", "http://web:8000/djstripe/webhook/"] 
     depends_on:
       - web
     environment:
@@ -63,4 +64,4 @@ services:
 
 !!! note
 
-    stripe expects the `WEBHOOK ENDPOINT SIGNING SECRET (whsec_...)` to match the output of `stripe CLI`.
+    In case the `Stripe CLI` is used to perform local webhook testing, set `x-djstripe-webhook-secret` Custom Header in Stripe `listen` to the `Webhook Signing Secret` output of `Stripe CLI`. That is what Stripe expects and uses to create the `stripe-signature` header.
