@@ -19,4 +19,13 @@ class Migration(migrations.Migration):
                 max_length=64,
             ),
         ),
+        migrations.AlterField(
+            model_name="webhookendpoint",
+            name="api_version",
+            field=models.CharField(
+                max_length=64,
+                blank=True,
+                help_text="The API version events are rendered as for this webhook endpoint.",
+            ),
+        ),
     ]
