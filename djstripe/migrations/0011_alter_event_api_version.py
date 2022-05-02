@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 blank=True,
                 help_text="the API version at which the event data was rendered. Blank for old entries only, all new entries will have this value",
-                max_length=40,
+                max_length=64,
             ),
         ),
     ]
