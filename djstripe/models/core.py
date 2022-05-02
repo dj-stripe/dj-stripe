@@ -1522,7 +1522,7 @@ class Event(StripeModel):
     stripe_dashboard_item_name = "events"
 
     api_version = models.CharField(
-        max_length=15,
+        max_length=64,
         blank=True,
         help_text="the API version at which the event data was "
         "rendered. Blank for old entries only, all new entries will have this value",

@@ -27,7 +27,7 @@ class WebhookEndpoint(StripeModel):
     stripe_dashboard_item_name = "webhooks"
 
     api_version = models.CharField(
-        max_length=10,
+        max_length=64,
         blank=True,
         help_text="The API version events are rendered as for this webhook endpoint.",
     )

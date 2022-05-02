@@ -2013,7 +2013,7 @@ FAKE_EVENT_TEST_CHARGE_SUCCEEDED["id"] = TEST_EVENT_ID
 FAKE_EVENT_CUSTOMER_CREATED = {
     "id": "evt_38DHch3whaDvKYlo2CT2oe5ff3",
     "object": "event",
-    "api_version": "2016-03-07",
+    "api_version": "2016-03-07; orders_beta=v3",
     "created": 1439229084,
     "data": {"object": deepcopy(FAKE_CUSTOMER)},
     "livemode": False,
