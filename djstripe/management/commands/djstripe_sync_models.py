@@ -90,6 +90,12 @@ class Command(BaseCommand):
             # get all APIKey objects in the db
             api_qs = models.APIKey.objects.all()
 
+            if not api_qs.exists():
+                self.stderr.write(
+                    "You don't have any API Keys in the database. Did you forget to add them?"
+                )
+                return
+
         for model in model_list:
             for api_key in api_qs:
                 self.sync_model(model, api_key=api_key)
