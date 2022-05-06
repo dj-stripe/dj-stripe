@@ -319,6 +319,8 @@ class StripeModel(StripeBaseModel):
             for which this request is being made.
         :return: All the members from the input, translated, mutated, etc
         """
+        from .webhooks import WebhookEndpoint
+
         manipulated_data = cls._manipulate_stripe_object_hook(data)
 
         if not cls.is_valid_object(data):
@@ -377,9 +379,14 @@ class StripeModel(StripeBaseModel):
                     isinstance(field, (models.CharField, models.TextField))
                     and field_data is None
                 ):
-                    # TODO - this applies to StripeEnumField as well, since it
-                    #  sub-classes CharField, is that intentional?
-                    field_data = ""
+                    # do not add empty secret field for WebhookEndpoint model
+                    # as stripe does not return the secret except for the CREATE call
+                    if cls is WebhookEndpoint and field.name == "secret":
+                        continue
+                    else:
+                        # TODO - this applies to StripeEnumField as well, since it
+                        #  sub-classes CharField, is that intentional?
+                        field_data = ""
 
             result[field.name] = field_data
 
