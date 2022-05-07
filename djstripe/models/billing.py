@@ -2022,12 +2022,19 @@ class TaxRate(StripeModel):
     """
 
     stripe_class = stripe.TaxRate
+    stripe_dashboard_item_name = "tax-rates"
 
     active = models.BooleanField(
         default=True,
         help_text="Defaults to true. When set to false, this tax rate cannot be "
         "applied to objects in the API, but will still be applied to subscriptions "
         "and invoices that already have it set.",
+    )
+    country = models.CharField(
+        max_length=2,
+        default="",
+        blank=True,
+        help_text="Two-letter country code.",
     )
     display_name = models.CharField(
         max_length=50,
@@ -2050,9 +2057,25 @@ class TaxRate(StripeModel):
         max_digits=7,
         help_text="This represents the tax rate percent out of 100.",
     )
+    state = models.CharField(
+        max_length=2,
+        default="",
+        blank=True,
+        help_text="ISO 3166-2 subdivision code, without country prefix.",
+    )
+    tax_type = models.CharField(
+        default="",
+        blank=True,
+        max_length=50,
+        help_text="The high-level tax type, such as vat, gst, sales_tax or custom.",
+    )
 
     def __str__(self):
-        return f"{self.display_name} – {self.jurisdiction} at {self.percentage}%"
+        return f"{self.display_name} at {self.percentage}%"
+
+    class Meta:
+        verbose_name = "Tax Rates"
+        verbose_name_plural = "Tax Rates"
 
 
 class UsageRecord(StripeModel):

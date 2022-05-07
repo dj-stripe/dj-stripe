@@ -1,5 +1,5 @@
 """
-dj-stripe SetupIntent Model Tests.
+dj-stripe TaxRate Model Tests.
 """
 from copy import deepcopy
 from decimal import Decimal
@@ -18,7 +18,7 @@ class TaxRateTest(AssertStripeFksMixin, TestCase):
         tax_rate = TaxRate.sync_from_stripe_data(deepcopy(FAKE_TAX_RATE_EXAMPLE_1_VAT))
 
         self.assertEqual(
-            f"{FAKE_TAX_RATE_EXAMPLE_1_VAT['display_name']} – {FAKE_TAX_RATE_EXAMPLE_1_VAT['jurisdiction']} at {FAKE_TAX_RATE_EXAMPLE_1_VAT['percentage']:.4f}%",
+            f"{FAKE_TAX_RATE_EXAMPLE_1_VAT['display_name']} at {FAKE_TAX_RATE_EXAMPLE_1_VAT['percentage']:.4f}%",
             str(tax_rate),
         )
 
