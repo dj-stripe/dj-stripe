@@ -322,6 +322,24 @@ class SubscriptionInline(admin.StackedInline):
     show_change_link = True
 
 
+class SubscriptionScheduleInline(admin.StackedInline):
+    """A TabularInline for use models.SubscriptionSchedule."""
+
+    model = models.SubscriptionSchedule
+    extra = 0
+    readonly_fields = ("id", "created", "djstripe_owner_account")
+    raw_id_fields = get_forward_relation_fields_for_model(model)
+    show_change_link = True
+
+    def __init__(self, parent_model, admin_site):
+        super().__init__(parent_model, admin_site)
+
+        # dynamically set fk_name as SubscriptionScheduleInline is used
+        # in CustomerAdmin as well as SubscriptionAdmin
+        if parent_model is models.Subscription:
+            self.fk_name = "subscription"
+
+
 class TaxIdInline(admin.TabularInline):
     """A TabularInline for use models.Subscription."""
 
@@ -503,7 +521,7 @@ class CustomerAdmin(StripeModelAdmin):
         "deleted",
     )
     search_fields = ("email", "description", "deleted")
-    inlines = (SubscriptionInline, TaxIdInline)
+    inlines = (SubscriptionInline, SubscriptionScheduleInline, TaxIdInline)
 
     def get_queryset(self, request):
         return (
@@ -815,7 +833,7 @@ class SubscriptionAdmin(StripeModelAdmin):
     list_display = ("customer", "status", "get_default_tax_rates")
     list_filter = ("status", "cancel_at_period_end")
 
-    inlines = (SubscriptionItemInline,)
+    inlines = (SubscriptionItemInline, SubscriptionScheduleInline)
 
     def get_actions(self, request):
         # get all actions
