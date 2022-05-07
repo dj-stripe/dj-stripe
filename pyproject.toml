@@ -47,7 +47,7 @@ mike = {version = "^1.1.2", optional = true}
 
 
 [tool.poetry.dev-dependencies]
-black = "^21.5b1"
+black = "^22.3.0"
 psycopg2 = "^2.8.5"
 mysqlclient = ">=1.4.0"
 flake8 = "^3.9.2"
