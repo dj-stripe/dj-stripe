@@ -95,3 +95,21 @@ class SourceTransactionTest(AssertStripeFksMixin, TestCase):
             id=FAKE_SOURCE["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
         )
+
+    @patch.object(SourceTransaction, "api_list", autospec=True)
+    def test_api_retrieve(self, source_transaction_api_list_mock):
+        # create the SourceTransaction object
+        sourcetransaction = SourceTransaction.sync_from_stripe_data(
+            deepcopy(FAKE_SOURCE_TRANSACTION)
+        )
+
+        self.assertEqual(sourcetransaction.source, self.source)
+
+        source_transaction_api_list_mock.return_value = [sourcetransaction]
+
+        # retrieve the object
+        sourcetransaction_retv = sourcetransaction.api_retrieve()
+
+        # assert the same sourcetransaction object gets retrieved
+        self.assertEqual(sourcetransaction.id, sourcetransaction_retv.id)
+        self.assertEqual(sourcetransaction.source.id, sourcetransaction_retv.source.id)
