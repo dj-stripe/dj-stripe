@@ -1,4 +1,26 @@
 {% extends "admin/delete_confirmation.html" %}
+{% block extrahead %}
+    {{ block.super }}
+    <script>
+
+    // Handler for .ready() called.
+    django.jQuery(function() {
+        // show loader whenever a link is clicked
+        django.jQuery('a').
+        on('click', function(e) {
+            django.jQuery('#div_spinner').show();
+        });
+
+        // show the spinner whenever a form is submitted
+        django.jQuery('form').on('submit', function(e) {
+            django.jQuery('#div_spinner').show();
+        });
+
+    });
+
+    </script>
+
+{% endblock %}
 
 
 {% block extrastyle %}
