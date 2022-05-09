@@ -58,7 +58,7 @@
             {% endfor %}
         </ul>
 
-        <form id="form_custom_action" method="post" onsubmit="django.jQuery('#main_content').hide(); django.jQuery('.messagelist').hide(); django.jQuery('#div_spinner').show();" action="{% url 'djstripe:djstripe_custom_action' action_name=action_name model_name=model_name %}">
+        <form id="form_custom_action" method="post" onsubmit="django.jQuery('#main_content').hide(); django.jQuery('.messagelist').hide(); django.jQuery('#div_spinner').show();" action="{% url 'admin:djstripe_custom_action' action_name=action_name model_name=model_name %}">
             {% csrf_token %}
             {{form}}
 
