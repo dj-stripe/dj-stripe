@@ -5,10 +5,11 @@ from django.contrib import admin
 from django.contrib.admin import helpers
 from django.contrib.admin.utils import quote
 from django.shortcuts import render
-from django.urls import reverse
+from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.text import capfirst
 
+from . import views
 from .forms import CustomActionForm
 
 
@@ -17,6 +18,16 @@ class CustomActionMixin:
     # So that actions get shown even if there are 0 instances
     # https://docs.djangoproject.com/en/dev/ref/contrib/admin/#django.contrib.admin.ModelAdmin.show_full_result_count
     show_full_result_count = False
+
+    def get_urls(self):
+        custom_urls = [
+            path(
+                "action/<str:action_name>/<str:model_name>/",
+                self.admin_site.admin_view(views.ConfirmCustomAction.as_view()),
+                name="djstripe_custom_action",
+            ),
+        ]
+        return custom_urls + super().get_urls()
 
     def get_admin_action_context(self, queryset, action_name, form_class):
 
