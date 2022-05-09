@@ -564,6 +564,18 @@ class SourceAdmin(StripeModelAdmin):
         )
 
 
+@admin.register(models.SourceTransaction)
+class SourceTransactionAdmin(StripeModelAdmin):
+    list_display = ("status", "amount", "currency")
+    list_filter = (
+        "status",
+        "source__id",
+        "source__customer",
+        "source__customer__subscriber",
+    )
+    list_select_related = ("source", "source__customer", "source__customer__subscriber")
+
+
 @admin.register(models.PaymentMethod)
 class PaymentMethodAdmin(StripeModelAdmin):
     list_display = ("customer", "type", "billing_details")

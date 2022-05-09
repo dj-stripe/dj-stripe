@@ -470,7 +470,7 @@ class TestAdminRegisteredModelsChildrenOfStripeModel(TestCase):
 
                 # sub-classes of StripeModel
                 if model.__name__ not in self.ignore_models:
-                    if model.__name__ in ("UsageRecordSummary", "LineItem"):
+                    if model.__name__ in ("UsageRecordSummary", "LineItem", "SourceTransaction"):
                         assert "_resync_instances" not in actions
                         assert "_sync_all_instances" in actions
                     elif model.__name__ == "Subscription":
