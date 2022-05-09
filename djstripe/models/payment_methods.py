@@ -853,6 +853,20 @@ class SourceTransaction(StripeModel):
         else:
             return f"{self._get_base_stripe_dashboard_url()}sources/{self.source.id}"
 
+    @classmethod
+    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        """
+        Call the stripe API's list operation for this model.
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        See Stripe documentation for accepted kwargs for each object.
+        :returns: an iterator over all items in the query
+        """
+        return stripe.Source.list_source_transactions(
+            api_key=api_key, **kwargs
+        ).auto_paging_iter()
+
 
 class PaymentMethod(StripeModel):
     """
