@@ -13,8 +13,18 @@
 
 {% block content %}
 
+{% comment %} Page Loader Icon {% endcomment %}
+<div id="div_spinner" style="display: none;">
+    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+        <div id="spinner" role="status">
+            <span>Loading...</span>
+        </div>
+    </div>
+</div>
+
 <p class="stripe-confirmation-warning">
     <strong>Warning:</strong> This {{ object_name }} will also be deleted from Stripe.
 </p>
 
-{{ block.super }} {% endblock %}
+{{ block.super }}
+{% endblock %}
