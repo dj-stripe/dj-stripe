@@ -1,4 +1,8 @@
+"""
+dj-stripe SourceTransaction Model Tests.
+"""
 from copy import deepcopy
+from unittest.mock import PropertyMock, patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -6,6 +10,7 @@ from django.test import TestCase
 from djstripe import enums
 from djstripe.models import Source
 from djstripe.models.payment_methods import SourceTransaction
+from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_CUSTOMER_III,
@@ -76,3 +81,17 @@ class SourceTransactionTest(AssertStripeFksMixin, TestCase):
             fake_source_transaction
         )
         self.assertEqual("", sourcetransaction_2.get_stripe_dashboard_url()),
+
+    @patch(
+        "stripe.Source.list_source_transactions",
+    )
+    def test_api_list(self, source_transaction_list_mock):
+        p = PropertyMock(return_value=deepcopy(FAKE_SOURCE_TRANSACTION))
+        type(source_transaction_list_mock).auto_paging_iter = p
+
+        # invoke the api_list classmethod
+        SourceTransaction.api_list(id=self.source.id)
+        source_transaction_list_mock.assert_called_once_with(
+            id=FAKE_SOURCE["id"],
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        )
