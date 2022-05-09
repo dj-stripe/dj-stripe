@@ -741,6 +741,20 @@ class Source(StripeModel):
             )
             return False
 
+    @classmethod
+    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        """
+        Call the stripe API's list operation for this model.
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        See Stripe documentation for accepted kwargs for each object.
+        :returns: an iterator over all items in the query
+        """
+        return Customer.stripe_class.list_sources(
+            object="source", api_key=api_key, **kwargs
+        ).auto_paging_iter()
+
 
 class PaymentMethod(StripeModel):
     """
