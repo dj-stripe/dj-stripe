@@ -323,10 +323,10 @@ class StripeModel(StripeBaseModel):
 
         manipulated_data = cls._manipulate_stripe_object_hook(data)
 
-        if not cls.is_valid_object(data):
+        if not cls.is_valid_object(manipulated_data):
             raise ValueError(
                 "Trying to fit a %r into %r. Aborting."
-                % (data.get("object", ""), cls.__name__)
+                % (manipulated_data.get("object", ""), cls.__name__)
             )
 
         result = {}
