@@ -1119,6 +1119,7 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
     delete_confirmation_template = (
         "djstripe/admin/webhook_endpoint/delete_confirmation.html"
     )
+    add_form_template = "djstripe/admin/webhook_endpoint/add_form.html"
     readonly_fields = ("url",)
     list_display = (
         "__str__",

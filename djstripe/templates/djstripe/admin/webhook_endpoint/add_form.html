@@ -1,0 +1,6 @@
+{% extends "./change_form.html" %}
+
+
+{% block djstripewarning %}
+    <p class="stripe-danger-warning">{{opts.verbose_name | capfirst}} created here will also be created on your Stripe Account. Proceed with caution.</p>
+{% endblock djstripewarning %}
