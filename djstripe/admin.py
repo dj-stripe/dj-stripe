@@ -1115,7 +1115,7 @@ class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
 
 @admin.register(models.WebhookEndpoint)
 class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
-    change_form_template = "djstripe/admin/change_form.html"
+    change_form_template = "djstripe/admin/webhook_endpoint/change_form.html"
     delete_confirmation_template = (
         "djstripe/admin/webhook_endpoint/delete_confirmation.html"
     )
