@@ -2,15 +2,56 @@
 dj-stripe form tests
 """
 import pytest
+from django import forms
+from django.contrib.admin import helpers
 from django.forms.utils import ErrorDict
 
-from djstripe import enums
-from djstripe.forms import APIKeyAdminCreateForm
+from djstripe import enums, utils
+from djstripe.forms import APIKeyAdminCreateForm, CustomActionForm
 from tests import FAKE_PLATFORM_ACCOUNT
 
+from .fields.models import TestCustomActionModel
 from .test_apikey import RK_LIVE, RK_TEST, SK_LIVE, SK_TEST
 
 pytestmark = pytest.mark.django_db
+
+
+class TestCustomActionForm:
+    @pytest.mark.parametrize(
+        "action_name", ["_sync_all_instances", "_resync_instances"]
+    )
+    def test___init__(self, action_name, monkeypatch):
+
+        # monkeypatch utils.get_model
+        def mock_get_model(*args, **kwargs):
+            return model
+
+        monkeypatch.setattr(utils, "get_model", mock_get_model)
+
+        model = TestCustomActionModel
+
+        # create instances to be used in the Django Admin Action
+        model.objects.create(id="test")
+        model.objects.create(id="test-2")
+
+        form = CustomActionForm(
+            model_name=TestCustomActionModel._meta.model_name,
+            action_name=action_name,
+        )
+
+        # assert _selected_action_field has been added to the form
+        _selected_action_field = form.fields[helpers.ACTION_CHECKBOX_NAME]
+        assert _selected_action_field is not None
+
+        # assert _selected_action_field is an instance of MultipleHiddenInput
+        assert isinstance(_selected_action_field.widget, forms.MultipleHiddenInput)
+
+        if action_name == "_sync_all_instances":
+            assert _selected_action_field.choices == [
+                ("_sync_all_instances", "_sync_all_instances")
+            ]
+        else:
+            assert _selected_action_field.choices == [(1, 1), (2, 2)]
 
 
 class TestAPIKeyAdminCreateForm:
