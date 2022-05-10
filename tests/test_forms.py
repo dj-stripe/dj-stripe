@@ -31,8 +31,9 @@ class TestCustomActionForm:
         model = TestCustomActionModel
 
         # create instances to be used in the Django Admin Action
-        model.objects.create(id="test")
-        model.objects.create(id="test-2")
+        inst_1 = model.objects.create(id="test")
+        inst_2 = model.objects.create(id="test-2")
+        pk_values = [inst_1.pk, inst_2.pk]
 
         form = CustomActionForm(
             model_name=TestCustomActionModel._meta.model_name,
@@ -51,7 +52,7 @@ class TestCustomActionForm:
                 ("_sync_all_instances", "_sync_all_instances")
             ]
         else:
-            assert _selected_action_field.choices == [(1, 1), (2, 2)]
+            assert _selected_action_field.choices == list(zip(pk_values, pk_values))
 
 
 class TestAPIKeyAdminCreateForm:
