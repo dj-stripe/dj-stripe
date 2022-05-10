@@ -750,6 +750,7 @@ FAKE_CHARGE_REFUNDED["refunds"].update(
 FAKE_COUPON = {
     "id": "fake-coupon-1",
     "object": "coupon",
+    "applies_to": {"products": ["prod_fake1"]},
     "amount_off": None,
     "created": 1490157071,
     "currency": None,
