@@ -3,8 +3,11 @@ Module for all dj-stripe app forms
 """
 from django import forms
 from django.contrib.admin import helpers
+from stripe.error import AuthenticationError
 
 from djstripe import utils
+
+from . import enums, models
 
 
 class CustomActionForm(forms.Form):
@@ -38,3 +41,22 @@ class CustomActionForm(forms.Form):
                     model.objects.values_list("pk", flat=True),
                 ),
             )
+
+
+class APIKeyAdminCreateForm(forms.ModelForm):
+    class Meta:
+        model = models.APIKey
+        fields = ["name", "secret"]
+
+    def _post_clean(self):
+        super()._post_clean()
+
+        if not self.errors:
+            if (
+                self.instance.type == enums.APIKeyType.secret
+                and self.instance.djstripe_owner_account is None
+            ):
+                try:
+                    self.instance.refresh_account()
+                except AuthenticationError as e:
+                    self.add_error("secret", str(e))

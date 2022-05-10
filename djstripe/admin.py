@@ -15,11 +15,11 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.text import capfirst
 from jsonfield import JSONField
-from stripe.error import AuthenticationError, InvalidRequestError
+from stripe.error import InvalidRequestError
 
-from djstripe.forms import CustomActionForm
+from djstripe.forms import APIKeyAdminCreateForm, CustomActionForm
 
-from . import enums, models
+from . import models
 
 
 def custom_display_for_JSONfield(value, field, empty_value_display):
@@ -396,26 +396,6 @@ class AccountAdmin(StripeModelAdmin):
     list_display = ("business_url", "country", "default_currency")
     list_filter = ("details_submitted",)
     search_fields = ("settings", "business_profile")
-
-
-class APIKeyAdminCreateForm(forms.ModelForm):
-    class Meta:
-        model = models.APIKey
-        fields = ["name", "secret"]
-
-    # todo add test
-    def _post_clean(self):
-        super()._post_clean()
-
-        if not self.errors:
-            if (
-                self.instance.type == enums.APIKeyType.secret
-                and self.instance.djstripe_owner_account is None
-            ):
-                try:
-                    self.instance.refresh_account()
-                except AuthenticationError as e:
-                    self.add_error("secret", str(e))
 
 
 @admin.register(models.APIKey)
