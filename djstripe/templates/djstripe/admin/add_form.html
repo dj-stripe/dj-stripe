@@ -1,0 +1,7 @@
+{% extends "./change_form.html" %}
+
+
+
+{% block djstripewarning %}
+    <p class="stripe-confirmation-warning">{{opts.verbose_name | capfirst}} created here will <strong>not</strong> be created on your Stripe Account.</p>
+{% endblock djstripewarning %}

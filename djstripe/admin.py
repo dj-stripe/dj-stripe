@@ -289,6 +289,7 @@ class StripeModelAdmin(CustomActionMixin, admin.ModelAdmin):
     """Base class for all StripeModel-based model admins"""
 
     change_form_template = "djstripe/admin/change_form.html"
+    add_form_template = "djstripe/admin/add_form.html"
     actions = ("_resync_instances", "_sync_all_instances")
 
     def __init__(self, *args, **kwargs):
@@ -400,6 +401,7 @@ class AccountAdmin(StripeModelAdmin):
 
 @admin.register(models.APIKey)
 class APIKeyAdmin(admin.ModelAdmin):
+    add_form_template = "djstripe/admin/add_form.html"
     change_form_template = "djstripe/admin/change_form.html"
 
     list_display = ("__str__", "type", "djstripe_owner_account", "livemode")
