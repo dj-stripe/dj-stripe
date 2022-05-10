@@ -50,7 +50,7 @@ mike = {version = "^1.1.2", optional = true}
 black = "^22.3.0"
 psycopg2 = "^2.8.5"
 mysqlclient = ">=1.4.0"
-flake8 = "^4.0.1"
+flake8 = "^3.9.2"
 isort = "^5.10.1"
 pre-commit = "^2.19.0"
 pytest = "^7.1.2"
