@@ -1966,6 +1966,7 @@ class SubscriptionSchedule(StripeModel):
         )
         return SubscriptionSchedule.sync_from_stripe_data(stripe_subscription_schedule)
 
+
 class TaxId(StripeModel):
     """
     Add one or multiple tax IDs to a customer.

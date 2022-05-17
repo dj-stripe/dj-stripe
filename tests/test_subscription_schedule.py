@@ -196,7 +196,6 @@ class SubscriptionScheduleTest(AssertStripeFksMixin, TestCase):
             stripe_account=schedule.djstripe_owner_account.id,
         )
 
-
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
