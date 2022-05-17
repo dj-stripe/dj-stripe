@@ -119,6 +119,7 @@ tox-gh-actions = "^2.10.0"
 [tool.poetry.extras]
 postgres = ["psycopg2"]
 mysql = ["mysqlclient"]
+docs = ["mkdocs", "mkdocstrings", "mkdocstrings-python-legacy", "mkdocs-material", "mkdocs-autorefs", "mike"]
 
 [tool.isort]
 profile = "black"

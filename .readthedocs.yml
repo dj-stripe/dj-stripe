@@ -6,7 +6,11 @@ mkdocs:
   configuration: mkdocs.yml
 
 python:
+<<<<<<< HEAD
   version: "3.11"
+=======
+  version: 3.9
+>>>>>>> 0538a0cd (Test to see if docs works on my branch)
   install:
     - method: pip
       path: .
