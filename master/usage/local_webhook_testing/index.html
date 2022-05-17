@@ -177,7 +177,6 @@
 </ol>
 <div class="highlight"><pre><span></span><code>stripe trigger customer.created
 </code></pre></div>
-<p>```</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>In case the <code>Stripe CLI</code> is used to perform local webhook testing, set <code>-H</code> to <code>x-djstripe-webhook-secret</code> Custom Header in Stripe <code>listen</code> to the <code>Webhook Signing Secret</code> output of <code>Stripe CLI</code>. That is what Stripe expects and uses to create the <code>stripe-signature</code> header.</p>
