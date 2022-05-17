@@ -1,132 +1,128 @@
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <meta name="author" content="Dj-Stripe Team">
-  <link rel="canonical" href="https://dj-stripe.github.io/dj-stripe/master/reference/models/">
-  <link rel="shortcut icon" href="../../img/favicon.ico">
-  <title>Models - Dj-Stripe</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
-
-  <link rel="stylesheet" href="../../css/theme.css" />
-  <link rel="stylesheet" href="../../css/theme_extra.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
-  <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
-  <link href="../../css/version-select.css" rel="stylesheet" />
-  
-  <script>
-    // Current page data
-    var mkdocs_page_name = "Models";
-    var mkdocs_page_input_path = "reference/models.md";
-    var mkdocs_page_url = "/dj-stripe/master/reference/models/";
-  </script>
-  
-  <script src="../../js/jquery-2.1.1.min.js" defer></script>
-  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-  <script>hljs.initHighlightingOnLoad();</script> 
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Dj-Stripe Team" /><link rel="canonical" href="https://dj-stripe.github.io/dj-stripe/master/reference/models/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Models - Dj-Stripe</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
+        <link href="../../css/version-select.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Models";
+        var mkdocs_page_input_path = "reference/models.md";
+        var mkdocs_page_url = "/dj-stripe/master/reference/models/";
+      </script>
+    
+    <script src="../../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
 </head>
 
 <body class="wy-body-for-nav" role="document">
 
   <div class="wy-grid-for-nav">
-
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
     <div class="wy-side-scroll">
       <div class="wy-side-nav-search">
-        <a href="../.." class="icon icon-home"> Dj-Stripe</a>
-        <div role="search">
+          <a href="../.." class="icon icon-home"> Dj-Stripe
+        </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
       <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
   </form>
 </div>
       </div>
 
-      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-                <ul>
-                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
-                    </li>
-                </ul>
-                <ul>
-                    <li class="toctree-l1"><a class="reference internal" href="../../project/sponsors/">Sponsors</a>
-                    </li>
-                </ul>
-                <p class="caption"><span class="caption-text">Getting Started</span></p>
-                <ul>
-                    <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../api_keys/">Managing Stripe API Keys</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../api_versions/">A note on Stripe API Versions</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../stripe_elements_js/">Integrating Stripe Elements</a>
-                    </li>
-                </ul>
-                <p class="caption"><span class="caption-text">Release notes</span></p>
-                <ul>
-                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_7_0/">dj-stripe 2.7 release notes</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_6_0/">dj-stripe 2.6 release notes</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_5_0/">dj-stripe 2.5 release notes</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_4_x/">dj-stripe 2.4.1 release notes</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_4_0/">dj-stripe 2.4 release notes</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../history/2_x/">dj-stripe 2.0 ~ 2.3 release notes</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../history/1_x/">dj-stripe 1.x release notes</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../history/0_x/">dj-stripe 0.x release notes</a>
-                    </li>
-                </ul>
-                <p class="caption"><span class="caption-text">Usage</span></p>
-                <ul>
-                    <li class="toctree-l1"><a class="reference internal" href="../../usage/webhooks/">Using Stripe Webhooks</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../usage/subscribing_customers/">Subscribing a customer to a plan</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../usage/managing_subscriptions/">Managing subscriptions and payment sources</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../usage/manually_syncing_with_stripe/">Manually syncing data with Stripe</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../usage/creating_individual_charges/">Creating individual charges</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../usage/creating_usage_record/">Creating Usage Records</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../usage/using_stripe_checkout/">Using Stripe Checkout</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../usage/using_with_docker/">Using with Docker</a>
-                    </li>
-                </ul>
-                <p class="caption"><span class="caption-text">Project</span></p>
-                <ul>
-                    <li class="toctree-l1"><a class="reference internal" href="../../project/contributing/">Contributing</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../project/test_fixtures/">Test Fixtures</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../project/authors/">Credits</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../project/support/">Support</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../../project/release_process/">Release Process</a>
-                    </li>
-                </ul>
-                <p class="caption"><span class="caption-text">Reference</span></p>
-                <ul class="current">
-                    <li class="toctree-l1"><a class="reference internal" href="../context_managers/">Context Managers</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../enums/">Enumerations</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../managers/">Managers</a>
-                    </li>
-                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Models</a>
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../project/sponsors/">Sponsors</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api_keys/">Managing Stripe API Keys</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../api_versions/">A note on Stripe API Versions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../stripe_elements_js/">Integrating Stripe Elements</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Release notes</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../history/2_7_0/">dj-stripe 2.7 release notes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../history/2_6_0/">dj-stripe 2.6 release notes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../history/2_5_0/">dj-stripe 2.5 release notes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../history/2_4_x/">dj-stripe 2.4.1 release notes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../history/2_4_0/">dj-stripe 2.4 release notes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../history/2_x/">dj-stripe 2.0 ~ 2.3 release notes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../history/1_x/">dj-stripe 1.x release notes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../history/0_x/">dj-stripe 0.x release notes</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Usage</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../usage/webhooks/">Using Stripe Webhooks</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../usage/subscribing_customers/">Subscribing a customer to a plan</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../usage/managing_subscriptions/">Managing subscriptions and payment sources</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../usage/manually_syncing_with_stripe/">Manually syncing data with Stripe</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../usage/creating_individual_charges/">Creating individual charges</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../usage/creating_usage_record/">Creating Usage Records</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../usage/using_stripe_checkout/">Using Stripe Checkout</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../usage/using_with_docker/">Using with Docker</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../usage/local_webhook_testing/">Development with local webhooks</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Project</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../project/contributing/">Contributing</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../project/test_fixtures/">Test Fixtures</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../project/authors/">Credits</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../project/support/">Support</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../project/release_process/">Release Process</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../context_managers/">Context Managers</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../enums/">Enumerations</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../managers/">Managers</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">Models</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#core-resources">Core Resources</a>
     </li>
@@ -992,6 +988,8 @@
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.Coupon.amount_off">amount_off</a>
     </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.Coupon.applies_to">applies_to</a>
+    </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.Coupon.currency">currency</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.Coupon.djstripe_owner_account">djstripe_owner_account</a>
@@ -999,6 +997,8 @@
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.Coupon.duration">duration</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.Coupon.duration_in_months">duration_in_months</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.Coupon.expand_fields">expand_fields</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.Coupon.human_readable">human_readable</a>
     </li>
@@ -1260,8 +1260,6 @@
     </li>
     <li class="toctree-l3"><a class="reference internal" href="#djstripe.models.billing.SubscriptionSchedule">SubscriptionSchedule</a>
         <ul>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.SubscriptionSchedule.billing_thresholds">billing_thresholds</a>
-    </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.SubscriptionSchedule.canceled_at">canceled_at</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.SubscriptionSchedule.completed_at">completed_at</a>
@@ -1284,23 +1282,17 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.SubscriptionSchedule.status">status</a>
     </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.SubscriptionSchedule.stripe_dashboard_item_name">stripe_dashboard_item_name</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.SubscriptionSchedule.subscription">subscription</a>
+    </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.SubscriptionSchedule.DoesNotExist">DoesNotExist</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.SubscriptionSchedule.MultipleObjectsReturned">MultipleObjectsReturned</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.SubscriptionSchedule.stripe_class">stripe_class</a>
     </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.SubscriptionSchedule.get_end_behavior_display">get_end_behavior_display()</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.SubscriptionSchedule.get_next_by_djstripe_created">get_next_by_djstripe_created()</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.SubscriptionSchedule.get_next_by_djstripe_updated">get_next_by_djstripe_updated()</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.SubscriptionSchedule.get_previous_by_djstripe_created">get_previous_by_djstripe_created()</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.SubscriptionSchedule.get_previous_by_djstripe_updated">get_previous_by_djstripe_updated()</a>
-    </li>
-    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.SubscriptionSchedule.get_status_display">get_status_display()</a>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.SubscriptionSchedule-methods">Methods</a>
     </li>
         </ul>
     </li>
@@ -1336,6 +1328,8 @@
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxRate.active">active</a>
     </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxRate.country">country</a>
+    </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxRate.display_name">display_name</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxRate.djstripe_owner_account">djstripe_owner_account</a>
@@ -1345,6 +1339,12 @@
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxRate.jurisdiction">jurisdiction</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxRate.percentage">percentage</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxRate.state">state</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxRate.stripe_dashboard_item_name">stripe_dashboard_item_name</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxRate.tax_type">tax_type</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxRate.DoesNotExist">DoesNotExist</a>
     </li>
@@ -1501,6 +1501,8 @@
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.connect.ApplicationFeeRefund.DoesNotExist">DoesNotExist</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.connect.ApplicationFeeRefund.MultipleObjectsReturned">MultipleObjectsReturned</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.connect.ApplicationFeeRefund.stripe_class">stripe_class</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.connect.ApplicationFeeRefund.get_next_by_djstripe_created">get_next_by_djstripe_created()</a>
     </li>
@@ -1767,51 +1769,37 @@
         </ul>
     </li>
     </ul>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../settings/">Settings</a>
-                    </li>
-                    <li class="toctree-l1"><a class="reference internal" href="../utils/">Utilities</a>
-                    </li>
-                </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings/">Settings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../utils/">Utilities</a>
+                  </li>
+              </ul>
       </div>
     </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../..">Dj-Stripe</a>
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Dj-Stripe</a>
+        
       </nav>
-
-      
       <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="breadcrumbs navigation">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
-    <li><a href="../..">Docs</a> &raquo;</li>
-    
-      
-        
-          <li>Reference &raquo;</li>
-        
-      
-    
-    <li>Models</li>
+    <li><a href="../.." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+          <li>Reference &raquo;</li><li>Models</li>
     <li class="wy-breadcrumbs-aside">
-      
         <a href="https://github.com/dj-stripe/dj-stripe/edit/master/docs/reference/models.md"
           class="icon icon-github"> Edit on GitHub</a>
-      
     </li>
   </ul>
-  
   <hr/>
 </div>
 
-          <div role="main">
-            <div class="section">
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
               
                 <h1 id="models">Models</h1>
 <p>Models hold the bulk of the functionality included in the dj-stripe
@@ -3603,6 +3591,64 @@ djstripe.models.core.Charge.stripe_class        </code>
 
 
 
+<h7 id="djstripe.models.core.Charge.stripe_class.search" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Charge</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_search</span><span class="p">(</span><span class="n">search_url</span><span class="o">=</span><span class="s2">&quot;/v1/charges/search&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.core.Charge.stripe_class.search_auto_paging_iter" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Charge</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">search_auto_paging_iter</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">search_auto_paging_iter</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">auto_paging_iter</span><span class="p">()</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
 <h7 id="djstripe.models.core.Charge.stripe_class.update_dispute" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Charge</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">update_dispute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
 
@@ -4696,6 +4742,85 @@ djstripe.models.core.Customer.stripe_class        </code>
 
 
 
+<h7 id="djstripe.models.core.Customer.stripe_class.cash_balances_request" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">cash_balances_request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">nested_resource_request</span><span class="p">(</span>
+    <span class="bp">cls</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">,</span>
+    <span class="n">url</span><span class="p">,</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">stripe_version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">params</span>
+<span class="p">):</span>
+    <span class="n">requestor</span> <span class="o">=</span> <span class="n">api_requestor</span><span class="o">.</span><span class="n">APIRequestor</span><span class="p">(</span>
+        <span class="n">api_key</span><span class="p">,</span> <span class="n">api_version</span><span class="o">=</span><span class="n">stripe_version</span><span class="p">,</span> <span class="n">account</span><span class="o">=</span><span class="n">stripe_account</span>
+    <span class="p">)</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
+    <span class="n">response</span><span class="p">,</span> <span class="n">api_key</span> <span class="o">=</span> <span class="n">requestor</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">convert_to_stripe_object</span><span class="p">(</span>
+        <span class="n">response</span><span class="p">,</span> <span class="n">api_key</span><span class="p">,</span> <span class="n">stripe_version</span><span class="p">,</span> <span class="n">stripe_account</span>
+    <span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.core.Customer.stripe_class.cash_balances_url" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">cash_balances_url</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">nested_id</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">nested_resource_url</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">nested_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">class_url</span><span class="p">(),</span>
+        <span class="n">quote_plus</span><span class="p">(</span><span class="nb">id</span><span class="p">),</span>
+        <span class="n">quote_plus</span><span class="p">(</span><span class="n">path</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">nested_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">quote_plus</span><span class="p">(</span><span class="n">nested_id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">url</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
 <h7 id="djstripe.models.core.Customer.stripe_class.create_balance_transaction" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">create_balance_transaction</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
 
@@ -4715,6 +4840,35 @@ djstripe.models.core.Customer.stripe_class        </code>
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">resource_request_method</span><span class="p">)(</span>
         <span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span>
     <span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.core.Customer.stripe_class.create_funding_instructions" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">create_funding_instructions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_funding_instructions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/funding_instructions&quot;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
+    <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+    <span class="n">stripe_object</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">convert_to_stripe_object</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">stripe_object</span>
 </code></pre></div>
         </details>
     </div>
@@ -5037,6 +5191,37 @@ djstripe.models.core.Customer.stripe_class        </code>
 
 
 
+<h7 id="djstripe.models.core.Customer.stripe_class.modify_cash_balance" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">modify_cash_balance</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">nested_id</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">modify_nested_resource</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">nested_id</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">resource_url_method</span><span class="p">)(</span><span class="nb">id</span><span class="p">,</span> <span class="n">nested_id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">resource_request_method</span><span class="p">)(</span>
+        <span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span>
+    <span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
 <h7 id="djstripe.models.core.Customer.stripe_class.modify_source" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">modify_source</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">nested_id</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
 
@@ -5070,6 +5255,37 @@ djstripe.models.core.Customer.stripe_class        </code>
 
 <h7 id="djstripe.models.core.Customer.stripe_class.retrieve_balance_transaction" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">retrieve_balance_transaction</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">nested_id</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">retrieve_nested_resource</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">nested_id</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">resource_url_method</span><span class="p">)(</span><span class="nb">id</span><span class="p">,</span> <span class="n">nested_id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">resource_request_method</span><span class="p">)(</span>
+        <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span>
+    <span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.core.Customer.stripe_class.retrieve_cash_balance" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">retrieve_cash_balance</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">nested_id</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
@@ -5149,6 +5365,64 @@ djstripe.models.core.Customer.stripe_class        </code>
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">resource_request_method</span><span class="p">)(</span>
         <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span>
     <span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.core.Customer.stripe_class.search" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_search</span><span class="p">(</span><span class="n">search_url</span><span class="o">=</span><span class="s2">&quot;/v1/customers/search&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.core.Customer.stripe_class.search_auto_paging_iter" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">search_auto_paging_iter</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">search_auto_paging_iter</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">auto_paging_iter</span><span class="p">()</span>
 </code></pre></div>
         </details>
     </div>
@@ -6306,7 +6580,7 @@ Stripe API and sync for all RelatedModels would fail</p>
     <span class="p">)</span>
 
     <span class="n">api_key</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;api_key&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span>
-    <span class="n">Subscription</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_subscription</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Subscription</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_subscription</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -9898,6 +10172,34 @@ djstripe.models.core.PaymentIntent.stripe_class        </code>
 
 
 
+<h7 id="djstripe.models.core.PaymentIntent.stripe_class.apply_customer_balance" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">PaymentIntent</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">apply_customer_balance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">apply_customer_balance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/apply_customer_balance&quot;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
+    <span class="k">return</span> <span class="bp">self</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
 <h7 id="djstripe.models.core.PaymentIntent.stripe_class.cancel" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">PaymentIntent</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
 
@@ -9970,6 +10272,94 @@ djstripe.models.core.PaymentIntent.stripe_class        </code>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.core.PaymentIntent.stripe_class.increment_authorization" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">PaymentIntent</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">increment_authorization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">increment_authorization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/increment_authorization&quot;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
+    <span class="k">return</span> <span class="bp">self</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.core.PaymentIntent.stripe_class.search" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">PaymentIntent</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_search</span><span class="p">(</span>
+        <span class="n">search_url</span><span class="o">=</span><span class="s2">&quot;/v1/payment_intents/search&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.core.PaymentIntent.stripe_class.search_auto_paging_iter" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">PaymentIntent</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">search_auto_paging_iter</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">search_auto_paging_iter</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">auto_paging_iter</span><span class="p">()</span>
 </code></pre></div>
         </details>
     </div>
@@ -11571,6 +11961,97 @@ djstripe.models.core.Price.stripe_class        </code>
 
 
 
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h7 id="djstripe.models.core.Price.stripe_class.OBJECT_NAME" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Price</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">OBJECT_NAME</span></code>
+
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.core.Price.stripe_class.search" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Price</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_search</span><span class="p">(</span><span class="n">search_url</span><span class="o">=</span><span class="s2">&quot;/v1/prices/search&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.core.Price.stripe_class.search_auto_paging_iter" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Price</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">search_auto_paging_iter</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">search_auto_paging_iter</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">auto_paging_iter</span><span class="p">()</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
     </div>
 
   </div>
@@ -12223,6 +12704,97 @@ djstripe.models.core.Product.stripe_class        </code>
 
 
 
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h7 id="djstripe.models.core.Product.stripe_class.OBJECT_NAME" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Product</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">OBJECT_NAME</span></code>
+
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.core.Product.stripe_class.search" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Product</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_search</span><span class="p">(</span><span class="n">search_url</span><span class="o">=</span><span class="s2">&quot;/v1/products/search&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.core.Product.stripe_class.search_auto_paging_iter" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Product</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">search_auto_paging_iter</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">search_auto_paging_iter</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">auto_paging_iter</span><span class="p">()</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
     </div>
 
   </div>
@@ -12699,6 +13271,157 @@ djstripe.models.core.Refund.stripe_class        </code>
 
 
 
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h7 id="djstripe.models.core.Refund.stripe_class.OBJECT_NAME" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Refund</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">OBJECT_NAME</span></code>
+
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h7 id="djstripe.models.core.Refund.stripe_class.test_helpers" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Refund</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">test_helpers</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-property"><code>property</code></small>
+      <small class="doc doc-property doc-property-readonly"><code>readonly</code></small>
+  </span>
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h7 id="djstripe.models.core.Refund.stripe_class.TestHelpers" class="doc doc-heading">
+        <code>
+djstripe.models.core.Refund.stripe_class.TestHelpers        </code>
+
+
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h9 id="djstripe.models.core.Refund.stripe_class.TestHelpers.expire" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Refund</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">TestHelpers</span><span class="o">.</span><span class="n">expire</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+
+
+</h9>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">expire</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/expire&quot;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">resource</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resource</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">resource</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.core.Refund.stripe_class.cancel" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Refund</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/cancel&quot;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
+    <span class="k">return</span> <span class="bp">self</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
 
     </div>
 
@@ -17628,6 +18351,24 @@ Coupons do not work with conventional one-off charges.</p>
 
 
 
+<h5 id="djstripe.models.billing.Coupon.applies_to" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Coupon</span><span class="o">.</span><span class="n">applies_to</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.billing.Coupon.currency" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Coupon</span><span class="o">.</span><span class="n">currency</span></code>
 
@@ -17684,6 +18425,24 @@ Coupons do not work with conventional one-off charges.</p>
 
 <h5 id="djstripe.models.billing.Coupon.duration_in_months" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Coupon</span><span class="o">.</span><span class="n">duration_in_months</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.billing.Coupon.expand_fields" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Coupon</span><span class="o">.</span><span class="n">expand_fields</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span></code>
 
 
 </h5>
@@ -21187,6 +21946,66 @@ djstripe.models.billing.Subscription.stripe_class        </code>
 
 
 
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.billing.Subscription.stripe_class.search" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Subscription</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/billing.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_search</span><span class="p">(</span>
+        <span class="n">search_url</span><span class="o">=</span><span class="s2">&quot;/v1/subscriptions/search&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.billing.Subscription.stripe_class.search_auto_paging_iter" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Subscription</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">search_auto_paging_iter</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/billing.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">search_auto_paging_iter</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">auto_paging_iter</span><span class="p">()</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
 
 
   </div>
@@ -22692,24 +23511,6 @@ of a subscription by predefining expected changes.</p>
 
 
 
-<h5 id="djstripe.models.billing.SubscriptionSchedule.billing_thresholds" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">SubscriptionSchedule</span><span class="o">.</span><span class="n">billing_thresholds</span></code>
-
-
-</h5>
-
-    <div class="doc doc-contents ">
-
-    </div>
-
-  </div>
-
-
-
-  <div class="doc doc-object doc-attribute">
-
-
-
 <h5 id="djstripe.models.billing.SubscriptionSchedule.canceled_at" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">SubscriptionSchedule</span><span class="o">.</span><span class="n">canceled_at</span></code>
 
@@ -22892,6 +23693,42 @@ of a subscription by predefining expected changes.</p>
 
 <h5 id="djstripe.models.billing.SubscriptionSchedule.status" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">SubscriptionSchedule</span><span class="o">.</span><span class="n">status</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.billing.SubscriptionSchedule.stripe_dashboard_item_name" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">SubscriptionSchedule</span><span class="o">.</span><span class="n">stripe_dashboard_item_name</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.billing.SubscriptionSchedule.subscription" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">SubscriptionSchedule</span><span class="o">.</span><span class="n">subscription</span></code>
 
 
 </h5>
@@ -23145,6 +23982,60 @@ djstripe.models.billing.SubscriptionSchedule.stripe_class        </code>
 
 
 
+<h4 id="djstripe.models.billing.SubscriptionSchedule-methods">Methods</h4>
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.billing.SubscriptionSchedule.cancel" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">SubscriptionSchedule</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+      <p>Cancels a subscription schedule and its associated subscription immediately
+(if the subscription schedule has an active subscription). A subscription schedule can only be canceled if its status is not_started or active
+and returns the Canceled SubscriptionSchedule.
+:param api_key: The api key to use for this request.
+    Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+:type api_key: string
+:param stripe_account: The optional connected account             for which this request is being made.
+:type stripe_account: string</p>
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/billing.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cancels a subscription schedule and its associated subscription immediately</span>
+<span class="sd">    (if the subscription schedule has an active subscription). A subscription schedule can only be canceled if its status is not_started or active</span>
+<span class="sd">    and returns the Canceled SubscriptionSchedule.</span>
+<span class="sd">    :param api_key: The api key to use for this request.</span>
+<span class="sd">        Defaults to djstripe_settings.STRIPE_SECRET_KEY.</span>
+<span class="sd">    :type api_key: string</span>
+<span class="sd">    :param stripe_account: The optional connected account \</span>
+<span class="sd">        for which this request is being made.</span>
+<span class="sd">    :type stripe_account: string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">api_key</span> <span class="o">=</span> <span class="n">api_key</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span>
+    <span class="c1"># Prefer passed in stripe_account if set.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">stripe_account</span><span class="p">:</span>
+        <span class="n">stripe_account</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_stripe_account_id</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
+
+    <span class="n">stripe_subscription_schedule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="n">stripe_account</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">SubscriptionSchedule</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_subscription_schedule</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
 
 
   <div class="doc doc-object doc-method">
@@ -23295,6 +24186,113 @@ djstripe.models.billing.SubscriptionSchedule.stripe_class        </code>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_method</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
     <span class="n">keywords</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">}</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.billing.SubscriptionSchedule.release" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">SubscriptionSchedule</span><span class="o">.</span><span class="n">release</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+      <p>Releases the subscription schedule immediately, which will stop scheduling
+of its phases, but leave any existing subscription in place.
+A schedule can only be released if its status is not_started or active.
+If the subscription schedule is currently associated with a subscription,
+releasing it will remove its subscription property and set the subscription’s
+ID to the released_subscription property
+and returns the Released SubscriptionSchedule.
+:param api_key: The api key to use for this request.
+    Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+:type api_key: string
+:param stripe_account: The optional connected account             for which this request is being made.
+:type stripe_account: string</p>
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/billing.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">release</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Releases the subscription schedule immediately, which will stop scheduling</span>
+<span class="sd">    of its phases, but leave any existing subscription in place.</span>
+<span class="sd">    A schedule can only be released if its status is not_started or active.</span>
+<span class="sd">    If the subscription schedule is currently associated with a subscription,</span>
+<span class="sd">    releasing it will remove its subscription property and set the subscription’s</span>
+<span class="sd">    ID to the released_subscription property</span>
+<span class="sd">    and returns the Released SubscriptionSchedule.</span>
+<span class="sd">    :param api_key: The api key to use for this request.</span>
+<span class="sd">        Defaults to djstripe_settings.STRIPE_SECRET_KEY.</span>
+<span class="sd">    :type api_key: string</span>
+<span class="sd">    :param stripe_account: The optional connected account \</span>
+<span class="sd">        for which this request is being made.</span>
+<span class="sd">    :type stripe_account: string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">api_key</span> <span class="o">=</span> <span class="n">api_key</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span>
+    <span class="c1"># Prefer passed in stripe_account if set.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">stripe_account</span><span class="p">:</span>
+        <span class="n">stripe_account</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_stripe_account_id</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
+
+    <span class="n">stripe_subscription_schedule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">release</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="n">stripe_account</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">SubscriptionSchedule</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_subscription_schedule</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.billing.SubscriptionSchedule.update" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">SubscriptionSchedule</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+      <p>Updates an existing subscription schedule
+and returns the updated SubscriptionSchedule.
+:param api_key: The api key to use for this request.
+    Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+:type api_key: string
+:param stripe_account: The optional connected account             for which this request is being made.
+:type stripe_account: string</p>
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/billing.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Updates an existing subscription schedule</span>
+<span class="sd">    and returns the updated SubscriptionSchedule.</span>
+<span class="sd">    :param api_key: The api key to use for this request.</span>
+<span class="sd">        Defaults to djstripe_settings.STRIPE_SECRET_KEY.</span>
+<span class="sd">    :type api_key: string</span>
+<span class="sd">    :param stripe_account: The optional connected account \</span>
+<span class="sd">        for which this request is being made.</span>
+<span class="sd">    :type stripe_account: string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">stripe_subscription_schedule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api_update</span><span class="p">(</span>
+        <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="n">stripe_account</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">SubscriptionSchedule</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_subscription_schedule</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -24014,6 +25012,24 @@ djstripe.models.billing.TaxRate        </code>
 
 
 
+<h5 id="djstripe.models.billing.TaxRate.country" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">TaxRate</span><span class="o">.</span><span class="n">country</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.billing.TaxRate.display_name" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">TaxRate</span><span class="o">.</span><span class="n">display_name</span></code>
 
@@ -24088,6 +25104,60 @@ djstripe.models.billing.TaxRate        </code>
 
 <h5 id="djstripe.models.billing.TaxRate.percentage" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">TaxRate</span><span class="o">.</span><span class="n">percentage</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.billing.TaxRate.state" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">TaxRate</span><span class="o">.</span><span class="n">state</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.billing.TaxRate.stripe_dashboard_item_name" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">TaxRate</span><span class="o">.</span><span class="n">stripe_dashboard_item_name</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.billing.TaxRate.tax_type" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">TaxRate</span><span class="o">.</span><span class="n">tax_type</span></code>
 
 
 </h5>
@@ -24191,7 +25261,7 @@ djstripe.models.billing.TaxRate.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s2"> – </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">jurisdiction</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">percentage</span><span class="si">}</span><span class="s2">%&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">percentage</span><span class="si">}</span><span class="s2">%&quot;</span>
 </code></pre></div>
         </details>
     </div>
@@ -28860,6 +29930,149 @@ djstripe.models.connect.ApplicationFeeRefund.MultipleObjectsReturned        </co
 
 
 
+  <div class="doc doc-object doc-class">
+
+
+
+<h5 id="djstripe.models.connect.ApplicationFeeRefund.stripe_class" class="doc doc-heading">
+        <code>
+djstripe.models.connect.ApplicationFeeRefund.stripe_class        </code>
+
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h7 id="djstripe.models.connect.ApplicationFeeRefund.stripe_class.OBJECT_NAME" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">connect</span><span class="o">.</span><span class="n">ApplicationFeeRefund</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">OBJECT_NAME</span></code>
+
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.connect.ApplicationFeeRefund.stripe_class.instance_url" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">connect</span><span class="o">.</span><span class="n">ApplicationFeeRefund</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">instance_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/connect.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">instance_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_instance_url</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fee</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.connect.ApplicationFeeRefund.stripe_class.modify" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">connect</span><span class="o">.</span><span class="n">ApplicationFeeRefund</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">modify</span><span class="p">(</span><span class="n">fee</span><span class="p">,</span> <span class="n">sid</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/connect.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">modify</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fee</span><span class="p">,</span> <span class="n">sid</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_build_instance_url</span><span class="p">(</span><span class="n">fee</span><span class="p">,</span> <span class="n">sid</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_static_request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.connect.ApplicationFeeRefund.stripe_class.retrieve" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">connect</span><span class="o">.</span><span class="n">ApplicationFeeRefund</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
+  </span>
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/connect.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">retrieve</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+        <span class="s2">&quot;Can&#39;t retrieve a refund without an application fee ID. &quot;</span>
+        <span class="s2">&quot;Use application_fee.refunds.retrieve(&#39;refund_id&#39;) instead.&quot;</span>
+    <span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
 
 
   <div class="doc doc-object doc-method">
@@ -32797,7 +34010,14 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
         <span class="c1"># HTTP headers are case-insensitive, but we store them as a dict.</span>
         <span class="n">headers</span> <span class="o">=</span> <span class="n">CaseInsensitiveMapping</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
         <span class="n">signature</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stripe-signature&quot;</span><span class="p">)</span>
+        <span class="n">local_cli_signing_secret</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;x-djstripe-webhook-secret&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># check if the x-djstripe-webhook-secret Custom Header exists</span>
+            <span class="k">if</span> <span class="n">local_cli_signing_secret</span><span class="p">:</span>
+                <span class="c1"># Set Endpoint Signing Secret to the output of Stripe CLI</span>
+                <span class="c1"># for signature verification</span>
+                <span class="n">secret</span> <span class="o">=</span> <span class="n">local_cli_signing_secret</span>
+
             <span class="n">stripe</span><span class="o">.</span><span class="n">WebhookSignature</span><span class="o">.</span><span class="n">verify_header</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="n">secret</span><span class="p">,</span> <span class="n">tolerance</span>
             <span class="p">)</span>
@@ -32924,29 +34144,21 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
   </div>
               
             </div>
-          </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../managers/" class="btn btn-neutral float-left" title="Managers"><span class="icon icon-circle-arrow-left"></span> Previous</a>
         <a href="../settings/" class="btn btn-neutral float-right" title="Settings">Next <span class="icon icon-circle-arrow-right"></span></a>
-      
-      
-        <a href="../managers/" class="btn btn-neutral" title="Managers"><span class="icon icon-circle-arrow-left"></span> Previous</a>
-      
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <!-- Copyright etc -->
-    
   </div>
 
-  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
 </footer>
-      
+          
         </div>
       </div>
 
@@ -32954,7 +34166,7 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
 
   </div>
 
-  <div class="rst-versions" role="note" aria-label="versions">
+  <div class="rst-versions" role="note" aria-label="Versions">
   <span class="rst-current-version" data-toggle="rst-current-version">
     
         <span>
