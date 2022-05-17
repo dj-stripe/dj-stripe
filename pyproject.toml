@@ -121,6 +121,7 @@ postgres = ["psycopg2"]
 mysql = ["mysqlclient"]
 docs = ["mkdocs", "mkdocstrings", "mkdocstrings-python-legacy", "mkdocs-material", "mkdocs-autorefs", "psycopg2", "mike", "jinja2"]
 
+
 [tool.isort]
 profile = "black"
 
