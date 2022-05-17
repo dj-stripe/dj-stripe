@@ -170,9 +170,8 @@
 <p>Start the local <code>Stripe</code> server like so:</p>
 </li>
 </ol>
-<p>```bash</p>
-<p>stripe listen -H "x-djstripe-webhook-secret: <STRIPE_CLI_WEBHOOK_SIGNING_SECRET_OUTPUT>" --forward-to <URL></p>
-<p>```</p>
+<div class="highlight"><pre><span></span><code>stripe listen -H <span class="s2">&quot;x-djstripe-webhook-secret: &lt;STRIPE_CLI_WEBHOOK_SIGNING_SECRET_OUTPUT&gt;&quot;</span> --forward-to &lt;URL&gt;
+</code></pre></div>
 <ol>
 <li><code>Stripe</code> events can now be triggered like so:</li>
 </ol>
