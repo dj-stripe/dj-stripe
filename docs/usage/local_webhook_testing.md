@@ -12,7 +12,7 @@ To perform local webhook testing using the `Stripe CLI`, please do the following
 
   stripe listen -H "x-djstripe-webhook-secret: <STRIPE_CLI_WEBHOOK_SIGNING_SECRET_OUTPUT>" --forward-to <URL>
 
-```
+  ```
 
 4. `Stripe` events can now be triggered like so:
 
