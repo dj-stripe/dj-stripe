@@ -8,9 +8,7 @@ import pytest
 import stripe
 from django.test import TestCase
 
-from djstripe.enums import PaymentIntentStatus
-from djstripe.models import Account, Customer, PaymentIntent
-from djstripe.utils import get_friendly_currency_amount
+from djstripe.models import PaymentIntent
 
 from . import (
     FAKE_ACCOUNT,
