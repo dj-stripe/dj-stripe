@@ -764,6 +764,12 @@ class ShippingRateType(Enum):
     fixed_amount = _("Fixed Amount")
 
 
+class ShippingRateTaxBehavior(Enum):
+    inclusive = _("Inclusive")
+    exclusive = _("Exclusive")
+    unspecified = _("Unspecified")
+
+
 class TaxIdType(Enum):
     ae_trn = _("AE TRN")
     au_abn = _("AU ABN")
