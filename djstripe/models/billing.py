@@ -1967,6 +1967,28 @@ class SubscriptionSchedule(StripeModel):
         return SubscriptionSchedule.sync_from_stripe_data(stripe_subscription_schedule)
 
 
+class TaxCode(StripeModel):
+    """
+    Tax codes classify goods and services for tax purposes.
+
+    Stripe documentation: https://stripe.com/docs/api/tax_codes
+    """
+
+    stripe_class = stripe.TaxCode
+    metadata = None
+
+    name = models.CharField(
+        max_length=128,
+        help_text="A short name for the tax code.",
+    )
+
+    class Meta:
+        verbose_name = "Tax Code"
+
+    def __str__(self):
+        return f"{self.name}: {self.id}"
+
+
 class TaxId(StripeModel):
     """
     Add one or multiple tax IDs to a customer.
