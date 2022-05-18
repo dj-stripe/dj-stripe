@@ -760,6 +760,10 @@ class SubscriptionProrationBehavior(Enum):
     none = _("None")
 
 
+class ShippingRateType(Enum):
+    fixed_amount = _("Fixed Amount")
+
+
 class TaxIdType(Enum):
     ae_trn = _("AE TRN")
     au_abn = _("AU ABN")
