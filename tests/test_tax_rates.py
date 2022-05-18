@@ -8,12 +8,20 @@ import pytest
 from django.test import TestCase
 
 from djstripe.models import TaxRate
-from tests import FAKE_TAX_RATE_EXAMPLE_1_VAT, AssertStripeFksMixin
+from tests import FAKE_TAX_RATE_EXAMPLE_1_VAT
 
 pytestmark = pytest.mark.django_db
 
 
-class TaxRateTest(AssertStripeFksMixin, TestCase):
+class TaxRateTest(TestCase):
+    def test_sync_from_stripe_data(self):
+        tax_rate = TaxRate.sync_from_stripe_data(deepcopy(FAKE_TAX_RATE_EXAMPLE_1_VAT))
+
+        self.assertEqual(
+            FAKE_TAX_RATE_EXAMPLE_1_VAT["id"],
+            tax_rate.id,
+        )
+
     def test___str__(self):
         tax_rate = TaxRate.sync_from_stripe_data(deepcopy(FAKE_TAX_RATE_EXAMPLE_1_VAT))
 
