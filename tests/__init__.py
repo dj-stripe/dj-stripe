@@ -1210,6 +1210,12 @@ FAKE_SUBSCRIPTION_SCHEDULE = {
 }
 
 
+FAKE_SHIPPING_RATE = load_fixture("shipping_rate_shr_fakefakefakefakefake0001.json")
+FAKE_SHIPPING_RATE_WITH_TAX_CODE = load_fixture(
+    "shipping_rate_shr_fakefakefakefakefake0002.json"
+)
+
+
 class Sources(object):
     def __init__(self, card_fakes):
         self.card_fakes = card_fakes
