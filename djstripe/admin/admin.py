@@ -570,6 +570,13 @@ class BankAccountAdmin(StripeModelAdmin):
         )
 
 
+@admin.register(models.ShippingRate)
+class ShippingRateAdmin(StripeModelAdmin):
+    list_display = ("display_name", "active", "tax_behavior", "tax_code")
+    list_filter = ("active", "tax_behavior")
+    list_select_related = ("tax_code",)
+
+
 @admin.register(models.Subscription)
 class SubscriptionAdmin(StripeModelAdmin):
     list_display = ("customer", "status", "get_default_tax_rates")

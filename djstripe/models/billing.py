@@ -2007,6 +2007,74 @@ class SubscriptionSchedule(StripeModel):
         return SubscriptionSchedule.sync_from_stripe_data(stripe_subscription_schedule)
 
 
+class ShippingRate(StripeModel):
+    """
+    Shipping rates describe the price of shipping presented
+    to your customers and can be applied to Checkout Sessions
+    to collect shipping costs.
+
+    Stripe documentation: https://stripe.com/docs/api/shipping_rates
+    """
+
+    stripe_class = stripe.ShippingRate
+    stripe_dashboard_item_name = "shipping-rates"
+    description = None
+
+    active = models.BooleanField(
+        default=True,
+        help_text="Whether the shipping rate can be used for new purchases. Defaults to true",
+    )
+    display_name = models.CharField(
+        max_length=50,
+        default="",
+        blank=True,
+        help_text="The name of the shipping rate, meant to be displayable to the customer. This will appear on CheckoutSessions.",
+    )
+    fixed_amount = JSONField(
+        help_text="Describes a fixed amount to charge for shipping. Must be present if type is fixed_amount",
+    )
+    type = StripeEnumField(
+        enum=enums.ShippingRateType,
+        default=enums.ShippingRateType.fixed_amount,
+        help_text=_(
+            "The type of calculation to use on the shipping rate. Can only be fixed_amount for now."
+        ),
+    )
+    delivery_estimate = JSONField(
+        null=True,
+        blank=True,
+        help_text="The estimated range for how long shipping will take, meant to be displayable to the customer. This will appear on CheckoutSessions.",
+    )
+    tax_behavior = StripeEnumField(
+        enum=enums.ShippingRateTaxBehavior,
+        help_text=_(
+            "Specifies whether the rate is considered inclusive of taxes or exclusive of taxes."
+        ),
+    )
+    tax_code = StripeForeignKey(
+        "TaxCode",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text="The shipping tax code",
+    )
+
+    class Meta:
+        verbose_name = "Shipping Rate"
+
+    def __str__(self):
+        base = f"{self.display_name} - {self.human_readable_amount}"
+        if self.active:
+            return f"{base} (Active)"
+        return f"{base} (Archived)"
+
+    @property
+    def human_readable_amount(self):
+        return get_friendly_currency_amount(
+            self.fixed_amount.get("amount") / 100, self.fixed_amount.get("currency")
+        )
+
+
 class TaxCode(StripeModel):
     """
     Tax codes classify goods and services for tax purposes.

@@ -1,0 +1,17 @@
+{
+    "id": "shr_1L0co1JSZQVUcJYgcYfX1tZj",
+    "object": "shipping_rate",
+    "livemode": false,
+    "created": 1570435136,
+    "metadata": {},
+    "active": true,
+    "display_name": "Test Shipping Code with no Tax Code",
+    "fixed_amount": {
+        "amount": 125,
+        "currency": "usd"
+    },
+    "type": "fixed_amount",
+    "delivery_estimate": null,
+    "tax_behavior": "exclusive",
+    "tax_code": null
+}
