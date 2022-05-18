@@ -899,6 +899,12 @@ class SubscriptionScheduleAdmin(StripeModelAdmin):
         return actions
 
 
+@admin.register(models.TaxCode)
+class TaxCodeAdmin(StripeModelAdmin):
+    list_display = ("name",)
+    list_filter = ("name",)
+
+
 @admin.register(models.TaxRate)
 class TaxRateAdmin(StripeModelAdmin):
     list_display = ("active", "display_name", "inclusive", "jurisdiction", "percentage")
