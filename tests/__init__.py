@@ -1651,6 +1651,8 @@ FAKE_EVENT_TAX_ID_UPDATED = {
 FAKE_EVENT_TAX_ID_DELETED = deepcopy(FAKE_EVENT_TAX_ID_UPDATED)
 FAKE_EVENT_TAX_ID_DELETED["type"] = "customer.tax_id.deleted"
 
+FAKE_TAX_CODE = load_fixture("tax_code_txcd_fakefakefakefakefake0001.json")
+
 FAKE_INVOICEITEM = {
     "id": "ii_16XVTY2eZvKYlo2Cxz5n3RaS",
     "object": "invoiceitem",
