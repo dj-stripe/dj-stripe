@@ -106,10 +106,6 @@ class BalanceTransaction(StripeModel):
     def get_stripe_dashboard_url(self):
         return self.get_source_instance().get_stripe_dashboard_url()
 
-    @property
-    def human_readable_amount(self) -> str:
-        return get_friendly_currency_amount(self.amount / 100, self.currency)
-
 
 class Charge(StripeModel):
     """
@@ -1503,10 +1499,6 @@ class Dispute(StripeModel):
                 stripe_balance_transaction, api_key=api_key
             )
 
-    @property
-    def human_readable_amount(self) -> str:
-        return get_friendly_currency_amount(self.amount / 100, self.currency)
-
 
 class Event(StripeModel):
     """
@@ -1913,10 +1905,6 @@ class PaymentIntent(StripeModel):
         api_key = api_key or self.default_api_key
 
         return self.api_retrieve(api_key=api_key).confirm(**kwargs)
-
-    @property
-    def human_readable_amount(self) -> str:
-        return get_friendly_currency_amount(self.amount / 100, self.currency)
 
 
 class SetupIntent(StripeModel):
