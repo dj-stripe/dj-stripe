@@ -395,6 +395,7 @@ class InvoiceBillingReason(Enum):
     manual = _("Manual")
     upcoming = _("Upcoming")
     subscription_threshold = _("Subscription threshold")
+    automatic_pending_invoice_item_invoice = _("Automatic pending invoice item invoice")
 
 
 class InvoiceCollectionMethod(Enum):
