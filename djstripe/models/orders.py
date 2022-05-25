@@ -118,3 +118,8 @@ class Order(StripeModel):
         ):
             return "Placed " + template
         return self.id
+
+    @classmethod
+    def _manipulate_stripe_object_hook(cls, data):
+        data["payment_intent"] = data["payment"]["payment_intent"]
+        return data
