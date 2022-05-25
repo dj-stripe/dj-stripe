@@ -1,8 +1,13 @@
 """
 dj-stripe System Checks
 """
+import re
+
 from django.core import checks
-from django.utils.dateparse import date_re
+
+STRIPE_API_VERSION_PATTERN = re.compile(
+    r"(?P<year>\d{4})-(?P<month>\d{1,2})-(?P<day>\d{1,2})(; [\w=]*)?$"
+)
 
 
 @checks.register("djstripe")
@@ -34,13 +39,15 @@ def validate_stripe_api_version(version):
     """
     Check the API version is formatted correctly for Stripe.
 
-    The expected format is an iso8601 date: `YYYY-MM-DD`
+    The expected format is `YYYY-MM-DD` (an iso8601 date) or
+    for access to alphs or beta releases the expected format is: `YYYY-MM-DD; modelname_version=version_number`.
+    Ex "2020-08-27; orders_beta=v3"
 
     :param version: The version to set for the Stripe API.
     :type version: ``str``
     :returns bool: Whether the version is formatted correctly.
     """
-    return date_re.match(version)
+    return re.match(STRIPE_API_VERSION_PATTERN, version)
 
 
 @checks.register("djstripe")
