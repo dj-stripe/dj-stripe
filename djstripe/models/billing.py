@@ -1510,7 +1510,7 @@ class Subscription(StripeModel):
         products_lst = [
             subscription.plan.product.name
             for subscription in subscriptions_lst
-            if subscription and subscription.plan
+            if subscription and subscription.plan and subscription.plan.product
         ]
 
         return f"{self.customer} on {' and '.join(products_lst)}"
