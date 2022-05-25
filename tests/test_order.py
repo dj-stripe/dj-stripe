@@ -148,6 +148,25 @@ class TestOrder(AssertStripeFksMixin, TestCase):
             },
         )
 
+    def test__manipulate_stripe_object_hook(self):
+        order_data = deepcopy(FAKE_ORDER_WITH_CUSTOMER_WITH_PAYMENT_INTENT)
+
+        # Remove "payment_intent" key from order_data dictionary
+        del order_data["payment_intent"]
+
+        # assert "payment_intent" key is removed from the data dictionary
+        self.assertTrue("payment_intent" not in order_data)
+
+        # Invoke _manipulate_stripe_object_hook
+        modified_order_data = Order._manipulate_stripe_object_hook(order_data)
+
+        # assert "payment_intent" key gets added to the data dictionary
+        self.assertTrue("payment_intent" in modified_order_data)
+        self.assertEqual(
+            modified_order_data["payment_intent"],
+            order_data["payment"]["payment_intent"],
+        )
+
 
 class TestOrderStr:
     @pytest.mark.parametrize(
