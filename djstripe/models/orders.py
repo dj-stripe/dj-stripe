@@ -106,3 +106,15 @@ class Order(StripeModel):
     total_details = JSONField(
         help_text="Tax, discount, and shipping details for the computed total amount of this order.",
     )
+
+    def __str__(self):
+        template = f"on {self.created.strftime('%m/%d/%Y')} ({self.status})"
+        if self.status in (OrderStatus.open, OrderStatus.canceled):
+            return "Created " + template
+        elif self.status in (
+            OrderStatus.submitted,
+            OrderStatus.complete,
+            OrderStatus.processing,
+        ):
+            return "Placed " + template
+        return self.id
