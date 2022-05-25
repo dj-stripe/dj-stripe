@@ -41,6 +41,7 @@ from .core import (
     Refund,
     SetupIntent,
 )
+from .orders import Order
 from .payment_methods import (
     BankAccount,
     Card,
@@ -73,6 +74,7 @@ __all__ = [
     "Invoice",
     "InvoiceItem",
     "Mandate",
+    "Order",
     "PaymentIntent",
     "PaymentMethod",
     "Payout",
