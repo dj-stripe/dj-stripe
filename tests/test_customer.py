@@ -773,9 +773,9 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         with pytest.warns(DeprecationWarning):
             self.assertFalse(self.customer.can_charge())
 
-    def test_charge_accepts_only_decimals(self):
+    def test_charge_accepts_only_integrals(self):
         with self.assertRaises(ValueError):
-            self.customer.charge(10)
+            self.customer.charge(decimal.Decimal("10"))
 
     @patch("stripe.Coupon.retrieve", return_value=deepcopy(FAKE_COUPON), autospec=True)
     @patch(
@@ -1058,7 +1058,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         payment_intent_retrieve_mock.return_value = fake_payment_intent
 
-        self.customer.charge(amount=decimal.Decimal("10.00"))
+        self.customer.charge(amount=1000)
 
         _, kwargs = charge_create_mock.call_args
         self.assertEqual(kwargs["amount"], 1000)
@@ -1118,7 +1118,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         invoice_retrieve_mock.return_value = fake_invoice_copy
 
         try:
-            self.customer.charge(amount=decimal.Decimal("20.00"))
+            self.customer.charge(amount=2000)
         except Invoice.DoesNotExist:
             self.fail(msg="Stripe Charge shouldn't throw Invoice DoesNotExist.")
 
@@ -1162,7 +1162,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         payment_intent_retrieve_mock.return_value = fake_payment_intent
 
         self.customer.charge(
-            amount=decimal.Decimal("10.00"),
+            amount=1000,
             capture=True,
             destination=FAKE_PLATFORM_ACCOUNT["id"],
         )
@@ -1210,7 +1210,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         payment_intent_retrieve_mock.return_value = fake_payment_intent
 
-        self.customer.charge(amount=decimal.Decimal("10.00"), source=self.card.id)
+        self.customer.charge(amount=1000, source=self.card.id)
 
     @patch(
         "djstripe.models.Account.get_default_account",
@@ -1251,7 +1251,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         payment_intent_retrieve_mock.return_value = fake_payment_intent
 
-        self.customer.charge(amount=decimal.Decimal("10.00"), source=self.card)
+        self.customer.charge(amount=1000, source=self.card)
 
     @patch(
         "djstripe.models.Account.get_default_account",
