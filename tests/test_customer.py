@@ -898,7 +898,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assertFalse(created2)
 
         self.assertEqual(refunded_charge.refunded, True)
-        self.assertEqual(refunded_charge.amount_refunded, decimal.Decimal("20.00"))
+        self.assertEqual(refunded_charge.amount_refunded, 2000)
 
         self.assert_fks(
             refunded_charge,
@@ -987,7 +987,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
         refunded_charge = charge.refund()
         self.assertEqual(refunded_charge.refunded, True)
-        self.assertEqual(refunded_charge.amount_refunded, decimal.Decimal("20.00"))
+        self.assertEqual(refunded_charge.amount_refunded, 2000)
 
         self.assert_fks(
             refunded_charge,
@@ -1877,7 +1877,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
     )
     def test_add_invoice_item(self, invoiceitem_create_mock, invoiceitem_sync_mock):
         invoiceitem = self.customer.add_invoice_item(
-            amount=decimal.Decimal("50.00"),
+            amount=5000,
             currency="eur",
             description="test",
             invoice=77,
@@ -1911,7 +1911,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self, invoiceitem_create_mock, invoiceitem_sync_mock
     ):
         invoiceitem = self.customer.add_invoice_item(
-            amount=decimal.Decimal("50.00"),
+            amount=5000,
             currency="eur",
             description="test",
             invoice=Invoice(id=77),

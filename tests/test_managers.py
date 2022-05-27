@@ -203,7 +203,7 @@ class ChargeManagerTest(TestCase):
             id="ch_XXXXAPR1",
             customer=customer,
             created=datetime.datetime(2015, 4, 1, tzinfo=timezone.utc),
-            amount=decimal.Decimal("20.15"),
+            amount=2015,
             amount_refunded=0,
             currency="usd",
             status="succeeded",
@@ -214,8 +214,8 @@ class ChargeManagerTest(TestCase):
             id="ch_XXXXAPR2",
             customer=customer,
             created=datetime.datetime(2015, 4, 18, tzinfo=timezone.utc),
-            amount=decimal.Decimal("10.35"),
-            amount_refunded=decimal.Decimal("5.35"),
+            amount=1035,
+            amount_refunded=535,
             currency="usd",
             status="succeeded",
             paid=True,
@@ -225,8 +225,8 @@ class ChargeManagerTest(TestCase):
             id="ch_XXXXAPR3",
             customer=customer,
             created=datetime.datetime(2015, 4, 30, tzinfo=timezone.utc),
-            amount=decimal.Decimal("100.00"),
-            amount_refunded=decimal.Decimal("80.00"),
+            amount=100,
+            amount_refunded=80,
             currency="usd",
             status="pending",
             paid=False,
@@ -300,12 +300,12 @@ class ChargeManagerTest(TestCase):
         paid_totals = Charge.objects.paid_totals_for(year=2015, month=4)
 
         self.assertEqual(
-            decimal.Decimal("30.50"),
+            3050,
             paid_totals["total_amount"],
             "Total amount is not correct.",
         )
         self.assertEqual(
-            decimal.Decimal("5.35"),
+            535,
             paid_totals["total_refunded"],
             "Total amount refunded is not correct.",
         )
