@@ -2043,9 +2043,11 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
     def test_add_invoice_item_bad_decimal(self):
         with self.assertRaisesMessage(
-            ValueError, "You must supply a decimal value representing dollars."
+            ValueError, "You must supply an integer value representing cents."
         ):
-            self.customer.add_invoice_item(amount=5000, currency="usd")
+            self.customer.add_invoice_item(
+                amount=decimal.Decimal("5000"), currency="usd"
+            )
 
     @patch(
         "stripe.BalanceTransaction.retrieve",

@@ -1,4 +1,4 @@
-from decimal import Decimal
+import warnings
 from typing import Optional, Union
 
 import stripe
@@ -422,17 +422,11 @@ class Charge(StripeModel):
 
         return amount_to_refund
 
-    def refund(
-        self,
-        amount: Decimal = None,
-        reason: str = None,
-        api_key: str = None,
-        stripe_account: str = None,
-    ) -> "Refund":
+    def refund(self, amount: int = None, reason: str = None) -> "Charge":
         """
         Initiate a refund. Returns the refund object.
 
-        :param amount: A positive decimal amount representing how much of this charge
+        :param amount: A positive integer amount representing how much of this charge
             to refund. If amount is not provided, then this will be a full refund.
             Can only refund up to the unrefunded amount remaining of the charge.
         :param reason: String indicating the reason for the refund.
@@ -1040,8 +1034,8 @@ class Customer(StripeModel):
         processed immediately. Invoice items are appended to the customer's next
         invoice. This is extremely useful when adding surcharges to subscriptions.
 
-        :param amount: The amount to charge.
-        :type amount: Decimal. Precision is 2; anything more will be ignored.
+        :param amount: The amount to charge (in cents).
+        :type amount: int.
         :param currency: 3-letter ISO code for currency
         :type currency: string
         :param description: An arbitrary string.
@@ -1075,8 +1069,8 @@ class Customer(StripeModel):
         """
         from .billing import InvoiceItem
 
-        if not isinstance(amount, Decimal):
-            raise ValueError("You must supply a decimal value representing dollars.")
+        if not isinstance(amount, int):
+            raise ValueError("You must supply an integer value representing cents.")
 
         # Convert Invoice to id
         if invoice is not None and isinstance(invoice, StripeModel):
@@ -1087,7 +1081,7 @@ class Customer(StripeModel):
             subscription = subscription.id
 
         stripe_invoiceitem = InvoiceItem._api_create(
-            amount=int(amount * 100),  # Convert dollars into cents
+            amount=amount,
             currency=currency,
             customer=self.id,
             description=description,
