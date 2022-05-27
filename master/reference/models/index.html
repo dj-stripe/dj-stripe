@@ -1290,6 +1290,32 @@
     </li>
         </ul>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.models.billing.TaxCode">TaxCode</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxCode.djstripe_owner_account">djstripe_owner_account</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxCode.metadata">metadata</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxCode.name">name</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxCode.DoesNotExist">DoesNotExist</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxCode.MultipleObjectsReturned">MultipleObjectsReturned</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxCode.stripe_class">stripe_class</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxCode.__str__">__str__()</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxCode.get_next_by_djstripe_created">get_next_by_djstripe_created()</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxCode.get_next_by_djstripe_updated">get_next_by_djstripe_updated()</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxCode.get_previous_by_djstripe_created">get_previous_by_djstripe_created()</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxCode.get_previous_by_djstripe_updated">get_previous_by_djstripe_updated()</a>
+    </li>
+        </ul>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#djstripe.models.billing.TaxId">TaxId</a>
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.TaxId.country">country</a>
@@ -5275,6 +5301,43 @@ djstripe.models.core.Customer.stripe_class        </code>
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">resource_request_method</span><span class="p">)(</span>
         <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span>
     <span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.core.Customer.stripe_class.retrieve_payment_method" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">retrieve_payment_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payment_method</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/core.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="nd">@util</span><span class="o">.</span><span class="n">class_method_variant</span><span class="p">(</span><span class="s2">&quot;_cls_retrieve_payment_method&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">retrieve_payment_method</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">payment_method</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span>
+<span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;/v1/customers/</span><span class="si">{customer}</span><span class="s2">/payment_methods/</span><span class="si">{payment_method}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">customer</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)),</span>
+            <span class="n">payment_method</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="n">payment_method</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
+    <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+    <span class="n">stripe_object</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">convert_to_stripe_object</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">stripe_object</span>
 </code></pre></div>
         </details>
     </div>
@@ -24221,6 +24284,301 @@ and returns the updated SubscriptionSchedule.
         <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="n">stripe_account</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">SubscriptionSchedule</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">stripe_subscription_schedule</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h3 id="djstripe.models.billing.TaxCode" class="doc doc-heading">
+        <code>
+djstripe.models.billing.TaxCode        </code>
+
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Tax codes classify goods and services for tax purposes.</p>
+<p>Stripe documentation: https://stripe.com/docs/api/tax_codes</p>
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.billing.TaxCode.djstripe_owner_account" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">TaxCode</span><span class="o">.</span><span class="n">djstripe_owner_account</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">djstripe</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">StripeForeignKey</span><span class="p">]</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.billing.TaxCode.metadata" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">TaxCode</span><span class="o">.</span><span class="n">metadata</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.billing.TaxCode.name" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">TaxCode</span><span class="o">.</span><span class="n">name</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h5 id="djstripe.models.billing.TaxCode.DoesNotExist" class="doc doc-heading">
+        <code>
+djstripe.models.billing.TaxCode.DoesNotExist        </code>
+
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h5 id="djstripe.models.billing.TaxCode.MultipleObjectsReturned" class="doc doc-heading">
+        <code>
+djstripe.models.billing.TaxCode.MultipleObjectsReturned        </code>
+
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h5 id="djstripe.models.billing.TaxCode.stripe_class" class="doc doc-heading">
+        <code>
+djstripe.models.billing.TaxCode.stripe_class        </code>
+
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+
+
+    </div>
+
+  </div>
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.billing.TaxCode.__str__" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">TaxCode</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-special"><code>special</code></small>
+  </span>
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/billing.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.billing.TaxCode.get_next_by_djstripe_created" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">TaxCode</span><span class="o">.</span><span class="n">get_next_by_djstripe_created</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">field</span><span class="o">=&lt;</span><span class="n">django</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">:</span> <span class="n">djstripe_created</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">is_next</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/billing.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_method</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+    <span class="n">keywords</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">}</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.billing.TaxCode.get_next_by_djstripe_updated" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">TaxCode</span><span class="o">.</span><span class="n">get_next_by_djstripe_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">field</span><span class="o">=&lt;</span><span class="n">django</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">:</span> <span class="n">djstripe_updated</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">is_next</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/billing.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_method</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+    <span class="n">keywords</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">}</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.billing.TaxCode.get_previous_by_djstripe_created" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">TaxCode</span><span class="o">.</span><span class="n">get_previous_by_djstripe_created</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">field</span><span class="o">=&lt;</span><span class="n">django</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">:</span> <span class="n">djstripe_created</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">is_next</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/billing.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_method</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+    <span class="n">keywords</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">}</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.billing.TaxCode.get_previous_by_djstripe_updated" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">TaxCode</span><span class="o">.</span><span class="n">get_previous_by_djstripe_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">field</span><span class="o">=&lt;</span><span class="n">django</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">:</span> <span class="n">djstripe_updated</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">is_next</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/billing.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_method</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+    <span class="n">keywords</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">}</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
