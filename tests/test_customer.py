@@ -992,20 +992,12 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
 
     def test_calculate_refund_amount_partial_refund(self):
-        charge = Charge(
-            id="ch_111111", customer=self.customer, amount=decimal.Decimal("500.00")
-        )
-        self.assertEqual(
-            charge._calculate_refund_amount(amount=decimal.Decimal("300.00")), 30000
-        )
+        charge = Charge(id="ch_111111", customer=self.customer, amount=50000)
+        self.assertEqual(charge._calculate_refund_amount(amount=30000), 30000)
 
     def test_calculate_refund_above_max_refund(self):
-        charge = Charge(
-            id="ch_111111", customer=self.customer, amount=decimal.Decimal("500.00")
-        )
-        self.assertEqual(
-            charge._calculate_refund_amount(amount=decimal.Decimal("600.00")), 50000
-        )
+        charge = Charge(id="ch_111111", customer=self.customer, amount=50000)
+        self.assertEqual(charge._calculate_refund_amount(amount=60000), 50000)
 
     @patch(
         "djstripe.models.Account.get_default_account",

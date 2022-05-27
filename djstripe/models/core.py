@@ -411,7 +411,7 @@ class Charge(StripeModel):
             self.fraud_details and list(self.fraud_details.values())[0] == "fraudulent"
         )
 
-    def _calculate_refund_amount(self, amount: Optional[Decimal]) -> int:
+    def _calculate_refund_amount(self, amount: Optional[int]) -> int:
         """
         Returns the amount that can be refunded (in cents)
         """
@@ -420,7 +420,7 @@ class Charge(StripeModel):
             min(eligible_to_refund, amount) if amount else eligible_to_refund
         )
 
-        return int(amount_to_refund * 100)
+        return amount_to_refund
 
     def refund(
         self,
