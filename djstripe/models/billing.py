@@ -225,8 +225,8 @@ class BaseInvoice(StripeModel):
         help_text="The public name of the business associated with this invoice, "
         "most often the business creating the invoice.",
     )
-    amount_due = StripeDecimalCurrencyAmountField(
-        help_text="Final amount due (as decimal) at this time for this invoice. "
+    amount_due = StripeQuantumCurrencyAmountField(
+        help_text="Final amount due (in cents) at this time for this invoice. "
         "If the invoice's total is smaller than the minimum charge amount, "
         "for example, or if there is account credit that can be applied to the "
         "invoice, the amount_due may be 0. If there is a positive starting_balance "
@@ -234,18 +234,18 @@ class BaseInvoice(StripeModel):
         "into account. The charge that gets generated for the invoice will be for "
         "the amount specified in amount_due."
     )
-    amount_paid = StripeDecimalCurrencyAmountField(
+    amount_paid = StripeQuantumCurrencyAmountField(
         null=True,  # XXX: This is not nullable, but it's a new field
-        help_text="The amount, (as decimal), that was paid.",
+        help_text="The amount, (in cents), that was paid.",
     )
-    amount_remaining = StripeDecimalCurrencyAmountField(
+    amount_remaining = StripeQuantumCurrencyAmountField(
         null=True,  # XXX: This is not nullable, but it's a new field
-        help_text="The amount remaining, (as decimal), that is due.",
+        help_text="The amount remaining, (in cents), that is due.",
     )
-    application_fee_amount = StripeDecimalCurrencyAmountField(
+    application_fee_amount = StripeQuantumCurrencyAmountField(
         null=True,
         blank=True,
-        help_text="The fee (as decimal) that will be applied to the invoice and "
+        help_text="The fee (in cents) that will be applied to the invoice and "
         "transferred to the application owner's "
         "Stripe account when the invoice is paid.",
     )
@@ -514,14 +514,14 @@ class BaseInvoice(StripeModel):
         help_text="Only set for upcoming invoices that preview prorations. "
         "The time used to calculate prorations.",
     )
-    subtotal = StripeDecimalCurrencyAmountField(
-        help_text="Total (as decimal) of all subscriptions, invoice items, "
+    subtotal = StripeQuantumCurrencyAmountField(
+        help_text="Total (in cents) of all subscriptions, invoice items, "
         "and prorations on the invoice before any discount or tax is applied."
     )
-    tax = StripeDecimalCurrencyAmountField(
+    tax = StripeQuantumCurrencyAmountField(
         null=True,
         blank=True,
-        help_text="The amount (as decimal) of tax included in the total, calculated "
+        help_text="The amount (in cents) of tax included in the total, calculated "
         "from ``tax_percent`` and the subtotal. If no "
         "``tax_percent`` is defined, this value will be null.",
     )
@@ -539,7 +539,7 @@ class BaseInvoice(StripeModel):
         help_text="If billing_reason is set to subscription_threshold this returns "
         "more information on which threshold rules triggered the invoice.",
     )
-    total = StripeDecimalCurrencyAmountField("Total (as decimal) after discount.")
+    total = StripeQuantumCurrencyAmountField("Total (in cents) after discount.")
     webhooks_delivered_at = StripeDateTimeField(
         null=True,
         help_text=(
