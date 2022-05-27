@@ -185,16 +185,7 @@ class PlanTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             stripe_account=self.plan.djstripe_owner_account.id,
         )
         plan = Plan.sync_from_stripe_data(stripe_plan)
-        assert plan.amount_in_cents == plan.amount * 100
-        assert isinstance(plan.amount_in_cents, int)
-
-        self.assert_fks(
-            plan,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
-            },
-        )
+        self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
 
     def test_stripe_plan_null_product(self):
         """

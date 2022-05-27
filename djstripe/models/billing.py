@@ -1629,7 +1629,7 @@ class Plan(StripeModel):
     def create(cls, **kwargs):
         # A few minor things are changed in the api-version of the create call
         api_kwargs = dict(kwargs)
-        api_kwargs["amount"] = int(api_kwargs["amount"] * 100)
+        api_kwargs["amount"] = api_kwargs["amount"]
 
         if isinstance(api_kwargs.get("product"), StripeModel):
             api_kwargs["product"] = api_kwargs["product"].id
@@ -1646,14 +1646,10 @@ class Plan(StripeModel):
         return self.human_readable_price
 
     @property
-    def amount_in_cents(self):
-        return int(self.amount * 100)
-
-    @property
     def human_readable_price(self) -> str:
         if self.billing_scheme == "per_unit":
             unit_amount = self.amount
-            amount = get_friendly_currency_amount(unit_amount, self.currency)
+            amount = get_friendly_currency_amount(unit_amount / 100, self.currency)
         else:
             # tiered billing scheme
             tier_1 = self.tiers[0]
