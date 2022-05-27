@@ -988,17 +988,17 @@ class Customer(StripeModel):
 
     def charge(
         self,
-        amount: Decimal,
+        amount: int,
         *,
-        application_fee: Decimal = None,
+        application_fee: int = None,
         source: Union[str, StripeModel] = None,
         **kwargs,
     ) -> Charge:
         """
         Creates a charge for this customer.
 
-        :param amount: The amount to charge.
-        :type amount: Decimal. Precision is 2; anything more will be ignored.
+        :param amount: The amount to charge (in cents).
+        :type amount: int.
         :param source: The source to use for this charge.
             Must be a source attributed to this customer. If None, the customer's
             default source is used. Can be either the id of the source or
@@ -1006,8 +1006,8 @@ class Customer(StripeModel):
         :type source: string, Source
         """
 
-        if not isinstance(amount, Decimal):
-            raise ValueError("You must supply a decimal value representing dollars.")
+        if not isinstance(amount, int):
+            raise ValueError("You must supply an integer value representing cents.")
 
         # Convert Source to id
         if source and isinstance(source, StripeModel):
@@ -1015,10 +1015,8 @@ class Customer(StripeModel):
 
         stripe_charge = Charge._api_create(
             customer=self.id,
-            amount=int(amount * 100),  # Convert dollars into cents
-            application_fee=(
-                int(application_fee * 100) if application_fee else None
-            ),  # Convert dollars into cents
+            amount=amount,
+            application_fee=application_fee if application_fee else None,
             source=source,
             **kwargs,
         )

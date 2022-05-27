@@ -5,6 +5,7 @@ import decimal
 from copy import deepcopy
 from unittest.mock import ANY, call, patch
 
+import pytest
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.utils import timezone
@@ -739,9 +740,17 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             },
         )
 
-    def test_charge_accepts_only_decimals(self):
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    def test_cannot_charge(self, customer_retrieve_fake):
+        self.customer.date_purged = timezone.now()
+        with pytest.warns(DeprecationWarning):
+            self.assertFalse(self.customer.can_charge())
+
+    def test_charge_accepts_only_integrals(self):
         with self.assertRaises(ValueError):
-            self.customer.charge(10)
+            self.customer.charge(decimal.Decimal("10"))
 
     @patch("stripe.Coupon.retrieve", return_value=deepcopy(FAKE_COUPON), autospec=True)
     @patch(
@@ -1038,7 +1047,7 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         payment_intent_retrieve_mock.return_value = fake_payment_intent
 
-        self.customer.charge(amount=decimal.Decimal("10.00"))
+        self.customer.charge(amount=1000)
 
         _, kwargs = charge_create_mock.call_args
         self.assertEqual(kwargs["amount"], 1000)
@@ -1116,7 +1125,7 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         invoice_retrieve_mock.return_value = fake_invoice_copy
 
         try:
-            self.customer.charge(amount=decimal.Decimal("20.00"))
+            self.customer.charge(amount=2000)
         except Invoice.DoesNotExist:
             self.fail(msg="Stripe Charge shouldn't throw Invoice DoesNotExist.")
 
@@ -1160,7 +1169,7 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         payment_intent_retrieve_mock.return_value = fake_payment_intent
 
         self.customer.charge(
-            amount=decimal.Decimal("10.00"),
+            amount=1000,
             capture=True,
             destination=FAKE_PLATFORM_ACCOUNT["id"],
         )
@@ -1208,7 +1217,7 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         payment_intent_retrieve_mock.return_value = fake_payment_intent
 
-        self.customer.charge(amount=decimal.Decimal("10.00"), source=self.card.id)
+        self.customer.charge(amount=1000, source=self.card.id)
 
     @patch(
         "djstripe.models.Account.get_default_account",
@@ -1249,7 +1258,7 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         payment_intent_retrieve_mock.return_value = fake_payment_intent
 
-        self.customer.charge(amount=decimal.Decimal("10.00"), source=self.card)
+        self.customer.charge(amount=1000, source=self.card)
 
     @patch(
         "djstripe.models.Account.get_default_account",
