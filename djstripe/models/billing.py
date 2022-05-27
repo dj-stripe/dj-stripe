@@ -187,7 +187,9 @@ class Coupon(StripeModel):
         if self.percent_off:
             amount = f"{self.percent_off}%"
         elif self.currency:
-            amount = get_friendly_currency_amount(self.amount_off or 0, self.currency)
+            amount = get_friendly_currency_amount(
+                (self.amount_off or 0) / 100, self.currency
+            )
         else:
             amount = "(invalid amount)"
         return f"{amount} off"
