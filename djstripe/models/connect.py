@@ -7,7 +7,6 @@ from .. import enums
 from ..fields import (
     JSONField,
     StripeCurrencyCodeField,
-    StripeDecimalCurrencyAmountField,
     StripeEnumField,
     StripeForeignKey,
     StripeIdField,
@@ -193,13 +192,11 @@ class Transfer(StripeModel):
     objects = TransferManager()
 
     amount = StripeQuantumCurrencyAmountField(help_text="The amount transferred")
-    amount_reversed = StripeDecimalCurrencyAmountField(
+    amount_reversed = StripeQuantumCurrencyAmountField(
         null=True,
         blank=True,
-        help_text=(
-            "The amount (as decimal) reversed (can be less than the amount "
-            "attribute on the transfer if a partial reversal was issued)."
-        ),
+        help_text="The amount (in cents) reversed (can be less than the amount "
+        "attribute on the transfer if a partial reversal was issued).",
     )
     balance_transaction = StripeForeignKey(
         "BalanceTransaction",

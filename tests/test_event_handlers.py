@@ -3102,7 +3102,7 @@ class TestTransferEvents(EventTestCase):
         transfer = Transfer.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(
             transfer.amount,
-            fake_stripe_event["data"]["object"]["amount"] / Decimal("100"),
+            fake_stripe_event["data"]["object"]["amount"],
         )
 
     @patch.object(Transfer, "_attach_objects_post_save_hook")

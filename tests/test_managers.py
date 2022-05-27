@@ -178,7 +178,7 @@ class TransferManagerTest(TestCase):
         self.assertEqual(Transfer.objects.during(2015, 8).count(), 2)
 
         totals = Transfer.objects.paid_totals_for(2015, 12)
-        self.assertEqual(totals["total_amount"], decimal.Decimal("190.10"))
+        self.assertEqual(totals["total_amount"], 19010)
 
 
 class ChargeManagerTest(TestCase):
