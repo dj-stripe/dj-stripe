@@ -923,7 +923,7 @@ class InvoiceItem(StripeModel):
 
     stripe_class = stripe.InvoiceItem
 
-    amount = StripeDecimalCurrencyAmountField(help_text="Amount invoiced (as decimal).")
+    amount = StripeQuantumCurrencyAmountField(help_text="Amount invoiced (in cents).")
     currency = StripeCurrencyCodeField()
     customer = StripeForeignKey(
         "Customer",

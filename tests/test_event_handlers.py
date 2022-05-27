@@ -2000,7 +2000,7 @@ class TestInvoiceItemEvents(EventTestCase):
         )
         self.assertEqual(
             invoiceitem.amount,
-            fake_stripe_event["data"]["object"]["amount"] / Decimal("100"),
+            2000,
         )
 
     @patch(
