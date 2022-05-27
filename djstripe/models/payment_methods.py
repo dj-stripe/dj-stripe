@@ -9,9 +9,9 @@ from ..exceptions import StripeObjectManipulationException
 from ..fields import (
     JSONField,
     StripeCurrencyCodeField,
-    StripeDecimalCurrencyAmountField,
     StripeEnumField,
     StripeForeignKey,
+    StripeQuantumCurrencyAmountField,
 )
 from ..settings import djstripe_settings
 from ..utils import get_id_from_stripe_data
@@ -609,11 +609,11 @@ class Source(StripeModel):
     Stripe documentation: https://stripe.com/docs/api#sources
     """
 
-    amount = StripeDecimalCurrencyAmountField(
+    amount = StripeQuantumCurrencyAmountField(
         null=True,
         blank=True,
         help_text=(
-            "Amount (as decimal) associated with the source. "
+            "Amount (in cents) associated with the source. "
             "This is the amount for which the source will be chargeable once ready. "
             "Required for `single_use` sources."
         ),

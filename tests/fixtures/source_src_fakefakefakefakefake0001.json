@@ -1,7 +1,7 @@
 {
     "id": "src_fakefakefakefakefake0001",
     "object": "source",
-    "amount": null,
+    "amount": 1000,
     "card": {
         "exp_month": 6,
         "exp_year": 2021,

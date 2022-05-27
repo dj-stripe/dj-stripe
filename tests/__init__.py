@@ -434,7 +434,7 @@ FAKE_SOURCE_II = SourceDict(
     {
         "id": "src_1DuuGjkE6hxDGaasasjdlajl",
         "object": "source",
-        "amount": None,
+        "amount": 1000,
         "card": {
             "address_line1_check": None,
             "address_zip_check": "pass",
