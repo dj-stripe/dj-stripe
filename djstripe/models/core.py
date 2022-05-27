@@ -2033,8 +2033,8 @@ class Payout(StripeModel):
     stripe_class = stripe.Payout
     stripe_dashboard_item_name = "payouts"
 
-    amount = StripeDecimalCurrencyAmountField(
-        help_text="Amount (as decimal) to be transferred to your bank account or "
+    amount = StripeQuantumCurrencyAmountField(
+        help_text="Amount (in cents) to be transferred to your bank account or "
         "debit card."
     )
     arrival_date = StripeDateTimeField(
