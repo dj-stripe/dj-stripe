@@ -26,7 +26,7 @@ class CouponTest(TestCase):
     def test___str__(self):
         coupon = Coupon.objects.create(
             id="coupon-test-amount-off-forever",
-            amount_off=10,
+            amount_off=1000,
             currency="usd",
             duration="forever",
             name="Test coupon",
@@ -36,7 +36,7 @@ class CouponTest(TestCase):
     def test_human_readable_usd_off_forever(self):
         coupon = Coupon.objects.create(
             id="coupon-test-amount-off-forever",
-            amount_off=10,
+            amount_off=1000,
             currency="usd",
             duration="forever",
         )
@@ -46,7 +46,7 @@ class CouponTest(TestCase):
     def test_human_readable_eur_off_forever(self):
         coupon = Coupon.objects.create(
             id="coupon-test-amount-off-forever",
-            amount_off=10,
+            amount_off=1000,
             currency="eur",
             duration="forever",
         )
