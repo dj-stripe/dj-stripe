@@ -39,7 +39,7 @@ class PlanCreateTest(AssertStripeFksMixin, TestCase):
     @patch("stripe.Plan.create", return_value=deepcopy(FAKE_PLAN), autospec=True)
     def test_create_from_product_id(self, plan_create_mock, product_retrieve_mock):
         fake_plan = deepcopy(FAKE_PLAN)
-        fake_plan["amount"] = fake_plan["amount"] / 100
+        fake_plan["amount"] = fake_plan["amount"]
         self.assertIsInstance(fake_plan["product"], str)
 
         plan = Plan.create(**fake_plan)
@@ -58,7 +58,7 @@ class PlanCreateTest(AssertStripeFksMixin, TestCase):
     def test_create_from_stripe_product(self, plan_create_mock, product_retrieve_mock):
         fake_plan = deepcopy(FAKE_PLAN)
         fake_plan["product"] = self.stripe_product
-        fake_plan["amount"] = fake_plan["amount"] / 100
+        fake_plan["amount"] = fake_plan["amount"]
         self.assertIsInstance(fake_plan["product"], dict)
 
         plan = Plan.create(**fake_plan)
@@ -81,7 +81,7 @@ class PlanCreateTest(AssertStripeFksMixin, TestCase):
     ):
         fake_plan = deepcopy(FAKE_PLAN)
         fake_plan["product"] = Product.sync_from_stripe_data(self.stripe_product)
-        fake_plan["amount"] = fake_plan["amount"] / 100
+        fake_plan["amount"] = fake_plan["amount"]
         self.assertIsInstance(fake_plan["product"], Product)
 
         plan = Plan.create(**fake_plan)
@@ -99,7 +99,7 @@ class PlanCreateTest(AssertStripeFksMixin, TestCase):
     def test_create_with_metadata(self, plan_create_mock, product_retrieve_mock):
         metadata = {"other_data": "more_data"}
         fake_plan = deepcopy(FAKE_PLAN)
-        fake_plan["amount"] = fake_plan["amount"] / 100
+        fake_plan["amount"] = fake_plan["amount"]
         fake_plan["metadata"] = metadata
         self.assertIsInstance(fake_plan["product"], str)
 
