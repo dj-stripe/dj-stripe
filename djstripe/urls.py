@@ -9,6 +9,8 @@ Wire this into the root URLConf this way::
 """
 from django.urls import path, re_path
 
+from djstripe.admin import views as admin_views
+
 from . import views
 from .settings import djstripe_settings as app_settings
 
@@ -28,7 +30,7 @@ urlpatterns = [
     ),
     path(
         "action/<str:action_name>/<str:model_name>/",
-        views.ConfirmCustomAction.as_view(),
+        admin_views.ConfirmCustomAction.as_view(),
         name="djstripe_custom_action",
     ),
 ]
