@@ -18,7 +18,7 @@ from pytest_django.asserts import assertQuerysetEqual
 
 from djstripe import admin as djstripe_admin
 from djstripe import models, utils
-from djstripe.forms import CustomActionForm
+from djstripe.admin.forms import CustomActionForm
 from djstripe.models.account import Account
 from tests import (
     FAKE_BALANCE_TRANSACTION,

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.shortcuts import render
 
 from djstripe.admin import StripeModelAdmin
-from djstripe.forms import CustomActionForm
+from djstripe.admin.forms import CustomActionForm
 
 from .models import TestCustomActionModel
 

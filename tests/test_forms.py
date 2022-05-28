@@ -7,7 +7,7 @@ from django.contrib.admin import helpers
 from django.forms.utils import ErrorDict
 
 from djstripe import enums, utils
-from djstripe.forms import APIKeyAdminCreateForm, CustomActionForm
+from djstripe.admin.forms import APIKeyAdminCreateForm, CustomActionForm
 from tests import FAKE_PLATFORM_ACCOUNT
 
 from .fields.models import TestCustomActionModel
