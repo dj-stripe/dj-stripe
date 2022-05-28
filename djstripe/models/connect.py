@@ -1,8 +1,6 @@
 import stripe
 from django.db import models
 
-from djstripe.utils import get_friendly_currency_amount
-
 from .. import enums
 from ..fields import (
     JSONField,
@@ -251,10 +249,6 @@ class Transfer(StripeModel):
             return f"{self.human_readable_amount} Partially Reversed"
         # No Reversal
         return f"{self.human_readable_amount}"
-
-    @property
-    def human_readable_amount(self) -> str:
-        return get_friendly_currency_amount(self.amount / 100, self.currency)
 
     def _attach_objects_post_save_hook(
         self,
