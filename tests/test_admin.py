@@ -16,8 +16,8 @@ from django.urls import reverse
 from jsonfield import JSONField
 from pytest_django.asserts import assertQuerysetEqual
 
-from djstripe import admin as djstripe_admin
 from djstripe import models, utils
+from djstripe.admin import admin as djstripe_admin
 from djstripe.admin.forms import CustomActionForm
 from djstripe.models.account import Account
 from tests import (

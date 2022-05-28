@@ -7,7 +7,7 @@ from unittest.mock import patch
 import pytest
 from django.test import TestCase
 
-from djstripe.admin import APIKeyAdminCreateForm
+from djstripe.admin.admin import APIKeyAdminCreateForm
 from djstripe.enums import APIKeyType
 from djstripe.exceptions import InvalidStripeAPIKey
 from djstripe.models import Account, APIKey
