@@ -194,6 +194,16 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
 
 
 class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
+
+    enabled_events = forms.MultipleChoiceField(
+        label="Enabled Events",
+        required=True,
+        help_text=(
+            "The list of events to enable for this endpoint. "
+            "['*'] indicates that all events are enabled, except those that require explicit selection."
+        ),
+        choices=zip(ENABLED_EVENTS, ENABLED_EVENTS),
+    )
     base_url = forms.URLField(
         required=False,
         help_text=(
