@@ -10,6 +10,7 @@ from django.urls import reverse
 from stripe.error import AuthenticationError, InvalidRequestError
 
 from djstripe import enums, models, utils
+from djstripe.signals import ENABLED_EVENTS
 
 
 class CustomActionForm(forms.Form):
@@ -107,6 +108,16 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
         self.fields["djstripe_owner_account"].label = "Stripe account"
         self.fields["djstripe_owner_account"].help_text = ""
 
+    enabled_events = forms.MultipleChoiceField(
+        label="Enabled Events",
+        required=True,
+        help_text=(
+            "The list of events to enable for this endpoint. "
+            "['*'] indicates that all events are enabled, except those that require explicit selection."
+        ),
+        choices=zip(ENABLED_EVENTS, ENABLED_EVENTS),
+        initial=["*"],
+    )
     livemode = forms.BooleanField(
         label="Live mode",
         required=False,
@@ -133,6 +144,7 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
     class Meta:
         model = models.WebhookEndpoint
         fields = (
+            "enabled_events",
             "livemode",
             "djstripe_owner_account",
             "description",
@@ -169,7 +181,7 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
                 url=url,
                 api_version=self.cleaned_data["api_version"] or None,
                 description=self.cleaned_data["description"],
-                enabled_events=["*"],
+                enabled_events=self.cleaned_data.get("enabled_events"),
                 metadata=metadata,
                 connect=self.cleaned_data["connect"],
                 **_api_key,
