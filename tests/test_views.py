@@ -16,7 +16,7 @@ from django.urls import reverse
 from pytest_django.asserts import assertContains
 
 from djstripe import models, utils
-from djstripe.views import ConfirmCustomAction
+from djstripe.admin.views import ConfirmCustomAction
 from tests import (
     FAKE_BALANCE_TRANSACTION,
     FAKE_CARD_AS_PAYMENT_METHOD,
