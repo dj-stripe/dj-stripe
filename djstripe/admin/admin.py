@@ -762,7 +762,7 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
         else:
             header_fields = ["djstripe_owner_account", "livemode"]
             core_fields = ["description", "base_url", "connect"]
-            advanced_fields = ["metadata", "api_version"]
+            advanced_fields = ["metadata", "api_version", "enabled_events"]
 
         return [
             (None, {"fields": header_fields}),
