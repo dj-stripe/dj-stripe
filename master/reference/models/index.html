@@ -22033,7 +22033,7 @@ djstripe.models.billing.Subscription.stripe_class        </code>
     <span class="n">products_lst</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">subscription</span><span class="o">.</span><span class="n">plan</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">name</span>
         <span class="k">for</span> <span class="n">subscription</span> <span class="ow">in</span> <span class="n">subscriptions_lst</span>
-        <span class="k">if</span> <span class="n">subscription</span> <span class="ow">and</span> <span class="n">subscription</span><span class="o">.</span><span class="n">plan</span>
+        <span class="k">if</span> <span class="n">subscription</span> <span class="ow">and</span> <span class="n">subscription</span><span class="o">.</span><span class="n">plan</span> <span class="ow">and</span> <span class="n">subscription</span><span class="o">.</span><span class="n">plan</span><span class="o">.</span><span class="n">product</span>
     <span class="p">]</span>
 
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">customer</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="s1">&#39; and &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">products_lst</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
