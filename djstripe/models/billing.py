@@ -556,9 +556,11 @@ class BaseInvoice(StripeModel):
         ordering = ["-created"]
 
     def __str__(self):
-        return "Invoice #{number}".format(
-            number=self.number or self.receipt_number or self.id
-        )
+        return f"Invoice #{self.number or self.receipt_number or self.id} for {self.human_readable_amount} ({self.status})"
+
+    @property
+    def human_readable_amount(self) -> str:
+        return get_friendly_currency_amount(self.amount_paid / 100, self.currency)
 
     @classmethod
     def upcoming(
