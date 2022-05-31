@@ -385,6 +385,7 @@ class InvoiceAdmin(StripeModelAdmin):
         "due_date",
     )
     list_filter = (
+        "status",
         "paid",
         "attempted",
         "created",
