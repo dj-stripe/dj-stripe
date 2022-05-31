@@ -41,7 +41,7 @@ class PriceCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     @patch("stripe.Price.create", return_value=deepcopy(FAKE_PRICE), autospec=True)
     def test_create_from_product_id(self, price_create_mock, product_retrieve_mock):
         fake_price = deepcopy(FAKE_PRICE)
-        fake_price["unit_amount"] /= 100
+
         assert isinstance(fake_price["product"], str)
 
         price = Price.create(**fake_price)
@@ -69,7 +69,7 @@ class PriceCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def test_create_from_stripe_product(self, price_create_mock, product_retrieve_mock):
         fake_price = deepcopy(FAKE_PRICE)
         fake_price["product"] = self.stripe_product
-        fake_price["unit_amount"] /= 100
+
         assert isinstance(fake_price["product"], dict)
 
         price = Price.create(**fake_price)
@@ -100,7 +100,7 @@ class PriceCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     ):
         fake_price = deepcopy(FAKE_PRICE)
         fake_price["product"] = Product.sync_from_stripe_data(self.stripe_product)
-        fake_price["unit_amount"] /= 100
+
         assert isinstance(fake_price["product"], Product)
 
         price = Price.create(**fake_price)
@@ -126,7 +126,7 @@ class PriceCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def test_create_with_metadata(self, price_create_mock, product_retrieve_mock):
         metadata = {"other_data": "more_data"}
         fake_price = deepcopy(FAKE_PRICE)
-        fake_price["unit_amount"] /= 100
+
         fake_price["metadata"] = metadata
         assert isinstance(fake_price["product"], str)
 

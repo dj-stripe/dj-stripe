@@ -2372,8 +2372,6 @@ class Price(StripeModel):
     def create(cls, **kwargs):
         # A few minor things are changed in the api-version of the create call
         api_kwargs = dict(kwargs)
-        if api_kwargs["unit_amount"]:
-            api_kwargs["unit_amount"] = int(api_kwargs["unit_amount"] * 100)
 
         if isinstance(api_kwargs.get("product"), StripeModel):
             api_kwargs["product"] = api_kwargs["product"].id
