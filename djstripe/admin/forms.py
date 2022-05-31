@@ -9,7 +9,7 @@ from django.contrib.admin import helpers
 from django.urls import reverse
 from stripe.error import AuthenticationError, InvalidRequestError
 
-from djstripe import enums, models, utils
+from djstripe import enums, models, settings, utils
 
 
 class CustomActionForm(forms.Form):
@@ -166,7 +166,8 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
         try:
             self._stripe_data = models.WebhookEndpoint._api_create(
                 url=url,
-                api_version=self.cleaned_data["api_version"] or None,
+                api_version=self.cleaned_data["api_version"]
+                or settings.djstripe_settings.STRIPE_API_VERSION,
                 description=self.cleaned_data["description"],
                 enabled_events=["*"],
                 metadata=metadata,
