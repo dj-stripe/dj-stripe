@@ -120,4 +120,9 @@ class Migration(migrations.Migration):
                 verbose_name="Total (in cents) after discount."
             ),
         ),
+        migrations.AlterField(
+            model_name="invoiceitem",
+            name="amount",
+            field=djstripe.fields.StripeQuantumCurrencyAmountField(),
+        ),
     ]
