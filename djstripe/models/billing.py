@@ -1510,10 +1510,10 @@ class Plan(StripeModel):
             "usage during a period. Defaults to `sum`."
         ),
     )
-    amount = StripeDecimalCurrencyAmountField(
+    amount = StripeQuantumCurrencyAmountField(
         null=True,
         blank=True,
-        help_text="Amount (as decimal) to be charged on the interval specified.",
+        help_text="Amount (in cents) to be charged on the interval specified.",
     )
     amount_decimal = StripeDecimalCurrencyAmountField(
         null=True,

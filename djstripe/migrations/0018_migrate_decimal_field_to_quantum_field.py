@@ -125,4 +125,11 @@ class Migration(migrations.Migration):
             name="amount",
             field=djstripe.fields.StripeQuantumCurrencyAmountField(),
         ),
+        migrations.AlterField(
+            model_name="plan",
+            name="amount",
+            field=djstripe.fields.StripeQuantumCurrencyAmountField(
+                blank=True, null=True
+            ),
+        ),
     ]
