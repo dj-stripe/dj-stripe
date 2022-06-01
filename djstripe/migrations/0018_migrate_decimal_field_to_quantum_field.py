@@ -137,4 +137,26 @@ class Migration(migrations.Migration):
             name="amount",
             field=djstripe.fields.StripeQuantumCurrencyAmountField(),
         ),
+        migrations.AlterField(
+            model_name="charge",
+            name="amount",
+            field=djstripe.fields.StripeQuantumCurrencyAmountField(),
+        ),
+        migrations.AlterField(
+            model_name="charge",
+            name="amount_captured",
+            field=djstripe.fields.StripeQuantumCurrencyAmountField(null=True),
+        ),
+        migrations.AlterField(
+            model_name="charge",
+            name="amount_refunded",
+            field=djstripe.fields.StripeQuantumCurrencyAmountField(),
+        ),
+        migrations.AlterField(
+            model_name="charge",
+            name="application_fee_amount",
+            field=djstripe.fields.StripeQuantumCurrencyAmountField(
+                blank=True, null=True
+            ),
+        ),
     ]

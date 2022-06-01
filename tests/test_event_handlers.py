@@ -780,7 +780,7 @@ class TestChargeEvents(CreateAccountMixin, EventTestCase):
         charge = Charge.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(
             charge.amount,
-            fake_stripe_event["data"]["object"]["amount"] / Decimal("100"),
+            2000,
         )
         self.assertEqual(charge.status, fake_stripe_event["data"]["object"]["status"])
 

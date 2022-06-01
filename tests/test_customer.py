@@ -5,8 +5,6 @@ import decimal
 from copy import deepcopy
 from unittest.mock import ANY, call, patch
 
-import pytest
-import stripe
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.utils import timezone
@@ -866,10 +864,37 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             },
         )
 
-        refund_object = charge.refund()
-        self.assertEqual(refund_object.status, "succeeded")
-        self.assertEqual(refund_object.charge.id, charge.id)
-        self.assertEqual(refund_object.amount, 2000)
+        charge.refund()
+
+        refunded_charge, created2 = Charge._get_or_create_from_stripe_object(
+            fake_charge_no_invoice
+        )
+        self.assertFalse(created2)
+
+        self.assertEqual(refunded_charge.refunded, True)
+        self.assertEqual(refunded_charge.amount_refunded, 2000)
+
+        self.assert_fks(
+            refunded_charge,
+            expected_blank_fks={
+                "djstripe.Account.branding_logo",
+                "djstripe.Account.branding_icon",
+                "djstripe.Charge.application_fee",
+                "djstripe.Charge.dispute",
+                "djstripe.Charge.latest_invoice (related name)",
+                "djstripe.Charge.latest_upcominginvoice (related name)",
+                "djstripe.Charge.invoice",
+                "djstripe.Charge.on_behalf_of",
+                "djstripe.Charge.source_transfer",
+                "djstripe.Charge.transfer",
+                "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
+                "djstripe.PaymentIntent.invoice (related name)",
+                "djstripe.PaymentIntent.on_behalf_of",
+                "djstripe.PaymentIntent.payment_method",
+                "djstripe.PaymentIntent.upcominginvoice (related name)",
+            },
+        )
 
     @patch(
         "stripe.Refund.create",
@@ -940,10 +965,31 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             },
         )
 
-        refund_object = charge.refund()
-        self.assertEqual(refund_object.status, "succeeded")
-        self.assertEqual(refund_object.charge.id, charge.id)
-        self.assertEqual(refund_object.amount, 2000)
+        refunded_charge = charge.refund()
+        self.assertEqual(refunded_charge.refunded, True)
+        self.assertEqual(refunded_charge.amount_refunded, 2000)
+
+        self.assert_fks(
+            refunded_charge,
+            expected_blank_fks={
+                "djstripe.Account.branding_logo",
+                "djstripe.Account.branding_icon",
+                "djstripe.Charge.application_fee",
+                "djstripe.Charge.dispute",
+                "djstripe.Charge.latest_invoice (related name)",
+                "djstripe.Charge.latest_upcominginvoice (related name)",
+                "djstripe.Charge.invoice",
+                "djstripe.Charge.on_behalf_of",
+                "djstripe.Charge.source_transfer",
+                "djstripe.Charge.transfer",
+                "djstripe.Customer.coupon",
+                "djstripe.Customer.default_payment_method",
+                "djstripe.PaymentIntent.invoice (related name)",
+                "djstripe.PaymentIntent.on_behalf_of",
+                "djstripe.PaymentIntent.payment_method",
+                "djstripe.PaymentIntent.upcominginvoice (related name)",
+            },
+        )
 
     def test_calculate_refund_amount_partial_refund(self):
         charge = Charge(
@@ -1938,7 +1984,7 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     )
     def test_add_invoice_item(self, invoiceitem_create_mock, invoiceitem_sync_mock):
         invoiceitem = self.customer.add_invoice_item(
-            amount=decimal.Decimal("50.00"),
+            amount=5000,
             currency="eur",
             description="test",
             invoice=77,
@@ -1973,7 +2019,7 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self, invoiceitem_create_mock, invoiceitem_sync_mock
     ):
         invoiceitem = self.customer.add_invoice_item(
-            amount=decimal.Decimal("50.00"),
+            amount=5000,
             currency="eur",
             description="test",
             invoice=Invoice(id=77),

@@ -118,17 +118,17 @@ class Charge(StripeModel):
     expand_fields = ["balance_transaction"]
     stripe_dashboard_item_name = "payments"
 
-    amount = StripeDecimalCurrencyAmountField(help_text="Amount charged (as decimal).")
-    amount_captured = StripeDecimalCurrencyAmountField(
+    amount = StripeQuantumCurrencyAmountField(help_text="Amount charged (in cents).")
+    amount_captured = StripeQuantumCurrencyAmountField(
         null=True,
         help_text=(
-            "Amount (as decimal) captured (can be less than the amount attribute "
+            "Amount (in cents) captured (can be less than the amount attribute "
             "on the charge if a partial capture was issued)."
         ),
     )
-    amount_refunded = StripeDecimalCurrencyAmountField(
+    amount_refunded = StripeQuantumCurrencyAmountField(
         help_text=(
-            "Amount (as decimal) refunded (can be less than the amount attribute on "
+            "Amount (in cents) refunded (can be less than the amount attribute on "
             "the charge if a partial refund was issued)."
         )
     )
@@ -145,13 +145,11 @@ class Charge(StripeModel):
         related_name="fee_for_charge",
         help_text="The application fee (if any) for the charge.",
     )
-    application_fee_amount = StripeDecimalCurrencyAmountField(
+    application_fee_amount = StripeQuantumCurrencyAmountField(
         null=True,
         blank=True,
-        help_text=(
-            "The amount (as decimal) of the application fee (if any) "
-            "requested for the charge."
-        ),
+        help_text="The amount (in cents) of the application fee (if any) "
+        "requested for the charge.",
     )
     balance_transaction = StripeForeignKey(
         "BalanceTransaction",
