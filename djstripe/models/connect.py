@@ -192,7 +192,7 @@ class Transfer(StripeModel):
 
     objects = TransferManager()
 
-    amount = StripeDecimalCurrencyAmountField(help_text="The amount transferred")
+    amount = StripeQuantumCurrencyAmountField(help_text="The amount transferred")
     amount_reversed = StripeDecimalCurrencyAmountField(
         null=True,
         blank=True,

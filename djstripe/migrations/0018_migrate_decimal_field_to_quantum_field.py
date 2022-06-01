@@ -19,4 +19,9 @@ class Migration(migrations.Migration):
                 blank=True, null=True
             ),
         ),
+        migrations.AlterField(
+            model_name="transfer",
+            name="amount",
+            field=djstripe.fields.StripeQuantumCurrencyAmountField(),
+        ),
     ]
