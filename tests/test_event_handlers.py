@@ -1953,7 +1953,7 @@ class TestInvoiceEvents(CreateAccountMixin, EventTestCase):
         invoice = Invoice.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(
             invoice.amount_due,
-            fake_stripe_event["data"]["object"]["amount_due"] / Decimal("100"),
+            2000,
         )
         self.assertEqual(invoice.paid, fake_stripe_event["data"]["object"]["paid"])
 
