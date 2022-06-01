@@ -110,13 +110,11 @@ class Coupon(StripeModel):
         blank=True,
         help_text="Contains information about what this coupon applies to.",
     )
-    amount_off = StripeDecimalCurrencyAmountField(
+    amount_off = StripeQuantumCurrencyAmountField(
         null=True,
         blank=True,
-        help_text=(
-            "Amount (as decimal) that will be taken off the subtotal of any "
-            "invoices for this customer."
-        ),
+        help_text="Amount (in cents) that will be taken off the subtotal of any "
+        "invoices for this customer.",
     )
     currency = StripeCurrencyCodeField(null=True, blank=True)
     duration = StripeEnumField(
