@@ -132,4 +132,9 @@ class Migration(migrations.Migration):
                 blank=True, null=True
             ),
         ),
+        migrations.AlterField(
+            model_name="payout",
+            name="amount",
+            field=djstripe.fields.StripeQuantumCurrencyAmountField(),
+        ),
     ]
