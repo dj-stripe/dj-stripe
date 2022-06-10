@@ -7,6 +7,7 @@ from typing import Optional
 import stripe
 from django.apps import apps
 from django.conf import settings
+from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db.models.query import QuerySet
 from django.utils import timezone
 
@@ -55,9 +56,8 @@ CURRENCY_SIGILS = {"CAD": "$", "EUR": "€", "GBP": "£", "USD": "$"}
 def get_friendly_currency_amount(amount, currency: str) -> str:
     currency = currency.upper()
     sigil = CURRENCY_SIGILS.get(currency, "")
-    return "{sigil}{amount:.2f} {currency}".format(
-        sigil=sigil, amount=amount, currency=currency
-    )
+    amount_two_decimals = f"{amount:.2f}"
+    return f"{sigil}{intcomma(amount_two_decimals)} {currency}"
 
 
 class QuerySetMock(QuerySet):
