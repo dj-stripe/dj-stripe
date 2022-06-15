@@ -4736,85 +4736,6 @@ djstripe.models.core.Customer.stripe_class        </code>
 
 
 
-<h7 id="djstripe.models.core.Customer.stripe_class.cash_balances_request" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">cash_balances_request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
-
-  <span class="doc doc-properties">
-      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
-  </span>
-
-</h7>
-
-    <div class="doc doc-contents ">
-
-
-        <details class="quote">
-          <summary>Source code in <code>djstripe/models/core.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">nested_resource_request</span><span class="p">(</span>
-    <span class="bp">cls</span><span class="p">,</span>
-    <span class="n">method</span><span class="p">,</span>
-    <span class="n">url</span><span class="p">,</span>
-    <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">stripe_version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">params</span>
-<span class="p">):</span>
-    <span class="n">requestor</span> <span class="o">=</span> <span class="n">api_requestor</span><span class="o">.</span><span class="n">APIRequestor</span><span class="p">(</span>
-        <span class="n">api_key</span><span class="p">,</span> <span class="n">api_version</span><span class="o">=</span><span class="n">stripe_version</span><span class="p">,</span> <span class="n">account</span><span class="o">=</span><span class="n">stripe_account</span>
-    <span class="p">)</span>
-    <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
-    <span class="n">response</span><span class="p">,</span> <span class="n">api_key</span> <span class="o">=</span> <span class="n">requestor</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">convert_to_stripe_object</span><span class="p">(</span>
-        <span class="n">response</span><span class="p">,</span> <span class="n">api_key</span><span class="p">,</span> <span class="n">stripe_version</span><span class="p">,</span> <span class="n">stripe_account</span>
-    <span class="p">)</span>
-</code></pre></div>
-        </details>
-    </div>
-
-  </div>
-
-
-
-  <div class="doc doc-object doc-method">
-
-
-
-<h7 id="djstripe.models.core.Customer.stripe_class.cash_balances_url" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">cash_balances_url</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">nested_id</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
-
-  <span class="doc doc-properties">
-      <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
-  </span>
-
-</h7>
-
-    <div class="doc doc-contents ">
-
-
-        <details class="quote">
-          <summary>Source code in <code>djstripe/models/core.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">nested_resource_url</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">nested_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">class_url</span><span class="p">(),</span>
-        <span class="n">quote_plus</span><span class="p">(</span><span class="nb">id</span><span class="p">),</span>
-        <span class="n">quote_plus</span><span class="p">(</span><span class="n">path</span><span class="p">),</span>
-    <span class="p">)</span>
-    <span class="k">if</span> <span class="n">nested_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">url</span> <span class="o">+=</span> <span class="s2">&quot;/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">quote_plus</span><span class="p">(</span><span class="n">nested_id</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">url</span>
-</code></pre></div>
-        </details>
-    </div>
-
-  </div>
-
-
-
-  <div class="doc doc-object doc-method">
-
-
-
 <h7 id="djstripe.models.core.Customer.stripe_class.create_balance_transaction" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">create_balance_transaction</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
 
@@ -5186,7 +5107,7 @@ djstripe.models.core.Customer.stripe_class        </code>
 
 
 <h7 id="djstripe.models.core.Customer.stripe_class.modify_cash_balance" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">modify_cash_balance</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">nested_id</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">modify_cash_balance</span><span class="p">(</span><span class="n">customer</span><span class="p">,</span> <span class="n">nested_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
@@ -5199,10 +5120,26 @@ djstripe.models.core.Customer.stripe_class        </code>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">modify_nested_resource</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">nested_id</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">resource_url_method</span><span class="p">)(</span><span class="nb">id</span><span class="p">,</span> <span class="n">nested_id</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">resource_request_method</span><span class="p">)(</span>
-        <span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span>
+          <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">modify_cash_balance</span><span class="p">(</span>
+    <span class="bp">cls</span><span class="p">,</span>
+    <span class="n">customer</span><span class="p">,</span>
+    <span class="n">nested_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">stripe_version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">params</span>
+<span class="p">):</span>
+    <span class="c1"># The nested_id parameter is required for backwards compatibility purposes and is ignored.</span>
+    <span class="n">requestor</span> <span class="o">=</span> <span class="n">api_requestor</span><span class="o">.</span><span class="n">APIRequestor</span><span class="p">(</span>
+        <span class="n">api_key</span><span class="p">,</span> <span class="n">api_version</span><span class="o">=</span><span class="n">stripe_version</span><span class="p">,</span> <span class="n">account</span><span class="o">=</span><span class="n">stripe_account</span>
+    <span class="p">)</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/customers/</span><span class="si">{customer}</span><span class="s2">/cash_balance&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">customer</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="n">customer</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">response</span><span class="p">,</span> <span class="n">api_key</span> <span class="o">=</span> <span class="n">requestor</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">convert_to_stripe_object</span><span class="p">(</span>
+        <span class="n">response</span><span class="p">,</span> <span class="n">api_key</span><span class="p">,</span> <span class="n">stripe_version</span><span class="p">,</span> <span class="n">stripe_account</span>
     <span class="p">)</span>
 </code></pre></div>
         </details>
@@ -5279,7 +5216,7 @@ djstripe.models.core.Customer.stripe_class        </code>
 
 
 <h7 id="djstripe.models.core.Customer.stripe_class.retrieve_cash_balance" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">retrieve_cash_balance</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">nested_id</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">retrieve_cash_balance</span><span class="p">(</span><span class="n">customer</span><span class="p">,</span> <span class="n">nested_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-classmethod"><code>classmethod</code></small>
@@ -5292,10 +5229,26 @@ djstripe.models.core.Customer.stripe_class        </code>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">retrieve_nested_resource</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">nested_id</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">resource_url_method</span><span class="p">)(</span><span class="nb">id</span><span class="p">,</span> <span class="n">nested_id</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">resource_request_method</span><span class="p">)(</span>
-        <span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span>
+          <div class="highlight"><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">retrieve_cash_balance</span><span class="p">(</span>
+    <span class="bp">cls</span><span class="p">,</span>
+    <span class="n">customer</span><span class="p">,</span>
+    <span class="n">nested_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">stripe_version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">params</span>
+<span class="p">):</span>
+    <span class="c1"># The nested_id parameter is required for backwards compatibility purposes and is ignored.</span>
+    <span class="n">requestor</span> <span class="o">=</span> <span class="n">api_requestor</span><span class="o">.</span><span class="n">APIRequestor</span><span class="p">(</span>
+        <span class="n">api_key</span><span class="p">,</span> <span class="n">api_version</span><span class="o">=</span><span class="n">stripe_version</span><span class="p">,</span> <span class="n">account</span><span class="o">=</span><span class="n">stripe_account</span>
+    <span class="p">)</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/customers/</span><span class="si">{customer}</span><span class="s2">/cash_balance&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">customer</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="n">customer</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">response</span><span class="p">,</span> <span class="n">api_key</span> <span class="o">=</span> <span class="n">requestor</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">convert_to_stripe_object</span><span class="p">(</span>
+        <span class="n">response</span><span class="p">,</span> <span class="n">api_key</span><span class="p">,</span> <span class="n">stripe_version</span><span class="p">,</span> <span class="n">stripe_account</span>
     <span class="p">)</span>
 </code></pre></div>
         </details>
@@ -28717,7 +28670,7 @@ djstripe.models.account.Account.stripe_class        </code>
 
 
 <h7 id="djstripe.models.account.Account.stripe_class.persons" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">Account</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">persons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">Account</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">persons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
 
 
 </h7>
@@ -28727,8 +28680,13 @@ djstripe.models.account.Account.stripe_class        </code>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/account.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">persons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/persons&quot;</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">persons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/persons&quot;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
+    <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+    <span class="n">stripe_object</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">convert_to_stripe_object</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+    <span class="n">stripe_object</span><span class="o">.</span><span class="n">_retrieve_params</span> <span class="o">=</span> <span class="n">params</span>
+    <span class="k">return</span> <span class="n">stripe_object</span>
 </code></pre></div>
         </details>
     </div>
