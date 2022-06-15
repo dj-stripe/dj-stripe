@@ -1204,6 +1204,10 @@
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.Subscription.plan">plan</a>
     </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.Subscription.proration_behavior">proration_behavior</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.Subscription.proration_date">proration_date</a>
+    </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.Subscription.quantity">quantity</a>
     </li>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.billing.Subscription.schedule">schedule</a>
@@ -21580,6 +21584,42 @@ pay their closed invoices.</p>
 
 
 
+<h5 id="djstripe.models.billing.Subscription.proration_behavior" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Subscription</span><span class="o">.</span><span class="n">proration_behavior</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.billing.Subscription.proration_date" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Subscription</span><span class="o">.</span><span class="n">proration_date</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.billing.Subscription.quantity" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Subscription</span><span class="o">.</span><span class="n">quantity</span></code>
 
@@ -22414,6 +22454,32 @@ subscription at all.</p>
 
 
 
+<h5 id="djstripe.models.billing.Subscription.get_proration_behavior_display" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Subscription</span><span class="o">.</span><span class="n">get_proration_behavior_display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">field</span><span class="o">=&lt;</span><span class="n">djstripe</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">StripeEnumField</span><span class="p">:</span> <span class="n">proration_behavior</span><span class="o">&gt;</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/billing.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_method</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+    <span class="n">keywords</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">}</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
 <h5 id="djstripe.models.billing.Subscription.get_status_display" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Subscription</span><span class="o">.</span><span class="n">get_status_display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">field</span><span class="o">=&lt;</span><span class="n">djstripe</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">StripeEnumField</span><span class="p">:</span> <span class="n">status</span><span class="o">&gt;</span><span class="p">)</span></code>
 
@@ -22688,8 +22754,18 @@ Subscriptions canceled immediately cannot be reactivated.
                 <span class="s2">&quot;The `prorate` parameter to Subscription.update() is deprecated &quot;</span>
                 <span class="s2">&quot;by Stripe. Use `proration_behavior` instead.</span><span class="se">\n</span><span class="s2">&quot;</span>
                 <span class="s2">&quot;Read more: &quot;</span>
-                <span class="s2">&quot;https://stripe.com/docs/billing/subscriptions/prorations&quot;</span>
+                <span class="s2">&quot;https://stripe.com/docs/billing/subscriptions/prorations&quot;</span><span class="p">,</span>
+                <span class="ne">DeprecationWarning</span><span class="p">,</span>
             <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;subscription_prorate&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;The `subscription_prorate` parameter to Subscription.update() is deprecated &quot;</span>
+                <span class="s2">&quot;by Stripe. Use `proration_behavior` instead.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;Read more: &quot;</span>
+                <span class="s2">&quot;https://stripe.com/docs/billing/subscriptions/prorations&quot;</span><span class="p">,</span>
+                <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+
         <span class="k">else</span><span class="p">:</span>
             <span class="n">prorate</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">PRORATION_POLICY</span>
             <span class="k">if</span> <span class="n">prorate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
