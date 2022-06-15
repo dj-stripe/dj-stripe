@@ -166,17 +166,21 @@
 automatically synced from Stripe to the Django database, but in some
 circumstances you may want to manually sync Stripe API data as well.</p>
 <h2 id="command-line">Command line</h2>
-<p>You can sync your database with stripe using the manage command
+<p>You can sync your database with stripe using the management command
 <a href="../../reference/project/#djstripe.management.commands.djstripe_sync_models"><code>djstripe_sync_models</code></a>, e.g. to populate an empty database from an
 existing Stripe account.
 <div class="highlight"><pre><span></span><code>    ./manage.py djstripe_sync_models
 </code></pre></div>
-With no arguments this will sync all supported models, or a list of
-models to sync can be provided.
+With no arguments this will sync all supported models for all in database API Keys , or a list of
+models to sync can also be provided.
 <div class="highlight"><pre><span></span><code>    ./manage.py djstripe_sync_models Invoice Subscription
 </code></pre></div>
 Note that this may be redundant since we recursively sync related
 objects.</p>
+<p>A list of models to sync can also be provided along with the API Keys.
+<div class="highlight"><pre><span></span><code>    ./manage.py djstripe_sync_models Invoice Subscription --api-keys sk_test_XXX sk_test_YYY
+</code></pre></div>
+This will sync all the Invoice and Subscription data for the given API Keys. Please note that the API Keys sk_test_YYY and sk_test_XXX need to be in the database.</p>
 <p>You can manually reprocess events using the management commands
 <a href="../../reference/project/#djstripe.management.commands.djstripe_process_events"><code>djstripe_process_events</code></a>. By default this processes all events, but
 options can be passed to limit the events processed. Note the Stripe API
