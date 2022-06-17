@@ -5,7 +5,7 @@
 
 [![CI tests](https://github.com/dj-stripe/dj-stripe/actions/workflows/ci.yml/badge.svg)](https://github.com/dj-stripe/dj-stripe/actions/workflows/ci.yml)
 [![Package Downloads](https://img.shields.io/pypi/dm/dj-stripe)](https://pypi.org/project/dj-stripe/)
-[![Documentation](https://img.shields.io/static/v1?label=Docs&message=READ&color=informational&style=plastic)](https://dj-stripe.github.io/dj-stripe/)
+[![Documentation](https://img.shields.io/static/v1?label=Docs&message=READ&color=informational&style=plastic)](https://dj-stripe.dev/dj-stripe/)
 [![Sponsor dj-stripe](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=red&style=plastic)](https://github.com/sponsors/dj-stripe)
 [![MIT License](https://img.shields.io/static/v1?label=License&message=MIT&color=informational&style=plastic)](https://github.com/sponsors/dj-stripe)
 
@@ -18,7 +18,7 @@ webhook endpoint and start receiving model updates. You will then have
 a copy of all the Stripe models available in Django models, as soon as
 they are updated!
 
-The full documentation is available [on Read the Docs](https://dj-stripe.github.io/dj-stripe/).
+The full documentation is available [on Read the Docs](https://dj-stripe.dev/dj-stripe/).
 
 ## Features
 
@@ -33,7 +33,7 @@ The full documentation is available [on Read the Docs](https://dj-stripe.github.
 ## Requirements
 
 -   Django 3.2.5+
--   Python 3.7+
+-   Python 3.7.12+
 -   PostgreSQL engine (recommended) 9.6+
 -   MySQL engine: MariaDB 10.2+ or MySQL 5.7+
 -   SQLite: Not recommended in production. Version 3.26+ required.
@@ -42,7 +42,7 @@ The full documentation is available [on Read the Docs](https://dj-stripe.github.
 
 ## Changelog
 
-[See release notes on Read the Docs](https://dj-stripe.github.io/dj-stripe/history/2_5_0/).
+[See release notes on Read the Docs](https://dj-stripe.dev/dj-stripe/2.6/history/2_6_x/).
 
 ## Funding and Support
 
