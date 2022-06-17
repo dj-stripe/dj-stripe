@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dj-stripe"
-version = "2.6.1"
+version = "2.6.2"
 description = "Django + Stripe made easy"
 license = "MIT"
 authors = [
@@ -36,7 +36,10 @@ exclude = [
 
 [tool.poetry.dependencies]
 python = "^3.7.12"
-django = ">=3.2.5"
+Django = [
+    {version = ">=3.2.5, <4.0", python = "^3.7.12"},
+    {version = ">=3.2.5, <4.1", python = "^3.8.0"}
+]
 jsonfield = ">=3.0"
 stripe = ">=2.48.0"
 mkdocs = {version = "^1.1.2", optional = true}
