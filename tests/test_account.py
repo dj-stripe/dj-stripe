@@ -437,3 +437,60 @@ def test_account__create_from_stripe_object(
         stripe_account=expected_stripe_account,
         api_key=djstripe_settings.STRIPE_SECRET_KEY,
     )
+
+
+@pytest.mark.parametrize("stripe_account", (None, "acct_fakefakefakefake001"))
+@pytest.mark.parametrize(
+    "api_key, expected_api_key",
+    (
+        (None, djstripe_settings.STRIPE_SECRET_KEY),
+        ("sk_fakefakefake01", "sk_fakefakefake01"),
+    ),
+)
+@pytest.mark.parametrize("extra_kwargs", ({"reason": "fraud"}, {"reason": "other"}))
+@patch(
+    "stripe.Account.retrieve",
+    autospec=True,
+    return_value=deepcopy(FAKE_ACCOUNT),
+)
+@patch(
+    "stripe.Account.reject",
+)
+@patch(
+    "stripe.File.retrieve",
+    side_effect=[deepcopy(FAKE_FILEUPLOAD_ICON), deepcopy(FAKE_FILEUPLOAD_LOGO)],
+    autospec=True,
+)
+def test_api_reject(
+    fileupload_retrieve_mock,
+    account_reject_mock,
+    account_retrieve_mock,
+    extra_kwargs,
+    api_key,
+    expected_api_key,
+    stripe_account,
+):
+    """Test that API reject properly uses the passed in parameters."""
+
+    fake_account = deepcopy(FAKE_ACCOUNT)
+    fake_account_rejected = deepcopy(FAKE_ACCOUNT)
+    fake_account_rejected["charges_enabled"] = False
+    fake_account_rejected["payouts_enabled"] = False
+    account_reject_mock.return_value = fake_account_rejected
+
+    account = Account.sync_from_stripe_data(fake_account)
+
+    # invoke api_reject()
+    account_rejected = account.api_reject(
+        api_key=api_key, stripe_account=stripe_account, **extra_kwargs
+    )
+
+    assert account_rejected["charges_enabled"] is False
+    assert account_rejected["payouts_enabled"] is False
+
+    Account.stripe_class.reject.assert_called_once_with(
+        account.id,
+        api_key=expected_api_key,
+        stripe_account=stripe_account or FAKE_PLATFORM_ACCOUNT["id"],
+        **extra_kwargs,
+    )
