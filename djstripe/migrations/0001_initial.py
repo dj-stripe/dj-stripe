@@ -390,7 +390,7 @@ class Migration(migrations.Migration):
                 (
                     "duration",
                     djstripe.fields.StripeEnumField(
-                        enum=djstripe.enums.CouponDuration, max_length=9
+                        default='once', enum=djstripe.enums.CouponDuration, max_length=9
                     ),
                 ),
                 (

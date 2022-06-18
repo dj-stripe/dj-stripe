@@ -21,7 +21,7 @@ class TransferTest(TestCase):
 class CouponTest(TestCase):
     def test_blank_coupon_str(self):
         coupon = Coupon()
-        self.assertEqual(str(coupon).strip(), "(invalid amount) off")
+        self.assertEqual(str(coupon).strip(), "(invalid amount) off once")
 
     def test___str__(self):
         coupon = Coupon.objects.create(

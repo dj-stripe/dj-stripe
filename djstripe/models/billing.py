@@ -119,6 +119,7 @@ class Coupon(StripeModel):
             "Describes how long a customer who applies this coupon "
             "will get the discount."
         ),
+        default=enums.CouponDuration.once,
     )
     duration_in_months = models.PositiveIntegerField(
         null=True,
