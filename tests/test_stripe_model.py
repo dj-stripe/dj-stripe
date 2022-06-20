@@ -7,12 +7,18 @@ import pytest
 from django.test import TestCase
 
 from djstripe.models import Account, Customer, StripeModel
+from djstripe.models.base import StripeBaseModel
 from djstripe.settings import djstripe_settings
 
 pytestmark = pytest.mark.django_db
 
 
 class ExampleStripeModel(StripeModel):
+    # exists to avoid "Abstract models cannot be instantiated." error
+    pass
+
+
+class ExampleStripeBaseModel(StripeBaseModel):
     # exists to avoid "Abstract models cannot be instantiated." error
     pass
 
@@ -286,3 +292,29 @@ def test__find_owner_account_for_webhook_event_trigger(
             mock_get_or_retrieve_for_api_key.assert_called_once_with(
                 djstripe_settings.STRIPE_SECRET_KEY
             )
+
+
+@pytest.mark.parametrize("stripe_account", (None, "acct_fakefakefakefake001"))
+@pytest.mark.parametrize(
+    "api_key, expected_api_key",
+    (
+        (None, None),
+        ("sk_fakefakefake01", "sk_fakefakefake01"),
+    ),
+)
+@pytest.mark.parametrize(
+    "query", [("active:'true' AND metadata['order_id']:'6735'"), ("active:'true'")]
+)
+@patch.object(target=StripeBaseModel, attribute="stripe_class")
+def test_api_search(
+    mock_stripe_class, stripe_account, api_key, expected_api_key, query
+):
+    """Test that API search properly uses the passed in parameters."""
+    test_model = ExampleStripeBaseModel()
+    test_model.api_search(api_key=api_key, stripe_account=stripe_account, query=query)
+
+    mock_stripe_class.search.assert_called_once_with(
+        query=query,
+        api_key=expected_api_key,
+        stripe_account=stripe_account,
+    )

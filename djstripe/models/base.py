@@ -49,6 +49,22 @@ class StripeBaseModel(models.Model):
 
         return cls.stripe_class.list(api_key=api_key, **kwargs).auto_paging_iter()
 
+    @classmethod
+    def api_search(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        """
+        Call the stripe API's search operation for this model.
+
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+
+        See Stripe documentation for accepted kwargs for each object.
+        docs: https://stripe.com/docs/api/pagination/search
+
+        :returns: an iterator over all items in the query
+        """
+        return cls.stripe_class.search(api_key=api_key, **kwargs)
+
 
 class StripeModel(StripeBaseModel):
     # This must be defined in descendants of this model/mixin
