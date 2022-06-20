@@ -318,3 +318,28 @@ def test_api_search(
         api_key=expected_api_key,
         stripe_account=stripe_account,
     )
+
+
+@pytest.mark.parametrize("stripe_account", (None, "acct_fakefakefakefake001"))
+@pytest.mark.parametrize(
+    "api_key, expected_api_key",
+    (
+        (None, None),
+        ("sk_fakefakefake01", "sk_fakefakefake01"),
+    ),
+)
+@patch.object(target=StripeBaseModel, attribute="stripe_class")
+def test_api_list(
+    mock_stripe_class,
+    stripe_account,
+    api_key,
+    expected_api_key,
+):
+    """Test that API list properly uses the passed in parameters."""
+    test_model = ExampleStripeBaseModel()
+    test_model.api_list(api_key=api_key, stripe_account=stripe_account, id="FAKEFAKE")
+    mock_stripe_class.list.assert_called_once_with(
+        id="FAKEFAKE",
+        api_key=expected_api_key,
+        stripe_account=stripe_account,
+    )
