@@ -198,7 +198,11 @@ endpoint from the urls.py step above (e.g.
 <p class="admonition-title">Note</p>
 <p>djstripe expects <code>STRIPE_LIVE_MODE</code> to be a Boolean Type. In case you use <code>Bash env vars or equivalent</code> to inject its value, make sure to convert it to a Boolean type. We highly recommended the library <a href="https://django-environ.readthedocs.io/en/latest/">django-environ</a></p>
 </div>
-<p>Add some payment plans via the Stripe.com dashboard.</p>
+<p>Sync data from Stripe:</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>djstripe expects <code>APIKeys</code> of all Stripe Accounts you'd like to sync data for to already be in the DB. They can be Added from Django Admin.</p>
+</div>
 <p>Run the commands:</p>
 <div class="highlight"><pre><span></span><code>    python manage.py migrate
 
