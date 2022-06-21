@@ -9,23 +9,25 @@ from django.shortcuts import render
 from stripe.error import InvalidRequestError
 
 from djstripe import models
-
-from .actions import CustomActionMixin
-from .admin_inline import (
+from djstripe.admin_d.actions import CustomActionMixin
+from djstripe.admin_d.admin_inline import (
     InvoiceItemInline,
     SubscriptionInline,
     SubscriptionItemInline,
     SubscriptionScheduleInline,
     TaxIdInline,
 )
-from .filters import CustomerHasSourceListFilter, CustomerSubscriptionStatusListFilter
-from .forms import (
+from djstripe.admin_d.filters import (
+    CustomerHasSourceListFilter,
+    CustomerSubscriptionStatusListFilter,
+)
+from djstripe.admin_d.forms import (
     APIKeyAdminCreateForm,
     CustomActionForm,
     WebhookEndpointAdminCreateForm,
     WebhookEndpointAdminEditForm,
 )
-from .utils import (
+from djstripe.admin_d.utils import (
     ReadOnlyMixin,
     custom_display_for_JSONfield,
     get_forward_relation_fields_for_model,
