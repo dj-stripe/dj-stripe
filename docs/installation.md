@@ -51,7 +51,13 @@ Add your Stripe keys and set the operating mode:
 
     djstripe expects `STRIPE_LIVE_MODE` to be a Boolean Type. In case you use `Bash env vars or equivalent` to inject its value, make sure to convert it to a Boolean type. We highly recommended the library [django-environ](https://django-environ.readthedocs.io/en/latest/)
 
-Add some payment plans via the Stripe.com dashboard.
+
+Sync data from Stripe:
+
+!!! note
+
+    djstripe expects `APIKeys` of all Stripe Accounts you'd like to sync data for to already be in the DB. They can be Added from Django Admin.
+
 
 Run the commands:
 
