@@ -886,6 +886,22 @@
     </li>
         </ul>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.enums.OrderStatus">OrderStatus</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.enums.OrderStatus.canceled">canceled</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.enums.OrderStatus.complete">complete</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.enums.OrderStatus.open">open</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.enums.OrderStatus.processing">processing</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.enums.OrderStatus.submitted">submitted</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.enums.OrderStatus.humanize">humanize()</a>
+    </li>
+        </ul>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#djstripe.enums.PaymentIntentCancellationReason">PaymentIntentCancellationReason</a>
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.enums.PaymentIntentCancellationReason.abandoned">abandoned</a>
@@ -8840,6 +8856,159 @@ djstripe.enums.MandateType        </code>
 
 <h5 id="djstripe.enums.MandateType.humanize" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">MandateType</span><span class="o">.</span><span class="n">humanize</span><span class="p">(</span><span class="n">enum</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/enums.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_human_enum_values</span><span class="p">(</span><span class="n">enum</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__choices__</span><span class="p">[</span><span class="n">enum</span><span class="p">]</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h3 id="djstripe.enums.OrderStatus" class="doc doc-heading">
+        <code>
+djstripe.enums.OrderStatus        </code>
+
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.enums.OrderStatus.canceled" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">OrderStatus</span><span class="o">.</span><span class="n">canceled</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.enums.OrderStatus.complete" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">OrderStatus</span><span class="o">.</span><span class="n">complete</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.enums.OrderStatus.open" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">OrderStatus</span><span class="o">.</span><span class="n">open</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.enums.OrderStatus.processing" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">OrderStatus</span><span class="o">.</span><span class="n">processing</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.enums.OrderStatus.submitted" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">OrderStatus</span><span class="o">.</span><span class="n">submitted</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.enums.OrderStatus.humanize" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">OrderStatus</span><span class="o">.</span><span class="n">humanize</span><span class="p">(</span><span class="n">enum</span><span class="p">)</span></code>
 
 
 </h5>

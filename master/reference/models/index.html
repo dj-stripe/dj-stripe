@@ -1646,6 +1646,74 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#djstripe.models.orders">djstripe.models.orders</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#djstripe.models.orders-classes">Classes</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.models.orders.Order">Order</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.amount_subtotal">amount_subtotal</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.amount_total">amount_total</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.application">application</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.automatic_tax">automatic_tax</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.billing_details">billing_details</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.client_secret">client_secret</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.currency">currency</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.customer">customer</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.discounts">discounts</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.djstripe_owner_account">djstripe_owner_account</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.expand_fields">expand_fields</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.ip_address">ip_address</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.line_items">line_items</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.payment">payment</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.payment_intent">payment_intent</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.shipping_cost">shipping_cost</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.shipping_details">shipping_details</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.status">status</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.stripe_dashboard_item_name">stripe_dashboard_item_name</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.tax_details">tax_details</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.total_details">total_details</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.DoesNotExist">DoesNotExist</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.MultipleObjectsReturned">MultipleObjectsReturned</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.stripe_class">stripe_class</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.__str__">__str__()</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.get_next_by_djstripe_created">get_next_by_djstripe_created()</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.get_next_by_djstripe_updated">get_next_by_djstripe_updated()</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.get_previous_by_djstripe_created">get_previous_by_djstripe_created()</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.get_previous_by_djstripe_updated">get_previous_by_djstripe_updated()</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.models.orders.Order.get_status_display">get_status_display()</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#sigma">Sigma</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#djstripe.models.sigma">djstripe.models.sigma</a>
@@ -32816,6 +32884,824 @@ See Stripe documentation for accepted kwargs for each object.
     <div class="doc doc-contents first">
 
 
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+<h2 id="djstripe.models.orders-classes">Classes</h2>
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h3 id="djstripe.models.orders.Order" class="doc doc-heading">
+        <code>
+djstripe.models.orders.Order        </code>
+
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+      <p>An Order describes a purchase being made by a customer,
+including the products &amp; quantities being purchased, the order status,
+the payment information, and the billing/shipping details.</p>
+<p>Stripe documentation: https://stripe.com/docs/api/orders_v2/object</p>
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.amount_subtotal" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">amount_subtotal</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.amount_total" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">amount_total</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.application" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">application</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.automatic_tax" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">automatic_tax</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.billing_details" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">billing_details</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.client_secret" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">client_secret</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.currency" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">currency</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.customer" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">customer</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.discounts" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">discounts</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.djstripe_owner_account" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">djstripe_owner_account</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">djstripe</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">StripeForeignKey</span><span class="p">]</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.expand_fields" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">expand_fields</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.ip_address" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">ip_address</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.line_items" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">line_items</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.payment" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">payment</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.payment_intent" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">payment_intent</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.shipping_cost" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">shipping_cost</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.shipping_details" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">shipping_details</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.status" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">status</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.stripe_dashboard_item_name" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">stripe_dashboard_item_name</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.tax_details" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">tax_details</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.orders.Order.total_details" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">total_details</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h5 id="djstripe.models.orders.Order.DoesNotExist" class="doc doc-heading">
+        <code>
+djstripe.models.orders.Order.DoesNotExist        </code>
+
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h5 id="djstripe.models.orders.Order.MultipleObjectsReturned" class="doc doc-heading">
+        <code>
+djstripe.models.orders.Order.MultipleObjectsReturned        </code>
+
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h5 id="djstripe.models.orders.Order.stripe_class" class="doc doc-heading">
+        <code>
+djstripe.models.orders.Order.stripe_class        </code>
+
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h7 id="djstripe.models.orders.Order.stripe_class.OBJECT_NAME" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">OBJECT_NAME</span></code>
+
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.orders.Order.stripe_class.cancel" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/orders.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/cancel&quot;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
+    <span class="k">return</span> <span class="bp">self</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.orders.Order.stripe_class.list_line_items" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">list_line_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/orders.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">list_line_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/line_items&quot;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
+    <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+    <span class="n">stripe_object</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">convert_to_stripe_object</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+    <span class="n">stripe_object</span><span class="o">.</span><span class="n">_retrieve_params</span> <span class="o">=</span> <span class="n">params</span>
+    <span class="k">return</span> <span class="n">stripe_object</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.orders.Order.stripe_class.reopen" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">reopen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/orders.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">reopen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/reopen&quot;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
+    <span class="k">return</span> <span class="bp">self</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h7 id="djstripe.models.orders.Order.stripe_class.submit" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+
+
+</h7>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/orders.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/submit&quot;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
+    <span class="k">return</span> <span class="bp">self</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.orders.Order.__str__" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-special"><code>special</code></small>
+  </span>
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/orders.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;on </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">created</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%m/</span><span class="si">%d</span><span class="s1">/%Y&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="si">}</span><span class="s2">)&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="ow">in</span> <span class="p">(</span><span class="n">OrderStatus</span><span class="o">.</span><span class="n">open</span><span class="p">,</span> <span class="n">OrderStatus</span><span class="o">.</span><span class="n">canceled</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Created &quot;</span> <span class="o">+</span> <span class="n">template</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="n">OrderStatus</span><span class="o">.</span><span class="n">submitted</span><span class="p">,</span>
+        <span class="n">OrderStatus</span><span class="o">.</span><span class="n">complete</span><span class="p">,</span>
+        <span class="n">OrderStatus</span><span class="o">.</span><span class="n">processing</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Placed &quot;</span> <span class="o">+</span> <span class="n">template</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.orders.Order.get_next_by_djstripe_created" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">get_next_by_djstripe_created</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">field</span><span class="o">=&lt;</span><span class="n">django</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">:</span> <span class="n">djstripe_created</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">is_next</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/orders.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_method</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+    <span class="n">keywords</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">}</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.orders.Order.get_next_by_djstripe_updated" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">get_next_by_djstripe_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">field</span><span class="o">=&lt;</span><span class="n">django</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">:</span> <span class="n">djstripe_updated</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">is_next</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/orders.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_method</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+    <span class="n">keywords</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">}</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.orders.Order.get_previous_by_djstripe_created" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">get_previous_by_djstripe_created</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">field</span><span class="o">=&lt;</span><span class="n">django</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">:</span> <span class="n">djstripe_created</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">is_next</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/orders.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_method</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+    <span class="n">keywords</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">}</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.orders.Order.get_previous_by_djstripe_updated" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">get_previous_by_djstripe_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">field</span><span class="o">=&lt;</span><span class="n">django</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">:</span> <span class="n">djstripe_updated</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">is_next</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/orders.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_method</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+    <span class="n">keywords</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">}</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.models.orders.Order.get_status_display" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">Order</span><span class="o">.</span><span class="n">get_status_display</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">field</span><span class="o">=&lt;</span><span class="n">djstripe</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">StripeEnumField</span><span class="p">:</span> <span class="n">status</span><span class="o">&gt;</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/models/orders.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_method</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+    <span class="n">keywords</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">keywords</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">}</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+
+
+
+
+  </div>
 
     </div>
 
