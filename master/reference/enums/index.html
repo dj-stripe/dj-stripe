@@ -1266,6 +1266,24 @@
     </li>
         </ul>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.enums.ShippingRateTaxBehavior">ShippingRateTaxBehavior</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.enums.ShippingRateTaxBehavior.exclusive">exclusive</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.enums.ShippingRateTaxBehavior.inclusive">inclusive</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.enums.ShippingRateTaxBehavior.unspecified">unspecified</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.enums.ShippingRateTaxBehavior.humanize">humanize()</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.enums.ShippingRateType">ShippingRateType</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.enums.ShippingRateType.humanize">humanize()</a>
+    </li>
+        </ul>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#djstripe.enums.SourceCodeVerificationStatus">SourceCodeVerificationStatus</a>
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.enums.SourceCodeVerificationStatus.failed">failed</a>
@@ -12503,6 +12521,186 @@ djstripe.enums.SetupIntentStatus        </code>
 
 <h5 id="djstripe.enums.SetupIntentStatus.humanize" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">SetupIntentStatus</span><span class="o">.</span><span class="n">humanize</span><span class="p">(</span><span class="n">enum</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/enums.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_human_enum_values</span><span class="p">(</span><span class="n">enum</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__choices__</span><span class="p">[</span><span class="n">enum</span><span class="p">]</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h3 id="djstripe.enums.ShippingRateTaxBehavior" class="doc doc-heading">
+        <code>
+djstripe.enums.ShippingRateTaxBehavior        </code>
+
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.enums.ShippingRateTaxBehavior.exclusive" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">ShippingRateTaxBehavior</span><span class="o">.</span><span class="n">exclusive</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.enums.ShippingRateTaxBehavior.inclusive" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">ShippingRateTaxBehavior</span><span class="o">.</span><span class="n">inclusive</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.enums.ShippingRateTaxBehavior.unspecified" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">ShippingRateTaxBehavior</span><span class="o">.</span><span class="n">unspecified</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+    </div>
+
+  </div>
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.enums.ShippingRateTaxBehavior.humanize" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">ShippingRateTaxBehavior</span><span class="o">.</span><span class="n">humanize</span><span class="p">(</span><span class="n">enum</span><span class="p">)</span></code>
+
+
+</h5>
+
+    <div class="doc doc-contents ">
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/enums.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_human_enum_values</span><span class="p">(</span><span class="n">enum</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__choices__</span><span class="p">[</span><span class="n">enum</span><span class="p">]</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h3 id="djstripe.enums.ShippingRateType" class="doc doc-heading">
+        <code>
+djstripe.enums.ShippingRateType        </code>
+
+
+
+</h3>
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h5 id="djstripe.enums.ShippingRateType.humanize" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">ShippingRateType</span><span class="o">.</span><span class="n">humanize</span><span class="p">(</span><span class="n">enum</span><span class="p">)</span></code>
 
 
 </h5>
