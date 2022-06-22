@@ -437,9 +437,8 @@ fields to the appropriate values.</p>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_friendly_currency_amount</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">currency</span> <span class="o">=</span> <span class="n">currency</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
     <span class="n">sigil</span> <span class="o">=</span> <span class="n">CURRENCY_SIGILS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">currency</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{sigil}{amount:.2f}</span><span class="s2"> </span><span class="si">{currency}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-        <span class="n">sigil</span><span class="o">=</span><span class="n">sigil</span><span class="p">,</span> <span class="n">amount</span><span class="o">=</span><span class="n">amount</span><span class="p">,</span> <span class="n">currency</span><span class="o">=</span><span class="n">currency</span>
-    <span class="p">)</span>
+    <span class="n">amount_two_decimals</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">amount</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sigil</span><span class="si">}{</span><span class="n">intcomma</span><span class="p">(</span><span class="n">amount_two_decimals</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">currency</span><span class="si">}</span><span class="s2">&quot;</span>
 </code></pre></div>
         </details>
     </div>
