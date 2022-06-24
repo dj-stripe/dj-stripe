@@ -123,3 +123,23 @@ class Order(StripeModel):
     def _manipulate_stripe_object_hook(cls, data):
         data["payment_intent"] = data["payment"]["payment_intent"]
         return data
+
+    def cancel(self, api_key=None, stripe_account=None, **kwargs):
+        """
+        Cancels the order as well as the payment intent if one is attached.
+
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        :param stripe_account: The optional connected account \
+            for which this request is being made.
+        :type stripe_account: string
+        """
+        api_key = api_key or self.default_api_key
+        # Prefer passed in stripe_account if set.
+        if not stripe_account:
+            stripe_account = self._get_stripe_account_id(api_key)
+
+        return self.stripe_class.cancel(
+            self.id, api_key=api_key, stripe_account=stripe_account, **kwargs
+        )
