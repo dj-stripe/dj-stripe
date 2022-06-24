@@ -537,7 +537,58 @@ FAKE_ORDER_WITHOUT_CUSTOMER_WITHOUT_PAYMENT_INTENT["payment_intent"] = None
 FAKE_ORDER_WITHOUT_CUSTOMER_WITHOUT_PAYMENT_INTENT["payment"]["payment_intent"] = None
 
 
-# status=open, pi =None, Customer can be not none
+# Created Orders have their status="open"
+FAKE_EVENT_ORDER_CREATED = {
+    "id": "evt_16igNU2eZvKYlo2CYyMkYvet",
+    "object": "event",
+    "api_version": "2016-03-07",
+    "created": 1441696732,
+    "data": {"object": deepcopy(FAKE_ORDER_WITH_CUSTOMER_WITHOUT_PAYMENT_INTENT)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_6wZW9MskhYU15Y",
+    "type": "order.created",
+}
+FAKE_EVENT_ORDER_CREATED["data"]["object"]["status"] = "open"
+
+
+FAKE_EVENT_ORDER_UPDATED = {
+    "id": "evt_16igNU2eZvKYlo2CYyMkYvet",
+    "object": "event",
+    "api_version": "2016-03-07",
+    "created": 1441696732,
+    "data": {"object": deepcopy(FAKE_ORDER_WITH_CUSTOMER_WITH_PAYMENT_INTENT)},
+    "livemode": False,
+    "pending_webhooks": 0,
+    "request": "req_6wZW9MskhYU15Y",
+    "type": "order.created",
+}
+
+FAKE_EVENT_ORDER_UPDATED["data"]["object"]["status"] = "open"
+FAKE_EVENT_ORDER_UPDATED["type"] = "order.updated"
+FAKE_EVENT_ORDER_UPDATED["data"]["object"]["billing_details"][
+    "email"
+] = "arnav13@gmail.com"
+
+
+FAKE_EVENT_ORDER_SUBMITTED = deepcopy(FAKE_EVENT_ORDER_UPDATED)
+FAKE_EVENT_ORDER_SUBMITTED["type"] = "order.submitted"
+FAKE_EVENT_ORDER_SUBMITTED["data"]["object"]["status"] = "submitted"
+
+
+FAKE_EVENT_ORDER_PROCESSING = deepcopy(FAKE_EVENT_ORDER_UPDATED)
+FAKE_EVENT_ORDER_PROCESSING["type"] = "order.processing"
+FAKE_EVENT_ORDER_PROCESSING["data"]["object"]["status"] = "processing"
+
+
+FAKE_EVENT_ORDER_CANCELLED = deepcopy(FAKE_EVENT_ORDER_UPDATED)
+FAKE_EVENT_ORDER_CANCELLED["type"] = "order.canceled"
+FAKE_EVENT_ORDER_CANCELLED["data"]["object"]["status"] = "canceled"
+
+
+FAKE_EVENT_ORDER_COMPLETED = deepcopy(FAKE_EVENT_ORDER_UPDATED)
+FAKE_EVENT_ORDER_COMPLETED["type"] = "order.complete"
+FAKE_EVENT_ORDER_COMPLETED["data"]["object"]["status"] = "complete"
 
 # TODO - add to regenerate_test_fixtures and replace this with a JSON fixture
 FAKE_SETUP_INTENT_I = {
