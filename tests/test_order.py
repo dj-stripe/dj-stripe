@@ -415,3 +415,87 @@ class TestOrderMethods:
             api_key=expected_api_key,
             stripe_account=stripe_account or FAKE_PLATFORM_ACCOUNT["id"],
         )
+
+    @pytest.mark.parametrize("stripe_account", (None, "acct_fakefakefakefake001"))
+    @pytest.mark.parametrize(
+        "api_key, expected_api_key",
+        (
+            (None, djstripe_settings.STRIPE_SECRET_KEY),
+            ("sk_fakefakefake01", "sk_fakefakefake01"),
+        ),
+    )
+    @patch(
+        "stripe.BalanceTransaction.retrieve",
+        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Subscription.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION),
+        autospec=True,
+    )
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+    @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    @patch(
+        "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
+    )
+    @patch(
+        "stripe.Order.submit",
+    )
+    def test_submit(
+        self,
+        order_submit_mock,
+        invoice_retrieve_mock,
+        customer_retrieve_mock,
+        product_retrieve_mock,
+        payment_intent_retrieve_mock,
+        paymentmethod_card_retrieve_mock,
+        charge_retrieve_mock,
+        subscription_retrieve_mock,
+        balance_transaction_retrieve_mock,
+        api_key,
+        expected_api_key,
+        stripe_account,
+    ):
+        fake_order = deepcopy(FAKE_ORDER_WITH_CUSTOMER_WITH_PAYMENT_INTENT)
+
+        fake_order_submit = deepcopy(FAKE_ORDER_WITH_CUSTOMER_WITH_PAYMENT_INTENT)
+        fake_order_submit["status"] = "submitted"
+        order_submit_mock.return_value = fake_order_submit
+
+        order = Order.sync_from_stripe_data(fake_order)
+
+        expected_total = fake_order["amount_total"]
+
+        # Submit the order
+        submitted_order = order.submit(
+            api_key=api_key,
+            stripe_account=stripe_account,
+            expected_total=expected_total,
+        )
+
+        # assert Order got submitted
+        assert submitted_order["status"] == "submitted"
+
+        # assert submit called with the correct kwargs
+        Order.stripe_class.submit.assert_called_once_with(
+            "order_fakefakefakefakefake0001",
+            api_key=expected_api_key,
+            stripe_account=stripe_account or FAKE_PLATFORM_ACCOUNT["id"],
+            expected_total=expected_total,
+        )
