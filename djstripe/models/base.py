@@ -1002,7 +1002,9 @@ class StripeModel(StripeBaseModel):
         )
 
         if not created:
-            record_data = cls._stripe_object_to_record(data, api_key=api_key)
+            record_data = cls._stripe_object_to_record(
+                data, api_key=api_key, stripe_account=stripe_account
+            )
             for attr, value in record_data.items():
                 setattr(instance, attr, value)
             instance._attach_objects_hook(
