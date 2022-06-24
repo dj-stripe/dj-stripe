@@ -9,7 +9,6 @@ from django.contrib.admin import helpers, site
 from django.core.management import call_command
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from django.utils.encoding import iri_to_uri
 from django.views.generic import FormView
 
 from djstripe import utils
@@ -22,13 +21,6 @@ logger = logging.getLogger(__name__)
 class ConfirmCustomAction(FormView):
     template_name = "djstripe/admin/confirm_action.html"
     form_class = CustomActionForm
-
-    def dispatch(self, request, *args, **kwargs):
-        if not (request.user.is_authenticated and request.user.is_staff):
-            return HttpResponseRedirect(
-                reverse("admin:login") + f"?next={iri_to_uri(request.path_info)}"
-            )
-        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         model_name = self.kwargs.get("model_name")
