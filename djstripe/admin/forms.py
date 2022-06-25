@@ -80,7 +80,8 @@ class WebhookEndpointAdminBaseForm(forms.ModelForm):
 
     def save(self, commit: bool = False):
         # If we do the following in _post_clean(), the data doesn't save properly.
-        assert self._stripe_data
+        if not self._stripe_data:
+            raise ValueError("_stripe_data is not present. ")
 
         # Update scenario
         # Add back secret if endpoint already exists
