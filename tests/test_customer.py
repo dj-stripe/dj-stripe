@@ -53,7 +53,6 @@ from . import (
     FAKE_SOURCE,
     FAKE_SOURCE_II,
     FAKE_SUBSCRIPTION,
-    FAKE_SUBSCRIPTION_II,
     FAKE_UPCOMING_INVOICE,
     AssertStripeFksMixin,
     StripeList,
@@ -1552,39 +1551,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
     ):
         self.customer._sync_invoices()
         self.assertEqual(0, invoice_sync_mock.call_count)
-
-    @patch(
-        "djstripe.models.Subscription.sync_from_stripe_data",
-        autospec=True,
-    )
-    @patch(
-        "stripe.Subscription.list",
-        return_value=StripeList(
-            data=[deepcopy(FAKE_SUBSCRIPTION), deepcopy(FAKE_SUBSCRIPTION_II)]
-        ),
-    )
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    def test_sync_subscriptions(
-        self, customer_retrieve_mock, subscription_list_mock, subscription_sync_mock
-    ):
-        self.customer._sync_subscriptions()
-        self.assertEqual(2, subscription_sync_mock.call_count)
-
-    @patch(
-        "djstripe.models.Subscription.sync_from_stripe_data",
-        autospec=True,
-    )
-    @patch("stripe.Subscription.list", return_value=StripeList(data=[]), autospec=True)
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    def test_sync_subscriptions_none(
-        self, customer_retrieve_mock, subscription_list_mock, subscription_sync_mock
-    ):
-        self.customer._sync_subscriptions()
-        self.assertEqual(0, subscription_sync_mock.call_count)
 
     @patch("stripe.Subscription.create", autospec=True)
     @patch(
