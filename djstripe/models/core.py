@@ -1366,11 +1366,6 @@ class Customer(StripeModel):
         for stripe_invoice in Invoice.api_list(customer=self.id, **kwargs):
             Invoice.sync_from_stripe_data(stripe_invoice, api_key=api_key)
 
-    def _sync_charges(self, **kwargs):
-        api_key = kwargs.get("api_key") or self.default_api_key
-        for stripe_charge in Charge.api_list(customer=self.id, **kwargs):
-            Charge.sync_from_stripe_data(stripe_charge, api_key=api_key)
-
     def _sync_cards(self, **kwargs):
         from .payment_methods import Card
 
