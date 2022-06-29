@@ -718,9 +718,8 @@ class StripeModel(StripeBaseModel):
         # *and* we didn't refetch by id, then `should_expand` is True and we
         # don't have the data to actually create the object.
         # If this happens when syncing Stripe data, it's a djstripe bug. Report it!
-        assert not should_expand, "No data to create {} from {}".format(
-            cls.__name__, field_name
-        )
+        if should_expand:
+            raise ValueError(f"No data to create {cls.__name__} from {field_name}")
 
         try:
             # We wrap the `_create_from_stripe_object` in a transaction to
