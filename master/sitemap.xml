@@ -66,6 +66,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://dj-stripe.github.io/dj-stripe/master/history/2_6_x/</loc>
+         <lastmod>2022-07-02</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://dj-stripe.github.io/dj-stripe/master/history/2_7_0/</loc>
          <lastmod>2022-07-02</lastmod>
          <changefreq>daily</changefreq>
