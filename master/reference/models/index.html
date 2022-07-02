@@ -3563,7 +3563,9 @@ djstripe.models.core.Charge.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">capture</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/capture&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/charges/</span><span class="si">{charge}</span><span class="s2">/capture&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">charge</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -4830,8 +4832,11 @@ djstripe.models.core.Customer.stripe_class.TestHelpers        </code>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">fund_cash_balance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/fund_cash_balance&quot;</span>
+          <div class="highlight"><pre><span></span><code><span class="nd">@util</span><span class="o">.</span><span class="n">class_method_variant</span><span class="p">(</span><span class="s2">&quot;_cls_fund_cash_balance&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">fund_cash_balance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/test_helpers/customers/</span><span class="si">{customer}</span><span class="s2">/fund_cash_balance&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">customer</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">resource</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">resource</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
@@ -4983,7 +4988,9 @@ djstripe.models.core.Customer.stripe_class.TestHelpers        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">create_funding_instructions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/funding_instructions&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/customers/</span><span class="si">{customer}</span><span class="s2">/funding_instructions&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">customer</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
     <span class="n">stripe_object</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">convert_to_stripe_object</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
@@ -5199,7 +5206,9 @@ djstripe.models.core.Customer.stripe_class.TestHelpers        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">list_payment_methods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/payment_methods&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/customers/</span><span class="si">{customer}</span><span class="s2">/payment_methods&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">customer</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
     <span class="n">stripe_object</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">convert_to_stripe_object</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
@@ -5342,9 +5351,10 @@ djstripe.models.core.Customer.stripe_class.TestHelpers        </code>
         <span class="n">customer</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="n">customer</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="n">response</span><span class="p">,</span> <span class="n">api_key</span> <span class="o">=</span> <span class="n">requestor</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">convert_to_stripe_object</span><span class="p">(</span>
+    <span class="n">stripe_object</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">convert_to_stripe_object</span><span class="p">(</span>
         <span class="n">response</span><span class="p">,</span> <span class="n">api_key</span><span class="p">,</span> <span class="n">stripe_version</span><span class="p">,</span> <span class="n">stripe_account</span>
     <span class="p">)</span>
+    <span class="k">return</span> <span class="n">stripe_object</span>
 </code></pre></div>
         </details>
     </div>
@@ -5451,9 +5461,10 @@ djstripe.models.core.Customer.stripe_class.TestHelpers        </code>
         <span class="n">customer</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="n">customer</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="n">response</span><span class="p">,</span> <span class="n">api_key</span> <span class="o">=</span> <span class="n">requestor</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">convert_to_stripe_object</span><span class="p">(</span>
+    <span class="n">stripe_object</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">convert_to_stripe_object</span><span class="p">(</span>
         <span class="n">response</span><span class="p">,</span> <span class="n">api_key</span><span class="p">,</span> <span class="n">stripe_version</span><span class="p">,</span> <span class="n">stripe_account</span>
     <span class="p">)</span>
+    <span class="k">return</span> <span class="n">stripe_object</span>
 </code></pre></div>
         </details>
     </div>
@@ -7198,7 +7209,9 @@ djstripe.models.core.Dispute.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/close&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/disputes/</span><span class="si">{dispute}</span><span class="s2">/close&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">dispute</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -10328,7 +10341,9 @@ djstripe.models.core.PaymentIntent.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">apply_customer_balance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/apply_customer_balance&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/payment_intents/</span><span class="si">{intent}</span><span class="s2">/apply_customer_balance&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">intent</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -10356,7 +10371,9 @@ djstripe.models.core.PaymentIntent.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/cancel&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/payment_intents/</span><span class="si">{intent}</span><span class="s2">/cancel&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">intent</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -10384,7 +10401,9 @@ djstripe.models.core.PaymentIntent.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">capture</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/capture&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/payment_intents/</span><span class="si">{intent}</span><span class="s2">/capture&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">intent</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -10412,7 +10431,9 @@ djstripe.models.core.PaymentIntent.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/confirm&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/payment_intents/</span><span class="si">{intent}</span><span class="s2">/confirm&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">intent</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -10440,7 +10461,9 @@ djstripe.models.core.PaymentIntent.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">increment_authorization</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/increment_authorization&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/payment_intents/</span><span class="si">{intent}</span><span class="s2">/increment_authorization&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">intent</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -10528,7 +10551,9 @@ djstripe.models.core.PaymentIntent.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">verify_microdeposits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/verify_microdeposits&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/payment_intents/</span><span class="si">{intent}</span><span class="s2">/verify_microdeposits&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">intent</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -11320,7 +11345,9 @@ djstripe.models.core.Payout.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/cancel&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/payouts/</span><span class="si">{payout}</span><span class="s2">/cancel&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">payout</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -11348,7 +11375,9 @@ djstripe.models.core.Payout.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/reverse&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/payouts/</span><span class="si">{payout}</span><span class="s2">/reverse&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">payout</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -13486,8 +13515,11 @@ djstripe.models.core.Refund.stripe_class.TestHelpers        </code>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">expire</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/expire&quot;</span>
+          <div class="highlight"><pre><span></span><code><span class="nd">@util</span><span class="o">.</span><span class="n">class_method_variant</span><span class="p">(</span><span class="s2">&quot;_cls_expire&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">expire</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/test_helpers/refunds/</span><span class="si">{refund}</span><span class="s2">/expire&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">refund</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">resource</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">resource</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
@@ -13529,7 +13561,9 @@ djstripe.models.core.Refund.stripe_class.TestHelpers        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/cancel&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/refunds/</span><span class="si">{refund}</span><span class="s2">/cancel&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">refund</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -14158,7 +14192,9 @@ djstripe.models.core.SetupIntent.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/cancel&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/setup_intents/</span><span class="si">{intent}</span><span class="s2">/cancel&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">intent</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -14186,7 +14222,9 @@ djstripe.models.core.SetupIntent.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">confirm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/confirm&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/setup_intents/</span><span class="si">{intent}</span><span class="s2">/confirm&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">intent</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -14214,7 +14252,9 @@ djstripe.models.core.SetupIntent.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">verify_microdeposits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/verify_microdeposits&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/setup_intents/</span><span class="si">{intent}</span><span class="s2">/verify_microdeposits&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">intent</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -16993,7 +17033,9 @@ djstripe.models.payment_methods.PaymentMethod.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">attach</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/attach&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/payment_methods/</span><span class="si">{payment_method}</span><span class="s2">/attach&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">payment_method</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -17021,7 +17063,9 @@ djstripe.models.payment_methods.PaymentMethod.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/detach&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/payment_methods/</span><span class="si">{payment_method}</span><span class="s2">/detach&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">payment_method</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -24750,7 +24794,9 @@ djstripe.models.billing.SubscriptionSchedule.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/cancel&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/subscription_schedules/</span><span class="si">{schedule}</span><span class="s2">/cancel&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">schedule</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -24778,7 +24824,9 @@ djstripe.models.billing.SubscriptionSchedule.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">release</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/release&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/subscription_schedules/</span><span class="si">{schedule}</span><span class="s2">/release&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">schedule</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -29581,7 +29629,9 @@ djstripe.models.account.Account.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/account.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">persons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/persons&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/accounts/</span><span class="si">{account}</span><span class="s2">/persons&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">account</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
     <span class="n">stripe_object</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">convert_to_stripe_object</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
@@ -29690,7 +29740,9 @@ djstripe.models.account.Account.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/account.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">reject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/reject&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/accounts/</span><span class="si">{account}</span><span class="s2">/reject&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">account</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -32197,7 +32249,9 @@ djstripe.models.connect.Transfer.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/connect.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/cancel&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/transfers/</span><span class="si">{transfer}</span><span class="s2">/cancel&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">transfer</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -32889,7 +32943,9 @@ djstripe.models.connect.TransferReversal.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/connect.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/cancel&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/transfers/</span><span class="si">{transfer}</span><span class="s2">/cancel&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">transfer</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -33946,7 +34002,9 @@ djstripe.models.orders.Order.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/orders.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/cancel&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/orders/</span><span class="si">{id}</span><span class="s2">/cancel&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="nb">id</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -33974,7 +34032,9 @@ djstripe.models.orders.Order.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/orders.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">list_line_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/line_items&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/orders/</span><span class="si">{id}</span><span class="s2">/line_items&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="nb">id</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;get&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
     <span class="n">stripe_object</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">convert_to_stripe_object</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
@@ -34004,7 +34064,9 @@ djstripe.models.orders.Order.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/orders.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">reopen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/reopen&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/orders/</span><span class="si">{id}</span><span class="s2">/reopen&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="nb">id</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
@@ -34032,7 +34094,9 @@ djstripe.models.orders.Order.stripe_class        </code>
         <details class="quote">
           <summary>Source code in <code>djstripe/models/orders.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-    <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_url</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;/submit&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/v1/orders/</span><span class="si">{id}</span><span class="s2">/submit&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="nb">id</span><span class="o">=</span><span class="n">util</span><span class="o">.</span><span class="n">sanitize_id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">populate_headers</span><span class="p">(</span><span class="n">idempotency_key</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refresh_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">))</span>
     <span class="k">return</span> <span class="bp">self</span>
