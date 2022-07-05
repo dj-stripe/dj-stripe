@@ -654,7 +654,7 @@ class SubscriptionScheduleAdmin(StripeModelAdmin):
 
 @admin.register(models.TaxCode)
 class TaxCodeAdmin(StripeModelAdmin):
-    list_display = ("name",)
+    list_display = ("name", "description")
     list_filter = ("name",)
 
 
