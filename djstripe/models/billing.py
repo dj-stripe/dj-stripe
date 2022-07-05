@@ -2090,7 +2090,7 @@ class TaxCode(StripeModel):
         help_text="A short name for the tax code.",
     )
 
-    class Meta:
+    class Meta(StripeModel.Meta):
         verbose_name = "Tax Code"
 
     def __str__(self):
