@@ -165,7 +165,7 @@ class Coupon(StripeModel):
     )
     # valid = models.BooleanField(editable=False)
 
-    class Meta:
+    class Meta(StripeModel.Meta):
         unique_together = ("id", "livemode")
 
     stripe_class = stripe.Coupon

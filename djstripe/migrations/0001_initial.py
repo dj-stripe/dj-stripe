@@ -454,7 +454,10 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"unique_together": {("id", "livemode")}},
+            options={
+                "get_latest_by": "created",
+                "unique_together": {("id", "livemode")},
+            },
         ),
         migrations.CreateModel(
             name="PaymentMethod",
