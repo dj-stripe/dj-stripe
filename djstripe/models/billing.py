@@ -2059,7 +2059,7 @@ class ShippingRate(StripeModel):
         help_text="The shipping tax code",
     )
 
-    class Meta:
+    class Meta(StripeModel.Meta):
         verbose_name = "Shipping Rate"
 
     def __str__(self):

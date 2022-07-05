@@ -413,6 +413,7 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
+                "get_latest_by": "created",
                 "verbose_name": "Shipping Rate",
             },
         ),
