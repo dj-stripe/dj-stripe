@@ -551,7 +551,7 @@ class BaseInvoice(StripeModel):
         ),
     )
 
-    class Meta:
+    class Meta(StripeModel.Meta):
         abstract = True
         ordering = ["-created"]
 

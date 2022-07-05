@@ -1743,7 +1743,7 @@ class Migration(migrations.Migration):
                     djstripe.fields.JSONField(blank=True, null=True),
                 ),
             ],
-            options={"ordering": ["-created"]},
+            options={"get_latest_by": "created", "ordering": ["-created"]},
         ),
         migrations.CreateModel(
             name="IdempotencyKey",
@@ -2791,7 +2791,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"abstract": False, "ordering": ["-created"]},
+            options={"get_latest_by": "created", "ordering": ["-created"]},
         ),
         migrations.CreateModel(
             name="TaxRate",
