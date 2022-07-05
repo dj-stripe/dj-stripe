@@ -97,7 +97,7 @@ class StripeModel(StripeBaseModel):
         null=True, blank=True, help_text="A description of this object."
     )
 
-    class Meta:
+    class Meta(StripeBaseModel.Meta):
         abstract = True
         get_latest_by = "created"
 

@@ -454,7 +454,10 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"unique_together": {("id", "livemode")}},
+            options={
+                "get_latest_by": "created",
+                "unique_together": {("id", "livemode")},
+            },
         ),
         migrations.CreateModel(
             name="PaymentMethod",
@@ -653,9 +656,10 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
+                "get_latest_by": "created",
                 "unique_together": {
                     ("subscriber", "livemode", "djstripe_owner_account")
-                }
+                },
             },
         ),
         migrations.CreateModel(
@@ -1739,7 +1743,7 @@ class Migration(migrations.Migration):
                     djstripe.fields.JSONField(blank=True, null=True),
                 ),
             ],
-            options={"ordering": ["-created"]},
+            options={"get_latest_by": "created", "ordering": ["-created"]},
         ),
         migrations.CreateModel(
             name="IdempotencyKey",
@@ -2787,7 +2791,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"abstract": False, "ordering": ["-created"]},
+            options={"get_latest_by": "created", "ordering": ["-created"]},
         ),
         migrations.CreateModel(
             name="TaxRate",
@@ -2872,10 +2876,8 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "abstract": False,
                 "get_latest_by": "created",
-                "verbose_name": "Tax Rates",
-                "verbose_name_plural": "Tax Rates",
+                "verbose_name": "Tax Rate",
             },
         ),
         migrations.AddField(
@@ -4169,7 +4171,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"verbose_name": "Tax ID", "verbose_name_plural": "Tax IDs"},
+            options={"get_latest_by": "created", "verbose_name": "Tax ID"},
         ),
         migrations.CreateModel(
             name="InvoiceItem",

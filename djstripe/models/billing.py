@@ -165,7 +165,7 @@ class Coupon(StripeModel):
     )
     # valid = models.BooleanField(editable=False)
 
-    class Meta:
+    class Meta(StripeModel.Meta):
         unique_together = ("id", "livemode")
 
     stripe_class = stripe.Coupon
@@ -551,7 +551,7 @@ class BaseInvoice(StripeModel):
         ),
     )
 
-    class Meta:
+    class Meta(StripeModel.Meta):
         abstract = True
         ordering = ["-created"]
 
@@ -2059,7 +2059,7 @@ class ShippingRate(StripeModel):
         help_text="The shipping tax code",
     )
 
-    class Meta:
+    class Meta(StripeModel.Meta):
         verbose_name = "Shipping Rate"
 
     def __str__(self):
@@ -2090,7 +2090,7 @@ class TaxCode(StripeModel):
         help_text="A short name for the tax code.",
     )
 
-    class Meta:
+    class Meta(StripeModel.Meta):
         verbose_name = "Tax Code"
 
     def __str__(self):
@@ -2126,9 +2126,8 @@ class TaxId(StripeModel):
     def __str__(self):
         return f"{enums.TaxIdType.humanize(self.type)} {self.value} ({self.verification.get('status')})"
 
-    class Meta:
+    class Meta(StripeModel.Meta):
         verbose_name = "Tax ID"
-        verbose_name_plural = "Tax IDs"
 
     @classmethod
     def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
@@ -2249,9 +2248,8 @@ class TaxRate(StripeModel):
     def __str__(self):
         return f"{self.display_name} at {self.percentage}%"
 
-    class Meta:
-        verbose_name = "Tax Rates"
-        verbose_name_plural = "Tax Rates"
+    class Meta(StripeModel.Meta):
+        verbose_name = "Tax Rate"
 
 
 class UsageRecord(StripeModel):
