@@ -19,6 +19,24 @@ def import_jsonfield():
     return BaseJSONField
 
 
+class FieldDeconstructMixin:
+    IGNORED_ATTRS = [
+        "verbose_name",
+        "help_text",
+        "choices",
+        "get_latest_by",
+        "ordering",
+    ]
+
+    def deconstruct(self):
+        """Remove field attributes that have nothing to
+        do with the database. Otherwise unencessary migrations are generated."""
+        name, path, args, kwargs = super().deconstruct()
+        for attr in self.IGNORED_ATTRS:
+            kwargs.pop(attr, None)
+        return name, path, args, kwargs
+
+
 class StripeForeignKey(models.ForeignKey):
     setting_name = "DJSTRIPE_FOREIGN_KEY_TO_FIELD"
 
@@ -33,8 +51,6 @@ class StripeForeignKey(models.ForeignKey):
         kwargs["to_field"] = SettingsReference(
             getattr(settings, self.setting_name, "id"), self.setting_name
         )
-        if "help_text" in kwargs:
-            del kwargs["help_text"]
         return name, path, args, kwargs
 
     def get_default(self):
@@ -45,19 +61,13 @@ class StripeForeignKey(models.ForeignKey):
         return super().get_default()
 
 
-class PaymentMethodForeignKey(models.ForeignKey):
+class PaymentMethodForeignKey(FieldDeconstructMixin, models.ForeignKey):
     def __init__(self, **kwargs):
         kwargs.setdefault("to", "DjstripePaymentMethod")
         super().__init__(**kwargs)
 
-    def deconstruct(self):
-        name, path, args, kwargs = super().deconstruct()
-        if "help_text" in kwargs:
-            del kwargs["help_text"]
-        return name, path, args, kwargs
 
-
-class StripePercentField(models.DecimalField):
+class StripePercentField(FieldDeconstructMixin, models.DecimalField):
     """A field used to define a percent according to djstripe logic."""
 
     def __init__(self, *args, **kwargs):
@@ -70,14 +80,8 @@ class StripePercentField(models.DecimalField):
         defaults.update(kwargs)
         super().__init__(*args, **defaults)
 
-    def deconstruct(self):
-        name, path, args, kwargs = super().deconstruct()
-        if "help_text" in kwargs:
-            del kwargs["help_text"]
-        return name, path, args, kwargs
 
-
-class StripeCurrencyCodeField(models.CharField):
+class StripeCurrencyCodeField(FieldDeconstructMixin, models.CharField):
     """
     A field used to store a three-letter currency code (eg. usd, eur, ...)
     """
@@ -87,28 +91,18 @@ class StripeCurrencyCodeField(models.CharField):
         defaults.update(kwargs)
         super().__init__(*args, **defaults)
 
-    def deconstruct(self):
-        name, path, args, kwargs = super().deconstruct()
-        if "help_text" in kwargs:
-            del kwargs["help_text"]
-        return name, path, args, kwargs
 
-
-class StripeQuantumCurrencyAmountField(models.BigIntegerField):
+class StripeQuantumCurrencyAmountField(FieldDeconstructMixin, models.BigIntegerField):
     """
     A field used to store currency amounts in cents (etc) as per stripe.
     By contacting stripe support, some accounts will have their limit raised to 11
     digits, hence the use of BigIntegerField instead of IntegerField
     """
 
-    def deconstruct(self):
-        name, path, args, kwargs = super().deconstruct()
-        if "help_text" in kwargs:
-            del kwargs["help_text"]
-        return name, path, args, kwargs
+    pass
 
 
-class StripeDecimalCurrencyAmountField(models.DecimalField):
+class StripeDecimalCurrencyAmountField(FieldDeconstructMixin, models.DecimalField):
     """
     A legacy field to store currency amounts in dollars (etc).
 
@@ -128,12 +122,6 @@ class StripeDecimalCurrencyAmountField(models.DecimalField):
         defaults.update(kwargs)
         super().__init__(*args, **defaults)
 
-    def deconstruct(self):
-        name, path, args, kwargs = super().deconstruct()
-        if "help_text" in kwargs:
-            del kwargs["help_text"]
-        return name, path, args, kwargs
-
     def stripe_to_db(self, data):
         """Convert the raw value to decimal representation."""
         val = data.get(self.name)
@@ -147,7 +135,7 @@ class StripeDecimalCurrencyAmountField(models.DecimalField):
             return val / decimal.Decimal("100")
 
 
-class StripeEnumField(models.CharField):
+class StripeEnumField(FieldDeconstructMixin, models.CharField):
     def __init__(self, enum, *args, **kwargs):
         self.enum = enum
         choices = enum.choices
@@ -158,14 +146,10 @@ class StripeEnumField(models.CharField):
     def deconstruct(self):
         name, path, args, kwargs = super().deconstruct()
         kwargs["enum"] = self.enum
-        if "choices" in kwargs:
-            del kwargs["choices"]
-        if "help_text" in kwargs:
-            del kwargs["help_text"]
         return name, path, args, kwargs
 
 
-class StripeIdField(models.CharField):
+class StripeIdField(FieldDeconstructMixin, models.CharField):
     """A field with enough space to hold any stripe ID."""
 
     def __init__(self, *args, **kwargs):
@@ -181,21 +165,9 @@ class StripeIdField(models.CharField):
         defaults.update(kwargs)
         super().__init__(*args, **defaults)
 
-    def deconstruct(self):
-        name, path, args, kwargs = super().deconstruct()
-        if "help_text" in kwargs:
-            del kwargs["help_text"]
-        return name, path, args, kwargs
 
-
-class StripeDateTimeField(models.DateTimeField):
+class StripeDateTimeField(FieldDeconstructMixin, models.DateTimeField):
     """A field used to define a DateTimeField value according to djstripe logic."""
-
-    def deconstruct(self):
-        name, path, args, kwargs = super().deconstruct()
-        if "help_text" in kwargs:
-            del kwargs["help_text"]
-        return name, path, args, kwargs
 
     def stripe_to_db(self, data):
         """Convert the raw timestamp value to a DateTime representation."""
@@ -206,11 +178,7 @@ class StripeDateTimeField(models.DateTimeField):
             return convert_tstamp(val)
 
 
-class JSONField(import_jsonfield()):
+class JSONField(FieldDeconstructMixin, import_jsonfield()):
     """A field used to define a JSONField value according to djstripe logic."""
 
-    def deconstruct(self):
-        name, path, args, kwargs = super().deconstruct()
-        if "help_text" in kwargs:
-            del kwargs["help_text"]
-        return name, path, args, kwargs
+    pass
