@@ -304,6 +304,14 @@ class Command(BaseCommand):
         return all_list_kwargs
 
     @staticmethod
+    def get_list_kwargs_txcd(default_list_kwargs):
+        """Returns sequence of kwargs to sync Tax Codes for
+        all Stripe Accounts"""
+
+        # tax codes are the same for all Stripe Accounts
+        return [{}]
+
+    @staticmethod
     def get_list_kwargs_trr(default_list_kwargs):
         """Returns sequence of kwrags to sync Transfer Reversals for
         all Stripe Accounts"""
@@ -386,6 +394,7 @@ class Command(BaseCommand):
             "CountrySpec": self.get_list_kwargs_country_spec,
             "TransferReversal": self.get_list_kwargs_trr,
             "ApplicationFeeRefund": self.get_list_kwargs_fee_refund,
+            "TaxCode": self.get_list_kwargs_txcd,
             "TaxId": self.get_list_kwargs_tax_id,
             "UsageRecordSummary": self.get_list_kwargs_sis,
         }
