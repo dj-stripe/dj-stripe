@@ -19,24 +19,6 @@ def import_jsonfield():
     return BaseJSONField
 
 
-class FieldDeconstructMixin:
-    IGNORED_ATTRS = [
-        "verbose_name",
-        "help_text",
-        "choices",
-        "get_latest_by",
-        "ordering",
-    ]
-
-    def deconstruct(self):
-        """Remove field attributes that have nothing to
-        do with the database. Otherwise unencessary migrations are generated."""
-        name, path, args, kwargs = super().deconstruct()
-        for attr in self.IGNORED_ATTRS:
-            kwargs.pop(attr, None)
-        return name, path, args, kwargs
-
-
 class StripeForeignKey(models.ForeignKey):
     setting_name = "DJSTRIPE_FOREIGN_KEY_TO_FIELD"
 
@@ -61,13 +43,13 @@ class StripeForeignKey(models.ForeignKey):
         return super().get_default()
 
 
-class PaymentMethodForeignKey(FieldDeconstructMixin, models.ForeignKey):
+class PaymentMethodForeignKey(models.ForeignKey):
     def __init__(self, **kwargs):
         kwargs.setdefault("to", "DjstripePaymentMethod")
         super().__init__(**kwargs)
 
 
-class StripePercentField(FieldDeconstructMixin, models.DecimalField):
+class StripePercentField(models.DecimalField):
     """A field used to define a percent according to djstripe logic."""
 
     def __init__(self, *args, **kwargs):
@@ -81,7 +63,7 @@ class StripePercentField(FieldDeconstructMixin, models.DecimalField):
         super().__init__(*args, **defaults)
 
 
-class StripeCurrencyCodeField(FieldDeconstructMixin, models.CharField):
+class StripeCurrencyCodeField(models.CharField):
     """
     A field used to store a three-letter currency code (eg. usd, eur, ...)
     """
@@ -92,7 +74,7 @@ class StripeCurrencyCodeField(FieldDeconstructMixin, models.CharField):
         super().__init__(*args, **defaults)
 
 
-class StripeQuantumCurrencyAmountField(FieldDeconstructMixin, models.BigIntegerField):
+class StripeQuantumCurrencyAmountField(models.BigIntegerField):
     """
     A field used to store currency amounts in cents (etc) as per stripe.
     By contacting stripe support, some accounts will have their limit raised to 11
@@ -102,7 +84,7 @@ class StripeQuantumCurrencyAmountField(FieldDeconstructMixin, models.BigIntegerF
     pass
 
 
-class StripeDecimalCurrencyAmountField(FieldDeconstructMixin, models.DecimalField):
+class StripeDecimalCurrencyAmountField(models.DecimalField):
     """
     A legacy field to store currency amounts in dollars (etc).
 
@@ -135,7 +117,7 @@ class StripeDecimalCurrencyAmountField(FieldDeconstructMixin, models.DecimalFiel
             return val / decimal.Decimal("100")
 
 
-class StripeEnumField(FieldDeconstructMixin, models.CharField):
+class StripeEnumField(models.CharField):
     def __init__(self, enum, *args, **kwargs):
         self.enum = enum
         choices = enum.choices
@@ -149,7 +131,7 @@ class StripeEnumField(FieldDeconstructMixin, models.CharField):
         return name, path, args, kwargs
 
 
-class StripeIdField(FieldDeconstructMixin, models.CharField):
+class StripeIdField(models.CharField):
     """A field with enough space to hold any stripe ID."""
 
     def __init__(self, *args, **kwargs):
@@ -166,7 +148,7 @@ class StripeIdField(FieldDeconstructMixin, models.CharField):
         super().__init__(*args, **defaults)
 
 
-class StripeDateTimeField(FieldDeconstructMixin, models.DateTimeField):
+class StripeDateTimeField(models.DateTimeField):
     """A field used to define a DateTimeField value according to djstripe logic."""
 
     def stripe_to_db(self, data):
@@ -178,7 +160,7 @@ class StripeDateTimeField(FieldDeconstructMixin, models.DateTimeField):
             return convert_tstamp(val)
 
 
-class JSONField(FieldDeconstructMixin, import_jsonfield()):
+class JSONField(import_jsonfield()):
     """A field used to define a JSONField value according to djstripe logic."""
 
     pass
