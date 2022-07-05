@@ -222,6 +222,30 @@ def check_webhook_validation(app_configs=None, **kwargs):  # noqa: C901
 
 
 @checks.register("djstripe")
+def check_webhook_endpoint_has_secret(app_configs=None, **kwargs):
+    """Checks if all Webhook Endpoints have not empty secrets."""
+    from djstripe.models import WebhookEndpoint
+
+    messages = []
+
+    qs = WebhookEndpoint.objects.filter(secret="").all()
+    if qs.exists():
+        for webhook in qs:
+            messages.append(
+                checks.Warning(
+                    f"The secret of Webhook Endpoint: {webhook} is not populated in the db. Events sent to it will not work properly.",
+                    hint=(
+                        "This can happen if it was deleted and resynced as Stripe sends the webhook secret ONLY on the creation call."
+                        f" Please use the django shell and update the secret with the value from {webhook.get_stripe_dashboard_url()}"
+                    ),
+                    id="djstripe.W005",
+                )
+            )
+
+    return messages
+
+
+@checks.register("djstripe")
 def check_subscriber_key_length(app_configs=None, **kwargs):
     """
     Check that DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY fits in metadata.
