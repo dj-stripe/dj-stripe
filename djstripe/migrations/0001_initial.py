@@ -4173,7 +4173,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"verbose_name": "Tax ID", "verbose_name_plural": "Tax IDs"},
+            options={"get_latest_by": "created", "verbose_name": "Tax ID"},
         ),
         migrations.CreateModel(
             name="InvoiceItem",

@@ -2126,9 +2126,8 @@ class TaxId(StripeModel):
     def __str__(self):
         return f"{enums.TaxIdType.humanize(self.type)} {self.value} ({self.verification.get('status')})"
 
-    class Meta:
+    class Meta(StripeModel.Meta):
         verbose_name = "Tax ID"
-        verbose_name_plural = "Tax IDs"
 
     @classmethod
     def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
