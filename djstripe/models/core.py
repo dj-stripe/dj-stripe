@@ -744,7 +744,7 @@ class Customer(StripeModel):
     )
     date_purged = models.DateTimeField(null=True, editable=False)
 
-    class Meta:
+    class Meta(StripeModel.Meta):
         unique_together = ("subscriber", "livemode", "djstripe_owner_account")
 
     def __str__(self):

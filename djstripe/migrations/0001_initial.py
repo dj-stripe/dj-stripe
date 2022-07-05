@@ -656,9 +656,10 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
+                "get_latest_by": "created",
                 "unique_together": {
                     ("subscriber", "livemode", "djstripe_owner_account")
-                }
+                },
             },
         ),
         migrations.CreateModel(
