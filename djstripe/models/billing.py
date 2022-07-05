@@ -2096,6 +2096,11 @@ class TaxCode(StripeModel):
     def __str__(self):
         return f"{self.name}: {self.id}"
 
+    @classmethod
+    def _find_owner_account(cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY):
+        # Tax Codes do not belong to any Stripe Account
+        pass
+
 
 class TaxId(StripeModel):
     """
