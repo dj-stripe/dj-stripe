@@ -2876,10 +2876,8 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "abstract": False,
                 "get_latest_by": "created",
-                "verbose_name": "Tax Rates",
-                "verbose_name_plural": "Tax Rates",
+                "verbose_name": "Tax Rate",
             },
         ),
         migrations.AddField(

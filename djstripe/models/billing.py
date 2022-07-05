@@ -2248,9 +2248,8 @@ class TaxRate(StripeModel):
     def __str__(self):
         return f"{self.display_name} at {self.percentage}%"
 
-    class Meta:
-        verbose_name = "Tax Rates"
-        verbose_name_plural = "Tax Rates"
+    class Meta(StripeModel.Meta):
+        verbose_name = "Tax Rate"
 
 
 class UsageRecord(StripeModel):
