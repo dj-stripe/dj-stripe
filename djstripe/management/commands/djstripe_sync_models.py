@@ -110,6 +110,7 @@ class Command(BaseCommand):
         if not hasattr(model.stripe_class, "list"):
             if model in (
                 models.ApplicationFeeRefund,
+                models.LineItem,
                 models.Source,
                 models.TransferReversal,
                 models.TaxId,
@@ -306,6 +307,24 @@ class Command(BaseCommand):
         return default_list_kwargs
 
     @staticmethod
+    def get_list_kwargs_il(default_list_kwargs):
+        """Returns sequence of kwargs to sync Line Items for
+        all Stripe Accounts"""
+
+        all_list_kwargs = []
+
+        for def_kwarg in default_list_kwargs:
+            stripe_account = def_kwarg.get("stripe_account")
+            api_key = def_kwarg.get("api_key")
+            for stripe_invoice in models.Invoice.api_list(
+                stripe_account=stripe_account, api_key=api_key
+            ):
+
+                all_list_kwargs.append({"id": stripe_invoice.id, **def_kwarg})
+
+        return all_list_kwargs
+
+    @staticmethod
     def get_list_kwargs_pm(default_list_kwargs):
         """Returns sequence of kwrags to sync Payment Methods for
         all Stripe Accounts"""
@@ -453,6 +472,7 @@ class Command(BaseCommand):
         """
 
         list_kwarg_handlers_dict = {
+            "LineItem": self.get_list_kwargs_il,
             "PaymentMethod": self.get_list_kwargs_pm,
             "Source": self.get_list_kwargs_src,
             "SubscriptionItem": self.get_list_kwargs_si,
