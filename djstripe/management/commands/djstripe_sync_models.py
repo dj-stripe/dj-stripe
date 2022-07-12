@@ -325,7 +325,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_list_kwargs_pm(default_list_kwargs):
-        """Returns sequence of kwrags to sync Payment Methods for
+        """Returns sequence of kwargs to sync Payment Methods for
         all Stripe Accounts"""
 
         all_list_kwargs = []
@@ -362,7 +362,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_list_kwargs_si(default_list_kwargs):
-        """Returns sequence of kwrags to sync Subscription Items for
+        """Returns sequence of kwargs to sync Subscription Items for
         all Stripe Accounts"""
 
         all_list_kwargs = []
@@ -377,7 +377,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_list_kwargs_country_spec(default_list_kwargs):
-        """Returns sequence of kwrags to sync Country Specs for
+        """Returns sequence of kwargs to sync Country Specs for
         all Stripe Accounts"""
 
         all_list_kwargs = []
@@ -396,7 +396,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_list_kwargs_trr(default_list_kwargs):
-        """Returns sequence of kwrags to sync Transfer Reversals for
+        """Returns sequence of kwargs to sync Transfer Reversals for
         all Stripe Accounts"""
         all_list_kwargs = []
         for def_kwarg in default_list_kwargs:
@@ -411,7 +411,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_list_kwargs_fee_refund(default_list_kwargs):
-        """Returns sequence of kwrags to sync Application Fee Refunds for
+        """Returns sequence of kwargs to sync Application Fee Refunds for
         all Stripe Accounts"""
         all_list_kwargs = []
         for def_kwarg in default_list_kwargs:
@@ -426,7 +426,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_list_kwargs_tax_id(default_list_kwargs):
-        """Returns sequence of kwrags to sync Tax Ids for
+        """Returns sequence of kwargs to sync Tax Ids for
         all Stripe Accounts"""
         all_list_kwargs = []
         for def_kwarg in default_list_kwargs:
@@ -441,7 +441,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_list_kwargs_sis(default_list_kwargs):
-        """Returns sequence of kwrags to sync Usage Record Summarys for
+        """Returns sequence of kwargs to sync Usage Record Summarys for
         all Stripe Accounts"""
         all_list_kwargs = []
         for def_kwarg in default_list_kwargs:
