@@ -41,7 +41,10 @@ class LineItemTest(AssertStripeFksMixin, TestCase):
             "djstripe.Charge.on_behalf_of",
             "djstripe.Charge.source_transfer",
             "djstripe.Charge.transfer",
+<<<<<<< HEAD
             "djstripe.Customer.coupon",
+=======
+>>>>>>> 3cc20a6c (Updated LineItem model to also sync discount objects.)
             "djstripe.Customer.default_payment_method",
             "djstripe.Customer.subscriber",
             "djstripe.Invoice.default_payment_method",
@@ -52,7 +55,10 @@ class LineItemTest(AssertStripeFksMixin, TestCase):
             "djstripe.PaymentIntent.on_behalf_of",
             "djstripe.PaymentIntent.payment_method",
             "djstripe.PaymentIntent.upcominginvoice (related name)",
+<<<<<<< HEAD
             "djstripe.Product.default_price",
+=======
+>>>>>>> 3cc20a6c (Updated LineItem model to also sync discount objects.)
             "djstripe.Subscription.default_payment_method",
             "djstripe.Subscription.default_source",
             "djstripe.Subscription.pending_setup_intent",
@@ -147,7 +153,7 @@ class LineItemTest(AssertStripeFksMixin, TestCase):
             type(patched_obj).auto_paging_iter = p
 
             # Invoke LineItem.api_list(...)
-            LineItem.api_list(id=FAKE_INVOICE["id"])
+            LineItem.api_list(id=FAKE_INVOICE["id"], expand=["data.discounts"])
 
             # assert invoice_retrieve_mock was called once
             invoice_retrieve_mock.assert_called_once_with(
@@ -157,5 +163,5 @@ class LineItemTest(AssertStripeFksMixin, TestCase):
 
             # assert invoice.lines.list(...) was called once
             patched_obj.assert_called_once_with(
-                api_key=djstripe_settings.STRIPE_SECRET_KEY,
+                api_key=djstripe_settings.STRIPE_SECRET_KEY, expand=["data.discounts"]
             )

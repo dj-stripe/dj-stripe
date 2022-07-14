@@ -1053,8 +1053,7 @@ class LineItem(StripeModel):
     """
 
     stripe_class = stripe.InvoiceLineItem
-    # todo uncomment when discount model gets implemented
-    # expand_fields = ["discounts"]
+    expand_fields = ["discounts"]
 
     amount = StripeQuantumCurrencyAmountField(help_text="The amount, in cents.")
     amount_excluding_tax = StripeQuantumCurrencyAmountField(
@@ -1144,22 +1143,20 @@ class LineItem(StripeModel):
 
         return data
 
-    # todo uncomment when discount model gets implemented
-    # def _attach_objects_post_save_hook(
-    #     self,
-    #     cls,
-    #     data,
-    #     api_key=djstripe_settings.STRIPE_SECRET_KEY,
-    #     pending_relations=None,
-    # ):
-    #     super()._attach_objects_post_save_hook(
-    #         cls, data, api_key=api_key, pending_relations=pending_relations
-    #     )
-    #
-    #
-    # # sync every discount
-    # for discount in self.discounts:
-    #     Discount.sync_from_stripe_data(discount, api_key=api_key)
+    def _attach_objects_post_save_hook(
+        self,
+        cls,
+        data,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        pending_relations=None,
+    ):
+        super()._attach_objects_post_save_hook(
+            cls, data, api_key=api_key, pending_relations=pending_relations
+        )
+
+        # sync every discount
+        for discount in self.discounts:
+            Discount.sync_from_stripe_data(discount, api_key=api_key)
 
     @classmethod
     def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
