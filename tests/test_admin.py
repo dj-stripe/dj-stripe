@@ -476,6 +476,9 @@ class TestAdminRegisteredModelsChildrenOfStripeModel(TestCase):
                         assert "_resync_instances" in actions
                         assert "_sync_all_instances" in actions
                         assert "_cancel" in actions
+                    elif model.__name__ in ("Mandate", "UsageRecord"):
+                        assert "_resync_instances" in actions
+                        assert "_sync_all_instances" not in actions
                     else:
                         assert "_resync_instances" in actions
                         assert "_sync_all_instances" in actions
@@ -1112,9 +1115,13 @@ class TestCustomActionMixin:
         all_models_lst = app_config.get_models()
 
         for model in all_models_lst:
-            if model in site._registry.keys() and (
-                model.__name__ == "WebhookEndpoint"
-                or model.__name__ not in self.ignore_models
+            if (
+                model in site._registry.keys()
+                and model.__name__ not in ("Mandate", "UsageRecord")
+                and (
+                    model.__name__ == "WebhookEndpoint"
+                    or model.__name__ not in self.ignore_models
+                )
             ):
 
                 # get the standard changelist_view url

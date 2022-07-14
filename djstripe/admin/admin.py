@@ -434,6 +434,18 @@ class MandateAdmin(StripeModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("payment_method")
 
+    def get_actions(self, request):
+        """
+        Returns _resync_instances only for
+        models with a defined model.stripe_class.retrieve
+        """
+        actions = super().get_actions(request)
+
+        # remove "_sync_all_instances" as Mandates cannot be listed
+        actions.pop("_sync_all_instances", None)
+
+        return actions
+
 
 @admin.register(models.Plan)
 class PlanAdmin(StripeModelAdmin):
@@ -690,6 +702,18 @@ class UsageRecordAdmin(StripeModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("subscription_item")
+
+    def get_actions(self, request):
+        """
+        Returns _resync_instances only for
+        models with a defined model.stripe_class.retrieve
+        """
+        actions = super().get_actions(request)
+
+        # remove "_sync_all_instances" as UsageRecords cannot be listed
+        actions.pop("_sync_all_instances", None)
+
+        return actions
 
 
 @admin.register(models.UsageRecordSummary)
