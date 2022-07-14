@@ -1412,7 +1412,11 @@ class Subscription(StripeModel):
         "that does not have tax_rates set. Invoices created will have their "
         "default_tax_rates populated from the subscription.",
     )
-    discount = JSONField(null=True, blank=True)
+    discount = JSONField(
+        null=True,
+        blank=True,
+        help_text="Describes the current discount applied to this subscription, if there is one. When billing, a discount applied to a subscription overrides a discount applied on a customer-wide basis.",
+    )
     ended_at = StripeDateTimeField(
         null=True,
         blank=True,
