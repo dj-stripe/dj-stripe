@@ -8,7 +8,6 @@ import djstripe.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("djstripe", "0018_discount"),
     ]
@@ -17,6 +16,16 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="customer",
             name="discount",
+            field=djstripe.fields.JSONField(blank=True, null=True),
+        ),
+        migrations.AddField(
+            model_name="invoice",
+            name="discounts",
+            field=djstripe.fields.JSONField(blank=True, null=True),
+        ),
+        migrations.AddField(
+            model_name="upcominginvoice",
+            name="discounts",
             field=djstripe.fields.JSONField(blank=True, null=True),
         ),
     ]

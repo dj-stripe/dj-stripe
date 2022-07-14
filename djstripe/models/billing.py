@@ -290,6 +290,7 @@ class BaseInvoice(StripeModel):
 
     stripe_class = stripe.Invoice
     stripe_dashboard_item_name = "invoices"
+    expand_fields = ["discounts"]
 
     account_country = models.CharField(
         max_length=2,
@@ -451,9 +452,14 @@ class BaseInvoice(StripeModel):
     discount = JSONField(
         null=True,
         blank=True,
-        help_text="Describes the current discount applied to this "
+        help_text="Deprecated! Please use discounts instead. Describes the current discount applied to this "
         "subscription, if there is one. When billing, a discount applied to a "
         "subscription overrides a discount applied on a customer-wide basis.",
+    )
+    discounts = JSONField(
+        null=True,
+        blank=True,
+        help_text="The discounts applied to the invoice. Line item discounts are applied before invoice discounts.",
     )
     due_date = StripeDateTimeField(
         null=True,
@@ -738,6 +744,9 @@ class BaseInvoice(StripeModel):
         cls._stripe_object_to_line_items(
             target_cls=LineItem, data=data, invoice=self, api_key=api_key
         )
+        # sync every discount
+        for discount in self.discounts:
+            Discount.sync_from_stripe_data(discount, api_key=api_key)
 
     @property
     def plan(self) -> Optional["Plan"]:
