@@ -691,6 +691,12 @@ class Customer(StripeModel):
         "the date that the discount will end.",
     )
     # </discount>
+    discount = JSONField(
+        null=True,
+        blank=True,
+        help_text="Describes the current discount active on the customer, if there is one.",
+    )
+
     email = models.TextField(max_length=5000, default="", blank=True)
     invoice_prefix = models.CharField(
         default="",
