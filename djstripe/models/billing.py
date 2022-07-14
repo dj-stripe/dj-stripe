@@ -844,8 +844,22 @@ class UpcomingInvoice(BaseInvoice):
         return a mock of a queryset, but with the data fetched from Stripe - It
         will act like a normal queryset, but mutation will silently fail.
         """
-
         return QuerySetMock.from_iterable(InvoiceItem, self._invoiceitems)
+
+    @property
+    def lineitems(self):
+        """
+        Gets the line items associated with this upcoming invoice.
+
+        This differs from normal (non-upcoming) invoices, in that upcoming
+        invoices are in-memory and do not persist to the database. Therefore,
+        all of the data comes from the Stripe API itself.
+
+        Instead of returning a normal queryset for the lineitems, this will
+        return a mock of a queryset, but with the data fetched from Stripe - It
+        will act like a normal queryset, but mutation will silently fail.
+        """
+        return QuerySetMock.from_iterable(LineItem, self._lineitems)
 
     @property
     def default_tax_rates(self):
