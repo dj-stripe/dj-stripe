@@ -1179,10 +1179,15 @@ class LineItem(StripeModel):
         # get current invoice if any
         invoice_id = kwargs.pop("id")
 
+        # get expand parameter that needs to be passed to invoice.lines.list call
+        expand_fields = kwargs.pop("expand")
+
         invoice = Invoice.stripe_class.retrieve(invoice_id, api_key=api_key, **kwargs)
 
         # iterate over all the line items on the current invoice
-        return invoice.lines.list(api_key=api_key, **kwargs).auto_paging_iter()
+        return invoice.lines.list(
+            api_key=api_key, expand=expand_fields, **kwargs
+        ).auto_paging_iter()
 
 
 class Plan(StripeModel):

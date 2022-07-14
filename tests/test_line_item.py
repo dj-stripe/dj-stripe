@@ -41,10 +41,6 @@ class LineItemTest(AssertStripeFksMixin, TestCase):
             "djstripe.Charge.on_behalf_of",
             "djstripe.Charge.source_transfer",
             "djstripe.Charge.transfer",
-<<<<<<< HEAD
-            "djstripe.Customer.coupon",
-=======
->>>>>>> 3cc20a6c (Updated LineItem model to also sync discount objects.)
             "djstripe.Customer.default_payment_method",
             "djstripe.Customer.subscriber",
             "djstripe.Invoice.default_payment_method",
@@ -55,10 +51,7 @@ class LineItemTest(AssertStripeFksMixin, TestCase):
             "djstripe.PaymentIntent.on_behalf_of",
             "djstripe.PaymentIntent.payment_method",
             "djstripe.PaymentIntent.upcominginvoice (related name)",
-<<<<<<< HEAD
             "djstripe.Product.default_price",
-=======
->>>>>>> 3cc20a6c (Updated LineItem model to also sync discount objects.)
             "djstripe.Subscription.default_payment_method",
             "djstripe.Subscription.default_source",
             "djstripe.Subscription.pending_setup_intent",
