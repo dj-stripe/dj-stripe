@@ -3,6 +3,7 @@ from .api import APIKey
 from .base import IdempotencyKey, StripeModel
 from .billing import (
     Coupon,
+    Discount,
     Invoice,
     InvoiceItem,
     InvoiceOrLineItem,
@@ -67,6 +68,7 @@ __all__ = [
     "CountrySpec",
     "Coupon",
     "Customer",
+    "Discount",
     "Dispute",
     "DjstripePaymentMethod",
     "Event",

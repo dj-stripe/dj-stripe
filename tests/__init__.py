@@ -1374,10 +1374,26 @@ FAKE_CUSTOMER_IV = CustomerDict(
 )
 
 
+FAKE_DISCOUNT = {
+    "id": "di_fakefakefakefakefake0001",
+    "object": "discount",
+    "description": "",
+    "checkout_session": None,
+    "coupon": deepcopy(FAKE_COUPON),
+    "customer": FAKE_CUSTOMER,
+    "end": None,
+    "invoice": None,
+    "invoice_item": None,
+    "promotion_code": "",
+    "start": 1493206114,
+    "subscription": "sub_fakefakefakefakefake0001",
+}
+
 FAKE_DISCOUNT_CUSTOMER = {
+    "id": "di_fakefakefakefakefake0002",
     "object": "discount",
     "coupon": deepcopy(FAKE_COUPON),
-    "customer": FAKE_CUSTOMER["id"],
+    "customer": FAKE_CUSTOMER,
     "start": 1493206114,
     "end": None,
     "subscription": None,

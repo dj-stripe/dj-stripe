@@ -11,6 +11,7 @@ from stripe.error import InvalidRequestError
 
 from .. import enums
 from ..fields import (
+    InvoiceOrLineItemForeignKey,
     JSONField,
     PaymentMethodForeignKey,
     StripeCurrencyCodeField,
@@ -196,6 +197,86 @@ class Coupon(StripeModel):
         else:
             duration = self.duration
         return f"{self.human_readable_amount} {duration}"
+
+
+class Discount(StripeModel):
+    """
+    A discount represents the actual application of a coupon or promotion code.
+    It contains information about when the discount began,
+    when it will end, and what it is applied to.
+
+    Stripe documentation: https://stripe.com/docs/api/discounts
+    """
+
+    expand_fields = ["customer"]
+    stripe_class = None
+
+    checkout_session = StripeForeignKey(
+        "Session",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text="The Checkout session that this coupon is applied to, if it is applied to a particular session in payment mode. Will not be present for subscription mode.",
+    )
+    coupon = JSONField(
+        null=True,
+        blank=True,
+        help_text="Hash describing the coupon applied to create this discount.",
+    )
+    customer = StripeForeignKey(
+        "Customer",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text="The ID of the customer associated with this discount.",
+        related_name="customer_discounts",
+    )
+    end = StripeDateTimeField(
+        null=True,
+        blank=True,
+        help_text=(
+            "If the coupon has a duration of repeating, the date that this discount will end. If the coupon has a duration of once or forever, this attribute will be null."
+        ),
+    )
+    invoice = StripeForeignKey(
+        "Invoice",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text="The invoice that the discount’s coupon was applied to, if it was applied directly to a particular invoice.",
+        related_name="invoice_discounts",
+    )
+    invoice_item = InvoiceOrLineItemForeignKey(
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text="The invoice item id (or invoice line item id for invoice line items of type=‘subscription’) that the discount’s coupon was applied to, if it was applied directly to a particular invoice item or invoice line item.",
+    )
+    promotion_code = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="The promotion code applied to create this discount.",
+    )
+    start = StripeDateTimeField(
+        null=True,
+        blank=True,
+        help_text=("Date that the coupon was applied."),
+    )
+    subscription = StripeForeignKey(
+        "subscription",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text="The subscription that this coupon is applied to, if it is applied to a particular subscription.",
+        related_name="subscription_discounts",
+    )
+
+    @classmethod
+    def is_valid_object(cls, data):
+        """
+        Returns whether the data is a valid object for the class
+        """
+        return "object" in data and data["object"] == "discount"
 
 
 class BaseInvoice(StripeModel):
