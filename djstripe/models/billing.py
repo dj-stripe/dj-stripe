@@ -1027,6 +1027,149 @@ class InvoiceItem(StripeModel):
         return super().api_retrieve(*args, **kwargs)
 
 
+class LineItem(StripeModel):
+    """
+    The individual line items that make up the invoice.
+
+    Stripe documentation: https://stripe.com/docs/api/invoices/line_item
+    """
+
+    stripe_class = stripe.InvoiceLineItem
+    # todo uncomment when discount model gets implemented
+    # expand_fields = ["discounts"]
+
+    amount = StripeQuantumCurrencyAmountField(help_text="The amount, in cents.")
+    amount_excluding_tax = StripeQuantumCurrencyAmountField(
+        help_text="The integer amount in cents representing the amount for this line item, excluding all tax and discounts."
+    )
+    currency = StripeCurrencyCodeField()
+    discount_amounts = JSONField(
+        null=True,
+        blank=True,
+        help_text="The amount of discount calculated per discount for this line item.",
+    )
+    discountable = models.BooleanField(
+        default=False,
+        help_text="If True, discounts will apply to this line item. "
+        "Always False for prorations.",
+    )
+    discounts = JSONField(
+        null=True,
+        blank=True,
+        help_text="The discounts applied to the invoice line item. Line item discounts are applied before invoice discounts.",
+    )
+    invoice_item = StripeForeignKey(
+        "InvoiceItem",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text="The ID of the invoice item associated with this line item if any.",
+    )
+    period = JSONField(
+        help_text="The period this line_item covers. For subscription line items, this is the subscription period. For prorations, this starts when the proration was calculated, and ends at the period end of the subscription. For invoice items, this is the time at which the invoice item was created or the period of the item."
+    )
+    period_end = StripeDateTimeField(
+        help_text="The end of the period, which must be greater than or equal to the start."
+    )
+    period_start = StripeDateTimeField(help_text="The start of the period.")
+    price = JSONField(
+        help_text="The price of the line item.",
+    )
+    proration = models.BooleanField(
+        default=False,
+        help_text="Whether or not the invoice item was created automatically as a "
+        "proration adjustment when the customer switched plans.",
+    )
+    proration_details = JSONField(
+        help_text="Additional details for proration line items"
+    )
+    subscription = StripeForeignKey(
+        "Subscription",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text="The subscription that the invoice item pertains to, if any.",
+    )
+    subscription_item = StripeForeignKey(
+        "SubscriptionItem",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text="The subscription item that generated this invoice item. Left empty if the line item is not an explicit result of a subscription.",
+    )
+    tax_amounts = JSONField(
+        null=True,
+        blank=True,
+        help_text="The amount of tax calculated per tax rate for this line item",
+    )
+    tax_rates = JSONField(
+        null=True, blank=True, help_text="The tax rates which apply to the line item."
+    )
+    type = StripeEnumField(enum=enums.LineItem)
+    unit_amount_excluding_tax = StripeDecimalCurrencyAmountField(
+        null=True,
+        blank=True,
+        help_text=(
+            "The amount in cents representing the unit amount for this line item, excluding all tax and discounts."
+        ),
+    )
+    quantity = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="The quantity of the subscription, if the line item is a subscription or a proration.",
+    )
+
+    @classmethod
+    def _manipulate_stripe_object_hook(cls, data):
+        data["period_start"] = data["period"]["start"]
+        data["period_end"] = data["period"]["end"]
+
+        return data
+
+    # todo uncomment when discount model gets implemented
+    # def _attach_objects_post_save_hook(
+    #     self,
+    #     cls,
+    #     data,
+    #     api_key=djstripe_settings.STRIPE_SECRET_KEY,
+    #     pending_relations=None,
+    # ):
+    #     super()._attach_objects_post_save_hook(
+    #         cls, data, api_key=api_key, pending_relations=pending_relations
+    #     )
+    #
+    #
+    # # sync every discount
+    # for discount in self.discounts:
+    #     Discount.sync_from_stripe_data(discount, api_key=api_key)
+
+    @classmethod
+    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        """
+        Call the stripe API's list operation for this model.
+        Note that we only iterate and sync the LineItem associated with the
+        passed in Invoice.
+
+        Upcoming invoices are virtual and are not saved and hence their
+        line items are also not retrieved and synced
+
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+
+        See Stripe documentation for accepted kwargs for each object.
+
+        :returns: an iterator over all items in the query
+        """
+        # get current invoice if any
+        invoice_id = kwargs.pop("id")
+
+        invoice = Invoice.stripe_class.retrieve(invoice_id, api_key=api_key, **kwargs)
+
+        # iterate over all the line items on the current invoice
+        return invoice.lines.list(api_key=api_key, **kwargs).auto_paging_iter()
+
+
 class Plan(StripeModel):
     """
     A subscription plan contains the pricing information for different
