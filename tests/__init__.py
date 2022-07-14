@@ -1384,6 +1384,14 @@ FAKE_DISCOUNT_CUSTOMER = {
 }
 
 
+FAKE_LINE_ITEM = load_fixture("line_item_il_invoice_item_fakefakefakefakefake0001.json")
+
+
+FAKE_LINE_ITEM_SUBSCRIPTION = load_fixture(
+    "line_item_il_invoice_item_fakefakefakefakefake0002.json"
+)
+
+
 class InvoiceDict(StripeItem):
     def __init__(self, *args, **kwargs):
         """Match Stripe's behavior: return a stripe iterable on `invoice.lines`."""
