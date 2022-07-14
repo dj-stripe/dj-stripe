@@ -168,9 +168,6 @@ class Coupon(StripeModel):
     class Meta(StripeModel.Meta):
         unique_together = ("id", "livemode")
 
-    stripe_class = stripe.Coupon
-    stripe_dashboard_item_name = "coupons"
-
     def __str__(self):
         if self.name:
             return self.name
