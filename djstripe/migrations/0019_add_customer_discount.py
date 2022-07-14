@@ -28,4 +28,9 @@ class Migration(migrations.Migration):
             name="discounts",
             field=djstripe.fields.JSONField(blank=True, null=True),
         ),
+        migrations.AddField(
+            model_name="invoiceitem",
+            name="discounts",
+            field=djstripe.fields.JSONField(blank=True, null=True),
+        ),
     ]
