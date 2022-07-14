@@ -1003,6 +1003,7 @@ class InvoiceItem(StripeModel):
     """
 
     stripe_class = stripe.InvoiceItem
+    expand_fields = ["discounts"]
 
     amount = StripeDecimalCurrencyAmountField(help_text="Amount invoiced (as decimal).")
     currency = StripeCurrencyCodeField()
@@ -1018,7 +1019,11 @@ class InvoiceItem(StripeModel):
         help_text="If True, discounts will apply to this invoice item. "
         "Always False for prorations.",
     )
-    # TODO: discounts
+    discounts = JSONField(
+        null=True,
+        blank=True,
+        help_text="The discounts which apply to the invoice item. Item discounts are applied before invoice discounts.",
+    )
     invoice = StripeForeignKey(
         "Invoice",
         on_delete=models.CASCADE,
@@ -1120,6 +1125,10 @@ class InvoiceItem(StripeModel):
                     target_cls=TaxRate, data=data, api_key=api_key
                 )
             )
+
+        # sync every discount
+        for discount in self.discounts:
+            Discount.sync_from_stripe_data(discount, api_key=api_key)
 
     def __str__(self):
         return self.description
