@@ -844,7 +844,13 @@ class UpcomingInvoice(BaseInvoice):
         return a mock of a queryset, but with the data fetched from Stripe - It
         will act like a normal queryset, but mutation will silently fail.
         """
-        return QuerySetMock.from_iterable(InvoiceItem, self._invoiceitems)
+        # filter lineitems with type="invoice_item" and fetch all the actual InvoiceItem objects
+        items = []
+        for item in self._lineitems:
+            if item.type == "invoice_item":
+                items.append(item.invoice_item)
+
+        return QuerySetMock.from_iterable(InvoiceItem, items)
 
     @property
     def lineitems(self):
