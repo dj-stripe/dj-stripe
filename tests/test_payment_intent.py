@@ -9,6 +9,7 @@ import stripe
 from django.test import TestCase
 
 from djstripe.models import PaymentIntent
+from djstripe.models.billing import Invoice
 
 from . import (
     FAKE_ACCOUNT,
@@ -16,11 +17,13 @@ from . import (
     FAKE_CHARGE,
     FAKE_CUSTOMER,
     FAKE_INVOICE,
+    FAKE_INVOICEITEM,
     FAKE_PAYMENT_INTENT_DESTINATION_CHARGE,
     FAKE_PAYMENT_INTENT_I,
     FAKE_PAYMENT_METHOD_I,
     FAKE_PRODUCT,
     FAKE_SUBSCRIPTION,
+    FAKE_SUBSCRIPTION_ITEM,
     AssertStripeFksMixin,
 )
 
@@ -76,9 +79,15 @@ class TestStrPaymentIntent:
             """Monkeypatched stripe.Invoice.retrieve"""
             return deepcopy(FAKE_INVOICE)
 
+        def mock_invoice_item_get(*args, **kwargs):
+            return FAKE_INVOICEITEM
+
         def mock_subscription_get(*args, **kwargs):
             """Monkeypatched stripe.Subscription.retrieve"""
             return deepcopy(FAKE_SUBSCRIPTION)
+
+        def mock_subscriptionitem_get(*args, **kwargs):
+            return FAKE_SUBSCRIPTION_ITEM
 
         def mock_balance_transaction_get(*args, **kwargs):
             """Monkeypatched stripe.BalanceTransaction.retrieve"""
@@ -100,6 +109,10 @@ class TestStrPaymentIntent:
 
         # because of Reverse o2o field sync due to PaymentIntent.sync_from_stripe_data..
         monkeypatch.setattr(stripe.Invoice, "retrieve", mock_invoice_get)
+        monkeypatch.setattr(stripe.InvoiceItem, "retrieve", mock_invoice_item_get)
+        monkeypatch.setattr(
+            stripe.SubscriptionItem, "retrieve", mock_subscriptionitem_get
+        )
         monkeypatch.setattr(stripe.Subscription, "retrieve", mock_subscription_get)
         monkeypatch.setattr(
             stripe.BalanceTransaction, "retrieve", mock_balance_transaction_get
@@ -144,6 +157,11 @@ class PaymentIntentTest(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -158,7 +176,17 @@ class PaymentIntentTest(AssertStripeFksMixin, TestCase):
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
+        autospec=True,
+    )
+    @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
     )
     @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
@@ -166,14 +194,16 @@ class PaymentIntentTest(AssertStripeFksMixin, TestCase):
     def test_sync_from_stripe_data(
         self,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         customer_retrieve_mock,
+        paymentintent_retrieve_mock,
         product_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
-
         payment_intent = PaymentIntent.sync_from_stripe_data(
             deepcopy(FAKE_PAYMENT_INTENT_I)
         )
@@ -212,6 +242,11 @@ class PaymentIntentTest(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -226,7 +261,17 @@ class PaymentIntentTest(AssertStripeFksMixin, TestCase):
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
+        autospec=True,
+    )
+    @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
     )
     @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
@@ -234,11 +279,14 @@ class PaymentIntentTest(AssertStripeFksMixin, TestCase):
     def test_status_enum(
         self,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         customer_retrieve_mock,
+        paymentintent_retrieve_mock,
         product_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
         fake_payment_intent = deepcopy(FAKE_PAYMENT_INTENT_I)
@@ -265,6 +313,11 @@ class PaymentIntentTest(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -279,7 +332,16 @@ class PaymentIntentTest(AssertStripeFksMixin, TestCase):
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     @patch(
+        "stripe.PaymentIntent.retrieve",
+        autospec=True,
+    )
+    @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
+    @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
     )
     @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
@@ -287,11 +349,14 @@ class PaymentIntentTest(AssertStripeFksMixin, TestCase):
     def test_canceled_intent(
         self,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         customer_retrieve_mock,
+        paymentintent_retrieve_mock,
         product_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
         fake_payment_intent = deepcopy(FAKE_PAYMENT_INTENT_I)
@@ -310,6 +375,8 @@ class PaymentIntentTest(AssertStripeFksMixin, TestCase):
             "automatic",
         ):
             fake_payment_intent["cancellation_reason"] = reason
+            paymentintent_retrieve_mock.return_value = fake_payment_intent
+
             payment_intent = PaymentIntent.sync_from_stripe_data(fake_payment_intent)
             assert payment_intent
 
