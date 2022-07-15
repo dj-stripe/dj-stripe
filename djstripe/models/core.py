@@ -830,11 +830,6 @@ class Customer(StripeModel):
             # set "deleted" key to False (default)
             data["deleted"] = False
 
-        discount = data.get("discount")
-        if discount:
-            data["coupon_start"] = discount["start"]
-            data["coupon_end"] = discount["end"]
-
         # Populate the object id for our default_payment_method field (or set it None)
         data["default_payment_method"] = data.get("invoice_settings", {}).get(
             "default_payment_method"
@@ -1343,8 +1338,7 @@ class Customer(StripeModel):
         data,
         pending_relations=None,
         api_key=djstripe_settings.STRIPE_SECRET_KEY,
-    ):
-        from .billing import Coupon
+    ):  # noqa (function complexity)
         from .payment_methods import DjstripePaymentMethod
 
         super()._attach_objects_post_save_hook(
@@ -1364,18 +1358,6 @@ class Customer(StripeModel):
                     source, source["object"], api_key=api_key
                 )
                 sources[source["id"]] = obj
-
-        discount = data.get("discount")
-        if discount:
-            coupon, _created = Coupon._get_or_create_from_stripe_object(
-                discount, "coupon", api_key=api_key
-            )
-            if coupon and coupon != self.coupon:
-                self.coupon = coupon
-                save = True
-        elif self.coupon:
-            self.coupon = None
-            save = True
 
         if save:
             self.save()
