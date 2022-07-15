@@ -207,7 +207,7 @@ class PlanTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             plan,
-            expected_blank_fks={"djstripe.Customer.coupon", "djstripe.Plan.product"},
+            expected_blank_fks={"djstripe.Plan.product"},
         )
 
     def test_stripe_tier_plan(self):

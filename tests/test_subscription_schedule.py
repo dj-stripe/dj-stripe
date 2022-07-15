@@ -93,7 +93,6 @@ class SubscriptionScheduleTest(CreateAccountMixin, AssertStripeFksMixin, TestCas
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
         self.default_expected_blank_fks = {
-            "djstripe.Customer.coupon",
             "djstripe.Customer.default_payment_method",
             "djstripe.Charge.application_fee",
             "djstripe.Charge.dispute",

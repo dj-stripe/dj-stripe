@@ -48,7 +48,6 @@ class RefundTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             "djstripe.Charge.refund",
             "djstripe.Charge.source_transfer",
             "djstripe.Charge.transfer",
-            "djstripe.Customer.coupon",
             "djstripe.Customer.default_payment_method",
             "djstripe.Invoice.default_payment_method",
             "djstripe.Invoice.default_source",

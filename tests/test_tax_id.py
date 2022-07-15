@@ -65,7 +65,6 @@ class TestTransfer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assert_fks(
             tax_id,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.subscriber",
             },

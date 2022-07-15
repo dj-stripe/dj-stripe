@@ -65,7 +65,6 @@ pytestmark = pytest.mark.django_db
             [
                 "djstripe_owner_account",
                 "default_source",
-                "coupon",
                 "default_payment_method",
                 "subscriber",
             ],

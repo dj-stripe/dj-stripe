@@ -734,26 +734,6 @@ class Customer(StripeModel):
             "Whether the Customer instance has been deleted upstream in Stripe or not."
         ),
     )
-    # <discount>
-    coupon = models.ForeignKey(
-        "Coupon", null=True, blank=True, on_delete=models.SET_NULL
-    )
-    coupon_start = StripeDateTimeField(
-        null=True,
-        blank=True,
-        editable=False,
-        help_text="If a coupon is present, the date at which it was applied.",
-    )
-    coupon_end = StripeDateTimeField(
-        null=True,
-        blank=True,
-        editable=False,
-        help_text=(
-            "If a coupon is present and has a limited duration, "
-            "the date that the discount will end."
-        ),
-    )
-    # </discount>
     discount = JSONField(
         null=True,
         blank=True,
@@ -761,7 +741,6 @@ class Customer(StripeModel):
             "Describes the current discount active on the customer, if there is one."
         ),
     )
-
     email = models.TextField(max_length=5000, default="", blank=True)
     invoice_prefix = models.CharField(
         default="",

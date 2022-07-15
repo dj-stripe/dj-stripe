@@ -72,7 +72,6 @@ class TestUsageRecordSummary(CreateAccountMixin, AssertStripeFksMixin, TestCase)
         self.assert_fks(
             usage_record_summary,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.subscriber",
                 "djstripe.Product.default_price",
@@ -141,7 +140,6 @@ class TestUsageRecordSummary(CreateAccountMixin, AssertStripeFksMixin, TestCase)
         self.assert_fks(
             usage_record_summary,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.subscriber",
                 "djstripe.Product.default_price",
