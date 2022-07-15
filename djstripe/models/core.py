@@ -1229,17 +1229,21 @@ class Customer(StripeModel):
                 if str(exc) != "Invoice is already paid":
                     raise
 
-    def add_coupon(self, coupon, idempotency_key=None):
-        """
-        Add a coupon to a Customer.
+    def has_valid_source(self):
+        """Check whether the customer has a valid payment source."""
+        warnings.warn(
+            "Customer.has_valid_source() is deprecated and will be removed in dj-stripe 2.8. "
+            "Use `Customer.default_source is not None` instead.",
+            DeprecationWarning,
+        )
+        return self.default_source is not None
 
-        The coupon can be a Coupon object, or a valid Stripe Coupon ID.
+    def add_discount(self, discount: dict, idempotency_key=None):
         """
-        if isinstance(coupon, StripeModel):
-            coupon = coupon.id
-
+        Add a Discount to a Customer.
+        """
         stripe_customer = self.api_retrieve()
-        stripe_customer["coupon"] = coupon
+        stripe_customer["discount"] = discount
         stripe_customer.save(idempotency_key=idempotency_key)
         return self.__class__.sync_from_stripe_data(
             stripe_customer, api_key=self.default_api_key

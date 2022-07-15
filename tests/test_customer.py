@@ -729,52 +729,26 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         with self.assertRaises(ValueError):
             self.customer.charge(10)
 
-    @patch("stripe.Coupon.retrieve", return_value=deepcopy(FAKE_COUPON), autospec=True)
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
-    def test_add_coupon_by_id(self, customer_retrieve_mock, coupon_retrieve_mock):
-        self.assertEqual(self.customer.coupon, None)
-        self.customer.add_coupon(FAKE_COUPON["id"])
-        customer_retrieve_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            expand=ANY,
-            id=FAKE_CUSTOMER["id"],
-            stripe_account=self.customer.djstripe_owner_account.id,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-        )
-
-    @patch("stripe.Coupon.retrieve", return_value=deepcopy(FAKE_COUPON), autospec=True)
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    def test_add_coupon_by_object(self, customer_retrieve_mock, coupon_retrieve_mock):
-        self.assertEqual(self.customer.coupon, None)
-        coupon = Coupon.sync_from_stripe_data(FAKE_COUPON)
+    def test_add_discount(self, customer_retrieve_mock):
+        self.assertEqual(self.customer.discount, None)
         fake_discount = deepcopy(FAKE_DISCOUNT_CUSTOMER)
 
-        def fake_customer_save(self, *args, **kwargs):
-            # fake the api coupon update behaviour
-            coupon = self.pop("coupon", None)
-            if coupon:
-                self["discount"] = fake_discount
-            else:
-                self["discount"] = None
-
-            return self
-
-        with patch("tests.CustomerDict.save", new=fake_customer_save):
-            self.customer.add_coupon(coupon)
+        self.customer.add_discount(fake_discount)
 
         customer_retrieve_mock.assert_called_once_with(
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            expand=ANY,
+            expand=["default_source", "sources"],
             id=FAKE_CUSTOMER["id"],
             stripe_account=self.customer.djstripe_owner_account.id,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
         self.customer.refresh_from_db()
+
+        self.assertEqual(self.customer.discount["id"], "di_fakefakefakefakefake0002")
 
         self.assert_fks(
             self.customer,
