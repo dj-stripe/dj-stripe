@@ -22,7 +22,6 @@ from djstripe.settings import djstripe_settings
 
 from . import models, webhooks
 from .enums import PayoutType, SourceType
-from .utils import convert_tstamp
 
 logger = logging.getLogger(__name__)
 
@@ -80,38 +79,19 @@ def customer_webhook_handler(event):
 
 @webhooks.handler("customer.discount")
 def customer_discount_webhook_handler(event):
-    """Handle updates to customer discount objects.
-
-    Docs: https://stripe.com/docs/api#discounts
-
-    Because there is no concept of a "Discount" model in dj-stripe (due to the
-    lack of a stripe id on them), this is a little different to the other
-    handlers.
-    """
+    """Handle updates to customer discount objects."""
 
     crud_type = CrudType.determine(event=event)
-    discount_data = event.data.get("object", {})
-    coupon_data = discount_data.get("coupon", {})
-    customer = event.customer
+    # will recieve all events of the type customer.discount.Y so
+    # need to ensure the data object is related to Discount Object
+    target_object_type = event.data.get("object", {}).get("object", {})
 
-    if crud_type is CrudType.DELETED:
-        coupon = None
-        coupon_start = None
-        coupon_end = None
-    else:
-        coupon = _handle_crud_like_event(
-            target_cls=models.Coupon,
+    if target_object_type == "discount":
+        _handle_crud_like_event(
+            target_cls=models.Discount,
             event=event,
-            data=coupon_data,
-            id=coupon_data.get("id"),
+            crud_type=crud_type,
         )
-        coupon_start = discount_data.get("start")
-        coupon_end = discount_data.get("end")
-
-    customer.coupon = coupon
-    customer.coupon_start = convert_tstamp(coupon_start)
-    customer.coupon_end = convert_tstamp(coupon_end)
-    customer.save()
 
 
 @webhooks.handler("customer.source")

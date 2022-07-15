@@ -13,7 +13,6 @@ from djstripe.enums import SubscriptionStatus
 from djstripe.models import (
     Card,
     Charge,
-    Coupon,
     Customer,
     Dispute,
     DjstripePaymentMethod,
@@ -50,6 +49,7 @@ from . import (
     FAKE_CUSTOM_ACCOUNT,
     FAKE_CUSTOMER,
     FAKE_CUSTOMER_II,
+    FAKE_DISCOUNT_CUSTOMER,
     FAKE_DISPUTE_BALANCE_TRANSACTION,
     FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_FULL,
     FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_PARTIAL,
@@ -1218,30 +1218,38 @@ class TestCustomerEvents(CreateAccountMixin, EventTestCase):
         customer = Customer.objects.get(id=FAKE_CUSTOMER["id"])
         self.assertIsNotNone(customer.date_purged)
 
+    @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
     @patch("stripe.Coupon.retrieve", return_value=FAKE_COUPON, autospec=True)
     @patch(
         "stripe.Event.retrieve",
         return_value=FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED,
         autospec=True,
     )
-    def test_customer_discount_created(self, event_retrieve_mock, coupon_retrieve_mock):
+    def test_customer_discount_created(
+        self, event_retrieve_mock, coupon_retrieve_mock, customer_retrieve_mock
+    ):
         fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED)
+        fake_customer_with_discount = deepcopy(FAKE_CUSTOMER)
+        fake_customer_with_discount["discount"] = FAKE_DISCOUNT_CUSTOMER
+        customer_retrieve_mock.return_value = fake_customer_with_discount
+
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
 
         self.assertIsNotNone(event.customer)
         self.assertEqual(event.customer.id, FAKE_CUSTOMER["id"])
-        self.assertIsNotNone(event.customer.coupon)
+        self.assertIsNotNone(event.customer.discount)
 
-    @patch("stripe.Coupon.retrieve", return_value=FAKE_COUPON, autospec=True)
+    @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
     @patch(
         "stripe.Event.retrieve",
         return_value=FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED,
         autospec=True,
     )
-    def test_customer_discount_deleted(self, event_retrieve_mock, coupon_retrieve_mock):
-        coupon = Coupon.sync_from_stripe_data(FAKE_COUPON)
-        self.customer.coupon = coupon
+    def test_customer_discount_deleted(
+        self, event_retrieve_mock, customer_retrieve_mock
+    ):
+        self.customer.discount = deepcopy(FAKE_DISCOUNT_CUSTOMER)
 
         fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED)
         event = Event.sync_from_stripe_data(fake_stripe_event)
@@ -1249,7 +1257,7 @@ class TestCustomerEvents(CreateAccountMixin, EventTestCase):
 
         self.assertIsNotNone(event.customer)
         self.assertEqual(event.customer.id, FAKE_CUSTOMER["id"])
-        self.assertIsNone(event.customer.coupon)
+        self.assertIsNone(event.customer.discount)
 
     @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
     @patch("stripe.Event.retrieve", autospec=True)
