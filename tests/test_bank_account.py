@@ -193,7 +193,6 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
                 "djstripe.BankAccount.account",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.default_source",
-                "djstripe.Customer.coupon",
             },
         )
 
@@ -215,7 +214,6 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
             expected_blank_fks={
                 "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.default_source",
-                "djstripe.Customer.coupon",
             },
         )
 
@@ -238,7 +236,6 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
                 "djstripe.BankAccount.customer",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.default_source",
-                "djstripe.Customer.coupon",
             },
         )
 

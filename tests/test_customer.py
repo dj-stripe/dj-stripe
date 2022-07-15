@@ -154,7 +154,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             customer,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.subscriber",
             },
@@ -172,7 +171,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             customer,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.subscriber",
             },
@@ -205,7 +203,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             customer,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.default_source",
             },
@@ -278,7 +275,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             customer,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
             },
         )
@@ -307,7 +303,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             customer,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.default_source",
             },
@@ -329,7 +324,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             customer,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.subscriber",
             },
@@ -360,7 +354,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             customer,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.subscriber",
             },
         )
@@ -393,7 +386,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             customer,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.subscriber",
             },
         )
@@ -419,7 +411,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             customer,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.subscriber",
                 "djstripe.Customer.default_payment_method",
             },
@@ -643,7 +634,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             self.customer.invoice_settings["default_payment_method"],
         )
 
-        self.assert_fks(self.customer, expected_blank_fks={"djstripe.Customer.coupon"})
+        self.assert_fks(self.customer, expected_blank_fks={})
 
     @patch("stripe.Customer.retrieve", autospec=True)
     @patch("stripe.PaymentMethod.attach", return_value=deepcopy(FAKE_PAYMENT_METHOD_I))
@@ -690,7 +681,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             self.customer,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_source",
             },
         )
@@ -730,7 +720,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             self.customer,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.default_source",
             },
@@ -846,7 +835,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 "djstripe.Charge.on_behalf_of",
                 "djstripe.Charge.source_transfer",
                 "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.PaymentIntent.invoice (related name)",
                 "djstripe.PaymentIntent.on_behalf_of",
@@ -878,7 +866,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 "djstripe.Charge.on_behalf_of",
                 "djstripe.Charge.source_transfer",
                 "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.PaymentIntent.invoice (related name)",
                 "djstripe.PaymentIntent.on_behalf_of",
@@ -941,7 +928,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 "djstripe.Charge.on_behalf_of",
                 "djstripe.Charge.source_transfer",
                 "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.PaymentIntent.invoice (related name)",
                 "djstripe.PaymentIntent.on_behalf_of",
@@ -967,7 +953,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 "djstripe.Charge.on_behalf_of",
                 "djstripe.Charge.source_transfer",
                 "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.PaymentIntent.invoice (related name)",
                 "djstripe.PaymentIntent.on_behalf_of",

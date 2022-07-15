@@ -66,7 +66,6 @@ class TestUsageRecord(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             usage_record,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.subscriber",
                 "djstripe.Product.default_price",

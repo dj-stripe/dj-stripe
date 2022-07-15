@@ -116,7 +116,6 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             payment_method,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
             },
         )
@@ -135,7 +134,6 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             payment_method,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
             },
         )
@@ -163,7 +161,6 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             payment_method,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
             },
         )

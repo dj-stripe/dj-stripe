@@ -55,7 +55,6 @@ class SourceTest(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             source,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
             },
         )
@@ -72,7 +71,6 @@ class SourceTest(AssertStripeFksMixin, TestCase):
         self.assert_fks(
             source,
             expected_blank_fks={
-                "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
             },
         )

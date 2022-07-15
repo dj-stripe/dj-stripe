@@ -52,7 +52,6 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
             "djstripe.Charge.on_behalf_of",
             "djstripe.Charge.source_transfer",
             "djstripe.Charge.transfer",
-            "djstripe.Customer.coupon",
             "djstripe.Customer.default_payment_method",
             "djstripe.Customer.subscriber",
             "djstripe.Invoice.default_payment_method",
