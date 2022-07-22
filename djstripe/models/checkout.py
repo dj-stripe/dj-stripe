@@ -33,6 +33,7 @@ class Session(StripeModel):
         "subscription",
     ]
     stripe_class = stripe.checkout.Session
+    expand_fields = ["customer", "payment_intent", "subscription"]
 
     amount_total = StripeQuantumCurrencyAmountField(
         null=True,

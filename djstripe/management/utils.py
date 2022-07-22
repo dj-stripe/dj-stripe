@@ -141,6 +141,83 @@ def get_list_kwargs_sis(default_list_kwargs):
     return all_list_kwargs
 
 
+# todo add a parent model, related model args to make the . chanin explicit?
+def util(model, expand=[]):
+    rel_fields = []
+    try:
+        # get all forward and reverse relations for given cls
+        for field in model.expand_fields:
+            expand.append(f"data.{field}")
+
+            field_inst = model._meta.get_field(field)
+
+            # get expand_fields on Forward FK and OneToOneField relations on the current model
+            if isinstance(
+                field_inst, (django_models.ForeignKey, django_models.OneToOneField)
+            ):
+
+                rel_fields.append(field_inst)
+
+    except AttributeError:
+        pass
+    # print(expand)
+    return rel_fields, expand
+
+
+# todo simplfy this code by spliting ontop 1-2 functions
+
+
+def get_default_list_kwargs_new(model, accounts_set, api_key: str):
+    """Returns default sequence of kwargs to sync
+    all Stripe Accounts"""
+    expand = []
+
+    related_fields, expand = util(model, expand)
+
+    try:
+        for field in related_fields:
+            related_fields_new, expand = util(field.related_model, expand=expand)
+            for related_model_expand_field_inst in related_fields_new:
+                try:
+                    # need to prepend "field_name." to each of the entry in the expand_fields list
+                    related_model_expand_fields = map(
+                        lambda i: f"data.{field.name}.{related_model_expand_field_inst.name}.{i}",
+                        related_model_expand_field_inst.related_model.expand_fields,
+                    )
+
+                    expand = [
+                        *expand,
+                        *related_model_expand_fields,
+                    ]
+                except AttributeError:
+                    continue
+
+    except AttributeError:
+        pass
+
+    if expand:
+        default_list_kwargs = [
+            {
+                "expand": expand,
+                "stripe_account": account,
+                "api_key": api_key,
+            }
+            for account in accounts_set
+        ]
+
+    else:
+        default_list_kwargs = [
+            {
+                "stripe_account": account,
+                "api_key": api_key,
+            }
+            for account in accounts_set
+        ]
+    print("expand:", expand)
+
+    return default_list_kwargs
+
+
 # todo simplfy this code by spliting ontop 1-2 functions
 def get_default_list_kwargs(model, accounts_set, api_key: str):  # noqa: C901
     """Returns default sequence of kwargs to sync
@@ -253,6 +330,11 @@ def get_list_kwargs(model, api_key: str):
     accs_set = get_stripe_account(api_key=api_key)
 
     default_list_kwargs = get_default_list_kwargs(model, accs_set, api_key=api_key)
+
+    default_list_kwargs_new = get_default_list_kwargs_new(
+        model, accs_set, api_key=api_key
+    )
+    assert default_list_kwargs == default_list_kwargs_new
 
     handler = list_kwarg_handlers_dict.get(
         model.__name__, lambda _: default_list_kwargs

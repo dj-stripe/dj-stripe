@@ -10,6 +10,7 @@ from stripe.error import InvalidRequestError
 
 from djstripe import models
 
+from ..utils import warn_about_unregistered_in_admin_models
 from .actions import CustomActionMixin
 from .admin_inline import (
     InvoiceItemInline,
@@ -31,7 +32,6 @@ from .utils import (
     ReadOnlyMixin,
     custom_display_for_JSONfield,
     get_forward_relation_fields_for_model,
-    warn_about_unregistered_in_admin_models
 )
 
 
@@ -813,6 +813,7 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("djstripe_owner_account")
+
 
 # run warnings after all models have been registered
 warn_about_unregistered_in_admin_models()

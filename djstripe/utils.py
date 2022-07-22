@@ -8,8 +8,8 @@ from typing import Optional
 import stripe
 from django.apps import apps
 from django.conf import settings
-from django.contrib.humanize.templatetags.humanize import intcomma
 from django.contrib import admin
+from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db.models.query import QuerySet
 from django.utils import timezone
 

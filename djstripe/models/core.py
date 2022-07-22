@@ -58,6 +58,8 @@ class BalanceTransaction(StripeModel):
     """
 
     stripe_class = stripe.BalanceTransaction
+    # # TODO Uncomment after Source FK gets implemented
+    # expand_fields = ["source"]
 
     amount = StripeQuantumCurrencyAmountField(
         help_text="Gross amount of the transaction, in cents."
@@ -77,6 +79,7 @@ class BalanceTransaction(StripeModel):
     net = StripeQuantumCurrencyAmountField(
         help_text="Net amount of the transaction, in cents."
     )
+    # todo turn this into a FK to Source model?
     source = StripeIdField()
     reporting_category = StripeEnumField(
         enum=enums.BalanceTransactionReportingCategory,
@@ -115,7 +118,9 @@ class Charge(StripeModel):
     """
 
     stripe_class = stripe.Charge
-    expand_fields = ["balance_transaction"]
+    # todo some expandable fields are only applicable for connect accounts and hence may need to be handled differently.
+    # connect_expand_fields = ["application_fee", "on_behalf_of", "source_transfer", "transfer"]
+    expand_fields = ["balance_transaction", "customer", "invoice", "payment_intent"]
     stripe_dashboard_item_name = "payments"
 
     amount = StripeDecimalCurrencyAmountField(help_text="Amount charged (as decimal).")
@@ -500,6 +505,7 @@ class Mandate(StripeModel):
     """
 
     stripe_class = stripe.Mandate
+    expand_fields = ["payment_method"]
 
     customer_acceptance = JSONField(
         help_text="Details about the customer's acceptance of the mandate."
@@ -1430,6 +1436,7 @@ class Dispute(StripeModel):
     """
 
     stripe_class = stripe.Dispute
+    expand_fields = ["charge", "payment_intent"]
     stripe_dashboard_item_name = "payments"
 
     amount = StripeQuantumCurrencyAmountField(
@@ -1719,6 +1726,7 @@ class FileLink(StripeModel):
     """
 
     stripe_class = stripe.FileLink
+    expand_fields = ["file"]
 
     expires_at = StripeDateTimeField(
         null=True, blank=True, help_text="Time at which the link expires."
@@ -1745,6 +1753,9 @@ class PaymentIntent(StripeModel):
     """
 
     stripe_class = stripe.PaymentIntent
+    # todo some expandable fields are only applicable for connect accounts and hence may need to be handled differently.
+    # connect_expand_fields = ["on_behalf_of"]
+    expand_fields = ["customer", "payment_method"]
     stripe_dashboard_item_name = "payments"
 
     amount = StripeQuantumCurrencyAmountField(
@@ -1987,6 +1998,9 @@ class SetupIntent(StripeModel):
     """
 
     stripe_class = stripe.SetupIntent
+    # todo some expandable fields are only applicable for connect accounts and hence may need to be handled differently.
+    # connect_expand_fields = ["on_behalf_of"]
+    expand_fields = ["customer", "payment_method"]
 
     application = models.CharField(
         max_length=255,
@@ -2099,7 +2113,11 @@ class Payout(StripeModel):
     Stripe documentation: https://stripe.com/docs/api?lang=python#payouts
     """
 
-    expand_fields = ["destination"]
+    expand_fields = [
+        "balance_transaction",
+        "destination",
+        "failure_balance_transaction",
+    ]
     stripe_class = stripe.Payout
     stripe_dashboard_item_name = "payouts"
 
@@ -2379,7 +2397,8 @@ class Price(StripeModel):
         if self.billing_scheme == "per_unit":
             unit_amount = (self.unit_amount or 0) / 100
             amount = get_friendly_currency_amount(unit_amount, self.currency)
-        else:
+        # else:
+        elif self.tiers:
             # tiered billing scheme
             tier_1 = self.tiers[0]
             formatted_unit_amount_tier_1 = get_friendly_currency_amount(
@@ -2394,7 +2413,8 @@ class Price(StripeModel):
                     flat_amount_tier_1 / 100, self.currency
                 )
                 amount = f"{amount} + {formatted_flat_amount_tier_1}"
-
+        else:
+            amount = 99999999999999
         format_args = {"amount": amount}
 
         if self.recurring:
@@ -2435,6 +2455,7 @@ class Refund(StripeModel):
     """
 
     stripe_class = stripe.Refund
+    expand_fields = ["balance_transaction", "charge", "failure_balance_transaction"]
 
     amount = StripeQuantumCurrencyAmountField(help_text="Amount, in cents.")
     balance_transaction = StripeForeignKey(

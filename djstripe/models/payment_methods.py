@@ -374,6 +374,7 @@ class BankAccount(LegacySourceMixin, StripeModel):
     """
 
     stripe_class = stripe.BankAccount
+    expand_fields = ["customer", "account"]
 
     account = StripeForeignKey(
         "Account",
@@ -490,6 +491,10 @@ class Card(LegacySourceMixin, StripeModel):
     """
 
     stripe_class = stripe.Card
+
+    # todo test if account is posible to be expanded for regular accounts. Or would need to be injected dynamically in the sync management command?
+    expand_fields = ["customer", "account"]
+
     # Stripe Custom Connected Accounts can have cards as "Payout Sources"
     account = StripeForeignKey(
         "Account",
@@ -938,6 +943,7 @@ class PaymentMethod(StripeModel):
     """
 
     stripe_class = stripe.PaymentMethod
+    expand_fields = ["customer"]
     description = None
 
     billing_details = JSONField(

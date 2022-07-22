@@ -271,6 +271,14 @@ class BaseInvoice(StripeModel):
     """
 
     stripe_class = stripe.Invoice
+    expand_fields = [
+        "charge",
+        "customer",
+        "payment_intent",
+        "subscription",
+        "default_payment_method",
+        "default_source",
+    ]
     stripe_dashboard_item_name = "invoices"
     expand_fields = ["discounts"]
 
@@ -457,6 +465,17 @@ class BaseInvoice(StripeModel):
             "subscription's default payment method, if any, or to the default payment "
             "method in the customer's invoice settings."
         ),
+    )
+    default_source = PaymentMethodForeignKey(
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="%(class)ss",
+        # related_name="invoices",
+        help_text="The default payment source for the invoice. "
+        "It must belong to the customer associated with the invoice and be "
+        "in a chargeable state. If not set, defaults to the subscription's "
+        "default source, if any, or to the customer's default source.",
     )
     # Note: default_tax_rates is handled in the subclasses since it's a
     # ManyToManyField, otherwise reverse accessors clash
@@ -1052,7 +1071,7 @@ class InvoiceItem(StripeModel):
     """
 
     stripe_class = stripe.InvoiceItem
-    expand_fields = ["discounts"]
+    expand_fields = ["discounts", "customer", "invoice", "subscription", "price", "plan"]
 
     amount = StripeDecimalCurrencyAmountField(help_text="Amount invoiced (as decimal).")
     currency = StripeCurrencyCodeField()
@@ -1435,7 +1454,8 @@ class Plan(StripeModel):
         if self.billing_scheme == "per_unit":
             unit_amount = self.amount
             amount = get_friendly_currency_amount(unit_amount, self.currency)
-        else:
+        # else:
+        elif self.tiers:
             # tiered billing scheme
             tier_1 = self.tiers[0]
             flat_amount_tier_1 = tier_1["flat_amount"]
@@ -1450,7 +1470,8 @@ class Plan(StripeModel):
                     flat_amount_tier_1 / 100, self.currency
                 )
                 amount = f"{amount} + {formatted_flat_amount_tier_1}"
-
+        else:
+            amount = 999999999
         format_args = {"amount": amount}
 
         interval_count = self.interval_count
@@ -1502,6 +1523,14 @@ class Subscription(StripeModel):
     """
 
     stripe_class = stripe.Subscription
+    expand_fields = [
+        "customer",
+        "default_payment_method",
+        "default_source",
+        "latest_invoice",
+        "pending_setup_intent",
+        "schedule",
+    ]
     stripe_dashboard_item_name = "subscriptions"
 
     customer = StripeForeignKey(
@@ -1729,6 +1758,7 @@ class SubscriptionItem(StripeModel):
     """
 
     stripe_class = stripe.SubscriptionItem
+    expand_fields = ["price", "plan"]
 
     billing_thresholds = JSONField(
         null=True,
@@ -1828,6 +1858,7 @@ class SubscriptionSchedule(StripeModel):
     """
 
     stripe_class = stripe.SubscriptionSchedule
+    expand_fields = ["customer", "subscription"]
     stripe_dashboard_item_name = "subscription_schedules"
 
     canceled_at = StripeDateTimeField(
@@ -1987,11 +2018,12 @@ class ShippingRate(StripeModel):
     to your customers and can be applied to Checkout Sessions
     to collect shipping costs.
 
-    Stripe documentation: https://stripe.com/docs/api/shipping_rates
+    Stripe documentation: https://stripe.com/docs/api/shipping_rates?lang=python
     """
 
     stripe_class = stripe.ShippingRate
     stripe_dashboard_item_name = "shipping-rates"
+    expand_fields = ["tax_code"]
     description = None
 
     active = models.BooleanField(
@@ -2063,7 +2095,7 @@ class TaxCode(StripeModel):
     """
     Tax codes classify goods and services for tax purposes.
 
-    Stripe documentation: https://stripe.com/docs/api/tax_codes
+    Stripe documentation: https://stripe.com/docs/api/tax_codes?lang=python
     """
 
     stripe_class = stripe.TaxCode
@@ -2096,6 +2128,7 @@ class TaxId(StripeModel):
     """
 
     stripe_class = stripe.TaxId
+    expand_fields = ["customer"]
     description = None
     metadata = None
 

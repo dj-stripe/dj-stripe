@@ -376,7 +376,11 @@ class StripeModel(StripeBaseModel):
 
             # will work for Forward FK and OneToOneField relations and reverse OneToOneField relations
             if isinstance(field, (models.ForeignKey, models.OneToOneRel)):
-                field_data, skip, is_nulled = cls._stripe_object_field_to_foreign_key(
+                (
+                    rel_obj_instance,
+                    skip,
+                    is_nulled,
+                ) = cls._stripe_object_field_to_foreign_key(
                     field=field,
                     manipulated_data=manipulated_data,
                     current_ids=current_ids,
@@ -389,13 +393,13 @@ class StripeModel(StripeBaseModel):
                     continue
             else:
                 if hasattr(field, "stripe_to_db"):
-                    field_data = field.stripe_to_db(manipulated_data)
+                    rel_obj_instance = field.stripe_to_db(manipulated_data)
                 else:
-                    field_data = manipulated_data.get(field.name)
+                    rel_obj_instance = manipulated_data.get(field.name)
 
                 if (
                     isinstance(field, (models.CharField, models.TextField))
-                    and field_data is None
+                    and rel_obj_instance is None
                 ):
                     # do not add empty secret field for WebhookEndpoint model
                     # as stripe does not return the secret except for the CREATE call
@@ -404,9 +408,9 @@ class StripeModel(StripeBaseModel):
                     else:
                         # TODO - this applies to StripeEnumField as well, since it
                         #  sub-classes CharField, is that intentional?
-                        field_data = ""
+                        rel_obj_instance = ""
 
-            result[field.name] = field_data
+            result[field.name] = rel_obj_instance
 
         # For all objects other than the account object itself, get the API key
         # attached to the request, and get the matching Account for that key.
@@ -445,7 +449,7 @@ class StripeModel(StripeBaseModel):
         """
         from djstripe.models import DjstripePaymentMethod
 
-        field_data = None
+        instance = None
         field_name = field.name
         refetch = False
         skip = False
@@ -516,6 +520,61 @@ class StripeModel(StripeBaseModel):
                     # This skip is a hack, but it will prevent a crash.
                     skip = True
 
+                # if not created and not issubclass(
+                #     field.related_model, DjstripePaymentMethod
+                # ):
+                #     # try:
+                #     data = instance.api_retrieve(
+                #         stripe_account=stripe_account, api_key=api_key
+                #     )
+                #     # except InvalidRequestError as e:
+                #     #     if "a similar object exists in" in str(e):
+                #     #         # HACK around a Stripe bug.
+                #     #         # When a File is retrieved from the Account object,
+                #     #         # a mismatch between live and test mode is possible depending
+                #     #         # on whether the file (usually the logo) was uploaded in live
+                #     #         # or test. Reported to Stripe in August 2020.
+                #     #         # Context: https://github.com/dj-stripe/dj-stripe/issues/830
+                #     #         pass
+                #     #     elif "No such PaymentMethod:" in str(e):
+                #     #         # payment methods (card_… etc) can be irretrievably deleted,
+                #     #         # but still present during sync. For example, if a refund is
+                #     #         # issued on a charge whose payment method has been deleted.
+                #     #         return None, False
+                #     #     else:
+                #     #         raise
+
+                #     record_data = field.related_model._stripe_object_to_record(
+                #         data,
+                #         current_ids=current_ids,
+                #         pending_relations=pending_relations,
+                #         stripe_account=stripe_account,
+                #         api_key=api_key,
+                #     )
+
+                #     # print(instance, record_data==data, id_)
+
+                #     for attr, value in record_data.items():
+                #         setattr(instance, attr, value)
+
+                #     instance._attach_objects_hook(
+                #         field.related_model,
+                #         data,
+                #         api_key=api_key,
+                #         current_ids=current_ids,
+                #     )
+                #     # print(instance, id_, current_ids, pending_relations)
+                #     print(id_, manipulated_data.get("id"))
+                #     instance.save()
+                #     instance._attach_objects_post_save_hook(
+                #         field.related_model,
+                #         data,
+                #         api_key=api_key,
+                #         pending_relations=pending_relations,
+                #     )
+
+                # todo if not created, then update the fields
+
                 # Remove the id of the current object from the list
                 # after it has been created or retrieved
                 current_ids.remove(id_)
@@ -524,7 +583,7 @@ class StripeModel(StripeBaseModel):
             # eg PaymentMethod, handled in hooks
             skip = True
 
-        return field_data, skip, is_nulled
+        return instance, skip, is_nulled
 
     @classmethod
     def is_valid_object(cls, data):
@@ -710,7 +769,38 @@ class StripeModel(StripeBaseModel):
             data = field
 
         try:
+            cls_instance = cls.stripe_objects.get(id=id_)
+            # data = cls_instance.api_retrieve(
+            #     stripe_account=stripe_account, api_key=api_key
+            # )
+
+            # stripe_data = cls._stripe_object_to_record(
+            #             data,
+            #             current_ids=current_ids,
+            #             pending_relations=pending_relations,
+            #             stripe_account=stripe_account,
+            #             api_key=api_key,
+            #         )
+
+            # print(cls_instance, data==stripe_data)
+
+            # for attr, value in stripe_data.items():
+            #     setattr(cls_instance, attr, value)
+
+            # cls_instance._attach_objects_hook(
+            #                 cls, data, api_key=api_key, current_ids=current_ids
+            #             )
+
+            # if save:
+            #     cls_instance.save()
+
+            # cls_instance._attach_objects_post_save_hook(
+            #     cls, data, api_key=api_key, pending_relations=pending_relations
+            # )
+
+            # return cls_instance, False
             return cls.stripe_objects.get(id=id_), False
+
         except cls.DoesNotExist:
             if is_nested_data and refetch:
                 # This is what `data` usually looks like:
@@ -722,6 +812,11 @@ class StripeModel(StripeBaseModel):
                     data = cls_instance.api_retrieve(
                         stripe_account=stripe_account, api_key=api_key
                     )
+                    if not data:
+                        raise ValueError(
+                            f"No data returned from Stripe for {cls_instance} from {field_name}"
+                        )
+
                 except InvalidRequestError as e:
                     if "a similar object exists in" in str(e):
                         # HACK around a Stripe bug.
@@ -1021,11 +1116,18 @@ class StripeModel(StripeBaseModel):
             stripe_account=stripe_account,
             api_key=api_key,
         )
+        # print(
+        #     "sync_from_stripe_data",
+        #     data,
+        #     instance,
+        #     created,
+        # )
 
         if not created:
             record_data = cls._stripe_object_to_record(
                 data, api_key=api_key, stripe_account=stripe_account
             )
+            # print(record_data)
             for attr, value in record_data.items():
                 setattr(instance, attr, value)
             instance._attach_objects_hook(

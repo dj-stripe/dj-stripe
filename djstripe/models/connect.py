@@ -31,6 +31,9 @@ class ApplicationFee(StripeModel):
     """
 
     stripe_class = stripe.ApplicationFee
+    # # TODO Need to see how these fields need to be retrieved with or without stripe_account header
+    # expand_fields = ["account", "balance_transaction", "charge"]
+
     account = StripeForeignKey(
         "Account",
         on_delete=models.PROTECT,
@@ -80,8 +83,10 @@ class ApplicationFeeRefund(StripeModel):
     Stripe documentation: https://stripe.com/docs/api?lang=python#fee_refunds
     """
 
-    description = None
     stripe_class = stripe.ApplicationFeeRefund
+    # # TODO Need to see how these fields need to be retrieved with or without stripe_account header
+    # expand_fields = ["fee", "balance_transaction"]
+    description = None
 
     amount = StripeQuantumCurrencyAmountField(help_text="Amount refunded, in cents.")
     balance_transaction = StripeForeignKey(
@@ -174,6 +179,7 @@ class CountrySpec(StripeBaseModel):
             id=self.id,
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            expand=self.expand_fields,
             stripe_account=stripe_account,
         )
 
