@@ -1620,7 +1620,12 @@ class Event(StripeModel):
 
 class File(StripeModel):
     """
-    Stripe documentation: https://stripe.com/docs/api/files
+    This is an object representing a file hosted on Stripe's servers.
+    The file may have been uploaded by yourself using the create file request
+    (for example, when uploading dispute evidence) or it may have been created by
+    Stripe (for example, the results of a Sigma scheduled query).
+
+    Stripe documentation: https://stripe.com/docs/api/files?lang=python
     """
 
     stripe_class = stripe.File
