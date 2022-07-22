@@ -1911,7 +1911,8 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" alt="Docs"></a> &raquo;</li>
-          <li>Reference &raquo;</li><li>Models</li>
+          <li>Reference &raquo;</li>
+      <li>Models</li>
     <li class="wy-breadcrumbs-aside">
         <a href="https://github.com/dj-stripe/dj-stripe/edit/master/docs/reference/models.md"
           class="icon icon-github"> Edit on GitHub</a>
@@ -1919,7 +1920,6 @@
   </ul>
   <hr/>
 </div>
-
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
@@ -7938,7 +7938,11 @@ djstripe.models.core.File        </code>
 
     <div class="doc doc-contents ">
 
-      <p>Stripe documentation: https://stripe.com/docs/api/files</p>
+      <p>This is an object representing a file hosted on Stripe's servers.
+The file may have been uploaded by yourself using the create file request
+(for example, when uploading dispute evidence) or it may have been created by
+Stripe (for example, the results of a Sigma scheduled query).</p>
+<p>Stripe documentation: https://stripe.com/docs/api/files?lang=python</p>
 
 
 
@@ -8499,7 +8503,10 @@ djstripe.models.core.FileLink        </code>
 
     <div class="doc doc-contents ">
 
-      <p>Stripe documentation: https://stripe.com/docs/api/file_links</p>
+      <p>To share the contents of a File object with non-Stripe users,
+you can create a FileLink. FileLinks contain a URL that can be used
+to retrieve the contents of the file without authentication.</p>
+<p>Stripe documentation: https://stripe.com/docs/api/file_links?lang=python</p>
 
 
 
@@ -8811,7 +8818,11 @@ djstripe.models.core.FileUpload        </code>
 
     <div class="doc doc-contents ">
 
-      <p>Stripe documentation: https://stripe.com/docs/api/files</p>
+      <p>This is an object representing a file hosted on Stripe's servers.
+The file may have been uploaded by yourself using the create file request
+(for example, when uploading dispute evidence) or it may have been created by
+Stripe (for example, the results of a Sigma scheduled query).</p>
+<p>Stripe documentation: https://stripe.com/docs/api/files?lang=python</p>
 
 
 
