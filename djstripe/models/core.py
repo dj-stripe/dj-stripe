@@ -1662,7 +1662,11 @@ FileUpload = File
 
 class FileLink(StripeModel):
     """
-    Stripe documentation: https://stripe.com/docs/api/file_links
+    To share the contents of a File object with non-Stripe users,
+    you can create a FileLink. FileLinks contain a URL that can be used
+    to retrieve the contents of the file without authentication.
+
+    Stripe documentation: https://stripe.com/docs/api/file_links?lang=python
     """
 
     stripe_class = stripe.FileLink
