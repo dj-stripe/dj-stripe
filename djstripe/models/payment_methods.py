@@ -260,6 +260,12 @@ class LegacySourceMixin:
                 .auto_paging_iter()
             )
 
+        raise NotImplementedError(
+            f"Can't list {cls.stripe_class.OBJECT_NAME} without a customer or account object."
+            " This may happen if not all accounts or customer objects are in the db."
+            ' Please run "python manage.py djstripe_sync_models Account Customer" as a potential fix.'
+        )
+
     def get_stripe_dashboard_url(self) -> str:
         if self.customer:
             return self.customer.get_stripe_dashboard_url()
@@ -314,6 +320,12 @@ class LegacySourceMixin:
                 api_key=api_key,
             )
 
+        raise NotImplementedError(
+            f"Can't retrieve {self.__class__} without a customer or account object."
+            " This may happen if not all accounts or customer objects are in the db."
+            ' Please run "python manage.py djstripe_sync_models Account Customer" as a potential fix.'
+        )
+
     def _api_delete(self, api_key=None, stripe_account=None, **kwargs):
         # OVERRIDING the parent version of this function
         # Cards & Banks Accounts must be manipulated through a customer or account.
@@ -340,6 +352,12 @@ class LegacySourceMixin:
                 stripe_account=stripe_account,
                 **kwargs,
             )
+
+        raise NotImplementedError(
+            f"Can't delete {self.__class__} without a customer or account object."
+            " This may happen if not all accounts or customer objects are in the db."
+            ' Please run "python manage.py djstripe_sync_models Account Customer" as a potential fix.'
+        )
 
 
 class BankAccount(LegacySourceMixin, StripeModel):
@@ -426,7 +444,10 @@ class BankAccount(LegacySourceMixin, StripeModel):
         if not self.customer and not self.account:
             raise NotImplementedError(
                 "Can't retrieve a bank account without a customer or account object."
+                " This may happen if not all accounts or customer objects are in the db."
+                ' Please run "python manage.py djstripe_sync_models Account Customer" as a potential fix.'
             )
+
         return super().api_retrieve(**kwargs)
 
 
