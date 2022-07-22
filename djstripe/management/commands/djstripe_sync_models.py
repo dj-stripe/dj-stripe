@@ -32,6 +32,8 @@ from django.core.exceptions import FieldDoesNotExist
 from django.core.management.base import BaseCommand, CommandError
 from django.db import models as django_models
 
+from djstripe.management.utils import get_list_kwargs
+
 from ... import enums, models
 from ...models.base import StripeBaseModel
 from ...settings import djstripe_settings
@@ -157,8 +159,7 @@ class Command(BaseCommand):
 
         count = 0
         try:
-            # todo convert get_list_kwargs into a generator to make the code memory effecient.
-            for list_kwargs in self.get_list_kwargs(model, api_key=api_key.secret):
+            for list_kwargs in get_list_kwargs(model, api_key=api_key.secret):
                 stripe_account = list_kwargs.get("stripe_account", "")
 
                 if (
