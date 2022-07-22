@@ -365,6 +365,7 @@ class FilePurpose(Enum):
     business_icon = _("Business icon")
     business_logo = _("Business logo")
     customer_signature = _("Customer signature")
+    credit_note = _("Credit Note")
     dispute_evidence = _("Dispute evidence")
     document_provider_identity_document = _("Document provider identity document")
     finance_report_run = _("Finance report run")
