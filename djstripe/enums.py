@@ -370,7 +370,7 @@ class FilePurpose(Enum):
     document_provider_identity_document = _("Document provider identity document")
     finance_report_run = _("Finance report run")
     identity_document = _("Identity document")
-    identity_document_downloadable = _("Idnetity document (downloadable)")
+    identity_document_downloadable = _("Identity document (downloadable)")
     invoice_statement = _("Invoice statement")
     pci_document = _("PCI document")
     selfie = _("Selfie (Stripe Identity)")
