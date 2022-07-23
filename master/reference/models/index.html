@@ -15124,7 +15124,10 @@ djstripe.models.payment_methods.BankAccount.stripe_class        </code>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">customer</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">account</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
             <span class="s2">&quot;Can&#39;t retrieve a bank account without a customer or account object.&quot;</span>
+            <span class="s2">&quot; This may happen if not all accounts or customer objects are in the db.&quot;</span>
+            <span class="s1">&#39; Please run &quot;python manage.py djstripe_sync_models Account Customer&quot; as a potential fix.&#39;</span>
         <span class="p">)</span>
+
     <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">api_retrieve</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div>
         </details>
