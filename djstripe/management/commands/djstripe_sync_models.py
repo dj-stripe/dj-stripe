@@ -376,6 +376,13 @@ class Command(BaseCommand):
 
         return all_list_kwargs
 
+    @staticmethod
+    def get_list_kwargs_sub(default_list_kwargs):
+        all_list_kwargs = []
+        for def_kwarg in default_list_kwargs:
+            all_list_kwargs.append({"status": "all", **def_kwarg})
+        return all_list_kwargs
+
     # todo handle supoorting double + nested fields like data.invoice.subscriptions.customer etc?
     def get_list_kwargs(self, model, api_key: str):
         """
@@ -397,6 +404,7 @@ class Command(BaseCommand):
             "TaxCode": self.get_list_kwargs_txcd,
             "TaxId": self.get_list_kwargs_tax_id,
             "UsageRecordSummary": self.get_list_kwargs_sis,
+            "Subscription": self.get_list_kwargs_sub,
         }
 
         # get all Stripe Accounts for the given platform account.
