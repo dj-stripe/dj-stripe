@@ -4,7 +4,7 @@ dj-stripe Subscription Model Tests.
 from copy import deepcopy
 from datetime import datetime
 from decimal import Decimal
-from unittest.mock import patch
+from unittest.mock import PropertyMock, patch
 
 import pytest
 import stripe
@@ -16,6 +16,7 @@ from stripe.error import InvalidRequestError
 from djstripe.enums import SubscriptionStatus
 from djstripe.models import Plan, Product, Subscription
 from djstripe.models.billing import Invoice
+from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_BALANCE_TRANSACTION,
@@ -1154,6 +1155,32 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
                 self.default_expected_blank_fks
                 | {"djstripe.Subscription.latest_invoice"}
             ),
+        )
+
+    @patch("stripe.Subscription.list")
+    def test_api_list(self, subscription_list_mock):
+        p = PropertyMock(return_value=deepcopy(FAKE_SUBSCRIPTION))
+        type(subscription_list_mock).auto_paging_iter = p
+
+        # invoke Subscription.api_list with status enum populated
+        Subscription.api_list(status=SubscriptionStatus.canceled)
+
+        subscription_list_mock.assert_called_once_with(
+            status=SubscriptionStatus.canceled,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        )
+
+    @patch("stripe.Subscription.list")
+    def test_api_list_with_no_status(self, subscription_list_mock):
+        p = PropertyMock(return_value=deepcopy(FAKE_SUBSCRIPTION))
+        type(subscription_list_mock).auto_paging_iter = p
+
+        # invoke Subscription.api_list without status enum populated
+        Subscription.api_list()
+
+        subscription_list_mock.assert_called_once_with(
+            status="all",
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
         )
 
 
