@@ -27,6 +27,7 @@ from typing import List
 
 from django.apps import apps
 from django.core.management.base import BaseCommand, CommandError
+from django.db import models as django_models
 
 from ... import enums, models
 from ...models.base import StripeBaseModel
@@ -214,15 +215,71 @@ class Command(BaseCommand):
 
         return accs_set
 
+    # todo simplfy this code by spliting into 1-2 functions
     @staticmethod
-    def get_default_list_kwargs(model, accounts_set, api_key: str):
+    def get_default_list_kwargs(model, accounts_set, api_key: str):  # noqa: C901
         """Returns default sequence of kwargs to sync
         all Stripe Accounts"""
+        expand = []
 
-        if getattr(model, "expand_fields", []):
+        try:
+            # get all forward and reverse relations for given cls
+            for field in model.expand_fields:
+                # add expand_field on the current model
+                expand.append(f"data.{field}")
+
+                field_inst = model._meta.get_field(field)
+
+                # get expand_fields on Forward FK and OneToOneField relations on the current model
+                if isinstance(
+                    field_inst, (django_models.ForeignKey, django_models.OneToOneField)
+                ):
+
+                    try:
+                        for (
+                            related_model_expand_field
+                        ) in field_inst.related_model.expand_fields:
+                            # add expand_field on the current model
+                            expand.append(f"data.{field}.{related_model_expand_field}")
+
+                            related_model_expand_field_inst = (
+                                field_inst.related_model._meta.get_field(
+                                    related_model_expand_field
+                                )
+                            )
+
+                            # get expand_fields on Forward FK and OneToOneField relations on the current model
+                            if isinstance(
+                                related_model_expand_field_inst,
+                                (
+                                    django_models.ForeignKey,
+                                    django_models.OneToOneField,
+                                ),
+                            ):
+
+                                try:
+                                    # need to prepend "field_name." to each of the entry in the expand_fields list
+                                    related_model_expand_fields = map(
+                                        lambda i: f"data.{field_inst.name}.{related_model_expand_field}.{i}",
+                                        related_model_expand_field_inst.related_model.expand_fields,
+                                    )
+
+                                    expand = [
+                                        *expand,
+                                        *related_model_expand_fields,
+                                    ]
+                                except AttributeError:
+                                    continue
+                    except AttributeError:
+                        continue
+
+        except AttributeError:
+            pass
+
+        if expand:
             default_list_kwargs = [
                 {
-                    "expand": [f"data.{k}" for k in model.expand_fields],
+                    "expand": expand,
                     "stripe_account": account,
                     "api_key": api_key,
                 }
