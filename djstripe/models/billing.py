@@ -365,6 +365,16 @@ class BaseInvoice(StripeModel):
         "subscription's default payment method, if any, or to the default payment "
         "method in the customer's invoice settings.",
     )
+    default_source = PaymentMethodForeignKey(
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="%(class)ss",
+        help_text="The default payment source for the invoice. "
+        "It must belong to the customer associated with the invoice and be "
+        "in a chargeable state. If not set, defaults to the subscription's "
+        "default source, if any, or to the customer's default source.",
+    )
     # Note: default_tax_rates is handled in the subclasses since it's a
     # ManyToManyField, otherwise reverse accessors clash
     discount = JSONField(
@@ -742,17 +752,6 @@ class Invoice(BaseInvoice):
     Stripe documentation: https://stripe.com/docs/api?lang=python#invoices
     """
 
-    default_source = PaymentMethodForeignKey(
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="invoices",
-        help_text="The default payment source for the invoice. "
-        "It must belong to the customer associated with the invoice and be "
-        "in a chargeable state. If not set, defaults to the subscription's "
-        "default source, if any, or to the customer's default source.",
-    )
-
     # Note:
     # Most fields are defined on BaseInvoice so they're shared with UpcomingInvoice.
     # ManyToManyFields are an exception, since UpcomingInvoice doesn't exist in the db.
@@ -800,16 +799,6 @@ class UpcomingInvoice(BaseInvoice):
     Logically it should be set abstract, but that doesn't quite work since we
     do actually want to instantiate the model and use relations.
     """
-
-    default_source = PaymentMethodForeignKey(
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="upcoming_invoices",
-        help_text="The default payment source for the invoice. "
-        "It must belong to the customer associated with the invoice and be "
-        "in a chargeable state. If not set, defaults to the subscription's "
-        "default source, if any, or to the customer's default source.",
-    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
