@@ -1073,7 +1073,7 @@ class Plan(StripeModel):
     """
 
     stripe_class = stripe.Plan
-    expand_fields = ["tiers"]
+    expand_fields = ["product", "tiers"]
     stripe_dashboard_item_name = "plans"
 
     active = models.BooleanField(
