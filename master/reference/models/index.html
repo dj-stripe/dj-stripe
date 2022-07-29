@@ -1962,7 +1962,7 @@ djstripe.models.core.BalanceTransaction        </code>
     <div class="doc doc-contents ">
 
       <p>A single transaction that updates the Stripe balance.</p>
-<p>Stripe documentation: https://stripe.com/docs/api#balance_transaction_object</p>
+<p>Stripe documentation: https://stripe.com/docs/api?lang=python#balance_transaction_object</p>
 
 
 
@@ -6846,7 +6846,7 @@ djstripe.models.core.Dispute        </code>
       <p>A dispute occurs when a customer questions your charge with their
 card issuer. When this happens, you're given the opportunity to
 respond to the dispute with evidence that shows that the charge is legitimate</p>
-<p>Stripe documentation: https://stripe.com/docs/api#disputes</p>
+<p>Stripe documentation: https://stripe.com/docs/api?lang=python#disputes</p>
 
 
 
@@ -7469,7 +7469,7 @@ djstripe.models.core.Event        </code>
 happens in your account.
 When an interesting event occurs, a new Event object is created and POSTed
 to the configured webhook URL if the Event type matches.</p>
-<p>Stripe documentation: https://stripe.com/docs/api/events</p>
+<p>Stripe documentation: https://stripe.com/docs/api/events?lang=python</p>
 
 
 
@@ -9383,7 +9383,8 @@ djstripe.models.core.Mandate        </code>
 
     <div class="doc doc-contents ">
 
-      <p>https://stripe.com/docs/api/mandates</p>
+      <p>A Mandate is a record of the permission a customer has given you to debit their payment method.</p>
+<p>https://stripe.com/docs/api/mandates</p>
 
 
 
@@ -9791,7 +9792,14 @@ djstripe.models.core.PaymentIntent        </code>
 
     <div class="doc doc-contents ">
 
-      <p>Stripe documentation: https://stripe.com/docs/api#payment_intents</p>
+      <p>A PaymentIntent guides you through the process of collecting a payment
+from your customer. We recommend that you create exactly one PaymentIntent for each order
+or customer session in your system. You can reference the PaymentIntent later to
+see the history of payment attempts for a particular session.</p>
+<p>A PaymentIntent transitions through multiple statuses throughout its lifetime as
+it interfaces with Stripe.js to perform authentication flows and ultimately
+creates at most one successful charge.</p>
+<p>Stripe documentation: https://stripe.com/docs/api?lang=python#payment_intents</p>
 
 
 
@@ -10921,7 +10929,7 @@ djstripe.models.core.Payout        </code>
 
       <p>A Payout object is created when you receive funds from Stripe, or when you initiate
 a payout to either a bank account or debit card of a connected Stripe account.</p>
-<p>Stripe documentation: https://stripe.com/docs/api#payouts</p>
+<p>Stripe documentation: https://stripe.com/docs/api?lang=python#payouts</p>
 
 
 
@@ -12551,8 +12559,11 @@ djstripe.models.core.Product        </code>
 
     <div class="doc doc-contents ">
 
-      <p>Stripe documentation:
-- https://stripe.com/docs/api#products</p>
+      <p>Products describe the specific goods or services you offer to your customers.
+For example, you might offer a Standard and Premium version of your goods or service;
+each version would be a separate Product. They can be used in conjunction with
+Prices to configure pricing in Payment Links, Checkout, and Subscriptions.</p>
+<p>Stripe documentation: https://stripe.com/docs/api?lang=python#products</p>
 
 
 
@@ -13170,7 +13181,10 @@ djstripe.models.core.Refund        </code>
 
     <div class="doc doc-contents ">
 
-      <p>Stripe documentation: https://stripe.com/docs/api#refund_object</p>
+      <p>Refund objects allow you to refund a charge that has previously been created
+but not yet refunded. Funds will be refunded to the credit or debit card
+that was originally charged.</p>
+<p>Stripe documentation: https://stripe.com/docs/api?lang=python#refund_object</p>
 
 
 
@@ -13858,7 +13872,7 @@ to set up your customer's card without immediately collecting a payment.
 Later, you can use PaymentIntents to drive the payment flow.</p>
 <p>NOTE: You should not maintain long-lived, unconfirmed SetupIntents.
 For security purposes, SetupIntents older than 24 hours may no longer be valid.</p>
-<p>Stripe documentation: https://stripe.com/docs/api#setup_intents</p>
+<p>Stripe documentation: https://stripe.com/docs/api?lang=python#setup_intents</p>
 
 
 
@@ -14561,7 +14575,10 @@ djstripe.models.payment_methods.BankAccount        </code>
 
     <div class="doc doc-contents ">
 
-      <p>BankAccount(djstripe_created, djstripe_updated, djstripe_id, id, djstripe_owner_account, livemode, created, metadata, description, account, account_holder_name, account_holder_type, bank_name, country, currency, customer, default_for_currency, fingerprint, last4, routing_number, status)</p>
+      <p>These bank accounts are payment methods on Customer objects.
+On the other hand External Accounts are transfer destinations on Account
+objects for Custom accounts. They can be bank accounts or debit cards as well.</p>
+<p>Stripe documentation:https://stripe.com/docs/api/customer_bank_accounts</p>
 
 
 
@@ -16386,7 +16403,10 @@ djstripe.models.payment_methods.PaymentMethod        </code>
 
     <div class="doc doc-contents ">
 
-      <p>Stripe documentation: https://stripe.com/docs/api#payment_methods</p>
+      <p>PaymentMethod objects represent your customer's payment instruments.
+You can use them with PaymentIntents to collect payments or save them
+to Customer objects to store instrument details for future payments.</p>
+<p>Stripe documentation: https://stripe.com/docs/api?lang=python#payment_methods</p>
 
 
 
@@ -17476,7 +17496,11 @@ djstripe.models.payment_methods.Source        </code>
 
     <div class="doc doc-contents ">
 
-      <p>Stripe documentation: https://stripe.com/docs/api#sources</p>
+      <p>Source objects allow you to accept a variety of payment methods.
+They represent a customer's payment instrument, and can be used with
+the Stripe API just like a Card object: once chargeable,
+they can be charged, or can be attached to customers.</p>
+<p>Stripe documentation: https://stripe.com/docs/api?lang=python#sources</p>
 
 
 
@@ -18533,7 +18557,7 @@ djstripe.models.billing.Coupon        </code>
       <p>A coupon contains information about a percent-off or amount-off discount you might want to apply to a customer.
 Coupons may be applied to invoices or orders.
 Coupons do not work with conventional one-off charges.</p>
-<p>Stripe documentation: https://stripe.com/docs/api/coupons</p>
+<p>Stripe documentation: https://stripe.com/docs/api/coupons?lang=python</p>
 
 
 
@@ -20594,7 +20618,7 @@ djstripe.models.billing.Plan        </code>
 
       <p>A subscription plan contains the pricing information for different
 products and feature levels on your site.</p>
-<p>Stripe documentation: https://stripe.com/docs/api/plans</p>
+<p>Stripe documentation: https://stripe.com/docs/api/plans?lang=python</p>
 <p>NOTE: The Stripe Plans API has been deprecated in favor of the Prices API.
 You may want to upgrade to use the Price model instead of the Plan model.</p>
 
@@ -23632,7 +23656,7 @@ djstripe.models.billing.SubscriptionItem        </code>
 
       <p>Subscription items allow you to create customer subscriptions
 with more than one plan, making it easy to represent complex billing relationships.</p>
-<p>Stripe documentation: https://stripe.com/docs/api#subscription_items</p>
+<p>Stripe documentation: https://stripe.com/docs/api?lang=python#subscription_items</p>
 
 
 
@@ -24363,7 +24387,7 @@ djstripe.models.billing.SubscriptionSchedule        </code>
 
       <p>Subscription schedules allow you to create and manage the lifecycle
 of a subscription by predefining expected changes.</p>
-<p>Stripe documentation: https://stripe.com/docs/api/subscription_schedules</p>
+<p>Stripe documentation: https://stripe.com/docs/api/subscription_schedules?lang=python</p>
 
 
 
@@ -25530,7 +25554,7 @@ djstripe.models.billing.TaxId        </code>
       <p>Add one or multiple tax IDs to a customer.
 A customer's tax IDs are displayed on invoices and
 credit notes issued for the customer.</p>
-<p>Stripe documentation: https://stripe.com/docs/api/customer_tax_ids</p>
+<p>Stripe documentation: https://stripe.com/docs/api/customer_tax_ids?lang=python</p>
 
 
 
@@ -26180,7 +26204,7 @@ djstripe.models.billing.TaxRate        </code>
     <div class="doc doc-contents ">
 
       <p>Tax rates can be applied to invoices and subscriptions to collect tax.</p>
-<p>Stripe documentation: https://stripe.com/docs/api/tax_rates</p>
+<p>Stripe documentation: https://stripe.com/docs/api/tax_rates?lang=python</p>
 
 
 
@@ -27421,7 +27445,7 @@ djstripe.models.billing.UsageRecord        </code>
 
       <p>Usage records allow you to continually report usage and metrics to
 Stripe for metered billing of plans.</p>
-<p>Stripe documentation: https://stripe.com/docs/api#usage_records</p>
+<p>Stripe documentation: https://stripe.com/docs/api?lang=python#usage_records</p>
 
 
 
@@ -27991,7 +28015,7 @@ from multiple usage records and over a subscription billing period
 (e.g., 15 usage records in the month of September).
 Since new usage records can still be added, the returned summary information for the subscription item's ID
 should be seen as unstable until the subscription billing period ends.</p>
-<p>Stripe documentation: https://stripe.com/docs/api/usage_records/subscription_item_summary_list</p>
+<p>Stripe documentation: https://stripe.com/docs/api/usage_records/subscription_item_summary_list?lang=python</p>
 
 
 
@@ -28513,7 +28537,10 @@ djstripe.models.account.Account        </code>
 
     <div class="doc doc-contents ">
 
-      <p>Stripe documentation: https://stripe.com/docs/api/accounts</p>
+      <p>This is an object representing a Stripe account.</p>
+<p>You can retrieve it to see properties on the account like its
+current e-mail address or if the account is enabled yet to make live charges.</p>
+<p>Stripe documentation: https://stripe.com/docs/api/accounts?lang=python</p>
 
 
 
@@ -30398,7 +30425,7 @@ djstripe.models.connect.ApplicationFee        </code>
 user (using Connect), an ApplicationFee is created in your account.</p>
 <p>Please note the model field charge exists on the Stripe Connected Account
 while the application_fee modelfield on Charge model exists on the Platform Account!</p>
-<p>Stripe documentation: https://stripe.com/docs/api#application_fees</p>
+<p>Stripe documentation: https://stripe.com/docs/api?lang=python#application_fees</p>
 
 
 
@@ -31022,7 +31049,7 @@ djstripe.models.connect.ApplicationFeeRefund        </code>
 has previously been created but not yet refunded.
 Funds will be refunded to the Stripe account from which the fee was
 originally collected.</p>
-<p>Stripe documentation: https://stripe.com/docs/api#fee_refunds</p>
+<p>Stripe documentation: https://stripe.com/docs/api?lang=python#fee_refunds</p>
 
 
 
@@ -31462,7 +31489,7 @@ djstripe.models.connect.CountrySpec        </code>
 
     <div class="doc doc-contents ">
 
-      <p>Stripe documentation: https://stripe.com/docs/api#country_specs</p>
+      <p>Stripe documentation: https://stripe.com/docs/api?lang=python#country_specs</p>
 
 
 
@@ -32737,7 +32764,7 @@ djstripe.models.connect.TransferReversal        </code>
 
     <div class="doc doc-contents ">
 
-      <p>Stripe documentation: https://stripe.com/docs/api#transfer_reversals</p>
+      <p>Stripe documentation: https://stripe.com/docs/api?lang=python#transfer_reversals</p>
 
 
 
@@ -33544,7 +33571,7 @@ djstripe.models.orders.Order        </code>
       <p>An Order describes a purchase being made by a customer,
 including the products &amp; quantities being purchased, the order status,
 the payment information, and the billing/shipping details.</p>
-<p>Stripe documentation: https://stripe.com/docs/api/orders_v2/object</p>
+<p>Stripe documentation: https://stripe.com/docs/api/orders_v2/object?lang=python</p>
 
 
 
@@ -34530,7 +34557,7 @@ djstripe.models.sigma.ScheduledQueryRun        </code>
 
     <div class="doc doc-contents ">
 
-      <p>Stripe documentation: https://stripe.com/docs/api#scheduled_queries</p>
+      <p>Stripe documentation: https://stripe.com/docs/api?lang=python#scheduled_queries</p>
 
 
 
