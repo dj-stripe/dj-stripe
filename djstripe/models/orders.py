@@ -18,7 +18,7 @@ class Order(StripeModel):
     including the products & quantities being purchased, the order status,
     the payment information, and the billing/shipping details.
 
-    Stripe documentation: https://stripe.com/docs/api/orders_v2/object
+    Stripe documentation: https://stripe.com/docs/api/orders_v2/object?lang=python
     """
 
     stripe_class = stripe.Order

@@ -93,7 +93,7 @@ class Coupon(StripeModel):
     Coupons may be applied to invoices or orders.
     Coupons do not work with conventional one-off charges.
 
-    Stripe documentation: https://stripe.com/docs/api/coupons
+    Stripe documentation: https://stripe.com/docs/api/coupons?lang=python
     """
 
     stripe_class = stripe.Coupon
@@ -1066,7 +1066,7 @@ class Plan(StripeModel):
     A subscription plan contains the pricing information for different
     products and feature levels on your site.
 
-    Stripe documentation: https://stripe.com/docs/api/plans
+    Stripe documentation: https://stripe.com/docs/api/plans?lang=python
 
     NOTE: The Stripe Plans API has been deprecated in favor of the Prices API.
     You may want to upgrade to use the Price model instead of the Plan model.
@@ -1783,7 +1783,7 @@ class SubscriptionItem(StripeModel):
     Subscription items allow you to create customer subscriptions
     with more than one plan, making it easy to represent complex billing relationships.
 
-    Stripe documentation: https://stripe.com/docs/api#subscription_items
+    Stripe documentation: https://stripe.com/docs/api?lang=python#subscription_items
     """
 
     stripe_class = stripe.SubscriptionItem
@@ -1867,7 +1867,7 @@ class SubscriptionSchedule(StripeModel):
     Subscription schedules allow you to create and manage the lifecycle
     of a subscription by predefining expected changes.
 
-    Stripe documentation: https://stripe.com/docs/api/subscription_schedules
+    Stripe documentation: https://stripe.com/docs/api/subscription_schedules?lang=python
     """
 
     stripe_class = stripe.SubscriptionSchedule
@@ -2109,7 +2109,7 @@ class TaxId(StripeModel):
     A customer's tax IDs are displayed on invoices and
     credit notes issued for the customer.
 
-    Stripe documentation: https://stripe.com/docs/api/customer_tax_ids
+    Stripe documentation: https://stripe.com/docs/api/customer_tax_ids?lang=python
     """
 
     stripe_class = stripe.TaxId
@@ -2199,7 +2199,7 @@ class TaxRate(StripeModel):
     """
     Tax rates can be applied to invoices and subscriptions to collect tax.
 
-    Stripe documentation: https://stripe.com/docs/api/tax_rates
+    Stripe documentation: https://stripe.com/docs/api/tax_rates?lang=python
     """
 
     stripe_class = stripe.TaxRate
@@ -2263,7 +2263,7 @@ class UsageRecord(StripeModel):
     Usage records allow you to continually report usage and metrics to
     Stripe for metered billing of plans.
 
-    Stripe documentation: https://stripe.com/docs/api#usage_records
+    Stripe documentation: https://stripe.com/docs/api?lang=python#usage_records
     """
 
     description = None
@@ -2342,7 +2342,7 @@ class UsageRecordSummary(StripeModel):
     Since new usage records can still be added, the returned summary information for the subscription item's ID
     should be seen as unstable until the subscription billing period ends.
 
-    Stripe documentation: https://stripe.com/docs/api/usage_records/subscription_item_summary_list
+    Stripe documentation: https://stripe.com/docs/api/usage_records/subscription_item_summary_list?lang=python
     """
 
     stripe_class = stripe.UsageRecordSummary

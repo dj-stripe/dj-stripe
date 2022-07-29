@@ -25,7 +25,7 @@ class ApplicationFee(StripeModel):
     Please note the model field charge exists on the Stripe Connected Account
     while the application_fee modelfield on Charge model exists on the Platform Account!
 
-    Stripe documentation: https://stripe.com/docs/api#application_fees
+    Stripe documentation: https://stripe.com/docs/api?lang=python#application_fees
     """
 
     stripe_class = stripe.ApplicationFee
@@ -72,7 +72,7 @@ class ApplicationFeeRefund(StripeModel):
     Funds will be refunded to the Stripe account from which the fee was
     originally collected.
 
-    Stripe documentation: https://stripe.com/docs/api#fee_refunds
+    Stripe documentation: https://stripe.com/docs/api?lang=python#fee_refunds
     """
 
     description = None
@@ -96,7 +96,7 @@ class ApplicationFeeRefund(StripeModel):
 
 class CountrySpec(StripeBaseModel):
     """
-    Stripe documentation: https://stripe.com/docs/api#country_specs
+    Stripe documentation: https://stripe.com/docs/api?lang=python#country_specs
     """
 
     stripe_class = stripe.CountrySpec
@@ -280,7 +280,7 @@ class Transfer(StripeModel):
 # TODO Add Tests
 class TransferReversal(StripeModel):
     """
-    Stripe documentation: https://stripe.com/docs/api#transfer_reversals
+    Stripe documentation: https://stripe.com/docs/api?lang=python#transfer_reversals
     """
 
     expand_fields = ["balance_transaction", "transfer"]

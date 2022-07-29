@@ -11,7 +11,12 @@ from .base import StripeModel, logger
 
 class Account(StripeModel):
     """
-    Stripe documentation: https://stripe.com/docs/api/accounts
+    This is an object representing a Stripe account.
+
+    You can retrieve it to see properties on the account like its
+    current e-mail address or if the account is enabled yet to make live charges.
+
+    Stripe documentation: https://stripe.com/docs/api/accounts?lang=python
     """
 
     stripe_class = stripe.Account

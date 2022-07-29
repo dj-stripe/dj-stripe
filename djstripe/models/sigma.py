@@ -9,7 +9,7 @@ from .base import StripeModel
 # TODO Add Tests
 class ScheduledQueryRun(StripeModel):
     """
-    Stripe documentation: https://stripe.com/docs/api#scheduled_queries
+    Stripe documentation: https://stripe.com/docs/api?lang=python#scheduled_queries
     """
 
     stripe_class = stripe.sigma.ScheduledQueryRun

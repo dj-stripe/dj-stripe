@@ -58,7 +58,7 @@ class BalanceTransaction(StripeModel):
     """
     A single transaction that updates the Stripe balance.
 
-    Stripe documentation: https://stripe.com/docs/api#balance_transaction_object
+    Stripe documentation: https://stripe.com/docs/api?lang=python#balance_transaction_object
     """
 
     stripe_class = stripe.BalanceTransaction
@@ -453,6 +453,8 @@ class Charge(StripeModel):
 # TODO Add Tests
 class Mandate(StripeModel):
     """
+    A Mandate is a record of the permission a customer has given you to debit their payment method.
+
     https://stripe.com/docs/api/mandates
     """
 
@@ -487,8 +489,12 @@ class Mandate(StripeModel):
 
 class Product(StripeModel):
     """
-    Stripe documentation:
-    - https://stripe.com/docs/api#products
+    Products describe the specific goods or services you offer to your customers.
+    For example, you might offer a Standard and Premium version of your goods or service;
+    each version would be a separate Product. They can be used in conjunction with
+    Prices to configure pricing in Payment Links, Checkout, and Subscriptions.
+
+    Stripe documentation: https://stripe.com/docs/api?lang=python#products
     """
 
     stripe_class = stripe.Product
@@ -1388,7 +1394,7 @@ class Dispute(StripeModel):
     card issuer. When this happens, you're given the opportunity to
     respond to the dispute with evidence that shows that the charge is legitimate
 
-    Stripe documentation: https://stripe.com/docs/api#disputes
+    Stripe documentation: https://stripe.com/docs/api?lang=python#disputes
     """
 
     stripe_class = stripe.Dispute
@@ -1507,7 +1513,7 @@ class Event(StripeModel):
     When an interesting event occurs, a new Event object is created and POSTed
     to the configured webhook URL if the Event type matches.
 
-    Stripe documentation: https://stripe.com/docs/api/events
+    Stripe documentation: https://stripe.com/docs/api/events?lang=python
     """
 
     stripe_class = stripe.Event
@@ -1683,7 +1689,16 @@ class FileLink(StripeModel):
 
 class PaymentIntent(StripeModel):
     """
-    Stripe documentation: https://stripe.com/docs/api#payment_intents
+    A PaymentIntent guides you through the process of collecting a payment
+    from your customer. We recommend that you create exactly one PaymentIntent for each order
+    or customer session in your system. You can reference the PaymentIntent later to
+    see the history of payment attempts for a particular session.
+
+    A PaymentIntent transitions through multiple statuses throughout its lifetime as
+    it interfaces with Stripe.js to perform authentication flows and ultimately
+    creates at most one successful charge.
+
+    Stripe documentation: https://stripe.com/docs/api?lang=python#payment_intents
     """
 
     stripe_class = stripe.PaymentIntent
@@ -1926,7 +1941,7 @@ class SetupIntent(StripeModel):
     NOTE: You should not maintain long-lived, unconfirmed SetupIntents.
     For security purposes, SetupIntents older than 24 hours may no longer be valid.
 
-    Stripe documentation: https://stripe.com/docs/api#setup_intents
+    Stripe documentation: https://stripe.com/docs/api?lang=python#setup_intents
     """
 
     stripe_class = stripe.SetupIntent
@@ -2035,7 +2050,7 @@ class Payout(StripeModel):
     A Payout object is created when you receive funds from Stripe, or when you initiate
     a payout to either a bank account or debit card of a connected Stripe account.
 
-    Stripe documentation: https://stripe.com/docs/api#payouts
+    Stripe documentation: https://stripe.com/docs/api?lang=python#payouts
     """
 
     expand_fields = ["destination"]
@@ -2355,7 +2370,11 @@ class Price(StripeModel):
 
 class Refund(StripeModel):
     """
-    Stripe documentation: https://stripe.com/docs/api#refund_object
+    Refund objects allow you to refund a charge that has previously been created
+    but not yet refunded. Funds will be refunded to the credit or debit card
+    that was originally charged.
+
+    Stripe documentation: https://stripe.com/docs/api?lang=python#refund_object
     """
 
     stripe_class = stripe.Refund

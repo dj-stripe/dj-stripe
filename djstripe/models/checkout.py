@@ -12,6 +12,8 @@ class Session(StripeModel):
     """
     A Checkout Session represents your customer's session as they pay
     for one-time purchases or subscriptions through Checkout.
+
+    Stripe documentation: https://stripe.com/docs/api/checkout/sessions?lang=python
     """
 
     stripe_class = stripe.checkout.Session

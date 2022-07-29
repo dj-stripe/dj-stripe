@@ -361,6 +361,14 @@ class LegacySourceMixin:
 
 
 class BankAccount(LegacySourceMixin, StripeModel):
+    """
+    These bank accounts are payment methods on Customer objects.
+    On the other hand External Accounts are transfer destinations on Account
+    objects for Custom accounts. They can be bank accounts or debit cards as well.
+
+    Stripe documentation:https://stripe.com/docs/api/customer_bank_accounts
+    """
+
     stripe_class = stripe.BankAccount
 
     account = StripeForeignKey(
@@ -627,7 +635,12 @@ class Card(LegacySourceMixin, StripeModel):
 
 class Source(StripeModel):
     """
-    Stripe documentation: https://stripe.com/docs/api#sources
+    Source objects allow you to accept a variety of payment methods.
+    They represent a customer's payment instrument, and can be used with
+    the Stripe API just like a Card object: once chargeable,
+    they can be charged, or can be attached to customers.
+
+    Stripe documentation: https://stripe.com/docs/api?lang=python#sources
     """
 
     amount = StripeDecimalCurrencyAmountField(
@@ -779,7 +792,11 @@ class Source(StripeModel):
 
 class PaymentMethod(StripeModel):
     """
-    Stripe documentation: https://stripe.com/docs/api#payment_methods
+    PaymentMethod objects represent your customer's payment instruments.
+    You can use them with PaymentIntents to collect payments or save them
+    to Customer objects to store instrument details for future payments.
+
+    Stripe documentation: https://stripe.com/docs/api?lang=python#payment_methods
     """
 
     stripe_class = stripe.PaymentMethod
