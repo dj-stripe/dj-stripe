@@ -105,19 +105,39 @@ def check_webhook_secret(app_configs=None, **kwargs):
     """
     Check that DJSTRIPE_WEBHOOK_SECRET looks correct
     """
+
+    def check_webhook_endpoint_secret(secret, messages, endpoint=None):
+        if secret and not secret.startswith("whsec_"):
+            if endpoint:
+                extra_msg = (
+                    f"The secret for Webhook Endpoint: {endpoint} does not look valid"
+                )
+            else:
+                extra_msg = "DJSTRIPE_WEBHOOK_SECRET does not look valid"
+
+            messages.append(
+                checks.Warning(
+                    extra_msg,
+                    hint="It should start with whsec_...",
+                    id="djstripe.W003",
+                )
+            )
+        return messages
+
+    from .models import WebhookEndpoint
     from .settings import djstripe_settings
 
     messages = []
 
-    secret = djstripe_settings.WEBHOOK_SECRET
-    if secret and not secret.startswith("whsec_"):
-        messages.append(
-            checks.Warning(
-                "DJSTRIPE_WEBHOOK_SECRET does not look valid",
-                hint="It should start with whsec_...",
-                id="djstripe.W003",
-            )
-        )
+    if WebhookEndpoint.objects.exists():
+        for endpoint in WebhookEndpoint.objects.all():
+            secret = endpoint.secret
+            # check secret
+            check_webhook_endpoint_secret(secret, messages, endpoint=endpoint)
+    else:
+        secret = djstripe_settings.WEBHOOK_SECRET
+        # check secret
+        check_webhook_endpoint_secret(secret, messages)
 
     return messages
 
