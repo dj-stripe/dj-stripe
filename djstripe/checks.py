@@ -40,7 +40,7 @@ def validate_stripe_api_version(version):
     Check the API version is formatted correctly for Stripe.
 
     The expected format is `YYYY-MM-DD` (an iso8601 date) or
-    for access to alphs or beta releases the expected format is: `YYYY-MM-DD; modelname_version=version_number`.
+    for access to alpha or beta releases the expected format is: `YYYY-MM-DD; modelname_version=version_number`.
     Ex "2020-08-27; orders_beta=v3"
 
     :param version: The version to set for the Stripe API.
