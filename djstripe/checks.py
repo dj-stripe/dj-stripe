@@ -147,6 +147,26 @@ def check_webhook_validation(app_configs=None, **kwargs):
     """
     Check that DJSTRIPE_WEBHOOK_VALIDATION is valid
     """
+
+    def check_webhook_endpoint_validation(secret, messages, endpoint=None):
+        if not secret:
+            if endpoint:
+                extra_msg = f"but Webhook Endpoint: {endpoint} has no secret set"
+                secret_attr = "secret"
+            else:
+                extra_msg = "but DJSTRIPE_WEBHOOK_SECRET is not set"
+                secret_attr = "DJSTRIPE_WEBHOOK_SECRET"
+
+            messages.append(
+                checks.Critical(
+                    f"DJSTRIPE_WEBHOOK_VALIDATION='verify_signature' {extra_msg}",
+                    hint=f"Set {secret_attr} or set DJSTRIPE_WEBHOOK_VALIDATION='retrieve_event'",
+                    id="djstripe.C006",
+                )
+            )
+        return messages
+
+    from .models import WebhookEndpoint
     from .settings import djstripe_settings
 
     messages = []
@@ -165,16 +185,17 @@ def check_webhook_validation(app_configs=None, **kwargs):
             )
         )
     elif djstripe_settings.WEBHOOK_VALIDATION == "verify_signature":
-        if not djstripe_settings.WEBHOOK_SECRET:
-            messages.append(
-                checks.Critical(
-                    "DJSTRIPE_WEBHOOK_VALIDATION='verify_signature' "
-                    "but DJSTRIPE_WEBHOOK_SECRET is not set",
-                    hint="Set DJSTRIPE_WEBHOOK_SECRET or set "
-                    "DJSTRIPE_WEBHOOK_VALIDATION='retrieve_event'",
-                    id="djstripe.C006",
-                )
-            )
+
+        if WebhookEndpoint.objects.exists():
+            for endpoint in WebhookEndpoint.objects.all():
+                secret = endpoint.secret
+                # check secret
+                check_webhook_endpoint_validation(secret, messages, endpoint=endpoint)
+        else:
+            secret = djstripe_settings.WEBHOOK_SECRET
+            # check secret
+            check_webhook_endpoint_validation(secret, messages)
+
     elif djstripe_settings.WEBHOOK_VALIDATION not in validation_options:
         messages.append(
             checks.Critical(
