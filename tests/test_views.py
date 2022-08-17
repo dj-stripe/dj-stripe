@@ -278,12 +278,12 @@ class TestConfirmCustomActionView:
                 # Invoke the Custom Actions
                 view._sync_all_instances(request, model.objects.none())
 
-                # assert correct Success messages are emmitted
+                # assert correct Success messages are emitted
                 messages_sent_dictionary = {
                     m.message: m.level_tag for m in messages.get_messages(request)
                 }
 
-                # assert correct success message was emmitted
+                # assert correct success message was emitted
                 assert (
                     messages_sent_dictionary.get("Successfully Synced All Instances")
                     == "success"
@@ -346,12 +346,12 @@ class TestConfirmCustomActionView:
         # Invoke the Custom Actions
         view._resync_instances(request, [instance])
 
-        # assert correct Success messages are emmitted
+        # assert correct Success messages are emitted
         messages_sent_dictionary = {
             m.message: m.level_tag for m in messages.get_messages(request)
         }
 
-        # assert correct success message was emmitted
+        # assert correct success message was emitted
         assert (
             messages_sent_dictionary.get(f"Successfully Synced: {instance}")
             == "success"
@@ -409,12 +409,12 @@ class TestConfirmCustomActionView:
         # Invoke the Custom Actions
         view._resync_instances(request, [instance])
 
-        # assert correct Success messages are emmitted
+        # assert correct Success messages are emitted
         messages_sent_dictionary = {
             m.message.user_message: m.level_tag for m in messages.get_messages(request)
         }
 
-        # assert correct success message was emmitted
+        # assert correct success message was emitted
         assert messages_sent_dictionary.get("some random error message") == "warning"
 
     def test__resync_instances_stripe_invalid_request_error(self, monkeypatch):
@@ -542,12 +542,12 @@ class TestConfirmCustomActionView:
         # Invoke the Custom Actions
         view._cancel(request, [instance])
 
-        # assert correct Success messages are emmitted
+        # assert correct Success messages are emitted
         messages_sent_dictionary = {
             m.message: m.level_tag for m in messages.get_messages(request)
         }
 
-        # assert correct success message was emmitted
+        # assert correct success message was emitted
         assert (
             messages_sent_dictionary.get(f"Successfully Canceled: {instance}")
             == "success"
@@ -721,12 +721,12 @@ class TestConfirmCustomActionView:
         # Invoke the Custom Actions
         view._release_subscription_schedule(request, [instance])
 
-        # assert correct Success messages are emmitted
+        # assert correct Success messages are emitted
         messages_sent_dictionary = {
             m.message: m.level_tag for m in messages.get_messages(request)
         }
 
-        # assert correct success message was emmitted
+        # assert correct success message was emitted
         assert (
             messages_sent_dictionary.get(f"Successfully Released: {instance}")
             == "success"
@@ -818,12 +818,12 @@ class TestConfirmCustomActionView:
         # Invoke the Custom Actions
         view._cancel_subscription_schedule(request, [instance])
 
-        # assert correct Success messages are emmitted
+        # assert correct Success messages are emitted
         messages_sent_dictionary = {
             m.message: m.level_tag for m in messages.get_messages(request)
         }
 
-        # assert correct success message was emmitted
+        # assert correct success message was emitted
         assert (
             messages_sent_dictionary.get(f"Successfully Canceled: {instance}")
             == "success"
