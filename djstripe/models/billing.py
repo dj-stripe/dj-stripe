@@ -1173,6 +1173,7 @@ class InvoiceItem(StripeModel):
         blank=True,
         help_text="Unit amount (in the `currency` specified) of the invoice item.",
     )
+    # Biggest possible number allowed is 999_999_999_998.999_999_999_999 IDR
     unit_amount_decimal = StripeDecimalCurrencyAmountField(
         null=True,
         blank=True,
