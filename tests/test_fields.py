@@ -27,10 +27,36 @@ class TestStripeDecimalCurrencyAmountField:
             (Decimal("1"), Decimal("100")),
             (Decimal("1.5"), Decimal("150")),
             (Decimal("0"), Decimal("0")),
+            (Decimal("9_999_999_999.99"), Decimal("999_999_999_999")),
+            # Max allowed for IDR Currency
+            (
+                Decimal("999_999_999_998.999_999_999_999"),
+                Decimal("999_999_999_998_99.9_999_999_999"),
+            ),
+            # Max allowed for Other Currencies
+            (Decimal("999_999_999_998.99"), Decimal("999_999_999_998_99")),
         ],
     )
     def test_stripe_to_db_decimal_val(self, expected, inputted):
         assert expected == self.noval.stripe_to_db({"noval": inputted})
+
+
+# 9999,999,999.123_456_789_123_45 IDR
+# 10.14
+# 24, 14
+# The value must be less than 9,999,999,999.999_999_999_999_99
+
+# Stripe automatically sent the val 999_999_999_998.999_999_999_999
+
+
+# 999,999.000_000_003_400_05 USD
+# 6.14
+# 20.14
+
+# The value must be less than 999,999.99999999999999
+
+# Stripe automatically sent the val  999_999_98.999_999_999_999
+# 999,999.98999999999999
 
 
 @override_settings(USE_TZ=get_timezone_utc())
