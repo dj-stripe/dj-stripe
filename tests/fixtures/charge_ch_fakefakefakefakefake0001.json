@@ -76,7 +76,12 @@
     "receipt_number": null,
     "receipt_url": "https://pay.stripe.com/receipts/acct_1EaetYCOCguPTL2B/ch_fakefakefakefakefake0001/rcpt_F4oXnrfNz0ijmlgXiDK31ArpYEgLEko",
     "refunded": false,
-    "refunds": {},
+    "refunds": {
+        "object": "list",
+        "data": [],
+        "has_more": false,
+        "url": "/v1/charges/ch_fakefakefakefakefake0001/refunds"
+    },
     "review": null,
     "shipping": null,
     "source": {
