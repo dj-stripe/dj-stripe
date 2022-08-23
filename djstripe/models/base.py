@@ -9,6 +9,7 @@ from django.utils import dateformat, timezone
 from django.utils.encoding import smart_str
 from stripe.api_resources.abstract.api_resource import APIResource
 from stripe.error import InvalidRequestError
+from stripe.util import convert_to_stripe_object
 
 from ..fields import (
     JSONField,
@@ -957,13 +958,14 @@ class StripeModel(StripeBaseModel):
         :type charge: djstripe.models.Refund
         :return:
         """
+        stripe_refunds = convert_to_stripe_object(data.get("refunds"))
 
-        refunds = data.get("refunds")
-        if not refunds:
+        if not stripe_refunds:
             return []
 
         refund_objs = []
-        for refund_data in refunds.auto_paging_iter():
+
+        for refund_data in stripe_refunds.auto_paging_iter():
             item, _ = target_cls._get_or_create_from_stripe_object(
                 refund_data,
                 refetch=False,
