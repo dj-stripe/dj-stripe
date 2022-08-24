@@ -4,6 +4,7 @@ dj-stripe System Checks
 import re
 
 from django.core import checks
+from django.db.utils import ProgrammingError
 
 STRIPE_API_VERSION_PATTERN = re.compile(
     r"(?P<year>\d{4})-(?P<month>\d{1,2})-(?P<day>\d{1,2})(; [\w=]*)?$"
@@ -128,13 +129,17 @@ def check_webhook_secret(app_configs=None, **kwargs):
     from .settings import djstripe_settings
 
     messages = []
-
-    if WebhookEndpoint.objects.exists():
-        for endpoint in WebhookEndpoint.objects.all():
-            secret = endpoint.secret
+    try:
+        if WebhookEndpoint.objects.exists():
+            for endpoint in WebhookEndpoint.objects.all():
+                secret = endpoint.secret
+                # check secret
+                check_webhook_endpoint_secret(secret, messages, endpoint=endpoint)
+        else:
+            secret = djstripe_settings.WEBHOOK_SECRET
             # check secret
-            check_webhook_endpoint_secret(secret, messages, endpoint=endpoint)
-    else:
+            check_webhook_endpoint_secret(secret, messages)
+    except ProgrammingError:  # sub-class of DatabaseError
         secret = djstripe_settings.WEBHOOK_SECRET
         # check secret
         check_webhook_endpoint_secret(secret, messages)
@@ -143,7 +148,7 @@ def check_webhook_secret(app_configs=None, **kwargs):
 
 
 @checks.register("djstripe")
-def check_webhook_validation(app_configs=None, **kwargs):
+def check_webhook_validation(app_configs=None, **kwargs):  # noqa: C901
     """
     Check that DJSTRIPE_WEBHOOK_VALIDATION is valid
     """
@@ -185,13 +190,19 @@ def check_webhook_validation(app_configs=None, **kwargs):
             )
         )
     elif djstripe_settings.WEBHOOK_VALIDATION == "verify_signature":
-
-        if WebhookEndpoint.objects.exists():
-            for endpoint in WebhookEndpoint.objects.all():
-                secret = endpoint.secret
+        try:
+            if WebhookEndpoint.objects.exists():
+                for endpoint in WebhookEndpoint.objects.all():
+                    secret = endpoint.secret
+                    # check secret
+                    check_webhook_endpoint_validation(
+                        secret, messages, endpoint=endpoint
+                    )
+            else:
+                secret = djstripe_settings.WEBHOOK_SECRET
                 # check secret
-                check_webhook_endpoint_validation(secret, messages, endpoint=endpoint)
-        else:
+                check_webhook_endpoint_validation(secret, messages)
+        except ProgrammingError:  # sub-class of DatabaseError
             secret = djstripe_settings.WEBHOOK_SECRET
             # check secret
             check_webhook_endpoint_validation(secret, messages)
