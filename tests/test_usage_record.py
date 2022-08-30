@@ -56,6 +56,7 @@ class TestUsageRecord(AssertStripeFksMixin, TestCase):
         fake_usage_data = deepcopy(FAKE_USAGE_RECORD)
 
         usage_record = UsageRecord.sync_from_stripe_data(fake_usage_data)
+        assert usage_record
 
         self.assertEqual(usage_record.id, fake_usage_data["id"])
         self.assertEqual(
@@ -108,6 +109,7 @@ class TestUsageRecord(AssertStripeFksMixin, TestCase):
         fake_usage_data = deepcopy(FAKE_USAGE_RECORD)
 
         usage_record = UsageRecord.sync_from_stripe_data(fake_usage_data)
+        assert usage_record
 
         self.assertEqual(
             str(usage_record),

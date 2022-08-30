@@ -58,6 +58,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     ):
 
         tax_id = TaxId.sync_from_stripe_data(FAKE_TAX_ID)
+        assert tax_id
         assert tax_id.id == FAKE_TAX_ID["id"]
         assert tax_id.customer.id == FAKE_CUSTOMER["id"]
         self.assert_fks(
@@ -155,7 +156,9 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     ):
 
         tax_id = TaxId.sync_from_stripe_data(FAKE_TAX_ID)
+        assert tax_id
         tax_id.api_retrieve()
+        assert tax_id.djstripe_owner_account
 
         tax_id_retrieve_mock.assert_called_once_with(
             id=FAKE_CUSTOMER["id"],
