@@ -461,7 +461,7 @@ class TestConfirmCustomActionView:
 
         assert str(exc_info.value.param) == "some random error message"
 
-    def test__cancel_subscription_instances(  # noqa: C901
+    def test__cancel_subscription_instances(
         self,
         monkeypatch,
     ):
@@ -553,7 +553,7 @@ class TestConfirmCustomActionView:
             == "success"
         )
 
-    def test__cancel_subscription_instances_stripe_invalid_request_error(  # noqa: C901
+    def test__cancel_subscription_instances_stripe_invalid_request_error(
         self,
         monkeypatch,
     ):
@@ -635,7 +635,7 @@ class TestConfirmCustomActionView:
             # Invoke the Custom Actions
             view._cancel(request, [instance])
 
-    def test__release_subscription_schedule(  # noqa: C901
+    def test__release_subscription_schedule(
         self,
         monkeypatch,
     ):
@@ -732,7 +732,7 @@ class TestConfirmCustomActionView:
             == "success"
         )
 
-    def test__cancel_subscription_schedule(  # noqa: C901
+    def test__cancel_subscription_schedule(
         self,
         monkeypatch,
     ):
@@ -829,7 +829,7 @@ class TestConfirmCustomActionView:
             == "success"
         )
 
-    def test__release_subscription_schedule_stripe_invalid_request_error(  # noqa: C901
+    def test__release_subscription_schedule_stripe_invalid_request_error(
         self,
         monkeypatch,
     ):
@@ -916,7 +916,7 @@ class TestConfirmCustomActionView:
             # Invoke the Custom Actions
             view._release_subscription_schedule(request, [instance])
 
-    def test__cancel_subscription_schedule_stripe_invalid_request_error(  # noqa: C901
+    def test__cancel_subscription_schedule_stripe_invalid_request_error(
         self,
         monkeypatch,
     ):

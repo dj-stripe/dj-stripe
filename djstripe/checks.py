@@ -148,7 +148,7 @@ def check_webhook_secret(app_configs=None, **kwargs):
 
 
 @checks.register("djstripe")
-def check_webhook_validation(app_configs=None, **kwargs):  # noqa: C901
+def check_webhook_validation(app_configs=None, **kwargs):
     """
     Check that DJSTRIPE_WEBHOOK_VALIDATION is valid
     """

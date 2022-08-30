@@ -399,7 +399,7 @@ class Command(BaseCommand):
 
         return json_str
 
-    def update_fixture_obj(  # noqa: C901
+    def update_fixture_obj(
         self,
         old_obj,
         model_class,

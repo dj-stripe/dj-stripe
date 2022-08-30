@@ -154,7 +154,6 @@ class TestSession:
             {"key1": "val1", key: "random"},
         ],
     )
-    # flake8: noqa (C901)
     def test__attach_objects_post_save_hook(
         self, monkeypatch, fake_user, fake_customer, metadata
     ):

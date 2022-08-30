@@ -53,7 +53,6 @@ class TestStrPaymentIntent:
             (get_fake_payment_intent_i_no_customer(), False, False),
         ],
     )
-    # flake8: noqa (C901)
     def test___str__(self, fake_intent_data, has_account, has_customer, monkeypatch):
         def mock_customer_get(*args, **kwargs):
             """Monkeypatched stripe.Customer.retrieve"""

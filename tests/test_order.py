@@ -181,7 +181,6 @@ class TestOrderStr:
             OrderStatus.processing,
         ],
     )
-    # flake8: noqa (C901)
     def test___str__(self, order_status, monkeypatch):
         def mock_customer_get(*args, **kwargs):
             """Monkeypatched stripe.Customer.retrieve"""

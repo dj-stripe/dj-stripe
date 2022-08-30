@@ -626,7 +626,6 @@ class StripeModel(StripeBaseModel):
 
         return instance
 
-    # flake8: noqa (C901)
     @classmethod
     def _get_or_create_from_stripe_object(
         cls,

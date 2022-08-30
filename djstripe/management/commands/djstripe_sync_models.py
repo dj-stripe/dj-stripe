@@ -61,7 +61,7 @@ class Command(BaseCommand):
             help="Specify the api_keys you would like to perform this sync for.",
         )
 
-    def handle(self, *args, api_keys, **options):  # noqa: C901
+    def handle(self, *args, api_keys, **options):
         app_label = "djstripe"
         app_config = apps.get_app_config(app_label)
         model_list = []  # type: List[models.StripeModel]
@@ -129,7 +129,7 @@ class Command(BaseCommand):
 
         return True, ""
 
-    def sync_model(self, model, api_key: str):  # noqa: C901
+    def sync_model(self, model, api_key: str):
         model_name = model.__name__
 
         should_sync, reason = self._should_sync_model(model)
@@ -218,7 +218,7 @@ class Command(BaseCommand):
 
     # todo simplfy this code by spliting into 1-2 functions
     @staticmethod
-    def get_default_list_kwargs(model, accounts_set, api_key: str):  # noqa: C901
+    def get_default_list_kwargs(model, accounts_set, api_key: str):
         """Returns default sequence of kwargs to sync
         all Stripe Accounts"""
         expand = []
