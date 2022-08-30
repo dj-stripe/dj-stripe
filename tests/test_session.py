@@ -236,6 +236,7 @@ class TestSession:
         # refresh self.customer from db
         customer.refresh_from_db()
 
+        assert session
         assert session.customer.id == customer.id
         assert customer.subscriber == user
         if metadata.get(self.key, ""):

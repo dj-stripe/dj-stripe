@@ -99,6 +99,7 @@ class TestOrder(AssertStripeFksMixin, TestCase):
         order = Order.sync_from_stripe_data(
             deepcopy(FAKE_ORDER_WITH_CUSTOMER_WITH_PAYMENT_INTENT)
         )
+        assert order
         self.assertEqual(order.payment_intent.id, FAKE_PAYMENT_INTENT_I["id"])
         self.assertEqual(order.customer.id, FAKE_CUSTOMER["id"])
 
@@ -108,7 +109,8 @@ class TestOrder(AssertStripeFksMixin, TestCase):
         order = Order.sync_from_stripe_data(
             deepcopy(FAKE_ORDER_WITH_CUSTOMER_WITHOUT_PAYMENT_INTENT)
         )
-        self.assertEqual(order.payment_intent, None)
+        assert order
+        assert order.payment_intent is None
         self.assertEqual(order.customer.id, FAKE_CUSTOMER["id"])
 
         self.assert_fks(
@@ -123,6 +125,7 @@ class TestOrder(AssertStripeFksMixin, TestCase):
         order = Order.sync_from_stripe_data(
             deepcopy(FAKE_ORDER_WITHOUT_CUSTOMER_WITH_PAYMENT_INTENT)
         )
+        assert order
         self.assertEqual(order.payment_intent.id, FAKE_PAYMENT_INTENT_I["id"])
         self.assertEqual(order.customer, None)
 
@@ -138,6 +141,7 @@ class TestOrder(AssertStripeFksMixin, TestCase):
         order = Order.sync_from_stripe_data(
             deepcopy(FAKE_ORDER_WITHOUT_CUSTOMER_WITHOUT_PAYMENT_INTENT)
         )
+        assert order
         self.assertEqual(order.payment_intent, None)
         self.assertEqual(order.customer, None)
 
@@ -318,6 +322,7 @@ class TestOrderMethods:
         order_cancel_mock.return_value = fake_order_cancel
 
         order = Order.sync_from_stripe_data(fake_order)
+        assert order
 
         # Cancel the order
         cancelled_order = order.cancel(
@@ -398,6 +403,7 @@ class TestOrderMethods:
         order_reopen_mock.return_value = fake_order_reopen
 
         order = Order.sync_from_stripe_data(fake_order)
+        assert order
 
         # Reopen the order
         reopened_order = order.reopen(
@@ -478,6 +484,7 @@ class TestOrderMethods:
         order_submit_mock.return_value = fake_order_submit
 
         order = Order.sync_from_stripe_data(fake_order)
+        assert order
 
         expected_total = fake_order["amount_total"]
 
