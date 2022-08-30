@@ -434,6 +434,9 @@ class StripeModel(StripeBaseModel):
         # a flag to indicate if the given field is null upstream on Stripe
         is_nulled = False
 
+        if current_ids is None:
+            current_ids = set()
+
         if issubclass(field.related_model, StripeModel) or issubclass(
             field.related_model, DjstripePaymentMethod
         ):
