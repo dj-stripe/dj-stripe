@@ -130,16 +130,17 @@ def check_webhook_secret(app_configs=None, **kwargs):
 
     messages = []
     try:
-        if WebhookEndpoint.objects.exists():
-            for endpoint in WebhookEndpoint.objects.all():
-                secret = endpoint.secret
-                # check secret
-                check_webhook_endpoint_secret(secret, messages, endpoint=endpoint)
-        else:
-            secret = djstripe_settings.WEBHOOK_SECRET
+        webhooks = list(WebhookEndpoint.objects.all())
+    except ProgrammingError:
+        # skip the db-based check (db most likely not migrated yet)
+        webhooks = []
+
+    if webhooks:
+        for endpoint in webhooks:
+            secret = endpoint.secret
             # check secret
-            check_webhook_endpoint_secret(secret, messages)
-    except ProgrammingError:  # sub-class of DatabaseError
+            check_webhook_endpoint_secret(secret, messages, endpoint=endpoint)
+    else:
         secret = djstripe_settings.WEBHOOK_SECRET
         # check secret
         check_webhook_endpoint_secret(secret, messages)
@@ -190,19 +191,19 @@ def check_webhook_validation(app_configs=None, **kwargs):
             )
         )
     elif djstripe_settings.WEBHOOK_VALIDATION == "verify_signature":
+
         try:
-            if WebhookEndpoint.objects.exists():
-                for endpoint in WebhookEndpoint.objects.all():
-                    secret = endpoint.secret
-                    # check secret
-                    check_webhook_endpoint_validation(
-                        secret, messages, endpoint=endpoint
-                    )
-            else:
-                secret = djstripe_settings.WEBHOOK_SECRET
+            webhooks = list(WebhookEndpoint.objects.all())
+        except ProgrammingError:
+            # Skip the db-based check (database most likely not migrated yet)
+            webhooks = []
+
+        if webhooks:
+            for endpoint in webhooks:
+                secret = endpoint.secret
                 # check secret
-                check_webhook_endpoint_validation(secret, messages)
-        except ProgrammingError:  # sub-class of DatabaseError
+                check_webhook_endpoint_validation(secret, messages, endpoint=endpoint)
+        else:
             secret = djstripe_settings.WEBHOOK_SECRET
             # check secret
             check_webhook_endpoint_validation(secret, messages)
@@ -228,19 +229,23 @@ def check_webhook_endpoint_has_secret(app_configs=None, **kwargs):
 
     messages = []
 
-    qs = WebhookEndpoint.objects.filter(secret="").all()
-    if qs.exists():
-        for webhook in qs:
-            messages.append(
-                checks.Warning(
-                    f"The secret of Webhook Endpoint: {webhook} is not populated in the db. Events sent to it will not work properly.",
-                    hint=(
-                        "This can happen if it was deleted and resynced as Stripe sends the webhook secret ONLY on the creation call."
-                        f" Please use the django shell and update the secret with the value from {webhook.get_stripe_dashboard_url()}"
-                    ),
-                    id="djstripe.W005",
-                )
+    try:
+        qs = list(WebhookEndpoint.objects.filter(secret="").all())
+    except ProgrammingError:
+        # Skip the check - Database most likely not migrated yet
+        return []
+
+    for webhook in qs:
+        messages.append(
+            checks.Warning(
+                f"The secret of Webhook Endpoint: {webhook} is not populated in the db. Events sent to it will not work properly.",
+                hint=(
+                    "This can happen if it was deleted and resynced as Stripe sends the webhook secret ONLY on the creation call."
+                    f" Please use the django shell and update the secret with the value from {webhook.get_stripe_dashboard_url()}"
+                ),
+                id="djstripe.W005",
             )
+        )
 
     return messages
 
