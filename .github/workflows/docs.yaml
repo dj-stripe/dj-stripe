@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - "master"
-      # Push events to branches matching 
+      # Push events to branches matching
         # refs/heads/stable/2.5
         # refs/heads/stable/10
         # refs/heads/stable/2
@@ -14,7 +14,7 @@ on:
   workflow_dispatch: # to trigger manually
 
 env:
-  POETRY_VERSION: "1.1.11"
+  POETRY_VERSION: "1.2.0rc2"
   POETRY_VIRTUALENVS_IN_PROJECT: "1"
   LATEST_STABLE_BRANCH: "stable/2.6"
 
@@ -58,7 +58,7 @@ jobs:
       run: poetry install -E docs
 
     - name: Configure git user to make commit
-      run: |      
+      run: |
         git config user.name "Arnav Choudhury"
         git config user.email "arnav13@gmail.com"
 
@@ -70,6 +70,3 @@ jobs:
 
     - name: Set default docs to ${LATEST_STABLE_BRANCH##*/}
       run: poetry run mike set-default --push --rebase "${LATEST_STABLE_BRANCH##*/}"
-
-
-

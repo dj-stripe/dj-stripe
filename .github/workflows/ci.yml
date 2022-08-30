@@ -22,7 +22,7 @@ on:
       - '.github/workflows/docs.yaml'
 
 env:
-  POETRY_VERSION: "1.1.11"
+  POETRY_VERSION: "1.2.0rc2"
   POETRY_VIRTUALENVS_IN_PROJECT: "1"
 
 
