@@ -185,15 +185,15 @@ specific UUID which will be part of the URL, making it impossible to guess exter
 by brute-force.</p>
 <h2 id="legacy-setup">Legacy setup</h2>
 <p>Before dj-stripe 2.7.0, dj-stripe included a global webhook endpoint URL, which uses the
-setting <a href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_SECRET"><code>DJSTRIPE_WEBHOOK_SECRET</code></a>
+setting <a class="autorefs autorefs-internal" href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_SECRET"><code>DJSTRIPE_WEBHOOK_SECRET</code></a>
 to validate incoming webhooks.</p>
 <p>This is not recommended as it makes the URL guessable, and may be removed in the future.</p>
 <h2 id="extra-configuration">Extra configuration</h2>
 <p>dj-stripe provides the following settings to tune how your webhooks work:</p>
 <ul>
-<li><a href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_VALIDATION"><code>DJSTRIPE_WEBHOOK_VALIDATION</code></a></li>
-<li><a href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_TOLERANCE"><code>DJSTRIPE_WEBHOOK_TOLERANCE</code></a></li>
-<li><a href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_EVENT_CALLBACK"><code>DJSTRIPE_WEBHOOK_EVENT_CALLBACK</code></a></li>
+<li><a class="autorefs autorefs-internal" href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_VALIDATION"><code>DJSTRIPE_WEBHOOK_VALIDATION</code></a></li>
+<li><a class="autorefs autorefs-internal" href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_TOLERANCE"><code>DJSTRIPE_WEBHOOK_TOLERANCE</code></a></li>
+<li><a class="autorefs autorefs-internal" href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_EVENT_CALLBACK"><code>DJSTRIPE_WEBHOOK_EVENT_CALLBACK</code></a></li>
 </ul>
 <h2 id="advanced-usage">Advanced usage</h2>
 <p>dj-stripe comes with native support for webhooks as event listeners.</p>
