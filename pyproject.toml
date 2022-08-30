@@ -35,6 +35,10 @@ exclude = [
     "manage.py"
 ]
 
+[tool.poetry.urls]
+"Funding" = "https://github.com/sponsors/dj-stripe"
+
+
 [tool.poetry.dependencies]
 python = "^3.7.12"
 django = ">=3.2, <4.1"
