@@ -120,5 +120,5 @@ mysql = ["mysqlclient"]
 profile = "black"
 
 [build-system]
-requires = ["poetry_core>=1.0.0"]
+requires = ["poetry_core>=1.1.0rc3"]
 build-backend = "poetry.core.masonry.api"
