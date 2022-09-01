@@ -28,6 +28,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.SET_NULL,
                 to="djstripe.webhookendpoint",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                help_text="The endpoint this webhook was received on",
             ),
         ),
         migrations.AddField(
@@ -39,6 +40,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.CASCADE,
                 to="djstripe.account",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                help_text="The Stripe Account this object belongs to.",
             ),
         ),
         migrations.AlterField(
@@ -223,6 +225,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.account",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                        help_text="The Stripe Account this object belongs to.",
                     ),
                 ),
             ],
@@ -309,6 +312,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.customer",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                        help_text="The customer which this orders belongs to.",
                     ),
                 ),
                 (
@@ -319,6 +323,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.account",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                        help_text="The Stripe Account this object belongs to.",
                     ),
                 ),
                 (
@@ -329,6 +334,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.paymentintent",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                        help_text="ID of the payment intent associated with this order. Null when the order is open.",
                     ),
                 ),
             ],
@@ -400,6 +406,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.account",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                        help_text="The Stripe Account this object belongs to.",
                     ),
                 ),
                 (
@@ -410,6 +417,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.taxcode",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                        help_text="The shipping tax code",
                     ),
                 ),
             ],
