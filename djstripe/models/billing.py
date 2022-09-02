@@ -557,7 +557,7 @@ class BaseInvoice(StripeModel):
 
     @property
     def human_readable_amount(self) -> str:
-        return get_friendly_currency_amount(self.amount_paid / 100, self.currency)
+        return get_friendly_currency_amount(self.amount_paid, self.currency)
 
     @classmethod
     def upcoming(
