@@ -38,7 +38,7 @@ RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/inst
 COPY pyproject.toml .
 
 # Disable poetry managed virtualenvs and install all dependencies and sub-depenendencies but the project itself
-RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi --no-root
+RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi --no-root --all-extras --with dev --with docs
 
 # copy application code to WORKDIR
 COPY . .
@@ -46,4 +46,4 @@ COPY . .
 # Install dj-stripe package
 # dj-stripe is installed later on so that any changes in application code don't cause unnecessary
 # re-builds
-RUN poetry install --no-interaction --no-ansi --all-extras
+RUN poetry install --no-interaction --no-ansi --all-extras --with dev --with docs

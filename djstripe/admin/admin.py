@@ -27,7 +27,6 @@ from .forms import (
     WebhookEndpointAdminCreateForm,
     WebhookEndpointAdminEditForm,
 )
-from .utils import ReadOnlyMixin, get_forward_relation_fields_for_model
 from .utils import (
     ReadOnlyMixin,
     custom_display_for_JSONfield,

@@ -24,6 +24,11 @@ from ..utils import get_id_from_stripe_data
 logger = logging.getLogger(__name__)
 
 
+# TODO Can you retry an event automatically on failure using idemopotency key or something?
+# ! The idea being that if you get a failure due to a race condition or any other error, we by default re-trigger the same webhook event using the key or some way that ensures we don't create the same object twice?
+# todo for any failed webhook, get the associated event and the object (from event.data) and re-sync the data
+
+
 class StripeBaseModel(models.Model):
     stripe_class: Type[APIResource] = APIResource
 
@@ -699,8 +704,11 @@ class StripeModel(StripeBaseModel):
                 raise cls.DoesNotExist
 
         except cls.DoesNotExist:
+            # TODO it can be the case that some other webhook has already created the object by the time the next line executes
+
             # try to create iff instance doesn't already exist in the DB
             # TODO dictionary unpacking will not work if cls has any ManyToManyField
+
             instance = cls(**stripe_data)
 
             instance._attach_objects_hook(
