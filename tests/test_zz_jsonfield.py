@@ -7,19 +7,12 @@ import sys
 from unittest import skipUnless
 
 from django.apps.registry import apps
+from django.db.models import JSONField as DjangoJSONField
 from django.test import TestCase
 from django.test.utils import override_settings
 from jsonfield import JSONField as UglyJSONField
 
 from djstripe.fields import import_jsonfield
-
-try:
-    try:
-        from django.db.models import JSONField as DjangoJSONField
-    except ImportError:
-        from django.db.models import JSONField as DjangoJSONField
-except ImportError:
-    pass
 
 
 @override_settings(DJSTRIPE_USE_NATIVE_JSONFIELD=False)
