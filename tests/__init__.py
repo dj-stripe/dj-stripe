@@ -219,7 +219,7 @@ class ExternalAccounts(object):
             if fake_external_account["id"] == source:
                 return fake_external_account
 
-    def retrieve(self, id, expand=None):  # noqa
+    def retrieve(self, id, expand=None):
         for fake_external_account in self.external_account_fakes:
             if fake_external_account["id"] == id:
                 return fake_external_account
@@ -1304,7 +1304,7 @@ class Sources(object):
             if fake_card["id"] == source:
                 return fake_card
 
-    def retrieve(self, id, expand=None):  # noqa
+    def retrieve(self, id, expand=None):
         for fake_card in self.card_fakes:
             if fake_card["id"] == id:
                 return fake_card

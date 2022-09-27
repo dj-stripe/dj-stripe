@@ -153,7 +153,7 @@ class PlanTest(AssertStripeFksMixin, TestCase):
         plan_retrieve_mock.assert_called_once_with(
             id=self.plan_data["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            expand=["tiers"],
+            expand=["product", "tiers"],
             stripe_account=self.plan.djstripe_owner_account.id,
         )
         plan = Plan.sync_from_stripe_data(stripe_plan)

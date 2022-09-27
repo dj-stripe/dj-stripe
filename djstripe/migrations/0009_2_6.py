@@ -102,6 +102,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.account",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                        help_text="The Stripe Account this object belongs to.",
                     ),
                 ),
                 (
@@ -167,6 +168,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.account",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                        help_text="The Stripe Account this object belongs to.",
                     ),
                 ),
                 (
@@ -187,6 +189,7 @@ class Migration(migrations.Migration):
                         related_name="usage_record_summaries",
                         to="djstripe.subscriptionitem",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                        help_text="The subscription item this usage record contains data for.",
                     ),
                 ),
             ],
@@ -201,6 +204,7 @@ class Migration(migrations.Migration):
                 related_name="application_fees",
                 to="djstripe.account",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                help_text="ID of the Stripe account this fee was taken from.",
             ),
             preserve_default=False,
         ),
@@ -223,6 +227,7 @@ class Migration(migrations.Migration):
                 related_name="disputes",
                 to="djstripe.balancetransaction",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                help_text="Balance transaction that describes the impact on your account balance.",
             ),
         ),
         migrations.AddField(
@@ -234,6 +239,7 @@ class Migration(migrations.Migration):
                 related_name="disputes",
                 to="djstripe.charge",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                help_text="The charge that was disputed",
             ),
         ),
         migrations.AddField(
@@ -245,6 +251,7 @@ class Migration(migrations.Migration):
                 related_name="disputes",
                 to="djstripe.paymentintent",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                help_text="The PaymentIntent that was disputed",
             ),
         ),
         migrations.AddField(
@@ -300,6 +307,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.CASCADE,
                 to="djstripe.account",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                help_text="The Stripe Account this object belongs to.",
             ),
         ),
         migrations.RemoveField(model_name="usagerecord", name="description"),
@@ -346,6 +354,7 @@ class Migration(migrations.Migration):
                 related_name="+",
                 to="djstripe.invoice",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                help_text="The most recent invoice this subscription has generated.",
             ),
         ),
         migrations.AlterField(

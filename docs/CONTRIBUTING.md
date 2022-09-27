@@ -41,8 +41,7 @@ The documentation site will then be served on <http://127.0.0.1:8000>.
 
     In case you get the error that some plugin is not installed, please run:
         ``` bash
-
-        poetry install -E docs
+        poetry install --with docs
         ```
 
 If you wish to just generate the documentation, you can replace `serve` with `build`,

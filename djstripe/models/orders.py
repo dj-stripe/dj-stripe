@@ -22,7 +22,7 @@ class Order(StripeModel):
     """
 
     stripe_class = stripe.Order
-    expand_fields = ["customer", "line_items"]
+    expand_fields = ["customer", "line_items", "total_details.breakdown"]
     stripe_dashboard_item_name = "orders"
 
     amount_subtotal = StripeQuantumCurrencyAmountField(

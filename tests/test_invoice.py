@@ -108,9 +108,9 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
     ):
         default_account_mock.return_value = self.account
         invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
-
-        self.assertEqual(
-            str(invoice), f"Invoice #{FAKE_INVOICE['number']} for $20.00 USD (paid)"
+        assert invoice
+        assert (
+            str(invoice) == f"Invoice #{FAKE_INVOICE['number']} for $20.00 USD (paid)"
         )
         self.assertGreater(len(invoice.status_transitions.keys()), 1)
         self.assertTrue(bool(invoice.account_country))

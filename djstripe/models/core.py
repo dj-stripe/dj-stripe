@@ -1295,7 +1295,7 @@ class Customer(StripeModel):
         data,
         pending_relations=None,
         api_key=djstripe_settings.STRIPE_SECRET_KEY,
-    ):  # noqa (function complexity)
+    ):
         from .billing import Coupon
         from .payment_methods import DjstripePaymentMethod
 
@@ -2178,7 +2178,7 @@ class Price(StripeModel):
     """
 
     stripe_class = stripe.Price
-    expand_fields = ["tiers"]
+    expand_fields = ["product", "tiers"]
     stripe_dashboard_item_name = "prices"
 
     active = models.BooleanField(

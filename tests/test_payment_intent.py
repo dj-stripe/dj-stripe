@@ -27,33 +27,35 @@ from . import (
 pytestmark = pytest.mark.django_db
 
 
+def _get_fake_payment_intent_destination_charge_no_customer():
+    FAKE_PAYMENT_INTENT_DESTINATION_CHARGE_NO_CUSTOMER = deepcopy(
+        FAKE_PAYMENT_INTENT_DESTINATION_CHARGE
+    )
+    FAKE_PAYMENT_INTENT_DESTINATION_CHARGE_NO_CUSTOMER["customer"] = None
+    return FAKE_PAYMENT_INTENT_DESTINATION_CHARGE_NO_CUSTOMER
+
+
+def _get_fake_payment_intent_i_no_customer():
+    FAKE_PAYMENT_INTENT_I_NO_CUSTOMER = deepcopy(FAKE_PAYMENT_INTENT_I)
+    FAKE_PAYMENT_INTENT_I_NO_CUSTOMER["customer"] = None
+    return FAKE_PAYMENT_INTENT_I_NO_CUSTOMER
+
+
 class TestStrPaymentIntent:
 
     #
     # Helpers
     #
-    def get_fake_payment_intent_destination_charge_no_customer():
-        FAKE_PAYMENT_INTENT_DESTINATION_CHARGE_NO_CUSTOMER = deepcopy(
-            FAKE_PAYMENT_INTENT_DESTINATION_CHARGE
-        )
-        FAKE_PAYMENT_INTENT_DESTINATION_CHARGE_NO_CUSTOMER["customer"] = None
-        return FAKE_PAYMENT_INTENT_DESTINATION_CHARGE_NO_CUSTOMER
-
-    def get_fake_payment_intent_i_no_customer():
-        FAKE_PAYMENT_INTENT_I_NO_CUSTOMER = deepcopy(FAKE_PAYMENT_INTENT_I)
-        FAKE_PAYMENT_INTENT_I_NO_CUSTOMER["customer"] = None
-        return FAKE_PAYMENT_INTENT_I_NO_CUSTOMER
 
     @pytest.mark.parametrize(
         "fake_intent_data, has_account, has_customer",
         [
             (FAKE_PAYMENT_INTENT_I, False, True),
             (FAKE_PAYMENT_INTENT_DESTINATION_CHARGE, True, True),
-            (get_fake_payment_intent_destination_charge_no_customer(), True, False),
-            (get_fake_payment_intent_i_no_customer(), False, False),
+            (_get_fake_payment_intent_destination_charge_no_customer(), True, False),
+            (_get_fake_payment_intent_i_no_customer(), False, False),
         ],
     )
-    # flake8: noqa (C901)
     def test___str__(self, fake_intent_data, has_account, has_customer, monkeypatch):
         def mock_customer_get(*args, **kwargs):
             """Monkeypatched stripe.Customer.retrieve"""
@@ -106,6 +108,7 @@ class TestStrPaymentIntent:
         monkeypatch.setattr(stripe.Charge, "retrieve", mock_charge_get)
 
         pi = PaymentIntent.sync_from_stripe_data(fake_intent_data)
+        assert pi
 
         # due to reverse o2o sync invoice should also get created
         if fake_intent_data.get("invoice"):
@@ -199,6 +202,7 @@ class PaymentIntentTest(AssertStripeFksMixin, TestCase):
             },
         )
 
+        assert payment_intent
         self.assertIsNotNone(payment_intent.invoice)
 
     @patch(
@@ -251,6 +255,7 @@ class PaymentIntentTest(AssertStripeFksMixin, TestCase):
             payment_intent = PaymentIntent.sync_from_stripe_data(fake_payment_intent)
 
             # trigger model field validation (including enum value choices check)
+            assert payment_intent
             payment_intent.full_clean()
 
     @patch(
@@ -305,6 +310,7 @@ class PaymentIntentTest(AssertStripeFksMixin, TestCase):
         ):
             fake_payment_intent["cancellation_reason"] = reason
             payment_intent = PaymentIntent.sync_from_stripe_data(fake_payment_intent)
+            assert payment_intent
 
             if reason is None:
                 # enums nulls are coerced to "" by StripeModel._stripe_object_to_record

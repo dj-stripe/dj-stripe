@@ -69,10 +69,12 @@ class TestPaymentMethod:
         if not customer_exists:
             fake_payment_method_data["customer"] = None
             pm = models.PaymentMethod.sync_from_stripe_data(fake_payment_method_data)
+            assert pm
             assert pm.get_stripe_dashboard_url() == ""
 
         else:
             pm = models.PaymentMethod.sync_from_stripe_data(fake_payment_method_data)
+            assert pm
             customer = models.Customer.objects.get(
                 id=fake_payment_method_data["customer"]
             )
@@ -90,6 +92,7 @@ class TestPaymentMethod:
             fake_payment_method_data["customer"] = None
 
         pm = models.PaymentMethod.sync_from_stripe_data(fake_payment_method_data)
+        assert pm
         assert pm.id == fake_payment_method_data["id"]
 
 
@@ -132,6 +135,7 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
     )
     def test_attach_obj(self, attach_mock):
         pm = models.PaymentMethod.sync_from_stripe_data(FAKE_PAYMENT_METHOD_I)
+        assert pm
 
         payment_method = models.PaymentMethod.attach(pm, customer=self.customer)
 
@@ -153,6 +157,7 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
         fake_payment_method["customer"] = None
 
         payment_method = models.PaymentMethod.sync_from_stripe_data(fake_payment_method)
+        assert payment_method
 
         self.assert_fks(
             payment_method, expected_blank_fks={"djstripe.PaymentMethod.customer"}
@@ -183,6 +188,7 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
         ):
             models.PaymentMethod.sync_from_stripe_data(deepcopy(FAKE_PAYMENT_METHOD_I))
 
+        assert self.customer
         self.assertEqual(1, self.customer.payment_methods.count())
 
         payment_method = self.customer.payment_methods.first()
@@ -251,7 +257,8 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
                 deepcopy(FAKE_CARD_AS_PAYMENT_METHOD)
             )
 
-        self.assertEqual(1, self.customer.payment_methods.count())
+        assert self.customer
+        assert self.customer.payment_methods.count() == 1
 
         payment_method = self.customer.payment_methods.first()
 
@@ -268,8 +275,8 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
         ):
             self.assertTrue(payment_method.detach())
 
-        self.assertEqual(0, self.customer.payment_methods.count())
-        self.assertIsNone(self.customer.default_payment_method)
+        assert self.customer.payment_methods.count() == 0
+        assert self.customer.default_payment_method is None
 
         self.assertEqual(
             models.PaymentMethod.objects.filter(id=payment_method.id).count(),
@@ -305,6 +312,7 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
         payment_method = models.PaymentMethod.sync_from_stripe_data(
             deepcopy(FAKE_PAYMENT_METHOD_I)
         )
+        assert payment_method
 
         self.assertIsNotNone(payment_method.customer)
 
@@ -315,6 +323,7 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
         payment_method = models.PaymentMethod.sync_from_stripe_data(
             fake_payment_method_no_customer
         )
+        assert payment_method
 
         self.assertIsNone(payment_method.customer)
 

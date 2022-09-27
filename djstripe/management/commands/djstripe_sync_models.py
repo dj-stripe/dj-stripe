@@ -26,6 +26,7 @@ Invoke like so:
 from typing import List
 
 from django.apps import apps
+from django.core.exceptions import FieldDoesNotExist
 from django.core.management.base import BaseCommand, CommandError
 from django.db import models as django_models
 
@@ -60,7 +61,7 @@ class Command(BaseCommand):
             help="Specify the api_keys you would like to perform this sync for.",
         )
 
-    def handle(self, *args, api_keys, **options):  # noqa: C901
+    def handle(self, *args, api_keys, **options):
         app_label = "djstripe"
         app_config = apps.get_app_config(app_label)
         model_list = []  # type: List[models.StripeModel]
@@ -128,7 +129,7 @@ class Command(BaseCommand):
 
         return True, ""
 
-    def sync_model(self, model, api_key: str):  # noqa: C901
+    def sync_model(self, model, api_key: str):
         model_name = model.__name__
 
         should_sync, reason = self._should_sync_model(model)
@@ -217,7 +218,7 @@ class Command(BaseCommand):
 
     # todo simplfy this code by spliting into 1-2 functions
     @staticmethod
-    def get_default_list_kwargs(model, accounts_set, api_key: str):  # noqa: C901
+    def get_default_list_kwargs(model, accounts_set, api_key: str):
         """Returns default sequence of kwargs to sync
         all Stripe Accounts"""
         expand = []
@@ -228,51 +229,56 @@ class Command(BaseCommand):
                 # add expand_field on the current model
                 expand.append(f"data.{field}")
 
-                field_inst = model._meta.get_field(field)
+                try:
+                    field_inst = model._meta.get_field(field)
 
-                # get expand_fields on Forward FK and OneToOneField relations on the current model
-                if isinstance(
-                    field_inst, (django_models.ForeignKey, django_models.OneToOneField)
-                ):
+                    # get expand_fields on Forward FK and OneToOneField relations on the current model
+                    if isinstance(
+                        field_inst,
+                        (django_models.ForeignKey, django_models.OneToOneField),
+                    ):
 
-                    try:
-                        for (
-                            related_model_expand_field
-                        ) in field_inst.related_model.expand_fields:
-                            # add expand_field on the current model
-                            expand.append(f"data.{field}.{related_model_expand_field}")
-
-                            related_model_expand_field_inst = (
-                                field_inst.related_model._meta.get_field(
-                                    related_model_expand_field
+                        try:
+                            for (
+                                related_model_expand_field
+                            ) in field_inst.related_model.expand_fields:
+                                # add expand_field on the current model
+                                expand.append(
+                                    f"data.{field}.{related_model_expand_field}"
                                 )
-                            )
 
-                            # get expand_fields on Forward FK and OneToOneField relations on the current model
-                            if isinstance(
-                                related_model_expand_field_inst,
-                                (
-                                    django_models.ForeignKey,
-                                    django_models.OneToOneField,
-                                ),
-                            ):
-
-                                try:
-                                    # need to prepend "field_name." to each of the entry in the expand_fields list
-                                    related_model_expand_fields = map(
-                                        lambda i: f"data.{field_inst.name}.{related_model_expand_field}.{i}",
-                                        related_model_expand_field_inst.related_model.expand_fields,
+                                related_model_expand_field_inst = (
+                                    field_inst.related_model._meta.get_field(
+                                        related_model_expand_field
                                     )
+                                )
 
-                                    expand = [
-                                        *expand,
-                                        *related_model_expand_fields,
-                                    ]
-                                except AttributeError:
-                                    continue
-                    except AttributeError:
-                        continue
+                                # get expand_fields on Forward FK and OneToOneField relations on the current model
+                                if isinstance(
+                                    related_model_expand_field_inst,
+                                    (
+                                        django_models.ForeignKey,
+                                        django_models.OneToOneField,
+                                    ),
+                                ):
 
+                                    try:
+                                        # need to prepend "field_name." to each of the entry in the expand_fields list
+                                        related_model_expand_fields = map(
+                                            lambda i: f"data.{field_inst.name}.{related_model_expand_field}.{i}",
+                                            related_model_expand_field_inst.related_model.expand_fields,
+                                        )
+
+                                        expand = [
+                                            *expand,
+                                            *related_model_expand_fields,
+                                        ]
+                                    except AttributeError:
+                                        continue
+                        except AttributeError:
+                            continue
+                except FieldDoesNotExist:
+                    pass
         except AttributeError:
             pass
 

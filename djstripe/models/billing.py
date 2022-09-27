@@ -557,7 +557,7 @@ class BaseInvoice(StripeModel):
 
     @property
     def human_readable_amount(self) -> str:
-        return get_friendly_currency_amount(self.amount_paid / 100, self.currency)
+        return get_friendly_currency_amount(self.amount_paid, self.currency)
 
     @classmethod
     def upcoming(
@@ -1073,7 +1073,7 @@ class Plan(StripeModel):
     """
 
     stripe_class = stripe.Plan
-    expand_fields = ["tiers"]
+    expand_fields = ["product", "tiers"]
     stripe_dashboard_item_name = "plans"
 
     active = models.BooleanField(
@@ -1534,6 +1534,23 @@ class Subscription(StripeModel):
         ]
 
         return f"{self.customer} on {' and '.join(products_lst)}"
+
+    @classmethod
+    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        """
+        Call the stripe API's list operation for this model.
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        See Stripe documentation for accepted kwargs for each object.
+        :returns: an iterator over all items in the query
+        """
+        if not kwargs.get("status"):
+            # special case: https://stripe.com/docs/api/subscriptions/list#list_subscriptions-status
+            # See Issue: https://github.com/dj-stripe/dj-stripe/issues/1763
+            kwargs["status"] = "all"
+
+        return super().api_list(api_key=api_key, **kwargs)
 
     def update(
         self,

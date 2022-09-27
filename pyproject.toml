@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dj-stripe"
-version = "2.7.0-beta.1"
+version = "2.7.0-rc.2"
 description = "Django + Stripe made easy"
 license = "MIT"
 authors = [
@@ -8,6 +8,7 @@ authors = [
     "Jerome Leclanche <jerome@leclan.ch>",
 ]
 readme = "docs/README.md"
+homepage = "https://dj-stripe.dev"
 repository = "https://github.com/dj-stripe/dj-stripe"
 documentation = "https://dj-stripe.github.io/dj-stripe/"
 classifiers = [
@@ -34,35 +35,94 @@ exclude = [
     "manage.py"
 ]
 
+[tool.poetry.urls]
+"Funding" = "https://github.com/sponsors/dj-stripe"
+
+
 [tool.poetry.dependencies]
 python = "^3.7.12"
 django = ">=3.2, <4.1"
 jsonfield = ">=3.0"
 stripe = ">=2.48.0"
-mkdocs = {version = "^1.3.0", optional = true}
-mkdocstrings = {version = "^0.16.0", optional = true}
-mkdocs-material = {version = "^8.2.15", optional = true}
-mkdocs-autorefs = {version = "^0.3.0", optional = true}
-mike = {version = "^1.1.2", optional = true}
-jinja2 = {version = "<3.1.0", optional = true}
+psycopg2 = { version = "^2.8.5", optional = true }
+mysqlclient = { version = ">=1.4.0", optional = true }
 
-[tool.poetry.dev-dependencies]
-black = "^22.3.0"
-psycopg2 = "^2.8.5"
-mysqlclient = ">=1.4.0"
-flake8 = "^3.9.2"
-isort = "^5.10.1"
-pre-commit = "^2.19.0"
-pytest = "^7.1.2"
-pytest-django = "^4.5.2"
-mypy = "^0.950"
+[tool.poetry.group.dev]
+optional = true
+[tool.poetry.group.dev.dependencies]
+black = ">=22.6.0"
+isort = ">=5.10.1"
+pre-commit = ">=2.20.0"
+pytest = ">=7.1.2"
+pytest-django = ">=4.5.2"
+mypy = ">=0.971"
+
+# flake8 = ">=5.0.4"
+# Why is flake8 commented out?
+# The short version: flake8 is pinned to an old version of importlib-metadata
+# which clashes with other dependencies (such as mkdocs in our case).
+#
+# For the longer version, you have to look at these links:
+# https://github.com/PyCQA/flake8/pull/1438
+# https://github.com/PyCQA/flake8/issues/1474
+# https://github.com/PyCQA/flake8/issues/1503
+# https://github.com/PyCQA/flake8/issues/1522
+# https://github.com/PyCQA/flake8/issues/1526
+#
+# So the flake8 team ran into a deprecation path they didn't like, and got so
+# upset about it that… it seems they just decided to never unpin it, even though
+# the maintainers of importlib-metadata have since fixed the issue flake8 was
+# complaining about.
+#
+# Now, they're getting issue, after issue, after issue opened on Github because:
+# - importlib-metadata 4.4+ is required by many popular libs (markdown, sphinx…)
+# - The pin looks unnecessary at first glance
+# - They don't document the reasoning for their choice
+# - There probably ISN'T any valid reasoning for their choice
+# - They are closing & locking any reference to this as off-topic
+# - They refuse to address the issue, and complain about anyone who brings it up.
+#
+# The reasonable approach would of course be to remove the useless pin, but by
+# doing so they fear they would "increase the maintenance burden" because they're
+# a small team (in other words, they're worried about more bug tracker activity).
+# Obviously this makes zero sense since the issue is gone, and they are instead
+# generating lots of bug tracker activity, which they're promptly ignoring.
+#
+# So they're wasting my time, and everybody else's, including yours who's reading
+# this little rant right now. But I'd like this to serve as a lesson on how not
+# to maintain a popular open source project.
+# Many OSS devs are finding out that, with increased popularity comes increased
+# responsibility. If you don't want the responsibility, you are not forced to
+# continue maintaining the library; but as long as you do, your reach puts you in
+# a position of power.
+# Wasting your users' time is abusing that position of power.
+# Think of the underpaid bureaucrat who, by the stroke of a pen, makes or breaks
+# the lives of others. Who was a little too grumpy at work and decided to take it
+# out on someone and waste hours of their life by making illogical demands, just
+# out of spite.
+#
+# I'm grateful flake8 exists. But it's not a useful enough tool to allow it to
+# waste our time like this, and it's largely been displaced by the other tools:
+# mypy, isort, and black. So let's stick to those instead.
+
+[tool.poetry.group.docs]
+optional = true
+[tool.poetry.group.docs.dependencies]
+mkdocs = ">=1.3.1"
+mkdocs-material = ">=8.4.2"
+mkdocs-autorefs = ">=0.4.1"
+mkdocstrings = {extras = ["python"], version = ">=0.19.0"}
+mike = ">=1.1.2"
+jinja2 = "<3.1.0"
+
 
 [tool.poetry.extras]
-docs = ["mkdocs", "mkdocstrings", "mkdocs-material", "mkdocs-autorefs", "psycopg2", "mike", "jinja2"]
+postgres = ["psycopg2"]
+mysql = ["mysqlclient"]
 
 [tool.isort]
 profile = "black"
 
 [build-system]
-requires = ["poetry_core>=1.0.0"]
+requires = ["poetry_core>=1.1.0"]
 build-backend = "poetry.core.masonry.api"

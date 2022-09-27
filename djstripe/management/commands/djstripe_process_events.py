@@ -21,7 +21,7 @@ class Command(VerbosityAwareOutputMixin, BaseCommand):
     )
 
     def add_arguments(self, parser):
-        """Add optional arugments to filter Events by."""
+        """Add optional arguments to filter Events by."""
         # Use a mutually exclusive group to prevent multiple arguments being
         # specified together.
         group = parser.add_mutually_exclusive_group()
