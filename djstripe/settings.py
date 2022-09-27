@@ -120,8 +120,8 @@ class DjstripeSettings:
 
     # A user-defined preprocessor to modify or ignore events
     @property
-    def STRIPE_EVENT_PREPROCESSOR(self):
-        return self.get_callback_function("STRIPE_EVENT_PREPROCESSOR")
+    def DJSTRIPE_EVENT_PREPROCESSOR(self):
+        return self.get_callback_function("DJSTRIPE_EVENT_PREPROCESSOR")
 
     @property
     def STRIPE_SECRET_KEY(self):

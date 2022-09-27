@@ -195,8 +195,8 @@ class WebhookEventTrigger(models.Model):
         except ValueError:
             data = {}
 
-        if djstripe_settings.STRIPE_EVENT_PREPROCESSOR:
-            data = djstripe_settings.STRIPE_EVENT_PREPROCESSOR(data):
+        if djstripe_settings.DJSTRIPE_EVENT_PREPROCESSOR:
+            data = djstripe_settings.DJSTRIPE_EVENT_PREPROCESSOR(data):
             if data is None:
                 return None
 
