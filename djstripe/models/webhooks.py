@@ -195,6 +195,11 @@ class WebhookEventTrigger(models.Model):
         except ValueError:
             data = {}
 
+        if djstripe_settings.STRIPE_EVENT_PREPROCESSOR:
+            data = djstripe_settings.STRIPE_EVENT_PREPROCESSOR(data):
+            if data is None:
+                return None
+
         if webhook_endpoint is None:
             stripe_account = StripeModel._find_owner_account(data=data)
             secret = djstripe_settings.WEBHOOK_SECRET

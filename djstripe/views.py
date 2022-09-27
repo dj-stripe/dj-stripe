@@ -47,6 +47,9 @@ class ProcessWebhookView(View):
             request, webhook_endpoint=webhook_endpoint
         )
 
+        if trigger is None:
+            return HttpResponse("Event ignored")
+
         if trigger.is_test_event:
             # Since we don't do signature verification, we have to skip trigger.valid
             return HttpResponse("Test webhook successfully received and discarded!")

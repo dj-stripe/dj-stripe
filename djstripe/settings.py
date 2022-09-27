@@ -118,6 +118,11 @@ class DjstripeSettings:
     def STRIPE_LIVE_MODE(self):
         return getattr(settings, "STRIPE_LIVE_MODE", False)
 
+    # Determines whether we are in live mode or test mode
+    @property
+    def STRIPE_EVENT_PREPROCESSOR(self):
+        return self.get_callback_function("STRIPE_EVENT_PREPROCESSOR")
+
     @property
     def STRIPE_SECRET_KEY(self):
         # Default secret key
