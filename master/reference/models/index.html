@@ -590,8 +590,7 @@
           <li>Reference &raquo;</li>
       <li>Models</li>
     <li class="wy-breadcrumbs-aside">
-        <a href="https://github.com/dj-stripe/dj-stripe/edit/master/docs/reference/models.md"
-          class="icon icon-github"> Edit on GitHub</a>
+          <a href="https://github.com/dj-stripe/dj-stripe/edit/master/docs/reference/models.md" class="icon icon-github"> Edit on GitHub</a>
     </li>
   </ul>
   <hr/>
@@ -10456,7 +10455,8 @@ and its usage is encouraged instead of Plan objects.</p>
 <span class="normal">2365</span>
 <span class="normal">2366</span>
 <span class="normal">2367</span>
-<span class="normal">2368</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Price</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">2368</span>
+<span class="normal">2369</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Price</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Prices define the unit cost, currency, and (optional) billing cycle for</span>
 <span class="sd">    both recurring and one-time purchases of products.</span>
@@ -10593,7 +10593,8 @@ and its usage is encouraged instead of Plan objects.</p>
     <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># A few minor things are changed in the api-version of the create call</span>
         <span class="n">api_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="n">api_kwargs</span><span class="p">[</span><span class="s2">&quot;unit_amount&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">api_kwargs</span><span class="p">[</span><span class="s2">&quot;unit_amount&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">api_kwargs</span><span class="p">[</span><span class="s2">&quot;unit_amount&quot;</span><span class="p">]:</span>
+            <span class="n">api_kwargs</span><span class="p">[</span><span class="s2">&quot;unit_amount&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">api_kwargs</span><span class="p">[</span><span class="s2">&quot;unit_amount&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">api_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;product&quot;</span><span class="p">),</span> <span class="n">StripeModel</span><span class="p">):</span>
             <span class="n">api_kwargs</span><span class="p">[</span><span class="s2">&quot;product&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">api_kwargs</span><span class="p">[</span><span class="s2">&quot;product&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">id</span>
@@ -10616,18 +10617,18 @@ and its usage is encouraged instead of Plan objects.</p>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">human_readable_price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">billing_scheme</span> <span class="o">==</span> <span class="s2">&quot;per_unit&quot;</span><span class="p">:</span>
-            <span class="n">unit_amount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit_amount</span> <span class="o">/</span> <span class="mi">100</span>
+            <span class="n">unit_amount</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit_amount</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span>
             <span class="n">amount</span> <span class="o">=</span> <span class="n">get_friendly_currency_amount</span><span class="p">(</span><span class="n">unit_amount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># tiered billing scheme</span>
             <span class="n">tier_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tiers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">flat_amount_tier_1</span> <span class="o">=</span> <span class="n">tier_1</span><span class="p">[</span><span class="s2">&quot;flat_amount&quot;</span><span class="p">]</span>
             <span class="n">formatted_unit_amount_tier_1</span> <span class="o">=</span> <span class="n">get_friendly_currency_amount</span><span class="p">(</span>
                 <span class="p">(</span><span class="n">tier_1</span><span class="p">[</span><span class="s2">&quot;unit_amount&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span>
             <span class="p">)</span>
             <span class="n">amount</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Starts at </span><span class="si">{</span><span class="n">formatted_unit_amount_tier_1</span><span class="si">}</span><span class="s2"> per unit&quot;</span>
 
             <span class="c1"># stripe shows flat fee even if it is set to 0.00</span>
+            <span class="n">flat_amount_tier_1</span> <span class="o">=</span> <span class="n">tier_1</span><span class="p">[</span><span class="s2">&quot;flat_amount&quot;</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">flat_amount_tier_1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">formatted_flat_amount_tier_1</span> <span class="o">=</span> <span class="n">get_friendly_currency_amount</span><span class="p">(</span>
                     <span class="n">flat_amount_tier_1</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span>
@@ -11059,13 +11060,13 @@ and its usage is encouraged instead of Plan objects.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2312</span>
-<span class="normal">2313</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2313</span>
 <span class="normal">2314</span>
 <span class="normal">2315</span>
 <span class="normal">2316</span>
 <span class="normal">2317</span>
-<span class="normal">2318</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">2318</span>
+<span class="normal">2319</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="kn">from</span> <span class="nn">.billing</span> <span class="kn">import</span> <span class="n">Subscription</span>
 
     <span class="n">subscriptions</span> <span class="o">=</span> <span class="n">Subscription</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">plan__id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
@@ -11110,11 +11111,13 @@ and its usage is encouraged instead of Plan objects.</p>
 <span class="normal">2307</span>
 <span class="normal">2308</span>
 <span class="normal">2309</span>
-<span class="normal">2310</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">2310</span>
+<span class="normal">2311</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="c1"># A few minor things are changed in the api-version of the create call</span>
     <span class="n">api_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="n">api_kwargs</span><span class="p">[</span><span class="s2">&quot;unit_amount&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">api_kwargs</span><span class="p">[</span><span class="s2">&quot;unit_amount&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">api_kwargs</span><span class="p">[</span><span class="s2">&quot;unit_amount&quot;</span><span class="p">]:</span>
+        <span class="n">api_kwargs</span><span class="p">[</span><span class="s2">&quot;unit_amount&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">api_kwargs</span><span class="p">[</span><span class="s2">&quot;unit_amount&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">api_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;product&quot;</span><span class="p">),</span> <span class="n">StripeModel</span><span class="p">):</span>
         <span class="n">api_kwargs</span><span class="p">[</span><span class="s2">&quot;product&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">api_kwargs</span><span class="p">[</span><span class="s2">&quot;product&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">id</span>
@@ -11190,8 +11193,7 @@ and its usage is encouraged instead of Plan objects.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2320</span>
-<span class="normal">2321</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2321</span>
 <span class="normal">2322</span>
 <span class="normal">2323</span>
 <span class="normal">2324</span>
@@ -11238,21 +11240,22 @@ and its usage is encouraged instead of Plan objects.</p>
 <span class="normal">2365</span>
 <span class="normal">2366</span>
 <span class="normal">2367</span>
-<span class="normal">2368</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
+<span class="normal">2368</span>
+<span class="normal">2369</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">human_readable_price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">billing_scheme</span> <span class="o">==</span> <span class="s2">&quot;per_unit&quot;</span><span class="p">:</span>
-        <span class="n">unit_amount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit_amount</span> <span class="o">/</span> <span class="mi">100</span>
+        <span class="n">unit_amount</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit_amount</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span>
         <span class="n">amount</span> <span class="o">=</span> <span class="n">get_friendly_currency_amount</span><span class="p">(</span><span class="n">unit_amount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># tiered billing scheme</span>
         <span class="n">tier_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tiers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">flat_amount_tier_1</span> <span class="o">=</span> <span class="n">tier_1</span><span class="p">[</span><span class="s2">&quot;flat_amount&quot;</span><span class="p">]</span>
         <span class="n">formatted_unit_amount_tier_1</span> <span class="o">=</span> <span class="n">get_friendly_currency_amount</span><span class="p">(</span>
             <span class="p">(</span><span class="n">tier_1</span><span class="p">[</span><span class="s2">&quot;unit_amount&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span>
         <span class="p">)</span>
         <span class="n">amount</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Starts at </span><span class="si">{</span><span class="n">formatted_unit_amount_tier_1</span><span class="si">}</span><span class="s2"> per unit&quot;</span>
 
         <span class="c1"># stripe shows flat fee even if it is set to 0.00</span>
+        <span class="n">flat_amount_tier_1</span> <span class="o">=</span> <span class="n">tier_1</span><span class="p">[</span><span class="s2">&quot;flat_amount&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">flat_amount_tier_1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">formatted_flat_amount_tier_1</span> <span class="o">=</span> <span class="n">get_friendly_currency_amount</span><span class="p">(</span>
                 <span class="n">flat_amount_tier_1</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span>
@@ -11925,8 +11928,7 @@ that was originally charged.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2371</span>
-<span class="normal">2372</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2372</span>
 <span class="normal">2373</span>
 <span class="normal">2374</span>
 <span class="normal">2375</span>
@@ -11991,7 +11993,8 @@ that was originally charged.</p>
 <span class="normal">2434</span>
 <span class="normal">2435</span>
 <span class="normal">2436</span>
-<span class="normal">2437</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Refund</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">2437</span>
+<span class="normal">2438</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Refund</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Refund objects allow you to refund a charge that has previously been created</span>
 <span class="sd">    but not yet refunded. Funds will be refunded to the credit or debit card</span>
@@ -12277,10 +12280,10 @@ that was originally charged.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2434</span>
-<span class="normal">2435</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2435</span>
 <span class="normal">2436</span>
-<span class="normal">2437</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">2437</span>
+<span class="normal">2438</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">human_readable_amount</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">enums</span><span class="o">.</span><span class="n">RefundStatus</span><span class="o">.</span><span class="n">humanize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
     <span class="p">)</span>
@@ -12304,8 +12307,8 @@ that was originally charged.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2431</span>
-<span class="normal">2432</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_stripe_dashboard_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2432</span>
+<span class="normal">2433</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_stripe_dashboard_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">charge</span><span class="o">.</span><span class="n">get_stripe_dashboard_url</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -25942,8 +25945,8 @@ do actually want to instantiate the model and use relations.</p>
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">id</span><span class="p">()</span></code>
   
   <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
       <small class="doc doc-label doc-label-writable"><code>writable</code></small>
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
   </span>
 
 </h5>
