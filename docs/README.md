@@ -46,7 +46,9 @@ The full documentation is available [on Read the Docs](https://dj-stripe.github.
 
 ## Funding and Support
 
-[![Stripe Logo](./logos/stripe_blurple.svg)](https://stripe.com)
+<a href="https://stripe.com">
+  <img alt="Stripe Logo" src="./logos/stripe_blurple.svg" width="250px" />
+</a>
 
 You can now become a sponsor to dj-stripe with [GitHub Sponsors](https://github.com/sponsors/dj-stripe).
 
@@ -63,13 +65,9 @@ an open ledger on how donations are spent.
 
 ## Our Gold sponsors
 
-<style>
-img[alt="Stripe Logo"] {
-    max-width: 250px;
-}
-</style>
-
-[![Stripe Logo](./logos/stripe_blurple.svg)](https://stripe.com)
+<a href="https://stripe.com">
+  <img alt="Stripe Logo" src="./logos/stripe_blurple.svg" width="250px" />
+</a>
 
 ## Similar libraries
 
