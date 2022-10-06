@@ -2297,7 +2297,8 @@ class Price(StripeModel):
     def create(cls, **kwargs):
         # A few minor things are changed in the api-version of the create call
         api_kwargs = dict(kwargs)
-        api_kwargs["unit_amount"] = int(api_kwargs["unit_amount"] * 100)
+        if api_kwargs["unit_amount"]:
+            api_kwargs["unit_amount"] = int(api_kwargs["unit_amount"] * 100)
 
         if isinstance(api_kwargs.get("product"), StripeModel):
             api_kwargs["product"] = api_kwargs["product"].id
@@ -2320,18 +2321,18 @@ class Price(StripeModel):
     @property
     def human_readable_price(self):
         if self.billing_scheme == "per_unit":
-            unit_amount = self.unit_amount / 100
+            unit_amount = (self.unit_amount or 0) / 100
             amount = get_friendly_currency_amount(unit_amount, self.currency)
         else:
             # tiered billing scheme
             tier_1 = self.tiers[0]
-            flat_amount_tier_1 = tier_1["flat_amount"]
             formatted_unit_amount_tier_1 = get_friendly_currency_amount(
                 (tier_1["unit_amount"] or 0) / 100, self.currency
             )
             amount = f"Starts at {formatted_unit_amount_tier_1} per unit"
 
             # stripe shows flat fee even if it is set to 0.00
+            flat_amount_tier_1 = tier_1["flat_amount"]
             if flat_amount_tier_1 is not None:
                 formatted_flat_amount_tier_1 = get_friendly_currency_amount(
                     flat_amount_tier_1 / 100, self.currency
