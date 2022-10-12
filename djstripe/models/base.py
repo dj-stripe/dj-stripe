@@ -193,12 +193,22 @@ class StripeModel(StripeBaseModel):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        return self.stripe_class.retrieve(
+        data = self.stripe_class.retrieve(
             id=self.id,
             api_key=api_key or self.default_api_key,
             expand=self.expand_fields,
             stripe_account=stripe_account,
         )
+
+        if not data:
+            raise RuntimeError(
+                f"No data returned from Stripe for {self.stripe_class}, id={self.id}, "
+                f"api_key={api_key or self.default_api_key}, stripe_account={stripe_account}, "
+                f"expand_fields={self.expand_fields}. "
+                "This is a bug, please report to dj-stripe!"
+            )
+
+        return data
 
     @classmethod
     def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):

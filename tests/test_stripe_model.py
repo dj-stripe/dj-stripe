@@ -93,6 +93,43 @@ def test_api_retrieve(
     )
 
 
+@pytest.mark.parametrize("stripe_account", (None, "acct_fakefakefakefake001"))
+@pytest.mark.parametrize(
+    "api_key, expected_api_key",
+    (
+        (None, djstripe_settings.STRIPE_SECRET_KEY),
+        ("sk_fakefakefake01", "sk_fakefakefake01"),
+    ),
+)
+@pytest.mark.parametrize("expand_fields", ([], ["foo", "bar"]))
+@patch.object(target=StripeModel, attribute="stripe_class")
+def test_api_retrieve_with_empty_data(
+    mock_stripe_class, stripe_account, api_key, expected_api_key, expand_fields
+):
+    """Test that API retrieve raises the expected error."""
+    test_model = ExampleStripeModel()
+    mock_id = "id_fakefakefakefake01"
+    test_model.id = mock_id
+    test_model.expand_fields = expand_fields
+
+    with patch.object(
+        mock_stripe_class, "retrieve", return_value=None
+    ) as mock_stripe_retrieve:
+
+        with pytest.raises(RuntimeError) as exc:
+
+            test_model.api_retrieve(api_key=api_key, stripe_account=stripe_account)
+
+        assert "No data returned from Stripe for " in str(exc.value)
+
+    mock_stripe_retrieve.assert_called_once_with(
+        id=mock_id,
+        api_key=expected_api_key,
+        stripe_account=stripe_account,
+        expand=expand_fields,
+    )
+
+
 @patch.object(target=StripeModel, attribute="stripe_class")
 def test_api_retrieve_reverse_foreign_key_lookup(mock_stripe_class):
     """Test that the reverse foreign key lookup finds the correct fields."""
