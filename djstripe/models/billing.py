@@ -1242,7 +1242,7 @@ class Plan(StripeModel):
             tier_1 = self.tiers[0]
             flat_amount_tier_1 = tier_1["flat_amount"]
             formatted_unit_amount_tier_1 = get_friendly_currency_amount(
-                tier_1["unit_amount"] / 100, self.currency
+                (tier_1["unit_amount"] or 0) / 100, self.currency
             )
             amount = f"Starts at {formatted_unit_amount_tier_1} per unit"
 
