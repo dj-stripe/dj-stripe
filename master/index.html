@@ -52,14 +52,6 @@
     <li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#get-the-distribution">Get the distribution</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#configuration">Configuration</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#running-tests">Running Tests</a>
-    </li>
-        </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#changelog">Changelog</a>
     </li>
@@ -213,58 +205,7 @@ they are updated!</p>
 <li>SQLite: Not recommended in production. Version &gt;=3.26 required.</li>
 </ul>
 <h2 id="installation">Installation</h2>
-<h3 id="get-the-distribution">Get the distribution</h3>
-<p>Install dj-stripe with pip:
-<div class="highlight"><pre><span></span><code>    pip install dj-stripe
-</code></pre></div></p>
-<p>Or with <a href="https://python-poetry.org/">Poetry</a> (recommended):
-<div class="highlight"><pre><span></span><code>    poetry add dj-stripe
-</code></pre></div></p>
-<h3 id="configuration">Configuration</h3>
-<p>Add <code>djstripe</code> to your <code>INSTALLED_APPS</code>:
-<div class="highlight"><pre><span></span><code>    <span class="nv">INSTALLED_APPS</span> <span class="o">=(</span>
-        ...
-        <span class="s2">&quot;djstripe&quot;</span>,
-        ...
-    <span class="o">)</span>
-</code></pre></div></p>
-<p>Add to urls.py:</p>
-<div class="highlight"><pre><span></span><code>    path<span class="o">(</span><span class="s2">&quot;stripe/&quot;</span>, include<span class="o">(</span><span class="s2">&quot;djstripe.urls&quot;</span>, <span class="nv">namespace</span><span class="o">=</span><span class="s2">&quot;djstripe&quot;</span><span class="o">))</span>,
-</code></pre></div>
-<p>Tell Stripe about the webhook (Stripe webhook docs can be found
-<a href="https://stripe.com/docs/webhooks">here</a>) using the full URL of your
-endpoint from the urls.py step above (e.g.
-<code>https://example.com/stripe/webhook</code>).</p>
-<p>Add your Stripe keys and set the operating mode:
-<div class="highlight"><pre><span></span><code>    <span class="nv">STRIPE_LIVE_SECRET_KEY</span> <span class="o">=</span> os.environ.get<span class="o">(</span><span class="s2">&quot;STRIPE_LIVE_SECRET_KEY&quot;</span>, <span class="s2">&quot;&lt;your secret key&gt;&quot;</span><span class="o">)</span>
-    <span class="nv">STRIPE_TEST_SECRET_KEY</span> <span class="o">=</span> os.environ.get<span class="o">(</span><span class="s2">&quot;STRIPE_TEST_SECRET_KEY&quot;</span>, <span class="s2">&quot;&lt;your secret key&gt;&quot;</span><span class="o">)</span>
-    <span class="nv">STRIPE_LIVE_MODE</span> <span class="o">=</span> False  <span class="c1"># Change to True in production</span>
-    <span class="nv">DJSTRIPE_WEBHOOK_SECRET</span> <span class="o">=</span> <span class="s2">&quot;whsec_xxx&quot;</span>  <span class="c1"># Get it from the section in the Stripe dashboard where you added the webhook endpoint</span>
-    <span class="nv">DJSTRIPE_USE_NATIVE_JSONFIELD</span> <span class="o">=</span> True  <span class="c1"># We recommend setting to True for new installations</span>
-    <span class="nv">DJSTRIPE_FOREIGN_KEY_TO_FIELD</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
-</code></pre></div></p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>djstripe expects <code>STRIPE_LIVE_MODE</code> to be a Boolean Type. In case you use <code>Bash env vars or equivalent</code> to inject its value, make sure to convert it to a Boolean type. We highly recommended the library <a href="https://django-environ.readthedocs.io/en/latest/">django-environ</a></p>
-</div>
-<p>Sync data from Stripe:</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>djstripe expects <code>APIKeys</code> of all Stripe Accounts you'd like to sync data for to already be in the DB. They can be Added from Django Admin.</p>
-</div>
-<p>Run the commands:</p>
-<div class="highlight"><pre><span></span><code>    python manage.py migrate
-
-    python manage.py djstripe_sync_models
-</code></pre></div>
-<p>See <a href="stripe_elements_js/#integrating_stripe_elements-js_sdk">here</a> for notes about usage of the Stripe Elements
-frontend JS library.</p>
-<h3 id="running-tests">Running Tests</h3>
-<p>Assuming the tests are run against PostgreSQL:</p>
-<div class="highlight"><pre><span></span><code>    createdb djstripe
-    pip install tox
-    tox
-</code></pre></div>
+<p>See <a href="docs/installation.md">installation</a> instructions.</p>
 <h2 id="changelog">Changelog</h2>
 <p><a href="https://dj-stripe.github.io/dj-stripe/history/2_5_0/">See release notes on Read the Docs</a>.</p>
 <h2 id="funding-and-support">Funding and Support</h2>
@@ -343,5 +284,5 @@ an open ledger on how donations are spent.</p>
 
 <!--
 MkDocs version : 1.4.0
-Build Date UTC : 2022-10-13 11:02:05.976261+00:00
+Build Date UTC : 2022-10-13 13:26:45.273069+00:00
 -->
