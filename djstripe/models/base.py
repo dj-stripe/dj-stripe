@@ -1,7 +1,7 @@
 import logging
 import uuid
 from datetime import timedelta
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Type
 
 from django.apps import apps
 from django.db import IntegrityError, models, transaction
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class StripeBaseModel(models.Model):
-    stripe_class: Optional[APIResource] = None
+    stripe_class: Type[APIResource] = APIResource
 
     djstripe_created = models.DateTimeField(auto_now_add=True, editable=False)
     djstripe_updated = models.DateTimeField(auto_now=True, editable=False)
@@ -506,7 +506,11 @@ class StripeModel(StripeBaseModel):
         """
         Returns whether the data is a valid object for the class
         """
-        return data and data.get("object") == cls.stripe_class.OBJECT_NAME
+        # .OBJECT_NAME will not exist on the base type itself
+        object_name: str = getattr(cls.stripe_class, "OBJECT_NAME", "")
+        if not object_name:
+            return False
+        return data and data.get("object") == object_name
 
     def _attach_objects_hook(
         self, cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY, current_ids=None
