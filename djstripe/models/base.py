@@ -322,7 +322,6 @@ class StripeModel(StripeBaseModel):
         from .webhooks import WebhookEndpoint
 
         manipulated_data = cls._manipulate_stripe_object_hook(data)
-
         if not cls.is_valid_object(manipulated_data):
             raise ValueError(
                 "Trying to fit a %r into %r. Aborting."
@@ -672,14 +671,9 @@ class StripeModel(StripeBaseModel):
         if not field:
             # An empty field - We need to return nothing here because there is
             # no way of knowing what needs to be fetched!
-            logger.warning(
-                "empty field %s.%s = %r - this is a bug, "
-                "please report it to dj-stripe!",
-                cls.__name__,
-                field_name,
-                field,
+            raise RuntimeError(
+                f"dj-stripe encountered an empty field {cls.__name__}.{field_name} = {field}"
             )
-            return None, False
         elif id_ == field:
             # A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}
             # We'll have to expand if the field is not "id" (= is nested)
