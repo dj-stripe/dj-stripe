@@ -18991,7 +18991,7 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">amount</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">human_readable_price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">human_readable_price</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">billing_scheme</span> <span class="o">==</span> <span class="s2">&quot;per_unit&quot;</span><span class="p">:</span>
             <span class="n">unit_amount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">amount</span>
             <span class="n">amount</span> <span class="o">=</span> <span class="n">get_friendly_currency_amount</span><span class="p">(</span><span class="n">unit_amount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span><span class="p">)</span>
@@ -19034,7 +19034,7 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
             <span class="n">format_args</span><span class="p">[</span><span class="s2">&quot;interval&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interval</span>
             <span class="n">format_args</span><span class="p">[</span><span class="s2">&quot;interval_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interval_count</span>
 
-        <span class="k">return</span> <span class="n">format_lazy</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="o">**</span><span class="n">format_args</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">format_lazy</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="o">**</span><span class="n">format_args</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
         </details>
 
@@ -19667,7 +19667,7 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
 <span class="normal">1272</span>
 <span class="normal">1273</span>
 <span class="normal">1274</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">human_readable_price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">human_readable_price</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">billing_scheme</span> <span class="o">==</span> <span class="s2">&quot;per_unit&quot;</span><span class="p">:</span>
         <span class="n">unit_amount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">amount</span>
         <span class="n">amount</span> <span class="o">=</span> <span class="n">get_friendly_currency_amount</span><span class="p">(</span><span class="n">unit_amount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span><span class="p">)</span>
@@ -19710,7 +19710,7 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
         <span class="n">format_args</span><span class="p">[</span><span class="s2">&quot;interval&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interval</span>
         <span class="n">format_args</span><span class="p">[</span><span class="s2">&quot;interval_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interval_count</span>
 
-    <span class="k">return</span> <span class="n">format_lazy</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="o">**</span><span class="n">format_args</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">format_lazy</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="o">**</span><span class="n">format_args</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
