@@ -7855,7 +7855,7 @@ Stripe (for example, the results of a Sigma scheduled query).</p>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">is_valid_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;object&quot;</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;file&quot;</span><span class="p">,</span> <span class="s2">&quot;file_upload&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;file&quot;</span><span class="p">,</span> <span class="s2">&quot;file_upload&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">enums</span><span class="o">.</span><span class="n">FilePurpose</span><span class="o">.</span><span class="n">humanize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">purpose</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -8033,7 +8033,7 @@ Stripe (for example, the results of a Sigma scheduled query).</p>
 <span class="normal">1656</span>
 <span class="normal">1657</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">is_valid_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-    <span class="k">return</span> <span class="s2">&quot;object&quot;</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;file&quot;</span><span class="p">,</span> <span class="s2">&quot;file_upload&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;file&quot;</span><span class="p">,</span> <span class="s2">&quot;file_upload&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -18026,7 +18026,7 @@ or having Stripe tabulate your usage-based billing totals.</p>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">is_valid_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;object&quot;</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;invoiceitem&quot;</span><span class="p">,</span> <span class="s2">&quot;line_item&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;invoiceitem&quot;</span><span class="p">,</span> <span class="s2">&quot;line_item&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_stripe_dashboard_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">invoice</span><span class="o">.</span><span class="n">get_stripe_dashboard_url</span><span class="p">()</span>
@@ -18592,7 +18592,7 @@ or having Stripe tabulate your usage-based billing totals.</p>
 <span class="normal">1047</span>
 <span class="normal">1048</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">is_valid_object</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-    <span class="k">return</span> <span class="s2">&quot;object&quot;</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;invoiceitem&quot;</span><span class="p">,</span> <span class="s2">&quot;line_item&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;invoiceitem&quot;</span><span class="p">,</span> <span class="s2">&quot;line_item&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -25945,8 +25945,8 @@ do actually want to instantiate the model and use relations.</p>
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">id</span><span class="p">()</span></code>
   
   <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
       <small class="doc doc-label doc-label-property"><code>property</code></small>
+      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
   </span>
 
 </h5>
@@ -30230,7 +30230,7 @@ debit card, or connected Stripe account, a transfer object will be created.</p>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns whether the data is a valid object for the class</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;object&quot;</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;transfer_reversal&quot;</span>
+        <span class="k">return</span> <span class="n">data</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;transfer_reversal&quot;</span>
 </code></pre></div></td></tr></table></div>
         </details>
 
@@ -30560,7 +30560,7 @@ See Stripe documentation for accepted kwargs for each object.
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns whether the data is a valid object for the class</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;object&quot;</span> <span class="ow">in</span> <span class="n">data</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;transfer_reversal&quot;</span>
+    <span class="k">return</span> <span class="n">data</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;object&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;transfer_reversal&quot;</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
