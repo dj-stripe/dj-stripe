@@ -1223,10 +1223,9 @@ class Plan(StripeModel):
         return plan
 
     def __str__(self):
-        subscriptions_cnt = self.subscriptions.count()
         if self.product and self.product.name:
-            return f"{self.human_readable_price} for {self.product.name} ({subscriptions_cnt} subscriptions)"
-        return f"{self.human_readable_price} ({subscriptions_cnt} subscriptions)"
+            return f"{self.human_readable_price} for {self.product.name}"
+        return self.human_readable_price
 
     @property
     def amount_in_cents(self):

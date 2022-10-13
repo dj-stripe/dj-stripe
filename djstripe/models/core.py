@@ -2311,11 +2311,6 @@ class Price(StripeModel):
         return price
 
     def __str__(self):
-        from .billing import Subscription
-
-        subscriptions = Subscription.objects.filter(plan__id=self.id).count()
-        if self.recurring:
-            return f"{self.human_readable_price} for {self.product.name} ({subscriptions} subscriptions)"
         return f"{self.human_readable_price} for {self.product.name}"
 
     @property
