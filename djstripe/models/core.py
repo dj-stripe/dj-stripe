@@ -92,7 +92,9 @@ class BalanceTransaction(StripeModel):
     type = StripeEnumField(enum=enums.BalanceTransactionType)
 
     def __str__(self):
-        return f"{self.human_readable_amount} ({enums.BalanceTransactionStatus.humanize(self.status)})"
+        amount = get_friendly_currency_amount(self.amount / 100, self.currency)
+        status = enums.BalanceTransactionStatus.humanize(self.status)
+        return f"{amount} ({status})"
 
     def get_source_class(self):
         try:
@@ -364,9 +366,8 @@ class Charge(StripeModel):
     objects = ChargeManager()
 
     def __str__(self):
-        amount = self.human_readable_amount
-        status = self.human_readable_status
-        return "{amount} ({status})".format(amount=amount, status=status)
+        amount = get_friendly_currency_amount(self.amount, self.currency)
+        return f"{amount} ({self.human_readable_status})"
 
     @property
     def fee(self):
@@ -1449,7 +1450,9 @@ class Dispute(StripeModel):
     status = StripeEnumField(enum=enums.DisputeStatus)
 
     def __str__(self):
-        return f"{self.human_readable_amount} ({enums.DisputeStatus.humanize(self.status)}) "
+        amount = get_friendly_currency_amount(self.amount / 100, self.currency)
+        status = enums.DisputeStatus.humanize(self.status)
+        return f"{amount} ({status}) "
 
     def get_stripe_dashboard_url(self) -> str:
         """Get the stripe dashboard url for this object."""
@@ -1875,20 +1878,17 @@ class PaymentIntent(StripeModel):
     def __str__(self):
         account = self.on_behalf_of
         customer = self.customer
+        amount = get_friendly_currency_amount(self.amount / 100, self.currency)
+        status = enums.PaymentIntentStatus.humanize(self.status)
 
         if account and customer:
-            return (
-                f"{self.human_readable_amount} ({enums.PaymentIntentStatus.humanize(self.status)}) "
-                f"for {account} "
-                f"by {customer}"
-            )
-
+            return f"{amount} ({status}) for {account} by {customer}"
         if account:
-            return f"{self.human_readable_amount} for {account}. {enums.PaymentIntentStatus.humanize(self.status)}"
+            return f"{amount} for {account}. {status}"
         if customer:
-            return f"{self.human_readable_amount} by {customer}. {enums.PaymentIntentStatus.humanize(self.status)}"
+            return f"{amount} by {customer}. {status}"
 
-        return f"{self.human_readable_amount} ({enums.PaymentIntentStatus.humanize(self.status)})"
+        return f"{amount} ({status})"
 
     def update(self, api_key=None, **kwargs):
         """
@@ -2428,6 +2428,6 @@ class Refund(StripeModel):
         return self.charge.get_stripe_dashboard_url()
 
     def __str__(self):
-        return (
-            f"{self.human_readable_amount} ({enums.RefundStatus.humanize(self.status)})"
-        )
+        amount = get_friendly_currency_amount(self.amount / 100, self.currency)
+        status = enums.RefundStatus.humanize(self.status)
+        return f"{amount} ({status})"

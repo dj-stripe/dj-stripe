@@ -116,6 +116,8 @@ class PlanCreateTest(AssertStripeFksMixin, TestCase):
 
 
 class PlanTest(AssertStripeFksMixin, TestCase):
+    plan: Plan
+
     def setUp(self):
         self.plan_data = deepcopy(FAKE_PLAN)
         with patch(
@@ -126,19 +128,19 @@ class PlanTest(AssertStripeFksMixin, TestCase):
             self.plan = Plan.sync_from_stripe_data(self.plan_data)
 
     def test___str__(self):
-        assert str(self.plan) == f"{self.plan.human_readable_price} for {FAKE_PRODUCT['name']}",
+        assert (
+            str(self.plan)
+            == f"{self.plan.human_readable_price} for {FAKE_PRODUCT['name']}"
+        )
 
     def test___str__null_product(self):
         plan_data = deepcopy(FAKE_PLAN_II)
         del plan_data["product"]
-        plan = Plan.sync_from_stripe_data(plan_data)
+        plan: Plan = Plan.sync_from_stripe_data(plan_data)
 
         self.assertIsNone(plan.product)
 
-        subscriptions = Subscription.objects.filter(plan__id=plan.id).count()
-
         assert str(plan) == plan.human_readable_price
-
 
     @patch("stripe.Plan.retrieve", return_value=FAKE_PLAN, autospec=True)
     def test_stripe_plan(self, plan_retrieve_mock):

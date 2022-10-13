@@ -176,12 +176,12 @@ class Coupon(StripeModel):
     @property
     def human_readable_amount(self):
         if self.percent_off:
-            amount = "{percent_off}%".format(percent_off=self.percent_off)
+            amount = f"{self.percent_off}%"
         elif self.currency:
             amount = get_friendly_currency_amount(self.amount_off or 0, self.currency)
         else:
             amount = "(invalid amount)"
-        return "{amount} off".format(amount=amount)
+        return f"{amount} off"
 
     @property
     def human_readable(self):
@@ -193,9 +193,7 @@ class Coupon(StripeModel):
             duration = duration.format(duration_in_months=self.duration_in_months)
         else:
             duration = self.duration
-        return "{amount} {duration}".format(
-            amount=self.human_readable_amount, duration=duration
-        )
+        return f"{self.human_readable_amount} {duration}"
 
 
 class BaseInvoice(StripeModel):
@@ -553,11 +551,9 @@ class BaseInvoice(StripeModel):
         ordering = ["-created"]
 
     def __str__(self):
-        return f"Invoice #{self.number or self.receipt_number or self.id} for {self.human_readable_amount} ({self.status})"
-
-    @property
-    def human_readable_amount(self) -> str:
-        return get_friendly_currency_amount(self.amount_paid, self.currency)
+        invoice_number = self.number or self.receipt_number or self.id
+        amount = get_friendly_currency_amount(self.amount_paid or 0, self.currency)
+        return f"Invoice #{invoice_number} for {amount} ({self.status})"
 
     @classmethod
     def upcoming(
@@ -1232,7 +1228,7 @@ class Plan(StripeModel):
         return int(self.amount * 100)
 
     @property
-    def human_readable_price(self):
+    def human_readable_price(self) -> str:
         if self.billing_scheme == "per_unit":
             unit_amount = self.amount
             amount = get_friendly_currency_amount(unit_amount, self.currency)
@@ -1275,7 +1271,7 @@ class Plan(StripeModel):
             format_args["interval"] = interval
             format_args["interval_count"] = interval_count
 
-        return format_lazy(template, **format_args)
+        return str(format_lazy(template, **format_args))
 
 
 class Subscription(StripeModel):
@@ -2080,16 +2076,13 @@ class ShippingRate(StripeModel):
         verbose_name = "Shipping Rate"
 
     def __str__(self):
-        base = f"{self.display_name} - {self.human_readable_amount}"
-        if self.active:
-            return f"{base} (Active)"
-        return f"{base} (Archived)"
-
-    @property
-    def human_readable_amount(self):
-        return get_friendly_currency_amount(
+        amount = get_friendly_currency_amount(
             self.fixed_amount.get("amount") / 100, self.fixed_amount.get("currency")
         )
+        if self.active:
+            return f"{self.display_name} - {amount} (Active)"
+        else:
+            return f"{self.display_name} - {amount} (Archived)"
 
 
 class TaxCode(StripeModel):
