@@ -506,7 +506,7 @@ class StripeModel(StripeBaseModel):
         """
         Returns whether the data is a valid object for the class
         """
-        return "object" in data and data["object"] == cls.stripe_class.OBJECT_NAME
+        return data and data.get("object") == cls.stripe_class.OBJECT_NAME
 
     def _attach_objects_hook(
         self, cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY, current_ids=None

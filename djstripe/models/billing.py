@@ -1045,7 +1045,7 @@ class InvoiceItem(StripeModel):
 
     @classmethod
     def is_valid_object(cls, data):
-        return "object" in data and data["object"] in ("invoiceitem", "line_item")
+        return data and data.get("object") in ("invoiceitem", "line_item")
 
     def get_stripe_dashboard_url(self):
         return self.invoice.get_stripe_dashboard_url()

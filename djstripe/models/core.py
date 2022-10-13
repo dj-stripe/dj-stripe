@@ -1654,7 +1654,7 @@ class File(StripeModel):
 
     @classmethod
     def is_valid_object(cls, data):
-        return "object" in data and data["object"] in ("file", "file_upload")
+        return data and data.get("object") in ("file", "file_upload")
 
     def __str__(self):
         return f"{self.filename}, {enums.FilePurpose.humanize(self.purpose)}"

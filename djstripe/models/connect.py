@@ -374,4 +374,4 @@ class TransferReversal(StripeModel):
         """
         Returns whether the data is a valid object for the class
         """
-        return "object" in data and data["object"] == "transfer_reversal"
+        return data and data.get("object") == "transfer_reversal"
