@@ -598,6 +598,8 @@ class Card(LegacySourceMixin, StripeModel):
             account_template = f"{enums.CardBrand.humanize(self.brand)} {self.account.default_currency} {'Default' if default else ''} {self.last4}"
             return account_template
 
+        return self.id or ""
+
     @classmethod
     def create_token(
         cls,
