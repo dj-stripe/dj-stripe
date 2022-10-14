@@ -5,7 +5,7 @@ from django.db import models, transaction
 from stripe.error import InvalidRequestError
 
 from .. import enums
-from ..exceptions import StripeObjectManipulationException
+from ..exceptions import ImpossibleAPIRequest, StripeObjectManipulationException
 from ..fields import (
     JSONField,
     StripeCurrencyCodeField,
@@ -260,7 +260,7 @@ class LegacySourceMixin:
                 .auto_paging_iter()
             )
 
-        raise NotImplementedError(
+        raise ImpossibleAPIRequest(
             f"Can't list {cls.stripe_class.OBJECT_NAME} without a customer or account object."
             " This may happen if not all accounts or customer objects are in the db."
             ' Please run "python manage.py djstripe_sync_models Account Customer" as a potential fix.'
@@ -320,7 +320,7 @@ class LegacySourceMixin:
                 api_key=api_key,
             )
 
-        raise NotImplementedError(
+        raise ImpossibleAPIRequest(
             f"Can't retrieve {self.__class__} without a customer or account object."
             " This may happen if not all accounts or customer objects are in the db."
             ' Please run "python manage.py djstripe_sync_models Account Customer" as a potential fix.'
@@ -353,7 +353,7 @@ class LegacySourceMixin:
                 **kwargs,
             )
 
-        raise NotImplementedError(
+        raise ImpossibleAPIRequest(
             f"Can't delete {self.__class__} without a customer or account object."
             " This may happen if not all accounts or customer objects are in the db."
             ' Please run "python manage.py djstripe_sync_models Account Customer" as a potential fix.'
@@ -450,7 +450,7 @@ class BankAccount(LegacySourceMixin, StripeModel):
 
     def api_retrieve(self, **kwargs):
         if not self.customer and not self.account:
-            raise NotImplementedError(
+            raise ImpossibleAPIRequest(
                 "Can't retrieve a bank account without a customer or account object."
                 " This may happen if not all accounts or customer objects are in the db."
                 ' Please run "python manage.py djstripe_sync_models Account Customer" as a potential fix.'

@@ -24,3 +24,11 @@ class InvalidStripeAPIKey(ValueError):
     """
 
     pass
+
+
+class ImpossibleAPIRequest(Exception):
+    """
+    Raised when dj-stripe attempts to make an impossible API request
+    """
+
+    pass
