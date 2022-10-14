@@ -204,8 +204,9 @@ class TestStrPrice:
 
         else:
             price = Price.sync_from_stripe_data(fake_price_data)
-            assert str(price) == f"{price.human_readable_price} for {FAKE_PRODUCT['name']}"
-
+            assert (
+                str(price) == f"{price.human_readable_price} for {FAKE_PRODUCT['name']}"
+            )
 
 
 class TestHumanReadablePrice:
