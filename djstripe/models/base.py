@@ -10,6 +10,7 @@ from stripe.api_resources.abstract.api_resource import APIResource
 from stripe.error import InvalidRequestError
 from stripe.util import convert_to_stripe_object
 
+from ..exceptions import ImpossibleAPIRequest
 from ..fields import (
     JSONField,
     StripeDateTimeField,
@@ -476,15 +477,25 @@ class StripeModel(StripeBaseModel):
                 # requests the same object
                 current_ids.add(id_)
 
-                field_data, _ = field.related_model._get_or_create_from_stripe_object(
-                    manipulated_data,
-                    field_name,
-                    refetch=refetch,
-                    current_ids=current_ids,
-                    pending_relations=pending_relations,
-                    stripe_account=stripe_account,
-                    api_key=api_key,
-                )
+                try:
+                    (
+                        field_data,
+                        _,
+                    ) = field.related_model._get_or_create_from_stripe_object(
+                        manipulated_data,
+                        field_name,
+                        refetch=refetch,
+                        current_ids=current_ids,
+                        pending_relations=pending_relations,
+                        stripe_account=stripe_account,
+                        api_key=api_key,
+                    )
+                except ImpossibleAPIRequest:
+                    # Found to happen in the following situation:
+                    # Customer has a `default_source` set to a `card_` object,
+                    # and neither the Customer nor the Card are present in db.
+                    # This skip is a hack, but it will prevent a crash.
+                    skip = True
 
                 # Remove the id of the current object from the list
                 # after it has been created or retrieved
