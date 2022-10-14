@@ -767,10 +767,8 @@ class Source(StripeModel):
                 self.api_retrieve(api_key=api_key).detach(), api_key=api_key
             )
             return True
-        except (InvalidRequestError, NotImplementedError):
+        except InvalidRequestError:
             # The source was already detached. Resyncing.
-            # NotImplementedError is an artifact of stripe-python<2.0
-            # https://github.com/stripe/stripe-python/issues/376
             self.sync_from_stripe_data(
                 self.api_retrieve(api_key=self.default_api_key),
                 api_key=self.default_api_key,
