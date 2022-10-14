@@ -19000,7 +19000,7 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
             <span class="n">tier_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tiers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">flat_amount_tier_1</span> <span class="o">=</span> <span class="n">tier_1</span><span class="p">[</span><span class="s2">&quot;flat_amount&quot;</span><span class="p">]</span>
             <span class="n">formatted_unit_amount_tier_1</span> <span class="o">=</span> <span class="n">get_friendly_currency_amount</span><span class="p">(</span>
-                <span class="n">tier_1</span><span class="p">[</span><span class="s2">&quot;unit_amount&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span>
+                <span class="p">(</span><span class="n">tier_1</span><span class="p">[</span><span class="s2">&quot;unit_amount&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span>
             <span class="p">)</span>
             <span class="n">amount</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Starts at </span><span class="si">{</span><span class="n">formatted_unit_amount_tier_1</span><span class="si">}</span><span class="s2"> per unit&quot;</span>
 
@@ -19676,7 +19676,7 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
         <span class="n">tier_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tiers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">flat_amount_tier_1</span> <span class="o">=</span> <span class="n">tier_1</span><span class="p">[</span><span class="s2">&quot;flat_amount&quot;</span><span class="p">]</span>
         <span class="n">formatted_unit_amount_tier_1</span> <span class="o">=</span> <span class="n">get_friendly_currency_amount</span><span class="p">(</span>
-            <span class="n">tier_1</span><span class="p">[</span><span class="s2">&quot;unit_amount&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span>
+            <span class="p">(</span><span class="n">tier_1</span><span class="p">[</span><span class="s2">&quot;unit_amount&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span>
         <span class="p">)</span>
         <span class="n">amount</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Starts at </span><span class="si">{</span><span class="n">formatted_unit_amount_tier_1</span><span class="si">}</span><span class="s2"> per unit&quot;</span>
 
