@@ -13098,7 +13098,7 @@ objects for Custom accounts. They can be bank accounts or debit cards as well.</
 
     <span class="k">def</span> <span class="nf">api_retrieve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">customer</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">account</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="k">raise</span> <span class="n">ImpossibleAPIRequest</span><span class="p">(</span>
                 <span class="s2">&quot;Can&#39;t retrieve a bank account without a customer or account object.&quot;</span>
                 <span class="s2">&quot; This may happen if not all accounts or customer objects are in the db.&quot;</span>
                 <span class="s1">&#39; Please run &quot;python manage.py djstripe_sync_models Account Customer&quot; as a potential fix.&#39;</span>
@@ -13448,7 +13448,7 @@ objects for Custom accounts. They can be bank accounts or debit cards as well.</
 <span class="normal">458</span>
 <span class="normal">459</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">api_retrieve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">customer</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">account</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+        <span class="k">raise</span> <span class="n">ImpossibleAPIRequest</span><span class="p">(</span>
             <span class="s2">&quot;Can&#39;t retrieve a bank account without a customer or account object.&quot;</span>
             <span class="s2">&quot; This may happen if not all accounts or customer objects are in the db.&quot;</span>
             <span class="s1">&#39; Please run &quot;python manage.py djstripe_sync_models Account Customer&quot; as a potential fix.&#39;</span>
@@ -13702,7 +13702,9 @@ objects cannot be converted into Source objects by Stripe at this time.</p>
 <span class="normal">630</span>
 <span class="normal">631</span>
 <span class="normal">632</span>
-<span class="normal">633</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Card</span><span class="p">(</span><span class="n">LegacySourceMixin</span><span class="p">,</span> <span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">633</span>
+<span class="normal">634</span>
+<span class="normal">635</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Card</span><span class="p">(</span><span class="n">LegacySourceMixin</span><span class="p">,</span> <span class="n">StripeModel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    You can store multiple cards on a customer in order to charge the customer later.</span>
 
@@ -13840,6 +13842,8 @@ objects cannot be converted into Source objects by Stripe at this time.</p>
             <span class="n">default</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;default_for_currency&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
             <span class="n">account_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">enums</span><span class="o">.</span><span class="n">CardBrand</span><span class="o">.</span><span class="n">humanize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">brand</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">default_currency</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;Default&#39;</span> <span class="k">if</span> <span class="n">default</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">last4</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="k">return</span> <span class="n">account_template</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create_token</span><span class="p">(</span>
@@ -14359,7 +14363,9 @@ objects cannot be converted into Source objects by Stripe at this time.</p>
 <span class="normal">596</span>
 <span class="normal">597</span>
 <span class="normal">598</span>
-<span class="normal">599</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
+<span class="normal">601</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">default</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="c1"># prefer to show it by customer format if present</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">customer</span><span class="p">:</span>
@@ -14379,6 +14385,8 @@ objects cannot be converted into Source objects by Stripe at this time.</p>
         <span class="n">default</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;default_for_currency&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="n">account_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">enums</span><span class="o">.</span><span class="n">CardBrand</span><span class="o">.</span><span class="n">humanize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">brand</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">default_currency</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">&#39;Default&#39;</span> <span class="k">if</span> <span class="n">default</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">last4</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">return</span> <span class="n">account_template</span>
+
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -14414,9 +14422,7 @@ or attaching them to a customer.
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">601</span>
-<span class="normal">602</span>
-<span class="normal">603</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">603</span>
 <span class="normal">604</span>
 <span class="normal">605</span>
 <span class="normal">606</span>
@@ -14446,7 +14452,9 @@ or attaching them to a customer.
 <span class="normal">630</span>
 <span class="normal">631</span>
 <span class="normal">632</span>
-<span class="normal">633</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">633</span>
+<span class="normal">634</span>
+<span class="normal">635</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">create_token</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">,</span>
     <span class="n">number</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -15790,9 +15798,7 @@ they can be charged, or can be attached to customers.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">636</span>
-<span class="normal">637</span>
-<span class="normal">638</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">638</span>
 <span class="normal">639</span>
 <span class="normal">640</span>
 <span class="normal">641</span>
@@ -16076,10 +16082,8 @@ they can be charged, or can be attached to customers.</p>
                 <span class="bp">self</span><span class="o">.</span><span class="n">api_retrieve</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">except</span> <span class="p">(</span><span class="n">InvalidRequestError</span><span class="p">,</span> <span class="ne">NotImplementedError</span><span class="p">):</span>
+        <span class="k">except</span> <span class="n">InvalidRequestError</span><span class="p">:</span>
             <span class="c1"># The source was already detached. Resyncing.</span>
-            <span class="c1"># NotImplementedError is an artifact of stripe-python&lt;2.0</span>
-            <span class="c1"># https://github.com/stripe/stripe-python/issues/376</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">api_retrieve</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span><span class="p">),</span>
                 <span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span><span class="p">,</span>
@@ -16432,8 +16436,8 @@ they can be charged, or can be attached to customers.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">726</span>
-<span class="normal">727</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">728</span>
+<span class="normal">729</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -16455,9 +16459,7 @@ they can be charged, or can be attached to customers.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">735</span>
-<span class="normal">736</span>
-<span class="normal">737</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">737</span>
 <span class="normal">738</span>
 <span class="normal">739</span>
 <span class="normal">740</span>
@@ -16470,7 +16472,9 @@ they can be charged, or can be attached to customers.</p>
 <span class="normal">747</span>
 <span class="normal">748</span>
 <span class="normal">749</span>
-<span class="normal">750</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_hook</span><span class="p">(</span>
+<span class="normal">750</span>
+<span class="normal">751</span>
+<span class="normal">752</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_hook</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
     <span class="n">customer</span> <span class="o">=</span> <span class="kc">None</span>
@@ -16510,11 +16514,11 @@ they can be charged, or can be attached to customers.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">729</span>
-<span class="normal">730</span>
-<span class="normal">731</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">731</span>
 <span class="normal">732</span>
-<span class="normal">733</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">733</span>
+<span class="normal">734</span>
+<span class="normal">735</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">_manipulate_stripe_object_hook</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
     <span class="c1"># The source_data dict is an alias of all the source types</span>
     <span class="n">data</span><span class="p">[</span><span class="s2">&quot;source_data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]]</span>
@@ -16596,9 +16600,7 @@ See Stripe documentation for accepted kwargs for each object.
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">752</span>
-<span class="normal">753</span>
-<span class="normal">754</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">754</span>
 <span class="normal">755</span>
 <span class="normal">756</span>
 <span class="normal">757</span>
@@ -16636,10 +16638,8 @@ See Stripe documentation for accepted kwargs for each object.
             <span class="bp">self</span><span class="o">.</span><span class="n">api_retrieve</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">(),</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>
-    <span class="k">except</span> <span class="p">(</span><span class="n">InvalidRequestError</span><span class="p">,</span> <span class="ne">NotImplementedError</span><span class="p">):</span>
+    <span class="k">except</span> <span class="n">InvalidRequestError</span><span class="p">:</span>
         <span class="c1"># The source was already detached. Resyncing.</span>
-        <span class="c1"># NotImplementedError is an artifact of stripe-python&lt;2.0</span>
-        <span class="c1"># https://github.com/stripe/stripe-python/issues/376</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">api_retrieve</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span><span class="p">),</span>
             <span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span><span class="p">,</span>
@@ -25882,8 +25882,8 @@ do actually want to instantiate the model and use relations.</p>
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">id</span><span class="p">()</span></code>
   
   <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
       <small class="doc doc-label doc-label-property"><code>property</code></small>
+      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
   </span>
 
 </h5>
