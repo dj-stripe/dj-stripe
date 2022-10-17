@@ -100,6 +100,8 @@ class DjstripePaymentMethod(models.Model):
 
         raw_field_data = data.get(field_name)
         id_ = get_id_from_stripe_data(raw_field_data)
+        if not id_:
+            raise ValueError(f"ID not found in Stripe data: {raw_field_data!r}")
 
         if id_.startswith("card"):
             source_cls = Card
