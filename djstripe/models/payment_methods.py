@@ -221,6 +221,8 @@ class LegacySourceMixin:
             **kwargs
         )
 
+        object_name = cls.stripe_class.OBJECT_NAME
+
         # First we try to retrieve by customer attribute,
         # then by account attribute
         if customer and account:
@@ -228,7 +230,7 @@ class LegacySourceMixin:
                 # retrieve by customer
                 return (
                     customer.api_retrieve(api_key=api_key)
-                    .sources.list(object=cls.stripe_class.OBJECT_NAME, **clean_kwargs)
+                    .sources.list(object=object_name, **clean_kwargs)
                     .auto_paging_iter()
                 )
             except Exception as customer_exc:
@@ -236,9 +238,7 @@ class LegacySourceMixin:
                     # retrieve by account
                     return (
                         account.api_retrieve(api_key=api_key)
-                        .external_accounts.list(
-                            object=cls.stripe_class.OBJECT_NAME, **clean_kwargs
-                        )
+                        .external_accounts.list(object=object_name, **clean_kwargs)
                         .auto_paging_iter()
                     )
                 except Exception:
@@ -247,21 +247,19 @@ class LegacySourceMixin:
         if customer:
             return (
                 customer.api_retrieve(api_key=api_key)
-                .sources.list(object=cls.stripe_class.OBJECT_NAME, **clean_kwargs)
+                .sources.list(object=object_name, **clean_kwargs)
                 .auto_paging_iter()
             )
 
         if account:
             return (
                 account.api_retrieve(api_key=api_key)
-                .external_accounts.list(
-                    object=cls.stripe_class.OBJECT_NAME, **clean_kwargs
-                )
+                .external_accounts.list(object=object_name, **clean_kwargs)
                 .auto_paging_iter()
             )
 
         raise ImpossibleAPIRequest(
-            f"Can't list {cls.stripe_class.OBJECT_NAME} without a customer or account object."
+            f"Can't list {object_name} without a customer or account object."
             " This may happen if not all accounts or customer objects are in the db."
             ' Please run "python manage.py djstripe_sync_models Account Customer" as a potential fix.'
         )
