@@ -145,6 +145,8 @@ class LegacySourceMixin:
 
     customer: Optional[StripeForeignKey]
     account: Optional[StripeForeignKey]
+    id: str
+    default_api_key: str
 
     @classmethod
     def _get_customer_or_account_from_kwargs(cls, **kwargs):
