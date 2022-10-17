@@ -6,17 +6,10 @@ import decimal
 from django.conf import SettingsReference, settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models import JSONField as BaseJSONField
 
 from .settings import djstripe_settings
 from .utils import convert_tstamp
-
-
-def import_jsonfield():
-    if djstripe_settings.USE_NATIVE_JSONFIELD:
-        from django.db.models import JSONField as BaseJSONField
-    else:
-        from jsonfield import JSONField as BaseJSONField
-    return BaseJSONField
 
 
 class FieldDeconstructMixin:
@@ -178,7 +171,7 @@ class StripeDateTimeField(FieldDeconstructMixin, models.DateTimeField):
             return convert_tstamp(val)
 
 
-class JSONField(FieldDeconstructMixin, import_jsonfield()):
+class JSONField(FieldDeconstructMixin, BaseJSONField):
     """A field used to define a JSONField value according to djstripe logic."""
 
     pass

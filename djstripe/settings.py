@@ -67,10 +67,6 @@ class DjstripeSettings:
         )
 
     @property
-    def USE_NATIVE_JSONFIELD(self):
-        return getattr(settings, "DJSTRIPE_USE_NATIVE_JSONFIELD", True)
-
-    @property
     def PRORATION_POLICY(self):
         return getattr(settings, "DJSTRIPE_PRORATION_POLICY", None)
 

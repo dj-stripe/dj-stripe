@@ -13,7 +13,6 @@ from django.core.exceptions import FieldError
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.urls import reverse
-from jsonfield import JSONField
 from pytest_django.asserts import assertQuerysetEqual
 
 from djstripe import models, utils
@@ -912,22 +911,6 @@ class TestAdminSite(TestCase):
                     list(model.objects.select_related(*fields))
                 except FieldError as error:
                     self.fail(error)
-
-    def test_custom_display_for_JSONfield(self):
-        json_tests = [
-            ({"a": {"b": None}}, '{"a": {"b": null}}'),
-            (["a", False], '["a", false]'),
-            ("a", '"a"'),
-            ({("a", "b"): "c"}, "{('a', 'b'): 'c'}"),  # Invalid JSON.
-        ]
-        for value, display_value in json_tests:
-            with self.subTest(value=value):
-                self.assertEqual(
-                    djstripe_admin.custom_display_for_JSONfield(
-                        value, JSONField(), self.empty_value
-                    ),
-                    display_value,
-                )
 
 
 class TestCustomActionMixin:
