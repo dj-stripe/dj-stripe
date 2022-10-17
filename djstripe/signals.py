@@ -5,6 +5,11 @@ Stripe docs for Webhooks: https://stripe.com/docs/webhooks
 """
 from django.dispatch import Signal
 
+webhook_pre_validate = Signal()
+webhook_post_validate = Signal()
+webhook_pre_process = Signal()
+webhook_post_process = Signal()
+
 # providing_args=["data", "exception"]
 webhook_processing_error = Signal()
 
