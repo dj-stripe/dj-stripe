@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Dj-Stripe Team" /><link rel="canonical" href="https://dj-stripe.github.io/dj-stripe/master/history/2_7_0/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Dj-Stripe Team" /><link rel="canonical" href="https://dj-stripe.github.io/dj-stripe/2.7/history/2_7_0/" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
     <title>dj-stripe 2.7 release notes - Dj-Stripe</title>
     <link rel="stylesheet" href="../../css/theme.css" />
@@ -16,7 +16,7 @@
         // Current page data
         var mkdocs_page_name = "dj-stripe 2.7 release notes";
         var mkdocs_page_input_path = "history/2_7_0.md";
-        var mkdocs_page_url = "/dj-stripe/master/history/2_7_0/";
+        var mkdocs_page_url = "/dj-stripe/2.7/history/2_7_0/";
       </script>
     
     <script src="../../js/jquery-3.6.0.min.js" defer></script>
@@ -164,7 +164,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="dj-stripe-270-2022-xx-xx">dj-stripe 2.7.0 (2022-XX-XX)</h1>
+                <h1 id="dj-stripe-270-2022-10-17">dj-stripe 2.7.0 (2022-10-17)</h1>
 <div class="admonition attention">
 <p class="admonition-title">Attention</p>
 <p>It is not possible to upgrade to dj-stripe 2.7.0 from versions older than 2.4.0.
@@ -176,6 +176,8 @@ the changes, please see the discussion on Github:</p>
 <h2 id="release-highlights">Release highlights</h2>
 <ul>
 <li>Webhook Endpoints are now configured via the Django administration.</li>
+<li>Multiple Webhook Endpoints are now supported.</li>
+<li>Webhook Endpoints now have a unique, non-guessable URL.</li>
 </ul>
 <h2 id="deprecated-features">Deprecated features</h2>
 <ul>
@@ -185,18 +187,16 @@ the changes, please see the discussion on Github:</p>
 </ul>
 <h2 id="breaking-changes">Breaking changes</h2>
 <ul>
-<li>If you are installing directly from source, you now need Poetry 1.2.0 or higher.</li>
 <li>Remove the deprecated middleware <code>djstripe.middleware.SubscriptionPaymentMiddleware</code></li>
+<li>Remove support for the deprecated <code>DJSTRIPE_SUBSCRIPTION_REDIRECT</code> setting</li>
+<li>Remove support for the <code>DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS</code> setting</li>
 </ul>
 <h2 id="other-changes">Other changes</h2>
 <ul>
-<li>Remove support for the deprecated <code>DJSTRIPE_SUBSCRIPTION_REDIRECT</code> setting</li>
-<li>Remove support for the <code>DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS</code> setting</li>
-<li>Added support for releasing <code>Subscription Schedules</code> by using the <code>SubscriptionSchedule.release()</code> method.</li>
-<li>Added support for releasing <code>Subscription Schedules</code> from Django-Admin.</li>
-<li>Added support for cancelling <code>Subscription Schedules</code> by using the <code>SubscriptionSchedule.cancel()</code> method.</li>
-<li>Added support for cancelling <code>Subscription Schedules</code> from Django-Admin.</li>
-<li>Added support for updating <code>Subscription Schedules</code> by using the <code>SubscriptionSchedule.update()</code> method.</li>
+<li>Many Stripe Connect related fixes (Special thanks to Dominik Bartenstein of Zemtu)</li>
+<li>Allow passing stripe kwargs in Subscription.cancel()</li>
+<li>Various admin improvements</li>
+<li>Add support for managing subscription schedules from the admin</li>
 </ul>
               
             </div>

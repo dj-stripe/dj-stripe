@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Dj-Stripe Team" /><link rel="canonical" href="https://dj-stripe.github.io/dj-stripe/master/installation/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Dj-Stripe Team" /><link rel="canonical" href="https://dj-stripe.github.io/dj-stripe/2.7/installation/" />
       <link rel="shortcut icon" href="../img/favicon.ico" />
     <title>Installation - Dj-Stripe</title>
     <link rel="stylesheet" href="../css/theme.css" />
@@ -16,7 +16,7 @@
         // Current page data
         var mkdocs_page_name = "Installation";
         var mkdocs_page_input_path = "installation.md";
-        var mkdocs_page_url = "/dj-stripe/master/installation/";
+        var mkdocs_page_url = "/dj-stripe/2.7/installation/";
       </script>
     
     <script src="../js/jquery-3.6.0.min.js" defer></script>
@@ -190,7 +190,6 @@ endpoint from the urls.py step above (e.g.
     <span class="nv">STRIPE_TEST_SECRET_KEY</span> <span class="o">=</span> os.environ.get<span class="o">(</span><span class="s2">&quot;STRIPE_TEST_SECRET_KEY&quot;</span>, <span class="s2">&quot;&lt;your secret key&gt;&quot;</span><span class="o">)</span>
     <span class="nv">STRIPE_LIVE_MODE</span> <span class="o">=</span> False  <span class="c1"># Change to True in production</span>
     <span class="nv">DJSTRIPE_WEBHOOK_SECRET</span> <span class="o">=</span> <span class="s2">&quot;whsec_xxx&quot;</span>  <span class="c1"># Get it from the section in the Stripe dashboard where you added the webhook endpoint</span>
-    <span class="nv">DJSTRIPE_USE_NATIVE_JSONFIELD</span> <span class="o">=</span> True  <span class="c1"># We recommend setting to True for new installations</span>
     <span class="nv">DJSTRIPE_FOREIGN_KEY_TO_FIELD</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
 </code></pre></div></p>
 <div class="admonition note">

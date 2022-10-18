@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Dj-Stripe Team" /><link rel="canonical" href="https://dj-stripe.github.io/dj-stripe/master/reference/models/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Dj-Stripe Team" /><link rel="canonical" href="https://dj-stripe.github.io/dj-stripe/2.7/reference/models/" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
     <title>Models - Dj-Stripe</title>
     <link rel="stylesheet" href="../../css/theme.css" />
@@ -16,7 +16,7 @@
         // Current page data
         var mkdocs_page_name = "Models";
         var mkdocs_page_input_path = "reference/models.md";
-        var mkdocs_page_url = "/dj-stripe/master/reference/models/";
+        var mkdocs_page_url = "/dj-stripe/2.7/reference/models/";
       </script>
     
     <script src="../../js/jquery-3.6.0.min.js" defer></script>
@@ -12912,9 +12912,7 @@ objects for Custom accounts. They can be bank accounts or debit cards as well.</
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">363</span>
-<span class="normal">364</span>
-<span class="normal">365</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">365</span>
 <span class="normal">366</span>
 <span class="normal">367</span>
 <span class="normal">368</span>
@@ -13008,7 +13006,9 @@ objects for Custom accounts. They can be bank accounts or debit cards as well.</
 <span class="normal">456</span>
 <span class="normal">457</span>
 <span class="normal">458</span>
-<span class="normal">459</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">BankAccount</span><span class="p">(</span><span class="n">LegacySourceMixin</span><span class="p">,</span> <span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">BankAccount</span><span class="p">(</span><span class="n">LegacySourceMixin</span><span class="p">,</span> <span class="n">StripeModel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    These bank accounts are payment methods on Customer objects.</span>
 <span class="sd">    On the other hand External Accounts are transfer destinations on Account</span>
@@ -13381,9 +13381,7 @@ objects for Custom accounts. They can be bank accounts or debit cards as well.</
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">425</span>
-<span class="normal">426</span>
-<span class="normal">427</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">427</span>
 <span class="normal">428</span>
 <span class="normal">429</span>
 <span class="normal">430</span>
@@ -13399,7 +13397,9 @@ objects for Custom accounts. They can be bank accounts or debit cards as well.</
 <span class="normal">440</span>
 <span class="normal">441</span>
 <span class="normal">442</span>
-<span class="normal">443</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">default</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="c1"># prefer to show it by customer format if present</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">customer</span><span class="p">:</span>
@@ -13438,15 +13438,15 @@ objects for Custom accounts. They can be bank accounts or debit cards as well.</
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">451</span>
-<span class="normal">452</span>
-<span class="normal">453</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">453</span>
 <span class="normal">454</span>
 <span class="normal">455</span>
 <span class="normal">456</span>
 <span class="normal">457</span>
 <span class="normal">458</span>
-<span class="normal">459</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">api_retrieve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">api_retrieve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">customer</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">account</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">ImpossibleAPIRequest</span><span class="p">(</span>
             <span class="s2">&quot;Can&#39;t retrieve a bank account without a customer or account object.&quot;</span>
@@ -13479,11 +13479,11 @@ objects for Custom accounts. They can be bank accounts or debit cards as well.</
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">445</span>
-<span class="normal">446</span>
-<span class="normal">447</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">447</span>
 <span class="normal">448</span>
-<span class="normal">449</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">human_readable_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;new&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;Pending Verification&quot;</span>
@@ -13531,9 +13531,7 @@ objects cannot be converted into Source objects by Stripe at this time.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">462</span>
-<span class="normal">463</span>
-<span class="normal">464</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">464</span>
 <span class="normal">465</span>
 <span class="normal">466</span>
 <span class="normal">467</span>
@@ -13704,7 +13702,9 @@ objects cannot be converted into Source objects by Stripe at this time.</p>
 <span class="normal">632</span>
 <span class="normal">633</span>
 <span class="normal">634</span>
-<span class="normal">635</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Card</span><span class="p">(</span><span class="n">LegacySourceMixin</span><span class="p">,</span> <span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">635</span>
+<span class="normal">636</span>
+<span class="normal">637</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Card</span><span class="p">(</span><span class="n">LegacySourceMixin</span><span class="p">,</span> <span class="n">StripeModel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    You can store multiple cards on a customer in order to charge the customer later.</span>
 
@@ -14344,9 +14344,7 @@ objects cannot be converted into Source objects by Stripe at this time.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">580</span>
-<span class="normal">581</span>
-<span class="normal">582</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">582</span>
 <span class="normal">583</span>
 <span class="normal">584</span>
 <span class="normal">585</span>
@@ -14365,7 +14363,9 @@ objects cannot be converted into Source objects by Stripe at this time.</p>
 <span class="normal">598</span>
 <span class="normal">599</span>
 <span class="normal">600</span>
-<span class="normal">601</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">601</span>
+<span class="normal">602</span>
+<span class="normal">603</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">default</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="c1"># prefer to show it by customer format if present</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">customer</span><span class="p">:</span>
@@ -14422,9 +14422,7 @@ or attaching them to a customer.
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">603</span>
-<span class="normal">604</span>
-<span class="normal">605</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">605</span>
 <span class="normal">606</span>
 <span class="normal">607</span>
 <span class="normal">608</span>
@@ -14454,7 +14452,9 @@ or attaching them to a customer.
 <span class="normal">632</span>
 <span class="normal">633</span>
 <span class="normal">634</span>
-<span class="normal">635</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">635</span>
+<span class="normal">636</span>
+<span class="normal">637</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">create_token</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">,</span>
     <span class="n">number</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -14525,9 +14525,7 @@ to Customer objects to store instrument details for future payments.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 793</span>
-<span class="normal"> 794</span>
-<span class="normal"> 795</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 795</span>
 <span class="normal"> 796</span>
 <span class="normal"> 797</span>
 <span class="normal"> 798</span>
@@ -14756,7 +14754,9 @@ to Customer objects to store instrument details for future payments.</p>
 <span class="normal">1021</span>
 <span class="normal">1022</span>
 <span class="normal">1023</span>
-<span class="normal">1024</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">PaymentMethod</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">1024</span>
+<span class="normal">1025</span>
+<span class="normal">1026</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">PaymentMethod</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    PaymentMethod objects represent your customer&#39;s payment instruments.</span>
 <span class="sd">    You can use them with PaymentIntents to collect payments or save them</span>
@@ -15492,10 +15492,10 @@ to Customer objects to store instrument details for future payments.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">930</span>
-<span class="normal">931</span>
-<span class="normal">932</span>
-<span class="normal">933</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">932</span>
+<span class="normal">933</span>
+<span class="normal">934</span>
+<span class="normal">935</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">customer</span><span class="p">:</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">enums</span><span class="o">.</span><span class="n">PaymentMethodType</span><span class="o">.</span><span class="n">humanize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">customer</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">enums</span><span class="o">.</span><span class="n">PaymentMethodType</span><span class="o">.</span><span class="n">humanize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="si">}</span><span class="s2"> is not associated with any customer&quot;</span>
@@ -15519,9 +15519,7 @@ to Customer objects to store instrument details for future payments.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">940</span>
-<span class="normal">941</span>
-<span class="normal">942</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">942</span>
 <span class="normal">943</span>
 <span class="normal">944</span>
 <span class="normal">945</span>
@@ -15534,7 +15532,9 @@ to Customer objects to store instrument details for future payments.</p>
 <span class="normal">952</span>
 <span class="normal">953</span>
 <span class="normal">954</span>
-<span class="normal">955</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_hook</span><span class="p">(</span>
+<span class="normal">955</span>
+<span class="normal">956</span>
+<span class="normal">957</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_hook</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
     <span class="n">customer</span> <span class="o">=</span> <span class="kc">None</span>
@@ -15576,9 +15576,7 @@ to Customer objects to store instrument details for future payments.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">957</span>
-<span class="normal">958</span>
-<span class="normal">959</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">959</span>
 <span class="normal">960</span>
 <span class="normal">961</span>
 <span class="normal">962</span>
@@ -15603,7 +15601,9 @@ to Customer objects to store instrument details for future payments.</p>
 <span class="normal">981</span>
 <span class="normal">982</span>
 <span class="normal">983</span>
-<span class="normal">984</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">984</span>
+<span class="normal">985</span>
+<span class="normal">986</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">attach</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">,</span>
     <span class="n">payment_method</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;PaymentMethod&quot;</span><span class="p">],</span>
@@ -15655,9 +15655,7 @@ to Customer objects to store instrument details for future payments.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 986</span>
-<span class="normal"> 987</span>
-<span class="normal"> 988</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 988</span>
 <span class="normal"> 989</span>
 <span class="normal"> 990</span>
 <span class="normal"> 991</span>
@@ -15693,7 +15691,9 @@ to Customer objects to store instrument details for future payments.</p>
 <span class="normal">1021</span>
 <span class="normal">1022</span>
 <span class="normal">1023</span>
-<span class="normal">1024</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">1024</span>
+<span class="normal">1025</span>
+<span class="normal">1026</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Detach the payment method from its customer.</span>
 
@@ -15752,10 +15752,10 @@ to Customer objects to store instrument details for future payments.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">935</span>
-<span class="normal">936</span>
-<span class="normal">937</span>
-<span class="normal">938</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_stripe_dashboard_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">937</span>
+<span class="normal">938</span>
+<span class="normal">939</span>
+<span class="normal">940</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_stripe_dashboard_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">customer</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">customer</span><span class="o">.</span><span class="n">get_stripe_dashboard_url</span><span class="p">()</span>
     <span class="k">return</span> <span class="s2">&quot;&quot;</span>
@@ -15798,9 +15798,7 @@ they can be charged, or can be attached to customers.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">638</span>
-<span class="normal">639</span>
-<span class="normal">640</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">640</span>
 <span class="normal">641</span>
 <span class="normal">642</span>
 <span class="normal">643</span>
@@ -15950,7 +15948,9 @@ they can be charged, or can be attached to customers.</p>
 <span class="normal">787</span>
 <span class="normal">788</span>
 <span class="normal">789</span>
-<span class="normal">790</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Source</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">790</span>
+<span class="normal">791</span>
+<span class="normal">792</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Source</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Source objects allow you to accept a variety of payment methods.</span>
 <span class="sd">    They represent a customer&#39;s payment instrument, and can be used with</span>
@@ -16436,8 +16436,8 @@ they can be charged, or can be attached to customers.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">728</span>
-<span class="normal">729</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">730</span>
+<span class="normal">731</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -16459,9 +16459,7 @@ they can be charged, or can be attached to customers.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">737</span>
-<span class="normal">738</span>
-<span class="normal">739</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">739</span>
 <span class="normal">740</span>
 <span class="normal">741</span>
 <span class="normal">742</span>
@@ -16474,7 +16472,9 @@ they can be charged, or can be attached to customers.</p>
 <span class="normal">749</span>
 <span class="normal">750</span>
 <span class="normal">751</span>
-<span class="normal">752</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_hook</span><span class="p">(</span>
+<span class="normal">752</span>
+<span class="normal">753</span>
+<span class="normal">754</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_hook</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
     <span class="n">customer</span> <span class="o">=</span> <span class="kc">None</span>
@@ -16514,11 +16514,11 @@ they can be charged, or can be attached to customers.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">731</span>
-<span class="normal">732</span>
-<span class="normal">733</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">733</span>
 <span class="normal">734</span>
-<span class="normal">735</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">735</span>
+<span class="normal">736</span>
+<span class="normal">737</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">_manipulate_stripe_object_hook</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
     <span class="c1"># The source_data dict is an alias of all the source types</span>
     <span class="n">data</span><span class="p">[</span><span class="s2">&quot;source_data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]]</span>
@@ -16553,9 +16553,7 @@ See Stripe documentation for accepted kwargs for each object.
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">778</span>
-<span class="normal">779</span>
-<span class="normal">780</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">780</span>
 <span class="normal">781</span>
 <span class="normal">782</span>
 <span class="normal">783</span>
@@ -16565,7 +16563,9 @@ See Stripe documentation for accepted kwargs for each object.
 <span class="normal">787</span>
 <span class="normal">788</span>
 <span class="normal">789</span>
-<span class="normal">790</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">790</span>
+<span class="normal">791</span>
+<span class="normal">792</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">api_list</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Call the stripe API&#39;s list operation for this model.</span>
@@ -16600,9 +16600,7 @@ See Stripe documentation for accepted kwargs for each object.
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">754</span>
-<span class="normal">755</span>
-<span class="normal">756</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">756</span>
 <span class="normal">757</span>
 <span class="normal">758</span>
 <span class="normal">759</span>
@@ -16622,7 +16620,9 @@ See Stripe documentation for accepted kwargs for each object.
 <span class="normal">773</span>
 <span class="normal">774</span>
 <span class="normal">775</span>
-<span class="normal">776</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="normal">776</span>
+<span class="normal">777</span>
+<span class="normal">778</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Detach the source from its customer.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -25882,8 +25882,8 @@ do actually want to instantiate the model and use relations.</p>
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">id</span><span class="p">()</span></code>
   
   <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
       <small class="doc doc-label doc-label-writable"><code>writable</code></small>
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
   </span>
 
 </h5>
@@ -32530,7 +32530,8 @@ The 'valid' flag in this model monitors this.</p>
 <span class="normal">333</span>
 <span class="normal">334</span>
 <span class="normal">335</span>
-<span class="normal">336</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">WebhookEventTrigger</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="normal">336</span>
+<span class="normal">337</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">WebhookEventTrigger</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An instance of a request that reached the server endpoint for Stripe webhooks.</span>
 
@@ -32676,8 +32677,29 @@ The 'valid' flag in this model monitors this.</p>
 
     <span class="k">def</span> <span class="nf">verify_signature</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">secret</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_TOLERANCE</span>
-    <span class="p">):</span>
-        <span class="k">pass</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">secret</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot verify event signature without a secret&quot;</span><span class="p">)</span>
+
+        <span class="c1"># HTTP headers are case-insensitive, but we store them as a dict.</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="n">CaseInsensitiveMapping</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
+        <span class="n">signature</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stripe-signature&quot;</span><span class="p">)</span>
+        <span class="n">local_cli_signing_secret</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;x-djstripe-webhook-secret&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># check if the x-djstripe-webhook-secret Custom Header exists</span>
+            <span class="k">if</span> <span class="n">local_cli_signing_secret</span><span class="p">:</span>
+                <span class="c1"># Set Endpoint Signing Secret to the output of Stripe CLI</span>
+                <span class="c1"># for signature verification</span>
+                <span class="n">secret</span> <span class="o">=</span> <span class="n">local_cli_signing_secret</span>
+
+            <span class="n">stripe</span><span class="o">.</span><span class="n">WebhookSignature</span><span class="o">.</span><span class="n">verify_header</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="n">secret</span><span class="p">,</span> <span class="n">tolerance</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">stripe</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">SignatureVerificationError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Failed to verify header&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -32710,27 +32732,7 @@ The 'valid' flag in this model monitors this.</p>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;WEBHOOK VALIDATION is disabled.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">elif</span> <span class="n">validation_method</span> <span class="o">==</span> <span class="s2">&quot;verify_signature&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">secret</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot verify event signature without a secret&quot;</span><span class="p">)</span>
-            <span class="c1"># HTTP headers are case-insensitive, but we store them as a dict.</span>
-            <span class="n">headers</span> <span class="o">=</span> <span class="n">CaseInsensitiveMapping</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
-            <span class="n">signature</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stripe-signature&quot;</span><span class="p">)</span>
-            <span class="n">local_cli_signing_secret</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;x-djstripe-webhook-secret&quot;</span><span class="p">)</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="c1"># check if the x-djstripe-webhook-secret Custom Header exists</span>
-                <span class="k">if</span> <span class="n">local_cli_signing_secret</span><span class="p">:</span>
-                    <span class="c1"># Set Endpoint Signing Secret to the output of Stripe CLI</span>
-                    <span class="c1"># for signature verification</span>
-                    <span class="n">secret</span> <span class="o">=</span> <span class="n">local_cli_signing_secret</span>
-
-                <span class="n">stripe</span><span class="o">.</span><span class="n">WebhookSignature</span><span class="o">.</span><span class="n">verify_header</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="n">secret</span><span class="p">,</span> <span class="n">tolerance</span>
-                <span class="p">)</span>
-            <span class="k">except</span> <span class="n">stripe</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">SignatureVerificationError</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Failed to verify header&quot;</span><span class="p">)</span>
-                <span class="k">return</span> <span class="kc">False</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">verify_signature</span><span class="p">(</span><span class="n">secret</span><span class="o">=</span><span class="n">secret</span><span class="p">)</span>
 
         <span class="n">livemode</span> <span class="o">=</span> <span class="n">local_data</span><span class="p">[</span><span class="s2">&quot;livemode&quot;</span><span class="p">]</span>
         <span class="n">api_key</span> <span class="o">=</span> <span class="n">api_key</span> <span class="ow">or</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">get_default_api_key</span><span class="p">(</span><span class="n">livemode</span><span class="p">)</span>
@@ -33304,8 +33306,7 @@ request object.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">326</span>
-<span class="normal">327</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">327</span>
 <span class="normal">328</span>
 <span class="normal">329</span>
 <span class="normal">330</span>
@@ -33314,7 +33315,8 @@ request object.</p>
 <span class="normal">333</span>
 <span class="normal">334</span>
 <span class="normal">335</span>
-<span class="normal">336</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="normal">336</span>
+<span class="normal">337</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     <span class="c1"># Reset traceback and exception in case of reprocessing</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">traceback</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
@@ -33350,28 +33352,7 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span>
-<span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">283</span>
 <span class="normal">284</span>
 <span class="normal">285</span>
 <span class="normal">286</span>
@@ -33412,7 +33393,8 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
 <span class="normal">321</span>
 <span class="normal">322</span>
 <span class="normal">323</span>
-<span class="normal">324</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">validate</span><span class="p">(</span>
+<span class="normal">324</span>
+<span class="normal">325</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">validate</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">secret</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_SECRET</span><span class="p">,</span>
@@ -33443,27 +33425,7 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;WEBHOOK VALIDATION is disabled.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">elif</span> <span class="n">validation_method</span> <span class="o">==</span> <span class="s2">&quot;verify_signature&quot;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">secret</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot verify event signature without a secret&quot;</span><span class="p">)</span>
-        <span class="c1"># HTTP headers are case-insensitive, but we store them as a dict.</span>
-        <span class="n">headers</span> <span class="o">=</span> <span class="n">CaseInsensitiveMapping</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
-        <span class="n">signature</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stripe-signature&quot;</span><span class="p">)</span>
-        <span class="n">local_cli_signing_secret</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;x-djstripe-webhook-secret&quot;</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># check if the x-djstripe-webhook-secret Custom Header exists</span>
-            <span class="k">if</span> <span class="n">local_cli_signing_secret</span><span class="p">:</span>
-                <span class="c1"># Set Endpoint Signing Secret to the output of Stripe CLI</span>
-                <span class="c1"># for signature verification</span>
-                <span class="n">secret</span> <span class="o">=</span> <span class="n">local_cli_signing_secret</span>
-
-            <span class="n">stripe</span><span class="o">.</span><span class="n">WebhookSignature</span><span class="o">.</span><span class="n">verify_header</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="n">secret</span><span class="p">,</span> <span class="n">tolerance</span>
-            <span class="p">)</span>
-        <span class="k">except</span> <span class="n">stripe</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">SignatureVerificationError</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Failed to verify header&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">False</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">verify_signature</span><span class="p">(</span><span class="n">secret</span><span class="o">=</span><span class="n">secret</span><span class="p">)</span>
 
     <span class="n">livemode</span> <span class="o">=</span> <span class="n">local_data</span><span class="p">[</span><span class="s2">&quot;livemode&quot;</span><span class="p">]</span>
     <span class="n">api_key</span> <span class="o">=</span> <span class="n">api_key</span> <span class="ow">or</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">get_default_api_key</span><span class="p">(</span><span class="n">livemode</span><span class="p">)</span>
@@ -33498,10 +33460,52 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
         <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">257</span>
 <span class="normal">258</span>
 <span class="normal">259</span>
-<span class="normal">260</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">verify_signature</span><span class="p">(</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">verify_signature</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">secret</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_TOLERANCE</span>
-<span class="p">):</span>
-    <span class="k">pass</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">secret</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot verify event signature without a secret&quot;</span><span class="p">)</span>
+
+    <span class="c1"># HTTP headers are case-insensitive, but we store them as a dict.</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="n">CaseInsensitiveMapping</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
+    <span class="n">signature</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stripe-signature&quot;</span><span class="p">)</span>
+    <span class="n">local_cli_signing_secret</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;x-djstripe-webhook-secret&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># check if the x-djstripe-webhook-secret Custom Header exists</span>
+        <span class="k">if</span> <span class="n">local_cli_signing_secret</span><span class="p">:</span>
+            <span class="c1"># Set Endpoint Signing Secret to the output of Stripe CLI</span>
+            <span class="c1"># for signature verification</span>
+            <span class="n">secret</span> <span class="o">=</span> <span class="n">local_cli_signing_secret</span>
+
+        <span class="n">stripe</span><span class="o">.</span><span class="n">WebhookSignature</span><span class="o">.</span><span class="n">verify_header</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="n">secret</span><span class="p">,</span> <span class="n">tolerance</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="n">stripe</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">SignatureVerificationError</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Failed to verify header&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
