@@ -8,7 +8,7 @@ on:
       - "mkdocs.yml"
       - "codecov.yml"
       - ".readthedocs.yml"
-      - ".github/workflows/docs.yaml"
+      - ".github/workflows/docs.yml"
 
   pull_request:
     # The branches below must be a subset of the branches above
@@ -19,7 +19,7 @@ on:
       - "mkdocs.yml"
       - "codecov.yml"
       - ".readthedocs.yml"
-      - ".github/workflows/docs.yaml"
+      - ".github/workflows/docs.yml"
 
 env:
   POETRY_VERSION: "1.2.2"
