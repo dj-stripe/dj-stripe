@@ -13,8 +13,6 @@ env:
   POETRY_VERSION: "1.2.2"
   POETRY_VIRTUALENVS_IN_PROJECT: "1"
   LATEST_STABLE_BRANCH: "stable/2.7"
-  GIT_COMMITTER_NAME: "dj-stripe commit bot"
-  GIT_COMMITTER_EMAIL: "admin@djstripe.dev"
 
 jobs:
   deploy:
@@ -46,11 +44,16 @@ jobs:
       - name: Install dependencies
         run: poetry install --with docs
 
+      - name: Configure git user to make commit
+        run: |
+          git config user.name "dj-stripe commit bot"
+          git config user.email "admin@djstripe.dev"
+
       - name: Fetch gh-pages remote changes (if any)
         run: git fetch origin gh-pages --depth=1
 
-      - name: Deploy (and Update) docs for the branch
+      - name: Deploy (and Update) docs for the branch, ${GITHUB_REF##*/}
         run: poetry run mike deploy --push --rebase "${GITHUB_REF##*/}"
 
-      - name: Set default docs version
+      - name: Set default docs to ${LATEST_STABLE_BRANCH##*/}
         run: poetry run mike set-default --push --rebase "${LATEST_STABLE_BRANCH##*/}"
