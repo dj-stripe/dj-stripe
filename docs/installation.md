@@ -78,4 +78,4 @@ Assuming the tests are run against PostgreSQL:
     createdb djstripe
     pip install tox
     tox
-``` 
+```
