@@ -67,10 +67,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Get full Python version
-        id: full-python-version
-        run: echo ::set-output name=version::$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))")
-
       - name: Install poetry (${{ env.POETRY_VERSION }}) binary on runner
         run: |
           curl -sL https://install.python-poetry.org | python - --version ${{ env.POETRY_VERSION }}
@@ -80,7 +76,7 @@ jobs:
         id: cache
         with:
           path: .venv
-          key: venv-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ matrix.python-version }}
 
       - name: Ensure cache is healthy
         if: steps.cache.outputs.cache-hit == 'true'
