@@ -16,7 +16,7 @@ on:
 env:
   POETRY_VERSION: "1.2.2"
   POETRY_VIRTUALENVS_IN_PROJECT: "1"
-  LATEST_STABLE_BRANCH: "stable/2.6"
+  LATEST_STABLE_BRANCH: "stable/2.7"
 
 jobs:
 
