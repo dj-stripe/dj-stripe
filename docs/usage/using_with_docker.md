@@ -53,7 +53,7 @@ services:
   stripe:
     image: stripe/stripe-cli:v1.7.4
     # In case Stripe CLI is used to perform local webhook testing, set x-djstripe-webhook-secret custom header to output of Stripe CLI.
-    command: ["listen", "-H", "x-djstripe-webhook-secret: whsec_******", "--forward-to", "http://web:8000/djstripe/webhook/"] 
+    command: ["listen", "-H", "x-djstripe-webhook-secret: whsec_******", "--forward-to", "http://web:8000/djstripe/webhook/"]
     depends_on:
       - web
     environment:
