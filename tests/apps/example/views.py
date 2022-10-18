@@ -169,7 +169,7 @@ class PurchaseSubscriptionView(FormView):
             raise Exception(
                 "No Product Plans in the dj-stripe database - create some in your "
                 "stripe account and then "
-                "run `./manage.py djstripe_sync_plans_from_stripe` "
+                "run `./manage.py djstripe_sync_models Plan` "
                 "(or use the dj-stripe webhooks)"
             )
 
