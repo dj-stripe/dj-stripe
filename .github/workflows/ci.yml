@@ -6,7 +6,6 @@ on:
       - "docs/**"
       - "pyproject.toml"
       - "mkdocs.yml"
-      - "codecov.yml"
       - ".readthedocs.yml"
       - ".github/workflows/docs.yml"
 
@@ -17,7 +16,6 @@ on:
       - "docs/**"
       - "pyproject.toml"
       - "mkdocs.yml"
-      - "codecov.yml"
       - ".readthedocs.yml"
       - ".github/workflows/docs.yml"
 
@@ -85,16 +83,10 @@ jobs:
       - name: Install dependencies
         run: |
           poetry run python -m pip install --upgrade pip setuptools wheel
-          poetry run python -m pip install coverage[toml] tox tox-gh-actions codecov
+          poetry run python -m pip install coverage[toml] tox tox-gh-actions
 
       - name: Test with tox for ${{ matrix.python-version }}
         run: poetry run python -m tox
 
       - name: Convert coverage
         run: poetry run python -m coverage xml
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          fail_ci_if_error: true
-          files: ./coverage.xml
