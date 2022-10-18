@@ -23,7 +23,7 @@ __all__ = ["handler", "handler_all", "call_handlers"]
 
 
 registrations = defaultdict(list)
-registrations_global = list()
+registrations_global = []
 
 # Legacy. In previous versions of Stripe API, all test events used this ID.
 # Check out issue #779 for more information.
