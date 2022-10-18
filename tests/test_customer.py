@@ -564,22 +564,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             stripe_account=self.customer.djstripe_owner_account.id,
         )
 
-    def test_can_charge(self):
-        with pytest.warns(DeprecationWarning) as record:
-            self.assertTrue(self.customer.can_charge())
-
-        # check that the message matches
-        assert "Customer.can_charge() is misleading" in record[0].message.args[0]
-
-    def test_has_valid_source(self):
-
-        assert self.customer.default_source
-        with pytest.warns(DeprecationWarning) as record:
-            self.assertTrue(self.customer.has_valid_source())
-
-        # check that the message matches
-        assert "Customer.has_valid_source() is deprecated" in record[0].message.args[0]
-
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
@@ -665,7 +649,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
     def test_add_payment_method_set_default_true(
         self, attach_mock, customer_retrieve_mock
     ):
-        # clear default source so we can check can_charge()
         fake_customer = deepcopy(FAKE_CUSTOMER)
         fake_customer["default_source"] = None
         customer_retrieve_mock.return_value = fake_customer
@@ -703,12 +686,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             self.customer.invoice_settings["default_payment_method"],
         )
 
-        with pytest.warns(DeprecationWarning):
-            self.assertTrue(
-                self.customer.can_charge(),
-                "Expect to be able to charge since we've set a default_payment_method",
-            )
-
         self.assert_fks(
             self.customer,
             expected_blank_fks={
@@ -722,7 +699,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
     def test_add_payment_method_set_default_false(
         self, attach_mock, customer_retrieve_mock
     ):
-        # clear default source so we can check can_charge()
         fake_customer = deepcopy(FAKE_CUSTOMER)
         fake_customer["default_source"] = None
         customer_retrieve_mock.return_value = fake_customer
@@ -749,12 +725,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             ).count(),
             1,
         )
-        with pytest.warns(DeprecationWarning):
-            self.assertFalse(
-                self.customer.can_charge(),
-                "Expect not to be able to charge since we've not set a "
-                "default_payment_method",
-            )
 
         self.assert_fks(
             self.customer,
@@ -764,14 +734,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                 "djstripe.Customer.default_source",
             },
         )
-
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    def test_cannot_charge(self, customer_retrieve_fake):
-        self.customer.date_purged = timezone.now()
-        with pytest.warns(DeprecationWarning):
-            self.assertFalse(self.customer.can_charge())
 
     def test_charge_accepts_only_decimals(self):
         with self.assertRaises(ValueError):
