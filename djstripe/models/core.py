@@ -1211,19 +1211,6 @@ class Customer(StripeModel):
         else:
             return subscriptions.first()
 
-    def can_charge(self):
-        """Determines if this customer is able to be charged."""
-
-        warnings.warn(
-            "Customer.can_charge() is misleading and deprecated, will be removed in dj-stripe 2.8. "
-            "Look at Customer.payment_methods.all() instead.",
-            DeprecationWarning,
-        )
-
-        return (
-            self.has_valid_source() or self.default_payment_method is not None
-        ) and self.date_purged is None
-
     def send_invoice(self):
         """
         Pay and send the customer's latest invoice.
@@ -1251,15 +1238,6 @@ class Customer(StripeModel):
             except InvalidRequestError as exc:
                 if str(exc) != "Invoice is already paid":
                     raise
-
-    def has_valid_source(self):
-        """Check whether the customer has a valid payment source."""
-        warnings.warn(
-            "Customer.has_valid_source() is deprecated and will be removed in dj-stripe 2.8. "
-            "Use `Customer.default_source is not None` instead.",
-            DeprecationWarning,
-        )
-        return self.default_source is not None
 
     def add_coupon(self, coupon, idempotency_key=None):
         """
