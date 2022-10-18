@@ -42,6 +42,7 @@ plugins:
         - .
       enable_inventory: true
   - mike:
+      canonical_version: "2.7"
 
 nav:
   - Home: README.md
