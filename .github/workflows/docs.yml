@@ -53,8 +53,8 @@ jobs:
 
       - name: Configure git user to make commit
         run: |
-          git config user.name "Arnav Choudhury"
-          git config user.email "arnav13@gmail.com"
+          git config user.name "dj-stripe commit bot"
+          git config user.email "admin@djstripe.dev"
 
       - name: Fetch gh-pages remote changes (if any)
         run: git fetch origin gh-pages --depth=1
