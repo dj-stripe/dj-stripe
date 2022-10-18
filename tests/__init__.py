@@ -568,7 +568,7 @@ FAKE_EVENT_ORDER_UPDATED["data"]["object"]["status"] = "open"
 FAKE_EVENT_ORDER_UPDATED["type"] = "order.updated"
 FAKE_EVENT_ORDER_UPDATED["data"]["object"]["billing_details"][
     "email"
-] = "arnav13@gmail.com"
+] = "testuser@example.com"
 
 
 FAKE_EVENT_ORDER_SUBMITTED = deepcopy(FAKE_EVENT_ORDER_UPDATED)

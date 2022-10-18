@@ -3096,7 +3096,7 @@ class TestOrderEvents(EventTestCase):
         order = Order.objects.get(id=fake_stripe_event["data"]["object"]["id"])
 
         # assert email got updated
-        self.assertEqual(order.billing_details["email"], "arnav13@gmail.com")
+        self.assertEqual(order.billing_details["email"], "testuser@example.com")
         self.assertEqual(order.payment_intent.id, FAKE_PAYMENT_INTENT_I["id"])
         self.assertEqual(order.customer.id, FAKE_CUSTOMER["id"])
 
@@ -3155,7 +3155,7 @@ class TestOrderEvents(EventTestCase):
         order = Order.objects.get(id=fake_stripe_event["data"]["object"]["id"])
 
         self.assertEqual(order.status, "submitted")
-        self.assertEqual(order.billing_details["email"], "arnav13@gmail.com")
+        self.assertEqual(order.billing_details["email"], "testuser@example.com")
         self.assertEqual(order.payment_intent.id, FAKE_PAYMENT_INTENT_I["id"])
         self.assertEqual(order.customer.id, FAKE_CUSTOMER["id"])
 
@@ -3214,7 +3214,7 @@ class TestOrderEvents(EventTestCase):
         order = Order.objects.get(id=fake_stripe_event["data"]["object"]["id"])
 
         self.assertEqual(order.status, "processing")
-        self.assertEqual(order.billing_details["email"], "arnav13@gmail.com")
+        self.assertEqual(order.billing_details["email"], "testuser@example.com")
         self.assertEqual(order.payment_intent.id, FAKE_PAYMENT_INTENT_I["id"])
         self.assertEqual(order.customer.id, FAKE_CUSTOMER["id"])
 
@@ -3273,7 +3273,7 @@ class TestOrderEvents(EventTestCase):
         order = Order.objects.get(id=fake_stripe_event["data"]["object"]["id"])
 
         self.assertEqual(order.status, "canceled")
-        self.assertEqual(order.billing_details["email"], "arnav13@gmail.com")
+        self.assertEqual(order.billing_details["email"], "testuser@example.com")
         self.assertEqual(order.payment_intent.id, FAKE_PAYMENT_INTENT_I["id"])
         self.assertEqual(order.customer.id, FAKE_CUSTOMER["id"])
 
@@ -3332,6 +3332,6 @@ class TestOrderEvents(EventTestCase):
         order = Order.objects.get(id=fake_stripe_event["data"]["object"]["id"])
 
         self.assertEqual(order.status, "complete")
-        self.assertEqual(order.billing_details["email"], "arnav13@gmail.com")
+        self.assertEqual(order.billing_details["email"], "testuser@example.com")
         self.assertEqual(order.payment_intent.id, FAKE_PAYMENT_INTENT_I["id"])
         self.assertEqual(order.customer.id, FAKE_CUSTOMER["id"])
