@@ -114,6 +114,13 @@ mike = ">=1.1.2"
 jinja2 = "<3.1.0"
 
 
+[tool.poetry.group.ci]
+optional = true
+[tool.poetry.group.ci.dependencies]
+coverage = {version = "^6.5.0", extras = ["toml"]}
+tox = "^3.26.0"
+tox-gh-actions = "^2.10.0"
+
 [tool.poetry.extras]
 postgres = ["psycopg2"]
 mysql = ["mysqlclient"]
