@@ -560,13 +560,8 @@ class BaseInvoice(StripeModel):
         cls,
         api_key=djstripe_settings.STRIPE_SECRET_KEY,
         customer=None,
-        coupon=None,
         subscription=None,
         subscription_plan=None,
-        subscription_prorate=None,
-        subscription_proration_date=None,
-        subscription_quantity=None,
-        subscription_trial_end=None,
         **kwargs,
     ) -> Optional["UpcomingInvoice"]:
         """
@@ -593,22 +588,6 @@ class BaseInvoice(StripeModel):
         updating the subscription given to this plan, or creating a new \
         subscription to this plan if no subscription is given.
         :type subscription_plan: Plan or string (plan ID)
-        :param subscription_prorate: If previewing an update to a subscription, \
-        this decides whether the preview will show the result of applying \
-        prorations or not.
-        :type subscription_prorate: bool
-        :param subscription_proration_date: If previewing an update to a \
-        subscription, and doing proration, subscription_proration_date forces \
-        the proration to be calculated as though the update was done at the \
-        specified time.
-        :type subscription_proration_date: datetime
-        :param subscription_quantity: If provided, the invoice returned will \
-        preview updating or creating a subscription with that quantity.
-        :type subscription_quantity: int
-        :param subscription_trial_end: If provided, the invoice returned will \
-        preview updating or creating a subscription with that trial end.
-        :type subscription_trial_end: datetime
-        :returns: The upcoming preview invoice.
         """
 
         # Convert Customer to id
@@ -627,13 +606,8 @@ class BaseInvoice(StripeModel):
             upcoming_stripe_invoice = cls.stripe_class.upcoming(
                 api_key=api_key,
                 customer=customer,
-                coupon=coupon,
                 subscription=subscription,
                 subscription_plan=subscription_plan,
-                subscription_prorate=subscription_prorate,
-                subscription_proration_date=subscription_proration_date,
-                subscription_quantity=subscription_quantity,
-                subscription_trial_end=subscription_trial_end,
                 **kwargs,
             )
         except InvalidRequestError as exc:
