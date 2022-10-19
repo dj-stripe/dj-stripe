@@ -65,7 +65,7 @@ class CreateCheckoutSessionView(LoginRequiredMixin, TemplateView):
         }
 
         try:
-            # retreive the Stripe Customer.
+            # retrieve the Stripe Customer.
             customer = models.Customer.objects.get(subscriber=self.request.user)
 
             print("Customer Object in DB.")
