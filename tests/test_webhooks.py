@@ -9,6 +9,7 @@ from unittest.mock import Mock, PropertyMock, call, patch
 from uuid import UUID
 
 import pytest
+from django.http.request import HttpHeaders
 from django.test import TestCase, override_settings
 from django.test.client import Client
 from django.urls import reverse
@@ -571,6 +572,10 @@ class TestGetRemoteIp:
     class RequestClass:
         def __init__(self, data):
             self.data = data
+
+        @property
+        def headers(self):
+            return HttpHeaders(self.META)
 
         @property
         def META(self):
