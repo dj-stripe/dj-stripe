@@ -329,6 +329,24 @@ def check_webhook_event_callback_accepts_api_key(app_configs=None, **kwargs):
     callable = djstripe_settings.WEBHOOK_EVENT_CALLBACK
 
     if callable:
+
+        # Deprecated in 2.8.0. Raise a warning.
+        messages.append(
+            checks.Warning(
+                "DJSTRIPE_WEBHOOK_EVENT_CALLBACK is deprecated. See release notes for details.",
+                hint=(
+                    "If you need to trigger a function during webhook processing, "
+                    "you can use djstripe.signals instead.\n"
+                    "Available signals:\n"
+                    "- djstripe.signals.webhook_pre_validate\n"
+                    "- djstripe.signals.webhook_post_validate\n"
+                    "- djstripe.signals.webhook_pre_process\n"
+                    "- djstripe.signals.webhook_post_process\n"
+                    "- djstripe.signals.webhook_processing_error"
+                ),
+            )
+        )
+
         sig = signature(callable)
         signature_sz = len(sig.parameters.keys())
 
