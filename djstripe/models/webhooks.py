@@ -12,11 +12,11 @@ from django.db import models
 from django.utils.datastructures import CaseInsensitiveMapping
 from django.utils.functional import cached_property
 
+from .. import signals
 from ..context_managers import stripe_temporary_api_version
 from ..enums import WebhookEndpointStatus
 from ..fields import JSONField, StripeEnumField, StripeForeignKey
 from ..settings import djstripe_settings
-from ..signals import webhook_processing_error
 from .base import StripeModel, logger
 from .core import Event
 
@@ -215,21 +215,33 @@ class WebhookEventTrigger(models.Model):
         )
 
         try:
+            # Validate the webhook first
+            signals.webhook_pre_validate.send(sender=WebhookEventTrigger, instance=obj)
             obj.valid = obj.validate(secret=secret, api_key=api_key)
+            signals.webhook_post_validate.send(
+                sender=WebhookEventTrigger, instance=obj, valid=obj.valid
+            )
+
             if obj.valid:
+                signals.webhook_pre_process.send(
+                    sender=WebhookEventTrigger, instance=obj
+                )
                 if djstripe_settings.WEBHOOK_EVENT_CALLBACK:
                     # If WEBHOOK_EVENT_CALLBACK, pass it for processing
                     djstripe_settings.WEBHOOK_EVENT_CALLBACK(obj, api_key=api_key)
                 else:
                     # Process the item (do not save it, it'll get saved below)
                     obj.process(save=False, api_key=api_key)
+                signals.webhook_post_process.send(
+                    sender=WebhookEventTrigger, instance=obj, api_key=api_key
+                )
         except Exception as e:
             max_length = WebhookEventTrigger._meta.get_field("exception").max_length
             obj.exception = str(e)[:max_length]
             obj.traceback = format_exc()
 
             # Send the exception as the webhook_processing_error signal
-            webhook_processing_error.send(
+            signals.webhook_processing_error.send(
                 sender=WebhookEventTrigger,
                 exception=e,
                 data=getattr(e, "http_body", ""),
