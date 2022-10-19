@@ -25544,8 +25544,8 @@ do actually want to instantiate the model and use relations.</p>
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">id</span><span class="p">()</span></code>
   
   <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
       <small class="doc doc-label doc-label-writable"><code>writable</code></small>
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
   </span>
 
 </h5>
@@ -33290,8 +33290,8 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
 <span class="sd">    :Returns: the client ip address</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># HTTP_X_FORWARDED_FOR is relevant for django running behind a proxy</span>
-    <span class="n">x_forwarded_for</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;HTTP_X_FORWARDED_FOR&quot;</span><span class="p">)</span>
+    <span class="c1"># x-forwarded-for is relevant for django running behind a proxy</span>
+    <span class="n">x_forwarded_for</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;x-forwarded-for&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">x_forwarded_for</span><span class="p">:</span>
         <span class="n">ip</span> <span class="o">=</span> <span class="n">x_forwarded_for</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
