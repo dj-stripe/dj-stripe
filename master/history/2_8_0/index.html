@@ -161,11 +161,18 @@ To upgrade from an older version, first upgrade to dj-stripe 2.5.0.</p>
 </div>
 <h2 id="release-highlights">Release highlights</h2>
 <ul>
-<li>...</li>
+<li>New webhook signals are available:<ul>
+<li><code>djstripe.signals.webhook_pre_validate(instance, api_key)</code>: Fired before webhook validation</li>
+<li><code>djstripe.signals.webhook_post_validate(instance, api_key, valid)</code>: Fired after validation (even unsuccessful validations)</li>
+<li><code>djstripe.signals.webhook_pre_process(instance, api_key)</code>: Fired before webhook processing. Not fired if the validation failed.</li>
+<li><code>djstripe.signals.webhook_post_process(instance, api_key)</code>: Fired after webhook successful processing.</li>
+</ul>
+</li>
+<li><code>djstripe.signals.webhook_processing_error</code> now also takes <code>instance</code> and <code>api_key</code> arguments</li>
 </ul>
 <h2 id="deprecated-features">Deprecated features</h2>
 <ul>
-<li>...</li>
+<li><code>DJSTRIPE_WEBHOOK_EVENT_CALLBACK</code> is deprecated in favour of the new webhook signals.</li>
 </ul>
 <h2 id="breaking-changes">Breaking changes</h2>
 <ul>

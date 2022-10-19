@@ -32193,7 +32193,21 @@ The 'valid' flag in this model monitors this.</p>
 <span class="normal">334</span>
 <span class="normal">335</span>
 <span class="normal">336</span>
-<span class="normal">337</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">WebhookEventTrigger</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">WebhookEventTrigger</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An instance of a request that reached the server endpoint for Stripe webhooks.</span>
 
@@ -32298,22 +32312,36 @@ The 'valid' flag in this model monitors this.</p>
         <span class="p">)</span>
 
         <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Validate the webhook first</span>
+            <span class="n">signals</span><span class="o">.</span><span class="n">webhook_pre_validate</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
             <span class="n">obj</span><span class="o">.</span><span class="n">valid</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">secret</span><span class="o">=</span><span class="n">secret</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
+            <span class="n">signals</span><span class="o">.</span><span class="n">webhook_post_validate</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
+                <span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">valid</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">valid</span>
+            <span class="p">)</span>
+
             <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">valid</span><span class="p">:</span>
+                <span class="n">signals</span><span class="o">.</span><span class="n">webhook_pre_process</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
+                    <span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span>
+                <span class="p">)</span>
                 <span class="k">if</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_EVENT_CALLBACK</span><span class="p">:</span>
                     <span class="c1"># If WEBHOOK_EVENT_CALLBACK, pass it for processing</span>
                     <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_EVENT_CALLBACK</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># Process the item (do not save it, it&#39;ll get saved below)</span>
                     <span class="n">obj</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
+                <span class="n">signals</span><span class="o">.</span><span class="n">webhook_post_process</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
+                    <span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span>
+                <span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">max_length</span> <span class="o">=</span> <span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="s2">&quot;exception&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max_length</span>
             <span class="n">obj</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)[:</span><span class="n">max_length</span><span class="p">]</span>
             <span class="n">obj</span><span class="o">.</span><span class="n">traceback</span> <span class="o">=</span> <span class="n">format_exc</span><span class="p">()</span>
 
             <span class="c1"># Send the exception as the webhook_processing_error signal</span>
-            <span class="n">webhook_processing_error</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
+            <span class="n">signals</span><span class="o">.</span><span class="n">webhook_processing_error</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
                 <span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span>
+                <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span>
+                <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span>
                 <span class="n">exception</span><span class="o">=</span><span class="n">e</span><span class="p">,</span>
                 <span class="n">data</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="s2">&quot;http_body&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
             <span class="p">)</span>
@@ -32816,7 +32844,21 @@ request object.</p>
 <span class="normal">240</span>
 <span class="normal">241</span>
 <span class="normal">242</span>
-<span class="normal">243</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">from_request</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">webhook_endpoint</span><span class="p">:</span> <span class="n">WebhookEndpoint</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create, validate and process a WebhookEventTrigger given a Django</span>
@@ -32860,22 +32902,36 @@ request object.</p>
     <span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Validate the webhook first</span>
+        <span class="n">signals</span><span class="o">.</span><span class="n">webhook_pre_validate</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">valid</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">secret</span><span class="o">=</span><span class="n">secret</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
+        <span class="n">signals</span><span class="o">.</span><span class="n">webhook_post_validate</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
+            <span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">valid</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">valid</span>
+        <span class="p">)</span>
+
         <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">valid</span><span class="p">:</span>
+            <span class="n">signals</span><span class="o">.</span><span class="n">webhook_pre_process</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
+                <span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_EVENT_CALLBACK</span><span class="p">:</span>
                 <span class="c1"># If WEBHOOK_EVENT_CALLBACK, pass it for processing</span>
                 <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_EVENT_CALLBACK</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Process the item (do not save it, it&#39;ll get saved below)</span>
                 <span class="n">obj</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
+            <span class="n">signals</span><span class="o">.</span><span class="n">webhook_post_process</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
+                <span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span>
+            <span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">max_length</span> <span class="o">=</span> <span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="s2">&quot;exception&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max_length</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)[:</span><span class="n">max_length</span><span class="p">]</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">traceback</span> <span class="o">=</span> <span class="n">format_exc</span><span class="p">()</span>
 
         <span class="c1"># Send the exception as the webhook_processing_error signal</span>
-        <span class="n">webhook_processing_error</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
+        <span class="n">signals</span><span class="o">.</span><span class="n">webhook_processing_error</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
             <span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span>
+            <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span>
+            <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span>
             <span class="n">exception</span><span class="o">=</span><span class="n">e</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="s2">&quot;http_body&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
         <span class="p">)</span>
@@ -32910,10 +32966,10 @@ request object.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">is_test_event</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">event_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">json_body</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">event_id</span> <span class="ow">and</span> <span class="n">event_id</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_00000000000000&quot;</span><span class="p">)</span>
@@ -32937,12 +32993,12 @@ request object.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@cached_property</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@cached_property</span>
 <span class="k">def</span> <span class="nf">json_body</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
@@ -32968,17 +33024,17 @@ request object.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">327</span>
-<span class="normal">328</span>
-<span class="normal">329</span>
-<span class="normal">330</span>
-<span class="normal">331</span>
-<span class="normal">332</span>
-<span class="normal">333</span>
-<span class="normal">334</span>
-<span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     <span class="c1"># Reset traceback and exception in case of reprocessing</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">traceback</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
@@ -33014,21 +33070,7 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">283</span>
-<span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
-<span class="normal">297</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">297</span>
 <span class="normal">298</span>
 <span class="normal">299</span>
 <span class="normal">300</span>
@@ -33056,7 +33098,21 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
 <span class="normal">322</span>
 <span class="normal">323</span>
 <span class="normal">324</span>
-<span class="normal">325</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">validate</span><span class="p">(</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">validate</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">secret</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_SECRET</span><span class="p">,</span>
@@ -33119,21 +33175,7 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span>
-<span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">271</span>
 <span class="normal">272</span>
 <span class="normal">273</span>
 <span class="normal">274</span>
@@ -33143,7 +33185,21 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
 <span class="normal">278</span>
 <span class="normal">279</span>
 <span class="normal">280</span>
-<span class="normal">281</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">verify_signature</span><span class="p">(</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">verify_signature</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">secret</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_TOLERANCE</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">secret</span><span class="p">:</span>
