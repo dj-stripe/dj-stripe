@@ -20,25 +20,23 @@ class DjstripeSettings:
 
     DEFAULT_STRIPE_API_VERSION = "2020-08-27"
 
-    ZERO_DECIMAL_CURRENCIES = set(
-        [
-            "bif",
-            "clp",
-            "djf",
-            "gnf",
-            "jpy",
-            "kmf",
-            "krw",
-            "mga",
-            "pyg",
-            "rwf",
-            "vnd",
-            "vuv",
-            "xaf",
-            "xof",
-            "xpf",
-        ]
-    )
+    ZERO_DECIMAL_CURRENCIES = {
+        "bif",
+        "clp",
+        "djf",
+        "gnf",
+        "jpy",
+        "kmf",
+        "krw",
+        "mga",
+        "pyg",
+        "rwf",
+        "vnd",
+        "vuv",
+        "xaf",
+        "xof",
+        "xpf",
+    }
 
     def __init__(self):
         # Set STRIPE_API_HOST if you want to use a different Stripe API server
