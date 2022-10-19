@@ -3843,7 +3843,7 @@ charges that are associated with the same customer.</p>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">Customer</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subscriber</span><span class="o">=</span><span class="n">subscriber</span><span class="p">,</span> <span class="n">livemode</span><span class="o">=</span><span class="n">livemode</span><span class="p">),</span> <span class="kc">False</span>
         <span class="k">except</span> <span class="n">Customer</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
-            <span class="n">action</span> <span class="o">=</span> <span class="s2">&quot;create:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subscriber</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;create:</span><span class="si">{</span><span class="n">subscriber</span><span class="o">.</span><span class="n">pk</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="n">idempotency_key</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">get_idempotency_key</span><span class="p">(</span>
                 <span class="s2">&quot;customer&quot;</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">livemode</span>
             <span class="p">)</span>
@@ -4149,7 +4149,7 @@ charges that are associated with the same customer.</p>
             <span class="c1"># Delete the idempotency key used by Customer.create()</span>
             <span class="c1"># So re-creating a customer for this subscriber before the key expires</span>
             <span class="c1"># doesn&#39;t return the older Customer data</span>
-            <span class="n">idempotency_key_action</span> <span class="o">=</span> <span class="s2">&quot;customer:create:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subscriber</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+            <span class="n">idempotency_key_action</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;customer:create:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">subscriber</span><span class="o">.</span><span class="n">pk</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="n">IdempotencyKey</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="n">idempotency_key_action</span><span class="p">)</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">subscriber</span> <span class="o">=</span> <span class="kc">None</span>
@@ -5760,7 +5760,7 @@ invoice. This is extremely useful when adding surcharges to subscriptions.</p>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Customer</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subscriber</span><span class="o">=</span><span class="n">subscriber</span><span class="p">,</span> <span class="n">livemode</span><span class="o">=</span><span class="n">livemode</span><span class="p">),</span> <span class="kc">False</span>
     <span class="k">except</span> <span class="n">Customer</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
-        <span class="n">action</span> <span class="o">=</span> <span class="s2">&quot;create:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">subscriber</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;create:</span><span class="si">{</span><span class="n">subscriber</span><span class="o">.</span><span class="n">pk</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">idempotency_key</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">get_idempotency_key</span><span class="p">(</span>
             <span class="s2">&quot;customer&quot;</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">livemode</span>
         <span class="p">)</span>
@@ -5988,7 +5988,7 @@ Stripe API and sync for all RelatedModels would fail</p>
         <span class="c1"># Delete the idempotency key used by Customer.create()</span>
         <span class="c1"># So re-creating a customer for this subscriber before the key expires</span>
         <span class="c1"># doesn&#39;t return the older Customer data</span>
-        <span class="n">idempotency_key_action</span> <span class="o">=</span> <span class="s2">&quot;customer:create:</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subscriber</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+        <span class="n">idempotency_key_action</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;customer:create:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">subscriber</span><span class="o">.</span><span class="n">pk</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">IdempotencyKey</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="n">idempotency_key_action</span><span class="p">)</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">subscriber</span> <span class="o">=</span> <span class="kc">None</span>
@@ -25544,8 +25544,8 @@ do actually want to instantiate the model and use relations.</p>
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">id</span><span class="p">()</span></code>
   
   <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
       <small class="doc doc-label doc-label-writable"><code>writable</code></small>
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
   </span>
 
 </h5>
