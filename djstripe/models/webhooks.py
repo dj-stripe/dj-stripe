@@ -243,6 +243,8 @@ class WebhookEventTrigger(models.Model):
             # Send the exception as the webhook_processing_error signal
             signals.webhook_processing_error.send(
                 sender=WebhookEventTrigger,
+                instance=obj,
+                api_key=api_key,
                 exception=e,
                 data=getattr(e, "http_body", ""),
             )

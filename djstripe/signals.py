@@ -17,7 +17,7 @@ webhook_pre_process = Signal()
 # providing_args=["instance", "api_key"]
 webhook_post_process = Signal()
 
-# providing_args=["data", "exception"]
+# providing_args=["instance", "api_key", "exception", "data"]
 webhook_processing_error = Signal()
 
 ENABLED_EVENTS = [
