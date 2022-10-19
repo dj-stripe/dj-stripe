@@ -67,10 +67,6 @@ class DjstripeSettings:
         )
 
     @property
-    def PRORATION_POLICY(self):
-        return getattr(settings, "DJSTRIPE_PRORATION_POLICY", None)
-
-    @property
     def DJSTRIPE_WEBHOOK_URL(self):
         return getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
 

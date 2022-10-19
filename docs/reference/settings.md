@@ -70,27 +70,6 @@ The function MUST return a string suitably random for the object_type/action pai
 usable in the Stripe `Idempotency-Key` HTTP header. For more information, see the
 [stripe documentation](https://stripe.com/docs/upgrades).
 
-## DJSTRIPE_PRORATION_POLICY (=False)
-
-!!! warning
-
-    This setting is deprecated and will be removed in dj-stripe 2.8.
-
-By default, plans are not prorated in dj-stripe. Concretely, this is how this
-translates:
-
-1.  If a customer cancels their plan during a trial, the cancellation is effective right
-    away.
-2.  If a customer cancels their plan outside of a trial, their subscription remains
-    active until the subscription's period end, and they do not receive a refund.
-3.  If a customer switches from one plan to another, the new plan becomes effective
-    right away, and the customer is billed for the new plan's amount.
-
-Assigning `True` to `DJSTRIPE_PRORATION_POLICY` reverses the functioning of item 2 (plan
-cancellation) by making a cancellation effective right away and refunding the unused
-balance to the customer, and affects the functioning of item 3 (plan change) by
-prorating the previous customer's plan towards their new plan's amount.
-
 ## DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY (="djstripe_subscriber")
 
 Every Customer object created in Stripe is tagged with

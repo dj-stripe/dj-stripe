@@ -572,24 +572,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
 
         self.assertEqual(1, subscription.quantity)
 
-        # prorate the Subscription
-        subscription_updated = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_updated["prorate"] = True
-        subscription_modify_mock.return_value = subscription_updated
-
-        with pytest.warns(DeprecationWarning, match=r"The `prorate` parameter to"):
-            subscription.update(prorate=True)
-
-        # prorate the Subscription
-        subscription_updated = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_updated["subscription_prorate"] = True
-        subscription_modify_mock.return_value = subscription_updated
-
-        with pytest.warns(
-            DeprecationWarning, match=r"The `subscription_prorate` parameter to"
-        ):
-            subscription.update(subscription_prorate=True)
-
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True

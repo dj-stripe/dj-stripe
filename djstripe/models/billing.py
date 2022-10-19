@@ -1547,12 +1547,7 @@ class Subscription(StripeModel):
 
         return super().api_list(api_key=api_key, **kwargs)
 
-    def update(
-        self,
-        plan: Union[StripeModel, str] = None,
-        prorate: bool = None,
-        **kwargs,
-    ):
+    def update(self, plan: Union[StripeModel, str] = None, **kwargs):
         """
         See `Customer.subscribe() <#djstripe.models.Customer.subscribe>`__
 
@@ -1567,53 +1562,6 @@ class Subscription(StripeModel):
         # Convert Plan to id
         if plan is not None and isinstance(plan, StripeModel):
             plan = plan.id
-
-        # In short: We used to have a `prorate` argument which defaulted to
-        # a DJSTRIPE_PRORATION_POLICY setting.
-        # This is overly complex and specific, so we are dropping support for this.
-        # To override it, you can pass `proration_behavior`.
-        # If instead you pass `prorate`, we will transform it until dj-stripe 2.8.
-        # If you have DJSTRIPE_PRORATION_POLICY set, we will default to it for now.
-        # In 2.8, we will ignore both of those and let Stripe figure it out.
-        # Stripe's default proration policy is specified here:
-        # https://stripe.com/docs/billing/subscriptions/prorations
-        if "proration_behavior" not in kwargs:
-            if prorate is not None:
-                warnings.warn(
-                    "The `prorate` parameter to Subscription.update() is deprecated "
-                    "by Stripe. Use `proration_behavior` instead.\n"
-                    "Read more: "
-                    "https://stripe.com/docs/billing/subscriptions/prorations",
-                    DeprecationWarning,
-                )
-            elif kwargs.get("subscription_prorate") is not None:
-                warnings.warn(
-                    "The `subscription_prorate` parameter to Subscription.update() is deprecated "
-                    "by Stripe. Use `proration_behavior` instead.\n"
-                    "Read more: "
-                    "https://stripe.com/docs/billing/subscriptions/prorations",
-                    DeprecationWarning,
-                )
-
-            else:
-                prorate = djstripe_settings.PRORATION_POLICY
-                if prorate is not None:
-                    warnings.warn(
-                        "The `DJSTRIPE_PRORATION_POLICY` setting is deprecated and will "
-                        "be ignored in dj-stripe 2.8. "
-                        "Specify `proration_behavior` instead."
-                    )
-                else:
-                    prorate = False
-
-            if prorate:
-                kwargs.setdefault("proration_behavior", "create_prorations")
-            else:
-                kwargs.setdefault("proration_behavior", "none")
-        elif prorate is not None:
-            raise TypeError(
-                "`prorate` argument must not be set when `proration_behavior` is specified"
-            )
 
         stripe_subscription = self._api_update(plan=plan, **kwargs)
 
