@@ -659,9 +659,7 @@ example, <code>"http://localhost:12111"</code> if you are running
 <span class="normal">259</span>
 <span class="normal">260</span>
 <span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DjstripeSettings</span><span class="p">:</span>
+<span class="normal">262</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DjstripeSettings</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Container for Dj-stripe settings</span>
 
 <span class="sd">    :return: Initialised settings for Dj-stripe.</span>
@@ -671,25 +669,23 @@ example, <code>"http://localhost:12111"</code> if you are running
 
     <span class="n">DEFAULT_STRIPE_API_VERSION</span> <span class="o">=</span> <span class="s2">&quot;2020-08-27&quot;</span>
 
-    <span class="n">ZERO_DECIMAL_CURRENCIES</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
-        <span class="p">[</span>
-            <span class="s2">&quot;bif&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;clp&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;djf&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;gnf&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;jpy&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;kmf&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;krw&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;mga&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;pyg&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;rwf&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;vnd&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;vuv&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;xaf&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;xof&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;xpf&quot;</span><span class="p">,</span>
-        <span class="p">]</span>
-    <span class="p">)</span>
+    <span class="n">ZERO_DECIMAL_CURRENCIES</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;bif&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;clp&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;djf&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;gnf&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;jpy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;kmf&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;krw&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;mga&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pyg&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;rwf&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vnd&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;vuv&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;xaf&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;xof&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;xpf&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Set STRIPE_API_HOST if you want to use a different Stripe API server</span>
@@ -950,7 +946,7 @@ example, <code>"http://localhost:12111"</code> if you are running
 
 
 <h5 id="djstripe.settings.DjstripeSettings.ZERO_DECIMAL_CURRENCIES" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">DjstripeSettings</span><span class="o">.</span><span class="n">ZERO_DECIMAL_CURRENCIES</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="s1">&#39;bif&#39;</span><span class="p">,</span> <span class="s1">&#39;clp&#39;</span><span class="p">,</span> <span class="s1">&#39;djf&#39;</span><span class="p">,</span> <span class="s1">&#39;gnf&#39;</span><span class="p">,</span> <span class="s1">&#39;jpy&#39;</span><span class="p">,</span> <span class="s1">&#39;kmf&#39;</span><span class="p">,</span> <span class="s1">&#39;krw&#39;</span><span class="p">,</span> <span class="s1">&#39;mga&#39;</span><span class="p">,</span> <span class="s1">&#39;pyg&#39;</span><span class="p">,</span> <span class="s1">&#39;rwf&#39;</span><span class="p">,</span> <span class="s1">&#39;vnd&#39;</span><span class="p">,</span> <span class="s1">&#39;vuv&#39;</span><span class="p">,</span> <span class="s1">&#39;xaf&#39;</span><span class="p">,</span> <span class="s1">&#39;xof&#39;</span><span class="p">,</span> <span class="s1">&#39;xpf&#39;</span><span class="p">])</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">DjstripeSettings</span><span class="o">.</span><span class="n">ZERO_DECIMAL_CURRENCIES</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;bif&#39;</span><span class="p">,</span> <span class="s1">&#39;clp&#39;</span><span class="p">,</span> <span class="s1">&#39;djf&#39;</span><span class="p">,</span> <span class="s1">&#39;gnf&#39;</span><span class="p">,</span> <span class="s1">&#39;jpy&#39;</span><span class="p">,</span> <span class="s1">&#39;kmf&#39;</span><span class="p">,</span> <span class="s1">&#39;krw&#39;</span><span class="p">,</span> <span class="s1">&#39;mga&#39;</span><span class="p">,</span> <span class="s1">&#39;pyg&#39;</span><span class="p">,</span> <span class="s1">&#39;rwf&#39;</span><span class="p">,</span> <span class="s1">&#39;vnd&#39;</span><span class="p">,</span> <span class="s1">&#39;vuv&#39;</span><span class="p">,</span> <span class="s1">&#39;xaf&#39;</span><span class="p">,</span> <span class="s1">&#39;xof&#39;</span><span class="p">,</span> <span class="s1">&#39;xpf&#39;</span><span class="p">}</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
@@ -984,9 +980,9 @@ example, <code>"http://localhost:12111"</code> if you are running
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">DJSTRIPE_WEBHOOK_URL</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;DJSTRIPE_WEBHOOK_URL&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;^webhook/$&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -1013,9 +1009,9 @@ example, <code>"http://localhost:12111"</code> if you are running
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">LIVE_API_KEY</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;STRIPE_LIVE_SECRET_KEY&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -1044,13 +1040,13 @@ example, <code>"http://localhost:12111"</code> if you are running
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">135</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
 <span class="normal">136</span>
 <span class="normal">137</span>
 <span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
+<span class="normal">139</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">STRIPE_API_VERSION</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the desired API version to use for Stripe requests.</span>
@@ -1081,9 +1077,9 @@ example, <code>"http://localhost:12111"</code> if you are running
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">STRIPE_LIVE_MODE</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;STRIPE_LIVE_MODE&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -1110,16 +1106,16 @@ example, <code>"http://localhost:12111"</code> if you are running
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">124</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
 <span class="normal">125</span>
 <span class="normal">126</span>
 <span class="normal">127</span>
 <span class="normal">128</span>
 <span class="normal">129</span>
 <span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
+<span class="normal">131</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">STRIPE_PUBLIC_KEY</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="c1"># Default public key</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;STRIPE_PUBLIC_KEY&quot;</span><span class="p">):</span>
@@ -1153,16 +1149,16 @@ example, <code>"http://localhost:12111"</code> if you are running
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">113</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
 <span class="normal">114</span>
 <span class="normal">115</span>
 <span class="normal">116</span>
 <span class="normal">117</span>
 <span class="normal">118</span>
 <span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
+<span class="normal">120</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">STRIPE_SECRET_KEY</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="c1"># Default secret key</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;STRIPE_SECRET_KEY&quot;</span><span class="p">):</span>
@@ -1196,11 +1192,11 @@ example, <code>"http://localhost:12111"</code> if you are running
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">94</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
 <span class="normal">95</span>
-<span class="normal">96</span>
-<span class="normal">97</span>
-<span class="normal">98</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
+<span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">SUBSCRIBER_CUSTOMER_KEY</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span>
         <span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY&quot;</span><span class="p">,</span> <span class="s2">&quot;djstripe_subscriber&quot;</span>
@@ -1229,9 +1225,9 @@ example, <code>"http://localhost:12111"</code> if you are running
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">TEST_API_KEY</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;STRIPE_TEST_SECRET_KEY&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -1258,9 +1254,9 @@ example, <code>"http://localhost:12111"</code> if you are running
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">90</span>
-<span class="normal">91</span>
-<span class="normal">92</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">WEBHOOK_EVENT_CALLBACK</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_callback_function</span><span class="p">(</span><span class="s2">&quot;DJSTRIPE_WEBHOOK_EVENT_CALLBACK&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -1287,9 +1283,9 @@ example, <code>"http://localhost:12111"</code> if you are running
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">WEBHOOK_SECRET</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;DJSTRIPE_WEBHOOK_SECRET&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -1316,11 +1312,11 @@ example, <code>"http://localhost:12111"</code> if you are running
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">73</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
 <span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
+<span class="normal">75</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">WEBHOOK_TOLERANCE</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span>
         <span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;DJSTRIPE_WEBHOOK_TOLERANCE&quot;</span><span class="p">,</span> <span class="n">stripe</span><span class="o">.</span><span class="n">Webhook</span><span class="o">.</span><span class="n">DEFAULT_TOLERANCE</span>
@@ -1349,9 +1345,9 @@ example, <code>"http://localhost:12111"</code> if you are running
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">WEBHOOK_VALIDATION</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;DJSTRIPE_WEBHOOK_VALIDATION&quot;</span><span class="p">,</span> <span class="s2">&quot;verify_signature&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -1374,8 +1370,8 @@ example, <code>"http://localhost:12111"</code> if you are running
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">53</span>
-<span class="normal">54</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__delattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">51</span>
+<span class="normal">52</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__delattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
     <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -1397,11 +1393,11 @@ example, <code>"http://localhost:12111"</code> if you are running
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">43</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
 <span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">45</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="c1"># Set STRIPE_API_HOST if you want to use a different Stripe API server</span>
     <span class="c1"># Example: https://github.com/stripe/stripe-mock</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;STRIPE_API_HOST&quot;</span><span class="p">):</span>
@@ -1426,8 +1422,8 @@ example, <code>"http://localhost:12111"</code> if you are running
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">50</span>
-<span class="normal">51</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">48</span>
+<span class="normal">49</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -1461,7 +1457,9 @@ a failed import causing ImportError to be raised.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">143</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
 <span class="normal">144</span>
 <span class="normal">145</span>
 <span class="normal">146</span>
@@ -1488,9 +1486,7 @@ a failed import causing ImportError to be raised.</p>
 <span class="normal">167</span>
 <span class="normal">168</span>
 <span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span>
-<span class="normal">172</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_callback_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setting_name</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">170</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_callback_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setting_name</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Resolve a callback function based on a setting name.</span>
 
@@ -1542,7 +1538,9 @@ a failed import causing ImportError to be raised.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">183</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
 <span class="normal">184</span>
 <span class="normal">185</span>
 <span class="normal">186</span>
@@ -1552,9 +1550,7 @@ a failed import causing ImportError to be raised.</p>
 <span class="normal">190</span>
 <span class="normal">191</span>
 <span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_default_api_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">livemode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">193</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_default_api_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">livemode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the default API key for a value of `livemode`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1591,11 +1587,11 @@ a failed import causing ImportError to be raised.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">63</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
 <span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
+<span class="normal">65</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">get_idempotency_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_callback_function</span><span class="p">(</span>
         <span class="s2">&quot;DJSTRIPE_IDEMPOTENCY_KEY_CALLBACK&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_idempotency_key</span>
@@ -1626,7 +1622,9 @@ DJSTRIPE_SUBSCRIBER_MODEL setting.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">201</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
 <span class="normal">202</span>
 <span class="normal">203</span>
 <span class="normal">204</span>
@@ -1669,9 +1667,7 @@ DJSTRIPE_SUBSCRIBER_MODEL setting.</p>
 <span class="normal">241</span>
 <span class="normal">242</span>
 <span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_subscriber_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">244</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_subscriber_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Attempt to pull settings.DJSTRIPE_SUBSCRIBER_MODEL.</span>
 
@@ -1739,9 +1735,9 @@ DJSTRIPE_SUBSCRIBER_MODEL setting.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">197</span>
-<span class="normal">198</span>
-<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_subscriber_model_string</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_subscriber_model_string</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Get the configured subscriber model as a module path string.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;DJSTRIPE_SUBSCRIBER_MODEL&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_USER_MODEL</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 </code></pre></div></td></tr></table></div>
@@ -1770,7 +1766,9 @@ DJSTRIPE_SUBSCRIBER_MODEL setting.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">248</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
 <span class="normal">249</span>
 <span class="normal">250</span>
 <span class="normal">251</span>
@@ -1784,9 +1782,7 @@ DJSTRIPE_SUBSCRIBER_MODEL setting.</p>
 <span class="normal">259</span>
 <span class="normal">260</span>
 <span class="normal">261</span>
-<span class="normal">262</span>
-<span class="normal">263</span>
-<span class="normal">264</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">set_stripe_api_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="normal">262</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">set_stripe_api_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the desired API version to use for Stripe requests.</span>
 
@@ -1827,12 +1823,12 @@ DJSTRIPE_SUBSCRIBER_MODEL setting.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">56</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
 <span class="normal">57</span>
 <span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
+<span class="normal">59</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
 <span class="k">def</span> <span class="nf">subscriber_request_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_callback_function</span><span class="p">(</span>
         <span class="s2">&quot;DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK&quot;</span><span class="p">,</span>
