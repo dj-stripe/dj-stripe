@@ -41,7 +41,7 @@ exclude = [
 
 
 [tool.poetry.dependencies]
-python = "^3.7.12"
+python = "^3.8.0"
 django = "^3.2"
 stripe = ">=2.48.0"
 psycopg2 = { version = "^2.8.5", optional = true }
