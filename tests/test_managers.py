@@ -41,19 +41,19 @@ class SubscriptionManagerTest(TestCase):
 
         for i in range(10):
             user = get_user_model().objects.create_user(
-                username="patrick{0}".format(i),
-                email="patrick{0}@example.com".format(i),
+                username=f"patrick{i}",
+                email=f"patrick{i}@example.com",
             )
             customer = Customer.objects.create(
                 subscriber=user,
-                id="cus_xxxxxxxxxxxxxx{0}".format(i),
+                id=f"cus_xxxxxxxxxxxxxx{i}",
                 livemode=False,
                 balance=0,
                 delinquent=False,
             )
 
             Subscription.objects.create(
-                id="sub_xxxxxxxxxxxxxx{0}".format(i),
+                id=f"sub_xxxxxxxxxxxxxx{i}",
                 customer=customer,
                 plan=self.plan,
                 current_period_start=period_start,
@@ -64,17 +64,17 @@ class SubscriptionManagerTest(TestCase):
             )
 
         user = get_user_model().objects.create_user(
-            username="patrick{0}".format(11), email="patrick{0}@example.com".format(11)
+            username="patrick11", email="patrick11@example.com"
         )
         customer = Customer.objects.create(
             subscriber=user,
-            id="cus_xxxxxxxxxxxxxx{0}".format(11),
+            id="cus_xxxxxxxxxxxxxx11",
             livemode=False,
             balance=0,
             delinquent=False,
         )
         Subscription.objects.create(
-            id="sub_xxxxxxxxxxxxxx{0}".format(11),
+            id="sub_xxxxxxxxxxxxxx11",
             customer=customer,
             plan=self.plan,
             current_period_start=period_start,
@@ -86,17 +86,17 @@ class SubscriptionManagerTest(TestCase):
         )
 
         user = get_user_model().objects.create_user(
-            username="patrick{0}".format(12), email="patrick{0}@example.com".format(12)
+            username="patrick12", email="patrick12@example.com"
         )
         customer = Customer.objects.create(
             subscriber=user,
-            id="cus_xxxxxxxxxxxxxx{0}".format(12),
+            id="cus_xxxxxxxxxxxxxx12",
             livemode=False,
             balance=0,
             delinquent=False,
         )
         Subscription.objects.create(
-            id="sub_xxxxxxxxxxxxxx{0}".format(12),
+            id="sub_xxxxxxxxxxxxxx12",
             customer=customer,
             plan=self.plan2,
             current_period_start=period_start,

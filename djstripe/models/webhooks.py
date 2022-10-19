@@ -303,7 +303,7 @@ class WebhookEventTrigger(models.Model):
             return False
 
         if self.is_test_event:
-            logger.info("Test webhook received and discarded: {}".format(local_data))
+            logger.info("Test webhook received and discarded: %s", local_data)
             return False
 
         if validation_method is None:

@@ -873,15 +873,12 @@ class TestAdminSite(TestCase):
         """
 
         for _model, model_admin in site._registry.items():
+            model_name = model_admin.model.__name__
+            table_name = model_name.lower()
             for search_field in getattr(model_admin, "search_fields", []):
-                model_name = model_admin.model.__name__
                 self.assertFalse(
-                    search_field.startswith(
-                        "{table_name}__".format(table_name=model_name.lower())
-                    ),
-                    "Bad search field <{search_field}> for {model_name} model.".format(
-                        search_field=search_field, model_name=model_name
-                    ),
+                    search_field.startswith(f"{table_name}__"),
+                    f"Bad search field <{search_field}> for {model_name} model.",
                 )
 
     def test_search_fields_exist(self):

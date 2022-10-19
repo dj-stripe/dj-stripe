@@ -280,7 +280,7 @@ class Command(BaseCommand):
                 if path in paths:
                     continue
                 else:
-                    self.stdout.write("deleting {}".format(path))
+                    self.stdout.write(f"deleting {path!r}")
                     path.unlink()
 
     def init_fake_id_map(self):
@@ -363,7 +363,7 @@ class Command(BaseCommand):
             # source charge (etc)
             fake_source_id = self.get_fake_id(obj["source"])
 
-            fake_id = "txn_fake_{}".format(fake_source_id)
+            fake_id = f"txn_fake_{fake_source_id}"
 
         return fake_id
 

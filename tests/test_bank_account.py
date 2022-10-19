@@ -245,7 +245,7 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
 
     def test_api_call_no_customer_and_no_account(self):
         exception_message = (
-            "BankAccounts must be manipulated through either a Stripe Connected Account or a customer. "
+            "BankAccount objects must be manipulated through either a Stripe Connected Account or a customer. "
             "Pass a Customer or an Account object into this call."
         )
 
@@ -261,7 +261,7 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
 
     def test_api_call_bad_customer(self):
         exception_message = (
-            "BankAccounts must be manipulated through a Customer. "
+            "BankAccount objects must be manipulated through a Customer. "
             "Pass a Customer object into this call."
         )
 
@@ -277,7 +277,7 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
 
     def test_api_call_bad_account(self):
         exception_message = (
-            "BankAccounts must be manipulated through a Stripe Connected Account. "
+            "BankAccount objects must be manipulated through a Stripe Connected Account. "
             "Pass an Account object into this call."
         )
 

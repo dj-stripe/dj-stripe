@@ -108,20 +108,17 @@ class StripeModel(StripeBaseModel):
             if self.djstripe_owner_account
             else ""
         )
-        return "https://dashboard.stripe.com/{}{}".format(
-            owner_path_prefix, "test/" if not self.livemode else ""
-        )
+        suffix = "test/" if not self.livemode else ""
+        return f"https://dashboard.stripe.com/{owner_path_prefix}{suffix}"
 
     def get_stripe_dashboard_url(self) -> str:
         """Get the stripe dashboard url for this object."""
         if not self.stripe_dashboard_item_name or not self.id:
             return ""
         else:
-            return "{base_url}{item}/{id}".format(
-                base_url=self._get_base_stripe_dashboard_url(),
-                item=self.stripe_dashboard_item_name,
-                id=self.id,
-            )
+            base_url = self._get_base_stripe_dashboard_url()
+            item = self.stripe_dashboard_item_name
+            return f"{base_url}{item}/{self.id}"
 
     @property
     def default_api_key(self) -> str:
@@ -894,10 +891,9 @@ class StripeModel(StripeBaseModel):
                     # when received from Stripe. This means that future updates to
                     # a subscription will change previously saved invoices - Doing
                     # the composite key avoids this.
-                    if not line["id"].startswith(invoice.id):
-                        line["id"] = "{invoice_id}-{subscription_id}".format(
-                            invoice_id=invoice.id, subscription_id=line["id"]
-                        )
+                    line_id = line["id"]
+                    if not line_id.startswith(invoice.id):
+                        line["id"] = f"{invoice.id}-{line_id}"
             else:
                 # Don't save invoice items for ephemeral invoices
                 save = False

@@ -806,7 +806,7 @@ class Customer(StripeModel):
         try:
             return Customer.objects.get(subscriber=subscriber, livemode=livemode), False
         except Customer.DoesNotExist:
-            action = "create:{}".format(subscriber.pk)
+            action = f"create:{subscriber.pk}"
             idempotency_key = djstripe_settings.get_idempotency_key(
                 "customer", action, livemode
             )
@@ -1112,7 +1112,7 @@ class Customer(StripeModel):
             # Delete the idempotency key used by Customer.create()
             # So re-creating a customer for this subscriber before the key expires
             # doesn't return the older Customer data
-            idempotency_key_action = "customer:create:{}".format(self.subscriber.pk)
+            idempotency_key_action = f"customer:create:{self.subscriber.pk}"
             IdempotencyKey.objects.filter(action=idempotency_key_action).delete()
 
         self.subscriber = None

@@ -187,10 +187,9 @@ class Coupon(StripeModel):
     def human_readable(self):
         if self.duration == enums.CouponDuration.repeating:
             if self.duration_in_months == 1:
-                duration = "for {duration_in_months} month"
+                duration = f"for 1 month"
             else:
-                duration = "for {duration_in_months} months"
-            duration = duration.format(duration_in_months=self.duration_in_months)
+                duration = f"for {self.duration_in_months} months"
         else:
             duration = self.duration
         return f"{self.human_readable_amount} {duration}"

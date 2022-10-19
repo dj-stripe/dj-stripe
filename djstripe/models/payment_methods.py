@@ -76,7 +76,7 @@ class DjstripePaymentMethod(models.Model):
         elif type == "account":
             return Account
 
-        raise ValueError("Unknown source type: {}".format(type))
+        raise ValueError(f"Unknown source type: {type}")
 
     @property
     def object_model(self):
@@ -155,22 +155,21 @@ class LegacySourceMixin:
 
         if not account and not customer:
             raise StripeObjectManipulationException(
-                "{}s must be manipulated through either a Stripe Connected Account or a customer. "
-                "Pass a Customer or an Account object into this call.".format(
-                    cls.__name__
-                )
+                f"{cls.__name__} objects must be manipulated through either a "
+                "Stripe Connected Account or a customer. "
+                "Pass a Customer or an Account object into this call."
             )
 
         if account and not isinstance(account, Account):
             raise StripeObjectManipulationException(
-                "{}s must be manipulated through a Stripe Connected Account. "
-                "Pass an Account object into this call.".format(cls.__name__)
+                f"{cls.__name__} objects must be manipulated through a Stripe Connected Account. "
+                "Pass an Account object into this call."
             )
 
         if customer and not isinstance(customer, Customer):
             raise StripeObjectManipulationException(
-                "{}s must be manipulated through a Customer. "
-                "Pass a Customer object into this call.".format(cls.__name__)
+                f"{cls.__name__} objects must be manipulated through a Customer. "
+                "Pass a Customer object into this call."
             )
 
         if account:

@@ -167,16 +167,14 @@ class DjstripeSettings:
             func = import_string(func)
 
         if not callable(func):
-            raise ImproperlyConfigured(
-                "{name} must be callable.".format(name=setting_name)
-            )
+            raise ImproperlyConfigured(f"{setting_name} must be callable.")
 
         return func
 
     def _get_idempotency_key(self, object_type, action, livemode) -> str:
         from .models import IdempotencyKey
 
-        action = "{}:{}".format(object_type, action)
+        action = f"{object_type}:{action}"
         idempotency_key, _created = IdempotencyKey.objects.get_or_create(
             action=action, livemode=livemode
         )
@@ -222,8 +220,8 @@ class DjstripeSettings:
             )
         except LookupError:
             raise ImproperlyConfigured(
-                "DJSTRIPE_SUBSCRIBER_MODEL refers to model '{model}' "
-                "that has not been installed.".format(model=model_name)
+                f"DJSTRIPE_SUBSCRIBER_MODEL refers to model '{model_name}' "
+                "that has not been installed."
             )
 
         if (
@@ -261,7 +259,7 @@ class DjstripeSettings:
         if validate:
             valid = validate_stripe_api_version(version)
             if not valid:
-                raise ValueError("Bad stripe API version: {}".format(version))
+                raise ValueError(f"Bad stripe API version: {version!r}")
 
         stripe.api_version = version
 

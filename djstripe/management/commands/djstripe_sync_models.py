@@ -71,9 +71,7 @@ class Command(BaseCommand):
                 try:
                     model = app_config.get_model(model_label)
                 except LookupError:
-                    raise CommandError(
-                        "Unknown model: {}.{}".format(app_label, model_label)
-                    )
+                    raise CommandError(f"Unknown model: {app_label}.{model_label}")
 
                 model_list.append(model)
         else:

@@ -487,7 +487,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         user = get_user_model().objects.create_user(
             username="blah", email=FAKE_CUSTOMER_II["email"]
         )
-        idempotency_key_action = "customer:create:{}".format(user.pk)
+        idempotency_key_action = f"customer:create:{user.pk}"
         self.assertFalse(
             IdempotencyKey.objects.filter(action=idempotency_key_action).exists()
         )

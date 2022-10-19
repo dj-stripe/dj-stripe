@@ -51,7 +51,7 @@ elif test_db_vendor == "sqlite":
         }
     }
 else:
-    raise NotImplementedError("DJSTRIPE_TEST_DB_VENDOR = {}".format(test_db_vendor))
+    raise NotImplementedError(f"DJSTRIPE_TEST_DB_VENDOR = {test_db_vendor}")
 
 
 TEMPLATES = [
