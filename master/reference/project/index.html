@@ -3746,7 +3746,7 @@ Updated to API VERSION 2016-03-07 with bogus fields.</p>
                         <span class="n">field_value</span><span class="p">,</span> <span class="n">expected_blank_fks</span><span class="p">,</span> <span class="n">processed_stripe_ids</span>
                     <span class="p">)</span>
 
-                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;checked </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">field_str</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;checked </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">field_str</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
         </details>
 
@@ -3852,7 +3852,7 @@ Updated to API VERSION 2016-03-07 with bogus fields.</p>
                     <span class="n">field_value</span><span class="p">,</span> <span class="n">expected_blank_fks</span><span class="p">,</span> <span class="n">processed_stripe_ids</span>
                 <span class="p">)</span>
 
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;checked </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">field_str</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;checked </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">field_str</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -6262,7 +6262,7 @@ argument-accepting functionality of Stripe's list() method.</p>
         <span class="k">elif</span> <span class="n">source_type</span> <span class="o">==</span> <span class="s2">&quot;source&quot;</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">SourceDict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown source type: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source_type</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown source type: </span><span class="si">{</span><span class="n">source_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">data</span>
 </code></pre></div></td></tr></table></div>
