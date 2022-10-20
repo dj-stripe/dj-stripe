@@ -273,7 +273,7 @@ class BusinessType(Enum):
     individual = _("Individual")
     company = _("Company")
     non_profit = _("Non Profit")
-    government_entity = _("Government Entity")
+    # government_entity = _("Government Entity")
 
 
 class CaptureMethod(Enum):
