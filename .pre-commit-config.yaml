@@ -22,3 +22,9 @@ repos:
     rev: 5.10.1
     hooks:
       - id: isort
+
+  - repo: https://github.com/adamchainz/django-upgrade
+    rev: 1.10.0
+    hooks:
+      - id: django-upgrade
+        args: [--target-version, "3.2"]
