@@ -5,7 +5,7 @@ from django.db import models, transaction
 from stripe.error import InvalidRequestError
 
 from .. import enums
-from ..exceptions import StripeObjectManipulationException
+from ..exceptions import ImpossibleAPIRequest, StripeObjectManipulationException
 from ..fields import (
     JSONField,
     StripeCurrencyCodeField,
@@ -76,7 +76,7 @@ class DjstripePaymentMethod(models.Model):
         elif type == "account":
             return Account
 
-        raise ValueError("Unknown source type: {}".format(type))
+        raise ValueError(f"Unknown source type: {type}")
 
     @property
     def object_model(self):
@@ -100,6 +100,8 @@ class DjstripePaymentMethod(models.Model):
 
         raw_field_data = data.get(field_name)
         id_ = get_id_from_stripe_data(raw_field_data)
+        if not id_:
+            raise ValueError(f"ID not found in Stripe data: {raw_field_data!r}")
 
         if id_.startswith("card"):
             source_cls = Card
@@ -143,6 +145,8 @@ class LegacySourceMixin:
 
     customer: Optional[StripeForeignKey]
     account: Optional[StripeForeignKey]
+    id: str
+    default_api_key: str
 
     @classmethod
     def _get_customer_or_account_from_kwargs(cls, **kwargs):
@@ -151,22 +155,21 @@ class LegacySourceMixin:
 
         if not account and not customer:
             raise StripeObjectManipulationException(
-                "{}s must be manipulated through either a Stripe Connected Account or a customer. "
-                "Pass a Customer or an Account object into this call.".format(
-                    cls.__name__
-                )
+                f"{cls.__name__} objects must be manipulated through either a "
+                "Stripe Connected Account or a customer. "
+                "Pass a Customer or an Account object into this call."
             )
 
         if account and not isinstance(account, Account):
             raise StripeObjectManipulationException(
-                "{}s must be manipulated through a Stripe Connected Account. "
-                "Pass an Account object into this call.".format(cls.__name__)
+                f"{cls.__name__} objects must be manipulated through a Stripe Connected Account. "
+                "Pass an Account object into this call."
             )
 
         if customer and not isinstance(customer, Customer):
             raise StripeObjectManipulationException(
-                "{}s must be manipulated through a Customer. "
-                "Pass a Customer object into this call.".format(cls.__name__)
+                f"{cls.__name__} objects must be manipulated through a Customer. "
+                "Pass a Customer object into this call."
             )
 
         if account:
@@ -221,6 +224,8 @@ class LegacySourceMixin:
             **kwargs
         )
 
+        object_name = cls.stripe_class.OBJECT_NAME
+
         # First we try to retrieve by customer attribute,
         # then by account attribute
         if customer and account:
@@ -228,7 +233,7 @@ class LegacySourceMixin:
                 # retrieve by customer
                 return (
                     customer.api_retrieve(api_key=api_key)
-                    .sources.list(object=cls.stripe_class.OBJECT_NAME, **clean_kwargs)
+                    .sources.list(object=object_name, **clean_kwargs)
                     .auto_paging_iter()
                 )
             except Exception as customer_exc:
@@ -236,9 +241,7 @@ class LegacySourceMixin:
                     # retrieve by account
                     return (
                         account.api_retrieve(api_key=api_key)
-                        .external_accounts.list(
-                            object=cls.stripe_class.OBJECT_NAME, **clean_kwargs
-                        )
+                        .external_accounts.list(object=object_name, **clean_kwargs)
                         .auto_paging_iter()
                     )
                 except Exception:
@@ -247,21 +250,19 @@ class LegacySourceMixin:
         if customer:
             return (
                 customer.api_retrieve(api_key=api_key)
-                .sources.list(object=cls.stripe_class.OBJECT_NAME, **clean_kwargs)
+                .sources.list(object=object_name, **clean_kwargs)
                 .auto_paging_iter()
             )
 
         if account:
             return (
                 account.api_retrieve(api_key=api_key)
-                .external_accounts.list(
-                    object=cls.stripe_class.OBJECT_NAME, **clean_kwargs
-                )
+                .external_accounts.list(object=object_name, **clean_kwargs)
                 .auto_paging_iter()
             )
 
-        raise NotImplementedError(
-            f"Can't list {cls.stripe_class.OBJECT_NAME} without a customer or account object."
+        raise ImpossibleAPIRequest(
+            f"Can't list {object_name} without a customer or account object."
             " This may happen if not all accounts or customer objects are in the db."
             ' Please run "python manage.py djstripe_sync_models Account Customer" as a potential fix.'
         )
@@ -320,7 +321,7 @@ class LegacySourceMixin:
                 api_key=api_key,
             )
 
-        raise NotImplementedError(
+        raise ImpossibleAPIRequest(
             f"Can't retrieve {self.__class__} without a customer or account object."
             " This may happen if not all accounts or customer objects are in the db."
             ' Please run "python manage.py djstripe_sync_models Account Customer" as a potential fix.'
@@ -353,7 +354,7 @@ class LegacySourceMixin:
                 **kwargs,
             )
 
-        raise NotImplementedError(
+        raise ImpossibleAPIRequest(
             f"Can't delete {self.__class__} without a customer or account object."
             " This may happen if not all accounts or customer objects are in the db."
             ' Please run "python manage.py djstripe_sync_models Account Customer" as a potential fix.'
@@ -450,7 +451,7 @@ class BankAccount(LegacySourceMixin, StripeModel):
 
     def api_retrieve(self, **kwargs):
         if not self.customer and not self.account:
-            raise NotImplementedError(
+            raise ImpossibleAPIRequest(
                 "Can't retrieve a bank account without a customer or account object."
                 " This may happen if not all accounts or customer objects are in the db."
                 ' Please run "python manage.py djstripe_sync_models Account Customer" as a potential fix.'
@@ -597,6 +598,8 @@ class Card(LegacySourceMixin, StripeModel):
             default = getattr(self, "default_for_currency", False)
             account_template = f"{enums.CardBrand.humanize(self.brand)} {self.account.default_currency} {'Default' if default else ''} {self.last4}"
             return account_template
+
+        return self.id or ""
 
     @classmethod
     def create_token(
@@ -765,10 +768,8 @@ class Source(StripeModel):
                 self.api_retrieve(api_key=api_key).detach(), api_key=api_key
             )
             return True
-        except (InvalidRequestError, NotImplementedError):
+        except InvalidRequestError:
             # The source was already detached. Resyncing.
-            # NotImplementedError is an artifact of stripe-python<2.0
-            # https://github.com/stripe/stripe-python/issues/376
             self.sync_from_stripe_data(
                 self.api_retrieve(api_key=self.default_api_key),
                 api_key=self.default_api_key,

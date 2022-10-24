@@ -10,7 +10,7 @@ from djstripe import enums, utils
 from djstripe.admin.forms import APIKeyAdminCreateForm, CustomActionForm
 from tests import FAKE_PLATFORM_ACCOUNT
 
-from .fields.models import TestCustomActionModel
+from .fields.models import CustomActionModel
 from .test_apikey import RK_LIVE, RK_TEST, SK_LIVE, SK_TEST
 
 pytestmark = pytest.mark.django_db
@@ -28,7 +28,7 @@ class TestCustomActionForm:
 
         monkeypatch.setattr(utils, "get_model", mock_get_model)
 
-        model = TestCustomActionModel
+        model = CustomActionModel
 
         # create instances to be used in the Django Admin Action
         inst_1 = model.objects.create(id="test")
@@ -36,7 +36,7 @@ class TestCustomActionForm:
         pk_values = [inst_1.pk, inst_2.pk]
 
         form = CustomActionForm(
-            model_name=TestCustomActionModel._meta.model_name,
+            model_name=CustomActionModel._meta.model_name,
             action_name=action_name,
         )
 

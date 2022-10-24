@@ -51,4 +51,3 @@ short reason behind the decision in the docstring for each model.
 ## Webhooks
 
 ::: djstripe.models.webhooks
-

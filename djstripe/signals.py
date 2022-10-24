@@ -5,7 +5,19 @@ Stripe docs for Webhooks: https://stripe.com/docs/webhooks
 """
 from django.dispatch import Signal
 
-# providing_args=["data", "exception"]
+# providing_args=["instance", "api_key"]
+webhook_pre_validate = Signal()
+
+# providing_args=["instance", "api_key", "valid"]
+webhook_post_validate = Signal()
+
+# providing_args=["instance", "api_key"]
+webhook_pre_process = Signal()
+
+# providing_args=["instance", "api_key"]
+webhook_post_process = Signal()
+
+# providing_args=["instance", "api_key", "exception", "data"]
 webhook_processing_error = Signal()
 
 ENABLED_EVENTS = [

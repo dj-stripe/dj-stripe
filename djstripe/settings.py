@@ -20,25 +20,23 @@ class DjstripeSettings:
 
     DEFAULT_STRIPE_API_VERSION = "2020-08-27"
 
-    ZERO_DECIMAL_CURRENCIES = set(
-        [
-            "bif",
-            "clp",
-            "djf",
-            "gnf",
-            "jpy",
-            "kmf",
-            "krw",
-            "mga",
-            "pyg",
-            "rwf",
-            "vnd",
-            "vuv",
-            "xaf",
-            "xof",
-            "xpf",
-        ]
-    )
+    ZERO_DECIMAL_CURRENCIES = {
+        "bif",
+        "clp",
+        "djf",
+        "gnf",
+        "jpy",
+        "kmf",
+        "krw",
+        "mga",
+        "pyg",
+        "rwf",
+        "vnd",
+        "vuv",
+        "xaf",
+        "xof",
+        "xpf",
+    }
 
     def __init__(self):
         # Set STRIPE_API_HOST if you want to use a different Stripe API server
@@ -65,14 +63,6 @@ class DjstripeSettings:
         return self.get_callback_function(
             "DJSTRIPE_IDEMPOTENCY_KEY_CALLBACK", self._get_idempotency_key
         )
-
-    @property
-    def USE_NATIVE_JSONFIELD(self):
-        return getattr(settings, "DJSTRIPE_USE_NATIVE_JSONFIELD", True)
-
-    @property
-    def PRORATION_POLICY(self):
-        return getattr(settings, "DJSTRIPE_PRORATION_POLICY", None)
 
     @property
     def DJSTRIPE_WEBHOOK_URL(self):
@@ -180,16 +170,14 @@ class DjstripeSettings:
             func = import_string(func)
 
         if not callable(func):
-            raise ImproperlyConfigured(
-                "{name} must be callable.".format(name=setting_name)
-            )
+            raise ImproperlyConfigured(f"{setting_name} must be callable.")
 
         return func
 
     def _get_idempotency_key(self, object_type, action, livemode) -> str:
         from .models import IdempotencyKey
 
-        action = "{}:{}".format(object_type, action)
+        action = f"{object_type}:{action}"
         idempotency_key, _created = IdempotencyKey.objects.get_or_create(
             action=action, livemode=livemode
         )
@@ -235,8 +223,8 @@ class DjstripeSettings:
             )
         except LookupError:
             raise ImproperlyConfigured(
-                "DJSTRIPE_SUBSCRIBER_MODEL refers to model '{model}' "
-                "that has not been installed.".format(model=model_name)
+                f"DJSTRIPE_SUBSCRIBER_MODEL refers to model '{model_name}' "
+                "that has not been installed."
             )
 
         if (
@@ -274,7 +262,7 @@ class DjstripeSettings:
         if validate:
             valid = validate_stripe_api_version(version)
             if not valid:
-                raise ValueError("Bad stripe API version: {}".format(version))
+                raise ValueError(f"Bad stripe API version: {version!r}")
 
         stripe.api_version = version
 

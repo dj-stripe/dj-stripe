@@ -1,7 +1,7 @@
 import logging
 import uuid
 from datetime import timedelta
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Type
 
 from django.apps import apps
 from django.db import IntegrityError, models, transaction
@@ -10,6 +10,7 @@ from stripe.api_resources.abstract.api_resource import APIResource
 from stripe.error import InvalidRequestError
 from stripe.util import convert_to_stripe_object
 
+from ..exceptions import ImpossibleAPIRequest
 from ..fields import (
     JSONField,
     StripeDateTimeField,
@@ -25,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 class StripeBaseModel(models.Model):
-    stripe_class: Optional[APIResource] = None
+    stripe_class: Type[APIResource] = APIResource
 
     djstripe_created = models.DateTimeField(auto_now_add=True, editable=False)
     djstripe_updated = models.DateTimeField(auto_now=True, editable=False)
@@ -107,24 +108,17 @@ class StripeModel(StripeBaseModel):
             if self.djstripe_owner_account
             else ""
         )
-        return "https://dashboard.stripe.com/{}{}".format(
-            owner_path_prefix, "test/" if not self.livemode else ""
-        )
+        suffix = "test/" if not self.livemode else ""
+        return f"https://dashboard.stripe.com/{owner_path_prefix}{suffix}"
 
     def get_stripe_dashboard_url(self) -> str:
         """Get the stripe dashboard url for this object."""
         if not self.stripe_dashboard_item_name or not self.id:
             return ""
         else:
-            return "{base_url}{item}/{id}".format(
-                base_url=self._get_base_stripe_dashboard_url(),
-                item=self.stripe_dashboard_item_name,
-                id=self.id,
-            )
-
-    @property
-    def human_readable_amount(self) -> str:
-        return get_friendly_currency_amount(self.amount / 100, self.currency)
+            base_url = self._get_base_stripe_dashboard_url()
+            item = self.stripe_dashboard_item_name
+            return f"{base_url}{item}/{self.id}"
 
     @property
     def default_api_key(self) -> str:
@@ -322,7 +316,6 @@ class StripeModel(StripeBaseModel):
         from .webhooks import WebhookEndpoint
 
         manipulated_data = cls._manipulate_stripe_object_hook(data)
-
         if not cls.is_valid_object(manipulated_data):
             raise ValueError(
                 "Trying to fit a %r into %r. Aborting."
@@ -481,15 +474,25 @@ class StripeModel(StripeBaseModel):
                 # requests the same object
                 current_ids.add(id_)
 
-                field_data, _ = field.related_model._get_or_create_from_stripe_object(
-                    manipulated_data,
-                    field_name,
-                    refetch=refetch,
-                    current_ids=current_ids,
-                    pending_relations=pending_relations,
-                    stripe_account=stripe_account,
-                    api_key=api_key,
-                )
+                try:
+                    (
+                        field_data,
+                        _,
+                    ) = field.related_model._get_or_create_from_stripe_object(
+                        manipulated_data,
+                        field_name,
+                        refetch=refetch,
+                        current_ids=current_ids,
+                        pending_relations=pending_relations,
+                        stripe_account=stripe_account,
+                        api_key=api_key,
+                    )
+                except ImpossibleAPIRequest:
+                    # Found to happen in the following situation:
+                    # Customer has a `default_source` set to a `card_` object,
+                    # and neither the Customer nor the Card are present in db.
+                    # This skip is a hack, but it will prevent a crash.
+                    skip = True
 
                 # Remove the id of the current object from the list
                 # after it has been created or retrieved
@@ -506,7 +509,11 @@ class StripeModel(StripeBaseModel):
         """
         Returns whether the data is a valid object for the class
         """
-        return "object" in data and data["object"] == cls.stripe_class.OBJECT_NAME
+        # .OBJECT_NAME will not exist on the base type itself
+        object_name: str = getattr(cls.stripe_class, "OBJECT_NAME", "")
+        if not object_name:
+            return False
+        return data and data.get("object") == object_name
 
     def _attach_objects_hook(
         self, cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY, current_ids=None
@@ -668,14 +675,9 @@ class StripeModel(StripeBaseModel):
         if not field:
             # An empty field - We need to return nothing here because there is
             # no way of knowing what needs to be fetched!
-            logger.warning(
-                "empty field %s.%s = %r - this is a bug, "
-                "please report it to dj-stripe!",
-                cls.__name__,
-                field_name,
-                field,
+            raise RuntimeError(
+                f"dj-stripe encountered an empty field {cls.__name__}.{field_name} = {field}"
             )
-            return None, False
         elif id_ == field:
             # A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}
             # We'll have to expand if the field is not "id" (= is nested)
@@ -889,10 +891,9 @@ class StripeModel(StripeBaseModel):
                     # when received from Stripe. This means that future updates to
                     # a subscription will change previously saved invoices - Doing
                     # the composite key avoids this.
-                    if not line["id"].startswith(invoice.id):
-                        line["id"] = "{invoice_id}-{subscription_id}".format(
-                            invoice_id=invoice.id, subscription_id=line["id"]
-                        )
+                    line_id = line["id"]
+                    if not line_id.startswith(invoice.id):
+                        line["id"] = f"{invoice.id}-{line_id}"
             else:
                 # Don't save invoice items for ephemeral invoices
                 save = False

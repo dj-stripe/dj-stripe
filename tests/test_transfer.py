@@ -19,19 +19,21 @@ from . import (
 pytestmark = pytest.mark.django_db
 
 
+def FAKE_TRANSFER_COMPLETE_REVERSAL():
+    data = deepcopy(FAKE_TRANSFER)
+    data["reversed"] = True
+    data["amount_reversed"] = data["amount"]
+    return data
+
+
+def FAKE_TRANSFER_PARTIAL_REVERSAL():
+    data = deepcopy(FAKE_TRANSFER)
+    assert data["amount"] > 1
+    data["amount_reversed"] = data["amount"] - 1
+    return data
+
+
 class TestTransferStr:
-    def FAKE_TRANSFER_COMPLETE_REVERSAL():
-        data = deepcopy(FAKE_TRANSFER)
-        data["reversed"] = True
-        data["amount_reversed"] = data["amount"]
-        return data
-
-    def FAKE_TRANSFER_PARTIAL_REVERSAL():
-        data = deepcopy(FAKE_TRANSFER)
-        assert data["amount"] > 1
-        data["amount_reversed"] = data["amount"] - 1
-        return data
-
     @pytest.mark.parametrize(
         "fake_transfer_data",
         [
@@ -65,13 +67,13 @@ class TestTransferStr:
         transfer = Transfer.sync_from_stripe_data(fake_transfer_data)
 
         if fake_transfer_data["reversed"]:
-            assert "$0.01 USD Reversed" == str(transfer)
+            assert "$1.00 USD Reversed" == str(transfer)
 
         elif fake_transfer_data["amount_reversed"]:
-            assert "$0.01 USD Partially Reversed" == str(transfer)
+            assert "$1.00 USD Partially Reversed" == str(transfer)
 
         else:
-            assert "$0.01 USD" == str(transfer)
+            assert "$1.00 USD" == str(transfer)
 
 
 class TestTransfer(AssertStripeFksMixin, TestCase):

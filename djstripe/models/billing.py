@@ -176,26 +176,23 @@ class Coupon(StripeModel):
     @property
     def human_readable_amount(self):
         if self.percent_off:
-            amount = "{percent_off}%".format(percent_off=self.percent_off)
+            amount = f"{self.percent_off}%"
         elif self.currency:
             amount = get_friendly_currency_amount(self.amount_off or 0, self.currency)
         else:
             amount = "(invalid amount)"
-        return "{amount} off".format(amount=amount)
+        return f"{amount} off"
 
     @property
     def human_readable(self):
         if self.duration == enums.CouponDuration.repeating:
             if self.duration_in_months == 1:
-                duration = "for {duration_in_months} month"
+                duration = f"for 1 month"
             else:
-                duration = "for {duration_in_months} months"
-            duration = duration.format(duration_in_months=self.duration_in_months)
+                duration = f"for {self.duration_in_months} months"
         else:
             duration = self.duration
-        return "{amount} {duration}".format(
-            amount=self.human_readable_amount, duration=duration
-        )
+        return f"{self.human_readable_amount} {duration}"
 
 
 class BaseInvoice(StripeModel):
@@ -553,24 +550,17 @@ class BaseInvoice(StripeModel):
         ordering = ["-created"]
 
     def __str__(self):
-        return f"Invoice #{self.number or self.receipt_number or self.id} for {self.human_readable_amount} ({self.status})"
-
-    @property
-    def human_readable_amount(self) -> str:
-        return get_friendly_currency_amount(self.amount_paid, self.currency)
+        invoice_number = self.number or self.receipt_number or self.id
+        amount = get_friendly_currency_amount(self.amount_paid or 0, self.currency)
+        return f"Invoice #{invoice_number} for {amount} ({self.status})"
 
     @classmethod
     def upcoming(
         cls,
         api_key=djstripe_settings.STRIPE_SECRET_KEY,
         customer=None,
-        coupon=None,
         subscription=None,
         subscription_plan=None,
-        subscription_prorate=None,
-        subscription_proration_date=None,
-        subscription_quantity=None,
-        subscription_trial_end=None,
         **kwargs,
     ) -> Optional["UpcomingInvoice"]:
         """
@@ -597,22 +587,6 @@ class BaseInvoice(StripeModel):
         updating the subscription given to this plan, or creating a new \
         subscription to this plan if no subscription is given.
         :type subscription_plan: Plan or string (plan ID)
-        :param subscription_prorate: If previewing an update to a subscription, \
-        this decides whether the preview will show the result of applying \
-        prorations or not.
-        :type subscription_prorate: bool
-        :param subscription_proration_date: If previewing an update to a \
-        subscription, and doing proration, subscription_proration_date forces \
-        the proration to be calculated as though the update was done at the \
-        specified time.
-        :type subscription_proration_date: datetime
-        :param subscription_quantity: If provided, the invoice returned will \
-        preview updating or creating a subscription with that quantity.
-        :type subscription_quantity: int
-        :param subscription_trial_end: If provided, the invoice returned will \
-        preview updating or creating a subscription with that trial end.
-        :type subscription_trial_end: datetime
-        :returns: The upcoming preview invoice.
         """
 
         # Convert Customer to id
@@ -631,13 +605,8 @@ class BaseInvoice(StripeModel):
             upcoming_stripe_invoice = cls.stripe_class.upcoming(
                 api_key=api_key,
                 customer=customer,
-                coupon=coupon,
                 subscription=subscription,
                 subscription_plan=subscription_plan,
-                subscription_prorate=subscription_prorate,
-                subscription_proration_date=subscription_proration_date,
-                subscription_quantity=subscription_quantity,
-                subscription_trial_end=subscription_trial_end,
                 **kwargs,
             )
         except InvalidRequestError as exc:
@@ -1045,7 +1014,7 @@ class InvoiceItem(StripeModel):
 
     @classmethod
     def is_valid_object(cls, data):
-        return "object" in data and data["object"] in ("invoiceitem", "line_item")
+        return data and data.get("object") in ("invoiceitem", "line_item")
 
     def get_stripe_dashboard_url(self):
         return self.invoice.get_stripe_dashboard_url()
@@ -1223,17 +1192,16 @@ class Plan(StripeModel):
         return plan
 
     def __str__(self):
-        subscriptions_cnt = self.subscriptions.count()
         if self.product and self.product.name:
-            return f"{self.human_readable_price} for {self.product.name} ({subscriptions_cnt} subscriptions)"
-        return f"{self.human_readable_price} ({subscriptions_cnt} subscriptions)"
+            return f"{self.human_readable_price} for {self.product.name}"
+        return self.human_readable_price
 
     @property
     def amount_in_cents(self):
         return int(self.amount * 100)
 
     @property
-    def human_readable_price(self):
+    def human_readable_price(self) -> str:
         if self.billing_scheme == "per_unit":
             unit_amount = self.amount
             amount = get_friendly_currency_amount(unit_amount, self.currency)
@@ -1242,7 +1210,7 @@ class Plan(StripeModel):
             tier_1 = self.tiers[0]
             flat_amount_tier_1 = tier_1["flat_amount"]
             formatted_unit_amount_tier_1 = get_friendly_currency_amount(
-                tier_1["unit_amount"] / 100, self.currency
+                (tier_1["unit_amount"] or 0) / 100, self.currency
             )
             amount = f"Starts at {formatted_unit_amount_tier_1} per unit"
 
@@ -1276,7 +1244,7 @@ class Plan(StripeModel):
             format_args["interval"] = interval
             format_args["interval_count"] = interval_count
 
-        return format_lazy(template, **format_args)
+        return str(format_lazy(template, **format_args))
 
 
 class Subscription(StripeModel):
@@ -1552,12 +1520,7 @@ class Subscription(StripeModel):
 
         return super().api_list(api_key=api_key, **kwargs)
 
-    def update(
-        self,
-        plan: Union[StripeModel, str] = None,
-        prorate: bool = None,
-        **kwargs,
-    ):
+    def update(self, plan: Union[StripeModel, str] = None, **kwargs):
         """
         See `Customer.subscribe() <#djstripe.models.Customer.subscribe>`__
 
@@ -1572,53 +1535,6 @@ class Subscription(StripeModel):
         # Convert Plan to id
         if plan is not None and isinstance(plan, StripeModel):
             plan = plan.id
-
-        # In short: We used to have a `prorate` argument which defaulted to
-        # a DJSTRIPE_PRORATION_POLICY setting.
-        # This is overly complex and specific, so we are dropping support for this.
-        # To override it, you can pass `proration_behavior`.
-        # If instead you pass `prorate`, we will transform it until dj-stripe 2.8.
-        # If you have DJSTRIPE_PRORATION_POLICY set, we will default to it for now.
-        # In 2.8, we will ignore both of those and let Stripe figure it out.
-        # Stripe's default proration policy is specified here:
-        # https://stripe.com/docs/billing/subscriptions/prorations
-        if "proration_behavior" not in kwargs:
-            if prorate is not None:
-                warnings.warn(
-                    "The `prorate` parameter to Subscription.update() is deprecated "
-                    "by Stripe. Use `proration_behavior` instead.\n"
-                    "Read more: "
-                    "https://stripe.com/docs/billing/subscriptions/prorations",
-                    DeprecationWarning,
-                )
-            elif kwargs.get("subscription_prorate") is not None:
-                warnings.warn(
-                    "The `subscription_prorate` parameter to Subscription.update() is deprecated "
-                    "by Stripe. Use `proration_behavior` instead.\n"
-                    "Read more: "
-                    "https://stripe.com/docs/billing/subscriptions/prorations",
-                    DeprecationWarning,
-                )
-
-            else:
-                prorate = djstripe_settings.PRORATION_POLICY
-                if prorate is not None:
-                    warnings.warn(
-                        "The `DJSTRIPE_PRORATION_POLICY` setting is deprecated and will "
-                        "be ignored in dj-stripe 2.8. "
-                        "Specify `proration_behavior` instead."
-                    )
-                else:
-                    prorate = False
-
-            if prorate:
-                kwargs.setdefault("proration_behavior", "create_prorations")
-            else:
-                kwargs.setdefault("proration_behavior", "none")
-        elif prorate is not None:
-            raise TypeError(
-                "`prorate` argument must not be set when `proration_behavior` is specified"
-            )
 
         stripe_subscription = self._api_update(plan=plan, **kwargs)
 
@@ -2081,16 +1997,13 @@ class ShippingRate(StripeModel):
         verbose_name = "Shipping Rate"
 
     def __str__(self):
-        base = f"{self.display_name} - {self.human_readable_amount}"
-        if self.active:
-            return f"{base} (Active)"
-        return f"{base} (Archived)"
-
-    @property
-    def human_readable_amount(self):
-        return get_friendly_currency_amount(
+        amount = get_friendly_currency_amount(
             self.fixed_amount.get("amount") / 100, self.fixed_amount.get("currency")
         )
+        if self.active:
+            return f"{self.display_name} - {amount} (Active)"
+        else:
+            return f"{self.display_name} - {amount} (Archived)"
 
 
 class TaxCode(StripeModel):

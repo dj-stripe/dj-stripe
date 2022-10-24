@@ -61,19 +61,17 @@ def check_stripe_api_version(app_configs=None, **kwargs):
     version = djstripe_settings.STRIPE_API_VERSION
 
     if not validate_stripe_api_version(version):
-        msg = "Invalid Stripe API version: {}".format(version)
+        msg = f"Invalid Stripe API version: {version!r}"
         hint = "STRIPE_API_VERSION should be formatted as: YYYY-MM-DD"
         messages.append(checks.Critical(msg, hint=hint, id="djstripe.C004"))
 
     if version != default_version:
         msg = (
-            "The Stripe API version has a non-default value of '{}'. "
+            f"The Stripe API version has a non-default value of '{version!r}'. "
             "Non-default versions are not explicitly supported, and may "
-            "cause compatibility issues.".format(version)
+            "cause compatibility issues."
         )
-        hint = "Use the dj-stripe default for Stripe API version: {}".format(
-            default_version
-        )
+        hint = f"Use the dj-stripe default for Stripe API version: {default_version}"
         messages.append(checks.Warning(msg, hint=hint, id="djstripe.W001"))
 
     return messages
@@ -148,32 +146,34 @@ def check_webhook_secret(app_configs=None, **kwargs):
     return messages
 
 
+def _check_webhook_endpoint_validation(secret, messages, endpoint=None):
+    if not secret:
+        if endpoint:
+            extra_msg = f"but Webhook Endpoint: {endpoint} has no secret set"
+            secret_attr = "secret"
+        else:
+            extra_msg = "but DJSTRIPE_WEBHOOK_SECRET is not set"
+            secret_attr = "DJSTRIPE_WEBHOOK_SECRET"
+
+        messages.append(
+            checks.Critical(
+                f"DJSTRIPE_WEBHOOK_VALIDATION is set to 'verify_signature' {extra_msg}",
+                hint=f"Set {secret_attr} or set DJSTRIPE_WEBHOOK_VALIDATION='retrieve_event'",
+                id="djstripe.C006",
+            )
+        )
+    return messages
+
+
 @checks.register("djstripe")
 def check_webhook_validation(app_configs=None, **kwargs):
     """
     Check that DJSTRIPE_WEBHOOK_VALIDATION is valid
     """
-
-    def check_webhook_endpoint_validation(secret, messages, endpoint=None):
-        if not secret:
-            if endpoint:
-                extra_msg = f"but Webhook Endpoint: {endpoint} has no secret set"
-                secret_attr = "secret"
-            else:
-                extra_msg = "but DJSTRIPE_WEBHOOK_SECRET is not set"
-                secret_attr = "DJSTRIPE_WEBHOOK_SECRET"
-
-            messages.append(
-                checks.Critical(
-                    f"DJSTRIPE_WEBHOOK_VALIDATION='verify_signature' {extra_msg}",
-                    hint=f"Set {secret_attr} or set DJSTRIPE_WEBHOOK_VALIDATION='retrieve_event'",
-                    id="djstripe.C006",
-                )
-            )
-        return messages
-
     from .models import WebhookEndpoint
     from .settings import djstripe_settings
+
+    setting_name = "DJSTRIPE_WEBHOOK_VALIDATION"
 
     messages = []
 
@@ -184,9 +184,7 @@ def check_webhook_validation(app_configs=None, **kwargs):
             checks.Warning(
                 "Webhook validation is disabled, this is a security risk if the "
                 "webhook view is enabled",
-                hint="Set DJSTRIPE_WEBHOOK_VALIDATION to one of {}".format(
-                    ", ".join(validation_options)
-                ),
+                hint=f"Set {setting_name} to one of: {validation_options}",
                 id="djstripe.W004",
             )
         )
@@ -202,19 +200,17 @@ def check_webhook_validation(app_configs=None, **kwargs):
             for endpoint in webhooks:
                 secret = endpoint.secret
                 # check secret
-                check_webhook_endpoint_validation(secret, messages, endpoint=endpoint)
+                _check_webhook_endpoint_validation(secret, messages, endpoint=endpoint)
         else:
             secret = djstripe_settings.WEBHOOK_SECRET
             # check secret
-            check_webhook_endpoint_validation(secret, messages)
+            _check_webhook_endpoint_validation(secret, messages)
 
     elif djstripe_settings.WEBHOOK_VALIDATION not in validation_options:
         messages.append(
             checks.Critical(
-                "DJSTRIPE_WEBHOOK_VALIDATION is invalid",
-                hint="Set DJSTRIPE_WEBHOOK_VALIDATION to one of {} or None".format(
-                    ", ".join(validation_options)
-                ),
+                f"{setting_name} is invalid",
+                hint=f"Set {setting_name} to one of: {validation_options} or None",
                 id="djstripe.C007",
             )
         )
@@ -236,12 +232,18 @@ def check_webhook_endpoint_has_secret(app_configs=None, **kwargs):
         return []
 
     for webhook in qs:
+        webhook_url = webhook.get_stripe_dashboard_url()
         messages.append(
             checks.Warning(
-                f"The secret of Webhook Endpoint: {webhook} is not populated in the db. Events sent to it will not work properly.",
+                (
+                    f"The secret of Webhook Endpoint: {webhook} is not populated "
+                    "in the db. Events sent to it will not work properly."
+                ),
                 hint=(
-                    "This can happen if it was deleted and resynced as Stripe sends the webhook secret ONLY on the creation call."
-                    f" Please use the django shell and update the secret with the value from {webhook.get_stripe_dashboard_url()}"
+                    "This can happen if it was deleted and resynced as Stripe "
+                    "sends the webhook secret ONLY on the creation call. "
+                    "Please use the django shell and update the secret with "
+                    f"the value from {webhook_url}"
                 ),
                 id="djstripe.W005",
             )
@@ -262,13 +264,13 @@ def check_subscriber_key_length(app_configs=None, **kwargs):
     messages = []
 
     key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
-    key_size = len(str(key))
-    if key and key_size > 40:
+    key_max_length = 40
+    if key and len(key) > key_max_length:
         messages.append(
             checks.Error(
                 "DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY must be no more than "
-                "40 characters long",
-                hint="Current value: %r (%i characters)" % (key, key_size),
+                f"{key_max_length} characters long",
+                hint=f"Current value: {key!r}",
                 id="djstripe.E001",
             )
         )
@@ -293,16 +295,16 @@ def check_djstripe_settings_foreign_key_to_field(app_configs=None, **kwargs):
     if not hasattr(settings, setting_name):
         messages.append(
             checks.Error(
-                "%s is not set." % (setting_name),
+                f"{setting_name} is not set.",
                 hint=hint,
                 id="djstripe.E002",
             )
         )
     elif getattr(settings, setting_name) not in ("id", "djstripe_id"):
+        setting_value = getattr(settings, setting_name)
         messages.append(
             checks.Error(
-                "%r is not a valid value for %s."
-                % (getattr(settings, setting_name), setting_name),
+                f"{setting_value} is not a valid value for {setting_name}.",
                 hint=hint,
                 id="djstripe.E003",
             )
@@ -327,12 +329,31 @@ def check_webhook_event_callback_accepts_api_key(app_configs=None, **kwargs):
     callable = djstripe_settings.WEBHOOK_EVENT_CALLBACK
 
     if callable:
-        sig = signature(callable)
 
-        if len(sig.parameters.keys()) < 2:
+        # Deprecated in 2.8.0. Raise a warning.
+        messages.append(
+            checks.Warning(
+                "DJSTRIPE_WEBHOOK_EVENT_CALLBACK is deprecated. See release notes for details.",
+                hint=(
+                    "If you need to trigger a function during webhook processing, "
+                    "you can use djstripe.signals instead.\n"
+                    "Available signals:\n"
+                    "- djstripe.signals.webhook_pre_validate\n"
+                    "- djstripe.signals.webhook_post_validate\n"
+                    "- djstripe.signals.webhook_pre_process\n"
+                    "- djstripe.signals.webhook_post_process\n"
+                    "- djstripe.signals.webhook_processing_error"
+                ),
+            )
+        )
+
+        sig = signature(callable)
+        signature_sz = len(sig.parameters.keys())
+
+        if signature_sz < 2:
             messages.append(
                 checks.Error(
-                    f"{callable} accepts {len(sig.parameters.keys())} arguments.",
+                    f"{callable} accepts {signature_sz} arguments.",
                     hint="You may have forgotten to add api_key parameter to your custom callback.",
                     id="djstripe.E004",
                 )

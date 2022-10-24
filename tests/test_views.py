@@ -29,7 +29,7 @@ from tests import (
     FAKE_SUBSCRIPTION_SCHEDULE,
 )
 
-from .fields.models import TestCustomActionModel
+from .fields.models import CustomActionModel
 
 pytestmark = pytest.mark.django_db
 
@@ -61,7 +61,7 @@ class TestConfirmCustomActionView:
     )
     def test_get_form_kwargs(self, action_name, admin_user, monkeypatch):
 
-        model = TestCustomActionModel
+        model = CustomActionModel
 
         # monkeypatch utils.get_model
         def mock_get_model(*args, **kwargs):
@@ -105,7 +105,7 @@ class TestConfirmCustomActionView:
     )
     @pytest.mark.parametrize("djstripe_owner_account_exists", [False, True])
     def test_form_valid(self, djstripe_owner_account_exists, action_name, monkeypatch):
-        model = TestCustomActionModel
+        model = CustomActionModel
 
         # create instance to be used in the Django Admin Action
         instance = model.objects.create(id="test")
@@ -163,7 +163,7 @@ class TestConfirmCustomActionView:
 
         # assert user redirected to the correct url
         assert response.status_code == 302
-        assert response.url == "/admin/fields/testcustomactionmodel/"
+        assert response.url == "/admin/fields/customactionmodel/"
 
     @pytest.mark.parametrize(
         "action_name",
@@ -179,7 +179,7 @@ class TestConfirmCustomActionView:
     def test_form_invalid(
         self, djstripe_owner_account_exists, action_name, monkeypatch
     ):
-        model = TestCustomActionModel
+        model = CustomActionModel
 
         # create instance to be used in the Django Admin Action
         instance = model.objects.create(id="test")
@@ -291,7 +291,7 @@ class TestConfirmCustomActionView:
 
     @pytest.mark.parametrize("djstripe_owner_account_exists", [False, True])
     def test__resync_instances(self, djstripe_owner_account_exists, monkeypatch):
-        model = TestCustomActionModel
+        model = CustomActionModel
 
         # create instance to be used in the Django Admin Action
         instance = model.objects.create(id="test")
@@ -369,7 +369,7 @@ class TestConfirmCustomActionView:
 
     def test__resync_instances_stripe_permission_error(self, monkeypatch):
 
-        model = TestCustomActionModel
+        model = CustomActionModel
 
         # create instance to be used in the Django Admin Action
         instance = model.objects.create(id="test")
@@ -418,7 +418,7 @@ class TestConfirmCustomActionView:
         assert messages_sent_dictionary.get("some random error message") == "warning"
 
     def test__resync_instances_stripe_invalid_request_error(self, monkeypatch):
-        model = TestCustomActionModel
+        model = CustomActionModel
 
         # create instance to be used in the Django Admin Action
         instance = model.objects.create(id="test")

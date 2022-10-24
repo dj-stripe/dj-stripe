@@ -223,7 +223,7 @@ class CardTest(AssertStripeFksMixin, TestCase):
 
     def test_api_call_no_customer_and_no_account(self):
         exception_message = (
-            "Cards must be manipulated through either a Stripe Connected Account or a customer. "
+            "Card objects must be manipulated through either a Stripe Connected Account or a customer. "
             "Pass a Customer or an Account object into this call."
         )
 
@@ -239,7 +239,7 @@ class CardTest(AssertStripeFksMixin, TestCase):
 
     def test_api_call_bad_customer(self):
         exception_message = (
-            "Cards must be manipulated through a Customer. "
+            "Card objects must be manipulated through a Customer. "
             "Pass a Customer object into this call."
         )
 
@@ -255,7 +255,7 @@ class CardTest(AssertStripeFksMixin, TestCase):
 
     def test_api_call_bad_account(self):
         exception_message = (
-            "Cards must be manipulated through a Stripe Connected Account. "
+            "Card objects must be manipulated through a Stripe Connected Account. "
             "Pass an Account object into this call."
         )
 

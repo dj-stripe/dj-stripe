@@ -3,31 +3,21 @@ name: CI tests
 on:
   push:
     paths-ignore:
-      - 'docs/**'
-      - 'pyproject.toml'
-      - 'mkdocs.yml'
-      - 'codecov.yml'
-      - '.readthedocs.yml'
-      - '.github/workflows/docs.yaml'
+      - "docs/**"
+      - "pyproject.toml"
+      - "mkdocs.yml"
+      - ".readthedocs.yml"
+      - ".github/workflows/docs.yml"
 
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [master]
-    paths-ignore:
-      - 'docs/**'
-      - 'pyproject.toml'
-      - 'mkdocs.yml'
-      - 'codecov.yml'
-      - '.readthedocs.yml'
-      - '.github/workflows/docs.yaml'
 
 env:
-  POETRY_VERSION: "1.2.0rc2"
+  POETRY_VERSION: "1.2.2"
   POETRY_VIRTUALENVS_IN_PROJECT: "1"
 
-
 jobs:
-
   tests:
     runs-on: ubuntu-latest
     strategy:
@@ -62,45 +52,33 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Get full Python version
-      id: full-python-version
-      run: echo ::set-output name=version::$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info))")
+      - name: Install poetry
+        run: |
+          curl -sL https://install.python-poetry.org | python - --version ${{ env.POETRY_VERSION }}
 
-    - name: Install poetry (${{ env.POETRY_VERSION }}) binary on runner
-      run: |
-        curl -sL https://install.python-poetry.org | python - --version ${{ env.POETRY_VERSION }}
+      - name: Set up cache
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: .venv
+          key: venv-${{ matrix.python-version }}
 
-    - name: Set up cache
-      uses: actions/cache@v3
-      id: cache
-      with:
-        path: .venv
-        key: venv-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Ensure cache is healthy
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: timeout 10s poetry run pip --version || rm -rf .venv
 
-    - name: Ensure cache is healthy
-      if: steps.cache.outputs.cache-hit == 'true'
-      run: timeout 10s poetry run pip --version || rm -rf .venv
+      - name: Install dependencies
+        run: poetry install --with ci
 
-    - name: Install dependencies
-      run: |
-        poetry run python -m pip install --upgrade pip setuptools wheel
-        poetry run python -m pip install coverage[toml] tox tox-gh-actions codecov
+      - name: Test with tox for ${{ matrix.python-version }}
+        run: poetry run tox
 
-    - name: Test with tox for ${{ matrix.python-version }}
-      run: poetry run python -m tox
-
-    - name: Convert coverage
-      run: poetry run python -m coverage xml
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        fail_ci_if_error: true
-        files: ./coverage.xml
+      - name: Convert coverage
+        run: poetry run coverage xml

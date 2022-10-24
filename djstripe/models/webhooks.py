@@ -12,11 +12,11 @@ from django.db import models
 from django.utils.datastructures import CaseInsensitiveMapping
 from django.utils.functional import cached_property
 
+from .. import signals
 from ..context_managers import stripe_temporary_api_version
 from ..enums import WebhookEndpointStatus
 from ..fields import JSONField, StripeEnumField, StripeForeignKey
 from ..settings import djstripe_settings
-from ..signals import webhook_processing_error
 from .base import StripeModel, logger
 from .core import Event
 
@@ -93,8 +93,8 @@ def get_remote_ip(request):
     :Returns: the client ip address
     """
 
-    # HTTP_X_FORWARDED_FOR is relevant for django running behind a proxy
-    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+    # x-forwarded-for is relevant for django running behind a proxy
+    x_forwarded_for = request.headers.get("x-forwarded-for")
     if x_forwarded_for:
         ip = x_forwarded_for.split(",")[0]
     else:
@@ -220,22 +220,36 @@ class WebhookEventTrigger(models.Model):
         )
 
         try:
+            # Validate the webhook first
+            signals.webhook_pre_validate.send(sender=WebhookEventTrigger, instance=obj)
             obj.valid = obj.validate(secret=secret, api_key=api_key)
+            signals.webhook_post_validate.send(
+                sender=WebhookEventTrigger, instance=obj, valid=obj.valid
+            )
+
             if obj.valid:
+                signals.webhook_pre_process.send(
+                    sender=WebhookEventTrigger, instance=obj
+                )
                 if djstripe_settings.WEBHOOK_EVENT_CALLBACK:
                     # If WEBHOOK_EVENT_CALLBACK, pass it for processing
                     djstripe_settings.WEBHOOK_EVENT_CALLBACK(obj, api_key=api_key)
                 else:
                     # Process the item (do not save it, it'll get saved below)
                     obj.process(save=False, api_key=api_key)
+                signals.webhook_post_process.send(
+                    sender=WebhookEventTrigger, instance=obj, api_key=api_key
+                )
         except Exception as e:
             max_length = WebhookEventTrigger._meta.get_field("exception").max_length
             obj.exception = str(e)[:max_length]
             obj.traceback = format_exc()
 
             # Send the exception as the webhook_processing_error signal
-            webhook_processing_error.send(
+            signals.webhook_processing_error.send(
                 sender=WebhookEventTrigger,
+                instance=obj,
+                api_key=api_key,
                 exception=e,
                 data=getattr(e, "http_body", ""),
             )
@@ -261,8 +275,29 @@ class WebhookEventTrigger(models.Model):
 
     def verify_signature(
         self, secret: str, tolerance: int = djstripe_settings.WEBHOOK_TOLERANCE
-    ):
-        pass
+    ) -> bool:
+        if not secret:
+            raise ValueError("Cannot verify event signature without a secret")
+
+        # HTTP headers are case-insensitive, but we store them as a dict.
+        headers = CaseInsensitiveMapping(self.headers)
+        signature = headers.get("stripe-signature")
+        local_cli_signing_secret = headers.get("x-djstripe-webhook-secret")
+        try:
+            # check if the x-djstripe-webhook-secret Custom Header exists
+            if local_cli_signing_secret:
+                # Set Endpoint Signing Secret to the output of Stripe CLI
+                # for signature verification
+                secret = local_cli_signing_secret
+
+            stripe.WebhookSignature.verify_header(
+                self.body, signature, secret, tolerance
+            )
+        except stripe.error.SignatureVerificationError:
+            logger.exception("Failed to verify header")
+            return False
+        else:
+            return True
 
     def validate(
         self,
@@ -287,7 +322,7 @@ class WebhookEventTrigger(models.Model):
             return False
 
         if self.is_test_event:
-            logger.info("Test webhook received and discarded: {}".format(local_data))
+            logger.info("Test webhook received and discarded: %s", local_data)
             return False
 
         if validation_method is None:
@@ -295,27 +330,7 @@ class WebhookEventTrigger(models.Model):
             warnings.warn("WEBHOOK VALIDATION is disabled.")
             return True
         elif validation_method == "verify_signature":
-            if not secret:
-                raise ValueError("Cannot verify event signature without a secret")
-            # HTTP headers are case-insensitive, but we store them as a dict.
-            headers = CaseInsensitiveMapping(self.headers)
-            signature = headers.get("stripe-signature")
-            local_cli_signing_secret = headers.get("x-djstripe-webhook-secret")
-            try:
-                # check if the x-djstripe-webhook-secret Custom Header exists
-                if local_cli_signing_secret:
-                    # Set Endpoint Signing Secret to the output of Stripe CLI
-                    # for signature verification
-                    secret = local_cli_signing_secret
-
-                stripe.WebhookSignature.verify_header(
-                    self.body, signature, secret, tolerance
-                )
-            except stripe.error.SignatureVerificationError:
-                logger.exception("Failed to verify header")
-                return False
-            else:
-                return True
+            return self.verify_signature(secret=secret)
 
         livemode = local_data["livemode"]
         api_key = api_key or djstripe_settings.get_default_api_key(livemode)

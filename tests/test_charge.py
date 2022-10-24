@@ -74,26 +74,26 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
             captured=False,
             paid=False,
         )
-        self.assertEqual(str(charge), "$0.50 USD (Uncaptured)")
+        self.assertEqual(str(charge), "$50.00 USD (Uncaptured)")
 
         charge.captured = True
-        self.assertEqual(str(charge), "$0.50 USD (Failed)")
+        self.assertEqual(str(charge), "$50.00 USD (Failed)")
         charge.status = ChargeStatus.succeeded
 
         charge.disputed = True
-        self.assertEqual(str(charge), "$0.50 USD (Disputed)")
+        self.assertEqual(str(charge), "$50.00 USD (Disputed)")
 
         charge.disputed = False
         charge.refunded = True
         charge.amount_refunded = 50
-        self.assertEqual(str(charge), "$0.50 USD (Refunded)")
+        self.assertEqual(str(charge), "$50.00 USD (Refunded)")
 
         charge.refunded = False
         charge.amount_refunded = 0
-        self.assertEqual(str(charge), "$0.50 USD (Succeeded)")
+        self.assertEqual(str(charge), "$50.00 USD (Succeeded)")
 
         charge.status = ChargeStatus.pending
-        self.assertEqual(str(charge), "$0.50 USD (Pending)")
+        self.assertEqual(str(charge), "$50.00 USD (Pending)")
 
     @patch(
         "djstripe.models.Account.get_default_account",

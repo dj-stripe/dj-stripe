@@ -1,6 +1,5 @@
-from django.conf.urls import include
 from django.http import HttpResponse
-from django.urls import path
+from django.urls import include, path
 
 
 def empty_view(request):

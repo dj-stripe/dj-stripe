@@ -92,7 +92,9 @@ class BalanceTransaction(StripeModel):
     type = StripeEnumField(enum=enums.BalanceTransactionType)
 
     def __str__(self):
-        return f"{self.human_readable_amount} ({enums.BalanceTransactionStatus.humanize(self.status)})"
+        amount = get_friendly_currency_amount(self.amount / 100, self.currency)
+        status = enums.BalanceTransactionStatus.humanize(self.status)
+        return f"{amount} ({status})"
 
     def get_source_class(self):
         try:
@@ -364,9 +366,8 @@ class Charge(StripeModel):
     objects = ChargeManager()
 
     def __str__(self):
-        amount = self.human_readable_amount
-        status = self.human_readable_status
-        return "{amount} ({status})".format(amount=amount, status=status)
+        amount = get_friendly_currency_amount(self.amount, self.currency)
+        return f"{amount} ({self.human_readable_status})"
 
     @property
     def fee(self):
@@ -805,7 +806,7 @@ class Customer(StripeModel):
         try:
             return Customer.objects.get(subscriber=subscriber, livemode=livemode), False
         except Customer.DoesNotExist:
-            action = "create:{}".format(subscriber.pk)
+            action = f"create:{subscriber.pk}"
             idempotency_key = djstripe_settings.get_idempotency_key(
                 "customer", action, livemode
             )
@@ -1111,7 +1112,7 @@ class Customer(StripeModel):
             # Delete the idempotency key used by Customer.create()
             # So re-creating a customer for this subscriber before the key expires
             # doesn't return the older Customer data
-            idempotency_key_action = "customer:create:{}".format(self.subscriber.pk)
+            idempotency_key_action = f"customer:create:{self.subscriber.pk}"
             IdempotencyKey.objects.filter(action=idempotency_key_action).delete()
 
         self.subscriber = None
@@ -1210,19 +1211,6 @@ class Customer(StripeModel):
         else:
             return subscriptions.first()
 
-    def can_charge(self):
-        """Determines if this customer is able to be charged."""
-
-        warnings.warn(
-            "Customer.can_charge() is misleading and deprecated, will be removed in dj-stripe 2.8. "
-            "Look at Customer.payment_methods.all() instead.",
-            DeprecationWarning,
-        )
-
-        return (
-            self.has_valid_source() or self.default_payment_method is not None
-        ) and self.date_purged is None
-
     def send_invoice(self):
         """
         Pay and send the customer's latest invoice.
@@ -1250,15 +1238,6 @@ class Customer(StripeModel):
             except InvalidRequestError as exc:
                 if str(exc) != "Invoice is already paid":
                     raise
-
-    def has_valid_source(self):
-        """Check whether the customer has a valid payment source."""
-        warnings.warn(
-            "Customer.has_valid_source() is deprecated and will be removed in dj-stripe 2.8. "
-            "Use `Customer.default_source is not None` instead.",
-            DeprecationWarning,
-        )
-        return self.default_source is not None
 
     def add_coupon(self, coupon, idempotency_key=None):
         """
@@ -1449,7 +1428,9 @@ class Dispute(StripeModel):
     status = StripeEnumField(enum=enums.DisputeStatus)
 
     def __str__(self):
-        return f"{self.human_readable_amount} ({enums.DisputeStatus.humanize(self.status)}) "
+        amount = get_friendly_currency_amount(self.amount / 100, self.currency)
+        status = enums.DisputeStatus.humanize(self.status)
+        return f"{amount} ({status}) "
 
     def get_stripe_dashboard_url(self) -> str:
         """Get the stripe dashboard url for this object."""
@@ -1654,7 +1635,7 @@ class File(StripeModel):
 
     @classmethod
     def is_valid_object(cls, data):
-        return "object" in data and data["object"] in ("file", "file_upload")
+        return data and data.get("object") in ("file", "file_upload")
 
     def __str__(self):
         return f"{self.filename}, {enums.FilePurpose.humanize(self.purpose)}"
@@ -1875,20 +1856,17 @@ class PaymentIntent(StripeModel):
     def __str__(self):
         account = self.on_behalf_of
         customer = self.customer
+        amount = get_friendly_currency_amount(self.amount / 100, self.currency)
+        status = enums.PaymentIntentStatus.humanize(self.status)
 
         if account and customer:
-            return (
-                f"{self.human_readable_amount} ({enums.PaymentIntentStatus.humanize(self.status)}) "
-                f"for {account} "
-                f"by {customer}"
-            )
-
+            return f"{amount} ({status}) for {account} by {customer}"
         if account:
-            return f"{self.human_readable_amount} for {account}. {enums.PaymentIntentStatus.humanize(self.status)}"
+            return f"{amount} for {account}. {status}"
         if customer:
-            return f"{self.human_readable_amount} by {customer}. {enums.PaymentIntentStatus.humanize(self.status)}"
+            return f"{amount} by {customer}. {status}"
 
-        return f"{self.human_readable_amount} ({enums.PaymentIntentStatus.humanize(self.status)})"
+        return f"{amount} ({status})"
 
     def update(self, api_key=None, **kwargs):
         """
@@ -2311,11 +2289,6 @@ class Price(StripeModel):
         return price
 
     def __str__(self):
-        from .billing import Subscription
-
-        subscriptions = Subscription.objects.filter(plan__id=self.id).count()
-        if self.recurring:
-            return f"{self.human_readable_price} for {self.product.name} ({subscriptions} subscriptions)"
         return f"{self.human_readable_price} for {self.product.name}"
 
     @property
@@ -2433,6 +2406,6 @@ class Refund(StripeModel):
         return self.charge.get_stripe_dashboard_url()
 
     def __str__(self):
-        return (
-            f"{self.human_readable_amount} ({enums.RefundStatus.humanize(self.status)})"
-        )
+        amount = get_friendly_currency_amount(self.amount / 100, self.currency)
+        status = enums.RefundStatus.humanize(self.status)
+        return f"{amount} ({status})"

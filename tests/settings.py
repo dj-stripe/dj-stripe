@@ -51,7 +51,7 @@ elif test_db_vendor == "sqlite":
         }
     }
 else:
-    raise NotImplementedError("DJSTRIPE_TEST_DB_VENDOR = {}".format(test_db_vendor))
+    raise NotImplementedError(f"DJSTRIPE_TEST_DB_VENDOR = {test_db_vendor}")
 
 
 TEMPLATES = [
@@ -78,7 +78,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.sites",
     "django.contrib.staticfiles",
-    "jsonfield",
     "djstripe",
     "tests",
     # to load custom models defined to test fields.py
@@ -112,7 +111,6 @@ STRIPE_TEST_SECRET_KEY = os.environ.get(
     "sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX",
 )
 
-DJSTRIPE_USE_NATIVE_JSONFIELD = os.environ.get("USE_NATIVE_JSONFIELD", "1") == "1"
 DJSTRIPE_FOREIGN_KEY_TO_FIELD = (
     "id" if os.environ.get("USE_NATIVE_STRIPE_ID", "") == "1" else "djstripe_id"
 )

@@ -11,7 +11,6 @@ theme:
     - search.suggest
     - search.highligh
 
-
 markdown_extensions:
   - admonition
   - codehilite
@@ -20,8 +19,6 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.snippets
 
-
-
 plugins:
   - autorefs
   - search
@@ -29,7 +26,7 @@ plugins:
       default_handler: python
       handlers:
         python:
-          rendering:
+          options:
             # show_root_heading: true
             show_object_full_path: true
             show_category_heading: true
@@ -45,44 +42,45 @@ plugins:
         - .
       enable_inventory: true
   - mike:
+      canonical_version: "2.7"
 
 nav:
   - Home: README.md
   - Sponsors: project/sponsors.md
   - Getting Started:
-    - Installation: installation.md
-    - Managing Stripe API Keys: api_keys.md
-    - A note on Stripe API Versions: api_versions.md
-    - Integrating Stripe Elements: stripe_elements_js.md
+      - Installation: installation.md
+      - Managing Stripe API Keys: api_keys.md
+      - A note on Stripe API Versions: api_versions.md
+      - Integrating Stripe Elements: stripe_elements_js.md
   - Release notes:
-    - dj-stripe 2.7 release notes: history/2_7_0.md
-    - dj-stripe 2.6 release notes: history/2_6_0.md
-    - dj-stripe 2.5 release notes: history/2_5_0.md
-    - dj-stripe 2.4.1 release notes: history/2_4_x.md
-    - dj-stripe 2.4 release notes: history/2_4_0.md
-    - dj-stripe 2.0 ~ 2.3 release notes: history/2_x.md
-    - dj-stripe 1.x release notes: history/1_x.md
-    - dj-stripe 0.x release notes: history/0_x.md
+      - dj-stripe 2.7 release notes: history/2_7_0.md
+      - dj-stripe 2.6 release notes: history/2_6_0.md
+      - dj-stripe 2.5 release notes: history/2_5_0.md
+      - dj-stripe 2.4.1 release notes: history/2_4_x.md
+      - dj-stripe 2.4 release notes: history/2_4_0.md
+      - dj-stripe 2.0 ~ 2.3 release notes: history/2_x.md
+      - dj-stripe 1.x release notes: history/1_x.md
+      - dj-stripe 0.x release notes: history/0_x.md
   - Usage:
-    - Using Stripe Webhooks: usage/webhooks.md
-    - Subscribing a customer to a plan: usage/subscribing_customers.md
-    - Managing subscriptions and payment sources: usage/managing_subscriptions.md
-    - Manually syncing data with Stripe: usage/manually_syncing_with_stripe.md
-    - Creating individual charges: usage/creating_individual_charges.md
-    - Creating Usage Records: usage/creating_usage_record.md
-    - Using Stripe Checkout: usage/using_stripe_checkout.md
-    - Using with Docker: usage/using_with_docker.md
-    - Development with local webhooks: usage/local_webhook_testing.md
+      - Using Stripe Webhooks: usage/webhooks.md
+      - Subscribing a customer to a plan: usage/subscribing_customers.md
+      - Managing subscriptions and payment sources: usage/managing_subscriptions.md
+      - Manually syncing data with Stripe: usage/manually_syncing_with_stripe.md
+      - Creating individual charges: usage/creating_individual_charges.md
+      - Creating Usage Records: usage/creating_usage_record.md
+      - Using Stripe Checkout: usage/using_stripe_checkout.md
+      - Using with Docker: usage/using_with_docker.md
+      - Development with local webhooks: usage/local_webhook_testing.md
   - Project:
-    - Contributing: project/contributing.md
-    - Test Fixtures: project/test_fixtures.md
-    - Credits: project/authors.md
-    - Support: project/support.md
-    - Release Process: project/release_process.md
+      - Contributing: project/contributing.md
+      - Test Fixtures: project/test_fixtures.md
+      - Credits: project/authors.md
+      - Support: project/support.md
+      - Release Process: project/release_process.md
   - Reference:
-    - Context Managers: reference/context_managers.md
-    - Enumerations: reference/enums.md
-    - Managers: reference/managers.md
-    - Models: reference/models.md
-    - Settings: reference/settings.md
-    - Utilities: reference/utils.md
+      - Context Managers: reference/context_managers.md
+      - Enumerations: reference/enums.md
+      - Managers: reference/managers.md
+      - Models: reference/models.md
+      - Settings: reference/settings.md
+      - Utilities: reference/utils.md

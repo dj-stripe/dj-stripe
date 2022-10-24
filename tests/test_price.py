@@ -204,10 +204,9 @@ class TestStrPrice:
 
         else:
             price = Price.sync_from_stripe_data(fake_price_data)
-            subscriptions = Subscription.objects.filter(plan__id=price.id).count()
             assert (
-                f"{price.human_readable_price} for {FAKE_PRODUCT['name']} ({subscriptions} subscriptions)"
-            ) == str(price)
+                str(price) == f"{price.human_readable_price} for {FAKE_PRODUCT['name']}"
+            )
 
 
 class TestHumanReadablePrice:

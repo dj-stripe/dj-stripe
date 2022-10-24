@@ -1,0 +1,59 @@
+name: Build and deploy docs
+
+on:
+  push:
+    branches:
+      - "master"
+      # Push events to branches matching "stable/*"
+      - "stable/.+"
+
+  workflow_dispatch: # to trigger manually
+
+env:
+  POETRY_VERSION: "1.2.2"
+  POETRY_VIRTUALENVS_IN_PROJECT: "1"
+  LATEST_STABLE_BRANCH: "stable/2.7"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install poetry (${{ env.POETRY_VERSION }}) binary on runner
+        run: |
+          curl -sL https://install.python-poetry.org | python - --version ${{ env.POETRY_VERSION }}
+
+      - name: Set up cache
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: .venv
+          key: venv
+
+      - name: Ensure cache is healthy
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: timeout 10s poetry run pip --version || rm -rf .venv
+
+      - name: Install dependencies
+        run: poetry install --with docs
+
+      - name: Configure git user to make commit
+        run: |
+          git config user.name "dj-stripe commit bot"
+          git config user.email "admin@djstripe.dev"
+
+      - name: Fetch gh-pages remote changes (if any)
+        run: git fetch origin gh-pages --depth=1
+
+      - name: Deploy (and Update) docs for the branch, ${GITHUB_REF##*/}
+        run: poetry run mike deploy --push --rebase "${GITHUB_REF##*/}"
+
+      - name: Set default docs to ${LATEST_STABLE_BRANCH##*/}
+        run: poetry run mike set-default --push --rebase "${LATEST_STABLE_BRANCH##*/}"

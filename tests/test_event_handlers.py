@@ -1215,8 +1215,6 @@ class TestCustomerEvents(EventTestCase):
         )
         self.customer.save()
         self.assertIsNotNone(self.customer.default_source)
-        with pytest.warns(DeprecationWarning):
-            self.assertTrue(self.customer.has_valid_source())
 
         event = self._create_event(FAKE_EVENT_CUSTOMER_SOURCE_DELETED)
         event.invoke_webhook_handlers()
@@ -1225,8 +1223,6 @@ class TestCustomerEvents(EventTestCase):
         # deleted
         customer = Customer.objects.get(id=FAKE_CUSTOMER["id"])
         self.assertIsNone(customer.default_source)
-        with pytest.warns(DeprecationWarning):
-            self.assertFalse(customer.has_valid_source())
 
     @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
     def test_customer_source_double_delete(self, customer_retrieve_mock):
@@ -1240,8 +1236,6 @@ class TestCustomerEvents(EventTestCase):
         # deleted
         customer = Customer.objects.get(id=FAKE_CUSTOMER["id"])
         self.assertIsNone(customer.default_source)
-        with pytest.warns(DeprecationWarning):
-            self.assertFalse(customer.has_valid_source())
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch("stripe.Subscription.retrieve", autospec=True)
@@ -3096,7 +3090,7 @@ class TestOrderEvents(EventTestCase):
         order = Order.objects.get(id=fake_stripe_event["data"]["object"]["id"])
 
         # assert email got updated
-        self.assertEqual(order.billing_details["email"], "arnav13@gmail.com")
+        self.assertEqual(order.billing_details["email"], "testuser@example.com")
         self.assertEqual(order.payment_intent.id, FAKE_PAYMENT_INTENT_I["id"])
         self.assertEqual(order.customer.id, FAKE_CUSTOMER["id"])
 
@@ -3155,7 +3149,7 @@ class TestOrderEvents(EventTestCase):
         order = Order.objects.get(id=fake_stripe_event["data"]["object"]["id"])
 
         self.assertEqual(order.status, "submitted")
-        self.assertEqual(order.billing_details["email"], "arnav13@gmail.com")
+        self.assertEqual(order.billing_details["email"], "testuser@example.com")
         self.assertEqual(order.payment_intent.id, FAKE_PAYMENT_INTENT_I["id"])
         self.assertEqual(order.customer.id, FAKE_CUSTOMER["id"])
 
@@ -3214,7 +3208,7 @@ class TestOrderEvents(EventTestCase):
         order = Order.objects.get(id=fake_stripe_event["data"]["object"]["id"])
 
         self.assertEqual(order.status, "processing")
-        self.assertEqual(order.billing_details["email"], "arnav13@gmail.com")
+        self.assertEqual(order.billing_details["email"], "testuser@example.com")
         self.assertEqual(order.payment_intent.id, FAKE_PAYMENT_INTENT_I["id"])
         self.assertEqual(order.customer.id, FAKE_CUSTOMER["id"])
 
@@ -3273,7 +3267,7 @@ class TestOrderEvents(EventTestCase):
         order = Order.objects.get(id=fake_stripe_event["data"]["object"]["id"])
 
         self.assertEqual(order.status, "canceled")
-        self.assertEqual(order.billing_details["email"], "arnav13@gmail.com")
+        self.assertEqual(order.billing_details["email"], "testuser@example.com")
         self.assertEqual(order.payment_intent.id, FAKE_PAYMENT_INTENT_I["id"])
         self.assertEqual(order.customer.id, FAKE_CUSTOMER["id"])
 
@@ -3332,6 +3326,6 @@ class TestOrderEvents(EventTestCase):
         order = Order.objects.get(id=fake_stripe_event["data"]["object"]["id"])
 
         self.assertEqual(order.status, "complete")
-        self.assertEqual(order.billing_details["email"], "arnav13@gmail.com")
+        self.assertEqual(order.billing_details["email"], "testuser@example.com")
         self.assertEqual(order.payment_intent.id, FAKE_PAYMENT_INTENT_I["id"])
         self.assertEqual(order.customer.id, FAKE_CUSTOMER["id"])

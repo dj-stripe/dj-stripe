@@ -28,7 +28,7 @@ def create_account(monkeypatch):
 @pytest.fixture
 def fake_user():
     user = get_user_model().objects.create_user(
-        username="arnav", email="arnav13@gmail.com"
+        username="testuser", email="testuser@example.com"
     )
     return user
 

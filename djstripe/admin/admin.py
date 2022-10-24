@@ -25,20 +25,7 @@ from .forms import (
     WebhookEndpointAdminCreateForm,
     WebhookEndpointAdminEditForm,
 )
-from .utils import (
-    ReadOnlyMixin,
-    custom_display_for_JSONfield,
-    get_forward_relation_fields_for_model,
-)
-
-
-def admin_display_for_field_override():
-    admin.utils.display_for_field = custom_display_for_JSONfield
-    admin.helpers.display_for_field = custom_display_for_JSONfield
-
-
-# execute override
-admin_display_for_field_override()
+from .utils import ReadOnlyMixin, get_forward_relation_fields_for_model
 
 
 @admin.register(models.IdempotencyKey)
@@ -68,7 +55,7 @@ class WebhookEventTriggerAdmin(ReadOnlyMixin, admin.ModelAdmin):
     def reprocess(self, request, queryset):
         for trigger in queryset:
             if not trigger.valid:
-                self.message_user(request, "Skipped invalid trigger {}".format(trigger))
+                self.message_user(request, "Skipped invalid trigger {trigger!r}")
                 continue
 
             trigger.process()

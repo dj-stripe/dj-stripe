@@ -70,27 +70,6 @@ The function MUST return a string suitably random for the object_type/action pai
 usable in the Stripe `Idempotency-Key` HTTP header. For more information, see the
 [stripe documentation](https://stripe.com/docs/upgrades).
 
-## DJSTRIPE_PRORATION_POLICY (=False)
-
-!!! warning
-
-    This setting is deprecated and will be removed in dj-stripe 2.8.
-
-By default, plans are not prorated in dj-stripe. Concretely, this is how this
-translates:
-
-1.  If a customer cancels their plan during a trial, the cancellation is effective right
-    away.
-2.  If a customer cancels their plan outside of a trial, their subscription remains
-    active until the subscription's period end, and they do not receive a refund.
-3.  If a customer switches from one plan to another, the new plan becomes effective
-    right away, and the customer is billed for the new plan's amount.
-
-Assigning `True` to `DJSTRIPE_PRORATION_POLICY` reverses the functioning of item 2 (plan
-cancellation) by making a cancellation effective right away and refunding the unused
-balance to the customer, and affects the functioning of item 3 (plan change) by
-prorating the previous customer's plan towards their new plan's amount.
-
 ## DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY (="djstripe_subscriber")
 
 Every Customer object created in Stripe is tagged with
@@ -130,23 +109,6 @@ class Organization(models.Model):
 If the model referenced in DJSTRIPE_SUBSCRIBER_MODEL is not created in the `__first__`
 migration of an app you can specify the migration name to depend on here. For example:
 "0003_here_the_subscriber_model_was_added"
-
-## DJSTRIPE_USE_NATIVE_JSONFIELD (=True)
-
-!!! warning
-
-    This setting is deprecated and will be removed in dj-stripe 2.8.
-
-When set to `False`, forces dj-stripe to use the `jsonfield` library for `JSONField`.
-
-Leaving this set to True is highly recommended. However, if you have already migrated
-with the old fields, migrating to the native JSONField has to be done manually and is not
-currently natively supported by dj-stripe.
-
-The native Django JSONField uses the postgres `jsonb` column type, which efficiently
-stores JSON and can be queried far moreconveniently. Django also supports [querying
-JSONField](https://docs.djangoproject.com/en/3.1/topics/db/queries/#querying-jsonfield)
-with the ORM.
 
 ## DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")
 

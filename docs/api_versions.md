@@ -42,7 +42,7 @@ This is the version used by new accounts and it's also "**true**" internal
 version of Stripe's API
 
 !!! tip
-    Checkout [Stripe API Versioning](https://stripe.com/blog/api-versioning) 
+    Checkout [Stripe API Versioning](https://stripe.com/blog/api-versioning)
 
 
 ## Dj-stripe API version

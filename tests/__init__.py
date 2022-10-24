@@ -81,7 +81,7 @@ class AssertStripeFksMixin:
                         field_value, expected_blank_fks, processed_stripe_ids
                     )
 
-                logger.warning("checked {}".format(field_str))
+                logger.warning("checked %s", field_str)
 
 
 def load_fixture(filename):
@@ -568,7 +568,7 @@ FAKE_EVENT_ORDER_UPDATED["data"]["object"]["status"] = "open"
 FAKE_EVENT_ORDER_UPDATED["type"] = "order.updated"
 FAKE_EVENT_ORDER_UPDATED["data"]["object"]["billing_details"][
     "email"
-] = "arnav13@gmail.com"
+] = "testuser@example.com"
 
 
 FAKE_EVENT_ORDER_SUBMITTED = deepcopy(FAKE_EVENT_ORDER_UPDATED)
@@ -1323,7 +1323,7 @@ def convert_source_dict(data):
         elif source_type == "source":
             data = SourceDict(data)
         else:
-            raise ValueError("Unknown source type: {}".format(source_type))
+            raise ValueError(f"Unknown source type: {source_type}")
 
     return data
 

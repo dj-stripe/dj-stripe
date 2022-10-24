@@ -38,7 +38,9 @@ The full documentation is available [on Read the Docs](https://dj-stripe.github.
 -   MySQL engine: MariaDB >=10.2 or MySQL >=5.7
 -   SQLite: Not recommended in production. Version >=3.26 required.
 
---8<-- "docs/installation.md"
+## Installation
+
+See [installation](docs/installation.md) instructions.
 
 ## Changelog
 

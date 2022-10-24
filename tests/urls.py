@@ -1,7 +1,6 @@
-from django.conf.urls import include
 from django.contrib import admin
 from django.http.response import HttpResponse
-from django.urls import path
+from django.urls import include, path
 
 admin.autodiscover()
 

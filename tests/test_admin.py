@@ -13,7 +13,6 @@ from django.core.exceptions import FieldError
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.urls import reverse
-from jsonfield import JSONField
 from pytest_django.asserts import assertQuerysetEqual
 
 from djstripe import models, utils
@@ -33,7 +32,7 @@ from tests import (
     FAKE_SUBSCRIPTION_SCHEDULE,
 )
 
-from .fields.models import TestCustomActionModel
+from .fields.models import CustomActionModel
 
 pytestmark = pytest.mark.django_db
 
@@ -874,15 +873,12 @@ class TestAdminSite(TestCase):
         """
 
         for _model, model_admin in site._registry.items():
+            model_name = model_admin.model.__name__
+            table_name = model_name.lower()
             for search_field in getattr(model_admin, "search_fields", []):
-                model_name = model_admin.model.__name__
                 self.assertFalse(
-                    search_field.startswith(
-                        "{table_name}__".format(table_name=model_name.lower())
-                    ),
-                    "Bad search field <{search_field}> for {model_name} model.".format(
-                        search_field=search_field, model_name=model_name
-                    ),
+                    search_field.startswith(f"{table_name}__"),
+                    f"Bad search field <{search_field}> for {model_name} model.",
                 )
 
     def test_search_fields_exist(self):
@@ -913,22 +909,6 @@ class TestAdminSite(TestCase):
                 except FieldError as error:
                     self.fail(error)
 
-    def test_custom_display_for_JSONfield(self):
-        json_tests = [
-            ({"a": {"b": None}}, '{"a": {"b": null}}'),
-            (["a", False], '["a", false]'),
-            ("a", '"a"'),
-            ({("a", "b"): "c"}, "{('a', 'b'): 'c'}"),  # Invalid JSON.
-        ]
-        for value, display_value in json_tests:
-            with self.subTest(value=value):
-                self.assertEqual(
-                    djstripe_admin.custom_display_for_JSONfield(
-                        value, JSONField(), self.empty_value
-                    ),
-                    display_value,
-                )
-
 
 class TestCustomActionMixin:
     # the 4 models that do not inherit from StripeModel and hence
@@ -953,7 +933,7 @@ class TestCustomActionMixin:
 
         monkeypatch.setattr(utils, "get_model", mock_get_model)
 
-        model = TestCustomActionModel
+        model = CustomActionModel
 
         # create instance to be used in the Django Admin Action
         instance = model.objects.create(id="test")
@@ -972,8 +952,8 @@ class TestCustomActionMixin:
 
         assert context.get("queryset") == queryset
         assert context.get("action_name") == action_name
-        assert context.get("model_name") == "testcustomactionmodel"
-        assert context.get("changelist_url") == "/admin/fields/testcustomactionmodel/"
+        assert context.get("model_name") == "customactionmodel"
+        assert context.get("changelist_url") == "/admin/fields/customactionmodel/"
         assert context.get("ACTION_CHECKBOX_NAME") == helpers.ACTION_CHECKBOX_NAME
 
         if action_name == "_sync_all_instances":
@@ -987,7 +967,7 @@ class TestCustomActionMixin:
             ).choices == [("_sync_all_instances", "_sync_all_instances")]
         else:
             assert context.get("info") == [
-                f'Test custom action model: <a href="/admin/fields/testcustomactionmodel/{instance.pk}/change/">&lt;id=test&gt;</a>'
+                f'Custom action model: <a href="/admin/fields/customactionmodel/{instance.pk}/change/">&lt;id=test&gt;</a>'
             ]
 
             assertQuerysetEqual(
@@ -1066,7 +1046,7 @@ class TestCustomActionMixin:
     def test__resync_instances(
         self, djstripe_owner_account_exists, admin_client, monkeypatch
     ):
-        model = TestCustomActionModel
+        model = CustomActionModel
         model_admin = site._registry.get(model)
 
         # monkeypatch utils.get_model
@@ -1077,7 +1057,7 @@ class TestCustomActionMixin:
         def mock_get_admin_action_context(*args, **kwargs):
             return {
                 "action_name": "_resync_instances",
-                "model_name": "testcustomactionmodel",
+                "model_name": "customactionmodel",
             }
 
         monkeypatch.setattr(

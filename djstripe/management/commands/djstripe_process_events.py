@@ -59,11 +59,9 @@ class Command(VerbosityAwareOutputMixin, BaseCommand):
         if failed:
             self.output("Processing all failed events")
         elif type_filter:
-            self.output(
-                "Processing all events that match {filter}".format(filter=type_filter)
-            )
+            self.output(f"Processing all events that match {type_filter}")
         elif event_ids:
-            self.output("Processing specific events {events}".format(events=event_ids))
+            self.output(f"Processing specific events {event_ids}")
         else:
             self.output("Processing all available events")
 
