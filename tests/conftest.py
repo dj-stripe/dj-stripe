@@ -52,6 +52,16 @@ def configure_settings(settings):
     )
 
 
+def pytest_configure(config):
+    markexpr = config.getoption("markexpr")
+    if markexpr == "stripe_api":
+        key = os.environ.get("STRIPE_TEST_SECRET_KEY")
+        if not key:
+            pytest.exit(
+                f"Expected Real Stripe Account Testing key to be provided. Got {key}. Please pass it like so 'STRIPE_TEST_SECRET_KEY=<STRIPE_KEY> pytest -m stripe_api'"
+            )
+
+
 @pytest.fixture
 def fake_user():
     user = get_user_model().objects.create_user(
