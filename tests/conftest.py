@@ -10,19 +10,20 @@ from . import FAKE_CUSTOMER, FAKE_PLATFORM_ACCOUNT
 pytestmark = pytest.mark.django_db
 
 
-@pytest.fixture(autouse=True)
-def create_account(monkeypatch):
-    """
-    Fixture to automatically create and assign the default testing keys to the Platform Account
-    """
+class CreateAccountMixin:
+    @pytest.fixture(autouse=True)
+    def create_account(self, monkeypatch):
+        """
+        Fixture to automatically create and assign the default testing keys to the Platform Account
+        """
 
-    def mock_account_retrieve(*args, **kwargs):
-        return FAKE_PLATFORM_ACCOUNT
+        def mock_account_retrieve(*args, **kwargs):
+            return FAKE_PLATFORM_ACCOUNT
 
-    monkeypatch.setattr(stripe.Account, "retrieve", mock_account_retrieve)
+        monkeypatch.setattr(stripe.Account, "retrieve", mock_account_retrieve)
 
-    # create a Stripe Platform Account
-    FAKE_PLATFORM_ACCOUNT.create()
+        # create a Stripe Platform Account
+        FAKE_PLATFORM_ACCOUNT.create()
 
 
 @pytest.fixture
