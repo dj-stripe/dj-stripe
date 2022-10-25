@@ -5,6 +5,7 @@ from copy import deepcopy
 from unittest.mock import patch
 
 import pytest
+import stripe
 from django.test import TestCase
 
 from djstripe.admin.admin import APIKeyAdminCreateForm
@@ -24,6 +25,7 @@ PK_TEST = "pk_test_" + "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXAAAA"
 PK_LIVE = "pk_live_" + "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXBBBB"
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
 def test_get_api_key_details_by_prefix():
@@ -54,8 +56,16 @@ def test_clean_public_apikey():
 @patch("stripe.Account.retrieve", return_value=deepcopy(FAKE_PLATFORM_ACCOUNT))
 @patch("stripe.File.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD_ICON))
 def test_apikey_detect_livemode_and_type(
-    fileupload_retrieve_mock, account_retrieve_mock
+    fileupload_retrieve_mock, account_retrieve_mock, monkeypatch
 ):
+    def mock_account_retrieve(*args, **kwargs):
+        return FAKE_PLATFORM_ACCOUNT
+
+    monkeypatch.setattr(stripe.Account, "retrieve", mock_account_retrieve)
+
+    # create a Stripe Platform Account
+    FAKE_PLATFORM_ACCOUNT.create()
+
     keys_and_values = (
         (PK_TEST, False, APIKeyType.publishable),
         (RK_TEST, False, APIKeyType.restricted),
@@ -77,7 +87,7 @@ def test_apikey_detect_livemode_and_type(
         assert key.type is type
 
 
-class APIKeyTest(TestCase):
+class APIKeyTest(CreateAccountMixin, TestCase):
     def setUp(self):
         # create a Stripe Platform Account
         self.account = FAKE_PLATFORM_ACCOUNT.create()

@@ -5,6 +5,8 @@ import decimal
 from copy import deepcopy
 from unittest.mock import ANY, call, patch
 
+import pytest
+import stripe
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.utils import timezone
@@ -61,9 +63,10 @@ from . import (
     StripeList,
     datetime_to_unix,
 )
+from .conftest import CreateAccountMixin
 
 
-class TestCustomer(AssertStripeFksMixin, TestCase):
+class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def setUp(self):
         # create a Stripe Platform Account
         self.account = FAKE_PLATFORM_ACCOUNT.create()
@@ -2223,7 +2226,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
 
 
 # These tests use Plan which is deprecated in favor of Price
-class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
+class TestCustomerLegacy(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def setUp(self):
         # create a Stripe Platform Account
         self.account = FAKE_PLATFORM_ACCOUNT.create()

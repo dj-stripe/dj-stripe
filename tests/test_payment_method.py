@@ -21,9 +21,11 @@ from . import (
 )
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
-class TestPaymentMethod:
+class TestPaymentMethod(CreateAccountMixin):
+
     #
     # Helper Methods for monkeypatching
     #
@@ -91,7 +93,7 @@ class TestPaymentMethod:
         assert pm.id == fake_payment_method_data["id"]
 
 
-class PaymentMethodTest(AssertStripeFksMixin, TestCase):
+class PaymentMethodTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def setUp(self):
         user = get_user_model().objects.create_user(
             username="testuser", email="djstripe@example.com"

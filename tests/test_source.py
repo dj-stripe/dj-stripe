@@ -17,9 +17,10 @@ from . import (
     AssertStripeFksMixin,
     SourceDict,
 )
+from .conftest import CreateAccountMixin
 
 
-class SourceTest(AssertStripeFksMixin, TestCase):
+class SourceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def setUp(self):
         user = get_user_model().objects.create_user(
             username="testuser", email="djstripe@example.com"

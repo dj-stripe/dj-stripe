@@ -21,9 +21,11 @@ from . import (
 )
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
-class TestProduct:
+class TestProduct(CreateAccountMixin):
+
     #
     # Helper Methods for monkeypatching
     #

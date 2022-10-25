@@ -23,9 +23,10 @@ from . import (
 )
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
-class TestDispute(TestCase):
+class TestDispute(CreateAccountMixin, TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(
             username="fake_customer_1", email=FAKE_CUSTOMER["email"]

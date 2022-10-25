@@ -13,6 +13,7 @@ from djstripe.models import Plan
 from djstripe.settings import djstripe_settings
 
 from . import FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II, FAKE_PRODUCT
+from .conftest import CreateAccountMixin
 
 
 class TestPaymentsContextMixin(TestCase):
@@ -40,7 +41,7 @@ class TestPaymentsContextMixin(TestCase):
         )
 
 
-class TestSubscriptionMixin(TestCase):
+class TestSubscriptionMixin(CreateAccountMixin, TestCase):
     def setUp(self):
         with patch(
             "stripe.Product.retrieve",

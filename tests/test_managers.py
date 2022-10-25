@@ -19,9 +19,10 @@ from . import (
     FAKE_PRODUCT,
     FAKE_TRANSFER,
 )
+from .conftest import CreateAccountMixin
 
 
-class SubscriptionManagerTest(TestCase):
+class SubscriptionManagerTest(CreateAccountMixin, TestCase):
     def setUp(self):
         # create customers and current subscription records
         period_start = datetime.datetime(2013, 4, 1, tzinfo=get_timezone_utc())

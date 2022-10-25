@@ -34,6 +34,7 @@ from tests import (
     FAKE_SUBSCRIPTION_SCHEDULE,
 )
 
+from .conftest import CreateAccountMixin
 from .fields.models import CustomActionModel
 
 pytestmark = pytest.mark.django_db
@@ -1120,8 +1121,8 @@ class TestCustomActionMixin:
                 assert response.status_code == 200
 
 
-class TestSubscriptionAdminCustomAction:
-    def test__cancel_subscription_instances(  # noqa: C901
+class TestSubscriptionAdminCustomAction(CreateAccountMixin):
+    def test__cancel_subscription_instances(
         self,
         admin_client,
         monkeypatch,
@@ -1197,8 +1198,8 @@ class TestSubscriptionAdminCustomAction:
         assert response.status_code == 200
 
 
-class TestSubscriptionScheduleAdminCustomAction:
-    def test__release_subscription_schedule(  # noqa: C901
+class TestSubscriptionScheduleAdminCustomAction(CreateAccountMixin):
+    def test__release_subscription_schedule(
         self,
         admin_client,
         monkeypatch,
