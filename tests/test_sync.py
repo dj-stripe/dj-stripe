@@ -13,6 +13,7 @@ from djstripe.models import Customer
 from djstripe.sync import sync_subscriber
 
 from . import FAKE_CUSTOMER
+from .conftest import CreateAccountMixin
 
 
 @contextlib.contextmanager
@@ -29,7 +30,7 @@ def capture_stdout():
         sys.stdout = old_stdout
 
 
-class TestSyncSubscriber(TestCase):
+class TestSyncSubscriber(CreateAccountMixin, TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(
             username="testuser", email="test@example.com", password="123"

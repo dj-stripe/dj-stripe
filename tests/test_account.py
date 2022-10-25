@@ -24,7 +24,10 @@ from . import (
 pytestmark = pytest.mark.django_db
 
 
-class TestAccount(AssertStripeFksMixin, TestCase):
+from .conftest import CreateAccountMixin
+
+
+class TestAccount(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     @patch("stripe.Account.retrieve", autospec=True)
     @patch(
         "stripe.File.retrieve",
@@ -470,8 +473,17 @@ def test_api_reject(
     api_key,
     expected_api_key,
     stripe_account,
+    monkeypatch,
 ):
     """Test that API reject properly uses the passed in parameters."""
+
+    def mock_account_retrieve(*args, **kwargs):
+        return FAKE_PLATFORM_ACCOUNT
+
+    monkeypatch.setattr(stripe.Account, "retrieve", mock_account_retrieve)
+
+    # create a Stripe Platform Account
+    FAKE_PLATFORM_ACCOUNT.create()
 
     fake_account = deepcopy(FAKE_ACCOUNT)
     fake_account_rejected = deepcopy(FAKE_ACCOUNT)

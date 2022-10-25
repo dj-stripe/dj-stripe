@@ -14,9 +14,10 @@ from djstripe.settings import djstripe_settings
 from . import FAKE_CUSTOMER, FAKE_TAX_ID, AssertStripeFksMixin
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
-class TestTaxIdStr(TestCase):
+class TestTaxIdStr(CreateAccountMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve",
         return_value=deepcopy(FAKE_CUSTOMER),
@@ -39,7 +40,7 @@ class TestTaxIdStr(TestCase):
         )
 
 
-class TestTransfer(AssertStripeFksMixin, TestCase):
+class TestTransfer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve",
         return_value=deepcopy(FAKE_CUSTOMER),

@@ -13,9 +13,10 @@ from djstripe.settings import djstripe_settings
 from . import FAKE_FILEUPLOAD_ICON
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
-class TestFileLink(TestCase):
+class TestFileLink(CreateAccountMixin, TestCase):
     @patch(
         target="stripe.File.retrieve",
         autospec=True,

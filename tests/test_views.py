@@ -31,12 +31,13 @@ from tests import (
     FAKE_SUBSCRIPTION_SCHEDULE,
 )
 
+from .conftest import CreateAccountMixin
 from .fields.models import CustomActionModel
 
 pytestmark = pytest.mark.django_db
 
 
-class TestConfirmCustomActionView:
+class TestConfirmCustomActionView(CreateAccountMixin):
     # the 4 models that do not inherit from StripeModel and hence
     # do not inherit from StripeModelAdmin
     ignore_models = [

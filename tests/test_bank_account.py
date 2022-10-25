@@ -21,6 +21,7 @@ from . import (
     FAKE_STANDARD_ACCOUNT,
     AssertStripeFksMixin,
 )
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
 
@@ -121,7 +122,7 @@ class TestStrBankAccount:
             )
 
 
-class BankAccountTest(AssertStripeFksMixin, TestCase):
+class BankAccountTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def setUp(self):
         # create a Standard Stripe Account
         self.standard_account = FAKE_STANDARD_ACCOUNT.create()

@@ -21,6 +21,7 @@ from tests import (
 )
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
 class TestStrSetupIntent:
@@ -87,7 +88,7 @@ class TestStrSetupIntent:
             )
 
 
-class SetupIntentTest(AssertStripeFksMixin, TestCase):
+class SetupIntentTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )

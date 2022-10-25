@@ -5,6 +5,8 @@ from copy import deepcopy
 from decimal import Decimal
 from unittest.mock import call, create_autospec, patch
 
+import pytest
+import stripe
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
 
@@ -34,9 +36,12 @@ from . import (
     FAKE_TRANSFER,
     AssertStripeFksMixin,
 )
+from .conftest import CreateAccountMixin
+
+pytestmark = pytest.mark.django_db
 
 
-class ChargeTest(AssertStripeFksMixin, TestCase):
+class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     @classmethod
     def setUp(self):
         # create a Stripe Platform Account

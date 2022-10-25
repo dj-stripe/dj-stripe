@@ -5,6 +5,7 @@ from copy import deepcopy
 from unittest.mock import patch
 
 import pytest
+import stripe
 from django.test.testcases import TestCase
 
 from djstripe import models
@@ -25,9 +26,10 @@ from . import (
 )
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
-class TestBalanceTransactionStr:
+class TestBalanceTransactionStr(CreateAccountMixin):
     @pytest.mark.parametrize("transaction_status", BalanceTransactionStatus.__members__)
     def test___str__(self, transaction_status):
         modified_balance_transaction = deepcopy(FAKE_BALANCE_TRANSACTION)
@@ -42,7 +44,7 @@ class TestBalanceTransactionStr:
         )
 
 
-class TestBalanceTransactionSourceClass:
+class TestBalanceTransactionSourceClass(CreateAccountMixin):
     @pytest.mark.parametrize("transaction_type", ["card", "payout", "refund"])
     def test_get_source_class_success(self, transaction_type):
         modified_balance_transaction = deepcopy(FAKE_BALANCE_TRANSACTION)
@@ -67,7 +69,7 @@ class TestBalanceTransactionSourceClass:
             balance_transaction.get_source_class()
 
 
-class TestBalanceTransaction(TestCase):
+class TestBalanceTransaction(CreateAccountMixin, TestCase):
     @patch(
         "stripe.Invoice.retrieve",
         return_value=deepcopy(FAKE_INVOICE),

@@ -4,6 +4,8 @@ dj-stripe Event Model Tests.
 from copy import deepcopy
 from unittest.mock import patch
 
+import pytest
+import stripe
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from stripe.error import StripeError
@@ -18,9 +20,10 @@ from . import (
     FAKE_PLATFORM_ACCOUNT,
     FAKE_TRANSFER,
 )
+from .conftest import CreateAccountMixin
 
 
-class EventTest(TestCase):
+class EventTest(CreateAccountMixin, TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"

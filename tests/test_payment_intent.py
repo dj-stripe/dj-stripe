@@ -27,6 +27,7 @@ from . import (
 )
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
 def _get_fake_payment_intent_destination_charge_no_customer():
@@ -144,7 +145,7 @@ class TestStrPaymentIntent:
             assert str(pi) == "$20.00 USD (The funds are in your account.)"
 
 
-class PaymentIntentTest(AssertStripeFksMixin, TestCase):
+class PaymentIntentTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.BalanceTransaction.retrieve",
         return_value=deepcopy(FAKE_BALANCE_TRANSACTION),

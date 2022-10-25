@@ -30,13 +30,14 @@ from . import (
 )
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
 def mock_webhook_handler(webhook_event_trigger):
     webhook_event_trigger.process()
 
 
-class TestWebhookEventTrigger(TestCase):
+class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
     """Test class to test WebhookEventTrigger model and its methods"""
 
     def _send_event(self, event_data):
@@ -615,7 +616,7 @@ class TestGetRemoteIp:
             assert get_remote_ip(request) == "0.0.0.0"
 
 
-class TestWebhookEndpoint:
+class TestWebhookEndpoint(CreateAccountMixin):
     """Test Class to test WebhookEndpoint and its methods"""
 
     def test_sync_from_stripe_data_non_existent_webhook_endpoint(self):

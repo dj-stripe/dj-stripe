@@ -25,9 +25,10 @@ from . import (
     FAKE_SUBSCRIPTION_ITEM,
     AssertStripeFksMixin,
 )
+from .conftest import CreateAccountMixin
 
 
-class RefundTest(AssertStripeFksMixin, TestCase):
+class RefundTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def setUp(self):
         # create a Stripe Platform Account
         self.account = FAKE_PLATFORM_ACCOUNT.create()

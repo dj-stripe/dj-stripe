@@ -21,9 +21,10 @@ from . import (
 )
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
-class TestUsageRecord(AssertStripeFksMixin, TestCase):
+class TestUsageRecord(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN_METERED), autospec=True
     )

@@ -33,9 +33,10 @@ from . import (
 )
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
-class TestOrder(AssertStripeFksMixin, TestCase):
+class TestOrder(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.BalanceTransaction.retrieve",
         return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
@@ -282,7 +283,7 @@ class TestOrderStr:
             assert str(order) == f"Placed on 07/10/2019 ({order_status})"
 
 
-class TestOrderMethods:
+class TestOrderMethods(CreateAccountMixin):
     @pytest.mark.parametrize("stripe_account", (None, "acct_fakefakefakefake001"))
     @pytest.mark.parametrize(
         "api_key, expected_api_key",
