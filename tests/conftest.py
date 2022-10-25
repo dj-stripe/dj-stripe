@@ -1,6 +1,8 @@
 """
 Module for creating re-usable fixtures to be used across the test suite
 """
+import os
+
 import pytest
 import stripe
 from django.contrib.auth import get_user_model
@@ -24,6 +26,13 @@ class CreateAccountMixin:
 
         # create a Stripe Platform Account
         FAKE_PLATFORM_ACCOUNT.create()
+
+
+@pytest.fixture
+def configure_settings(settings):
+    settings.STRIPE_TEST_SECRET_KEY = settings.STRIPE_SECRET_KEY = os.environ.get(
+        "STRIPE_TEST_SECRET_KEY"
+    )
 
 
 @pytest.fixture
