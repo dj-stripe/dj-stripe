@@ -159,11 +159,12 @@
                 <h1 id="local-webhook-testing">Local Webhook Testing</h1>
 <p>To perform local webhook testing using the <code>Stripe CLI</code>, please do the following:</p>
 <ol>
+<li>Run <code>stripe listen --print-secret</code>. Its output would be used as the value of the <code>x-djstripe-webhook-secret</code> Custom Header in <code>2.</code></li>
 <li>
-<p>Set <code>-H</code> to <code>x-djstripe-webhook-secret</code> Custom Header in Stripe <code>listen</code> to the <code>Webhook Signing Secret</code> output of <code>Stripe CLI</code>. That is what Stripe expects and uses to create the <code>stripe-signature</code> header. Without that <code>webhook</code> validation will fail and you would get a <code>400</code> status code.</p>
+<p>Set <code>-H</code> to <code>x-djstripe-webhook-secret</code> Custom Header in Stripe <code>listen</code> to the output from <code>1.</code>. That is what Stripe expects and uses to create the <code>stripe-signature</code> header. Without that <code>webhook</code> validation will fail and you would get a <code>400</code> status code.</p>
 </li>
 <li>
-<p>Set <code>--forward-to</code> to the <code>URL</code> you want stripe to forward the request to. New Style <code>UUID</code> urls are also supported from <code>v2.7</code> onwards.</p>
+<p>Set <code>--forward-to</code> to the <code>URL</code> you want stripe to forward the request to. New Style <code>UUID</code> urls are also supported from <code>v2.7</code> onwards. The <code>URL</code> is the webhook url you created on the Django Admin Page of the format <code>{scheme}://{netloc}/djstripe/webhook/{UUID}/</code>.</p>
 </li>
 <li>
 <p>Start the local <code>Stripe</code> server like so:</p>
