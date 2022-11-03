@@ -60,10 +60,9 @@ class SubscriptionStrTest(TestCase):
         )
         self.customer = FAKE_CUSTOMER_II.create_for_user(self.user)
 
-    @patch("djstripe.models.billing.Subscription._api_create", autospec=True)
     @patch(
         "stripe.Plan.retrieve",
-        side_effect=[deepcopy(FAKE_PLAN), deepcopy(FAKE_PLAN_II)],
+        return_value=deepcopy(FAKE_PLAN),
         autospec=True,
     )
     @patch(
@@ -79,48 +78,17 @@ class SubscriptionStrTest(TestCase):
         customer_retrieve_mock,
         product_retrieve_mock,
         plan_retrieve_mock,
-        subscription_creation_mock,
     ):
-        assert self.customer
-        subscription_fake_1 = deepcopy(FAKE_SUBSCRIPTION_III)
-        subscription_fake_1["current_period_end"] += int(
-            datetime.timestamp(timezone.now())
-        )
-        subscription_fake_1["latest_invoice"] = None
 
-        subscription_fake_2 = deepcopy(FAKE_SUBSCRIPTION_II)
-        subscription_fake_2["current_period_end"] += int(
-            datetime.timestamp(timezone.now())
-        )
-        subscription_fake_2["customer"] = self.customer.id
-        subscription_fake_2["latest_invoice"] = None
-
-        subscription_creation_mock.side_effect = [
-            subscription_fake_1,
-            subscription_fake_2,
-        ]
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION_III)
+        subscription_fake["latest_invoice"] = None
 
         # sync subscriptions (to update the changes just made)
-        Subscription.sync_from_stripe_data(subscription_fake_1)
-        Subscription.sync_from_stripe_data(subscription_fake_2)
-
-        # refresh self.customer from db
-        self.customer.refresh_from_db()
-
-        # subscribe the customer to 2 plans
-        self.customer.subscribe(plan=FAKE_PLAN["id"])
-        self.customer.subscribe(plan=FAKE_PLAN_II["id"])
-
-        subscriptions_lst = self.customer._get_valid_subscriptions()
-        products_lst = [
-            subscription.plan.product.name
-            for subscription in subscriptions_lst
-            if subscription and subscription.plan
-        ]
+        Subscription.sync_from_stripe_data(subscription_fake)
 
         self.assertEqual(
-            str(Subscription.objects.get(id=subscription_fake_2["id"])),
-            f"{self.customer} on {' and '.join(products_lst)}",
+            str(Subscription.objects.get(id=subscription_fake["id"])),
+            f'<id={subscription_fake["id"]}>',
         )
 
 
