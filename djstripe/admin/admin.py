@@ -601,6 +601,8 @@ class SubscriptionAdmin(StripeModelAdmin):
             .get_queryset(request)
             .select_related(
                 "customer",
+                "plan",
+                "plan__product",
             )
             .prefetch_related(
                 "customer__subscriptions",
