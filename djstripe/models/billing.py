@@ -1172,8 +1172,8 @@ class Plan(StripeModel):
         """Get or create a Plan."""
 
         try:
-            return Plan.objects.get(id=kwargs["id"]), False
-        except Plan.DoesNotExist:
+            return cls.objects.get(id=kwargs["id"]), False
+        except cls.DoesNotExist:
             return cls.create(**kwargs), True
 
     @classmethod
