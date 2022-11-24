@@ -3841,8 +3841,8 @@ charges that are associated with the same customer.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">Customer</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subscriber</span><span class="o">=</span><span class="n">subscriber</span><span class="p">,</span> <span class="n">livemode</span><span class="o">=</span><span class="n">livemode</span><span class="p">),</span> <span class="kc">False</span>
-        <span class="k">except</span> <span class="n">Customer</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subscriber</span><span class="o">=</span><span class="n">subscriber</span><span class="p">,</span> <span class="n">livemode</span><span class="o">=</span><span class="n">livemode</span><span class="p">),</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="bp">cls</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
             <span class="n">action</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;create:</span><span class="si">{</span><span class="n">subscriber</span><span class="o">.</span><span class="n">pk</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="n">idempotency_key</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">get_idempotency_key</span><span class="p">(</span>
                 <span class="s2">&quot;customer&quot;</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">livemode</span>
@@ -3869,7 +3869,7 @@ charges that are associated with the same customer.</p>
             <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
             <span class="n">stripe_account</span><span class="o">=</span><span class="n">stripe_account</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">customer</span><span class="p">,</span> <span class="n">created</span> <span class="o">=</span> <span class="n">Customer</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+        <span class="n">customer</span><span class="p">,</span> <span class="n">created</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
             <span class="nb">id</span><span class="o">=</span><span class="n">stripe_customer</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
             <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
                 <span class="s2">&quot;subscriber&quot;</span><span class="p">:</span> <span class="n">subscriber</span><span class="p">,</span>
@@ -5580,7 +5580,7 @@ invoice. This is extremely useful when adding surcharges to subscriptions.</p>
         <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
         <span class="n">stripe_account</span><span class="o">=</span><span class="n">stripe_account</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">customer</span><span class="p">,</span> <span class="n">created</span> <span class="o">=</span> <span class="n">Customer</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+    <span class="n">customer</span><span class="p">,</span> <span class="n">created</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
         <span class="nb">id</span><span class="o">=</span><span class="n">stripe_customer</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
         <span class="n">defaults</span><span class="o">=</span><span class="p">{</span>
             <span class="s2">&quot;subscriber&quot;</span><span class="p">:</span> <span class="n">subscriber</span><span class="p">,</span>
@@ -5758,8 +5758,8 @@ invoice. This is extremely useful when adding surcharges to subscriptions.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Customer</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subscriber</span><span class="o">=</span><span class="n">subscriber</span><span class="p">,</span> <span class="n">livemode</span><span class="o">=</span><span class="n">livemode</span><span class="p">),</span> <span class="kc">False</span>
-    <span class="k">except</span> <span class="n">Customer</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subscriber</span><span class="o">=</span><span class="n">subscriber</span><span class="p">,</span> <span class="n">livemode</span><span class="o">=</span><span class="n">livemode</span><span class="p">),</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="bp">cls</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
         <span class="n">action</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;create:</span><span class="si">{</span><span class="n">subscriber</span><span class="o">.</span><span class="n">pk</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">idempotency_key</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">get_idempotency_key</span><span class="p">(</span>
             <span class="s2">&quot;customer&quot;</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">livemode</span>
@@ -10456,8 +10456,8 @@ and its usage is encouraged instead of Plan objects.</p>
         <span class="sd">&quot;&quot;&quot;Get or create a Price.&quot;&quot;&quot;</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">Price</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]),</span> <span class="kc">False</span>
-        <span class="k">except</span> <span class="n">Price</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]),</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="bp">cls</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="kc">True</span>
 
     <span class="nd">@classmethod</span>
@@ -11022,8 +11022,8 @@ and its usage is encouraged instead of Plan objects.</p>
     <span class="sd">&quot;&quot;&quot;Get or create a Price.&quot;&quot;&quot;</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Price</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]),</span> <span class="kc">False</span>
-    <span class="k">except</span> <span class="n">Price</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]),</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="bp">cls</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -18832,8 +18832,8 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
         <span class="sd">&quot;&quot;&quot;Get or create a Plan.&quot;&quot;&quot;</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">Plan</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]),</span> <span class="kc">False</span>
-        <span class="k">except</span> <span class="n">Plan</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]),</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="bp">cls</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="kc">True</span>
 
     <span class="nd">@classmethod</span>
@@ -19465,8 +19465,8 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
     <span class="sd">&quot;&quot;&quot;Get or create a Plan.&quot;&quot;&quot;</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Plan</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]),</span> <span class="kc">False</span>
-    <span class="k">except</span> <span class="n">Plan</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]),</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="bp">cls</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="kc">True</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -25479,8 +25479,8 @@ do actually want to instantiate the model and use relations.</p>
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">id</span><span class="p">()</span></code>
   
   <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
       <small class="doc doc-label doc-label-property"><code>property</code></small>
+      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
   </span>
 
 </h5>
@@ -32248,15 +32248,15 @@ The 'valid' flag in this model monitors this.</p>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># Validate the webhook first</span>
-            <span class="n">signals</span><span class="o">.</span><span class="n">webhook_pre_validate</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+            <span class="n">signals</span><span class="o">.</span><span class="n">webhook_pre_validate</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">sender</span><span class="o">=</span><span class="bp">cls</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
             <span class="n">obj</span><span class="o">.</span><span class="n">valid</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">secret</span><span class="o">=</span><span class="n">secret</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
             <span class="n">signals</span><span class="o">.</span><span class="n">webhook_post_validate</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
-                <span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">valid</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">valid</span>
+                <span class="n">sender</span><span class="o">=</span><span class="bp">cls</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">valid</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">valid</span>
             <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">valid</span><span class="p">:</span>
                 <span class="n">signals</span><span class="o">.</span><span class="n">webhook_pre_process</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
-                    <span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span>
+                    <span class="n">sender</span><span class="o">=</span><span class="bp">cls</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span>
                 <span class="p">)</span>
                 <span class="k">if</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_EVENT_CALLBACK</span><span class="p">:</span>
                     <span class="c1"># If WEBHOOK_EVENT_CALLBACK, pass it for processing</span>
@@ -32265,16 +32265,16 @@ The 'valid' flag in this model monitors this.</p>
                     <span class="c1"># Process the item (do not save it, it&#39;ll get saved below)</span>
                     <span class="n">obj</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
                 <span class="n">signals</span><span class="o">.</span><span class="n">webhook_post_process</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
-                    <span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span>
+                    <span class="n">sender</span><span class="o">=</span><span class="bp">cls</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span>
                 <span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">max_length</span> <span class="o">=</span> <span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="s2">&quot;exception&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max_length</span>
+            <span class="n">max_length</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="s2">&quot;exception&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max_length</span>
             <span class="n">obj</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)[:</span><span class="n">max_length</span><span class="p">]</span>
             <span class="n">obj</span><span class="o">.</span><span class="n">traceback</span> <span class="o">=</span> <span class="n">format_exc</span><span class="p">()</span>
 
             <span class="c1"># Send the exception as the webhook_processing_error signal</span>
             <span class="n">signals</span><span class="o">.</span><span class="n">webhook_processing_error</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
-                <span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span>
+                <span class="n">sender</span><span class="o">=</span><span class="bp">cls</span><span class="p">,</span>
                 <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span>
                 <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span>
                 <span class="n">exception</span><span class="o">=</span><span class="n">e</span><span class="p">,</span>
@@ -32838,15 +32838,15 @@ request object.</p>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Validate the webhook first</span>
-        <span class="n">signals</span><span class="o">.</span><span class="n">webhook_pre_validate</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+        <span class="n">signals</span><span class="o">.</span><span class="n">webhook_pre_validate</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">sender</span><span class="o">=</span><span class="bp">cls</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">valid</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">secret</span><span class="o">=</span><span class="n">secret</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
         <span class="n">signals</span><span class="o">.</span><span class="n">webhook_post_validate</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
-            <span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">valid</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">valid</span>
+            <span class="n">sender</span><span class="o">=</span><span class="bp">cls</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">valid</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">valid</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">valid</span><span class="p">:</span>
             <span class="n">signals</span><span class="o">.</span><span class="n">webhook_pre_process</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
-                <span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span>
+                <span class="n">sender</span><span class="o">=</span><span class="bp">cls</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_EVENT_CALLBACK</span><span class="p">:</span>
                 <span class="c1"># If WEBHOOK_EVENT_CALLBACK, pass it for processing</span>
@@ -32855,16 +32855,16 @@ request object.</p>
                 <span class="c1"># Process the item (do not save it, it&#39;ll get saved below)</span>
                 <span class="n">obj</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
             <span class="n">signals</span><span class="o">.</span><span class="n">webhook_post_process</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
-                <span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span>
+                <span class="n">sender</span><span class="o">=</span><span class="bp">cls</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span>
             <span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">max_length</span> <span class="o">=</span> <span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="s2">&quot;exception&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max_length</span>
+        <span class="n">max_length</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_meta</span><span class="o">.</span><span class="n">get_field</span><span class="p">(</span><span class="s2">&quot;exception&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max_length</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)[:</span><span class="n">max_length</span><span class="p">]</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">traceback</span> <span class="o">=</span> <span class="n">format_exc</span><span class="p">()</span>
 
         <span class="c1"># Send the exception as the webhook_processing_error signal</span>
         <span class="n">signals</span><span class="o">.</span><span class="n">webhook_processing_error</span><span class="o">.</span><span class="n">send</span><span class="p">(</span>
-            <span class="n">sender</span><span class="o">=</span><span class="n">WebhookEventTrigger</span><span class="p">,</span>
+            <span class="n">sender</span><span class="o">=</span><span class="bp">cls</span><span class="p">,</span>
             <span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span>
             <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span>
             <span class="n">exception</span><span class="o">=</span><span class="n">e</span><span class="p">,</span>
