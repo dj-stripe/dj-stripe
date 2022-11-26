@@ -223,9 +223,7 @@ class WebhookEventTrigger(models.Model):
             )
 
             if obj.valid:
-                signals.webhook_pre_process.send(
-                    sender=cls, instance=obj
-                )
+                signals.webhook_pre_process.send(sender=cls, instance=obj)
                 if djstripe_settings.WEBHOOK_EVENT_CALLBACK:
                     # If WEBHOOK_EVENT_CALLBACK, pass it for processing
                     djstripe_settings.WEBHOOK_EVENT_CALLBACK(obj, api_key=api_key)
