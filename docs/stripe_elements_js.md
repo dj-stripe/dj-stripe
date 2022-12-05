@@ -36,4 +36,4 @@ If you're using `stripe.createToken`, see if you can upgrade to
 `stripe.createSource` or ideally to Payment Intents .
 
 !!! tip
-Checkout [Card Elements Quickstart JS](https://stripe.com/docs/payments/accept-a-payment-charges?platform=web)
+    Checkout [Card Elements Quickstart JS](https://stripe.com/docs/payments/accept-a-payment-charges?platform=web)

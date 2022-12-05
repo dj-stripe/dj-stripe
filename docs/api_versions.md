@@ -35,8 +35,7 @@ version Stripe only allows you to upgrade to the **latest** version.
 ## Stripe's current latest API version
 
 You can find this on your Stripe dashboard labelled "**latest**" or in
-[Stripe's API documentation]
-(https://stripe.com/docs/upgrades#api-changelog)
+[Stripe's API documentation](https://stripe.com/docs/upgrades#api-changelog)
 
 This is the version used by new accounts and it's also "**true**" internal
 version of Stripe's API
