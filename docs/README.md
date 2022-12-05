@@ -40,11 +40,17 @@ The full documentation is available [on Read the Docs](https://dj-stripe.github.
 
 ## Installation
 
-See [installation](docs/installation.md) instructions.
+See [installation](installation.md) instructions.
 
 ## Changelog
 
-[See release notes on Read the Docs](https://dj-stripe.github.io/dj-stripe/history/2_5_0/).
+[See release notes on Read the Docs](history/2_7_0/).
+
+<!-- This link *will* get stale again eventually. There should be an index page for the
+     changelog that can be linked to.
+
+     For example:
+     https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#section-index-pages -->
 
 ## Funding and Support
 
