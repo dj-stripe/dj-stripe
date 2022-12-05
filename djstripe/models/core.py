@@ -804,8 +804,8 @@ class Customer(StripeModel):
         """
 
         try:
-            return Customer.objects.get(subscriber=subscriber, livemode=livemode), False
-        except Customer.DoesNotExist:
+            return cls.objects.get(subscriber=subscriber, livemode=livemode), False
+        except cls.DoesNotExist:
             action = f"create:{subscriber.pk}"
             idempotency_key = djstripe_settings.get_idempotency_key(
                 "customer", action, livemode
@@ -832,7 +832,7 @@ class Customer(StripeModel):
             metadata=metadata,
             stripe_account=stripe_account,
         )
-        customer, created = Customer.objects.get_or_create(
+        customer, created = cls.objects.get_or_create(
             id=stripe_customer["id"],
             defaults={
                 "subscriber": subscriber,
@@ -2267,8 +2267,8 @@ class Price(StripeModel):
         """Get or create a Price."""
 
         try:
-            return Price.objects.get(id=kwargs["id"]), False
-        except Price.DoesNotExist:
+            return cls.objects.get(id=kwargs["id"]), False
+        except cls.DoesNotExist:
             return cls.create(**kwargs), True
 
     @classmethod

@@ -578,7 +578,7 @@ class ShippingRateAdmin(StripeModelAdmin):
 
 @admin.register(models.Subscription)
 class SubscriptionAdmin(StripeModelAdmin):
-    list_display = ("customer", "status", "get_default_tax_rates")
+    list_display = ("customer", "status", "get_product_name", "get_default_tax_rates")
     list_filter = ("status", "cancel_at_period_end")
 
     inlines = (SubscriptionItemInline, SubscriptionScheduleInline)
@@ -601,6 +601,8 @@ class SubscriptionAdmin(StripeModelAdmin):
             .get_queryset(request)
             .select_related(
                 "customer",
+                "plan",
+                "plan__product",
             )
             .prefetch_related(
                 "customer__subscriptions",
@@ -615,6 +617,11 @@ class SubscriptionAdmin(StripeModelAdmin):
         result = [str(tax_rate) for tax_rate in obj.default_tax_rates.all()]
         if result:
             return ", ".join(result)
+
+    @admin.display(description="Product Name")
+    def get_product_name(self, obj):
+        if obj.plan and obj.plan.product:
+            return obj.plan.product.name
 
 
 @admin.register(models.SubscriptionSchedule)

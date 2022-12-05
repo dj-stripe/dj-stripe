@@ -1172,8 +1172,8 @@ class Plan(StripeModel):
         """Get or create a Plan."""
 
         try:
-            return Plan.objects.get(id=kwargs["id"]), False
-        except Plan.DoesNotExist:
+            return cls.objects.get(id=kwargs["id"]), False
+        except cls.DoesNotExist:
             return cls.create(**kwargs), True
 
     @classmethod
@@ -1492,17 +1492,6 @@ class Subscription(StripeModel):
 
     objects = SubscriptionManager()
 
-    def __str__(self):
-
-        subscriptions_lst = self.customer._get_valid_subscriptions()
-        products_lst = [
-            subscription.plan.product.name
-            for subscription in subscriptions_lst
-            if subscription and subscription.plan and subscription.plan.product
-        ]
-
-        return f"{self.customer} on {' and '.join(products_lst)}"
-
     @classmethod
     def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
         """
@@ -1517,7 +1506,6 @@ class Subscription(StripeModel):
             # special case: https://stripe.com/docs/api/subscriptions/list#list_subscriptions-status
             # See Issue: https://github.com/dj-stripe/dj-stripe/issues/1763
             kwargs["status"] = "all"
-
         return super().api_list(api_key=api_key, **kwargs)
 
     def update(self, plan: Union[StripeModel, str] = None, **kwargs):

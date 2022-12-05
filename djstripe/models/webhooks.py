@@ -221,16 +221,14 @@ class WebhookEventTrigger(models.Model):
 
         try:
             # Validate the webhook first
-            signals.webhook_pre_validate.send(sender=WebhookEventTrigger, instance=obj)
+            signals.webhook_pre_validate.send(sender=cls, instance=obj)
             obj.valid = obj.validate(secret=secret, api_key=api_key)
             signals.webhook_post_validate.send(
-                sender=WebhookEventTrigger, instance=obj, valid=obj.valid
+                sender=cls, instance=obj, valid=obj.valid
             )
 
             if obj.valid:
-                signals.webhook_pre_process.send(
-                    sender=WebhookEventTrigger, instance=obj
-                )
+                signals.webhook_pre_process.send(sender=cls, instance=obj)
                 if djstripe_settings.WEBHOOK_EVENT_CALLBACK:
                     # If WEBHOOK_EVENT_CALLBACK, pass it for processing
                     djstripe_settings.WEBHOOK_EVENT_CALLBACK(obj, api_key=api_key)
@@ -238,16 +236,16 @@ class WebhookEventTrigger(models.Model):
                     # Process the item (do not save it, it'll get saved below)
                     obj.process(save=False, api_key=api_key)
                 signals.webhook_post_process.send(
-                    sender=WebhookEventTrigger, instance=obj, api_key=api_key
+                    sender=cls, instance=obj, api_key=api_key
                 )
         except Exception as e:
-            max_length = WebhookEventTrigger._meta.get_field("exception").max_length
+            max_length = cls._meta.get_field("exception").max_length
             obj.exception = str(e)[:max_length]
             obj.traceback = format_exc()
 
             # Send the exception as the webhook_processing_error signal
             signals.webhook_processing_error.send(
-                sender=WebhookEventTrigger,
+                sender=cls,
                 instance=obj,
                 api_key=api_key,
                 exception=e,
