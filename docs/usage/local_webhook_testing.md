@@ -1,28 +1,47 @@
 # Local Webhook Testing
 
-To perform local webhook testing using the `Stripe CLI`, please do the following:
+The [Stripe CLI][cli] allows receiving webhooks events from Stripe on your local machine via a direct connection to Stripe's API.
 
-1. Run `stripe listen --print-secret`. Its output would be used as the value of the `x-djstripe-webhook-secret` Custom Header in `2.`
-2. Set `-H` to `x-djstripe-webhook-secret` Custom Header in Stripe `listen` to the output from `1.`. That is what Stripe expects and uses to create the `stripe-signature` header. Without that `webhook` validation will fail and you would get a `400` status code.
+Set the `--forward-to` flag to the URL of a local webhook endpoint
+you created via the Django admin or the Stripe Dashboard.
+New Style `UUID` urls are also supported from `v2.7` onwards.
+For example:
 
-2. Set `--forward-to` to the `URL` you want stripe to forward the request to. New Style `UUID` urls are also supported from `v2.7` onwards. The `URL` is the webhook url you created on the Django Admin Page of the format `{scheme}://{netloc}/djstripe/webhook/{UUID}/`.
-
-3. Start the local `Stripe` server like so:
-
-  ```bash
-
-  stripe listen -H "x-djstripe-webhook-secret: <STRIPE_CLI_WEBHOOK_SIGNING_SECRET_OUTPUT>" --forward-to <URL>
-
-  ```
-
-4. `Stripe` events can now be triggered like so:
-
-```bash
-
-stripe trigger customer.created
-
+```sh
+stripe listen --forward-to http://localhost:8000/stripe/webhook/<UUID>
 ```
 
-!!! note
+The [signatures of events sent by Stripe to the webhooks are verified][signatures]
+to prevent third-parties from interacting with the endpoints.
+Events will be signed with a webhook secret different from existing endpoints
+(because Stripe CLI doesn't require a webhook endpoint to be set up).
+You can obtain this secret by looking at the output of `stripe listen`
+or by running `stripe listen --print-secret`.
 
-    In case the `Stripe CLI` is used to perform local webhook testing, set `-H` to `x-djstripe-webhook-secret` Custom Header in Stripe `listen` to the `Webhook Signing Secret` output of `Stripe CLI`. That is what Stripe expects and uses to create the `stripe-signature` header.
+In order to let dj-stripe know about the secret key to verify the signature,
+it can be passed as an HTTP header;
+dj-stripe looks for a header called `X-Djstripe-Webhook-Secret`:
+
+```sh
+stripe listen \
+  --forward-to http://localhost:8000/stripe/webhook/<UUID> \
+  -H "x-djstripe-webhook-secret: $(stripe listen --print-secret)"
+```
+
+From now on, whenever you make changes on the Stripe Dashboard,
+the webhook endpoint you specified with `--forward-to` will called
+with the respective changes.
+
+!!! hint
+    If the webhook secret is not passed to dj-stripe,
+    signature validation will fail with an HTTP status code 400
+    and the message "Failed to verify header".
+
+Stripe events can now be triggered like so:
+
+```sh
+stripe trigger customer.created
+```
+
+[cli]: https://stripe.com/docs/cli
+[signatures]: https://stripe.com/docs/webhooks/signatures
