@@ -53,10 +53,10 @@ support all the arguments you need for your implementation. When this
 happens you can just call the official `stripe.Customer.subscribe()`.
 
 !!! tip
-Check out the following examples:
+    Check out the following examples:
 
--   [`form_valid view example`][tests.apps.example.views.PurchaseSubscriptionView.form_valid]
--   [`djstripe.models.Customer.add_payment_method`][djstripe.models.core.Customer.add_payment_method]
+    -   [`form_valid view example`][tests.apps.example.views.PurchaseSubscriptionView.form_valid]
+    -   [`djstripe.models.Customer.add_payment_method`][djstripe.models.core.Customer.add_payment_method]
 
 
     Note that PaymentMethods can be used instead of Cards/Source by
