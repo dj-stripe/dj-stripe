@@ -40,32 +40,32 @@ def check_stripe_api_key(app_configs=None, **kwargs):
         # get all APIKey objects in the db
         api_qs = APIKey.objects.all()
 
-        if not api_qs.exists():
-            msg = "You don't have any API Keys in the database. Did you forget to add them?"
+    except DatabaseError:
+        # Skip the check - Database most likely not migrated yet
+        return []
+
+    if not api_qs.exists():
+        msg = "You don't have any API Keys in the database. Did you forget to add them?"
+        hint = "Add STRIPE_TEST_SECRET_KEY and STRIPE_LIVE_SECRET_KEY directly from the Django Admin."
+        messages.append(checks.Info(msg, hint=hint, id="djstripe.I001"))
+
+        # Keys not in admin but in settings
+        if djstripe_settings.STRIPE_SECRET_KEY:
+            msg = "Your keys are defined in the settings files. You can now add and manage them directly from the django admin."
             hint = "Add STRIPE_TEST_SECRET_KEY and STRIPE_LIVE_SECRET_KEY directly from the Django Admin."
-            messages.append(checks.Info(msg, hint=hint, id="djstripe.I001"))
-
-            # Keys not in admin but in settings
-            if djstripe_settings.STRIPE_SECRET_KEY:
-                msg = "Your keys are defined in the settings files. You can now add and manage them directly from the django admin."
-                hint = "Add STRIPE_TEST_SECRET_KEY and STRIPE_LIVE_SECRET_KEY directly from the Django Admin."
-                messages.append(checks.Info(msg, hint=hint, id="djstripe.I002"))
-
-                # Ensure keys defined in settings files are valid
-                _check_stripe_api_in_settings(messages)
-
-        # Keys in admin and in settings
-        elif djstripe_settings.STRIPE_SECRET_KEY:
-            msg = "Your keys are defined in the settings files and are also in the admin. You can now add and manage them directly from the django admin."
-            hint = "We suggest adding STRIPE_TEST_SECRET_KEY and STRIPE_LIVE_SECRET_KEY directly from the Django Admin. And removing them from the settings files."
             messages.append(checks.Info(msg, hint=hint, id="djstripe.I002"))
 
             # Ensure keys defined in settings files are valid
             _check_stripe_api_in_settings(messages)
 
-    except DatabaseError:
-        # Skip the check - Database most likely not migrated yet
-        return []
+    # Keys in admin and in settings
+    elif djstripe_settings.STRIPE_SECRET_KEY:
+        msg = "Your keys are defined in the settings files and are also in the admin. You can now add and manage them directly from the django admin."
+        hint = "We suggest adding STRIPE_TEST_SECRET_KEY and STRIPE_LIVE_SECRET_KEY directly from the Django Admin. And removing them from the settings files."
+        messages.append(checks.Info(msg, hint=hint, id="djstripe.I002"))
+
+        # Ensure keys defined in settings files are valid
+        _check_stripe_api_in_settings(messages)
 
     return messages
 
