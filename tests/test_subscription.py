@@ -1142,6 +1142,50 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
+    @patch("stripe.Subscription.list")
+    def test_api_list_with_valid_timestamp_created(self, subscription_list_mock):
+        p = PropertyMock(return_value=deepcopy(FAKE_SUBSCRIPTION))
+        type(subscription_list_mock).auto_paging_iter = p
+
+        # invoke Subscription.api_list with created populated
+        Subscription.api_list(created="123456789")
+
+        subscription_list_mock.assert_called_once_with(
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            status="all",
+            created="123456789",
+        )
+
+    @patch("stripe.Subscription.list")
+    def test_api_list_with_valid_dict_created(self, subscription_list_mock):
+        p = PropertyMock(return_value=deepcopy(FAKE_SUBSCRIPTION))
+        type(subscription_list_mock).auto_paging_iter = p
+
+        # invoke Subscription.api_list with created populated
+        Subscription.api_list(created={"gt": 123456789})
+
+        subscription_list_mock.assert_called_once_with(
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            status="all",
+            created={"gt": 123456789},
+        )
+
+    @patch("stripe.Subscription.list")
+    def test_api_list_with_invalid_dict_created(self, subscription_list_mock):
+        p = PropertyMock(return_value=deepcopy(FAKE_SUBSCRIPTION))
+        type(subscription_list_mock).auto_paging_iter = p
+        subscription_list_mock.side_effect = InvalidRequestError(
+            "Received unknown parameter: created", "created"
+        )
+
+        with pytest.raises(InvalidRequestError) as error:
+            # invoke Subscription.api_list with created populated
+            Subscription.api_list(created={"gtpq": 123456789})
+
+        assert "Received unknown parameter: created", (
+            "created" == error.value.user_message
+        )
+
 
 class TestSubscriptionDecimal:
     @pytest.mark.parametrize(

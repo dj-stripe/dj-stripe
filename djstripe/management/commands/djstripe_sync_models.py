@@ -22,8 +22,16 @@ Invoke like so:
 
     7) To only sync Stripe Accounts and Charges for sk_test_XXX and sk_test_YYY API keys:
         python manage.py djstripe_sync_models Account Charge --api-keys sk_test_XXX sk_test_YYY
+
+    6) To only sync Stripe Accounts for sk_test_XXX and sk_test_YYY API keys for objects created after {unix_timestamp}:
+        python manage.py djstripe_sync_models Account --api-keys sk_test_XXX sk_test_YYY --created "{\"gt\": {unix_timestamp}}"
+
+    7) To only sync Stripe Accounts and Charges for sk_test_XXX and sk_test_YYY API keys for objects created between {unix_gt_timestamp} and {unix_lt_timestamp}:
+        python manage.py djstripe_sync_models Account Charge --api-keys sk_test_XXX sk_test_YYY --created "{\"gte\": {unix_gt_timestamp}, \"lte\": {unix_lt_timestamp}}"
+
 """
-from typing import List
+import json
+from typing import Dict, List, Union
 
 from django.apps import apps
 from django.core.exceptions import FieldDoesNotExist
@@ -60,11 +68,26 @@ class Command(BaseCommand):
             # action="extend",
             help="Specify the api_keys you would like to perform this sync for.",
         )
+        # Named (optional) arguments
+        parser.add_argument(
+            "--created",
+            metavar="Created",
+            nargs="?",
+            type=str,
+            help="Specify the created you would like to perform this sync for.",
+        )
 
-    def handle(self, *args, api_keys, **options):
+    def handle(self, *args, api_keys, created, **options):
         app_label = "djstripe"
         app_config = apps.get_app_config(app_label)
         model_list = []  # type: List[models.StripeModel]
+        if created:
+            try:
+                created = json.loads(created)
+            except json.decoder.JSONDecodeError as error:
+                raise CommandError(
+                    "Unable to convert created to python dict object. " + str(error)
+                ) from error
 
         if args:
             for model_label in args:
@@ -98,7 +121,7 @@ class Command(BaseCommand):
 
         for model in model_list:
             for api_key in api_qs:
-                self.sync_model(model, api_key=api_key)
+                self.sync_model(model, api_key=api_key, created=created)
 
     def _should_sync_model(self, model):
         if not issubclass(model, StripeBaseModel):
@@ -127,7 +150,7 @@ class Command(BaseCommand):
 
         return True, ""
 
-    def sync_model(self, model, api_key: str):
+    def sync_model(self, model, api_key: str, created: Union[Dict, int]):
         model_name = model.__name__
 
         should_sync, reason = self._should_sync_model(model)
@@ -140,7 +163,9 @@ class Command(BaseCommand):
         count = 0
         try:
             # todo convert get_list_kwargs into a generator to make the code memory effecient.
-            for list_kwargs in self.get_list_kwargs(model, api_key=api_key.secret):
+            for list_kwargs in self.get_list_kwargs(
+                model, api_key=api_key.secret, created=created
+            ):
                 stripe_account = list_kwargs.get("stripe_account", "")
 
                 if (
@@ -220,7 +245,7 @@ class Command(BaseCommand):
 
     # todo simplfy this code by spliting into 1-2 functions
     @staticmethod
-    def get_default_list_kwargs(model, accounts_set, api_key: str):
+    def get_default_list_kwargs(model, accounts_set, api_key: str, created):
         """Returns default sequence of kwargs to sync
         all Stripe Accounts"""
         expand = []
@@ -290,6 +315,7 @@ class Command(BaseCommand):
                     "expand": expand,
                     "stripe_account": account,
                     "api_key": api_key,
+                    "created": created,
                 }
                 for account in accounts_set
             ]
@@ -299,6 +325,7 @@ class Command(BaseCommand):
                 {
                     "stripe_account": account,
                     "api_key": api_key,
+                    "created": created,
                 }
                 for account in accounts_set
             ]
@@ -442,7 +469,7 @@ class Command(BaseCommand):
         return all_list_kwargs
 
     # todo handle supoorting double + nested fields like data.invoice.subscriptions.customer etc?
-    def get_list_kwargs(self, model, api_key: str):
+    def get_list_kwargs(self, model, api_key: str, created: Union[Dict, int]):
         """
         Returns a sequence of kwargs dicts to pass to model.api_list
 
@@ -470,7 +497,7 @@ class Command(BaseCommand):
         accs_set = self.get_stripe_account(api_key=api_key)
 
         default_list_kwargs = self.get_default_list_kwargs(
-            model, accs_set, api_key=api_key
+            model, accs_set, api_key=api_key, created=created
         )
 
         handler = list_kwarg_handlers_dict.get(
