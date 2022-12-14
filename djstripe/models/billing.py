@@ -8,6 +8,8 @@ from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 from stripe.error import InvalidRequestError
 
+import djstripe
+
 from .. import enums
 from ..fields import (
     JSONField,
@@ -607,6 +609,7 @@ class BaseInvoice(StripeModel):
                 customer=customer,
                 subscription=subscription,
                 subscription_plan=subscription_plan,
+                stripe_version=djstripe_settings.STRIPE_API_VERSION,
                 **kwargs,
             )
         except InvalidRequestError as exc:
@@ -1883,7 +1886,11 @@ class SubscriptionSchedule(StripeModel):
             stripe_account = self._get_stripe_account_id(api_key)
 
         stripe_subscription_schedule = self.stripe_class.release(
-            self.id, api_key=api_key, stripe_account=stripe_account, **kwargs
+            self.id,
+            api_key=api_key,
+            stripe_account=stripe_account,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
         )
 
         return SubscriptionSchedule.sync_from_stripe_data(stripe_subscription_schedule)
@@ -1907,7 +1914,11 @@ class SubscriptionSchedule(StripeModel):
             stripe_account = self._get_stripe_account_id(api_key)
 
         stripe_subscription_schedule = self.stripe_class.cancel(
-            self.id, api_key=api_key, stripe_account=stripe_account, **kwargs
+            self.id,
+            api_key=api_key,
+            stripe_account=stripe_account,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
         )
 
         return SubscriptionSchedule.sync_from_stripe_data(stripe_subscription_schedule)
@@ -2096,6 +2107,7 @@ class TaxId(StripeModel):
             api_key=api_key or self.default_api_key,
             expand=self.expand_fields,
             stripe_account=stripe_account,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
     @classmethod
@@ -2109,7 +2121,9 @@ class TaxId(StripeModel):
         :returns: an iterator over all items in the query
         """
         return stripe.Customer.list_tax_ids(
-            api_key=api_key, **kwargs
+            api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
         ).auto_paging_iter()
 
 
@@ -2334,5 +2348,7 @@ class UsageRecordSummary(StripeModel):
             raise
 
         return stripe.SubscriptionItem.list_usage_record_summaries(
-            api_key=api_key, **kwargs
+            api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
         ).auto_paging_iter()

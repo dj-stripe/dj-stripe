@@ -55,6 +55,7 @@ class TestFileLink(TestCase):
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=[],
             stripe_account=None,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
         assert file_link.file == File.objects.get(id=file_link_data["file"])

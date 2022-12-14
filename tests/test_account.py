@@ -37,7 +37,8 @@ class TestAccount(AssertStripeFksMixin, TestCase):
         account = Account.get_default_account()
 
         account_retrieve_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
         self.assertGreater(len(account.business_profile), 0)
@@ -173,6 +174,7 @@ class TestAccount(AssertStripeFksMixin, TestCase):
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=[],
             stripe_account=fake_account["id"],
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
     @patch("stripe.Account.retrieve", autospec=True)
@@ -192,7 +194,8 @@ class TestAccount(AssertStripeFksMixin, TestCase):
         account = Account.get_default_account()
 
         account_retrieve_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
         self.assert_fks(
@@ -492,5 +495,6 @@ def test_api_reject(
         account.id,
         api_key=expected_api_key,
         stripe_account=stripe_account or FAKE_PLATFORM_ACCOUNT["id"],
+        stripe_version=djstripe_settings.STRIPE_API_VERSION,
         **extra_kwargs,
     )

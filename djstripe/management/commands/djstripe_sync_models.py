@@ -150,7 +150,8 @@ class Command(BaseCommand):
                 ):
                     # special case, since own account isn't returned by Account.api_list
                     stripe_obj = models.Account.stripe_class.retrieve(
-                        api_key=api_key.secret
+                        api_key=api_key.secret,
+                        stripe_version=djstripe_settings.STRIPE_API_VERSION,
                     )
 
                     djstripe_obj = model.sync_from_stripe_data(
@@ -206,7 +207,10 @@ class Command(BaseCommand):
         accs_set = set()
 
         # special case, since own account isn't returned by Account.api_list
-        stripe_platform_obj = models.Account.stripe_class.retrieve(api_key=api_key)
+        stripe_platform_obj = models.Account.stripe_class.retrieve(
+            api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+        )
         accs_set.add(stripe_platform_obj.id)
 
         for stripe_connected_obj in models.Account.api_list(api_key=api_key, **kwargs):
@@ -484,6 +488,7 @@ class Command(BaseCommand):
             "id": instance.id,
             "api_key": api_key,
             "stripe_account": stripe_account,
+            "stripe_version": djstripe_settings.STRIPE_API_VERSION,
         }
 
         if type in (enums.AccountType.custom, enums.AccountType.express) and isinstance(

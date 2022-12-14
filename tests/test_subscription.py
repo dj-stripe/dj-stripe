@@ -1126,6 +1126,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         subscription_list_mock.assert_called_once_with(
             status=SubscriptionStatus.canceled,
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
     @patch("stripe.Subscription.list")
@@ -1139,6 +1140,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         subscription_list_mock.assert_called_once_with(
             status="all",
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
 

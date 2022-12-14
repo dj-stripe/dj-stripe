@@ -46,6 +46,7 @@ class PlanCreateTest(AssertStripeFksMixin, TestCase):
 
         expected_create_kwargs = deepcopy(FAKE_PLAN)
         expected_create_kwargs["api_key"] = djstripe_settings.STRIPE_SECRET_KEY
+        expected_create_kwargs["stripe_version"] = djstripe_settings.STRIPE_API_VERSION
 
         plan_create_mock.assert_called_once_with(**expected_create_kwargs)
 
@@ -67,7 +68,9 @@ class PlanCreateTest(AssertStripeFksMixin, TestCase):
         expected_create_kwargs["product"] = self.stripe_product
 
         plan_create_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY, **expected_create_kwargs
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **expected_create_kwargs,
         )
 
         self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
@@ -87,7 +90,9 @@ class PlanCreateTest(AssertStripeFksMixin, TestCase):
         plan = Plan.create(**fake_plan)
 
         plan_create_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY, **FAKE_PLAN
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **FAKE_PLAN,
         )
 
         self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
@@ -109,7 +114,9 @@ class PlanCreateTest(AssertStripeFksMixin, TestCase):
         expected_create_kwargs["metadata"] = metadata
 
         plan_create_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY, **expected_create_kwargs
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **expected_create_kwargs,
         )
 
         self.assert_fks(plan, expected_blank_fks={"djstripe.Customer.coupon"})
@@ -148,6 +155,7 @@ class PlanTest(AssertStripeFksMixin, TestCase):
         plan_retrieve_mock.assert_called_once_with(
             id=self.plan_data["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
             expand=["product", "tiers"],
             stripe_account=self.plan.djstripe_owner_account.id,
         )

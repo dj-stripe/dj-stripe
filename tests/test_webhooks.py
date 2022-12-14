@@ -126,6 +126,7 @@ class TestWebhookEventTrigger(TestCase):
         self.assertEqual(resp.status_code, 200)
         event_retrieve_mock.assert_called_once_with(
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=FAKE_EVENT_TRANSFER_CREATED["api_version"],
             id=FAKE_EVENT_TRANSFER_CREATED["id"],
         )
 
