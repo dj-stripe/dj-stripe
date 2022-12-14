@@ -9,6 +9,7 @@ from ..fields import (
     StripeForeignKey,
     StripeQuantumCurrencyAmountField,
 )
+from ..settings import djstripe_settings
 from .base import StripeModel
 
 
@@ -141,7 +142,11 @@ class Order(StripeModel):
             stripe_account = self._get_stripe_account_id(api_key)
 
         return self.stripe_class.cancel(
-            self.id, api_key=api_key, stripe_account=stripe_account, **kwargs
+            self.id,
+            api_key=api_key,
+            stripe_account=stripe_account,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
         )
 
     def reopen(self, api_key=None, stripe_account=None, **kwargs):
@@ -161,7 +166,11 @@ class Order(StripeModel):
             stripe_account = self._get_stripe_account_id(api_key)
 
         return self.stripe_class.reopen(
-            self.id, api_key=api_key, stripe_account=stripe_account, **kwargs
+            self.id,
+            api_key=api_key,
+            stripe_account=stripe_account,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
         )
 
     def submit(self, api_key=None, stripe_account=None, **kwargs):
@@ -185,5 +194,9 @@ class Order(StripeModel):
             stripe_account = self._get_stripe_account_id(api_key)
 
         return self.stripe_class.submit(
-            self.id, api_key=api_key, stripe_account=stripe_account, **kwargs
+            self.id,
+            api_key=api_key,
+            stripe_account=stripe_account,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
         )

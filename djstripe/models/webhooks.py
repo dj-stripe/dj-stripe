@@ -331,7 +331,9 @@ class WebhookEventTrigger(models.Model):
         # Retrieve the event using the api_version specified in itself
         with stripe_temporary_api_version(local_data["api_version"], validate=False):
             remote_data = Event.stripe_class.retrieve(
-                id=local_data["id"], api_key=api_key
+                id=local_data["id"],
+                api_key=api_key,
+                stripe_version=djstripe_settings.STRIPE_API_VERSION,
             )
 
         return local_data["data"] == remote_data["data"]

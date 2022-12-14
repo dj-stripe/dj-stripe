@@ -197,6 +197,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             idempotency_key=None,
             metadata={},
             stripe_account=None,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
         self.assertEqual(customer.metadata, None)
@@ -530,6 +531,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             self.customer.id,
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_account=self.customer.djstripe_owner_account.id,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
         self.assertEqual(0, customer_retrieve_mock.call_count)
@@ -562,6 +564,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             self.customer.id,
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_account=self.customer.djstripe_owner_account.id,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
     @patch(
@@ -751,6 +754,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             expand=ANY,
             id=FAKE_CUSTOMER["id"],
             stripe_account=self.customer.djstripe_owner_account.id,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
     @patch("stripe.Coupon.retrieve", return_value=deepcopy(FAKE_COUPON), autospec=True)
@@ -780,6 +784,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             expand=ANY,
             id=FAKE_CUSTOMER["id"],
             stripe_account=self.customer.djstripe_owner_account.id,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
         self.customer.refresh_from_db()
@@ -1434,7 +1439,9 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assertTrue(return_status)
 
         invoice_create_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY, customer=self.customer.id
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            customer=self.customer.id,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
     @patch("stripe.Invoice.create", autospec=True)
@@ -1447,7 +1454,9 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assertFalse(return_status)
 
         invoice_create_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY, customer=self.customer.id
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            customer=self.customer.id,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
     @patch("stripe.Coupon.retrieve", return_value=deepcopy(FAKE_COUPON), autospec=True)
@@ -1857,6 +1866,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             invoice=77,
             metadata=None,
             subscription=25,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
     @patch(
@@ -1891,6 +1901,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             invoice=77,
             metadata=None,
             subscription=25,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
     def test_add_invoice_item_bad_decimal(self):
@@ -1959,7 +1970,11 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assertIsNone(invoice.save())
 
         subscription_retrieve_mock.assert_called_once_with(
-            api_key=ANY, expand=ANY, id=FAKE_SUBSCRIPTION["id"], stripe_account=None
+            api_key=ANY,
+            expand=ANY,
+            id=FAKE_SUBSCRIPTION["id"],
+            stripe_account=None,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
         plan_retrieve_mock.assert_not_called()
 
@@ -2335,7 +2350,11 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
         self.assertIsNone(invoice.save())
 
         subscription_retrieve_mock.assert_called_once_with(
-            api_key=ANY, expand=ANY, id=FAKE_SUBSCRIPTION["id"], stripe_account=None
+            api_key=ANY,
+            expand=ANY,
+            id=FAKE_SUBSCRIPTION["id"],
+            stripe_account=None,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
         plan_retrieve_mock.assert_not_called()
 

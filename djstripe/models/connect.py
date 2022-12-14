@@ -167,6 +167,7 @@ class CountrySpec(StripeBaseModel):
         return self.stripe_class.retrieve(
             id=self.id,
             api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
             stripe_account=stripe_account,
         )
 
@@ -331,7 +332,11 @@ class TransferReversal(StripeModel):
         except Transfer.DoesNotExist:
             raise
 
-        return stripe.Transfer.create_reversal(api_key=api_key, **kwargs)
+        return stripe.Transfer.create_reversal(
+            api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
+        )
 
     def api_retrieve(self, api_key=None, stripe_account=None):
         """
@@ -354,6 +359,7 @@ class TransferReversal(StripeModel):
             id=id,
             nested_id=nested_id,
             api_key=api_key or self.default_api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
             expand=self.expand_fields,
             stripe_account=stripe_account,
         )
@@ -369,7 +375,9 @@ class TransferReversal(StripeModel):
         :returns: an iterator over all items in the query
         """
         return stripe.Transfer.list_reversals(
-            api_key=api_key, **kwargs
+            api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
         ).auto_paging_iter()
 
     @classmethod

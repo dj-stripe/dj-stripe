@@ -309,6 +309,7 @@ class LegacySourceMixin:
                 expand=self.expand_fields,
                 stripe_account=stripe_account,
                 api_key=api_key,
+                stripe_version=djstripe_settings.STRIPE_API_VERSION,
             )
 
         # try to retrieve by account attribute if retrieval by customer fails.
@@ -319,6 +320,7 @@ class LegacySourceMixin:
                 expand=self.expand_fields,
                 stripe_account=stripe_account,
                 api_key=api_key,
+                stripe_version=djstripe_settings.STRIPE_API_VERSION,
             )
 
         raise ImpossibleAPIRequest(
@@ -787,7 +789,10 @@ class Source(StripeModel):
         :returns: an iterator over all items in the query
         """
         return Customer.stripe_class.list_sources(
-            object="source", api_key=api_key, **kwargs
+            object="source",
+            api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
         ).auto_paging_iter()
 
 

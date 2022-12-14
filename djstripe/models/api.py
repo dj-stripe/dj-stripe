@@ -9,6 +9,7 @@ from django.forms import ValidationError
 from ..enums import APIKeyType
 from ..exceptions import InvalidStripeAPIKey
 from ..fields import StripeEnumField
+from ..settings import djstripe_settings
 from .base import StripeModel
 
 # A regex to validate API key format
@@ -88,7 +89,10 @@ class APIKey(StripeModel):
         if self.type != APIKeyType.secret:
             return
 
-        account_data = Account.stripe_class.retrieve(api_key=self.secret)
+        account_data = Account.stripe_class.retrieve(
+            api_key=self.secret,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+        )
         # NOTE: Do not immediately use _get_or_create_from_stripe_object() here.
         # Account needs to exist for things to work. Make a stub if necessary.
         account, created = Account.objects.get_or_create(

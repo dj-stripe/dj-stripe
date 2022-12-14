@@ -9,6 +9,7 @@ from django.test import TestCase
 
 from djstripe.enums import FilePurpose
 from djstripe.models import Account, File
+from djstripe.settings import djstripe_settings
 
 from . import FAKE_ACCOUNT, FAKE_FILEUPLOAD_ICON, FAKE_FILEUPLOAD_LOGO
 
@@ -39,10 +40,18 @@ class TestFileLink(TestCase):
         mock_file_upload_retrieve.assert_has_calls(
             (
                 call(
-                    id=icon_file.id, api_key=ANY, expand=ANY, stripe_account=account.id
+                    id=icon_file.id,
+                    api_key=ANY,
+                    expand=ANY,
+                    stripe_account=account.id,
+                    stripe_version=djstripe_settings.STRIPE_API_VERSION,
                 ),
                 call(
-                    id=logo_file.id, api_key=ANY, expand=ANY, stripe_account=account.id
+                    id=logo_file.id,
+                    api_key=ANY,
+                    expand=ANY,
+                    stripe_account=account.id,
+                    stripe_version=djstripe_settings.STRIPE_API_VERSION,
                 ),
             )
         )

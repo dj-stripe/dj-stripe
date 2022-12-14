@@ -163,12 +163,14 @@ class TestDispute(TestCase):
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=[],
             stripe_account=None,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
         # assert Balance Transactions were retrieved correctly
         balance_transaction_retrieve_mock.assert_called_once_with(
             id=FAKE_DISPUTE_BALANCE_TRANSACTION["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
             expand=[],
             stripe_account=None,
         )
