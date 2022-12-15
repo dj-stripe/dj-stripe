@@ -22,6 +22,13 @@ Invoke like so:
 
     7) To only sync Stripe Accounts and Charges for sk_test_XXX and sk_test_YYY API keys:
         python manage.py djstripe_sync_models Account Charge --api-keys sk_test_XXX sk_test_YYY
+
+    6) To only sync Stripe Accounts for sk_test_XXX and sk_test_YYY API keys for objects created after {unix_timestamp}:
+        python manage.py djstripe_sync_models Account --api-keys sk_test_XXX sk_test_YYY --created "{\"gt\": {unix_timestamp}}"
+
+    7) To only sync Stripe Accounts and Charges for sk_test_XXX and sk_test_YYY API keys for objects created between {unix_gt_timestamp} and {unix_lt_timestamp}:
+        python manage.py djstripe_sync_models Account Charge --api-keys sk_test_XXX sk_test_YYY --created "{\"gte\": {unix_gt_timestamp}, \"lte\": {unix_lt_timestamp}}"
+
 """
 import json
 from typing import Dict, List, Union
