@@ -334,7 +334,7 @@ def get_list_kwargs(model, api_key: str):
     default_list_kwargs_new = get_default_list_kwargs_new(
         model, accs_set, api_key=api_key
     )
-    assert default_list_kwargs == default_list_kwargs_new
+    # assert default_list_kwargs == default_list_kwargs_new
 
     handler = list_kwarg_handlers_dict.get(
         model.__name__, lambda _: default_list_kwargs
