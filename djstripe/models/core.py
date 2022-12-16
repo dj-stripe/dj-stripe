@@ -30,9 +30,6 @@ from ..signals import WEBHOOK_SIGNALS
 from ..utils import get_friendly_currency_amount
 from .base import IdempotencyKey, StripeModel, logger
 
-# Override the default API version used by the Stripe library.
-djstripe_settings.set_stripe_api_version()
-
 
 def _sanitise_price(price=None, plan=None, **kwargs):
     """
