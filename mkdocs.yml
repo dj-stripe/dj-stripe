@@ -78,7 +78,6 @@ nav:
       - Support: project/support.md
       - Release Process: project/release_process.md
   - Reference:
-      - Context Managers: reference/context_managers.md
       - Enumerations: reference/enums.md
       - Managers: reference/managers.md
       - Models: reference/models.md
