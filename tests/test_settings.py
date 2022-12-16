@@ -137,29 +137,6 @@ class TestGetStripeApiVersion(TestCase):
         )
 
 
-@override_settings(STRIPE_API_VERSION=None)
-class TestSetStripeApiVersion(TestCase):
-    def test_with_default(self):
-        settings.djstripe_settings.set_stripe_api_version()
-        self.assertEqual(
-            settings.djstripe_settings.DEFAULT_STRIPE_API_VERSION, stripe.api_version
-        )
-
-    def test_with_valid_date(self):
-        settings.djstripe_settings.set_stripe_api_version(version="2016-03-07")
-        self.assertEqual("2016-03-07", stripe.api_version)
-
-    def test_with_invalid_date(self):
-        with self.assertRaises(ValueError):
-            settings.djstripe_settings.set_stripe_api_version(version="foobar")
-
-    def test_with_invalid_date_and_no_validation(self):
-        settings.djstripe_settings.set_stripe_api_version(
-            version="foobar", validate=False
-        )
-        self.assertEqual("foobar", stripe.api_version)
-
-
 class TestObjectPatching(TestCase):
     @patch.object(
         settings.djstripe_settings,
