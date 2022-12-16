@@ -121,6 +121,16 @@ class TestSubscriberModelRetrievalMethod(TestCase):
             settings.djstripe_settings.get_callback_function("DJSTRIPE_TEST_CALLBACK")
 
 
+@override_settings(STRIPE_API_VERSION="2016-03-07")
+class TestStripeApiVersion(TestCase):
+    def test_global_stripe_api_version(self):
+        """Test that stripe.api_version is untouched.
+
+        See https://github.com/dj-stripe/dj-stripe/issues/1854
+        """
+        assert stripe.api_version is None
+
+
 @override_settings(STRIPE_API_VERSION=None)
 class TestGetStripeApiVersion(TestCase):
     def test_with_default(self):
