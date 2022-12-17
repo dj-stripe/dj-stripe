@@ -23,4 +23,9 @@ class Migration(migrations.Migration):
             name="blik",
             field=djstripe.fields.JSONField(blank=True, null=True),
         ),
+        migrations.AddField(
+            model_name="paymentmethod",
+            name="customer_balance",
+            field=djstripe.fields.JSONField(blank=True, null=True),
+        ),
     ]

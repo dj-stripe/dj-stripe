@@ -880,6 +880,11 @@ class PaymentMethod(StripeModel):
         blank=True,
         help_text="Additional information for payment methods of type `card_present`",
     )
+    customer_balance = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `customer_balance`",
+    )
     eps = JSONField(
         null=True,
         blank=True,
