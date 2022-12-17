@@ -18,4 +18,9 @@ class Migration(migrations.Migration):
             name="affirm",
             field=djstripe.fields.JSONField(blank=True, null=True),
         ),
+        migrations.AddField(
+            model_name="paymentmethod",
+            name="blik",
+            field=djstripe.fields.JSONField(blank=True, null=True),
+        ),
     ]

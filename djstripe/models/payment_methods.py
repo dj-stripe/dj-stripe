@@ -860,6 +860,11 @@ class PaymentMethod(StripeModel):
         blank=True,
         help_text="Additional information for payment methods of type `bancontact`",
     )
+    blik = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `blik`",
+    )
     boleto = JSONField(
         null=True,
         blank=True,
