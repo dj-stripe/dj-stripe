@@ -63,4 +63,11 @@ class Migration(migrations.Migration):
             name="us_bank_account",
             field=djstripe.fields.JSONField(blank=True, null=True),
         ),
+        migrations.AlterField(
+            model_name="account",
+            name="business_type",
+            field=djstripe.fields.StripeEnumField(
+                blank=True, default="", enum=djstripe.enums.BusinessType, max_length=17
+            ),
+        ),
     ]
