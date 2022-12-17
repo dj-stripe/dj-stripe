@@ -58,4 +58,9 @@ class Migration(migrations.Migration):
             name="promptpay",
             field=djstripe.fields.JSONField(blank=True, null=True),
         ),
+        migrations.AddField(
+            model_name="paymentmethod",
+            name="us_bank_account",
+            field=djstripe.fields.JSONField(blank=True, null=True),
+        ),
     ]

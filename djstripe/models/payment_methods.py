@@ -967,6 +967,11 @@ class PaymentMethod(StripeModel):
         blank=True,
         help_text="Additional information for payment methods of type `sofort`",
     )
+    us_bank_account = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `us_bank_account`",
+    )
     wechat_pay = JSONField(
         null=True,
         blank=True,
