@@ -38,4 +38,9 @@ class Migration(migrations.Migration):
             name="konbini",
             field=djstripe.fields.JSONField(blank=True, null=True),
         ),
+        migrations.AddField(
+            model_name="paymentmethod",
+            name="link",
+            field=djstripe.fields.JSONField(blank=True, null=True),
+        ),
     ]

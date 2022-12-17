@@ -927,6 +927,11 @@ class PaymentMethod(StripeModel):
         blank=True,
         help_text="Additional information for payment methods of type `konbini`",
     )
+    link = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `link`",
+    )
     oxxo = JSONField(
         null=True,
         blank=True,
