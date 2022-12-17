@@ -830,6 +830,11 @@ class PaymentMethod(StripeModel):
         blank=True,
         help_text="Additional information for payment methods of type `acss_debit`",
     )
+    affirm = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `affirm`",
+    )
     afterpay_clearpay = JSONField(
         null=True,
         blank=True,
