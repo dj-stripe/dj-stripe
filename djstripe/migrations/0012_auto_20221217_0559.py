@@ -43,4 +43,9 @@ class Migration(migrations.Migration):
             name="link",
             field=djstripe.fields.JSONField(blank=True, null=True),
         ),
+        migrations.AddField(
+            model_name="paymentmethod",
+            name="paynow",
+            field=djstripe.fields.JSONField(blank=True, null=True),
+        ),
     ]
