@@ -53,4 +53,9 @@ class Migration(migrations.Migration):
             name="pix",
             field=djstripe.fields.JSONField(blank=True, null=True),
         ),
+        migrations.AddField(
+            model_name="paymentmethod",
+            name="promptpay",
+            field=djstripe.fields.JSONField(blank=True, null=True),
+        ),
     ]

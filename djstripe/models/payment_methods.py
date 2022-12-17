@@ -952,6 +952,11 @@ class PaymentMethod(StripeModel):
         blank=True,
         help_text="Additional information for payment methods of type `pix`",
     )
+    promptpay = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `promptpay`",
+    )
     sepa_debit = JSONField(
         null=True,
         blank=True,
