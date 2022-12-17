@@ -917,6 +917,11 @@ class PaymentMethod(StripeModel):
             "Additional information for payment methods of type `interac_present`"
         ),
     )
+    klarna = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `klarna`",
+    )
     oxxo = JSONField(
         null=True,
         blank=True,
